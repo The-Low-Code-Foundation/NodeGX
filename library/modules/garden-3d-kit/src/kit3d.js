@@ -1311,26 +1311,10 @@
   }
 
   /**
-   * Every mesh of a world, pure in THREE: `{ root, tiles, decor, things, robots, lights, meshCount }`. Instanced
-   * tiles and instanced decorations count as one mesh each. The engine adds `root` to its scene; the gate counts.
+   * The things of a world (and a dry tulip on each bed cell with none), built into `root`: the list of their groups.
+   * P108 IW-008 (lane C): moved out of buildScene, unchanged, so a write that changes only the things redraws only them.
    */
-  function buildScene(world, THREE, shared) {
-    var out = { meshCount: 0, geos: shared ? shared.geos : null };
-    var mat = shared ? shared.mat : materials(THREE);
-    var root = new THREE.Group();
-    root.name = 'garden';
-    var ground = buildGround(world.map, THREE, mat, out);
-    ground.forEach(function (m) {
-      root.add(m);
-    });
-    var tiles = buildTiles(world.map, THREE, mat, out);
-    var decor = buildTileDecor(world.map, THREE, mat, out);
-    tiles.forEach(function (m) {
-      root.add(m);
-    });
-    decor.forEach(function (m) {
-      root.add(m);
-    });
+  function buildThings(world, THREE, mat, out, root) {
     // A tulip bed draws a dry tulip until a Thing waters it: the bed cells with no tulip Thing get one.
     var thingsAt = {};
     world.things.forEach(function (t) {
@@ -1345,7 +1329,10 @@
       if (!build) return;
       var x = Number(t.x);
       var y = Number(t.y);
+      var before = out.meshCount;
       var g = build(THREE, mat, t, out);
+      // P108 IW-008 (lane C): how many meshes this thing is (a redraw of the things alone keeps the count true).
+      g.userData.meshes = out.meshCount - before;
       var p = tileCentre(world.map, x, y);
       var k = kindAt(world.map, x, y);
       g.position.set(p.x, (g.position.y || 0) + tileHeight(k || 'grass'), p.z);
@@ -1385,13 +1372,40 @@
         placeThing(t, world.things.indexOf(t));
       });
     });
+    return things;
+  }
+
+  /**
+   * Every mesh of a world, pure in THREE: `{ root, tiles, decor, things, robots, lights, meshCount }`. Instanced
+   * tiles and instanced decorations count as one mesh each. The engine adds `root` to its scene; the gate counts.
+   */
+  function buildScene(world, THREE, shared) {
+    var out = { meshCount: 0, geos: shared ? shared.geos : null };
+    var mat = shared ? shared.mat : materials(THREE);
+    var root = new THREE.Group();
+    root.name = 'garden';
+    var ground = buildGround(world.map, THREE, mat, out);
+    ground.forEach(function (m) {
+      root.add(m);
+    });
+    var tiles = buildTiles(world.map, THREE, mat, out);
+    var decor = buildTileDecor(world.map, THREE, mat, out);
+    tiles.forEach(function (m) {
+      root.add(m);
+    });
+    decor.forEach(function (m) {
+      root.add(m);
+    });
+    var things = buildThings(world, THREE, mat, out, root);
     // Robots, two on one tile drawn smaller and apart (the 2D kit’s robotPlaces: −90%/−10% offsets, scale .78).
     var byTile = {};
     world.robots.forEach(function (r, i) {
       (byTile[r.x + ',' + r.y] = byTile[r.x + ',' + r.y] || []).push(i);
     });
     var robots = world.robots.map(function (r, i) {
+      var before = out.meshCount;
       var g = buildRobot(THREE, mat, r, out);
+      g.userData.meshes = out.meshCount - before; // P108 IW-008 (lane C)
       var mates = byTile[r.x + ',' + r.y];
       var share = mates.length > 1 ? mates.indexOf(i) : -1;
       var offset = share === -1 ? [0, 0] : share === 0 ? [-0.22, -0.22] : share === 1 ? [0.22, 0.22] : [0, 0];
@@ -2017,6 +2031,77 @@
         })
       );
     };
+    /** P108 IW-008 (lane C): one robot's look, as lookKey reads it (a robot redrawn alone when only ITS key changed). */
+    var robotKey = function (r) {
+      return JSON.stringify([r.colour, r.eyes, r.hat, r.name, r.can, r.canMax, r.carry, r.holds]);
+    };
+    var meshesOf = function (g) {
+      return g && g.userData && typeof g.userData.meshes === 'number' ? g.userData.meshes : 0;
+    };
+    /**
+     * P108 IW-008 (lane C, IW-008 §4 "with many robots, redraw by robot, not the scene"): the same map and the same robots
+     * (how many) — the things redrawn alone when they changed, and each robot whose own look changed redrawn alone, where
+     * it is drawn now (its glide goes on). The tiles, the ground and every other robot are left as they are. False when
+     * the scene must be built whole (a new map, a robot more or fewer, nothing built yet).
+     */
+    var redrawParts = function (previous, world, thingsChanged) {
+      var built = eng.built;
+      if (!built || !previous || !previous.robots || previous.robots.length !== world.robots.length || built.robots.length !== world.robots.length) return false;
+      var out = { meshCount: 0, geos: shared.geos };
+      var gone = 0;
+      if (thingsChanged) {
+        built.things.forEach(function (g) {
+          gone += meshesOf(g);
+          built.root.remove(g);
+        });
+        built.things = buildThings(world, THREE, shared.mat, out, built.root);
+        eng.thingBuilds = (eng.thingBuilds || 0) + 1;
+        markThings(previous, false);
+      }
+      world.robots.forEach(function (r, i) {
+        if (robotKey(previous.robots[i]) === robotKey(r)) return;
+        var old = built.robots[i];
+        var before = out.meshCount;
+        var g = buildRobot(THREE, shared.mat, r, out);
+        g.userData.meshes = out.meshCount - before;
+        g.position.set(old.position.x, old.position.y, old.position.z);
+        g.rotation.y = old.rotation.y;
+        g.scale.set(old.scale.x, old.scale.y, old.scale.z);
+        g.userData.index = i;
+        g.userData.share = old.userData.share;
+        g.userData.offset = old.userData.offset;
+        gone += meshesOf(old);
+        built.root.remove(old);
+        built.root.add(g);
+        built.robots[i] = g;
+        eng.robotBuilds = (eng.robotBuilds || 0) + 1;
+      });
+      eng.meshCount = eng.meshCount - gone + out.meshCount;
+      built.meshCount = eng.meshCount;
+      setAttr('data-meshes', eng.meshCount);
+      setAttr('data-robot-builds', eng.robotBuilds || 0);
+      setAttr('data-thing-builds', eng.thingBuilds || 0);
+      rebuildOverlay();
+      return true;
+    };
+    /** A tulip that just got watered stands up over TULIP_MS; a puddle that just appeared pops (P108 IW-008: both redraws). */
+    var markThings = function (previous, first) {
+      var t0 = now();
+      eng.built.things.forEach(function (g) {
+        var key = g.userData.key;
+        if (g.userData.kind === 'tulip') {
+          var was = previous && previous.things.some(function (t) {
+            return t.kind === 'tulip' && Number(t.x) === g.userData.x && Number(t.y) === g.userData.y && (t.watered === true || t.state === 'watered' || t.state === 'wet');
+          });
+          if (g.userData.wet && !was && !first) anims.tulips[key] = t0;
+        } else if (g.userData.kind === 'puddle') {
+          var had = previous && previous.things.some(function (t) {
+            return t.kind === 'puddle' && Number(t.x) === g.userData.x && Number(t.y) === g.userData.y;
+          });
+          if (!had && !first) anims.pops[key] = t0;
+        }
+      });
+    };
     var setWorld = function (world) {
       var first = !eng.world;
       var mapChanged = first || !eng.world || JSON.stringify(eng.world.map.rows) !== JSON.stringify(world.map.rows) || JSON.stringify(eng.world.map.legend) !== JSON.stringify(world.map.legend);
@@ -2027,8 +2112,12 @@
       var robotsChanged = first || lookKey(eng.world.robots) !== lookKey(world.robots);
       var previous = eng.world;
       eng.world = world;
-      if (mapChanged || thingsChanged || robotsChanged) {
+      // P108 IW-008 (lane C): the things or a robot's look alone — redraw those, never the scene.
+      var partly = !first && !mapChanged && (thingsChanged || robotsChanged) && redrawParts(previous, world, thingsChanged);
+      if (!partly && (mapChanged || thingsChanged || robotsChanged)) {
         var oldBuilt = eng.built;
+        eng.sceneBuilds = (eng.sceneBuilds || 0) + 1;
+        setAttr('data-scene-builds', eng.sceneBuilds);
         eng.built = buildScene(world, THREE, shared);
         eng.meshCount = eng.built.meshCount;
         if (oldBuilt) {
@@ -2061,22 +2150,7 @@
           }
           return a;
         });
-        // A tulip that just got watered stands up over TULIP_MS; a puddle that just appeared pops.
-        var t0 = now();
-        eng.built.things.forEach(function (g) {
-          var key = g.userData.key;
-          if (g.userData.kind === 'tulip') {
-            var was = previous && previous.things.some(function (t) {
-              return t.kind === 'tulip' && Number(t.x) === g.userData.x && Number(t.y) === g.userData.y && (t.watered === true || t.state === 'watered' || t.state === 'wet');
-            });
-            if (g.userData.wet && !was && !first) anims.tulips[key] = t0;
-          } else if (g.userData.kind === 'puddle') {
-            var had = previous && previous.things.some(function (t) {
-              return t.kind === 'puddle' && Number(t.x) === g.userData.x && Number(t.y) === g.userData.y;
-            });
-            if (!had && !first) anims.pops[key] = t0;
-          }
-        });
+        markThings(previous, first);
         setAttr('data-w', world.map.w);
         setAttr('data-h', world.map.h);
         setAttr('data-meshes', eng.meshCount);

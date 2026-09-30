@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2516c2cb-c942-5184-8fc0-ed27f38b7aa7",
+  "name": "Copy program",
+  "path": "/Logic/Copy program",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One robot’s program copied onto another of hers, or refused with the block it cannot do or its brain too small. Runs on Go; answers Ran once its outputs are set."
+}

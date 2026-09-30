@@ -270,7 +270,31 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw3mNoteTgt: s('🌷 the row Mamie’s note asks for: 3 tulips, one drink each', '🌷 la rangée que demande le mot de Mamie : 3 tulipes, une gorgée chacune'),
   iw3mNoteFin: s('that row watered → {b} walks home', 'cette rangée arrosée → {b} rentre'),
   iw3mNoteWr: s('a tulip gets thirsty again', 'une tulipe a de nouveau soif'),
-  iw3mNoteSum: s('{n}/{t} tulips of the note', '{n}/{t} tulipes du mot')
+  iw3mNoteSum: s('{n}/{t} tulips of the note', '{n}/{t} tulipes du mot'),
+  // P108 IW-008 (lane C): the crew — the plot card's crew row, a robot sent or brought home, a program copied or refused,
+  // a brain and what it knows on My robots. {r} the robot, {m} the one already at work, {f} the one copied from.
+  iw8cCrew: s('Your crew for this job', 'Ton équipe pour ce travail'),
+  iw8cCrewTap: s('Tap a robot to send it here. Tap it again to bring it home.', 'Touche un robot pour l’envoyer ici. Touche-le encore pour le ramener à la maison.'),
+  iw8cWorks: s('{r} works here', '{r} travaille ici'),
+  iw8cHelps: s('{r} helps', '{r} aide'),
+  iw8cSent: s('{r} works here now.', '{r} travaille ici maintenant.'),
+  iw8cHelping: s('{r} helps {m} here now.', '{r} aide {m} ici maintenant.'),
+  iw8cGoneHome: s('{r} is back home.', '{r} est rentré à la maison.'),
+  iw8cTeach: s('{r} has no program for this job yet. Win it with {r}, or copy a program on My robots.', '{r} n’a pas encore de programme pour ce travail. Gagne-le avec {r}, ou copie un programme dans Mes robots.'),
+  iw8cFull: s('Two robots already work here.', 'Deux robots travaillent déjà ici.'),
+  iw8cKind: s('{r} can’t do this job.', '{r} ne sait pas faire ce travail.'),
+  iw8cNoBlockHere: s('{r} can’t do “{blk}”, and this job’s program needs it.', '{r} ne sait pas faire « {blk} », et le programme de ce travail en a besoin.'),
+  iw8cNoBrainHere: s('This job’s program has {k} blocks, but {r}’s brain holds {n}.', 'Le programme de ce travail a {k} blocs, mais le cerveau de {r} n’en tient que {n}.'),
+  iw8cCopyTo: s('Copy {r}’s program to', 'Copier le programme de {r} vers'),
+  iw8cCopied: s('{r} knows {f}’s program now.', '{r} connaît maintenant le programme de {f}.'),
+  iw8cNoBlock: s('{r} can’t do “{blk}”, so {r} can’t take {f}’s program.', '{r} ne sait pas faire « {blk} » : {r} ne peut pas prendre le programme de {f}.'),
+  iw8cNoBrain: s('{f}’s program has {k} blocks, but {r}’s brain holds {n}.', 'Le programme de {f} a {k} blocs, mais le cerveau de {r} n’en tient que {n}.'),
+  iw8cNoProgram: s('{f} has no program to copy yet.', '{f} n’a pas encore de programme à copier.'),
+  iw8cBrainL: s('Brain', 'Cerveau'),
+  iw8cBrainText: s('{n} blocks · {knows}', '{n} blocs · {knows}'),
+  iw8cKnows: s('knows a program of {k}', 'connaît un programme de {k}'),
+  iw8cKnowsNone: s('no program yet', 'pas encore de programme'),
+  iw8cHelpsOn: s('Helping on “{plot}”', 'Aide sur « {plot} »')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);

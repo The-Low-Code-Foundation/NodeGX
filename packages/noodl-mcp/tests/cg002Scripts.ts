@@ -1717,15 +1717,45 @@ function robotsOf(raw) {
   for (var i = 0; i < list.length; i++) {
     var r = list[i], id = r && typeof r === 'object' ? String(r.id || '') : typeof r === 'string' ? r : '';
     // P108 IW-006 (v5): r1 is always first; its stored row gives it only its brain.
-    if (id === FIRST_ROBOT_ID && seen[id] === 1) { brainOnto(out[0], r); seen[id] = 2; continue; }
+    if (id === FIRST_ROBOT_ID && seen[id] === 1) { crewOnto(brainOnto(out[0], r), r); seen[id] = 2; continue; }
     if (!id || seen[id]) continue;
     seen[id] = 1;
     // IG-005: a lent robot's row keeps its own kind and look (each field only when it is there and sound); r1's look
     // stays profile.robot (one source). A v4 row from session 3 is { id } and reads as it did.
-    out.push(id === FIRST_ROBOT_ID ? brainOnto({ id: id }, r) : robotFields(id, r));
+    out.push(id === FIRST_ROBOT_ID ? crewOnto(brainOnto({ id: id }, r), r) : robotFields(id, r));
   }
   return out;
 }
+/**
+ * P108 IW-008 (lane C): a row's crew fields, each only when it is there and sound — 'program' (the program the robot
+ * carries: copied onto it, or kept when it came home; a list of one block at least) and 'helps' (the plot it works as a
+ * second robot, beside the one pinned there). Where a robot pinned on a plot is, its program is that plot's.
+ */
+function crewOnto(row, r) {
+  if (!r || typeof r !== 'object') return row;
+  var pg = programOf(r.program);
+  if (pg && pg.length) row.program = pg;
+  if (typeof r.helps === 'string' && r.helps && r.helps !== 'free') row.helps = r.helps.slice(0, 40);
+  return row;
+}
+/**
+ * P108 IW-008 (lane C): a second robot works a plot only beside the one pinned there, with a program of its own, one per
+ * plot (the first row that claims it), and never while it is pinned itself. Anything else goes home.
+ */
+function crewHelps(robots, plots) {
+  var taken = {};
+  for (var i = 0; i < robots.length; i++) {
+    var r = robots[i];
+    if (!r.helps) continue;
+    var q = plots[r.helps];
+    var pinnedHere = false;
+    for (var id in plots) if (plots[id] && plots[id].robotId === r.id) pinnedHere = true;
+    if (!q || !q.robotId || q.robotId === r.id || pinnedHere || taken[r.helps] || !r.program) { delete r.helps; continue; }
+    taken[r.helps] = r.id;
+  }
+}
+/** P108 IW-008 (lane C): how many blocks a program holds — every block, the ones inside loops and an else too (the brain's count). */
+function crewBlocks(list) { var n = 0, l = Array.isArray(list) ? list : []; for (var i = 0; i < l.length; i++) { if (!l[i]) continue; n++; if (l[i].body) n += crewBlocks(l[i].body); if (Array.isArray(l[i]['else'])) n += crewBlocks(l[i]['else']); } return n; }
 /** P108 IW-006 (v5): a row's brain, kept only when it is one of BRAIN_SIZES and bigger than BRAIN_SIZE (absent = BRAIN_SIZE). */
 function brainOnto(row, r) {
   var b = r && typeof r === 'object' ? Math.floor(Number(r.brain)) : 0;
@@ -1742,7 +1772,7 @@ function robotFields(id, r) {
   if (typeof r.color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(r.color)) row.color = r.color;
   if (r.eye === 'round' || r.eye === 'happy' || r.eye === 'wink') row.eye = r.eye;
   if (typeof r.hat === 'string' && r.hat) row.hat = r.hat;
-  return brainOnto(row, r);
+  return crewOnto(brainOnto(row, r), r);
 }
 /** IG-005: the catalogue's entry for a robot kind, or null. */
 function robotSpec(kind) { for (var i = 0; i < ROBOTS.length; i++) if (ROBOTS[i].id === String(kind)) return ROBOTS[i]; return null; }
@@ -1770,6 +1800,11 @@ function robotRow(p, row) {
     upgrade: spec.upgrade, upgraded: false, lentBy: spec.lentBy || '', working: p ? plotOfRobot(p.island, String(row.id)) : '',
     brain: Number(row.brain) > BRAIN_SIZE ? Number(row.brain) : BRAIN_SIZE
   };
+  // P108 IW-008 (lane C): the plot it helps on ('' when none) and the program it runs or carries (its plot's when pinned).
+  out.helps = row.helps ? String(row.helps) : '';
+  var runs = out.working && p && p.island.plots[out.working] ? p.island.plots[out.working].program : row.program;
+  out.program = Array.isArray(runs) && runs.length ? JSON.parse(JSON.stringify(runs)) : null;
+  out.blocks = crewBlocks(out.program);
   // P108 IW-006 (v5): an upgrade counts given (an islander's sticker) or bought (the shop's owned).
   var owned = (p && Array.isArray(p.stickers) ? p.stickers : []).concat(p && Array.isArray(p.owned) ? p.owned : []);
   for (var u = 0; u < UPGRADES.length; u++) {
@@ -1853,7 +1888,10 @@ function islandOf(raw) {
   for (var k = 0; k < list.length; k++) if (done.indexOf(String(list[k])) === -1) done.push(String(list[k]));
   var robots = robotsOf(i.robots);
   // v3's placed is not read: nothing ever wrote it (IG-004).
-  return { done: done, plots: plotsOf(i.plots, robots), robots: robots };
+  var plots = plotsOf(i.plots, robots);
+  // P108 IW-008 (lane C): a second robot only where it may be.
+  crewHelps(robots, plots);
+  return { done: done, plots: plots, robots: robots };
 }
 /** IG-004: the plot a robot is pinned to on an island, or ''. */
 function plotOfRobot(island, robotId) {
@@ -2068,7 +2106,15 @@ var freed = '';
 if (p) {
   var robotId = String(Inputs.robotId || p.island.robots[0].id);
   freed = plotOfRobot(p.island, robotId);
-  if (freed) p.island.plots[freed] = { program: null, robotId: '', wonAt: p.island.plots[freed].wonAt };
+  // P108 IW-008 (lane C): the robot keeps the program it ran (to copy, or to take to another plot); a second robot leaves
+  // the plot it helped on.
+  for (var ck = 0; ck < p.island.robots.length; ck++) {
+    var crow = p.island.robots[ck];
+    if (crow.id !== robotId) continue;
+    if (freed && Array.isArray(p.island.plots[freed].program) && p.island.plots[freed].program.length) crow.program = JSON.parse(JSON.stringify(p.island.plots[freed].program));
+    else if (!freed && crow.helps) { freed = crow.helps; delete crow.helps; }
+  }
+  if (freed && p.island.plots[freed].robotId === robotId) p.island.plots[freed] = { program: null, robotId: '', wonAt: p.island.plots[freed].wonAt };
 }
 Outputs.model = model;
 Outputs.freed = freed;
@@ -2121,8 +2167,11 @@ for (var i = 0; i < model.profiles.length; i++) {
   // IG-005: r1 (and any row with nothing of its own) is its id, as in session 3; a lent robot is [id, kind, name, color, eye, hat].
   // P108 IW-006 (v5): a robot with a bigger brain is always a row, its brain the seventh field.
   for (var r = 0; r < p.island.robots.length; r++) {
-    var rb = p.island.robots[r], rr = (rb.id === FIRST_ROBOT_ID || !rb.kind) && !rb.brain ? rb.id : [rb.id, rb.id === FIRST_ROBOT_ID ? '' : rb.kind || '', rb.name || '', rb.color || '', rb.eye || '', rb.hat || ''];
-    if (rb.brain && Array.isArray(rr)) rr.push(rb.brain);
+    var rb = p.island.robots[r], rr = (rb.id === FIRST_ROBOT_ID || !rb.kind) && !rb.brain && !rb.program && !rb.helps ? rb.id : [rb.id, rb.id === FIRST_ROBOT_ID ? '' : rb.kind || '', rb.name || '', rb.color || '', rb.eye || '', rb.hat || ''];
+    // P108 IW-008 (lane C): the program it carries the eighth field, the plot it helps on the ninth (null where a later one is set).
+    if ((rb.brain || rb.program || rb.helps) && Array.isArray(rr)) rr.push(rb.brain || null);
+    if ((rb.program || rb.helps) && Array.isArray(rr)) rr.push(rb.program || null);
+    if (rb.helps && Array.isArray(rr)) rr.push(rb.helps);
     robots.push(rr);
   }
   var row = [p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats, p.island.done, plots, robots];
@@ -2161,7 +2210,7 @@ try {
     if (v4 && Array.isArray(a[13])) for (var q = 0; q < a[13].length; q++) { var row = a[13][q]; if (Array.isArray(row) && row[0]) plots[String(row[0])] = { program: row[1], robotId: row[2], wonAt: row[3], live: v5 ? row[4] : undefined }; }
     // IG-005: a robot is its id (session 3, and r1) or [id, kind, name, color, eye, hat] (a lent robot and its look).
     var robots = [];
-    if (v4 && Array.isArray(a[14])) for (var rb = 0; rb < a[14].length; rb++) { var ro = a[14][rb]; robots.push(Array.isArray(ro) ? { id: ro[0], kind: ro[1], name: ro[2], color: ro[3], eye: ro[4], hat: ro[5], brain: v5 ? ro[6] : undefined } : ro); }
+    if (v4 && Array.isArray(a[14])) for (var rb = 0; rb < a[14].length; rb++) { var ro = a[14][rb]; robots.push(Array.isArray(ro) ? { id: ro[0], kind: ro[1], name: ro[2], color: ro[3], eye: ro[4], hat: ro[5], brain: v5 ? ro[6] : undefined, program: v5 ? ro[7] : undefined, helps: v5 ? ro[8] : undefined } : ro); }
     var island = v4 ? { done: a[12], plots: plots, robots: robots } : v3 ? { done: a[12] } : family;
     profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: island, cardsSeen: v4 && Array.isArray(a[15]) ? a[15] : undefined, shells: v5 && Array.isArray(a[16]) ? { earned: a[16][0], spent: a[16][1] } : undefined, owned: v5 ? a[17] : undefined });
   }

@@ -1,0 +1,210 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "bea9e54f-0c0a-5fd1-8672-26f95ad12c4b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "crewchipsIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "cards",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "plots",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "requestId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "requests",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "robots",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "told",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "words",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "crewchipsFn",
+      "type": "JavaScriptFunction",
+      "label": "Crew chips",
+      "parameters": {
+        "functionScript": "\nfunction wordMap(rows, lang, name) {\n  var map = {};\n  var list = Array.isArray(rows) ? rows : [];\n  for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || '').split('{b}').join(name);\n  return map;\n}\nfunction fill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }\nfunction langOf(v) { return String(v) === 'fr' ? 'fr' : 'en'; }\nfunction nameOf(v) { var n = String(v || '').trim(); return n || 'Pip'; }\n// P108 IW-003 (lane M): sayNone:<kind> (the step's none, by what was sought) as its word key — iw3mNone<Kind> when the\n// table has one, else the plain sayNone; any other key comes back as it was.\nfunction noneKeyOf(key, words) { var k = String(key || ''); if (k.indexOf('sayNone:') !== 0) return k; var kind = k.slice(8), wk = 'iw3mNone' + kind.charAt(0).toUpperCase() + kind.slice(1); return words && words[wk] ? wk : 'sayNone'; }\n\nfunction crewKindOf(m) { return m && m.kind ? String(m.kind) : m && m.id && m.id !== 'r1' ? String(m.id) : 'pip'; }\nfunction crewWorkOf(m, plots) { var ps = plots && typeof plots === 'object' ? plots : {}; for (var k in ps) if (m && ps[k] && ps[k].robotId === m.id && Array.isArray(ps[k].program) && ps[k].program.length) return k; return ''; }\nfunction crewPick(mine, plots, id, kind) {\n  var here = null, free = null, any = null, list = Array.isArray(mine) ? mine : [];\n  for (var i = 0; i < list.length; i++) {\n    var m = list[i];\n    if (!m || crewKindOf(m) !== kind) continue;\n    if (!any) any = m;\n    var at = crewWorkOf(m, plots);\n    if (at && at === id && !here) here = m;\n    else if (!at && !m.helps && !free) free = m;\n  }\n  return here || free || any;\n}\n\nvar lang = langOf(Inputs.lang);\nvar w = wordMap(Inputs.words, lang, 'Pip');\nvar id = String(Inputs.requestId || '');\nvar reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];\nvar cards = Array.isArray(Inputs.cards) ? Inputs.cards : [];\nvar plots = Inputs.plots && typeof Inputs.plots === 'object' ? Inputs.plots : {};\nvar mine = Array.isArray(Inputs.robots) ? Inputs.robots : [];\nvar req = null, card = null;\nfor (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];\nfor (var c = 0; c < cards.length; c++) if (cards[c] && cards[c].id === id) card = cards[c];\nvar kind = req && req.needs ? String(req.needs) : 'pip';\nvar rows = [], here = [];\nfor (var j = 0; j < mine.length; j++) {\n  var m = mine[j];\n  if (!m || crewKindOf(m) !== kind) continue;\n  var works = crewWorkOf(m, plots) === id, helps = String(m.helps || '') === id;\n  rows.push({ id: 'crew|' + String(m.id), label: String(m.name || m.id), selected: works || helps, locked: false });\n  if (works) here.unshift(fill(w.iw8cWorks, { r: String(m.name || m.id) }));\n  if (helps) here.push(fill(w.iw8cHelps, { r: String(m.name || m.id) }));\n}\nvar show = !!req && !!card && (card.status === 'won' || card.status === 'working') && rows.length >= 2;\nOutputs.rows = show ? rows : [];\nOutputs.show = show;\nOutputs.label = w.iw8cCrew || '';\nOutputs.line = w.iw8cCrewTap || '';\nOutputs.hereText = here.join(' · ');\n// What the last tap said, on this plot's card only (another plot's card opened since says nothing).\nvar told = Inputs.told && typeof Inputs.told === 'object' ? Inputs.told : null;\nOutputs.saidText = show && told && String(told.requestId || '') === id ? String(told.text || '') : '';\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-lang",
+          "displayName": "lang",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-words",
+          "displayName": "words",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requestId",
+          "displayName": "requestId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-requests",
+          "displayName": "requests",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-cards",
+          "displayName": "cards",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-plots",
+          "displayName": "plots",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-robots",
+          "displayName": "robots",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-told",
+          "displayName": "told",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-rows",
+          "displayName": "rows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-label",
+          "displayName": "label",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-line",
+          "displayName": "line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hereText",
+          "displayName": "hereText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-saidText",
+          "displayName": "saidText",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "crewchipsOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "hereText",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "label",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "line",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "saidText",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "show",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

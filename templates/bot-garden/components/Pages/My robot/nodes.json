@@ -84,7 +84,7 @@
         "name": "gardenLang"
       },
       "x": 530,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "rbWords",
@@ -108,7 +108,7 @@
         "runOnChange-condition": false
       },
       "x": 530,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "rbFleetL",
@@ -173,14 +173,14 @@
       "type": "/Logic/Robot cards",
       "label": "Her robots and the ones to be lent",
       "x": 530,
-      "y": 1240
+      "y": 2080
     },
     {
       "id": "rbRequests",
       "type": "/Data/Requests",
       "label": "The requests",
       "x": 530,
-      "y": 1960
+      "y": 2200
     },
     {
       "id": "rbSetName",
@@ -190,7 +190,7 @@
         "field": "name"
       },
       "x": 530,
-      "y": 1360
+      "y": 1240
     },
     {
       "id": "rbSetColour",
@@ -200,7 +200,7 @@
         "field": "color"
       },
       "x": 530,
-      "y": 1480
+      "y": 1360
     },
     {
       "id": "rbSetHat",
@@ -210,7 +210,41 @@
         "field": "hat"
       },
       "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "rbCopy",
+      "type": "/Logic/Copy program",
+      "label": "A program copied onto another robot",
+      "x": 530,
       "y": 1600
+    },
+    {
+      "id": "rbSettle",
+      "type": "Timer",
+      "label": "The cards, once they stop changing",
+      "parameters": {
+        "duration": 120
+      },
+      "x": 530,
+      "y": 2320
+    },
+    {
+      "id": "rbHold",
+      "type": "/Logic/Latch",
+      "label": "The settled cards",
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "rbCopyOk",
+      "type": "Condition",
+      "label": "Was it copied?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 2440
     },
     {
       "id": "rbHead",

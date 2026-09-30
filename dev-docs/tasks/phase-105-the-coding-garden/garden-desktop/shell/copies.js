@@ -120,15 +120,39 @@ function robotsOf(raw) {
     const id = r && typeof r === 'object' ? String(r.id || '') : typeof r === 'string' ? r : '';
     // P108 IW-006 (v5): r1 is always first; its stored row gives it only its brain.
     if (id === FIRST_ROBOT_ID && seen[id] === 1) {
-      brainOnto(out[0], r);
+      crewOnto(brainOnto(out[0], r), r);
       seen[id] = 2;
       continue;
     }
     if (!id || seen[id]) continue;
     seen[id] = 1;
-    out.push(id === FIRST_ROBOT_ID ? brainOnto({ id }, r) : robotFields(id, r));
+    out.push(id === FIRST_ROBOT_ID ? crewOnto(brainOnto({ id }, r), r) : robotFields(id, r));
   }
   return out;
+}
+
+/** P108 IW-008 (lane C): the page's crewOnto — a row's program (one block at least) and the plot it helps on, when sound. */
+function crewOnto(row, r) {
+  if (!r || typeof r !== 'object') return row;
+  const pg = programOf(r.program);
+  if (pg && pg.length) row.program = pg;
+  if (typeof r.helps === 'string' && r.helps && r.helps !== 'free') row.helps = r.helps.slice(0, 40);
+  return row;
+}
+
+/** P108 IW-008 (lane C): the page's crewHelps — a second robot only beside the one pinned there, with a program, one a plot. */
+function crewHelps(robots, plots) {
+  const taken = {};
+  for (const r of robots) {
+    if (!r.helps) continue;
+    const q = plots[r.helps];
+    const pinnedHere = Object.keys(plots).some((id) => plots[id] && plots[id].robotId === r.id);
+    if (!q || !q.robotId || q.robotId === r.id || pinnedHere || taken[r.helps] || !r.program) {
+      delete r.helps;
+      continue;
+    }
+    taken[r.helps] = r.id;
+  }
 }
 
 /** P108 IW-006 (v5): the page's brainOnto — a brain kept only when it is one of BRAIN_SIZES and bigger than BRAIN_SIZE. */
@@ -175,7 +199,7 @@ function robotFields(id, r) {
   if (typeof r.color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(r.color)) row.color = r.color;
   if (r.eye === 'round' || r.eye === 'happy' || r.eye === 'wink') row.eye = r.eye;
   if (typeof r.hat === 'string' && r.hat) row.hat = r.hat;
-  return brainOnto(row, r);
+  return crewOnto(brainOnto(row, r), r);
 }
 
 function programOf(v) {
@@ -222,7 +246,9 @@ function islandOf(raw) {
   const done = [];
   for (const d of Array.isArray(i.done) ? i.done : []) if (!done.includes(String(d))) done.push(String(d));
   const robots = robotsOf(i.robots);
-  return { done, plots: plotsOf(i.plots, robots), robots };
+  const plots = plotsOf(i.plots, robots);
+  crewHelps(robots, plots);
+  return { done, plots, robots };
 }
 
 /**
@@ -267,10 +293,13 @@ function saveCodeOf(model) {
       plots,
       // P106 IG-005: r1 (and a row with no kind) is its id; a lent robot is [id, kind, name, color, eye, hat]. P108 IW-006
       // (v5): a robot with a bigger brain is always a row, its brain the seventh field.
+      // P108 IW-008 (lane C): the program it carries the eighth field, the plot it helps on the ninth (null before a later one).
       island.robots.map((r) => {
-        if ((r.id === FIRST_ROBOT_ID || !r.kind) && !r.brain) return r.id;
+        if ((r.id === FIRST_ROBOT_ID || !r.kind) && !r.brain && !r.program && !r.helps) return r.id;
         const rr = [r.id, r.id === FIRST_ROBOT_ID ? '' : r.kind || '', r.name || '', r.color || '', r.eye || '', r.hat || ''];
-        if (r.brain) rr.push(r.brain);
+        if (r.brain || r.program || r.helps) rr.push(r.brain || null);
+        if (r.program || r.helps) rr.push(r.program || null);
+        if (r.helps) rr.push(r.helps);
         return rr;
       })
     ];

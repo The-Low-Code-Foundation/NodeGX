@@ -137,6 +137,41 @@
           "name": "nameWord",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "brainWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "brainText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "copyWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "copyChips",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasCopy",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "saidText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasSaid",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 590,
@@ -156,8 +191,12 @@
         "rcCanRow",
         "rcUpL",
         "rcUp",
+        "rcBrainL",
+        "rcBrain",
         "rcWhereL",
-        "rcWhere"
+        "rcWhere",
+        "rcCopy",
+        "rcSaid"
       ],
       "parameters": {
         "width": {
@@ -708,7 +747,7 @@
         "cssClassName": "bg-caps"
       },
       "x": 100,
-      "y": 2920
+      "y": 3160
     },
     {
       "id": "rcWhere",
@@ -726,7 +765,140 @@
         "cssClassName": "bg-robot-where"
       },
       "x": 100,
+      "y": 3280
+    },
+    {
+      "id": "rcBrainL",
+      "type": "Text",
+      "label": "Brain",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps"
+      },
+      "x": 100,
+      "y": 2920
+    },
+    {
+      "id": "rcBrain",
+      "type": "Text",
+      "label": "Its brain",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "cssClassName": "bg-robot-brain"
+      },
+      "x": 100,
       "y": 3040
+    },
+    {
+      "id": "rcCopy",
+      "type": "Group",
+      "label": "Copy its program",
+      "parent": "rcCard",
+      "children": [
+        "rcCopyL",
+        "rcCopyRow"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "cssClassName": "bg-robot-copy",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 3400
+    },
+    {
+      "id": "rcCopyL",
+      "type": "Text",
+      "label": "Copy its program to",
+      "parent": "rcCopy",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps"
+      },
+      "x": 160,
+      "y": 3520
+    },
+    {
+      "id": "rcCopyRow",
+      "type": "Group",
+      "label": "Her other robots",
+      "parent": "rcCopy",
+      "children": [
+        "rcCopyEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 3640
+    },
+    {
+      "id": "rcCopyEach",
+      "type": "For Each",
+      "label": "One chip per other robot",
+      "parent": "rcCopyRow",
+      "parameters": {
+        "template": "/Robot/Chip",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 3760
+    },
+    {
+      "id": "rcSaid",
+      "type": "Text",
+      "label": "What the copy did",
+      "parent": "rcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "cssClassName": "bg-robot-said",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 3880
     },
     {
       "id": "rcIsOwned",
@@ -795,6 +967,16 @@
         },
         {
           "name": "hatted",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "copyTo",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "copied",
           "plug": "input",
           "type": "signal"
         }

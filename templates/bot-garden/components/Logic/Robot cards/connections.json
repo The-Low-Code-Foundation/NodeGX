@@ -41,6 +41,12 @@
     },
     {
       "fromId": "robotcardsIn",
+      "fromProperty": "told",
+      "toId": "robotcardsFn",
+      "toProperty": "in-told"
+    },
+    {
+      "fromId": "robotcardsIn",
       "fromProperty": "words",
       "toId": "robotcardsFn",
       "toProperty": "in-words"

@@ -260,6 +260,72 @@
       "fromProperty": "itemOutputSignal-picked",
       "toId": "rcOut",
       "toProperty": "hatted"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "brainWord",
+      "toId": "rcBrainL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "brainText",
+      "toId": "rcBrain",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcOwn",
+      "fromProperty": "owned",
+      "toId": "rcBrainL",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcOwn",
+      "fromProperty": "owned",
+      "toId": "rcBrain",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "copyWord",
+      "toId": "rcCopyL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "copyChips",
+      "toId": "rcCopyEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "hasCopy",
+      "toId": "rcCopy",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "saidText",
+      "toId": "rcSaid",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "hasSaid",
+      "toId": "rcSaid",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcCopyEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "rcOut",
+      "toProperty": "copyTo"
+    },
+    {
+      "fromId": "rcCopyEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "rcOut",
+      "toProperty": "copied"
     }
   ]
 }

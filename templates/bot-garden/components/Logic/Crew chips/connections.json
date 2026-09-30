@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "bea9e54f-0c0a-5fd1-8672-26f95ad12c4b",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "crewchipsIn",
+      "fromProperty": "cards",
+      "toId": "crewchipsFn",
+      "toProperty": "in-cards"
+    },
+    {
+      "fromId": "crewchipsIn",
+      "fromProperty": "lang",
+      "toId": "crewchipsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "crewchipsIn",
+      "fromProperty": "plots",
+      "toId": "crewchipsFn",
+      "toProperty": "in-plots"
+    },
+    {
+      "fromId": "crewchipsIn",
+      "fromProperty": "requestId",
+      "toId": "crewchipsFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "crewchipsIn",
+      "fromProperty": "requests",
+      "toId": "crewchipsFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "crewchipsIn",
+      "fromProperty": "robots",
+      "toId": "crewchipsFn",
+      "toProperty": "in-robots"
+    },
+    {
+      "fromId": "crewchipsIn",
+      "fromProperty": "told",
+      "toId": "crewchipsFn",
+      "toProperty": "in-told"
+    },
+    {
+      "fromId": "crewchipsIn",
+      "fromProperty": "words",
+      "toId": "crewchipsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "crewchipsFn",
+      "fromProperty": "out-hereText",
+      "toId": "crewchipsOut",
+      "toProperty": "hereText"
+    },
+    {
+      "fromId": "crewchipsFn",
+      "fromProperty": "out-label",
+      "toId": "crewchipsOut",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "crewchipsFn",
+      "fromProperty": "out-line",
+      "toId": "crewchipsOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "crewchipsFn",
+      "fromProperty": "out-rows",
+      "toId": "crewchipsOut",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "crewchipsFn",
+      "fromProperty": "out-saidText",
+      "toId": "crewchipsOut",
+      "toProperty": "saidText"
+    },
+    {
+      "fromId": "crewchipsFn",
+      "fromProperty": "out-show",
+      "toId": "crewchipsOut",
+      "toProperty": "show"
+    },
+    {
+      "fromId": "crewchipsFn",
+      "fromProperty": "success",
+      "toId": "crewchipsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

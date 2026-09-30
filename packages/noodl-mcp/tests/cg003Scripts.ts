@@ -48,6 +48,9 @@ import { ISLAND_ENGINE } from './ig004Island';
 import { ROBOTS_JSON, UPGRADES_JSON } from './cg002Content';
 // P108 IW-002 (lane J): Start world's seed line lays a request's seeded layout with the engine's own helpers.
 import { SEED_HELPERS } from './cg002Scripts';
+// P108 IW-008 (lane C): the crew.
+import { CREW_PICK, assignRobotScript, copyProgramScript, crewChipsScript } from './iw008Crew';
+import { BRAIN_SIZE as IW8_BRAIN } from './cg002Content';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -537,7 +540,7 @@ Outputs.open = open;
 Outputs.count = pins.length;
 `;
 
-export const ISLAND_ROWS_SCRIPT = `${WORD_HELPER}
+export const ISLAND_ROWS_SCRIPT = `${WORD_HELPER}${CREW_PICK}
 var ISLANDERS = ${JSON.stringify(ISLANDERS)};
 var KIND = { 1: 'motion', 2: 'control', 3: 'control', 4: 'control', 5: 'control', 6: 'control', 7: 'ask' };
 var lang = langOf(Inputs.lang), name = nameOf(Inputs.botName);
@@ -550,7 +553,8 @@ var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
 var plots = Inputs.plots && typeof Inputs.plots === 'object' ? Inputs.plots : {};
 var mine = Array.isArray(Inputs.robots) && Inputs.robots.length ? Inputs.robots : [{ id: 'r1' }];
 function kindOfRow(m) { return m && m.kind ? String(m.kind) : m && m.id !== 'r1' && m.id ? String(m.id) : 'pip'; }
-function jobOf(r) { var k = r && r.needs ? String(r.needs) : 'pip'; for (var q = 0; q < mine.length; q++) if (kindOfRow(mine[q]) === k) return mine[q]; return null; }
+// P108 IW-008 (lane C): with a crew, the robot at work on THIS plot, else one of that kind at home, else the first.
+function jobOf(r) { var k = r && r.needs ? String(r.needs) : 'pip'; return crewPick(mine, plots, r.id, k); }
 function workOf(bot) { if (!bot) return ''; for (var pk in plots) if (plots[pk] && plots[pk].robotId === bot.id && Array.isArray(plots[pk].program) && plots[pk].program.length) return pk; return ''; }
 var rows = [], open = 0;
 for (var i = 0; i < reqs.length; i++) {
@@ -1115,7 +1119,7 @@ export const ISLAND_CHOOSE_SCRIPT = islandChooseScript({ free: FREE_PLAY, island
  * opens it) the catalogue's robot, `owned` false. `robotKey` is the text Start world re-runs on (id, kind, look).
  * `paletteRobot` is the row, except in free play (the garden offers every block, whoever drives).
  */
-export const JOB_ROBOT_SCRIPT = `${WORD_HELPER}
+export const JOB_ROBOT_SCRIPT = `${WORD_HELPER}${CREW_PICK}
 var ROBOTS = ${ROBOTS_JSON};
 var lang = langOf(Inputs.lang);
 var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
@@ -1124,8 +1128,8 @@ var req = null;
 for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];
 var kind = req && req.needs ? String(req.needs) : 'pip';
 var mine = Array.isArray(Inputs.robots) ? Inputs.robots : [];
-var row = null;
-for (var j = 0; j < mine.length && !row; j++) if (mine[j] && String(mine[j].kind || '') === kind) row = mine[j];
+// P108 IW-008 (lane C): with a crew, the robot at work on this plot, else one of that kind at home, else the first.
+var row = crewPick(mine, Inputs.plots, id, kind);
 var owned = !!row;
 if (!row) {
   var spec = null;
@@ -1198,9 +1202,17 @@ function titleOf(id) { for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs
 function blockWord(id) { if (id.indexOf('olive:') === 0) return w[OLIVE_WORD[id]] || id; var k = LABEL[id]; if (band === 1 && k && w['c' + k.slice(1)]) k = 'c' + k.slice(1); return w[k] || id; }
 function kindClass(id) { return 'bg-ability bg-blk bg-blk-' + (id.indexOf('olive:') === 0 ? 'ask' : META[id] ? META[id].kind : 'action'); }
 var cards = [];
-for (var i = 0; i < ROBOTS.length; i++) {
-  var spec = ROBOTS[i], row = null;
-  for (var j = 0; j < mine.length && !row; j++) if (mine[j] && String(mine[j].kind || '') === spec.id) row = mine[j];
+// P108 IW-008 (lane C): a card per robot she has (a crew: every copy its own card, beside its kind's first), else one
+// locked card for a kind nobody has lent her yet. What the last copy said rides on the card it was said on.
+var told = Inputs.told && typeof Inputs.told === 'object' ? Inputs.told : null;
+var crew = [];
+for (var i0 = 0; i0 < ROBOTS.length; i0++) {
+  var anyOf = false;
+  for (var j0 = 0; j0 < mine.length; j0++) if (mine[j0] && String(mine[j0].kind || '') === ROBOTS[i0].id) { crew.push({ spec: ROBOTS[i0], row: mine[j0], first: !anyOf }); anyOf = true; }
+  if (!anyOf) crew.push({ spec: ROBOTS[i0], row: null, first: true });
+}
+for (var i = 0; i < crew.length; i++) {
+  var spec = crew[i].spec, row = crew[i].row;
   var has = !!row;
   var look = row || { id: '', name: spec.defaultName[lang] || spec.defaultName.en, color: spec.colour, eye: 'round', hat: 'none', canMax: spec.canMax, basket: spec.basket, upgraded: false, working: '' };
   var abilities = [], ids = MOVES.slice();
@@ -1208,7 +1220,9 @@ for (var i = 0; i < ROBOTS.length; i++) {
   if (band === 2) ids = ids.concat(CONTROLS);
   // 🔴 A repeater's row is a Noodl Object, global by id (P105 D57): every nested row id carries its card's kind, or two
   // cards (and the Options panel's own swatches and hats) would share one row and one ring.
-  var pre = spec.id + '|';
+  // P108 IW-008 (lane C): a copy's card is its robot's id (the kind's first keeps the kind: stable across a lend).
+  var cardId = has && !crew[i].first ? String(row.id) : spec.id;
+  var pre = cardId + '|';
   for (var b = 0; b < ids.length; b++) if (!(band === 1 && ids[b] === 'say')) abilities.push({ id: pre + ids[b], label: blockWord(ids[b]), cls: kindClass(ids[b]) });
   var up = null;
   for (var u = 0; u < UPGRADES.length; u++) if (UPGRADES[u].id === spec.upgrade) up = UPGRADES[u];
@@ -1222,17 +1236,26 @@ for (var i = 0; i < ROBOTS.length; i++) {
   var nm = String(look.name || spec.defaultName.en);
   // The card's id is its KIND (stable whether she has the robot or not: an id that changed between runs left a stale
   // row behind in the repeater); the robot's own id rides in robotId, for Update robot.
+  // P108 IW-008 (lane C): its brain and the program it knows; copy it to another of hers; where it helps; what a copy said.
+  var others = [];
+  if (has) for (var o2 = 0; o2 < mine.length; o2++) if (mine[o2] && mine[o2].id !== row.id) others.push({ id: pre + 'copy|' + String(mine[o2].id), label: String(mine[o2].name || mine[o2].id), selected: false, locked: false });
+  var knows = has ? Number(row.blocks) || 0 : 0, brainN = has && Number(row.brain) > 0 ? Number(row.brain) : ${IW8_BRAIN};
+  var saidHere = has && told && String(told.robotId || '') === String(row.id) ? String(told.text || '') : '';
+  var helpsAt = has && row.helps ? String(row.helps) : '';
   cards.push({
-    id: spec.id, robotId: has ? String(row.id) : '', kind: spec.id, name: nm, owned: has, locked: !has,
-    tag: !has ? (w.ig5LockedTag || '') : spec.lentBy ? fill(w.ig5LentBy, { who: lender }) : (w.ig5Yours || ''),
+    id: cardId, robotId: has ? String(row.id) : '', kind: spec.id, name: nm, owned: has, locked: !has,
+    tag: !has ? (w.ig5LockedTag || '') : spec.lentBy && row.id === spec.id ? fill(w.ig5LentBy, { who: lender }) : (w.ig5Yours || ''),
     tagClass: 'bg-robot-tag ' + (!has ? 'bg-robot-tag-locked' : spec.lentBy ? 'bg-robot-tag-lent' : 'bg-robot-tag-yours'),
     cardClass: 'bg-panel bg-robot-card bg-robot-' + spec.id + (has ? '' : ' bg-robot-locked'),
     wears: w[RW.wears[spec.accessory]] || '', color: String(look.color), eye: String(look.eye || 'round'), hat: String(look.hat || 'none'), accessory: spec.accessory,
     paints: paints, hats: hats, abilities: abilities,
     upgradeText: up ? fill(has && look.upgraded ? w.ig5UpHas : w.ig5UpEmpty, { up: upWord, who: upWho }) : '',
     upgradeClass: 'bg-robot-up' + (has && look.upgraded ? ' bg-robot-up-on' : ''),
-    whereText: !has ? fill(w.ig5WhenLent, { who: lender, r: nm, q: titleOf(spec.unlockedBy) }) : look.working ? fill(w.ig5AtWork, { plot: titleOf(look.working) }) : (w.ig5AtHome || ''),
-    nameWord: w.rbName || '', colourWord: w.rbColour || '', hatWord: w.rbHat || '', canDoWord: w.ig5CanDo || '', upgradeWord: w.ig5Upgrade || '', whereWord: w.ig5Where || ''
+    whereText: !has ? fill(w.ig5WhenLent, { who: lender, r: nm, q: titleOf(spec.unlockedBy) }) : look.working ? fill(w.ig5AtWork, { plot: titleOf(look.working) }) : helpsAt ? fill(w.iw8cHelpsOn, { plot: titleOf(helpsAt) }) : (w.ig5AtHome || ''),
+    nameWord: w.rbName || '', colourWord: w.rbColour || '', hatWord: w.rbHat || '', canDoWord: w.ig5CanDo || '', upgradeWord: w.ig5Upgrade || '', whereWord: w.ig5Where || '',
+    brainWord: w.iw8cBrainL || '', brainText: has ? fill(w.iw8cBrainText, { n: brainN, knows: knows > 0 ? fill(w.iw8cKnows, { k: knows }) : (w.iw8cKnowsNone || '') }) : '',
+    copyWord: fill(w.iw8cCopyTo, { r: nm }), copyChips: knows > 0 ? others : [], hasCopy: knows > 0 && others.length > 0,
+    saidText: saidHere, hasSaid: !!saidHere
   });
 }
 Outputs.cards = cards;
@@ -1396,6 +1419,12 @@ Outputs.full = jt > 0 && jn >= jt;
 Outputs.sumClass = 'bg-job-sum' + (jt > 0 && jn >= jt ? ' bg-job-sum-full' : '');
 `;
 
+// ── P108 IW-008 (lane C): the crew — copy a program, send a robot to a plot, the plot card's crew row ──
+const IW8_OLIVE_WORD: Record<string, string> = Object.fromEntries(PALETTE_RUNG_IDS.map((id) => ['olive:' + id, rungWordKey(id)]));
+export const COPY_PROGRAM_SCRIPT = copyProgramScript({ wordHelper: WORD_HELPER, oliveWords: IW8_OLIVE_WORD });
+export const ASSIGN_ROBOT_SCRIPT = assignRobotScript({ wordHelper: WORD_HELPER, oliveWords: IW8_OLIVE_WORD });
+export const CREW_CHIPS_SCRIPT = crewChipsScript({ wordHelper: WORD_HELPER });
+
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
   { component: 'Logic/Start world', script: START_WORLD_SCRIPT, seam: 'the world a request starts from, and the request' },
@@ -1453,5 +1482,9 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   // P108 IW-003 (lane B).
   { component: 'Logic/Teach again', script: TEACH_AGAIN_SCRIPT, seam: 'a program pinned on this request that its rewritten job outgrew: the line that asks her to teach it again' },
   // P108 IW-003 (lane M).
-  { component: 'Logic/Job card', script: JOB_CARD_SCRIPT, seam: 'the job in five lines, and how much of it is done' }
+  { component: 'Logic/Job card', script: JOB_CARD_SCRIPT, seam: 'the job in five lines, and how much of it is done' },
+  // P108 IW-008 (lane C): the crew.
+  { component: 'Logic/Copy program', script: COPY_PROGRAM_SCRIPT, seam: 'one robot\u2019s program copied onto another of hers, or refused with the block it cannot do or its brain too small' },
+  { component: 'Logic/Assign robot', script: ASSIGN_ROBOT_SCRIPT, seam: 'a robot of her crew sent to work a plot she won, or to help the one at work there, or home' },
+  { component: 'Logic/Crew chips', script: CREW_CHIPS_SCRIPT, seam: 'the plot card\u2019s crew: her robots of the kind the job needs, the ones here ringed' }
 ];

@@ -484,4 +484,12 @@ ${Object.entries(PAD_GO.emoji).map(([k, e]) => `.bg-key-go-${k}::after { content
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* P108 IW-008 (lane C): the crew — on the plot card, her robots of the job's kind as pills (ink when here) on a dashed
+   paper strip; on My robots, the brain line and the copy chips under a hairline, what a copy said in a soft pill. */
+.bg-crew { border-top: 2px dashed var(--line); padding-top: 8px; }
+.bg-crew-row, .bg-robot-copy .bg-chip { min-height: 44px; }
+.bg-crew-said:empty, .bg-robot-said:empty { display: none !important; }
+.bg-crew-said, .bg-robot-said { background-color: var(--paper-2); border-radius: 14px; padding: 8px 12px; }
+.bg-robot-copy { border-top: 2px dashed var(--line); padding-top: 8px; }
 `;

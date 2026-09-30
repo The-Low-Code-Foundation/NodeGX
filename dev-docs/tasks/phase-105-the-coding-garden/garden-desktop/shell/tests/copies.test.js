@@ -279,6 +279,18 @@ test('the save code is byte-identical to the page’s own encoder, and the page�
   assert.deepEqual(richBack.model.profiles.map((p) => [p.shells, p.owned]), [[{ earned: 41, spent: 12 }, ['rain', 'can+']], [{ earned: 3, spent: 3 }, []]]);
   assert.deepEqual(richBack.model.profiles[0].island.robots.map((r) => r.brain), [16, undefined, undefined, 20, undefined]);
   assert.deepEqual([richBack.model.profiles[0].island.plots[pinnedId].live.age, richBack.model.profiles[0].island.plots[pinnedId].live.helper], [44, 'selfcan']);
+  // P108 IW-008 (lane C): the crew — a robot's program (r1's too) and the plot a copy helps on pack as the page packs them;
+  // a helper where it may not be (beside nobody, a second on one plot, with no program) is sent home the same way.
+  const crew = JSON.parse(JSON.stringify(rich));
+  const isl = crew.profiles[0].island;
+  isl.robots[0].program = [{ id: 1, t: 'fwd' }];
+  const pinnedBy = isl.plots[pinnedId].robotId;
+  isl.robots.push({ id: 'rk4', kind: 'pip', name: 'Nimbus', helps: pinnedId, program: [{ id: 2, t: 'left' }, { id: 3, t: 'water' }] }, { id: 'rk5', kind: 'pip', name: 'Twice', helps: pinnedId, program: [{ id: 4, t: 'fwd' }] }, { id: 'rk6', kind: 'pip', name: 'Empty', helps: pinnedId }, { id: 'rk7', kind: 'pip', name: 'Nowhere', helps: 'no-such-plot', program: [{ id: 5, t: 'fwd' }] });
+  assert.ok(pinnedBy, 'the fixture has a pinned plot to help on');
+  assert.equal(C.saveCodeOf(crew), encode({ model: crew }).code, 'the crew packs as the page packs it');
+  const crewBack = decode({ code: C.saveCodeOf(crew) });
+  assert.deepEqual(crewBack.model.profiles[0].island.robots.filter((r) => r.helps).map((r) => [r.id, r.helps]), [['rk4', pinnedId]]);
+  assert.deepEqual(crewBack.model.profiles[0].island.robots.find((r) => r.id === 'rk7').program, [{ id: 5, t: 'fwd' }]);
 });
 
 // ── The restore ─────────────────────────────────────────────────────────────
