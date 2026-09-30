@@ -20,6 +20,7 @@ import type { Step } from '../adapter';
 import type { AnyNodeSpec, InputDecl } from '../spec';
 import { isSignalInput } from '../spec';
 import { mulberry32, sequenceSeed, type Rng } from './random';
+import type { Reach } from './reach';
 
 export interface Sequence {
   seed: number;
@@ -35,6 +36,12 @@ export interface GenerateOptions {
   settleChance?: number;
   /** How many declared value inputs get a parameter at mount. */
   paramChance?: number;
+  /**
+   * NSP-005: generate inside one target's reach only — params from `reach.params`, steps on
+   * `reach.inputs`. Absent (the interpreter, the runtime), the whole declared surface is drawn
+   * from and the pinned digest in tests/runner.test.ts holds.
+   */
+  reach?: Reach;
 }
 
 const CROSS_TYPE: readonly unknown[] = [null, undefined, '', 'abc', '3', 0, 1, -1, true, false, {}, [], { a: 1 }, [1, 2]];
@@ -69,12 +76,15 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   const settleChance = options.settleChance ?? 0.35;
   const paramChance = options.paramChance ?? 0.5;
 
+  const reach = options.reach;
+  const inReachParams = (name: string) => !reach || reach.params.includes(name);
+  const inReachInputs = (name: string) => !reach || reach.inputs.includes(name);
   const valuePorts = Object.entries(spec.inputs).filter(([, d]) => !isSignalInput(d));
-  const signalPorts = Object.entries(spec.inputs).filter(([, d]) => isSignalInput(d));
+  const signalPorts = Object.entries(spec.inputs).filter(([name, d]) => isSignalInput(d) && inReachInputs(name));
 
   const params: Record<string, unknown> = {};
   for (const [name, decl] of valuePorts) {
-    if (rng.chance(paramChance)) params[name] = rng.pick(poolFor(decl));
+    if (inReachParams(name) && rng.chance(paramChance)) params[name] = rng.pick(poolFor(decl));
   }
 
   // Derived ports (NSP-004): the ports an editor would draw for these params, plus the names the
@@ -91,13 +101,14 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
       if (decl) drivable.push([name, decl]);
     }
     for (const [name, decl] of drivable.slice(valuePorts.length)) {
-      if (rng.chance(paramChance)) params[name] = rng.pick(poolFor(decl));
+      if (inReachParams(name) && rng.chance(paramChance)) params[name] = rng.pick(poolFor(decl));
     }
   }
+  const steppable = reach ? drivable.filter(([name]) => inReachInputs(name)) : drivable;
 
   const n = minSteps + rng.int(maxSteps - minSteps + 1);
   const steps: Step[] = [];
-  for (let i = 0; i < n; i++) steps.push(oneStep(rng, drivable, signalPorts, settleChance));
+  for (let i = 0; i < n; i++) steps.push(oneStep(rng, steppable, signalPorts, settleChance));
   if (steps[steps.length - 1] !== 'settle') steps.push('settle');
   return { seed, params, steps };
 }

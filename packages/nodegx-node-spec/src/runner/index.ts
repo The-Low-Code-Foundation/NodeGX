@@ -5,3 +5,4 @@ export * from './shrink';
 export * from './mutants';
 export * from './scenario';
 export * from './conformance';
+export * from './reach';

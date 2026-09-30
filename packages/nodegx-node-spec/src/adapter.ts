@@ -40,6 +40,18 @@
  *                          recorded, so the first settle records every output that is defined,
  *                          `null` included (C8).
  *                        - SORTED BY PORT NAME is code-unit order, `Array.prototype.sort`'s default.
+ *                        And the three the second stranger asked about (NSP-006 §5.6):
+ *                        - WHEN OUTPUTS ARE SAMPLED, as a procedure: after every step, the outputs
+ *                          that step sends are read and a DEFINED reading replaces the frame's last;
+ *                          at each settle, after the frame-end reducer, every output is read once
+ *                          more under the same rule (an `undefined` reading never replaces a defined
+ *                          one); then what differs from the last recorded value is recorded. MOUNT IS
+ *                          NOT A SAMPLE: a value an output held at mount and lost before the first
+ *                          settle is never sent (Boolean To String handed `falseString: undefined`
+ *                          before its first settle sends nothing, not the `''` it held at mount).
+ *                        - AN OUTCOME'S `port` IS THE INPUT THAT WAS INVOKED (trace.ts), never an
+ *                          output name; outcomes are recorded in invocation order.
+ *                        - `settle()` runs the frame-end reducer on EVERY settle, steps or none.
  *   trace(h)             a copy of the events so far, values in canonical form (canonical.ts).
  *   dispose(h)           tears the instance down.
  *

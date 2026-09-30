@@ -1,7 +1,7 @@
 # NSP-011 — Batch: logic, math, strings, variables, converters
 
 **Opened 2026-09-29.** **Depends on NSP-004** (and R4 = continue).
-**Status: ✅ built s4 (2026-09-30) — 13 / 13 conform on the runtime at 200 with every mutant killed; 3 runtime-bug rows (C4, C5, C6→R7) + 3 doc-vs-code (D6–D8), none graded by an existing test; AC2 (the export adapter) waits for NSP-005; the deep run waits for a quiet box (§6.4).**
+**Status: ✅ built s4 (2026-09-30) — 13 / 13 conform on the runtime at 200 with every mutant killed; 3 runtime-bug rows (C4, C5, C6→R7) + 3 doc-vs-code (D6–D8), none graded by an existing test; AC2 (the export adapter): NSP-005 is built (s6) but none of the 13 has an export REACH declared yet — the Variables are the first candidates (the exporter lifts them to `value()`); the deep run done s5 (13 / 13 at 10,000).**
 
 ## 1. The person sentence
 
@@ -173,7 +173,7 @@ untouched.
   budget and nothing else appeared: C4 1,932 (String Mapper) + 1,350 (Substring); C6 115 (Log) + 91 (Value Changed);
   C5 has no known count because it is not a divergence: the spec models the runtime's seed (R3 (a)), and the row is
   pinned by scenarios both targets agree on. Per-node times in §6.1.
-- **AC2** ⏳ not run — the export adapter is NSP-005, not built. Nothing here is graded on the export.
+- **AC2** ⏳ not run — the export adapter exists since s6 (NSP-005) but grades a node only inside a declared reach (`EXPORT_REACH`), and none of the 13 has one yet. The Variables (Boolean / Number / String / Color) are the first candidates: the exporter lifts them to a module-level `value()`, the one shape reachable without React.
 - **AC3** ✅ every divergence is a row (§6.2) with its scenario marked `row` and a narrow `known` predicate in the runtime
   suite that asserts it STILL FIRES; the first example is kept unshrunk (the row mechanism does not shrink a known class).
 - **AC4** ⏳ the ledger is NSP-009, not built; README §6 carries the number by hand: **18 of 147**.

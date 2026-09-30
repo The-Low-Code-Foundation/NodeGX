@@ -40,5 +40,11 @@
     "because": "booleantostring.ts :44 — no conversion",
     "params": { "trueString": 5, "input": true },
     "steps": ["settle"]
+  },
+  {
+    "name": "String for false set to nothing before the first settle: nothing is sent — the first settle samples at the settle, not at mount",
+    "because": "booleantostring.ts :56-63 stores undefined and flags; node.ts :820-822 never sends undefined; the '' the output held at mount was never a sample (NSP-006 §5.6 item 1)",
+    "params": {},
+    "steps": [{ "set": "falseString" }, "settle", { "set": "falseString", "value": "no" }, "settle"]
   }
 ]

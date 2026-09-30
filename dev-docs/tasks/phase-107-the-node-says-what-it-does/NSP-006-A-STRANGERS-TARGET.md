@@ -1,7 +1,7 @@
 # NSP-006 — A stranger's target
 
 **Opened 2026-09-29.** **Depends on NSP-004.**
-**Status: ✅ built and graded — s5, 2026-09-30. The thesis held: a stranger built the pilot five in plain JS from the spec and the suite alone, green on its FIRST run at 200 and 10,000, every mutant caught both ways; 15 ambiguities written up, 14 fixed as sentences in the format files + a schema fix; one hole the pilot five cannot see, measured (§5.4).**
+**Status: ✅ built and graded — s5, 2026-09-30. The thesis held: a stranger built the pilot five in plain JS from the spec and the suite alone, green on its FIRST run at 200 and 10,000, every mutant caught both ways; 15 ambiguities written up, 14 fixed as sentences in the format files + a schema fix; one hole the pilot five cannot see, measured (§5.4). **s6 (2026-09-30): round 2 — a fresh stranger handed Inverter + Boolean To String beside the five: 7 / 7 conform at 200 and 10,000, 78 / 78 mutants caught; Inverter (the §5.4 shape) right on run 1; one new hole (the mount-time read) → a procedure sentence; §5.6.**
 
 ## 1. The person sentence
 
@@ -139,3 +139,51 @@ patched into its code, because a fixture nobody but the suite edits is the point
   the five on the stranger).
 - **AC4** ✅ a fixture; the static check refuses any `require` outside `stranger/`.
 - **§4's warning** ✅ taken: the hole named and measured (§5.4), not celebrated past.
+
+### 5.6 Round 2 — s6, 2026-09-30: Inverter and Boolean To String beside the five
+
+The direct test of §5.4's fix: a FRESH agent (same model, same lab recipe — a copy with no `.git`, trimmed to the seven
+nodes; brief in [NSP-006-BRIEF-2.md](NSP-006-BRIEF-2.md), which also answers the two things round 1 asked for up front:
+no node defers, and the generator's value vocabulary) handed the five plus the two nodes whose output passes through
+`undefined` mid-frame. Fixture kept at `packages/nodegx-node-spec/stranger-2/` (`target.js`, `nodes.js`, `canon.js`,
+`coerce.js`, its `REPORT.md`); `tests/stranger.test.ts` now grades every round listed in
+`tests/stranger-suite-hashes.helper.js` (round 1 the five in `stranger/`, round 2 the seven in `stranger-2/`), one hash
+file for both. Its 26 tool calls were read against the brief: every read a `cat` of a listed file; nothing under
+`src/adapters/`, no runner body, no interpreter, no parent.
+
+| | reading |
+|---|---|
+| iterations to green at 200 | **3** (run 1: 6 / 7 — Boolean To String, the mount-time read below; run 2: that node alone, green; run 3: all seven) |
+| **Inverter on run 1** | **CONFORMS** — the `null` then `undefined` shape of §5.4, right first time from the sentence written in s5 |
+| at 200, seed 20726 | 7 / 7 CONFORM; mutants caught by the stranger **78 / 78** (23 · 26 · 4 · 16 · 2 · 1 · 6) |
+| at 10,000, once | 7 / 7 CONFORM, 0 divergences, 0.8–1.5 s per node |
+| in primary, both rounds | 29 tests green (12 deep skipped) |
+| cost | 8 min wall clock (16:58–17:06); 141 k tokens; 26 tool calls |
+| its design | mutable classes per node with one method per port and an `fx` of three verbs (`pulse`, `outcome`, `only`); a frame ledger that samples the outputs a step may send after every call and keeps the last defined value; `close()` writes the settle |
+
+**The one correction, a new hole (§5.4 was closed, this one was under it):** *when* the "first settle records every
+defined output" read happens. The stranger read them at MOUNT (before the params were applied) and published the `''`
+Boolean To String held at mount for a sequence whose only step set `falseString` to `undefined` — the reference sends
+nothing. The rule, now a sentence in `adapter.ts` as the procedure it asked for: per-step samples keep the last defined
+value; every settle samples once more after the frame-end reducer, and an `undefined` sample never replaces a defined
+one; **mount is not a sample**. Two strangers fell into this frame from opposite sides (round 1 read only at settle; round
+2 read at mount too).
+
+**Its 13 ambiguities, what each became** (its REPORT.md §1 is the record): 1 the mount read → the procedure sentence;
+2 "settle-time sample first-frame only?" → the sentence says every settle (the interpreter's `observe(inst)` at
+`settle`, interpreter.ts) — and an open format row **F1** below; 3–4 `afterInputs` on a frame with no steps → "every
+settle, steps or none" in `spec.ts`; 5 a port with no `default` → "`undefined` when absent; reducers read state" in
+`spec.ts`; 6 the `DerivedPorts` "spec error" / "unset placeholder" pair → one behaviour, rewritten; 7 the outcome
+event's `port` → a sentence in `adapter.ts` and on the `trace.ts` union; 8–13 (one outcome per invocation, digit-named
+params order, an unknown param at mount, a discoverable name pulsed, frozen state, canonicalise-at-record) → not graded
+by any node yet, left as they are. Its item 7 of "what I would change" → **two hand scenarios added** (Inverter: `null`
+then `undefined` in one frame; Boolean To String: String for false set to nothing before the first settle), both pass on
+the runtime (38 / 38) and on both strangers; the hashes refreshed in the same commit. Its item 8 (the report says
+`interpreter` for the reference a stranger is told not to read) — cosmetic, left.
+
+**F1 — an open row for the format, not for Richard:** the interpreter samples every output at EVERY settle
+(interpreter.ts `observe` in `settle`); the runtime target reads getters nothing sent at the FIRST settle only (a wire
+made before the first frame reads the getter; afterwards only sends reach a wire). The two agree on all 18 specs at
+10,000 because no spec's `send: []` step changes an output that is still defined at settle. A spec that did would grade
+the two differently — the interpreter would record a change the runtime never sent. NSP-001 / NSP-018 own the sentence
+that settles which one the format means; the runtime's is the safer reading (R3 (a)).

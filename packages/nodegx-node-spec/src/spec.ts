@@ -94,7 +94,12 @@ export interface PortMeta {
 
 export interface ValueInputDecl extends PortMeta {
   type: ValueType;
-  /** What the port holds before anything is sent to it. Also the `fallback` of a `typed-*` coercion. */
+  /**
+   * What the port holds before anything is sent to it — `undefined` when absent. Also the
+   * `fallback` of a `typed-*` coercion. Reducers read STATE, not this: a spec's `state` may seed
+   * differently (String Format's `format` state starts `''` while its `format` input starts
+   * `undefined`), and only a reducer that reads `inputs.<port>` before any write would tell.
+   */
   default?: unknown;
   /** Which conversion the runtime applies on arrival. Declared, never implied — see coerce.ts. */
   coerce?: Coercion;
@@ -217,9 +222,9 @@ export type Reducers<S, I, O> = {
  * How a TARGET uses these (NSP-006 §5): it registers `inputs(params)` at mount, each at its
  * declared default, and every other name `discover` accepts on its first write; a port is coerced
  * by whichever declaration registered it. A DECLARED input always wins over a derived port of the
- * same name — a write consults the declaration first — and a spec whose `inputs(params)` or
- * `discover` mints a declared name is a spec error (String Format's `{format}` reads an unset
- * placeholder, never the `format` input).
+ * same name: a write consults the declaration first, and a target registers NO derived port under
+ * a declared name (the interpreter refuses one as a spec error). So String Format's `{format}`
+ * reads an unset placeholder (`''`), never the `format` input — one behaviour, not two.
  */
 export interface DerivedPorts<S, O> {
   /**
@@ -249,8 +254,9 @@ export interface DerivedPorts<S, O> {
  * The frame-end reducer — the runtime's `scheduleAfterInputsHaveUpdated` idiom (Condition,
  * Expression, Function, String Format … the twelve `hasScheduled…` families, NDA-017 §2
  * constraint 3). A value or signal reducer records that a frame needs work (`set: { scheduled:
- * true }`); the interpreter calls this ONCE per `settle`, before the frame's observations are
- * recorded, and the reducer does the work against the frame's FINAL inputs and state. It is
+ * true }`); the interpreter calls this ONCE per `settle` — every settle, steps or none — before
+ * the frame's observations are recorded, and the reducer does the work against the frame's FINAL
+ * inputs and state. It is
  * how "two triggers in one frame produce one test" is written without a frame in the spec.
  * Outcomes are reported by the invoking reducer (they queue to the same settle) — unless it
  * reported `deferred`, in which case THIS reducer resolves them (`AfterInputsPatch.outcomes`),

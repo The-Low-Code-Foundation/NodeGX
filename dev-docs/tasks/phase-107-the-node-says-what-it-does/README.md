@@ -3,7 +3,7 @@
 **Scoped:** 2026-09-29, from a conversation with Richard about DHH's Rails World 2026 keynote
 ("pencils down"), Fireship's take on it, and what a world where agents write most code means for
 NodeGX.
-**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`). s2: NSP-002 traces + the runtime as a target ✅; NSP-003 the runner ✅. s3: NSP-004 the pilot five ✅ (R4 asked). s4 (2026-09-30): NSP-011 the first batch ✅ — **18 of 147 picker nodes conform on the runtime** at 200 with every mutant killed; 3 more runtime-bug rows + 3 doc-vs-code, 0 graded before; **R7 asked** (§7). R1 R2 R3 R5 R6 ruled; R4 taken as (a) from Richard's "continue" (s4) — confirm. **s5 (2026-09-30): the deep run — 13 / 13 conform at 10,000, 0 divergences; NSP-006 the stranger ✅ — the thesis held (green on its first run, 71 / 71 mutants caught both ways), 15 ambiguities became sentences in the format files + a schema fix (the empty placeholder port), and the hole the pilot five cannot see (a target that reads outputs only at settle) is measured in NSP-006 §5.4.** NSP-005 / NSP-012 next.**
+**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`). s2: NSP-002 traces + the runtime as a target ✅; NSP-003 the runner ✅. s3: NSP-004 the pilot five ✅ (R4 asked). s4 (2026-09-30): NSP-011 the first batch ✅ — **18 of 147 picker nodes conform on the runtime** at 200 with every mutant killed; 3 more runtime-bug rows + 3 doc-vs-code, 0 graded before; **R7 asked** (§7). R1 R2 R3 R5 R6 ruled; R4 taken as (a) from Richard's "continue" (s4) — confirm. **s5 (2026-09-30): the deep run — 13 / 13 conform at 10,000, 0 divergences; NSP-006 the stranger ✅ — the thesis held (green on its first run, 71 / 71 mutants caught both ways), 15 ambiguities became sentences in the format files + a schema fix (the empty placeholder port), and the hole the pilot five cannot see (a target that reads outputs only at settle) is measured in NSP-006 §5.4.** **s6 (2026-09-30): NSP-005 the export adapter ✅ — the exporter DEFERS the task file's wrapper for all five (it translates graph shapes, not nodes), so the runner grew a REACH (the part of a node one target carries) and Counter + Switch conform on the export inside theirs at 200 and 10,000; four export/runtime rows E1–E4 routed to phase 18; And, Condition, String Format have no drivable shape. NSP-006 round 2 ✅ — 7 / 7, 78 / 78, Inverter right on run 1.** NSP-012 (after NSP-008) / NSP-007 next.**
 **Prefix: `NSP`** (node spec).
 
 > "I think the node level spec thing you talked about could be a great thing to already start and
@@ -122,8 +122,8 @@ Full detail in NSP-001 to NSP-003. The shape:
 | [NSP-002](NSP-002-TRACES-AND-THE-RUNTIME-ADAPTER.md) ✅ | Traces, the adapter interface, and the interpreted runtime as a target. **Built s2** (schema v1, canonicaliser, `TargetAdapter`, the runtime target in `noodl-runtime/test/helpers`) | 001 | T1 |
 | [NSP-003](NSP-003-THE-RUNNER.md) ✅ | The runner — scenarios, generated sequences, shrinking, mutants. **Built s2** (`runConformance → Report`; a planted off-by-one shrinks to 2 steps) | 002 | T1 |
 | [NSP-004](NSP-004-THE-PILOT-FIVE.md) ✅ | 🔴 **The pilot five** — Counter, Switch, And, Condition, String Format. **Built s3** (all five conform at 10,000; 2 + 3 findings, 0 previously caught; **R4 asked**, §7) | 003 | T1 |
-| [NSP-005](NSP-005-THE-EXPORT-ADAPTER.md) | The export adapter — run the emitted code for one node, headless | 004 | T1 |
-| [NSP-006](NSP-006-A-STRANGERS-TARGET.md) | ✅ s5 **A stranger's target** — an agent built the pilot five in vanilla JS from spec + suite alone, green on run 1 at 200 and 10,000; 15 ambiguities → format sentences; one hole measured (§5.4) | 004 | T1 |
+| [NSP-005](NSP-005-THE-EXPORT-ADAPTER.md) ✅ | The export adapter — run the emitted code for one node, headless. **Built s6**: the exporter defers the every-port wrapper for all five → a target declares its REACH; Counter + Switch conform on the export inside theirs at 200 and 10,000 (rows E1–E4 → phase 18); And / Condition / String Format: no drivable shape, said in the exporter's words | 004 | T1 |
+| [NSP-006](NSP-006-A-STRANGERS-TARGET.md) ✅ | **A stranger's target** — s5: an agent built the pilot five in vanilla JS from spec + suite alone, green on run 1 at 200 and 10,000; 15 ambiguities → format sentences; one hole measured (§5.4). **s6 round 2**: a fresh agent, seven nodes, 7 / 7 and 78 / 78; the §5.4 shape right on run 1; one new hole (the mount-time read) → a sentence (§5.6) | 004 | T1 |
 | [NSP-007](NSP-007-THE-WORLD.md) | The world — fake clock, seeded random, scripted network, scripted backend | 004 | T2, T3 |
 | [NSP-008](NSP-008-THE-GRAPH.md) | The graph — CONTRACT C1–C11 as graph scenarios on every target | 005 | T4 |
 | [NSP-009](NSP-009-THE-RATCHET.md) | The ratchet — spec coverage in PR CI; new picker nodes ship specced | 004 | — |
@@ -154,7 +154,7 @@ session or two, each closing on the ledger number.
 npm run spec-ledger            # NSP-009 — ratcheted in PR CI
 ```
 
-> **SPEC COVERAGE: 18 of 147 picker nodes conform on the runtime (12.2%); 0 on the export; 0 exempt.** (s4, 2026-09-30,
+> **SPEC COVERAGE: 18 of 147 picker nodes conform on the runtime (12.2%); 2 on the export, inside a declared reach (Counter, Switch — s6); 0 exempt.** (s4, 2026-09-30,
 > by hand — NSP-009's ledger is not built. T1 18/46 · T2 0/11 · T3 0/39 · T4 0/27 · T5 0/19 · T6 0/5. Ports derivable
 > without a viewer: 5 of the 68 dynamic-port nodes — And, Or, String Format, String Mapper, Color Blend; catalog parity: 18.)
 

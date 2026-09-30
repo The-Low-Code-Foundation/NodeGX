@@ -28,6 +28,7 @@ import type { TraceEvent } from '../trace';
 import { compareTraces, differenceWithThrow, formatDifference, hasObservation, type Difference } from './compare';
 import { generateSequence } from './generate';
 import { discoverBranches, mutantsOf, type Branch, type MutationKind } from './mutants';
+import { outsideReach, projectTrace, type Reach } from './reach';
 import { loadScenarios, writeReplay, type Scenario } from './scenario';
 import { shrink } from './shrink';
 
@@ -55,6 +56,13 @@ export interface ConformanceOptions {
    * finding, and the report cannot tell.
    */
   known?: KnownRow[];
+  /**
+   * NSP-005: the part of the node this target carries (reach.ts). Sequences are generated inside
+   * it, hand scenarios outside it are marked `outside`, and the reference is projected onto it
+   * before every comparison — the mutant phase included, so its counts say how much of the node
+   * this reach grades.
+   */
+  reach?: Reach;
 }
 
 export interface KnownRow {
@@ -72,8 +80,11 @@ export interface KnownCount {
 
 export interface ScenarioResult {
   name: string;
-  /** `known`: failed, and the scenario names the §6 row it belongs to (`row` in the JSON). */
-  status: 'passed' | 'failed' | 'refused' | 'known';
+  /**
+   * `known`: failed, and the scenario names the §6 row it belongs to (`row` in the JSON).
+   * `outside`: not played — a param or port of it is outside the target's reach (NSP-005).
+   */
+  status: 'passed' | 'failed' | 'refused' | 'known' | 'outside';
   reason?: string;
   row?: string;
   difference?: Difference;
@@ -110,6 +121,10 @@ export interface Report {
   scenarios: ScenarioResult[];
   generated: { seed: number; requested: number; ran: number; divergences: Divergence[]; known: KnownCount[] };
   mutants?: { total: number; killed: number; survivors: MutantResult[]; unreached: Branch[]; results: MutantResult[] };
+  /** The reach this run was graded inside (NSP-005); absent for a full-surface target. */
+  reach?: Reach;
+  /** Reducers the reach never calls (their port is outside it) — not `unreached`, not graded here. */
+  outsideReducers?: string[];
   timeMs: number;
   conforms: boolean;
 }
@@ -134,8 +149,9 @@ async function playTarget(target: TargetAdapter, type: string, params: Record<st
   }
 }
 
-async function playBoth(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[]) {
-  const reference = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps);
+async function playBoth(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reach?: Reach) {
+  const full = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps);
+  const reference = reach ? projectTrace(full, reach) : full;
   return { reference, ...(await playTarget(target, spec.type, params, steps, reference)) };
 }
 
@@ -143,6 +159,8 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   const started = Date.now();
   const seed = options.seed ?? defaultSeed();
   const requested = options.sequences ?? 200;
+  const reach = options.reach;
+  const project = (t: TraceEvent[]) => (reach ? projectTrace(t, reach) : t);
   const report: Report = {
     node: spec.type,
     version: spec.version,
@@ -152,6 +170,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
     timeMs: 0,
     conforms: false
   };
+  if (reach) report.reach = reach;
 
   // 0. the world this runner does not have
   if (spec.needs && spec.needs.length > 0) {
@@ -162,9 +181,14 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
 
   // 1. hand scenarios
   for (const sc of options.scenarios ?? loadScenarios(spec.type)) {
-    const reference = sc.expect ?? (await play(interpreterAdapter({ resolve: () => spec }), spec.type, sc.params, sc.steps));
+    const outside = reach ? outsideReach(sc.params, sc.steps, reach) : undefined;
+    if (outside !== undefined) {
+      report.scenarios.push({ name: sc.name, status: 'outside', row: sc.row, reason: outside });
+      continue;
+    }
+    const reference = project(sc.expect ?? (await play(interpreterAdapter({ resolve: () => spec }), spec.type, sc.params, sc.steps)));
     if (!hasObservation(reference)) {
-      report.scenarios.push({ name: sc.name, status: 'refused', reason: 'the reference trace has no observation event — an arm with no predicate grades nothing' });
+      report.scenarios.push({ name: sc.name, status: 'refused', reason: `the reference trace has no observation event${reach ? ' inside the reach' : ''} — an arm with no predicate grades nothing` });
       continue;
     }
     const { actual, difference } = await playTarget(target, spec.type, sc.params, sc.steps, reference);
@@ -182,8 +206,8 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
 
   // 2. generated sequences
   for (let i = 0; i < requested; i++) {
-    const seq = generateSequence(spec, seed, i);
-    const { reference, actual, difference } = await playBoth(spec, target, seq.params, seq.steps);
+    const seq = generateSequence(spec, seed, i, { reach });
+    const { reference, actual, difference } = await playBoth(spec, target, seq.params, seq.steps, reach);
     report.generated.ran++;
     if (difference.index < 0) continue;
     const div: Divergence = { seed: seq.seed, params: seq.params, steps: seq.steps, shrunk: false, difference, reference, actual };
@@ -195,8 +219,8 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
       continue;
     }
     if (options.shrink) {
-      const { result, runs } = await shrink({ params: seq.params, steps: seq.steps }, async (c) => (await playBoth(spec, target, c.params, c.steps)).difference.index >= 0);
-      const again = await playBoth(spec, target, result.params, result.steps);
+      const { result, runs } = await shrink({ params: seq.params, steps: seq.steps }, async (c) => (await playBoth(spec, target, c.params, c.steps, reach)).difference.index >= 0);
+      const again = await playBoth(spec, target, result.params, result.steps, reach);
       Object.assign(div, { params: result.params, steps: result.steps, shrunk: true, shrinkRuns: runs, difference: again.difference, reference: again.reference, actual: again.actual });
       if (options.replayDir) {
         div.replayFile = writeReplay(options.replayDir, {
@@ -216,16 +240,18 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   // 3. mutants — the suite is the hand scenarios plus the same generated sequences
   if (options.mutants) {
     const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[] }> = [
-      ...(options.scenarios ?? loadScenarios(spec.type)).map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps }))
+      ...(options.scenarios ?? loadScenarios(spec.type))
+        .filter((s) => !reach || outsideReach(s.params, s.steps, reach) === undefined)
+        .map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps }))
     ];
     for (let i = 0; i < requested; i++) {
-      const seq = generateSequence(spec, seed, i);
+      const seq = generateSequence(spec, seed, i, { reach });
       suite.push({ name: `sequence ${i} (seed ${seq.seed})`, params: seq.params, steps: seq.steps });
     }
     const discovered = discoverBranches(spec);
     const probe = interpreterAdapter({ resolve: () => discovered.spec });
     const referenceTraces: TraceEvent[][] = [];
-    for (const s of suite) referenceTraces.push(await play(probe, spec.type, s.params, s.steps));
+    for (const s of suite) referenceTraces.push(project(await play(probe, spec.type, s.params, s.steps)));
 
     const results: MutantResult[] = [];
     for (const m of mutantsOf(spec, discovered.branches)) {
@@ -241,7 +267,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
           result.killedBy = `${suite[i].name}: ${(e as Error).message}`;
           break;
         }
-        if (compareTraces(referenceTraces[i], actual).index >= 0) {
+        if (compareTraces(referenceTraces[i], project(actual)).index >= 0) {
           result.killed = true;
           result.killedBy = suite[i].name;
           break;
@@ -260,6 +286,10 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
     };
     for (const name of Object.keys(spec.on)) {
       if (typeof spec.on[name] === 'function' && !declared.has(name)) {
+        if (reach && !reach.inputs.includes(name) && !reach.params.includes(name)) {
+          (report.outsideReducers ??= []).push(name);
+          continue;
+        }
         report.mutants.unreached.push({ reducer: name, shape: '<never called by the suite>', example: {}, hits: 0 });
       }
     }
@@ -268,9 +298,11 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   report.timeMs = Date.now() - started;
   report.conforms =
     report.refused === undefined &&
-    report.scenarios.every((s) => s.status === 'passed' || s.status === 'known') &&
+    report.scenarios.every((s) => s.status === 'passed' || s.status === 'known' || s.status === 'outside') &&
     report.generated.divergences.length === 0 &&
-    (report.mutants === undefined || (report.mutants.survivors.length === 0 && report.mutants.unreached.length === 0));
+    // under a reach a survivor is behaviour the reach cannot see (the suite inside it would have caught anything it can):
+    // reported as the honesty number, not held against the target
+    (report.mutants === undefined || ((reach !== undefined || report.mutants.survivors.length === 0) && report.mutants.unreached.length === 0));
   return report;
 }
 
@@ -284,8 +316,13 @@ export function formatReport(report: Report): string {
   const lines: string[] = [];
   lines.push(`${report.node} v${report.version} on ${report.target}: ${report.conforms ? 'CONFORMS' : 'DOES NOT CONFORM'} (${report.timeMs} ms, seed ${report.generated.seed})`);
   if (report.refused) lines.push(`  refused: ${report.refused}`);
+  if (report.reach) {
+    lines.push(`  reach: params [${report.reach.params.join(', ')}]  inputs [${report.reach.inputs.join(', ')}]  outputs [${report.reach.outputs.join(', ')}]  outcomes [${(report.reach.outcomes ?? []).join(', ')}]`);
+    if (report.outsideReducers?.length) lines.push(`    reducers outside the reach, not graded here: ${report.outsideReducers.join(', ')}`);
+  }
   const failed = report.scenarios.filter((s) => s.status !== 'passed');
-  lines.push(`  scenarios: ${report.scenarios.length - failed.length} / ${report.scenarios.length} passed`);
+  const outside = report.scenarios.filter((s) => s.status === 'outside').length;
+  lines.push(`  scenarios: ${report.scenarios.length - failed.length} / ${report.scenarios.length} passed${outside ? ` (${outside} outside the reach)` : ''}`);
   for (const s of report.scenarios) {
     if (s.status === 'passed' && !s.reason) continue;
     lines.push(`    ${s.status} ${s.name}${s.row ? ` [row ${s.row}]` : ''}${s.reason ? ': ' + s.reason : ''}`);
@@ -306,7 +343,7 @@ export function formatReport(report: Report): string {
   }
   if (report.mutants) {
     lines.push(`  mutants: ${report.mutants.killed} / ${report.mutants.total} killed`);
-    for (const s of report.mutants.survivors) lines.push(`    SURVIVED ${s.reducer} ${s.kind} on branch ${s.branch}${s.swappedWith ? ' ↔ ' + s.swappedWith : ''}`);
+    for (const s of report.mutants.survivors) lines.push(`    SURVIVED${report.reach ? ' (not graded by this reach)' : ''} ${s.reducer} ${s.kind} on branch ${s.branch}${s.swappedWith ? ' ↔ ' + s.swappedWith : ''}`);
     for (const u of report.mutants.unreached) lines.push(`    UNREACHED ${u.reducer}: ${u.shape}`);
   }
   return lines.join('\n');

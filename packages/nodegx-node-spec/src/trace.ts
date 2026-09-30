@@ -35,6 +35,7 @@ export type TraceEvent =
   | (Base & { t: 'settle' })
   | (Base & { t: 'value'; port: string; value: unknown })
   | (Base & { t: 'signal'; port: string })
+  /** `port` is the INPUT that was invoked (the signal whose reducer reported), never an output name. */
   | (Base & { t: 'outcome'; port: string; value: Outcome; error?: string });
 
 /** Trace-format version — must match the `/v1.json` in the schema's `$id` (tests/schema.test.ts). */
