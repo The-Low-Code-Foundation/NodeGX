@@ -1,0 +1,192 @@
+[
+  {
+    "name": "a value sent over a wire lands at the frame's drain, after a direct write made later in the same frame",
+    "clauses": [
+      "C5"
+    ],
+    "because": "C5 — a send only queues and flags (node.ts :659-672); the drain is the context's, at the frame (nodecontext.ts :355-395). So a wire's value (1, sent first) is applied AFTER a direct write to the same port (5, written later but applied at once): the Value Changed ends the frame holding 1, and the next frame's direct write of 1 is not a change. A target that delivers synchronously ends the frame holding 5 and fires again on the 1: the Counter reads 4 where the runtime reads 3 and records nothing. The pulses in frame 2 are the known-firing control.",
+    "nodes": {
+      "a": {
+        "type": "Counter"
+      },
+      "b": {
+        "type": "Value Changed"
+      },
+      "c": {
+        "type": "Counter"
+      }
+    },
+    "wires": [
+      {
+        "from": "a.currentCount",
+        "to": "b.value"
+      },
+      {
+        "from": "b.valueChanged",
+        "to": "c.increase"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      {
+        "node": "b",
+        "set": "value",
+        "value": 5
+      },
+      "settle",
+      {
+        "node": "b",
+        "set": "value",
+        "value": 1
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "valueChanged",
+        "count": 2
+      },
+      {
+        "at": 2,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 3
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "signal": "valueChanged",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "c",
+        "port": "currentCount",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 0,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 5,
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 3,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  }
+]

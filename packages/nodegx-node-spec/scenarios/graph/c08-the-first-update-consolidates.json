@@ -1,0 +1,236 @@
+[
+  {
+    "name": "values queued before a node's first update collapse to the last one; after it, every value is delivered",
+    "clauses": [
+      "C8",
+      "C2"
+    ],
+    "because": "C8 — while `_isFirstUpdate` is set, a newly queued value clears the port's queue instead of appending (node.ts :1017-1045); signals are exempt. Before the first frame the Value Changed's port receives 0 (the wire's seed), 1 and 2, keeps only 2, and pulses once; the Counter behind it, whose pulses are exempt, reads 1. In the next frame the same two Increases are two deliveries (C2) and it reads 3. A target with no first-update rule reads 3 then 5.",
+    "nodes": {
+      "a": {
+        "type": "Counter"
+      },
+      "b": {
+        "type": "Value Changed"
+      },
+      "c": {
+        "type": "Counter"
+      }
+    },
+    "wires": [
+      {
+        "from": "a.currentCount",
+        "to": "b.value"
+      },
+      {
+        "from": "b.valueChanged",
+        "to": "c.increase"
+      }
+    ],
+    "steps": [
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      "settle",
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "a",
+        "port": "currentCount",
+        "value": 2
+      },
+      {
+        "at": 1,
+        "subject": "b",
+        "signal": "valueChanged",
+        "count": 1
+      },
+      {
+        "at": 1,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "currentCount",
+        "value": 4
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "valueChanged",
+        "count": 2
+      },
+      {
+        "at": 2,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 3
+      }
+    ],
+    "divergence": {
+      "export": "CONTRACT.md Part 2, C8: first-update consolidation is 'a startup artefact of interpretation' the library does not implement — exported components initialise once, so the two Increases before the first frame are two deliveries and the Counter reads 3 where the runtime reads 1"
+    },
+    "expect": [
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 2,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 4,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 3,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      }
+    ]
+  }
+]

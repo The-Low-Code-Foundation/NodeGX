@@ -3,7 +3,7 @@
 **Scoped:** 2026-09-29, from a conversation with Richard about DHH's Rails World 2026 keynote
 ("pencils down"), Fireship's take on it, and what a world where agents write most code means for
 NodeGX.
-**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`). s2: NSP-002 traces + the runtime as a target ✅; NSP-003 the runner ✅. s3: NSP-004 the pilot five ✅ (R4 asked). s4 (2026-09-30): NSP-011 the first batch ✅ — **18 of 147 picker nodes conform on the runtime** at 200 with every mutant killed; 3 more runtime-bug rows + 3 doc-vs-code, 0 graded before; **R7 asked** (§7). R1 R2 R3 R5 R6 ruled; R4 taken as (a) from Richard's "continue" (s4) — confirm. **s5 (2026-09-30): the deep run — 13 / 13 conform at 10,000, 0 divergences; NSP-006 the stranger ✅ — the thesis held (green on its first run, 71 / 71 mutants caught both ways), 15 ambiguities became sentences in the format files + a schema fix (the empty placeholder port), and the hole the pilot five cannot see (a target that reads outputs only at settle) is measured in NSP-006 §5.4.** **s6 (2026-09-30): NSP-005 the export adapter ✅ — the exporter DEFERS the task file's wrapper for all five (it translates graph shapes, not nodes), so the runner grew a REACH (the part of a node one target carries) and Counter + Switch conform on the export inside theirs at 200 and 10,000; four export/runtime rows E1–E4 routed to phase 18; And, Condition, String Format have no drivable shape. NSP-006 round 2 ✅ — 7 / 7, 78 / 78, Inverter right on run 1.** NSP-012 (after NSP-008) / NSP-007 next.**
+**Status: 🟡 IN PROGRESS — s1 (2026-09-30): NSP-000 the census ✅ ([CENSUS.md](CENSUS.md)); NSP-001 the package ✅ (`packages/nodegx-node-spec`). s2: NSP-002 traces + the runtime as a target ✅; NSP-003 the runner ✅. s3: NSP-004 the pilot five ✅ (R4 asked). s4 (2026-09-30): NSP-011 the first batch ✅ — **18 of 147 picker nodes conform on the runtime** at 200 with every mutant killed; 3 more runtime-bug rows + 3 doc-vs-code, 0 graded before; **R7 asked** (§7). R1 R2 R3 R5 R6 ruled; R4 taken as (a) from Richard's "continue" (s4) — confirm. **s5 (2026-09-30): the deep run — 13 / 13 conform at 10,000, 0 divergences; NSP-006 the stranger ✅ — the thesis held (green on its first run, 71 / 71 mutants caught both ways), 15 ambiguities became sentences in the format files + a schema fix (the empty placeholder port), and the hole the pilot five cannot see (a target that reads outputs only at settle) is measured in NSP-006 §5.4.** **s6 (2026-09-30): NSP-005 the export adapter ✅ — the exporter DEFERS the task file's wrapper for all five (it translates graph shapes, not nodes), so the runner grew a REACH (the part of a node one target carries) and Counter + Switch conform on the export inside theirs at 200 and 10,000; four export/runtime rows E1–E4 routed to phase 18; And, Condition, String Format have no drivable shape. NSP-006 round 2 ✅ — 7 / 7, 78 / 78, Inverter right on run 1.** **s7 (2026-09-30): NSP-008 the graph ✅ — CONTRACT.md C1–C11 as 14 graph scenarios with the runtime as the reference and claims written FROM THE CLAUSE; 14 / 14 on the runtime, one row (G1: C6's sentence is false for a per-setter node — R8 asked); on the export 1 passed, C7 and C8 DIVERGE as Part 2 declares (AC3), G1 from the other side, 10 outside in the exporter's words. Two target holes fixed (a settle is a frame; a wired pulse's outcome names its input). NSP-012 / NSP-015 unblocked; NSP-007 next.**
 **Prefix: `NSP`** (node spec).
 
 > "I think the node level spec thing you talked about could be a great thing to already start and
@@ -67,6 +67,8 @@ Measured 2026-09-29 against the working tree. Read, not run.
 
 | 14 | **The first batch (NSP-011, 2026-09-30):** 13 more specs conform on the runtime at 200, every mutant killed — **18 of 147**; **3 runtime-bug rows + 3 doc-vs-code + 1 edge, 0 graded by an existing test**: four `.toString()` setters throw on `null` (C4, Substring's description even says so); every Variable ignores a first Value of `0` and a Set before any Value stores the seed `0` — `'0'` in a String, the number 0 in a Color (C5); node.ts merges a later primitive into a unit object any `*` port once held, so Value Changed fires on a repeated `2` (C6 → **R7**); Boolean To String's "not true counts as false" is truthiness (D6); Substring's End `'-1'` as text yields `''` (D7); Color Blend renders `'#NaNNaNNaN'` for a non-numeric Blend Value — P79 E2's shape through the other door (D8). Format grew: a deferred outcome resolved at frame end; the wire's value is the last DEFINED value a frame sent | [NSP-011 §6](NSP-011-BATCH-LOGIC-MATH-STRINGS.md) |
 
+| 15 | **The graph (NSP-008, 2026-09-30):** CONTRACT.md C1–C11 as 14 two-to-six-node graph scenarios, the runtime's trace recorded as the reference and each clause's sentence written as a checkable claim BEFORE recording. **13 of 14 bear their clause out; one does not (G1)**: C6's *"never computes from a half-updated upstream"* is true of a frame-end node (String Format) and false of a per-setter node (And): under C7's lockstep `x AND NOT x` carries `true` then `false` inside one pass. The export computes it atomically — the sentence describes the export, not the runtime. Two holes in the runtime TARGET found by the graphs and fixed (a settle that only drains is not a frame — a breaker-tripped node never re-armed; a wired pulse's outcome had no port). The exporter emits 3 of 14 graphs whole; C7 and C8 differ on it exactly as Part 2 says | [NSP-008 §6](NSP-008-THE-GRAPH.md) |
+
 So the phase is **generalising five things that already exist in part** (#4–#8), not inventing
 a discipline from nothing.
 
@@ -125,7 +127,7 @@ Full detail in NSP-001 to NSP-003. The shape:
 | [NSP-005](NSP-005-THE-EXPORT-ADAPTER.md) ✅ | The export adapter — run the emitted code for one node, headless. **Built s6**: the exporter defers the every-port wrapper for all five → a target declares its REACH; Counter + Switch conform on the export inside theirs at 200 and 10,000 (rows E1–E4 → phase 18); And / Condition / String Format: no drivable shape, said in the exporter's words | 004 | T1 |
 | [NSP-006](NSP-006-A-STRANGERS-TARGET.md) ✅ | **A stranger's target** — s5: an agent built the pilot five in vanilla JS from spec + suite alone, green on run 1 at 200 and 10,000; 15 ambiguities → format sentences; one hole measured (§5.4). **s6 round 2**: a fresh agent, seven nodes, 7 / 7 and 78 / 78; the §5.4 shape right on run 1; one new hole (the mount-time read) → a sentence (§5.6) | 004 | T1 |
 | [NSP-007](NSP-007-THE-WORLD.md) | The world — fake clock, seeded random, scripted network, scripted backend | 004 | T2, T3 |
-| [NSP-008](NSP-008-THE-GRAPH.md) | The graph — CONTRACT C1–C11 as graph scenarios on every target | 005 | T4 |
+| [NSP-008](NSP-008-THE-GRAPH.md) ✅ | The graph — CONTRACT C1–C11 as graph scenarios on every target. **Built s7**: 14 scenarios, every clause tagged and gated; the runtime records the reference, claims from the clause grade it; 14 / 14 on the runtime (G1 known), C7 + C8 asserted as differences on the export | 005 | T4 |
 | [NSP-009](NSP-009-THE-RATCHET.md) | The ratchet — spec coverage in PR CI; new picker nodes ship specced | 004 | — |
 | [NSP-010](NSP-010-A-CHANGE-IS-A-VERSION.md) | A behaviour change is a version, a trace diff, and a migration answer | 009 | — |
 | [NSP-011](NSP-011-BATCH-LOGIC-MATH-STRINGS.md) ✅ | Batch — logic, math, strings, variables, converters (**13**). **Built s4** (13 / 13 conform at 200; rows C4–C6, D6–D9; AC2 waits for NSP-005, the deep run for a quiet box) | 004 | T1 |
@@ -157,6 +159,7 @@ npm run spec-ledger            # NSP-009 — ratcheted in PR CI
 > **SPEC COVERAGE: 18 of 147 picker nodes conform on the runtime (12.2%); 2 on the export, inside a declared reach (Counter, Switch — s6); 0 exempt.** (s4, 2026-09-30,
 > by hand — NSP-009's ledger is not built. T1 18/46 · T2 0/11 · T3 0/39 · T4 0/27 · T5 0/19 · T6 0/5. Ports derivable
 > without a viewer: 5 of the 68 dynamic-port nodes — And, Or, String Format, String Mapper, Color Blend; catalog parity: 18.)
+> **GRAPH: 11 of 11 CONTRACT clauses graded by 14 scenarios; 14 / 14 on the runtime (1 known row); on the export 1 passed + 2 declared differences + 1 known, 10 outside.** (s7, NSP-008)
 
 Reported per target: *conforms on the runtime · conforms on the export · exempt with a reason* —
 and, from R6, *ports derivable without a viewer: N of 147* and *catalog parity: N of 147*.
@@ -221,6 +224,26 @@ Until ruled, the runtime suite counts the rows (C6) every run and goes red the d
 
 **Also for a ruling, the batch's rows** (NSP-011 §6.2): C4 (four `.toString()` setters throw on null), C5 (the Variables'
 seed of 0), D6, D7, D8 — each a proposed answer; C5 and D8 are the ones an author meets first.
+
+**R8 — Is CONTRACT.md C6's sentence a rule or a description of one kind of node? Asked by NSP-008 (s7, 2026-09-30),
+found by a claim written from the clause before the runtime was recorded.** C6 says *"a node never computes from a
+half-updated upstream"*. Read against And — which recomputes in its SETTER — it is false: C7's lockstep applies one queue
+entry per port per pass and And publishes after each, so `x AND NOT x` sends `true` then `false` on the wire inside one
+pass (a Value Changed behind it fires twice, a Counter behind that reads 3). A frame-end node (String Format) never does.
+The React export computes `switchState && !switchState` atomically and never does either — the export bears the sentence
+out, the runtime does not. Plain words: *"When two inputs of a node change in the same frame, may the node briefly publish
+a result computed from one new input and one old one? The runtime does, for nodes that compute on every write; the export
+never does."*
+
+- **(a) Recommended: the sentence is a description, not a rule — rewrite C6** to say what is true (the DEPENDENCY update
+  runs first; a per-setter node still sees its ports one entry at a time), keep the runtime (R3 (a)), and keep the scenario
+  as the record of it. Nothing ships. The export's atomic And stays an export/runtime difference on the P18 ledger (E-rows).
+- **(b) A rule — make the runtime glitch-free** for per-setter nodes (compute after the pass, not per entry): a behaviour
+  change in node.ts's drain touching every node with two or more value inputs, shipped alone after the ruling, with the
+  scenario's claims flipped to green as its test.
+
+Until ruled, both suites count the scenario under row G1 (known on the runtime, known-from-the-other-side on the export)
+and go red the day either stops.
 
 **R6 — Is the editor a target?** Asked by s1 as *"can we make sure the work in this phase prepares
 for a future where even the editor is exchangeable?"* — Richard's own words, 2026-09-30: **yes,

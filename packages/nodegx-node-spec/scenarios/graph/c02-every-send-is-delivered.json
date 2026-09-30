@@ -1,0 +1,388 @@
+[
+  {
+    "name": "two values sent in one frame are both delivered, in order",
+    "clauses": [
+      "C2"
+    ],
+    "because": "C2 — inputs are queued per port and `update` shifts entries one at a time (node.ts :568-609); nothing collapses a queue to its newest entry after the first update. Two Increases in one frame send 1 then 2; the Value Changed downstream sees both and pulses twice; the Counter after it counts the pulses. A target that keeps only the newest value per turn reads 2 here, not 3.",
+    "nodes": {
+      "a": {
+        "type": "Counter"
+      },
+      "b": {
+        "type": "Value Changed"
+      },
+      "c": {
+        "type": "Counter"
+      }
+    },
+    "wires": [
+      {
+        "from": "a.currentCount",
+        "to": "b.value"
+      },
+      {
+        "from": "b.valueChanged",
+        "to": "c.increase"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      {
+        "node": "a",
+        "signal": "increase"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "b",
+        "signal": "valueChanged",
+        "count": 1
+      },
+      {
+        "at": 1,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "currentCount",
+        "value": 2
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "valueChanged",
+        "count": 2
+      },
+      {
+        "at": 2,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 3
+      }
+    ],
+    "expect": [
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 0,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 2,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "valueChanged",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 3,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      }
+    ]
+  },
+  {
+    "name": "an identical value sent again is delivered again — no equality short-circuit",
+    "clauses": [
+      "C2"
+    ],
+    "because": "C2 — `setInputValue` writes and invokes the setter unconditionally (node.ts :331-354). A Log passes its Value through and flags on every write (log.ts :120-129); a Switch's State setter announces EVERY write on Switched (switch.ts :64-68). `true` written twice in one frame reaches the Switch twice and Switched fires twice; the Counter counts them. A target that short-circuits identical writes counts one.",
+    "nodes": {
+      "a": {
+        "type": "net.noodl.Log"
+      },
+      "s": {
+        "type": "Switch"
+      },
+      "c": {
+        "type": "Counter"
+      }
+    },
+    "wires": [
+      {
+        "from": "a.value",
+        "to": "s.onFromStart"
+      },
+      {
+        "from": "s.switched",
+        "to": "c.increase"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "set": "value",
+        "value": true
+      },
+      {
+        "node": "a",
+        "set": "value",
+        "value": true
+      },
+      "settle",
+      {
+        "node": "a",
+        "set": "value",
+        "value": true
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "s",
+        "signal": "switched",
+        "count": 2
+      },
+      {
+        "at": 2,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 2
+      },
+      {
+        "at": 3,
+        "subject": "s",
+        "signal": "switched",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "c",
+        "port": "currentCount",
+        "value": 3
+      }
+    ],
+    "expect": [
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": false,
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 0,
+        "subject": "c"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": true,
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": true,
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": true,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": true,
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switchedToOn",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switched",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switchedToOn",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switched",
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 2,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": true,
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "switchedToOn",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "switched",
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 3,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      }
+    ]
+  }
+]

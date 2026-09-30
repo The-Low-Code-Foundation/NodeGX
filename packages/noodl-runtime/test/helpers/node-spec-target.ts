@@ -32,9 +32,10 @@
  *     through the input queue. So two graph-level behaviours are deliberately NOT reproduced
  *     here and belong to NSP-008: C8 first-update consolidation of queued values, and
  *     nodescope's `inputPriority` / `runOnChange-` parameter ordering.
- *   - **settle** is `context.updateDirtyNodes()` (C5's drain), a microtask and a macrotask yield
- *     for the async nodes, and one more drain. `settle()` is the target's, so every mounted
- *     instance is flushed on each call.
+ *   - **settle** is one frame (`frameStart`, `context.updateDirtyNodes()` — C5's drain —
+ *     `frameEnd`, as `_doUpdate` runs it), a microtask and a macrotask yield for the async nodes,
+ *     and one more frame — the viewer's shape: an async completion schedules a NEW frame.
+ *     `settle()` is the target's, so every mounted instance is flushed on each call.
  *   - **runtime errors** raised on a mounted node are kept on its handle (`errors`), outside the
  *     trace: the trace is behaviour on the wire; the error channel is the runner's to read.
  *   - **log lines** (`net.noodl.Log`, NSP-011): the scope carries a `runContext.log` sink, the one
@@ -46,12 +47,19 @@
  *     User, Query Records). A lone node gets the scope a browser app's root component has: no
  *     model scope (so the global `Model`), and a component owner named after the handle. What a
  *     scope MEANS for behaviour is NSP-008's (the graph); this only lets the node construct.
+ *   - **graphs** (NSP-008): `mountGraph` mounts every node as `mount` does and then makes every
+ *     wire with `connectInput` — the runtime's own connection, so the wire's seed (C11), the
+ *     per-port input queues (C2, C7), the first-update consolidation (C8) and the breakers (C9)
+ *     are all the runtime's; nothing is reproduced here. Stimulus still goes through
+ *     `setInputValue` directly; what travels BETWEEN nodes goes through the queues. `connect` is
+ *     the same call made later — a scenario's `wire` step.
  */
 
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { Handle, TargetAdapter, TraceEvent } from '../../../nodegx-node-spec/src';
+import type { GraphNodeDecl, GraphTarget, Handle, TraceEvent, Wire } from '../../../nodegx-node-spec/src';
+import { parseEndpoint } from '../../../nodegx-node-spec/src';
 import { canonicalise, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
@@ -93,7 +101,7 @@ export interface LogLine {
   data?: unknown;
 }
 
-export interface RuntimeTarget extends TargetAdapter<RuntimeHandle> {
+export interface RuntimeTarget extends GraphTarget<RuntimeHandle> {
   /** Every type this runtime registered — the population `mount` accepts. */
   types(): string[];
   hasType(type: string): boolean;
@@ -148,6 +156,19 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
 
   const newFrame = (): Frame => ({ values: new Map(), signals: [], outcomes: [] });
 
+  /**
+   * One frame as `NoodlRuntime._doUpdate` runs it (noodl-runtime.ts :743-753): `frameStart`, the
+   * drain, `frameEnd`. The events matter: `scheduleNextFrame` (nodecontext.ts :548-551) is
+   * `once('frameStart')`, and it is how a node the breaker tripped is re-flagged for the next
+   * frame (C9, node.ts :629-644) — a settle that only drained left such a node dead for good,
+   * which the runtime never does (NSP-008 found it on the self-wired Counter).
+   */
+  const frame = () => {
+    context.eventEmitter.emit('frameStart');
+    context.updateDirtyNodes();
+    context.eventEmitter.emit('frameEnd');
+  };
+
   function isSignalInput(s: State, port: string): boolean {
     const input = s.h.metadata.inputs[port];
     const t = input && input.type;
@@ -161,6 +182,20 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
 
   function intercept(s: State): void {
     const node = s.h.node;
+    // The invoking input of an outcome (trace.ts: an outcome's `port` is the INPUT that was
+    // invoked). A direct `signal()` names it; a pulse arriving over a WIRE (NSP-008) reaches the
+    // node through the drain's `setInputValue(name, true)` (node.ts :718), so the rising edge of
+    // any signal input is where the name is learnt — the same edge for both.
+    const originalSetInputValue = node.setInputValue.bind(node);
+    node.setInputValue = (name: string, value: unknown) => {
+      const previous = s.currentInput;
+      if (value === true && isSignalInput(s, name)) s.currentInput = name;
+      try {
+        originalSetInputValue(name, value);
+      } finally {
+        s.currentInput = previous;
+      }
+    };
     const originalSendValue = node.sendValue.bind(node);
     node.sendValue = (name: string, value: unknown) => {
       if (value !== undefined && node.hasOutput(name)) s.frame.values.set(name, canonicalise(value));
@@ -289,10 +324,10 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     },
 
     async settle() {
-      context.updateDirtyNodes();
+      frame();
       await Promise.resolve();
       await new Promise((resolve) => setTimeout(resolve, 0));
-      context.updateDirtyNodes();
+      frame();
       for (const s of states.values()) flush(s);
     },
 
@@ -312,6 +347,31 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       } catch {
         // a node whose teardown assumes a scope it never had; the instance is unreachable anyway
       }
+    },
+
+    mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[]) {
+      const handles: Record<string, RuntimeHandle> = {};
+      for (const id of Object.keys(nodes)) handles[id] = target.mount(nodes[id].type, nodes[id].params ?? {});
+      for (const w of wires) {
+        const from = parseEndpoint(w.from);
+        const to = parseEndpoint(w.to);
+        if (!(from.node in handles) || !(to.node in handles)) throw new Error(`runtime: wire ${w.from} → ${w.to} names a node the graph does not declare`);
+        target.connect!(handles[from.node], from.port, handles[to.node], to.port);
+      }
+      return handles;
+    },
+
+    connect(from, fromPort, to, toPort) {
+      if (!states.has(from.id) || !states.has(to.id)) throw new Error('runtime: a wire to or from a disposed node');
+      const source = from.node as unknown as NodeInstance;
+      const sink = to.node as unknown as NodeInstance;
+      if (!source.hasOutput(fromPort)) throw new Error(`${from.type}: no output "${fromPort}" on the runtime`);
+      sink.registerInputIfNeeded(toPort);
+      if (!sink.hasInput(toPort)) throw new Error(`${to.type}: no input "${toPort}" on the runtime`);
+      // node.ts `connectInput`: registers the connection on the source's output and seeds the sink
+      // with the source's current value unless it is undefined (C11, C3) — or replays a signal sent
+      // during THIS update, which a wire made between frames never meets.
+      to.node.connectInput(toPort, from.node, fromPort);
     }
   };
   return target;

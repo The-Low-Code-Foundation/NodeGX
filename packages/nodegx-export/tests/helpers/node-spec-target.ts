@@ -286,3 +286,270 @@ export function exportTarget(): TargetAdapter<ExportHandle> {
     }
   };
 }
+
+// ---------------------------------------------------------------------------------------------
+// NSP-008 — a GRAPH on the export: the scenario's nodes and wires emitted as ONE component.
+//
+// The shape: every node with its literal params; a <button> per signal input of every node,
+// labelled `<id>.<port>`, wired into it (element events are the one trigger the exporter always
+// takes); the wires as connections; every value output of every node lifted into a Component
+// Outputs port `<id>_<port>` (a callback prop). The spike (NSP-008 §6.3) found the exporter emits
+// three of the fourteen graphs whole and refuses the rest with a sentence each — a consumed
+// change pulse, a value wire between two logic nodes "with no deterministic translation", an
+// Inverter that "drives nothing statically translatable" — so `canPlay` returns the exporter's
+// own notes and the runner counts the scenario `outside`. A `set` step and a `wire` step are
+// outside by construction (no value input is drivable; a component is emitted whole).
+//
+// The reach: value outputs the exporter LIFTED (the callback props the emitted interface
+// declares); no signal, no outcome. The runner projects the runtime's recording onto it.
+// ---------------------------------------------------------------------------------------------
+
+import type { GraphNodeDecl, GraphReach, GraphScenario, GraphTarget, Wire } from '../../../nodegx-node-spec/src';
+import { parseEndpoint } from '../../../nodegx-node-spec/src';
+
+export interface ExportGraphHandle extends Handle {
+  graph: ExportGraph;
+}
+
+interface ExportGraph {
+  key: string;
+  ids: string[];
+  root: { render(el: unknown): void; unmount(): void };
+  container: any;
+  /** `<id>.<port>` → the last value its callback delivered. */
+  latest: Record<string, unknown>;
+  /** `<id>.<port>` → the canonical key last RECORDED. */
+  recorded: Record<string, string>;
+  events: Record<string, TraceEvent[]>;
+  lifted: Set<string>;
+  live: Set<string>;
+}
+
+interface EmittedGraph {
+  tsx: string;
+  notes: string[];
+  component: (props: Record<string, unknown>) => unknown;
+  /** `<id>.<port>` → callback prop, for every value output the exporter lifted. */
+  lifted: Map<string, string>;
+  /** The notes that say part of the graph did not survive. */
+  refused: string[];
+}
+
+/** The exporter's prop for a Component Outputs port `<id>_<port>`: `on` + each `_`-word capitalised + `Changed` (observed on the spike). */
+const liftedProp = (id: string, port: string) => 'on' + `${id}_${port}`.split('_').map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join('') + 'Changed';
+
+export function graphComponent(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[]): ComponentIR {
+  const irNodes: NodeIR[] = [];
+  const connections: ComponentIR['connections'] = [];
+  const children: string[] = [];
+  const outPorts: PortIR[] = [];
+  for (const [id, n] of Object.entries(nodes)) {
+    const spec = specFor(n.type);
+    if (!spec) throw new Error(`no spec for ${n.type}`);
+    const params = Object.keys(n.params ?? {})
+      .filter((k) => n.params![k] !== undefined)
+      .map((name) => ({ name, value: paramValue(n.params![name]) }));
+    irNodes.push({ id, type: n.type, catalogRef: n.type, parameters: params, declaredPorts: [], portKnowledge: 'complete' });
+    for (const [port, d] of Object.entries(spec.inputs)) {
+      if (!isSignalInput(d)) continue;
+      const bid = `btn-${id}-${port}`;
+      irNodes.push({ id: bid, type: 'net.noodl.controls.button', catalogRef: 'net.noodl.controls.button', parameters: [{ name: 'label', value: { kind: 'literal', value: `${id}.${port}` } }], declaredPorts: [], portKnowledge: 'complete', parent: 'root' });
+      children.push(bid);
+      connections.push({ key: `${bid}:onClick->${id}:${port}`, fromId: bid, fromProperty: 'onClick', toId: id, toProperty: port, kind: 'signal' });
+    }
+    for (const [port, d] of Object.entries(spec.outputs)) {
+      if (d.type === 'signal') continue;
+      const name = `${id}_${port}`;
+      outPorts.push({ name, plug: 'input', kind: 'value', type: d.type });
+      connections.push({ key: `${id}:${port}->out:${name}`, fromId: id, fromProperty: port, toId: 'out', toProperty: name, kind: 'value' });
+    }
+  }
+  for (const w of wires) {
+    const from = parseEndpoint(w.from);
+    const to = parseEndpoint(w.to);
+    const spec = specFor(nodes[from.node].type)!;
+    const kind = spec.outputs[from.port]?.type === 'signal' ? 'signal' : 'value';
+    connections.push({ key: `${from.node}:${from.port}->${to.node}:${to.port}`, fromId: from.node, fromProperty: from.port, toId: to.node, toProperty: to.port, kind });
+  }
+  irNodes.unshift({ id: 'root', type: 'Group', catalogRef: 'Group', parameters: [], declaredPorts: [], portKnowledge: 'complete', children });
+  irNodes.push({ id: 'out', type: 'Component Outputs', catalogRef: 'Component Outputs', parameters: [], declaredPorts: outPorts, portKnowledge: 'complete' });
+  return { id: 'probe-graph', path: 'Components/Probe', role: 'component', nodes: irNodes, connections, visualRoots: ['root'], intent: { nodeComments: [], wireLabels: [], regions: [] } };
+}
+
+const emittedGraphs = new Map<string, EmittedGraph>();
+
+export function emitGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[]): EmittedGraph {
+  const key = JSON.stringify([canonicalise(nodes as never) ?? null, wires]);
+  const hit = emittedGraphs.get(key);
+  if (hit) return hit;
+  const app = emitApp(probeProject(graphComponent(nodes, wires)), catalog());
+  const tsx = app.files['src/components/Probe.tsx'];
+  if (tsx === undefined) throw new Error(`the exporter emitted no src/components/Probe.tsx for the graph: ${app.notes.join(' | ')}`);
+  const notes = app.notes.filter((n) => n.includes('Components/Probe') && !n.includes('no route reaches'));
+  // A refusal of the probe's OWN lift (`-> out:<id>_<port>`, the `out` node, "output … not
+  // lifted") means that output is unobservable — the reach's edge, not the graph's. A refusal of
+  // a scenario node, its button, or one of its wires means the graph did not survive: outside.
+  const refused = notes.filter((n) => /\b(dropped|deferred)\b/.test(n) && !/->out:|node out \(Component Outputs\)|: output "/.test(n));
+  const transpile = (source: string) => ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020, jsx: ts.JsxEmit.ReactJSX } }).outputText;
+  // The component may import the exporter's own `../lib/<name>` (a Log node's `log`); those files
+  // are in the emitted app too, and are served from it. Instantiated ONCE, lazily: a graph the
+  // exporter refused is never run.
+  const libs = new Map<string, unknown>();
+  const load = (js: string, self: string): unknown => {
+    const exported: Record<string, unknown> = {};
+    const mod = { exports: exported };
+    const req = (id: string): unknown => {
+      if (id.endsWith('.css')) return new Proxy({}, { get: (_t, k) => String(k) });
+      const m = /^\.\.\/lib\/([\w-]+)$/.exec(id);
+      if (m) {
+        const file = `src/lib/${m[1]}.ts`;
+        if (!libs.has(file)) {
+          const source = app.files[file] ?? app.files[`src/lib/${m[1]}.tsx`];
+          if (source === undefined) throw new Error(`${self} imports ${id} and the emitted app has no ${file}`);
+          libs.set(file, load(transpile(source), file));
+        }
+        return libs.get(file);
+      }
+      return require(id);
+    };
+    // eslint-disable-next-line no-new-func
+    new Function('exports', 'module', 'require', js)(exported, mod, req);
+    return mod.exports;
+  };
+  let instance: EmittedGraph['component'] | undefined;
+  const component: EmittedGraph['component'] = (props) => {
+    if (!instance) {
+      const exports = load(transpile(tsx), 'src/components/Probe.tsx') as { Probe?: EmittedGraph['component'] };
+      if (typeof exports.Probe !== 'function') throw new Error('the emitted Probe.tsx for the graph exports no Probe component');
+      instance = exports.Probe;
+    }
+    return instance(props);
+  };
+  const lifted = new Map<string, string>();
+  for (const [id, n] of Object.entries(nodes)) {
+    const spec = specFor(n.type)!;
+    for (const [port, d] of Object.entries(spec.outputs)) {
+      if (d.type === 'signal') continue;
+      const prop = liftedProp(id, port);
+      if (new RegExp(`\\b${prop}\\?:`).test(tsx)) lifted.set(`${id}.${port}`, prop);
+    }
+  }
+  const result: EmittedGraph = { tsx, notes, component, lifted, refused };
+  emittedGraphs.set(key, result);
+  return result;
+}
+
+/** A fresh graph target over the export. */
+export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
+  ensureDom();
+  const graphs = new Map<string, ExportGraph>();
+  let next = 0;
+  const graphOf = (h: ExportGraphHandle): ExportGraph => {
+    const g = graphs.get(h.graph.key);
+    if (!g || !g.live.has(h.id)) throw new Error(`no live node ${h.id}`);
+    return g;
+  };
+  const target: GraphTarget<ExportGraphHandle> = {
+    name: 'export',
+
+    canPlay(sc: GraphScenario) {
+      for (const step of sc.steps) {
+        if (step === 'settle') continue;
+        if ('wire' in step) return 'the export emits a component whole — no wire is made after mount';
+        if ('set' in step) return `a value input reaches the export only as a literal param — set on ${step.node}.${step.set} is not drivable`;
+      }
+      const { refused } = emitGraph(sc.nodes, sc.wires ?? []);
+      if (refused.length) return `the exporter refused part of the graph: ${refused.map((n) => n.replace('Components/Probe: ', '')).join(' | ')}`;
+      return undefined;
+    },
+
+    graphReach(sc: GraphScenario): GraphReach {
+      const { lifted } = emitGraph(sc.nodes, sc.wires ?? []);
+      return { signals: false, outcomes: false, output: (subject, port) => lifted.has(`${subject}.${port}`) };
+    },
+
+    mountGraph(nodes, wires) {
+      const { component, lifted } = emitGraph(nodes, wires);
+      const key = `graph#${next++}`;
+      const g: ExportGraph = { key, ids: Object.keys(nodes), root: undefined as never, container: undefined, latest: {}, recorded: {}, events: {}, lifted: new Set(lifted.keys()), live: new Set(Object.keys(nodes)) };
+      const handles: Record<string, ExportGraphHandle> = {};
+      for (const id of g.ids) {
+        g.events[id] = [];
+        const params = nodes[id].params ?? {};
+        for (const k of Object.keys(params)) {
+          const v = params[k];
+          g.events[id].push(v === undefined ? { t: 'set', port: k } : { t: 'set', port: k, value: canonicalise(v) });
+        }
+        handles[id] = { id, type: nodes[id].type, graph: g };
+      }
+      const props: Record<string, unknown> = {};
+      for (const [output, prop] of lifted) {
+        props[prop] = (v: unknown) => {
+          g.latest[output] = v;
+        };
+      }
+      g.container = document.createElement('div');
+      document.body.appendChild(g.container);
+      g.root = createRoot(g.container);
+      void act(() => {
+        g.root.render(React.createElement(component, props));
+      });
+      graphs.set(key, g);
+      return handles;
+    },
+
+    mount() {
+      throw new Error('the export graph target mounts graphs (mountGraph); one node is exportTarget()');
+    },
+    set(h, port) {
+      throw new Error(`${h.type} on the export has no drivable value input "${port}" — a value input reaches an exported component only as a literal param`);
+    },
+    signal(h, port) {
+      const g = graphOf(h);
+      const label = `${h.id}.${port}`;
+      const button = Array.from(g.container.querySelectorAll('button') as Iterable<any>).find((b) => b.textContent === label);
+      if (!button) throw new Error(`the emitted graph has no <button>${label}</button>`);
+      g.events[h.id].push({ t: 'in', port });
+      void act(() => {
+        button.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+    },
+    async settle() {
+      await act(async () => {
+        /* flush */
+      });
+      for (const g of graphs.values()) {
+        for (const id of g.ids) {
+          if (!g.live.has(id)) continue;
+          g.events[id].push({ t: 'settle' });
+          const ports = [...g.lifted].filter((o) => o.startsWith(`${id}.`)).map((o) => o.slice(id.length + 1)).sort();
+          for (const port of ports) {
+            const output = `${id}.${port}`;
+            if (!(output in g.latest) || g.latest[output] === undefined) continue;
+            const value = canonicalise(g.latest[output]);
+            const k = JSON.stringify(value);
+            if (g.recorded[output] === k) continue;
+            g.recorded[output] = k;
+            g.events[id].push({ t: 'value', port, value });
+          }
+        }
+      }
+    },
+    trace(h) {
+      return graphOf(h).events[h.id].map((e) => ({ ...e }));
+    },
+    dispose(h) {
+      const g = graphs.get(h.graph.key);
+      if (!g || !g.live.has(h.id)) return;
+      g.live.delete(h.id);
+      if (g.live.size === 0) {
+        void act(() => {
+          g.root.unmount();
+        });
+        g.container.remove();
+        graphs.delete(g.key);
+      }
+    }
+  };
+  return target;
+}
