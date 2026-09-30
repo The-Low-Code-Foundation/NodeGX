@@ -2057,15 +2057,25 @@ var gardenKitBlocks = (function () {
       }
     }
 
+    /**
+     * The running block's ring: our class on its SVG and nothing else, once per tick. Measured: Blockly's own
+     * highlightBlock (Zelos paints it with an SVG glow filter) plus a re-tag of every block each tick made Garden 3D beside
+     * it trip its Too Slow rule during Play under software GL; the ink ring over the white halo is the glow.
+     */
     function highlight() {
       if (!ed.ws) return;
-      try {
-        ed.ws.highlightBlock(null);
-        if (ed.runningId && ed.ws.getBlockById(ed.runningId)) ed.ws.highlightBlock(ed.runningId);
-      } catch (e) {
-        /* a block gone mid-run */
+      var was = ed.ringOn ? ed.ws.getBlockById(ed.ringOn) : null;
+      if (was && was.getSvgRoot()) {
+        was.getSvgRoot().classList.remove('gd-run');
+        was.getSvgRoot().removeAttribute('data-run');
       }
-      schedule();
+      ed.ringOn = '';
+      var now = ed.runningId ? ed.ws.getBlockById(ed.runningId) : null;
+      if (now && now.getSvgRoot()) {
+        now.getSvgRoot().classList.add('gd-run');
+        now.getSvgRoot().setAttribute('data-run', 'true');
+        ed.ringOn = now.id;
+      }
     }
 
     // Selection is BlockList's: a tap on a placed block selects it, a second tap lets go, a tap on the empty workspace
