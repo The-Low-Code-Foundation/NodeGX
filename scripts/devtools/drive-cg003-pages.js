@@ -111,6 +111,17 @@ const hintIn = (lang, key, name = 'Pip') => String((HINT_ROWS.find((r) => r.key 
 const PAD_ORDER = ['fwd', 'left', 'water', 'right', 'fill', 'pick', 'put', 'say', 'olive:read'];
 const padFor = (id) => PAD_ORDER.filter((op) => ((REQUESTS.find((r) => r.id === id) || { palette: [] }).palette || []).includes(op));
 /**
+ * P108 IW-003 (s3 merge): the pad also carries a "go to" key per kind on the plot when the request offers go to nearest /
+ * go to (lane M's PAD_GO keys, read as `go:<kind>`). A pad is right when its action keys are padFor's, in order, and it
+ * has go keys exactly when the request offers a walk.
+ */
+const padMatches = (ops, id) => {
+  const pal = ((REQUESTS.find((r) => r.id === id) || { palette: [] }).palette || []);
+  const acts = ops.filter((o) => !String(o).startsWith('go:'));
+  const walks = pal.includes('go_nearest') || pal.includes('go_to');
+  return JSON.stringify(acts) === JSON.stringify(padFor(id)) && ops.some((o) => String(o).startsWith('go:')) === walks && !ops.includes(null);
+};
+/**
  * IG-002: the tulips' fetch-and-return dance, one pass (fill, turn round, walk, water, step down a row, walk back).
  * P108 IW-003 (lane M): the request's own pass, laid out — three pours a tulip now (eleven presses); its reference is
  * the pass ×3 with the pours ×3 inside (two folds).
@@ -634,7 +645,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const loadExpr = `(() => { const l = document.querySelector('.bg-stage .gd-bot .gd-load'); return l ? { load: l.getAttribute('data-load'), carry: l.getAttribute('data-carry'), svg: !!l.querySelector('svg.gd-sprite[data-sprite]') } : null; })()`;
     const bubbleExpr = `(() => { const b = document.querySelector('.bg-stage .gd-bubble'); return b ? b.innerText : ''; })()`;
     const owlExpr = `(document.querySelector('.bg-owl-say') || {}).innerText || ''`;
-    const padOpsNow = () => evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1])`);
+    const padOpsNow = () => evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-go-([a-z]+)/) ? 'go:' + e.className.match(/bg-key-go-([a-z]+)/)[1] : (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1]))`);
     const tidyShown = `(() => { const e = document.querySelector('.bg-tidy'); return !!e && e.offsetParent !== null; })()`;
     const SHOT_TAGS = ['1368-en', '390-fr'];
     for (const vp of VIEWPORTS) {
@@ -704,7 +715,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
         await until(`!!document.querySelector('.bg-pad .bg-key-pick')`, Boolean, 3000);
         const stonesPad = await padOpsNow();
         await control('rec');
-        check(`IG-002 ${tag}: the stones’ pad has pick and put, no water, no fill (${padFor('path-stones').join(' ')}); the robot has no can here (no drops)`, JSON.stringify(stonesPad) === JSON.stringify(padFor('path-stones')) && noCan === null, { stonesPad, noCan });
+        check(`IG-002 ${tag}: the stones’ pad has pick and put, no water, no fill (${padFor('path-stones').join(' ')} + IW-003's go keys); the robot has no can here (no drops)`, padMatches(stonesPad, 'path-stones') && noCan === null, { stonesPad, noCan });
         const s0 = await evaluate(IW3S_SEEN);
         const built = await iw3sBuildStones();
         await control('play');
@@ -1321,8 +1332,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
     check('IG-001 D9: the stones request draws the post box as a sprite on its own tile and no label pill at all', stonesWorld.postbox && stonesWorld.labels === 0 && stonesWorld.stones === 0, stonesWorld);
     await control('rec');
     await until(`!!document.querySelector('.bg-pad .bg-key-put')`, Boolean, 3000);
-    const padOps = await evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1])`);
-    check(`IG-001 D10: the stones’ pad shows ${padFor('path-stones').join(' ')} and not water (IG-002: pick, the basket starts empty)`, JSON.stringify(padOps) === JSON.stringify(padFor('path-stones')) && !padOps.includes('water'), padOps);
+    const padOps = await evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-go-([a-z]+)/) ? 'go:' + e.className.match(/bg-key-go-([a-z]+)/)[1] : (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1]))`);
+    check(`IG-001 D10: the stones’ pad shows ${padFor('path-stones').join(' ')} (+ IW-003's go keys) and not water (IG-002: pick, the basket starts empty)`, padMatches(padOps, 'path-stones') && !padOps.includes('water'), padOps);
     await control('rec');
     // P108 IW-003 (lane S): the stones are a job — the reference is built from the drawer (drive-iw003-stones.js grades
     // the build and the run clause by clause); here D5 and D3 on it: One step glows the repeat and then the go to nearest
@@ -1354,8 +1365,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await wait(900);
     await control('rec');
     await until(`!!document.querySelector('.bg-pad .bg-key-fwd')`, Boolean, 3000);
-    const tulipOps = await evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1])`);
-    check(`IG-001 D10: the tulips’ pad shows water (${padFor('tulips-three').join(' ')}; IG-002: fill too)`, JSON.stringify(tulipOps) === JSON.stringify(padFor('tulips-three')) && tulipOps.includes('water'), tulipOps);
+    const tulipOps = await evaluate(`[...document.querySelectorAll('.bg-pad .bg-key')].filter((e) => e.offsetParent !== null).map((e) => (e.className.match(/bg-key-go-([a-z]+)/) ? 'go:' + e.className.match(/bg-key-go-([a-z]+)/)[1] : (e.className.match(/bg-key-(fwd|left|right|water|pick|put|fill)/) || [])[1]))`);
+    check(`IG-001 D10: the tulips’ pad shows water (${padFor('tulips-three').join(' ')}; IG-002: fill too)`, padMatches(tulipOps, 'tulips-three') && tulipOps.includes('water'), tulipOps);
     await control('rec');
     await tab(0);
     await until('location.pathname', (p) => p === '/island');
