@@ -65,6 +65,18 @@
     },
     {
       "fromId": "wnIn",
+      "fromProperty": "payText",
+      "toId": "wnPay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "hasPay",
+      "toId": "wnPay",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wnIn",
       "fromProperty": "islandWord",
       "toId": "wnIsland",
       "toProperty": "label"

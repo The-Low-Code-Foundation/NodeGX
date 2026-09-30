@@ -326,7 +326,10 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw6hUseOn: s('Use it on a job:', 'Utilise-le pour un travail :'),
   iw6hUse: s('Use it', 'L’utiliser'),
   iw6hNoJob: s('No robot is at work on a job it helps just now. Keep it for later!', 'Aucun robot ne fait un travail qu’il aide en ce moment. Garde-le pour plus tard !'),
-  iw6hUsed: s('{what}: at work on “{plot}”!', '{what} : au travail sur « {plot} » !')
+  iw6hUsed: s('{what}: at work on “{plot}”!', '{what} : au travail sur « {plot} » !'),
+  // P108 IW-006 (lane E): the shells a job earned — under the win card's thanks (smaller), and on the island after a lap.
+  iw6eWinPay: s('+{n} 🐚 shells for the job', '+{n} 🐚 coquillages pour le travail'),
+  iw6eIslePay: s('{r} +{n} 🐚', '{r} +{n} 🐚')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);

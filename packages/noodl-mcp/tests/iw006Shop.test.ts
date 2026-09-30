@@ -250,7 +250,7 @@ describe('IW-006 AC4 — every helper does what its line says for exactly one jo
       if (c.helper) riding.push(c.robot.can);
     }
     const max = liveOf(s, 'tulips-three').robot.canMax;
-    expect([liveOf(s, 'tulips-three').phase, riding.length > 10, riding.every((c) => c === max), liveOf(s, 'tulips-three').helper, liveOf(s, 'tulips-three').helperDone]).toEqual(['wait', true, true, undefined, 'selfcan']);
+    expect([liveOf(s, 'tulips-three').phase, riding.length > 10, riding.every((c) => c === max), liveOf(s, 'tulips-three').helper || '', liveOf(s, 'tulips-three').helperDone]).toEqual(['wait', true, true, '', 'selfcan']);
     // The next lap (wear reopens the job): the can is a can again — it runs down.
     const after: number[] = [];
     for (let k = 0; k < 300 && after.length < 40; k++) {
@@ -273,7 +273,7 @@ describe('IW-006 AC4 — every helper does what its line says for exactly one jo
       s = tick(s);
       if (liveOf(s, 'path-stones').helper) riding.push(liveOf(s, 'path-stones').robot.basket);
     }
-    expect([own, liveOf(s, 'path-stones').phase, riding.length > 5, riding.every((n) => n === 8), liveOf(s, 'path-stones').robot.basket, liveOf(s, 'path-stones').helper]).toEqual([4, 'wait', true, true, own, undefined]);
+    expect([own, liveOf(s, 'path-stones').phase, riding.length > 5, riding.every((n) => n === 8), liveOf(s, 'path-stones').robot.basket, liveOf(s, 'path-stones').helper || '']).toEqual([4, 'wait', true, true, own, '']);
     // The other plot never saw it.
     expect(liveOf(s, 'tulips-three').helper).toBeUndefined();
   });
@@ -403,7 +403,8 @@ describe('arms: each rule mutated, and the row that kills it', () => {
     expect(active(bare(m, { model: b.model, itemId: 'rain', plotId: 'tulips-three', state: isle(b.model).state }).model).owned).toEqual(['rain']);
   });
   it('a riding helper that outlives its finish line → the self-filling can row fails (it is still riding once the job waits)', () => {
-    const m = mutate(ISLAND_TICK_SCRIPT, 'out.helperDone = h;\n    return out;', 'out.helperDone = h;');
+    // Merge (s4): the finish line now also writes helper '' (lane E's Island keep drops it from the save); the arm keeps it riding.
+    const m = mutate(ISLAND_TICK_SCRIPT, "out.helper = '';\n    return out;", 'out.helper = h;');
     let fam = funded(win(kid(), 'tulips-three', 'r1').model, 10);
     const b = buy(fam, 'selfcan');
     let s = use(b.model, 'selfcan', 'tulips-three', isle(b.model).state).state;
@@ -416,7 +417,8 @@ describe('arms: each rule mutated, and the row that kills it', () => {
     expect(helper<any>(ENGINE, 'helperOn', { things: [], robots: [{ id: 'a', can: 0, canMax: 3 }] }, 'selfcan').robots[0].can).toBe(3);
   });
   it('the build counts a plot’s live again → a helper used rebuilds the island (the kept-island row fails)', () => {
-    const m = mutate(ISLAND_WORLD_SCRIPT, "if (bf !== 'live') buildPlots[bk][bf] = saved[bk][bf];", 'buildPlots[bk][bf] = saved[bk][bf];');
+    // Merge (s4): the hash line is lane E's (iw6Unlive), the rule the same.
+    const m = mutate(ISLAND_WORLD_SCRIPT, 'islHash(JSON.stringify([iw6Unlive(saved),', 'islHash(JSON.stringify([saved,');
     const b = buy(funded(win(kid(), 'tulips-three', 'r1').model, 10), 'selfcan');
     const f = (model: any, kept?: unknown) => { const r = runScript(FAMILY_SCRIPT, { model }); return bare(m, { requests: REQUESTS, plots: r.plots, robots: r.robots, done: r.done, band: r.band, pins: [], kept }); };
     const s0 = f(b.model).state;

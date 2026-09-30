@@ -524,7 +524,11 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const ws = connectionsOf(built, C.pageWorkshop);
       const v = nodesOf(built, C.pageWorkshop).find((n) => n.type === 'Variable2' && params(n).name === 'gardenProgram')!;
       expect(ws.some((c) => c.fromId === v.id && c.fromProperty === 'value' && c.toId === 'wsComplete' && c.toProperty === 'program')).toBe(true);
-      expect(ws.some((c) => c.fromId === 'wsPlay' && c.fromProperty === 'won' && c.toId === 'wsComplete' && c.toProperty === 'go')).toBe(true);
+      // P108 IW-006 (lane E): the win goes through Win pay first (it reads her island before the win is recorded), whose
+      // ran is Complete request's go — the win still reaches Complete request, once.
+      expect(ws.some((c) => c.fromId === 'wsPlay' && c.fromProperty === 'won' && c.toId === 'wsPay' && c.toProperty === 'go')).toBe(true);
+      expect(ws.some((c) => c.fromId === 'wsPay' && c.fromProperty === 'ran' && c.toId === 'wsComplete' && c.toProperty === 'go')).toBe(true);
+      expect(ws.filter((c) => c.toId === 'wsComplete' && c.toProperty === 'go').length).toBe(1);
     });
 
     it('ruling 7: what a person sees says Olive’s Island; the slugs stay', () => {

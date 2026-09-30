@@ -5,6 +5,12 @@
   "connections": [
     {
       "fromId": "completerequesIn",
+      "fromProperty": "jobLive",
+      "toId": "completerequesFn",
+      "toProperty": "in-jobLive"
+    },
+    {
+      "fromId": "completerequesIn",
       "fromProperty": "model",
       "toId": "completerequesFn",
       "toProperty": "in-model"
@@ -14,6 +20,12 @@
       "fromProperty": "now",
       "toId": "completerequesFn",
       "toProperty": "in-now"
+    },
+    {
+      "fromId": "completerequesIn",
+      "fromProperty": "pay",
+      "toId": "completerequesFn",
+      "toProperty": "in-pay"
     },
     {
       "fromId": "completerequesIn",

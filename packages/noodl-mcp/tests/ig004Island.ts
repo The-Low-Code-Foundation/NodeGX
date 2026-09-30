@@ -41,6 +41,8 @@ import { ENGINE } from './cg002Scripts';
 import { OLIVE_SLIM } from './cg005Olive';
 // P108 IW-008 (lane C): the crew — which of her robots does a plot's job.
 import { CREW_PICK } from './iw008Crew';
+// P108 IW-006 (lane E): the earning rule and the live job's resume, appended to the island engine.
+import { EARN_ENGINE } from './iw006Earn';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { writtenAnswer: islWritten } = require('../../../dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/olive-written.js');
 
@@ -105,19 +107,26 @@ function islStepJob(plot, cur) {
   var worn = wearOf(w, age);
   for (var i = 0; i < worn.length; i++) w = apply(w, worn[i]);
   var delta = null;
-  if (phase === 'wait' && !jobDone(w)) { lap++; run = islRun(plot, lap); phase = 'work'; }
+  // P108 IW-006 (lane E): the lap's gain so far; what a lap's end pays; a moment the save is written at (a lap's end, wear reopening the job).
+  var gain = cur.gain && typeof cur.gain === 'object' ? cur.gain : {}, paid = null, moment = false;
+  if (phase === 'wait' && !jobDone(w)) { lap++; run = islRun(plot, lap); phase = 'work'; moment = true; }
   if (phase !== 'wait') {
     var r = step(run, w, null);
     if (r.waiting && r.request) r = step(r.run, w, islAnswer(r.request));
+    // P108 IW-006 (lane E): the robot's own fill this tick (never the wear's), counted into the lap's gain.
+    var m0 = iw6Meters(w);
     w = apply(w, r.delta);
+    gain = iw6Gain(gain, m0, iw6Meters(w));
     run = r.run; delta = r.delta;
     if (r.done) {
+      // P108 IW-006 (lane E): the program run to its end is a lap: it pays what it filled, and the bonus at the finish line.
+      if (phase === 'work') { paid = iw6Pay(plot.id, iw6Steps(gain), iw6Total(w), jobDone(w)); gain = {}; moment = true; }
       if (jobDone(w)) phase = 'wait';
       else if (phase === 'return') { lap++; run = islRun(plot, lap); phase = 'work'; }
       else { phase = 'return'; run = islHomeRun(plot, lap); }
     }
   }
-  return islKeep({ run: run, things: w.things, robot: w.robots[0], spent: Array.isArray(w.spent) ? w.spent : [], hold: 0, lap: lap, phase: phase, age: age, seed: Number(w.seed) >>> 0, worn: worn, delta: delta }, w);
+  return islKeep({ run: run, things: w.things, robot: w.robots[0], spent: Array.isArray(w.spent) ? w.spent : [], hold: 0, lap: lap, phase: phase, age: age, seed: Number(w.seed) >>> 0, worn: worn, delta: delta, gain: gain, paid: paid, moment: moment }, w);
 }
 /** One tick of one pinned plot. A finished run holds the plot done, then the plot resets and the run restarts. */
 function islStepPlot(plot, cur) {
@@ -258,12 +267,15 @@ function islHelped(plot, cur) {
     var own = plot.start && plot.start.robot ? plot.start.robot.basket : undefined;
     if (h === 'barrow') { if (own === undefined) delete out.robot.basket; else out.robot.basket = own; }
     out.helperDone = h;
+    // Merge (s4): '' (not absent) tells lane E's Island keep the helper is gone, so the save drops it too.
+    out.helper = '';
     return out;
   }
   helperOn({ things: out.things, robots: [out.robot] }, h);
   out.helper = h;
   return out;
 }
+${EARN_ENGINE}
 `;
 
 /**
@@ -340,7 +352,10 @@ for (var p = 0; p < list.length; p++) {
   cards.push({ id: req.id, x: px, y: py, w: PW, h: PH, status: status, islander: plot.islander, band: plot.band, robotId: robotId, door: null, needs: needs, lock: lock });
   if (plot.stale) cards[cards.length - 1].stale = true;
   if (status === 'working') {
-    live[req.id] = { run: islRun(plot, 0), things: islClone(start.things), robot: islClone(start.robot), spent: [], hold: 0, lap: 0 }; if (plot.job) { live[req.id].phase = plot.stale ? 'teach' : 'work'; live[req.id].age = 0; live[req.id].seed = plot.seed; }
+    live[req.id] = { run: islRun(plot, 0), things: islClone(start.things), robot: islClone(start.robot), spent: [], hold: 0, lap: 0 };
+    if (plot.job) { live[req.id].phase = plot.stale ? 'teach' : 'work'; live[req.id].age = 0; live[req.id].seed = plot.seed; }
+    // P108 IW-006 (lane E): a job plot goes on from the live job its save kept (robot at home; waiting if the job is done).
+    if (plot.job && sv.live) iw6Resume(live[req.id], plot, sv.live);
     // P108 IW-008 (lane C): a robot of hers that helps on this job plot (its kind, its own program), on the tile beside.
     if (plot.job && !plot.stale) for (var hm = 0; hm < mine.length && !plot.mate; hm++) {
       var mh = mine[hm];
@@ -401,11 +416,8 @@ for (var m = 0; m < mine.length; m++) {
 for (var hp = 0; hp < plots.length; hp++) { var hsv = saved[plots[hp].id]; if (plots[hp].job && live[plots[hp].id] && hsv && hsv.live && typeof hsv.live.helper === 'string' && hsv.live.helper) live[plots[hp].id].helper = hsv.live.helper; }
 // The build's name: what it was built from. A tick handed a state from an OLDER build (its Set Variable landed after
 // the rebuild's) starts again from this one — so a robot brought home never walks back to its plot.
-// P108 IW-006 (lane H): a plot's live job is NOT part of the build (brief §4.2 🔴 — lane E's rule; at the merge E's line
-// stands): a helper used writes a plot's live, and a rebuild would drop the island it was used on.
-var buildPlots = {};
-for (var bk in saved) { buildPlots[bk] = {}; for (var bf in saved[bk]) if (bf !== 'live') buildPlots[bk][bf] = saved[bk][bf]; }
-var build = islHash(JSON.stringify([buildPlots, done, band, mine, pins.map(function (x) { return x ? [x.id, x.requestId, x.isOpen] : null; }), list.map(function (r) { return [r.id, r.plot, r.band]; })]));
+// P108 IW-006 (lane E): the saved plots WITHOUT their live jobs — a lap's end writes one; the build must not move with it.
+var build = islHash(JSON.stringify([iw6Unlive(saved), done, band, mine, pins.map(function (x) { return x ? [x.id, x.requestId, x.isOpen] : null; }), list.map(function (r) { return [r.id, r.plot, r.band]; })]));
 var state = { v: 1, build: build, w: W, h: H, map: rows.map(function (r) { return r.join(''); }), plots: plots, still: still, deco: deco, home: home, live: live, tick: 0 };
 // P108 IW-003 (lane M, IW-002 AC3): the Island page opened again on the SAME island (nothing she saved changed: the same
 // build) goes on from the island it left — each plot's live state as the last tick left it (meters, robots, laps, the

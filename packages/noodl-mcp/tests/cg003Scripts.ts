@@ -53,6 +53,8 @@ import { CREW_PICK, assignRobotScript, copyProgramScript, crewChipsScript } from
 import { BRAIN_SIZE as IW8_BRAIN } from './cg002Content';
 // P108 IW-006 (lane H): the shop's glue (its own file; it imports nothing from here).
 import { IW006_SHOP_SCRIPTS } from './iw006Shop';
+// P108 IW-006 (lane E): earning — the win's pay (over the island engine) and the island's live jobs and shells kept.
+import { ISLAND_KEEP_SCRIPT, winPayScript } from './iw006Earn';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -1426,6 +1428,8 @@ const IW8_OLIVE_WORD: Record<string, string> = Object.fromEntries(PALETTE_RUNG_I
 export const COPY_PROGRAM_SCRIPT = copyProgramScript({ wordHelper: WORD_HELPER, oliveWords: IW8_OLIVE_WORD });
 export const ASSIGN_ROBOT_SCRIPT = assignRobotScript({ wordHelper: WORD_HELPER, oliveWords: IW8_OLIVE_WORD });
 export const CREW_CHIPS_SCRIPT = crewChipsScript({ wordHelper: WORD_HELPER });
+/** P108 IW-006 (lane E): `Logic/Win pay` — the shells a Workshop win earns (none for a job done and not worn), before Complete request records it. */
+export const WIN_PAY_SCRIPT = winPayScript(ISLAND_ENGINE);
 
 export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
   { component: 'Logic/Read program', script: READ_PROGRAM_SCRIPT, seam: 'the program as a list, whatever held it' },
@@ -1490,5 +1494,8 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Assign robot', script: ASSIGN_ROBOT_SCRIPT, seam: 'a robot of her crew sent to work a plot she won, or to help the one at work there, or home' },
   { component: 'Logic/Crew chips', script: CREW_CHIPS_SCRIPT, seam: 'the plot card\u2019s crew: her robots of the kind the job needs, the ones here ringed' },
   // P108 IW-006 (lane H): the shop, its purchase card, Buy, a helper used on a job, the brain the Workshop holds.
-  ...IW006_SHOP_SCRIPTS
+  ...IW006_SHOP_SCRIPTS,
+  // P108 IW-006 (lane E): earning.
+  { component: 'Logic/Win pay', script: WIN_PAY_SCRIPT, seam: 'the shells a win in the Workshop earns, and the plot as a done job' },
+  { component: 'Logic/Island keep', script: ISLAND_KEEP_SCRIPT, seam: 'the island\u2019s live jobs and what its laps earned, written into her save at the moments that matter' }
 ];

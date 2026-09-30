@@ -67,6 +67,16 @@
           "name": "hasLent",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "payText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasPay",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 530,
@@ -102,6 +112,7 @@
         "wnLine",
         "wnRewards",
         "wnLent",
+        "wnPay",
         "wnButtons"
       ],
       "parameters": {
@@ -331,6 +342,27 @@
       "y": 1240
     },
     {
+      "id": "wnPay",
+      "type": "Text",
+      "label": "The shells earned",
+      "parent": "wnCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "fontWeight": "700",
+        "textAlignX": "center",
+        "cssClassName": "bg-win-pay",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
       "id": "wnButtons",
       "type": "Group",
       "label": "The two ways on",
@@ -349,7 +381,7 @@
         "justifyContent": "center"
       },
       "x": 160,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "wnIsland",
@@ -391,7 +423,7 @@
         "label": "Back to the island"
       },
       "x": 220,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "wnStay",
@@ -433,7 +465,7 @@
         "label": "Keep tinkering"
       },
       "x": 220,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "wnOut",
@@ -452,7 +484,7 @@
         }
       ],
       "x": 530,
-      "y": 1480
+      "y": 1600
     }
   ],
   "visualRoots": [

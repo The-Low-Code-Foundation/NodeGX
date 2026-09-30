@@ -770,6 +770,108 @@
       "fromProperty": "ran",
       "toId": "iwRendWrite",
       "toProperty": "set"
+    },
+    {
+      "fromId": "iwTick",
+      "fromProperty": "state",
+      "toId": "iwKeep",
+      "toProperty": "state"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwKeep",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "robots",
+      "toId": "iwKeep",
+      "toProperty": "robots"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwKeep",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwKeep",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwTick",
+      "fromProperty": "ran",
+      "toId": "iwKeep",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "model",
+      "toId": "iwOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "due",
+      "toId": "iwKeepDue",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "ran",
+      "toId": "iwKeepDue",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwKeepDue",
+      "fromProperty": "ontrue",
+      "toId": "iwOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "text",
+      "toId": "iwPay",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "has",
+      "toId": "iwPayIs",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwKeep",
+      "fromProperty": "ran",
+      "toId": "iwPayIs",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwPayIs",
+      "fromProperty": "ontrue",
+      "toId": "iwPayState",
+      "toProperty": "to-shown"
+    },
+    {
+      "fromId": "iwPayIs",
+      "fromProperty": "ontrue",
+      "toId": "iwPayWait",
+      "toProperty": "start"
+    },
+    {
+      "fromId": "iwPayWait",
+      "fromProperty": "timerFinished",
+      "toId": "iwPayState",
+      "toProperty": "to-hidden"
+    },
+    {
+      "fromId": "iwPayState",
+      "fromProperty": "shown",
+      "toId": "iwPay",
+      "toProperty": "mounted"
     }
   ]
 }

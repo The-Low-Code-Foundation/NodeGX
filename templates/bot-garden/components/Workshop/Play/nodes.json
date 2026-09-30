@@ -102,6 +102,16 @@
           "name": "plots",
           "plug": "output",
           "type": "object"
+        },
+        {
+          "name": "payText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasPay",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 710,
