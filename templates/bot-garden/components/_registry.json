@@ -750,8 +750,8 @@
     "Island/World": {
       "path": "Island/World",
       "type": "visual",
-      "nodeCount": 55,
-      "connectionCount": 125,
+      "nodeCount": 57,
+      "connectionCount": 128,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -926,8 +926,8 @@
     "Pages/My robot": {
       "path": "Pages/My robot",
       "type": "page",
-      "nodeCount": 25,
-      "connectionCount": 84,
+      "nodeCount": 27,
+      "connectionCount": 87,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -950,7 +950,7 @@
   },
   "stats": {
     "totalComponents": 118,
-    "totalNodes": 947,
-    "totalConnections": 3010
+    "totalNodes": 951,
+    "totalConnections": 3016
   }
 }

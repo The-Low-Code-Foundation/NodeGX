@@ -504,6 +504,24 @@
     {
       "fromId": "iwCrewFn",
       "fromProperty": "rows",
+      "toId": "iwCrewHold",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwCrewFn",
+      "fromProperty": "ran",
+      "toId": "iwCrewSettle",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "iwCrewSettle",
+      "fromProperty": "timerFinished",
+      "toId": "iwCrewHold",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwCrewHold",
+      "fromProperty": "value",
       "toId": "iwCrewEach",
       "toProperty": "items"
     },

@@ -670,11 +670,28 @@
       "y": 1840
     },
     {
+      "id": "iwCrewSettle",
+      "type": "Timer",
+      "label": "The crew, once it stops changing",
+      "parameters": {
+        "duration": 120
+      },
+      "x": 590,
+      "y": 2800
+    },
+    {
+      "id": "iwCrewHold",
+      "type": "/Logic/Latch",
+      "label": "The settled crew",
+      "x": 590,
+      "y": 2080
+    },
+    {
       "id": "iwAssign",
       "type": "/Logic/Assign robot",
       "label": "A robot sent here, or home",
       "x": 590,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "iwAssignOk",
@@ -684,7 +701,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 2800
+      "y": 2920
     },
     {
       "id": "iwCardState",
@@ -709,7 +726,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 2920
+      "y": 3040
     },
     {
       "id": "iwWorld",
@@ -723,7 +740,7 @@
       "type": "/Logic/Island tick",
       "label": "One tick of the island",
       "x": 590,
-      "y": 3040
+      "y": 3160
     },
     {
       "id": "iwVar",
@@ -733,7 +750,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 3160
+      "y": 3280
     },
     {
       "id": "iwSetBuilt",
@@ -743,7 +760,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 3280
+      "y": 3400
     },
     {
       "id": "iwSetTick",
@@ -753,7 +770,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 3400
+      "y": 3520
     },
     {
       "id": "iwTimer",
@@ -763,7 +780,7 @@
         "duration": 760
       },
       "x": 590,
-      "y": 3520
+      "y": 3640
     },
     {
       "id": "iwDraw",
@@ -804,7 +821,7 @@
         "duration": 400
       },
       "x": 590,
-      "y": 3640
+      "y": 3760
     },
     {
       "id": "iwRevealWait",
@@ -814,7 +831,7 @@
         "duration": 80
       },
       "x": 590,
-      "y": 3760
+      "y": 3880
     },
     {
       "id": "iwReveal",
@@ -824,7 +841,7 @@
         "what": "card"
       },
       "x": 590,
-      "y": 3880
+      "y": 4000
     },
     {
       "id": "iwFindFn",
@@ -891,21 +908,21 @@
         "keys": "renderer"
       },
       "x": 590,
-      "y": 4000
+      "y": 4120
     },
     {
       "id": "iwRendRead",
       "type": "/Logic/Renderer",
       "label": "Draw in 3D here?",
       "x": 590,
-      "y": 4120
+      "y": 4240
     },
     {
       "id": "iwRendIs3d",
       "type": "Condition",
       "label": "In 3D?",
       "x": 590,
-      "y": 4240
+      "y": 4360
     },
     {
       "id": "iwRendOk",
@@ -922,7 +939,7 @@
         "event": "unsupported"
       },
       "x": 590,
-      "y": 4360
+      "y": 4480
     },
     {
       "id": "iwRendSlow",
@@ -944,7 +961,7 @@
         "merge": false
       },
       "x": 590,
-      "y": 4480
+      "y": 4600
     },
     {
       "id": "iwOut",

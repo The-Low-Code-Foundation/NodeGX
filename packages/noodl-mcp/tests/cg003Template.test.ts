@@ -1035,7 +1035,9 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const rb = C.pageRobot;
       expect(String(nodeIn(rb, 'rbFleetEach').type)).toBe('For Each');
       expect(params(nodeIn(rb, 'rbFleetEach')).template).toBe(C.robotCard);
-      expect(into(rb, 'rbFleetEach', 'items')).toEqual(['rbCards.cards']);
+      // P108 IW-008 (lane C): through the settle latch (a crew's copies were doubled by a list that changed mid-rebuild).
+      expect(into(rb, 'rbFleetEach', 'items')).toEqual(['rbHold.value']);
+      expect([into(rb, 'rbHold', 'value'), into(rb, 'rbHold', 'go'), into(rb, 'rbSettle', 'restart')]).toEqual([['rbCards.cards'], ['rbSettle.timerFinished'], ['rbCards.ran']]);
       for (const [u, value, signal, field] of [['rbSetName', 'name', 'named', 'name'], ['rbSetColour', 'colour', 'coloured', 'color'], ['rbSetHat', 'hat', 'hatted', 'hat']]) {
         expect({ u, field: params(nodeIn(rb, u)).field, id: into(rb, u, 'robotId'), value: into(rb, u, 'value'), go: into(rb, u, 'go') }).toEqual({ u, field, id: ['rbFleetEach.itemOutput-robotId'], value: [`rbFleetEach.itemOutput-${value}`], go: [`rbFleetEach.itemOutputSignal-${signal}`] });
       }

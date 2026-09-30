@@ -1684,6 +1684,10 @@ const ISLE_WORLD: CgComponent = {
     text('iwCrewTap', 'How to send one', 'iwCrew', '', { ...T_SMALL, cssClassName: 'bg-crew-tap' }),
     text('iwCrewSaid', 'What the last tap did', 'iwCrew', '', { ...T_BODY, cssClassName: 'bg-crew-said' }),
     logic('iwCrewFn', L('Crew chips'), 'The crew for this job'),
+    // The chips reach the For Each once they have SETTLED (IW-001 F7's latch): a list answered twice while the For Each
+    // rebuilt left both sets on the page.
+    logic('iwCrewSettle', TIMER_NODE, 'The crew, once it stops changing', { duration: PAD_SETTLE_MS }),
+    logic('iwCrewHold', L('Latch'), 'The settled crew'),
     logic('iwAssign', L('Assign robot'), 'A robot sent here, or home'),
     gate('iwAssignOk', 'Did the robot go?'),
     withStates('iwCardState', 'The card shown or not', ['hidden', 'shown'], { shown: { type: 'boolean', by: { hidden: false, shown: true } } }),
@@ -1787,7 +1791,10 @@ const ISLE_WORLD: CgComponent = {
     wire('iwWorld', 'cards', 'iwCrewFn', 'cards'),
     ...(['requests', 'plots', 'robots', 'words', 'lang'] as const).map((f) => wire('iwIn', f, 'iwCrewFn', f)),
     wire('iwCrewFn', 'show', 'iwCrew', 'mounted'),
-    wire('iwCrewFn', 'rows', 'iwCrewEach', 'items'),
+    wire('iwCrewFn', 'rows', 'iwCrewHold', 'value'),
+    wire('iwCrewFn', 'ran', 'iwCrewSettle', 'restart'),
+    wire('iwCrewSettle', 'timerFinished', 'iwCrewHold', 'go'),
+    wire('iwCrewHold', 'value', 'iwCrewEach', 'items'),
     wire('iwCrewFn', 'label', 'iwCrewL', 'text'),
     wire('iwCrewFn', 'hereText', 'iwCrewHere', 'text'),
     wire('iwCrewFn', 'line', 'iwCrewTap', 'text'),
@@ -2720,6 +2727,11 @@ const PAGE_ROBOT: CgComponent = (() => {
       logic('rbSetHat', L('Update robot'), 'A robot’s hat', { field: 'hat' }),
       // P108 IW-008 (lane C): one robot's program copied onto another (written only when it went).
       logic('rbCopy', L('Copy program'), 'A program copied onto another robot'),
+      // The cards reach the For Each once they have SETTLED (IW-001 F7's latch): Robot cards answers once per input as the
+      // page mounts, and a list that changed while the For Each rebuilt left a copy's card twice (this lane's drive: 14 cards
+      // for 9, every copy twice — a kind's card, id the kind, was never doubled).
+      logic('rbSettle', TIMER_NODE, 'The cards, once they stop changing', { duration: PAD_SETTLE_MS }),
+      logic('rbHold', L('Latch'), 'The settled cards'),
       gate('rbCopyOk', 'Was it copied?'),
       place('rbHead', C.head, 'The head', 'rbWrap'),
       group('rbGrid', 'Stage and options', 'rbWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-robo' }, ['rbStage', 'rbOptions']),
@@ -2735,7 +2747,11 @@ const PAGE_ROBOT: CgComponent = (() => {
       ...(['robots', 'hats', 'band', 'lang', 'botName'] as const).map((f) => wire('rbFam', f, 'rbCards', f)),
       wire('rbWords', 'words', 'rbCards', 'words'),
       wire('rbRequests', 'requests', 'rbCards', 'requests'),
-      wire('rbCards', 'cards', 'rbFleetEach', 'items'),
+      // P108 IW-008 (lane C): through the settle latch (above).
+      wire('rbCards', 'cards', 'rbHold', 'value'),
+      wire('rbCards', 'ran', 'rbSettle', 'restart'),
+      wire('rbSettle', 'timerFinished', 'rbHold', 'go'),
+      wire('rbHold', 'value', 'rbFleetEach', 'items'),
       // P108 IW-008 (lane C): a card's copy chip: its robot's program onto the chip's robot; the line on the card it is said on.
       wire('rbStore', 'model', 'rbCopy', 'model'),
       wire('rbFam', 'profileId', 'rbCopy', 'profileId'),

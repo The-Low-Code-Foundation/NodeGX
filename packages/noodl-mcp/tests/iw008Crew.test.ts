@@ -13,7 +13,7 @@ import * as vm from 'vm';
 
 import * as React from 'react';
 
-import { BRAIN_SIZE, CREW_CAP, ISLAND_HOME, ISLAND_HOME_MAP, ISLAND_HOME_PLOT, PLOT_H, PLOT_W, REQUESTS, WORDS } from './cg002Content';
+import { BRAIN_SIZE, CREW_CAP, FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, ISLAND_HOME_PLOT, PLOT_H, PLOT_W, REQUESTS, WORDS } from './cg002Content';
 import { ADD_PROFILE_SCRIPT, BRING_HOME_SCRIPT, COMPLETE_REQUEST_SCRIPT, DECODE_SAVE_SCRIPT, ENCODE_SAVE_SCRIPT, SAVE_HELPERS, helper, runScript } from './cg002Scripts';
 import { PAGE_WORDS } from './cg003Content';
 import { ALL_WORDS_JSON, ASSIGN_ROBOT_SCRIPT, COPY_PROGRAM_SCRIPT, CREW_CHIPS_SCRIPT, FAMILY_SCRIPT, ISLAND_CHOOSE_SCRIPT, ISLAND_ROWS_SCRIPT, ISLAND_WORLD_SCRIPT, JOB_ROBOT_SCRIPT, ROBOT_CARDS_SCRIPT } from './cg003Scripts';
@@ -52,6 +52,10 @@ function islandOf(model: any) {
   return { fam, world };
 }
 const inPlot = (t: { x: number; y: number }, p: { x: number; y: number }) => t.x >= p.x && t.x < p.x + PLOT_W && t.y >= p.y && t.y < p.y + PLOT_H;
+/** Where a robot at home may stand: grass or path of the island's base, on the home slot or off every slot (a path, the shore). */
+const SLOTS = [...REQUESTS.map((r) => r.plot!), FREE_PLAY_PLOT];
+for (let sy = 1; sy + PLOT_H < 22; sy += PLOT_H + 1) for (let sx = 1; sx + PLOT_W < ISLAND_BASE[0].length; sx += PLOT_W + 1) SLOTS.push({ x: sx, y: sy });
+const homeTile = (x: number, y: number) => /^[GP]$/.test((ISLAND_BASE[y] || '').charAt(x)) && (inPlot({ x, y }, ISLAND_HOME_PLOT) || !SLOTS.some((p) => inPlot({ x, y }, p)));
 
 /** Pip's four jobs won by Pip in turn (he moves each time; each plot he leaves keeps the program that won it). */
 const PIP_WINS = ['wall-until', 'tulip-door', 'path-postbox', 'tulips-three'];
@@ -342,7 +346,7 @@ describe('IW-008 AC3 — reservation across the crew: two robots on one pen neve
 });
 
 describe('IW-008 AC4 / AC5 — the island with the crew at its cap', () => {
-  it(`🔴 ${CREW_CAP} robots at home stand on ${CREW_CAP} different tiles of the home slot, each grass or path (never the house, the pond, a tree or a rock)`, () => {
+  it(`🔴 ${CREW_CAP} robots at home stand on ${CREW_CAP} different tiles round home, each grass or path (never the house, the pond, a tree, a rock or another plot), the four IG-005 spots first`, () => {
     const m = kid();
     for (let i = 1; i < CREW_CAP; i++) buyCopy(m, 'pip', `P${i}`);
     expect(helper<any>(SAVE_HELPERS, 'buyItem', profile(m), 'robot:pip').error).toBe('cap');
@@ -350,11 +354,11 @@ describe('IW-008 AC4 / AC5 — the island with the crew at its cap', () => {
     const at = is.world.world.robots.filter((r: any) => r.home);
     expect(at.length).toBe(CREW_CAP);
     expect(new Set(at.map((r: any) => `${r.x},${r.y}`)).size).toBe(CREW_CAP);
-    for (const r of at) {
-      const lx = r.x - ISLAND_HOME_PLOT.x, ly = r.y - ISLAND_HOME_PLOT.y;
-      expect({ r: [r.x, r.y], tile: (ISLAND_HOME_MAP[ly] || '').charAt(lx) }).toEqual({ r: [r.x, r.y], tile: expect.stringMatching(/^[GP]$/) });
-    }
-    expect(at[0]).toMatchObject({ x: ISLAND_HOME.x, y: ISLAND_HOME.y });
+    expect(at.filter((r: any) => !homeTile(r.x, r.y)).map((r: any) => [r.x, r.y])).toEqual([]);
+    expect(at.slice(0, 4).map((r: any) => [r.x - ISLAND_HOME.x, r.y - ISLAND_HOME.y])).toEqual([[0, 0], [3, 2], [5, 0], [-1, 2]]);
+    // Spread: every robot at home at least two tiles (Chebyshev) from every other.
+    const near = at.flatMap((a: any, i: number) => at.slice(i + 1).filter((b: any) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y)) < 2).map((b: any) => [a.x, a.y, b.x, b.y]));
+    expect(near).toEqual([]);
   });
 
   it(`🔴 the crew at its cap (${CREW_CAP}): every robot at work on its own plot (one helping), every pinned run stepped each tick, 300 ticks under 5 ms a tick (p95), each robot moving`, () => {
@@ -470,7 +474,7 @@ describe('IW-008 — arms: each crew rule mutated, and the row that kills it', (
     for (let i = 1; i < CREW_CAP; i++) buyCopy(m, 'pip', `P${i}`);
     const fam = runScript(FAMILY_SCRIPT, { model: m });
     const at = runScript(bad, { requests: REQ_ROWS, plots: fam.plots, robots: fam.robots, done: fam.done, band: 2, pins: [] }).world.robots.filter((r: any) => r.home);
-    expect(at.some((r: any) => !/^[GP]$/.test((ISLAND_HOME_MAP[r.y - ISLAND_HOME_PLOT.y] || '').charAt(r.x - ISLAND_HOME_PLOT.x)))).toBe(true);
+    expect(at.some((r: any) => !homeTile(r.x, r.y))).toBe(true);
   });
   it('the save code drops a robot’s program → the round-trip row fails', () => {
     const bad = mutate(ENCODE_SAVE_SCRIPT, 'if ((rb.program || rb.helps) && Array.isArray(rr)) rr.push(rb.program || null);', '');

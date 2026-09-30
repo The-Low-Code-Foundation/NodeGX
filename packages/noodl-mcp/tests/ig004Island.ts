@@ -355,9 +355,10 @@ for (var n = 0; n < ISL.length; n++) {
 // P106 IG-005: the robots at home stand apart on the home slot (its path, then its grass), so their names never cover one
 // another on a phone's 16 px tiles (a robot is drawn 56 px at least): Pip on the path, the others 3–5 tiles away.
 var HOME_SPOTS = [[0, 0], [3, 2], [5, 0], [-1, 2]];
-// P108 IW-008 (lane C): a crew of up to CREW_CAP at home — eight more spots on the home slot's grass and path, each its own
-// tile, spread over the slot (never the house, the pond, a tree or a rock).
-HOME_SPOTS.push([2, -2], [-2, -2], [5, 2], [2, 3], [-2, 3], [4, 1], [0, 3], [-2, 1]);
+// P108 IW-008 (lane C): a crew of up to CREW_CAP at home — eight more spots round the home slot, three tiles or more from
+// one another where the island allows (a name pill is about three tiles wide at 1368): the path above it, the path on its
+// left, the shore below it. Never the house, the pond, a tree, a rock, or another plot.
+HOME_SPOTS.push([-2, -3], [1, -3], [4, -3], [7, -3], [-3, 0], [-3, 3], [2, 4], [5, 4]);
 var home = [], homeN = 0;
 for (var m = 0; m < mine.length; m++) {
   if (!mine[m] || busy[mine[m].id]) continue;
