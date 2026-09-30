@@ -16,6 +16,9 @@ import { ADD_PROFILE_SCRIPT, APPLY_DELTA_SCRIPT, BRING_HOME_SCRIPT, COMPLETE_REQ
 import { ALL_WORDS_JSON, DRAW_WORLD_SCRIPT, FAMILY_SCRIPT, FREE_PLAY, ISLAND_CHOOSE_SCRIPT, ISLAND_PINS_SCRIPT, ISLAND_ROWS_SCRIPT, ISLAND_WORLD_SCRIPT, START_WORLD_SCRIPT } from './cg003Scripts';
 import { PAGE_WORDS } from './cg003Content';
 import { ISLAND_HOLD_TICKS, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandWorldScript } from './ig004Island';
+// P108 IW-003 (lane S): the island's own plot seed and layout, for the job plots.
+import { ISLAND_ENGINE } from './ig004Island';
+import { helper } from './cg002Scripts';
 // P108 IW-002 (lane J): the job tick — the wear clock it runs.
 import { WEAR } from './cg002Content';
 
@@ -52,7 +55,8 @@ const pinned = (program: unknown, robotId: string) => ({ program, robotId, wonAt
 
 /** The same program run alone, the way the Workshop runs it: Start world's world, New run, Step + Apply per tick. */
 function solo(r: GardenRequest, program: unknown, robotId: string, ticks: number) {
-  const start = runScript(START_WORLD_SCRIPT, { requests: [r], requestId: r.id, nonce: 0 }).world;
+  // P108 IW-003 (lane S): a seeded request is laid from the seed the island lays its plot with (its id's djb2).
+  const start = runScript(START_WORLD_SCRIPT, { requests: [r], requestId: r.id, nonce: 0, ...(r.seeded ? { seed: helper<number>(ISLAND_ENGINE, 'islSeedOf', r.id) } : {}) }).world;
   start.robots[0].id = robotId;
   let run = runScript(NEW_RUN_SCRIPT, { program, robotId, lang: 'en', runId: 'solo' }).run;
   let world = start;
@@ -79,7 +83,9 @@ describe('IG-004 — the island as a world', () => {
       const aloneT = solo(req('tulips-three'), ref('tulips-three'), 'r1', 400);
       const aloneS = solo(req('path-stones'), ref('path-stones'), 'r2', 400);
       let state = built.state;
-      const n = Math.min(aloneT.length, aloneS.length);
+      // P108 IW-003 (lane S): path-stones is a job plot now, and the island wears it (a rock regrows every WEAR.rock ticks,
+      // which the Workshop never does): the traces are the same up to the first wear tick.
+      const n = Math.min(aloneT.length, aloneS.length, WEAR.rock - 1);
       for (let t = 0; t < n; t++) {
         const out = bare(ISLAND_TICK_SCRIPT, { state });
         state = out.state;
@@ -327,7 +333,9 @@ describe('IG-004 — the island as a world', () => {
       const is = islandOf(kid(2));
       const things = is.world.world.things;
       for (const r of REQ_ROWS) {
-        const want = r.things.map((t: any) => ({ ...t, x: t.x + r.plot.x, y: t.y + r.plot.y }));
+        // P108 IW-003 (lane S): a job plot is drawn as the island lays it (its seed's layout, a site's stage).
+        const laid = r.job || r.seeded ? helper<any>(ISLAND_ENGINE, 'worldOf', helper<any>(ISLAND_ENGINE, 'seedWorld', { map: [...r.map], things: JSON.parse(JSON.stringify(r.things)), robots: [] }, r, helper<number>(ISLAND_ENGINE, 'islSeedOf', r.id))) : null;
+        const want = (laid ? laid.things : r.things).map((t: any) => ({ ...t, x: t.x + r.plot.x, y: t.y + r.plot.y }));
         expect({ id: r.id, things: things.filter((t: any) => inPlot(t, r.plot) && t.kind !== 'islander' && t.kind !== 'fence' && t.kind !== 'padlock') }).toEqual({ id: r.id, things: want });
       }
       expect(things.filter((t: any) => inPlot(t, FREE_PLAY_PLOT)).map((t: any) => t.kind)).toEqual(['tulip', 'tulip', 'tulip']);

@@ -3999,6 +3999,46 @@ var gardenKitBlocks = (function () {
     '.gd-picking .gd-cell:hover>.gd-thing,.gd-picking .gd-cell:active>.gd-thing,.gd-picking .gd-cell:hover>.gd-tulip,.gd-picking .gd-cell:active>.gd-tulip{transform:translateY(-12%) scale(1.1);filter:drop-shadow(0 5px 3px rgba(46,42,61,.28))}\n' +
     '@media (prefers-reduced-motion: reduce){.gd-puddle{animation:none}.gd-bump{animation:none}.gd-cheer .gd-turn{animation:none}.gd-bot{transition:none}.gd-turn{transition:none}}';
 
+  // ── P108 IW-003 (lane S): Sami's bench — a site with build 'bench' (the first build), drawn by stage ─────────────────
+  // The 3D kit draws the same five stages (garden-3d-kit THING_BUILDERS.site, its bench branch); both expose benchStage on
+  // the job look, and ig007Garden3d pins the two equal. A finished bench is not a path square: the engine never reads it as
+  // P and it blocks at every stage (robots walk round a building); Sami sits on it once it is built.
+  /** The bench's stage by its stones: 0 pegs and string on dirt · 1 a leg · 2 two legs · 3 the seat · 4 built (the back; Sami sits). */
+  function benchStage(t) {
+    var need = (t && wholeOf(t.need)) || 1;
+    var have = Math.min((t && wholeOf(t.have)) || 0, need);
+    return have >= need ? 4 : Math.min(3, Math.floor((have * 4) / need));
+  }
+  JOB_LOOK.benchStage = benchStage;
+  (function () {
+    var ghost = { fill: 'none', stroke: '#FFFFFF', strokeWidth: 2, strokeDasharray: '4 3', opacity: 0.9 };
+    var stone = function (o, fill) { var r = { rx: 2.5, fill: fill, stroke: '#7E7B8C', strokeWidth: 1.5 }; for (var k in o) r[k] = o[k]; return r; };
+    var gh = function (o) { var r = { rx: 2.5 }; for (var k in ghost) r[k] = ghost[k]; for (var k2 in o) r[k2] = o[k2]; return r; };
+    var LEG_L = { x: 13, y: 36, width: 10, height: 18 };
+    var LEG_R = { x: 41, y: 36, width: 10, height: 18 };
+    var SEAT = { x: 8, y: 27, width: 48, height: 9 };
+    var BACK = { x: 10, y: 13, width: 44, height: 9 };
+    var shadow = ['ellipse', { cx: 32, cy: 56, rx: 24, ry: 3, fill: 'rgba(0,0,0,.14)' }];
+    var pegs = [['rect', { x: 7, y: 25, width: 3, height: 11, rx: 1, fill: '#A9773F' }], ['rect', { x: 54, y: 25, width: 3, height: 11, rx: 1, fill: '#A9773F' }], ['path', { d: 'M8.5 26H55.5', stroke: '#FFFFFF', strokeWidth: 1, opacity: 0.8 }]];
+    var legL = ['rect', stone(LEG_L, '#A3A0AB')], legR = ['rect', stone(LEG_R, '#A3A0AB')], seat = ['rect', stone(SEAT, '#C9C6D2')];
+    var back = [['rect', stone({ x: 15, y: 21, width: 5, height: 7 }, '#A3A0AB')], ['rect', stone({ x: 44, y: 21, width: 5, height: 7 }, '#A3A0AB')], ['rect', stone(BACK, '#B8B5C2')]];
+    SPRITES.bench0 = { box: '0 0 64 64', shapes: [shadow].concat(pegs, [['rect', gh(LEG_L)], ['rect', gh(LEG_R)], ['rect', gh(SEAT)]]) };
+    SPRITES.bench1 = { box: '0 0 64 64', shapes: [shadow].concat(pegs, [legL, ['rect', gh(LEG_R)], ['rect', gh(SEAT)]]) };
+    SPRITES.bench2 = { box: '0 0 64 64', shapes: [shadow].concat(pegs, [legL, legR, ['rect', gh(SEAT)]]) };
+    SPRITES.bench3 = { box: '0 0 64 64', shapes: [shadow, legL, legR, seat, ['rect', gh(BACK)]] };
+    SPRITES.bench4 = { box: '0 0 64 64', shapes: [shadow].concat([legL, legR], back, [seat]) };
+  })();
+  WORLD_CSS +=
+    '\n.gd-cell>.gd-bench{z-index:1}\n' +
+    '.gd-cell>.gd-bench-sami{inset:auto;left:18%;top:-24%;width:64%;height:64%;z-index:2}\n';
+  /** The bench on its tile: the ground (dirt while it is built, gravel once it stands), its sprite by stage, Sami on a built one. */
+  function benchEls(t, i, ground, extras) {
+    var st = benchStage(t);
+    ground.push(h('div', { key: 'site-' + i, className: 'gd-site gd-site-' + (st === 4 ? 'gravel' : 'dirt'), 'data-site': st === 4 ? 'gravel' : 'dirt' }));
+    extras.push(spriteEl('bench' + st, 'bench-' + i, 'gd-thing gd-bench gd-bench-' + st, { 'data-bench': String(st) }));
+    if (st === 4) extras.push(spriteEl('islSami', 'bench-sami-' + i, 'gd-bench-sami', { 'data-who': 'sami', 'data-sits': 'bench' }));
+  }
+
   /** A rising count is a new event; a mount, the same value, a fall or junk is not (the Boost-count rule). */
   function rose(before, after) {
     var a = Number(before);
@@ -4190,6 +4230,8 @@ var gardenKitBlocks = (function () {
               // IW-002: a rock with a max is a source that regrows: used up, it stays as a faint stub.
               else if (m) extras.push(spriteEl('rockSmall', 'rock-' + i, 'gd-thing gd-boulder gd-used', { 'data-left': '0' }));
             }
+            // P108 IW-003 (lane S): a site with a build is Sami's bench, drawn by stage (benchEls, below WORLD_CSS).
+            else if (t.kind === 'site' && t.build === 'bench') benchEls(t, i, ground, extras);
             else if (t.kind === 'site') ground.push(h('div', { key: 'site-' + i, className: 'gd-site gd-site-' + siteStage(t), 'data-site': siteStage(t) }));
             else if (t.kind === 'basket') extras.push(spriteEl(m && m.have > 0 ? 'basketEggs' : 'basket', 'basket-' + i, 'gd-thing gd-basket'));
             else if (t.kind === 'store') extras.push(spriteEl(m && m.have > 0 ? 'storeFull' : 'store', 'store-' + i, 'gd-thing gd-store'));

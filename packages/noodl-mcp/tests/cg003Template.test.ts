@@ -1341,9 +1341,10 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     const free = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' });
     expect(free.isFree).toBe(true);
     expect(free.world.robots).toEqual([{ id: 'me', x: 0, y: 3, d: 1, carry: [], can: null, canMax: 3 }]);
-    // The stones: an empty basket, a rock of four beside the start.
-    const st = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones' });
-    expect([st.world.robots[0].carry, st.world.things]).toEqual([[], [{ kind: 'rock', x: 2, y: 2, left: 4 }]]);
+    // The stones (P108 IW-003 lane S, a job): an empty hod, four squares of dirt, two rocks of eight laid by the seed (1:
+    // at 2,1 and 5,1), the job on the world.
+    const st = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', seed: 1 });
+    expect([st.world.robots[0].carry, st.world.things.map((t: any) => [t.kind, t.x, t.y, t.have ?? t.left]), st.world.job.targets]).toEqual([[], [['site', 3, 3, 0], ['site', 4, 3, 0], ['site', 5, 3, 0], ['site', 6, 3, 0], ['rock', 2, 1, 8], ['rock', 5, 1, 8]], ['s1', 's2', 's3', 's4']]);
     expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: '' }).found).toBe(false);
     expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS }).found).toBe(false);
   });
@@ -1373,10 +1374,12 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect([filled.recorded, filled.sayKey, filled.world.robots[0].can, JSON.parse(filled.program)]).toEqual([true, 'sayFill', 3, [{ id: 1, t: 'fill' }]]);
     const dry = run(RECORD_STEP_SCRIPT, { op: 'water', program: '[]', world: tul.world, selected: '', lang: 'en', bumps: 0 });
     expect([dry.sayKey, dry.world.robots[0].can, dry.bumps]).toEqual(['sayDry', 0, 0]);
-    const st = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones' });
+    // P108 IW-003 (lane S): on seed 1 the first rock is at 2,1 — turn, step up, pick: a stone, the rock keeps seven.
+    const st = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', seed: 1 });
     const faced = run(RECORD_STEP_SCRIPT, { op: 'left', program: '[]', world: st.world, selected: '', lang: 'en', bumps: 0 });
-    const mined = run(RECORD_STEP_SCRIPT, { op: 'pick', program: faced.program, world: faced.world, selected: '', lang: 'en', bumps: 0 });
-    expect([mined.world.robots[0].carry, mined.world.things]).toEqual([['stone'], [{ kind: 'rock', x: 2, y: 2, left: 3 }]]);
+    const up = run(RECORD_STEP_SCRIPT, { op: 'fwd', program: faced.program, world: faced.world, selected: '', lang: 'en', bumps: 0 });
+    const mined = run(RECORD_STEP_SCRIPT, { op: 'pick', program: up.program, world: up.world, selected: '', lang: 'en', bumps: 0 });
+    expect([mined.world.robots[0].carry, mined.world.things.find((t: any) => t.id === 'r1')]).toEqual([['stone'], { kind: 'rock', id: 'r1', x: 2, y: 1, left: 7, max: 8 }]);
   });
 
   it('Kit palette: band 7–9 draws the caption, band 10–12 the word; every block has its icon; slots come with options', () => {
@@ -1418,10 +1421,16 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     // IG-005: a robot with no look of its own wears the page's look and Pip's can.
     expect(d.robots).toEqual([{ x: 0, y: 0, d: 1, colour: '#8F6BFF', eyes: 'wink', hat: 'sun', name: 'Bo', bump: 3, can: null, canMax: 3, carry: [], accessory: 'can' }]);
     expect(run(DRAW_WORLD_SCRIPT, { world: w, showEnd: false, endX: 1, endY: 0 }).things).toHaveLength(2);
-    const stones = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones' }).world;
-    stones.things.push({ kind: 'stone', x: 3, y: 3 });
+    // P108 IW-003 (lane S): the stones' job — the squares with their meters, the rocks with left and max, a loose stone.
+    const stones = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', seed: 1 }).world;
+    stones.things.push({ kind: 'stone', x: 3, y: 2 });
     const drawn = run(DRAW_WORLD_SCRIPT, { world: stones }).things;
-    expect(drawn).toEqual([{ kind: 'rock', x: 2, y: 2, left: 4 }, { kind: 'stone', x: 3, y: 3 }]);
+    expect(drawn).toEqual([
+      ...[3, 4, 5, 6].map((x, i) => ({ kind: 'site', x, y: 3, id: 's' + (i + 1), have: 0, need: 4, item: 'stone' })),
+      { kind: 'rock', x: 2, y: 1, left: 8, id: 'r1', max: 8 },
+      { kind: 'rock', x: 5, y: 1, left: 8, id: 'r2', max: 8 },
+      { kind: 'stone', x: 3, y: 2 }
+    ]);
     // IG-002: the can and the load pass through to the Robots port; a sign and a note keep their text for the renderer.
     const carrying = { map: ['WGG'], things: [{ kind: 'sign', x: 2, y: 0, text: 'Tulips' }, { kind: 'note', x: 1, y: 0, text: 'Red ones' }], robots: [{ id: 'me', x: 1, y: 0, d: 3, can: 2, canMax: 3, carry: ['stone', 'letter'] }] };
     const cd = run(DRAW_WORLD_SCRIPT, { world: carrying });
@@ -2086,8 +2095,9 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       const blocked = (m: any) => rowsOf(m).filter((r: any) => r.blocked).map((r: any) => r.id).sort();
       expect(blocked(kid())).toEqual(REQUESTS.filter((r) => (r.needs ?? 'pip') !== 'pip').map((r) => r.id).sort());
       const m = run(COMPLETE_REQUEST_SCRIPT, { model: win(kid(), 'path-postbox'), requestId: 'path-stones', tricks: [], reward: null, program: '[{"id":1,"t":"fwd"}]', robotId: 'cobble' }).model;
-      // Cobble works the stones: the bowl (his) is blocked; Pip's jobs are not.
-      expect(blocked(m)).toEqual(['bowl-if', 'eggs-count', 'letter-say', 'rock-flower', 'sami-thanks']);
+      // Cobble works the stones: the bowl (his) is blocked; Pip's jobs are not. P108 IW-003 (lane S): Sami's bench is
+      // Cobble's too, so it waits for him.
+      expect(blocked(m)).toEqual(['bowl-if', 'eggs-count', 'letter-say', 'rock-flower', 'sami-bench', 'sami-thanks']);
       expect(rowsOf(m).find((r: any) => r.id === 'path-stones').doneWord).toBe('✓ ' + WORD_ROWS.find((x) => x.key === 'done')!.en + ' · Cobble works here');
     });
   });
@@ -2139,8 +2149,9 @@ describe('P108 s2 (merge) — Draw world hands the kits the job model as the eng
   const drawOf = (world: unknown) => run(DRAW_WORLD_SCRIPT, { world, words: WORD_ROWS, lang: 'en', botName: 'Pip', stepMs: 380, sayN: 0, run: { runId: 'r1' } });
 
   it('the known-firing half: every one of the 13 requests is drawn with the keys it had before (no job field on any thing, no `holds`)', () => {
-    const ids = REQ_ROWS.map((r: { id: string }) => r.id);
-    expect(ids.length).toBe(REQUESTS.length);
+    // P108 IW-003: the requests not on the job model yet (a mission moved onto a job is the other half's, above).
+    const ids = REQ_ROWS.filter((r: { job?: unknown }) => !r.job).map((r: { id: string }) => r.id);
+    expect(ids.length).toBe(REQUESTS.filter((r) => !r.job).length);
     for (const id of ids) {
       const out = drawOf(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: id }).world);
       for (const t of out.things) for (const k of Object.keys(t)) expect([id, k, OLD_KEYS.has(k)]).toEqual([id, k, true]);

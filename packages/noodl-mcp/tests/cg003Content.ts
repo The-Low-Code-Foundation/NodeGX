@@ -23,7 +23,7 @@ export const REQUEST_SUBS: Readonly<Record<string, { key: string; words: Bi }>> 
   'path-postbox': { key: 'subPathPostbox', words: s('Drive {b} along the path, one step at a time. Every step you take becomes a block.', 'Conduis {b} sur le chemin, un pas à la fois. Chaque pas devient un bloc.') },
   'tulip-door': { key: 'subTulipDoor', words: s('One thirsty tulip. Walk {b} to her, turn, and water: three kinds of step, in the right order.', 'Une tulipe qui a soif. Emmène {b} jusqu’à elle, tourne, et arrose : trois sortes de pas, dans le bon ordre.') },
   'tulips-three': { key: 'subTulipsThree', words: s('Drive {b} yourself first. {b} remembers every step as a block, and then you can tidy the steps up.', 'Conduis {b} toi-même d’abord. {b} retient chaque pas comme un bloc, et ensuite tu peux ranger les pas.') },
-  'path-stones': { key: 'subPathStones', words: s('Put a stone down, step, and again. When the same steps come back, fold them into a repeat.', 'Pose une pierre, avance, et encore. Quand les mêmes pas reviennent, range-les dans un « répéter ».') },
+  'path-stones': { key: 'subPathStones', words: s('To the rock, four stones in the hod, to a square, four stones down. Four squares, the same trip: fold it into a repeat.', 'Au rocher, quatre pierres dans la hotte, à une case, quatre pierres posées. Quatre cases, le même trajet : range-le dans un « répéter ».') },
   'bowl-if': { key: 'subBowlIf', words: s('Only the empty bowl gets food. Teach {b} to look first: if the bowl is empty, then fill it.', 'Seul le bol vide reçoit à manger. Apprends à {b} à regarder d’abord : si le bol est vide, alors remplis-le.') },
   'letter-say': { key: 'subLetterSay', words: s('Carry the letter to the post box, then give {b} something kind to say when it gets there.', 'Porte la lettre jusqu’à la boîte aux lettres, puis donne à {b} quelque chose de gentil à dire en arrivant.') },
   'wall-until': { key: 'subWallUntil', words: s('No need to count the steps. {b} can keep going until the wall, then stop by itself.', 'Pas besoin de compter les pas. {b} peut avancer jusqu’au mur, puis s’arrêter tout seul.') },
@@ -32,8 +32,10 @@ export const REQUEST_SUBS: Readonly<Record<string, { key: string; words: Bi }>> 
   'rows-trick': { key: 'subRowsTrick', words: s('Two rows, the same job. Teach {b} the job once, as a trick with a name, then use it twice.', 'Deux rangées, le même travail. Apprends le travail une fois à {b}, comme une astuce avec un nom, puis utilise-la deux fois.') },
   // P106 IG-006 (lane C): Olive's three requests.
   'mamie-note': { key: 'subMamieNote', words: s('A program cannot read Mamie’s note, but Olive can. Ask her, then let “if Olive read…” choose the row.', 'Un programme ne sait pas lire le mot de Mamie, Olive si. Demande-lui, puis laisse « si Olive a lu… » choisir la rangée.') },
-  'rock-flower': { key: 'subRockFlower', words: s('Olive is right most of the time, not every time. Ask three times, and the count decides.', 'Olive a raison presque tout le temps, pas à chaque fois. Demande trois fois, et le compte décide.') },
-  'sami-thanks': { key: 'subSamiThanks', words: s('The letter is {b}’s job; the kind words are Olive’s. Put her thank-you at the end.', 'La lettre, c’est le travail de {b} ; les mots gentils, ceux d’Olive. Mets son merci à la fin.') }
+  'rock-flower': { key: 'subRockFlower', words: s('Fill the can at the pond first. Olive is right most of the time, not every time. Ask three times, and the count decides.', 'Remplis d’abord l’arrosoir à la mare. Olive a raison presque tout le temps, pas à chaque fois. Demande trois fois, et le compte décide.') },
+  'sami-thanks': { key: 'subSamiThanks', words: s('The letter is {b}’s job; the kind words are Olive’s. Put her thank-you at the end.', 'La lettre, c’est le travail de {b} ; les mots gentils, ceux d’Olive. Mets son merci à la fin.') },
+  // P108 IW-003 (lane S): Sami's bench.
+  'sami-bench': { key: 'iw3sSubBench', words: s('Nobody knows how many stones a rock has today. {b} can fill the hod until it is full, and keep going until the bench is built.', 'Personne ne sait combien de pierres a un rocher aujourd’hui. {b} peut remplir la hotte jusqu’à ce qu’elle soit pleine, et continuer jusqu’à ce que le banc soit construit.') }
 };
 
 /** Page words, EN and FR. `{b}` is the robot's name; `{who}`, `{k}`, `{reward}` are filled by the script that shows them. */
@@ -282,7 +284,7 @@ export const IG006_WORDS: Readonly<Record<string, Bi>> = {
   giftNote: s('A note sticker, from Mamie Rose', 'Un autocollant petit mot, offert par Mamie Rose'),
   rqFlowerTitle: s('Water the flowers, not the rocks', 'Arrose les fleurs, pas les rochers'),
   rqFlowerBlurb: s('Is it a…?', 'Est-ce un… ?'),
-  rqFlowerLine: s('"Flowers and rocks, side by side. Ask Olive if each one is a flower before {b} waters it. If she gets one wrong, ask three times."', '« Des fleurs et des rochers, côte à côte. Demande à Olive si chacun est une fleur avant que {b} l’arrose. Si elle se trompe, demande trois fois. »'),
+  rqFlowerLine: s('"Flowers and rocks, side by side. Fill the can at the pond, then ask Olive if each one is a flower before {b} waters it: rocks don’t drink. If she gets one wrong, ask three times."', '« Des fleurs et des rochers, côte à côte. Remplis l’arrosoir à la mare, puis demande à Olive si chacun est une fleur avant que {b} l’arrose : les rochers ne boivent pas. Si elle se trompe, demande trois fois. »'),
   stickerFlower: s('Rose sticker', 'Autocollant rose'),
   giftFlower: s('A rose sticker, from Sami', 'Un autocollant rose, offert par Sami'),
   rqThanksTitle: s('Carry my letter, then say thank you', 'Porte ma lettre, puis dis merci'),

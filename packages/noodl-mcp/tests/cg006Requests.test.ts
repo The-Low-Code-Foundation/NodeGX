@@ -31,6 +31,8 @@ import fs from 'fs';
 import path from 'path';
 import { BAND_PALETTE, Block, GardenRequest, HINTS, OLIVE_RUNGS, REQUESTS, VOICED_HINT_KEYS, WORDS, WORD_KEYS } from './cg002Content';
 import { UPGRADES } from './cg002Content';
+// P108 IW-003 (lane S): a job's run is bounded by its targets' wear.
+import { WEAR } from './cg002Content';
 import { ENGINE, FUNCTION_SCRIPTS, MAX_TICKS, PALETTE_SCRIPT, helper, runScript } from './cg002Scripts';
 import { OLIVE_LESSON_IDS, OLIVE_SLOTS_SCRIPT, OLIVE_WORDS, PALETTE_RUNG_IDS } from './cg005Olive';
 import { DROPPED_LISTS, DROPPED_RUNGS, Expect, MOMENTS, PROBES, RETIRED_RUNGS, decide, meets, mergeTemplates } from './cg006Probes';
@@ -191,7 +193,8 @@ describe('CG-006 — the requests', () => {
       // Every request is a §2 row, or the D3 letter (a `say` request, rung 1's stage).
       const rest = REQUESTS.map((r) => r.id).filter((id) => !SECTION2.some((s) => s[1] === id));
       // P106 IG-006 appends Olive's three (Mamie's note, the rock and the flowers, Sami's thank-you).
-      expect(rest).toEqual(['letter-say', 'mamie-note', 'rock-flower', 'sami-thanks']);
+      // P108 IW-003 (lane S): + Sami's bench, the first build (the last of the literal list, before Olive's three).
+      expect(rest).toEqual(['letter-say', 'sami-bench', 'mamie-note', 'rock-flower', 'sami-thanks']);
       // Band 7–9 gets the steps and the repeat rows (the fold is band 10–12's): 1, 1b, 2, 2b.
       expect(REQUESTS.filter((r) => r.band === 1).map((r) => r.id)).toEqual(['path-postbox', 'tulip-door', 'tulips-three', 'path-stones']);
     });
@@ -209,7 +212,10 @@ describe('CG-006 — the requests', () => {
       for (const t of typesIn(program)) expect({ block: t, inBand: palette.has(t), inRequest: r.palette.includes(t as Block['t']) }).toEqual({ block: t, inBand: true, inRequest: true });
       const { end, goal } = goalOf(r, program, lang);
       expect({ id, done: end.done, met: goal.met, missing: goal.missing, bumps: end.run.bumps, puddles: end.run.puddles }).toEqual({ id, done: true, met: true, missing: [], bumps: 0, puddles: 0 });
-      expect(end.ticks).toBeLessThan(100);
+      // P108 IW-003 (lane S): a job's run is bounded by its targets' wear (the IW-003 gate's rule: seen finished before
+      // it wears); a request with no job keeps the old bound.
+      const job = r.job ? Math.min(...r.job.targets.map((t) => WEAR[(worldOfRequest(r).things.find((x: any) => String(x.id) === String(t))?.kind ?? 'tulip') as keyof typeof WEAR] ?? 100)) : 100;
+      expect(end.ticks).toBeLessThan(job);
       // The card in the language: title, blurb, the islander's line, the reward, the gift — no placeholder left.
       const words = runScript(TRANSLATE, { lang, words: WORD_ROWS, botName: 'Pip' });
       for (const key of Object.values(r.copyKeys)) expect({ key, text: words[key] }).toEqual({ key, text: expect.stringMatching(/^[^{}]*\S[^{}]*$/) });
@@ -221,7 +227,8 @@ describe('CG-006 — the requests', () => {
         'tulip-door': prog('fwd', 'fwd', 'fwd', 'right', 'fwd', 'water'),
         // IG-002: the old dance, and the new one without the pond (the can starts empty: dry).
         'tulips-three': [{ id: 1, t: 'repeat', n: 3, body: prog('left', 'left', 'fwd', 'water', 'right', 'fwd', 'right', 'fwd') }],
-        'path-stones': [{ id: 1, t: 'left' }, { id: 2, t: 'repeat', n: 4, body: prog('pick') }, { id: 9, t: 'right' }, { id: 10, t: 'repeat', n: 4, body: prog('fwd', 'put') }],
+        // P108 IW-003 (lane S): one trip, not four — the first square is path, three are still dirt.
+        'path-stones': [{ id: 1, t: 'go_nearest', slots: { kind: 'rock' } }, { id: 2, t: 'repeat', n: 4, body: prog('pick') }, { id: 7, t: 'go_nearest', slots: { kind: 'site' } }, { id: 8, t: 'repeat', n: 4, body: prog('put') }],
         'wall-until': prog('fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'left'),
         'bowl-if': [{ id: 1, t: 'repeat', n: 2, body: prog('fwd', 'fwd', 'left', 'put', 'right') }],
         'meow-when': prog('fwd', 'fwd'),
@@ -235,10 +242,10 @@ describe('CG-006 — the requests', () => {
       // 1b's wrong turn is the README's own sentence: the puddle is the error message.
       const door = goalOf(byId('tulip-door'), wrong['tulip-door']);
       expect([door.end.run.puddles, door.goal.missing]).toEqual([1, ['every_tulip_watered', 'no_puddle']]);
-      // 2b laid one tile late: the stone that should start the path is missing, the post box got one.
-      const late = goalOf(byId('path-stones'), wrong['path-stones']);
-      expect(late.end.world.things).toEqual(expect.arrayContaining([{ kind: 'stone', x: 7, y: 3 }]));
-      expect(late.goal.missing).toEqual(['thing_at']);
+      // 2b, one trip only (P108 IW-003 lane S): one square is path, three are dirt, and the job is 1 of 4.
+      const once = goalOf(byId('path-stones'), wrong['path-stones']);
+      expect(once.end.world.things.filter((t: any) => t.kind === 'site').map((t: any) => t.have)).toEqual([4, 0, 0, 0]);
+      expect([once.goal.missing, once.goal.done, once.goal.total]).toEqual([['job_done'], 1, 4]);
     });
 
     it('row 2 "the fold offered": the band 10–12 recording of the tulips offers repeat 3; band 7–9 is never offered one', () => {
@@ -251,14 +258,15 @@ describe('CG-006 — the requests', () => {
       expect(runScript(FIND_REPEAT, { program: recording, band: 1 }).offer).toBe(false);
     });
 
-    it('row 2b: four stones laid, the basket empty, the robot on the last one; the recording offers a fold that covers all eight blocks', () => {
+    it('row 2b: four squares of four stones are path, the hod empty, Cobble home; the recording offers a fold that covers all forty blocks', () => {
+      // P108 IW-003 (lane S): the path as a job (four trips: the rock, four picks, a square, four puts).
       const r = byId('path-stones');
       const { end } = goalOf(r, r.referenceProgram);
-      expect(end.world.things).toEqual([3, 4, 5, 6].map((x) => ({ kind: 'stone', x, y: 3 })));
-      expect(end.world.robots[0]).toMatchObject({ x: 6, y: 3, carry: [] });
+      expect(end.world.things.filter((t: any) => t.kind === 'site').map((t: any) => [t.x, t.y, t.have, t.stage])).toEqual([3, 4, 5, 6].map((x) => [x, 3, 4, 'path']));
+      expect(end.world.robots[0]).toMatchObject({ x: 2, y: 3, d: 1, carry: [] });
       const found = runScript(FIND_REPEAT, { program: unrolled(r.referenceProgram), band: 2 });
-      // Richard's tie-break ruling (2026-09-28, CG-002 §7): equal cover → the higher count, so this is repeat 4 { put fwd }.
-      expect({ offer: found.offer, count: found.count, len: found.len }).toEqual({ offer: true, count: 4, len: 2 });
+      // The whole trip, four times: the fold that covers every block (a repeat of four picks inside it is the child's next fold).
+      expect({ offer: found.offer, count: found.count, len: found.len }).toEqual({ offer: true, count: 4, len: 10 });
     });
 
     it('row 1b: the water lands on the tulip under the house, and nowhere else', () => {

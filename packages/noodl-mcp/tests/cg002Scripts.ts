@@ -265,7 +265,8 @@ function worldOf(raw) {
 function tileAt(w, x, y) {
   if (x < 0 || y < 0 || y >= w.h || x >= w.w) return '';
   var c = String(w.map[y]).charAt(x);
-  if (c !== 'P' && Array.isArray(w.things)) for (var i = 0; i < w.things.length; i++) { var t = w.things[i]; if (t && t.kind === 'site' && t.x === x && t.y === y && isFull(t)) return 'P'; }
+  // P108 IW-003 (lane S): a path square only (pathSite) — a finished bench is not path.
+  if (c !== 'P' && Array.isArray(w.things)) for (var i = 0; i < w.things.length; i++) { var t = w.things[i]; if (t && pathSite(t) && t.x === x && t.y === y && isFull(t)) return 'P'; }
   return c;
 }
 function thingsAt(w, x, y, kind) {
@@ -278,7 +279,7 @@ function blocked(w, x, y) {
   if (c === '') return true;
   if (BLOCKING_TILES[c]) return true;
   var th = thingsAt(w, x, y);
-  for (var i = 0; i < th.length; i++) if (BLOCKING_THINGS[th[i].kind]) return true;
+  for (var i = 0; i < th.length; i++) if (BLOCKING_THINGS[th[i].kind] || buildSite(th[i])) return true;
   return false;
 }
 function robotOf(w, id) { for (var i = 0; i < w.robots.length; i++) if (w.robots[i].id === id) return w.robots[i]; return w.robots[0] || null; }
@@ -656,6 +657,7 @@ function nearestOf(w, r, kind, ps) {
   for (var i = 0; i < w.things.length; i++) {
     var t = w.things[i];
     if (!t || t.kind !== kind) continue;
+    if (seekSkips(t)) continue; // P108 IW-003 (lane S)
     if (isSet(t.id) && res[String(t.id)] && res[String(t.id)] !== r.id) continue;
     var st = standFor(ps, t);
     if (!st) continue;
@@ -733,6 +735,21 @@ function varStep(w, run, s, delta) {
   else { var by = s.by === undefined || s.by === null ? 1 : exprNum(evalVal(w, run, s.by)); run.vars[name] = (exprNum(run.vars[name]) || 0) + (by === null ? 0 : by); }
   delta.vars = clone(run.vars);
 }
+// ── P108 IW-003 (lane S): Sami's stones — go to nearest skips what is not worth the walk; a build site (the bench) ──
+/**
+ * go to nearest passes over a thing not worth the walk (IW-005 dev. 5; the mockup's rule): a rock with no stones left
+ * (left 0 — a rock with a max stays on the map to regrow) and a target already full (a site or a tulip at its need).
+ */
+function seekSkips(t) {
+  if (!t) return true;
+  if (t.kind === 'rock') return !(Number(t.left) > 0);
+  if (JOB_KINDS[t.kind] === 'target') return isFull(t);
+  return false;
+}
+/** A path square: a site with no build. A full one reads as path (P); a site with a build (the bench) never does. */
+function pathSite(t) { return !!t && t.kind === 'site' && !isSet(t.build); }
+/** A build site (build: 'bench'): robots walk round it at every stage, and a finished bench is furniture Sami sits on. */
+function buildSite(t) { return !!t && t.kind === 'site' && isSet(t.build); }
 function slotsOf(b) { return b && b.slots && typeof b.slots === 'object' ? b.slots : {}; }
 function bodyOf(b) { return b && Array.isArray(b.body) ? b.body : []; }
 function collectTricks(list, out) {

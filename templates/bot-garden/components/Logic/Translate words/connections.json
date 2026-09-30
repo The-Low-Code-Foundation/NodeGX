@@ -1169,6 +1169,42 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3sBenchBlurb",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3sBenchBlurb"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3sBenchLine",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3sBenchLine"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3sBenchTitle",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3sBenchTitle"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3sGiftBench",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3sGiftBench"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3sStickerBench",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3sStickerBench"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw3sSubBench",
+      "toId": "translatewordsOut",
+      "toProperty": "iw3sSubBench"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw4And",
       "toId": "translatewordsOut",
       "toProperty": "iw4And"

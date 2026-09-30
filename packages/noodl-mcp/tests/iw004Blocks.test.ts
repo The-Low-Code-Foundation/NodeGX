@@ -72,6 +72,12 @@ const round = (p: unknown) => JSON.stringify(T().toEngine(T().toBlockly(p)));
 /** Block List's emitted shape (a stored v4 program): the kit's own normalizer, run on the program. */
 const blockListNode = () => kit.reactNodes.find((n: any) => n.name === 'garden-kit.BlockList');
 const asStored = (p: unknown): Program => JSON.parse(blockListNode().program.emit(p));
+/**
+ * P108 IW-003 (lane S): can Block List hold this program? Its slots are words and numbers (it writes each as a string);
+ * a condition or a chip is an OBJECT slot, which only the Blocks node builds — so a program with one was never a Block
+ * List save, and its "as stored" twin is not a shape any save holds (Block List would write "[object Object]").
+ */
+const blockListHolds = (list: ReadonlyArray<any>): boolean => list.every((b) => Object.values(b.slots ?? {}).every((v) => v === null || typeof v !== 'object') && blockListHolds(b.body ?? []) && blockListHolds(b.else ?? []));
 
 /**
  * The program a band-1 child records (cg002Engine's `unrolled`): repeats unrolled, tricks inlined, primitives only —
@@ -200,6 +206,7 @@ describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', (
         const program = band === 1 ? unrolled(r.referenceProgram) : r.referenceProgram;
         it(`${r.id}, band ${band === 1 ? '7–9' : '10–12'}: the reference program, and the same as a stored v4 save holds it`, () => {
           expect(round(program)).toBe(JSON.stringify(program));
+          if (!blockListHolds(program)) return;
           const stored = asStored(program);
           expect(round(stored)).toBe(JSON.stringify(stored));
         });
@@ -358,6 +365,7 @@ describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', (
         for (const band of [1, 2]) {
           const program = band === 1 ? unrolled(r.referenceProgram) : r.referenceProgram;
           if (through(program) !== JSON.stringify(program)) bad.push(`${r.id}/${band}`);
+          if (!blockListHolds(program)) continue;
           const stored = asStored(program);
           if (through(stored) !== JSON.stringify(stored)) bad.push(`${r.id}/${band}/stored`);
         }

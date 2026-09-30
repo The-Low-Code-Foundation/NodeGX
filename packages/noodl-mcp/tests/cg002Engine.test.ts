@@ -239,8 +239,10 @@ describe('CG-002 — the engine', () => {
       const tricks = new Set(REQUESTS.flatMap((r) => [...r.tricks]));
       expect([...tricks].sort()).toEqual([1, 2, 3, 4, 5, 6, 7]);
       expect(new Set(ids).size).toBe(ids.length);
-      // CG-006: four requests open at band 7–9 (both bands), six at band 10–12 only; IG-006 adds three at 10–12: 4×2×2 + 9×2×1.
-      expect(rows).toHaveLength(34);
+      // CG-006: four requests open at band 7–9 (both bands), the rest at band 10–12 only (IG-006 added three, IW-003 more):
+      // 4×2×2 + the rest×2×1, counted from the list (P108 IW-003 lane S: a new request is two more rows, never a literal).
+      expect(REQUESTS.filter((r) => r.band === 1)).toHaveLength(4);
+      expect(rows).toHaveLength(4 * 2 * 2 + (REQUESTS.length - 4) * 2);
     });
 
     it.each(rows)('%s · %s · band %i', (_id, lang, band, r) => {
@@ -270,7 +272,7 @@ describe('CG-002 — the engine', () => {
     });
 
     it('the goal is data: no request carries a function, and every goal name is one GOAL_SCRIPT knows', () => {
-      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses', 'tulips_watered'];
+      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses', 'tulips_watered', 'job_done'];
       for (const name of known) expect({ name, inScript: GOAL_SCRIPT.includes(`g.name === '${name}'`) }).toEqual({ name, inScript: true });
       for (const r of REQUESTS) {
         expect(JSON.parse(JSON.stringify(r))).toEqual(r);
@@ -1442,13 +1444,15 @@ describe('CG-002 — the engine', () => {
       }
       // The tulips' reference is ten blocks, over MANY_BLOCKS: Perfect outranks "done with many" when it IS the reference.
       expect(refCount(TULIPS())).toBeGreaterThan(MANY_BLOCKS);
-      // The consequence in the world: three tulips watered, the can left with two; four stones laid, the rock gone.
+      // The consequence in the world: three tulips watered, the can left with two.
       const t = runToEnd(TULIPS().referenceProgram, worldOfRequest(TULIPS()));
       expect([t.world.things.filter((x: any) => x.watered).length, t.world.robots[0].can]).toEqual([3, 2]);
+      // P108 IW-003 (lane S): the path as a job — four squares of four stones each are path, both rocks of eight are
+      // used up and STAY (a max: they regrow on the island), nothing lies loose, the hod is empty, Cobble is home.
       const st = runToEnd(STONES().referenceProgram, worldOfRequest(STONES()));
-      expect([st.world.things.filter((x: any) => x.kind === 'stone').length, st.world.things.some((x: any) => x.kind === 'rock'), st.world.robots[0].carry]).toEqual([4, false, []]);
-      // Path-stones starts with an EMPTY basket and a rock of four beside the start.
-      expect([STONES().robotStart.carry ?? [], STONES().things]).toEqual([[], [{ kind: 'rock', x: 2, y: 2, left: 4 }]]);
+      expect([st.world.things.filter((x: any) => x.kind === 'site').map((x: any) => [x.have, x.stage]), st.world.things.filter((x: any) => x.kind === 'rock').map((x: any) => x.left), st.world.things.filter((x: any) => x.kind === 'stone').length, st.world.robots[0].carry, [st.world.robots[0].x, st.world.robots[0].y]]).toEqual([[[4, 'path'], [4, 'path'], [4, 'path'], [4, 'path']], [0, 0], 0, [], [2, 3]]);
+      // Path-stones starts with an EMPTY hod, four squares of dirt and two rocks of eight.
+      expect([STONES().robotStart.carry ?? [], STONES().things.map((x) => [x.kind, x.have ?? x.left])]).toEqual([[], [['site', 0], ['site', 0], ['site', 0], ['site', 0], ['rock', 8], ['rock', 8]]]);
       expect([TULIPS().robotStart.can, TULIPS().robotStart.canMax]).toEqual([0, 3]);
     });
 
@@ -1456,9 +1460,11 @@ describe('CG-002 — the engine', () => {
       const pal = (band: number, allowed: ReadonlyArray<string>) => runScript(PALETTE_SCRIPT, { band, words: WORD_ROWS, lang: 'en', allowed: [...allowed] }).palette.map((p: any) => p.id);
       expect(pal(1, TULIPS().palette)).toContain('fill');
       expect(pal(2, TULIPS().palette)).toContain('fill');
-      expect(pal(2, STONES().palette)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'repeat']);
+      // P108 IW-003 (lane S): + go to nearest (the rocks lie somewhere new each day).
+      expect(pal(2, STONES().palette)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'repeat', 'go_nearest']);
       // rock-flower (IG-006) places rocks as the things Olive is asked about; its palette has no pick, so none is mined.
-      const ROCKS_ON_PURPOSE = ['path-stones', 'rock-flower'];
+      // P108 IW-003 (lane S): Sami's bench is built from rocks too.
+      const ROCKS_ON_PURPOSE = ['path-stones', 'rock-flower', 'sami-bench'];
       expect(REQUESTS.find((r) => r.id === 'rock-flower')?.palette).not.toContain('pick');
       for (const r of REQUESTS) if (!ROCKS_ON_PURPOSE.includes(r.id)) expect({ id: r.id, rocks: r.things.filter((x) => x.kind === 'rock').length }).toEqual({ id: r.id, rocks: 0 });
     });
@@ -1469,6 +1475,9 @@ describe('CG-002 — the engine', () => {
     const repeatBodies = (list: ReadonlyArray<Block>, out: string[] = []): string[] => {
       for (const b of list) {
         if (b.t === 'repeat') out.push(JSON.stringify(shape(b.body ?? [])));
+        // P108 IW-003 (lane S): a recording sees an inner repeat unrolled, so a whole trip (path-stones: go, four picks, go,
+        // four puts) folded is the outer repeat's body as recorded.
+        if (b.t === 'repeat') out.push(JSON.stringify(shape(unrolled(b.body ?? []))));
         if (b.body) repeatBodies(b.body, out);
       }
       return out;
@@ -1565,7 +1574,8 @@ describe('CG-002 — the engine', () => {
 
     it('🔴 AC1: band 7–9 × tulips × Pip is fwd left right water fill; × path-stones × Cobble is fwd left right pick put; Cobble on the tulips is refused', () => {
       expect(pal(1, req('tulips-three'), spec('pip')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill']);
-      expect(pal(1, req('path-stones'), spec('cobble')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put']);
+      // P108 IW-003 (lane S): + go to nearest (band 7–9 walks to a thing, D9).
+      expect(pal(1, req('path-stones'), spec('cobble')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'go_nearest']);
       const refused = pal(1, req('tulips-three'), spec('cobble'));
       expect([refused.refused, refused.count, refused.palette]).toEqual([true, 0, []]);
       // Known-firing beside the refusal: the same robot on its own job is not refused; a kind name works as a robot too.
@@ -1573,7 +1583,8 @@ describe('CG-002 — the engine', () => {
       expect(pal(2, req('tulips-three'), spec('pip')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill', 'repeat']);
       // The robot narrows the request. P108 IW-003 (s3 base, D9): every robot has hands now, so Pip on the stones' list
       // keeps pick and put; the narrowing is shown by Olive's blocks below (and water/fill/say, each a robot's own).
-      expect(pal(2, req('path-stones'), spec('pip'), { needs: '' }).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'repeat']);
+      // P108 IW-003 (lane S): + go to nearest (every robot walks to a thing, D9).
+      expect(pal(2, req('path-stones'), spec('pip'), { needs: '' }).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'repeat', 'go_nearest']);
       // Echo carries Olive's blocks as a PALETTE choice: Pip (read only) on the flowers loses is it a…?; Echo keeps it.
       const olive = (robot: string) => pal(2, req('rock-flower'), spec(robot), { needs: '' }).palette.map((p: any) => p.id).filter((id: string) => id.startsWith('olive:'));
       expect([olive('pip'), olive('echo')]).toEqual([[], ['olive:is-it-a']]);
@@ -1789,8 +1800,18 @@ describe('IW-002 (P108 s1) — the job model: a target takes exactly its need, a
     expect([eng('blocked', eng('worldOf', { map: ['GL'] }), 1, 0), eng('blocked', eng('worldOf', { map: ['GL'] }), 2, 0), eng('blocked', eng('worldOf', { map: ['GL'] }), 0, 0)]).toEqual([true, true, false]);
     for (const k of ['sayFull', 'sayNoCan', 'sayHome']) expect({ k, en: !!WORDS[k]?.en, fr: !!WORDS[k]?.fr, differ: WORDS[k]?.en !== WORDS[k]?.fr }).toEqual({ k, en: true, fr: true, differ: true });
     // The wear numbers are longer than the longest reference run: a job that finishes is seen done before it wears.
-    const longest = Math.max(...REQUESTS.map((r) => runToEnd(r.referenceProgram, worldOfRequest(r)).ticks));
-    for (const k of ['tulip', 'site', 'bowl', 'basket', 'store'] as const) expect({ k, longer: WEAR[k] > longest }).toEqual({ k, longer: true });
+    // P108 IW-003 (lane S): per kind, over the requests whose job TARGETS that kind (a tulip never waits on the path's run).
+    const runs = REQUESTS.map((r) => {
+      const w = worldOfRequest(r);
+      const kinds = new Set((r.job?.targets ?? []).map((id) => w.things.find((x: any) => (Array.isArray(id) ? x.x === id[0] && x.y === id[1] : String(x.id) === String(id)))?.kind));
+      return { kinds, ticks: runToEnd(r.referenceProgram, w).ticks };
+    });
+    for (const k of ['tulip', 'site', 'bowl', 'basket', 'store'] as const) {
+      const longest = Math.max(0, ...runs.filter((x) => x.kinds.has(k)).map((x) => x.ticks));
+      expect({ k, longer: WEAR[k] > longest }).toEqual({ k, longer: true });
+    }
+    // Known-firing beside it: the path's own run is longer than a tulip's period (the rule is per target, not global).
+    expect(Math.max(...runs.filter((x) => x.kinds.has('site')).map((x) => x.ticks))).toBeGreaterThan(WEAR.tulip);
   });
 
   it.each(ROWS)('🔴 AC1 a tulip takes exactly its need (3 drinks), a fourth pour is refused and says so — %s · band %i', (lang, band) => {
@@ -2047,8 +2068,11 @@ describe('IW-002 (P108 s1) — the job model: a target takes exactly its need, a
       // No seed given: one is picked (a uint32), and the layout is one the seed in the world replays.
       const picked = runScript(START_WORLD_SCRIPT, { requests: [REQ], requestId: REQ.id, nonce: 0 });
       expect(Number.isInteger(picked.world.seed) && picked.world.seed >= 0 && picked.world.seed < 2 ** 32).toBe(true);
-      // Every request today: no seed, no job on its world (the 13 start exactly as before).
-      for (const q of REQUESTS) {
+      // Every request with no job and no layout: no seed, no job on its world (they start exactly as before). P108 IW-003
+      // (lane S): the missions on the job model carry theirs — known-firing beside the absence.
+      expect(REQUESTS.filter((x) => x.job).length).toBeGreaterThan(0);
+      for (const q of REQUESTS.filter((x) => x.job)) expect({ id: q.id, job: runScript(START_WORLD_SCRIPT, { requests: JSON.parse(JSON.stringify(REQUESTS)), requestId: q.id, nonce: 0, seed: 9 }).world.job }).toEqual({ id: q.id, job: JSON.parse(JSON.stringify(q.job)) });
+      for (const q of REQUESTS.filter((x) => !x.job && !x.seeded)) {
         const out = runScript(START_WORLD_SCRIPT, { requests: JSON.parse(JSON.stringify(REQUESTS)), requestId: q.id, nonce: 0, seed: 9 }).world;
         expect({ id: q.id, seed: out.seed, job: out.job, map: out.map }).toEqual({ id: q.id, seed: undefined, job: undefined, map: q.map });
       }
@@ -2152,8 +2176,8 @@ describe('IW-005 (P108 s2) — seek and regrow: go to nearest by path length, re
       for (const p of pal.filter((x: any) => KEY[x.id])) expect({ band, id: p.id, label: p.label, caption: p.caption }).toEqual({ band, id: p.id, label: WORDS['b' + KEY[p.id]].en, caption: WORDS['c' + KEY[p.id]].en });
     }
     expect({ en: !!WORDS.sayNone?.en, fr: !!WORDS.sayNone?.fr, differ: WORDS.sayNone?.en !== WORDS.sayNone?.fr }).toEqual({ en: true, fr: true, differ: true });
-    // Every reference program still uses only the sixteen (IW-003 moves the missions).
-    for (const r of REQUESTS) for (const t of typesIn(r.referenceProgram)) expect({ id: r.id, t, old: BLOCK_TYPES.indexOf(t as BlockType) < 16 }).toEqual({ id: r.id, t, old: true });
+    // Every reference program uses only the engine's blocks and Olive's (P108 IW-003 moved the missions onto the walks).
+    for (const r of REQUESTS) for (const t of typesIn(r.referenceProgram)) expect({ id: r.id, t, known: BLOCK_TYPES.includes(t as BlockType) || t.startsWith('olive:') }).toEqual({ id: r.id, t, known: true });
   });
 
   describe('AC1 — go to nearest: the true nearest by PATH length; ties the same way every time; none when there is none; a blocked target skipped', () => {
@@ -2642,6 +2666,115 @@ describe('IW-005 (P108 s2) — seek and regrow: go to nearest by path length, re
       const world = { map: G(3, 1), things: [], robots: [{ id: 'pip', x: 1, y: 0, d: 1 }] };
       expect(walk(api(m), prog, world).w.robots[0].x).toBe(1);
       expect(walk(E, prog, world).w.robots[0].x).toBe(2);
+    });
+  });
+});
+
+// ── P108 IW-003 (lane S): Sami's stones — go to nearest skips what is not worth the walk; the bench (a build site) ───────
+describe('IW-003 lane S (P108 s3) — go to nearest skips a used-up rock and a full square; the bench is a build that blocks and never reads as path', () => {
+  const eng = <T = any>(name: string, ...args: unknown[]) => helper<T>(ENGINE, name, ...args);
+  const api = (text: string) => new Function(`${text}; return { newRun: newRun, step: step, apply: apply, worldOf: worldOf, blocked: blocked, tileAt: tileAt };`)() as any;
+  const E = api(ENGINE);
+  const mutate = (from: string, to: string) => {
+    if (ENGINE.split(from).length !== 2) throw new Error(`the arm's anchor must occur exactly once: ${from}`);
+    return ENGINE.replace(from, to);
+  };
+  const walk = (A: any, program: Block[], world: any, cap = 400) => {
+    let run = A.newRun(program, 'pip', 'en');
+    let w = A.worldOf(world);
+    const deltas: any[] = [];
+    for (let i = 0; i < cap && !run.done; i++) {
+      const st = A.step(run, w, null);
+      run = st.run;
+      w = A.apply(w, st.delta);
+      deltas.push(st.delta);
+    }
+    return { run, w, deltas };
+  };
+  const seek = (kind: string) => ({ id: 1, t: 'go_nearest', slots: { kind } }) as Block;
+  const faces = (r: any) => [r.x + [0, 1, 0, -1][r.d], r.y + [-1, 0, 1, 0][r.d]];
+  /** Two rocks on a row of grass: the near one (2 steps) used up and staying (a max), the far one with stones. */
+  const QUARRY = (nearLeft: number) => ({ map: ['GGGGGGGG', 'GGGGGGGG'], things: [{ kind: 'rock', id: 'near', x: 2, y: 0, left: nearLeft, max: 4 }, { kind: 'rock', id: 'far', x: 6, y: 0, left: 3, max: 4 }], robots: [{ id: 'pip', x: 0, y: 0, d: 1 }] });
+  /** A row of path squares: the first full (path), the second half laid. */
+  const SQUARES = () => ({ map: ['GGGGGG', 'GGGGGG'], things: [{ kind: 'site', id: 'a', x: 2, y: 0, have: 4, need: 4 }, { kind: 'site', id: 'b', x: 4, y: 0, have: 2, need: 4 }], robots: [{ id: 'pip', x: 0, y: 1, d: 1 }] });
+
+  it('🔴 go to nearest rock walks past a used-up rock (left 0, kept by its max) to one with stones; known-firing: with stones, the near one', () => {
+    const used = walk(E, [seek('rock')], QUARRY(0));
+    expect([used.deltas[0].reserve.thing, faces(used.w.robots[0]), used.run.bumps]).toEqual(['far', [6, 0], 0]);
+    const full = walk(E, [seek('rock')], QUARRY(2));
+    expect([full.deltas[0].reserve.thing, faces(full.w.robots[0])]).toEqual(['near', [2, 0]]);
+    // Every rock used up: nothing to find — none + sayNone, the block ends, no walk.
+    const none = walk(E, [seek('rock')], { ...QUARRY(0), things: QUARRY(0).things.map((t) => ({ ...t, left: 0 })) });
+    expect([none.deltas[0].none, none.deltas[0].sayKey, none.w.robots[0].x]).toEqual([{ id: 'pip', kind: 'rock' }, 'sayNone', 0]);
+  });
+
+  it('🔴 go to nearest site walks past a square that is path already to the next one that is not; a full tulip is passed the same way', () => {
+    const w = walk(E, [seek('site')], SQUARES());
+    expect([w.deltas[0].reserve.thing, faces(w.w.robots[0])]).toEqual(['b', [4, 0]]);
+    // Known-firing: the same world with the first square still dirt stops at it.
+    const dirt = SQUARES();
+    dirt.things[0].have = 0;
+    expect(walk(E, [seek('site')], dirt).deltas[0].reserve.thing).toBe('a');
+    const tulips = { map: ['GGGGG', 'GGGGG'], things: [{ kind: 'tulip', id: 'drunk', x: 1, y: 0, have: 3, need: 3 }, { kind: 'tulip', id: 'dry', x: 3, y: 0, have: 0, need: 3 }], robots: [{ id: 'pip', x: 0, y: 0, d: 2 }] };
+    expect(walk(E, [seek('tulip')], tulips).deltas[0].reserve.thing).toBe('dry');
+  });
+
+  it('🔴 the bench: a site with build bench rises by the stone, never reads as path when built, and blocks at every stage; a path square never blocks', () => {
+    for (const have of [0, 4, 8]) {
+      const w = E.worldOf({ map: ['GGG'], things: [{ kind: 'site', id: 'bench', x: 1, y: 0, have, need: 8, build: 'bench' }], robots: [] });
+      expect({ have, tile: E.tileAt(w, 1, 0), blocks: E.blocked(w, 1, 0) }).toEqual({ have, tile: 'G', blocks: true });
+      const p = E.worldOf({ map: ['GGG'], things: [{ kind: 'site', id: 's', x: 1, y: 0, have: have / 2, need: 4 }], robots: [] });
+      expect({ have: have / 2, tile: E.tileAt(p, 1, 0), blocks: E.blocked(p, 1, 0) }).toEqual({ have: have / 2, tile: have === 8 ? 'P' : 'G', blocks: false });
+    }
+    // Put fills it one stone at a time, to its need (the meter), and a ninth is refused (the stone stays carried).
+    const bench = { map: ['GGG'], things: [{ kind: 'site', id: 'bench', x: 1, y: 0, have: 7, need: 8, build: 'bench' }], robots: [{ id: 'pip', x: 0, y: 0, d: 1, carry: ['stone', 'stone'] }] };
+    const put = walk(E, [{ id: 1, t: 'put' } as Block, { id: 2, t: 'put' } as Block], bench);
+    expect([put.w.things[0].have, put.deltas[0].meter.have, put.deltas[1].full, put.w.robots[0].carry]).toEqual([8, 8, { id: 'bench', x: 1, y: 0 }, ['stone']]);
+  });
+
+  it('🔴 Sami’s bench is built on every seed: 0 → 4 → 8 stones in two trips, Cobble never on the bench’s tile, then home; EN and FR', () => {
+    const r = REQUESTS.find((x) => x.id === 'sami-bench')!;
+    expect([r.plot, r.islander, r.band, r.things[0]]).toEqual([{ x: 46, y: 8 }, 'sami', 2, { kind: 'site', id: 'bench', x: 4, y: 2, have: 0, need: 8, item: 'stone', build: 'bench' }]);
+    expect(REQUESTS[REQUESTS.length - 1 - 3].id).toBe('sami-bench');
+    for (const seed of [1, 2, 3]) for (const lang of ['en', 'fr']) {
+      const end = runToEnd(r.referenceProgram, worldOfRequest(r, 'pip', seed), 'pip', lang);
+      const meters = end.deltas.filter((d) => d.meter && d.meter.id === 'bench').map((d) => d.meter.have);
+      const onBench = end.deltas.some((d) => d.move && d.move.x === 4 && d.move.y === 2);
+      expect({ seed, lang, done: end.done, meters, onBench, bumps: end.run.bumps, home: [end.world.robots[0].x, end.world.robots[0].y, end.world.robots[0].d], sayHome: end.deltas.some((d) => d.sayKey === 'sayHome') }).toEqual({ seed, lang, done: true, meters: [1, 2, 3, 4, 5, 6, 7, 8], onBench: false, bumps: 0, home: [1, 3, 1], sayHome: true });
+    }
+  });
+
+  it('🔴 band 10–12’s other path: repeat 4 { go to nearest rock, until [hod] is full { pick }, go to nearest site, until [hod] is empty { put } } builds the path on every seed', () => {
+    const r = REQUESTS.find((x) => x.id === 'path-stones')!;
+    const is = (state: string) => ({ op: 'is', thing: { ref: 'held' }, state });
+    const prog: Block[] = [{ id: 1, t: 'repeat', n: 4, body: [{ id: 2, t: 'go_nearest', slots: { kind: 'rock' } }, { id: 3, t: 'until', slots: { cond: is('full') }, body: [{ id: 4, t: 'pick' }] }, { id: 5, t: 'go_nearest', slots: { kind: 'site' } }, { id: 6, t: 'until', slots: { cond: is('empty') }, body: [{ id: 7, t: 'put' }] }] }] as any;
+    for (const seed of [1, 2, 3]) {
+      const end = runToEnd(prog, worldOfRequest(r, 'pip', seed));
+      const g = runScript(GOAL_SCRIPT, { world: end.world, run: end.run, program: prog, goal: r.goal });
+      expect({ seed, met: g.met, bumps: end.run.bumps, ticks: end.ticks < WEAR.site }).toEqual({ seed, met: true, bumps: 0, ticks: true });
+    }
+  });
+
+  describe('arms: each lane S rule mutated in the engine text, and the row that kills it', () => {
+    it('a used-up rock not skipped → go to nearest rock walks to the near rock with nothing in it', () => {
+      const A = api(mutate("if (t.kind === 'rock') return !(Number(t.left) > 0);", "if (t.kind === 'rock') return false;"));
+      expect(walk(A, [seek('rock')], QUARRY(0)).deltas[0].reserve.thing).toBe('near');
+      expect(walk(E, [seek('rock')], QUARRY(0)).deltas[0].reserve.thing).toBe('far');
+    });
+    it('a full square not skipped → go to nearest site stops at the square that is path already', () => {
+      const A = api(mutate("if (JOB_KINDS[t.kind] === 'target') return isFull(t);", "if (JOB_KINDS[t.kind] === 'target') return false;"));
+      expect(walk(A, [seek('site')], SQUARES()).deltas[0].reserve.thing).toBe('a');
+      expect(walk(E, [seek('site')], SQUARES()).deltas[0].reserve.thing).toBe('b');
+    });
+    it('the bench reading as path when built → its tile is P', () => {
+      const A = api(mutate('function pathSite(t) { return !!t && t.kind === \'site\' && !isSet(t.build); }', 'function pathSite(t) { return !!t && t.kind === \'site\'; }'));
+      const built = { map: ['GGG'], things: [{ kind: 'site', id: 'bench', x: 1, y: 0, have: 8, need: 8, build: 'bench' }], robots: [] };
+      expect([A.tileAt(A.worldOf(built), 1, 0), E.tileAt(E.worldOf(built), 1, 0)]).toEqual(['P', 'G']);
+    });
+    it('the bench not blocking → a robot walks onto it', () => {
+      const A = api(mutate('if (BLOCKING_THINGS[th[i].kind] || buildSite(th[i])) return true;', 'if (BLOCKING_THINGS[th[i].kind]) return true;'));
+      const w = { map: ['GGG'], things: [{ kind: 'site', id: 'bench', x: 1, y: 0, have: 3, need: 8, build: 'bench' }], robots: [{ id: 'pip', x: 0, y: 0, d: 1 }] };
+      expect([walk(A, [{ id: 1, t: 'fwd' } as Block], w).w.robots[0].x, walk(E, [{ id: 1, t: 'fwd' } as Block], w).w.robots[0].x]).toEqual([1, 0]);
     });
   });
 });
