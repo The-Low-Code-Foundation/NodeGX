@@ -550,8 +550,10 @@ describe('CG-006 — the requests', () => {
       for (const r of REQUESTS) model = runScript(COMPLETE, { model, profileId: model.profiles[0].id, requestId: r.id, tricks: r.tricks, reward: r.reward }).model;
       const p = model.profiles[0];
       expect([...p.hats].sort()).toEqual(REQUESTS.filter((r) => r.reward.kind === 'hat').map((r) => r.reward.id).sort());
-      // P106 IG-005: the upgrades (items) the catalogue gives after their requests are on the sticker page too.
-      expect([...p.stickers].sort()).toEqual([...REQUESTS.filter((r) => r.reward.kind !== 'hat').map((r) => r.reward.id), ...UPGRADES.map((u) => u.id)].sort());
+      // P106 IG-005: the upgrades (items) the catalogue gave after their requests were on the sticker page too. P108 IW-006
+      // (lane H): they moved to the shop — a first win gives none now; the rewards (hats, stickers) stay the islanders' gifts.
+      expect([...p.stickers].sort()).toEqual([...REQUESTS.filter((r) => r.reward.kind !== 'hat').map((r) => r.reward.id)].sort());
+      for (const u of UPGRADES) expect(p.stickers).not.toContain(u.id);
       expect(model.island.done).toHaveLength(REQUESTS.length);
     });
   });

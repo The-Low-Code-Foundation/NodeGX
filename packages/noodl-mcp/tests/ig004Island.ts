@@ -119,7 +119,8 @@ function islStepJob(plot, cur) {
 function islStepPlot(plot, cur) {
   // P108 IW-003 (lane B): a stale plot (teach again) is not stepped: its robot waits at home, where it started.
   if (plot.stale) return cur;
-  if (plot.job) return islStepJob(plot, cur);
+  // P108 IW-006 (lane H): a job with a shop helper riding on it steps with the helper on (islHelped).
+  if (plot.job) return islHelped(plot, cur);
   if (cur.hold > 0) {
     if (cur.hold > 1) return { run: cur.run, things: cur.things, robot: cur.robot, spent: cur.spent, hold: cur.hold - 1, lap: cur.lap };
     var st = islClone(plot.start);
@@ -189,6 +190,32 @@ function islStale(req, program, laid, robot) {
   }
   if (!Array.isArray(req.referenceProgram) || !wins(req.referenceProgram)) return false;
   return !wins(program);
+}
+// ── P108 IW-006 (lane H): a shop helper riding on a job (AC4) ──
+/**
+ * One tick of a job plot with a helper riding on it (the live state's helper: selfcan or barrow — the rain cloud never
+ * rides, it is spent the moment it is used). The helper is put on the job's world before the step (helperOn: the can
+ * full, eight carried) and again after it, so the drawn can never shows a pour spent; the tick the job crosses its finish
+ * line (the robot turns to wait at home) it is gone: the state no longer carries it and the robot carries its own again.
+ */
+function islHelped(plot, cur) {
+  var h = cur && typeof cur.helper === 'string' ? cur.helper : '';
+  if (!h) return islStepJob(plot, cur);
+  var c = {};
+  for (var k in cur) c[k] = cur[k];
+  c.robot = islClone(cur.robot);
+  c.things = islClone(cur.things);
+  helperOn({ things: c.things, robots: [c.robot] }, h);
+  var out = islStepJob(plot, c);
+  if (out.phase === 'wait') {
+    var own = plot.start && plot.start.robot ? plot.start.robot.basket : undefined;
+    if (h === 'barrow') { if (own === undefined) delete out.robot.basket; else out.robot.basket = own; }
+    out.helperDone = h;
+    return out;
+  }
+  helperOn({ things: out.things, robots: [out.robot] }, h);
+  out.helper = h;
+  return out;
 }
 `;
 
@@ -306,9 +333,15 @@ for (var m = 0; m < mine.length; m++) {
   home.push(hr);
   homeN++;
 }
+// P108 IW-006 (lane H): a shop helper riding on a job plot (the save's live.helper) goes on riding on the island built from it.
+for (var hp = 0; hp < plots.length; hp++) { var hsv = saved[plots[hp].id]; if (plots[hp].job && live[plots[hp].id] && hsv && hsv.live && typeof hsv.live.helper === 'string' && hsv.live.helper) live[plots[hp].id].helper = hsv.live.helper; }
 // The build's name: what it was built from. A tick handed a state from an OLDER build (its Set Variable landed after
 // the rebuild's) starts again from this one — so a robot brought home never walks back to its plot.
-var build = islHash(JSON.stringify([saved, done, band, mine, pins.map(function (x) { return x ? [x.id, x.requestId, x.isOpen] : null; }), list.map(function (r) { return [r.id, r.plot, r.band]; })]));
+// P108 IW-006 (lane H): a plot's live job is NOT part of the build (brief §4.2 🔴 — lane E's rule; at the merge E's line
+// stands): a helper used writes a plot's live, and a rebuild would drop the island it was used on.
+var buildPlots = {};
+for (var bk in saved) { buildPlots[bk] = {}; for (var bf in saved[bk]) if (bf !== 'live') buildPlots[bk][bf] = saved[bk][bf]; }
+var build = islHash(JSON.stringify([buildPlots, done, band, mine, pins.map(function (x) { return x ? [x.id, x.requestId, x.isOpen] : null; }), list.map(function (r) { return [r.id, r.plot, r.band]; })]));
 var state = { v: 1, build: build, w: W, h: H, map: rows.map(function (r) { return r.join(''); }), plots: plots, still: still, deco: deco, home: home, live: live, tick: 0 };
 // P108 IW-003 (lane M, IW-002 AC3): the Island page opened again on the SAME island (nothing she saved changed: the same
 // build) goes on from the island it left — each plot's live state as the last tick left it (meters, robots, laps, the

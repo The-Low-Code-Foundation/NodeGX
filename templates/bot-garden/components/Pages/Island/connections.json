@@ -422,6 +422,42 @@
       "fromProperty": "done",
       "toId": "isGoWorkshop",
       "toProperty": "navigate"
+    },
+    {
+      "fromId": "isStore",
+      "fromProperty": "model",
+      "toId": "isShop",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isWords",
+      "fromProperty": "words",
+      "toId": "isShop",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "isFam",
+      "fromProperty": "lang",
+      "toId": "isShop",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "isRequests",
+      "fromProperty": "requests",
+      "toId": "isShop",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "isShop",
+      "fromProperty": "model",
+      "toId": "isStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "isShop",
+      "fromProperty": "write",
+      "toId": "isStore",
+      "toProperty": "write"
     }
   ]
 }

@@ -412,6 +412,18 @@
       "toProperty": "botName"
     },
     {
+      "fromId": "plIn",
+      "fromProperty": "robot",
+      "toId": "plBrain",
+      "toProperty": "robot"
+    },
+    {
+      "fromId": "plBrain",
+      "fromProperty": "size",
+      "toId": "plBlocks",
+      "toProperty": "brainSize"
+    },
+    {
       "fromId": "plBlocks",
       "fromProperty": "onPicking",
       "toId": "plPickThing",

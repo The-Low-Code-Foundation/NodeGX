@@ -76,6 +76,8 @@ import { FAMILY_SCRIPT, ISLAND_PINS_SCRIPT, LOOK_ROWS_SCRIPT, REQUEST_CARD_SCRIP
 // P106 IG-005: robots for the job.
 import { GIFT_LINE_SCRIPT, JOB_ROBOT_SCRIPT, ROBOT_CARDS_SCRIPT } from './cg003Scripts';
 import { CHOOSE_HINT_SCRIPT, HINT_LINE_SCRIPT, PREDICT_END_SCRIPT } from './cg002Scripts';
+// P108 IW-006 (lane H): the upgrades are bought now (IG-005's rows buy them with the one purchase rule).
+import { SAVE_HELPERS, helper } from './cg002Scripts';
 import { HINTS, HINT_KEYS, OLIVE_RUNGS } from './cg002Content';
 import { PALETTE_RUNG_IDS } from './cg005Olive';
 import { ISLAND_PINS, REQUEST_SUBS } from './cg003Content';
@@ -2031,6 +2033,14 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     const kid = (lang = 'en') => run(ADD_PROFILE_SCRIPT, { model: null, name: 'Ada', band: 2, lang, robotName: 'Pip' }).model;
     const win = (model: any, id: string) => run(COMPLETE_REQUEST_SCRIPT, { model, requestId: id, tricks: [], reward: null }).model;
     const robotsOf = (model: any) => run(FAMILY_SCRIPT, { model }).robots;
+    // P108 IW-006 (lane H): the upgrades moved to the shop — bought with shells (buyItem, the purchase card's rule), no
+    // longer given by a first win; they work exactly as the gifts did.
+    const bought = (model: any, ...ids: string[]) => {
+      const p = model.profiles.find((x: any) => x.id === model.island.activeId);
+      helper(SAVE_HELPERS, 'earnShells', p, 100);
+      for (const id of ids) expect(helper<any>(SAVE_HELPERS, 'buyItem', p, id).ok).toBe(true);
+      return model;
+    };
 
     it('🔴 Job robot: the stones need Cobble — hers once Sami lent him (his name, look, hod, id); not lent yet, the catalogue’s Cobble, not owned; free play is Pip with no palette filter', () => {
       const lent = robotsOf(win(kid(), 'path-postbox'));
@@ -2042,7 +2052,7 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       const free = run(JOB_ROBOT_SCRIPT, { requests: REQ_ROWS, requestId: 'free', robots: lent, lang: 'en', stepMs: TICK_MS });
       expect([free.needs, free.robotId, free.botName, free.paletteRobot]).toEqual(['pip', 'r1', 'Pip', null]);
       // Biscuit's boots: Pocket's steps × 0.7.
-      let m = win(win(win(kid(), 'path-postbox'), 'bowl-if'), 'wall-until');
+      let m = bought(win(win(win(kid(), 'path-postbox'), 'bowl-if'), 'wall-until'), 'boots');
       expect(run(JOB_ROBOT_SCRIPT, { requests: REQ_ROWS, requestId: 'eggs-count', robots: robotsOf(m), lang: 'en', stepMs: TICK_MS }).stepMs).toBe(Math.round(TICK_MS * 0.7));
       // The key changes with the look, not with an upgrade (the world is not reset under the win card).
       const k1 = run(JOB_ROBOT_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', robots: robotsOf(m), lang: 'en' }).robotKey;
@@ -2052,7 +2062,7 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
 
     it('🔴 Start world puts the job robot on the world: its can (6 with can+), its basket (8 with basket+), its look for Draw world; and says which robot the request needs', () => {
       let m = win(kid(), 'path-postbox');
-      m = win(win(m, 'rows-trick'), 'path-stones');
+      m = bought(win(win(m, 'rows-trick'), 'path-stones'), 'can+', 'basket+');
       const rows = robotsOf(m);
       const pip = rows.find((r: any) => r.kind === 'pip');
       const cobble = rows.find((r: any) => r.kind === 'cobble');

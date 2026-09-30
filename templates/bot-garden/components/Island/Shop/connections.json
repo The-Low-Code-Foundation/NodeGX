@@ -1,0 +1,601 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f43f5377-3117-5464-8a0b-e31e84f6cd07",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "shIn",
+      "fromProperty": "words",
+      "toId": "shT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "lang",
+      "toId": "shT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "iw6hTitle",
+      "toId": "shTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "iw6hNameL",
+      "toId": "shNameL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "iw6hWhich",
+      "toId": "shWhichL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "iw6hUseOn",
+      "toId": "shUseL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "iw6hBuy",
+      "toId": "shBuy",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "iw6hUse",
+      "toId": "shUse",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "shT",
+      "fromProperty": "iw6hNotNow",
+      "toId": "shNotNow",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "model",
+      "toId": "shRows",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "words",
+      "toId": "shRows",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "lang",
+      "toId": "shRows",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "shTabVar",
+      "fromProperty": "value",
+      "toId": "shRows",
+      "toProperty": "tab"
+    },
+    {
+      "fromId": "shRows",
+      "fromProperty": "btnText",
+      "toId": "shOpen",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "shRows",
+      "fromProperty": "balText",
+      "toId": "shBal",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shRows",
+      "fromProperty": "tabs",
+      "toId": "shTabEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "shRows",
+      "fromProperty": "items",
+      "toId": "shItemEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "shRows",
+      "fromProperty": "showItems",
+      "toId": "shItems",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shRows",
+      "fromProperty": "later",
+      "toId": "shLater",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shRows",
+      "fromProperty": "showLater",
+      "toId": "shLater",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shOpen",
+      "fromProperty": "onClick",
+      "toId": "shOpenState",
+      "toProperty": "to-open"
+    },
+    {
+      "fromId": "shOpen",
+      "fromProperty": "onClick",
+      "toId": "shClearItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shClose",
+      "fromProperty": "onClick",
+      "toId": "shOpenState",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "shOpenState",
+      "fromProperty": "open",
+      "toId": "shSheet",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shTabEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "shSetTab",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "shTabEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "shSetTab",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shTabEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "shClearItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shItemEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "shSetItem",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "shItemEach",
+      "fromProperty": "itemOutputSignal-chosen",
+      "toId": "shSetItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shItemEach",
+      "fromProperty": "itemOutputSignal-chosen",
+      "toId": "shClearBot",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shItemEach",
+      "fromProperty": "itemOutputSignal-chosen",
+      "toId": "shClearPlot",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shItemEach",
+      "fromProperty": "itemOutputSignal-chosen",
+      "toId": "shClearBought",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shItemEach",
+      "fromProperty": "itemOutputSignal-chosen",
+      "toId": "shClearUsed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shItemEach",
+      "fromProperty": "itemOutputSignal-chosen",
+      "toId": "shName",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "shNotNow",
+      "fromProperty": "onClick",
+      "toId": "shClearItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "model",
+      "toId": "shCardFn",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "words",
+      "toId": "shCardFn",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "lang",
+      "toId": "shCardFn",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "requests",
+      "toId": "shCardFn",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "shItemVar",
+      "fromProperty": "value",
+      "toId": "shCardFn",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "shBotVar",
+      "fromProperty": "value",
+      "toId": "shCardFn",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "shPlotVar",
+      "fromProperty": "value",
+      "toId": "shCardFn",
+      "toProperty": "plotId"
+    },
+    {
+      "fromId": "shBoughtVar",
+      "fromProperty": "value",
+      "toId": "shCardFn",
+      "toProperty": "bought"
+    },
+    {
+      "fromId": "shUsedVar",
+      "fromProperty": "value",
+      "toId": "shCardFn",
+      "toProperty": "used"
+    },
+    {
+      "fromId": "shIsleVar",
+      "fromProperty": "value",
+      "toId": "shCardFn",
+      "toProperty": "state"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showCard",
+      "toId": "shCard",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "icon",
+      "toId": "shCPic",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "name",
+      "toId": "shCName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "line",
+      "toId": "shCLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showFigures",
+      "toId": "shFigs",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "have",
+      "toId": "shHave",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "cost",
+      "toId": "shCost",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "left",
+      "toId": "shLeft",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showLeft",
+      "toId": "shLeft",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "short",
+      "toId": "shShort",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showShort",
+      "toId": "shShort",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "done",
+      "toId": "shDone",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showDone",
+      "toId": "shDone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "none",
+      "toId": "shNone",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showNone",
+      "toId": "shNone",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showName",
+      "toId": "shNameL",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showName",
+      "toId": "shName",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "namePlaceholder",
+      "toId": "shName",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showRobots",
+      "toId": "shWhichL",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showRobots",
+      "toId": "shBots",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "robots",
+      "toId": "shBotEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "shBotEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "shSetBot",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "shBotEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "shSetBot",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showUse",
+      "toId": "shUseL",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "showUse",
+      "toId": "shPlots",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "plots",
+      "toId": "shPlotEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "shPlotEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "shSetPlot",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "shPlotEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "shSetPlot",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "canBuy",
+      "toId": "shBuy",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "canUse",
+      "toId": "shUse",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "model",
+      "toId": "shBuyFn",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "itemId",
+      "toId": "shBuyFn",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "robotId",
+      "toId": "shBuyFn",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "shName",
+      "fromProperty": "onTextChanged",
+      "toId": "shBuyFn",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "shBuy",
+      "fromProperty": "onClick",
+      "toId": "shBuyFn",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "shBuyFn",
+      "fromProperty": "bought",
+      "toId": "shSetBought",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "shBuyFn",
+      "fromProperty": "ran",
+      "toId": "shSetBought",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shBuyFn",
+      "fromProperty": "model",
+      "toId": "shOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "shBuyFn",
+      "fromProperty": "ok",
+      "toId": "shBuyOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "shBuyFn",
+      "fromProperty": "ran",
+      "toId": "shBuyOk",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "shBuyOk",
+      "fromProperty": "ontrue",
+      "toId": "shOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "shIn",
+      "fromProperty": "model",
+      "toId": "shUseFn",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "itemId",
+      "toId": "shUseFn",
+      "toProperty": "itemId"
+    },
+    {
+      "fromId": "shCardFn",
+      "fromProperty": "plotId",
+      "toId": "shUseFn",
+      "toProperty": "plotId"
+    },
+    {
+      "fromId": "shIsleVar",
+      "fromProperty": "value",
+      "toId": "shUseFn",
+      "toProperty": "state"
+    },
+    {
+      "fromId": "shUse",
+      "fromProperty": "onClick",
+      "toId": "shUseFn",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "shUseFn",
+      "fromProperty": "used",
+      "toId": "shSetUsed",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "shUseFn",
+      "fromProperty": "ran",
+      "toId": "shSetUsed",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shUseFn",
+      "fromProperty": "state",
+      "toId": "shSetIsle",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "shUseFn",
+      "fromProperty": "ok",
+      "toId": "shUseOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "shUseFn",
+      "fromProperty": "ran",
+      "toId": "shUseOk",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "shUseOk",
+      "fromProperty": "ontrue",
+      "toId": "shSetIsle",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "shUseFn",
+      "fromProperty": "model",
+      "toId": "shOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "shSetIsle",
+      "fromProperty": "done",
+      "toId": "shOut",
+      "toProperty": "write"
+    }
+  ]
+}

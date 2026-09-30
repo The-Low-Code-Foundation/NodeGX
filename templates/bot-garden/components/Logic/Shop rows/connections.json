@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f6d39233-5cec-5ba0-8c36-3e561e6aaffe",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "shoprowsIn",
+      "fromProperty": "lang",
+      "toId": "shoprowsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "shoprowsIn",
+      "fromProperty": "model",
+      "toId": "shoprowsFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "shoprowsIn",
+      "fromProperty": "tab",
+      "toId": "shoprowsFn",
+      "toProperty": "in-tab"
+    },
+    {
+      "fromId": "shoprowsIn",
+      "fromProperty": "words",
+      "toId": "shoprowsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "out-balText",
+      "toId": "shoprowsOut",
+      "toProperty": "balText"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "out-balance",
+      "toId": "shoprowsOut",
+      "toProperty": "balance"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "out-btnText",
+      "toId": "shoprowsOut",
+      "toProperty": "btnText"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "out-hasProfile",
+      "toId": "shoprowsOut",
+      "toProperty": "hasProfile"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "out-items",
+      "toId": "shoprowsOut",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "out-later",
+      "toId": "shoprowsOut",
+      "toProperty": "later"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "out-showItems",
+      "toId": "shoprowsOut",
+      "toProperty": "showItems"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "out-showLater",
+      "toId": "shoprowsOut",
+      "toProperty": "showLater"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "out-tab",
+      "toId": "shoprowsOut",
+      "toProperty": "tab"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "out-tabs",
+      "toId": "shoprowsOut",
+      "toProperty": "tabs"
+    },
+    {
+      "fromId": "shoprowsFn",
+      "fromProperty": "success",
+      "toId": "shoprowsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

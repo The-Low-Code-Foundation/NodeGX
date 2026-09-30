@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f43f5377-3117-5464-8a0b-e31e84f6cd07",
+  "name": "Shop",
+  "path": "/Island/Shop",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The shop (IW-006): the balance on its button; five tabs; each item a picture, a price and one line; the purchase card (you have, it costs, left after — or how many more shells), a copy’s name, a brain’s robot, a held helper’s job; Buy / Use it / Not now. Publishes Model and Write for the page’s store."
+}

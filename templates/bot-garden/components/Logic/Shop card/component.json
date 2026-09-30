@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "4ef414a8-37c1-54f2-8c2b-80be25075236",
+  "name": "Shop card",
+  "path": "/Logic/Shop card",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The purchase card: what you have, the cost, what is left, or how many more shells; the robot, the name, the job. Runs when an input changes; Ran after each run."
+}

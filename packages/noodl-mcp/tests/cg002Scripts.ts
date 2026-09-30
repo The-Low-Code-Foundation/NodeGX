@@ -766,6 +766,42 @@ function varStep(w, run, s, delta) {
   else { var by = s.by === undefined || s.by === null ? 1 : exprNum(evalVal(w, run, s.by)); run.vars[name] = (exprNum(run.vars[name]) || 0) + (by === null ? 0 : by); }
   delta.vars = clone(run.vars);
 }
+// ── P108 IW-006 (lane H): the shop's helpers on one job (AC4). A helper is used on a job (a plot): the rain cloud fills
+// every tulip there at once and is gone; the self-filling can and the wheelbarrow ride on that job until it crosses its
+// finish line (the island tick puts them on the job's world before each step and takes them off at the finish line).
+/** What the wheelbarrow lets a robot carry (the shop's line: "Carries eight, for one job"). */
+var BARROW_CARRY = 8;
+/** The rain cloud: every tulip of the world full (its meter at its need). Returns how many it filled. */
+function helperRain(w) {
+  var n = 0, list = w && Array.isArray(w.things) ? w.things : [];
+  for (var i = 0; i < list.length; i++) if (list[i] && list[i].kind === 'tulip' && !isFull(list[i])) { setMeter(list[i], meterOf(list[i]).need); n++; }
+  return n;
+}
+/** A riding helper put on a job's world: the self-filling can keeps every can (held, or lying on the plot) full; the wheelbarrow lets the robots carry BARROW_CARRY. */
+function helperOn(w, h) {
+  var bots = w && Array.isArray(w.robots) ? w.robots : [], list = w && Array.isArray(w.things) ? w.things : [];
+  for (var i = 0; i < bots.length; i++) {
+    var r = bots[i];
+    if (!r) continue;
+    if (h === 'selfcan' && canOf(r) !== null) r.can = canMaxOf(r);
+    if (h === 'barrow') r.basket = Math.max(basketOf(r), BARROW_CARRY);
+  }
+  if (h === 'selfcan') for (var j = 0; j < list.length; j++) if (list[j] && list[j].kind === 'can') list[j].level = Number(list[j].max) > 0 ? Math.floor(Number(list[j].max)) : CAN_MAX;
+  return w;
+}
+/**
+ * Does a helper do anything for this job, as it stands? Never for a job that is done. Rain: a tulip not full. The
+ * self-filling can: a job with a can (lying on the plot, held, or the robot's own). The wheelbarrow: a job whose targets
+ * take carried things (a site, a basket, a bowl, a crate, a door).
+ */
+function helperFits(w, h) {
+  if (!w || jobDone(w)) return false;
+  var list = Array.isArray(w.things) ? w.things : [], bots = Array.isArray(w.robots) ? w.robots : [];
+  if (h === 'rain') { for (var i = 0; i < list.length; i++) if (list[i] && list[i].kind === 'tulip' && !isFull(list[i])) return true; return false; }
+  if (h === 'selfcan') { if (canWorld(w)) return true; for (var k = 0; k < bots.length; k++) if (canOf(bots[k]) !== null) return true; return false; }
+  if (h === 'barrow') { var j = jobOf(w); if (!j) return false; for (var t = 0; t < j.targets.length; t++) { var th = thingById(w, j.targets[t]); if (th && (th.kind === 'site' || JOB_KINDS[th.kind] === 'container')) return true; } return false; }
+  return false;
+}
 // ── P108 IW-003 (lane P): the post — a door takes letters, an addressed letter goes only into its owner's door, and
 // Olive reads the name on an envelope (IW-005 dev. 6). The carry stays a list of plain strings (letter, stone, egg…):
 // an addressed letter keeps its name in carryTo, a list BESIDE it (carryTo[i] is the name on carry[i], '' for none),
@@ -2035,7 +2071,8 @@ if (p) {
   // for this request — the robot an islander lends after it, the upgrade she gives — come with every first win.
   if (reward && reward.kind === 'robot' && lendRobot(p, reward.id)) lent.push(String(reward.id));
   for (var g = 0; g < ROBOTS.length; g++) if (requestId && ROBOTS[g].unlockedBy === requestId && lendRobot(p, ROBOTS[g].id)) lent.push(ROBOTS[g].id);
-  for (var u = 0; u < UPGRADES.length; u++) if (requestId && UPGRADES[u].unlockedBy === requestId && p.stickers.indexOf(UPGRADES[u].id) === -1) { p.stickers.push(UPGRADES[u].id); upgraded.push(UPGRADES[u].id); }
+  // P108 IW-006 (lane H): the upgrades moved to the shop — a first win no longer gives one; the shop shows it once its
+  // request is done (Shop rows). One given before (a sticker) is still hers; Upgraded stays empty.
   var robotId = String(Inputs.robotId || p.island.robots[0].id);
   var known = false;
   for (var r = 0; r < p.island.robots.length; r++) if (p.island.robots[r].id === robotId) known = true;

@@ -48,6 +48,8 @@ import { ISLAND_ENGINE } from './ig004Island';
 import { ROBOTS_JSON, UPGRADES_JSON } from './cg002Content';
 // P108 IW-002 (lane J): Start world's seed line lays a request's seeded layout with the engine's own helpers.
 import { SEED_HELPERS } from './cg002Scripts';
+// P108 IW-006 (lane H): the shop's glue (its own file; it imports nothing from here).
+import { IW006_SHOP_SCRIPTS } from './iw006Shop';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -1453,5 +1455,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   // P108 IW-003 (lane B).
   { component: 'Logic/Teach again', script: TEACH_AGAIN_SCRIPT, seam: 'a program pinned on this request that its rewritten job outgrew: the line that asks her to teach it again' },
   // P108 IW-003 (lane M).
-  { component: 'Logic/Job card', script: JOB_CARD_SCRIPT, seam: 'the job in five lines, and how much of it is done' }
+  { component: 'Logic/Job card', script: JOB_CARD_SCRIPT, seam: 'the job in five lines, and how much of it is done' },
+  // P108 IW-006 (lane H): the shop, its purchase card, Buy, a helper used on a job, the brain the Workshop holds.
+  ...IW006_SHOP_SCRIPTS
 ];

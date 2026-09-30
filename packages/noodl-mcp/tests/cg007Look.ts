@@ -484,4 +484,27 @@ ${Object.entries(PAD_GO.emoji).map(([k, e]) => `.bg-key-go-${k}::after { content
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* P108 IW-006 (lane H): the shop — its button beside the Island page's head (the balance on it), the sheet over the island
+   (the win card's veil), the tabs and the robots / jobs to pick as chips that wrap, the items as a grid of cards (a picture,
+   a price on the sun, one line), the purchase card's figures. */
+.bg-island-top { justify-content: space-between !important; }
+.bg-island-top > :first-child { flex: 1 1 auto; min-width: 0; }
+.bg-shop-root { flex: none; }
+.bg-shop-open { box-shadow: var(--shadow-soft); white-space: nowrap; }
+.bg-shop { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 40 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; overflow-y: auto !important; background: color-mix(in srgb, var(--paper) 72%, transparent); backdrop-filter: blur(2px); padding: 16px; box-sizing: border-box; }
+.bg-shop-panel { width: 100% !important; max-width: 920px !important; box-sizing: border-box; animation: bg-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
+.bg-shop-bal { background-color: var(--sun); border-radius: 999px; padding: 4px 12px; white-space: nowrap; }
+.bg-shop-tabs, .bg-shop-chips { display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 8px; }
+.bg-shop-items { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.bg-shop-item { width: 100% !important; box-sizing: border-box; cursor: pointer; border: 2px solid var(--line); box-shadow: none; }
+.bg-shop-item-yours, .bg-shop-item-held { border-color: var(--leaf-3); }
+.bg-shop-price { background-color: var(--sun); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }
+.bg-shop-tag { align-self: flex-start; background-color: var(--leaf-2); border-radius: 999px; padding: 2px 10px; }
+.bg-shop-card { background-color: var(--paper-2) !important; box-shadow: none; }
+.bg-shop-fig { display: inline-block; }
+.bg-shop-left { background-color: var(--leaf-2); border-radius: 999px; padding: 2px 10px; }
+.bg-shop-done { align-self: flex-start; background-color: var(--leaf-2); border-radius: 14px; padding: 6px 12px; }
+.bg-shop-short { background-color: var(--tidy); border: 2px solid var(--tidy-edge); border-radius: 14px; padding: 6px 12px; }
+@media (max-width: 600px) { .bg-island-top { flex-wrap: wrap !important; } .bg-shop { padding: 8px; } .bg-shop-items { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; } }
 `;
