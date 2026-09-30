@@ -839,10 +839,15 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect([W().DEFAULT_LEGEND[WALL_TILE], W().KINDS.includes('wall')]).toEqual(['wall', true]);
     });
 
-    it('🔴 the 13 requests draw exactly as before: every start world AND the world each reference program leaves carries no meter, and Watch empty / Picking off change not one byte', () => {
+    // P108 IW-003 (lane M): the requests carry jobs now (meters, the can, the basket), so the control is each request
+    // with its job fields and job things taken off — drawn exactly as before.
+    const JOB_FIELDS = ['id', 'have', 'need', 'count', 'capacity', 'item', 'level', 'max', 'pen', 'owner', 'to', 'build', 'droop', 'stage', 'walked'];
+    const JOB_THINGS = ['can', 'basket', 'hen', 'site', 'store', 'postbox', 'door'];
+    const unjobbed = (things: ReadonlyArray<any>) => things.filter((t) => !JOB_THINGS.includes(t.kind)).map((t) => Object.fromEntries(Object.entries(t).filter(([k]) => !JOB_FIELDS.includes(k))));
+    it('🔴 the 13 requests draw exactly as before (their job fields taken off): every start world AND the world each reference program leaves carries no meter, and Watch empty / Picking off change not one byte', () => {
       expect(REQUESTS).toHaveLength(13);
       for (const r of REQUESTS) {
-        const start = { map: [...r.map], things: r.things.map((t: any) => ({ ...t })), robots: [{ id: 'pip', ...r.robotStart, carry: [...(r.robotStart.carry || [])] }] };
+        const start = { map: [...r.map], things: unjobbed(r.things), robots: [{ id: 'pip', ...r.robotStart, carry: [...(r.robotStart.carry || [])] }] };
         const end = play(JSON.parse(JSON.stringify(start)), r.referenceProgram);
         for (const [when, w] of [['start', start], ['end', end]] as const) {
           const plain = draw(w);

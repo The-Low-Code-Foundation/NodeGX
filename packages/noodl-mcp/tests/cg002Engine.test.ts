@@ -270,7 +270,7 @@ describe('CG-002 — the engine', () => {
     });
 
     it('the goal is data: no request carries a function, and every goal name is one GOAL_SCRIPT knows', () => {
-      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses', 'tulips_watered'];
+      const known = ['every_tulip_watered', 'thing_at', 'bowl_has', 'robot_at', 'facing', 'carrying', 'uses', 'handled', 'said', 'no_puddle', 'senses', 'tulips_watered', 'job_done'];
       for (const name of known) expect({ name, inScript: GOAL_SCRIPT.includes(`g.name === '${name}'`) }).toEqual({ name, inScript: true });
       for (const r of REQUESTS) {
         expect(JSON.parse(JSON.stringify(r))).toEqual(r);
@@ -1166,12 +1166,13 @@ describe('CG-002 — the engine', () => {
   });
 
   describe('AC7 — predictEnd returns the tile the robot ends on', () => {
-    it('the tulip request (IG-002: fetch and return) ends at 1,4 facing the pond; a tap there hits, a tap beside it misses', () => {
+    // P108 IW-003 (lane M): the tulips are a job — the dance ends at (1,4), then Pip walks home to (1,1), facing the pond.
+    it('the tulip request (IG-002: fetch and return; IW-003: a job) ends at home 1,1 facing the pond; a tap there hits, a tap beside it misses', () => {
       const r = REQUESTS.find((x) => x.id === 'tulips-three')!;
       const p = runScript(PREDICT_END_SCRIPT, { program: r.referenceProgram, world: worldOfRequest(r), robotId: 'pip' });
-      expect({ x: p.x, y: p.y, d: p.d, known: p.known, asked: p.asked, hit: p.hit }).toEqual({ x: 1, y: 4, d: 3, known: true, asked: false, hit: false });
-      expect(runScript(PREDICT_END_SCRIPT, { program: r.referenceProgram, world: worldOfRequest(r), robotId: 'pip', tapX: 1, tapY: 4 })).toMatchObject({ asked: true, hit: true });
-      expect(runScript(PREDICT_END_SCRIPT, { program: r.referenceProgram, world: worldOfRequest(r), robotId: 'pip', tapX: 2, tapY: 4 })).toMatchObject({ asked: true, hit: false });
+      expect({ x: p.x, y: p.y, d: p.d, known: p.known, asked: p.asked, hit: p.hit }).toEqual({ x: 1, y: 1, d: 3, known: true, asked: false, hit: false });
+      expect(runScript(PREDICT_END_SCRIPT, { program: r.referenceProgram, world: worldOfRequest(r), robotId: 'pip', tapX: 1, tapY: 1 })).toMatchObject({ asked: true, hit: true });
+      expect(runScript(PREDICT_END_SCRIPT, { program: r.referenceProgram, world: worldOfRequest(r), robotId: 'pip', tapX: 1, tapY: 4 })).toMatchObject({ asked: true, hit: false });
       // The prediction is what the run does: the same end as a full run.
       const end = runToEnd(r.referenceProgram, worldOfRequest(r));
       expect(end.world.robots[0]).toMatchObject({ x: p.x, y: p.y, d: p.d });
@@ -1402,19 +1403,24 @@ describe('CG-002 — the engine', () => {
       expect(HINTS.hintRockGone.en).toContain('{b}');
     });
 
-    it('🔴 AC2: the recorded tulips dance folds to repeat 3 with the nine-block body, in both bands (offered at 10–12 only, as every fold)', () => {
+    // P108 IW-003 (lane M): three drinks a tulip — the dance is eleven presses, and two folds make the reference: the
+    // passes ×3, then the pours ×3 inside the pass.
+    it('🔴 AC2: the recorded tulips dance folds to repeat 3 with the eleven-block pass, then the pours to repeat 3 inside it, in both bands (offered at 10–12 only, as every fold)', () => {
       const r = TULIPS();
-      const dance = 'K L L F W R F R F';
+      const dance = 'K L L F W W W R F R F';
       const recording = parse([dance, dance, dance].join(' '));
-      expect(recording).toHaveLength(27);
+      expect(recording).toHaveLength(33);
       expect(shape(recording)).toEqual(shape(unrolled(r.referenceProgram)));
       for (const band of [1, 2]) {
         const found = runScript(FIND_REPEAT_SCRIPT, { program: recording, band, allowed: [...r.palette] });
-        expect({ band, found: found.found, i: found.i, len: found.len, count: found.count, cover: found.cover, offer: found.offer }).toEqual({ band, found: true, i: 0, len: 9, count: 3, cover: 27, offer: band === 2 });
+        expect({ band, found: found.found, i: found.i, len: found.len, count: found.count, cover: found.cover, offer: found.offer }).toEqual({ band, found: true, i: 0, len: 11, count: 3, cover: 33, offer: band === 2 });
       }
       const found = runScript(FIND_REPEAT_SCRIPT, { program: recording, band: 2, allowed: [...r.palette] });
-      const folded = runScript(FOLD_SCRIPT, { program: recording, i: found.i, len: found.len, count: found.count, containerId: found.containerId });
-      expect(folded.program).toHaveLength(1);
+      const once = runScript(FOLD_SCRIPT, { program: recording, i: found.i, len: found.len, count: found.count, containerId: found.containerId });
+      expect(once.program).toHaveLength(1);
+      const inner = runScript(FIND_REPEAT_SCRIPT, { program: once.program, band: 2, allowed: [...r.palette] });
+      expect({ offer: inner.offer, container: inner.containerId === once.repeatId, i: inner.i, len: inner.len, count: inner.count }).toEqual({ offer: true, container: true, i: 4, len: 1, count: 3 });
+      const folded = runScript(FOLD_SCRIPT, { program: once.program, i: inner.i, len: inner.len, count: inner.count, containerId: inner.containerId });
       expect(shape(folded.program)).toEqual(shape(r.referenceProgram));
       const end = runToEnd(folded.program, worldOfRequest(r));
       expect(runScript(GOAL_SCRIPT, { world: end.world, run: end.run, program: folded.program, goal: r.goal }).met).toBe(true);
@@ -1440,11 +1446,12 @@ describe('CG-002 — the engine', () => {
           }
         }
       }
-      // The tulips' reference is ten blocks, over MANY_BLOCKS: Perfect outranks "done with many" when it IS the reference.
+      // The tulips' reference is eleven blocks, over MANY_BLOCKS: Perfect outranks "done with many" when it IS the reference.
       expect(refCount(TULIPS())).toBeGreaterThan(MANY_BLOCKS);
-      // The consequence in the world: three tulips watered, the can left with two; four stones laid, the rock gone.
+      // The consequence in the world: three tulips watered, three drinks each (IW-003: the can's three is one tulip's
+      // worth, so it comes home empty); four stones laid, the rock gone.
       const t = runToEnd(TULIPS().referenceProgram, worldOfRequest(TULIPS()));
-      expect([t.world.things.filter((x: any) => x.watered).length, t.world.robots[0].can]).toEqual([3, 2]);
+      expect([t.world.things.filter((x: any) => x.watered).length, t.world.things.map((x: any) => x.have), t.world.robots[0].can]).toEqual([3, [3, 3, 3], 0]);
       const st = runToEnd(STONES().referenceProgram, worldOfRequest(STONES()));
       expect([st.world.things.filter((x: any) => x.kind === 'stone').length, st.world.things.some((x: any) => x.kind === 'rock'), st.world.robots[0].carry]).toEqual([4, false, []]);
       // Path-stones starts with an EMPTY basket and a rock of four beside the start.
@@ -1469,6 +1476,9 @@ describe('CG-002 — the engine', () => {
     const repeatBodies = (list: ReadonlyArray<Block>, out: string[] = []): string[] => {
       for (const b of list) {
         if (b.t === 'repeat') out.push(JSON.stringify(shape(b.body ?? [])));
+        // P108 IW-003 (lane M): a press-by-press recording is flat, so a body with a repeat inside (the tulips' pass holds
+        // the pours ×3) is offered in its flat form — still the reference's own run.
+        if (b.t === 'repeat') out.push(JSON.stringify(shape(unrolled(b.body ?? []))));
         if (b.body) repeatBodies(b.body, out);
       }
       return out;
@@ -1494,14 +1504,18 @@ describe('CG-002 — the engine', () => {
       expect(asked).toBeGreaterThan(40);
     });
 
-    it('🔴 the tulips dance: nothing offered from the first dance to the second, the nine-block body at the second, ×3 at the third', () => {
+    // P108 IW-003 (lane M): the pass is eleven presses with three pours in it — the pours (the reference's own inner repeat)
+    // are offered from the third pour on, and nothing else until the second pass is whole.
+    it('🔴 the tulips dance: from the first pass to the second only its pours ×3 are offered (never the pass’s tail), the eleven-block pass at the second, ×3 at the third', () => {
       const r = REQUESTS.find((x) => x.id === 'tulips-three')!;
       const recording = unrolled(r.referenceProgram);
-      const body = r.referenceProgram[0].body!.length;
+      const body = recording.length / 3;
+      expect(body).toBe(11);
       const at = (p: number) => runScript(FIND_REPEAT_SCRIPT, { program: recording.slice(0, p), band: 2, allowed: [...r.palette] });
       // The first dance ends in right, forward, right, forward: a run seen twice that does not start the list is held back.
-      for (let p = body; p < body * 2; p++) {
-        expect({ press: p, offer: at(p).offer }).toEqual({ press: p, offer: false });
+      for (let p = 1; p < body * 2; p++) {
+        const f = at(p);
+        expect({ press: p, offer: f.offer, i: f.i, len: f.len, count: f.count }).toEqual(p < 7 ? { press: p, offer: false, i: -1, len: 0, count: 0 } : { press: p, offer: true, i: 4, len: 1, count: 3 });
         expect({ press: p, hint: runScript(CHOOSE_HINT_SCRIPT, { program: recording.slice(0, p), allowed: [...r.palette] }).key }).not.toEqual({ press: p, hint: 'hintPattern' });
       }
       expect([at(body * 2).offer, at(body * 2).i, at(body * 2).len, at(body * 2).count]).toEqual([true, 0, body, 2]);
@@ -1546,7 +1560,8 @@ describe('CG-002 — the engine', () => {
       // Why not Mamie's note: a program that goes one step further when Olive read the red tulip ends on another tile
       // with her real answer than with the fallback the prediction takes.
       const note = REQUESTS.find((r) => r.id === 'mamie-note')!;
-      const readThenGo: Block[] = [{ id: 1, t: 'olive:read' as BlockType }, { id: 2, t: 'if', slots: { sensor: 'olive_read:red_tulip' }, body: [{ id: 3, t: 'fwd' }] }];
+      // (P108 IW-003, lane M: Pip starts facing the well now, so the step is taken after a turn onto the path.)
+      const readThenGo: Block[] = [{ id: 1, t: 'olive:read' as BlockType }, { id: 4, t: 'left' }, { id: 2, t: 'if', slots: { sensor: 'olive_read:red_tulip' }, body: [{ id: 3, t: 'fwd' }] }];
       const guess = runScript(PREDICT_END_SCRIPT, { program: readThenGo, world: worldOfRequest(note), robotId: 'pip' });
       const seen = runToEnd(readThenGo, worldOfRequest(note), 'pip', 'en', [{ ok: true, value: 'red tulip' }]);
       expect(guess.x).not.toBe(seen.world.robots[0].x);
@@ -2047,10 +2062,17 @@ describe('IW-002 (P108 s1) — the job model: a target takes exactly its need, a
       // No seed given: one is picked (a uint32), and the layout is one the seed in the world replays.
       const picked = runScript(START_WORLD_SCRIPT, { requests: [REQ], requestId: REQ.id, nonce: 0 });
       expect(Number.isInteger(picked.world.seed) && picked.world.seed >= 0 && picked.world.seed < 2 ** 32).toBe(true);
-      // Every request today: no seed, no job on its world (the 13 start exactly as before).
+      // P108 IW-003 (lane M): a request with a job or a layout starts on the seed given, its job copied on; one with
+      // neither starts exactly as before (each request with its job and layout taken off is that control).
       for (const q of REQUESTS) {
         const out = runScript(START_WORLD_SCRIPT, { requests: JSON.parse(JSON.stringify(REQUESTS)), requestId: q.id, nonce: 0, seed: 9 }).world;
-        expect({ id: q.id, seed: out.seed, job: out.job, map: out.map }).toEqual({ id: q.id, seed: undefined, job: undefined, map: q.map });
+        // (A layout's draws write the PRNG's state back into the seed, so a seeded world's seed is 9 drawn on.)
+        if (q.job || q.seeded) expect({ id: q.id, seed: q.seeded ? Number.isInteger(out.seed) && out.seed !== 9 : out.seed, job: !!out.job }).toEqual({ id: q.id, seed: q.seeded ? true : 9, job: !!q.job });
+        if (q.job) expect({ id: q.id, home: out.job.home, targets: out.job.targets.length }).toEqual({ id: q.id, home: q.job.home, targets: q.job.targets.length });
+        if (!q.seeded) expect({ id: q.id, map: out.map }).toEqual({ id: q.id, map: q.map });
+        const bare = JSON.parse(JSON.stringify(REQUESTS)).map((x: any) => (x.id === q.id ? { ...x, job: undefined, seeded: undefined } : x));
+        const plain = runScript(START_WORLD_SCRIPT, { requests: bare, requestId: q.id, nonce: 0, seed: 9 }).world;
+        expect({ id: q.id, seed: plain.seed, job: plain.job, map: plain.map }).toEqual({ id: q.id, seed: undefined, job: undefined, map: q.map });
       }
       // The seed helpers are the engine's own text, in Start world too (one source).
       expect([ENGINE.includes(SEED_HELPERS), START_WORLD_SCRIPT.includes(SEED_HELPERS)]).toEqual([true, true]);
@@ -2152,8 +2174,9 @@ describe('IW-005 (P108 s2) — seek and regrow: go to nearest by path length, re
       for (const p of pal.filter((x: any) => KEY[x.id])) expect({ band, id: p.id, label: p.label, caption: p.caption }).toEqual({ band, id: p.id, label: WORDS['b' + KEY[p.id]].en, caption: WORDS['c' + KEY[p.id]].en });
     }
     expect({ en: !!WORDS.sayNone?.en, fr: !!WORDS.sayNone?.fr, differ: WORDS.sayNone?.en !== WORDS.sayNone?.fr }).toEqual({ en: true, fr: true, differ: true });
-    // Every reference program still uses only the sixteen (IW-003 moves the missions).
-    for (const r of REQUESTS) for (const t of typesIn(r.referenceProgram)) expect({ id: r.id, t, old: BLOCK_TYPES.indexOf(t as BlockType) < 16 }).toEqual({ id: r.id, t, old: true });
+    // P108 IW-003 (lane M): every reference program uses only the engine's blocks and Olive's (the missions now walk to
+    // things: eggs-count seeks its eggs and goes to the basket).
+    for (const r of REQUESTS) for (const t of typesIn(r.referenceProgram)) expect({ id: r.id, t, known: BLOCK_TYPES.indexOf(t as BlockType) !== -1 || t.startsWith('olive:') }).toEqual({ id: r.id, t, known: true });
   });
 
   describe('AC1 — go to nearest: the true nearest by PATH length; ties the same way every time; none when there is none; a blocked target skipped', () => {
@@ -2643,5 +2666,56 @@ describe('IW-005 (P108 s2) — seek and regrow: go to nearest by path length, re
       expect(walk(api(m), prog, world).w.robots[0].x).toBe(1);
       expect(walk(E, prog, world).w.robots[0].x).toBe(2);
     });
+  });
+});
+
+// ── P108 IW-003 (lane M): the job follows the day (a choose's targets), and the fold compares a repeat by its shape ──
+describe('P108 IW-003 (lane M) — the job follows the day; two repeats of one shape are one block to the fold', () => {
+  const note = () => REQUESTS.find((r) => r.id === 'mamie-note')!;
+  const colourOf = (w: any) => (String(w.things.find((t: any) => t.kind === 'note').text).includes('The red ones') ? 'red' : 'yellow');
+  const rowOf = (w: any) => [...new Set(w.job.targets.map((id: string) => w.things.find((t: any) => t.id === id).color))];
+
+  it('🔴 a choose with targets: the note the seed chooses and the job’s targets are the same day (the red note → the red row), over 30 seeds both days, and the targets cost no draw', () => {
+    const seen = new Set<string>();
+    for (let seed = 1; seed <= 30; seed++) {
+      const w = worldOfRequest(note(), 'pip', seed);
+      expect({ seed, row: rowOf(w) }).toEqual({ seed, row: [colourOf(w)] });
+      seen.add(colourOf(w));
+      // The same choose without its targets lays the same note and leaves the same seed (the targets draw nothing).
+      const bare = JSON.parse(JSON.stringify(note()));
+      delete bare.seeded.choose[0].targets;
+      const plain = helper<any>(ENGINE, 'seedWorld', { map: [...bare.map], things: bare.things.map((t: any) => ({ ...t })), robots: [] }, bare, seed);
+      expect({ seed, text: plain.things.find((t: any) => t.kind === 'note').text, state: plain.seed, targets: plain.job.targets }).toEqual({ seed, text: w.things.find((t: any) => t.kind === 'note').text, state: w.seed, targets: note().job!.targets });
+    }
+    expect([...seen].sort()).toEqual(['red', 'yellow']);
+    // The reference wins either day (the if turns Pip to the row Olive read); the gate's seeds lay both days.
+    expect(new Set([1, 2, 3].map((s) => colourOf(worldOfRequest(note(), 'pip', s)))).size).toBe(2);
+  });
+
+  it('arm: the targets never follow the note → the yellow day (seed 1) cannot be won by the reference', () => {
+    const mutated = ENGINE.replace('w.job.targets = JSON.parse(JSON.stringify(ch.targets[k]));', '');
+    expect(mutated).not.toBe(ENGINE);
+    const w = helper<any>(mutated, 'seedWorld', { map: [...note().map], things: note().things.map((t: any) => ({ ...t })), robots: [{ id: 'pip', x: 4, y: 3, d: 0, can: 0, canMax: 3 }] }, JSON.parse(JSON.stringify(note())), 1);
+    const end = runToEnd(note().referenceProgram, w);
+    expect([colourOf(w), runScript(GOAL_SCRIPT, { world: end.world, run: end.run, program: note().referenceProgram, goal: note().goal }).met]).toEqual(['yellow', false]);
+    // Known-firing: the engine as built wins that day.
+    const real = runToEnd(note().referenceProgram, worldOfRequest(note(), 'pip', 1));
+    expect(runScript(GOAL_SCRIPT, { world: real.world, run: real.run, program: note().referenceProgram, goal: note().goal }).met).toBe(true);
+  });
+
+  it('🔴 the fold: the tulips dance with its pours already folded (a repeat in each pass) still folds the passes ×3 — to the reference', () => {
+    const r = REQUESTS.find((x) => x.id === 'tulips-three')!;
+    const pass = (n: number) => [...parse('K L L F').map((b, i) => ({ ...b, id: n + i })), { id: n + 4, t: 'repeat' as BlockType, n: 3, body: [{ id: n + 5, t: 'water' as BlockType }] }, ...parse('R F R F').map((b, i) => ({ ...b, id: n + 6 + i }))];
+    const program = [...pass(1), ...pass(20), ...pass(40)];
+    const found = runScript(FIND_REPEAT_SCRIPT, { program, band: 2, allowed: [...r.palette] });
+    expect([found.offer, found.i, found.len, found.count]).toEqual([true, 0, 9, 3]);
+    const folded = runScript(FOLD_SCRIPT, { program, i: found.i, len: found.len, count: found.count, containerId: found.containerId });
+    expect(shape(folded.program)).toEqual(shape(r.referenceProgram));
+    // A repeat of another count, or another body, is another block.
+    expect(runScript(FIND_REPEAT_SCRIPT, { program: [...pass(1), ...pass(20).map((b) => (b.t === 'repeat' ? { ...b, n: 2 } : b))], band: 2 }).len).not.toBe(9);
+    // Arm: containers never match (as before) → the passes are never offered.
+    const before = FIND_REPEAT_SCRIPT.replace('if (a.body || b.body) return !!a.body && !!b.body && JSON.stringify(shapeOf([a])) === JSON.stringify(shapeOf([b]));', 'if (a.body || b.body) return false;');
+    expect(before).not.toBe(FIND_REPEAT_SCRIPT);
+    expect(runScript(before, { program, band: 2, allowed: [...r.palette] }).len).not.toBe(9);
   });
 });

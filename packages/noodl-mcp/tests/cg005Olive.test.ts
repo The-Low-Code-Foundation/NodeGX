@@ -664,7 +664,14 @@ describe('CG-005 — Olive in the game', () => {
 
   describe('IG-006 (P106) — Olive reads: three blocks a child can see, wire and doubt', () => {
     const request = (id: string) => REQUESTS.find((r) => r.id === id)!;
-    const worldOf = (r: (typeof REQUESTS)[number]) => ({ map: [...r.map], things: r.things.map((t) => ({ ...t })), robots: [{ id: 'pip', x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d, carry: [...(r.robotStart.carry || [])] }] });
+    // P108 IW-003 (lane M): the world as Start world hands it over — the robot's can, and the request's job (its finish
+    // line; unseeded: the request's own targets, so Mamie's note reads "the red ones" and the red row is the job).
+    const worldOf = (r: (typeof REQUESTS)[number]) => ({
+      map: [...r.map],
+      things: r.things.map((t) => ({ ...t })),
+      robots: [{ id: 'pip', x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d, carry: [...(r.robotStart.carry || [])], ...(r.robotStart.can !== undefined ? { can: r.robotStart.can } : {}), ...(r.robotStart.canMax !== undefined ? { canMax: r.robotStart.canMax } : {}) }],
+      ...(r.job ? { job: JSON.parse(JSON.stringify(r.job)) } : {})
+    });
     const words = (lang: 'en' | 'fr') => runScript(KIT_PALETTE_SCRIPT, { palette: [], lang, words: WORD_ROWS }); // (a no-op run: keeps the import honest)
 
     it('AC1: at band 10–12 the palette lists exactly read, is it a…?, say under Olive (olive:<rung>, the owl); at 7–9 none; no ask:<rung> id anywhere', () => {
@@ -711,7 +718,8 @@ describe('CG-005 — Olive in the game', () => {
       const told = await startShell({ stub: { answers: { read: 'yellow tulip' } } });
       try {
         const p = await play(told, r.referenceProgram as any[], { lang: 'en', world: worldOf(r) });
-        expect({ red: tulips(p.world, 'red'), yellow: tulips(p.world, 'yellow'), met: goal(p).met, missing: goal(p).missing }).toEqual({ red: [false, false, false], yellow: [true, true, true], met: false, missing: ['tulips_watered', 'tulips_watered'] });
+        // P108 IW-003 (lane M): the job is the note's row (the red ones here), so the yellow row watered leaves it undone.
+        expect({ red: tulips(p.world, 'red'), yellow: tulips(p.world, 'yellow'), met: goal(p).met, missing: goal(p).missing }).toEqual({ red: [false, false, false], yellow: [true, true, true], met: false, missing: ['job_done'] });
       } finally {
         await told.close();
       }

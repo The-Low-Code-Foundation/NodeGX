@@ -820,6 +820,12 @@
       "toProperty": "palette"
     },
     {
+      "fromId": "plStart",
+      "fromProperty": "world",
+      "toId": "plPad",
+      "toProperty": "world"
+    },
+    {
       "fromId": "plIn",
       "fromProperty": "words",
       "toId": "plRecord",

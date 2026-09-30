@@ -37,6 +37,10 @@
  * @module noodl-mcp/tests/ig004Island
  */
 import { ENGINE } from './cg002Scripts';
+// P108 IW-003 (lane M): Olive's written answers, for an ask on a job plot (the island has no Olive; the page's fallback).
+import { OLIVE_SLIM } from './cg005Olive';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { writtenAnswer: islWritten } = require('../../../dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/olive-written.js');
 
 /** A pinned run that has finished shows its done plot for this many ticks before the plot resets and the run restarts. */
 export const ISLAND_HOLD_TICKS = 3;
@@ -81,6 +85,11 @@ function islKeep(out, w) { if (w.reserved && typeof w.reserved === 'object') out
 function islRun(plot, lap) { return newRun(plot.program, plot.robotId, 'en', 'island-' + plot.id + '-' + lap); }
 /** P108 IW-002: a plot's seed, from its request's name (djb2): the island lays a plot the same way every build. */
 function islSeedOf(id) { var h = 5381, t = String(id); for (var i = 0; i < t.length; i++) h = ((h * 33) ^ t.charCodeAt(i)) >>> 0; return h; }
+// P108 IW-003 (lane M): no Olive on the island — an ask on a job plot takes her WRITTEN answer, the fallback the page
+// gives while she rests (Mamie's note read on the island says the day's row, so the pinned program still finishes).
+var ISL_WRITTEN = ${JSON.stringify({ written: OLIVE_SLIM.written })};
+${Function.prototype.toString.call(islWritten)}
+function islAnswer(q) { var a = writtenAnswer(ISL_WRITTEN, q.rung, q.slots, q.lang) || {}, out = { seq: q.seq, ok: false, fallback: true }; if (a.value !== undefined) out.value = a.value; if (a.text !== undefined) out.text = a.text; return out; }
 /** IW-002: a run that is only the walk home (a program that ended with the job not done goes home before it starts again). */
 function islHomeRun(plot, lap) { var run = newRun([], plot.robotId, 'en', 'island-' + plot.id + '-' + lap + '-home'); run.steps = [{ id: null, op: 'home', guard: 0 }]; return run; }
 /**
@@ -95,7 +104,7 @@ function islStepJob(plot, cur) {
   if (phase === 'wait' && !jobDone(w)) { lap++; run = islRun(plot, lap); phase = 'work'; }
   if (phase !== 'wait') {
     var r = step(run, w, null);
-    if (r.waiting && r.request) r = step(r.run, w, { seq: r.request.seq, ok: false, fallback: true });
+    if (r.waiting && r.request) r = step(r.run, w, islAnswer(r.request));
     w = apply(w, r.delta);
     run = r.run; delta = r.delta;
     if (r.done) {

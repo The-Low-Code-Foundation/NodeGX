@@ -24,7 +24,8 @@
  *
  * @module noodl-mcp/tests/cg007Look
  */
-
+// P108 IW-003 (lane M): the pad's go keys wear the kind they go to.
+import { PAD_GO } from './cg003Content';
 
 /** The preset the tokens sit on. Playful ships Nunito (P88 GAM-016), the mockup's body face. */
 export const GARDEN_PRESET = 'playful';
@@ -199,7 +200,9 @@ export const ICONS: Readonly<Record<string, string>> = {
   // P108 IW-001 F1: Stop (a square); F7: the pad's say (a speech bubble) and read (an open note).
   stop: svg('0 0 24 24', "<rect x='5' y='5' width='14' height='14' rx='2'/>"),
   say: svg('0 0 24 24', "<path d='M4 4h16a2 2 0 012 2v9a2 2 0 01-2 2h-9l-5 4v-4H4a2 2 0 01-2-2V6a2 2 0 012-2z'/>"),
-  read: svg('0 0 24 24', "<path d='M2 5c3-1 6-1 9 1v14c-3-2-6-2-9-1z'/><path d='M13 6c3-2 6-2 9-1v14c-3-1-6-1-9 1z'/>")
+  read: svg('0 0 24 24', "<path d='M2 5c3-1 6-1 9 1v14c-3-2-6-2-9-1z'/><path d='M13 6c3-2 6-2 9-1v14c-3-1-6-1-9 1z'/>"),
+  // P108 IW-003 (lane M): the pad's go keys (a map pin; the key's face shows the kind it goes to).
+  go: svg('0 0 24 24', "<path d='M12 2a7 7 0 00-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 00-7-7zm0 4a3 3 0 110 6 3 3 0 010-6z'/>")
 };
 
 const spriteRules = Object.entries(SPRITES)
@@ -455,6 +458,13 @@ ${owlColourRule}
 .bg-win-lent { background-color: var(--violet-2); border-radius: 14px; padding: 8px 12px; }
 
 ${spriteRules}
+
+/* P108 IW-003 (lane M): the pad's go keys — the kind's picture big on the key (go to the nearest 🥚, go to the 🧺), the
+   pin small in its corner, in the motion blocks' blue. */
+.bg-key-go { position: relative; color: var(--block-motion); }
+.bg-key-go::before { position: absolute; top: 5px; left: 5px; width: 15px !important; height: 15px !important; }
+.bg-key-go::after { font-size: 26px; line-height: 1; }
+${Object.entries(PAD_GO.emoji).map(([k, e]) => `.bg-key-go-${k}::after { content: '${e}'; }`).join('\n')}
 
 /* Reduced motion: the mockup's own rule. Every animation and transition stops; the tulip still reads by opacity and pose. */
 @media (prefers-reduced-motion: reduce) {

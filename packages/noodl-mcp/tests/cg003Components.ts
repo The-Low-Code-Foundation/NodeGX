@@ -610,7 +610,7 @@ const PAD: CgComponent = {
   description: 'The Teach pad over the world’s corner (the mockup’s .pad): one key per step the request allows (Allowed; every step with no list) — forward, left and right on the d-pad, the first action in its centre, more actions on a third row. Publishes Pressed with the Op, the op first.',
   repeats: { source: 'array', rowFields: ['op', 'cls', 'label'] },
   nodes: [
-    inputs('pdIn', [['show', 'boolean'], ['allowed', 'array'], ['palette', 'array'], ['words', 'array'], ['lang', 'string']]),
+    inputs('pdIn', [['show', 'boolean'], ['allowed', 'array'], ['palette', 'array'], ['words', 'array'], ['lang', 'string'], ['world', 'object']]),
     group('pdBox', 'The pad', undefined, { sizeMode: 'contentSize', cssClassName: 'bg-pad', mounted: false }, ['pdEach']),
     // IG-001 D10: the keys follow the request (the pad was fixed to fwd left water right, so the stones' put came only from the palette).
     logic('pdKeys', L('Pad keys'), 'One key per allowed step'),
@@ -631,6 +631,8 @@ const PAD: CgComponent = {
     wire('pdIn', 'palette', 'pdKeys', 'palette'),
     wire('pdIn', 'words', 'pdKeys', 'words'),
     wire('pdIn', 'lang', 'pdKeys', 'lang'),
+    // P108 IW-003 (lane M): the world the request opened on — its kinds are the go keys.
+    wire('pdIn', 'world', 'pdKeys', 'world'),
     wire('pdKeys', 'keys', 'pdHold', 'value'),
     wire('pdKeys', 'ran', 'pdSettle', 'restart'),
     wire('pdSettle', 'timerFinished', 'pdHold', 'go'),
@@ -1226,6 +1228,8 @@ const PLAY: CgComponent = {
     wire('plModeWords', 'driving', 'plStepsNote', 'mounted'),
     // P108 IW-001 F7: the pad's keys are the drawer's actions; say shows its line; read asks Olive and she answers.
     wire('plPalette', 'palette', 'plPad', 'palette'),
+    // P108 IW-003 (lane M): the start world to the pad (its go keys: one per kind lying on the plot).
+    wire('plStart', 'world', 'plPad', 'world'),
     wire('plIn', 'words', 'plRecord', 'words'),
     wire('plIn', 'botName', 'plRecord', 'botName'),
     wire('plStart', 'islander', 'plRecord', 'islander'),

@@ -16,8 +16,8 @@
       "en": ["watered her three tulips", "carried her letter", "filled Biscuit's bowl", "planted her seeds"]
     },
     "notes_read": {
-      "fr": ["Les rouges, pas les jaunes.", "Les tulipes veulent de l'eau aujourd'hui.", "Porte la lettre à Mamie Rose."],
-      "en": ["The red ones, not the yellow.", "The tulips want water today.", "Take the letter to Mamie Rose."]
+      "fr": ["Les rouges, pas les jaunes.", "Les tulipes veulent de l'eau aujourd'hui.", "Porte la lettre à Mamie Rose.", "Les jaunes, pas les rouges."],
+      "en": ["The red ones, not the yellow.", "The tulips want water today.", "Take the letter to Mamie Rose.", "The yellow ones, not the red."]
     },
     "plot_objects": {
       "fr": ["tulipe rouge", "tulipe jaune", "tulipe", "rocher", "pierre", "lettre", "gamelle", "œuf"],
@@ -129,7 +129,8 @@
         "map": {
           "Les rouges, pas les jaunes.": { "value": "tulipe rouge" },
           "Les tulipes veulent de l'eau aujourd'hui.": { "value": "tulipe rouge" },
-          "Porte la lettre à Mamie Rose.": { "value": "lettre" }
+          "Porte la lettre à Mamie Rose.": { "value": "lettre" },
+          "Les jaunes, pas les rouges.": { "value": "tulipe jaune" }
         }
       },
       "en": {
@@ -137,7 +138,8 @@
         "map": {
           "The red ones, not the yellow.": { "value": "red tulip" },
           "The tulips want water today.": { "value": "red tulip" },
-          "Take the letter to Mamie Rose.": { "value": "letter" }
+          "Take the letter to Mamie Rose.": { "value": "letter" },
+          "The yellow ones, not the red.": { "value": "yellow tulip" }
         }
       }
     },

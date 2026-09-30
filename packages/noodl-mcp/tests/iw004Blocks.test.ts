@@ -72,6 +72,12 @@ const round = (p: unknown) => JSON.stringify(T().toEngine(T().toBlockly(p)));
 /** Block List's emitted shape (a stored v4 program): the kit's own normalizer, run on the program. */
 const blockListNode = () => kit.reactNodes.find((n: any) => n.name === 'garden-kit.BlockList');
 const asStored = (p: unknown): Program => JSON.parse(blockListNode().program.emit(p));
+/**
+ * P108 IW-003 (lane M): could a v4 save hold it? Block List wrote every slot as a picker's string, so a program with an
+ * object slot (a cond, a chip — eggs-count's `until count of 🥚 in [basket] = 4`) was never stored by it: its "as
+ * stored" twin would be Block List's `[object Object]`, a shape no save holds. Those rows run raw only.
+ */
+const storable = (list: ReadonlyArray<any>): boolean => list.every((b) => Object.values(b.slots ?? {}).every((v) => v === null || typeof v !== 'object') && storable(b.body ?? []) && storable(b.else ?? []));
 
 /**
  * The program a band-1 child records (cg002Engine's `unrolled`): repeats unrolled, tricks inlined, primitives only —
@@ -200,6 +206,7 @@ describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', (
         const program = band === 1 ? unrolled(r.referenceProgram) : r.referenceProgram;
         it(`${r.id}, band ${band === 1 ? '7–9' : '10–12'}: the reference program, and the same as a stored v4 save holds it`, () => {
           expect(round(program)).toBe(JSON.stringify(program));
+          if (!storable(program)) return;
           const stored = asStored(program);
           expect(round(stored)).toBe(JSON.stringify(stored));
         });
@@ -214,7 +221,8 @@ describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', (
       });
     }
     it('🔴 known-firing: the memo is what keeps a stored shape — without it, a stored `arg: "4"` comes back in the contract’s order', () => {
-      const stored = asStored(REQUESTS.find((r) => r.id === 'eggs-count')?.referenceProgram ?? [{ id: 1, t: 'until', slots: { sensor: 'count_is', arg: 4 }, body: [] }]);
+      // (P108 IW-003, lane M: the eggs' old reference, as a v4 save holds it — the eggs now count with a cond.)
+      const stored = asStored([{ id: 1, t: 'until', slots: { sensor: 'count_is', arg: 4 }, body: [{ id: 2, t: 'pick' }, { id: 3, t: 'count_inc' }, { id: 4, t: 'fwd' }] }]);
       const state = T().toBlockly(stored);
       const strip = (j: any): void => {
         if (!j || typeof j !== 'object') return;
@@ -358,6 +366,7 @@ describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', (
         for (const band of [1, 2]) {
           const program = band === 1 ? unrolled(r.referenceProgram) : r.referenceProgram;
           if (through(program) !== JSON.stringify(program)) bad.push(`${r.id}/${band}`);
+          if (!storable(program)) continue;
           const stored = asStored(program);
           if (through(stored) !== JSON.stringify(stored)) bad.push(`${r.id}/${band}/stored`);
         }

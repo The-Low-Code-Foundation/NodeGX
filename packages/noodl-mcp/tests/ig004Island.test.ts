@@ -12,7 +12,7 @@
 import * as vm from 'vm';
 
 import { FREE_PLAY_PLOT, ISLAND_HOME, REQUESTS, GardenRequest, WORDS } from './cg002Content';
-import { ADD_PROFILE_SCRIPT, APPLY_DELTA_SCRIPT, BRING_HOME_SCRIPT, COMPLETE_REQUEST_SCRIPT, NEW_RUN_SCRIPT, STEP_SCRIPT, runScript } from './cg002Scripts';
+import { ADD_PROFILE_SCRIPT, APPLY_DELTA_SCRIPT, BRING_HOME_SCRIPT, COMPLETE_REQUEST_SCRIPT, ENGINE, NEW_RUN_SCRIPT, STEP_SCRIPT, helper, runScript } from './cg002Scripts';
 import { ALL_WORDS_JSON, DRAW_WORLD_SCRIPT, FAMILY_SCRIPT, FREE_PLAY, ISLAND_CHOOSE_SCRIPT, ISLAND_PINS_SCRIPT, ISLAND_ROWS_SCRIPT, ISLAND_WORLD_SCRIPT, START_WORLD_SCRIPT } from './cg003Scripts';
 import { PAGE_WORDS } from './cg003Content';
 import { ISLAND_HOLD_TICKS, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandWorldScript } from './ig004Island';
@@ -41,7 +41,18 @@ const BASE_W = 28;
 const BASE_H = 15;
 const SYN_BASE = Array.from({ length: BASE_H }, (_, y) => (y === 7 || y === 0 || y === BASE_H - 1 ? 'P'.repeat(BASE_W) : 'G'.repeat(BASE_W)));
 const SYN_PLOTS: Record<string, { x: number; y: number }> = { 'tulips-three': { x: 1, y: 1 }, 'path-stones': { x: 10, y: 1 }, 'path-postbox': { x: 19, y: 1 }, 'tulip-door': { x: 1, y: 8 } };
-const SYN_REQUESTS = REQUESTS.filter((r) => SYN_PLOTS[r.id]).map((r) => ({ ...JSON.parse(JSON.stringify(r)), plot: SYN_PLOTS[r.id] }));
+// P108 IW-003 (lane M): tulips-three is a job now; on the SYNTHETIC island it stays today's no-job plot (its job and
+// layout taken off) — the hold-and-reset control the AC2 rows and the job tick's known-firing row read.
+const NO_JOB = new Set(['tulips-three']);
+const SYN_REQUESTS = REQUESTS.filter((r) => SYN_PLOTS[r.id]).map((r) => {
+  const c = { ...JSON.parse(JSON.stringify(r)), plot: SYN_PLOTS[r.id] };
+  if (NO_JOB.has(r.id)) {
+    delete c.job;
+    delete c.seeded;
+  }
+  return c;
+});
+const syn = (id: string) => SYN_REQUESTS.find((r) => r.id === id)!;
 const SYN_WORLD = islandWorldScript({ free: FREE_PLAY, base: SYN_BASE, home: { x: 12, y: 10 }, freePlot: { x: 19, y: 8 }, plotW: 8, plotH: 6 });
 
 // P106 IG-005: the stones need Cobble — r2 is a Cobble (a plot needing a robot she lacks is padlocked, never worked).
@@ -76,7 +87,7 @@ describe('IG-004 — the island as a world', () => {
       expect(built.working).toBe(2);
       // Two robots at work, each with its own id, on its own plot; the third robot is at home.
       expect(built.world.robots.map((r: any) => [r.id, r.plot || 'home'])).toEqual([['r1', 'tulips-three'], ['r2', 'path-stones'], ['r3', 'home']]);
-      const aloneT = solo(req('tulips-three'), ref('tulips-three'), 'r1', 400);
+      const aloneT = solo(syn('tulips-three'), ref('tulips-three'), 'r1', 400);
       const aloneS = solo(req('path-stones'), ref('path-stones'), 'r2', 400);
       let state = built.state;
       const n = Math.min(aloneT.length, aloneS.length);
@@ -99,7 +110,7 @@ describe('IG-004 — the island as a world', () => {
     it('🔴 a pinned run that ends holds its plot done, then the plot resets (its things and its robot back to the start) and the run restarts', () => {
       let state = island({ 'tulips-three': pinned(ref('tulips-three'), 'r1') }).state;
       const start = JSON.parse(JSON.stringify(state.plots.find((p: any) => p.id === 'tulips-three').start));
-      const alone = solo(req('tulips-three'), ref('tulips-three'), 'r1', 400);
+      const alone = solo(syn('tulips-three'), ref('tulips-three'), 'r1', 400);
       const wet = (s: any) => s.live['tulips-three'].things.filter((t: any) => t.kind === 'tulip' && t.watered).length;
       // Run to the end: the last solo tick is the done tick.
       for (let t = 0; t < alone.length; t++) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
@@ -168,7 +179,7 @@ describe('IG-004 — the island as a world', () => {
       it('the reset keeps what the run left (the tulips stay watered on the next lap) → the reset row fails', () => {
         const m = mutate(ISLAND_TICK_SCRIPT, 'var st = islClone(plot.start);', 'var st = { things: cur.things, robot: islClone(plot.start).robot };');
         let state = island({ 'tulips-three': pinned(ref('tulips-three'), 'r1') }).state;
-        const n = solo(req('tulips-three'), ref('tulips-three'), 'r1', 400).length + ISLAND_HOLD_TICKS;
+        const n = solo(syn('tulips-three'), ref('tulips-three'), 'r1', 400).length + ISLAND_HOLD_TICKS;
         for (let t = 0; t < n; t++) state = bare(m, { state }).state;
         expect(state.live['tulips-three'].lap).toBe(1);
         expect(state.live['tulips-three'].things.filter((t: any) => t.kind === 'tulip' && t.watered).length).toBe(3);
@@ -326,8 +337,11 @@ describe('IG-004 — the island as a world', () => {
     it('AC4: every plot is drawn — open plots their start things, the garden its dry tulips; the islanders stand by their next plot, a bubble while it is open; a tap names the plot', () => {
       const is = islandOf(kid(2));
       const things = is.world.world.things;
+      // P108 IW-003 (lane M): a plot with a job or a layout is laid from its own seed (djb2 of its id), as the engine lays it.
+      const djb2 = (id: string) => { let h = 5381; for (let i = 0; i < id.length; i++) h = ((h * 33) ^ id.charCodeAt(i)) >>> 0; return h; };
+      const laid = (r: any) => (r.job || r.seeded ? helper<any>(ENGINE, 'worldOf', helper<any>(ENGINE, 'seedWorld', { map: [...r.map], things: JSON.parse(JSON.stringify(r.things)), robots: [] }, JSON.parse(JSON.stringify(r)), djb2(r.id))).things : r.things);
       for (const r of REQ_ROWS) {
-        const want = r.things.map((t: any) => ({ ...t, x: t.x + r.plot.x, y: t.y + r.plot.y }));
+        const want = laid(r).map((t: any) => ({ ...t, x: t.x + r.plot.x, y: t.y + r.plot.y }));
         expect({ id: r.id, things: things.filter((t: any) => inPlot(t, r.plot) && t.kind !== 'islander' && t.kind !== 'fence' && t.kind !== 'padlock') }).toEqual({ id: r.id, things: want });
       }
       expect(things.filter((t: any) => inPlot(t, FREE_PLAY_PLOT)).map((t: any) => t.kind)).toEqual(['tulip', 'tulip', 'tulip']);
@@ -515,8 +529,11 @@ describe('IW-002 (P108 s1) — the job tick: a job plot is never reset; its robo
       if (drank && d.every((x: number) => x === 0)) everStart++;
       expect(state.live['job-bed'].hold).toBe(0);
     }
-    // Known-firing: the plot with no job was reset many times; the job plot never once went back to its start.
-    expect(resets).toBeGreaterThan(3);
+    // Known-firing: the plot with no job was reset lap after lap (P108 IW-003, lane M: its lap is now its own run plus the
+    // hold — three pours a tulip made it longer, so the count is read from the control itself); the job plot never once
+    // went back to its start.
+    const lap = solo(syn('tulips-three'), ref('tulips-three'), 'r3', 400).length + ISLAND_HOLD_TICKS;
+    expect({ resets, atLeast: resets >= Math.floor((3 * WEAR.tulip) / (lap + 1)) && resets >= 3 }).toEqual({ resets, atLeast: true });
     // One lap per wear of a tulip in the window (each reopened the job).
     expect([drank, everStart, state.live['job-bed'].lap]).toEqual([true, 0, Math.floor((3 * WEAR.tulip) / WEAR.tulip)]);
   });
@@ -676,5 +693,94 @@ describe('IW-005 (P108 s2) — seek on the island: a pinned robot goes to the ne
     expect(p95).toBeLessThan(5);
     // A search per walk: far fewer searches than walking steps.
     expect(moves).toBeGreaterThan(searches);
+  });
+});
+
+// ── P108 IW-003 (lane M): Mamie's five missions as jobs on the island ────────────────────────────────────────────────
+describe('P108 IW-003 (lane M) — Mamie’s missions on the island: each pinned robot finishes its job, walks home, waits, and goes back when its target wears', () => {
+  const KIND: Record<string, string> = { 'tulip-door': 'pip', 'tulips-three': 'pip', 'eggs-count': 'pocket', 'rows-trick': 'pip', 'mamie-note': 'pip' };
+  const TARGET_KIND: Record<string, 'tulip' | 'basket'> = { 'tulip-door': 'tulip', 'tulips-three': 'tulip', 'eggs-count': 'basket', 'rows-trick': 'tulip', 'mamie-note': 'tulip' };
+  const PLOT = { x: 10, y: 8 };
+  const one = (id: string) => {
+    const r = { ...JSON.parse(JSON.stringify(req(id))), plot: PLOT };
+    const reqs = [...SYN_REQUESTS.filter((q) => q.id !== id && (q.plot.x !== PLOT.x || q.plot.y !== PLOT.y)), r];
+    return bare(SYN_WORLD, { requests: reqs, plots: { [id]: pinned(ref(id), 'r1') }, robots: [{ id: 'r1', kind: KIND[id] }], done: [id], band: 2, pins: [] }).state;
+  };
+  const fullOf = (cur: any, job: any) => job.targets.map((t: string) => cur.things.find((x: any) => String(x.id) === t)).filter(Boolean).map((t: any) => (t.kind === 'basket' ? t.count >= t.capacity : t.have >= t.need));
+  const pose = (cur: any) => ({ x: cur.robot.x, y: cur.robot.y, d: cur.robot.d });
+
+  for (const id of Object.keys(KIND)) {
+    it(`🔴 ${id}: works to the finish line, walks home to its start, waits; the ${TARGET_KIND[id]} wears at WEAR.${TARGET_KIND[id]} and the robot goes back and finishes again — never reset`, () => {
+      let state = one(id);
+      const plot = state.plots.find((p: any) => p.id === id);
+      expect(!!plot.job).toBe(true);
+      const home = req(id).job!.home;
+      // Lap 0: to the wait at home, every target full.
+      let t = 0;
+      const walked: string[] = [];
+      let doneAt = -1;
+      for (; t < 400 && state.live[id].phase !== 'wait'; t++) {
+        state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+        const cur = state.live[id];
+        if (cur.delta && cur.delta.jobDone && doneAt < 0) doneAt = t;
+        if (doneAt >= 0) walked.push(`${cur.robot.x},${cur.robot.y}`);
+      }
+      const cur = state.live[id];
+      expect({ id, phase: cur.phase, lap: cur.lap, full: fullOf(cur, plot.job).every(Boolean), at: pose(cur) }).toEqual({ id, phase: 'wait', lap: 0, full: true, at: { x: home.x, y: home.y, d: home.d } });
+      // The finish line fired once, and the robot was seen at home after it (the walk home: it ends on the home tile).
+      expect({ id, done: doneAt >= 0, last: walked[walked.length - 1] }).toEqual({ id, done: true, last: `${home.x},${home.y}` });
+      // Waiting until the wear: nothing reopens before WEAR.<kind> island ticks (the lap took fewer ticks than that).
+      expect({ id, age: cur.age, beforeWear: cur.age < WEAR[TARGET_KIND[id]] }).toEqual({ id, age: cur.age, beforeWear: true });
+      // Tick to the wear: the job reopens, lap 1 starts on the plot as it stands (never reset to the request's start).
+      let reopened = false;
+      for (; t < 2000 && !reopened; t++) {
+        state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+        if (state.live[id].lap === 1) reopened = true;
+      }
+      expect({ id, reopened, worn: state.live[id].age >= WEAR[TARGET_KIND[id]] }).toEqual({ id, reopened: true, worn: true });
+      // And it finishes again, back home.
+      for (let k = 0; k < 600 && state.live[id].phase !== 'wait'; k++) state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      const again = state.live[id];
+      expect({ id, phase: again.phase, lap: again.lap, full: fullOf(again, plot.job).every(Boolean), at: pose(again) }).toEqual({ id, phase: 'wait', lap: 1, full: true, at: { x: home.x, y: home.y, d: home.d } });
+    });
+  }
+
+  it('🔴 the eggs on the island: Pocket SEEKS each egg where the hen laid it (go to nearest — its target reserved on every walking tick), and after the wear walks to eggs the hen laid since', () => {
+    let state = one('eggs-count');
+    const seen: Array<{ x: number; y: number }> = [];
+    let picks = 0;
+    for (let t = 0; t < 400 && state.live['eggs-count'].phase !== 'wait'; t++) {
+      state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      const d = state.live['eggs-count'].delta || {};
+      if (d.op === 'go_nearest' && d.move) {
+        seen.push(d.move);
+        expect(Object.values(state.live['eggs-count'].reserved || {})).toContain('r1');
+      }
+      if (d.pick && d.pick.kind === 'egg') picks++;
+    }
+    const basket = state.live['eggs-count'].things.find((x: any) => x.id === 'basket');
+    expect({ count: basket.count, walked: seen.length > 0, picks: picks > 0 }).toEqual({ count: 4, walked: true, picks: true });
+    // After Mamie takes an egg (the basket's wear), the hen has laid again: Pocket walks to one of HER new eggs.
+    let lap1Walk = 0;
+    for (let t = 0; t < 1200 && !(state.live['eggs-count'].lap === 1 && state.live['eggs-count'].phase === 'wait'); t++) {
+      const before = state.live['eggs-count'].things.filter((x: any) => x.kind === 'egg').map((x: any) => `${x.x},${x.y}`);
+      state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      const cur = state.live['eggs-count'];
+      const d = cur.delta || {};
+      if (cur.lap === 1 && d.op === 'go_nearest' && d.move) lap1Walk++;
+      if (cur.lap === 1 && d.pick && d.pick.kind === 'egg') expect(before).toContain(`${d.pick.x},${d.pick.y}`);
+    }
+    expect({ lap: state.live['eggs-count'].lap, phase: state.live['eggs-count'].phase, walked: lap1Walk > 0 }).toEqual({ lap: 1, phase: 'wait', walked: true });
+  });
+
+  it('arm: the island’s ask without Olive’s written answer → Mamie’s note on the island never finishes (the robot goes home and back, lap after lap)', () => {
+    const mutated = ISLAND_TICK_SCRIPT.replace('if (r.waiting && r.request) r = step(r.run, w, islAnswer(r.request));', 'if (r.waiting && r.request) r = step(r.run, w, { seq: r.request.seq, ok: false, fallback: true });');
+    expect(mutated).not.toBe(ISLAND_TICK_SCRIPT);
+    // The note the island lays on its plot (djb2 of the id) says the red ones: with no answer, the else row (yellow) is watered.
+    let state = one('mamie-note');
+    const note = state.live['mamie-note'].things.find((x: any) => x.kind === 'note');
+    for (let t = 0; t < 300; t++) state = bare(mutated, { state }).state;
+    const cur = state.live['mamie-note'];
+    expect({ text: note.text, phase: cur.phase === 'wait', laps: cur.lap > 1 }).toEqual({ text: 'The red ones, not the yellow.', phase: false, laps: true });
   });
 });

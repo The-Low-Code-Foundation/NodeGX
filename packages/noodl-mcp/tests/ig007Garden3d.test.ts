@@ -1353,8 +1353,10 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(counts.Mesh + (counts.InstancedMesh || 0)).toBe(built.meshCount);
       // Every thing a job world carries draws something; the 13 requests’ worlds carry no meter and no wall.
       for (const k of ['site', 'basket', 'store', 'can', 'hen']) expect({ k, drawn: by(k).every((g: any) => meshesIn(g) > 0) && by(k).length > 0 }).toEqual({ k, drawn: true });
+      // P108 IW-003 (lane M): the requests carry jobs now; each with its job fields and job things taken off draws none.
+      const JOB_FIELDS = ['id', 'have', 'need', 'count', 'capacity', 'item', 'level', 'max', 'pen', 'owner', 'to', 'build', 'droop', 'stage', 'walked'];
       for (const r of REQUESTS) {
-        const b = build([...r.map], r.things.map((t: any) => ({ ...t }))).built;
+        const b = build([...r.map], r.things.filter((t: any) => !['can', 'basket', 'hen', 'site', 'store', 'postbox', 'door'].includes(t.kind)).map((t: any) => Object.fromEntries(Object.entries(t).filter(([k]) => !JOB_FIELDS.includes(k))))).built;
         expect({ id: r.id, meters: b.things.filter((g: any) => g.userData.meter).length, wall: b.tiles.some((m: any) => m.name === 'tiles-wall') }).toEqual({ id: r.id, meters: 0, wall: false });
       }
     });

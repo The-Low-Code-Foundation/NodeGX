@@ -32,6 +32,11 @@
           "name": "lang",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
         }
       ],
       "x": 350,

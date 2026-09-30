@@ -28,6 +28,12 @@
       "toProperty": "in-words"
     },
     {
+      "fromId": "padkeysIn",
+      "fromProperty": "world",
+      "toId": "padkeysFn",
+      "toProperty": "in-world"
+    },
+    {
       "fromId": "padkeysFn",
       "fromProperty": "out-count",
       "toId": "padkeysOut",

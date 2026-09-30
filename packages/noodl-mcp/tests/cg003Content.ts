@@ -205,7 +205,25 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw4B_trick: s('trick', 'astuce'),
   iw4B_do: s('do trick', 'faire l’astuce'),
   iw4VarsH: s('What {b} remembers', 'Ce que {b} retient'),
-  ...Object.fromEntries(Object.values(REQUEST_SUBS).map((r) => [r.key, r.words]))
+  ...Object.fromEntries(Object.values(REQUEST_SUBS).map((r) => [r.key, r.words])),
+  // ── P108 IW-003 (lane M): what a robot says when "go to nearest" / "go to" finds nothing, by what it looked for (the
+  // step says sayNone:<kind>; Draw world and the pad word it here, else the plain sayNone). One line per seekable kind.
+  iw3mNoneEgg: s('No more eggs here — the hen is still laying.', 'Plus d’œufs ici — la poule est encore en train de pondre.'),
+  iw3mNoneTulip: s('No more tulips to find here.', 'Plus de tulipes à trouver ici.'),
+  iw3mNoneCan: s('I can’t find the watering can.', 'Je ne trouve pas l’arrosoir.'),
+  iw3mNoneBasket: s('I can’t find the basket.', 'Je ne trouve pas le panier.'),
+  iw3mNoneRock: s('No rocks with stones left — they grow back.', 'Plus de rochers avec des pierres — ils repoussent.'),
+  iw3mNoneStone: s('No more stones here.', 'Plus de pierres ici.'),
+  iw3mNoneLetter: s('No more letters here — the post comes again soon.', 'Plus de lettres ici — le facteur repasse bientôt.'),
+  iw3mNoneBall: s('I can’t find the ball.', 'Je ne trouve pas la balle.'),
+  iw3mNoneBowl: s('I can’t find the bowl.', 'Je ne trouve pas la gamelle.'),
+  iw3mNoneDoor: s('I can’t find that door.', 'Je ne trouve pas cette porte.'),
+  iw3mNoneSite: s('I can’t find where to build.', 'Je ne trouve pas où construire.'),
+  iw3mNoneStore: s('I can’t find the crate.', 'Je ne trouve pas la caisse.'),
+  iw3mNoneHen: s('I can’t find the hen.', 'Je ne trouve pas la poule.'),
+  iw3mNonePostbox: s('I can’t find the post box.', 'Je ne trouve pas la boîte aux lettres.'),
+  iw3mNoneWell: s('I can’t walk to the water from here.', 'Je ne peux pas aller jusqu’à l’eau d’ici.'),
+  iw3mNoneRead: s('I don’t know where that is.', 'Je ne sais pas où c’est.')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);
@@ -256,6 +274,18 @@ export const PAD_KEYS: ReadonlyArray<{ op: string; place: string; icon: string; 
   { op: 'olive:read', place: '', icon: 'read', word: 'rungRead' }
 ];
 
+/**
+ * P108 IW-003 (lane M, IW-001 F7 "the pad is the drawer's actions"): where the drawer has `go to nearest` / `go to`, the
+ * pad has one key per kind lying on the plot when the request opens — a thing to fetch (`nearest`: go to the nearest egg)
+ * or a place to take it (`to`: go to the basket; the key records a chip of the first one on the plot). Kinds nobody
+ * fetches or visits (a tulip is watered where it stands) are not keys, so free play's pad is as it was.
+ */
+export const PAD_GO: { nearest: ReadonlyArray<string>; to: ReadonlyArray<string>; emoji: Readonly<Record<string, string>> } = {
+  nearest: ['egg', 'letter', 'stone', 'food', 'ball', 'rock', 'can'],
+  to: ['basket', 'bowl', 'store', 'door', 'site', 'postbox'],
+  emoji: { egg: '🥚', letter: '✉️', stone: '🪨', food: '🍖', ball: '⚽', rock: '⛰️', can: '🪣', basket: '🧺', bowl: '🥣', store: '📦', door: '🚪', site: '🟫', postbox: '📮' }
+};
+
 /** The eyes and hats the robot can wear (the mockup's `#eyes` and `#hats`). A hat other than none/cap is a gift. */
 export const EYES: ReadonlyArray<{ id: string; word: string }> = [
   { id: 'round', word: 'eyeRound' },
@@ -277,7 +307,7 @@ export const IG006_WORDS: Readonly<Record<string, Bi>> = {
   // The three requests (cg002Content.ts IG006_REQUESTS): title, blurb, the islander's line, the reward, the gift.
   rqNoteTitle: s('Water the flowers my note asks for', 'Arrose les fleurs que demande mon mot'),
   rqNoteBlurb: s('Olive reads', 'Olive lit'),
-  rqNoteLine: s('"I left a note by the tulips. Ask Olive to read it: it says which row wants water today."', '« J’ai laissé un mot près des tulipes. Demande à Olive de le lire : il dit quelle rangée veut de l’eau aujourd’hui. »'),
+  rqNoteLine: s('"I left a note by the well. Ask Olive to read it: it says which tulips want water today, the red ones or the yellow ones."', '« J’ai laissé un mot près du puits. Demande à Olive de le lire : il dit quelles tulipes veulent de l’eau aujourd’hui, les rouges ou les jaunes. »'),
   stickerNote: s('Note sticker', 'Autocollant petit mot'),
   giftNote: s('A note sticker, from Mamie Rose', 'Un autocollant petit mot, offert par Mamie Rose'),
   rqFlowerTitle: s('Water the flowers, not the rocks', 'Arrose les fleurs, pas les rochers'),
