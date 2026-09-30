@@ -362,7 +362,8 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     referenceProgram: [blk('when', { slots: { event: 'meow' }, body: [blk('fwd')] })]
   },
   {
-    // P108 IW-003 (lane M): the eggs as a job. The hen lays in her pen (x 0..3, y 0..2; she sits at 0,0) on four tiles
+    // P108 IW-003 (lane M): the eggs as a job. The hen lays in her pen (x 0..3, y 0..2; she sits at 0,2 — the Workshop's
+    // mode badge covers the world's top-left tile) on four tiles
     // the day's seed picks; Pocket carries one egg at a time to Mamie's basket under her door (6,1), which holds four. The
     // basket already has an egg or two from yesterday (the seed chooses 0, 1 or 2), so the count is the lesson: a fixed
     // `repeat 2` fits one morning and not the next, and `until [count of eggs in the basket] = 4` fits every one (IW-004
@@ -374,7 +375,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     tricks: [6],
     map: ['GGGGGGHT', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
     things: [
-      { kind: 'hen', id: 'hen', x: 0, y: 0, pen: [0, 0, 3, 2] },
+      { kind: 'hen', id: 'hen', x: 0, y: 2, pen: [0, 0, 3, 2] },
       { kind: 'basket', id: 'basket', x: 6, y: 1, count: 0, capacity: 4, item: 'egg' }
     ],
     robotStart: { x: 5, y: 1, d: 3, basket: 6 },
@@ -393,7 +394,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     ],
     job: { targets: ['basket'], home: { x: 5, y: 1, d: 3 } },
     seeded: {
-      eggs: { count: 4, among: [[1, 0], [2, 0], [3, 0], [0, 1], [1, 1], [2, 1], [3, 1], [0, 2], [1, 2], [2, 2], [3, 2]] },
+      eggs: { count: 4, among: [[0, 0], [1, 0], [2, 0], [3, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2], [2, 2], [3, 2]] },
       // 0, 1 or 2 from yesterday, three times over: a day is one in three of each, and the gate's seeds lay all three
       // (their fifth draws, after the four eggs, fall at 0.97, 0.88, 0.76: two on seed 1, one on 2, none on 3).
       choose: [{ thing: 'basket', field: 'count', among: [0, 1, 2, 0, 1, 2, 0, 1, 2] }]

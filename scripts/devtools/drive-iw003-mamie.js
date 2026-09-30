@@ -348,6 +348,11 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       const b0 = await evaluate(BOT);
       check(`M2 ${tag}: the tulips wear 0/3 each (three drinks, and the can holds three), Pip's can is empty`, m0.filter((m) => m.kind === 'tulip' && m.meter === '0/3').length === 3 && b0 && b0.can === '0', { m0, b0 });
       await shot('m2-1368-en-01-start');
+      await evaluate(`(() => { const j = document.querySelector('.bg-job'); if (j) j.scrollIntoView({ block: 'center' }); })()`);
+      await wait(400);
+      await shot('m2-1368-en-01b-jobcard');
+      await evaluate('window.scrollTo(0, 0)');
+      await wait(300);
       const presses = layOut(r.referenceProgram);
       await teach(presses);
       const n = (await program()).length;
@@ -445,6 +450,9 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       const ringed = await until(`[...document.querySelectorAll('.bg-stage .gd-ring')].map((r) => { const c = r.closest('.gd-cell'); return c ? c.getAttribute('data-x') + ',' + c.getAttribute('data-y') : 'robot'; })`, (l) => l.includes(`${basket.x},${basket.y}`), 3000);
       check(`M3 ${tag}: the basket the program counts is WATCHED — a ring on it on the world (${ringed.join(' ')})`, ringed.includes(`${basket.x},${basket.y}`), ringed);
       if (lang === 'en') await shot(`m3-${tag}-01-program`);
+      // The morning Play starts from (Start over lays a new day: the basket's count and the eggs may differ from the first).
+      const day = await world();
+      const basketNow = day.things.find((t) => t.kind === 'basket');
       const played = await (async () => {
         await control('play');
         const counts = [];
@@ -457,7 +465,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
           const bm = s.m.find((m) => m.kind === 'basket');
           if (bm && counts[counts.length - 1] !== bm.meter) counts.push(bm.meter);
           if (s.b && (!path.length || path[path.length - 1] !== `${s.b.x},${s.b.y}`)) path.push(`${s.b.x},${s.b.y}`);
-          if (!shotRun && lang === 'en' && bm && bm.meter === `${basket.count + 1}/4`) {
+          if (!shotRun && lang === 'en' && bm && bm.meter === `${basketNow.count + 1}/4`) {
             await shot(`m3-${tag}-02-running`);
             shotRun = true;
           }
@@ -470,7 +478,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
         return { counts, path, won };
       })();
       const want = [];
-      for (let c = basket.count; c <= 4; c++) want.push(`${c}/4`);
+      for (let c = basketNow.count; c <= 4; c++) want.push(`${c}/4`);
       const home = homeOf('eggs-count');
       const end = await world();
       const pen = (p) => { const [x, y] = p.split(',').map(Number); const hen = w0.things.find((t) => t.kind === 'hen'); return !!hen && x >= 0 && y >= 0 && x <= 4 && y <= 3; };
