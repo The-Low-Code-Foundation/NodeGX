@@ -345,7 +345,8 @@ async function pagesPart() {
 
       // ── P-IG6-AC3: the rock and the flowers — ask 3 times, "2 of 3 said yes", the majority waters ──
       await openRequest('Water the flowers, not the rocks', 'the rock and the flowers');
-      for (const op of ['fwd', 'left']) await palTap(op);
+      // P108 IW-003 (lane S): Echo carries an empty can now — turn to the pond below, fill, turn back, then as before.
+      for (const op of ['right', 'fill', 'left', 'fwd', 'left']) await palTap(op);
       await addAsk('is-it-a');
       await tap(first('.bg-blocks-box .gd-prog .gd-blk[data-t="olive:is-it-a"] .gd-slot[data-slot="kind"]'), 'kind');
       await tap(first('.bg-blocks-box .gd-picker .gd-opt[data-opt="a flower"]'), 'a flower');
