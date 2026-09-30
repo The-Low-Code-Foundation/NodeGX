@@ -1354,12 +1354,13 @@ var gardenKitBlocks = (function () {
     '.gd-bk .gd-sel>.blocklyPath{stroke:var(--gd-sel,#A86501);stroke-width:3px}\n' +
     '.gd-bk .gd-slot{cursor:pointer}\n' +
     '.gd-bk-zoom{position:absolute;right:18px;bottom:18px;display:flex;flex-direction:column;gap:6px;z-index:3}\n' +
+    '.gd-bk.gd-narrow .gd-bk-zoom{top:10px;bottom:auto;flex-direction:row}\n' +
     '.gd-bk-zoom button{width:40px;height:40px;border-radius:12px;border:0;background:#fff;color:#2E2A3D;font:800 20px/40px inherit;font-family:inherit;padding:0;box-shadow:0 1px 4px rgba(0,0,0,.2);cursor:pointer;touch-action:manipulation}\n' +
     '.gd-bk .gd-picker{position:fixed;z-index:60;display:flex;flex-wrap:wrap;gap:6px;padding:8px;border-radius:14px;background:#EEE8FF;box-shadow:0 8px 24px rgba(0,0,0,.2);max-width:340px}\n' +
     '.gd-bk .gd-opt{border:0;border-radius:999px;background:#fff;color:#4A2FA6;font-weight:800;font-family:inherit;font-size:15px;padding:9px 14px;min-height:40px;cursor:pointer;touch-action:manipulation}\n' +
     '.gd-bk .gd-opt[aria-pressed="true"]{background:#4A2FA6;color:#fff}\n' +
     '.gd-bk .gd-slot-text{font:inherit;font-weight:700;font-size:15px;padding:8px 10px;border-radius:10px;border:2px solid #D8CCF5;flex:1 1 180px;min-width:0}\n' +
-    '.gd-bk-line{position:absolute;left:12px;right:60px;bottom:12px;z-index:4;padding:10px 12px;border-radius:12px;background:#FFF0DA;color:#2E2A3D;font-weight:800;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;gap:10px;align-items:center}\n' +
+    '.gd-bk-line{position:absolute;left:12px;right:12px;top:12px;z-index:4;padding:10px 12px;border-radius:12px;background:#FFF0DA;color:#2E2A3D;font-weight:800;font-size:15px;box-shadow:0 2px 8px rgba(0,0,0,.15);display:flex;gap:10px;align-items:center}\n' +
     '.gd-bk-line button{border:0;border-radius:999px;background:#fff;color:#4A2FA6;font:800 14px inherit;font-family:inherit;padding:6px 12px;cursor:pointer}\n' +
     '.gd-bk.gd-picking .gd-bk-host{box-shadow:inset 0 0 0 4px #8F6BFF}\n' +
     '.gd-bk.gd-locked .blocklyFlyout{opacity:.55}\n' +
@@ -1415,10 +1416,10 @@ var gardenKitBlocks = (function () {
       return { band: Number(p.band) === 1 ? 1 : 2, lang: lang, palette: map, paletteList: list, words: wordsOf(p.words, lang), showHelp: flag(p.showHelp, false), botName: String(p.botName || 'Pip'), brain: Math.max(0, Math.floor(Number(p.brainSize) || 0)) };
     }
 
-    /** A workspace under 420 px wide (a phone) is narrow: the drawer goes along its top (IW-000: at 400 px a side drawer ate 60 %). */
+    /** A workspace under 380 px wide (a phone) is narrow: the drawer is a strip (IW-000: at 400 px a side drawer ate 60 %). */
     function isNarrow() {
       var wdt = root && root.clientWidth ? root.clientWidth : typeof window !== 'undefined' ? window.innerWidth : 1024;
-      return wdt > 0 && wdt < 420;
+      return wdt > 0 && wdt < 380;
     }
     ed.narrow = isNarrow();
     ed.flyoutScale = function () {
@@ -2050,6 +2051,7 @@ var gardenKitBlocks = (function () {
       var p = props();
       ed.ctx = makeCtx();
       ed.narrow = isNarrow();
+      root.classList.toggle('gd-narrow', ed.narrow);
       ed.key = [ed.narrow, ed.ctx.band, ed.ctx.lang, JSON.stringify(ed.ctx.paletteList), ed.ctx.showHelp, JSON.stringify(ed.ctx.words), ed.ctx.botName, p.motionColor, p.actionColor, p.controlColor, p.askColor].join('|');
       Bk.setLocale(messagesOf(Bk, ed.ctx.lang));
       Bk.config.snapRadius = 48;
@@ -2164,6 +2166,10 @@ var gardenKitBlocks = (function () {
         ed.pickKey = pickKey;
         if (pick && isObj(pick.ref)) ed.applyPick(pick.ref);
       }
+      // React writes the root's className on a render (band, locked): the classes the editor keeps are laid again.
+      root.classList.toggle('gd-narrow', !!ed.narrow);
+      root.classList.toggle('gd-picking', !!ed.picking);
+      root.classList.toggle('gd-locked', !!ed.locked);
     }
 
     function destroyWs() {

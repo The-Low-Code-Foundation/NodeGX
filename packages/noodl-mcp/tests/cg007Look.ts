@@ -265,9 +265,12 @@ ${owlColourRule}
 .bg-face { border-radius: 50%; background-color: var(--paper-2); }
 
 /* The workshop: world and steps side by side, one column under 980px (the mockup's .ws). */
-/* P108 IW-004: the steps column is the Blockly workspace (the drawer inside it) — IW-000's right half, as Richard graded it:
-   clamp(440px, 50vw, 780px). */
-.bg-ws { display: grid !important; grid-template-columns: minmax(0, 1fr) clamp(440px, 50vw, 780px); gap: 16px; align-items: start; }
+/* P108 IW-004: the steps column is the Blockly workspace (the drawer inside it) — IW-000's right half,
+   clamp(440px, 50vw, 780px), from 1200 px up; 43vw under it. Measured: at 1024 × 768 a half-page column made the pad wrap
+   under the world and pushed Play below the fold; at 1368 a 43vw column (588 px) clipped Olive's widest blocks in French
+   (say thank you … and its deed) off the workspace's right edge. */
+.bg-ws { display: grid !important; grid-template-columns: minmax(0, 1fr) clamp(420px, 43vw, 780px); gap: 16px; align-items: start; }
+@media (min-width: 1200px) { .bg-ws { grid-template-columns: minmax(0, 1fr) clamp(440px, 50vw, 780px); } }
 @media (max-width: 980px) { .bg-ws { grid-template-columns: minmax(0, 1fr); } }
 .bg-stage { position: relative !important; width: 100%; max-width: 640px; margin: 0 auto; }
 /* P106 s4 (b): with the pad on (Drive, Teach) the stage is the world and the pad side by side, so no key hides a tile (s3:
@@ -286,7 +289,8 @@ ${owlColourRule}
    the world is blue and still while driving; the steps sit on the paper while driving, never faded (ruling 5). */
 .bg-mode-on { box-shadow: 0 0 0 3px var(--ink), 0 0 0 6px var(--card) !important; }
 .bg-rec-drive::before { background: var(--block-motion); animation: none; }
-.bg-driving .gd-bk .blocklyMainBackground { fill: var(--paper-2); }
+/* IW-004: the workspace's background rect carries Blockly's inline grid fill — only !important paints it (measured). */
+.bg-driving .gd-bk .blocklyMainBackground { fill: var(--paper-2) !important; }
 .bg-steps-note { font-weight: 700; }
 /* The pad (the mockup's .pad), beside the world (P106 s4 (b), above), each key 56 px for a finger (AC5). On a phone it sits
    over the world's corner, as it did (the mockup's). */

@@ -949,7 +949,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(v('teach', 'boxCls')).toBe('bg-blocks-box');
       expect([into('plBlocksBox', 'cssClassName'), into('plStepsNote', 'mounted'), into('plRecText', 'text')]).toEqual([['plMode.boxCls'], ['plModeWords.driving'], ['plModeWords.badge']]);
       // P108 IW-004: the steps are Blockly's workspace; on the paper = its background's fill.
-      expect(GARDEN_CSS).toMatch(/\.bg-driving \.gd-bk \.blocklyMainBackground \{ fill: var\(--paper-2\); \}/);
+      expect(GARDEN_CSS).toMatch(/\.bg-driving \.gd-bk \.blocklyMainBackground \{ fill: var\(--paper-2\) !important; \}/);
       expect(GARDEN_CSS).not.toMatch(/\.bg-driving[^{]*\{[^}]*opacity/);
     });
 
