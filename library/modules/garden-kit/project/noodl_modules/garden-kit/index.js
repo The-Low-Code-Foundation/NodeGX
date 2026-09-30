@@ -4037,7 +4037,7 @@ var gardenKitBlocks = (function () {
   })();
   WORLD_CSS +=
     '\n.gd-cell>.gd-bench{z-index:1}\n' +
-    '.gd-cell>.gd-bench-sami{inset:auto;left:18%;top:-24%;width:64%;height:64%;z-index:2}\n';
+    '.gd-cell>.gd-bench-sami{inset:auto;left:22%;top:4%;width:56%;height:56%;z-index:2}\n';
   /** The bench on its tile: the ground (dirt while it is built, gravel once it stands), its sprite by stage, Sami on a built one. */
   function benchEls(t, i, ground, extras) {
     var st = benchStage(t);

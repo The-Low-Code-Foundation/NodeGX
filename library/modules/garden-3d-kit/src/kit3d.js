@@ -1070,11 +1070,14 @@
     if (st >= 2) add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.14, 0.26, 0.34), mat(PALETTE.rock), 0.28, 0.18, 0)).name = 'leg';
     if (st >= 3) add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.8, 0.08, 0.42), mat(PALETTE.rockLight), 0, 0.35, 0)).name = 'seat';
     if (st >= 4) {
-      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.76, 0.22, 0.07), mat(PALETTE.cobble), 0, 0.56, 0.18)).name = 'back';
-      // Sami sits on it: the islander (his cap, his satchel), lowered onto the seat and turned to face the path.
+      // The back on the north side (−z): the bench faces the path below it, and the camera.
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.76, 0.22, 0.07), mat(PALETTE.cobble), 0, 0.56, -0.18)).name = 'back';
+      // Sami sits on it: the islander (his cap, his satchel), lowered onto the seat and turned to face the path (an
+      // islander faces −z; half a turn faces +z, the path and the camera).
       var sami = THING_BUILDERS.islander(THREE, mat, { kind: 'islander', who: 'sami' }, out);
       sami.scale.set(0.8, 0.62, 0.8);
-      sami.position.set(0, 0.39, 0.02);
+      sami.rotation.y = Math.PI;
+      sami.position.set(0, 0.39, -0.02);
       sami.name = 'sami';
       g.add(sami);
     }
