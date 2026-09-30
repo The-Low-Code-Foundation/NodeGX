@@ -6,7 +6,7 @@
   "type": "array",
   "items": { "$ref": "#/definitions/event" },
   "definitions": {
-    "port": { "type": "string", "minLength": 1 },
+    "port": { "type": "string", "description": "A port name. MAY be empty: String Format registers the empty placeholder `{}` as the port named '' (NSP-006 found the schema refusing what the spec and its scenario produce)." },
     "subject": { "type": "string", "minLength": 1 },
     "canonical": {
       "description": "A canonical value: JSON, plus `{ \"$num\": tag }` for -0 / NaN / ±Infinity and `{ \"$date\": iso | null }` for a Date. Key order is not expressible in JSON Schema; the TypeScript validator checks it.",

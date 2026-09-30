@@ -23,7 +23,10 @@ Measured 2026-09-30 from the catalog's `dynamicPorts.mechanisms` over the 147 pi
 | `runtime-narrowed` | 2 | the runtime narrows a static list per instance |
 
 So for a third of the picker, a replacement editor cannot even show the node's ports without
-embedding this runtime. NSP-001 designed `derived.inputs(params)` as a pure function for exactly this;
+embedding this runtime. NSP-001 designed `derived.inputs(params)` as a pure function for exactly this (and NSP-004
+built the first two — String Format's placeholders and And's numbered inputs — with `derived.discover` beside it for
+what the runtime registers on first write; the catalog-parity gate now grades `inputs({})` against the catalog's
+`dynamicPorts` block);
 this task makes every mechanism above an instance of it.
 
 ## 3. What to build
@@ -58,4 +61,12 @@ this task makes every mechanism above an instance of it.
 
 ## 6. Built
 
-*(empty)*
+*(the task itself is not started; the batches close rows here)*
+
+**Rows closed by NSP-011 (s4, 2026-09-30), all `numbered-inputs`:** **Or** (`input <n>`, as And), **String Mapper** (TWO
+families on one node — `input <n>` drawn as *Input n* in group *Inputs*, `output <n>` drawn as *Mapping n* in group
+*Mappings*; `inputString` starts with `input` and is a declared port, so `discover` refuses it) and **Color Blend**
+(`color <n>`). Each `derived.inputs(params)` follows `collectPorts` (nodedefinition.ts :613-647: the highest index
+mentioned plus one spare, or `<base> 0` alone) and the catalog-parity gate checks `<base> 0`'s prefix and type. With And
+and String Format: **5 of the 68 dynamic-port nodes** have `ports(params)`; 63 rows open. `tests/batch.test.ts` pins the
+three.

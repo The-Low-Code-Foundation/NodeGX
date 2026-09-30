@@ -1,0 +1,217 @@
+[
+  {
+    "name": "nothing before any input; a matched input publishes its mapping",
+    "because": "stringmapper.ts :98-104",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "input 0",
+        "value": "a"
+      },
+      {
+        "set": "output 0",
+        "value": "A"
+      },
+      {
+        "set": "inputString",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "no match publishes Default; a later match publishes the mapping; a later miss the default again",
+    "because": "stringmapper.ts :100-102",
+    "params": {
+      "defaultMapping": "D",
+      "input 0": "a",
+      "output 0": "A"
+    },
+    "steps": [
+      {
+        "set": "inputString",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "inputString",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "inputString",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a matched input with no paired mapping publishes nothing (C3) — the wire keeps what it had",
+    "because": "stringmapper.ts :101 — `mappings[idx]` is undefined; :104 flags an undefined",
+    "params": {
+      "input 0": "a",
+      "output 0": "A",
+      "input 1": "b"
+    },
+    "steps": [
+      {
+        "set": "inputString",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "inputString",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an undefined numbered input reads as '' and matches an empty Input String",
+    "because": "stringmapper.ts :42 `value === undefined ? ''`",
+    "params": {},
+    "steps": [
+      {
+        "set": "input 0"
+      },
+      {
+        "set": "output 0",
+        "value": "EMPTY"
+      },
+      {
+        "set": "inputString",
+        "value": ""
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the first index wins when two inputs hold the same text",
+    "because": "stringmapper.ts :100 `indexOf`",
+    "params": {
+      "input 0": "a",
+      "input 1": "a",
+      "output 0": "X",
+      "output 1": "Y",
+      "inputString": "a"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "holes are skipped: input 2 alone, paired with output 2",
+    "because": "stringmapper.ts :3-9 — sparse arrays; `indexOf` skips holes",
+    "params": {
+      "input 2": "a",
+      "output 2": "Z",
+      "inputString": "a"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "non-strings are their text: the number 5 matches the text '5'",
+    "because": "stringmapper.ts :42, :70 `toString()`",
+    "params": {
+      "input 0": 5,
+      "output 0": "five"
+    },
+    "steps": [
+      {
+        "set": "inputString",
+        "value": "5"
+      },
+      "settle",
+      {
+        "set": "inputString",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "one mapping per frame: two Input String writes in a frame publish the last one",
+    "because": "stringmapper.ts :106-112 `hasScheduledFetch`",
+    "params": {
+      "input 0": "a",
+      "output 0": "A",
+      "input 1": "b",
+      "output 1": "B"
+    },
+    "steps": [
+      {
+        "set": "inputString",
+        "value": "a"
+      },
+      {
+        "set": "inputString",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an undefined Input String matches nothing and publishes Default",
+    "because": "stringmapper.ts :70 — `undefined` is stored, and no input is ever undefined",
+    "params": {
+      "input 0": "a",
+      "output 0": "A",
+      "defaultMapping": "D",
+      "inputString": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "inputString"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "null on Input String: the spec keeps the old lookup (a new Mapping 0 still lands), the runtime throws in the setter (§6 row C4)",
+    "because": "stringmapper.ts :70 — `null.toString()`",
+    "params": {
+      "input 0": "zz",
+      "output 0": "ZZ",
+      "inputString": "zz"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "inputString",
+        "value": null
+      },
+      {
+        "set": "output 0",
+        "value": "ZZ2"
+      },
+      "settle"
+    ],
+    "row": "NSP-011 §6 C4"
+  },
+  {
+    "name": "null on a numbered input: the same throw; the spec keeps the old input (a new Mapping 0 still lands) (§6 row C4)",
+    "because": "stringmapper.ts :42 — `null.toString()`",
+    "params": {
+      "input 0": "zz",
+      "output 0": "ZZ",
+      "inputString": "zz"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "input 0",
+        "value": null
+      },
+      {
+        "set": "output 0",
+        "value": "ZZ2"
+      },
+      "settle"
+    ],
+    "row": "NSP-011 §6 C4"
+  }
+]

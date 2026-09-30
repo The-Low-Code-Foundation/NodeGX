@@ -16,7 +16,13 @@
     "course": {
       "call": "authenticated"
     },
+    "capture": {
+      "call": "authenticated"
+    },
     "lesson": {
+      "call": "authenticated"
+    },
+    "finishStep": {
       "call": "authenticated"
     },
     "learnerProgramme": {

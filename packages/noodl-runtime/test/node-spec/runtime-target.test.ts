@@ -16,7 +16,7 @@ import * as path from 'path';
 
 import { interpreterAdapter, play, validateTrace, specs } from '../../../nodegx-node-spec/src';
 import type { Step, TraceEvent } from '../../../nodegx-node-spec/src';
-import { runtimeTarget } from '../helpers/node-spec-target';
+import { runtimeTarget, withViewerNodes } from '../helpers/node-spec-target';
 
 const runtime = runtimeTarget();
 const interpreter = interpreterAdapter();
@@ -105,11 +105,15 @@ describe('AC1 — mount by type name from the catalog, not a hand list', () => {
     // at mount (user.ts:114), a service the browser viewer installs — a T3 node whose world is
     // NSP-007's and NSP-014's. A node added here needs its reason written in NSP-002 §5; a node
     // leaving is a ratchet the way picker coverage is.
-    expect(failed).toEqual([['net.noodl.user.User', "Cannot read properties of undefined (reading 'forScope')"]]);
+    // (NSP-004: `play` now rethrows a target's throw as a `PlayError` wearing the adapter's name)
+    expect(failed).toEqual([['net.noodl.user.User', "runtime threw: Cannot read properties of undefined (reading 'forScope')"]]);
   });
 
-  test('every registered spec names a type the runtime can mount', () => {
-    for (const type of Object.keys(specs)) expect(runtime.hasType(type)).toBe(true);
+  test('every registered spec names a type the runtime can mount — with the viewer-provided nodes registered (NSP-011)', () => {
+    const withViewer = withViewerNodes(runtimeTarget());
+    for (const type of Object.keys(specs)) expect(withViewer.hasType(type)).toBe(true);
+    // the three the viewer provides are not in the runtime's own list
+    expect(['Color', 'Value Changed', 'Color Blend'].map((t) => runtime.hasType(t))).toEqual([false, false, false]);
   });
 });
 

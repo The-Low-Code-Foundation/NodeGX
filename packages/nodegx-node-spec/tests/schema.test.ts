@@ -38,7 +38,7 @@ const table: Array<[string, unknown, boolean]> = [
   ['an outcome with an empty error', [{ t: 'outcome', port: 'go', value: 'failure', error: '' }], false],
   ['a field the kind does not carry', [{ t: 'in', port: 'go', value: 1 }], false],
   ['a settle with a port', [{ t: 'settle', port: 'x' }], false],
-  ['an empty port name', [{ t: 'in', port: '' }], false],
+  ['an empty port name is well-formed — String Format registers `{}` as the port with the empty name (NSP-006 found the schema refusing it)', [{ t: 'in', port: '' }], true],
   ['a subject that is not a string', [{ t: 'in', port: 'go', subject: 7 }], false]
 ];
 

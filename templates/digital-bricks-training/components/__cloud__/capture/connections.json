@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e4ae8e24-c40c-5f97-9fcb-19b578955e2f",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "who",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-conceptId",
+      "toId": "write",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-field",
+      "toId": "write",
+      "toProperty": "in-field"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-value",
+      "toId": "write",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "who",
+      "fromProperty": "learnerId",
+      "toId": "write",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "write",
+      "fromProperty": "out-version",
+      "toId": "res",
+      "toProperty": "pm-version"
+    },
+    {
+      "fromId": "write",
+      "fromProperty": "out-bumped",
+      "toId": "res",
+      "toProperty": "pm-bumped"
+    },
+    {
+      "fromId": "write",
+      "fromProperty": "out-done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "who",
+      "fromProperty": "failed",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "write",
+      "fromProperty": "out-failed",
+      "toId": "deny",
+      "toProperty": "send"
+    }
+  ]
+}

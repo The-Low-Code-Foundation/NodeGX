@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "e4ae8e24-c40c-5f97-9fcb-19b578955e2f",
+  "name": "capture",
+  "path": "/#__cloud__/capture",
+  "type": "cloud",
+  "created": "2026-09-30T15:00:00.000Z",
+  "modified": "2026-09-30T15:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Save one of the signed-in learner's answers to their project, only if nobody else has changed it since it was read (TASK-L177). The learner comes from the session; conceptId and field only say which of their own questions."
+}

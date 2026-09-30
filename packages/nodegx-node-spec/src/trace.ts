@@ -4,7 +4,11 @@
  * Inputs and outputs in one ordered stream; `settle` marks where the target drains its frame.
  * Between two settles the events are grouped canonically: `value` events SORTED BY PORT NAME
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
- * events in invocation order. That grouping is a rule of the FORMAT, so that a runtime which
+ * events in invocation order. "Changed" is canonical inequality with the last value RECORDED for
+ * the port (nothing before the first settle, so the first settle records every defined output),
+ * "sorted by port name" is code-unit order, and what a frame records for an output is the last
+ * DEFINED value it held after any step of the frame — adapter.ts spells the three out (NSP-006).
+ * That grouping is a rule of the FORMAT, so that a runtime which
  * pulses a signal synchronously inside a setter and delivers the value at frame end (the
  * interpreted runtime) and one that does both at once (the interpreter) produce the same trace —
  * and so that a target which knows nothing of the spec's declaration order (NSP-006) can still
@@ -31,6 +35,7 @@ export type TraceEvent =
   | (Base & { t: 'settle' })
   | (Base & { t: 'value'; port: string; value: unknown })
   | (Base & { t: 'signal'; port: string })
+  /** `port` is the INPUT that was invoked (the signal whose reducer reported), never an output name. */
   | (Base & { t: 'outcome'; port: string; value: Outcome; error?: string });
 
 /** Trace-format version — must match the `/v1.json` in the schema's `$id` (tests/schema.test.ts). */

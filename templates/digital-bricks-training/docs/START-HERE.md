@@ -3,8 +3,9 @@
 A learning platform with no course catalogue: the learner's own project is the spine of their
 curriculum, and every lesson is written for it. This template is built entirely out of NodeGX
 nodes — the sticker-book design system, a lesson kit of section renderers, the learner's pages and
-the coach's — and it reads a **NodeGX backend**: four cloud functions over 25 collections, behind a
-security file that closes everything else. It **only reads**; nothing a person does is saved yet.
+the coach's — and it runs on a **NodeGX backend**: six cloud functions over 25 collections, behind a
+security file that closes everything else. Four read; two write — a learner's answer onto their
+project, and a finished step (TASK-L177, L178). `reset-demo` puts the seed back.
 
 Set up the backend first (*The backend, and the way in*, below — about five commands), then press
 **Run**. Home has two doors. *Log in as the learner* emails Sam a one-time sign-in link; on your own
@@ -120,9 +121,9 @@ on SQLite and on PostgreSQL):
   so a page cannot tell "not yours" from "not there", and it shows its empty state rather than
   waiting.
 - **Lesson/Section row** — the kit's `Section` node emits `Acted`, `Saved` (+ `Field`, `Value`),
-  `Submitted` (+ `Content`), `Write requested`, `Listen requested` and the rest. They are wired to
-  the row's outputs and nowhere else yet: **there are no writes**. They land with the NodeGX write
-  sprint, on the compare-and-swap OpenNoodl HLT-016 built for exactly that.
+  `Submitted` (+ `Content`), `Write requested`, `Listen requested` and the rest. **`Saved` is a
+  write** (TASK-L177): the row calls `capture` itself — see *The two write functions* below. The
+  others are wired to the row's outputs and nowhere else yet.
 
 ## The backend, and the way in (sprint 49)
 
@@ -259,6 +260,40 @@ PORT of the product's timeline model — `assembleTimeline`, `orderEntries`, the
   run, not to one shared `admin` bucket, and `rateLimit.functionRunQueries` (default 1000) is the
   runaway guard. Measured: 100 `course` loads from two learners, all 200, with the operator's admin
   requests in the middle all served. Before the fix, 13 loads drained the deployment.
+
+### The two write functions (L177, L178)
+
+`capture` and `finishStep`, in `components/__cloud__/`. Both are `authenticated`, both take their
+learner from `shared/Caller learner` — the session — and neither accepts a learner id. Every refusal
+is one body, *"This could not be saved."*
+
+- **`capture`** saves one answer onto the learner's project context: read it, merge the one field,
+  write it back **only if `version` is still what was read** (`Records.save(…, { className,
+  ifMatch: { version } })`, OpenNoodl HLT-016). A conflict is read again and retried, never answered
+  200. It refuses a field their lesson does not ask for, on a step that is not open to them.
+  Identical words write nothing. There is no version history (sprint 51 §3.1).
+- **`finishStep`** marks a step complete and opens the next, as three single-row writes each
+  guarded on what was read: stamp the progress row, **open the next step, then complete this one.**
+  The order is a measurement (decision 006): the other order can leave every step done and nothing
+  open after a crash.
+- **The row writes, not the page.** A For Each hands its page only a signal and the row's id, so
+  `Lesson/Section row` calls `capture` itself, when it carries its lesson's concept. Palette's
+  rows carry none and write nothing.
+- **The kit waits.** `Capture` and `Activity` show *Saving…* until the row says `saved:<token>`
+  (a token new for every save), and only then the ✓. A failure keeps the words and says it could
+  not save.
+- **The last step of a lesson** shows its landing and *Mark complete & continue →*. On success the
+  page goes to the course. On failure it stays and says so.
+- **`tools/check-write-functions.mjs`** runs both functions' own scripts against a fake that
+  enforces `ifMatch` as the backend does, including the race by construction and its control (the
+  script with `ifMatch` cut out must lose facts). `--backend … --token … --scratch [--log <backend
+  log>]` runs the real race. It WRITES; run `reset-demo` afterwards. Measured on SQLite and
+  PostgreSQL 16: 12 captures at once keep 12 facts, with 10–19 conflicts retried. With `ifMatch`
+  cut out, 6 of 12 kept on SQLite and 4 of 12 on PostgreSQL, every caller told 200.
+- **A client Cloud Function's outcome port is `done`, not `success`.** A `success` wire validates
+  and never fires. The check refuses one.
+- **A NodeGX archive carries the deployed functions**, so `reset-demo` restores the SEALED ones
+  too. Deploy after a reset, never before.
 
 **The fixtures were made into one consistent world first**, because one database could not hold
 all three as they were, and because the world has to be one person's.
@@ -596,7 +631,8 @@ PostgreSQL runs. Two things the move found, both worth knowing:
 
 ## What is not here yet
 
-Every write — the NodeGX write sprint, on OpenNoodl HLT-016's compare-and-swap. The engine: a lesson
+Every write but the two above — the coach's composers, the learner's question on a card, answers
+to a brief, the confidence check — each a later write on the pattern `capture` set. The engine: a lesson
 nobody has written says *not written yet*, and that is every step Sam has not reached yet. Every coach
 composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every
 string has one owner" above for exactly which strings the table owns today and which are still

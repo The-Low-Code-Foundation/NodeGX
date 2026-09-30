@@ -61,8 +61,8 @@ product's design-token names as aliases of NodeGX's and the lesson CSS lifted fr
 | `AnswerCapsule` | `text` | — |
 | `CodeBlock` | `language`, `code`, `explanation` | — |
 | `Quiz` | `question`, `variant` | Answered, Answer, Correct, Acted |
-| `Activity` | `title`, `steps[]`, `capturesProjectFact` | Saved, Field, Value, Acted |
-| `Capture` | `prompt`, `field`, `hint`, `initialValue`, `facts` | Saved, Field, Value, Acted |
+| `Activity` | `title`, `steps[]`, `capturesProjectFact`, `waitsForSave`, `saveStatus` | Saved, Field, Value, Acted |
+| `Capture` | `prompt`, `field`, `hint`, `initialValue`, `facts`, `waitsForSave`, `saveStatus` | Saved, Field, Value, Acted |
 | `PrepPack` | `title`, `instructions`, `factFields[]`, `facts` | Copied, Pack, Acted |
 | `ArtifactChallenge` | `title`, `brief`, `rubric[]`, `acceptedFormats[]` | Submitted, Content, Acted |
 | `HandoverPack` | `title`, `intro`, `files[]`, `productName` | Write requested, Acted |
@@ -75,6 +75,13 @@ product's design-token names as aliases of NodeGX's and the lesson CSS lifted fr
 | `Mermaid` | `source`, `caption` | — (placeholder) |
 | `Chart` | `chartType`, `data[]`, `xKey`, `yKeys[]`, `caption` | — (placeholder) |
 | `Widget` | `widgetKey`, `params`, `caption` | — (placeholder) |
+
+**A save can wait for the backend** (TASK-L177). With `Waits for save` off, `Capture` and
+`Activity` show a save the moment it is pressed. With it on, they show *Saving…* until `Save
+status` becomes `saved:<token>` (the ✓) or `failed:<token>` (the words stay, and a plain line
+says it could not save). The token must be new for every save: a fast backend can answer inside
+one frame, and a status left over from the last save must not settle this one. `Section` forwards
+both inputs.
 
 `Acted` fires whenever the learner did the thing a section asks — answered, ticked, saved, sent —
 right or wrong. It is what the product measures progress over (its L60 rule), and it is the port

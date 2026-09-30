@@ -206,6 +206,84 @@
       "fromProperty": "out-sections",
       "toId": "ls_index",
       "toProperty": "sections"
+    },
+    {
+      "fromId": "ls_fixture",
+      "fromProperty": "conceptId",
+      "toId": "ls_index",
+      "toProperty": "conceptId"
+    },
+    {
+      "fromId": "ls_programme",
+      "fromProperty": "facts",
+      "toId": "ls_index",
+      "toProperty": "facts"
+    },
+    {
+      "fromId": "ls_captured",
+      "fromProperty": "value",
+      "toId": "ls_index",
+      "toProperty": "captured"
+    },
+    {
+      "fromId": "ls_url",
+      "fromProperty": "pm-concept",
+      "toId": "ls_captured_reset",
+      "toProperty": "in-concept"
+    },
+    {
+      "fromId": "ls_fixture",
+      "fromProperty": "landing",
+      "toId": "ls_close",
+      "toProperty": "landing"
+    },
+    {
+      "fromId": "ls_close",
+      "fromProperty": "finish",
+      "toId": "ls_finish",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ls_fixture",
+      "fromProperty": "conceptId",
+      "toId": "ls_finish",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "ls_finish",
+      "fromProperty": "out-conceptId",
+      "toId": "ls_finish_call",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "ls_finish",
+      "fromProperty": "out-ask",
+      "toId": "ls_finish_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "ls_finish",
+      "fromProperty": "out-state",
+      "toId": "ls_close",
+      "toProperty": "finishState"
+    },
+    {
+      "fromId": "ls_finish_call",
+      "fromProperty": "failure",
+      "toId": "ls_finish_failed",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ls_finish_failed",
+      "fromProperty": "out-state",
+      "toId": "ls_close",
+      "toProperty": "finishState"
+    },
+    {
+      "fromId": "ls_finish_call",
+      "fromProperty": "done",
+      "toId": "ls_to_course",
+      "toProperty": "navigate"
     }
   ]
 }

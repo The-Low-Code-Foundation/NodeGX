@@ -31,6 +31,8 @@ interface CatalogNode {
   typeName: string;
   inputs: CatalogPort[];
   outputs: CatalogPort[];
+  dynamicPorts: null | { mechanisms: string[]; numberedInputs?: Array<{ nameBase: string; displayPrefix: string; type: { name: string } }> };
+  parameterEncoding: null | { known: boolean; seededBy?: string[] };
 }
 
 const catalogPath = path.join(__dirname, '..', '..', 'noodl-types', 'src', 'node-catalog.json');
@@ -63,6 +65,25 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
         .sort((a, b) => a.name.localeCompare(b.name));
       const fromCatalog = node!.inputs.map(shape).sort((a, b) => a.name.localeCompare(b.name));
       expect(fromSpec).toEqual(fromCatalog);
+    });
+
+    test(`${typeName}: dynamic ports — the spec has \`derived\` exactly when the catalog says the node has them (NSP-004, R6)`, () => {
+      const node = byName.get(typeName)!;
+      expect(spec.derived !== undefined).toBe(node.dynamicPorts !== null);
+      if (!node.dynamicPorts) return;
+      // numbered-inputs: `ports({})` draws the first numbered port with the catalog's prefix
+      for (const n of node.dynamicPorts.numberedInputs ?? []) {
+        const first = spec.derived!.inputs({})[`${n.nameBase} 0`];
+        expect(first).toBeDefined();
+        expect(first.displayName).toBe(`${n.displayPrefix} 0`);
+        expect(first.type).toBe(n.type.name);
+      }
+      // runtime-discovered from a parameter: the catalog names the seeding parameter; a placeholder in it draws a port
+      if (node.parameterEncoding?.known && node.parameterEncoding.seededBy) {
+        for (const seed of node.parameterEncoding.seededBy) {
+          expect(Object.keys(spec.derived!.inputs({ [seed]: 'x {probe}' }))).toContain('probe');
+        }
+      }
     });
 
     test(`${typeName}: outputs, with the outcome ports derived from \`outcomes\``, () => {

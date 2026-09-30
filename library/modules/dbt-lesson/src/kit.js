@@ -82,6 +82,8 @@
     captureSave: 'Save to my project',
     captureSaved: '✓ Saved to your project',
     captureEdit: 'Edit',
+    captureSaving: 'Saving…',
+    captureError: 'Couldn’t save — please try again.',
     prepCopy: 'Copy',
     prepCopied: 'Copied!',
     prepDownload: 'Download .md',
@@ -422,8 +424,11 @@
     var capture = data(p.capturesProjectFact, null);
     var doneState = R.useState({});
     var done = doneState[0];
-    var factState = R.useState({ text: '', saved: false });
+    var factState = R.useState({ text: '', saved: false, pending: null, pressedAt: null, error: false });
     var fact = factState[0];
+    var waits = !!p.waitsForSave;
+    useSaveWait(waits, str(p.saveStatus), factState[1]);
+    var busy = waits && fact.pending !== null;
 
     return h(
       'div',
@@ -465,9 +470,10 @@
                   h('textarea', {
                     className: 'dbt-textarea',
                     value: fact.text,
+                    readOnly: busy,
                     placeholder: COPY.activityPlaceholder,
                     onChange: function (e) {
-                      factState[1]({ text: e.target.value, saved: false });
+                      factState[1](Object.assign({}, fact, { text: e.target.value, saved: false, error: false }));
                     }
                   }),
                   h(
@@ -475,22 +481,56 @@
                     {
                       type: 'button',
                       className: 'dbt-btn',
-                      disabled: !fact.text.trim(),
+                      disabled: busy || !fact.text.trim(),
                       onClick: function () {
                         var v = fact.text.trim();
                         if (!v) return;
-                        factState[1]({ text: v, saved: true });
+                        if (waits) factState[1](Object.assign({}, fact, { text: v, pending: v, pressedAt: str(p.saveStatus), error: false }));
+                        else factState[1]({ text: v, saved: true, pending: null, pressedAt: null, error: false });
                         emit(p, 'onSaveField', str(capture.field));
                         emit(p, 'onSaveValue', v);
                         emit(p, 'onSave');
                         emit(p, 'onAction');
                       }
                     },
-                    COPY.activitySave
-                  )
+                    busy ? COPY.captureSaving : COPY.activitySave
+                  ),
+                  fact.error ? h('p', { className: 'dbt-save-error', role: 'status' }, COPY.captureError) : null
                 )
           )
         : null
+    );
+  }
+
+  /**
+   * WAITING FOR THE BACKEND (TASK-L177). With `Waits for save` off — Palette, or
+   * anything that places the kit with no backend — a save is shown the moment it
+   * is pressed, as it always was. With it on, the words wait: the graph sets
+   * `Save status` to `saving`, then `saved` or `failed`, each followed by `:`
+   * and a token that is new for every save (`saved:1727700000000`), and only
+   * `saved` puts the ✓ on screen. The token is what makes it safe: a status left
+   * over from the PREVIOUS save must not settle this one, and a fast backend can
+   * answer inside one frame, so `saving` may never be seen at all. A save
+   * settles on the first status that DIFFERS from the one on screen when it was
+   * pressed. `failed` gives the box back with the text still in it: somebody's
+   * answer is never lost to a network error.
+   */
+  function saveKind(status) {
+    return String(status || '').split(':')[0];
+  }
+  function useSaveWait(waits, status, setState) {
+    R.useEffect(
+      function () {
+        if (!waits) return;
+        setState(function (cur) {
+          if (cur.pending === null || cur.pending === undefined) return cur;
+          if (status === cur.pressedAt) return cur;
+          if (saveKind(status) === 'saved') return Object.assign({}, cur, { text: cur.pending, saved: cur.pending, editing: false, pending: null, error: false });
+          if (saveKind(status) === 'failed') return Object.assign({}, cur, { pending: null, error: true });
+          return cur;
+        });
+      },
+      [waits, status]
     );
   }
 
@@ -503,9 +543,26 @@
 
     var facts = data(p.facts, {}) || {};
     var initial = str(p.initialValue) || str(facts[str(p.field)]);
-    var st = R.useState({ text: initial, saved: initial, editing: !initial });
+    var st = R.useState({ text: initial, saved: initial, editing: !initial, pending: null, pressedAt: null, error: false });
     var s = st[0];
     var set = st[1];
+    var waits = !!p.waitsForSave;
+    useSaveWait(waits, str(p.saveStatus), set);
+    var busy = waits && s.pending !== null;
+    /* The facts can arrive after the lesson (TASK-L177: the page reads them from
+       the learner's programme, a second request). The product's rule: seed from
+       the FIRST defined value, and never over something the learner has typed or
+       is saving. */
+    R.useEffect(
+      function () {
+        if (!initial) return;
+        set(function (cur) {
+          if (cur.saved || cur.text || cur.pending !== null) return cur;
+          return Object.assign({}, cur, { text: initial, saved: initial, editing: false });
+        });
+      },
+      [initial]
+    );
 
     return h(
       'div',
@@ -540,9 +597,10 @@
               className: 'capture-input',
               rows: 3,
               value: s.text,
+              readOnly: busy,
               placeholder: str(p.hint) || COPY.capturePlaceholder,
               onChange: function (e) {
-                set(Object.assign({}, s, { text: e.target.value }));
+                set(Object.assign({}, s, { text: e.target.value, error: false }));
               }
             }),
             h(
@@ -550,19 +608,21 @@
               {
                 type: 'button',
                 className: 'capture-save-btn',
-                disabled: !s.text.trim(),
+                disabled: busy || !s.text.trim(),
                 onClick: function () {
                   var v = s.text.trim();
                   if (!v) return;
-                  set({ text: v, saved: v, editing: false });
+                  if (waits) set(Object.assign({}, s, { text: v, pending: v, pressedAt: str(p.saveStatus), error: false }));
+                  else set({ text: v, saved: v, editing: false, pending: null, pressedAt: null, error: false });
                   emit(p, 'onSaveField', str(p.field));
                   emit(p, 'onSaveValue', v);
                   emit(p, 'onSave');
                   emit(p, 'onAction');
                 }
               },
-              COPY.captureSave
-            )
+              busy ? COPY.captureSaving : COPY.captureSave
+            ),
+            s.error ? h('p', { className: 'dbt-save-error', role: 'status' }, COPY.captureError) : null
           )
     );
   }
@@ -1344,6 +1404,15 @@
       'Unwired, or missing a key, the node renders its built-in English — never a raw key and never blank.'
   });
 
+  /* TASK-L177: the two inputs that make a save wait for the backend. */
+  var WAITS_FOR_SAVE = port('boolean', 'Waits for save', {
+    default: false,
+    description: 'On: a save shows Saving… until Save status says saved or failed, and only then the ✓. Off (Palette, no backend): shown at once, as before.'
+  });
+  var SAVE_STATUS = text('Save status', {
+    description: 'Set by the graph around its write: "saving", then "saved" or "failed", each followed by ":" and a token new for every save. Read only while Waits for save is on.'
+  });
+
   var ASSET_BASE = text('Asset URL base', {
     default: '/api/assets/',
     description: 'Prepended to a storage key when no Src is given. A port, so the backend that serves files decides it.'
@@ -1432,15 +1501,15 @@
     'Lesson: Activity',
     'Numbered steps the learner ticks off, and optionally one project fact it captures. Ticking ONE step is the action.',
     Activity,
-    { title: text('Title'), steps: obj('Steps', { description: 'An array of markdown strings.' }), capturesProjectFact: obj('Captures fact', { description: 'Optional: { field, prompt }.' }) },
+    { title: text('Title'), steps: obj('Steps', { description: 'An array of markdown strings.' }), capturesProjectFact: obj('Captures fact', { description: 'Optional: { field, prompt }.' }), waitsForSave: WAITS_FOR_SAVE, saveStatus: SAVE_STATUS },
     pick(['onSave', 'onSaveField', 'onSaveValue', 'onAction'])
   );
   var Capture_ = kindNode(
     'Capture',
     'Lesson: Capture',
-    'Asks for one project fact and emits it. Pre-fills from Facts by field. The product bumps the project context on save; here the graph decides.',
+    'Asks for one project fact and emits it. Pre-fills from Facts by field. With Waits for save on, the ✓ appears only when the graph says the backend has it (TASK-L177).',
     Capture,
-    { prompt: text('Prompt', { description: 'Markdown.' }), field: text('Field', { description: 'lowerCamelCase, or deliverable.factName.' }), hint: text('Hint'), initialValue: text('Initial value'), facts: obj('Facts', { description: 'The learner’s facts, { field: value }.' }) },
+    { prompt: text('Prompt', { description: 'Markdown.' }), field: text('Field', { description: 'lowerCamelCase, or deliverable.factName.' }), hint: text('Hint'), initialValue: text('Initial value'), facts: obj('Facts', { description: 'The learner’s facts, { field: value }.' }), waitsForSave: WAITS_FOR_SAVE, saveStatus: SAVE_STATUS },
     pick(['onSave', 'onSaveField', 'onSaveValue', 'onAction'])
   );
   var PrepPack_ = kindNode(
@@ -1550,7 +1619,7 @@
         var cls = ['lesson-section', 'dbt-section-' + section.kind, section.kind === 'human_recording' && 'knot-warm', props.done && 'knot-tied', props.current && !props.done && 'knot-current']
           .filter(Boolean)
           .join(' ');
-        var forwarded = { facts: props.facts, assetBase: props.assetBase, copy: props.copy };
+        var forwarded = { facts: props.facts, assetBase: props.assetBase, copy: props.copy, waitsForSave: props.waitsForSave, saveStatus: props.saveStatus };
         Object.keys(ACTION_OUTS).forEach(function (k) {
           forwarded[k] = props[k];
         });
@@ -1564,7 +1633,9 @@
       current: port('boolean', 'Current', { default: false, description: 'Draws the current-knot ring.' }),
       label: text('Label', { description: 'Shown on the node in the graph only.' }),
       assetBase: ASSET_BASE,
-      copy: COPY_PORT
+      copy: COPY_PORT,
+      waitsForSave: WAITS_FOR_SAVE,
+      saveStatus: SAVE_STATUS
     },
     outputProps: ACTION_OUTS
   };

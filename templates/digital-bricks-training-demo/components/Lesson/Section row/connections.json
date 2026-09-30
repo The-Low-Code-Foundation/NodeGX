@@ -44,6 +44,114 @@
       "fromProperty": "copy",
       "toId": "sr_section",
       "toProperty": "copy"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "conceptId",
+      "toId": "sr_waits",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "sr_waits",
+      "fromProperty": "out-waits",
+      "toId": "sr_section",
+      "toProperty": "waitsForSave"
+    },
+    {
+      "fromId": "sr_in",
+      "fromProperty": "conceptId",
+      "toId": "sr_save",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "sr_section",
+      "fromProperty": "onSaveField",
+      "toId": "sr_save",
+      "toProperty": "in-field"
+    },
+    {
+      "fromId": "sr_section",
+      "fromProperty": "onSaveValue",
+      "toId": "sr_save",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "sr_section",
+      "fromProperty": "onSave",
+      "toId": "sr_save",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sr_save",
+      "fromProperty": "out-conceptId",
+      "toId": "sr_call",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "sr_save",
+      "fromProperty": "out-field",
+      "toId": "sr_call",
+      "toProperty": "in-field"
+    },
+    {
+      "fromId": "sr_save",
+      "fromProperty": "out-value",
+      "toId": "sr_call",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "sr_save",
+      "fromProperty": "out-ask",
+      "toId": "sr_call",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sr_save",
+      "fromProperty": "out-status",
+      "toId": "sr_section",
+      "toProperty": "saveStatus"
+    },
+    {
+      "fromId": "sr_save",
+      "fromProperty": "out-field",
+      "toId": "sr_ok",
+      "toProperty": "in-field"
+    },
+    {
+      "fromId": "sr_save",
+      "fromProperty": "out-value",
+      "toId": "sr_ok",
+      "toProperty": "in-value"
+    },
+    {
+      "fromId": "sr_call",
+      "fromProperty": "out-done",
+      "toId": "sr_ok",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sr_ok",
+      "fromProperty": "out-status",
+      "toId": "sr_section",
+      "toProperty": "saveStatus"
+    },
+    {
+      "fromId": "sr_fail",
+      "fromProperty": "out-status",
+      "toId": "sr_section",
+      "toProperty": "saveStatus"
+    },
+    {
+      "fromId": "sr_save",
+      "fromProperty": "out-token",
+      "toId": "sr_ok",
+      "toProperty": "in-token"
+    },
+    {
+      "fromId": "sr_save",
+      "fromProperty": "out-token",
+      "toId": "sr_fail",
+      "toProperty": "in-token"
     }
   ]
 }

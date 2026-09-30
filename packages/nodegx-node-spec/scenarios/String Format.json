@@ -1,0 +1,219 @@
+[
+  {
+    "name": "no params: the first settle publishes the empty string",
+    "because": "stringformat.ts :40-41 — format '' and cachedResult ''; connectInput's read of the getter",
+    "params": {},
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a placeholder fills from its port; while unset it is nothing",
+    "because": "stringformat.ts :89-94, :93 `v !== undefined ? String(v) : ''`",
+    "params": {
+      "format": "Hello, {name}!"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "name",
+        "value": "Ada"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a placeholder used twice fills EVERY time — the port description says only the first (§6 row)",
+    "because": "stringformat.ts :89-94 — one replace per match, each on the first occurrence still standing; the description at :52 and the comment at :91-92 say otherwise",
+    "params": {
+      "format": "{a}{a}"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "x"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a value set before the format mentions it is remembered",
+    "because": "stringformat.ts :102-109 — any name is registered on first write; :128 stores it",
+    "params": {},
+    "steps": [
+      {
+        "set": "name",
+        "value": "Ada"
+      },
+      "settle",
+      {
+        "set": "format",
+        "value": "Hi {name}"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "$-patterns in a value are interpreted by replace: '$&' prints the placeholder back, '$$' prints one dollar (§6 row)",
+    "because": "stringformat.ts :93 — String.prototype.replace with a string pattern still expands $&, $$, $` and $' in the replacement",
+    "params": {
+      "format": "[{v}]"
+    },
+    "steps": [
+      {
+        "set": "v",
+        "value": "$&"
+      },
+      "settle",
+      {
+        "set": "v",
+        "value": "$$"
+      },
+      "settle",
+      {
+        "set": "v",
+        "value": "$5"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the empty placeholder {} names the port ''",
+    "because": "stringformat.ts :81 — the regex allows zero name characters",
+    "params": {
+      "format": "a{}b"
+    },
+    "steps": [
+      {
+        "set": "",
+        "value": "X"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "non-string values are stringified: 5, [1,2], {a:1}, null, true",
+    "because": "stringformat.ts :93 `String(v)`",
+    "params": {
+      "format": "{a}|{b}|{c}|{d}|{e}"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": 5
+      },
+      {
+        "set": "b",
+        "value": [
+          1,
+          2
+        ]
+      },
+      {
+        "set": "c",
+        "value": {
+          "a": 1
+        }
+      },
+      {
+        "set": "d",
+        "value": null
+      },
+      {
+        "set": "e",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a wired number on Format: the spec says '5', the runtime throws in the frame (§6 row)",
+    "because": "stringformat.ts :57 stores the value unconverted and :81 calls .match on it",
+    "params": {
+      "format": 5
+    },
+    "steps": [
+      "settle"
+    ],
+    "row": "NSP-004 §6 C3"
+  },
+  {
+    "name": "characters outside [A-Za-z0-9_] make it not a placeholder",
+    "because": "stringformat.ts :81",
+    "params": {
+      "format": "{first-name} {x}"
+    },
+    "steps": [
+      {
+        "set": "first-name",
+        "value": "A"
+      },
+      {
+        "set": "x",
+        "value": "B"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a value parameter before the format parameter, in the caller's order",
+    "because": "nodescope.ts Object.keys(parameters); registerInputIfNeeded runs before hasInput",
+    "params": {
+      "name": "Ada",
+      "format": "{name}"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a later format keeps the values and drops the ports it no longer names from the output only",
+    "because": "stringformat.ts :54-60 — inputValues survive a format change (:128 is never cleared)",
+    "params": {
+      "format": "{a}-{b}"
+    },
+    "steps": [
+      {
+        "set": "a",
+        "value": "1"
+      },
+      {
+        "set": "b",
+        "value": "2"
+      },
+      "settle",
+      {
+        "set": "format",
+        "value": "{b}"
+      },
+      "settle",
+      {
+        "set": "format",
+        "value": "{a}{b}"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "after a non-string Format the node never formats again — a later good format sends nothing (§6 row)",
+    "because": "stringformat.ts :114-118 — formatScheduled is set before the callback and cleared after formatValue; the .match TypeError (:81) is caught by the scheduler's try/catch and the flag is never cleared, so :112 returns early forever",
+    "params": {},
+    "steps": [
+      {
+        "set": "format",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "format",
+        "value": "ok {a}"
+      },
+      {
+        "set": "a",
+        "value": "1"
+      },
+      "settle"
+    ],
+    "row": "NSP-004 §6 C3"
+  }
+]

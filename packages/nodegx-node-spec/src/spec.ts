@@ -19,6 +19,10 @@
  *   - a reducer receives FROZEN state and inputs and cannot mutate either.
  *
  * Not a DSL. If the spec language ever needs its own debugger, it has failed (NSP-001 §4).
+ *
+ * An authoring rule, from the stranger (NSP-006 §5): write the RULE in plain words before the
+ * citation. A target's author may not have the cited file — the line numbers are for the person
+ * checking the spec against the runtime, never the only place a behaviour is stated.
  */
 
 import type { Coercion } from './coerce';
@@ -63,6 +67,15 @@ export interface UnitValue {
 /** The three terminal outcomes (ERG-001). Exactly one per invocation of an `outcome: true` input. */
 export type Outcome = 'done' | 'unchanged' | 'failure';
 
+/**
+ * What an invoking reducer may report: a terminal outcome, or `deferred` — the outcome is decided
+ * at frame end by `afterInputs` (NSP-011). The Variables' `Set` is the first case: it schedules
+ * `setValueTo(latestValue)` (variablebase.ts :200-206) and only the frame's FINAL value says
+ * whether that was `done` or `unchanged`. Rule 3 still holds at run time: the interpreter refuses
+ * a settle that leaves a deferred outcome unresolved, or resolves one nobody deferred.
+ */
+export type ReducerOutcome = Outcome | 'deferred';
+
 // ------------------------------------------------------------------------------------------------
 // declarations
 
@@ -81,7 +94,12 @@ export interface PortMeta {
 
 export interface ValueInputDecl extends PortMeta {
   type: ValueType;
-  /** What the port holds before anything is sent to it. Also the `fallback` of a `typed-*` coercion. */
+  /**
+   * What the port holds before anything is sent to it — `undefined` when absent. Also the
+   * `fallback` of a `typed-*` coercion. Reducers read STATE, not this: a spec's `state` may seed
+   * differently (String Format's `format` state starts `''` while its `format` input starts
+   * `undefined`), and only a reducer that reads `inputs.<port>` before any write would tell.
+   */
   default?: unknown;
   /** Which conversion the runtime applies on arrival. Declared, never implied — see coerce.ts. */
   coerce?: Coercion;
@@ -118,6 +136,7 @@ export type OutputsDecl<S> = Record<string, OutputDecl<S>>;
 // key selectors
 
 type SignalKeys<T> = { [K in keyof T]: T[K] extends { type: 'signal' } ? K : never }[keyof T];
+type ValueOutputKeys<O> = Exclude<keyof O, SignalKeys<O>>;
 type OutcomeKeys<I> = { [K in keyof I]: I[K] extends { type: 'signal'; outcome: true } ? K : never }[keyof I];
 type PlainSignalKeys<I> = Exclude<SignalKeys<I>, OutcomeKeys<I>>;
 type ValueKeys<I> = Exclude<keyof I, SignalKeys<I>>;
@@ -144,17 +163,47 @@ export interface Patch<S, O> {
   set?: Partial<S>;
   /** Signal outputs to pulse, in order. Only declared signal outputs (rule 1). */
   emit?: ReadonlyArray<SignalKeys<O>>;
+  /**
+   * Which value outputs this write SENDS — the runtime's `flagOutputDirty` calls in the setter.
+   * Absent means all of them (a node that flags on every write, or whose outputs are never
+   * `undefined` mid-frame, needs nothing here). It matters in exactly one case, found by
+   * Boolean To String (NSP-011): a wire carries the last DEFINED value a frame sent, so when an
+   * output is `undefined` at frame end, WHICH earlier writes sent decides what the wire holds —
+   * `trueString` is flagged only while it is the selected string (:46-48). Not part of a
+   * branch's shape for the mutants (a `send` difference is unobservable except in that case).
+   */
+  send?: ReadonlyArray<ValueOutputKeys<O>>;
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
-  /** Required — rule 3. */
-  outcome: Outcome;
+  /** Required — rule 3. `deferred` hands the decision to `afterInputs` (see `ReducerOutcome`). */
+  outcome: ReducerOutcome;
   /** With `outcome: 'failure'`, the error the node reports. */
   error?: string;
 }
 
+/** An outcome `afterInputs` resolves for an invocation that reported `deferred`. */
+export interface ResolvedOutcome<I> {
+  port: OutcomeKeys<I>;
+  outcome: Outcome;
+  error?: string;
+}
+
+/**
+ * What the frame-end reducer returns: an ordinary patch, plus the outcomes it resolves — one per
+ * `deferred` invocation of that port this frame, in invocation order. An invocation the reducer
+ * does not resolve, or a resolution with no invocation behind it, is a spec error at settle.
+ */
+export interface AfterInputsPatch<S, I, O> extends Patch<S, O> {
+  outcomes?: ReadonlyArray<ResolvedOutcome<I>>;
+}
+
 // ------------------------------------------------------------------------------------------------
 // reducers — required for signal inputs, optional for value inputs (rule 4)
+//
+// A value reducer runs AFTER the write: `inputs[port]` already holds the coerced value being
+// written (the same value as its `value` argument); `state` is the state before the patch. A
+// signal reducer sees the inputs as they stand. (Asked by the stranger, NSP-006 §5.)
 
 export type Reducers<S, I, O> = {
   [K in OutcomeKeys<I>]: (state: Readonly<S>, inputs: Inputs<I>) => OutcomePatch<S, O>;
@@ -169,9 +218,58 @@ export type Reducers<S, I, O> = {
 // variables). Designed here, first used by NSP-004. The interpreter calls `inputs(params)` at
 // mount and routes a write to a derived port through `on`.
 
+/**
+ * How a TARGET uses these (NSP-006 §5): it registers `inputs(params)` at mount, each at its
+ * declared default, and every other name `discover` accepts on its first write; a port is coerced
+ * by whichever declaration registered it. A DECLARED input always wins over a derived port of the
+ * same name: a write consults the declaration first, and a target registers NO derived port under
+ * a declared name (the interpreter refuses one as a spec error). So String Format's `{format}`
+ * reads an unset placeholder (`''`), never the `format` input — one behaviour, not two.
+ */
 export interface DerivedPorts<S, O> {
+  /**
+   * The ports an EDITOR draws for these params — R6's `ports(params)`, what the runtime today
+   * computes only inside a live viewer (`sendDynamicPorts`; NSP-020). String Format: one port
+   * per `{placeholder}` in `format`. And: `input 0 … input N+1`, one spare beyond the highest
+   * mentioned, as `collectPorts` (nodedefinition.ts) does.
+   */
   inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
   on: (state: Readonly<S>, port: string, value: unknown, derived: Readonly<Record<string, unknown>>) => Patch<S, O>;
+  /**
+   * A port the target registers ON FIRST WRITE, whatever the params — the runtime's
+   * `registerInputIfNeeded` (node.ts): And accepts any `input <n>`, String Format any name at
+   * all, and stores the value for a format that may only later mention it. Returns the port's
+   * declaration, or `undefined` for a name the target would refuse. Without this, a spec's
+   * derived ports are fixed at mount, which is not what either runtime mechanism does (NSP-004).
+   */
+  discover?: (port: string) => ValueInputDecl | undefined;
+  /**
+   * Port names the GENERATOR may write to, beyond `inputs(params)`, because `discover` accepts
+   * them. The generator cannot invent `input 3` or a placeholder name; the spec offers a few.
+   */
+  candidates?: readonly string[];
+}
+
+/**
+ * The frame-end reducer — the runtime's `scheduleAfterInputsHaveUpdated` idiom (Condition,
+ * Expression, Function, String Format … the twelve `hasScheduled…` families, NDA-017 §2
+ * constraint 3). A value or signal reducer records that a frame needs work (`set: { scheduled:
+ * true }`); the interpreter calls this ONCE per `settle` — every settle, steps or none — before
+ * the frame's observations are recorded, and the reducer does the work against the frame's FINAL
+ * inputs and state. It is
+ * how "two triggers in one frame produce one test" is written without a frame in the spec.
+ * Outcomes are reported by the invoking reducer (they queue to the same settle) — unless it
+ * reported `deferred`, in which case THIS reducer resolves them (`AfterInputsPatch.outcomes`),
+ * the way a Variable's `Set` learns `done` / `unchanged` only from the frame's final value.
+ * Its `emit`s queue AFTER the pulses the frame's reducers already queued, and its `set` is
+ * observed like any step's (NSP-006 §5).
+ */
+export type AfterInputs<S, I, O> = (state: Readonly<S>, inputs: Inputs<I>) => AfterInputsPatch<S, I, O>;
+
+/** What `.on()` takes beside the reducers. */
+export interface Extras<S, I, O> {
+  derived?: DerivedPorts<S, O>;
+  afterInputs?: AfterInputs<S, I, O>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -196,16 +294,26 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   outcomes?: readonly Outcome[];
   /** What the editor's hover/inspect shows for an instance — the runtime's `getInspectInfo`. */
   inspect?: (state: Readonly<S>) => string;
+  /**
+   * What of the world this node's behaviour depends on (T2/T3). The runner refuses a spec that
+   * declares any of these until NSP-007 gives it a scripted world — running a clock-dependent
+   * node without a fake clock is flaky, and flaky grades nothing (NSP-003 §4).
+   */
+  needs?: readonly WorldNeed[];
 }
+
+/** The parts of the world NSP-007 scripts. */
+export type WorldNeed = 'clock' | 'random' | 'network' | 'backend';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
   derived?: DerivedPorts<S, O>;
+  afterInputs?: AfterInputs<S, I, O>;
 }
 
 export interface NodeBuilder<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> {
-  /** The behaviour: one reducer per signal input, optionally one per value input, and derived ports. */
-  on(reducers: Reducers<S, I, O>, derived?: DerivedPorts<S, O>): NodeSpec<S, I, O>;
+  /** The behaviour: one reducer per signal input, optionally one per value input; derived ports and the frame-end reducer in `extras`. */
+  on(reducers: Reducers<S, I, O>, extras?: Extras<S, I, O>): NodeSpec<S, I, O>;
 }
 
 /**
@@ -229,7 +337,12 @@ export function defineNode<S extends object, const I extends InputsDecl, const O
   decl: NodeDecl<S, I, O>
 ): NodeBuilder<S, I, O> {
   return {
-    on: (reducers, derived) => (derived ? { ...decl, on: reducers, derived } : { ...decl, on: reducers })
+    on: (reducers, extras) => {
+      const spec: NodeSpec<S, I, O> = { ...decl, on: reducers };
+      if (extras?.derived) spec.derived = extras.derived;
+      if (extras?.afterInputs) spec.afterInputs = extras.afterInputs;
+      return spec;
+    }
   };
 }
 
@@ -250,11 +363,15 @@ export interface AnyNodeSpec {
   outputs: Record<string, ErasedValueOutput | SignalOutputDecl>;
   outcomes?: readonly Outcome[];
   inspect?: (state: never) => string;
+  needs?: readonly WorldNeed[];
   on: Record<string, ErasedReducer | undefined>;
   derived?: {
     inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
     on: (state: never, port: string, value: unknown, derived: Readonly<Record<string, unknown>>) => unknown;
+    discover?: (port: string) => ValueInputDecl | undefined;
+    candidates?: readonly string[];
   };
+  afterInputs?: (state: never, inputs: never) => unknown;
 }
 export interface ErasedValueOutput extends PortMeta {
   type: ValueType;

@@ -27,6 +27,8 @@
     "captureSave": "Save to my project",
     "captureSaved": "✓ Saved to your project",
     "captureEdit": "Edit",
+    "captureSaving": "Saving…",
+    "captureError": "Couldn’t save — please try again.",
     "prepCopy": "Copy",
     "prepCopied": "Copied!",
     "prepDownload": "Download .md",

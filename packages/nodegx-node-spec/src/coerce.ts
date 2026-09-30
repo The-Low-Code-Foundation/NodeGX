@@ -16,7 +16,10 @@
  * is graded against it by the adapters (NSP-002), never the other way round — that is R3 (a):
  * a disagreement is a §6 row and a ruling, not an edit here.
  *
- * `fallback` is the port's declared `default`.
+ * `fallback` is the port's declared `default`. Only the `typed-*` rules read it: a `js-*` rule
+ * converts `undefined` exactly as JavaScript does — `String(undefined)` is the text `'undefined'`,
+ * `Number(undefined)` is `NaN` — so a port with no `default` and a `js-string` coercion holds
+ * `'undefined'` after a set with no value (asked by the stranger, NSP-006 §5).
  */
 
 export type Coercion =
@@ -27,7 +30,8 @@ export type Coercion =
   | 'typed-number'
   | 'typed-string'
   | 'typed-boolean'
-  | 'typed-color';
+  | 'typed-color'
+  | 'not-false';
 
 export interface CoercionRule {
   /** The runtime line(s) the rule was read from. */
@@ -80,6 +84,12 @@ export const COERCIONS: Readonly<Record<Coercion, CoercionRule>> = Object.freeze
       if (HEX3.test(s) || HEX6.test(s) || RGB.test(s)) return s;
       return fallback;
     }
+  },
+  'not-false': {
+    // The `runOnChange-<input>` checkboxes (NDA-017 §2): only an explicit `false` unticks; `null`,
+    // `undefined`, `0` and `""` all leave the box ticked, unlike `js-boolean`.
+    source: 'noodl-runtime/src/run-on-value-change.ts `setRunOnValueChange(this, inputName, value !== false)` in runOnChangeInput',
+    apply: (v) => v !== false
   }
 });
 

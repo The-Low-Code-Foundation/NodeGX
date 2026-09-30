@@ -1,0 +1,44 @@
+[
+  {
+    "name": "the NSP-001 script: seed pulse, one-frame pair, reset done, reset unchanged",
+    "because": "counter.ts :125-133 (seed), :46-59 and :64-76 (pair in one frame), :107-117 (FH-022 slice 3 reset guard)",
+    "params": { "startValue": 5 },
+    "steps": ["settle", { "signal": "increase" }, "settle", { "signal": "increase" }, { "signal": "decrease" }, "settle", { "signal": "reset" }, "settle", { "signal": "reset" }, "settle"]
+  },
+  {
+    "name": "limits: at Max, Increase reports unchanged and moves nothing",
+    "because": "counter.ts :50-53",
+    "params": { "limitsEnabled": true, "limitsMax": 1 },
+    "steps": ["settle", { "signal": "increase" }, "settle", { "signal": "increase" }, "settle"]
+  },
+  {
+    "name": "limits: at Min, Decrease reports unchanged and moves nothing",
+    "because": "counter.ts :68-70",
+    "params": { "limitsEnabled": true, "limitsMin": 0 },
+    "steps": ["settle", { "signal": "decrease" }, "settle"]
+  },
+  {
+    "name": "no Start Value: the first settle publishes 0 and no pulse",
+    "because": "connectInput delivers the getter's value to a wire made before the first frame (node.ts :555-565)",
+    "params": {},
+    "steps": ["settle"]
+  },
+  {
+    "name": "a later Start Value only moves where Reset returns to",
+    "because": "counter.ts :125-133 — the asymmetric setter",
+    "params": { "startValue": 1 },
+    "steps": ["settle", { "set": "startValue", "value": 9 }, "settle", { "signal": "reset" }, "settle"]
+  },
+  {
+    "name": "Reset when already at Start Value: unchanged, Count Changed silent",
+    "because": "counter.ts :85-105 docblock — the guard that had never once fired (FH-022)",
+    "params": { "startValue": 3 },
+    "steps": ["settle", { "signal": "reset" }, "settle"]
+  },
+  {
+    "name": "coercion: \"3\" → 3, \"abc\" → NaN, \"\" → false",
+    "because": "counter.ts :124 Number(value), :167 value ? true : false",
+    "params": { "startValue": "3", "limitsEnabled": "", "limitsMax": "abc" },
+    "steps": ["settle", { "signal": "increase" }, "settle"]
+  }
+]

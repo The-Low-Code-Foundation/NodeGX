@@ -1,0 +1,84 @@
+[
+  {
+    "name": "Value passes through; Log reports done",
+    "because": "log.ts :120-129, :150-158, :190",
+    "params": {
+      "value": "x"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "log"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "nothing before a value; Log with no message still reports done; null passes through as null",
+    "because": "log.ts :142 — a missing message is '', :159-160 no other outcome",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "log"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an unknown Level falls back to info at write time (an effect, not a wire event — NSP-007; `effectiveLevel`); Log still reports done",
+    "because": "log.ts :106",
+    "params": {
+      "level": "loud",
+      "message": "m"
+    },
+    "steps": [
+      {
+        "signal": "log"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two Log pulses in one frame are two dones",
+    "because": "log.ts :135-146 — one write, one outcome, per pulse",
+    "params": {
+      "message": "m"
+    },
+    "steps": [
+      {
+        "signal": "log"
+      },
+      {
+        "signal": "log"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a number after a unit object on Value: the spec passes 2 through, the runtime passes { value: 2, unit: 'px' } (§6 row C6)",
+    "because": "node.ts setInputValue :410-420",
+    "params": {},
+    "steps": [
+      {
+        "set": "value",
+        "value": {
+          "value": 1,
+          "unit": "px"
+        }
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 2
+      },
+      "settle"
+    ],
+    "row": "NSP-011 §6 C6"
+  }
+]

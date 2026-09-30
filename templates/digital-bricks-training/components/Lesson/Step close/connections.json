@@ -38,6 +38,84 @@
       "fromProperty": "Translation",
       "toId": "scl_eyebrow",
       "toProperty": "text"
+    },
+    {
+      "fromId": "scl_in",
+      "fromProperty": "hasNext",
+      "toId": "scl_shows",
+      "toProperty": "in-hasNext"
+    },
+    {
+      "fromId": "scl_in",
+      "fromProperty": "landing",
+      "toId": "scl_shows",
+      "toProperty": "in-landing"
+    },
+    {
+      "fromId": "scl_in",
+      "fromProperty": "finishState",
+      "toId": "scl_shows",
+      "toProperty": "in-finishState"
+    },
+    {
+      "fromId": "t_scl_finish",
+      "fromProperty": "Translation",
+      "toId": "scl_shows",
+      "toProperty": "in-finishLabel"
+    },
+    {
+      "fromId": "t_scl_finishing",
+      "fromProperty": "Translation",
+      "toId": "scl_shows",
+      "toProperty": "in-finishingLabel"
+    },
+    {
+      "fromId": "scl_in",
+      "fromProperty": "landing",
+      "toId": "scl_landing",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "scl_shows",
+      "fromProperty": "out-hasLanding",
+      "toId": "scl_landing",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "scl_shows",
+      "fromProperty": "out-isFinal",
+      "toId": "scl_finish",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "scl_shows",
+      "fromProperty": "out-label",
+      "toId": "scl_finish",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "scl_shows",
+      "fromProperty": "out-enabled",
+      "toId": "scl_finish",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "scl_shows",
+      "fromProperty": "out-failed",
+      "toId": "scl_failed",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "t_scl_failed",
+      "fromProperty": "Translation",
+      "toId": "scl_failed",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "scl_finish",
+      "fromProperty": "onClick",
+      "toId": "scl_out",
+      "toProperty": "finish"
     }
   ]
 }

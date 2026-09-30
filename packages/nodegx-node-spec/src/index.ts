@@ -7,3 +7,4 @@ export * from './adapters/interpreter';
 export * from './trace';
 export * from './interpreter';
 export * from './nodes';
+export * from './runner';

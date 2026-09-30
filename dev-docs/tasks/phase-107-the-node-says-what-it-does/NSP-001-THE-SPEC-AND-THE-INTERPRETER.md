@@ -142,7 +142,11 @@ export const Counter = defineNode({
   grouping is a rule of the trace FORMAT so a runtime that pulses synchronously inside a setter still compares equal
   — NSP-002's runtime adapter must group the same way; written into `trace.ts` and NSP-002 §4.
 - **Dynamic ports** designed as `derived: { inputs(params) → decls, on(state, port, value, derivedValues) → patch }`
-  passed as `.on(reducers, derived)`; the interpreter routes a write to a derived port through it and refuses a derived
+  passed as `.on(reducers, derived)` — ~~as `.on(reducers, derived)`~~ **s3 (NSP-004): the second argument is
+  `extras: { derived?, afterInputs? }`**, `derived` grew `discover(port)` (a port the target registers on first
+  write — And's `input <n>`, String Format's any-name) and `candidates` (names the generator may drive), and
+  `afterInputs(state, inputs) → patch` is the frame-end reducer the `scheduleAfterInputsHaveUpdated` families need
+  (Condition first). NSP-004 §5 has the reasons; the interpreter routes a write to a derived port through it and refuses a derived
   port that shadows a declared one. First real use: String Format, NSP-004.
 - **Units (C10):** `type: 'dimension'` ports carry `number | { value, unit }` (`UnitValue`). Nothing uses it yet.
 - **Run-time guards mirror every type rule** (a spec can arrive as data): undeclared `set` key / `emit` name, a
@@ -158,3 +162,11 @@ package still depends on nothing in the runtime.
 **Not in this task:** the JSON schema and canonicaliser (NSP-002), the runtime adapter (NSP-002), scenarios as JSON
 files and mutants (NSP-003). `run(spec, params, steps)` already takes a JSON-shaped `Step[]` so NSP-003 can read
 scenarios from disk without a new format.
+
+**Grown in s4 (NSP-011, 2026-09-30) — two things, both in `spec.ts` with their reasons:** an outcome may be
+**`'deferred'`** (`ReducerOutcome`) and the frame-end reducer then returns `outcomes: [{ port, outcome, error? }]`
+(`AfterInputsPatch`) — the Variables' `Set` learns done / unchanged only from the frame's final value; the interpreter keeps
+rule 3 at run time (an unresolved slot, a resolution nobody deferred, or a `deferred` with no `afterInputs` is a
+`SpecError` at settle). And a patch may carry **`send: [<value outputs>]`** — the runtime's `flagOutputDirty` calls, named
+only where they are conditional (Boolean To String), because a wire holds the last DEFINED value a frame sent (NSP-002 §5
+addendum). NSP-011 §6.3 has the derivations.

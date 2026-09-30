@@ -30,6 +30,21 @@ rule-breaking row. 🔴 Found: `classPut` answered **404** for a refusal it did 
 broken rule on an edit is now 400. **The index half is done.** ✅ **(b) is RULED OUT for now**
 (Richard, 2026-09-22, P99 s21 — see §3). Left on HLT-016: **AC6 only**, and it is the DBT stream's.
 
+## ✅ AC6 MET 2026-09-30 by the DBT stream (its sprint 51, TASK-L177 + TASK-L178). HLT-016 is closed.
+
+The template's capture write reads the project context, merges one field, and writes with
+`ifMatch: { version }`, re-reading on `precondition-failed`. **The L62 race was driven live, control
+first**: 12 concurrent captures from one learner's session with `ifMatch` cut out kept **6 of 12 on
+SQLite and 4 of 12 on PostgreSQL 16, every caller told 200**. As built, **12 of 12 on both**, with
+10–19 conflicts re-read and retried. **(b) is still not needed, and now that is a measurement**:
+finishing a step is the product's two-row transaction, and it is expressible as three guarded
+single-row writes **if the next step is opened before this one is completed**. Every state a crash
+between two writes can leave was built by hand and looked at as the learner. The other order can
+leave every step done and nothing to open, which nothing the learner would do heals. Found beside
+it: a client Cloud Function wired from `success` (ERG-001 renamed it `done`) passes
+`validate_project` with 0 errors and never fires. Reported in the template's decision 006, not
+filed as a row.
+
 ## 1. The person sentence
 
 > **Someone building on the NodeGX backend can write "change this row only if nobody else has

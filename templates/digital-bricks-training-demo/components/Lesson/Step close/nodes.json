@@ -24,6 +24,16 @@
           "name": "hasNext",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "landing",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "finishState",
+          "plug": "output",
+          "type": "string"
         }
       ]
     },
@@ -36,7 +46,10 @@
       "children": [
         "scl_eyebrow",
         "scl_goal",
-        "scl_next"
+        "scl_landing",
+        "scl_next",
+        "scl_finish",
+        "scl_failed"
       ],
       "parameters": {
         "width": {
@@ -112,6 +125,11 @@
           "name": "next",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "finish",
+          "plug": "input",
+          "type": "signal"
         }
       ]
     },
@@ -127,6 +145,177 @@
       },
       "metadata": {
         "comment": "Was the literal \"Where this step leaves you\" on scl_eyebrow.text. It lives in Data/Strings now (TASK-L161)."
+      }
+    },
+    {
+      "id": "scl_landing",
+      "type": "Text",
+      "label": "The landing — what is true now",
+      "x": 360,
+      "y": 320,
+      "parent": "scl_box",
+      "parameters": {
+        "cssClassName": "lesson-landing",
+        "mounted": false
+      },
+      "metadata": {
+        "comment": "The lesson's `landing` (TASK-L61), which Data/Lesson has carried since L170 and no page drew. Last step only (TASK-L178)."
+      }
+    },
+    {
+      "id": "scl_finish",
+      "type": "net.noodl.controls.button",
+      "label": "Mark complete & continue",
+      "x": 360,
+      "y": 440,
+      "parent": "scl_box",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "useLabel": true,
+        "cssClassName": "btn btn-thread lesson-step-next pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "mounted": false
+      },
+      "metadata": {
+        "comment": "Last step only (TASK-L178). The product's words. Background and colour as tokens because the Button control paints both inline."
+      }
+    },
+    {
+      "id": "scl_failed",
+      "type": "Text",
+      "label": "It could not be marked complete",
+      "x": 360,
+      "y": 540,
+      "parent": "scl_box",
+      "parameters": {
+        "cssClassName": "dbt-save-error",
+        "mounted": false
+      },
+      "metadata": {
+        "comment": "Plain ink, no red, no --warm: it is direction, not an alarm (TASK-L178)."
+      }
+    },
+    {
+      "id": "scl_shows",
+      "type": "JavaScriptFunction",
+      "label": "What the last step shows",
+      "x": 700,
+      "y": 200,
+      "parameters": {
+        "functionScript": "/*\n * WHAT THE LAST STEP SHOWS (TASK-L178). Steps 1..n-1 end with \"Next: … →\" and\n * nothing else. The last one ends with the lesson's landing — what is true now\n * that was not at the start — and the one way to say this step is done. Nothing\n * is disabled on the way there and nothing is scored: \"Mark complete\" is not a\n * test, and pressing it again on a finished step is harmless.\n *\n * `finishState` is '' (nothing yet), 'saving', or 'failed'. While saving the\n * button reads Saving… and cannot be pressed twice; a failure puts it back and\n * says so, because a step that looks finished and is not is the worst answer.\n */\nconst isFinal = Inputs.hasNext === false;\nconst state = String(Inputs.finishState || '');\nOutputs.isFinal = isFinal;\nOutputs.hasLanding = isFinal && String(Inputs.landing || '') !== '';\nOutputs.busy = state === 'saving';\nOutputs.enabled = state !== 'saving';\nOutputs.failed = isFinal && state === 'failed';\nOutputs.label = state === 'saving' ? String(Inputs.finishingLabel || '') : String(Inputs.finishLabel || '');\n"
+      },
+      "ports": [
+        {
+          "name": "in-hasNext",
+          "plug": "input",
+          "type": "*",
+          "displayName": "hasNext",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-landing",
+          "plug": "input",
+          "type": "*",
+          "displayName": "landing",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-finishState",
+          "plug": "input",
+          "type": "*",
+          "displayName": "finishState",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-finishLabel",
+          "plug": "input",
+          "type": "*",
+          "displayName": "finishLabel",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-finishingLabel",
+          "plug": "input",
+          "type": "*",
+          "displayName": "finishingLabel",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-isFinal",
+          "plug": "output",
+          "type": "*",
+          "displayName": "isFinal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasLanding",
+          "plug": "output",
+          "type": "*",
+          "displayName": "hasLanding",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-busy",
+          "plug": "output",
+          "type": "*",
+          "displayName": "busy",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-enabled",
+          "plug": "output",
+          "type": "*",
+          "displayName": "enabled",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "*",
+          "displayName": "failed",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-label",
+          "plug": "output",
+          "type": "*",
+          "displayName": "label",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "t_scl_finish",
+      "type": "Translation",
+      "label": "lesson:stepper.finish",
+      "x": 1000,
+      "y": 680,
+      "parameters": {
+        "Key": "stepper.finish",
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "t_scl_finishing",
+      "type": "Translation",
+      "label": "lesson:stepper.finishing",
+      "x": 1000,
+      "y": 760,
+      "parameters": {
+        "Key": "stepper.finishing",
+        "Namespace": "lesson"
+      }
+    },
+    {
+      "id": "t_scl_failed",
+      "type": "Translation",
+      "label": "lesson:stepper.finishFailed",
+      "x": 1000,
+      "y": 840,
+      "parameters": {
+        "Key": "stepper.finishFailed",
+        "Namespace": "lesson"
       }
     }
   ],
