@@ -72,6 +72,12 @@ const round = (p: unknown) => JSON.stringify(T().toEngine(T().toBlockly(p)));
 /** Block List's emitted shape (a stored v4 program): the kit's own normalizer, run on the program. */
 const blockListNode = () => kit.reactNodes.find((n: any) => n.name === 'garden-kit.BlockList');
 const asStored = (p: unknown): Program => JSON.parse(blockListNode().program.emit(p));
+/**
+ * P108 IW-003 (lane P): a v4 save was written by Block List, whose slots are strings — a program with a chip (an OBJECT
+ * slot: go_to [post box], go_to [what Olive read]) was never stored that way (no palette offered go_to before IW-003), and
+ * Block List's emit flattens it to "[object Object]". The "as stored" half is for the programs a v4 save can hold.
+ */
+const v4Storable = (list: ReadonlyArray<any>): boolean => list.every((b) => Object.values(b.slots ?? {}).every((v) => v === null || typeof v !== 'object') && v4Storable(b.body ?? []) && v4Storable(b.else ?? []));
 
 /**
  * The program a band-1 child records (cg002Engine's `unrolled`): repeats unrolled, tricks inlined, primitives only —
@@ -200,6 +206,7 @@ describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', (
         const program = band === 1 ? unrolled(r.referenceProgram) : r.referenceProgram;
         it(`${r.id}, band ${band === 1 ? '7–9' : '10–12'}: the reference program, and the same as a stored v4 save holds it`, () => {
           expect(round(program)).toBe(JSON.stringify(program));
+          if (!v4Storable(program)) return;
           const stored = asStored(program);
           expect(round(stored)).toBe(JSON.stringify(stored));
         });
@@ -326,6 +333,17 @@ describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', (
     it('band 2 without until/if: no value blocks', () => {
       expect(types(2, ['fwd', 'left', 'pick', 'put', 'say', 'repeat'])).toEqual(['garden_forward', 'garden_turn_left', 'garden_pick', 'garden_put', 'garden_say', 'garden_repeat']);
     });
+    // P108 IW-003 (lane P): the envelopes' drawer — go to and Olive's read, no until/if — offers the read chip alone.
+    it('band 2 with go to and Olive’s read but no until/if (the envelopes): the “what Olive read” chip, and no other value block', () => {
+      const withRead = blocksNode().toolbox({ band: 2, lang: 'en', palette: {}, paletteList: palette(['fwd', 'pick', 'put', 'go_to', 'repeat', 'olive:read']), words: {}, showHelp: false }).contents.filter((c: any) => c.kind === 'block');
+      const chips = withRead.filter((c: any) => c.type === 'garden_thing');
+      expect(chips.map((c: any) => c.extraState)).toEqual([{ ref: 'read' }]);
+      expect(withRead.map((c: any) => c.type).filter((x: string) => /garden_(sensor|is|count|level|compare|number|logic|not|read|if_else)$/.test(x))).toEqual([]);
+      // Known-firing beside the absence: without Olive's read (or without go to) there is no chip.
+      expect(types(2, ['fwd', 'pick', 'put', 'go_to', 'repeat'])).not.toContain('garden_thing');
+      expect(types(2, ['fwd', 'pick', 'put', 'repeat', 'olive:read'])).not.toContain('garden_thing');
+      expect(types(1, ['fwd', 'pick', 'put', 'go_to', 'olive:read'])).not.toContain('garden_thing');
+    });
   });
 
   describe('🔴 through a real Blockly 12.3.1 (the vendored file): load into a headless workspace, save, translate back — byte-identical', () => {
@@ -358,6 +376,7 @@ describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', (
         for (const band of [1, 2]) {
           const program = band === 1 ? unrolled(r.referenceProgram) : r.referenceProgram;
           if (through(program) !== JSON.stringify(program)) bad.push(`${r.id}/${band}`);
+          if (!v4Storable(program)) continue;
           const stored = asStored(program);
           if (through(stored) !== JSON.stringify(stored)) bad.push(`${r.id}/${band}/stored`);
         }

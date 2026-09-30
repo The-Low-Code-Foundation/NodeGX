@@ -1039,6 +1039,29 @@
         g.userData.pen = pen;
       }
       return g;
+    },
+    // P108 IW-003 (lane P): a front door standing on its step, facing the camera (+z, as the houses' doors do), with a
+    // letterbox; a letter through it (count > 0) shows its corner above the slot. Its owner's name is a plate the overlay
+    // draws under it (userData.owner).
+    door: function (THREE, mat, t, out) {
+      var g = new THREE.Group();
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.62, 0.06, 0.34), mat(PALETTE.path), 0, 0.03, 0.08));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.5, 0.8, 0.12), mat(PALETTE.hodPole), 0, 0.46, 0));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.4, 0.7, 0.04), mat(PALETTE.door), 0, 0.43, 0.06));
+      g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.22, 0.05, 0.02), mat(PALETTE.ink), 0, 0.58, 0.085));
+      g.add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.035, 6, 5), mat(PALETTE.yellow), 0.13, 0.42, 0.09));
+      out.meshCount += 5;
+      var dm = meterOf(t);
+      if (dm && dm.have > 0) {
+        var mail = mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.12, 0.02), mat(PALETTE.letter), 0, 0.66, 0.09);
+        mail.name = 'mail';
+        g.add(mail);
+        g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.025, 0.022), mat(PALETTE.letterInk), 0, 0.7, 0.092));
+        out.meshCount += 2;
+        g.userData.mail = true;
+      }
+      g.userData.owner = t.owner === undefined || t.owner === null ? '' : String(t.owner);
+      return g;
     }
   };
 
@@ -1234,6 +1257,7 @@
     var things = [];
     // P108 IW-002: where a meter chip floats over each kind (the mockup's lifts, in world units above the tile top).
     var METER_LIFT = { tulip: 0.72, site: 0.3, basket: 0.62, bowl: 0.45, store: 0.7, can: 0.62, rock: 0.72, hen: 0.66 };
+    METER_LIFT.door = 0.98; // P108 IW-003 (lane P): over the door's lintel.
     var placeThing = function (t, i) {
       var build = THING_BUILDERS[t.kind];
       if (!build) return;
@@ -1799,6 +1823,15 @@
         var e = el('gd3-label', { 'data-label': g.userData.x + ',' + g.userData.y });
         if (!e) return;
         e.textContent = String(g.userData.text || '');
+        o.overlay.appendChild(e);
+        overlayEls.labels.push({ el: e, g: g });
+      });
+      // P108 IW-003 (lane P): a door's owner on a plate under it — a label's pill, placed as a label is.
+      eng.built.things.forEach(function (g) {
+        if (g.userData.kind !== 'door' || !g.userData.owner) return;
+        var e = el('gd3-label gd3-plate', { 'data-owner': g.userData.owner, 'data-x': g.userData.x, 'data-y': g.userData.y });
+        if (!e) return;
+        e.textContent = String(g.userData.owner);
         o.overlay.appendChild(e);
         overlayEls.labels.push({ el: e, g: g });
       });
@@ -2420,6 +2453,8 @@
     '.gd3-meter.gd3-watch{outline:3px solid #8F6BFF;outline-offset:1px;font-size:15px;gap:5px;padding:2px 11px;z-index:3}\n' +
     '.gd3-meter.gd3-watch .gd3-pip{width:9px;height:14px;border-radius:4px}.gd3-meter.gd3-watch .gd3-mi{width:11px;height:11px}.gd3-meter.gd3-watch .gd3-mi-egg{width:10px;height:13px}.gd3-meter.gd3-watch .gd3-mi-stone,.gd3-meter.gd3-watch .gd3-mi-food,.gd3-meter.gd3-watch .gd3-mi-letter{width:14px;height:10px}\n' +
     '.gd3-ring{position:absolute;transform:translate(-50%,-50%);box-sizing:border-box;border:3px solid #8F6BFF;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.9),inset 0 0 0 2px rgba(255,255,255,.9);pointer-events:none}\n' +
+    // P108 IW-003 (lane P): the door's name plate (a label's pill, the 2D plate's colours); hidden on the island.
+    '.gd3-plate{background:#FFF7E8;color:#2E2A3D;border:1.5px solid #8B5A2B;border-radius:6px;padding:0 6px;font-size:11px;box-shadow:none}.gd3-world[data-wide="1"] .gd3-plate{display:none}\n' +
     '.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch){font-size:9px;padding:0 4px;gap:2px}.gd3-world[data-wide="1"] .gd3-meter:not(.gd3-watch) .gd3-pips{display:none}\n' +
     '.gd3-world.gd3-picking{border-color:#8F6BFF;box-shadow:0 0 0 3px #EEE8FF}.gd3-picking .gd3-canvas{cursor:crosshair}';
 

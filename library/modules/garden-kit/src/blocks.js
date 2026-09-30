@@ -1307,6 +1307,7 @@ var gardenKitBlocks = (function () {
     var hasIf = false;
     var hasRead = false;
     var hasVars = false;
+    var hasGoTo = false;
     for (var i = 0; i < list.length; i++) {
       var e = list[i];
       if (!e || typeof e.id !== 'string') continue;
@@ -1315,6 +1316,7 @@ var gardenKitBlocks = (function () {
       if (e.id === 'if') hasIf = true;
       if (e.id === 'olive:read') hasRead = true;
       if (e.id === 'set' || e.id === 'change') hasVars = true;
+      if (e.id === 'go_to') hasGoTo = true;
       if (e.id === 'if' && ctx.band === 2) contents.push({ kind: 'block', type: 'garden_if_else', inputs: { COND: { shadow: { type: 'garden_sensor', fields: { SENSOR: '', ARG: '1' } } } } });
     }
     if (ctx.band === 2 && hasCond) {
@@ -1334,6 +1336,12 @@ var gardenKitBlocks = (function () {
       contents.push({ kind: 'block', type: 'garden_not' });
       if (hasRead) contents.push({ kind: 'block', type: 'garden_read' });
       if (hasVars) contents.push({ kind: 'block', type: 'garden_var', fields: { NAME: 'count' } });
+    }
+    // P108 IW-003 (lane P): go to [what Olive read] with no until/if in the drawer (the envelopes): the read chip alone,
+    // so a child can put it in go to's slot; nothing else of the value blocks.
+    if (ctx.band === 2 && !hasCond && hasRead && hasGoTo) {
+      contents.push({ kind: 'sep', gap: 20 });
+      contents.push({ kind: 'block', type: 'garden_thing', extraState: { ref: 'read' } });
     }
     void hasIf;
     return { kind: 'flyoutToolbox', contents: contents };

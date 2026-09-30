@@ -1353,7 +1353,8 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(counts.Mesh + (counts.InstancedMesh || 0)).toBe(built.meshCount);
       // Every thing a job world carries draws something; the 13 requests’ worlds carry no meter and no wall.
       for (const k of ['site', 'basket', 'store', 'can', 'hen']) expect({ k, drawn: by(k).every((g: any) => meshesIn(g) > 0) && by(k).length > 0 }).toEqual({ k, drawn: true });
-      for (const r of REQUESTS) {
+      // P108 IW-003 (lane P): a mission moved onto the job model wears its meters (its own rows); the rest none.
+      for (const r of REQUESTS.filter((q: any) => !q.job && !q.seeded)) {
         const b = build([...r.map], r.things.map((t: any) => ({ ...t }))).built;
         expect({ id: r.id, meters: b.things.filter((g: any) => g.userData.meter).length, wall: b.tiles.some((m: any) => m.name === 'tiles-wall') }).toEqual({ id: r.id, meters: 0, wall: false });
       }
@@ -1434,6 +1435,47 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(new Set(three.map((l) => JSON.stringify(l))).size).toBe(3);
       expect(shape(2)).toEqual(three[1]);
       for (const l of three) expect([l.wall.length, l.eggs.length, l.walls]).toEqual([1, 3, 1]);
+    });
+  });
+
+  // ── P108 IW-003 (lane P): the door in 3D ──
+  describe('IW-003 (P108 s3, lane P) — a door in the round: frame, panel, letterbox, a letter once one is through; its owner’s name a plate in the overlay', () => {
+    /* eslint-disable @typescript-eslint/no-var-requires */
+    const { REQUESTS } = require('./cg002Content');
+    const { ENGINE, helper } = require('./cg002Scripts');
+    /* eslint-enable @typescript-eslint/no-var-requires */
+    const W = () => node().world;
+    const build = (rows: string[], things: unknown[]) => {
+      const st = threeStub();
+      return node().scene.buildScene({ map: W().parseMap({ rows }), things: W().parseThings(things), robots: [] }, st.THREE);
+    };
+    const live = (rows: string[], things: unknown[]) => {
+      const { THREE } = threeStub();
+      const dom = fakeDom();
+      const eng = node().engine.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => 0, raf: () => 1, caf: () => {}, onTap: () => {} });
+      eng.setWorld({ map: W().parseMap({ rows }), things: W().parseThings(things), robots: [] });
+      eng.frame();
+      return dom;
+    };
+    const DOOR = (count: number, owner?: string) => ({ kind: 'door', x: 1, y: 0, count, capacity: 1, ...(owner ? { owner } : {}) });
+
+    it('🔴 the door builds from primitives, honestly counted; with a letter through it the letter shows (two more meshes), and its chip floats over the lintel', () => {
+      const empty = build(['GGG'], [DOOR(0, 'Sami')]);
+      const full = build(['GGG'], [DOOR(1, 'Sami')]);
+      const door = (b: any) => b.things.find((g: any) => g.userData.kind === 'door');
+      const meshes = (g: any) => { let n = 0; g.traverse((o: any) => { if (o.type === 'Mesh') n++; }); return n; };
+      expect([meshes(door(empty)), meshes(door(full)), !!door(empty).userData.mail, door(full).userData.mail]).toEqual([5, 7, false, true]);
+      expect([door(full).userData.owner, door(full).userData.meter.text, door(full).userData.meter.full, door(full).userData.lift]).toEqual(['Sami', '1/1', true, 0.98]);
+    });
+
+    it('🔴 the plates: the envelopes’ three doors each wear their owner’s name in the overlay (a label’s pill); a door with no owner wears none; the island hides them', () => {
+      const r = REQUESTS.find((q: any) => q.id === 'envelopes');
+      const w = helper(ENGINE, 'seedWorld', { map: [...r.map], things: r.things.map((t: any) => ({ ...t })), robots: [] }, JSON.parse(JSON.stringify(r)), 1);
+      const dom = live(w.map, w.things);
+      const plates = dom.overlay.children.filter((c: any) => /gd3-plate/.test(c.className));
+      expect(plates.map((c: any) => [c.attrs['data-owner'], c.textContent])).toEqual([['Mamie Rose', 'Mamie Rose'], ['Sami', 'Sami'], ['Biscuit', 'Biscuit']]);
+      expect(live(['GGG'], [DOOR(0)]).overlay.children.filter((c: any) => /gd3-plate/.test(c.className))).toEqual([]);
+      expect(node().css as string).toMatch(/\.gd3-world\[data-wide="1"\] \.gd3-plate\{display:none\}/);
     });
   });
 });
