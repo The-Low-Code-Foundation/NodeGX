@@ -22,7 +22,7 @@ Built-but-undriven: 0 (nothing here is driven in the app until NSP-019).
 | `npx tsc -p packages/nodegx-node-spec --noEmit` | exit 0 |
 | `npx lerna run test --scope @nodegx/node-spec` | exit 0 |
 | `node scripts/node-spec/census.js --check` | fresh, 147 / 33 excluded |
-| `npm --prefix packages/noodl-editor run test:main` | ⏳ started at the end of s1 — read the reading in the s1 closing message or re-run; the package touches no editor code |
+| `npm --prefix packages/noodl-editor run test:main` | **564 / 565 suites, 8791 / 8792 tests, exit 1, 119 s.** The one red is `tests-unit/exp-013/exportBadge.test.tsx` expecting Parse Feed / Parse XML to be `scheduled`; HEAD's ledger has had them `translated` since P18 commit `fcf68a1c7` (§75, "editor gates owed") — **pre-existing at HEAD, phase 18's to close, not a P107 regression**. Nothing in this phase is read by the editor yet |
 
 ## What s1 settled (including where the task files were wrong)
 
