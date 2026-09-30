@@ -19,6 +19,10 @@
  *   - a reducer receives FROZEN state and inputs and cannot mutate either.
  *
  * Not a DSL. If the spec language ever needs its own debugger, it has failed (NSP-001 §4).
+ *
+ * An authoring rule, from the stranger (NSP-006 §5): write the RULE in plain words before the
+ * citation. A target's author may not have the cited file — the line numbers are for the person
+ * checking the spec against the runtime, never the only place a behaviour is stated.
  */
 
 import type { Coercion } from './coerce';
@@ -191,6 +195,10 @@ export interface AfterInputsPatch<S, I, O> extends Patch<S, O> {
 
 // ------------------------------------------------------------------------------------------------
 // reducers — required for signal inputs, optional for value inputs (rule 4)
+//
+// A value reducer runs AFTER the write: `inputs[port]` already holds the coerced value being
+// written (the same value as its `value` argument); `state` is the state before the patch. A
+// signal reducer sees the inputs as they stand. (Asked by the stranger, NSP-006 §5.)
 
 export type Reducers<S, I, O> = {
   [K in OutcomeKeys<I>]: (state: Readonly<S>, inputs: Inputs<I>) => OutcomePatch<S, O>;
@@ -205,6 +213,14 @@ export type Reducers<S, I, O> = {
 // variables). Designed here, first used by NSP-004. The interpreter calls `inputs(params)` at
 // mount and routes a write to a derived port through `on`.
 
+/**
+ * How a TARGET uses these (NSP-006 §5): it registers `inputs(params)` at mount, each at its
+ * declared default, and every other name `discover` accepts on its first write; a port is coerced
+ * by whichever declaration registered it. A DECLARED input always wins over a derived port of the
+ * same name — a write consults the declaration first — and a spec whose `inputs(params)` or
+ * `discover` mints a declared name is a spec error (String Format's `{format}` reads an unset
+ * placeholder, never the `format` input).
+ */
 export interface DerivedPorts<S, O> {
   /**
    * The ports an EDITOR draws for these params — R6's `ports(params)`, what the runtime today
@@ -239,6 +255,8 @@ export interface DerivedPorts<S, O> {
  * Outcomes are reported by the invoking reducer (they queue to the same settle) — unless it
  * reported `deferred`, in which case THIS reducer resolves them (`AfterInputsPatch.outcomes`),
  * the way a Variable's `Set` learns `done` / `unchanged` only from the frame's final value.
+ * Its `emit`s queue AFTER the pulses the frame's reducers already queued, and its `set` is
+ * observed like any step's (NSP-006 §5).
  */
 export type AfterInputs<S, I, O> = (state: Readonly<S>, inputs: Inputs<I>) => AfterInputsPatch<S, I, O>;
 

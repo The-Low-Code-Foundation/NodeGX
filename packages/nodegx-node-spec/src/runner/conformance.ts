@@ -170,7 +170,11 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
     const { actual, difference } = await playTarget(target, spec.type, sc.params, sc.steps, reference);
     if (difference.index < 0) {
       // a scenario that carries a row and PASSES says the row no longer reproduces on this target
-      report.scenarios.push(sc.row ? { name: sc.name, status: 'passed', row: sc.row, reason: `row ${sc.row} no longer reproduces here — close the row or drop the mark` } : { name: sc.name, status: 'passed' });
+      report.scenarios.push(
+        sc.row
+          ? { name: sc.name, status: 'passed', row: sc.row, reason: `row ${sc.row} does not reproduce on ${target.name} — expected on a target without the runtime's defect; on the runtime, close the row or drop the mark` }
+          : { name: sc.name, status: 'passed' }
+      );
     } else {
       report.scenarios.push({ name: sc.name, status: sc.row ? 'known' : 'failed', row: sc.row, difference, reference, actual });
     }

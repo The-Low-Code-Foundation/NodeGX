@@ -224,7 +224,7 @@ describe('a divergence class written up as a §6 row is counted, never hidden', 
     const scenarios = [{ name: 'state written', params: {}, steps: ['settle', { set: 'onFromStart', value: true }, 'settle'] as Step[], row: 'probe row' }];
     const report = await runConformance(spec, interpreterAdapter(), { sequences: 0, scenarios });
     expect(report.scenarios[0].status).toBe('passed');
-    expect(report.scenarios[0].reason).toMatch(/no longer reproduces/);
+    expect(report.scenarios[0].reason).toMatch(/does not reproduce on interpreter/);
   });
 
   test('a predicate that does not match leaves the divergence where it was: unknown, and not conforming', async () => {

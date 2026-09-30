@@ -66,21 +66,21 @@ graded against the code the app runs and no copy is kept.
 
 ### 6.1 The numbers (AC1, AC3)
 
-| node | spec lines (code) | hand scenarios | PR-CI reading (200, seed 20726, mutants) | rows |
-|---|---|---|---|---|
-| Boolean | base 217 (142) + 36 (27) | 12 | conforms, 40/40 | C5 |
-| Number | + 36 (27) | 8 | conforms, 40/40 | C5 |
-| String | + 47 (37) | 8 | conforms, 40/40 | C5 |
-| Color | + 43 (27) | 6 | conforms, 40/40 | C5 |
-| Boolean To String | 78 (49) | 7 | conforms, 6/6 | D6 |
-| Color Blend | 167 (113) | 10 | conforms, 2/2 | D8 |
-| Inverter | 53 (31) | 3 | conforms, 1/1 | — (decision 2 came from here) |
-| Log | 109 (70) | 5 | conforms, 2/2; 1 scenario + 4 sequences attributed to C6 | C6 |
-| Number Remapper | 124 (90) | 6 | conforms, 6/6 | — |
-| Or | 73 (41) | 5 | conforms, 1/1 | — |
-| String Mapper | 127 (89) | 11 | conforms, 15/15; 2 scenarios + 37 sequences attributed to C4 | C4 |
-| Substring | 79 (49) | 7 | conforms, 5/5; 2 scenarios + 26 sequences attributed to C4 | C4, D7 |
-| Value Changed | 56 (27) | 5 | conforms, 4/4; 1 scenario + 4 sequences attributed to C6 | C6, D9 |
+| node | spec lines (code) | hand scenarios | PR-CI reading (200, seed 20726, mutants) | deep (10,000, seed 20726, shrink; s5) | rows |
+|---|---|---|---|---|---|
+| Boolean | base 217 (142) + 36 (27) | 12 | conforms, 40/40 | conforms, 0 div, 37.4 s | C5 |
+| Number | + 36 (27) | 8 | conforms, 40/40 | conforms, 0 div, 39.4 s | C5 |
+| String | + 47 (37) | 8 | conforms, 40/40 | conforms, 0 div, 42.8 s | C5 |
+| Color | + 43 (27) | 6 | conforms, 40/40 | conforms, 0 div, 40.6 s | C5 |
+| Boolean To String | 78 (49) | 7 | conforms, 6/6 | conforms, 0 div, 37.1 s | D6 |
+| Color Blend | 167 (113) | 10 | conforms, 2/2 | conforms, 0 div, 37.9 s | D8 |
+| Inverter | 53 (31) | 3 | conforms, 1/1 | conforms, 0 div, 35.8 s | — (decision 2 came from here) |
+| Log | 109 (70) | 5 | conforms, 2/2; 1 scenario + 4 sequences attributed to C6 | conforms, 0 div, 38.6 s; C6 **115** | C6 |
+| Number Remapper | 124 (90) | 6 | conforms, 6/6 | conforms, 0 div, 36.9 s | — |
+| Or | 73 (41) | 5 | conforms, 1/1 | conforms, 0 div, 36.2 s | — |
+| String Mapper | 127 (89) | 11 | conforms, 15/15; 2 scenarios + 37 sequences attributed to C4 | conforms, 0 div, 38.8 s; C4 **1,932** | C4 |
+| Substring | 79 (49) | 7 | conforms, 5/5; 2 scenarios + 26 sequences attributed to C4 | conforms, 0 div, 36.3 s; C4 **1,350** | C4, D7 |
+| Value Changed | 56 (27) | 5 | conforms, 4/4; 1 scenario + 4 sequences attributed to C6 | conforms, 0 div, 36.5 s; C6 **91** | C6, D9 |
 
 **13 / 13 conform on the runtime at the R5 budget, every mutant killed, 0 unreached** (`npx jest test/node-spec` in
 `packages/noodl-runtime`: 2 suites, 38 passed, 18 skipped; the package: 10 suites, 249). The pilot five still conform (the
@@ -166,10 +166,13 @@ untouched.
 
 ### 6.4 Acceptance, honestly
 
-- **AC1** ✅ 13 / 13 specced by the ledger's definition on the runtime at the R5 budget (§6.1). The deep run (10,000,
-  shrink, replays) was NOT run this session: the box carried a peer's four lanes (load average 14–17 the whole session)
-  and the run is one heavy job (~40 s per node alone, 13 nodes). Next session, when quiet:
-  `NSP_DEEP=10000 NSP_ONLY="Boolean,Number,String,Color,Boolean To String,Color Blend,Inverter,net.noodl.Log,Number Remapper,Or,String Mapper,Substring,Value Changed" NSP_REPLAY_DIR=<dir> npx jest test/node-spec/conformance.test.ts -t deep`.
+- **AC1** ✅ 13 / 13 specced by the ledger's definition on the runtime at the R5 budget (§6.1), **and at the deep
+  budget** — s5, 2026-09-30 16:25–16:34, load average 4–5, commit `c1998f2fa`: `NSP_DEEP=10000 NSP_REPLAY_DIR=<scratch>
+  npx jest test/node-spec/conformance.test.ts -t deep` over the 13 → **13 / 13 CONFORM at 10,000 (seed 20726), 0
+  divergences, 0 replay files written, every mutant killed (13 passed, 496.6 s, exit 0)**. The known rows scale with the
+  budget and nothing else appeared: C4 1,932 (String Mapper) + 1,350 (Substring); C6 115 (Log) + 91 (Value Changed);
+  C5 has no known count because it is not a divergence: the spec models the runtime's seed (R3 (a)), and the row is
+  pinned by scenarios both targets agree on. Per-node times in §6.1.
 - **AC2** ⏳ not run — the export adapter is NSP-005, not built. Nothing here is graded on the export.
 - **AC3** ✅ every divergence is a row (§6.2) with its scenario marked `row` and a narrow `known` predicate in the runtime
   suite that asserts it STILL FIRES; the first example is kept unshrunk (the row mechanism does not shrink a known class).

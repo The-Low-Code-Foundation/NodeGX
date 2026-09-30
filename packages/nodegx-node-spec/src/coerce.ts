@@ -16,7 +16,10 @@
  * is graded against it by the adapters (NSP-002), never the other way round — that is R3 (a):
  * a disagreement is a §6 row and a ruling, not an edit here.
  *
- * `fallback` is the port's declared `default`.
+ * `fallback` is the port's declared `default`. Only the `typed-*` rules read it: a `js-*` rule
+ * converts `undefined` exactly as JavaScript does — `String(undefined)` is the text `'undefined'`,
+ * `Number(undefined)` is `NaN` — so a port with no `default` and a `js-string` coercion holds
+ * `'undefined'` after a set with no value (asked by the stranger, NSP-006 §5).
  */
 
 export type Coercion =

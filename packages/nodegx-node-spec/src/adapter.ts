@@ -15,14 +15,31 @@
  *                        nodescope.ts `setNodeParameters`), applies each as an ordinary write, and
  *                        does NOT settle. The scenario's first `settle` is where the first frame's
  *                        events land (C8, the first update consolidates).
- *   set(h, port, value)  records `{ t: 'set' }` and writes the value. An unknown port throws —
- *                        a port the spec declares and the target lacks is a divergence to see.
+ *   set(h, port, value)  records `{ t: 'set' }` carrying the value AS SENT (raw, canonicalised for
+ *                        the trace; `value` omitted for undefined), then coerces it by the port's
+ *                        declared coercion and writes it. An unknown port throws — a port the spec
+ *                        declares and the target lacks is a divergence to see; so does a KNOWN port
+ *                        of the other kind (a set on a signal input, a signal on a value input).
  *   signal(h, port)      records `{ t: 'in' }` and pulses the input.
  *   settle()             drains EVERY mounted instance's deferred work (C5), then records, per
  *                        instance, `{ t: 'settle' }` followed by the frame's observations in the
  *                        canonical grouping: values that CHANGED since the last settle, sorted by
  *                        port name; signals in emission order; outcomes in invocation order.
  *                        Async because a runtime may defer through the microtask queue.
+ *                        The three words a stranger asked about (NSP-006 §5):
+ *                        - WHAT A FRAME SENDS for an output is the last DEFINED value that output
+ *                          held after ANY step of the frame — not the settle-time value. A node
+ *                          whose output passes through undefined mid-frame (NSP-011's Inverter:
+ *                          `null` then `undefined`) sends the `null`; an output that held nothing
+ *                          defined all frame sends nothing (C3) and keeps its baseline. A target
+ *                          that reads its outputs only at settle diverges on exactly those nodes
+ *                          and on none of the pilot five (the stranger's did, NSP-006 §5).
+ *                        - CHANGED means the canonical form differs from the last value RECORDED
+ *                          for that port (canonical.ts `canonicalKey`: NaN equals NaN, structurally
+ *                          equal objects are equal). Before the first settle nothing has been
+ *                          recorded, so the first settle records every output that is defined,
+ *                          `null` included (C8).
+ *                        - SORTED BY PORT NAME is code-unit order, `Array.prototype.sort`'s default.
  *   trace(h)             a copy of the events so far, values in canonical form (canonical.ts).
  *   dispose(h)           tears the instance down.
  *
