@@ -46,6 +46,14 @@ if (!DIR || DIR.startsWith('--') || !PROJECT || !['2d', '3d'].includes(MODE)) {
   console.error('usage: drive-ig005-robots.js <deploy-dir> --project <assembled-project> [--shots <dir>] [--json <file>] [--mode 2d|3d]');
   process.exit(2);
 }
+
+// P108 IW-006: the save's version, read from the page's own encoder (Logic/Encode save code) — never a literal the next
+// version has to find and bump (v4 → v5 reddened every clause that typed it).
+const SAVE_V = (() => {
+  const nodes = JSON.parse(fs.readFileSync(path.join(PROJECT, 'components', 'Logic', 'Encode save code', 'nodes.json'), 'utf8'));
+  const list = Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
+  return Number(/var SAVE_VERSION = (\d+);/.exec(String(list.find((n) => n.type === 'JavaScriptFunction').parameters.functionScript))[1]);
+})();
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 
 // ── What the deployed project says (never typed here) ──
@@ -379,7 +387,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
         }
         const prow = packed && (packed.p.find((r) => r[0] === packed.a) || packed.p[0]);
         readings.code = prow && prow[14];
-        check('IG-005 AC6: the Grown-ups save code (v4) carries three robots — Pip as his id, the two lent as [id, kind, name, colour, eyes, hat]', !!packed && packed.v === 4 && Array.isArray(prow[14]) && prow[14].length === 3 && prow[14][0] === 'r1' && Array.isArray(prow[14][1]) && prow[14][1][2] === 'Rocky' && Array.isArray(prow[14][2]) && prow[14][2][3] === '#3FA66B', prow && prow[14]);
+        check(`IG-005 AC6: the Grown-ups save code (v${SAVE_V}) carries three robots — Pip as his id, the two lent as [id, kind, name, colour, eyes, hat]`, !!packed && packed.v === SAVE_V && Array.isArray(prow[14]) && prow[14].length === 3 && prow[14][0] === 'r1' && Array.isArray(prow[14][1]) && prow[14][1][2] === 'Rocky' && Array.isArray(prow[14][2]) && prow[14][2][3] === '#3FA66B', prow && prow[14]);
         const before = await stored();
         const pasteBox = `(document.querySelector('input.bg-paste') || document.querySelector('.bg-paste input'))`;
         await typeInto(pasteBox, code);

@@ -66,6 +66,8 @@ import { BLOCK_WORD, OLIVE_ENGINE, OLIVE_HELPERS, RUNG_SHAPE, RUNG_TEMPERATURE }
 import { ENVELOPE_NOTES } from './cg005Olive';
 // P108 IW-002: the job model's vocabulary, its wear clock and its seeded layouts.
 import { HEN_CAPACITY, JOB_ITEMS, JOB_KINDS, SITE_STAGES, WALL_TILE, WEAR } from './cg002Content';
+// P108 IW-006 / IW-008 (session-4 base): the economy's names.
+import { BRAIN_SIZE, BRAIN_SIZES, CREW_CAP, SHOP_JSON } from './cg002Content';
 
 /** An `until` gives up after this many passes, whatever its sensor says. */
 export const UNTIL_GUARD = 40;
@@ -99,8 +101,11 @@ export const MAX_PROFILES = 6;
  * `island: { done, placed }`. A v1 or v2 family (one island for the family) decodes, loads and asks for its own save.
  * v4 (P106 IG-004, R1): `island: { done, plots, robots }` — a won plot keeps its program and the robot pinned to it;
  * `placed` (never written by anything) is dropped. A v3 family decodes, loads and asks for its own save.
+ * v5 (P108 IW-006, session-4 base): each profile's `shells: { earned, spent }` and `owned` (what she bought); a plot's
+ * `live` (its job as the island left it: things, age, seed, spent); a robot row's `brain` (only once bigger than
+ * BRAIN_SIZE); robot rows of any id (copies, IW-008). A v4 family decodes with 0 shells, nothing owned, and asks for its save.
  */
-export const SAVE_VERSION = 4;
+export const SAVE_VERSION = 5;
 
 /** IG-004: the one robot a v4 profile has (its look is `profile.robot`); IG-005 adds more under `island.robots`. */
 export const FIRST_ROBOT_ID = 'r1';
@@ -1671,6 +1676,9 @@ Outputs.refused = refused;
  * brought home leaves `{ program: null, robotId: '', wonAt }`. P108 IW-001 F8: `cardsSeen` (optional, absent = none) is
  * the block cards the child has seen — packed as row 15 only when there are any. `robots` is `[{ id: 'r1' }]` in v4 (its look is
  * `profile.robot`); IG-005 adds more. v3's `placed` was never written by anything: it is dropped, never migrated.
+ * P108 IW-006 (v5): a profile's `shells: { earned, spent }` and `owned: [shop ids]`; a plot's optional `live` (its job as
+ * the island left it: `{ things, age, seed, spent? }`); a robot row's optional `brain` (16 or 20); robot rows of any id
+ * (a copy bought in the shop has its own id and its `kind`).
  *
  * `model.island` is the island ON SCREEN: `activeId`, and `done`/`plots`/`robots` DERIVED from the active profile (the
  * very same objects, so a reader of `model.island.done` reads the active kid's). It is never read back from a stored
@@ -1678,7 +1686,7 @@ Outputs.refused = refused;
  *
  * The migration rule for a v1/v2 family (one island for the family): EVERY existing profile keeps what the family had
  * done — nobody loses a request they finished together. A v3 profile keeps its own `done`. `migrationDue(raw)` says a
- * stored model is older than v4 so the page writes the migrated model back at once (an on-load migration owes its own
+ * stored model is older than v5 so the page writes the migrated model back at once (an on-load migration owes its own
  * save, P100).
  */
 export const SAVE_HELPERS = `
@@ -1690,6 +1698,11 @@ var TRICK_KEYS = ${JSON.stringify(TRICK_KEYS)};
 var FIRST_ROBOT_ID = ${JSON.stringify(FIRST_ROBOT_ID)};
 var ROBOTS = ${ROBOTS_JSON};
 var UPGRADES = ${UPGRADES_JSON};
+// P108 IW-006 / IW-008 (session-4 base): the economy's names.
+var BRAIN_SIZE = ${BRAIN_SIZE};
+var BRAIN_SIZES = ${JSON.stringify(BRAIN_SIZES)};
+var CREW_CAP = ${CREW_CAP};
+var SHOP = ${SHOP_JSON};
 function newId(prefix) { return prefix + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }
 function tricksOf(raw) {
   var out = {};
@@ -1703,13 +1716,21 @@ function robotsOf(raw) {
   var list = Array.isArray(raw) ? raw : [];
   for (var i = 0; i < list.length; i++) {
     var r = list[i], id = r && typeof r === 'object' ? String(r.id || '') : typeof r === 'string' ? r : '';
+    // P108 IW-006 (v5): r1 is always first; its stored row gives it only its brain.
+    if (id === FIRST_ROBOT_ID && seen[id] === 1) { brainOnto(out[0], r); seen[id] = 2; continue; }
     if (!id || seen[id]) continue;
     seen[id] = 1;
     // IG-005: a lent robot's row keeps its own kind and look (each field only when it is there and sound); r1's look
     // stays profile.robot (one source). A v4 row from session 3 is { id } and reads as it did.
-    out.push(id === FIRST_ROBOT_ID ? { id: id } : robotFields(id, r));
+    out.push(id === FIRST_ROBOT_ID ? brainOnto({ id: id }, r) : robotFields(id, r));
   }
   return out;
+}
+/** P108 IW-006 (v5): a row's brain, kept only when it is one of BRAIN_SIZES and bigger than BRAIN_SIZE (absent = BRAIN_SIZE). */
+function brainOnto(row, r) {
+  var b = r && typeof r === 'object' ? Math.floor(Number(r.brain)) : 0;
+  if (b > BRAIN_SIZE && BRAIN_SIZES.indexOf(b) !== -1) row.brain = b;
+  return row;
 }
 /** IG-005: a robot row's own fields, each kept only when it is there and sound (kind, name, color, eye, hat). */
 function robotFields(id, r) {
@@ -1721,7 +1742,7 @@ function robotFields(id, r) {
   if (typeof r.color === 'string' && /^#[0-9A-Fa-f]{6}$/.test(r.color)) row.color = r.color;
   if (r.eye === 'round' || r.eye === 'happy' || r.eye === 'wink') row.eye = r.eye;
   if (typeof r.hat === 'string' && r.hat) row.hat = r.hat;
-  return row;
+  return brainOnto(row, r);
 }
 /** IG-005: the catalogue's entry for a robot kind, or null. */
 function robotSpec(kind) { for (var i = 0; i < ROBOTS.length; i++) if (ROBOTS[i].id === String(kind)) return ROBOTS[i]; return null; }
@@ -1746,9 +1767,11 @@ function robotRow(p, row) {
     name: String((look && look.name) || spec.defaultName[lang] || spec.defaultName.en).slice(0, ROBOT_NAME_MAX),
     color: String((look && look.color) || spec.colour), eye: String((look && look.eye) || 'round'), hat: String((look && look.hat) || 'none'),
     accessory: spec.accessory, palette: spec.palette.slice(), canMax: spec.canMax, basket: spec.basket, stepFactor: 1,
-    upgrade: spec.upgrade, upgraded: false, lentBy: spec.lentBy || '', working: p ? plotOfRobot(p.island, String(row.id)) : ''
+    upgrade: spec.upgrade, upgraded: false, lentBy: spec.lentBy || '', working: p ? plotOfRobot(p.island, String(row.id)) : '',
+    brain: Number(row.brain) > BRAIN_SIZE ? Number(row.brain) : BRAIN_SIZE
   };
-  var owned = p && Array.isArray(p.stickers) ? p.stickers : [];
+  // P108 IW-006 (v5): an upgrade counts given (an islander's sticker) or bought (the shop's owned).
+  var owned = (p && Array.isArray(p.stickers) ? p.stickers : []).concat(p && Array.isArray(p.owned) ? p.owned : []);
   for (var u = 0; u < UPGRADES.length; u++) {
     var up = UPGRADES[u];
     if (owned.indexOf(up.id) === -1 || up.fits.indexOf(kind) === -1) continue;
@@ -1795,6 +1818,9 @@ function plotsOf(raw, robots) {
     var p = src[id];
     if (!id || id === 'free' || !p || typeof p !== 'object') continue;
     out[id] = { program: programOf(p.program), robotId: String(p.robotId || ''), wonAt: Number(p.wonAt) || 0 };
+    // P108 IW-006 (v5): the job as the island left it, when there is one.
+    var lv = liveOf(p.live);
+    if (lv) out[id].live = lv;
     if (!pinnedPlot(out[id], robots)) out[id].robotId = '';
     ids.push(id);
   }
@@ -1806,6 +1832,18 @@ function plotsOf(raw, robots) {
     if (taken[q.robotId]) q.robotId = '';
     else taken[q.robotId] = ids[k];
   }
+  return out;
+}
+/**
+ * P108 IW-006 (v5): a plot's live job as the save keeps it — '{ things, age, seed }' (+ 'spent', the things used up, when
+ * any; + 'helper', the shop helper at work on this job until it is done, IW-006 AC4), or null when it is not one. The
+ * island goes on from it after a restart (IW-002 AC3 across an app restart).
+ */
+function liveOf(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw) || !Array.isArray(raw.things)) return null;
+  var out = { things: JSON.parse(JSON.stringify(raw.things)), age: Math.max(0, Math.floor(Number(raw.age)) || 0), seed: Number(raw.seed) >>> 0 };
+  if (Array.isArray(raw.spent) && raw.spent.length) out.spent = JSON.parse(JSON.stringify(raw.spent));
+  if (typeof raw.helper === 'string' && raw.helper) out.helper = raw.helper.slice(0, 40);
   return out;
 }
 function islandOf(raw) {
@@ -1831,10 +1869,12 @@ function profileOf(raw) {
     face: String(p.face || ''),
     robot: { name: String(robot.name || 'Pip').slice(0, ROBOT_NAME_MAX), color: String(robot.color || '#FF7A59'), eye: String(robot.eye || 'round'), hat: String(robot.hat || 'none') },
     tricks: tricksOf(p.tricks), stickers: Array.isArray(p.stickers) ? p.stickers.map(String) : [], hats: Array.isArray(p.hats) ? p.hats.map(String) : [],
-    island: islandOf(p.island)
+    island: islandOf(p.island),
+    // P108 IW-006 (v5): her shells (earned only grows; spent is a second number, D4) and what she bought.
+    shells: shellsOf(p.shells), owned: ownedOf(p.owned)
   };
-  // P108 IW-001 F8: the block cards this child has seen (Got it), OPTIONAL — absent is none seen, so a v4 profile without
-  // it is this very profile and nothing is migrated (the save stays v4; no on-load write is owed).
+  // P108 IW-001 F8: the block cards this child has seen (Got it), OPTIONAL — absent is none seen, so a profile without
+  // it is this very profile (adding the field owed no migration; v5, IW-006, did).
   var seen = cardsOf(p.cardsSeen);
   if (seen.length) out.cardsSeen = seen;
   return out;
@@ -1848,7 +1888,64 @@ function cardsOf(raw) {
   }
   return out;
 }
-/** A stored model older than v4 that has anyone in it: the page writes the migrated model back at once. */
+/** P108 IW-006 (v5): a wallet — whole shells, never below 0, never more spent than earned. */
+function shellsOf(raw) {
+  var r = raw && typeof raw === 'object' ? raw : {};
+  var earned = Math.max(0, Math.floor(Number(r.earned)) || 0);
+  return { earned: earned, spent: Math.min(earned, Math.max(0, Math.floor(Number(r.spent)) || 0)) };
+}
+/**
+ * P108 IW-006 (v5): what she bought and still has — text ids (the shop's), trimmed, once each, in the order bought, at most
+ * CARDS_MAX (a helper leaves it when used). Not filtered by the catalogue: the shell packs the same list without one.
+ */
+function ownedOf(raw) {
+  var out = [], list = Array.isArray(raw) ? raw : [];
+  for (var i = 0; i < list.length && out.length < CARDS_MAX; i++) { var id = typeof list[i] === 'string' ? list[i].trim().slice(0, 40) : ''; if (id && out.indexOf(id) === -1) out.push(id); }
+  return out;
+}
+/** P108 IW-006: the catalogue's entry, or null. */
+function shopItem(id) { for (var i = 0; i < SHOP.length; i++) if (SHOP[i].id === String(id)) return SHOP[i]; return null; }
+/** P108 IW-006 (D4): what she can spend. */
+function balanceOf(p) { return p && p.shells ? p.shells.earned - p.shells.spent : 0; }
+/** P108 IW-006 (D2): shells earned — whole, never negative; earned only grows. Returns what was added. */
+function earnShells(p, n) { var k = Math.max(0, Math.floor(Number(n)) || 0); if (p && k) p.shells.earned += k; return k; }
+/**
+ * P108 IW-006 / IW-008 — THE purchase rule (the purchase card's Buy; the one place spent rises). Returns
+ * '{ ok, error, short, left, robotId }': error '' | 'unknown' | 'short' (short = how many more shells) | 'kind' (a copy of a
+ * robot kind the island does not have) | 'cap' (CREW_CAP robots) | 'robot' (a brain for no robot of hers) | 'size' (that
+ * robot's brain is not the size before this one) | 'held' (that helper is held already, unused) | 'owned' (that upgrade is hers).
+ * 'opts.robotId' names the robot a brain is for; 'opts.name' a copy's name (else the kind's name and its number).
+ */
+function buyItem(p, id, opts) {
+  var o = opts && typeof opts === 'object' ? opts : {};
+  var it = shopItem(id), out = { ok: false, error: '', short: 0, left: balanceOf(p), robotId: '' };
+  if (!p || !it) { out.error = 'unknown'; return out; }
+  var row = null;
+  if (it.kind === 'robot') {
+    if (!jobRobotId(p, it.robot)) { out.error = 'kind'; return out; }
+    if (p.island.robots.length >= CREW_CAP) { out.error = 'cap'; return out; }
+  } else if (it.kind === 'brain') {
+    for (var r = 0; r < p.island.robots.length; r++) if (p.island.robots[r].id === String(o.robotId || '')) row = p.island.robots[r];
+    if (!row) { out.error = 'robot'; return out; }
+    var at = BRAIN_SIZES.indexOf(Number(row.brain) > BRAIN_SIZE ? Number(row.brain) : BRAIN_SIZE);
+    if (BRAIN_SIZES[at + 1] !== it.size) { out.error = 'size'; return out; }
+  } else if (p.owned.indexOf(it.id) !== -1 || (it.kind === 'upgrade' && p.stickers.indexOf(it.upgrade) !== -1)) { out.error = it.kind === 'helper' ? 'held' : 'owned'; return out; }
+  if (balanceOf(p) < it.price) { out.error = 'short'; out.short = it.price - balanceOf(p); return out; }
+  p.shells.spent += it.price;
+  if (it.kind === 'robot') {
+    var spec = robotSpec(it.robot), lang = p.lang === 'fr' ? 'fr' : 'en', n = 1;
+    for (var k = 0; k < p.island.robots.length; k++) if (robotKindOf(p.island.robots[k]) === it.robot) n++;
+    var nm = typeof o.name === 'string' ? o.name.trim().slice(0, ROBOT_NAME_MAX) : '';
+    var nid = newId('r');
+    p.island.robots.push({ id: nid, kind: spec.id, name: nm || (spec.defaultName[lang] + ' ' + n).slice(0, ROBOT_NAME_MAX), color: spec.colour, eye: 'round', hat: 'none' });
+    out.robotId = nid;
+  } else if (it.kind === 'brain') row.brain = it.size;
+  else p.owned.push(it.id);
+  out.ok = true;
+  out.left = balanceOf(p);
+  return out;
+}
+/** A stored model older than the current version (v5) that has anyone in it: the page writes the migrated model back at once. */
 function migrationDue(raw) {
   return !!raw && typeof raw === 'object' && Array.isArray(raw.profiles) && raw.profiles.length > 0 && !(Number(raw.v) >= SAVE_VERSION);
 }
@@ -2017,14 +2114,20 @@ for (var i = 0; i < model.profiles.length; i++) {
   for (var k = 0; k < TRICK_KEYS.length; k++) tr += p.tricks[TRICK_KEYS[k]] === 'bloom' ? 'b' : p.tricks[TRICK_KEYS[k]] === 'sprout' ? 's' : '-';
   // IG-004: the plots as [requestId, program, robotId, wonAt] rows (sorted: the same island is the same code), the robots as ids.
   var plots = [];
-  for (var id in p.island.plots) plots.push([id, p.island.plots[id].program, p.island.plots[id].robotId, p.island.plots[id].wonAt]);
+  // P108 IW-006 (v5): a plot's live job rides as a fifth field, only when it has one.
+  for (var id in p.island.plots) { var pr = [id, p.island.plots[id].program, p.island.plots[id].robotId, p.island.plots[id].wonAt]; if (p.island.plots[id].live) pr.push(p.island.plots[id].live); plots.push(pr); }
   plots.sort(function (x, y) { return x[0] < y[0] ? -1 : x[0] > y[0] ? 1 : 0; });
   var robots = [];
   // IG-005: r1 (and any row with nothing of its own) is its id, as in session 3; a lent robot is [id, kind, name, color, eye, hat].
-  for (var r = 0; r < p.island.robots.length; r++) { var rb = p.island.robots[r]; robots.push(rb.id === FIRST_ROBOT_ID || !rb.kind ? rb.id : [rb.id, rb.kind, rb.name || '', rb.color || '', rb.eye || '', rb.hat || '']); }
+  // P108 IW-006 (v5): a robot with a bigger brain is always a row, its brain the seventh field.
+  for (var r = 0; r < p.island.robots.length; r++) {
+    var rb = p.island.robots[r], rr = (rb.id === FIRST_ROBOT_ID || !rb.kind) && !rb.brain ? rb.id : [rb.id, rb.id === FIRST_ROBOT_ID ? '' : rb.kind || '', rb.name || '', rb.color || '', rb.eye || '', rb.hat || ''];
+    if (rb.brain && Array.isArray(rr)) rr.push(rb.brain);
+    robots.push(rr);
+  }
   var row = [p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats, p.island.done, plots, robots];
-  // P108 IW-001 F8: row 15, the cards seen — only when there are any, so a family with none packs exactly as before.
-  if (p.cardsSeen && p.cardsSeen.length) row.push(p.cardsSeen);
+  // P108 IW-001 F8: row 15, the cards seen (null when none). P108 IW-006 (v5): row 16 the shells [earned, spent], row 17 owned.
+  row.push(p.cardsSeen && p.cardsSeen.length ? p.cardsSeen : null, [p.shells.earned, p.shells.spent], p.owned);
   packed.p.push(row);
 }
 var code = 'BG1.' + toB64(JSON.stringify(packed));
@@ -2037,7 +2140,7 @@ Outputs.length = code.length;
  * things) or a v2 code (one island for the family) decodes by the migration
  * rule — every profile keeps what the family had done; a v3 code (one island
  * per kid, row 13 = the never-written `placed`, dropped) keeps each kid's own.
- * Anything older than v4 says `migrated`, so the page saves it at once: an
+ * Anything older than v5 says `migrated`, so the page saves it at once: an
  * on-load migration owes its own save (P100).
  */
 export const DECODE_SAVE_SCRIPT = `${SAVE_HELPERS}
@@ -2046,8 +2149,8 @@ var ok = false, error = '', migrated = false, model = null;
 try {
   if (code.indexOf('BG1.') !== 0) throw new Error('prefix');
   var packed = JSON.parse(fromB64(code.slice(4)));
-  if (!packed || [1, 2, 3, 4].indexOf(packed.v) === -1 || !Array.isArray(packed.p) || !Array.isArray(packed.f)) throw new Error('shape');
-  var v2 = packed.v >= 2, v3 = packed.v >= 3, v4 = packed.v >= 4;
+  if (!packed || [1, 2, 3, 4, 5].indexOf(packed.v) === -1 || !Array.isArray(packed.p) || !Array.isArray(packed.f)) throw new Error('shape');
+  var v2 = packed.v >= 2, v3 = packed.v >= 3, v4 = packed.v >= 4, v5 = packed.v >= 5;
   var family = { done: Array.isArray(packed.d) ? packed.d : [] };
   var profiles = [];
   for (var i = 0; i < packed.p.length; i++) {
@@ -2055,15 +2158,15 @@ try {
     var tricks = {};
     if (v2 && typeof a[9] === 'string') for (var k = 0; k < TRICK_KEYS.length; k++) tricks[TRICK_KEYS[k]] = a[9].charAt(k) === 'b' ? 'bloom' : a[9].charAt(k) === 's' ? 'sprout' : 'seed';
     var plots = {};
-    if (v4 && Array.isArray(a[13])) for (var q = 0; q < a[13].length; q++) { var row = a[13][q]; if (Array.isArray(row) && row[0]) plots[String(row[0])] = { program: row[1], robotId: row[2], wonAt: row[3] }; }
+    if (v4 && Array.isArray(a[13])) for (var q = 0; q < a[13].length; q++) { var row = a[13][q]; if (Array.isArray(row) && row[0]) plots[String(row[0])] = { program: row[1], robotId: row[2], wonAt: row[3], live: v5 ? row[4] : undefined }; }
     // IG-005: a robot is its id (session 3, and r1) or [id, kind, name, color, eye, hat] (a lent robot and its look).
     var robots = [];
-    if (v4 && Array.isArray(a[14])) for (var rb = 0; rb < a[14].length; rb++) { var ro = a[14][rb]; robots.push(Array.isArray(ro) ? { id: ro[0], kind: ro[1], name: ro[2], color: ro[3], eye: ro[4], hat: ro[5] } : ro); }
+    if (v4 && Array.isArray(a[14])) for (var rb = 0; rb < a[14].length; rb++) { var ro = a[14][rb]; robots.push(Array.isArray(ro) ? { id: ro[0], kind: ro[1], name: ro[2], color: ro[3], eye: ro[4], hat: ro[5], brain: v5 ? ro[6] : undefined } : ro); }
     var island = v4 ? { done: a[12], plots: plots, robots: robots } : v3 ? { done: a[12] } : family;
-    profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: island, cardsSeen: v4 && Array.isArray(a[15]) ? a[15] : undefined });
+    profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: island, cardsSeen: v4 && Array.isArray(a[15]) ? a[15] : undefined, shells: v5 && Array.isArray(a[16]) ? { earned: a[16][0], spent: a[16][1] } : undefined, owned: v5 ? a[17] : undefined });
   }
   model = modelOf({ v: SAVE_VERSION, family: { id: packed.f[0], created: packed.f[1] }, profiles: profiles, island: { activeId: packed.a } });
-  migrated = !v4;
+  migrated = !v5;
   ok = true;
 } catch (e) {
   error = 'bad';

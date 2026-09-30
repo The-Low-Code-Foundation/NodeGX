@@ -1425,3 +1425,62 @@ export const JOB_ITEMS: Readonly<Record<string, string>> = Object.fromEntries(JO
  * own recording, not the drawer) and the fold makes the room back.
  */
 export const BRAIN_SIZE = 12;
+
+// ── P108 IW-006 / IW-008 (session-4 base): the economy's names — shells, the shop, brains, the crew ───────────────
+
+/**
+ * The brain sizes a robot can have (README §4.2, Autonauts' brain memory): every robot starts at {@link BRAIN_SIZE}; the
+ * shop's Upgrades tab sells the next size, one robot at a time (a robot row carries `brain` only once it is bigger).
+ */
+export const BRAIN_SIZES = [12, 16, 20] as const;
+
+/** The most robots one island keeps (IW-008 §2: set by the frame reading, not by design — lane C measures it and may lower it). */
+export const CREW_CAP = 12;
+
+/** The shop's tabs, in the order they are drawn (IW-006 §2). Build and Animals stay empty until IW-007 fills them. */
+export const SHOP_TABS = ['build', 'animals', 'robots', 'upgrades', 'helpers'] as const;
+export type ShopTab = (typeof SHOP_TABS)[number];
+
+/**
+ * One thing the shop sells (IW-006 §2): its tab, its price in shells, what it is, and its picture and one line in both
+ * languages. `kind` says what buying it does (`buyItem` in the save helpers is the one rule):
+ * - `robot` — a new row of that robot kind (a copy, IW-008): only a kind the island already has, never past CREW_CAP;
+ * - `upgrade` — an upgrade id into `owned` (today's can+, basket+, boots: the shop sells them; islanders' gifts stay stickers);
+ * - `brain` — ONE robot's brain to `size` (only from the size before it);
+ * - `helper` — one helper into `owned`, used up by the job it helps (IW-006 AC4); one of each held at a time.
+ */
+export interface ShopItem {
+  id: string;
+  tab: ShopTab;
+  price: number;
+  kind: 'robot' | 'upgrade' | 'brain' | 'helper';
+  robot?: RobotKind;
+  upgrade?: UpgradeId;
+  size?: number;
+  /** A helper's effect, read by the lane that builds it (IW-006 §2): the rain cloud, the self-filling can, the wheelbarrow. */
+  helper?: 'rain' | 'selfcan' | 'barrow';
+  icon: string;
+  name: Bi;
+  line: Bi;
+}
+
+/**
+ * The shop's catalogue (session-4 base; prices are the orchestrator's first guess, D1 — lane E measures what a mission
+ * pays and lane H may retune them, saying why). A job's run pays about its targets' steps (tulips-three 9, path-stones 16),
+ * a finished job a bonus of 5–10: a robot copy is two finished jobs; a helper less than one.
+ */
+export const SHOP: ReadonlyArray<ShopItem> = [
+  { id: 'robot:pip', tab: 'robots', price: 30, kind: 'robot', robot: 'pip', icon: '🤖', name: s('A new Pip', 'Un nouveau Pip'), line: s('Another watering robot. You name it.', 'Un autre robot arroseur. Tu lui donnes un nom.') },
+  { id: 'robot:cobble', tab: 'robots', price: 30, kind: 'robot', robot: 'cobble', icon: '🪨', name: s('A new Cobble', 'Un nouveau Cobble'), line: s('Another stone carrier. You name it.', 'Un autre porteur de pierres. Tu lui donnes un nom.') },
+  { id: 'robot:pocket', tab: 'robots', price: 30, kind: 'robot', robot: 'pocket', icon: '🎒', name: s('A new Pocket', 'Un nouveau Poche'), line: s('Another carrier of letters and eggs.', 'Un autre porteur de lettres et d’œufs.') },
+  { id: 'robot:echo', tab: 'robots', price: 30, kind: 'robot', robot: 'echo', icon: '🔔', name: s('A new Echo', 'Un nouvel Écho'), line: s('Another robot who asks Olive.', 'Un autre robot qui demande à Olive.') },
+  { id: 'can+', tab: 'upgrades', price: 15, kind: 'upgrade', upgrade: 'can+', icon: '🪣', name: s('A bigger can', 'Un plus grand arrosoir'), line: s('Six pours instead of three.', 'Six arrosages au lieu de trois.') },
+  { id: 'basket+', tab: 'upgrades', price: 15, kind: 'upgrade', upgrade: 'basket+', icon: '🧺', name: s('A bigger hod', 'Une plus grande hotte'), line: s('Cobble carries eight stones.', 'Cobble porte huit pierres.') },
+  { id: 'boots', tab: 'upgrades', price: 20, kind: 'upgrade', upgrade: 'boots', icon: '👢', name: s('Quick boots', 'Des bottes rapides'), line: s('Pocket walks faster.', 'Poche marche plus vite.') },
+  { id: 'brain16', tab: 'upgrades', price: 25, kind: 'brain', size: 16, icon: '🧠', name: s('A bigger brain', 'Un plus grand cerveau'), line: s('One robot remembers 16 blocks.', 'Un robot retient 16 blocs.') },
+  { id: 'brain20', tab: 'upgrades', price: 40, kind: 'brain', size: 20, icon: '🧠', name: s('The biggest brain', 'Le plus grand cerveau'), line: s('One robot remembers 20 blocks.', 'Un robot retient 20 blocs.') },
+  { id: 'rain', tab: 'helpers', price: 6, kind: 'helper', helper: 'rain', icon: '🌧️', name: s('A rain cloud', 'Un nuage de pluie'), line: s('Waters every tulip on one plot, once.', 'Arrose toutes les tulipes d’un terrain, une fois.') },
+  { id: 'selfcan', tab: 'helpers', price: 8, kind: 'helper', helper: 'selfcan', icon: '✨', name: s('A self-filling can', 'Un arrosoir magique'), line: s('Never needs the pond, for one job.', 'Jamais besoin de la mare, pour un travail.') },
+  { id: 'barrow', tab: 'helpers', price: 10, kind: 'helper', helper: 'barrow', icon: '🛒', name: s('A wheelbarrow', 'Une brouette'), line: s('Carries eight, for one job.', 'Porte huit choses, pour un travail.') }
+];
+export const SHOP_JSON = JSON.stringify(SHOP);

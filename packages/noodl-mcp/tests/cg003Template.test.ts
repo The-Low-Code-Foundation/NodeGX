@@ -2140,14 +2140,15 @@ describe('P108 IW-001 F8 — the cards seen, saved on the profile (lane A)', () 
     expect(won.profiles.find((p: any) => p.id === ada).cardsSeen).toEqual(['fwd', 'olive:read']);
   });
 
-  it('🔴 the save stays v4 and optional: a v4 family without it reads as itself (nothing migrated, no on-load write owed); with it, the code carries it and reads it back', () => {
+  it('🔴 the field is optional: a family without it reads as itself (nothing migrated, no on-load write owed); with it, the code carries it and reads it back', () => {
     const { m, ada } = kid();
     const stored = JSON.parse(JSON.stringify(m));
     const read = run(FAMILY_SCRIPT, { model: stored });
     expect([read.migrated, JSON.stringify(read.model) === JSON.stringify(stored), 'cardsSeen' in read.model.profiles[0]]).toEqual([false, true, false]);
-    // Its code is byte-for-byte what it was before the field existed (no row 15).
+    // Its code has no cards: row 15 is null (P108 IW-006, v5: rows 16 and 17 — the shells, what she bought — follow it).
     const code = run(ENCODE_SAVE_SCRIPT, { model: stored }).code;
-    expect(JSON.parse(Buffer.from(code.slice(4).replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')).p.map((row: unknown[]) => row.length)).toEqual([15, 15]);
+    const rows = JSON.parse(Buffer.from(code.slice(4).replace(/-/g, '+').replace(/_/g, '/'), 'base64').toString('utf8')).p;
+    expect(rows.map((row: unknown[]) => [row.length, row[15]])).toEqual([[18, null], [18, null]]);
     const seen = run(UPDATE_PROFILE_SCRIPT, { model: m, profileId: ada, field: 'cardsSeen', value: ['if', 'water'] }).model;
     const code2 = run(ENCODE_SAVE_SCRIPT, { model: seen }).code;
     const back = run(DECODE_SAVE_SCRIPT, { code: code2 });

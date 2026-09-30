@@ -750,10 +750,10 @@ describe('CG-002 — the engine', () => {
       expect(helper<boolean>(SAVE_HELPERS, 'migrationDue', tampered)).toBe(false);
     });
 
-    it('🔴 the model written as a code decodes to an identical model (v4, each kid’s island in her row: done, plots, robots)', () => {
+    it('🔴 the model written as a code decodes to an identical model (v5 since P108 IW-006, each kid’s island in her row: done, plots, robots)', () => {
       const model = family();
       expect(model.v).toBe(SAVE_VERSION);
-      expect(SAVE_VERSION).toBe(4);
+      expect(SAVE_VERSION).toBe(5);
       expect(model.profiles[0].hats).toEqual(['sun']);
       expect(model.profiles[0].tricks).toEqual({ n1: 'sprout', n2: 'bloom', n3: 'seed', n4: 'seed', n5: 'seed', n6: 'seed', n7: 'seed' });
       const enc = runScript(ENCODE_SAVE_SCRIPT, { model });
@@ -761,7 +761,7 @@ describe('CG-002 — the engine', () => {
       // A pinned program rides in the code: two kids, one tulips program (the ten-block reference), well under a paste box.
       expect(enc.length).toBeLessThan(1200);
       const packed = JSON.parse(Buffer.from(enc.code.slice(4), 'base64url').toString('utf8'));
-      expect(packed.v).toBe(4);
+      expect(packed.v).toBe(SAVE_VERSION);
       expect([packed.d, packed.pl]).toEqual([undefined, undefined]);
       expect(packed.p.map((row: unknown[]) => [row[12], row[13], row[14]])).toEqual([
         [['tulips-three'], [['tulips-three', JSON.parse(JSON.stringify(TULIPS.referenceProgram)), 'r1', 1759000000000]], ['r1']],
@@ -787,9 +787,9 @@ describe('CG-002 — the engine', () => {
       expect(dec.model.profiles[0].island.done).not.toBe(dec.model.profiles[1].island.done);
       expect(dec.model.profiles[0]).toMatchObject({ tricks: { n1: 'sprout', n2: 'bloom' }, stickers: ['letter'], hats: ['cap'] });
       expect(dec.model.island).toEqual({ activeId: 'p2', done: ['tulips-three', 'path-postbox'], plots: {}, robots: [{ id: 'r1' }] });
-      // Saved again, it is a v4 code, and decoding THAT is no longer a migration.
+      // Saved again, it is a current (v5) code, and decoding THAT is no longer a migration.
       const enc = runScript(ENCODE_SAVE_SCRIPT, { model: dec.model });
-      expect(JSON.parse(Buffer.from(enc.code.slice(4), 'base64url').toString('utf8')).v).toBe(4);
+      expect(JSON.parse(Buffer.from(enc.code.slice(4), 'base64url').toString('utf8')).v).toBe(SAVE_VERSION);
       const again = runScript(DECODE_SAVE_SCRIPT, { code: enc.code });
       expect([again.migrated, again.model]).toEqual([false, dec.model]);
     });
@@ -804,14 +804,16 @@ describe('CG-002 — the engine', () => {
         id: 'p1', name: 'Sam', band: 2, lang: 'en', face: 'f2',
         robot: { name: 'Pip', color: '#FF7A59', eye: 'round', hat: 'cap' },
         tricks: { n1: 'sprout', n2: 'seed', n3: 'seed', n4: 'seed', n5: 'seed', n6: 'seed', n7: 'seed' }, stickers: [], hats: [],
-        island: { done: ['path-postbox'], plots: {}, robots: [{ id: 'r1' }] }
+        island: { done: ['path-postbox'], plots: {}, robots: [{ id: 'r1' }] },
+        // P108 IW-006 (v5): no shells yet, nothing bought.
+        shells: { earned: 0, spent: 0 }, owned: []
       });
       expect(dec.model.island).toEqual({ activeId: 'p1', done: ['path-postbox'], plots: {}, robots: [{ id: 'r1' }] });
       const enc = runScript(ENCODE_SAVE_SCRIPT, { model: dec.model });
       expect(runScript(DECODE_SAVE_SCRIPT, { code: enc.code }).migrated).toBe(false);
     });
 
-    it('🔴 a STORED v2 model loads by the same rule and says its migration is due; the v4 it becomes does not', () => {
+    it('🔴 a STORED v2 model loads by the same rule and says its migration is due; the current model it becomes does not', () => {
       const stored = {
         v: 2, family: { id: 'fam2', created: 1700000000000 },
         profiles: [{ id: 'p1', name: 'Sam', robot: { name: 'Pip' } }, { id: 'p2', name: 'Noa', robot: { name: 'Bo' } }],
@@ -819,8 +821,8 @@ describe('CG-002 — the engine', () => {
       };
       expect(helper<boolean>(SAVE_HELPERS, 'migrationDue', stored)).toBe(true);
       const model = helper<any>(SAVE_HELPERS, 'modelOf', stored);
-      expect([model.v, model.profiles.map((p: any) => p.island.done)]).toEqual([4, [['tulips-three'], ['tulips-three']]]);
-      // Written back (the page does it at once), it is v4: loading it again migrates nothing and changes nothing.
+      expect([model.v, model.profiles.map((p: any) => p.island.done)]).toEqual([SAVE_VERSION, [['tulips-three'], ['tulips-three']]]);
+      // Written back (the page does it at once), it is current: loading it again migrates nothing and changes nothing.
       const written = JSON.parse(JSON.stringify(model));
       expect(helper<boolean>(SAVE_HELPERS, 'migrationDue', written)).toBe(false);
       expect(helper<any>(SAVE_HELPERS, 'modelOf', written)).toEqual(model);
@@ -895,35 +897,36 @@ describe('CG-002 — the engine', () => {
     const STONE_PROG = JSON.parse(JSON.stringify(req('path-stones').referenceProgram));
 
     for (const band of ['band1', 'band2'] as const) {
-      it(`🔴 a v3 code from P105 (${band === 'band1' ? 'band 7–9' : 'band 10–12, two kids'}) restores every profile, done request, hat, sticker and trick; it says migrated; the v4 code it becomes does not`, () => {
+      it(`🔴 a v3 code from P105 (${band === 'band1' ? 'band 7–9' : 'band 10–12, two kids'}) restores every profile, done request, hat, sticker and trick; it says migrated; the current code it becomes does not`, () => {
         const fx = V3[band];
         const packed = JSON.parse(Buffer.from(fx.code.slice(4), 'base64url').toString('utf8'));
         expect(packed.v).toBe(3);
         const dec = runScript(DECODE_SAVE_SCRIPT, { code: fx.code });
         expect([dec.ok, dec.error, dec.migrated, dec.profiles]).toEqual([true, '', true, fx.profiles.length]);
-        expect(dec.model.v).toBe(4);
+        expect(dec.model.v).toBe(SAVE_VERSION);
         for (const [i, want] of fx.profiles.entries()) {
           const got = dec.model.profiles[i];
           const { island, ...rest } = want;
-          expect({ ...got, island: undefined }).toEqual({ ...rest, island: undefined });
+          // P108 IW-006 (v5): a migrated profile has no shells yet and nothing bought.
+          expect({ ...got, island: undefined }).toEqual({ ...rest, island: undefined, shells: { earned: 0, spent: 0 }, owned: [] });
           // Every done request kept; placed (v3's never-written list) gone; no plot pinned (v3 kept no program); the one robot.
           expect(got.island).toEqual({ done: island.done, plots: {}, robots: [{ id: 'r1' }] });
           expect('placed' in got.island).toBe(false);
         }
         expect(fx.profiles.some((p) => p.hats.length > 0 && p.stickers.length > 0)).toBe(true);
-        // Written back as a code it is v4, and reading THAT migrates nothing and changes nothing.
+        // Written back as a code it is current (v5), and reading THAT migrates nothing and changes nothing.
         const again = runScript(ENCODE_SAVE_SCRIPT, { model: dec.model });
-        expect(JSON.parse(Buffer.from(again.code.slice(4), 'base64url').toString('utf8')).v).toBe(4);
+        expect(JSON.parse(Buffer.from(again.code.slice(4), 'base64url').toString('utf8')).v).toBe(SAVE_VERSION);
         const back = runScript(DECODE_SAVE_SCRIPT, { code: again.code });
         expect([back.migrated, back.model]).toEqual([false, dec.model]);
       });
     }
 
-    it('🔴 a STORED v3 model (what localStorage holds before IG-004) is due its migration, loads as v4 with placed dropped, and once written back is not due', () => {
+    it('🔴 a STORED v3 model (what localStorage holds before IG-004) is due its migration, loads as current with placed dropped, and once written back is not due', () => {
       const stored = { v: 3, family: { id: 'f3', created: 1 }, profiles: V3.band2.profiles.map((p) => ({ ...p, island: { ...p.island, placed: [{ kind: 'stone', x: 1, y: 1 }] } })), island: { activeId: 'p-noa', done: [], placed: [] } };
       expect(helper<boolean>(SAVE_HELPERS, 'migrationDue', stored)).toBe(true);
       const model = helper<any>(SAVE_HELPERS, 'modelOf', stored);
-      expect(model.v).toBe(4);
+      expect(model.v).toBe(SAVE_VERSION);
       expect(model.profiles.map((p: any) => p.island.done)).toEqual(V3.band2.profiles.map((p) => p.island.done));
       expect(model.profiles.every((p: any) => !('placed' in p.island))).toBe(true);
       expect(model.island).toEqual({ activeId: 'p-noa', done: ['path-postbox'], plots: {}, robots: [{ id: 'r1' }] });
@@ -1686,10 +1689,11 @@ describe('CG-002 — the engine', () => {
       const back = runScript(DECODE_SAVE_SCRIPT, { code });
       expect([back.ok, back.migrated, back.model]).toEqual([true, false, m]);
       expect(rows(back.model).map((r: any) => [r.name, r.color, r.hat, r.accessory])).toEqual([['Pip', '#FF7A59', 'none', 'can'], ['Rocky', spec('cobble').colour, 'cap', 'hod'], ['Pocket', '#3FA66B', 'none', 'satchel']]);
-      // Session 3's encoder packed robots as ids: that code (hand-packed the same way) reads as it did — r1 alone, v4, not migrated.
+      // Session 3's encoder packed robots as ids: that code (hand-packed the same way) reads as it did — r1 alone. P108 IW-006:
+      // it is a v4 code, so it now says migrated (v5 is current) — and its island is exactly what it was.
       const s3 = { v: 4, f: ['f1', 1], a: 'p1', p: [['p1', 'Ada', 2, 'en', 'Ada', 'Pip', '#FF7A59', 'round', 'none', 'sssssss', [], [], ['tulips-three'], [['tulips-three', [{ id: 1, t: 'fwd' }], 'r1', 5]], ['r1']]] };
       const old = runScript(DECODE_SAVE_SCRIPT, { code: 'BG1.' + Buffer.from(JSON.stringify(s3)).toString('base64url') });
-      expect([old.ok, old.migrated, old.model.island.robots, old.model.island.plots['tulips-three'].robotId]).toEqual([true, false, [{ id: 'r1' }], 'r1']);
+      expect([old.ok, old.migrated, old.model.island.robots, old.model.island.plots['tulips-three'].robotId]).toEqual([true, true, [{ id: 'r1' }], 'r1']);
     });
 
     it('Update robot: r1’s look is the profile’s own (renaming Pip here renames him everywhere); a hat she does not own, a bad colour or an unknown robot change nothing', () => {

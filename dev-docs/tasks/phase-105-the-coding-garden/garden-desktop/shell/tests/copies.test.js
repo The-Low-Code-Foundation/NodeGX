@@ -253,15 +253,32 @@ test('the save code is byte-identical to the page’s own encoder, and the page�
   const seenBack = decode({ code: C.saveCodeOf(seenFam) });
   assert.deepEqual(seenBack.model.profiles.map((p) => p.cardsSeen), [['fwd', 'olive:read', 'repeat'], undefined], 'hers, and none for her sibling');
   assert.equal(seenBack.migrated, false);
-  // None seen packs exactly as before (no row 15): the same code as a family that never had the field.
+  // None seen packs as a family that never had the field (row 15 null).
   const noneSeen = JSON.parse(JSON.stringify(fam));
   noneSeen.profiles[0].cardsSeen = [];
   assert.equal(C.saveCodeOf(noneSeen), C.saveCodeOf(fam));
   assert.equal(encode({ model: noneSeen }).code, C.saveCodeOf(fam));
   // A model this shell does not know is kept as stored, never packed by a guess (v3 is migrated by the page on load).
-  assert.equal(C.saveCodeOf({ ...fam, v: 5 }), null);
+  assert.equal(C.saveCodeOf({ ...fam, v: 6 }), null);
+  assert.equal(C.saveCodeOf({ ...fam, v: 4 }), null);
   assert.equal(C.saveCodeOf({ ...fam, v: 3 }), null);
   assert.equal(C.saveCodeOf({ ...fam, v: 2 }), null);
+  // P108 IW-006 (v5): shells, what she bought, a plot's live job and brains (r1's and a copy's) pack as the page packs them,
+  // and a hand-edit (spent over earned, a repeated id, a brain that is not a size) is normalised the same way.
+  const rich = JSON.parse(JSON.stringify(m));
+  rich.profiles[0].shells = { earned: 41.5, spent: 12 };
+  rich.profiles[0].owned = ['rain', 'can+', 'rain', 7];
+  rich.profiles[1].shells = { earned: 3, spent: 9 };
+  rich.profiles[0].island.robots[0].brain = 16;
+  rich.profiles[0].island.robots.push({ id: 'rk2', kind: 'pip', name: 'Bubbles', color: '#FF7A59', eye: 'round', hat: 'none', brain: 20 }, { id: 'rk3', kind: 'pip', name: 'Sprout', brain: 13 });
+  const pinnedId = Object.keys(rich.profiles[0].island.plots)[0];
+  rich.profiles[0].island.plots[pinnedId].live = { things: [{ kind: 'tulip', id: 't1', x: 2, y: 1, have: 1, need: 3 }], age: 44, seed: 7, helper: 'selfcan' };
+  assert.equal(C.saveCodeOf(rich), encode({ model: rich }).code, 'v5 packs as the page packs it');
+  const richBack = decode({ code: C.saveCodeOf(rich) });
+  assert.equal(richBack.migrated, false);
+  assert.deepEqual(richBack.model.profiles.map((p) => [p.shells, p.owned]), [[{ earned: 41, spent: 12 }, ['rain', 'can+']], [{ earned: 3, spent: 3 }, []]]);
+  assert.deepEqual(richBack.model.profiles[0].island.robots.map((r) => r.brain), [16, undefined, undefined, 20, undefined]);
+  assert.deepEqual([richBack.model.profiles[0].island.plots[pinnedId].live.age, richBack.model.profiles[0].island.plots[pinnedId].live.helper], [44, 'selfcan']);
 });
 
 // ── The restore ─────────────────────────────────────────────────────────────

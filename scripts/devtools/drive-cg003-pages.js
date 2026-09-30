@@ -98,6 +98,13 @@ const ROBOT_NAMES = (() => {
   const robots = JSON.parse(/var ROBOTS = (\[.*?\]);\n/.exec(String(list.find((n) => n.type === 'JavaScriptFunction').parameters.functionScript))[1]);
   return robots.flatMap((r) => [r.defaultName.en, r.defaultName.fr]);
 })();
+// P108 IW-006: the save's version, read from the page's own encoder (Logic/Encode save code) — never a literal the next
+// version has to find and bump (v4 → v5 reddened three clauses that typed it).
+const SAVE_V = (() => {
+  const nodes = JSON.parse(fs.readFileSync(path.join(PROJECT, 'components', 'Logic', 'Encode save code', 'nodes.json'), 'utf8'));
+  const list = Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
+  return Number(/var SAVE_VERSION = (\d+);/.exec(String(list.find((n) => n.type === 'JavaScriptFunction').parameters.functionScript))[1]);
+})();
 const titleOf = (lang, id) => w(lang, (REQUESTS.find((r) => r.id === id) || { copyKeys: {} }).copyKeys.title);
 /** The hint lines, from the project's own Data/Hints (IG-002 reads "Perfect!" in both languages). */
 function loadHints(projectDir) {
@@ -1035,7 +1042,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const bo = await doneOf();
   readings.boStored = bo;
   // IG-004: the family is stored as v4 (it was v3).
-  check('S3-R8: the family is stored as v4, each kid with her own island (Bo: nothing done)', bo.v === 4 && Array.isArray(bo.done) && bo.done.length === 0, bo);
+  check(`S3-R8: the family is stored as v${SAVE_V} (the encoder's), each kid with her own island (Bo: nothing done)`, bo.v === SAVE_V && Array.isArray(bo.done) && bo.done.length === 0, bo);
   const boIsland = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-quest')].find((e) => e.innerText.includes(${JSON.stringify(w('en', 'rqTulipsTitle'))})); const say = document.querySelector('.bg-isle .gd-isl-say[data-who="mamie"]'); return { card: c ? c.innerText : null, bots: [...document.querySelectorAll('.bg-isle .gd-bot')].map((b) => b.innerText), mamieSays: say ? say.innerText : null }; })()`);
   check('S3-R8: the tulips Ada did are NOT done on Bo’s island', !!boIsland.card && !boIsland.card.includes(w('en', 'done')), boIsland);
   check('S3-R8: only Bo’s robot is on Bo’s island (a sibling’s robot is not)', boIsland.bots.length === 1, boIsland.bots);
@@ -1145,7 +1152,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await seg('FR');
   await wait(600);
   const afterPick = await doneOf();
-  check('S4-PASTE: after a refused code, the bar’s next write still writes the family (not an empty one)', !afterPick.error && !!afterPick.name && afterPick.v === 4, afterPick);
+  check('S4-PASTE: after a refused code, the bar’s next write still writes the family (not an empty one)', !afterPick.error && !!afterPick.name && afterPick.v === SAVE_V, afterPick);
   await seg('EN');
   await wait(600);
   // A good code: the one shown, with the playing kid's robot renamed, re-encoded as the game does.
@@ -1160,7 +1167,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   check('S4-PASTE: a good code says the islands are back', doneSaid.includes(w('en', 'saveCodeDone')) && !doneSaid.includes(w('en', 'saveCodeBad')), doneSaid.slice(-300));
   const restored = await doneOf();
   readings.pasteRestored = restored;
-  check('S4-PASTE: … the stored family is the code’s (the robot is Remy)', restored.robot === 'Remy' && restored.v === 4, restored);
+  check('S4-PASTE: … the stored family is the code’s (the robot is Remy)', restored.robot === 'Remy' && restored.v === SAVE_V, restored);
   await tab(0);
   await until('location.pathname', (p) => p === '/island');
   await wait(900);

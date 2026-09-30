@@ -50,6 +50,14 @@ if (!DIR || DIR.startsWith('--') || !PROJECT || !['2d', '3d'].includes(MODE)) {
   console.error('usage: drive-ig004-island.js <deploy-dir> --project <assembled-project> [--shots <dir>] [--json <file>] [--mode 2d|3d] [--perf]');
   process.exit(2);
 }
+
+// P108 IW-006: the save's version, read from the page's own encoder (Logic/Encode save code) — never a literal the next
+// version has to find and bump (v4 → v5 reddened every clause that typed it).
+const SAVE_V = (() => {
+  const nodes = JSON.parse(fs.readFileSync(path.join(PROJECT, 'components', 'Logic', 'Encode save code', 'nodes.json'), 'utf8'));
+  const list = Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
+  return Number(/var SAVE_VERSION = (\d+);/.exec(String(list.find((n) => n.type === 'JavaScriptFunction').parameters.functionScript))[1]);
+})();
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 
 // ── What the deployed project says (never typed here) ──
@@ -269,7 +277,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       if (shots) await shot(`ig004-${tag}-02b-found`);
       const saved = await activeIsland();
       const plot = saved.island && saved.island.plots ? saved.island.plots[TULIPS.id] : null;
-      check(`IG-004 AC3 ${tag}: the save is v4 and the tulips’ plot keeps the program that won and the robot pinned there`, saved.v === 4 && !!plot && Array.isArray(plot.program) && plot.program.length > 0 && plot.robotId === 'r1', { v: saved.v, plot });
+      check(`IG-004 AC3 ${tag}: the save is v${SAVE_V} and the tulips’ plot keeps the program that won and the robot pinned there`, saved.v === SAVE_V && !!plot && Array.isArray(plot.program) && plot.program.length > 0 && plot.robotId === 'r1', { v: saved.v, plot });
       const tulipsCard = await evaluate(`(() => { const c = ${byText('.bg-quest', titleOf(lang, TULIPS))}; return c ? c.innerText : null; })()`);
       check(`IG-004 AC3 ${tag}: the tulips’ card says done and that the robot works there`, !!tulipsCard && tulipsCard.includes(w(lang, 'done')) && tulipsCard.includes(w(lang, 'ig4Working')), tulipsCard);
 
@@ -287,7 +295,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
         }
         const row = packed && (packed.p.find((r) => r[0] === packed.a) || packed.p[0]);
         const pinnedRow = row && Array.isArray(row[13]) ? row[13].find((p) => p[0] === TULIPS.id) : null;
-        check('IG-004 AC7: the Grown-ups save code is v4 and carries the tulips’ plot, its program and its robot', !!packed && packed.v === 4 && !!pinnedRow && Array.isArray(pinnedRow[1]) && pinnedRow[1].length > 0 && pinnedRow[2] === 'r1', { v: packed && packed.v, pinnedRow });
+        check(`IG-004 AC7: the Grown-ups save code is v${SAVE_V} and carries the tulips’ plot, its program and its robot`, !!packed && packed.v === SAVE_V && !!pinnedRow && Array.isArray(pinnedRow[1]) && pinnedRow[1].length > 0 && pinnedRow[2] === 'r1', { v: packed && packed.v, pinnedRow });
         const beforePaste = await stored();
         const pasteBox = `(document.querySelector('input.bg-paste') || document.querySelector('.bg-paste input'))`;
         await typeInto(pasteBox, code);
@@ -295,7 +303,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
         const said = await until('document.body.innerText', (t) => t.includes(w('en', 'saveCodeDone')), 4000);
         const afterPaste = await stored();
         const strip = (m) => m && JSON.stringify(m.profiles.map((p) => ({ id: p.id, name: p.name, robot: p.robot, done: p.island.done, plots: p.island.plots, robots: p.island.robots, hats: p.hats, stickers: p.stickers })));
-        check('IG-004 AC7: pasted back through the Grown-ups box, the code restores the same family (plots, robots, done, hats, stickers)', said.includes(w('en', 'saveCodeDone')) && !!afterPaste && afterPaste.v === 4 && strip(afterPaste) === strip(beforePaste), { before: strip(beforePaste), after: strip(afterPaste) });
+        check('IG-004 AC7: pasted back through the Grown-ups box, the code restores the same family (plots, robots, done, hats, stickers)', said.includes(w('en', 'saveCodeDone')) && !!afterPaste && afterPaste.v === SAVE_V && strip(afterPaste) === strip(beforePaste), { before: strip(beforePaste), after: strip(afterPaste) });
         await tab(0);
         await until('location.pathname', (p) => p === '/island');
         await wait(1500);
@@ -368,7 +376,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const m = await stored();
     const got = m ? m.profiles.map((p) => ({ id: p.id, name: p.name, band: p.band, robot: p.robot.name, done: p.island.done, hats: p.hats, stickers: p.stickers, plots: p.island.plots, placed: 'placed' in p.island })) : null;
     const want = fx.profiles.map((p) => ({ id: p.id, name: p.name, band: p.band, robot: p.robot.name, done: p.island.done, hats: p.hats, stickers: p.stickers, plots: {}, placed: false }));
-    check('IG-004 AC1 (the page): a P105 v3 code pasted in the Grown-ups box restores every profile, done request, hat and sticker, stored as v4 (placed dropped)', !!m && m.v === 4 && JSON.stringify(got) === JSON.stringify(want), { v: m && m.v, got, want });
+    check(`IG-004 AC1 (the page): a P105 v3 code pasted in the Grown-ups box restores every profile, done request, hat and sticker, stored as v${SAVE_V} (placed dropped)`, !!m && m.v === SAVE_V && JSON.stringify(got) === JSON.stringify(want), { v: m && m.v, got, want });
   }
 
   if (PERF) {
