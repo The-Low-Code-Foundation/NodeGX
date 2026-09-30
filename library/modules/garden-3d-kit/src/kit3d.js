@@ -1880,6 +1880,13 @@
         }
         var s = screenOf([l.g.position.x, l.g.position.y + l.g.userData.lift, l.g.position.z]);
         place(l.el, s.sx, s.sy);
+        // P108 IW-003 (lane B): on the island the compact bar is at most 80 % of its tile as the camera sees it (12 px at
+        // most), so two neighbours' bars never touch however far the camera stands.
+        if (eng.world.map.w > 16 && l.el.className.indexOf('gd3-watch') === -1) {
+          var a = screenOf([l.g.position.x - 0.5, l.g.position.y, l.g.position.z]);
+          var b = screenOf([l.g.position.x + 0.5, l.g.position.y, l.g.position.z]);
+          l.el.style.width = Math.max(3, Math.min(12, 0.8 * Math.abs(b.sx - a.sx))).toFixed(1) + 'px';
+        } else if (l.el.style.width) l.el.style.width = '';
       });
       overlayEls.rings.forEach(function (l) {
         var c;
