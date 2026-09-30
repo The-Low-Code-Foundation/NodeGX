@@ -199,19 +199,27 @@ const b1 = (...types: BlockType[]) => types.map((t) => blk(t));
  */
 export const REQUESTS: ReadonlyArray<GardenRequest> = [
   {
+    // P108 IW-003 (lane P): a job. The source is the post box (a letter waits in it for Sami), the carrier Pip's hands,
+    // the target Sami's door at the end of the path (a door, capacity 1: the letter through it is the finish line), then
+    // home. Still a sequence (trick 1): walk, turn, pick, turn, walk, put — ten blocks, no loop.
     id: 'path-postbox',
     islander: 'sami',
     band: 1,
     plot: { x: 1, y: 8 },
     tricks: [1],
-    map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPB', 'GWWGGRGG', 'GGGGGTGG'],
-    things: [],
+    map: ['GGTGGGTG', 'GGGGGGGG', 'GGGGGGGH', 'PPPPPPPP', 'GWWGGRGG', 'GGGGGTGG'],
+    things: [
+      { kind: 'postbox', id: 'postbox', x: 2, y: 2 },
+      { kind: 'letter', id: 'letter', x: 2, y: 2, to: 'Sami' },
+      { kind: 'door', id: 'door-sami', x: 7, y: 3, owner: 'Sami', count: 0, capacity: 1 }
+    ],
     robotStart: { x: 0, y: 3, d: 1 },
-    goal: { name: 'robot_at', args: [7, 3] },
-    palette: ['fwd', 'left', 'right'],
+    goal: { name: 'job_done' },
+    palette: ['fwd', 'left', 'right', 'pick', 'put'],
     reward: { kind: 'hat', id: 'cap', from: 'sami' },
     copyKeys: { title: 'rqPathTitle', blurb: 'rqPathBlurb', line: 'rqPathLine', reward: 'hatCap', gift: 'giftCap' },
-    referenceProgram: b1('fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd', 'fwd')
+    referenceProgram: b1('fwd', 'fwd', 'left', 'pick', 'right', 'fwd', 'fwd', 'fwd', 'fwd', 'put'),
+    job: { targets: ['door-sami'], home: { x: 0, y: 3, d: 1 } }
   },
   {
     // CG-006 §2 row 1b: steps in order, with a turn and a water. The tulip stands under the house (7,0).
@@ -302,21 +310,28 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     ]
   },
   {
+    // P108 IW-003 (lane P): the post box (Sami's letter in it) → Pocket's satchel → Sami's door, and something kind said
+    // there (carry + say, trick 1). The finish line: the letter through the door, the words said, then home.
     id: 'letter-say',
     islander: 'sami',
     band: 2,
     plot: { x: 19, y: 8 },
     tricks: [1],
-    map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPB', 'GWWGGRGG', 'GGGGGTGG'],
-    things: [{ kind: 'letter', x: 1, y: 3 }],
+    map: ['GGTGGGTG', 'GGGGGGGG', 'GGGGGGGH', 'PPPPPPPP', 'GGWWGRGG', 'GGGGGTGG'],
+    things: [
+      { kind: 'postbox', id: 'postbox', x: 1, y: 4 },
+      { kind: 'letter', id: 'letter', x: 1, y: 4, to: 'Sami' },
+      { kind: 'door', id: 'door-sami', x: 7, y: 3, owner: 'Sami', count: 0, capacity: 1 }
+    ],
     robotStart: { x: 0, y: 3, d: 1 },
-    goal: [{ name: 'thing_at', args: ['letter', 7, 3] }, { name: 'said', args: [1] }],
+    goal: [{ name: 'job_done' }, { name: 'said', args: [1] }],
     palette: ['fwd', 'left', 'right', 'pick', 'put', 'say', 'repeat'],
     needs: 'pocket',
     rungs: ['say-thanks'],
     reward: { kind: 'sticker', id: 'letter', from: 'sami' },
     copyKeys: { title: 'rqLetterTitle', blurb: 'rqLetterBlurb', line: 'rqLetterLine', reward: 'stickerLetter', gift: 'giftLetter' },
-    referenceProgram: [blk('pick'), blk('repeat', { n: 6, body: b1('fwd') }), blk('put'), blk('say', { slots: { text: 'thanksSami' } })]
+    referenceProgram: [blk('fwd'), blk('right'), blk('pick'), blk('left'), blk('repeat', { n: 5, body: b1('fwd') }), blk('put'), blk('say', { slots: { text: 'thanksSami' } })],
+    job: { targets: ['door-sami'], home: { x: 0, y: 3, d: 1 } }
   },
   {
     id: 'wall-until',
@@ -521,7 +536,10 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   // P108 IW-003 (s3 base): the job hints. A run that tried to fill or water with no can in hand; a run that ended with
   // the job part done ({w} of {t} targets full — every mission is a job now, so this replaces "Not quite yet"). Not voiced.
   iw3NoCan: s('{b} needs the can in hand first. Where is it?', '{b} doit d’abord prendre l’arrosoir. Où est-il ?'),
-  iw3Job: s('{w} of {t} done. What is still waiting?', '{w} sur {t}, c’est fait. Qu’est-ce qui attend encore ?')
+  iw3Job: s('{w} of {t} done. What is still waiting?', '{w} sur {t}, c’est fait. Qu’est-ce qui attend encore ?'),
+  // ── P108 IW-003 (lane P): Olive read an envelope — oliveRung2's "if Olive read… the right row" would send a child to the
+  // if block; the envelopes teach go to [what Olive read]. Not voiced. ──
+  iw3pRead: s('Olive read the name on the envelope. “Go to” what Olive read takes {b} to that door.', 'Olive a lu le nom sur l’enveloppe. « Aller à » ce qu’Olive a lu emmène {b} à cette porte.')
 };
 
 export const HINT_KEYS: ReadonlyArray<string> = Object.keys(HINTS);
@@ -631,7 +649,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   sayPut: s('There.', 'Voilà.'),
   sayFill: s('Full!', 'Plein !'),
   sayDry: s('Empty…', 'Vide…'),
-  thanksSami: s('Thank you, Sami. Your letter is on its way!', 'Merci, Sami. Ta lettre est en route !'),
+  thanksSami: s('Post for you, Sami! Have a lovely day.', 'Du courrier pour toi, Sami ! Belle journée !'),
   thanksMamie: s('Dear Mamie Rose, your tulips are drinking and so am I.', 'Chère Mamie Rose, tes tulipes boivent et moi aussi.'),
   thanksBiscuit: s('Biscuit, your bowl is full. Purr away!', 'Biscuit, ta gamelle est pleine. Ronronne !'),
   winFew: s('{k} blocks. Neat!', '{k} blocs. Bien joué !'),
@@ -653,9 +671,9 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   islMamie: s('Mamie Rose', 'Mamie Rose'),
   islBiscuit: s('Biscuit', 'Biscuit'),
   // The requests' copy.
-  rqPathTitle: s('Walk the path to the post box', 'Suis le chemin jusqu’à la boîte aux lettres'),
+  rqPathTitle: s('Bring my letter from the post box', 'Apporte ma lettre depuis la boîte aux lettres'),
   rqPathBlurb: s('Steps in order', 'Des pas dans l’ordre'),
-  rqPathLine: s('"The post box is at the end of the path. Can {b} walk there?"', '« La boîte aux lettres est au bout du chemin. {b} peut y aller ? »'),
+  rqPathLine: s('"A letter is waiting for me in the post box. Can {b} fetch it and bring it to my door?"', '« Une lettre m’attend dans la boîte aux lettres. {b} peut aller la chercher et l’apporter à ma porte ? »'),
   rqTulipsTitle: s('Water my three tulips', 'Arrose mes trois tulipes'),
   rqTulipsBlurb: s('Repeat', 'Répéter'),
   rqTulipsLine: s('"My tulips are thirsty. Fill the can at the pond, and come back!"', '« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »'),
@@ -664,7 +682,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqBowlLine: s('"Two bowls. One is full already. Fill only the empty one, {b}!"', '« Deux gamelles. L’une est déjà pleine. Remplis seulement la vide, {b} ! »'),
   rqLetterTitle: s('Deliver a letter and say something kind', 'Livre une lettre et dis quelque chose de gentil'),
   rqLetterBlurb: s('Say', 'Dire'),
-  rqLetterLine: s('"Take my letter to the post box, and say something nice when you get there."', '« Porte ma lettre à la boîte aux lettres, et dis quelque chose de gentil en arrivant. »'),
+  rqLetterLine: s('"There is post for me in the post box! Bring it to my door, and say something nice when you get there."', '« Il y a du courrier pour moi dans la boîte aux lettres ! Apporte-le à ma porte, et dis quelque chose de gentil en arrivant. »'),
   rqWallTitle: s('Walk to the wall, then turn', 'Va jusqu’au mur, puis tourne'),
   rqWallBlurb: s('Repeat until', 'Répéter jusqu’à'),
   rqWallLine: s('"Keep going until the wall, then turn left. I want to see {b} stop by itself."', '« Continue jusqu’au mur, puis tourne à gauche. Je veux voir {b} s’arrêter tout seul. »'),
@@ -846,7 +864,15 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   sayNoCan: s('I need the can.', 'Il me faut l’arrosoir.'),
   sayHome: s('Home! All done.', 'À la maison ! Tout est fait.'),
   // ── P108 IW-005 (lane J): go to nearest / go to found nothing to reach (the none event) ──
-  sayNone: s('There’s none left to find.', 'Il n’y en a plus à trouver.')
+  sayNone: s('There’s none left to find.', 'Il n’y en a plus à trouver.'),
+  // ── P108 IW-003 (lane P): the post — the envelopes' card, and what a robot says at a door ──
+  iw3pEnvTitle: s('Take each letter to the right door', 'Apporte chaque lettre à la bonne porte'),
+  iw3pEnvBlurb: s('Go to what Olive read', 'Aller à ce qu’Olive a lu'),
+  iw3pEnvLine: s('"Three letters came for my neighbours. Ask Olive to read the name on each one, then {b} takes it to that door!"', '« Trois lettres sont arrivées pour mes voisins. Demande à Olive de lire le nom sur chacune, puis {b} l’apporte à cette porte ! »'),
+  iw3pStickerEnvelope: s('Envelope sticker', 'Autocollant enveloppe'),
+  iw3pGiftEnvelope: s('An envelope sticker, from Mamie Rose', 'Un autocollant enveloppe, offert par Mamie Rose'),
+  iw3pPosted: s('Delivered!', 'Livrée !'),
+  iw3pWrongDoor: s('Not this door! Whose name is on the letter?', 'Pas cette porte ! Quel nom est écrit sur la lettre ?')
 };
 
 /** The word keys, for the generated translate script and the gate. */
@@ -940,17 +966,70 @@ function IG006_REQUESTS(): GardenRequest[] {
       band: 2,
       plot: { x: 37, y: 8 },
       tricks: [1],
-      map: ['GGTGGGTH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPB', 'GWWGGRGG', 'GGGGGTGG'],
-      things: [at('note', 0, 2, { text: 'Take the letter to Mamie Rose.' }), at('letter', 1, 3)],
+      // P108 IW-003 (lane P): as letter-say — the post box → Pocket's satchel → Mamie Rose's door — and Olive writes the
+      // thank-you. The note still names who the letter is for.
+      map: ['GGTGGGTG', 'GGGGGHGG', 'GGGGGGGG', 'PPPPPPPP', 'GGGGGGWW', 'GGTGGGWG'],
+      things: [
+        at('note', 0, 2, { text: 'Take the letter to Mamie Rose.' }),
+        at('postbox', 2, 4, { id: 'postbox' }),
+        at('letter', 2, 4, { id: 'letter', to: 'Mamie Rose' }),
+        at('door', 5, 2, { id: 'door-mamie', owner: 'Mamie Rose', count: 0, capacity: 1 })
+      ],
       robotStart: { x: 0, y: 3, d: 1 },
-      goal: goal([{ name: 'thing_at', args: ['letter', 7, 3] }, { name: 'said', args: [1] }, { name: 'uses', args: ['olive:say-thanks', 1] }]),
+      goal: goal([{ name: 'job_done' }, { name: 'said', args: [1] }, { name: 'uses', args: ['olive:say-thanks', 1] }]),
       palette: ['fwd', 'left', 'right', 'pick', 'put', 'repeat'],
       needs: 'pocket',
       challenge: 'predict',
       rungs: ['say-thanks'],
       reward: { kind: 'sticker', id: 'thanks', from: 'sami' },
       copyKeys: { title: 'rqThanksTitle', blurb: 'rqThanksBlurb', line: 'rqThanksLine', reward: 'stickerThanks', gift: 'giftThanks' },
-      referenceProgram: [blk('pick'), blk('repeat', { n: 6, body: b1('fwd') }), blk('put'), olive('say-thanks', { to: 'Mamie Rose', deed: 'carried her letter' })]
+      referenceProgram: [
+        blk('repeat', { n: 2, body: b1('fwd') }),
+        blk('right'),
+        blk('pick'),
+        blk('left'),
+        blk('repeat', { n: 3, body: b1('fwd') }),
+        blk('left'),
+        blk('put'),
+        olive('say-thanks', { to: 'Mamie Rose', deed: 'carried her letter' })
+      ],
+      job: { targets: ['door-mamie'], home: { x: 0, y: 3, d: 1 } }
+    },
+    {
+      // P108 IW-003 (lane P, NEW; D6 supersedes P106 R10): the envelopes. Three letters in the post box, each with a name
+      // dealt by the day's seed; three doors on the street, each with its owner. Olive reads the name on the envelope in
+      // Pocket's satchel, and go to [what Olive read] walks to that door (IW-005's REF read, by the door's owner). A fixed
+      // walk to the doors in a row wins only on the day the names happen to come in that order.
+      id: 'envelopes',
+      islander: 'mamie',
+      band: 2,
+      plot: { x: 46, y: 1 },
+      tricks: [2],
+      map: ['GHGGHGGH', 'GGGGGGGG', 'GGGGGGGG', 'PPPPPPPP', 'GGGGGGGG', 'GTGGGGTG'],
+      things: [
+        at('door', 1, 1, { id: 'door-mamie', owner: 'Mamie Rose', count: 0, capacity: 1 }),
+        at('door', 4, 1, { id: 'door-sami', owner: 'Sami', count: 0, capacity: 1 }),
+        at('door', 7, 1, { id: 'door-biscuit', owner: 'Biscuit', count: 0, capacity: 1 }),
+        at('postbox', 2, 2, { id: 'postbox' }),
+        at('letter', 2, 2, { id: 'e1', to: 'Mamie Rose' }),
+        at('letter', 2, 2, { id: 'e2', to: 'Sami' }),
+        at('letter', 2, 2, { id: 'e3', to: 'Biscuit' })
+      ],
+      robotStart: { x: 3, y: 3, d: 0 },
+      goal: goal([{ name: 'job_done' }]),
+      palette: ['fwd', 'left', 'right', 'pick', 'put', 'go_to', 'repeat'],
+      needs: 'pocket',
+      rungs: ['read'],
+      reward: { kind: 'sticker', id: 'envelope', from: 'mamie' },
+      copyKeys: { title: 'iw3pEnvTitle', blurb: 'iw3pEnvBlurb', line: 'iw3pEnvLine', reward: 'iw3pStickerEnvelope', gift: 'iw3pGiftEnvelope' },
+      referenceProgram: [
+        blk('repeat', {
+          n: 3,
+          body: [blk('go_to', { slots: { thing: { id: 'postbox', kind: 'postbox', x: 2, y: 2 } } }), blk('pick'), olive('read'), blk('go_to', { slots: { thing: { ref: 'read' } } }), blk('put')]
+        })
+      ],
+      job: { targets: ['door-mamie', 'door-sami', 'door-biscuit'], home: { x: 3, y: 3, d: 0 } },
+      seeded: { shuffle: { things: ['e1', 'e2', 'e3'], field: 'to', values: ['Mamie Rose', 'Sami', 'Biscuit'] } }
     }
   ];
 }
@@ -1055,7 +1134,7 @@ export const ROBOT_CONTROLS: ReadonlyArray<string> = ['repeat', 'until', 'if', '
 export const ROBOTS: ReadonlyArray<RobotSpec> = [
   { id: 'pip', defaultName: s('Pip', 'Pip'), colour: '#FF7A59', accessory: 'can', palette: ['water', 'fill', 'olive:read'], canMax: 3, basket: 4, upgrade: 'can+', lentBy: null, unlockedBy: null },
   { id: 'cobble', defaultName: s('Cobble', 'Cobble'), colour: '#7A8CA3', accessory: 'hod', palette: ['pick', 'put'], canMax: 3, basket: 4, upgrade: 'basket+', lentBy: 'sami', unlockedBy: 'path-postbox' },
-  { id: 'pocket', defaultName: s('Pocket', 'Poche'), colour: '#FFB347', accessory: 'satchel', palette: ['pick', 'put', 'say', 'olive:say-thanks'], canMax: 3, basket: 6, upgrade: 'boots', lentBy: 'biscuit', unlockedBy: 'bowl-if' },
+  { id: 'pocket', defaultName: s('Pocket', 'Poche'), colour: '#FFB347', accessory: 'satchel', palette: ['pick', 'put', 'say', 'olive:say-thanks', 'olive:read'], canMax: 3, basket: 6, upgrade: 'boots', lentBy: 'biscuit', unlockedBy: 'bowl-if' },
   { id: 'echo', defaultName: s('Echo', 'Écho'), colour: '#8F6BFF', accessory: 'bell', palette: ['water', 'fill', 'say', 'olive:read', 'olive:is-it-a', 'olive:say-thanks'], canMax: 3, basket: 4, upgrade: 'can+', lentBy: 'mamie', unlockedBy: 'mamie-note' }
 ];
 

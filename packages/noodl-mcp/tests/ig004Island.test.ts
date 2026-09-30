@@ -327,8 +327,11 @@ describe('IG-004 — the island as a world', () => {
       const is = islandOf(kid(2));
       const things = is.world.world.things;
       for (const r of REQ_ROWS) {
-        const want = r.things.map((t: any) => ({ ...t, x: t.x + r.plot.x, y: t.y + r.plot.y }));
-        expect({ id: r.id, things: things.filter((t: any) => inPlot(t, r.plot) && t.kind !== 'islander' && t.kind !== 'fence' && t.kind !== 'padlock') }).toEqual({ id: r.id, things: want });
+        // P108 IW-003 (lane P): a field a seeded layout deals (shuffle: the envelopes' names; choose) is the plot's seed's.
+        const dealt = [r.seeded?.shuffle?.field, ...(r.seeded?.choose ?? []).map((c: any) => c.field)].filter(Boolean);
+        const loose = (t: any) => { const o = { ...t }; for (const f of dealt) delete o[f]; return o; };
+        const want = r.things.map((t: any) => loose({ ...t, x: t.x + r.plot.x, y: t.y + r.plot.y }));
+        expect({ id: r.id, things: things.filter((t: any) => inPlot(t, r.plot) && t.kind !== 'islander' && t.kind !== 'fence' && t.kind !== 'padlock').map(loose) }).toEqual({ id: r.id, things: want });
       }
       expect(things.filter((t: any) => inPlot(t, FREE_PLAY_PLOT)).map((t: any) => t.kind)).toEqual(['tulip', 'tulip', 'tulip']);
       const people = things.filter((t: any) => t.kind === 'islander');
@@ -676,5 +679,56 @@ describe('IW-005 (P108 s2) — seek on the island: a pinned robot goes to the ne
     expect(p95).toBeLessThan(5);
     // A search per walk: far fewer searches than walking steps.
     expect(moves).toBeGreaterThan(searches);
+  });
+});
+
+// ── P108 IW-003 (lane P): the post on the island ────────────────────────────────────────────────────────────────────
+
+describe('IW-003 (P108 s3, lane P) — the envelopes on the island: Pocket delivers each letter to its door, walks home, and goes back when a neighbour takes a letter in', () => {
+  const ENV_PLOT = { x: 10, y: 8 };
+  const env = () => ({ ...JSON.parse(JSON.stringify(req('envelopes'))), plot: ENV_PLOT });
+  const built = () =>
+    bare(SYN_WORLD, {
+      requests: [...SYN_REQUESTS.filter((r) => !(r.plot.x === ENV_PLOT.x && r.plot.y === ENV_PLOT.y)), env()],
+      plots: { envelopes: pinned(ref('envelopes'), 'r4') },
+      robots: [{ id: 'r1' }, { id: 'r2', kind: 'cobble' }, { id: 'r4', kind: 'pocket' }],
+      done: ['envelopes'],
+      band: 2,
+      pins: []
+    });
+  const doors = (cur: any) => cur.things.filter((t: any) => t.kind === 'door').map((t: any) => [t.owner, t.count]);
+
+  it('🔴 the pinned program (Olive’s read on the tick takes no word: the name on the envelope is read) fills the three doors, walks home and waits; at WEAR.door a neighbour takes a letter in, the post box gets one addressed to that door, and Pocket delivers it there', () => {
+    let state = built().state;
+    expect(state.live.envelopes).toBeDefined();
+    const home = req('envelopes').job!.home;
+    let t = 0;
+    const wrong: number[] = [];
+    for (; t < WEAR.door && state.live.envelopes.phase !== 'wait'; t++) {
+      state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      if (state.live.envelopes.delta?.wrongDoor) wrong.push(t);
+    }
+    let cur = state.live.envelopes;
+    expect({ phase: cur.phase, doors: doors(cur), at: [cur.robot.x, cur.robot.y, cur.robot.d], carry: cur.robot.carry, wrong }).toEqual({ phase: 'wait', doors: [['Mamie Rose', 1], ['Sami', 1], ['Biscuit', 1]], at: [home.x, home.y, home.d], carry: [], wrong: [] });
+    // The wear tick: one door lets its letter in; the post box's new letter carries that owner's name.
+    let worn: any = null;
+    let letter: any = null;
+    for (; t < 3 * WEAR.door && !worn; t++) {
+      state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      for (const d of state.live.envelopes.worn || []) {
+        if (d.wear && d.wear.kind === 'door') worn = d.wear;
+        if (d.letter) letter = d.letter;
+      }
+    }
+    expect(worn).not.toBeNull();
+    const owner = state.live.envelopes.things.find((x: any) => x.id === worn.id).owner;
+    expect(letter).toMatchObject({ to: owner });
+    // Pocket goes back and puts it through THAT door (never another), then home again.
+    for (let k = 0; k < WEAR.door - 1 && !(state.live.envelopes.phase === 'wait' && doors(state.live.envelopes).every((d: any) => d[1] === 1)); k++) {
+      state = bare(ISLAND_TICK_SCRIPT, { state }).state;
+      expect(state.live.envelopes.delta?.wrongDoor).toBeUndefined();
+    }
+    cur = state.live.envelopes;
+    expect({ phase: cur.phase, doors: doors(cur), lap: cur.lap > 0, at: [cur.robot.x, cur.robot.y] }).toEqual({ phase: 'wait', doors: [['Mamie Rose', 1], ['Sami', 1], ['Biscuit', 1]], lap: true, at: [home.x, home.y] });
   });
 });

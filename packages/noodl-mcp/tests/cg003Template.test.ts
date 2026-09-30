@@ -2087,7 +2087,8 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       expect(blocked(kid())).toEqual(REQUESTS.filter((r) => (r.needs ?? 'pip') !== 'pip').map((r) => r.id).sort());
       const m = run(COMPLETE_REQUEST_SCRIPT, { model: win(kid(), 'path-postbox'), requestId: 'path-stones', tricks: [], reward: null, program: '[{"id":1,"t":"fwd"}]', robotId: 'cobble' }).model;
       // Cobble works the stones: the bowl (his) is blocked; Pip's jobs are not.
-      expect(blocked(m)).toEqual(['bowl-if', 'eggs-count', 'letter-say', 'rock-flower', 'sami-thanks']);
+      // P108 IW-003 (lane P): + the envelopes (Pocket's).
+      expect(blocked(m)).toEqual(['bowl-if', 'eggs-count', 'envelopes', 'letter-say', 'rock-flower', 'sami-thanks']);
       expect(rowsOf(m).find((r: any) => r.id === 'path-stones').doneWord).toBe('✓ ' + WORD_ROWS.find((x) => x.key === 'done')!.en + ' · Cobble works here');
     });
   });
@@ -2142,6 +2143,9 @@ describe('P108 s2 (merge) — Draw world hands the kits the job model as the eng
     const ids = REQ_ROWS.map((r: { id: string }) => r.id);
     expect(ids.length).toBe(REQUESTS.length);
     for (const id of ids) {
+      // P108 IW-003 (lane P): a mission on the job model draws its job (the row below); the rest as before.
+      const q = REQUESTS.find((r) => r.id === id)!;
+      if (q.job || q.seeded) continue;
       const out = drawOf(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: id }).world);
       for (const t of out.things) for (const k of Object.keys(t)) expect([id, k, OLD_KEYS.has(k)]).toEqual([id, k, true]);
       for (const r of out.robots) expect('holds' in r).toBe(false);
@@ -2255,5 +2259,33 @@ describe('P108 IW-004 — the Workshop’s program on garden-kit.Blocks (lane B)
     expect(Object.keys(kitWords).length).toBeGreaterThan(60);
     expect(bad).toEqual([]);
     expect(PAGE_WORD_KEYS.filter((k) => k.startsWith('iw4')).length).toBe(Object.keys(kitWords).length + 1);
+  });
+});
+
+// ── P108 IW-003 (lane P): the post on the page ──────────────────────────────────────────────────────────────────────
+describe('IW-003 (P108 s3, lane P) — Draw world hands the kits a door with its letters and its owner; the envelopes’ card and sticker', () => {
+  const drawOf = (world: unknown) => run(DRAW_WORLD_SCRIPT, { world, words: WORD_ROWS, lang: 'en', botName: 'Pocket', stepMs: 380, sayN: 0, run: { runId: 'r1' } });
+
+  it('🔴 a door reaches the kits with its id, count, capacity, item and owner; the post box and its letters too — and the names on the letters stay with the engine (Olive reads them)', () => {
+    const w = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'envelopes', seed: 1 }).world;
+    const out = drawOf(w);
+    expect(out.things.filter((t: any) => t.kind === 'door')).toEqual([
+      { kind: 'door', x: 1, y: 1, id: 'door-mamie', count: 0, capacity: 1, owner: 'Mamie Rose' },
+      { kind: 'door', x: 4, y: 1, id: 'door-sami', count: 0, capacity: 1, owner: 'Sami' },
+      { kind: 'door', x: 7, y: 1, id: 'door-biscuit', count: 0, capacity: 1, owner: 'Biscuit' }
+    ]);
+    expect(out.things.filter((t: any) => t.kind === 'letter').map((t: any) => Object.keys(t).sort())).toEqual([['id', 'kind', 'x', 'y'], ['id', 'kind', 'x', 'y'], ['id', 'kind', 'x', 'y']]);
+    expect(out.things.find((t: any) => t.kind === 'postbox')).toEqual({ kind: 'postbox', x: 2, y: 2, id: 'postbox' });
+  });
+
+  it('the envelopes’ own line under the Workshop title, the robot’s name in it, and its sticker on the sticker page — EN and FR', () => {
+    for (const lang of ['en', 'fr']) {
+      const card = run(REQUEST_CARD_SCRIPT, { requests: REQ_ROWS, requestId: 'envelopes', words: WORD_ROWS, lang, botName: 'Pocket' });
+      expect({ lang, sub: card.sub }).toEqual({ lang, sub: String((PAGE_WORDS.iw3pSubEnvelopes as Record<string, string>)[lang]).split('{b}').join('Pocket') });
+    }
+    for (const lang of ['en', 'fr'] as const) {
+      const rows = run(LOOK_ROWS_SCRIPT, { words: WORD_ROWS, lang, stickers: ['envelope'], hats: [] }).stickers;
+      expect(rows).toEqual([{ id: 'envelope', label: '💌 ' + WORDS.iw3pStickerEnvelope[lang] }]);
+    }
   });
 });

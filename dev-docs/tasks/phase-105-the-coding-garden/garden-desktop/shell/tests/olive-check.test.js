@@ -172,3 +172,28 @@ test('output: a voiced hint must still be the hint — its question, its robot, 
   assert.equal(checkOutput('Une flaque ! Pip regardait où ?', wet('fr', 'Bolt')).reason, 'unfaithful', 'the kid renamed the robot Bolt; "Pip" is not Bolt');
   assert.equal(checkOutput('Une flaque ! Bolt regardait où ?', wet('fr', 'Bolt')).ok, true);
 });
+
+// P108 IW-003 (lane P, IW-005 dev. 6): the envelopes. The engine sends read the name on the envelope as its note and the
+// doors' owners as its options; the shell must accept both, hold the model to the names, and write the name back.
+test('IW-003: an envelope is a read note ("For Sami." / "Pour Sami."), its choices are the neighbours’ names, and the written answer is the name — EN and FR', () => {
+  const NAMES = ['Mamie Rose', 'Sami', 'Biscuit'];
+  const { writtenAnswer } = require('../olive-written');
+  for (const name of NAMES) {
+    const i = templates.lists.notes_read.en.indexOf(`For ${name}.`);
+    assert.ok(i >= 0, `notes_read has the envelope for ${name}`);
+    assert.equal(templates.lists.notes_read.fr[i], `Pour ${name}.`, 'index-aligned in French');
+    for (const L of ['en', 'fr']) {
+      const note = templates.lists.notes_read[L][i];
+      assert.equal(checkSlots(templates, 'read', { note }, L).ok, true, `${L} "${note}" passes the slot check`);
+      assert.ok(templates.lists.plot_objects[L].includes(name), `${L} plot_objects knows ${name}`);
+      const p = compose(templates, 'read', { note }, { lang: L, options: NAMES });
+      assert.deepEqual(p.enumValues, NAMES, 'held to the names the engine sent');
+      assert.match(p.user, new RegExp(NAMES.join(', ')));
+      assert.equal(writtenAnswer(templates, 'read', { note }, L).value, name);
+      assert.equal(checkOutput(JSON.stringify({ objet: name }), { shape: p.shape, enumValues: p.enumValues, lang: L }).ok, true, 'her answer, the name, passes the grammar');
+    }
+  }
+  // The known-firing twin: a name the engine did not offer is refused by the grammar.
+  const p = compose(templates, 'read', { note: 'For Sami.' }, { lang: 'en', options: ['Sami', 'Biscuit'] });
+  assert.equal(checkOutput(JSON.stringify({ objet: 'Mamie Rose' }), { shape: p.shape, enumValues: p.enumValues, lang: 'en' }).ok, false);
+});

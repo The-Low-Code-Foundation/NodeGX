@@ -18,6 +18,8 @@ import * as path from 'path';
 import { BAND_PALETTE, HINTS, REQUESTS, WORDS, WORD_KEYS } from './cg002Content';
 import { KIT_PALETTE_SCRIPT } from './cg003Scripts';
 import { APPLY_DELTA_SCRIPT, DIAL_TEMPERATURE, GOAL_SCRIPT, NEW_RUN_SCRIPT, PALETTE_SCRIPT, STEP_SCRIPT, portsOf, runScript } from './cg002Scripts';
+// P108 IW-003 (lane P): the world a request opens on, laid by the engine's own seedWorld.
+import { ENGINE, helper } from './cg002Scripts';
 import {
   ACCEPT_PROPOSAL_SCRIPT,
   ASK_OLIVE_SCRIPT,
@@ -664,7 +666,8 @@ describe('CG-005 — Olive in the game', () => {
 
   describe('IG-006 (P106) — Olive reads: three blocks a child can see, wire and doubt', () => {
     const request = (id: string) => REQUESTS.find((r) => r.id === id)!;
-    const worldOf = (r: (typeof REQUESTS)[number]) => ({ map: [...r.map], things: r.things.map((t) => ({ ...t })), robots: [{ id: 'pip', x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d, carry: [...(r.robotStart.carry || [])] }] });
+    // P108 IW-003 (lane P): laid as Start world lays it (seed 1): a request with a job carries it onto its world.
+    const worldOf = (r: (typeof REQUESTS)[number]) => helper<any>(ENGINE, 'seedWorld', { map: [...r.map], things: r.things.map((t) => ({ ...t })), robots: [{ id: 'pip', x: r.robotStart.x, y: r.robotStart.y, d: r.robotStart.d, carry: [...(r.robotStart.carry || [])] }] }, JSON.parse(JSON.stringify(r)), 1);
     const words = (lang: 'en' | 'fr') => runScript(KIT_PALETTE_SCRIPT, { palette: [], lang, words: WORD_ROWS }); // (a no-op run: keeps the import honest)
 
     it('AC1: at band 10–12 the palette lists exactly read, is it a…?, say under Olive (olive:<rung>, the owl); at 7–9 none; no ask:<rung> id anywhere', () => {
@@ -767,7 +770,8 @@ describe('CG-005 — Olive in the game', () => {
 
     it('the three requests: band 10–12, Pip, each with one Olive block, and each reference program wins through the real route with the stub (EN and FR)', async () => {
       const ids = ['mamie-note', 'rock-flower', 'sami-thanks'];
-      expect(REQUESTS.slice(-3).map((r) => r.id)).toEqual(ids);
+      // P108 IW-003 (lane P): the envelopes (Olive's read → go to) come after them, the last of IG006_REQUESTS().
+      expect(REQUESTS.map((r) => r.id).filter((id) => ids.includes(id))).toEqual(ids);
       for (const id of ids) {
         const r = request(id);
         expect({ id, band: r.band, rungs: r.rungs }).toEqual({ id, band: 2, rungs: [{ 'mamie-note': 'read', 'rock-flower': 'is-it-a', 'sami-thanks': 'say-thanks' }[id]] });
