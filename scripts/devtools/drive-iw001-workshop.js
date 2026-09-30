@@ -446,12 +446,17 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const said = await until(SEEN, (s) => s.bubble.includes(sami), 2500);
   check(`AC6: the say key says "${sami}" over the robot (Drive: nothing recorded)`, said.bubble.includes(sami) && (await blocks()) === 0, { bubble: said.bubble, blocks: await blocks() });
   await shot('iw001-ac6-say');
+  // P108 IW-003 (lane P): the letter waits in the post box now (1,4), south of the path: a step and a turn to face it.
+  await key('fwd');
+  await key('right');
   await key('pick');
   const picked = await until(SEEN, (s) => !!s.engine && s.engine.carry.includes('letter'), 2500);
-  check('AC6: the pick key takes the letter ahead (on the robot, off the tile)', picked.engine.carry.includes('letter') && !picked.things.includes('letter@1,3'), { carry: picked.engine.carry, things: picked.things });
+  check('AC6: the pick key takes the letter from the post box ahead (on the robot, out of the box)', picked.engine.carry.includes('letter') && !picked.things.includes('letter@1,4'), { carry: picked.engine.carry, things: picked.things });
+  // The post box blocks: turn to the free path tile ahead and put it down there.
+  await key('left');
   await key('put');
   const put = await until(SEEN, (s) => !!s.engine && !s.engine.carry.includes('letter'), 2500);
-  check('AC6: the put key puts it down ahead again', !put.engine.carry.includes('letter') && put.things.includes('letter@1,3'), { carry: put.engine.carry, things: put.things });
+  check('AC6: the put key puts it down on the tile ahead', !put.engine.carry.includes('letter') && put.things.includes('letter@2,3'), { carry: put.engine.carry, things: put.things });
   // Teach: say is recorded as a say block with Sami's thank-you.
   await control('rec');
   await key('say');

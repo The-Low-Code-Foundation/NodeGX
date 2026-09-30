@@ -201,6 +201,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   };
   const newPlayer = async (name, lang = 'en') => {
     await tap(first('button.bg-profile-new'), `new player ${name}`);
+    await until(`[...document.querySelectorAll('input')].some((e) => e.offsetParent !== null)`, Boolean, 6000);
     await evaluate(`(() => { const el = [...document.querySelectorAll('input')].find((e) => e.offsetParent !== null); el.focus(); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, ${JSON.stringify(name)}); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); el.blur(); })()`);
     await wait(250);
     await tap(byText('.bg-seg-btn', '10–12'), 'band 10–12 in the form');
