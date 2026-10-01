@@ -106,11 +106,12 @@ function iw7bLandStale(plot, cur) {
 export const LAND_TICK = `
 // ── P108 IW-007 (lane B): her land on the island tick ──
 var IW7B_LAND_ID = ${JSON.stringify(LAND_ID)};
-function iw7bHaves(things) { var out = {}, l = Array.isArray(things) ? things : []; for (var i = 0; i < l.length; i++) { var t = l[i]; if (t && t.kind === 'site' && isSet(t.of)) out[String(t.id)] = meterOf(t).have; } return out; }
+function iw7bHaves(things) { var out = {}, l = Array.isArray(things) ? things : []; for (var i = 0; i < l.length; i++) { var t = l[i]; if (t && t.kind === 'site' && isSet(t.of)) out[String(t.id)] = meterOf(t).have; else if (t && t.kind === 'bowl' && t.animal) out['bowl:' + String(t.id)] = meterOf(t).have; } return out; }
+/** A building part that rose, or an animal's bowl that changed (fed or worn): Island keep writes it at once. */
 function iw7bDropMoment(cur, out) {
   if (!out || out === cur || out.moment) return out;
   var was = iw7bHaves(cur.things), now = iw7bHaves(out.things);
-  for (var k in now) if (now[k] > (Number(was[k]) || 0)) { out.moment = true; break; }
+  for (var k in now) if (k.indexOf('bowl:') === 0 ? now[k] !== (Number(was[k]) || 0) : now[k] > (Number(was[k]) || 0)) { out.moment = true; break; }
   return out;
 }
 `;

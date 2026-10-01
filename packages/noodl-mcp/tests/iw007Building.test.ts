@@ -169,6 +169,35 @@ describe('[B] plumbing — her land is a plot of the island (brief §4.2)', () =
     expect(lag).toBeGreaterThan(0);
   });
 
+  it('her rabbit’s bowl: every change of it (a carrot in, one worn) is written to her save the same tick — a reload never shows less than the island did (lane A’s finding)', () => {
+    const m = kid();
+    const p = active(m);
+    p.island.land = { buildings: [{ id: 'b2', bp: 'refuge', x: 3, y: 3, have: { plank: 6, stone: 4 } }], animals: [{ id: 'a1', kind: 'rabbit', name: 'Flopsy', at: 'b2', slot: 0, fed: 0 }] };
+    const bowl = { id: 'a1', kind: 'bowl', x: 3, y: 4 };
+    p.island.plots[LAND_ID] = { program: [blk(1, 'until', { slots: { cond: is(bowl, 'full') }, body: [blk(2, 'go_nearest', { slots: { kind: 'patch' } }), blk(3, 'pick'), blk(4, 'go_to', { slots: { thing: bowl } }), blk(5, 'put')] })], robotId: 'r1', wonAt: 1 };
+    const seen: number[] = [];
+    tickKeep(m, 120, {
+      watch: (s, mm) => {
+        const live = s.live[LAND_ID].things.find((t: any) => t.id === 'a1').count;
+        expect(active(mm).island.land.animals[0].fed).toBe(live);
+        if (seen[seen.length - 1] !== live) seen.push(live);
+      }
+    });
+    expect(seen.slice(0, 4)).toEqual([0, 1, 2, 3]);
+  });
+
+  it('arm: a bowl not a moment → the save lags her bowl by a carrot', () => {
+    const T = arm(ISLAND_TICK_SCRIPT, "k.indexOf('bowl:') === 0 ? now[k] !== (Number(was[k]) || 0) : ", 'k.indexOf(\'bowl:\') === 0 ? false : ');
+    const m = kid();
+    const p = active(m);
+    p.island.land = { buildings: [{ id: 'b2', bp: 'refuge', x: 3, y: 3, have: { plank: 6, stone: 4 } }], animals: [{ id: 'a1', kind: 'rabbit', name: 'Flopsy', at: 'b2', slot: 0, fed: 0 }] };
+    const bowl = { id: 'a1', kind: 'bowl', x: 3, y: 4 };
+    p.island.plots[LAND_ID] = { program: [blk(1, 'until', { slots: { cond: is(bowl, 'full') }, body: [blk(2, 'go_nearest', { slots: { kind: 'patch' } }), blk(3, 'pick'), blk(4, 'go_to', { slots: { thing: bowl } }), blk(5, 'put')] })], robotId: 'r1', wonAt: 1 };
+    let lag = 0;
+    tickKeep(m, 120, { tick: T, watch: (s, mm) => { if (active(mm).island.land.animals[0].fed < s.live[LAND_ID].things.find((t: any) => t.id === 'a1').count) lag++; } });
+    expect(lag).toBeGreaterThan(0);
+  });
+
   it('a land built from a save goes on from it: the sources’ left from the live job, the buildings from the land (a new one placed since appears)', () => {
     const m = crew();
     const r = tickKeep(m, 60);
