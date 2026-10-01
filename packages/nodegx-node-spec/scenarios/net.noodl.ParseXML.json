@@ -1,0 +1,80 @@
+[
+  {
+    "name": "a tag with attributes and text is { '@attr', '#text' }, every value a string (0123 stays \"0123\"), Changed; Error and Error Code sent clear",
+    "because": "parsexml.ts :139-150 the Result sentence, :223-230; xml.ts :165-181 parseTagValue / parseAttributeValue off, textNodeName '#text'",
+    "params": {},
+    "steps": [{ "set": "text", "value": "<item id=\"0123\" live=\"true\">0123</item>" }, "settle"]
+  },
+  {
+    "name": "Always Array: one <item> is an object without it and an array of one with it; names are trimmed and empties dropped",
+    "because": "parsexml.ts :98-111, :202-205; xml.ts :180 isArray",
+    "params": {},
+    "steps": [{ "set": "text", "value": "<root><item>x</item><b>1</b></root>" }, "settle", { "set": "alwaysArray", "value": " item , ,b" }, "settle", { "set": "alwaysArray", "value": "" }, "settle"]
+  },
+  {
+    "name": "namespace prefixes are kept, CDATA is text, the five entities, HTML entities and numeric references are decoded",
+    "because": "xml.ts :168-171 removeNSPrefix false, :175-177 processEntities + htmlEntities",
+    "params": {},
+    "steps": [{ "set": "text", "value": "<feed xmlns:yt=\"http://www.youtube.com/xml/schemas/2015\"><yt:videoId>0123</yt:videoId><p><![CDATA[<b>bold</b> & raw]]></p><t>Fish &amp; chips &#169; &copy; &lt;x&gt;</t></feed>" }, "settle"]
+  },
+  {
+    "name": "Trim Values off keeps a text's spaces; on again strips them ('' on it is off: truthiness)",
+    "because": "parsexml.ts :112-122 `!!value`; xml.ts :172",
+    "params": { "trimValues": false },
+    "steps": [{ "set": "text", "value": "<t>  spaced  </t>" }, "settle", { "set": "trimValues", "value": true }, "settle", { "set": "trimValues", "value": "" }, "settle"]
+  },
+  {
+    "name": "Attribute Prefix: '_' and the empty prefix are real prefixes; null falls back to '@'",
+    "because": "parsexml.ts :94 — undefined / null only; xml.ts :166",
+    "params": { "attributePrefix": "_" },
+    "steps": [{ "set": "text", "value": "<a href=\"u\">t</a>" }, "settle", { "set": "attributePrefix", "value": "" }, "settle", { "set": "attributePrefix", "value": null }, "settle"]
+  },
+  {
+    "name": "a document that declares an entity is refused before the parser sees it: Error, Error Code xml/entity-declaration, Failure, Result as it was; the next good parse clears both (the wire keeps the sentence)",
+    "because": "xml.ts :107-120 scanForHostileConstructs; parsexml.ts :210-221, :223-226",
+    "params": {},
+    "steps": [{ "set": "text", "value": "<a>1</a>" }, "settle", { "set": "text", "value": "<!DOCTYPE x [<!ENTITY a \"b\">]><x>&a;</x>" }, "settle", { "set": "text", "value": "<a>2</a>" }, "settle"]
+  },
+  {
+    "name": "an inline DOCTYPE subset is refused (xml/doctype-subset); a DOCTYPE without one is inert and parses",
+    "because": "xml.ts :122-131 — only the subset form is refused",
+    "params": {},
+    "steps": [{ "set": "text", "value": "<!DOCTYPE x [ ]><x/>" }, "settle", { "set": "text", "value": "<?xml version=\"1.0\"?><!DOCTYPE rss><rss><channel><title>T</title></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "Max Bytes counts characters: a text over it is xml/too-large before parsing; 0, a negative and non-numeric text fall back to the 5 MB default",
+    "because": "parsexml.ts :132-133; xml.ts :144, :150-158",
+    "params": { "maxBytes": 8 },
+    "steps": [{ "set": "text", "value": "<a>12345</a>" }, "settle", { "set": "maxBytes", "value": 0 }, "settle", { "set": "maxBytes", "value": 12 }, "settle", { "set": "maxBytes", "value": "x" }, "settle"]
+  },
+  {
+    "name": "null is not an arrival (nothing, not even Failure); whitespace and a number are xml/empty",
+    "because": "parsexml.ts :80, :198 the abstain; xml.ts :146-148 — `typeof text !== 'string'` is empty too",
+    "params": {},
+    "steps": [{ "set": "text", "value": null }, "settle", { "set": "text", "value": "   " }, "settle", { "set": "text", "value": 5 }, "settle"]
+  },
+  {
+    "name": "a malformed document and text that is not XML: what the library says, as the library says it",
+    "because": "xml.ts :183-192 — a library throw is xml/parse-failed with its own message; a non-object result is 'This text is not XML'",
+    "params": {},
+    "steps": [{ "set": "text", "value": "<a><b></a>" }, "settle", { "set": "text", "value": "not xml at all" }, "settle", { "set": "text", "value": "<a></a><b></b>" }, "settle"]
+  },
+  {
+    "name": "five inputs in one frame parse once: one Changed, under the options that arrived last",
+    "because": "parsexml.ts :185-194 _schedule's guard",
+    "params": {},
+    "steps": [{ "set": "text", "value": "<r><item a=\"1\"> x </item></r>" }, { "set": "alwaysArray", "value": "item" }, { "set": "attributePrefix", "value": "$" }, { "set": "trimValues", "value": false }, { "set": "maxBytes", "value": 1000 }, "settle"]
+  },
+  {
+    "name": "a second identical document still pulses Changed and replaces Result",
+    "because": "parsexml.ts :228-230 — no comparison with the last result",
+    "params": {},
+    "steps": [{ "set": "text", "value": "<a>1</a>" }, "settle", { "set": "trimValues", "value": true }, "settle"]
+  },
+  {
+    "name": "a truthy non-string Always Array makes every parse silent — no Result, no Changed, no Failure — until a string arrives (C18)",
+    "because": "parsexml.ts :108 `value || ''` stores it, :202 `.split` throws in the frame-end callback after :191 cleared the flag; the scheduler logs the throw",
+    "params": {},
+    "steps": [{ "set": "alwaysArray", "value": 5 }, { "set": "text", "value": "<a>1</a>" }, "settle", { "set": "text", "value": "<a>2</a>" }, "settle", { "set": "alwaysArray", "value": "a" }, "settle"]
+  }
+]

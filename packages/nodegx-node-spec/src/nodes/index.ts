@@ -37,6 +37,8 @@ import { Model2 } from './object';
 import { NumberRemapper } from './number-remapper';
 import { Or } from './or';
 import { ParseCSV } from './parse-csv';
+import { ParseXML } from './parse-xml';
+import { ParseFeed } from './parse-feed';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
 import { JSONStreamParser } from './json-stream-parser';
@@ -107,6 +109,8 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [RandomBytes.type]: RandomBytes,
   [UniqueId.type]: UniqueId,
   [ParseCSV.type]: ParseCSV,
+  [ParseXML.type]: ParseXML,
+  [ParseFeed.type]: ParseFeed,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
   [JSONStreamParser.type]: JSONStreamParser,
@@ -152,6 +156,8 @@ export {
   HttpRequest,
   Now,
   ParseCSV,
+  ParseXML,
+  ParseFeed,
   RandomBytes,
   Repeat,
   JSONStreamParser,

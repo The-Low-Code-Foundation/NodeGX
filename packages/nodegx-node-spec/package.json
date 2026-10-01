@@ -10,6 +10,9 @@
     "test": "jest",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
+  "dependencies": {
+    "fast-xml-parser": "^4.5.7"
+  },
   "devDependencies": {
     "@types/jest": "^29.0.1",
     "@types/node": "^20.0.0",

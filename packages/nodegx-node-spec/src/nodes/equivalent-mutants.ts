@@ -60,6 +60,8 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     }
   ],
   'net.noodl.ParseCSV': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on CSV yet, or nothing due)' }],
+  'net.noodl.ParseXML': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on XML yet, nothing due, or the Always Array that throws)' }],
+  'net.noodl.ParseFeed': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on Feed yet, or nothing due)' }],
   'net.noodl.ToCSV': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on Items yet, or nothing due)' }],
   CollectionClear: [
     {

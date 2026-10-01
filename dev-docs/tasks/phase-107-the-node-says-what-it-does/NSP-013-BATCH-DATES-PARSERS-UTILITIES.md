@@ -1,7 +1,7 @@
 # NSP-013 — Batch: dates, time, randomness, parsers, animation
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world) and R4 = continue.
-**Status: 🟡 s12 (2026-10-01) — 16 of 24 built and conform on the runtime; the other 8 named in §6.4.**
+**Status: 🟡 s13 (2026-10-01) — 18 of 24 built and conform on the runtime; the other 6 named in §6.4.**
 
 ## 1. The person sentence
 
@@ -213,6 +213,30 @@ T4 since NSP-003:
 
 **Readings after the fixes** (2026-10-01): see the commit message — the sweep is the last thing run before it.
 
+### 6.1c s13, 2026-10-01 — Parse XML and Parse Feed: a spec whose grammar is a library's
+
+**Built:** `src/nodes/xml.ts` and `src/nodes/feed.ts` (the runtime's `xml.ts` from :55 and `feed.ts` from :40,
+verbatim, each under a header that states the rules with line cites), `parse-xml.ts`, `parse-feed.ts`, 13 + 14
+hand scenarios. **Both CONFORM on the runtime on their first run at 200** (seed 20727: Parse XML 13/13, 200/200,
+15/16 mutants + 1 declared; Parse Feed 14/14, 200/200, 12/13 + 1 declared) → **64 of 147**.
+
+1. **The tree is a library's, and the spec says so.** XML's object shape is `fast-xml-parser` 4.5.7's under the
+   runtime's options (FED-001's ruling). The spec imports the same library — `@nodegx/node-spec` now has its first
+   runtime dependency (`fast-xml-parser ^4.5.7`, the runtime's range; already hoisted, so the lockfile moves by
+   one entry). The honest size of the spec: the node's own behaviour is the guards (empty, size, entity and
+   DOCTYPE-subset refusals before a byte reaches the parser), the codes, the abstain and the frame; the tree is
+   the library's, and a stranger's target in another language owes the same tree — the scenarios pin attributes,
+   `#text`, CDATA, namespaces, entities and Always Array so it can see what that means.
+2. **Parse Feed is not T1 — it needs the world's ZONE.** The census calls it pure; `toISODate` is `Date.parse`,
+   which reads a zoneless date in the process's zone. `needs: ['registry', 'random', 'timezone']`; the zone arms
+   are row D16.
+3. **Its items are NAMED records** (each carries `id`, and `Collection.set` → `Model.create` keys by it), so the
+   registry seam was already the right model — the spec's `collection.set` reproduced the runtime's duplicate-id
+   collapse (D18) without a line written for it.
+4. The idle branch's stuck-flag `drop-set` is declared equivalent for both, as Parse CSV's.
+
+Rows: C18, D16, D17, D18 (§6.2), each in the bug ledger.
+
 ### 6.2 Rows for a ruling (R3 (a): the runtime wins until ruled; each counted every run)
 
 | row | where | what the wire shows | plain words | proposed |
@@ -221,6 +245,10 @@ T4 since NSP-003:
 | **D14** | Date To String (datetostring.ts :264-273, :39-71) | with NO Timezone, `null` and a numeric timestamp on `Date` render blank with `Invalid Date` (getDate throws); WITH a Timezone the same timestamp RENDERS and `null` renders the epoch (`formatToParts` accepts anything `Number()` accepts) — one port, two validity rules | *"Whether a timestamp or a null on Date is 'invalid' depends on whether a Timezone is set."* Two scenarios record both arms | one rule: read through `toDate` as the rest of the family does (a timestamp renders in both; null is invalid in both) |
 | **D15** | Date Difference (datemath.ts :98-115) | a `Unit` not in the list misses every fixed unit and lands on the month path, whose last line reads anything but `'months'` as YEARS | *"An unknown Unit on Date Difference is counted in years; the same value on Date Add throws (C16)."* One scenario | the C16 answer, applied to both |
 | **C17** | JSON Stream Parser (stream-parsers.ts :234-241 `scanJsonValues`; json-stream-parser.ts :287-300) | Stream or Single format, a stray `}` (Single: also `]`, `,`) where a value should start: the scanner records `Could not parse JSON value: Unexpected end of JSON input` and does not advance — an infinite loop on the main thread, memory growing until the process dies. Any format that is none of the three reads as Stream and hangs too | *"One stray `}` from an agent stream freezes the whole app, for good."* Graded through a seam that throws where the runtime loops (§6.1b); two scenarios and the generated sequences counted | step over the character after recording the error once — `i = end > i ? end : i + 1` (the spec's line) |
+| **C18** | Parse XML (parsexml.ts :108, :191-192, :202-205) | a truthy non-string on `Always Array` (a number, `true`, an array a wire carries) is stored by `value \|\| ''`, and `.split(',')` THROWS in the frame-end callback — after `scheduled` was cleared, so the node is not dead: every parse while the value stands sends NOTHING, not `Failure`, not `Error`; the scheduler logs a `TypeError` | *"Put anything but text on Always Array and Parse XML goes quiet — no result and no failure — until text arrives there."* One scenario; the spec writes the silence | `String(value)` in the setter, or refuse it through the Failure contract with an `xml/…` code |
+| **D16** | Parse Feed (feed.ts :190-202 `toISODate`) | a date with no offset (`2026-09-15T08:00:00`, `2026-09-15 08:00:00`) is read in the PROCESS's zone — 08:00Z in a UTC cloud function, 06:00Z in a browser in Paris, for one feed; a named zone `Date.parse` declines (`CEST`, `BST`) is rewritten to ` UTC` and published hours wrong, where the module's own sentence says *"a feed whose date it cannot read gets null rather than a guess"*. Its example of a declined zone, `EST`, is one V8 reads correctly | *"The same feed gets different Published times depending on where it was parsed, and a CEST or BST date is published one or two hours wrong instead of being left empty."* Three scenarios, three zones | read a zoneless date as UTC (one answer everywhere); a named zone not in V8's list → `null`, as the sentence promises |
+| **D17** | Parse Feed (parsefeed.ts :269, :273-284) | `Feed Updated` is `\|\| undefined` and is flagged — an undefined is never sent, so after a feed that said when it changed, a feed that does not leaves the OLD date on the wire; the description says *"empty when it did not say"* and every other Feed output falls back to `''` | *"Feed Updated keeps the previous feed's date when the next feed has none."* One scenario | `\|\| ''`, as its five siblings |
+| **D18** | Parse Feed (parsefeed.ts :257-263; model.ts :243-252) | every item carries an `id`, so `collection.set` makes each a NAMED record: two items with one id in a feed are one record — `Items` holds it ONCE with the LATER item's fields, while `Count` (`items.length`) says two. The same id is also the same record app-wide (an Object node with that id, another Parse Feed) — by design for FED-002's store-once, but nothing on the node says the records are shared | *"A feed that repeats a guid shows Count 2 and one item, and the item is the second one."* One scenario | `Count` = what `Items` holds; say on `Items` that an item IS the record of that id |
 | **T3** | the runner — compare.ts `eventKey` (NSP-003) | **two traces whose nested values differed compared EQUAL** — a Date, NaN, a registry array, a unit — from NSP-003 to NSP-012 | a hole shaped like the defect in the gate itself; fixed in s11, the 46 earlier specs re-graded green | closed by the fix; recorded so the s3–s10 readings are read with it |
 
 ### 6.3 Acceptance, measured
@@ -242,10 +270,9 @@ T4 since NSP-003:
 
 ### 6.4 Not done, named
 
-The other 8 (the four agent parsers are s12's, §6.1b): **Parse XML, Parse Feed**
-(need the XML parser the runtime uses, read first), **Animate To Value** (the scheduler's `onRunning` with an
+The other 6 (the four agent parsers are s12's, §6.1b; Parse XML and Parse Feed s13's, §6.1c) — two of them, **UUID** and **Delay**, are NSP-007's and already conform; four are left: **Animate To Value** (the scheduler's `onRunning` with an
 ease curve — Repeat's pass plus `easecurves.ts`), **States** (1191 lines, dynamic ports — a session of its own),
 **Screen Resolution** and **On App Error** (each needs a seam the world does not have: a viewport with a resize
 step; an error stream with a raise step). The deep run (`NSP_DEEP=10000 NSP_ONLY=…`, a quiet box). AC2. The
-third stranger round (due five times over: graphs s7, the world s8, the registry s9, the tree s10, the zone and
-digest s11).
+third stranger round (due six times over: graphs s7, the world s8, the registry s9, the tree s10, the zone and
+digest s11, the clock's between-timers rule s12).

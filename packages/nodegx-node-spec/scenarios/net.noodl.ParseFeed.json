@@ -1,0 +1,100 @@
+[
+  {
+    "name": "RSS 2.0, one item: Items is an array of one (a fresh anonymous array, the record NAMED by its guid), Count 1, the Feed outputs, Kind rss, Source generic, Changed",
+    "because": "parsefeed.ts :248-286; feed.ts :420-423, :441-452, :359-366 the id ladder; :131-137 `many` wraps a lone item",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<rss version=\"2.0\"><channel><title>Blog</title><link>https://b.example</link><description>D</description><lastBuildDate>Tue, 16 Sep 2026 10:00:00 +0200</lastBuildDate><item><title>One</title><link>https://b.example/1</link><guid isPermaLink=\"false\">g1</guid><description>short</description><content:encoded><![CDATA[<p>long</p>]]></content:encoded><dc:creator>Ada</dc:creator><category>a</category><category>b</category><category>a</category><pubDate>Mon, 15 Sep 2026 08:00:00 +0000</pubDate></item></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "Atom: the alternate link wins over the feed's own self link, a typed title is its #text, author name, category term, summary as content, Kind atom",
+    "because": "feed.ts :229-242 atomLink, :155-168 text() and the '#text' trap, :329-337 itemAuthor, :318 category term, :351-357 content falls back to summary",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title type=\"html\">Atom &amp; co</title><subtitle>Sub</subtitle><link rel=\"self\" href=\"https://a.example/feed.xml\"/><link href=\"https://a.example/\"/><updated>2026-09-15T08:00:00Z</updated><entry><id>urn:1</id><title type=\"text\">E</title><link rel=\"self\" href=\"https://a.example/e.xml\"/><link rel=\"alternate\" href=\"https://a.example/e\"/><link rel=\"enclosure\" type=\"image/png\" href=\"https://a.example/e.png\" length=\"9\"/><author><name>Ada</name></author><category term=\"x\"/><summary>S</summary><published>2026-09-14T08:00:00+02:00</published></entry></feed>" }, "settle"]
+  },
+  {
+    "name": "RDF / RSS 1.0: the items sit BESIDE the channel and are found there; dc:date read; Kind rdf",
+    "because": "feed.ts :404-419 — rdf first, items from the RDF root",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<rdf:RDF xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns=\"http://purl.org/rss/1.0/\"><channel><title>R</title><link>https://r.example</link><description>RD</description></channel><item><title>R1</title><link>https://r.example/1</link><dc:date>2026-09-15T08:00:00Z</dc:date></item><item><title>R2</title><link>https://r.example/2</link></item></rdf:RDF>" }, "settle"]
+  },
+  {
+    "name": "no guid, no id, no link: the id is the FNV-1a hash of title and published — never empty",
+    "because": "feed.ts :208-217 hashId, :360-366 the last rung",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<rss><channel><title>No id</title><item><title>Only a title</title><pubDate>Mon, 15 Sep 2026 08:00:00 GMT</pubDate></item><item><title>No date either</title></item></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "a podcast: the enclosure with its type and length (a string, '0' kept), the iTunes image and keywords, Source podcast",
+    "because": "feed.ts :283-293 itemEnclosure, :269-271 itunes:image, :322-324 keywords, :388 xmlns:itunes",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<rss xmlns:itunes=\"http://www.itunes.com/dtds/podcast-1.0.dtd\"><channel><title>Pod</title><item><title>Ep</title><guid>ep1</guid><enclosure url=\"https://p.example/1.mp3\" type=\"audio/mpeg\" length=\"0\"/><itunes:image href=\"https://p.example/1.jpg\"/><itunes:keywords>a, b,a</itunes:keywords></item></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "YouTube: the body and thumbnail inside media:group, Source youtube; Reddit by its URLs",
+    "because": "feed.ts :249-267 itemImage searches media:group, :355 media:description, :384-391 detectSource",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<feed xmlns=\"http://www.w3.org/2005/Atom\" xmlns:yt=\"http://www.youtube.com/xml/schemas/2015\" xmlns:media=\"http://search.yahoo.com/mrss/\"><title>Chan</title><entry><id>yt:video:abc</id><yt:videoId>abc</yt:videoId><title>Vid</title><link rel=\"alternate\" href=\"https://www.youtube.com/watch?v=abc\"/><media:group><media:title>Vid</media:title><media:thumbnail url=\"https://i.ytimg.com/vi/abc/hq.jpg\" width=\"480\"/><media:description>About it</media:description></media:group></entry></feed>" }, "settle", { "set": "text", "value": "<feed xmlns=\"http://www.w3.org/2005/Atom\"><title>r/x</title><link href=\"https://www.reddit.com/r/x/\"/><entry><id>t3_1</id><title>Post</title></entry></feed>" }, "settle"]
+  },
+  {
+    "name": "XML that is not a feed is feed/unrecognised, a refused entity is Parse XML's code, malformed XML is xml/parse-failed: Error, Error Code, Failure, everything else as it was; a good parse clears both",
+    "because": "feed.ts :399-400, :430-439; parsefeed.ts :238-251",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<rss><channel><title>T</title></channel></rss>" }, "settle", { "set": "text", "value": "<root><notafeed/></root>" }, "settle", { "set": "text", "value": "<!DOCTYPE x [<!ENTITY a \"b\">]><rss/>" }, "settle", { "set": "text", "value": "<rss><channel>" }, "settle", { "set": "text", "value": "<rss><channel><title>U</title></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "a date with no offset is read in the world's zone — 08:00 is 08:00Z in UTC (D16)",
+    "because": "feed.ts :190-202 `Date.parse` — the zone's; the same steps in Paris below",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<rss><channel><title>Z</title><lastBuildDate>2026-09-15 08:00:00</lastBuildDate><item><guid>z1</guid><title>Z</title><pubDate>2026-09-15T08:00:00</pubDate></item></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "… and the same feed in Europe/Paris is 06:00Z: one feed, two Published, by where it was parsed (D16)",
+    "because": "feed.ts :194-195 — a zoneless ISO date-time is local time in ECMAScript",
+    "params": {},
+    "world": { "timeZone": "Europe/Paris" },
+    "steps": [{ "set": "text", "value": "<rss><channel><title>Z</title><lastBuildDate>2026-09-15 08:00:00</lastBuildDate><item><guid>z1</guid><title>Z</title><pubDate>2026-09-15T08:00:00</pubDate></item></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "a named zone Date.parse declines is read as UTC: 08:00 CEST is published as 08:00Z, two hours late; EST is understood (D16)",
+    "because": "feed.ts :197-201 the retry replaces a trailing [A-Z]{2,5} with ' UTC'; the docblock's own 'EST' example is one V8 accepts",
+    "params": {},
+    "world": { "timeZone": "America/New_York" },
+    "steps": [{ "set": "text", "value": "<rss><channel><title>N</title><item><guid>n1</guid><pubDate>Mon, 15 Sep 2026 08:00:00 CEST</pubDate></item><item><guid>n2</guid><pubDate>Mon, 15 Sep 2026 08:00:00 EST</pubDate></item><item><guid>n3</guid><pubDate>not a date</pubDate></item></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "a feed that does not say when it changed leaves the previous feed's Feed Updated on the wire — '|| undefined' is never sent (D17)",
+    "because": "parsefeed.ts :269 `|| undefined`, :273-284 flagged; the description says 'empty when it did not say'; every other Feed output falls back to ''",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<rss><channel><title>A</title><link>https://a.example</link><lastBuildDate>Mon, 15 Sep 2026 08:00:00 +0000</lastBuildDate></channel></rss>" }, "settle", { "set": "text", "value": "<rss><channel><title>B</title></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "two items with one guid are ONE named record — Items holds it once, with the later item's fields, while Count says 2 (D18)",
+    "because": "parsefeed.ts :257-261 `collection.set(items)`; collection.ts → Model.create keys a record by its `id` (model.ts :243-252)",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<rss><channel><title>Dup</title><item><guid>same</guid><title>First</title></item><item><guid>same</guid><title>Second</title></item></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "a second parse is a FRESH array; an item whose id comes back is the same record, updated in place",
+    "because": "parsefeed.ts :257 `Collection.get()` per parse; Model.create by id",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": "<rss><channel><title>V</title><item><guid>k</guid><title>v1</title></item></channel></rss>" }, "settle", { "set": "text", "value": "<rss><channel><title>V</title><item><guid>k</guid><title>v2</title></item><item><guid>m</guid><title>new</title></item></channel></rss>" }, "settle"]
+  },
+  {
+    "name": "null is not an arrival; Max Bytes refuses a long feed as xml/too-large and 0 restores the default; two inputs in one frame parse once",
+    "because": "parsefeed.ts :88, :234; :102-103; :224-231; feed.ts :399 maxBytes reaches parseXML",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "text", "value": null }, "settle", { "set": "maxBytes", "value": 40 }, { "set": "text", "value": "<rss><channel><title>long enough to refuse</title></channel></rss>" }, "settle", { "set": "maxBytes", "value": 0 }, "settle"]
+  }
+]
