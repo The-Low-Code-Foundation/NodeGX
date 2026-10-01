@@ -2,6 +2,7 @@
 id: P108-IW7-PARTWORD
 title: In the Workshop on her land, the spa's part reads "square … is path" and her bowl "bowl 1"
 status: fixed
+commit: 343a0b8e3
 severity: medium
 area: library garden-kit / blocks.js chipLabel + garden_is states (the land's building parts)
 found: P108 IW-007 s6, 2026-10-01 (drive-iw007-touch.js screenshot iw7t-pip-stones-won.png)

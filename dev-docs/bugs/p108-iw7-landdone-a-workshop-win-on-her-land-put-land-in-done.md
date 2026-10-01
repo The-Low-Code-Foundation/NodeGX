@@ -2,6 +2,7 @@
 id: P108-IW7-LANDDONE
 title: A Workshop win on her land put "land" in her list of won requests
 status: fixed
+commit: 343a0b8e3
 severity: low
 area: template bot-garden / Complete request
 found: P108 IW-007 s6, 2026-10-01 (measured with the page's scripts before building)

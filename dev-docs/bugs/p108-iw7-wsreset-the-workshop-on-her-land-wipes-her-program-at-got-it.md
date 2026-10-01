@@ -2,6 +2,7 @@
 id: P108-IW7-WSRESET
 title: The Workshop on her land wipes her program at every "Got it" (and at the win)
 status: fixed
+commit: 343a0b8e3
 severity: high
 area: template bot-garden / Workshop on her land (Read family → Land request → Start world)
 found: P108 IW-007 s6, 2026-10-01 (drive-iw007-touch.js, the first time anyone taught on the land by touch)
