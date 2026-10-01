@@ -236,25 +236,27 @@ withDeployedSite({ dir: DIR }, async (page) => {
   }
 
   // ── SHORT and BUY: a purchase end to end at each width (EN), and at 1368 in French ──
+  // P108 s6: the prices from SHOP (they were typed: 30 for a copy, 25 for a brain — lane O retuned the shop in s5).
+  const PIP = shop('robot:pip').price;
   const purchase = async (lang, vp, size) => {
     const tag = `${vp}-${lang}`;
     await page.setViewport(size);
     await freshFamily(lang);
-    await seed(22);
+    await seed(PIP - 8);
     await openShop(tag);
     await tabTap(lang, 'robots');
     await itemTap(shop('robot:pip').name[lang], `a new Pip (${tag})`);
     const short = await card();
     await shot(`iw6h-${tag}-short`);
     readings[`short-${tag}`] = short;
-    check(`SHORT ${tag}: 22 shells, a new Pip — "${w(lang, 'iw6hHave', { n: 22 })}", "${w(lang, 'iw6hCost', { n: 30 })}", "${w(lang, 'iw6hShort', { n: 8 })}"; no Buy, Not now`,
-      !!short && short.figs.join('|') === [w(lang, 'iw6hHave', { n: 22 }), w(lang, 'iw6hCost', { n: 30 })].join('|') && short.short === w(lang, 'iw6hShort', { n: 8 }) && !short.buy && short.notNow && !short.nameBox, short);
+    check(`SHORT ${tag}: ${PIP - 8} shells, a new Pip — "${w(lang, 'iw6hHave', { n: PIP - 8 })}", "${w(lang, 'iw6hCost', { n: PIP })}", "${w(lang, 'iw6hShort', { n: 8 })}"; no Buy, Not now`,
+      !!short && short.figs.join('|') === [w(lang, 'iw6hHave', { n: PIP - 8 }), w(lang, 'iw6hCost', { n: PIP })].join('|') && short.short === w(lang, 'iw6hShort', { n: 8 }) && !short.buy && short.notNow && !short.nameBox, short);
     await tap(first('.bg-shop-no'), `Not now (${tag})`);
     const gone = await until(CARD, (c) => !c, 2000);
     check(`SHORT ${tag}: Not now puts the card away`, !gone, gone);
     await closeShop(tag);
-    // 32 shells: the purchase.
-    await writeStore(`a.shells = { earned: 32, spent: 0 }`);
+    // A copy's price + 2 shells: the purchase.
+    await writeStore(`a.shells = { earned: ${PIP + 2}, spent: 0 }`);
     await openShop(tag);
     await tabTap(lang, 'robots');
     await itemTap(shop('robot:pip').name[lang], `a new Pip (${tag})`);
@@ -269,8 +271,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
     const st = await evaluate(STORE);
     const bubbles = st.island.robots.find((r) => r.name === 'Bubbles');
     readings[`buy-${tag}`] = { card: c, done, btn, shells: st.shells, bubbles };
-    check(`BUY ${tag}: the card says ${w(lang, 'iw6hHave', { n: 32 })} · ${w(lang, 'iw6hCost', { n: 30 })} · ${w(lang, 'iw6hLeft', { n: 2 })}, a name box ("Pip 3"); Buy → "${w(lang, 'iw6hBought')}" alone on the card, the button ${w(lang, 'iw6hBtn', { n: 2 })}; the store spent 30 of 32 and a Pip named Bubbles`,
-      !!c && c.figs.join('|') === [w(lang, 'iw6hHave', { n: 32 }), w(lang, 'iw6hCost', { n: 30 }), w(lang, 'iw6hLeft', { n: 2 })].join('|') && c.buy && c.nameBox && c.placeholder === 'Pip 3' && !!done && done.done === w(lang, 'iw6hBought') && done.figs.length === 0 && !done.short && !done.buy && !!btn && btn.text === w(lang, 'iw6hBtn', { n: 2 }) && st.shells.earned === 32 && st.shells.spent === 30 && !!bubbles && bubbles.kind === 'pip',
+    check(`BUY ${tag}: the card says ${w(lang, 'iw6hHave', { n: PIP + 2 })} · ${w(lang, 'iw6hCost', { n: PIP })} · ${w(lang, 'iw6hLeft', { n: 2 })}, a name box ("Pip 3"); Buy → "${w(lang, 'iw6hBought')}" alone on the card, the button ${w(lang, 'iw6hBtn', { n: 2 })}; the store spent ${PIP} of ${PIP + 2} and a Pip named Bubbles`,
+      !!c && c.figs.join('|') === [w(lang, 'iw6hHave', { n: PIP + 2 }), w(lang, 'iw6hCost', { n: PIP }), w(lang, 'iw6hLeft', { n: 2 })].join('|') && c.buy && c.nameBox && c.placeholder === 'Pip 3' && !!done && done.done === w(lang, 'iw6hBought') && done.figs.length === 0 && !done.short && !done.buy && !!btn && btn.text === w(lang, 'iw6hBtn', { n: 2 }) && st.shells.earned === PIP + 2 && st.shells.spent === PIP && !!bubbles && bubbles.kind === 'pip',
       readings[`buy-${tag}`]);
     await closeShop(tag);
     await page.navigate('/island');
@@ -297,7 +299,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await until(CARD, (x) => !!x && !!x.done, 3000);
   const bst = await evaluate(STORE);
   readings.brainCard = { bc, bc2, robots: bst.island.robots, shells: bst.shells };
-  check('BRAIN: the card offers her three robots at 12 blocks; Pip chosen, Buy → Pip’s brain is 16 in the store, 25 spent', !!bc && bc.chips.length === 3 && bc.chips.every((x) => x.includes('12')) && !!bc2 && bc2.buy && bst.island.robots[0].brain === 16 && bst.shells.spent === 25, readings.brainCard);
+  check(`BRAIN: the card offers her three robots at 12 blocks; Pip chosen, Buy → Pip’s brain is 16 in the store, ${shop('brain16').price} spent`, !!bc && bc.chips.length === 3 && bc.chips.every((x) => x.includes('12')) && !!bc2 && bc2.buy && bst.island.robots[0].brain === 16 && bst.shells.spent === shop('brain16').price, readings.brainCard);
   await closeShop('brain');
   // The Workshop: free play (Pip): 13 blocks placed (a 12-block brain refuses the 13th), the 17th refused and the line says 16.
   await tap(byText('.bg-quest', w('en', 'sandP').slice(0, 10)), 'free play');

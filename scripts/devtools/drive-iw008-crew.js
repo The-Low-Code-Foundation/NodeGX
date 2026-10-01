@@ -85,7 +85,7 @@ const CREW_CAP = Number(/var CREW_CAP = (\d+);/.exec(functionScript('Logic/Bring
 const BRAIN = Number(/var BRAIN_SIZE = (\d+);/.exec(functionScript('Logic/Bring home'))[1]);
 const inPlot = (x, y, r) => x >= r.plot.x && x < r.plot.x + PLOT_W && y >= r.plot.y && y < r.plot.y + PLOT_H;
 /** The base's purchase rule and wallet, out of the page's own save helpers. */
-const SAVE = pageRun('Logic/Bring home', { model: {} }, '\n;Outputs.buyItem = buyItem; Outputs.earnShells = earnShells; Outputs.modelOf = modelOf;');
+const SAVE = pageRun('Logic/Bring home', { model: {} }, '\n;Outputs.buyItem = buyItem; Outputs.earnShells = earnShells; Outputs.modelOf = modelOf; Outputs.SHOP = SHOP;');
 /** The program Teach records for a request: one block per pad press (a repeat laid out n times). */
 const layOut = (blocks) => blocks.flatMap((b) => (b.t === 'repeat' ? Array.from({ length: Number(b.n) || 0 }, () => layOut(b.body || [])).flat() : [b.t]));
 const recorded = (id) => layOut(req(id).referenceProgram).map((t, i) => ({ id: 500 + i, t }));
@@ -95,7 +95,8 @@ const win = (model, id, robotId = 'r1', program = req(id).referenceProgram) =>
   pageRun('Logic/Complete request', { model, requestId: id, tricks: req(id).tricks, reward: req(id).reward, program: JSON.stringify(program), robotId, now: 1759300000000 }).model;
 function buy(model, kind, name) {
   const p = model.profiles.find((x) => x.id === model.island.activeId);
-  SAVE.earnShells(p, 30);
+  // P108 s6: the copy's price from the shop (it was typed: 30).
+  SAVE.earnShells(p, SAVE.SHOP.find((s) => s.id === `robot:${kind}`).price);
   const out = SAVE.buyItem(p, `robot:${kind}`, { name });
   if (!out.ok) throw new Error(`buy ${kind} ${name}: ${out.error}`);
   return out.robotId;

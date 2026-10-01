@@ -191,6 +191,16 @@
       "y": 1360
     },
     {
+      "id": "wsLandBotVar",
+      "type": "Variable2",
+      "label": "The robot chosen on her land",
+      "parameters": {
+        "name": "gardenLandBot"
+      },
+      "x": 410,
+      "y": 2560
+    },
+    {
       "id": "wsGift",
       "type": "/Logic/Gift line",
       "label": "What the win lent and gave",
@@ -225,7 +235,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2560
+      "y": 2680
     },
     {
       "id": "wsGuard",

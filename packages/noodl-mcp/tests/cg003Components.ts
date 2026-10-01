@@ -1796,6 +1796,10 @@ const ISLE_WORLD: CgComponent = {
     logic('iwGhostCancel', L('Land ghost'), 'The ghost put away', { mode: 'cancel' }),
     gate('iwGhostPlaced', 'Was it placed?'),
     logic('iwWithGhost', L('With ghost'), 'The island with the ghost on it'),
+    // P108 IW-007 (s6): the robot she chose on her land's card — it learns a job there (the Workshop's Job robot reads it).
+    variable('iwLandBotVar', 'gardenLandBot', 'The robot chosen on her land'),
+    setVariable('iwSetLandBot', 'gardenLandBot', 'A robot chosen on her land'),
+    gate('iwChoseIs', 'Was a robot chosen on her land?'),
     outputs('iwOut', [['requestId', 'string'], ['open', 'signal'], ['model', 'object'], ['write', 'signal']])
   ],
   connections: [
@@ -1890,6 +1894,14 @@ const ISLE_WORLD: CgComponent = {
     wire('iwAssign', 'model', 'iwOut', 'model'),
     wire('iwAssignOk', 'ontrue', 'iwOut', 'write'),
     wire('iwAssignOk', 'ontrue', 'iwAgain', 'start'),
+    // P108 IW-007 (s6): on her land a tap chooses who learns there: held by name, the card and its robots read again.
+    wire('iwLandBotVar', 'value', 'iwChoose', 'landBot'),
+    wire('iwLandBotVar', 'value', 'iwCrewFn', 'landBot'),
+    wire('iwAssign', 'chosen', 'iwSetLandBot', 'value'),
+    wire('iwAssign', 'chose', 'iwChoseIs', 'condition'),
+    wire('iwAssign', 'ran', 'iwChoseIs', 'eval'),
+    wire('iwChoseIs', 'ontrue', 'iwSetLandBot', 'do'),
+    wire('iwSetLandBot', 'done', 'iwAgain', 'start'),
     // Find my robots: 3D frames them (and back to the whole island); the flat island scrolls to them and rings them.
     wire('iwIn', 'findText', 'iwFind', 'label'),
     wire('iwIn', 'tapText', 'iwTap', 'text'),
@@ -2807,6 +2819,8 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       variable('wsProgVar', 'gardenProgram', 'The program that won'),
       // P106 IG-005: the robot this request needs (hers of that kind), and what a win lent and gave, for the card.
       logic('wsJob', L('Job robot'), 'The robot for this job', { stepMs: TICK_MS }),
+      // P108 IW-007 (s6): on her land, the robot she chose on the land's card learns the job.
+      variable('wsLandBotVar', 'gardenLandBot', 'The robot chosen on her land'),
       logic('wsGift', L('Gift line'), 'What the win lent and gave'),
       logic('wsGuardWait', TIMER_NODE, 'A moment for the request to arrive', { duration: 600 }),
       // P108 IW-001 F8: Got it writes the cards seen to HER profile (per profile, saved), when it changed anything.
@@ -2820,7 +2834,8 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsReqVar', 'value', 'wsPlay', 'requestId'),
       // P108 IW-007 (lane B): her land among the requests.
       wire('wsRequests', 'requests', 'wsLandReqs', 'requests'),
-      wire('wsFam', 'land', 'wsLandReqs', 'land'),
+      // P108 IW-007 (s6): as text — a profile write that leaves her land as it was must not restart the Workshop.
+      wire('wsFam', 'landText', 'wsLandReqs', 'land'),
       wire('wsLandReqs', 'requests', 'wsPlay', 'requests'),
       wire('wsHints', 'hints', 'wsPlay', 'hints'),
       wire('wsWords', 'words', 'wsPlay', 'words'),
@@ -2832,6 +2847,7 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsFam', 'lang', 'wsJob', 'lang'),
       // P108 IW-008 (lane C): with a crew, the robot at work on this plot (else one of that kind at home) does the job.
       wire('wsFam', 'plots', 'wsJob', 'plots'),
+      wire('wsLandBotVar', 'value', 'wsJob', 'landBot'),
       ...(['botName', 'color', 'eye', 'hat', 'robot', 'robotKey', 'paletteRobot', 'stepMs'] as const).map((f) => wire('wsJob', f, 'wsPlay', f)),
       wire('wsJob', 'robotId', 'wsComplete', 'robotId'),
       wire('wsComplete', 'lent', 'wsGift', 'lent'),

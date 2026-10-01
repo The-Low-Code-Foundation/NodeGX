@@ -522,7 +522,8 @@ var needs = req && req.id !== 'free' && req.needs ? String(req.needs) : 'pip';
 // P108 IW-008 (lane C): with a crew, the robot at work HERE, else one of that kind at home, else the first (busy elsewhere).
 var job = crewPick(mine, plots, id, needs);
 // P108 IW-007 (lane B): on her land, the robot pinned there whatever its kind (else her Pip, as above).
-if (isLandCard) for (var lj = 0; lj < mine.length; lj++) if (mine[lj] && crewWorkOf(mine[lj], plots) === 'land') job = mine[lj];
+// P108 IW-007 (s6): the one she chose on the card's robots (any kind), else the one at work or helping there.
+if (isLandCard) job = iw7tLandPick(mine, plots, Inputs.landBot);
 var spec = null;
 for (var s = 0; s < ROBOTS.length; s++) if (ROBOTS[s].id === needs) spec = ROBOTS[s];
 var jobName = job && job.name ? String(job.name) : job ? name : spec ? String(spec.defaultName[lang] || spec.defaultName.en) : name;
@@ -554,6 +555,8 @@ else if (workingAt && workingAt === id && card && card.stale) { canOpen = true; 
 else if (workingAt && workingAt === id) { canOpen = true; showHome = true; line = w.ig4WorksHere || ''; }
 // P108 IW-007 (lane B): on her land, a robot at work elsewhere is brought home from THAT plot's card (this card is for building).
 else if (isLandCard && workingAt) { line = fill(w.iw7bLandBusy, { plot: workTitle }); }
+// P108 IW-007 (s6): the robot chosen helps on her land — teach it again, or bring it home.
+else if (isLandCard && job && String(job.helps || '') === 'land') { canOpen = true; showHome = true; line = w.iw7tHelpsHere || ''; }
 else if (workingAt) { showHome = true; line = fill(w.ig4AtWork, { plot: workTitle }); }
 else if (status === 'won') { canOpen = true; line = w.ig4Won || ''; }
 else { canOpen = true; line = w[req.copyKeys.line] || title; }
@@ -569,7 +572,7 @@ Outputs.title = title;
 Outputs.line = line;
 Outputs.faceClass = 'bg-face bg-sp-' + (isl ? isl.sprite : 'owl');
 Outputs.homeText = w.ig4Home || '';
-Outputs.openText = w.ig4Open || '';
+Outputs.openText = isLandCard ? w.iw7tTeach || '' : w.ig4Open || '';
 Outputs.robotId = robotId;
 Outputs.needs = needs;
 Outputs.stale = !!(card && card.stale);

@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 743,
+      "connectionCount": 754,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -311,7 +311,7 @@
       "path": "Logic/Read family",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 29,
+      "connectionCount": 30,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -519,7 +519,7 @@
       "path": "Logic/Island choose",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 26,
+      "connectionCount": 27,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -535,7 +535,7 @@
       "path": "Logic/Job robot",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 19,
+      "connectionCount": 20,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -631,7 +631,7 @@
       "path": "Logic/Assign robot",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 15,
+      "connectionCount": 17,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -639,7 +639,7 @@
       "path": "Logic/Crew chips",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 15,
+      "connectionCount": 16,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -711,7 +711,7 @@
       "path": "Logic/Send robot",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 16,
+      "connectionCount": 18,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -854,8 +854,8 @@
     "Island/World": {
       "path": "Island/World",
       "type": "visual",
-      "nodeCount": 83,
-      "connectionCount": 199,
+      "nodeCount": 86,
+      "connectionCount": 206,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1022,8 +1022,8 @@
     "Pages/Workshop": {
       "path": "Pages/Workshop",
       "type": "page",
-      "nodeCount": 25,
-      "connectionCount": 94,
+      "nodeCount": 26,
+      "connectionCount": 95,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1070,7 +1070,7 @@
   },
   "stats": {
     "totalComponents": 133,
-    "totalNodes": 1108,
-    "totalConnections": 3514
+    "totalNodes": 1112,
+    "totalConnections": 3541
   }
 }

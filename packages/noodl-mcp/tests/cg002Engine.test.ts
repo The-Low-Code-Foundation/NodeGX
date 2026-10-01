@@ -869,7 +869,8 @@ describe('CG-002 — the engine', () => {
         expect(helper<any>(m, 'modelOf', tampered).profiles[0].island.done).toEqual(['rows-trick']);
       });
       it('Complete request marks the family instead of the kid → the one-island-per-kid row fails', () => {
-        const m = mutate(COMPLETE_REQUEST_SCRIPT, 'if (requestId && p.island.done.indexOf(requestId) === -1) { p.island.done.push(requestId); newlyDone = true; }', 'if (requestId) { for (var q = 0; q < model.profiles.length; q++) if (model.profiles[q].island.done.indexOf(requestId) === -1) model.profiles[q].island.done.push(requestId); newlyDone = true; }');
+        // P108 IW-007 (s6): the anchor re-pointed — her land is never put in done (the rule mutated is unchanged).
+        const m = mutate(COMPLETE_REQUEST_SCRIPT, 'if (requestId && !iw7tLand && p.island.done.indexOf(requestId) === -1) { p.island.done.push(requestId); newlyDone = true; }', 'if (requestId) { for (var q = 0; q < model.profiles.length; q++) if (model.profiles[q].island.done.indexOf(requestId) === -1) model.profiles[q].island.done.push(requestId); newlyDone = true; }');
         const model = twoKids();
         expect(complete(model, model.profiles[0].id, TULIPS, m).model.profiles[1].island.done).toEqual(['tulips-three']);
       });

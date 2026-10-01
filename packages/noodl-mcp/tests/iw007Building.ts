@@ -53,7 +53,21 @@ function iw7bLandRequest(raw) {
   req.palette = IW7B_PALETTE.slice();
   req.copyKeys = { title: 'iw7bLandTitle', blurb: 'iw7bLandBlurb', line: 'iw7bLandLine', reward: '' };
   req.reward = null;
+  // P108 IW-007 (s6): a Workshop win on her land is a PART finished (a building's part or an animal's bowl that was not
+  // full), not the whole job — so Pip learns the stones, Cobble the planks, a third robot the carrots (iw007Touch).
+  if (req.job) req.goal = { name: 'part_done', args: iw7tOpenTargets(req) };
   return req;
+}
+/** The targets of the land's job not full yet (a part short of its need, a bowl short of its capacity). */
+function iw7tOpenTargets(req) {
+  var out = [], ts = req.job ? req.job.targets : [], l = Array.isArray(req.things) ? req.things : [];
+  for (var i = 0; i < ts.length; i++) for (var k = 0; k < l.length; k++) {
+    var t = l[k];
+    if (!t || String(t.id) !== String(ts[i])) continue;
+    var have = t.kind === 'bowl' ? Number(t.count) || 0 : Number(t.have) || 0, need = t.kind === 'bowl' ? Number(t.capacity) || 0 : Number(t.need) || 0;
+    if (have < need) out.push(String(t.id));
+  }
+  return out;
 }
 `;
 
@@ -132,7 +146,10 @@ ${LAND_REQUEST_FN}
 var reqs = Array.isArray(Inputs.requests) ? Inputs.requests.slice() : [];
 var out = [];
 for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id !== LAND_ID) out.push(reqs[i]);
-out.push(iw7bLandRequest(Inputs.land));
+// P108 IW-007 (s6): the Workshop hands her land as text (Read family's Land Text: published only when it changes).
+var iw7tLand = Inputs.land;
+if (typeof iw7tLand === 'string') { try { iw7tLand = iw7tLand ? JSON.parse(iw7tLand) : null; } catch (e) { iw7tLand = null; } }
+out.push(iw7bLandRequest(iw7tLand));
 Outputs.requests = out;
 `;
 

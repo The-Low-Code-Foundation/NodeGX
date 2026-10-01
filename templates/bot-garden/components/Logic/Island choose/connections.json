@@ -17,6 +17,12 @@
     },
     {
       "fromId": "islandchooseIn",
+      "fromProperty": "landBot",
+      "toId": "islandchooseFn",
+      "toProperty": "in-landBot"
+    },
+    {
+      "fromId": "islandchooseIn",
       "fromProperty": "lang",
       "toId": "islandchooseFn",
       "toProperty": "in-lang"

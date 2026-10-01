@@ -618,7 +618,8 @@ var gardenKitBlocks = (function () {
         var r = list[i];
         // P108 IW-003 (lane S): + a thing's own name by its id (iw3sK_<id>) and its states' words (iw3sS_<state>_<id>).
         // P108 IW-007 (lane A): + the land's sources' words (iw7aK_<kind>).
-        if (r && typeof r.key === 'string' && (r.key.indexOf('iw4') === 0 || r.key.indexOf('iw3sK_') === 0 || r.key.indexOf('iw3sS_') === 0 || r.key.indexOf('iw7aK_') === 0)) out[r.key] = String(r[lang] || r.en || out[r.key] || '');
+        // P108 IW-007 (s6): + her land's parts and her bowl in its own words (iw7tK_<building>_<material>, iw7tK_bowl, iw7tS_<state>).
+        if (r && typeof r.key === 'string' && (r.key.indexOf('iw4') === 0 || r.key.indexOf('iw3sK_') === 0 || r.key.indexOf('iw3sS_') === 0 || r.key.indexOf('iw7aK_') === 0 || r.key.indexOf('iw7tK_') === 0 || r.key.indexOf('iw7tS_') === 0)) out[r.key] = String(r[lang] || r.en || out[r.key] || '');
       }
     }
     return out;
@@ -756,6 +757,10 @@ var gardenKitBlocks = (function () {
     // P108 IW-003 (lane S): a thing with a name of its own (Sami's bench is a site, not a path square) wears it.
     var own = typeof ref.id === 'string' ? ctx.words['iw3sK_' + ref.id] : '';
     if (own) return own;
+    // P108 IW-007 (s6): her land — a building's part by its building and material, her bowl by her name.
+    var part = typeof ref.build === 'string' && typeof ref.item === 'string' ? ctx.words['iw7tK_' + ref.build + '_' + ref.item] : '';
+    if (part) return part;
+    if (ref.kind === 'bowl' && typeof ref.name === 'string' && ref.name && ctx.words.iw7tK_bowl) return fill(ctx.words.iw7tK_bowl, { name: ref.name });
     return kindWord(ctx, ref.kind) + (n ? ' ' + n : '');
   }
 
@@ -1119,7 +1124,9 @@ var gardenKitBlocks = (function () {
         // P108 IW-003 (lane S): a thing named by its id says its states in its own words (the bench "is built", not "is path").
         var chip = b && b.getInputTargetBlock && b.getInputTargetBlock('THING');
         var cid = chip && chip.ref_ && typeof chip.ref_.id === 'string' ? chip.ref_.id : '';
-        return statesOf(b && b.kind_).map(function (id) { return [(cid && c.words['iw3sS_' + id + '_' + cid]) || c.words['iw4S_' + id] || id, id]; });
+        // P108 IW-007 (s6): a building's part on her land "is built" (the path square's words were "is path").
+        var built = chip && chip.ref_ && typeof chip.ref_.build === 'string';
+        return statesOf(b && b.kind_).map(function (id) { return [(cid && c.words['iw3sS_' + id + '_' + cid]) || (built && c.words['iw7tS_' + id]) || c.words['iw4S_' + id] || id, id]; });
       }, 'state'), 'STATE');
       s.appendField(new KidPick('1', function () { return range(0, 9); }, 'n'), 'N');
       s.appendField(new KidPick('', function () { var c = ctxOf(this.getSourceBlock()); return WHAT_KINDS.map(function (k) { return [kindWord(c, k), k]; }); }, 'what'), 'WHAT');
@@ -2567,6 +2574,8 @@ var gardenKitBlocks = (function () {
     translate: translate,
     toolbox: toolboxOf,
     defineBlocks: defineBlocks,
+    // P108 IW-007 (s6): a chip's words (a thing picked on the world), for the gate.
+    chipLabel: chipLabel,
     words: WORDS,
     css: BLOCKS_CSS,
 

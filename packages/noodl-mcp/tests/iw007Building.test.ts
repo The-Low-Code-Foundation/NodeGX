@@ -250,7 +250,8 @@ describe('[B] plumbing — her land is a plot of the island (brief §4.2)', () =
     const reqs = bare(LAND_REQUEST_SCRIPT, { requests: REQUESTS, land: f.land }).requests;
     expect(reqs.length).toBe(REQUESTS.length + 1);
     const land = reqs[reqs.length - 1];
-    expect([land.id, land.palette, land.needs, land.goal, land.copyKeys.title]).toEqual([LAND_ID, LAND_PALETTE, '', { name: 'job_done' }, 'iw7bLandTitle']);
+    // P108 IW-007 (s6): the land's goal is a part finished (iw007Touch), naming the parts not full yet — was job_done.
+    expect([land.id, land.palette, land.needs, land.goal, land.copyKeys.title]).toEqual([LAND_ID, LAND_PALETTE, '', { name: 'part_done', args: ['b1-stone', 'b1-plank'] }, 'iw7bLandTitle']);
     expect(WORDS.find((w: any) => w.key === 'iw7bLandTitle')).toMatchObject({ en: 'Your land', fr: 'Ton terrain' });
     const s = runScript(START_WORLD_SCRIPT, { requests: reqs, requestId: LAND_ID, seed: 1 });
     expect([s.found, s.world.things.filter((t: any) => t.of === 'b1').map((t: any) => t.have), s.world.job.targets]).toEqual([true, [2, 1], ['b1-stone', 'b1-plank']]);

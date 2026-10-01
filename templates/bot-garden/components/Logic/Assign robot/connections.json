@@ -59,6 +59,18 @@
     },
     {
       "fromId": "assignrobotFn",
+      "fromProperty": "out-chose",
+      "toId": "assignrobotOut",
+      "toProperty": "chose"
+    },
+    {
+      "fromId": "assignrobotFn",
+      "fromProperty": "out-chosen",
+      "toId": "assignrobotOut",
+      "toProperty": "chosen"
+    },
+    {
+      "fromId": "assignrobotFn",
       "fromProperty": "out-error",
       "toId": "assignrobotOut",
       "toProperty": "error"

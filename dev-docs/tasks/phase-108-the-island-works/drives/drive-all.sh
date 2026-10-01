@@ -17,7 +17,9 @@ waitload() { until [ $(uptime | awk -F'load averages: ' '{print $2}' | cut -d' '
 cd $R || exit 2
 waitload
 # the page drive: drive-pages.sh's steps against THIS tree
-npm run template:garden > $P/generate.log 2>&1; echo $? > $P/generate.exit
+# P108 s6: the generator called directly — `npm run template:garden` is this command, but the primary checkout's root
+# package.json was overwritten (dev-docs/bugs/p108-repo-pkgjson-…), so npm found no script there.
+TS_NODE_COMPILER_OPTIONS='{"module":"CommonJS"}' npx ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-garden-template.ts > $P/generate.log 2>&1; echo $? > $P/generate.exit
 git -C $R status --short templates/bot-garden | head -5 > $P/drift.txt
 node scripts/devtools/drive-cg003-pages.js assemble $P/project > $P/assemble.log 2>&1; echo $? > $P/assemble.exit
 touch $P/.before-deploy
@@ -41,6 +43,8 @@ ALL+=(owed)
 ALL+=(build build-3d)
 # P108 IW-007 (lane A): her animals — the Animals tab, a rabbit bought, fed, worn, fed again (2D, 3D) and AC4's frame gate.
 ALL+=(animals animals-3d animals-perf)
+# P108 s6: her land by touch — Pip and Cobble taught there, the spa built, feeding taught (drive-iw007-touch.js).
+ALL+=(touch)
 (( $# )) && ALL=("$@")
 for n in $ALL; do
   waitload
@@ -78,6 +82,8 @@ for n in $ALL; do
     owed) node scripts/devtools/drive-iw006-owed.js $D $J --shots $P/owed-shots --json $P/owed.json ;;
     # P108 s5 lane B (IW-007 building).
     build) node scripts/devtools/drive-iw007-build.js $D $J --shots $P/build-shots --json $P/build.json ;;
+    # P108 s6 (IW-007 by touch).
+    touch) node scripts/devtools/drive-iw007-touch.js $D $J --shots $P/touch-shots --json $P/touch.json ;;
     build-3d) node scripts/devtools/drive-iw007-build.js $D $J --mode 3d --shots $P/build-3d-shots --json $P/build-3d.json ;;
     # P108 IW-007 (lane A).
     animals) node scripts/devtools/drive-iw007-animals.js $D $J --shots $P/animals --json $P/animals.json ;;

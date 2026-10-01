@@ -22,10 +22,7 @@
  * - **Send from My robots** (owed 4): a card of a robot she has lists the plots she has WON whose job needs its kind (and
  *   her band allows), as chips (ink where it works or helps); a tap is `crewAssign` — works it, helps the robot there, or
  *   (tapped where it already is) comes home; refused in the crew's words. The line is said on THAT robot's card.
- *   🔴 HOOK for the land (lane B, at the merge — not built here): Read family's `land` is not an input of Robot cards
- *   yet. When it is, `iw6oSendPlots` lists `LAND_ID` for a robot of ANY kind (brief §4.2: the land needs no one kind) and
- *   `Logic/Send robot` hands `crewAssign` the land's request (lane B's `landRequest`, with `needs` = the robot's kind, and
- *   `done` holding the land), because `crewAssign` finds its request in `Inputs.requests` by id.
+ *   The land is not sent to from here (P108 s6, decided — see `iw6oSendPlots`): its door is its own card.
  *
  * Words: every new key is an `iw6o…` key (cg003Content PAGE_WORDS, lane O's block, EN + FR). 🔴 No backtick and no
  * dollar-brace inside any script text (these are template literals).
@@ -76,8 +73,10 @@ function iw6oSendPlots(row, kind, pre) {
     if ((rq.needs ? String(rq.needs) : 'pip') !== kind || Number(rq.band) > band) continue;
     out.push({ id: pre + IW6O_SEND_ID + rq.id, label: titleOf(rq.id), selected: String(row.working || '') === rq.id || String(row.helps || '') === rq.id, locked: false });
   }
-  // HOOK (lane B, the land): when Robot cards reads the land, push { id: pre + IW6O_SEND_ID + LAND_ID, ... } here for
-  // a robot of ANY kind (see the module's header).
+  // P108 IW-007 (s6, decided): My robots does NOT send to her land. A robot sent there runs a COPY of the program, and on
+  // the land a copy stands still (one rock, one tree: the source reserved by the robot already at work — measured 183
+  // ticks against 181 alone). The land's door is its own card: her robots of any kind, the one chosen learns its own job
+  // there in the Workshop (iw007Touch.test.ts).
   return out;
 }
 `;

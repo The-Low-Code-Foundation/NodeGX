@@ -102,7 +102,9 @@ export interface Block {
 export interface Goal {
   name: 'every_tulip_watered' | 'thing_at' | 'bowl_has' | 'robot_at' | 'facing' | 'carrying' | 'uses' | 'handled' | 'said' | 'no_puddle' | 'senses' | 'job_done'
     // P108 IW-003 (lane B): the run bumped into nothing (Biscuit's wall: a fixed walk that crashes into it loses).
-    | 'no_bump';
+    | 'no_bump'
+    // P108 IW-007 (s6): her land — a part of the job finished (args: the targets not full when the run began).
+    | 'part_done';
   args?: ReadonlyArray<string | number>;
 }
 

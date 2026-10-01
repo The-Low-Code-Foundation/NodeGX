@@ -67,7 +67,7 @@ import { ENVELOPE_NOTES } from './cg005Olive';
 // P108 IW-002: the job model's vocabulary, its wear clock and its seeded layouts.
 import { HEN_CAPACITY, JOB_ITEMS, JOB_KINDS, SITE_STAGES, WALL_TILE, WEAR } from './cg002Content';
 // P108 IW-007 (s5 base): the sources a pick mines, the blueprints' stages, the land's save shape.
-import { ANIMALS_JSON, BLUEPRINTS, BLUEPRINTS_JSON, PLOT_H, PLOT_W, SOURCE_ITEMS } from './cg002Content';
+import { ANIMALS_JSON, BLUEPRINTS, BLUEPRINTS_JSON, LAND_ID, PLOT_H, PLOT_W, SOURCE_ITEMS } from './cg002Content';
 // P108 IW-006 / IW-008 (session-4 base): the economy's names.
 import { BRAIN_SIZE, BRAIN_SIZES, CREW_CAP, SHOP_JSON } from './cg002Content';
 
@@ -1365,6 +1365,10 @@ function goalMet(w, run, program, goal) {
     // P108 IW-003 (lane B): the run bumped into nothing (Biscuit's wall: sense it, never crash into it).
     else if (g.name === 'no_bump') ok = !(Number(run.bumps) > 0);
     else if (g.name === 'job_done') { var jp = jobProgress(w), jh = homeOf(w, r); done += jp.full; total += jp.total; ok = jp.total > 0 && jp.full === jp.total && !!r && (!jh || (r.x === Math.floor(Number(jh.x)) && r.y === Math.floor(Number(jh.y)))); }
+    // P108 IW-007 (s6): her land — the run FINISHED a part (one of the targets named, none full when the run began: a
+    // building's part, an animal's bowl). Each robot of her crew learns its own part of the job. Not "and home": the
+    // engine walks a robot home only when the WHOLE job is done, and on the island it goes home at the lap's end.
+    else if (g.name === 'part_done') { var pf = 0; for (var pa = 0; pa < a.length; pa++) if (isFull(thingById(w, a[pa]))) pf++; total += 1; done += pf > 0 ? 1 : 0; ok = pf > 0; }
     if (!ok) missing.push(String(g.name));
   }
   return { met: goals.length > 0 && missing.length === 0, missing: missing, done: done, total: total };
@@ -2245,7 +2249,9 @@ var p = null;
 for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === profileId) p = model.profiles[i];
 var newlyDone = false, bloomed = [], pinned = '', lent = [], upgraded = [];
 if (p) {
-  if (requestId && p.island.done.indexOf(requestId) === -1) { p.island.done.push(requestId); newlyDone = true; }
+  // P108 IW-007 (s6): her land is never won (its buildings rise on the island) — a win there teaches a robot, no more.
+  var iw7tLand = requestId === ${JSON.stringify(LAND_ID)};
+  if (requestId && !iw7tLand && p.island.done.indexOf(requestId) === -1) { p.island.done.push(requestId); newlyDone = true; }
   for (var t = 0; t < tricks.length; t++) { var key = 'n' + Math.floor(Number(tricks[t])); if (p.tricks[key] !== undefined && p.tricks[key] !== 'bloom') { p.tricks[key] = 'bloom'; bloomed.push(key); } }
   if (reward && reward.kind === 'hat' && p.hats.indexOf(String(reward.id)) === -1) p.hats.push(String(reward.id));
   if (reward && (reward.kind === 'sticker' || reward.kind === 'item' || reward.kind === 'seed') && p.stickers.indexOf(String(reward.id)) === -1) p.stickers.push(String(reward.id));
@@ -2258,7 +2264,21 @@ if (p) {
   var robotId = String(Inputs.robotId || p.island.robots[0].id);
   var known = false;
   for (var r = 0; r < p.island.robots.length; r++) if (p.island.robots[r].id === robotId) known = true;
-  if (requestId && requestId !== 'free' && program && program.length && known) {
+  // P108 IW-007 (s6): on her land a robot of hers ALREADY at work there keeps it, and the robot that won here helps it
+  // with its own program (Pip carries the stones, Cobble the planks); a helper there before goes home with its program.
+  var iw7tLead = iw7tLand && p.island.plots[requestId] && Array.isArray(p.island.plots[requestId].program) && p.island.plots[requestId].program.length ? String(p.island.plots[requestId].robotId || '') : '';
+  if (iw7tLand && program && program.length && known && iw7tLead && iw7tLead !== robotId) {
+    for (var o7 in p.island.plots) if (p.island.plots[o7].robotId === robotId) p.island.plots[o7].robotId = '';
+    for (var h7 = 0; h7 < p.island.robots.length; h7++) {
+      var hr = p.island.robots[h7];
+      if (hr.id === robotId) { hr.helps = requestId; hr.program = JSON.parse(JSON.stringify(program)); }
+      else if (hr.helps === requestId) delete hr.helps;
+    }
+    pinned = robotId;
+  }
+  else if (requestId && requestId !== 'free' && program && program.length && known) {
+    // P108 IW-007 (s6): the robot that won leaves any plot it helped on.
+    for (var x7 = 0; x7 < p.island.robots.length; x7++) if (p.island.robots[x7].id === robotId && p.island.robots[x7].helps) delete p.island.robots[x7].helps;
     for (var other in p.island.plots) if (other !== requestId && p.island.plots[other].robotId === robotId) p.island.plots[other].robotId = '';
     p.island.plots[requestId] = { program: program, robotId: robotId, wonAt: Number(Inputs.now) > 0 ? Number(Inputs.now) : Date.now() };
     pinned = robotId;

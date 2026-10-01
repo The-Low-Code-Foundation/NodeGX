@@ -1371,6 +1371,36 @@
       "y": 6760
     },
     {
+      "id": "iwLandBotVar",
+      "type": "Variable2",
+      "label": "The robot chosen on her land",
+      "parameters": {
+        "name": "gardenLandBot"
+      },
+      "x": 590,
+      "y": 6880
+    },
+    {
+      "id": "iwSetLandBot",
+      "type": "Set Variable",
+      "label": "A robot chosen on her land",
+      "parameters": {
+        "name": "gardenLandBot"
+      },
+      "x": 590,
+      "y": 7000
+    },
+    {
+      "id": "iwChoseIs",
+      "type": "Condition",
+      "label": "Was a robot chosen on her land?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 590,
+      "y": 7120
+    },
+    {
       "id": "iwOut",
       "type": "Component Outputs",
       "label": "What it answers",

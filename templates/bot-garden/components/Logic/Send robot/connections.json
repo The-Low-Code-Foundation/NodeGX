@@ -65,6 +65,18 @@
     },
     {
       "fromId": "sendrobotFn",
+      "fromProperty": "out-chose",
+      "toId": "sendrobotOut",
+      "toProperty": "chose"
+    },
+    {
+      "fromId": "sendrobotFn",
+      "fromProperty": "out-chosen",
+      "toId": "sendrobotOut",
+      "toProperty": "chosen"
+    },
+    {
+      "fromId": "sendrobotFn",
       "fromProperty": "out-error",
       "toId": "sendrobotOut",
       "toProperty": "error"

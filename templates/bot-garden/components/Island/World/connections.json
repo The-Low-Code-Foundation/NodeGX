@@ -652,6 +652,48 @@
       "toProperty": "start"
     },
     {
+      "fromId": "iwLandBotVar",
+      "fromProperty": "value",
+      "toId": "iwChoose",
+      "toProperty": "landBot"
+    },
+    {
+      "fromId": "iwLandBotVar",
+      "fromProperty": "value",
+      "toId": "iwCrewFn",
+      "toProperty": "landBot"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "chosen",
+      "toId": "iwSetLandBot",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "chose",
+      "toId": "iwChoseIs",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwAssign",
+      "fromProperty": "ran",
+      "toId": "iwChoseIs",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwChoseIs",
+      "fromProperty": "ontrue",
+      "toId": "iwSetLandBot",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwSetLandBot",
+      "fromProperty": "done",
+      "toId": "iwAgain",
+      "toProperty": "start"
+    },
+    {
       "fromId": "iwIn",
       "fromProperty": "findText",
       "toId": "iwFind",

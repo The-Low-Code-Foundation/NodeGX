@@ -137,7 +137,7 @@
     },
     {
       "fromId": "wsFam",
-      "fromProperty": "land",
+      "fromProperty": "landText",
       "toId": "wsLandReqs",
       "toProperty": "land"
     },
@@ -200,6 +200,12 @@
       "fromProperty": "plots",
       "toId": "wsJob",
       "toProperty": "plots"
+    },
+    {
+      "fromId": "wsLandBotVar",
+      "fromProperty": "value",
+      "toId": "wsJob",
+      "toProperty": "landBot"
     },
     {
       "fromId": "wsJob",

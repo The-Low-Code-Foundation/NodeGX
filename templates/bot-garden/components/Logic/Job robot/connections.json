@@ -5,6 +5,12 @@
   "connections": [
     {
       "fromId": "jobrobotIn",
+      "fromProperty": "landBot",
+      "toId": "jobrobotFn",
+      "toProperty": "in-landBot"
+    },
+    {
+      "fromId": "jobrobotIn",
       "fromProperty": "lang",
       "toId": "jobrobotFn",
       "toProperty": "in-lang"

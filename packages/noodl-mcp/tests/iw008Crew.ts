@@ -29,7 +29,7 @@
  * @module noodl-mcp/tests/iw008Crew
  */
 import { SAVE_HELPERS } from './cg002Scripts';
-import { ROBOTS, ROBOT_CONTROLS, ROBOT_MOVES } from './cg002Content';
+import { LAND_ID, ROBOTS, ROBOT_CONTROLS, ROBOT_MOVES } from './cg002Content';
 
 /** What each robot kind can place (every block type a program may hold): the moves, the controls, its own blocks. */
 export const CREW_CAN: Readonly<Record<string, ReadonlyArray<string>>> = Object.fromEntries(ROBOTS.map((r) => [r.id, [...ROBOT_MOVES, ...ROBOT_CONTROLS, ...r.palette]]));
@@ -53,6 +53,20 @@ function crewPick(mine, plots, id, kind) {
     else if (!at && !m.helps && !free) free = m;
   }
   return here || free || any;
+}
+// P108 IW-007 (s6): her land takes a robot of ANY kind. The one that learns or works there: the one she chose on the
+// land's card (a robot of hers), else the one at work there, else the one helping there, else Pip's rule.
+var IW7T_LAND = ${JSON.stringify(LAND_ID)};
+function iw7tLandPick(mine, plots, chosen) {
+  var list = Array.isArray(mine) ? mine : [], c = String(chosen || ''), lead = null, help = null;
+  for (var i = 0; i < list.length; i++) {
+    var m = list[i];
+    if (!m) continue;
+    if (c && String(m.id) === c) return m;
+    if (!lead && crewWorkOf(m, plots) === IW7T_LAND) lead = m;
+    if (!help && String(m.helps || '') === IW7T_LAND) help = m;
+  }
+  return lead || help || crewPick(list, plots, IW7T_LAND, 'pip') || list[0] || null;
 }
 `;
 
@@ -209,7 +223,9 @@ var reqs = Array.isArray(Inputs.requests) ? Inputs.requests : [];
 var req = null, p = null;
 for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === reqId) req = reqs[i];
 for (var j = 0; j < model.profiles.length; j++) if (model.profiles[j].id === pid) p = model.profiles[j];
-var res = p ? crewAssign(p, rid, req, p.band, Inputs.now) : { ok: false, error: 'robot', role: '', block: '', n: 0, brain: 0, mate: '' };
+// P108 IW-007 (s6): on her land a tap CHOOSES the robot that learns a job there (Go and help teaches it); nothing is written.
+var iw7tChose = reqId === ${JSON.stringify(LAND_ID)} && !!p && !!crewRowOf(p, rid);
+var res = iw7tChose ? { ok: false, error: '', role: 'chosen', block: '', n: 0, brain: 0, mate: '' } : p ? crewAssign(p, rid, req, p.band, Inputs.now) : { ok: false, error: 'robot', role: '', block: '', n: 0, brain: 0, mate: '' };
 var me = p && crewRowOf(p, rid) ? robotRow(p, crewRowOf(p, rid)).name : '';
 var mate = p && res.mate && crewRowOf(p, res.mate) ? robotRow(p, crewRowOf(p, res.mate)).name : '';
 var vars = { r: me, m: mate, blk: crewBlockWord(res.block, w, p ? p.band : 2), n: res.brain, k: res.n };
@@ -220,6 +236,8 @@ Outputs.ok = res.ok;
 Outputs.error = res.error;
 Outputs.role = res.role;
 Outputs.told = { requestId: reqId, text: line, ok: res.ok, n: Date.now() };
+Outputs.chose = iw7tChose;
+Outputs.chosen = iw7tChose ? rid : '';
 `;
 
 /**
@@ -239,20 +257,22 @@ var req = null, card = null;
 for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];
 for (var c = 0; c < cards.length; c++) if (cards[c] && cards[c].id === id) card = cards[c];
 var kind = req && req.needs ? String(req.needs) : 'pip';
+// P108 IW-007 (s6): her land — every robot of hers (any kind), the one chosen to learn there ringed.
+var isLand = id === IW7T_LAND, landBot = isLand ? iw7tLandPick(mine, plots, Inputs.landBot) : null;
 var rows = [], here = [];
 for (var j = 0; j < mine.length; j++) {
   var m = mine[j];
-  if (!m || crewKindOf(m) !== kind) continue;
+  if (!m || (!isLand && crewKindOf(m) !== kind)) continue;
   var works = crewWorkOf(m, plots) === id, helps = String(m.helps || '') === id;
-  rows.push({ id: 'crew|' + String(m.id), label: String(m.name || m.id), selected: works || helps, locked: false });
+  rows.push({ id: 'crew|' + String(m.id), label: String(m.name || m.id), selected: isLand ? !!landBot && String(landBot.id) === String(m.id) : works || helps, locked: false });
   if (works) here.unshift(fill(w.iw8cWorks, { r: String(m.name || m.id) }));
   if (helps) here.push(fill(w.iw8cHelps, { r: String(m.name || m.id) }));
 }
-var show = !!req && !!card && (card.status === 'won' || card.status === 'working') && rows.length >= 2;
+var show = isLand ? !!card && rows.length >= 2 : !!req && !!card && (card.status === 'won' || card.status === 'working') && rows.length >= 2;
 Outputs.rows = show ? rows : [];
 Outputs.show = show;
-Outputs.label = w.iw8cCrew || '';
-Outputs.line = w.iw8cCrewTap || '';
+Outputs.label = isLand ? w.iw7tCrewL || '' : w.iw8cCrew || '';
+Outputs.line = isLand ? w.iw7tCrewTap || '' : w.iw8cCrewTap || '';
 Outputs.hereText = here.join(' · ');
 // What the last tap said, on this plot's card only (another plot's card opened since says nothing).
 var told = Inputs.told && typeof Inputs.told === 'object' ? Inputs.told : null;

@@ -225,6 +225,19 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     check('PERF: her land holds two finished buildings (spa, refuge) and two animals (a rabbit, a sheep), drawn on the island; a robot works the land beside Pip on the tulips', drawn.pets.length === 2 && drawn.pets.includes('rabbit') && drawn.pets.includes('sheep') && drawn.bots >= 2 && !!st && st.bowls.length === 2 && st.parts.length === 4, readings.perfLand);
     await shot('iw7a-perf-island-1368');
     await landShot('iw7a-perf-land-1368');
+    // P108 s6 (the s5 merge's look item): the two animals side by side, not one behind the other, and the refuge's meter
+    // chips on top — each chip is what a finger meets at its own centre (they were under the animals).
+    const pen = await evaluate(`(() => { const box = document.querySelector('.bg-isle'); const petEls = [...box.querySelectorAll('.gd-pet')]; const pets = petEls.map((e) => e.getBoundingClientRect());
+      // The chips round each animal: her own bowl's (in her cell) and the refuge part's right above her (her pen is the row
+      // below it) — the s5 look had the animals over the bowls' chips.
+      const chips = petEls.flatMap((e) => { const c = e.closest('.gd-cell'); const up = c && box.querySelector('.gd-cell[data-x="' + c.getAttribute('data-x') + '"][data-y="' + (Number(c.getAttribute('data-y')) - 1) + '"]'); return [c ? c.querySelector('.gd-meter') : null, up ? up.querySelector('.gd-meter[data-kind="site"]') : null]; }).filter(Boolean);
+      // How much of one animal the other covers: the area of their boxes' overlap over the smaller box.
+      const over = pets.length === 2 ? (Math.max(0, Math.min(pets[0].right, pets[1].right) - Math.max(pets[0].left, pets[1].left)) * Math.max(0, Math.min(pets[0].bottom, pets[1].bottom) - Math.max(pets[0].top, pets[1].top))) / Math.min(pets[0].width * pets[0].height, pets[1].width * pets[1].height) : null;
+      // A chip is pointer-events:none (elementFromPoint never returns it): lent pointer events for the measurement only.
+      const onTop = chips.map((c) => { c.scrollIntoView({ block: 'nearest', inline: 'nearest' }); const was = c.style.pointerEvents; c.style.pointerEvents = 'auto'; const r = c.getBoundingClientRect(); const at = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); c.style.pointerEvents = was; return !!at && (at === c || c.contains(at)); });
+      return { pets: pets.length, overlap: over === null ? null : Math.round(over * 100) / 100, chips: chips.length, onTop }; })()`);
+    readings.pen = pen;
+    check(`PERF: the pen — the two animals side by side (one covers ${pen.overlap === null ? '?' : Math.round(pen.overlap * 100) + '%'} of the other's box, under a third), their bowls' chips and the refuge's above them on top (${pen.onTop.filter(Boolean).length}/${pen.chips})`, pen.pets === 2 && pen.overlap !== null && pen.overlap < 0.34 && pen.chips === 4 && pen.onTop.every(Boolean), pen);
     const LOOP = `(() => { const t = performance.now(); let x = 0; for (let i = 0; i < 3e7; i++) x = (x + i * 7) % 1000003; return performance.now() - t + (x < 0 ? 1 : 0); })()`;
     const loop1 = await evaluate(LOOP);
     await client.send('Emulation.setCPUThrottlingRate', { rate: 4 });

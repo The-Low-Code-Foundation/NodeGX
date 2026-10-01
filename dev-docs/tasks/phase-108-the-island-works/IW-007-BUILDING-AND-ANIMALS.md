@@ -1,13 +1,13 @@
 # IW-007 — Building and animals
 
 **Opened 2026-09-29** from README §0 ("the more they drop the resources the more the house pops up … a robot spa or an
-animal refuge … buy a sheep and a rabbit … task a robot with collecting food and feeding them"). **Status: 🟡 s5 (base
-`b40be26c8`, lanes B and A, merged 2026-10-01): AC1 🟡 — bought, placed on a legal footprint, built by two robots with two
-materials on the island, each stage in 2D and 3D, the puff — but a SECOND robot reaches the land only by a seeded save (no
-touch path: the land card's crew pills / My robots' send-to-land hook, §4 "Session 5 merge"); AC2 🟡 — the Animals tab,
-a rabbit bought and named, fed / worn / fed again on the island — the feeding pin seeded, its teaching in the Workshop on
-the land not driven; AC3 ✅; AC4 ✅ (2D + 3D drives, p95 16.7 ms at CPU ×4 with two buildings and two animals).**
-Depends on IW-005 (seek), IW-006 (the shop). Lane B or E.
+animal refuge … buy a sheep and a rabbit … task a robot with collecting food and feeding them"). **Status: ✅ s6
+(2026-10-01, on `cline-dev`): AC1 ✅ — the spa bought, placed, and built by Pip and Cobble, BOTH taught on her land by
+touch (her land's card names her robots of any kind, a tap chooses who learns, a win there makes the second robot the
+helper), the spa finished in 104 s on the island; AC2 ✅ — feeding taught on her land by touch and won while two
+buildings stand, her bowl filled on the island (wear and refill: lane A's drive); AC3 ✅; AC4 ✅. The pen's look and the
+chips' words fixed (s6). Owed, small: the spa's `rest`, a tune, a fed animal giving something, a helper's drops earning,
+two robots' name pills at home (§4 "Session 6").** Depends on IW-005 (seek), IW-006 (the shop). Lane B or E.
 
 ## 1. The person sentence
 
@@ -274,4 +274,98 @@ not yet driven on the page.
 **Owed (session 6):** a second robot sent onto the land BY TOUCH (AC1: today only a seeded save puts a helper there — the
 land card's crew pills, or lane O's hook in `tests/iw006Owed.ts` for My robots' send); teaching on the land driven (AC2);
 the look item above; the spa's `rest`; a tune on the last drop; a helper's drops earning; two drives that type a price.
+
+### Session 6 (2026-10-01, on `cline-dev` from `47929a133`) — her land by touch: a second robot, and teaching there
+
+**Measured first** (the page's own scripts, `tests/iw007Touch.test.ts` began as the measurement): a 10-block program
+carrying both materials WON on the land (`job_done`, 194 ticks) — so one robot could be taught there, but only the whole
+job; her land's card showed no robots (the crew row asked for the plot's kind and a won plot) and a tap had nowhere to
+go ("Cobble can't do this job": the land is not in the catalogue); **a second robot sent with a COPY of the first's
+program stood still** (one rock, one tree: the source reserved by the robot already at work — 183 ticks against 181
+alone), while two robots on two materials built the spa in 131. A Workshop win on the land also put `land` in `done`.
+So "send Cobble to help" (the handoff's words) was a dead end as specified: each robot must learn its OWN job there.
+
+**Built** (hunks under `// P108 IW-007 (s6)`; new: `tests/iw007Touch.test.ts`, `scripts/devtools/drive-iw007-touch.js`):
+- **The land's goal is a part finished** — `part_done` (ENGINE `goalMet`; args: the targets not full when the run began,
+  `iw7tOpenTargets` in `iw7bLandRequest`). A run that fills a building's part or an animal's bowl wins; not "and home"
+  (the engine walks a robot home only when the WHOLE job is done). Pip learns the stones, Cobble the planks; feeding
+  wins while a building is still going up.
+- **Her land's card names her robots of ANY kind** (`Logic/Crew chips` on the land: every robot, shown with two or more;
+  "Your robots" · "Tap a robot to choose who learns a job here. Each one can carry something different."). **A tap
+  CHOOSES** (`Logic/Assign robot` on the land: `chose`/`chosen`, nothing written) into the Variable `gardenLandBot`;
+  the card re-reads (`iwAgain`); Go and help says **"Teach Cobble here"**; the Workshop's `Job robot` teaches the robot
+  chosen (`iw7tLandPick` in CREW_PICK: chosen, else the one at work there, else the helper, else Pip's rule). A chosen
+  helper's card: "Cobble helps here, with the job you taught Cobble here. Go in to teach it again, or bring Cobble home."
+- **A win on her land** (`Logic/Complete request`): the first robot works it; a robot that wins there while another is
+  at work there becomes the HELPER with its own program (a helper there before goes home with its program; the save
+  keeps one helper per plot); the land is never put in `done`.
+- **Fixed, found by driving it by touch (every spec was green):**
+  1. **The Workshop on her land wiped her program at every "Got it"** (and would have at the win): Read family's `land`
+     is a fresh object on every read, so each profile write re-ran Land request → Start world's reset. Read family now
+     also gives `landText`; the Workshop wires that (equal text is not published again). `dev-docs/bugs/p108-iw7-wsreset-…`.
+  2. **Cobble's drawer on the land was empty**: Start world said the land `needs` 'pip' (`req.needs || 'pip'`), so the
+     palette refused every block to another kind. Her land needs no kind now.
+  3. The Workshop's card on the land said "Free play" under "'s request": an islander-less request is named by its own
+     title and blurb ("Your land" · "Build").
+  4. `land` put in `done` by a win there (`dev-docs/bugs/p108-iw7-landdone-…`).
+- **My robots' "send to a job" does not list the land** (decided; lane O's hook in `iw006Owed.ts` closed): a sent robot
+  runs a copy, and a copy stands still there.
+- **Two look items a child sees on her land** (after the touch drive's screenshots):
+  - **The chips' words** (`dev-docs/bugs/p108-iw7-partword-…`): `Logic/Pick thing` puts a land part's `build` and `item`
+    (only a part of a building of hers: `of` set — Sami's bench and a path square are as before) and her bowl's `name` on
+    the chip; garden-kit's `chipLabel` says "🧱 the spa's stone part" / « 🧱 la partie en pierre du spa », "🥣 Hazel's
+    bowl" / « 🥣 le bol de Hazel », and a part's states "is built" / « est construite » (`iw7tK_*`, `iw7tS_*`; kit
+    `src/blocks.js`, `chipLabel` exported for the gate; built with `build.mjs`).
+  - **The pen** (the s5 merge's look item): on the island an animal was drawn at 180% of a tile, 70% into the next pen
+    place and 110% up, above the chips (z 3 over 2) — the rabbit half hidden behind the sheep, both over their bowls'
+    chips. Now 160% (lane A's floor: ≥ 20 px on a 390 phone — 140% gave 18 px and its clause went red), centred on her
+    place, in front of the pen's fence (tried under it at z 1: the check passed, but LOOKED AT, the rabbit all but
+    vanished under the fence), her own cell's chip lifted above her (z 4, `:has(>.gd-pet)` — the island's other chips keep
+    their place under the robots), an animal on an odd column a little lower, and **the lower one in front** (z 3, the
+    upper z 2 — looked at: with the later cell on top, the sheep covered the rabbit's head; now only a leg is behind a
+    neighbour) (kit `src/kit.js`, `gd-pet-odd`). Graded on the page: a clause in `drive-iw007-animals.js --perf` — one
+    animal's box covers under a third of the other's, and the four chips round them (each bowl's, the refuge part's
+    above) are what a finger meets at their centres (lent pointer events: a chip is `pointer-events:none`, and the first
+    version of this check read FALSE on every kit for that reason). On the OLD kit it fails: 44%, 2/4.
+- Two drives read their prices from SHOP (`drive-iw006-shop.js` the copy and the brain, `drive-iw008-crew.js` the copy).
+- `drives/drive-all.sh`: `touch` added; the generator called directly (the root `package.json` is broken, below).
+
+**Decided here (the order is ours, R4; change any by saying so):**
+1. Her land is taught **robot by robot**, each its own part (the person sentence: "teaches Cobble to carry stones and a
+   new robot to carry planks"); at most TWO robots work her land (one at work, one helping — the save's one-helper rule).
+2. **The feeding pin when she places a new building:** the land is judged by its team (lane B's rule): a feeding robot
+   still fills a step, so it keeps feeding; the new building waits for a robot taught to build it. With two robots on the
+   land she chooses which job each keeps (e.g. Cobble re-taught from planks to feeding — driven).
+
+**Readings** (2026-10-01; each exit 0 unless said):
+
+| gate | total | previous |
+|---|---|---|
+| `iw007Touch.test.ts` (NEW: 16 rows + 5 arm rows; mutated sources inside rows too — each rule's arm red, asserted) | **21 / 21** | — |
+| the other 20 spec files, one at a time | **1021** (cg002Engine 259 · cg003Template 148 · … · iw007Animals 22) | 1021 |
+| all 21 spec files, the final tree | **1042**, every exit 0 | 1021 in 20 |
+| shell `node --test` | 92 / 92 | 92 |
+| generator (`generate-garden-template.ts`, called directly) | exit 0, then cg003Template's byte-for-byte row green (0 drift) | 0 |
+| `drive-iw007-touch.js` (NEW) | **25 / 25** — Pip taught the stones and Cobble the planks by touch, both WON; the chip says "🧱 the spa's stone part … is built"; the spa built on the island in **104 s**, Pip seen carrying stones and Cobble planks, store 6/6 · 4/4; Cobble re-taught to feed Hazel ("🥣 Hazel's bowl"), WON with two buildings standing, her bowl 3/3 on the island in 25 s; FR 390 card words; 0 console errors | — |
+| **final set on the final tree** (`drive-all.sh animals-perf animals touch kit2d`, one deploy, DONE) | page drive **331/331** · animals `--perf` **6/6** (the pen: one covers 29% of the other, 4/4 chips on top; p95 16.8 ms at CPU ×4) · animals 16/16 · touch 25/25 · kit fixtures 2D 50/50 | 331 · 5 · 16 · — · 50 |
+| the pen clause on the OLD kit (the s5 deploy of this session's first set) | **red, as it should be**: one covers 44%, 2/4 chips on top | — |
+
+**Regression set on one deploy** (`drives/drive-all.sh`, the session-6 tree before the two look items — the look items touch
+only the kit's chips and the island's pen, re-driven in the final set above; every exit 0,
+DONE): page drive **331/331** · touch **23/23** · build 26/26 · animals 16/16 · owed 19/19 · shop **60/60** (prices from
+SHOP) · crew **39/39** (the copy's price from SHOP) · earn 15/15 · island `--perf` 69/69 · robots 60/60 · modes 90/90 ·
+iw004 19/19 · stones 32/32.
+
+**Looked at** (`touch-shots/`): `iw7t-02-cobble-chosen` (the card: "Your robots", Pip · Cobble with Cobble in ink,
+"Teach Cobble here"); `iw7t-pip-stones-won` / `iw7t-feed-won` ("Thank you, Pip!" / "Thank you, Cobble!", 5 blocks.
+Neat!); `iw7t-04-here` ("Pip works here · Cobble helps", "Cobble helps here, …", Teach Cobble here · Bring Cobble home,
+"The robot spa: finished! · 10/10"). Seen there and fixed after (above): the spa's part chip read "square … is path" and
+her bowl "bowl 1". Not fixed: at home Pip's and Cobble's name pills overlap ("Cobble ²ip").
+
+**Not done, and why:** the spa's `rest`; a tune on the last drop (no sound in garden-kit); "a fed animal sometimes gives
+something" (no AC asks); a helper's drops earning (lane E's earnings pay the plot's first robot); two robots' name pills
+overlapping at home; 3D for the touch path (the 2D island and Workshop only; the build drive's 3D clauses still read the seeded crew).
+
+**Found, not this phase's:** the primary checkout's root `package.json` is Nightbook's app manifest since 2026-09-28
+(`dev-docs/bugs/p108-repo-pkgjson-…`): every `npm run` fails there. Not restored here.
 

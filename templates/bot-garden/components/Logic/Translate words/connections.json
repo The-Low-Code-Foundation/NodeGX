@@ -2519,6 +2519,72 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tCrewL",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tCrewL"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tCrewTap",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tCrewTap"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tHelpsHere",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tHelpsHere"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tK_bowl",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tK_bowl"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tK_refuge_plank",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tK_refuge_plank"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tK_refuge_stone",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tK_refuge_stone"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tK_spa_plank",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tK_spa_plank"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tK_spa_stone",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tK_spa_stone"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tS_dirt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tS_dirt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tS_done",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tS_done"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7tTeach",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7tTeach"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw8cBrainL",
       "toId": "translatewordsOut",
       "toProperty": "iw8cBrainL"

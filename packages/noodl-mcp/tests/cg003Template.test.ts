@@ -502,7 +502,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const timer = world.find((n) => n.id === 'iwTimer')!;
       expect(params(timer).duration).toBe(760);
       // P108 IW-007 (lane B): and the ghost of a blueprint while she places it — held by name for the same reason (one island on screen).
-      expect(world.filter((n) => n.type === 'Variable2').map((n) => params(n).name)).toEqual(['gardenIsland', 'gardenGhost']);
+      // P108 IW-007 (s6): and the robot she chose on her land's card (the Workshop's Job robot reads it by name).
+      expect(world.filter((n) => n.type === 'Variable2').map((n) => params(n).name)).toEqual(['gardenIsland', 'gardenGhost', 'gardenLandBot']);
       expect(into('iwTick')).toEqual(['iwTimer.timerFinished>go', 'iwVar.value>state', 'iwWorld.state>built']);
       expect(into('iwTimer')).toEqual(['iwSetBuilt.done>start', 'iwSetTick.done>start']);
       // A tap on either renderer asks Plot at, then the card; the page's pick opens the same card.
@@ -1030,7 +1031,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(String(nodeIn(ws, 'wsJob').type)).toBe('/Logic/Job robot');
       // P108 IW-007 (lane B): the Workshop's requests are the catalogue's with her land as one more (Land request).
       expect([into(ws, 'wsJob', 'robots'), into(ws, 'wsJob', 'requestId'), into(ws, 'wsJob', 'requests')]).toEqual([['wsFam.robots'], ['wsReqVar.value'], ['wsLandReqs.requests']]);
-      expect([into(ws, 'wsLandReqs', 'requests'), into(ws, 'wsLandReqs', 'land')]).toEqual([['wsRequests.requests'], ['wsFam.land']]);
+      // P108 IW-007 (s6): her land as TEXT (Read family's Land Text) — the object is new on every read and restarted the Workshop.
+      expect([into(ws, 'wsLandReqs', 'requests'), into(ws, 'wsLandReqs', 'land')]).toEqual([['wsRequests.requests'], ['wsFam.landText']]);
       for (const f of ['botName', 'color', 'eye', 'hat', 'robot', 'robotKey', 'paletteRobot', 'stepMs']) expect({ f, from: into(ws, 'wsPlay', f) }).toEqual({ f, from: [`wsJob.${f}`] });
       expect(into(ws, 'wsComplete', 'robotId')).toEqual(['wsJob.robotId']);
       expect([into(ws, 'wsGift', 'lent'), into(ws, 'wsGift', 'upgraded'), into(ws, 'wsPlay', 'giftText')]).toEqual([['wsComplete.lent'], ['wsComplete.upgraded'], ['wsGift.text']]);

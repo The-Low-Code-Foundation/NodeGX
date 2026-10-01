@@ -1823,7 +1823,15 @@
     '.gd-world[data-wide="1"] .gd-pet-name{font-size:9px;padding:0 4px;border-width:1px}\n' +
     // On the island a tile is ~16 px: she is drawn about two tiles tall (as a robot is drawn bigger than its tile), in
     // front of her refuge — a 13 px rabbit was a speck beside her name (s5 drive, looked at).
-    '.gd-world[data-wide="1"] .gd-cell>.gd-pet{left:-70%;top:-110%;width:180%;height:180%;z-index:3}\n' +
+    // P108 IW-007 (s6, the merge's look item): 180% reached 70% into the next pen place and 110% up, over her bowl's chip
+    // (z 3 over the chips' 2): the rabbit half hidden behind the sheep. 160% (20 px on a 390 phone, lane A's floor),
+    // centred on her place, in front of the pen's fence (z 3, as before — under it at z 1 she all but vanished); on an odd
+    // column a little lower, so two side by side stagger; her own cell's chip above her (z 4 — only there: the island's
+    // other chips keep their place under the robots).
+    // The lower one is the one in front (z 3; the upper z 2): only a leg is behind her neighbour, never a head.
+    '.gd-world[data-wide="1"] .gd-cell>.gd-pet{left:-30%;top:-62%;width:160%;height:160%;z-index:2}\n' +
+    '.gd-world[data-wide="1"] .gd-cell>.gd-pet.gd-pet-odd{top:-24%;z-index:3}\n' +
+    '.gd-world[data-wide="1"] .gd-cell:has(>.gd-pet)>.gd-meter{z-index:4}\n' +
     '.gd-world[data-wide="1"] .gd-cell>.gd-pet-bowl{right:-20%;bottom:-6%;width:80%;height:80%}\n' +
     // Two pen places side by side: on the island their names would overlap (a name is wider than a tile), so the one on
     // an odd column sits a line lower.
@@ -1839,7 +1847,8 @@
     var kind = PET_SPRITES[t.animal] ? String(t.animal) : 'rabbit';
     var fed = mood === 'happy';
     extras.push(spriteEl(fed ? 'bowlCarrots' : 'bowl', 'pet-bowl-' + i, 'gd-thing gd-bowl gd-pet-bowl' + (fed ? ' gd-full' : ''), { 'data-bowl': m ? m.text : String(wholeOf(t.count) || 0) }));
-    extras.push(spriteEl(PET_SPRITES[kind][mood], 'pet-' + i, 'gd-pet gd-pet-' + mood, { 'data-animal': kind, 'data-mood': mood, 'data-name': String(t.name || '') }));
+    // P108 IW-007 (s6): an animal on an odd column sits a little lower (as her name does): two pen places side by side stagger.
+    extras.push(spriteEl(PET_SPRITES[kind][mood], 'pet-' + i, 'gd-pet gd-pet-' + mood + (Math.abs(Math.floor(Number(t.x))) % 2 ? ' gd-pet-odd' : ''), { 'data-animal': kind, 'data-mood': mood, 'data-name': String(t.name || '') }));
     if (t.name) extras.push(h('span', { key: 'pet-name-' + i, className: 'gd-pet-name' + (Math.abs(Math.floor(Number(t.x))) % 2 ? ' gd-pet-name-odd' : ''), 'data-pet-name': String(t.name) }, String(t.name)));
   }
   /** The carrot patch: its carrots by what is left (four places at most); used up, bare soil with sprouts. */

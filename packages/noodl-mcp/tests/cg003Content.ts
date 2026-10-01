@@ -381,7 +381,20 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw7aBought_rabbit: s('{name} is waiting by her bowl on your land. A robot can bring her carrots!', '{name} t’attend près de son bol, sur ton terrain. Un robot peut lui apporter des carottes !'),
   iw7aBought_sheep: s('{name} is waiting by his bowl on your land. A robot can bring him carrots!', '{name} t’attend près de son bol, sur ton terrain. Un robot peut lui apporter des carottes !'),
   iw7aK_patch: s('🥕 carrot patch', '🥕 carré de carottes'),
-  iw7aK_tree: s('🌳 tree', '🌳 arbre')
+  iw7aK_tree: s('🌳 tree', '🌳 arbre'),
+  // ── P108 IW-007 (s6): her land by touch — her robots of ANY kind on its card, the one chosen learns a job there ──
+  iw7tCrewL: s('Your robots', 'Tes robots'),
+  iw7tCrewTap: s('Tap a robot to choose who learns a job here. Each one can carry something different.', 'Touche un robot pour choisir qui apprend un travail ici. Chacun peut porter autre chose.'),
+  iw7tTeach: s('Teach {b} here', 'Apprendre à {b} ici'),
+  // Her land's parts and her bowl, on a chip picked on the world (garden-kit's chipLabel; the state words for a part).
+  iw7tK_spa_stone: s('🧱 the spa’s stone part', '🧱 la partie en pierre du spa'),
+  iw7tK_spa_plank: s('🪵 the spa’s plank part', '🪵 la partie en bois du spa'),
+  iw7tK_refuge_stone: s('🧱 the refuge’s stone part', '🧱 la partie en pierre du refuge'),
+  iw7tK_refuge_plank: s('🪵 the refuge’s plank part', '🪵 la partie en bois du refuge'),
+  iw7tK_bowl: s('🥣 {name}’s bowl', '🥣 le bol de {name}'),
+  iw7tS_done: s('is built', 'est construite'),
+  iw7tS_dirt: s('is not built yet', 'n’est pas encore construite'),
+  iw7tHelpsHere: s('{b} helps here, with the job you taught {b} here. Go in to teach it again, or bring {b} home.', '{b} aide ici, avec le travail que tu lui as appris ici. Entre pour le lui réapprendre, ou ramène {b} à la maison.')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);

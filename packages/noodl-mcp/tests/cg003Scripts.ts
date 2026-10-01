@@ -40,7 +40,7 @@ import { BLOCK_CARDS, CardBlock, EYES, HATS, IG006_WORDS, IG006_WORD_KEYS, ISLAN
 // P108 IW-003 (lane M): the pad's go keys; the job card.
 import { JOB_CARDS, PAD_GO } from './cg003Content';
 import { ROBOT_PAINTS } from './cg007Look';
-import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, PLOT_H, PLOT_W } from './cg002Content';
+import { FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, LAND_ID, PLOT_H, PLOT_W } from './cg002Content';
 import { FIND_ROBOTS_SCRIPT, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandChooseScript, islandWorldScript } from './ig004Island';
 // P108 IW-003 (lane B): teach again — the island's own judgement, in the Workshop.
 import { ISLAND_ENGINE } from './ig004Island';
@@ -177,7 +177,8 @@ if (req) {
   // IG-003 (R5): the islander's challenge on this request ('predict'), or none.
   Outputs.challenge = req.challenge === 'predict' ? 'predict' : '';
   // IG-005: the robot kind this request needs (free play: none — the garden takes every block).
-  Outputs.needs = req.id === 'free' ? '' : String(req.needs || 'pip');
+  // P108 IW-007 (s6): her land needs no kind either (any robot of hers learns there) — 'pip' refused Cobble every block.
+  Outputs.needs = req.id === 'free' || req.id === ${JSON.stringify(LAND_ID)} ? '' : String(req.needs || 'pip');
 } else {
   Outputs.world = null;
   Outputs.request = null;
@@ -208,8 +209,11 @@ var req = null;
 for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];
 var isl = req ? ISLANDERS[req.islander] : null;
 var who = isl ? (w[isl.nameKey] || '') : '';
-Outputs.who = who || w.isFree || '';
-Outputs.eyebrow = req ? fill(w.wsEyebrowReq, { who: who }) : (w.isFree || '');
+// P108 IW-007 (s6): her land has no islander — its own title names it (it said "Free play"), its blurb is the eyebrow
+// (it said "’s request" with nobody before it).
+var iw7tOwn = !!req && !isl;
+Outputs.who = iw7tOwn ? (w[req.copyKeys.title] || '') : who || w.isFree || '';
+Outputs.eyebrow = iw7tOwn ? (w[req.copyKeys.blurb] || '') : req ? fill(w.wsEyebrowReq, { who: who }) : (w.isFree || '');
 Outputs.title = req ? (w[req.copyKeys.title] || '') : (w.wsFreeTitle || '');
 Outputs.line = req ? (w[req.copyKeys.line] || '') : (w.sandP || '');
 Outputs.faceClass = 'bg-face bg-sp-' + (isl ? isl.sprite : 'owl');
@@ -535,6 +539,10 @@ Outputs.robots = active ? robotRowsOf(active) : [];
 Outputs.cardsSeen = active && active.cardsSeen ? active.cardsSeen.slice() : [];
 // P108 IW-007 (lane B): her land (what stands on it), or null when nothing does.
 Outputs.land = active && active.island.land ? JSON.parse(JSON.stringify(active.island.land)) : null;
+// P108 IW-007 (s6): her land as TEXT, for the Workshop's Land request — a text the same as before is not published again,
+// so a write that leaves her land as it was (Got it's cards seen, the win itself) does not rebuild the requests, which
+// re-ran Start world: her program cleared and the world reset under her (Land object above is new on every read).
+Outputs.landText = active && active.island.land ? JSON.stringify(active.island.land) : '';
 var rows = [];
 for (var j = 0; j < model.profiles.length; j++) {
   var p = model.profiles[j];
@@ -1180,6 +1188,8 @@ var kind = req && req.needs ? String(req.needs) : 'pip';
 var mine = Array.isArray(Inputs.robots) ? Inputs.robots : [];
 // P108 IW-008 (lane C): with a crew, the robot at work on this plot, else one of that kind at home, else the first.
 var row = crewPick(mine, Inputs.plots, id, kind);
+// P108 IW-007 (s6): on her land, the robot she chose on the land's card (any kind), else the one at work there.
+if (id === IW7T_LAND) row = iw7tLandPick(mine, Inputs.plots, Inputs.landBot);
 var owned = !!row;
 if (!row) {
   var spec = null;
@@ -1393,6 +1403,10 @@ if (picking && isFinite(x) && isFinite(y)) {
     ref.kind = String(t.kind);
     ref.x = x;
     ref.y = y;
+    // P108 IW-007 (s6): her land — a building's part carries its building and material, her bowl her name, so the chip
+    // can say "the spa's stone part" and "Hazel's bowl" (it said "square … is path" and "bowl 1").
+    if (t.kind === 'site' && t.build && t.item && t.of !== undefined) { ref.build = String(t.build); ref.item = String(t.item); }
+    if (t.kind === 'bowl' && typeof t.name === 'string' && t.name) ref.name = t.name;
   }
   var robots = Array.isArray(w.robots) ? w.robots : [];
   for (var r = 0; r < robots.length && !ref; r++) {

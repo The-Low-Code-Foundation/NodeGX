@@ -11,6 +11,12 @@
     },
     {
       "fromId": "crewchipsIn",
+      "fromProperty": "landBot",
+      "toId": "crewchipsFn",
+      "toProperty": "in-landBot"
+    },
+    {
+      "fromId": "crewchipsIn",
       "fromProperty": "lang",
       "toId": "crewchipsFn",
       "toProperty": "in-lang"

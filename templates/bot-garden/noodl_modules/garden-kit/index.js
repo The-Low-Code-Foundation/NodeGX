@@ -621,7 +621,8 @@ var gardenKitBlocks = (function () {
         var r = list[i];
         // P108 IW-003 (lane S): + a thing's own name by its id (iw3sK_<id>) and its states' words (iw3sS_<state>_<id>).
         // P108 IW-007 (lane A): + the land's sources' words (iw7aK_<kind>).
-        if (r && typeof r.key === 'string' && (r.key.indexOf('iw4') === 0 || r.key.indexOf('iw3sK_') === 0 || r.key.indexOf('iw3sS_') === 0 || r.key.indexOf('iw7aK_') === 0)) out[r.key] = String(r[lang] || r.en || out[r.key] || '');
+        // P108 IW-007 (s6): + her land's parts and her bowl in its own words (iw7tK_<building>_<material>, iw7tK_bowl, iw7tS_<state>).
+        if (r && typeof r.key === 'string' && (r.key.indexOf('iw4') === 0 || r.key.indexOf('iw3sK_') === 0 || r.key.indexOf('iw3sS_') === 0 || r.key.indexOf('iw7aK_') === 0 || r.key.indexOf('iw7tK_') === 0 || r.key.indexOf('iw7tS_') === 0)) out[r.key] = String(r[lang] || r.en || out[r.key] || '');
       }
     }
     return out;
@@ -759,6 +760,10 @@ var gardenKitBlocks = (function () {
     // P108 IW-003 (lane S): a thing with a name of its own (Sami's bench is a site, not a path square) wears it.
     var own = typeof ref.id === 'string' ? ctx.words['iw3sK_' + ref.id] : '';
     if (own) return own;
+    // P108 IW-007 (s6): her land — a building's part by its building and material, her bowl by her name.
+    var part = typeof ref.build === 'string' && typeof ref.item === 'string' ? ctx.words['iw7tK_' + ref.build + '_' + ref.item] : '';
+    if (part) return part;
+    if (ref.kind === 'bowl' && typeof ref.name === 'string' && ref.name && ctx.words.iw7tK_bowl) return fill(ctx.words.iw7tK_bowl, { name: ref.name });
     return kindWord(ctx, ref.kind) + (n ? ' ' + n : '');
   }
 
@@ -1122,7 +1127,9 @@ var gardenKitBlocks = (function () {
         // P108 IW-003 (lane S): a thing named by its id says its states in its own words (the bench "is built", not "is path").
         var chip = b && b.getInputTargetBlock && b.getInputTargetBlock('THING');
         var cid = chip && chip.ref_ && typeof chip.ref_.id === 'string' ? chip.ref_.id : '';
-        return statesOf(b && b.kind_).map(function (id) { return [(cid && c.words['iw3sS_' + id + '_' + cid]) || c.words['iw4S_' + id] || id, id]; });
+        // P108 IW-007 (s6): a building's part on her land "is built" (the path square's words were "is path").
+        var built = chip && chip.ref_ && typeof chip.ref_.build === 'string';
+        return statesOf(b && b.kind_).map(function (id) { return [(cid && c.words['iw3sS_' + id + '_' + cid]) || (built && c.words['iw7tS_' + id]) || c.words['iw4S_' + id] || id, id]; });
       }, 'state'), 'STATE');
       s.appendField(new KidPick('1', function () { return range(0, 9); }, 'n'), 'N');
       s.appendField(new KidPick('', function () { var c = ctxOf(this.getSourceBlock()); return WHAT_KINDS.map(function (k) { return [kindWord(c, k), k]; }); }, 'what'), 'WHAT');
@@ -2570,6 +2577,8 @@ var gardenKitBlocks = (function () {
     translate: translate,
     toolbox: toolboxOf,
     defineBlocks: defineBlocks,
+    // P108 IW-007 (s6): a chip's words (a thing picked on the world), for the gate.
+    chipLabel: chipLabel,
     words: WORDS,
     css: BLOCKS_CSS,
 
@@ -4521,7 +4530,15 @@ var gardenKitBlocks = (function () {
     '.gd-world[data-wide="1"] .gd-pet-name{font-size:9px;padding:0 4px;border-width:1px}\n' +
     // On the island a tile is ~16 px: she is drawn about two tiles tall (as a robot is drawn bigger than its tile), in
     // front of her refuge — a 13 px rabbit was a speck beside her name (s5 drive, looked at).
-    '.gd-world[data-wide="1"] .gd-cell>.gd-pet{left:-70%;top:-110%;width:180%;height:180%;z-index:3}\n' +
+    // P108 IW-007 (s6, the merge's look item): 180% reached 70% into the next pen place and 110% up, over her bowl's chip
+    // (z 3 over the chips' 2): the rabbit half hidden behind the sheep. 160% (20 px on a 390 phone, lane A's floor),
+    // centred on her place, in front of the pen's fence (z 3, as before — under it at z 1 she all but vanished); on an odd
+    // column a little lower, so two side by side stagger; her own cell's chip above her (z 4 — only there: the island's
+    // other chips keep their place under the robots).
+    // The lower one is the one in front (z 3; the upper z 2): only a leg is behind her neighbour, never a head.
+    '.gd-world[data-wide="1"] .gd-cell>.gd-pet{left:-30%;top:-62%;width:160%;height:160%;z-index:2}\n' +
+    '.gd-world[data-wide="1"] .gd-cell>.gd-pet.gd-pet-odd{top:-24%;z-index:3}\n' +
+    '.gd-world[data-wide="1"] .gd-cell:has(>.gd-pet)>.gd-meter{z-index:4}\n' +
     '.gd-world[data-wide="1"] .gd-cell>.gd-pet-bowl{right:-20%;bottom:-6%;width:80%;height:80%}\n' +
     // Two pen places side by side: on the island their names would overlap (a name is wider than a tile), so the one on
     // an odd column sits a line lower.
@@ -4537,7 +4554,8 @@ var gardenKitBlocks = (function () {
     var kind = PET_SPRITES[t.animal] ? String(t.animal) : 'rabbit';
     var fed = mood === 'happy';
     extras.push(spriteEl(fed ? 'bowlCarrots' : 'bowl', 'pet-bowl-' + i, 'gd-thing gd-bowl gd-pet-bowl' + (fed ? ' gd-full' : ''), { 'data-bowl': m ? m.text : String(wholeOf(t.count) || 0) }));
-    extras.push(spriteEl(PET_SPRITES[kind][mood], 'pet-' + i, 'gd-pet gd-pet-' + mood, { 'data-animal': kind, 'data-mood': mood, 'data-name': String(t.name || '') }));
+    // P108 IW-007 (s6): an animal on an odd column sits a little lower (as her name does): two pen places side by side stagger.
+    extras.push(spriteEl(PET_SPRITES[kind][mood], 'pet-' + i, 'gd-pet gd-pet-' + mood + (Math.abs(Math.floor(Number(t.x))) % 2 ? ' gd-pet-odd' : ''), { 'data-animal': kind, 'data-mood': mood, 'data-name': String(t.name || '') }));
     if (t.name) extras.push(h('span', { key: 'pet-name-' + i, className: 'gd-pet-name' + (Math.abs(Math.floor(Number(t.x))) % 2 ? ' gd-pet-name-odd' : ''), 'data-pet-name': String(t.name) }, String(t.name)));
   }
   /** The carrot patch: its carrots by what is left (four places at most); used up, bare soil with sprouts. */

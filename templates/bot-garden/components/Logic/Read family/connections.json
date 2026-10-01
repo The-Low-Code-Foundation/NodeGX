@@ -101,6 +101,12 @@
     },
     {
       "fromId": "readfamilyFn",
+      "fromProperty": "out-landText",
+      "toId": "readfamilyOut",
+      "toProperty": "landText"
+    },
+    {
+      "fromId": "readfamilyFn",
       "fromProperty": "out-lang",
       "toId": "readfamilyOut",
       "toProperty": "lang"
