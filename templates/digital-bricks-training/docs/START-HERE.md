@@ -655,7 +655,7 @@ Every write but those above — the coach's composers, answers to a brief, the c
 each a later write on the pattern `capture` set. The lesson writer: a lesson
 nobody has written says *not written yet*, and that is every step Sam has not reached yet. **There
 will be no engine.** Lessons are written by the trainer's Claude over MCP and by nothing else, and a
-learner cannot revise or regenerate one (decision 008); that MCP server is not built yet. Every coach
+learner cannot revise or regenerate one (decision 008). See "Your Claude writes the lessons" above. Every coach
 composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every
 string has one owner" above for exactly which strings the table owns today and which are still
 English in place.
@@ -800,6 +800,54 @@ nothing, path before steps, finished stays finished, a coach refused, a second a
 nothing), each demonstrated failing by name. **The demo carries none of the coach's writes.**
 
 **"Ask your coach about this" used to do nothing**; TASK-L186 below is what it does now.
+
+## Your Claude writes the lessons (TASK-L189–L191)
+
+Lessons are written by the trainer's own Claude over MCP, and by nothing else (decision 008). A
+learner cannot change one. The door is NodeGX's own `POST /mcp`: a key **bound to a staff
+account** and **scoped to exactly nine functions** is offered exactly those nine tools.
+
+| tool | what it does |
+|---|---|
+| `authoringGuide` | how lessons are written here: the workflow, the product's projection prompt verbatim, and the exact JSON Schema of a lesson |
+| `learnersForLessons` | every learner, their path, and which steps have a lesson, a draft or nothing |
+| `lessonContext` | their project and saved answers, the step, the concept's teaching body, the capture fields already used, who has a lesson to copy |
+| `saveLessonDraft` | a DRAFT, after the product's own `validateLessonOutput`; replace one by sending its version |
+| `readLesson` | a draft or the published lesson, in full |
+| `publishLesson` | a new `Lesson` row beside the old ones; refuses a copy still about another learner |
+| `copyLesson` | another learner's published lesson as this one's draft, never published |
+| `conceptList`, `setLearnerPath` | the trainer's path tools (L184) |
+
+**A draft reaches no learner.** It is its own collection (`LessonDraft`), and the learner's
+`lesson` read never opens it. Staff see it at `/preview?learner=&concept=` (`Pages/Preview`): the
+learner's lesson page with every write taken out, under a band saying whose it is and whether it
+is live. `previewLesson` is the page's read and is **not** on the key.
+
+**Four blocks are generated, never edited,** by `tools/build-trainer-door.mjs` from the product's
+source: the gate (`LESSON_GATE`), the guide (`AUTHORING_GUIDE`), the concept bodies
+(`CONCEPT_BODIES`), and `tools/lib/trainer-door.lib.js` copied into each function as
+`TRAINER_DOOR_LIB`. `tools/check-trainer-door.mjs` runs the functions' own scripts against a fake as
+strict as the backend, with a control for each guarantee.
+
+**The copy check catches exact repeats, not paraphrase.** It names every place repeating the source
+learner's project name, problem statement or a saved answer of 12+ characters, and publish refuses
+while any remain. A paraphrase of the source's project survives it, so read the preview.
+
+```bash
+# On a backend that already holds data — production — in this order:
+node tools/update-backend.mjs   --backend <url> --token <admin>            # dry run: shows the diff
+node tools/update-backend.mjs   --backend <url> --token <admin> --apply    # LessonDraft + the policy
+node tools/deploy-functions.mjs --backend <url> --token <admin>            # refuses an unruled endpoint
+node tools/setup-trainer-key.mjs --backend <url> --token <admin> --as <your staff email>
+# It prints the secret ONCE, inside the line to add to Claude Code. It is stored nowhere.
+```
+
+**Deploy the functions only after `update-backend`.** A backend keeps the policy it started with,
+and a function deployed with no rule runs for ANY signed-in caller. `deploy-functions` catches this,
+but only after it has deployed.
+
+**claude.ai on the web and mobile cannot connect**: NodeGX's `/mcp` takes a key, not OAuth. Claude
+Code in the terminal or the desktop app's Code tab can.
 
 ## Asking your coach, and the coach's reply (TASK-L186)
 

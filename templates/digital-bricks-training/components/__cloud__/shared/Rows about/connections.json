@@ -17,6 +17,12 @@
     },
     {
       "fromId": "ra_fn",
+      "fromProperty": "out-alsoDeleted",
+      "toId": "ra_out",
+      "toProperty": "alsoDeleted"
+    },
+    {
+      "fromId": "ra_fn",
       "fromProperty": "out-order",
       "toId": "ra_out",
       "toProperty": "order"

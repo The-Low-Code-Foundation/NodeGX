@@ -69,6 +69,30 @@
     },
     "unsubscribe": {
       "call": "public"
+    },
+    "authoringGuide": {
+      "call": "role:staff"
+    },
+    "learnersForLessons": {
+      "call": "role:staff"
+    },
+    "lessonContext": {
+      "call": "role:staff"
+    },
+    "saveLessonDraft": {
+      "call": "role:staff"
+    },
+    "readLesson": {
+      "call": "role:staff"
+    },
+    "publishLesson": {
+      "call": "role:staff"
+    },
+    "copyLesson": {
+      "call": "role:staff"
+    },
+    "previewLesson": {
+      "call": "role:staff"
     }
   },
   "files": {

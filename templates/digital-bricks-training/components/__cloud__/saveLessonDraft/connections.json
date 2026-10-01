@@ -1,0 +1,79 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "66f63e4f-a02e-48c6-a754-2f61ed0ec345",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "receive",
+      "toId": "run",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "run",
+      "toProperty": "in-callerId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-learnerId",
+      "toId": "run",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-conceptId",
+      "toId": "run",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-lesson",
+      "toId": "run",
+      "toProperty": "in-lesson"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-version",
+      "toId": "run",
+      "toProperty": "in-version"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-version",
+      "toId": "res",
+      "toProperty": "pm-version"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-previewPath",
+      "toId": "res",
+      "toProperty": "pm-previewPath"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-stillAboutAnotherLearner",
+      "toId": "res",
+      "toProperty": "pm-stillAboutAnotherLearner"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-why",
+      "toId": "deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-refuse",
+      "toId": "deny",
+      "toProperty": "send"
+    }
+  ]
+}

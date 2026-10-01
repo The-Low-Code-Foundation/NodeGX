@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "77bae0e6-5c16-4d9d-b94a-8267e5c864ea",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pl_in",
+      "fromProperty": "learnerId",
+      "toId": "pl_ask",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "pl_in",
+      "fromProperty": "conceptId",
+      "toId": "pl_ask",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "pl_in",
+      "fromProperty": "which",
+      "toId": "pl_ask",
+      "toProperty": "in-which"
+    },
+    {
+      "fromId": "pl_ask",
+      "fromProperty": "out-learnerId",
+      "toId": "pl_call",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "pl_ask",
+      "fromProperty": "out-conceptId",
+      "toId": "pl_call",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "pl_ask",
+      "fromProperty": "out-which",
+      "toId": "pl_call",
+      "toProperty": "in-which"
+    },
+    {
+      "fromId": "pl_ask",
+      "fromProperty": "out-ask",
+      "toId": "pl_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "pl_call",
+      "fromProperty": "out-rows",
+      "toId": "pl_split",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "pl_call",
+      "fromProperty": "failure",
+      "toId": "pl_refused",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pl_refused",
+      "fromProperty": "out-items",
+      "toId": "pl_split",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-title",
+      "toId": "pl_out",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-hook",
+      "toId": "pl_out",
+      "toProperty": "hook"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-landing",
+      "toId": "pl_out",
+      "toProperty": "landing"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-conceptId",
+      "toId": "pl_out",
+      "toProperty": "conceptId"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-steps",
+      "toId": "pl_out",
+      "toProperty": "steps"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-sections",
+      "toId": "pl_out",
+      "toProperty": "sections"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-found",
+      "toId": "pl_out",
+      "toProperty": "found"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-which",
+      "toId": "pl_out",
+      "toProperty": "which"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-name",
+      "toId": "pl_out",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-conceptTitle",
+      "toId": "pl_out",
+      "toProperty": "conceptTitle"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-live",
+      "toId": "pl_out",
+      "toProperty": "live"
+    },
+    {
+      "fromId": "pl_split",
+      "fromProperty": "out-loaded",
+      "toId": "pl_out",
+      "toProperty": "loaded"
+    }
+  ]
+}

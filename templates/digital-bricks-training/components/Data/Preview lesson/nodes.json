@@ -1,0 +1,305 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "77bae0e6-5c16-4d9d-b94a-8267e5c864ea",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pl_in",
+      "type": "Component Inputs",
+      "label": "Whose lesson, which step, draft or published",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "conceptId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "which",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "metadata": {
+        "comment": "Unlike Data/Lesson, the learner IS an argument here: this is a staff read about somebody else, gated role:staff by the backend (previewLesson), and the App gate keeps a learner off the page."
+      }
+    },
+    {
+      "id": "pl_ask",
+      "type": "JavaScriptFunction",
+      "label": "Ask when a learner and a step arrive",
+      "x": 40,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * ASK WHEN THE PAGE SAYS WHOSE LESSON AND WHICH STEP (TASK-L190). Both come from\n * the page's query (?learner=&concept=); with either missing nothing is asked,\n * and the page says there is nothing to preview rather than guessing one.\n */\nconst learner = String(Inputs.learnerId || '');\nconst concept = String(Inputs.conceptId || '');\nif (!learner || !concept) return;\nOutputs.learnerId = learner;\nOutputs.conceptId = concept;\nOutputs.which = Inputs.which === 'published' ? 'published' : 'draft';\nOutputs.ask();\n"
+      },
+      "ports": [
+        {
+          "name": "in-learnerId",
+          "displayName": "learnerId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-conceptId",
+          "displayName": "conceptId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-which",
+          "displayName": "which",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-ask",
+          "displayName": "ask",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-learnerId",
+          "displayName": "learnerId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-conceptId",
+          "displayName": "conceptId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-which",
+          "displayName": "which",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pl_call",
+      "type": "CloudFunction2",
+      "label": "previewLesson — staff only",
+      "x": 40,
+      "y": 280,
+      "parameters": {
+        "function": "previewLesson"
+      },
+      "metadata": {
+        "comment": "components/__cloud__/previewLesson. Answers rows: [] for anything missing, one shape (L170)."
+      }
+    },
+    {
+      "id": "pl_refused",
+      "type": "JavaScriptFunction",
+      "label": "A refusal is no lesson",
+      "x": 40,
+      "y": 400,
+      "parameters": {
+        "functionScript": "/*\n * A REFUSAL IS NO LESSON (TASK-L171). Signed out, the App gate sends the page\n * to sign-in before this could matter; if the call fails anyway, the page gets\n * the same empty answer a lesson not written yet gets, not a spinner.\n */\nOutputs.items = [];\n"
+      },
+      "metadata": {
+        "comment": "Runs on the Cloud Function's failure only (its Run is wired)."
+      },
+      "ports": [
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pl_split",
+      "type": "JavaScriptFunction",
+      "label": "Split the lesson into its parts, and say whose",
+      "x": 320,
+      "y": 280,
+      "parameters": {
+        "functionScript": "function plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\n/*\n * Data/Lesson's split (le_split), plus the three things a preview must say that a\n * learner's own page never needs: whether this is the DRAFT or what they see,\n * whose lesson it is, and which step. Empty in, every part emptied and found false.\n */\nconst rows = plain(Inputs.items) || [];\nconst lesson = rows[0];\nif (!lesson) {\n  Outputs.title = '';\n  Outputs.hook = '';\n  Outputs.landing = '';\n  Outputs.conceptId = '';\n  Outputs.steps = [];\n  Outputs.sections = [];\n  Outputs.found = false;\n  Outputs.which = '';\n  Outputs.name = '';\n  Outputs.conceptTitle = '';\n  Outputs.live = false;\n  Outputs.loaded();\n  return;\n}\nOutputs.title = lesson.title || '';\nOutputs.hook = lesson.hook || '';\nOutputs.landing = lesson.landing || '';\nOutputs.conceptId = lesson.conceptId || '';\nOutputs.steps = lesson.steps || [];\nOutputs.sections = lesson.sections || [];\nOutputs.found = true;\nOutputs.which = lesson.which || 'draft';\nOutputs.name = lesson.name || '';\nOutputs.conceptTitle = lesson.conceptTitle || '';\nOutputs.live = lesson.live === true;\nOutputs.loaded();\n"
+      },
+      "metadata": {
+        "comment": "One calculation, one code node (doctrine 8). The backend's rows are plain (HLT-022), but plain() stays: it is the fixture's helper and costs nothing."
+      },
+      "ports": [
+        {
+          "name": "in-items",
+          "displayName": "items",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-loaded",
+          "displayName": "loaded",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hook",
+          "displayName": "hook",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-landing",
+          "displayName": "landing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-conceptId",
+          "displayName": "conceptId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-steps",
+          "displayName": "steps",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sections",
+          "displayName": "sections",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-found",
+          "displayName": "found",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-which",
+          "displayName": "which",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-conceptTitle",
+          "displayName": "conceptTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-live",
+          "displayName": "live",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pl_out",
+      "type": "Component Outputs",
+      "label": "The lesson's parts, and whose",
+      "x": 600,
+      "y": 280,
+      "ports": [
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hook",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "landing",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "conceptId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "steps",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "sections",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "loaded",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "found",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "which",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "conceptTitle",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "live",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ]
+    }
+  ]
+}

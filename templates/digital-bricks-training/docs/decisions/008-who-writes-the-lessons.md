@@ -38,19 +38,20 @@ This is a reading of the ruling. Richard can correct it.
   them too, that is a different and much larger decision: it would remove the produce loop.
 - **A learner still asks their coach (007)**, and still finishes steps at their own pace.
 
-## Not decided here
+## Answered the same day (decision 009)
 
-- **Whether each lesson is still written for one learner, onto their own project, or written once
-  for a group.** The two-document model (lessons projected per learner) is the product's
-  pedagogy. This ruling says *who* writes and does not say *for whom*.
-- **The shape of the trainer's MCP server**: its tools, its gate (staff only), and its validation.
-  Every lesson it writes has to pass the same gate `tools/check-lessons.mjs` applies today, the
-  product's `validateLessonOutput`. Refusals must name the fix. It is its own task.
+- **For whom: once per learner**, onto their own project, so the two-document model holds. A
+  lesson can be **duplicated as the basis for a new learner with similar needs**, and it is then
+  rewritten for that learner's project.
+- **The shape of the trainer's MCP server** is decision 009 and TASK-L189–L191: NodeGX's own
+  `/mcp`, nine `role:staff` functions, a key bound to a staff account, the product's
+  `validateLessonOutput` on every save, publish and copy.
 
 ## What follows for anyone building here
 
 - A task that gives a learner a control to edit, revise or regenerate a lesson reverses this.
   Escalate it, do not implement it. The same goes for one that builds a learner-facing lesson
   generator or connector.
-- No learner-callable cloud function may write the `Lesson` collection. Today none does: `capture`
-  and `lesson` only *read* it. A guard that keeps it so is a candidate, not yet built.
+- No learner-callable cloud function may write the `Lesson` or `LessonDraft` collection.
+  `tools/check-trainer-door.mjs` fails on one that does, and on any staff function but
+  `publishLesson` writing `Lesson`.

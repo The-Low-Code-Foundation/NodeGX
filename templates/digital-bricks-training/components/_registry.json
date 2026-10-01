@@ -378,6 +378,22 @@
       "connectionCount": 28,
       "modified": "2026-10-01T20:00:00.000Z",
       "created": "2026-10-01T20:00:00.000Z"
+    },
+    "Pages/Preview": {
+      "path": "Pages/Preview",
+      "type": "page",
+      "nodeCount": 29,
+      "connectionCount": 39,
+      "modified": "2026-10-01T19:00:00.000Z",
+      "created": "2026-10-01T19:00:00.000Z"
+    },
+    "Data/Preview lesson": {
+      "path": "Data/Preview lesson",
+      "type": "logic",
+      "nodeCount": 6,
+      "connectionCount": 22,
+      "modified": "2026-10-01T19:00:00.000Z",
+      "created": "2026-10-01T19:00:00.000Z"
     }
   },
   "stats": {

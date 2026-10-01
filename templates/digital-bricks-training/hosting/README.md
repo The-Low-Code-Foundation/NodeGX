@@ -95,6 +95,9 @@ trace of the demo world. Each of those was demonstrated failing by name (TASK-L1
 - **The site:** rebuild (§2), then `rsync -a --delete` into `/srv/dbtraining/site/`. It holds no
   data.
 - **The backend:** rsync `cli.js`, `systemctl restart dbtraining-backend`.
+- **The schema and the policy, FIRST:** `update-backend.mjs` (dry run, then `--apply`) through the
+  tunnel. A backend keeps the policy it started with; sprint 55 (TASK-L189–L191) adds `LessonDraft`
+  and eight `role:staff` functions, which would otherwise run for any signed-in caller.
 - **The functions:** `deploy-functions.mjs` through the tunnel. Sprint 54 (TASK-L186–L188) also
   needs `setup-mail.mjs` run once against production before its functions can send anything.
 - `provision.sh` refuses a second run on purpose; it is not how you redeploy.

@@ -61,6 +61,17 @@ for (const p of PLAN) {
     check(Boolean(p.key), `plan: ${p.c} hangs off ${p.via} by no key`);
   }
 }
+/* TASK-L189 §5: rows that go when a person goes but are another learner's (an
+   unadapted copy of their lesson). Each must be a planned collection, keyed by a
+   field that names a learner, deleted by deleteMine and NOT handed over by exportMine. */
+const ALSO = constant('ALSO_DELETED');
+check(ALSO.length > 0, 'plan: ALSO_DELETED read as empty');
+for (const a of ALSO) {
+  check(planned.includes(a.c), `plan: ${a.c} is in ALSO_DELETED but not in PLAN`);
+  check(/learnerid$/i.test(String(a.by)), `plan: ${a.c} in ALSO_DELETED is keyed by ${a.by}, which does not name a learner`);
+}
+check(/Inputs\.alsoDeleted/.test(scriptOf('deleteMine', 'erase')), 'plan: deleteMine does not delete Rows about\'s alsoDeleted rows');
+check(!/alsoDeleted/.test(scriptOf('exportMine', 'doc')), "plan: exportMine reads alsoDeleted — that is another learner's draft");
 check(planned[planned.length - 1] === 'LearnerProfile', 'plan: LearnerProfile is not last — it is how a second deletion run finds them');
 // Both functions read the plan from here, never a copy of their own.
 for (const [fn, node] of [['exportMine', 'doc'], ['deleteMine', 'erase']]) {
@@ -93,8 +104,13 @@ const walk = (d) => readdirSync(d).flatMap((n) => { const p = join(d, n); return
 const nodeTypes = new Set(walk(join(TEMPLATE, 'components')).filter((f) => f.endsWith('nodes.json')).flatMap((f) => JSON.parse(readFileSync(f, 'utf8')).nodes.map((n) => n.type)));
 const policy = json('nodegx.security.json');
 const hasType = (re) => [...nodeTypes].some((t) => re.test(t));
+/* TASK-L189: the trainer's Claude reads a learner's project through these, so
+   learner data reaches Anthropic whenever the door exists — and then the notice
+   MUST say so (checked below), not merely MAY. */
+const TRAINER_DOOR = ['authoringGuide', 'learnersForLessons', 'lessonContext', 'saveLessonDraft', 'readLesson', 'publishLesson', 'copyLesson'];
+const trainerDoor = TRAINER_DOOR.some((f) => policy.functions && policy.functions[f]);
 const CLAIMS = [
-  { word: /\banthropic\b|\bclaude\b|\bopenai\b|\bgpt\b/i, what: 'an AI company', does: () => hasType(/model|llm|ai\./i) },
+  { word: /\banthropic\b|\bclaude\b|\bopenai\b|\bgpt\b/i, what: 'an AI company', does: () => hasType(/model|llm|ai\./i) || trainerDoor },
   { word: /\bgoogle\b/i, what: 'Google', does: () => /google/i.test(JSON.stringify(policy)) },
   { word: /\bupload/i, what: 'uploads', does: () => policy.files.upload !== 'nobody' || hasType(/upload|file/i) },
   { word: /\btoken\b|\bapi key\b/i, what: 'a token or key', does: () => hasType(/apikey|mcp/i) },
@@ -108,6 +124,10 @@ for (const c of CLAIMS) {
   if (m) check(c.does(), `notice: it names ${c.what} ("${m[0]}") and the template has no node, function or setting that does that`);
 }
 check(/Brevo/.test(text), 'notice: it does not name Brevo, which sends every sign-in link');
+if (trainerDoor) {
+  check(/Anthropic/.test(text) && /Claude/.test(text), "notice: the trainer's lesson tools exist, so a learner's project reaches Anthropic, and the notice does not say so (TASK-L189 §6)");
+  check(!/nothing you do is sent to an AI model(\.|, and)/i.test(text), 'notice: it still says nothing you do is sent to an AI model, and the trainer\'s assistant reads their project (TASK-L189 §6)');
+}
 check(/Hetzner/.test(text) && /Germany/.test(text), 'notice: it does not say where the data lives (Hetzner, Germany)');
 check(!/GDPR compliant|RGPD compliant|fully compliant/i.test(text), 'notice: it claims compliance — a legal judgement nobody here may assert (sprint 17)');
 

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "38cadfff-00a1-4350-b75b-85c4b93318a6",
+  "name": "learnersForLessons",
+  "path": "/#__cloud__/learnersForLessons",
+  "type": "cloud",
+  "created": "2026-10-01T18:00:00.000Z",
+  "modified": "2026-10-01T18:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Each learner, their live path, and which steps have a published lesson, a draft, or nothing yet. No email address, message, note, session or review (sprint 55 §5)."
+}

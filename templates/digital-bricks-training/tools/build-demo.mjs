@@ -85,7 +85,9 @@ export const DEMO = join(TEMPLATE, '..', 'digital-bricks-training-demo');
 /** Components the demo does not carry, as path prefixes under components/. */
 export const DROPPED_COMPONENTS = [
   '__cloud__/', 'Pages/Sign in/', 'Pages/Privacy/', 'Pages/Settings/', 'Pages/Unsubscribe/', 'Privacy/',
-  'People/Add a learner/', 'People/Their path/', 'People/Path step row/', 'People/Path concept row/'
+  'People/Add a learner/', 'People/Their path/', 'People/Path step row/', 'People/Path concept row/',
+  // TASK-L190: a draft's preview reads previewLesson, and the demo has no backend and no drafts.
+  'Pages/Preview/', 'Data/Preview lesson/'
 ];
 /** Components whose files the demo changes. Every other file is byte-identical. */
 export const CHANGED_COMPONENTS = ['App', 'Pages/Home', 'Data/Programme', 'Data/Lesson', 'Data/Roster', 'Data/Strings', 'Lesson/Section row', 'Pages/Lesson', 'Pages/People', 'Pages/Learner', 'Course/Timeline row'];
@@ -312,7 +314,7 @@ function transformNodes(component, doc) {
     }
     if (node.id === 'app_router') {
       const routes = node.parameters.pages.routes;
-      const DROP_ROUTES = ['/Pages/Sign in', '/Pages/Privacy', '/Pages/Settings', '/Pages/Unsubscribe'];
+      const DROP_ROUTES = ['/Pages/Sign in', '/Pages/Privacy', '/Pages/Settings', '/Pages/Unsubscribe', '/Pages/Preview'];
       for (const r of DROP_ROUTES) if (!routes.includes(r)) throw new Error(`build-demo: the router no longer lists ${r}`);
       node.parameters.pages.routes = routes.filter((r) => !DROP_ROUTES.includes(r));
     }

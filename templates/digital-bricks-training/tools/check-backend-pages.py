@@ -43,7 +43,9 @@ APPENDED = {'Data/Lesson': ['found'], 'Data/Programme': ['work']}
 # Unsubscribe joined 2026-10-01 (TASK-L187): the link in a message email carries no session, and
 # a person must be able to stop mail without signing in. It only ever turns mail OFF.
 PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette', 'Pages/Privacy', 'Pages/Unsubscribe']
-STAFF = ['Pages/People', 'Pages/Learner']
+# TASK-L190: Pages/Preview draws a learner's DRAFT lesson; a learner there is sent home, and
+# previewLesson is role:staff besides (the gate is about what the page would SAY, not access).
+STAFF = ['Pages/People', 'Pages/Learner', 'Pages/Preview']
 
 
 def walk():

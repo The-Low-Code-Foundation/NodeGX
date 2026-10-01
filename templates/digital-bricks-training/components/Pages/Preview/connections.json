@@ -1,0 +1,241 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "61704ee6-8152-4aca-9f4c-80fc9a24a251",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lp_fixture",
+      "fromProperty": "title",
+      "toId": "lp_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_fixture",
+      "fromProperty": "hook",
+      "toId": "lp_hook",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_fixture",
+      "fromProperty": "steps",
+      "toId": "lp_index",
+      "toProperty": "steps"
+    },
+    {
+      "fromId": "lp_active",
+      "fromProperty": "value",
+      "toId": "lp_index",
+      "toProperty": "activeStepId"
+    },
+    {
+      "fromId": "lp_index",
+      "fromProperty": "chips",
+      "toId": "lp_chips",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lp_index",
+      "fromProperty": "rows",
+      "toId": "lp_rows",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "lp_index",
+      "fromProperty": "stepGoal",
+      "toId": "lp_close",
+      "toProperty": "goal"
+    },
+    {
+      "fromId": "lp_index",
+      "fromProperty": "nextTitle",
+      "toId": "lp_close",
+      "toProperty": "nextTitle"
+    },
+    {
+      "fromId": "lp_index",
+      "fromProperty": "hasNext",
+      "toId": "lp_close",
+      "toProperty": "hasNext"
+    },
+    {
+      "fromId": "lp_chips",
+      "fromProperty": "itemOutputSignal-select",
+      "toId": "lp_pick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "lp_chips",
+      "fromProperty": "itemActionItemId",
+      "toId": "lp_pick",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "lp_close",
+      "fromProperty": "next",
+      "toId": "lp_forward",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "lp_index",
+      "fromProperty": "nextStepId",
+      "toId": "lp_forward",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "lp_active",
+      "fromProperty": "changed",
+      "toId": "lp_scroll",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "lp_strings",
+      "fromProperty": "copy",
+      "toId": "lp_index",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "lp_lang_var",
+      "fromProperty": "value",
+      "toId": "lp_strings",
+      "toProperty": "language"
+    },
+    {
+      "fromId": "lp_fixture",
+      "fromProperty": "found",
+      "toId": "lp_state",
+      "toProperty": "in-found"
+    },
+    {
+      "fromId": "lp_state",
+      "fromProperty": "out-hasLesson",
+      "toId": "lp_eyebrow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lp_state",
+      "fromProperty": "out-hasLesson",
+      "toId": "lp_title",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lp_state",
+      "fromProperty": "out-hasLesson",
+      "toId": "lp_hook",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lp_state",
+      "fromProperty": "out-hasLesson",
+      "toId": "lp_layout",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lp_state",
+      "fromProperty": "out-notWritten",
+      "toId": "lp_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lp_fixture",
+      "fromProperty": "landing",
+      "toId": "lp_close",
+      "toProperty": "landing"
+    },
+    {
+      "fromId": "lp_url",
+      "fromProperty": "pm-learner",
+      "toId": "lp_fixture",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "lp_url",
+      "fromProperty": "pm-concept",
+      "toId": "lp_fixture",
+      "toProperty": "conceptId"
+    },
+    {
+      "fromId": "lp_url",
+      "fromProperty": "pm-which",
+      "toId": "lp_fixture",
+      "toProperty": "which"
+    },
+    {
+      "fromId": "lp_fixture",
+      "fromProperty": "sections",
+      "toId": "lp_index",
+      "toProperty": "sections"
+    },
+    {
+      "fromId": "lp_strings",
+      "fromProperty": "copy",
+      "toId": "lp_say",
+      "toProperty": "in-copy"
+    },
+    {
+      "fromId": "lp_fixture",
+      "fromProperty": "which",
+      "toId": "lp_say",
+      "toProperty": "in-which"
+    },
+    {
+      "fromId": "lp_fixture",
+      "fromProperty": "live",
+      "toId": "lp_say",
+      "toProperty": "in-live"
+    },
+    {
+      "fromId": "lp_fixture",
+      "fromProperty": "name",
+      "toId": "lp_say",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "lp_fixture",
+      "fromProperty": "conceptTitle",
+      "toId": "lp_say",
+      "toProperty": "in-conceptTitle"
+    },
+    {
+      "fromId": "lp_say",
+      "fromProperty": "out-band",
+      "toId": "lp_band_text",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_state",
+      "fromProperty": "out-hasLesson",
+      "toId": "lp_band_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lp_say",
+      "fromProperty": "out-eyebrow",
+      "toId": "lp_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_say",
+      "fromProperty": "out-tab",
+      "toId": "seo_lp_page",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "lp_say",
+      "fromProperty": "out-noneEyebrow",
+      "toId": "lp_none_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_say",
+      "fromProperty": "out-noneTitle",
+      "toId": "lp_none_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lp_say",
+      "fromProperty": "out-noneBody",
+      "toId": "lp_none_body",
+      "toProperty": "text"
+    }
+  ]
+}

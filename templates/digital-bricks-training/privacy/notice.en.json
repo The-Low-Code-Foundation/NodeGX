@@ -1,6 +1,6 @@
 {
   "_owner": "THE TEMPLATE'S PRIVACY NOTICE (TASK-L185). The one owner of its words AND its version. tools/build-privacy.mjs writes the `privacy` namespace into Data/Strings and the version into every cloud function that compares it; tools/check-privacy.mjs fails if any copy disagrees, if the deletion plan misses a collection, or if the text claims something the template does not do. It is NOT the product's notice: that one describes model calls, uploads, a connector and Google sign-in, none of which this template has. Change the words here, bump `version` when anything that matters changes, and run build-privacy.",
-  "version": "2026-10-02",
+  "version": "2026-10-03",
   "contactEmail": "richard@digitalbricks.io",
   "privacy": {
     "pageTitle": "Your data",
@@ -32,7 +32,7 @@
       {
         "id": "lessons",
         "heading": "Lessons written for you",
-        "body": "If a lesson has been written for your project, it is stored as yours alone. It is about your work, so it is personal data in the same way your project is."
+        "body": "Your coach writes your lessons, with the help of an AI assistant: Claude, made by Anthropic. To write one for you, the assistant reads your project — its name, what it is for, and the answers you have saved — the steps on your path, your lessons so far, and the name your coach knows you by. It is not given your email address, your messages to your coach, or anything your coach writes about you. A lesson is a draft until your coach publishes it, and you see it once it is published and its step is open. Drafts are yours too: they are in your download and deleted with your account. Your coach can start another learner's lesson from one written for you; it is rewritten for their project before they see it, and the course will not publish a copy that still names your project, repeats its description, or repeats a longer answer you saved. If you delete your account, a copy that has not been rewritten yet is deleted with it. A lesson is about your work, so it is personal data in the same way your project is."
       },
       {
         "heading": "Messages with your coach",
@@ -41,12 +41,12 @@
       {
         "id": "nothingElse",
         "heading": "What is not here",
-        "body": "No notes about you, reviews or scores can be written in this version, nothing you do is sent to an AI model, and you cannot attach files. When any of that changes, this notice changes first and asks you again."
+        "body": "No notes about you, reviews or scores can be written in this version, and you cannot attach files. Nothing you do is sent to an AI model, apart from what your coach's assistant reads to write your lessons, described above. When any of that changes, this notice changes first and asks you again."
       },
       {
         "id": "seen",
         "heading": "Who can see it",
-        "body": "You can see all of it, and download it whenever you like. Your coach can see your project, your path and how far along it you are, the answers you save, and the messages you write to them. Nobody else using the course can see any of it. The person who runs the service can reach the database to keep it working, and does not read it for anything else."
+        "body": "You can see all of it, and download it whenever you like. Your coach can see your project, your path and how far along it you are, the answers you save, and the messages you write to them. When your coach asks their AI assistant to write a lesson for you, it reads what is described under “Lessons written for you”. Nobody else using the course can see any of it. The person who runs the service can reach the database to keep it working, and does not read it for anything else."
       },
       {
         "id": "why",
@@ -56,7 +56,7 @@
       {
         "id": "where",
         "heading": "Where it lives",
-        "body": "On one server we rent from Hetzner, in Falkenstein, Germany. One other company is involved: Brevo, an email service based in France, sends our emails, so it sees your email address and what each email says. That is your sign-in links, and an email when there is a new message for you: when your coach replies, it carries their reply; when you ask your coach something, the email to them carries your question. It never carries the rest of the conversation. Nothing else leaves the server. The pages load nothing from anyone else's site."
+        "body": "On one server we rent from Hetzner, in Falkenstein, Germany. Two other companies are involved. Anthropic, an AI company based in the United States, runs Claude, the assistant your coach writes your lessons with: when your coach asks it to write one, what it reads (described above) is sent to Anthropic. Brevo, an email service based in France, sends our emails, so it sees your email address and what each email says. That is your sign-in links, and an email when there is a new message for you: when your coach replies, it carries their reply; when you ask your coach something, the email to them carries your question. It never carries the rest of the conversation. Nothing else leaves the server. The pages load nothing from anyone else's site."
       },
       {
         "id": "backups",
@@ -66,7 +66,7 @@
       {
         "id": "howLong",
         "heading": "How long we keep it",
-        "body": "For as long as your account exists. When you delete it, it goes at once — apart from the nightly copies, which still hold it until they age out, within seven days. Brevo keeps its own record of the emails it sent you, under its own rules."
+        "body": "For as long as your account exists. When you delete it, it goes at once — apart from the nightly copies, which still hold it until they age out, within seven days. Brevo keeps its own record of the emails it sent you, and Anthropic of what your coach's assistant was sent, each under its own rules."
       },
       {
         "id": "rights",

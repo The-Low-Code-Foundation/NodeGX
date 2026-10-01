@@ -40,6 +40,12 @@
       "toProperty": "in-order"
     },
     {
+      "fromId": "rows",
+      "fromProperty": "alsoDeleted",
+      "toId": "erase",
+      "toProperty": "in-alsoDeleted"
+    },
+    {
       "fromId": "erase",
       "fromProperty": "out-deleted",
       "toId": "res",

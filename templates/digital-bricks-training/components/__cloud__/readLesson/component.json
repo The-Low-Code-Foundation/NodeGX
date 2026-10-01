@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c7305aaf-22ce-46bb-a203-8801eb7b5daa",
+  "name": "readLesson",
+  "path": "/#__cloud__/readLesson",
+  "type": "cloud",
+  "created": "2026-10-01T18:00:00.000Z",
+  "modified": "2026-10-01T18:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Read one learner's lesson for one step in full: the draft, or the published lesson they see (TASK-L189)."
+}
