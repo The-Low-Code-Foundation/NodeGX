@@ -254,7 +254,9 @@ describe('[base] IW-007 save — her land in the profile, the codes, buying a bl
     const spent = p.shells.spent;
     const r1 = L.buyItem(p, 'rabbit', { name: '  Flopsy ' });
     const r2 = L.buyItem(p, 'sheep', { name: '' });
-    expect([r1.ok, r2.ok, p.shells.spent - spent]).toEqual([true, true, 45]);
+    // P108 IW-006 owed (lane O): the prices read from SHOP (were the literal 45 = 20 + 25; lane O retuned them).
+    const priceOf = (id: string) => SHOP.find((i) => i.id === id)!.price;
+    expect([r1.ok, r2.ok, p.shells.spent - spent]).toEqual([true, true, priceOf('rabbit') + priceOf('sheep')]);
     expect(p.island.land.animals.map((a: any) => [a.kind, a.name, a.at, a.slot, a.fed])).toEqual([['rabbit', 'Flopsy', 'b2', 0, 0], ['sheep', '', 'b2', 1, 0]]);
     expect(L.buyItem(p, 'rabbit')).toMatchObject({ ok: false, error: 'pen' });
     expect(p.owned).toEqual(['spa']);
@@ -264,9 +266,11 @@ describe('[base] IW-007 save — her land in the profile, the codes, buying a bl
     const m = kid();
     const p = active(m);
     L.earnShells(p, 10);
-    expect(L.buyItem(p, 'refuge')).toMatchObject({ ok: false, error: 'short', short: 40 });
+    // P108 IW-006 owed (lane O): the prices read from SHOP (were the literals 40 = 50 − 10 and 10 = 20 − 10).
+    const priceOf = (id: string) => SHOP.find((i) => i.id === id)!.price;
+    expect(L.buyItem(p, 'refuge')).toMatchObject({ ok: false, error: 'short', short: priceOf('refuge') - 10 });
     refugeDone(m);
-    expect(L.buyItem(p, 'rabbit')).toMatchObject({ ok: false, error: 'short', short: 10 });
+    expect(L.buyItem(p, 'rabbit')).toMatchObject({ ok: false, error: 'short', short: priceOf('rabbit') - 10 });
   });
 
   it('[base] arm: buyItem’s refuge check not asking for a finished one → a rabbit lands by an unfinished refuge (the row above fails)', () => {

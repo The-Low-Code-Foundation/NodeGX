@@ -56,6 +56,8 @@ import { IW006_SHOP_SCRIPTS } from './iw006Shop';
 // P108 IW-006 (lane E): earning — the win's pay (over the island engine) and the island's live jobs and shells kept.
 import { ISLAND_KEEP_SCRIPT, winPayScript } from './iw006Earn';
 import { IWL_REQUEST_HELPERS } from './cg002Scripts';
+// P108 IW-006 owed (s5, lane O): the upgrade slot, the win card's shop news, a robot sent from My robots.
+import { IW6O_CARD_HELPERS, sendRobotScript, shopNewsScript } from './iw006Owed';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -1233,6 +1235,10 @@ function titleOf(id) { for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs
 function blockWord(id) { if (id.indexOf('olive:') === 0) return w[OLIVE_WORD[id]] || id; var k = LABEL[id]; if (band === 1 && k && w['c' + k.slice(1)]) k = 'c' + k.slice(1); return w[k] || id; }
 function kindClass(id) { return 'bg-ability bg-blk bg-blk-' + (id.indexOf('olive:') === 0 ? 'ask' : META[id] ? META[id].kind : 'action'); }
 var cards = [];
+// P108 IW-006 owed (lane O): the upgrade slot's words (the shop, never an islander) and the jobs a card's robot can be sent to.
+${IW6O_CARD_HELPERS}
+var kinds = [];
+for (var k0 = 0; k0 < mine.length; k0++) if (mine[k0]) kinds.push(String(mine[k0].kind || ''));
 // P108 IW-008 (lane C): a card per robot she has (a crew: every copy its own card, beside its kind's first), else one
 // locked card for a kind nobody has lent her yet. What the last copy said rides on the card it was said on.
 var told = Inputs.told && typeof Inputs.told === 'object' ? Inputs.told : null;
@@ -1280,13 +1286,16 @@ for (var i = 0; i < crew.length; i++) {
     cardClass: 'bg-panel bg-robot-card bg-robot-' + spec.id + (has ? '' : ' bg-robot-locked'),
     wears: w[RW.wears[spec.accessory]] || '', color: String(look.color), eye: String(look.eye || 'round'), hat: String(look.hat || 'none'), accessory: spec.accessory,
     paints: paints, hats: hats, abilities: abilities,
-    upgradeText: up ? fill(has && look.upgraded ? w.ig5UpHas : w.ig5UpEmpty, { up: upWord, who: upWho }) : '',
+    // P108 IW-006 owed (lane O): the slot sends her to the island's shop, never to an islander (iw006Owed iw6oUpText).
+    upgradeText: up ? iw6oUpText(up, upWord, upWho, has, look.upgraded, kinds) : '',
     upgradeClass: 'bg-robot-up' + (has && look.upgraded ? ' bg-robot-up-on' : ''),
     whereText: !has ? fill(w.ig5WhenLent, { who: lender, r: nm, q: titleOf(spec.unlockedBy) }) : look.working ? fill(w.ig5AtWork, { plot: titleOf(look.working) }) : helpsAt ? fill(w.iw8cHelpsOn, { plot: titleOf(helpsAt) }) : (w.ig5AtHome || ''),
     nameWord: w.rbName || '', colourWord: w.rbColour || '', hatWord: w.rbHat || '', canDoWord: w.ig5CanDo || '', upgradeWord: w.ig5Upgrade || '', whereWord: w.ig5Where || '',
     brainWord: w.iw8cBrainL || '', brainText: has ? fill(w.iw8cBrainText, { n: brainN, knows: knows > 0 ? fill(w.iw8cKnows, { k: knows }) : (w.iw8cKnowsNone || '') }) : '',
     copyWord: fill(w.iw8cCopyTo, { r: nm }), copyChips: knows > 0 ? others : [], hasCopy: knows > 0 && others.length > 0,
-    saidText: saidHere, hasSaid: !!saidHere
+    saidText: saidHere, hasSaid: !!saidHere,
+    // P108 IW-006 owed (lane O): send this robot to a job she has won (the crew's assign rule, Logic/Send robot).
+    sendWord: fill(w.iw6oSendTo, { r: nm }), sendChips: has ? iw6oSendPlots(row, spec.id, pre) : [], hasSend: has && iw6oSendPlots(row, spec.id, pre).length > 0
   });
 }
 Outputs.cards = cards;
@@ -1455,6 +1464,9 @@ const IW8_OLIVE_WORD: Record<string, string> = Object.fromEntries(PALETTE_RUNG_I
 export const COPY_PROGRAM_SCRIPT = copyProgramScript({ wordHelper: WORD_HELPER, oliveWords: IW8_OLIVE_WORD });
 export const ASSIGN_ROBOT_SCRIPT = assignRobotScript({ wordHelper: WORD_HELPER, oliveWords: IW8_OLIVE_WORD });
 export const CREW_CHIPS_SCRIPT = crewChipsScript({ wordHelper: WORD_HELPER });
+/** P108 IW-006 owed (lane O): `Logic/Send robot` — My robots' send (the crew's assign rule); `Logic/Shop news` — the win card's "now in the shop". */
+export const SEND_ROBOT_SCRIPT = sendRobotScript({ wordHelper: WORD_HELPER, oliveWords: IW8_OLIVE_WORD });
+export const SHOP_NEWS_SCRIPT = shopNewsScript({ wordHelper: WORD_HELPER });
 /** P108 IW-006 (lane E): `Logic/Win pay` — the shells a Workshop win earns (none for a job done and not worn), before Complete request records it. */
 export const WIN_PAY_SCRIPT = winPayScript(ISLAND_ENGINE);
 
@@ -1524,5 +1536,8 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   ...IW006_SHOP_SCRIPTS,
   // P108 IW-006 (lane E): earning.
   { component: 'Logic/Win pay', script: WIN_PAY_SCRIPT, seam: 'the shells a win in the Workshop earns, and the plot as a done job' },
-  { component: 'Logic/Island keep', script: ISLAND_KEEP_SCRIPT, seam: 'the island\u2019s live jobs and what its laps earned, written into her save at the moments that matter' }
+  { component: 'Logic/Island keep', script: ISLAND_KEEP_SCRIPT, seam: 'the island\u2019s live jobs and what its laps earned, written into her save at the moments that matter' },
+  // P108 IW-006 owed (s5, lane O).
+  { component: 'Logic/Shop news', script: SHOP_NEWS_SCRIPT, seam: 'the win card\u2019s line when this first win puts an upgrade on the shop\u2019s shelf' },
+  { component: 'Logic/Send robot', script: SEND_ROBOT_SCRIPT, seam: 'My robots: a robot sent to a job she has won, by the crew\u2019s assign rule, said on its card' }
 ];

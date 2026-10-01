@@ -2656,6 +2656,18 @@
       "toProperty": "hasPay"
     },
     {
+      "fromId": "plIn",
+      "fromProperty": "shopText",
+      "toId": "plWin",
+      "toProperty": "shopText"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "hasShop",
+      "toId": "plWin",
+      "toProperty": "hasShop"
+    },
+    {
       "fromId": "plWinSum",
       "fromProperty": "bloom",
       "toId": "plOut",

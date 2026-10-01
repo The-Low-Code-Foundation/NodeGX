@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b5d93f4e-4d16-5469-86e1-7d86d2268bfc",
+  "name": "Send robot",
+  "path": "/Logic/Send robot",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "My robots: a robot sent to a job she has won, by the crew’s assign rule, said on its card. Runs on Go; answers Ran once its outputs are set."
+}

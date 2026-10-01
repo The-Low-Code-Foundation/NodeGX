@@ -81,7 +81,7 @@
         "name": "gardenLang"
       },
       "x": 410,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "wsWords",
@@ -95,7 +95,7 @@
       "type": "/Logic/Translate words",
       "label": "In their language",
       "x": 410,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "wsResave",
@@ -105,7 +105,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "wsPlay",
@@ -157,6 +157,13 @@
       "y": 1120
     },
     {
+      "id": "wsNews",
+      "type": "/Logic/Shop news",
+      "label": "Now in the shop",
+      "x": 410,
+      "y": 1240
+    },
+    {
       "id": "wsProgVar",
       "type": "Variable2",
       "label": "The program that won",
@@ -164,7 +171,7 @@
         "name": "gardenProgram"
       },
       "x": 410,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "wsJob",
@@ -174,14 +181,14 @@
         "stepMs": 420
       },
       "x": 410,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "wsGift",
       "type": "/Logic/Gift line",
       "label": "What the win lent and gave",
       "x": 410,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "wsGuardWait",
@@ -201,7 +208,7 @@
         "field": "cardsSeen"
       },
       "x": 410,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "wsSeenChanged",
@@ -211,7 +218,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "wsGuard",
@@ -221,7 +228,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "wsGoIsland",
@@ -232,7 +239,7 @@
         "target": "/Pages/Island"
       },
       "x": 410,
-      "y": 1720
+      "y": 1840
     }
   ],
   "visualRoots": [

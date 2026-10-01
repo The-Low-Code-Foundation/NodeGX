@@ -17,6 +17,12 @@
     },
     {
       "fromId": "robotcardsIn",
+      "fromProperty": "done",
+      "toId": "robotcardsFn",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "robotcardsIn",
       "fromProperty": "hats",
       "toId": "robotcardsFn",
       "toProperty": "in-hats"
@@ -38,6 +44,12 @@
       "fromProperty": "robots",
       "toId": "robotcardsFn",
       "toProperty": "in-robots"
+    },
+    {
+      "fromId": "robotcardsIn",
+      "fromProperty": "stickers",
+      "toId": "robotcardsFn",
+      "toProperty": "in-stickers"
     },
     {
       "fromId": "robotcardsIn",

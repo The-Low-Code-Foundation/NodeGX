@@ -326,6 +326,36 @@
       "fromProperty": "itemOutputSignal-picked",
       "toId": "rcOut",
       "toProperty": "copied"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "sendWord",
+      "toId": "rcSendL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "sendChips",
+      "toId": "rcSendEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rcIn",
+      "fromProperty": "hasSend",
+      "toId": "rcSend",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rcSendEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "rcOut",
+      "toProperty": "sendTo"
+    },
+    {
+      "fromId": "rcSendEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "rcOut",
+      "toProperty": "sent"
     }
   ]
 }

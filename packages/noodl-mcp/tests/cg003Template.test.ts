@@ -79,6 +79,8 @@ import { CHOOSE_HINT_SCRIPT, HINT_LINE_SCRIPT, PREDICT_END_SCRIPT } from './cg00
 // P108 IW-006 (lane H): the upgrades are bought now (IG-005's rows buy them with the one purchase rule).
 import { SAVE_HELPERS, helper } from './cg002Scripts';
 import { HINTS, HINT_KEYS, OLIVE_RUNGS } from './cg002Content';
+// P108 IW-006 owed (lane O): the upgrade slot's price is SHOP's.
+import { SHOP } from './cg002Content';
 import { PALETTE_RUNG_IDS } from './cg005Olive';
 import { ISLAND_PINS, REQUEST_SUBS } from './cg003Content';
 
@@ -2115,7 +2117,11 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       expect(cards.map((c: any) => [c.id, c.robotId])).toEqual([['pip', 'r1'], ['cobble', 'cobble'], ['pocket', ''], ['echo', '']]);
       expect(cards[1].abilities.map((a: any) => a.cls.split(' ').pop())).toEqual(['bg-blk-motion', 'bg-blk-motion', 'bg-blk-motion', 'bg-blk-action', 'bg-blk-action', 'bg-blk-control', 'bg-blk-control', 'bg-blk-control', 'bg-blk-control', 'bg-blk-control']);
       expect(cards[0].abilities.map((a: any) => bare(a.id))).toContain('olive:read');
-      expect(cards[0].upgradeText).toBe('Empty slot · Bigger can · 6 waters · from Mamie Rose');
+      // P108 IW-006 owed (lane O): the islanders no longer give upgrades — the shop sells them (lane H, s4); this row pinned the
+      // owed defect ("… · from Mamie Rose": a gift that never comes). The slot now names the shop, its price (SHOP's) and the
+      // request that puts it on the shelf (iw006Owed.test.ts O1 grades every card, EN and FR).
+      const canPrice = SHOP.find((i) => i.id === 'can+')!.price;
+      expect(cards[0].upgradeText).toBe(`Empty slot · Bigger can · 6 waters · in the shop after “Water both rows the same way”, for 🐚 ${canPrice}`);
       expect(cards[0].hats.find((h: any) => h.id === 'pip|sun')).toMatchObject({ locked: false });
       expect(cards[2].paints).toEqual([]);
       expect(cards[1].paints.find((p: any) => p.selected).id).toBe('cobble|#7A8CA3');

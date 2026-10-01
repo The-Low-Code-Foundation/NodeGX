@@ -1,0 +1,103 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b5d93f4e-4d16-5469-86e1-7d86d2268bfc",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "sendrobotIn",
+      "fromProperty": "lang",
+      "toId": "sendrobotFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "sendrobotIn",
+      "fromProperty": "model",
+      "toId": "sendrobotFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "sendrobotIn",
+      "fromProperty": "now",
+      "toId": "sendrobotFn",
+      "toProperty": "in-now"
+    },
+    {
+      "fromId": "sendrobotIn",
+      "fromProperty": "profileId",
+      "toId": "sendrobotFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "sendrobotIn",
+      "fromProperty": "requestId",
+      "toId": "sendrobotFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "sendrobotIn",
+      "fromProperty": "requests",
+      "toId": "sendrobotFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "sendrobotIn",
+      "fromProperty": "robotId",
+      "toId": "sendrobotFn",
+      "toProperty": "in-robotId"
+    },
+    {
+      "fromId": "sendrobotIn",
+      "fromProperty": "sendTo",
+      "toId": "sendrobotFn",
+      "toProperty": "in-sendTo"
+    },
+    {
+      "fromId": "sendrobotIn",
+      "fromProperty": "words",
+      "toId": "sendrobotFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "sendrobotIn",
+      "fromProperty": "go",
+      "toId": "sendrobotFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "sendrobotFn",
+      "fromProperty": "out-error",
+      "toId": "sendrobotOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "sendrobotFn",
+      "fromProperty": "out-model",
+      "toId": "sendrobotOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "sendrobotFn",
+      "fromProperty": "out-ok",
+      "toId": "sendrobotOut",
+      "toProperty": "ok"
+    },
+    {
+      "fromId": "sendrobotFn",
+      "fromProperty": "out-role",
+      "toId": "sendrobotOut",
+      "toProperty": "role"
+    },
+    {
+      "fromId": "sendrobotFn",
+      "fromProperty": "out-told",
+      "toId": "sendrobotOut",
+      "toProperty": "told"
+    },
+    {
+      "fromId": "sendrobotFn",
+      "fromProperty": "success",
+      "toId": "sendrobotOut",
+      "toProperty": "ran"
+    }
+  ]
+}

@@ -292,6 +292,96 @@
       "toProperty": "write"
     },
     {
+      "fromId": "rbFam",
+      "fromProperty": "stickers",
+      "toId": "rbCards",
+      "toProperty": "stickers"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "done",
+      "toId": "rbCards",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "rbStore",
+      "fromProperty": "model",
+      "toId": "rbSend",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "profileId",
+      "toId": "rbSend",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "rbFam",
+      "fromProperty": "lang",
+      "toId": "rbSend",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "rbWords",
+      "fromProperty": "words",
+      "toId": "rbSend",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "rbRequests",
+      "fromProperty": "requests",
+      "toId": "rbSend",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-robotId",
+      "toId": "rbSend",
+      "toProperty": "robotId"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutput-sendTo",
+      "toId": "rbSend",
+      "toProperty": "sendTo"
+    },
+    {
+      "fromId": "rbFleetEach",
+      "fromProperty": "itemOutputSignal-sent",
+      "toId": "rbSend",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "rbSend",
+      "fromProperty": "told",
+      "toId": "rbCards",
+      "toProperty": "told"
+    },
+    {
+      "fromId": "rbSend",
+      "fromProperty": "model",
+      "toId": "rbStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "rbSend",
+      "fromProperty": "ok",
+      "toId": "rbSendOk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "rbSend",
+      "fromProperty": "ran",
+      "toId": "rbSendOk",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "rbSendOk",
+      "fromProperty": "ontrue",
+      "toId": "rbStore",
+      "toProperty": "write"
+    },
+    {
       "fromId": "rbStore",
       "fromProperty": "model",
       "toId": "rbSetName",

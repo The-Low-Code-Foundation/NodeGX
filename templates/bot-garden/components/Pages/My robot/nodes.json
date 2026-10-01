@@ -84,7 +84,7 @@
         "name": "gardenLang"
       },
       "x": 530,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "rbWords",
@@ -108,7 +108,7 @@
         "runOnChange-condition": false
       },
       "x": 530,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "rbFleetL",
@@ -173,14 +173,14 @@
       "type": "/Logic/Robot cards",
       "label": "Her robots and the ones to be lent",
       "x": 530,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "rbRequests",
       "type": "/Data/Requests",
       "label": "The requests",
       "x": 530,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "rbSetName",
@@ -227,7 +227,7 @@
         "duration": 120
       },
       "x": 530,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "rbHold",
@@ -244,7 +244,24 @@
         "runOnChange-condition": false
       },
       "x": 530,
-      "y": 2440
+      "y": 2560
+    },
+    {
+      "id": "rbSend",
+      "type": "/Logic/Send robot",
+      "label": "A robot sent to a job she has won",
+      "x": 530,
+      "y": 1840
+    },
+    {
+      "id": "rbSendOk",
+      "type": "Condition",
+      "label": "Was it sent?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 2680
     },
     {
       "id": "rbHead",

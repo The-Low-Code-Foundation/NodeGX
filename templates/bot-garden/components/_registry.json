@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 699,
+      "connectionCount": 708,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -551,7 +551,7 @@
       "path": "Logic/Robot cards",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 12,
+      "connectionCount": 14,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -699,6 +699,22 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
+    "Logic/Shop news": {
+      "path": "Logic/Shop news",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 10,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
+    "Logic/Send robot": {
+      "path": "Logic/Send robot",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 16,
+      "modified": "2026-09-27T00:00:00.000Z",
+      "created": "2026-09-27T00:00:00.000Z"
+    },
     "Logic/App store": {
       "path": "Logic/App store",
       "type": "visual",
@@ -766,8 +782,8 @@
     "Workshop/Win card": {
       "path": "Workshop/Win card",
       "type": "visual",
-      "nodeCount": 17,
-      "connectionCount": 16,
+      "nodeCount": 18,
+      "connectionCount": 18,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -791,7 +807,7 @@
       "path": "Workshop/Play",
       "type": "visual",
       "nodeCount": 162,
-      "connectionCount": 448,
+      "connectionCount": 450,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -854,8 +870,8 @@
     "Robot/Card": {
       "path": "Robot/Card",
       "type": "visual",
-      "nodeCount": 38,
-      "connectionCount": 54,
+      "nodeCount": 42,
+      "connectionCount": 59,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -974,16 +990,16 @@
     "Pages/Workshop": {
       "path": "Pages/Workshop",
       "type": "page",
-      "nodeCount": 23,
-      "connectionCount": 83,
+      "nodeCount": 24,
+      "connectionCount": 92,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
     "Pages/My robot": {
       "path": "Pages/My robot",
       "type": "page",
-      "nodeCount": 27,
-      "connectionCount": 87,
+      "nodeCount": 29,
+      "connectionCount": 102,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1021,8 +1037,8 @@
     }
   },
   "stats": {
-    "totalComponents": 127,
-    "totalNodes": 1061,
-    "totalConnections": 3311
+    "totalComponents": 129,
+    "totalNodes": 1075,
+    "totalConnections": 3381
   }
 }

@@ -13,7 +13,7 @@ import * as vm from 'vm';
 
 import * as React from 'react';
 
-import { BRAIN_SIZE, CREW_CAP, FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, ISLAND_HOME_PLOT, PLOT_H, PLOT_W, REQUESTS, WORDS } from './cg002Content';
+import { BRAIN_SIZE, CREW_CAP, FREE_PLAY_PLOT, ISLAND_BASE, ISLAND_HOME, ISLAND_HOME_PLOT, PLOT_H, PLOT_W, REQUESTS, SHOP, WORDS } from './cg002Content';
 import { ADD_PROFILE_SCRIPT, BRING_HOME_SCRIPT, COMPLETE_REQUEST_SCRIPT, DECODE_SAVE_SCRIPT, ENCODE_SAVE_SCRIPT, SAVE_HELPERS, helper, runScript } from './cg002Scripts';
 import { PAGE_WORDS } from './cg003Content';
 import { ALL_WORDS_JSON, ASSIGN_ROBOT_SCRIPT, COPY_PROGRAM_SCRIPT, CREW_CHIPS_SCRIPT, FAMILY_SCRIPT, ISLAND_CHOOSE_SCRIPT, ISLAND_ROWS_SCRIPT, ISLAND_WORLD_SCRIPT, JOB_ROBOT_SCRIPT, ROBOT_CARDS_SCRIPT } from './cg003Scripts';
@@ -35,7 +35,8 @@ const profile = (m: any) => m.profiles[0];
 /** Buy a copy through the base's buyItem (earned first, as a run would pay): its new row's id. */
 function buyCopy(m: any, kind: string, name: string) {
   const p = profile(m);
-  helper<number>(SAVE_HELPERS, 'earnShells', p, 30);
+  // P108 IW-006 owed (lane O): the copy's price is SHOP's (was the literal 30).
+  helper<number>(SAVE_HELPERS, 'earnShells', p, SHOP.find((i) => i.id === `robot:${kind}`)!.price);
   const out = helper<any>(SAVE_HELPERS, 'buyItem', p, `robot:${kind}`, { name });
   if (!out.ok) throw new Error(`buy ${kind}: ${out.error}`);
   return out.robotId as string;
@@ -255,7 +256,7 @@ describe('IW-008 AC2 — copy a program between two robots; a refusal names the 
     const b = win(kid(), 'tulip-door', 'r1', long);
     const small = buyCopy(b, 'pip', 'Tiny');
     const big = buyCopy(b, 'pip', 'Big');
-    helper<number>(SAVE_HELPERS, 'earnShells', profile(b), 25);
+    helper<number>(SAVE_HELPERS, 'earnShells', profile(b), SHOP.find((i) => i.id === 'brain16')!.price);
     expect(helper<any>(SAVE_HELPERS, 'buyItem', profile(b), 'brain16', { robotId: big }).ok).toBe(true);
     const tooSmall = copy(b, 'r1', small);
     expect([tooSmall.ok, tooSmall.error, tooSmall.told.text]).toEqual([false, 'brain', fill(w('en', 'iw8cNoBrain'), { f: 'Pip', r: 'Tiny', k: 14, n: BRAIN_SIZE })]);

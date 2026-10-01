@@ -540,4 +540,9 @@ ${Object.entries(PAD_GO.emoji).map(([k, e]) => `.bg-key-go-${k}::after { content
 .bg-shop-done { align-self: flex-start; background-color: var(--leaf-2); border-radius: 14px; padding: 6px 12px; }
 .bg-shop-short { background-color: var(--tidy); border: 2px solid var(--tidy-edge); border-radius: 14px; padding: 6px 12px; }
 @media (max-width: 600px) { .bg-island-top { flex-wrap: wrap !important; } .bg-shop { padding: 8px; } .bg-shop-items { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; } }
+/* P108 IW-006 owed (s5, lane O): the win card's "Now in the shop" — quiet, after the thanks and the pay line (principle 2);
+   My robots' "Send to a job" chips under a hairline, as the copy chips are. */
+.bg-win-shop { color: var(--ink-2) !important; }
+.bg-robot-send { border-top: 2px dashed var(--line); padding-top: 8px; }
+.bg-robot-send .bg-chip { min-height: 44px; }
 `;

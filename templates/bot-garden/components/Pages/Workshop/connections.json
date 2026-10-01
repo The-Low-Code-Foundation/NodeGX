@@ -412,6 +412,60 @@
       "toProperty": "write"
     },
     {
+      "fromId": "wsComplete",
+      "fromProperty": "model",
+      "toId": "wsNews",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "newlyDone",
+      "toId": "wsNews",
+      "toProperty": "newlyDone"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "wonRequest",
+      "toId": "wsNews",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "profileId",
+      "toId": "wsNews",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "lang",
+      "toId": "wsNews",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "wsWords",
+      "fromProperty": "words",
+      "toId": "wsNews",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "wsComplete",
+      "fromProperty": "ran",
+      "toId": "wsNews",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "wsNews",
+      "fromProperty": "text",
+      "toId": "wsPlay",
+      "toProperty": "shopText"
+    },
+    {
+      "fromId": "wsNews",
+      "fromProperty": "has",
+      "toId": "wsPlay",
+      "toProperty": "hasShop"
+    },
+    {
       "fromId": "wsPlay",
       "fromProperty": "island",
       "toId": "wsGoIsland",

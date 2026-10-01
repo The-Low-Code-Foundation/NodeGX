@@ -77,6 +77,18 @@
     },
     {
       "fromId": "wnIn",
+      "fromProperty": "shopText",
+      "toId": "wnShop",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "wnIn",
+      "fromProperty": "hasShop",
+      "toId": "wnShop",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "wnIn",
       "fromProperty": "islandWord",
       "toId": "wnIsland",
       "toProperty": "label"

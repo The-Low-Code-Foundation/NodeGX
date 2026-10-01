@@ -1489,6 +1489,10 @@ export interface ShopItem {
  * The shop's catalogue (session-4 base; prices are the orchestrator's first guess, D1 — lane E measures what a mission
  * pays and lane H may retune them, saying why). A job's run pays about its targets' steps (tulips-three 9, path-stones 16),
  * a finished job a bonus of 5–10: a robot copy is two finished jobs; a helper less than one.
+ * P108 IW-006 owed (s5, lane O): retuned from lane E's earnings table — the rules and the table are in IW-006 §5 (lane O's
+ * notes) and each rule is a row of `iw006Owed.test.ts` (O2), read from these numbers and from what the engine pays: a
+ * helper under one first win, the three upgrades one price (1–1½ wins), a copy 2–3 wins, band 7–9's four first wins buy
+ * the refuge, and the refuge with her first animal within three more minutes of her robots on the island.
  */
 export const SHOP: ReadonlyArray<ShopItem> = [
   { id: 'robot:pip', tab: 'robots', price: 30, kind: 'robot', robot: 'pip', icon: '🤖', name: s('A new Pip', 'Un nouveau Pip'), line: s('Another watering robot. You name it.', 'Un autre robot arroseur. Tu lui donnes un nom.') },
@@ -1497,7 +1501,7 @@ export const SHOP: ReadonlyArray<ShopItem> = [
   { id: 'robot:echo', tab: 'robots', price: 30, kind: 'robot', robot: 'echo', icon: '🔔', name: s('A new Echo', 'Un nouvel Écho'), line: s('Another robot who asks Olive.', 'Un autre robot qui demande à Olive.') },
   { id: 'can+', tab: 'upgrades', price: 15, kind: 'upgrade', upgrade: 'can+', icon: '🪣', name: s('A bigger can', 'Un plus grand arrosoir'), line: s('Six pours instead of three.', 'Six arrosages au lieu de trois.') },
   { id: 'basket+', tab: 'upgrades', price: 15, kind: 'upgrade', upgrade: 'basket+', icon: '🧺', name: s('A bigger hod', 'Une plus grande hotte'), line: s('Cobble carries eight stones.', 'Cobble porte huit pierres.') },
-  { id: 'boots', tab: 'upgrades', price: 20, kind: 'upgrade', upgrade: 'boots', icon: '👢', name: s('Quick boots', 'Des bottes rapides'), line: s('Pocket walks faster.', 'Poche marche plus vite.') },
+  { id: 'boots', tab: 'upgrades', price: 15, kind: 'upgrade', upgrade: 'boots', icon: '👢', name: s('Quick boots', 'Des bottes rapides'), line: s('Pocket walks faster.', 'Poche marche plus vite.') },
   { id: 'brain16', tab: 'upgrades', price: 25, kind: 'brain', size: 16, icon: '🧠', name: s('A bigger brain', 'Un plus grand cerveau'), line: s('One robot remembers 16 blocks.', 'Un robot retient 16 blocs.') },
   { id: 'brain20', tab: 'upgrades', price: 40, kind: 'brain', size: 20, icon: '🧠', name: s('The biggest brain', 'Le plus grand cerveau'), line: s('One robot remembers 20 blocks.', 'Un robot retient 20 blocs.') },
   { id: 'rain', tab: 'helpers', price: 6, kind: 'helper', helper: 'rain', icon: '🌧️', name: s('A rain cloud', 'Un nuage de pluie'), line: s('Waters every tulip on one plot, once.', 'Arrose toutes les tulipes d’un terrain, une fois.') },
@@ -1505,10 +1509,10 @@ export const SHOP: ReadonlyArray<ShopItem> = [
   { id: 'barrow', tab: 'helpers', price: 10, kind: 'helper', helper: 'barrow', icon: '🛒', name: s('A wheelbarrow', 'Une brouette'), line: s('Carries eight, for one job.', 'Porte huit choses, pour un travail.') },
   // P108 IW-007 (s5 base): the Build and Animals tabs. Prices are the base's guesses (lane O retunes every price from
   // IW-006's earnings table, saying why): a blueprint about four finished jobs, an animal about two.
-  { id: 'spa', tab: 'build', price: 40, kind: 'blueprint', blueprint: 'spa', icon: '🛁', name: s('The robot spa', 'Le spa des robots'), line: s('Stones and planks. Robots rest there when a job is done.', 'Des pierres et des planches. Les robots s’y reposent quand un travail est fini.') },
-  { id: 'refuge', tab: 'build', price: 50, kind: 'blueprint', blueprint: 'refuge', icon: '🏡', name: s('The animal refuge', 'Le refuge des animaux'), line: s('Planks and stones. Then animals can come and live.', 'Des planches et des pierres. Puis des animaux peuvent venir vivre.') },
-  { id: 'rabbit', tab: 'animals', price: 20, kind: 'animal', animal: 'rabbit', icon: '🐇', name: s('A rabbit', 'Un lapin'), line: s('Eats carrots from her bowl. You name her.', 'Mange des carottes dans son bol. Tu lui donnes un nom.') },
-  { id: 'sheep', tab: 'animals', price: 25, kind: 'animal', animal: 'sheep', icon: '🐑', name: s('A sheep', 'Un mouton'), line: s('Eats carrots from his bowl. You name him.', 'Mange des carottes dans son bol. Tu lui donnes un nom.') }
+  { id: 'spa', tab: 'build', price: 30, kind: 'blueprint', blueprint: 'spa', icon: '🛁', name: s('The robot spa', 'Le spa des robots'), line: s('Stones and planks. Robots rest there when a job is done.', 'Des pierres et des planches. Les robots s’y reposent quand un travail est fini.') },
+  { id: 'refuge', tab: 'build', price: 35, kind: 'blueprint', blueprint: 'refuge', icon: '🏡', name: s('The animal refuge', 'Le refuge des animaux'), line: s('Planks and stones. Then animals can come and live.', 'Des planches et des pierres. Puis des animaux peuvent venir vivre.') },
+  { id: 'rabbit', tab: 'animals', price: 15, kind: 'animal', animal: 'rabbit', icon: '🐇', name: s('A rabbit', 'Un lapin'), line: s('Eats carrots from her bowl. You name her.', 'Mange des carottes dans son bol. Tu lui donnes un nom.') },
+  { id: 'sheep', tab: 'animals', price: 20, kind: 'animal', animal: 'sheep', icon: '🐑', name: s('A sheep', 'Un mouton'), line: s('Eats carrots from his bowl. You name him.', 'Mange des carottes dans son bol. Tu lui donnes un nom.') }
 ];
 export const SHOP_JSON = JSON.stringify(SHOP);
 

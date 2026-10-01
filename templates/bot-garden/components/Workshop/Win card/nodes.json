@@ -77,6 +77,16 @@
           "name": "hasPay",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "shopText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasShop",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 530,
@@ -113,6 +123,7 @@
         "wnRewards",
         "wnLent",
         "wnPay",
+        "wnShop",
         "wnButtons"
       ],
       "parameters": {
@@ -363,6 +374,27 @@
       "y": 1360
     },
     {
+      "id": "wnShop",
+      "type": "Text",
+      "label": "Now in the shop",
+      "parent": "wnCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 14,
+          "unit": "px"
+        },
+        "color": "var(--ink-2)",
+        "fontWeight": "700",
+        "textAlignX": "center",
+        "cssClassName": "bg-win-shop",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1480
+    },
+    {
       "id": "wnButtons",
       "type": "Group",
       "label": "The two ways on",
@@ -381,7 +413,7 @@
         "justifyContent": "center"
       },
       "x": 160,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "wnIsland",
@@ -423,7 +455,7 @@
         "label": "Back to the island"
       },
       "x": 220,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "wnStay",
@@ -465,7 +497,7 @@
         "label": "Keep tinkering"
       },
       "x": 220,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "wnOut",
@@ -484,7 +516,7 @@
         }
       ],
       "x": 530,
-      "y": 1600
+      "y": 1720
     }
   ],
   "visualRoots": [

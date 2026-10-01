@@ -112,6 +112,16 @@
           "name": "hasPay",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "shopText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasShop",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 710,

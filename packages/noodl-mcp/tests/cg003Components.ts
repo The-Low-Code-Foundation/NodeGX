@@ -341,7 +341,10 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Use helper': 'go',
   // P108 IW-006 (lane E).
   'Logic/Win pay': 'go',
-  'Logic/Island keep': 'go'
+  'Logic/Island keep': 'go',
+  // P108 IW-006 owed (s5, lane O): the win card's shop news (after Complete request); a robot sent from My robots.
+  'Logic/Shop news': 'go',
+  'Logic/Send robot': 'go'
 };
 
 /**
@@ -818,9 +821,11 @@ const WIN: CgComponent = {
   description: 'The win card (the mockup’s .win): fixed and centred, so it meets the child wherever the block list is scrolled. Publishes Island (back to the island) or Stay (keep tinkering).',
   nodes: [
     // P108 IW-006 (lane E): payText / hasPay — the "+N 🐚" line under the thanks.
-    inputs('wnIn', [['show', 'boolean'], ['faceClass', 'string'], ['thanks', 'string'], ['line', 'string'], ['rewardText', 'string'], ['hasReward', 'boolean'], ['learnText', 'string'], ['hasLearn', 'boolean'], ['islandWord', 'string'], ['stayWord', 'string'], ['lentText', 'string'], ['hasLent', 'boolean'], ['payText', 'string'], ['hasPay', 'boolean']]),
+    inputs('wnIn', [['show', 'boolean'], ['faceClass', 'string'], ['thanks', 'string'], ['line', 'string'], ['rewardText', 'string'], ['hasReward', 'boolean'], ['learnText', 'string'], ['hasLearn', 'boolean'], ['islandWord', 'string'], ['stayWord', 'string'], ['lentText', 'string'], ['hasLent', 'boolean'], ['payText', 'string'], ['hasPay', 'boolean'],
+      // P108 IW-006 owed (lane O): shopText / hasShop — "Now in the shop: …" under the pay line.
+      ['shopText', 'string'], ['hasShop', 'boolean']]),
     group('wnScrim', 'Over the page', undefined, { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-win', mounted: false }, ['wnCard']),
-    group('wnCard', 'The card', 'wnScrim', { ...column({ alignItems: 'center', rowGap: sp(8) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-bar)', ...pad(22, 26), maxWidth: px(380), cssClassName: 'bg-win-card' }, ['wnFace', 'wnThanks', 'wnLine', 'wnRewards', 'wnLent', 'wnPay', 'wnButtons']),
+    group('wnCard', 'The card', 'wnScrim', { ...column({ alignItems: 'center', rowGap: sp(8) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-bar)', ...pad(22, 26), maxWidth: px(380), cssClassName: 'bg-win-card' }, ['wnFace', 'wnThanks', 'wnLine', 'wnRewards', 'wnLent', 'wnPay', 'wnShop', 'wnButtons']),
     group('wnFace', 'The islander', 'wnCard', { sizeMode: 'explicit', width: px(72), height: px(72) }),
     text('wnThanks', 'Thank you', 'wnCard', '', { ...T_H3, fontSize: px(26), textAlignX: 'center' }),
     text('wnLine', 'How many blocks', 'wnCard', '', { ...T_MUTED, fontWeight: '700', textAlignX: 'center' }),
@@ -833,6 +838,8 @@ const WIN: CgComponent = {
     text('wnLent', 'A robot lent, an upgrade given', 'wnCard', '', { ...T_STRONG, textAlignX: 'center', color: 'var(--violet-ink)', cssClassName: 'bg-win-lent', mounted: false }),
     // P108 IW-006 (lane E): the shells the job earned — after the thanks and the gifts, smaller than the thanks (principle 2).
     text('wnPay', 'The shells earned', 'wnCard', '', { ...T_SMALL, fontWeight: '700', textAlignX: 'center', cssClassName: 'bg-win-pay', mounted: false }),
+    // P108 IW-006 owed (lane O): what this first win put on the shop's shelf — after the pay, as small (principle 2).
+    text('wnShop', 'Now in the shop', 'wnCard', '', { ...T_SMALL, fontWeight: '700', textAlignX: 'center', cssClassName: 'bg-win-shop', mounted: false }),
     group('wnButtons', 'The two ways on', 'wnCard', row({ justifyContent: 'center' }), ['wnIsland', 'wnStay']),
     place('wnIsland', BUTTON_NODE, 'Back to the island', 'wnButtons', { ...btn('primary'), label: 'Back to the island' }),
     place('wnStay', BUTTON_NODE, 'Keep tinkering', 'wnButtons', { ...btn('plain'), label: 'Keep tinkering' }),
@@ -852,6 +859,9 @@ const WIN: CgComponent = {
     // P108 IW-006 (lane E).
     wire('wnIn', 'payText', 'wnPay', 'text'),
     wire('wnIn', 'hasPay', 'wnPay', 'mounted'),
+    // P108 IW-006 owed (lane O).
+    wire('wnIn', 'shopText', 'wnShop', 'text'),
+    wire('wnIn', 'hasShop', 'wnShop', 'mounted'),
     wire('wnIn', 'islandWord', 'wnIsland', 'label'),
     wire('wnIn', 'stayWord', 'wnStay', 'label'),
     wire('wnIsland', 'onClick', 'wnOut', 'island'),
@@ -906,7 +916,9 @@ const PLAY: CgComponent = {
   description: 'The workshop: drive the robot freely (nothing remembered), teach it by driving it again (every press a block), see the steps as blocks, fold the repetition, play, and win. Request Id picks the request (free for free play); the line under the title is that request’s own. Won fires with Bloom, Reward and Won Request set; Island asks for the island; Found says whether the request exists (a reload has none).',
   repeats: { source: 'array', rowFields: ['id', 'cls', 'lit'] },
   nodes: [
-    inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number'], ['robot', 'object'], ['robotKey', 'string'], ['paletteRobot', 'object'], ['giftText', 'string'], ['hasGift', 'boolean'], ['cardsSeen', 'array'], ['plots', 'object'], ['payText', 'string'], ['hasPay', 'boolean']]),
+    inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number'], ['robot', 'object'], ['robotKey', 'string'], ['paletteRobot', 'object'], ['giftText', 'string'], ['hasGift', 'boolean'], ['cardsSeen', 'array'], ['plots', 'object'], ['payText', 'string'], ['hasPay', 'boolean'],
+      // P108 IW-006 owed (lane O): the win card's "Now in the shop" (Pages/Workshop's Shop news).
+      ['shopText', 'string'], ['hasShop', 'boolean']]),
     // ── What the child sees ──
     group('plRoot', 'The workshop', undefined, column({ rowGap: sp(12) }), ['plHead', 'plWs', 'plWin']),
     group('plHead', 'The head', 'plRoot', column({ rowGap: sp(2) }), ['plEyebrow', 'plTitle', 'plSub']),
@@ -1612,6 +1624,9 @@ const PLAY: CgComponent = {
     // P108 IW-006 (lane E): the win's "+N 🐚" (Pages/Workshop's Win pay), onto the win card.
     wire('plIn', 'payText', 'plWin', 'payText'),
     wire('plIn', 'hasPay', 'plWin', 'hasPay'),
+    // P108 IW-006 owed (lane O).
+    wire('plIn', 'shopText', 'plWin', 'shopText'),
+    wire('plIn', 'hasShop', 'plWin', 'hasShop'),
     wire('plWinSum', 'bloom', 'plOut', 'bloom'),
     wire('plWinSum', 'reward', 'plOut', 'reward'),
     wire('plWinSum', 'requestId', 'plOut', 'wonRequest'),
@@ -2045,8 +2060,10 @@ const ROBOT_CARD: CgComponent = {
   nodes: [
     inputs('rcIn', [['id', 'string'], ['robotId', 'string'], ['kind', 'string'], ['name', 'string'], ['owned', 'boolean'], ['locked', 'boolean'], ['tag', 'string'], ['tagClass', 'string'], ['cardClass', 'string'], ['wears', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['accessory', 'string'], ['paints', 'array'], ['hats', 'array'], ['abilities', 'array'], ['upgradeText', 'string'], ['upgradeClass', 'string'], ['whereText', 'string'], ['colourWord', 'string'], ['hatWord', 'string'], ['canDoWord', 'string'], ['upgradeWord', 'string'], ['whereWord', 'string'], ['nameWord', 'string'],
       // P108 IW-008 (lane C): its brain and what it knows, copy its program to another robot, what a copy said.
-      ['brainWord', 'string'], ['brainText', 'string'], ['copyWord', 'string'], ['copyChips', 'array'], ['hasCopy', 'boolean'], ['saidText', 'string'], ['hasSaid', 'boolean']]),
-    group('rcCard', 'The card', undefined, { ...column({ rowGap: sp(10) }), ...PANEL, cssClassName: 'bg-panel bg-robot-card' }, ['rcTop', 'rcColourL', 'rcColourRow', 'rcHatL', 'rcHatRow', 'rcCanL', 'rcCanRow', 'rcUpL', 'rcUp', 'rcBrainL', 'rcBrain', 'rcWhereL', 'rcWhere', 'rcCopy', 'rcSaid']),
+      ['brainWord', 'string'], ['brainText', 'string'], ['copyWord', 'string'], ['copyChips', 'array'], ['hasCopy', 'boolean'], ['saidText', 'string'], ['hasSaid', 'boolean'],
+      // P108 IW-006 owed (lane O): send it to a job she has won.
+      ['sendWord', 'string'], ['sendChips', 'array'], ['hasSend', 'boolean']]),
+    group('rcCard', 'The card', undefined, { ...column({ rowGap: sp(10) }), ...PANEL, cssClassName: 'bg-panel bg-robot-card' }, ['rcTop', 'rcColourL', 'rcColourRow', 'rcHatL', 'rcHatRow', 'rcCanL', 'rcCanRow', 'rcUpL', 'rcUp', 'rcBrainL', 'rcBrain', 'rcWhereL', 'rcWhere', 'rcCopy', 'rcSend', 'rcSaid']),
     group('rcTop', 'The robot, its name, whose', 'rcCard', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(12), flexWrap: 'nowrap', alignItems: 'flex-start' }), ['rcStage', 'rcWho']),
     group('rcStage', 'The robot, drawn', 'rcTop', { sizeMode: 'explicit', width: px(88), height: px(88), borderRadius: px(14), cssClassName: 'bg-robot-stage' }, ['rcGarden']),
     place('rcGarden', KIT_GARDEN, 'The robot', 'rcStage', { stepMs: STEP_MS, label: 'The robot' }),
@@ -2080,10 +2097,15 @@ const ROBOT_CARD: CgComponent = {
     text('rcCopyL', 'Copy its program to', 'rcCopy', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
     group('rcCopyRow', 'Her other robots', 'rcCopy', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(8), rowGap: sp(8) }), ['rcCopyEach']),
     { ...logic('rcCopyEach', FOR_EACH_NODE, 'One chip per other robot', { template: C.chip, templateType: 'explicit' }), parent: 'rcCopyRow' },
+    // P108 IW-006 owed (lane O): send it to a job she has won — a chip per job (ink where it works or helps).
+    group('rcSend', 'Send it to a job', 'rcCard', { ...column({ rowGap: sp(6) }), cssClassName: 'bg-robot-send', mounted: false }, ['rcSendL', 'rcSendRow']),
+    text('rcSendL', 'Send it to a job', 'rcSend', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps' }),
+    group('rcSendRow', 'The jobs she has won', 'rcSend', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(8), rowGap: sp(8) }), ['rcSendEach']),
+    { ...logic('rcSendEach', FOR_EACH_NODE, 'One chip per job', { template: C.chip, templateType: 'explicit' }), parent: 'rcSendRow' },
     text('rcSaid', 'What the copy did', 'rcCard', '', { ...T_BODY, cssClassName: 'bg-robot-said', mounted: false }),
     logic('rcIsOwned', CONDITION_NODE, 'Hers?'),
     withStates('rcOwn', 'Hers, or still to be lent', ['locked', 'owned'], { owned: { type: 'boolean', by: { locked: false, owned: true } }, locked: { type: 'boolean', by: { locked: true, owned: false } } }),
-    outputs('rcOut', [['id', 'string'], ['robotId', 'string'], ['name', 'string'], ['named', 'signal'], ['colour', 'string'], ['coloured', 'signal'], ['hat', 'string'], ['hatted', 'signal'], ['copyTo', 'string'], ['copied', 'signal']])
+    outputs('rcOut', [['id', 'string'], ['robotId', 'string'], ['name', 'string'], ['named', 'signal'], ['colour', 'string'], ['coloured', 'signal'], ['hat', 'string'], ['hatted', 'signal'], ['copyTo', 'string'], ['copied', 'signal'], ['sendTo', 'string'], ['sent', 'signal']])
   ],
   connections: [
     wire('rcIn', 'cardClass', 'rcCard', 'cssClassName'),
@@ -2134,7 +2156,13 @@ const ROBOT_CARD: CgComponent = {
     wire('rcIn', 'saidText', 'rcSaid', 'text'),
     wire('rcIn', 'hasSaid', 'rcSaid', 'mounted'),
     wire('rcCopyEach', 'itemOutput-id', 'rcOut', 'copyTo'),
-    wire('rcCopyEach', 'itemOutputSignal-picked', 'rcOut', 'copied')
+    wire('rcCopyEach', 'itemOutputSignal-picked', 'rcOut', 'copied'),
+    // P108 IW-006 owed (lane O).
+    wire('rcIn', 'sendWord', 'rcSendL', 'text'),
+    wire('rcIn', 'sendChips', 'rcSendEach', 'items'),
+    wire('rcIn', 'hasSend', 'rcSend', 'mounted'),
+    wire('rcSendEach', 'itemOutput-id', 'rcOut', 'sendTo'),
+    wire('rcSendEach', 'itemOutputSignal-picked', 'rcOut', 'sent')
   ]
 };
 
@@ -2706,6 +2734,8 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       logic('wsComplete', L('Complete request'), 'Done: the island, the tricks, the reward'),
       // P108 IW-006 (lane E): what the win earns, read from her island BEFORE Complete request records it.
       logic('wsPay', L('Win pay'), 'The shells this win earns'),
+      // P108 IW-006 owed (lane O): what this first win put on the shop's shelf, read from her model after Complete request.
+      logic('wsNews', L('Shop news'), 'Now in the shop'),
       // P106 IG-004: the program that won stays on the plot, the robot pinned to it (Complete request writes both).
       variable('wsProgVar', 'gardenProgram', 'The program that won'),
       // P106 IG-005: the robot this request needs (hers of that kind), and what a win lent and gave, for the card.
@@ -2762,6 +2792,16 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsPay', 'has', 'wsPlay', 'hasPay'),
       wire('wsComplete', 'model', 'wsStore', 'model'),
       wire('wsComplete', 'ran', 'wsStore', 'write'),
+      // P108 IW-006 owed (lane O): Complete request ran → Shop news → the win card's line under the pay.
+      wire('wsComplete', 'model', 'wsNews', 'model'),
+      wire('wsComplete', 'newlyDone', 'wsNews', 'newlyDone'),
+      wire('wsPlay', 'wonRequest', 'wsNews', 'requestId'),
+      wire('wsFam', 'profileId', 'wsNews', 'profileId'),
+      wire('wsFam', 'lang', 'wsNews', 'lang'),
+      wire('wsWords', 'words', 'wsNews', 'words'),
+      wire('wsComplete', 'ran', 'wsNews', 'go'),
+      wire('wsNews', 'text', 'wsPlay', 'shopText'),
+      wire('wsNews', 'has', 'wsPlay', 'hasShop'),
       wire('wsPlay', 'island', 'wsGoIsland', 'navigate'),
       wire('wsFam', 'cardsSeen', 'wsPlay', 'cardsSeen'),
       // P108 IW-003 (lane B): her plots, for teach again.
@@ -2788,7 +2828,7 @@ const PAGE_ROBOT: CgComponent = (() => {
   return {
     path: 'Pages/My robot',
     description: 'My robots (P106 IG-005): Pip big on his stage with his name, paint, eyes, hat (gifts, never bought) and stickers; then a card per robot of the island — the ones she has, each with its name, look, blocks, upgrade and where it works, and the ones an islander will lend, with who and after what.',
-    repeats: { source: 'array', rowFields: ['id', 'robotId', 'kind', 'name', 'owned', 'locked', 'tag', 'tagClass', 'cardClass', 'wears', 'color', 'eye', 'hat', 'accessory', 'paints', 'hats', 'abilities', 'upgradeText', 'upgradeClass', 'whereText', 'nameWord', 'colourWord', 'hatWord', 'canDoWord', 'upgradeWord', 'whereWord', 'brainWord', 'brainText', 'copyWord', 'copyChips', 'hasCopy', 'saidText', 'hasSaid'] },
+    repeats: { source: 'array', rowFields: ['id', 'robotId', 'kind', 'name', 'owned', 'locked', 'tag', 'tagClass', 'cardClass', 'wears', 'color', 'eye', 'hat', 'accessory', 'paints', 'hats', 'abilities', 'upgradeText', 'upgradeClass', 'whereText', 'nameWord', 'colourWord', 'hatWord', 'canDoWord', 'upgradeWord', 'whereWord', 'brainWord', 'brainText', 'copyWord', 'copyChips', 'hasCopy', 'saidText', 'hasSaid', 'sendWord', 'sendChips', 'hasSend'] },
     nodes: [
       ...base.nodes,
       // P106 IG-005: the fleet — a card per robot (Robot cards), written through Update robot (one per field).
@@ -2808,6 +2848,9 @@ const PAGE_ROBOT: CgComponent = (() => {
       logic('rbSettle', TIMER_NODE, 'The cards, once they stop changing', { duration: PAD_SETTLE_MS }),
       logic('rbHold', L('Latch'), 'The settled cards'),
       gate('rbCopyOk', 'Was it copied?'),
+      // P108 IW-006 owed (lane O): a robot sent to a job from its card (written only when it went).
+      logic('rbSend', L('Send robot'), 'A robot sent to a job she has won'),
+      gate('rbSendOk', 'Was it sent?'),
       place('rbHead', C.head, 'The head', 'rbWrap'),
       group('rbGrid', 'Stage and options', 'rbWrap', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-robo' }, ['rbStage', 'rbOptions']),
       group('rbStage', 'The stage', 'rbGrid', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-robo-stage' }, ['rbGarden']),
@@ -2841,6 +2884,23 @@ const PAGE_ROBOT: CgComponent = (() => {
       wire('rbCopy', 'ok', 'rbCopyOk', 'condition'),
       wire('rbCopy', 'ran', 'rbCopyOk', 'eval'),
       wire('rbCopyOk', 'ontrue', 'rbStore', 'write'),
+      // P108 IW-006 owed (lane O): the slot reads her stickers (a gift from before the shop) and her requests done (on the
+      // shelf, the jobs she has won); a card's send chip → Send robot → the store, the line on that robot's card.
+      wire('rbFam', 'stickers', 'rbCards', 'stickers'),
+      wire('rbFam', 'done', 'rbCards', 'done'),
+      wire('rbStore', 'model', 'rbSend', 'model'),
+      wire('rbFam', 'profileId', 'rbSend', 'profileId'),
+      wire('rbFam', 'lang', 'rbSend', 'lang'),
+      wire('rbWords', 'words', 'rbSend', 'words'),
+      wire('rbRequests', 'requests', 'rbSend', 'requests'),
+      wire('rbFleetEach', 'itemOutput-robotId', 'rbSend', 'robotId'),
+      wire('rbFleetEach', 'itemOutput-sendTo', 'rbSend', 'sendTo'),
+      wire('rbFleetEach', 'itemOutputSignal-sent', 'rbSend', 'go'),
+      wire('rbSend', 'told', 'rbCards', 'told'),
+      wire('rbSend', 'model', 'rbStore', 'model'),
+      wire('rbSend', 'ok', 'rbSendOk', 'condition'),
+      wire('rbSend', 'ran', 'rbSendOk', 'eval'),
+      wire('rbSendOk', 'ontrue', 'rbStore', 'write'),
       ...(
         [
           ['rbSetName', 'name', 'named'],

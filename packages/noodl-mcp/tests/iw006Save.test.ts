@@ -28,6 +28,8 @@ const win = (model: any, id: string, robotId?: string) =>
 const buy = (p: any, id: string, opts?: Record<string, unknown>) => helper<any>(SAVE_HELPERS, 'buyItem', p, id, opts);
 const earn = (p: any, n: unknown) => helper<number>(SAVE_HELPERS, 'earnShells', p, n);
 const balance = (p: any) => helper<number>(SAVE_HELPERS, 'balanceOf', p);
+/** P108 IW-006 owed (lane O): a price is SHOP's, never a literal (the rows below were written at copy 30, brain16 25, rain 6). */
+const P = (id: string) => SHOP.find((i) => i.id === id)!.price;
 
 describe('IW-006 — save v5 (session-4 base)', () => {
   it('the version is 5; the catalogue is sound (every tab known, every price a whole positive number, every id once, each kind carries what buying it needs)', () => {
@@ -92,7 +94,7 @@ describe('IW-006 — save v5 (session-4 base)', () => {
     p.island.plots['tulips-three'].live = { things: clone(req('tulips-three').things), age: 17, seed: 12345, spent: [{ kind: 'stone', x: 1, y: 1 }], helper: 'selfcan' };
     p.island.robots[p.island.robots.indexOf(copy)].brain = 20;
     m = helper<any>(SAVE_HELPERS, 'modelOf', m);
-    expect(m.profiles[0].shells).toEqual({ earned: 90, spent: 30 + 25 + 6 });
+    expect(m.profiles[0].shells).toEqual({ earned: 90, spent: P('robot:pip') + P('brain16') + P('rain') });
     expect(m.profiles[0].owned).toEqual(['rain']);
     expect(m.island.robots.map((r: any) => r.brain)).toEqual([16, undefined, 20]);
     expect([m.island.plots['tulips-three'].live.age, m.island.plots['tulips-three'].live.helper]).toEqual([17, 'selfcan']);
@@ -123,7 +125,7 @@ describe('IW-008 (lane C) — save v5 with a crew: a robot row’s program and t
   it('🔴 a copy that carries a program and helps on a plot round-trips (8th and 9th fields of its row); r1 carrying one is a row; nothing else moves', () => {
     const m = win(kid(), 'tulips-three', 'r1');
     const p = m.profiles[0];
-    earn(p, 30);
+    earn(p, P('robot:pip'));
     const copy = buy(p, 'robot:pip', { name: 'Sprout' });
     const row = p.island.robots.find((r: any) => r.id === copy.robotId);
     row.program = clone(req('tulips-three').referenceProgram);
@@ -152,9 +154,9 @@ describe('IW-006 / IW-008 — the purchase rule (buyItem) and the wallet (sessio
   it('🔴 AC3: a price she cannot pay says how many more shells, and changes nothing', () => {
     const m = win(kid(), 'path-postbox');
     const p = m.profiles[0];
-    earn(p, 22);
+    earn(p, P('robot:pip') - 8);
     const before = clone(m);
-    expect(buy(p, 'robot:pip')).toEqual({ ok: false, error: 'short', short: 8, left: 22, robotId: '' });
+    expect(buy(p, 'robot:pip')).toEqual({ ok: false, error: 'short', short: 8, left: P('robot:pip') - 8, robotId: '' });
     expect(m).toEqual(before);
     // Known-firing: with 8 more, it buys, and what is left is what the card said.
     earn(p, 8);

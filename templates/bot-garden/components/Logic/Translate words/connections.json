@@ -2255,6 +2255,60 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6oFull",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6oFull"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6oHelpsOn",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6oHelpsOn"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6oNews",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6oNews"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6oNewsItem",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6oNewsItem"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6oSendTo",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6oSendTo"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6oSentTo",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6oSentTo"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6oUpLater",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6oUpLater"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6oUpMine",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6oUpMine"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw6oUpShop",
+      "toId": "translatewordsOut",
+      "toProperty": "iw6oUpShop"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw8cBrainL",
       "toId": "translatewordsOut",
       "toProperty": "iw8cBrainL"

@@ -172,6 +172,21 @@
           "name": "hasSaid",
           "plug": "output",
           "type": "boolean"
+        },
+        {
+          "name": "sendWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sendChips",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasSend",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 590,
@@ -196,6 +211,7 @@
         "rcWhereL",
         "rcWhere",
         "rcCopy",
+        "rcSend",
         "rcSaid"
       ],
       "parameters": {
@@ -882,6 +898,83 @@
       "y": 3760
     },
     {
+      "id": "rcSend",
+      "type": "Group",
+      "label": "Send it to a job",
+      "parent": "rcCard",
+      "children": [
+        "rcSendL",
+        "rcSendRow"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "cssClassName": "bg-robot-send",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 3880
+    },
+    {
+      "id": "rcSendL",
+      "type": "Text",
+      "label": "Send it to a job",
+      "parent": "rcSend",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps"
+      },
+      "x": 160,
+      "y": 4000
+    },
+    {
+      "id": "rcSendRow",
+      "type": "Group",
+      "label": "The jobs she has won",
+      "parent": "rcSend",
+      "children": [
+        "rcSendEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 4120
+    },
+    {
+      "id": "rcSendEach",
+      "type": "For Each",
+      "label": "One chip per job",
+      "parent": "rcSendRow",
+      "parameters": {
+        "template": "/Robot/Chip",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 4240
+    },
+    {
       "id": "rcSaid",
       "type": "Text",
       "label": "What the copy did",
@@ -898,7 +991,7 @@
         "mounted": false
       },
       "x": 100,
-      "y": 3880
+      "y": 4360
     },
     {
       "id": "rcIsOwned",
@@ -977,6 +1070,16 @@
         },
         {
           "name": "copied",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "sendTo",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sent",
           "plug": "input",
           "type": "signal"
         }

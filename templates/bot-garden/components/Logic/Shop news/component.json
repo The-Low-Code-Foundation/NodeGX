@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "040b6587-07af-5ea0-8418-7613c0d3ee3a",
+  "name": "Shop news",
+  "path": "/Logic/Shop news",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The win card’s line when this first win puts an upgrade on the shop’s shelf. Runs on Go; answers Ran once its outputs are set."
+}

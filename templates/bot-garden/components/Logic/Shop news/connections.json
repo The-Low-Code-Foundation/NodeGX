@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "040b6587-07af-5ea0-8418-7613c0d3ee3a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "shopnewsIn",
+      "fromProperty": "lang",
+      "toId": "shopnewsFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "shopnewsIn",
+      "fromProperty": "model",
+      "toId": "shopnewsFn",
+      "toProperty": "in-model"
+    },
+    {
+      "fromId": "shopnewsIn",
+      "fromProperty": "newlyDone",
+      "toId": "shopnewsFn",
+      "toProperty": "in-newlyDone"
+    },
+    {
+      "fromId": "shopnewsIn",
+      "fromProperty": "profileId",
+      "toId": "shopnewsFn",
+      "toProperty": "in-profileId"
+    },
+    {
+      "fromId": "shopnewsIn",
+      "fromProperty": "requestId",
+      "toId": "shopnewsFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "shopnewsIn",
+      "fromProperty": "words",
+      "toId": "shopnewsFn",
+      "toProperty": "in-words"
+    },
+    {
+      "fromId": "shopnewsIn",
+      "fromProperty": "go",
+      "toId": "shopnewsFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "shopnewsFn",
+      "fromProperty": "out-has",
+      "toId": "shopnewsOut",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "shopnewsFn",
+      "fromProperty": "out-text",
+      "toId": "shopnewsOut",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "shopnewsFn",
+      "fromProperty": "success",
+      "toId": "shopnewsOut",
+      "toProperty": "ran"
+    }
+  ]
+}

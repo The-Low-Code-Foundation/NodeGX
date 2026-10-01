@@ -8,7 +8,7 @@
  *   and the island works that plot with it.
  */
 import * as vm from 'vm';
-import { REQUESTS } from './cg002Content';
+import { REQUESTS, SHOP } from './cg002Content';
 import { ADD_PROFILE_SCRIPT, COMPLETE_REQUEST_SCRIPT, SAVE_HELPERS, helper, runScript } from './cg002Scripts';
 import { ALL_WORDS_JSON, ASSIGN_ROBOT_SCRIPT, FAMILY_SCRIPT, ISLAND_WORLD_SCRIPT } from './cg003Scripts';
 import { ISLAND_TICK_SCRIPT } from './ig004Island';
@@ -86,7 +86,8 @@ describe('P108 s4 join — lane H × lane C: a copy bought in the shop is sent t
   it('🔴 Buy "a new Pip" named Sprout → the crew sends Sprout to the tulips Pip won → the island works the tulips with Sprout', () => {
     // Pip wins the tulips, then the door: he works the door; the tulips keep their program, nobody on them.
     let m = win(win(kid(), 'tulips-three', 'r1'), 'tulip-door', 'r1');
-    m = funded(m, 40);
+    // P108 IW-006 owed (lane O): the copy's price is SHOP's (was the literal 40 = 30 + 10).
+    m = funded(m, SHOP.find((i) => i.id === 'robot:pip')!.price + 10);
     const b = bare(BUY_SCRIPT, { model: m, itemId: SHOP_IDS.item + 'robot:pip', name: 'Sprout' });
     expect([b.ok, b.left]).toEqual([true, 10]);
     const sprout = b.robotId;

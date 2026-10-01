@@ -39,6 +39,10 @@ const win = (model: any, id: string, robotId?: string) =>
 const active = (m: any) => m.profiles.find((p: any) => p.id === m.island.activeId);
 /** A family with shells: earned through the one earning rule (earnShells), as lane E's runs will. */
 const funded = (m: any, n: number) => { helper(SAVE_HELPERS, 'earnShells', active(m), n); return m; };
+/** P108 IW-006 owed (lane O): a price is SHOP's, never a literal (lane O retuned the prices; the rows below read them). */
+const P = (id: string) => SHOP.find((i) => i.id === id)!.price;
+/** A copy's price: the rows below were written at 30 (32 = a copy + 2, 22 = a copy − 8, 50 / 40 = a copy + 20 / + 10). */
+const COPY = P('robot:pip');
 
 const rows = (model: any, tab?: string, lang = 'en') => bare(SHOP_ROWS_SCRIPT, { model, words: WORDS, lang, tab });
 const card = (model: any, itemId: string, extra: Record<string, unknown> = {}, lang = 'en') => bare(SHOP_CARD_SCRIPT, { model, words: WORDS, lang, requests: REQUESTS, itemId: SHOP_IDS.item + itemId, ...extra });
@@ -69,8 +73,8 @@ describe('IW-006 AC3 — the shop: what it shows', () => {
   });
 
   it('🔴 the balance on the button: earned − spent, EN and FR; it falls by what she bought', () => {
-    const m = funded(kid(), 32);
-    expect([rows(m).btnText, rows(m, undefined, 'fr').btnText]).toEqual(['🐚 32 · Shop', '🐚 32 · Boutique']);
+    const m = funded(kid(), COPY + 2);
+    expect([rows(m).btnText, rows(m, undefined, 'fr').btnText]).toEqual([`🐚 ${COPY + 2} · Shop`, `🐚 ${COPY + 2} · Boutique`]);
     const b = buy(m, 'robot:pip');
     expect(b.ok).toBe(true);
     expect([rows(b.model).balance, rows(b.model).btnText, rows(b.model).balText]).toEqual([2, '🐚 2 · Shop', '🐚 2 shells']);
@@ -114,7 +118,7 @@ describe('IW-006 AC3 — the shop: what it shows', () => {
   });
 
   it('Helpers: all three; one she holds says Ready to use', () => {
-    const m = funded(kid(), 20);
+    const m = funded(kid(), P('rain'));
     expect(ids(rows(m, 'helpers').items)).toEqual(['rain', 'selfcan', 'barrow']);
     const b = buy(m, 'rain');
     const held = rows(b.model, 'helpers').items.map((x: any) => [x.id.replace(SHOP_IDS.item, ''), x.tag]);
@@ -124,21 +128,21 @@ describe('IW-006 AC3 — the shop: what it shows', () => {
 
 describe('IW-006 AC3 — the purchase card (D4)', () => {
   it('🔴 what she has, the cost, what is left; a copy’s card asks its name (the kind’s and its number by default)', () => {
-    const m = funded(kid(), 32);
+    const m = funded(kid(), COPY + 2);
     const c = card(m, 'robot:pip');
-    expect([c.showCard, c.icon, c.name, c.have, c.cost, c.left, c.showLeft, c.showShort, c.canBuy, c.showName, c.namePlaceholder]).toEqual([true, '🤖', 'A new Pip', 'You have 🐚 32', 'It costs 🐚 30', 'Left after: 🐚 2', true, false, true, true, 'Pip 2']);
+    expect([c.showCard, c.icon, c.name, c.have, c.cost, c.left, c.showLeft, c.showShort, c.canBuy, c.showName, c.namePlaceholder]).toEqual([true, '🤖', 'A new Pip', `You have 🐚 ${COPY + 2}`, `It costs 🐚 ${COPY}`, 'Left after: 🐚 2', true, false, true, true, 'Pip 2']);
     const fr = card(m, 'robot:pip', {}, 'fr');
-    expect([fr.name, fr.have, fr.cost, fr.left, fr.namePlaceholder]).toEqual(['Un nouveau Pip', 'Tu as 🐚 32', 'Ça coûte 🐚 30', 'Il te restera 🐚 2', 'Pip 2']);
+    expect([fr.name, fr.have, fr.cost, fr.left, fr.namePlaceholder]).toEqual(['Un nouveau Pip', `Tu as 🐚 ${COPY + 2}`, `Ça coûte 🐚 ${COPY}`, 'Il te restera 🐚 2', 'Pip 2']);
   });
 
   it('🔴 a price she cannot pay says how many more shells, and has no Buy (EN, FR, one shell)', () => {
-    const m = funded(kid(), 22);
+    const m = funded(kid(), COPY - 8);
     const c = card(m, 'robot:pip');
-    expect([c.have, c.cost, c.showLeft, c.showShort, c.short, c.canBuy, c.showName]).toEqual(['You have 🐚 22', 'It costs 🐚 30', false, true, 'You need 8 more shells.', false, false]);
+    expect([c.have, c.cost, c.showLeft, c.showShort, c.short, c.canBuy, c.showName]).toEqual([`You have 🐚 ${COPY - 8}`, `It costs 🐚 ${COPY}`, false, true, 'You need 8 more shells.', false, false]);
     expect(card(m, 'robot:pip', {}, 'fr').short).toBe('Il te faut encore 8 coquillages.');
-    expect(card(funded(kid(), 29), 'robot:pip').short).toBe('You need 1 more shell.');
+    expect(card(funded(kid(), COPY - 1), 'robot:pip').short).toBe('You need 1 more shell.');
     // Known-firing: with exactly the price, Buy shows and nothing is short.
-    expect([card(funded(kid(), 30), 'robot:pip').canBuy, card(funded(kid(), 30), 'robot:pip').left]).toEqual([true, 'Left after: 🐚 0']);
+    expect([card(funded(kid(), COPY), 'robot:pip').canBuy, card(funded(kid(), COPY), 'robot:pip').left]).toEqual([true, 'Left after: 🐚 0']);
   });
 
   it('🔴 a brain’s card picks the robot: only robots at the size before; one alone is picked for her; two wait for her tap', () => {
@@ -162,7 +166,7 @@ describe('IW-006 AC3 — the purchase card (D4)', () => {
   });
 
   it('🔴 “It’s yours!” on the card of what was just bought — and only that (no “you need N more” under it); on no other card', () => {
-    const m = funded(kid(), 50);
+    const m = funded(kid(), COPY + 20);
     const b = buy(m, 'robot:pip');
     const c = card(b.model, 'robot:pip', { bought: 'robot:pip' });
     expect([c.done, c.showDone, c.showFigures, c.showShort, c.canBuy, c.showName]).toEqual([word('iw6hBought'), true, false, false, false, false]);
@@ -175,15 +179,15 @@ describe('IW-006 AC3 — the purchase card (D4)', () => {
 
 describe('IW-006 AC2 / AC3 — Buy: the one purchase rule on her profile', () => {
   it('🔴 Buy spends through buyItem only: spent rises by the price, earned never moves; a refusal changes nothing', () => {
-    const m = funded(kid(), 40);
+    const m = funded(kid(), COPY + 10);
     const before = clone(active(m).shells);
     const b = buy(m, 'robot:pip', { name: 'Bubbles' });
     const p = active(b.model);
-    expect([b.ok, b.bought, p.shells.earned, p.shells.spent - before.spent, p.island.robots[p.island.robots.length - 1].name]).toEqual([true, 'robot:pip', 40, 30, 'Bubbles']);
+    expect([b.ok, b.bought, p.shells.earned, p.shells.spent - before.spent, p.island.robots[p.island.robots.length - 1].name]).toEqual([true, 'robot:pip', COPY + 10, COPY, 'Bubbles']);
     const no = buy(b.model, 'robot:pip');
-    expect([no.ok, no.error, no.short, no.bought, active(no.model).shells]).toEqual([false, 'short', 20, '', p.shells]);
+    expect([no.ok, no.error, no.short, no.bought, active(no.model).shells]).toEqual([false, 'short', COPY - 10, '', p.shells]);
     // A brain for the robot the card chose (its row id).
-    const br = buy(funded(b.model, 20), 'brain16', { robotId: SHOP_IDS.robot + 'r1' });
+    const br = buy(funded(b.model, P('brain16')), 'brain16', { robotId: SHOP_IDS.robot + 'r1' });
     expect([br.ok, active(br.model).island.robots[0].brain]).toEqual([true, 16]);
     // Round-trip: what she bought survives the save code.
     const back = runScript(DECODE_SAVE_SCRIPT, { code: runScript(ENCODE_SAVE_SCRIPT, { model: br.model }).code }).model;
@@ -308,7 +312,7 @@ describe('IW-006 — the upgrades moved to the shop', () => {
   it('🔴 a first win gives no upgrade now (Upgraded empty, no sticker); the shop sells it; bought, it works as the gift did (Pip’s can 6)', () => {
     const won = win(kid(), 'rows-trick');
     expect([won.upgraded, active(won.model).stickers.includes('can+')]).toEqual([[], false]);
-    const m = funded(won.model, 15);
+    const m = funded(won.model, P('can+'));
     expect(card(m, 'can+').canBuy).toBe(true);
     const b = buy(m, 'can+');
     const pip = helper<any[]>(SAVE_HELPERS, 'robotRowsOf', active(b.model))[0];
@@ -384,12 +388,12 @@ describe('arms: each rule mutated, and the row that kills it', () => {
   });
   it('the card just bought keeps its figures → the “only that” row fails', () => {
     const m = mutate(SHOP_CARD_SCRIPT, 'if ((justBought && !held) || justUsed) {', 'if (false) {');
-    const b = buy(funded(kid(), 50), 'robot:pip');
+    const b = buy(funded(kid(), COPY + 20), 'robot:pip');
     expect(bare(m, { model: b.model, words: WORDS, lang: 'en', requests: REQUESTS, itemId: 'robot:pip', bought: 'robot:pip' }).showShort).toBe(true);
   });
   it('the card forgets the short price → the short row’s Buy shows', () => {
     const m = mutate(SHOP_CARD_SCRIPT, 'out.canBuy = can && !blocked;', 'out.canBuy = !blocked;');
-    expect(bare(m, { model: funded(kid(), 22), words: WORDS, lang: 'en', requests: REQUESTS, itemId: 'robot:pip' }).canBuy).toBe(true);
+    expect(bare(m, { model: funded(kid(), COPY - 8), words: WORDS, lang: 'en', requests: REQUESTS, itemId: 'robot:pip' }).canBuy).toBe(true);
   });
   it('the shop shows every upgrade at once → the upgrades row fails', () => {
     const m = mutate(SHOP_ROWS_SCRIPT, "if (!up || p.island.done.indexOf(up.unlockedBy) === -1) return false;", 'if (!up) return false;');
@@ -398,14 +402,14 @@ describe('arms: each rule mutated, and the row that kills it', () => {
   it('a helper that stays in owned when used → the rain row fails', () => {
     const m = mutate(USE_HELPER_SCRIPT, 'p.owned.splice(p.owned.indexOf(it.id), 1);', '');
     let fam = win(kid(), 'tulips-three', 'r1').model;
-    fam = funded(fam, 10);
+    fam = funded(fam, P('rain'));
     const b = buy(fam, 'rain');
     expect(active(bare(m, { model: b.model, itemId: 'rain', plotId: 'tulips-three', state: isle(b.model).state }).model).owned).toEqual(['rain']);
   });
   it('a riding helper that outlives its finish line → the self-filling can row fails (it is still riding once the job waits)', () => {
     // Merge (s4): the finish line now also writes helper '' (lane E's Island keep drops it from the save); the arm keeps it riding.
     const m = mutate(ISLAND_TICK_SCRIPT, "out.helper = '';\n    return out;", 'out.helper = h;');
-    let fam = funded(win(kid(), 'tulips-three', 'r1').model, 10);
+    let fam = funded(win(kid(), 'tulips-three', 'r1').model, P('selfcan'));
     const b = buy(fam, 'selfcan');
     let s = use(b.model, 'selfcan', 'tulips-three', isle(b.model).state).state;
     for (let t = 0; t < 200 && s.live['tulips-three'].phase !== 'wait'; t++) s = bare(m, { state: s, built: s }).state;
@@ -419,7 +423,7 @@ describe('arms: each rule mutated, and the row that kills it', () => {
   it('the build counts a plot’s live again → a helper used rebuilds the island (the kept-island row fails)', () => {
     // Merge (s4): the hash line is lane E's (iw6Unlive), the rule the same.
     const m = mutate(ISLAND_WORLD_SCRIPT, 'islHash(JSON.stringify([iw6Unlive(saved),', 'islHash(JSON.stringify([saved,');
-    const b = buy(funded(win(kid(), 'tulips-three', 'r1').model, 10), 'selfcan');
+    const b = buy(funded(win(kid(), 'tulips-three', 'r1').model, P('selfcan')), 'selfcan');
     const f = (model: any, kept?: unknown) => { const r = runScript(FAMILY_SCRIPT, { model }); return bare(m, { requests: REQUESTS, plots: r.plots, robots: r.robots, done: r.done, band: r.band, pins: [], kept }); };
     const s0 = f(b.model).state;
     const u = use(b.model, 'selfcan', 'tulips-three', s0);
