@@ -63,6 +63,8 @@ Depends on IW-005 (seek), IW-006 (the shop). Lane B or E.
   fence once finished, the puff on the last drop (2D: a building seen below its last stage then at it; 3D: markThings →
   `anims.puffs`, shown and swelled for PUFF_MS), her land's tree by its planks, a plank on a robot's back, the ghost.
   Draw world passes the tree, the ghost and each part's `bstage`, `of`, `bx`, `bw`.
+- **A land bowl's change is a keep moment too** (`0126a13d1`, lane A's finding: the store lagged her bowl by a carrot):
+  `iw7bDropMoment` also fires when an animal's bowl on the land changes (fed or worn). Row + arm.
 - **Drives:** `scripts/devtools/drive-iw007-build.js` (new, 2D + `--mode 3d`, in `drives/drive-all.sh` as `build`,
   `build-3d`); lane B clauses at the END of `drive-cg001-kit.js` (4) and `drive-ig007-3d.js` (5).
 
@@ -70,18 +72,20 @@ Depends on IW-005 (seek), IW-006 (the shop). Lane B or E.
 
 | gate | exit | total | previous |
 |---|---|---|---|
-| `iw007Building.test.ts` (NEW: 15 rows + 4 arms) | 0 | **19 / 19** | — |
+| `iw007Building.test.ts` (NEW: 16 rows + 5 arms) | 0 | **21 / 21** | — |
 | `iw007Build.test.ts` | 0 | **22 / 22** (the [B] rows green; the [A] rows also pass on this plumbing) | 18 + 4 red |
 | `cg001GardenKit` · `ig007Garden3d` | 0 · 0 | **62** · **52** (+5, +2: her land drawn) | 57 · 50 |
 | cg002Engine 259 · cg003Template 148 · cg005Olive 41 · cg006Requests 83 · ig004Island 38 · iw004Blocks 59 · p108s2Join 4 · iw003Missions 63 · iw006Save 17 · iw006Earn 34 · iw006Shop 34 · iw008Crew 25 · iwLook 15 · p108s4Join 3 | 0 each | same | same |
-| all spec files | 0 | **978** in 18 files | 952 (930 + iw007Build 22) |
+| all spec files | 0 | **980** in 18 files | 952 (930 + iw007Build 22) |
 | shell `node --test` | 0 | 92 / 92 | 92 |
 | `npm run template:garden` | 0 | regenerated, committed with each group | 0 |
 | kit fixture 2D `drive-cg001-kit.js` | 0 | **48 / 48** (+4) | 44 |
 | kit fixture 3D `drive-ig007-3d.js` | 0 | **35 / 35** (+5) | 30 |
 | `drive-iw007-build.js` 2D (dev deploy) | 0 | **26 / 26** (the spa built in 104 s) | — |
 | `drive-iw007-build.js --mode 3d` (dev deploy) | 0 | **4 / 4** (the live puff seen: 4 samples; no Too Slow) | — |
-| drive-all (page + named drives, final commit) | READINGS-PENDING | READINGS-PENDING | 331 · … |
+| `drives/drive-all.sh island island-3d shop earn crew robots robots-3d stones stones-3d kit2d kit3d build build-3d` on `a0917409e` (one deploy; exit 0, DONE) | generate 0 · 0 drift · deploy fresh · page drive 0 | **page 331/331** · island `--perf` 69/69 · island-3d 5/5 · shop **54/60** · earn 15/15 · crew 39/39 · robots 60/60 · robots-3d 4/4 · stones 32/32 · stones-3d 14/14 · kit2d 48/48 · kit3d 35/35 · build 26/26 · build-3d 4/4 | 331 · 69 · 5 · 60 · 15 · 39 · 60 · 4 · 32 · 14 · 44 · 30 |
+| shop drive again (its Build clause re-pointed: the six reds were the old "Build sells nothing yet" clause at three widths × EN/FR), same deploy | 0 | **60 / 60** | 60 |
+| `drive-iw007-build.js` 2D on the final commit `0126a13d1` (the land bowl moment), fresh deploy | 0 | **26 / 26** | 26 |
 
 **Looked at** (`iw007-build-scratch/`): `dev/build-shots/*-land.png` (her land ×3) — the ghost green at (3, 1), red over
 the rock's tile; the spa's pegs and string on dirt, the frame (Pip at its side), the walls, finished with its red roof,
