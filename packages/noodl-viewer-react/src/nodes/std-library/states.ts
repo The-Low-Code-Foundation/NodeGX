@@ -48,6 +48,8 @@ interface StatesInstance extends NodeInstance {
     startValues: Record<string, unknown>;
     /** GAM-006 R7: colours already reported, so a bad colour is reported once, not once per transition. */
     warnedUnreadableColors?: Record<string, boolean>;
+    /** P107-C21: the unreadable transitions already reported, keyed by port and value. */
+    warnedUnreadableTransitions?: Record<string, boolean>;
     bezierEaseCurves: Record<string, unknown>;
     transitionFuncs: Record<string, { get(t: number): number }>;
     valuesAreInitialised: boolean;
@@ -86,9 +88,25 @@ interface StatesInstance extends NodeInstance {
   updateAtStatePorts(): void;
   _failUnknownState(state: string, token?: OutcomeToken): void;
   warnUnreadableColor(value: string, color: string): void;
+  warnUnreadableTransition(port: string, transition: unknown): void;
 }
 
 const defaultDuration = 300;
+
+/** The transition a state uses when neither the value nor the state's Default names one. */
+const DEFAULT_TRANSITION: StateTransition = { curve: [0.0, 0.0, 0.58, 1.0], dur: 300, delay: 0 };
+
+/**
+ * P107-C21 — whether `bezier-easing` 1.1.1 accepts `points`: four finite numbers, both x in
+ * [0, 1]. It THROWS for anything else, and it is called inside the frame-end callback, so a
+ * refused curve abandoned the move half-done: the state did not change, no outcome, and the rest
+ * of the frame's queue was dropped.
+ */
+function curveAccepted(points: unknown): boolean {
+  if (!Array.isArray(points) || points.length !== 4) return false;
+  if (!points.every((p) => typeof p === 'number' && isFinite(p))) return false;
+  return points[0] >= 0 && points[0] <= 1 && points[2] >= 0 && points[2] <= 1;
+}
 const previousStates: Record<string, string[] | undefined> = {},
   previousValues: Record<string, string[] | undefined> = {};
 
@@ -577,6 +595,29 @@ const StatesNode: NodeDefinitionOptions = {
       );
     },
 
+    /** P107-C21 — reported once per port and value, as an unreadable colour is. */
+    warnUnreadableTransition: function (this: StatesInstance, port: string, transition: unknown) {
+      const internal = this._internal;
+      const warned = internal.warnedUnreadableTransitions || (internal.warnedUnreadableTransitions = {});
+      let shown: string;
+      try {
+        shown = JSON.stringify(transition);
+      } catch (e) {
+        shown = String(transition);
+      }
+      const key = port + ':' + shown;
+      if (warned[key]) return;
+      warned[key] = true;
+      if (typeof this.raiseRuntimeError !== 'function') return;
+      this.raiseRuntimeError(
+        'states/unreadable-transition',
+        `The transition "${port}" is set to ${shown}, which is not a curve, so moves into that state use ` +
+          `the state's Default transition instead. Set it in the curve editor, or as { curve: [x1, y1, x2, y2], dur, delay } ` +
+          `with both x between 0 and 1.`,
+        { port, transition }
+      );
+    },
+
     jumpToState: function (this: StatesInstance, state?: string) {
       const internal = this._internal;
       if (!internal.states) return;
@@ -788,21 +829,36 @@ const StatesNode: NodeDefinitionOptions = {
             this.flagOutputDirty(v);
           } else {
             // Figure out transition curve
-            let transitionCurve: StateTransition = internal.stateParameters['transition-' + state + '-' + v];
-            if (!transitionCurve)
-              transitionCurve = internal.stateParameters['transitiondef-' + state] || {
-                curve: [0.0, 0.0, 0.58, 1.0],
-                dur: 300,
-                delay: 0
-              };
+            const ownPort = 'transition-' + state + '-' + v;
+            const defaultPort = 'transitiondef-' + state;
+            let transitionCurve: StateTransition = internal.stateParameters[ownPort];
+            let fromPort = ownPort;
+            if (!transitionCurve) {
+              transitionCurve = internal.stateParameters[defaultPort] || DEFAULT_TRANSITION;
+              fromPort = defaultPort;
+            }
 
-            if (
-              (transitionCurve.dur === 0 && transitionCurve.delay === 0) ||
+            const setsAtOnce = (c: StateTransition) =>
+              (c.dur === 0 && c.delay === 0) ||
               !internal.useTransitions ||
               // A state the pass only passed through: settle it so it is observable, rather
               // than starting an animation the next queued state would cancel a line later.
-              settleImmediately
-            ) {
+              settleImmediately;
+
+            // P107-C21: a transition that would animate along a curve the library refuses
+            // (`{ dur }` with no `curve`, "easeOut", `true`, an x outside [0, 1]) reads as the
+            // state's Default — or, when that is the one refused or is unreadable too, the
+            // built-in ease-out — and is reported once.
+            if (!setsAtOnce(transitionCurve) && !curveAccepted(transitionCurve.curve)) {
+              this.warnUnreadableTransition(fromPort, transitionCurve);
+              const stateDefault: StateTransition = internal.stateParameters[defaultPort];
+              transitionCurve =
+                fromPort === ownPort && stateDefault && (setsAtOnce(stateDefault) || curveAccepted(stateDefault.curve))
+                  ? stateDefault
+                  : DEFAULT_TRANSITION;
+            }
+
+            if (setsAtOnce(transitionCurve)) {
               // Simply set the target value
               internal.currentValues[v] = internal.stateParameters['value-' + state + '-' + v];
               this.flagOutputDirty(v);

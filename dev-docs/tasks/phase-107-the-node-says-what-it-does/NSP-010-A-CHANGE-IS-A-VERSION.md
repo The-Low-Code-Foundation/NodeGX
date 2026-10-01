@@ -37,6 +37,13 @@
 - Memory: *an on-load migration owes its own save.* If an answer is *project migration*, that
   migration's task owns the save; this task only records the answer.
 
+- **Two holes a stranger measured (s16, round 3b — [NSP-006 §5.8](NSP-006-A-STRANGERS-TARGET.md)).** Three specs
+  are now v2 by a ruling (Boolean To String s12, Animate To Value and States s16), and each change note is a
+  comment above `version:` — the format has no field for it, and a scenario says which version it pins only in its
+  name. A target cannot say which version it implements, so an out-of-date one reads as trace differences, not as
+  "v1 target, v2 spec". And no mutant encodes the previous version (Animate To Value's count stayed 25), so
+  mutation grades nothing about a change. This task's gate is where both belong.
+
 ## 5. Built
 
 *(empty)*

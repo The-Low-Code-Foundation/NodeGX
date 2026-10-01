@@ -114,10 +114,21 @@
     "steps": ["settle", { "advance": 400 }, "settle"]
   },
   {
-    "name": "a transition that is not a curve (no `curve`, or x outside [0, 1]): the spec sets the value at once — on the runtime the move throws inside the frame-end callback, the state does not move and no outcome is reported",
-    "because": "states.ts :811 BezierEasing(transitionCurve.curve); bezier-easing 1.1.1 :63-79 throws; node.ts :743-746 the callback, nodecontext.ts :465-472 logs it",
-    "row": "NSP-013 §6 C21",
+    "name": "a transition that is not a curve (no `curve`) reads as the state's Default — here the built-in ease-out over 300 ms, since B has none (v2; was row C21: the move threw inside the frame-end callback, the state did not move and no outcome was reported)",
+    "because": "bezier-easing refuses anything but four finite numbers with both x in [0, 1]; v2 reads such a transition as the state's Default, else the built-in one",
     "params": { "states": "A,B", "values": "x,y", "value-A-x": 0, "value-B-x": 10, "value-A-y": 0, "value-B-y": 10, "transition-B-y": { "dur": 100, "delay": 0 } },
-    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 100 }, "settle", { "signal": "to-A" }, "settle"]
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 100 }, "settle", { "advance": 200 }, "settle", { "signal": "to-A" }, "settle"]
+  },
+  {
+    "name": "a refused value transition takes the state's own Default when that one is readable: y moves over B's Default (100 ms, linear), not the built-in 300 ms (v2, C21)",
+    "because": "v2: a refused `transition-<state>-<value>` reads as `transitiondef-<state>` when that is a curve the library accepts (or sets at once)",
+    "params": { "states": "A,B", "values": "y", "value-A-y": 0, "value-B-y": 10, "transitiondef-B": { "curve": [0, 0, 1, 1], "dur": 100, "delay": 0 }, "transition-B-y": "easeOut" },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle"]
+  },
+  {
+    "name": "a refused Default reads as the built-in ease-out over 300 ms (v2, C21)",
+    "because": "v2: when the refused transition IS the state's Default, the built-in one is used",
+    "params": { "states": "A,B", "values": "y", "value-A-y": 0, "value-B-y": 10, "transitiondef-B": { "curve": [2, 0, 1, 1], "dur": 100, "delay": 0 } },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 100 }, "settle", { "advance": 200 }, "settle"]
   }
 ]

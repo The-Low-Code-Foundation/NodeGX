@@ -52,13 +52,14 @@
  * not graded (§6.4). `var(--token)` reads through the document; a play has none, so only the
  * token's own fallback is read (color-blend.ts `readColor`).
  *
- * ⚠️ NSP-013 §6 C21: a transition whose `curve` the bezier library refuses (not four finite numbers,
- * or an x outside [0, 1] — any value a wire can carry into a curve port: an object without `curve`,
- * text, `true`) THROWS inside the frame-end callback (:811). The scheduler logs it and the frame goes
- * on: the values before it in the list are already set, the state does not move, the rest of the
- * queue is gone and no outcome is ever reported. The spec cannot write an invocation with no
- * outcome; it writes the row's proposed answer — a curve the library refuses is a value set at
- * once, like a 0 ms curve — and the runtime conformance test attributes the difference to the row.
+ * v2 (NSP-013 §6 C21, ruled "fix it" 2026-10-01): a transition that would animate along a curve the
+ * bezier library refuses (not four finite numbers, or an x outside [0, 1] — any value a wire can
+ * carry into a curve port: an object without `curve`, text, `true`) reads as the state's Default
+ * transition — or, when the Default is the one refused or is unreadable too, the built-in ease-out
+ * over 300 ms — and the node reports it once (`states/unreadable-transition`, not in the trace).
+ * A transition that sets its value at once (0 ms and no delay, Use Transitions off, a state only
+ * passed through) never reads its curve, so it is never refused. In v1 the runtime threw there:
+ * the state did not move and no outcome was reported.
  */
 
 import { defineNode, type OutputDecl, type WorldView } from '../spec';
@@ -325,9 +326,21 @@ function goToState(w: State, state: unknown, settleImmediately: boolean, port: s
       w.current[v] = w.params['value-' + state + '-' + v]; // :787
       flag(w, v, out);
     } else {
-      let c: Curve = w.params['transition-' + state + '-' + v];
-      if (!c) c = w.params['transitiondef-' + state] || DEFAULT_CURVE; // :791-797
-      if ((c.dur === 0 && c.delay === 0) || !w.useTransitions || settleImmediately || !bezierAccepts(c.curve) /* C21: the runtime throws here */) {
+      const ownPort = 'transition-' + state + '-' + v;
+      const defaultPort = 'transitiondef-' + state;
+      let c: Curve = w.params[ownPort];
+      let fromPort = ownPort;
+      if (!c) {
+        c = w.params[defaultPort] || DEFAULT_CURVE; // :791-797
+        fromPort = defaultPort;
+      }
+      const setsAtOnce = (k: Curve) => (k.dur === 0 && k.delay === 0) || !w.useTransitions || settleImmediately;
+      // v2 (C21): a refused curve reads as the state's Default, else the built-in one
+      if (!setsAtOnce(c) && !bezierAccepts(c.curve)) {
+        const stateDefault: Curve = w.params[defaultPort];
+        c = fromPort === ownPort && stateDefault && (setsAtOnce(stateDefault) || bezierAccepts(stateDefault.curve)) ? stateDefault : DEFAULT_CURVE;
+      }
+      if (setsAtOnce(c)) {
         w.current[v] = w.params['value-' + state + '-' + v]; // :807
         flag(w, v, out);
       } else {
@@ -502,7 +515,10 @@ function discover(port: string) {
 
 export const States = defineNode({
   type: 'States',
-  version: 1,
+  // v2 (NSP-013 s16, row C21 ruled "fix it"): a transition that would animate along a curve that is not
+  // four finite numbers with both x in [0, 1] reads as the state's Default transition (or, when the
+  // Default is the one refused or is refused too, ease-out over 300 ms). v1 set such a value at once.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/states.ts; packages/noodl-runtime/src/timerscheduler.ts; node_modules/bezier-easing (1.1.1); packages/noodl-viewer-react/src/color-reader.ts',
   needs: ['clock'],
   worldPool: { advances: [0, 1, 16, 50, 100, 150, 299, 300, 301, 1000] },

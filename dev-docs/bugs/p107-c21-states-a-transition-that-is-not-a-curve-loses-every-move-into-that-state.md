@@ -1,7 +1,7 @@
 ---
 id: P107-C21
 title: States — a transition setting that is not a curve makes every move into that state silently do nothing
-status: needs-ruling
+status: fixed
 severity: high
 area: runtime / States
 found: P107 NSP-013 s14, 2026-10-01
@@ -30,3 +30,13 @@ writing parameters through MCP (`{ "duration": 300 }`, `"easeOut"`) or a wire fr
 Proposed: read a transition the library refuses as the state's Default (or as a 0 ms jump — the spec
 writes the jump), checked before `BezierEasing`; and report it once on the node, as the unreadable
 colour is (`states/unreadable-color`).
+
+**Ruled (Richard, 2026-10-01, P107 s16):** use the Default and warn. **Fixed:**
+
+A transition that would animate along a curve `bezier-easing` refuses reads as the state's Default — or, when
+the Default is the one refused or is refused too, the built-in ease-out over 300 ms — and raises
+`states/unreadable-transition` once per port and value. A transition that sets its value at once (0 ms and no
+delay, Use Transitions off, a state passed through) never reads its curve and is unchanged. The spec is v2, the
+C21 scenario lost its `row` mark and two scenarios pin the Default paths; the runtime conformance test's known
+row is gone. `packages/noodl-viewer-react/tests/p107-c21-states-unreadable-transition.test.ts` (7 tests, a
+readable transition beside four refused shapes) — 6 red on the old code, 7 green after.
