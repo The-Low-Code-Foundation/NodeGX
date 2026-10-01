@@ -58,7 +58,7 @@ export function outsideReach(params: Record<string, unknown>, steps: readonly St
   const allowedInputs = new Set(reach.inputs);
   for (const name of Object.keys(params)) if (!allowedParams.has(name)) return `param ${JSON.stringify(name)} is outside the target's reach`;
   for (const step of steps) {
-    if (step === 'settle') continue;
+    if (step === 'settle' || 'advance' in step) continue; // the clock is the world's, inside every reach
     const port = 'signal' in step ? step.signal : step.set;
     if (!allowedInputs.has(port)) return `port ${JSON.stringify(port)} is outside the target's reach`;
   }

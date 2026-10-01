@@ -602,6 +602,26 @@ The words are `dossier` (generated from the kit, because the reveal is a kit nod
 `dossier`**: the meter and the reveal never reach a coach's page, so they would be sentences nobody
 renders.
 
+## Running it for real (TASK-L183)
+
+A real client's backend is **not** the demo world. `hosting/README.md` is the recipe for
+`training.digitalbricks.io` on nexus-1, in order; the pieces it uses, all in `tools/`:
+
+- **`build-production.mjs`** writes `backend/production.json`: the concept titles from the
+  PRODUCT's corpus (29) and nothing about any person. It fails if the seed's titles disagree with it.
+- **`setup-production.mjs`** applies the schema, the policy, the functions and those titles, and
+  creates ONE staff account. It never reads `seed.json`, and it refuses a backend holding any row
+  (the same refusal as `setup-backend.mjs`: both use `tools/lib/admin-client.mjs`).
+- **`setup-signin.mjs`** takes an authenticated relay (`--smtp-user`, the key from a FILE, never
+  argv) and `--base-url`, without which every sign-in link points at the backend's local address.
+- **`check-production.mjs`** reads a running backend back and fails on a demo-world trace, a
+  loosened policy, a sandbox relay, an empty `baseUrl` or an extra redirect origin.
+- **`build-production-site.mjs`** derives the site from the template with a named list of
+  changes: Home's signed-out doors become one plain *Sign in* (no prefilled address, no coach
+  door, no demo note), and Palette leaves the router. It refuses a development engine.
+- **`.noodlignore`** keeps `backend/`, `tools/`, `hosting/` and the security file out of any
+  deploy. Without it a build published the seed, the fixtures and the trainer's private labels.
+
 ## What is a placeholder, and why
 
 Four renders carry their data in a dashed box instead of drawing it: **Mermaid** diagrams (the

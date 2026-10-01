@@ -20,6 +20,7 @@ import * as path from 'path';
 import type { Step } from '../adapter';
 import { canonicalise, revive } from '../canonical';
 import type { TraceEvent } from '../trace';
+import type { WorldScript } from '../world';
 
 export interface Scenario {
   name: string;
@@ -27,6 +28,8 @@ export interface Scenario {
   node?: string;
   params: Record<string, unknown>;
   steps: Step[];
+  /** NSP-007: the world's script for this play — the seed, the network's answers. Absent, a default world (seed 1, no answers). */
+  world?: WorldScript;
   /** When present, both targets are graded against it; when absent, against the interpreter. */
   expect?: TraceEvent[];
   /** For a replay file: the seed the sequence came from. */
@@ -56,7 +59,9 @@ export function loadScenarios(type: string, dir = SCENARIOS_DIR): Scenario[] {
   return parsed.map((s, i) => {
     const sc = s as Scenario;
     if (!sc || typeof sc.name !== 'string' || !Array.isArray(sc.steps)) throw new Error(`${file}[${i}]: a scenario needs a name and steps`);
-    return { ...sc, node: sc.node ?? type, params: reviveParams(sc.params ?? {}), steps: sc.steps.map(reviveStep) };
+    const out: Scenario = { ...sc, node: sc.node ?? type, params: reviveParams(sc.params ?? {}), steps: sc.steps.map(reviveStep) };
+    if (sc.world) out.world = reviveWorld(sc.world);
+    return out;
   });
 }
 
@@ -67,6 +72,11 @@ function reviveParams(params: Record<string, unknown>): Record<string, unknown> 
 }
 function reviveStep(step: Step): Step {
   return step !== 'settle' && 'set' in step && 'value' in step ? { set: step.set, value: revive(step.value) } : step;
+}
+/** The world's script is JSON already; only a scripted body may carry a canonical tag. */
+export function reviveWorld(world: WorldScript | undefined): WorldScript | undefined {
+  if (!world?.network) return world;
+  return { ...world, network: world.network.map((r) => ('body' in r.answer ? { ...r, answer: { ...r.answer, body: revive(r.answer.body) } } : r)) };
 }
 function canonicalParams(params: Record<string, unknown>): Record<string, unknown> {
   const out: Record<string, unknown> = {};
@@ -87,6 +97,9 @@ export function writeReplay(dir: string, scenario: Scenario): string {
   fs.mkdirSync(dir, { recursive: true });
   const file = path.join(dir, `${scenario.node}-seed-${scenario.seed ?? 'hand'}.json`);
   const onDisk: Scenario = { ...scenario, params: canonicalParams(scenario.params), steps: scenario.steps.map(canonicalStep) };
+  if (scenario.world?.network) {
+    onDisk.world = { ...scenario.world, network: scenario.world.network.map((r) => ('body' in r.answer && r.answer.body !== undefined ? { ...r, answer: { ...r.answer, body: canonicalise(r.answer.body) } } : r)) };
+  }
   fs.writeFileSync(file, JSON.stringify([onDisk], null, 2) + '\n');
   return file;
 }

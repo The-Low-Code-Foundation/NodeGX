@@ -18,7 +18,8 @@ this page (NSP-006 asked for it).
 |---|---|
 | `name` | unique in the file; what the report prints |
 | `params` | the node's parameters at mount, applied as ordinary writes in this key order (adapter.ts `mount`) |
-| `steps` | in order: `{ "set": "<port>", "value": … }` (omit `value` to write `undefined`), `{ "signal": "<port>" }`, or `"settle"` |
+| `steps` | in order: `{ "set": "<port>", "value": … }` (omit `value` to write `undefined`), `{ "signal": "<port>" }`, `{ "advance": <ms> }` (NSP-007: the world's clock moves — what the world already delivered lands, the clock moves and fires what is due, what that delivered lands), or `"settle"` |
+| `world` | NSP-007, for a node whose spec declares `needs`: the world's script — `{ "seed": <n>, "network": [ { "match": { "method", "url" }, "answer": …, "after": <ms> } ] }`. `answer` is `{ "status", "statusText", "headers", "body" }` (a string body travels as text, anything else as its JSON text), `{ "error": "<message>" }` (never reaches a server), or `{ "never": true }`. The first rule whose `match` fits answers (absent `match` fits all; a `url` ending in `*` is a prefix). A request no rule answers FAILS the play (AC5). Absent: seed 1, no answers. The rules of the world — the clock, the random stream, what goes on the wire — are the header of `src/world.ts` |
 | `expect` | optional: a trace both targets are graded against; absent, the interpreter's trace is the expectation |
 | `because` | free text — why the scenario exists: the docblock line, the divergence row. Written for the spec's reviewer; the rule itself is in the spec file |
 | `seed` | on a replay the shrinker wrote: the generated sequence it came from |

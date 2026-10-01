@@ -3,9 +3,13 @@
  * like BRG-003's — jest wraps it, the ledger (NSP-009) reads it, and it never declares a test.
  *
  * What it does, in order:
- *   0. refuses a spec whose declared `needs` (clock, randomness, network, backend) the runner
- *      cannot yet supply — T2/T3 nodes are out until NSP-007 gives it a world (NSP-003 §4), and
- *      running them flaky would grade nothing;
+ *   0. refuses a spec whose declared `needs` the runner cannot supply on THIS target: `backend`
+ *      has no seam yet (NSP-014), and a target without `install` cannot take a world (NSP-007) —
+ *      running such a node flaky would grade nothing (NSP-003 §4). A spec with `needs` is
+ *      otherwise played with ONE WORLD PER PLAY, built from the scenario's or the sequence's
+ *      script, the same script for the reference and for the target; a play in which the node
+ *      touched something the script did not answer (world.ts `violations`) is a failure of that
+ *      play whatever the traces say (AC5);
  *   1. plays every hand scenario on the interpreter (the reference, unless the scenario carries
  *      its own `expect`) and on the target, and REFUSES a scenario whose reference trace has no
  *      observation event — an arm with no predicate grades nothing (AC4, README §9);
@@ -25,6 +29,7 @@ import { canonicalise } from '../canonical';
 import { interpreterAdapter } from '../adapters/interpreter';
 import type { AnyNodeSpec } from '../spec';
 import type { TraceEvent } from '../trace';
+import { World, type WorldScript } from '../world';
 import { compareTraces, differenceWithThrow, formatDifference, hasObservation, type Difference } from './compare';
 import { generateSequence } from './generate';
 import { discoverBranches, mutantsOf, type Branch, type MutationKind } from './mutants';
@@ -96,6 +101,8 @@ export interface Divergence {
   seed: number;
   params: Record<string, unknown>;
   steps: Step[];
+  /** NSP-007: the world's script the sequence was played with. */
+  world?: WorldScript;
   shrunk: boolean;
   shrinkRuns?: number;
   replayFile?: string;
@@ -134,14 +141,31 @@ export function defaultSeed(now = new Date()): number {
   return Math.floor(now.getTime() / 86_400_000) >>> 0;
 }
 
+/** A world for one play of this spec — none for a spec that declares no `needs` (its behaviour is then exactly what it was before NSP-007). */
+function worldFor(spec: AnyNodeSpec, script: WorldScript | undefined): World | undefined {
+  return spec.needs && spec.needs.length > 0 ? new World(script ?? {}) : undefined;
+}
+
+/** The reference play: the interpreter, on its own world. A spec that violates its own script is a scenario error, not a divergence. */
+async function playReference(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], script: WorldScript | undefined): Promise<TraceEvent[]> {
+  const world = worldFor(spec, script);
+  const t = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps, world);
+  if (world && world.violations.length > 0) throw new Error(`${spec.type}: the reference play touched what the script did not answer — ${world.violations.join('; ')}`);
+  return t;
+}
+
 /**
  * The target's side of a comparison. A target that THROWS mid-scenario (adapter.ts `PlayError`)
  * is a divergence at the point it died, with the trace it produced up to there — never a crash
- * of the run: the runner's job is to report it, shrink it and write the replay.
+ * of the run: the runner's job is to report it, shrink it and write the replay. A target whose
+ * play VIOLATED the world (a request no rule answers, AC5) is a divergence too, reported as a
+ * throw at the end of its trace: the traces may agree, and the run still may not pass.
  */
-async function playTarget(target: TargetAdapter, type: string, params: Record<string, unknown>, steps: readonly Step[], reference: TraceEvent[]) {
+async function playTarget(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reference: TraceEvent[], script: WorldScript | undefined) {
+  const world = worldFor(spec, script);
   try {
-    const actual = await play(target, type, params, steps);
+    const actual = await play(target, spec.type, params, steps, world);
+    if (world && world.violations.length > 0) return { actual, difference: { index: actual.length, threw: `the world refused (AC5): ${world.violations.join('; ')}` } as Difference };
     return { actual, difference: compareTraces(reference, actual) };
   } catch (e) {
     if (!(e instanceof PlayError)) throw e;
@@ -149,10 +173,10 @@ async function playTarget(target: TargetAdapter, type: string, params: Record<st
   }
 }
 
-async function playBoth(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reach?: Reach) {
-  const full = await play(interpreterAdapter({ resolve: () => spec }), spec.type, params, steps);
+async function playBoth(spec: AnyNodeSpec, target: TargetAdapter, params: Record<string, unknown>, steps: readonly Step[], reach?: Reach, script?: WorldScript) {
+  const full = await playReference(spec, params, steps, script);
   const reference = reach ? projectTrace(full, reach) : full;
-  return { reference, ...(await playTarget(target, spec.type, params, steps, reference)) };
+  return { reference, ...(await playTarget(spec, target, params, steps, reference, script)) };
 }
 
 export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, options: ConformanceOptions = {}): Promise<Report> {
@@ -172,9 +196,14 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   };
   if (reach) report.reach = reach;
 
-  // 0. the world this runner does not have
-  if (spec.needs && spec.needs.length > 0) {
-    report.refused = `${spec.type} needs ${spec.needs.join(', ')}; the runner has no world for it until NSP-007`;
+  // 0. the world this target cannot be handed
+  if (spec.needs && spec.needs.includes('backend')) {
+    report.refused = `${spec.type} needs a backend; the world has no backend seam until NSP-014`;
+    report.timeMs = Date.now() - started;
+    return report;
+  }
+  if (spec.needs && spec.needs.length > 0 && !target.install) {
+    report.refused = `${spec.type} needs ${spec.needs.join(', ')} and ${target.name} has no install(): it cannot be pointed at a scripted world`;
     report.timeMs = Date.now() - started;
     return report;
   }
@@ -186,12 +215,12 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
       report.scenarios.push({ name: sc.name, status: 'outside', row: sc.row, reason: outside });
       continue;
     }
-    const reference = project(sc.expect ?? (await play(interpreterAdapter({ resolve: () => spec }), spec.type, sc.params, sc.steps)));
+    const reference = project(sc.expect ?? (await playReference(spec, sc.params, sc.steps, sc.world)));
     if (!hasObservation(reference)) {
       report.scenarios.push({ name: sc.name, status: 'refused', reason: `the reference trace has no observation event${reach ? ' inside the reach' : ''} — an arm with no predicate grades nothing` });
       continue;
     }
-    const { actual, difference } = await playTarget(target, spec.type, sc.params, sc.steps, reference);
+    const { actual, difference } = await playTarget(spec, target, sc.params, sc.steps, reference, sc.world);
     if (difference.index < 0) {
       // a scenario that carries a row and PASSES says the row no longer reproduces on this target
       report.scenarios.push(
@@ -207,10 +236,11 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   // 2. generated sequences
   for (let i = 0; i < requested; i++) {
     const seq = generateSequence(spec, seed, i, { reach });
-    const { reference, actual, difference } = await playBoth(spec, target, seq.params, seq.steps, reach);
+    const { reference, actual, difference } = await playBoth(spec, target, seq.params, seq.steps, reach, seq.world);
     report.generated.ran++;
     if (difference.index < 0) continue;
     const div: Divergence = { seed: seq.seed, params: seq.params, steps: seq.steps, shrunk: false, difference, reference, actual };
+    if (seq.world) div.world = seq.world;
     const known = (options.known ?? []).findIndex((k) => k.matches(div));
     if (known >= 0) {
       const k = report.generated.known[known];
@@ -219,18 +249,20 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
       continue;
     }
     if (options.shrink) {
-      const { result, runs } = await shrink({ params: seq.params, steps: seq.steps }, async (c) => (await playBoth(spec, target, c.params, c.steps, reach)).difference.index >= 0);
-      const again = await playBoth(spec, target, result.params, result.steps, reach);
+      const { result, runs } = await shrink({ params: seq.params, steps: seq.steps, world: seq.world }, async (c) => (await playBoth(spec, target, c.params, c.steps, reach, c.world)).difference.index >= 0);
+      const again = await playBoth(spec, target, result.params, result.steps, reach, result.world);
       Object.assign(div, { params: result.params, steps: result.steps, shrunk: true, shrinkRuns: runs, difference: again.difference, reference: again.reference, actual: again.actual });
       if (options.replayDir) {
-        div.replayFile = writeReplay(options.replayDir, {
+        const replay: Scenario = {
           name: `divergence on ${target.name}, seed ${seq.seed}`,
           node: spec.type,
           params: result.params,
           steps: result.steps,
           seed: seq.seed,
           because: formatDifference(again.difference, 'interpreter', target.name)
-        });
+        };
+        if (result.world) replay.world = result.world;
+        div.replayFile = writeReplay(options.replayDir, replay);
       }
     }
     report.generated.divergences.push(div);
@@ -239,19 +271,19 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
 
   // 3. mutants — the suite is the hand scenarios plus the same generated sequences
   if (options.mutants) {
-    const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[] }> = [
+    const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript }> = [
       ...(options.scenarios ?? loadScenarios(spec.type))
         .filter((s) => !reach || outsideReach(s.params, s.steps, reach) === undefined)
-        .map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps }))
+        .map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world }))
     ];
     for (let i = 0; i < requested; i++) {
       const seq = generateSequence(spec, seed, i, { reach });
-      suite.push({ name: `sequence ${i} (seed ${seq.seed})`, params: seq.params, steps: seq.steps });
+      suite.push({ name: `sequence ${i} (seed ${seq.seed})`, params: seq.params, steps: seq.steps, world: seq.world });
     }
     const discovered = discoverBranches(spec);
     const probe = interpreterAdapter({ resolve: () => discovered.spec });
     const referenceTraces: TraceEvent[][] = [];
-    for (const s of suite) referenceTraces.push(project(await play(probe, spec.type, s.params, s.steps)));
+    for (const s of suite) referenceTraces.push(project(await play(probe, spec.type, s.params, s.steps, worldFor(spec, s.world))));
 
     const results: MutantResult[] = [];
     for (const m of mutantsOf(spec, discovered.branches)) {
@@ -260,7 +292,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
       for (let i = 0; i < suite.length; i++) {
         let actual: TraceEvent[];
         try {
-          actual = await play(mutantTarget, spec.type, suite[i].params, suite[i].steps);
+          actual = await play(mutantTarget, spec.type, suite[i].params, suite[i].steps, worldFor(spec, suite[i].world));
         } catch (e) {
           // a mutant that breaks a spec rule (an outcome input returning none) is caught by the interpreter itself
           result.killed = true;
@@ -332,13 +364,13 @@ export function formatReport(report: Report): string {
   for (const k of report.generated.known) {
     lines.push(`    known: ${k.count} attributed to row ${k.row}`);
     if (k.example) {
-      lines.push(`      e.g. seed ${k.example.seed}  params ${formatParams(k.example.params)}  steps ${JSON.stringify(k.example.steps)}`);
+      lines.push(`      e.g. seed ${k.example.seed}  params ${formatParams(k.example.params)}  steps ${JSON.stringify(k.example.steps)}${k.example.world ? `  world ${JSON.stringify(k.example.world)}` : ''}`);
       lines.push('      ' + formatDifference(k.example.difference, 'interpreter', report.target).replace(/\n/g, '\n      '));
     }
   }
   for (const d of report.generated.divergences) {
     lines.push(`    seed ${d.seed}${d.shrunk ? ` (shrunk to ${d.steps.length} step(s) in ${d.shrinkRuns} runs)` : ''}${d.replayFile ? ' → ' + d.replayFile : ''}`);
-    lines.push(`      params ${formatParams(d.params)}  steps ${JSON.stringify(d.steps)}`);
+    lines.push(`      params ${formatParams(d.params)}  steps ${JSON.stringify(d.steps)}${d.world ? `  world ${JSON.stringify(d.world)}` : ''}`);
     lines.push('      ' + formatDifference(d.difference, 'interpreter', report.target).replace(/\n/g, '\n      '));
   }
   if (report.mutants) {

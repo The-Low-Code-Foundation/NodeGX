@@ -1,0 +1,11 @@
+# What a DEPLOY of this template must not publish (TASK-L183 §4).
+#
+# nodegx-deploy copies every file that no rule excludes into the public site. Measured
+# 2026-09-30: without this file a production build shipped backend/ (the demo world's
+# seed and fixtures, the trainer's private labels included), tools/ and hosting/ to
+# anyone who asked for them by path.
+backend/
+tools/
+hosting/
+# The policy belongs to the backend, which reads it from its own data directory.
+nodegx.security.json

@@ -32,10 +32,22 @@
  *     through the input queue. So two graph-level behaviours are deliberately NOT reproduced
  *     here and belong to NSP-008: C8 first-update consolidation of queued values, and
  *     nodescope's `inputPriority` / `runOnChange-` parameter ordering.
- *   - **settle** is one frame (`frameStart`, `context.updateDirtyNodes()` — C5's drain —
- *     `frameEnd`, as `_doUpdate` runs it), a microtask and a macrotask yield for the async nodes,
- *     and one more frame — the viewer's shape: an async completion schedules a NEW frame.
- *     `settle()` is the target's, so every mounted instance is flushed on each call.
+ *   - **settle** is one frame exactly as `_doUpdate` runs it (`currentFrameTime` from the clock,
+ *     `frameStart`, `context.update()` — C5's drain and then the TIMER PASS — `frameEnd`), a
+ *     microtask and a macrotask yield for the async nodes, and one more DRAIN (`frameStart`,
+ *     `updateDirtyNodes()`, `frameEnd` — no timer pass) — the viewer's shape: an async
+ *     completion schedules a NEW frame. The second half is a drain and not a frame on purpose
+ *     (NSP-007): a settle is ONE tick of the scheduler's clock, the way the spec reads it, so a
+ *     Delay of Duration 0 shows `Started` in one settle and `Finished` in the next, as it does in
+ *     the app across two animation frames. `settle()` is the target's, so every mounted instance
+ *     is flushed on each call.
+ *   - **the world** (NSP-007): `install(world)` makes the platform clock the world's
+ *     (`getCurrentTime`), installs the world's globals (`setTimeout`, `fetch`, `crypto`,
+ *     `Math.random`, `Date.now` — world.ts `installWorld`) and attributes every request the world
+ *     sees to the node whose `update()` is running (an HTTP Request fetches from its after-inputs
+ *     callback, inside its update). `advance(h, ms)` yields to the event loop (what the world
+ *     already delivered lands), then moves the clock. A `request` event is recorded in the frame
+ *     it was issued in, after the outcomes.
  *   - **runtime errors** raised on a mounted node are kept on its handle (`errors`), outside the
  *     trace: the trace is behaviour on the wire; the error channel is the runner's to read.
  *   - **log lines** (`net.noodl.Log`, NSP-011): the scope carries a `runContext.log` sink, the one
@@ -55,12 +67,14 @@
  *     the same call made later — a scenario's `wire` step.
  */
 
+import { AsyncLocalStorage } from 'async_hooks';
+
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { GraphNodeDecl, GraphTarget, Handle, TraceEvent, Wire } from '../../../nodegx-node-spec/src';
+import type { GraphNodeDecl, GraphTarget, Handle, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint } from '../../../nodegx-node-spec/src';
-import { canonicalise, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
+import { canonicalise, installWorld, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -73,15 +87,29 @@ import NodeDefinition = require('../../src/nodedefinition');
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer'] as const;
+
+/**
+ * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
+ * registers (its :64-65 note: "HTTP node — temporarily here for debugging (normally in
+ * noodl-runtime)") — so `NoodlRuntime` does not know them and the census says the viewer provides
+ * them. Registered here from this package's source, as the viewer does (NSP-007: HTTP Request).
+ */
+export const VIEWER_REGISTERED_RUNTIME_NODES = ['data/httpnode'] as const;
+
+type NodeModuleLike = { node: Parameters<typeof NodeDefinition.defineNode>[0] };
 
 /** The target with the viewer-provided picker nodes registered as well. */
 export function withViewerNodes(target: RuntimeTarget): RuntimeTarget {
-  for (const file of VIEWER_NODES) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const mod = require('../../../noodl-viewer-react/src/nodes/std-library/' + file) as { default: { node: Parameters<typeof NodeDefinition.defineNode>[0] } };
-    target.context.nodeRegister.register(NodeDefinition.defineNode(mod.default.node));
-  }
+  const register = (mod: { default?: NodeModuleLike } & Partial<NodeModuleLike>) => {
+    // an `export default { node }` module (the viewer's TS files) or an `export =` one (httpnode.ts)
+    const m = mod.default ?? (mod as NodeModuleLike);
+    target.context.nodeRegister.register(NodeDefinition.defineNode(m.node));
+  };
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  for (const file of VIEWER_NODES) register(require('../../../noodl-viewer-react/src/nodes/std-library/' + file));
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  for (const file of VIEWER_REGISTERED_RUNTIME_NODES) register(require('../../src/nodes/std-library/' + file));
   return target;
 }
 
@@ -112,6 +140,7 @@ interface Frame {
   values: Map<string, unknown>;
   signals: string[];
   outcomes: TraceEvent[];
+  requests: TraceEvent[];
 }
 
 interface State {
@@ -135,12 +164,16 @@ export interface RuntimeTargetOptions {
 }
 
 export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget {
+  /** The world of the current play (NSP-007), or none — then the clock reads 0, as it always did. */
+  let world: World | undefined;
+  /** The real timers, captured before a world replaces the globals — the settle's yields must reach the event loop. */
+  const realSetTimeout = setTimeout;
   const rt = new NoodlRuntime({
     type: options.type || 'browser',
     platform: {
       // Nothing drives frames; `settle()` is the frame boundary.
       requestUpdate: () => undefined,
-      getCurrentTime: () => 0,
+      getCurrentTime: () => (world ? world.clock.now() : 0),
       objectToString: (o: unknown) => JSON.stringify(o)
     }
   });
@@ -148,25 +181,40 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   const states = new Map<string, State>();
   const byNodeId = new Map<string, State>();
   let next = 0;
+  /** The node whose `update()` is running (or whose update started the promise chain that is running) — where a request the world sees is attributed. */
+  const updating = new AsyncLocalStorage<State>();
 
   context.errorBus.subscribe((event: RuntimeErrorEventLike) => {
     const s = byNodeId.get(event.nodeId);
     if (s) s.h.errors.push(event);
   });
 
-  const newFrame = (): Frame => ({ values: new Map(), signals: [], outcomes: [] });
+  const newFrame = (): Frame => ({ values: new Map(), signals: [], outcomes: [], requests: [] });
 
   /**
-   * One frame as `NoodlRuntime._doUpdate` runs it (noodl-runtime.ts :743-753): `frameStart`, the
-   * drain, `frameEnd`. The events matter: `scheduleNextFrame` (nodecontext.ts :548-551) is
-   * `once('frameStart')`, and it is how a node the breaker tripped is re-flagged for the next
-   * frame (C9, node.ts :629-644) — a settle that only drained left such a node dead for good,
-   * which the runtime never does (NSP-008 found it on the self-wired Counter).
+   * One frame as `NoodlRuntime._doUpdate` runs it (noodl-runtime.ts :743-753): the frame time
+   * from the clock, `frameStart`, `context.update()` — the drain (nodecontext.ts :453-490) and
+   * then the timer pass (:500-503) — `frameEnd`. The events matter: `scheduleNextFrame`
+   * (nodecontext.ts :548-551) is `once('frameStart')`, and it is how a node the breaker tripped
+   * is re-flagged for the next frame (C9, node.ts :629-644) — a settle that only drained left
+   * such a node dead for good, which the runtime never does (NSP-008 found it on the self-wired
+   * Counter). The timer pass is what a Delay lives by (NSP-007).
    */
   const frame = () => {
+    context.currentFrameTime = world ? world.clock.now() : 0;
+    context.eventEmitter.emit('frameStart');
+    context.update();
+    context.eventEmitter.emit('frameEnd');
+  };
+  /** The second half of a settle: the drain an async completion's new frame does, without a second tick of the clock. */
+  const drain = () => {
     context.eventEmitter.emit('frameStart');
     context.updateDirtyNodes();
     context.eventEmitter.emit('frameEnd');
+  };
+  const yieldToEventLoop = async () => {
+    await Promise.resolve();
+    await new Promise((resolve) => realSetTimeout(resolve, 0));
   };
 
   function isSignalInput(s: State, port: string): boolean {
@@ -196,6 +244,11 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         s.currentInput = previous;
       }
     };
+    // Which node is updating — an HTTP Request's fetch is reached from its after-inputs callback,
+    // inside its update, through a promise chain (`conditionalHeaders(url).then(fetch)`): the
+    // async context set here follows that chain, where a plain variable would not.
+    const originalUpdate = node.update.bind(node);
+    node.update = () => updating.run(s, originalUpdate);
     const originalSendValue = node.sendValue.bind(node);
     node.sendValue = (name: string, value: unknown) => {
       if (value !== undefined && node.hasOutput(name)) s.frame.values.set(name, canonicalise(value));
@@ -258,8 +311,18 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     }
     for (const name of s.frame.signals) s.trace.push({ t: 'signal', port: name });
     for (const o of s.frame.outcomes) s.trace.push(o);
+    for (const r of s.frame.requests) s.trace.push(r);
     s.frame = newFrame();
     s.settles++;
+  }
+
+  /** A request the world saw, as the trace records it, attributed to the node that is updating. */
+  function recordRequest(record: RequestRecord): void {
+    const s = updating.getStore() ?? (states.size === 1 ? [...states.values()][0] : undefined);
+    if (!s) throw new Error(`runtime: a request (${record.method} ${record.url}) was made outside any node's update, and more than one node is mounted — it cannot be attributed`);
+    const event: TraceEvent = { t: 'request', method: canonicalise(record.method), url: record.url, headers: { ...record.headers } };
+    if (record.body !== undefined) event.body = canonicalise(record.body);
+    s.frame.requests.push(event);
   }
 
   const target: RuntimeTarget = {
@@ -325,10 +388,30 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
 
     async settle() {
       frame();
-      await Promise.resolve();
-      await new Promise((resolve) => setTimeout(resolve, 0));
-      frame();
+      await yieldToEventLoop();
+      drain();
       for (const s of states.values()) flush(s);
+    },
+
+    install(w) {
+      if (world) throw new Error('runtime: a world is already installed — one play at a time');
+      world = w;
+      w.network.onRequest(recordRequest);
+      const installed = installWorld(w);
+      return () => {
+        installed.restore();
+        world = undefined;
+      };
+    },
+
+    async advance(h, ms) {
+      const s = states.get(h.id);
+      if (!s) throw new Error(`runtime: ${h.id} is disposed`);
+      if (!world) throw new Error('runtime: advance() without a world — install one for the play');
+      s.trace.push({ t: 'advance', ms });
+      await yieldToEventLoop(); // what the world already delivered lands before time passes
+      world.clock.advance(ms);
+      await yieldToEventLoop(); // and what the move delivered lands before the next step
     },
 
     trace(h) {
