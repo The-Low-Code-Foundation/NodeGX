@@ -68,6 +68,17 @@
  *           the message `digestBytes` throws, as WebCrypto refuses it with `NotSupportedError`.
  *           `importKey` / `sign` (HMAC, JWT — cloud-only nodes) stay the host's.
  *
+ *   VIEWPORT. (NSP-013 s13) A play either HAS a browser viewport — the script's `viewport`,
+ *           `{ width, height }` in CSS pixels — or it has NONE, which is a server render: no
+ *           `window` at all (a node's `typeof window === 'undefined'` branch). With one, the size
+ *           is read the way a page reads it (`window.innerWidth` / `innerHeight`) and changes ONLY
+ *           at the script's `resizes`, each `{ at, width, height }` a world TIMER on the clock
+ *           (Node's rule above: `at` ms after the play starts, never before 1): the size moves,
+ *           then every `resize` listener runs, in the order it subscribed — synchronously, inside
+ *           the `advance` that reaches it, as a DOM event's listeners run at its dispatch. A target
+ *           with a real window (a browser, jsdom) refuses a `viewport` need it cannot size; on Node
+ *           the world defines the `window` for the play (`installWorld`) and removes it after.
+ *
  * Backend (records, users, files, cloud functions) is the fifth seam NSP-007 names; it arrives
  * with NSP-014, reusing the request seam at the HTTP level (README §8, NSP-007 §2).
  */
@@ -89,6 +100,15 @@ export interface WorldScript {
   registry?: RegistryScript;
   /** NSP-013: the IANA zone the play runs in (TIME ZONE above). Absent: `UTC`. */
   timeZone?: string;
+  /** NSP-013 s13: the browser viewport (VIEWPORT above). Absent: no window — a server render. */
+  viewport?: ViewportScript;
+}
+
+/** VIEWPORT above: the size at the start, and the resizes the clock will deliver. */
+export interface ViewportScript {
+  width: number;
+  height: number;
+  resizes?: ReadonlyArray<{ at: number; width: number; height: number }>;
 }
 
 export interface NetworkRule {
@@ -351,6 +371,34 @@ export function toDelivery(answer: Answer): Delivery {
 // ------------------------------------------------------------------------------------------------
 // the world
 
+/** The play's viewport (VIEWPORT above): its size now, and the `resize` listeners the scripted resizes run. */
+export class Viewport {
+  width: number;
+  height: number;
+  private listeners: Array<() => void> = [];
+
+  constructor(clock: Clock, script: ViewportScript) {
+    this.width = script.width;
+    this.height = script.height;
+    for (const r of script.resizes ?? []) {
+      clock.schedule(r.at, () => {
+        this.width = r.width;
+        this.height = r.height;
+        for (const l of [...this.listeners]) l();
+      });
+    }
+  }
+
+  /** Subscribes a `resize` listener; returns the unsubscribe. */
+  listen(fn: () => void): () => void {
+    this.listeners.push(fn);
+    return () => {
+      const i = this.listeners.indexOf(fn);
+      if (i >= 0) this.listeners.splice(i, 1);
+    };
+  }
+}
+
 export class World {
   readonly script: WorldScript;
   readonly clock = new Clock();
@@ -359,6 +407,8 @@ export class World {
   readonly registry: Registry;
   /** The IANA zone the play runs in (TIME ZONE above): the script's, or `UTC`. */
   readonly timeZone: string;
+  /** The viewport (VIEWPORT above), or none: a server render. */
+  readonly viewport: Viewport | undefined;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -366,6 +416,7 @@ export class World {
     this.network = new Network(this.clock, script.network ?? []);
     this.registry = new Registry(this.random, script.registry);
     this.timeZone = script.timeZone ?? 'UTC';
+    this.viewport = script.viewport ? new Viewport(this.clock, script.viewport) : undefined;
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */
@@ -502,6 +553,28 @@ export function installWorld(world: World): Installed {
     },
     randomUUID: () => world.random.uuid()
   });
+  // VIEWPORT: a window only when the script has a viewport — none is a server render, left as the host has it
+  const viewport = world.viewport;
+  if (viewport) {
+    const subscribed = new Map<unknown, () => void>();
+    define('window', {
+      get innerWidth() {
+        return viewport.width;
+      },
+      get innerHeight() {
+        return viewport.height;
+      },
+      addEventListener(type: string, fn: (e: unknown) => void) {
+        if (type !== 'resize' || subscribed.has(fn)) return;
+        subscribed.set(fn, viewport.listen(() => fn({ type: 'resize' })));
+      },
+      removeEventListener(type: string, fn: unknown) {
+        if (type !== 'resize') return;
+        subscribed.get(fn)?.();
+        subscribed.delete(fn);
+      }
+    });
+  }
   Math.random = () => world.random.next();
   Date.now = () => world.clock.now();
   if (perf && perfNow) perf.now = () => world.clock.now();

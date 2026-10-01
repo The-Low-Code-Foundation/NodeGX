@@ -40,6 +40,7 @@ import { ParseCSV } from './parse-csv';
 import { ParseXML } from './parse-xml';
 import { ParseFeed } from './parse-feed';
 import { AnimateToValue } from './animate-to-value';
+import { ScreenResolution } from './screen-resolution';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
 import { JSONStreamParser } from './json-stream-parser';
@@ -113,6 +114,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [ParseXML.type]: ParseXML,
   [ParseFeed.type]: ParseFeed,
   [AnimateToValue.type]: AnimateToValue,
+  [ScreenResolution.type]: ScreenResolution,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
   [JSONStreamParser.type]: JSONStreamParser,
@@ -161,6 +163,7 @@ export {
   ParseXML,
   ParseFeed,
   AnimateToValue,
+  ScreenResolution,
   RandomBytes,
   Repeat,
   JSONStreamParser,

@@ -126,6 +126,20 @@ export interface WorldView {
    * the instance's state before the patch. A declared or a derived output name.
    */
   send(port: string, state?: Readonly<Record<string, unknown>>): void;
+  /**
+   * NSP-013 s13 — the play's browser viewport (world.ts VIEWPORT), or `undefined` for a server
+   * render (no `window`): what `window.innerWidth` / `innerHeight` read now.
+   */
+  viewport(): { width: number; height: number } | undefined;
+  /**
+   * Subscribes THIS instance to the viewport's `resize` (`window.addEventListener('resize', …)`):
+   * the spec's `world.resize` handler is called at each scripted resize, after the size moved.
+   * Idempotent; a play with no viewport has nothing to listen to and the call does nothing (the
+   * runtime would throw on a missing `window` — a spec reads `viewport()` first, as a node checks
+   * `typeof window`). `unlisten` is the `removeEventListener`.
+   */
+  listen(event: 'resize'): void;
+  unlisten(event: 'resize'): void;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -429,6 +443,8 @@ export interface WorldHandlers<S, I, O> {
    * runtime's second pass is lands in the same settle.
    */
   change?: (state: Readonly<S>, inputs: Inputs<I>, event: ChangeEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /** NSP-013 s13 — the viewport was resized (`WorldView.listen`): called at the resize, `world.viewport()` already the new size. */
+  resize?: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -451,6 +467,8 @@ export interface WorldPool {
   registries?: readonly RegistryScript[];
   /** NSP-013: the IANA zones a `timezone` spec's sequences run in (one is drawn per sequence; the defaults cross a DST change and a half-hour offset). */
   timeZones?: readonly string[];
+  /** NSP-013 s13: the viewports a `viewport` spec's sequences start from (one is drawn per sequence; `null` is a server render — no window). */
+  viewports?: ReadonlyArray<import('./world').ViewportScript | null>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -505,9 +523,11 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * `Intl` call with no `timeZone`), so the play runs in the zone the script names (world.ts
  * TIME ZONE: `UTC` when the script names none); `digest` — the node asks the host for a SHA-2
  * digest (`crypto.subtle.digest`), which the world answers itself so the answer lands in the
- * microtask after the call and never on a thread the clock cannot see (world.ts DIGEST).
+ * microtask after the call and never on a thread the clock cannot see (world.ts DIGEST). s13 adds
+ * `viewport` — the node reads the browser window's size or listens for its resize, so the play has
+ * a scripted viewport, or none (a server render: no `window`) (world.ts VIEWPORT).
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'backend';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'backend';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
@@ -585,6 +605,7 @@ export interface AnyNodeSpec {
     timer?: (state: never, inputs: never, tag: string, world: WorldView) => unknown;
     response?: (state: never, inputs: never, response: WorldResponse, world: WorldView) => unknown;
     change?: (state: never, inputs: never, event: ChangeEvent, world: WorldView) => unknown;
+    resize?: (state: never, inputs: never, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

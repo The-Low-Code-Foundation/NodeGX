@@ -91,7 +91,7 @@ import type { TraceEvent } from './trace';
 import { installTimeZone, World, type Delivery } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
-type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse };
+type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'resize' };
 
 interface OutcomeSlot {
   port: string;
@@ -133,6 +133,8 @@ export interface Instance {
   changes: ChangeEvent[];
   /** What this instance watches: `model:<id>` / `collection:<name>` → the unsubscribe. */
   watches: Map<string, () => void>;
+  /** NSP-013 s13: the unsubscribe of this instance's `resize` listener (`WorldView.listen`), when it listens. */
+  resizeOff?: () => void;
 }
 
 export class SpecError extends Error {
@@ -215,6 +217,17 @@ function viewOf(inst: Instance): WorldView {
       if (!off) return;
       off();
       inst.watches.delete(key);
+    },
+    viewport: () => (world.viewport ? { width: world.viewport.width, height: world.viewport.height } : undefined),
+    // a DOM event's listener runs at its dispatch, inside the `advance` that reaches the resize — as a timer's handler does
+    listen: (event) => {
+      if (event !== 'resize' || !world.viewport || inst.resizeOff) return;
+      inst.resizeOff = world.viewport.listen(() => handleInbound(inst, { kind: 'resize' }));
+    },
+    unlisten: (event) => {
+      if (event !== 'resize' || !inst.resizeOff) return;
+      inst.resizeOff();
+      inst.resizeOff = undefined;
     }
   };
 }
@@ -518,6 +531,10 @@ function handleInbound(inst: Instance, item: Inbound): void {
     name = 'world.timer';
     if (!spec.world?.timer) throw new SpecError(`${spec.type}: a timer fired and the spec has no world.timer handler`);
     patch = asWriter(inst, () => spec.world!.timer!(inst.state as never, inst.inputs as never, item.tag, view));
+  } else if (item.kind === 'resize') {
+    name = 'world.resize';
+    if (!spec.world?.resize) throw new SpecError(`${spec.type}: the viewport was resized and the spec listens with no world.resize handler`);
+    patch = asWriter(inst, () => spec.world!.resize!(inst.state as never, inst.inputs as never, view));
   } else {
     name = 'world.response';
     if (!spec.world?.response) throw new SpecError(`${spec.type}: an answer landed and the spec has no world.response handler`);

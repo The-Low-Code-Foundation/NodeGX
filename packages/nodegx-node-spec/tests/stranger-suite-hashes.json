@@ -17,6 +17,6 @@
   "src/nodes/inverter.ts": "cded868c740e9b566311077125efadccfacda3354a41263cc3fb34aefc6d9455",
   "src/nodes/string-format.ts": "f363e0359ca05bc7a16e938c0d745ca7652873084df6c55b7763d96bb4f20a5d",
   "src/nodes/switch.ts": "15896daa7c22306f9a2220a1a0daf7cf71262db7e8b587c926bd27ea107d8680",
-  "src/spec.ts": "b9c4bf3ce49d23e9dbf3edb5f3984dcc2163d2aebbd7690394d5f456cd3990af",
+  "src/spec.ts": "f118f78048c976231babe2644cb9299123e7ecea3382ed84c7a441a9222cdb84",
   "src/trace.ts": "bbab071e3bd5a6a115a226559f8afb91bfca66b2b84ded27642189f1a06551a8"
 }

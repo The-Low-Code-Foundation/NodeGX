@@ -1,0 +1,36 @@
+[
+  {
+    "name": "a server render (no window): Width and Height are never sent; Aspect Ratio reads undefined / undefined — NaN — and that IS sent",
+    "because": "screenresolution.ts :21 returns before subscribing or reading; :67-69 the getter divides anyway",
+    "params": {},
+    "steps": ["settle", { "advance": 1000 }, "settle"]
+  },
+  {
+    "name": "a desktop window: Width, Height and Aspect Ratio at the first frame; nothing more while nothing resizes",
+    "because": "screenresolution.ts :30-38 subscribe then read; :73-77",
+    "params": {},
+    "world": { "viewport": { "width": 1280, "height": 800 } },
+    "steps": ["settle", { "advance": 30000 }, "settle"]
+  },
+  {
+    "name": "a phone rotated: the resize lands inside the advance that reaches it, all three outputs move",
+    "because": "screenresolution.ts :30-32 the listener, :73-77 re-read and flag every output; world.ts VIEWPORT — a resize is a world timer, its listeners run at its dispatch",
+    "params": {},
+    "world": { "viewport": { "width": 390, "height": 844, "resizes": [{ "at": 100, "width": 844, "height": 390 }] } },
+    "steps": ["settle", { "advance": 99 }, "settle", { "advance": 1 }, "settle"]
+  },
+  {
+    "name": "a window dragged to no height reads Aspect Ratio Infinity, to 0 × 0 NaN, and back to a real size",
+    "because": "screenresolution.ts :67-69 `width / height` with no guard",
+    "params": {},
+    "world": { "viewport": { "width": 1024, "height": 768, "resizes": [{ "at": 1, "width": 1024, "height": 0 }, { "at": 1000, "width": 0, "height": 0 }, { "at": 30000, "width": 1440, "height": 900 }] } },
+    "steps": ["settle", { "advance": 1 }, "settle", { "advance": 999 }, "settle", { "advance": 29000 }, "settle"]
+  },
+  {
+    "name": "two resizes reached by one advance land in order — the wire keeps the last; a resize to the same size sends nothing new",
+    "because": "world.ts VIEWPORT — resizes fire in time order inside one advance; the wire keeps the last value a frame sent",
+    "params": {},
+    "world": { "viewport": { "width": 800, "height": 600, "resizes": [{ "at": 10, "width": 600, "height": 800 }, { "at": 20, "width": 1000, "height": 500 }, { "at": 30, "width": 1000, "height": 500 }] } },
+    "steps": ["settle", { "advance": 25 }, "settle", { "advance": 10 }, "settle"]
+  }
+]

@@ -25,7 +25,7 @@ import { parseCSV, toCSV } from '../src/nodes/csv';
 import type { AnyNodeSpec, TargetAdapter } from '../src';
 import { DEFAULT_WORLD_POOL, digestBytes, EQUIVALENT_MUTANTS, generateSequence, installTimeZone, installWorld, interpreterAdapter, Random, run, runConformance, specs, World } from '../src';
 
-const BATCH = ['net.noodl.DateAdd', 'net.noodl.DateCompare', 'net.noodl.DateDifference', 'net.noodl.DateParts', 'Date To String', 'net.noodl.Now', 'net.noodl.Hash', 'net.noodl.RandomBytes', 'Unique Id', 'net.noodl.ParseCSV', 'net.noodl.ParseXML', 'net.noodl.ParseFeed', 'net.noodl.ToCSV', 'Repeat', 'net.noodl.JSONStreamParser', 'net.noodl.PatternExtractor', 'net.noodl.TextAccumulator', 'net.noodl.StreamBuffer', 'net.noodl.animatetovalue'];
+const BATCH = ['net.noodl.DateAdd', 'net.noodl.DateCompare', 'net.noodl.DateDifference', 'net.noodl.DateParts', 'Date To String', 'net.noodl.Now', 'net.noodl.Hash', 'net.noodl.RandomBytes', 'Unique Id', 'net.noodl.ParseCSV', 'net.noodl.ParseXML', 'net.noodl.ParseFeed', 'net.noodl.ToCSV', 'Repeat', 'net.noodl.JSONStreamParser', 'net.noodl.PatternExtractor', 'net.noodl.TextAccumulator', 'net.noodl.StreamBuffer', 'net.noodl.animatetovalue', 'Screen Resolution'];
 
 describe('NSP-013 — every batch spec conforms on the interpreter: scenarios, 200 sequences, every mutant killed or declared', () => {
   for (const type of BATCH) {

@@ -1,7 +1,7 @@
 # NSP-013 — Batch: dates, time, randomness, parsers, animation
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world) and R4 = continue.
-**Status: 🟡 s13 (2026-10-01) — 22 of 24 conform on the runtime (UUID and Delay are NSP-007's; s11–s13 built the other 20; On App Error by graph scenarios); the last 2 named in §6.4.**
+**Status: 🟡 s13 (2026-10-01) — 23 of 24 conform on the runtime (UUID and Delay are NSP-007's; s11–s13 built the other 21; On App Error by graph scenarios); States is left (§6.4).**
 
 ## 1. The person sentence
 
@@ -280,6 +280,29 @@ hears the first frame's error). **All four bear their claims out on the runtime*
    `outside` with a reason naming the HARNESS's limit (`node-spec-graph.test.ts` admits that reason, commented).
    `tests/graph.test.ts` gates it named-by-an-`N`-scenario (`GRAPH_GRADED`).
 
+### 6.1f s13, 2026-10-01 — Screen Resolution, and the world's sixth seam: a VIEWPORT
+
+**The seam** (world.ts header, VIEWPORT): a play either HAS a browser viewport — `WorldScript.viewport =
+{ width, height, resizes: [{ at, width, height }] }` — or has NONE, which is a server render (no `window`, the
+node's `typeof window === 'undefined'` branch). The size changes only at the scripted resizes, each a world
+TIMER on the clock; the size moves, then every `resize` listener runs in subscription order, inside the
+`advance` that reaches it. Format (`spec.ts`, guarded): `WorldView.viewport()`, `listen` / `unlisten('resize')`,
+`WorldHandlers.resize`, `needs: 'viewport'`, `WorldPool.viewports` (defaults: none, a still desktop, a phone
+rotated, a window dragged to 0 height and 0 × 0). Interpreter: a resize is delivered like a timer, at its
+firing. Runtime target: `installWorld` defines a fake `window` (`innerWidth` / `innerHeight`,
+`add/removeEventListener('resize')`) only when the script has a viewport, and removes it after the play.
+Generator: a node with NO input port could only ever draw `settle` — never `advance` — so its sequences could
+not reach a resize; such a node now draws settle or advance, and every spec with a port draws exactly the
+sequence it drew before. Hashes refreshed (`spec.ts` only); both stranger rounds re-graded green.
+
+**The node:** `screen-resolution.ts` (init reads the viewport and listens; the resize handler re-reads and sends
+all three), 5 hand scenarios. **Conforms on the runtime on its first run at 200** (seed 20727: 5/5, 200/200) and on
+seeds 3, 77, 20728, 99991 → **67 of 147** (T2 9/11). Mutants 1/1 — thin by construction: the node is an `init`
+(not mutated) and one handler; the no-window, still-window and resize scenarios grade `init`'s two branches.
+What the scenarios pin: a server render sends NO Width or Height but DOES send Aspect Ratio — `undefined /
+undefined` is NaN, which is a value; a window of height 0 is Aspect Ratio Infinity, 0 × 0 is NaN. Not rows: the
+description does not promise otherwise. No row.
+
 ### 6.2 Rows for a ruling (R3 (a): the runtime wins until ruled; each counted every run)
 
 | row | where | what the wire shows | plain words | proposed |
@@ -315,8 +338,8 @@ hears the first frame's error). **All four bear their claims out on the runtime*
 
 ### 6.4 Not done, named
 
-Two are left (the four agent parsers are s12's, §6.1b; Parse XML, Parse Feed, Animate To Value and On App Error
-s13's, §6.1c–e; UUID and Delay NSP-007's): **States** (1191 lines, dynamic ports — a session of its own) and
-**Screen Resolution** (needs a seam the world does not have: a viewport, and resizes on the world's clock). The deep run (`NSP_DEEP=10000 NSP_ONLY=…`, a quiet box). AC2. The
+One is left (the four agent parsers are s12's, §6.1b; Parse XML, Parse Feed, Animate To Value, On App Error and
+Screen Resolution s13's, §6.1c–f; UUID and Delay NSP-007's): **States** (1191 lines, dynamic ports — a session of
+its own). The deep run (`NSP_DEEP=10000 NSP_ONLY=…`, a quiet box). AC2. The
 third stranger round (due six times over: graphs s7, the world s8, the registry s9, the tree s10, the zone and
 digest s11, the clock's between-timers rule s12).

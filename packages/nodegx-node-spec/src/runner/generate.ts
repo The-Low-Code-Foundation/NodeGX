@@ -28,7 +28,7 @@ import type { Step } from '../adapter';
 import type { AnyNodeSpec, InputDecl } from '../spec';
 import { isSignalInput } from '../spec';
 import type { RegistryScript } from '../registry';
-import type { Answer, WorldScript } from '../world';
+import type { Answer, ViewportScript, WorldScript } from '../world';
 import { mulberry32, sequenceSeed, type Rng } from './random';
 import type { Reach } from './reach';
 
@@ -63,7 +63,14 @@ export const DEFAULT_WORLD_POOL = Object.freeze({
     { models: { m1: { a: 1 }, m2: { a: 2 }, m3: { a: 3 } }, collections: { abc: ['m1', 'm2'], def: ['m2', 'm3'] } }
   ] as readonly RegistryScript[]),
   // NSP-013: UTC, two zones with a DST change (one each side of the Atlantic), a half-hour offset, one west of the date line
-  timeZones: Object.freeze(['UTC', 'Europe/Paris', 'America/New_York', 'Asia/Kolkata', 'Pacific/Auckland'])
+  timeZones: Object.freeze(['UTC', 'Europe/Paris', 'America/New_York', 'Asia/Kolkata', 'Pacific/Auckland']),
+  // NSP-013 s13: no window (a server render), a desktop that never resizes, a phone rotated, a window dragged to nothing and back
+  viewports: Object.freeze([
+    null,
+    { width: 1280, height: 800 },
+    { width: 390, height: 844, resizes: [{ at: 100, width: 844, height: 390 }] },
+    { width: 1024, height: 768, resizes: [{ at: 1, width: 1024, height: 0 }, { at: 1000, width: 0, height: 0 }, { at: 30000, width: 1440, height: 900 }] }
+  ] as ReadonlyArray<ViewportScript | null>)
 });
 
 export interface GenerateOptions {
@@ -173,11 +180,18 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
     if (Object.keys(registry).length > 0) world.registry = registry;
   }
   if (needs.includes('timezone')) world.timeZone = rng.pick(pool.timeZones ?? DEFAULT_WORLD_POOL.timeZones);
+  if (needs.includes('viewport')) {
+    const viewport = rng.pick(pool.viewports ?? DEFAULT_WORLD_POOL.viewports);
+    if (viewport) world.viewport = viewport;
+  }
   return { seed, params, steps, world };
 }
 
 function oneStep(rng: Rng, valuePorts: Array<[string, InputDecl]>, signalPorts: Array<[string, InputDecl]>, settleChance: number, advances?: readonly number[]): Step {
-  if (rng.chance(settleChance) || (valuePorts.length === 0 && signalPorts.length === 0)) return 'settle';
+  if (rng.chance(settleChance)) return 'settle';
+  // a node with no input port (Screen Resolution) is driven by the world alone: settle or advance. Drawn
+  // only for such a node, so every spec with a port draws exactly the sequence it drew before s13
+  if (valuePorts.length === 0 && signalPorts.length === 0) return advances && rng.chance(0.5) ? { advance: rng.pick(advances) } : 'settle';
   if (advances && rng.chance(0.25)) return { advance: rng.pick(advances) };
   const wantSignal = signalPorts.length > 0 && (valuePorts.length === 0 || rng.chance(0.5));
   if (wantSignal) return { signal: rng.pick(signalPorts)[0] };
