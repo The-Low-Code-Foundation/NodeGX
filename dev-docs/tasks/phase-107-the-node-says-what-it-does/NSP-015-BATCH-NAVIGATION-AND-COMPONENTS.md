@@ -1,7 +1,7 @@
 # NSP-015 — Batch: navigation, popups, component utilities
 
 **Opened 2026-09-29.** **Depends on NSP-008** (graph scenarios) and R4 = continue.
-**Status: 📋 not started.**
+**Status: 🟡 6 of 14 — s15 (2026-10-01): the component boundary and the Component Object family. Left: the 8 navigation / popup nodes, AC2.**
 
 ## 1. The person sentence
 
@@ -48,4 +48,47 @@ As NSP-011 §4, plus:
 
 ## 6. Built
 
-*(empty)*
+### 6.1 s15 (2026-10-01) — the boundary, and the Component Object family
+
+**The format** ([graph.ts](../../../packages/nodegx-node-spec/src/graph.ts) BOUNDARY; not a guarded file, so
+no stranger re-grade): a component instance may declare its `component` name, its ports (`inputs` / `outputs`:
+port name → `'value'` | `'signal'`) and its instance `params`. Every instance is then a SUBJECT like a node —
+an endpoint for wires (`"a.Total"`), a target for `set` / `signal` steps (the parent setting its input), named
+by claims, its events in the trace under its id. Declaration order: instances, then nodes. Node and component
+ids are one namespace. There is no shared component DEFINITION: a component placed twice is two instances with
+their own nodes — per instance is what the runtime grades too (one scope each).
+
+**The runtime target**: each instance is now the runtime's own `ComponentInstanceNode` (s10 built a stand-in
+owner); after its nodes mount it finds its `Component Inputs` / `Component Outputs` and registers the declared
+ports as `setComponentModel` does (componentinstance.ts :91-95), and is adopted as a handle. Two harness facts
+found on the way: the instance's prototype is built from read-only DESCRIPTORS, so the intercept installs its
+wrappers as own writable properties; and an instance's teardown resets its whole scope, so it is disposed as a
+node only (the runner disposes each inner node). A component SIGNAL port crosses as the runtime carries every
+pulse — `true` then `false`, sent at once — and is recorded as a `signal` on the instance's signal outputs and on
+the matching `Component Inputs` outputs (the first recording showed `value false`: right on the wire, wrong as a
+trace). The 22 s10 scenarios (stand-in owners → real instances) are unmoved.
+
+**Scenarios** ([t08](../../../packages/nodegx-node-spec/scenarios/graph/t08-the-component-boundary.json),
+[t09](../../../packages/nodegx-node-spec/scenarios/graph/t09-component-object.json)), claims written from the
+sentence before recording:
+
+| scenario | grades | result |
+|---|---|---|
+| a component placed twice (Ann / Bo), one instance's input moved (Cy) | Component Inputs; **AC5** (the package test asserts the two instances' inner traces differ) | ✅ all claims on first record |
+| a value written into Component Outputs leaves the instance; two Add pulses in one frame count twice | Component Outputs, C4 across the boundary | ✅ |
+| a signal leaves a component (Press → Pressed → a Counter in the parent), 1 then 2 pulses | Component Outputs (signal), C4 | ✅ |
+| Component Object per INSTANCE; Set Component Object Properties writes only the listed properties; Fetch | Component Object, Set Component Object Properties, S2 | ✅ |
+| Parent Component Object: nearest / named ancestor; Set Parent …: writes it; a name not an ancestor fails with its error | Parent Component Object, Set Parent Component Object Properties | ✅ (two claims of mine named unwired outputs — a Component Object output exists only once wired; sinks added) |
+| Parent Component Object created BEFORE its parent's Component Object | the "nearest" sentence | ❌ **row C23** |
+
+**Not done**: the eight navigation / popup nodes — Show Popup, Push Component To Stack and Run Tasks make a
+component instance BY NAME, so the runtime instantiates it itself: the target needs a component DEFINITION
+registered as a real component model (and a subject naming for nodes in runtime-made instances); Navigate /
+Navigate To Path / Pop / Page Inputs / External Link need the world's LOCATION (§3). AC2 (export): this harness
+emits ONE component — every boundary scenario is `outside` in those words.
+
+### 6.2 Rows
+
+| row | what | where | proposed |
+|---|---|---|---|
+| **C23** | A Parent Component Object (blank Parent Component) whose parent's Component Object is created AFTER the child instance binds the **grandparent's** record for good — reads 8 when the grandparent is written, nothing when the parent is. The Set Parent … beside it resolves at Do and writes the PARENT's (measured: 5 into Page, `near` never sees it). Control: the same tree with the parent's object first binds the parent. Reachable: nodes are created in `Object.values(componentModel.nodes)` order and a child instance's graph is built when it is created ("place the Row, then add the Component Object"). | parentcomponentobject.ts `initialize` walks at creation; the deferred re-walk in `nodeScopeDidInitialize` runs only `if (!modelId)`; the `componentStateNodesChanged` re-walk is editor-only and edit-time | re-resolve unconditionally in the deferred callback and rebind when the id differs. [Ledger](../../bugs/p107-c23-parent-component-object-binds-the-grandparent-when-the-parent-s-object-is-created-later.md) |

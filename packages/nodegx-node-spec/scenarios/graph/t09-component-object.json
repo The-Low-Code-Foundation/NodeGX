@@ -1,0 +1,894 @@
+[
+  {
+    "name": "Component Object is one record per component INSTANCE: Set Component Object Properties writes its own instance's record (only the properties it lists), Changed fires there and not in the other instance, and Fetch republishes with Fetched then Done",
+    "clauses": [
+      "N",
+      "S2"
+    ],
+    "because": "componentobject.ts `properties`: \"Names of the values this component keeps, each becoming a matching input and output\"; `changed`: \"Fires when any property is written\"; `fetched`: \"Fires once Fetch has republished every property\"; record `componentState<own instance id>` (initialize). setcomponentobjectproperties.ts / base.ts `store`: \"Writes every supplied property value into the component object\", `properties`: \"Names of the values this node writes\" (keysToSet filters by them); `done`: \"Fires once every property has been written\". S2: two instances are two records",
+    "world": {},
+    "components": {
+      "a": {
+        "component": "Card"
+      },
+      "b": {
+        "component": "Card"
+      }
+    },
+    "nodes": {
+      "coa": {
+        "type": "net.noodl.ComponentObject",
+        "in": "a",
+        "params": {
+          "properties": "x,y"
+        }
+      },
+      "seta": {
+        "type": "net.noodl.SetComponentObjectProperties",
+        "in": "a",
+        "params": {
+          "properties": "x"
+        }
+      },
+      "sinka": {
+        "type": "net.noodl.Log",
+        "in": "a"
+      },
+      "cob": {
+        "type": "net.noodl.ComponentObject",
+        "in": "b",
+        "params": {
+          "properties": "x"
+        }
+      },
+      "sinkb": {
+        "type": "net.noodl.Log",
+        "in": "b"
+      }
+    },
+    "wires": [
+      {
+        "from": "coa.value-x",
+        "to": "sinka.value"
+      },
+      {
+        "from": "coa.value-y",
+        "to": "sinka.data"
+      },
+      {
+        "from": "cob.value-x",
+        "to": "sinkb.value"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "seta",
+        "set": "prop-x",
+        "value": 5
+      },
+      {
+        "node": "seta",
+        "set": "prop-y",
+        "value": 1
+      },
+      {
+        "node": "seta",
+        "signal": "store"
+      },
+      "settle",
+      {
+        "node": "coa",
+        "set": "value-x",
+        "value": 9
+      },
+      "settle",
+      {
+        "node": "coa",
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "coa",
+        "port": "value-x",
+        "value": 5
+      },
+      {
+        "at": 2,
+        "subject": "sinka",
+        "port": "value",
+        "value": 5
+      },
+      {
+        "at": 2,
+        "subject": "coa",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "coa",
+        "port": "value-y",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "cob",
+        "port": "value-x",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "cob",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "seta",
+        "signal": "done",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "coa",
+        "port": "value-x",
+        "value": 9
+      },
+      {
+        "at": 3,
+        "subject": "coa",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "cob",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 4,
+        "subject": "coa",
+        "signal": "fetched",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "coa",
+        "signal": "changed",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x,y",
+        "subject": "coa"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "seta"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "cob"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "set",
+        "port": "prop-x",
+        "value": 5,
+        "subject": "seta"
+      },
+      {
+        "t": "set",
+        "port": "prop-y",
+        "value": 1,
+        "subject": "seta"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "seta"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 5,
+        "subject": "coa"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "coa"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "seta"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "sinka"
+      },
+      {
+        "t": "set",
+        "port": "value-x",
+        "value": 9,
+        "subject": "coa"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 9,
+        "subject": "coa"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "coa"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 9,
+        "subject": "sinka"
+      },
+      {
+        "t": "in",
+        "port": "fetch",
+        "subject": "coa"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "coa"
+      },
+      {
+        "t": "outcome",
+        "port": "fetch",
+        "value": "done",
+        "subject": "coa"
+      }
+    ]
+  },
+  {
+    "name": "Parent Component Object reads the NEAREST ancestor that has a Component Object, or the one named by Parent Component; Set Parent Component Object Properties writes it; a name that is not an ancestor fails and says so",
+    "clauses": [
+      "N"
+    ],
+    "because": "parentcomponentobject.ts `targetComponent`: \"Which ancestor to read from; leave blank for the nearest one that has a Component Object\"; `changed`: \"Fires when a property on the resolved parent is written\"; `error`: \"Which ancestor was looked for and why it was not found\" ('No ancestor component named \"…\"'). setparentcomponentobjectproperties.ts `targetComponent`: \"Which ancestor to write to; leave blank for the nearest one that has a Component Object\"; base.ts `failure`: \"Fires when no parent Component Object could be found, so nothing was written\". A Component Object output exists once something is wired from it (registerOutputIfNeeded), so each record is read through a Log sink",
+    "world": {},
+    "components": {
+      "shell": {
+        "component": "Shell"
+      },
+      "page": {
+        "component": "Page",
+        "parent": "shell"
+      },
+      "row": {
+        "component": "Row",
+        "parent": "page"
+      }
+    },
+    "nodes": {
+      "cot": {
+        "type": "net.noodl.ComponentObject",
+        "in": "shell",
+        "params": {
+          "properties": "x"
+        }
+      },
+      "cop": {
+        "type": "net.noodl.ComponentObject",
+        "in": "page",
+        "params": {
+          "properties": "x"
+        }
+      },
+      "near": {
+        "type": "net.noodl.ParentComponentObject",
+        "in": "row",
+        "params": {
+          "properties": "x"
+        }
+      },
+      "named": {
+        "type": "net.noodl.ParentComponentObject",
+        "in": "row",
+        "params": {
+          "properties": "x",
+          "targetComponent": "Shell"
+        }
+      },
+      "set": {
+        "type": "net.noodl.SetParentComponentObjectProperties",
+        "in": "row",
+        "params": {
+          "properties": "x"
+        }
+      },
+      "lost": {
+        "type": "net.noodl.SetParentComponentObjectProperties",
+        "in": "row",
+        "params": {
+          "properties": "x",
+          "targetComponent": "Nowhere"
+        }
+      },
+      "sp": {
+        "type": "net.noodl.Log",
+        "in": "page"
+      },
+      "ss": {
+        "type": "net.noodl.Log",
+        "in": "shell"
+      },
+      "sr": {
+        "type": "net.noodl.Log",
+        "in": "row"
+      }
+    },
+    "wires": [
+      {
+        "from": "near.value-x",
+        "to": "cot.value-x"
+      },
+      {
+        "from": "cop.value-x",
+        "to": "sp.value"
+      },
+      {
+        "from": "cot.value-x",
+        "to": "ss.value"
+      },
+      {
+        "from": "named.value-x",
+        "to": "sr.value"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "set",
+        "set": "prop-x",
+        "value": 3
+      },
+      {
+        "node": "set",
+        "signal": "store"
+      },
+      "settle",
+      {
+        "node": "lost",
+        "set": "prop-x",
+        "value": 4
+      },
+      {
+        "node": "lost",
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "cop",
+        "port": "value-x",
+        "value": 3
+      },
+      {
+        "at": 2,
+        "subject": "near",
+        "port": "value-x",
+        "value": 3
+      },
+      {
+        "at": 2,
+        "subject": "near",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "cot",
+        "port": "value-x",
+        "value": 3
+      },
+      {
+        "at": 2,
+        "subject": "named",
+        "port": "value-x",
+        "value": 3
+      },
+      {
+        "at": 2,
+        "subject": "named",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "lost",
+        "port": "error",
+        "value": "No ancestor component named \"Nowhere\""
+      },
+      {
+        "at": 3,
+        "subject": "cop",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "near",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "sp",
+        "port": "value",
+        "value": 3
+      },
+      {
+        "at": 2,
+        "subject": "sr",
+        "port": "value",
+        "value": 3
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "cot"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "cop"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "near"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "named"
+      },
+      {
+        "t": "set",
+        "port": "targetComponent",
+        "value": "Shell",
+        "subject": "named"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "lost"
+      },
+      {
+        "t": "set",
+        "port": "targetComponent",
+        "value": "Nowhere",
+        "subject": "lost"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "named"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "named"
+      },
+      {
+        "t": "set",
+        "port": "prop-x",
+        "value": 3,
+        "subject": "set"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 3,
+        "subject": "cot"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "cot"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 3,
+        "subject": "cop"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "cop"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 3,
+        "subject": "near"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "near"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 3,
+        "subject": "named"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "named"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "set"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 3,
+        "subject": "sp"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 3,
+        "subject": "ss"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 3,
+        "subject": "sr"
+      },
+      {
+        "t": "set",
+        "port": "prop-x",
+        "value": 4,
+        "subject": "lost"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "lost"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "No ancestor component named \"Nowhere\"",
+        "subject": "lost"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "failure",
+        "error": "set-parent-component-object-properties/target-not-found",
+        "subject": "lost"
+      }
+    ]
+  },
+  {
+    "name": "Parent Component Object created BEFORE its parent's Component Object (the parent's nodes in that order — the Row placed, then the Component Object added) still reads the nearest ancestor that has one — the one Set Parent Component Object Properties beside it writes",
+    "clauses": [
+      "N"
+    ],
+    "because": "parentcomponentobject.ts `targetComponent`: \"leave blank for the nearest one that has a Component Object\". The deferral in `nodeScopeDidInitialize` re-resolves only when nothing was found (`if (!this._internal.modelId)`), and the editor-only `componentStateNodesChanged` re-walk (setup, `isRunningLocally`) never runs in a deployed app. Node creation order here is one an app can have: NodeScope.setComponentModel creates nodes in `Object.values(componentModel.nodes)` order and a child instance's whole graph is built when it is created",
+    "world": {},
+    "components": {
+      "shell": {
+        "component": "Shell"
+      },
+      "page": {
+        "component": "Page",
+        "parent": "shell"
+      },
+      "row": {
+        "component": "Row",
+        "parent": "page"
+      }
+    },
+    "nodes": {
+      "cot": {
+        "type": "net.noodl.ComponentObject",
+        "in": "shell",
+        "params": {
+          "properties": "x"
+        }
+      },
+      "near": {
+        "type": "net.noodl.ParentComponentObject",
+        "in": "row",
+        "params": {
+          "properties": "x"
+        }
+      },
+      "cop": {
+        "type": "net.noodl.ComponentObject",
+        "in": "page",
+        "params": {
+          "properties": "x"
+        }
+      },
+      "sr": {
+        "type": "net.noodl.Log",
+        "in": "row"
+      },
+      "set": {
+        "type": "net.noodl.SetParentComponentObjectProperties",
+        "in": "row",
+        "params": {
+          "properties": "x"
+        }
+      },
+      "sp": {
+        "type": "net.noodl.Log",
+        "in": "page"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "cop",
+        "set": "value-x",
+        "value": 7
+      },
+      "settle",
+      {
+        "node": "cot",
+        "set": "value-x",
+        "value": 8
+      },
+      "settle",
+      {
+        "node": "set",
+        "set": "prop-x",
+        "value": 5
+      },
+      {
+        "node": "set",
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "near",
+        "port": "value-x",
+        "value": 7
+      },
+      {
+        "at": 2,
+        "subject": "sr",
+        "port": "value",
+        "value": 7
+      },
+      {
+        "at": 2,
+        "subject": "near",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "near",
+        "port": "value-x",
+        "absent": true
+      },
+      {
+        "at": 3,
+        "subject": "near",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 4,
+        "subject": "near",
+        "port": "value-x",
+        "value": 5
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "cot"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "near"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "cop"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "x",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "set",
+        "port": "value-x",
+        "value": 7,
+        "subject": "cop"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 7,
+        "subject": "cop"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "cop"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 7,
+        "subject": "sp"
+      },
+      {
+        "t": "set",
+        "port": "value-x",
+        "value": 8,
+        "subject": "cot"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "cot"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 8,
+        "subject": "near"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "near"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 8,
+        "subject": "sr"
+      },
+      {
+        "t": "set",
+        "port": "prop-x",
+        "value": 5,
+        "subject": "set"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 5,
+        "subject": "cop"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "cop"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "set"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "sp"
+      }
+    ],
+    "wires": [
+      {
+        "from": "near.value-x",
+        "to": "sr.value"
+      },
+      {
+        "from": "cop.value-x",
+        "to": "sp.value"
+      }
+    ],
+    "row": "NSP-015 §6 C23"
+  }
+]

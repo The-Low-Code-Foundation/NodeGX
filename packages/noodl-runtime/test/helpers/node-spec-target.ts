@@ -87,8 +87,16 @@
  *     Event's `parent` / `children` / `siblings` walk (nodescope.ts `sendEventFromThisScope`) and
  *     the "From repeater" scope chain (componentwalk.ts) run unchanged over it. A component's
  *     `item` is `Model.get(id)` from the seeded registry, hung on the instance as `_forEachModel`,
- *     exactly as a Repeater or Run Tasks hangs it (runtasks.ts :407-408). What a component IS is
- *     not modelled (NSP-015's boundary).
+ *     exactly as a Repeater or Run Tasks hangs it (runtasks.ts :407-408).
+ *   - **the boundary** (NSP-015, graph.ts BOUNDARY): each instance is the runtime's own
+ *     `ComponentInstanceNode` (s10's was a stand-in owner); once its nodes are mounted it finds
+ *     its `Component Inputs` / `Component Outputs` and registers the declared ports as
+ *     `setComponentModel` does, and becomes a handle — a subject — so a wire, a step or a claim
+ *     can name it. Its params are set after the wires. A component SIGNAL port crosses as the
+ *     runtime carries it (`true` then `false`, sent at once) and is recorded as a `signal` event,
+ *     on the instance's signal outputs and on the matching `Component Inputs` outputs. What the
+ *     runtime instantiates ITSELF by name (a Repeater's or Run Tasks' template, a popup, a page)
+ *     needs a component DEFINITION registered as a real component model — not built.
  *   - **the three process-wide managers** behind the store, history and action nodes
  *     (`globalStoreManager`, `stateHistoryManager`, `actionRegistry`) are reset at `install` like
  *     the registry tables, and the history manager's clock becomes the world's — one play, one
@@ -109,6 +117,8 @@ import NodeDefinition = require('../../src/nodedefinition');
 import Model = require('../../src/model');
 import Collection = require('../../src/collection');
 import NodeScope = require('../../src/nodescope');
+import ComponentInstanceNode = require('../../src/nodes/componentinstance');
+import Node = require('../../src/node');
 
 import { globalStoreManager } from '../../src/nodes/std-library/agent/globalstore';
 import { stateHistoryManager } from '../../src/nodes/std-library/agent/statehistory';
@@ -146,7 +156,7 @@ function resetRegistry(world: World): void {
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -210,6 +220,14 @@ interface State {
   settles: number;
   currentInput: string | undefined;
   inOutcome: number;
+  /**
+   * NSP-015 — outputs that carry a SIGNAL as values: a component's signal port crosses the
+   * boundary the way the runtime carries every pulse between nodes — `true`, then `false`, sent
+   * at once (componentinstance.ts `setOutputFromComponentOutput` → `flagOutputDirty`; the
+   * receiving signal input fires on the rising edge). The port's kind is the component's
+   * declaration; a sent `true` is recorded as a `signal` event and no value is recorded.
+   */
+  signalOutputs?: Set<string>;
 }
 
 type StampedToken = OutcomeToken & { port?: string };
@@ -303,6 +321,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     return !!decl && decl.type === 'signal';
   }
   function isSignalOutput(s: State, port: string): boolean {
+    if (s.signalOutputs?.has(port)) return true;
     const output = s.h.metadata.outputs[port];
     const t = output && output.type;
     return !!t && (t === 'signal' || (typeof t === 'object' && (t as { name?: string }).name === 'signal'));
@@ -310,6 +329,12 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
 
   function intercept(s: State): void {
     const node = s.h.node;
+    // NSP-015 — `ComponentInstanceNode`'s prototype is built from property DESCRIPTORS
+    // (componentinstance.ts `Object.create(Node.prototype, { update: { value } … })`), which are
+    // read-only, so an assignment on the instance throws; an own writable property shadows them
+    for (const m of ['setInputValue', 'update', 'sendValue', 'sendSignalOnOutput', 'beginOutcome', 'reportOutcome'] as const) {
+      Object.defineProperty(node, m, { value: node[m], writable: true, configurable: true });
+    }
     // The invoking input of an outcome (trace.ts: an outcome's `port` is the INPUT that was
     // invoked). A direct `signal()` names it; a pulse arriving over a WIRE (NSP-008) reaches the
     // node through the drain's `setInputValue(name, true)` (node.ts :718), so the rising edge of
@@ -331,7 +356,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     node.update = () => updating.run(s, originalUpdate);
     const originalSendValue = node.sendValue.bind(node);
     node.sendValue = (name: string, value: unknown) => {
-      if (value !== undefined && node.hasOutput(name)) s.frame.values.set(name, canonicalise(value));
+      if (s.signalOutputs?.has(name)) {
+        if (value === true) s.frame.signals.push(name);
+      } else if (value !== undefined && node.hasOutput(name)) s.frame.values.set(name, canonicalise(value));
       originalSendValue(name, value);
     };
     const originalSignal = node.sendSignalOnOutput.bind(node);
@@ -450,7 +477,12 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (spec?.derived?.outputs) {
       for (const name of Object.keys(spec.derived.outputs(params))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
     }
-    const h: RuntimeHandle = { id, type, node, metadata: context.nodeRegister.getNodeMetadata(type), errors: [], logs };
+    return adopt(node, id, type, context.nodeRegister.getNodeMetadata(type), params, logs);
+  }
+
+  /** Makes `node` a handle: recorded, intercepted, its `params` applied as `set` events. */
+  function adopt(node: RuntimeNode, id: string, type: string, metadata: NodeMetadata, params: Record<string, unknown>, logs: LogLine[]): RuntimeHandle {
+    const h: RuntimeHandle = { id, type, node, metadata, errors: [], logs };
     const s: State = { h, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
     states.set(id, s);
     byNodeId.set(id, s);
@@ -459,16 +491,23 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     return h;
   }
 
-  /** The owner a real `NodeScope` is built around — what the propagation walk and the scope chain read of a component instance. */
+  /** The owner of the ROOT scope — what the propagation walk and the scope chain read of the app's top component. */
   interface Owner {
     name: string;
     nodeScope?: InstanceType<typeof NodeScope>;
     parentNodeScope?: InstanceType<typeof NodeScope>;
-    children?: Owner[];
+    children?: unknown[];
     getInstanceId(): string;
     getRoots(): never[];
-    _forEachModel?: unknown;
   }
+
+  /** A component instance as the target holds it: the runtime's own node (componentinstance.ts). */
+  type Instance = InstanceType<typeof ComponentInstanceNode> & RuntimeNode & {
+    _forEachModel?: unknown;
+    _internal: { instanceId: string; componentInputs: RuntimeNode[]; componentOutputs: RuntimeNode[] };
+    registerComponentInputPort(port: { name: string }): void;
+    registerComponentOutputPort(port: { name: string }): void;
+  };
 
   /** A real scope around `owner`, with the log sink; `owner.nodeScope` is set to it. */
   function scopeFor(owner: Owner, logs: LogLine[]): InstanceType<typeof NodeScope> {
@@ -479,39 +518,76 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   }
 
   /**
-   * The component tree (graph.ts COMPONENTS): one scope per declared instance, each placed in its
-   * parent's scope as a loaded app places it — an entry of `nodes` (nodescope.ts :310-312) and a
-   * child of a visual node of that scope (the `node-spec/host` entry, standing for the Group),
-   * its name a component model the context knows (`hasComponentModelWithName`, what the
-   * `children` / `siblings` walk asks). Returns the root scope and the scope of each component.
+   * The component tree (graph.ts COMPONENTS): one instance per declared component, each the
+   * runtime's own `ComponentInstanceNode` (NSP-015 — s10 built a stand-in owner; the boundary needs
+   * the real one: its input setters feed `Component Inputs`, `Component Outputs` writes its
+   * outputs), placed in its parent's scope as a loaded app places it — an entry of `nodes` and of
+   * `componentInstanceChildren` under its id (nodescope.ts :305-312) and a child of a visual node
+   * of that scope (the `node-spec/host` entry, standing for the Group), its name a component model
+   * the context knows (`hasComponentModelWithName`, what the `children` / `siblings` walk asks).
+   * Its instance id is `node-spec/instance/<id>` (the runtime's is a process-wide counter; the
+   * Component Object record is keyed on it and must not move between plays). Returns the root
+   * scope and each instance.
    */
   function componentTree(components: Readonly<Record<string, ComponentDecl>>, orphanLogs: LogLine[]) {
     const rootOwner: Owner = { name: 'node-spec/root', getInstanceId: () => 'node-spec/root', getRoots: () => [] as never[] };
     const root = scopeFor(rootOwner, orphanLogs);
-    const scopes: Record<string, InstanceType<typeof NodeScope>> = {};
+    const instances: Record<string, Instance> = {};
     const hostOf = (scope: InstanceType<typeof NodeScope>): Owner => {
       const id = 'node-spec/host';
       const nodes = scope.nodes as unknown as Record<string, Owner>;
       if (!nodes[id]) nodes[id] = { name: id, children: [], getInstanceId: () => id, getRoots: () => [] as never[] };
       return nodes[id];
     };
-    const build = (cid: string): InstanceType<typeof NodeScope> => {
-      if (scopes[cid]) return scopes[cid];
+    const build = (cid: string): Instance => {
+      if (instances[cid]) return instances[cid];
       const decl = components[cid];
-      const parentScope = decl.parent !== undefined ? build(decl.parent) : root;
-      const owner: Owner = { name: cid, parentNodeScope: parentScope, getInstanceId: () => `node-spec/instance/${cid}`, getRoots: () => [] as never[] };
-      if (decl.item !== undefined) owner._forEachModel = Model.get(decl.item);
-      scopes[cid] = scopeFor(owner, orphanLogs);
-      (parentScope.nodes as unknown as Record<string, Owner>)[`node-spec/instance/${cid}`] = owner;
-      (parentScope.componentInstanceChildren as unknown as Record<string, Owner>)[`node-spec/instance/${cid}`] = owner;
-      hostOf(parentScope).children!.push(owner);
+      const parentScope = decl.parent !== undefined ? build(decl.parent).nodeScope : root;
+      const instance = new ComponentInstanceNode(context as never, cid, parentScope) as unknown as Instance;
+      instance.name = decl.component ?? cid;
+      instance._internal.instanceId = `node-spec/instance/${cid}`;
+      (instance.nodeScope as unknown as { runContext: unknown }).runContext = { log: logSink(orphanLogs) };
+      // the stand-in graph model a loaded instance has (its parameters; `_onNodeDeleted` calls `removeListenersWithRef`)
+      (instance as unknown as { model?: unknown }).model = { type: instance.name, parameters: { ...(decl.params ?? {}) }, removeListenersWithRef: () => undefined };
+      if (decl.item !== undefined) instance._forEachModel = Model.get(decl.item);
+      instances[cid] = instance;
+      (parentScope.nodes as unknown as Record<string, unknown>)[cid] = instance;
+      (parentScope.componentInstanceChildren as unknown as Record<string, unknown>)[cid] = instance;
+      hostOf(parentScope).children!.push(instance);
       // the context's component-model table, written directly: a target plays many scenarios and
       // `registerComponentModel` refuses a name it has seen; only `hasComponentModelWithName` reads it here
-      (context as unknown as { componentModels: Record<string, unknown> }).componentModels[cid] = { name: cid, on: () => undefined, removeListenersWithRef: () => undefined };
-      return scopes[cid];
+      (context as unknown as { componentModels: Record<string, unknown> }).componentModels[instance.name] = { name: instance.name, on: () => undefined, removeListenersWithRef: () => undefined };
+      return instance;
     };
     for (const cid of Object.keys(components)) build(cid);
-    return { root, scopes };
+    return { root, instances };
+  }
+
+  /**
+   * NSP-015 — the boundary, once the instance's own nodes are mounted: what `setComponentModel`
+   * does after `nodeScope.setComponentModel` (componentinstance.ts :91-95) — find the scope's
+   * `Component Inputs` / `Component Outputs` nodes, register the component's ports — and then the
+   * instance becomes a handle, a subject like a node. Its metadata is the component's ports (the
+   * port's kind is the component model's port type: what makes a `signal()` step legal on it).
+   */
+  function boundary(cid: string, instance: Instance, decl: ComponentDecl, logs: LogLine[]): RuntimeHandle {
+    const scope = instance.nodeScope as unknown as InstanceType<typeof NodeScope>;
+    instance._internal.componentInputs = scope.getNodesWithType('Component Inputs') as unknown as RuntimeNode[];
+    instance._internal.componentOutputs = scope.getNodesWithType('Component Outputs') as unknown as RuntimeNode[];
+    for (const name of Object.keys(decl.inputs ?? {})) instance.registerComponentInputPort({ name });
+    for (const name of Object.keys(decl.outputs ?? {})) instance.registerComponentOutputPort({ name });
+    const ports = (kinds: Record<string, string> | undefined) =>
+      Object.fromEntries(Object.entries(kinds ?? {}).map(([name, kind]) => [name, { name, type: kind === 'signal' ? 'signal' : '*' }]));
+    const metadata = { inputs: ports(decl.inputs), outputs: ports(decl.outputs) } as unknown as NodeMetadata;
+    const signals = (kinds: Record<string, string> | undefined) => new Set(Object.keys(kinds ?? {}).filter((name) => kinds![name] === 'signal'));
+    // a signal input of the component is a signal OUTPUT of each Component Inputs inside it
+    for (const ci of instance._internal.componentInputs) {
+      const st = states.get(ci.id);
+      if (st) st.signalOutputs = signals(decl.inputs);
+    }
+    const h = adopt(instance, cid, `component:${instance.name}`, metadata, {}, logs);
+    states.get(cid)!.signalOutputs = signals(decl.outputs);
+    return h;
   }
 
   const target: RuntimeTarget = {
@@ -623,7 +699,11 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       states.delete(h.id);
       byNodeId.delete(h.id);
       try {
-        h.node._onNodeDeleted();
+        // NSP-015 — an instance's own teardown resets its whole scope (componentinstance.ts
+        // `_onNodeDeleted` → `nodeScope.reset()`), deleting the nodes inside; the runner disposes
+        // each of those itself, so an instance is torn down as a node only
+        if (h.type.startsWith('component:')) Node.prototype._onNodeDeleted.call(h.node);
+        else h.node._onNodeDeleted();
       } catch {
         // a node whose teardown assumes a scope it never had; the instance is unreachable anyway
       }
@@ -646,15 +726,21 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       const tree = components && Object.keys(components).length ? componentTree(components, orphanLogs) : undefined;
       for (const id of Object.keys(nodes)) {
         const decl = nodes[id];
-        const scope = tree ? (decl.in !== undefined ? tree.scopes[decl.in] : tree.root) : undefined;
+        const scope = tree ? (decl.in !== undefined ? (tree.instances[decl.in].nodeScope as unknown as InstanceType<typeof NodeScope>) : tree.root) : undefined;
         handles[id] = mountIn(decl.type, decl.params ?? {}, scope, id);
       }
+      // NSP-015 — each instance's ports once its nodes exist; then it is a subject (graph.ts BOUNDARY)
+      if (tree) for (const cid of Object.keys(components!)) handles[cid] = boundary(cid, tree.instances[cid], components![cid], orphanLogs);
       for (const w of wires) {
         const from = parseEndpoint(w.from);
         const to = parseEndpoint(w.to);
         if (!(from.node in handles) || !(to.node in handles)) throw new Error(`runtime: wire ${w.from} → ${w.to} names a node the graph does not declare`);
         target.connect!(handles[from.node], from.port, handles[to.node], to.port);
       }
+      // NSP-015 — the parent sets each instance's parameters (nodescope.ts `setNodeParameters`),
+      // after the wires: inside the instance its own wires exist by then (`setComponentModel` made
+      // them before the parent got the node back)
+      if (tree) for (const cid of Object.keys(components!)) for (const [name, value] of Object.entries(components![cid].params ?? {})) target.set(handles[cid], name, value);
       // nodescope.ts :487-490 — once the whole graph is in place, in declaration order
       for (const id of Object.keys(nodes)) {
         const node = handles[id].node as unknown as { nodeScopeDidInitialize?: () => void };

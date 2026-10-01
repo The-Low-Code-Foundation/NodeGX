@@ -34,10 +34,24 @@
  * node may say which component it sits `in` (absent: the root). A target that holds a component
  * tree builds one scope per component, places each child instance inside its parent as a loaded
  * app would (under a visual node of the parent's scope), and mounts each node in its component's
- * scope; the node ids stay global, so wires and claims are unchanged. What a component IS (its
- * ports, Component Inputs / Outputs) is NOT declared here — that boundary is NSP-015's; this is
- * only the tree a node sits in. A target without a component tree refuses a scenario that
- * declares one (`canPlay`).
+ * scope; the node ids stay global, so wires and claims are unchanged. A target without a
+ * component tree refuses a scenario that declares one (`canPlay`).
+ *
+ * THE BOUNDARY (NSP-015). A component instance may also declare what the component IS from
+ * outside: its `component` name (what Parent Component Object's `Parent Component` and the
+ * propagation walk read; absent: the instance id), its PORTS — `inputs` and `outputs`, each a
+ * port name → `'value'` | `'signal'` — and its instance `params`. Inside, a `Component Inputs`
+ * node (sitting `in` that instance) has an output per input port, and a `Component Outputs` node
+ * an input per output port: that pair is the only way a value crosses the boundary, as in an app.
+ * Every component instance is then a SUBJECT exactly like a node: its id is an endpoint (a wire
+ * from a node of its parent's scope into `"<instance>.<input port>"`, or out of
+ * `"<instance>.<output port>"`), a `set` / `signal` step may name it (that is the parent setting
+ * the instance's input), a claim may name it, and its events are in the trace stamped with its
+ * id. Declaration order: the component instances (in `components` key order), then the nodes.
+ * An instance with no ports records nothing. Node ids and component ids are one namespace.
+ * A component placed twice is two instances, each with its own nodes: the format has no shared
+ * component DEFINITION — what is graded is what each instance does, which is per instance in the
+ * runtime too (one scope each).
  */
 
 import * as fs from 'fs';
@@ -83,6 +97,22 @@ export interface ComponentDecl {
    * Repeater Item reads. Absent: the instance carries no item.
    */
   item?: string;
+  /** NSP-015: the component's name (what a walk by name reads); absent: the instance id. */
+  component?: string;
+  /** NSP-015: the component's input ports, port name → kind; a `Component Inputs` node inside has an output per port. */
+  inputs?: Record<string, PortKind>;
+  /** NSP-015: the component's output ports, port name → kind; a `Component Outputs` node inside has an input per port. */
+  outputs?: Record<string, PortKind>;
+  /** NSP-015: the instance's parameters — the parent setting its inputs at load, recorded as `set` events on the instance. */
+  params?: Record<string, unknown>;
+}
+
+/** NSP-015: what a component port carries. */
+export type PortKind = 'value' | 'signal';
+
+/** NSP-015: the subjects of a scenario in declaration order — component instances, then nodes. */
+export function subjectsOf(sc: Pick<GraphScenario, 'nodes' | 'components'>): string[] {
+  return [...Object.keys(sc.components ?? {}), ...Object.keys(sc.nodes)];
 }
 
 export interface Wire {
@@ -204,7 +234,8 @@ export interface GraphTarget<H extends Handle = Handle> extends TargetAdapter<H>
    * Mounts every node in declaration order (each exactly as `mount(type, params)` would, params
    * recorded as `set` events on that node) and then every wire in order, and returns a handle per
    * node id. A wire's making seeds the receiver with the source's current value (C11) — that is
-   * the target's business, and the first settle shows it.
+   * the target's business, and the first settle shows it. NSP-015: the handles include one per
+   * component INSTANCE, by its id — a subject like a node (the header's BOUNDARY paragraph).
    */
   mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[], components?: Readonly<Record<string, ComponentDecl>>): Record<string, H>;
   /** A wire made after mount. A target that cannot (the export: a component is emitted whole) omits it; a `wire` step then throws. */
@@ -242,6 +273,10 @@ export function loadGraphScenarios(dir = GRAPH_SCENARIOS_DIR): GraphScenario[] {
             if (seen.has(c)) throw new Error(`${file}[${i}]: component ${JSON.stringify(cid)} is inside itself`);
             seen.add(c);
           }
+          if (cid in sc.nodes) throw new Error(`${file}[${i}]: ${JSON.stringify(cid)} is both a component and a node — they are one namespace`);
+          for (const kind of [components[cid].inputs, components[cid].outputs]) {
+            for (const [port, k] of Object.entries(kind ?? {})) if (k !== 'value' && k !== 'signal') throw new Error(`${file}[${i}]: component ${JSON.stringify(cid)} port ${JSON.stringify(port)} is ${JSON.stringify(k)} — a port is 'value' or 'signal'`);
+          }
         }
       }
       const nodes: Record<string, GraphNodeDecl> = {};
@@ -256,6 +291,7 @@ export function loadGraphScenarios(dir = GRAPH_SCENARIOS_DIR): GraphScenario[] {
       out.push({
         ...sc,
         nodes,
+        ...(components ? { components: Object.fromEntries(Object.entries(components).map(([cid, c]) => [cid, c.params ? { ...c, params: reviveRecord(c.params) } : c])) } : {}),
         wires: sc.wires ?? [],
         steps: sc.steps.map(reviveStep),
         claims: sc.claims.map((c) => ('value' in c ? { ...c, value: revive(c.value) } : c)),

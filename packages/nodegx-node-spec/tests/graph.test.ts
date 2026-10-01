@@ -18,7 +18,7 @@
 import Ajv from 'ajv';
 
 import type { Handle, TargetAdapter, TraceEvent } from '../src';
-import { checkClaims, CLAUSES, framesOf, hasObservation, interpreterAdapter, loadGraphScenarios, playGraph, runGraphScenarios, TAGS, TRACE_SCHEMA, validateTrace, type GraphScenario, type GraphTarget } from '../src';
+import { checkClaims, CLAUSES, framesOf, hasObservation, interpreterAdapter, loadGraphScenarios, playGraph, runGraphScenarios, subjectsOf, TAGS, TRACE_SCHEMA, validateTrace, type GraphScenario, type GraphTarget } from '../src';
 
 const scenarios = loadGraphScenarios();
 const ajv = new Ajv({ allErrors: true, strict: true });
@@ -50,7 +50,7 @@ describe('AC1 — every clause has a scenario', () => {
  */
 const T4_NODES = ['Event Receiver', 'Event Sender', 'For Each Actions', 'net.noodl.ActionDispatcher', 'net.noodl.ActionHandler', 'net.noodl.GlobalStore', 'net.noodl.GlobalStore.Set', 'net.noodl.GlobalStore.Subscribe', 'net.noodl.OptimisticUpdate', 'net.noodl.StateHistory', 'net.noodl.StateHistory.Undo', 'net.noodl.StateSnapshot', 'RunTasks'] as const;
 const T4_EXEMPT: Record<string, string> = {
-  RunTasks: 'runs a template COMPONENT by name once per item (runtasks.ts :407 `nodeScope.createNode(template, …)`) — needs the component boundary (a component with ports, Component Inputs / Outputs), which is NSP-015\'s; the graph format holds a tree of instances only (graph.ts COMPONENTS)'
+  RunTasks: 'runs a template COMPONENT by name once per item (runtasks.ts :407 `nodeScope.createNode(template, …)`) — the runtime instantiates it itself, so it needs a component DEFINITION the target registers as a real component model; the graph format declares INSTANCES (graph.ts COMPONENTS, BOUNDARY — NSP-015 s15), never a definition'
 };
 
 /**
@@ -67,6 +67,36 @@ describe('NSP-013 — a node graded by graph scenarios rather than a reducer spe
       expect(scenarios.filter((s) => s.clauses.includes('N') && Object.values(s.nodes).some((n) => n.type === type)).map((s) => s.name)).not.toHaveLength(0);
     });
   }
+});
+
+/**
+ * NSP-015 — the batch's T4 nodes graded so far: the component BOUNDARY (graph.ts) and the Component
+ * Object family. The other eight (Show / Close Popup, the four page-stack and router navigations,
+ * Page Inputs, External Link) are not started — not exempt: each needs a component DEFINITION the
+ * runtime instantiates itself (a popup, a page) or the world's location seam (NSP-015 §6).
+ */
+const NSP015_GRADED = ['Component Inputs', 'Component Outputs', 'net.noodl.ComponentObject', 'net.noodl.SetComponentObjectProperties', 'net.noodl.ParentComponentObject', 'net.noodl.SetParentComponentObjectProperties'] as const;
+
+describe('NSP-015 — every graded node of the batch is named by an N scenario', () => {
+  for (const type of NSP015_GRADED) {
+    test(`${type}`, () => {
+      expect(scenarios.filter((s) => s.clauses.includes('N') && Object.values(s.nodes).some((n) => n.type === type)).map((s) => s.name)).not.toHaveLength(0);
+    });
+  }
+  test('AC5 — a component placed twice with different inputs: two instances of one component name, different params, and the trace differs between them', () => {
+    const twice = scenarios.filter((s) => {
+      const byName: Record<string, string[]> = {};
+      for (const [cid, c] of Object.entries(s.components ?? {})) if (c.inputs) (byName[c.component ?? cid] ??= []).push(cid);
+      return Object.values(byName).some((ids) => ids.length >= 2 && new Set(ids.map((id) => JSON.stringify(s.components![id].params))).size === ids.length);
+    });
+    expect(twice.map((s) => s.name)).not.toHaveLength(0);
+    for (const s of twice) {
+      // what the nodes inside each instance recorded, the instance ids taken out: two different streams
+      const inside = (cid: string) => JSON.stringify((s.expect ?? []).filter((e) => e.subject !== undefined && s.nodes[e.subject]?.in === cid).map((e) => ({ ...e, subject: undefined })));
+      const ids = Object.keys(s.components ?? {}).filter((cid) => s.components![cid].inputs);
+      expect(new Set(ids.map(inside)).size).toBe(ids.length);
+    }
+  });
 });
 
 describe('NSP-012 — every T4 node of the batch is named by an N scenario or exempt with a reason', () => {
@@ -101,7 +131,7 @@ describe('every recorded trace is well-formed and bears its claims out', () => {
       const trace = sc.expect!;
       expect(validateTrace(trace).ok).toBe(true);
       expect(validateWithAjv(JSON.parse(JSON.stringify(trace)))).toBe(true);
-      expect(trace.every((e) => e.t === 'settle' || (typeof e.subject === 'string' && e.subject in sc.nodes))).toBe(true);
+      expect(trace.every((e) => e.t === 'settle' || (typeof e.subject === 'string' && subjectsOf(sc).includes(e.subject)))).toBe(true);
       expect(hasObservation(trace)).toBe(true);
       expect(sc.claims.length).toBeGreaterThan(0);
       const failures = checkClaims(trace, sc.claims);

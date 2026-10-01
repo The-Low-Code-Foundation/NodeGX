@@ -10,7 +10,7 @@
  */
 
 import { PlayError, type Handle } from '../adapter';
-import { checkClaims, isGraphTarget, parseEndpoint, projectClaims, projectGraphTrace, type GraphScenario, type GraphTarget } from '../graph';
+import { checkClaims, isGraphTarget, parseEndpoint, projectClaims, projectGraphTrace, subjectsOf, type GraphScenario, type GraphTarget } from '../graph';
 import { specFor } from '../nodes';
 import type { TraceEvent } from '../trace';
 import { World } from '../world';
@@ -35,7 +35,8 @@ function worldFor(sc: GraphScenario): World | undefined {
  * holds no component tree says so through `canPlay`, and the runner reports it `outside`.
  */
 export async function playGraph<H extends Handle>(target: GraphTarget<H>, sc: GraphScenario): Promise<TraceEvent[]> {
-  const ids = Object.keys(sc.nodes);
+  // NSP-015: every component instance is a subject too, before the nodes (graph.ts BOUNDARY)
+  const ids = subjectsOf(sc);
   const out: TraceEvent[] = [];
   const seen: Record<string, number> = {};
   let handles: Record<string, H> | undefined;
@@ -43,6 +44,7 @@ export async function playGraph<H extends Handle>(target: GraphTarget<H>, sc: Gr
   /** Copies the node's events not yet copied into the graph trace, stamped with its id; the node's own `settle` markers are skipped. */
   const drain = (id: string) => {
     if (!handles) return;
+    if (!(id in handles)) throw new Error(`${target.name}: mountGraph returned no handle for ${JSON.stringify(id)} — every node and component instance is a subject`);
     const t = target.trace(handles[id]);
     for (let i = seen[id] ?? 0; i < t.length; i++) {
       if (t[i].t !== 'settle') out.push({ ...t[i], subject: id });
@@ -50,7 +52,7 @@ export async function playGraph<H extends Handle>(target: GraphTarget<H>, sc: Gr
     seen[id] = t.length;
   };
   const handle = (id: string): H => {
-    if (!handles || !(id in handles)) throw new Error(`the scenario names no node ${JSON.stringify(id)}`);
+    if (!handles || !(id in handles)) throw new Error(`the scenario names no node or component ${JSON.stringify(id)}`);
     return handles[id];
   };
 
@@ -91,7 +93,7 @@ export async function playGraph<H extends Handle>(target: GraphTarget<H>, sc: Gr
     throw new PlayError(`${target.name} threw: ${e instanceof Error ? e.message : String(e)}`, out, e);
   } finally {
     if (restore) restore();
-    if (handles) for (const id of ids) target.dispose(handles[id]);
+    if (handles) for (const id of ids) if (id in handles) target.dispose(handles[id]);
   }
 }
 
