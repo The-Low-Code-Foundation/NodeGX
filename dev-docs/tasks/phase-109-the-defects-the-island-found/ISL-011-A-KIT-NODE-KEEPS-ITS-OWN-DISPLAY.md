@@ -1,0 +1,120 @@
+# ISL-011 — A kit node keeps the display its author gave it
+
+**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**F15** · found by P105 [CG-001](../phase-105-the-coding-garden/CG-001-THE-KIT.md) §7.1 item 1, the first page drive,
+2026-09-27 · **Side:** product (React bridge, node-kit types and docs, scaffold; the export's half is P84 **P40**)
+
+The garden kit's world drew as one flat green rectangle. Its 48 tile buttons were on the page at zero size. The kit's
+stylesheet said `display:grid` on the world's class, but an inline `display:block` arrived through `props.style` and
+won, as an inline style always beats a class rule. Nothing logged.
+
+## 1. The person sentence
+
+**A kit author says once how their node lays out its own insides, and that is what draws: in the editor canvas, on a
+deployed page and in an exported app.**
+
+## 2. What was measured
+
+Read at HEAD `27d891bf3`, 2026-10-01, by the author of this file. Nothing was run.
+
+| reading | where |
+|---|---|
+| `defaultCss` is copied into one `startStyle` per node type at definition. Re-read at HEAD | `noodl-viewer-react/src/react-component-node.ts:989`, `:994` |
+| The declared defaults of `inputCss` ports go into the same `startStyle` (or a tagged one). Re-read at HEAD | `react-component-node.ts:996-1020` |
+| Each instance starts with `this.style = Object.assign({}, startStyle)`. Re-read at HEAD | `react-component-node.ts:1066` |
+| The bridge hands `this.style` to the kit's component as `props.style`. A React parent's `style` is merged over it. Re-read at HEAD | `react-component-node.ts:824-834`, `:851` |
+| 🔴 **A later style write skips React.** `setStyle` writes straight onto `element.style` (`setStylesOnDOMNode`) unless the property is on a short force-render list (opacity edges, `position`, `flexDirection`, `clip`, margins under a % size). So a value the component worked out at render can be overwritten on the DOM by a later port write, and put back at the next render. The **CSS Style** input (`styleCss`) goes this way too, through `updateAdvancedStyle`. Re-read at HEAD | `:1547-1636`, `:917-932`, `:1153-1166`, `:1274` |
+| 🔴 **The `display:block` was the kit's own, not the bridge's.** At the kit's first commit `f7d3ab33f`, the `Garden` node declared `defaultCss: { display: 'block' }` (line 1239 there), and its stylesheet said `.gd-world{…display:grid…}` (line 980). The world spread `props.style` last. The bridge adds no `display` when a kit gives no `defaultCss` (`defaultCss = {}`, `:989`). **So the audit's "the bridge seeds `display:block`" does not hold as written.** What does hold: whatever an author puts in `defaultCss` reaches the root as an inline style, which beats every rule in the kit's own stylesheet, and nothing the author reads says so. Re-read at HEAD (`git show`) | `git show f7d3ab33f:library/modules/garden-kit/src/kit.js` |
+| **The docs send display to `defaultCss`.** "If it is what makes the node a box at all — `display: flex`, `flexDirection` — it is structure, and it belongs in `defaultCss`." Every sample puts `style: props.style` on its root. The page never says that `props.style` is inline, or that it beats a stylesheet. Re-read at HEAD | `docs-site/docs/custom-nodes.md:147-149`; samples `:52`, `:252`, `:529` |
+| The types say only *"Styles applied to every instance before any input is set."* Re-read at HEAD | `nodegx-node-kit-types/src/index.d.ts:787-788` |
+| The scaffold's example node puts `display: 'flex', flexDirection: 'column', borderStyle: 'solid'` in `defaultCss`. Re-read at HEAD | `nodegx-kit-scaffold/src/index.js:544` |
+| **Census of shipped kit `defaultCss`:** game-kit 4 (`inline-block`, `block`, `inline-flex`, `flex`), nightbook-kit 2 (`block`), garden-kit 3 (`block` ×2, `grid`), garden-3d-kit 1 (`block`). Whether each kit's stylesheet also sets `display` on the same root was **not counted** (AC5). Re-read at HEAD | `grep -n defaultCss library/modules/*/src/*.js` |
+| **The workaround the kit carries at HEAD.** The world's style is built as `Object.assign({grid…}, props.style)`, then `display` is forced to `grid` unless it is `none`, and `defaultCss` is now `grid`. ⚠️ So a person who types `display: flex` into the node's CSS Style input sees it written on the DOM, then undone at the next render. Re-read at HEAD | `library/modules/garden-kit/src/kit.js:1932-1944`, `:1970` |
+| No product code writes `display: 'none'` to a node: `grep -rn "display: 'none'" packages/noodl-viewer-react/src` → 0. The kit's "keep the graph's `display:none`" branch serves only a CSS Style the person typed. Re-read at HEAD | as cited |
+| **The export does the opposite.** `nodegx-export`'s `parse/kitSource.ts` and `emit/kits.ts` contain neither `inputCss` nor `defaultCss` (grep → 0 in both). In an exported app a kit's `defaultCss` does not exist at all. P84 **P40**, owner **UNOWNED**. Re-read at HEAD | `nodegx-export/src/parse/kitSource.ts`, `src/emit/kits.ts`; [P84 register](../phase-84-the-defects-the-field-report-found/DEFECTS-THE-FIELD-REPORT-FOUND.md) line 175 |
+| The drive's readings (48 cells, zero size, the robot the only thing on screen). **As recorded 2026-09-27, not re-driven** | CG-001 §7.1 item 1 |
+
+## 3. Where it bites a person
+
+- Any hand-written kit that styles its root with a class from its own stylesheet string, which is the natural shape
+  once a node draws more than one element, **and** follows the docs by putting structure in `defaultCss`. The two
+  disagree and the inline value wins. A grid, a flex row or a sticky header silently collapses.
+- The same node renders three ways. The canvas and a deployed page use `defaultCss` inline. An exported app has no
+  `defaultCss` at all (P40). The kit's stylesheet is a third opinion.
+- A kit that "fixes" it the garden way, by forcing its own value after the merge, takes the property away from the
+  person using the node (the CSS Style input stops working for it).
+
+## 4. Related work and collisions
+
+- **P84 [P40](../phase-84-the-defects-the-field-report-found/DEFECTS-THE-FIELD-REPORT-FOUND.md)** (🔴 UNOWNED): the
+  export reads no `inputCss` or `defaultCss`. Any sentence this task writes about `defaultCss` is false in an exported
+  app unless P40's `defaultCss` half is fixed or the sentence says so. 🔴 This task either takes that half or names it.
+- **P88 [GAM-017](../phase-88-the-defects-the-games-found/GAM-017-A-KIT-NODE-TAKES-A-SIGNAL-AND-A-SIZE-THE-WAY-A-BUILT-IN-DOES.md)** ✅:
+  R17 ruled size by a wrapping Group (z3), not `frame`. It never touched `defaultCss` precedence.
+- **P88 [GAM-014](../phase-88-the-defects-the-games-found/GAM-014-A-KIT-NODE-DRAWS-WHEN-IT-IS-THE-WHOLE-COMPONENT.md)** ✅
+  (register **D53**): a kit node as a component's root. Different defect, same root element.
+- **P69 [CN-007](../phase-69-the-node-you-write-yourself/CN-007-THE-DOCS-PAGE-THAT-REPLACES-THE-BROKEN-ONE.md)** ✅: the
+  docs page. Its gate `nodegx-node-kit-types/tests/docsamples.test.js` compiles every complete sample and **counts**
+  the fragments. A new sample changes that count deliberately.
+- **P30 [NDA-016](../phase-30-node-library-audit/NDA-016-LAYOUT-SIZEMODE.md)**: built-in nodes (`group.ts`, `text.ts`,
+  `image.ts`, …) use the same `defaultCss` route through the same bridge. Nothing here may change their behaviour.
+- **[ISL-015](ISL-015-A-KIT-AUTHOR-READS-THE-TRAPS-BEFORE-MEETING-THEM.md)**: this trap is one of its rows. The fix
+  lives here; ISL-015's gate checks the words are where an author reads.
+- Owner grep: `grep -rlai --include='*.md' "defaultCss" dev-docs/tasks` → 11 files (P9, P18 EXP-011, P30 ×4, P54,
+  P84 ×2, P95, P105). None owns kit `defaultCss` precedence. P95's is about `group.ts` writing `position: relative` inline.
+
+## 5. Design — 🔒 rulings first
+
+[README §5](README.md) puts this task in slice 0, with no ruling. That holds for the recommended route: (1a) and (2a)
+below change no behaviour on a page, only what an author reads and what an exported app draws. **Build (1a) and (2a)
+without waiting.** The two questions are written out so that (1b), which changes every kit's look, is never taken on
+the way past. If Richard prefers (1b) or (2b), he says so and §6 is re-read.
+
+1. 🔒 **What should `defaultCss` mean for a kit node?**
+   - **(a) It stays inline, and everything an author reads says so.** The docs, the types, the scaffold's comment and
+     the `create_node_kit` README say: "`defaultCss` and `inputCss` reach your root as `props.style`, an inline style.
+     It beats any rule in your stylesheet. Set a property in one place, never both." Optionally, a kit check warns
+     when a node's `defaultCss` names a property that the kit's own stylesheet string also sets on the class its root
+     wears. No runtime change.
+   - **(b) It becomes the lowest layer.** The bridge writes a kit's `defaultCss` as a generated class rule, so the
+     kit's stylesheet and the person's ports both beat it. The bridge is shared with every built-in (§4), so this has
+     to tell kits from built-ins. It changes every shipped kit that relies on `defaultCss` winning today (AC5 counts them).
+   - **(c) Docs only:** "put `display` in `defaultCss` and nowhere else", with no check.
+   - **Recommendation: (a)**, with the check only if AC5 finds a second kit with the same conflict. The runtime path is
+     shared with every built-in node, and (b) has the largest blast radius for a trap that a sentence prevents.
+2. 🔒 **Does this task take P40's `defaultCss` half?** (a) Yes: the export's kit shim applies `defaultCss` as the
+   page does, so the docs sentence is true everywhere. (b) No: the docs say in a sentence that an exported app drops
+   `defaultCss`, and P40 stays UNOWNED. **Recommendation: (a)** for `defaultCss` only (one object, applied once);
+   `inputCss` stays P40's.
+
+Constraints, after the rulings:
+- Built-in nodes' `defaultCss` keeps its present meaning and order (NDA-016).
+- The direct DOM patch in `setStyle` is the hot path for animated `opacity` and `transform`. Do not route it through a render.
+- The garden kit's workaround stays until AC6 decides it. Removing it changes four copies of the kit (audit F19).
+
+## 6. Acceptance criteria (on the recommended route; re-read if a ruling differs)
+
+| AC | Clause |
+|---|---|
+| AC1 | **RED at HEAD, recorded in §8.** A minimal kit in a scratch project, not beside `library/`: one React node whose stylesheet sets `.k{display:grid; grid-template-columns:repeat(4,1fr)}` on its root class, with `defaultCss: { display: 'block' }`, `style: props.style` on the root, and four children. Deployed and driven in Chromium, `getComputedStyle(root).display` reads `block` and the four children are stacked. **Known-firing control:** the same kit with `defaultCss` removed reads `grid` with four columns. **Export arm:** the same project exported and built; record what `display` reads there (P40 predicts `grid`, the opposite of the page). |
+| AC2 | **The ruled fix.** Under (a), the sentence is in the docs page, the types comment, the scaffold comment and the scaffold README, and ISL-015's gate grades each. The optional check, if built, names the node, the property and both values. **Reverted arm:** remove the check and a fixture with the conflict is no longer reported, by name. |
+| AC3 | **Person sentence, on a deployed page and in the editor canvas.** A kit written the way the updated docs show lays out as a four-column grid in the canvas, on a deployed page and (under ruling 2a) in an exported app. Screenshots taken and looked at. Then a port write after mount (change the node's opacity) does not lose the grid. |
+| AC4 | **Sabotage arm for ruling 2a.** Remove the export shim's `defaultCss` line and AC3's export reading changes, by name. |
+| AC5 | **Blast radius.** For every `reactNodes` definition under `library/modules`, list its `defaultCss` properties and whether that kit's stylesheet sets the same property on the root's class. Each module is read in its own project (D41). Record the list before and after; under (b), every row whose look changes. |
+| AC6 | **The garden workaround.** Decide whether `kit.js:1932-1944` stays. If it goes, CG-001's gate row ("`display:block` in, `display:grid` out") and the page drive's THE LOOK clause are re-read, both still green, and the person's CSS Style `display` is no longer undone at the next render. |
+
+## 7. Traps
+
+- 🔴 **Read the computed style, not `props.style`.** An assertion on the props grades the bridge's input, not the
+  page. Read `getComputedStyle` on the element a person sees.
+- 🔴 **The DOM patch bypasses render.** A fix that only changes what render returns can be undone by the next port
+  write, then put back at the render after. Drive a port change after mount (AC3).
+- A React parent's `style` beats the node's own (`:828-834`; `Drag` does this). Do not read that as this defect.
+- The canvas and a deployed page share the bridge. The export does not (P40). Three readings, never one standing in for another.
+- `docsamples.test.js` counts fragments. A new sample is either complete, and compiled, or a counted fragment.
+- Rebuilding garden-kit changes `src`, the built `index.js`, the module's `project/` copy and the template's
+  `noodl_modules` copy (audit F19). The template must still regenerate byte-identical apart from the kit.
+
+## 8. Record
+
+None yet.

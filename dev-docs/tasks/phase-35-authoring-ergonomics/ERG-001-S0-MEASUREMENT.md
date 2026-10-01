@@ -972,6 +972,10 @@ drains while the rebuild is still awaiting `addItem` per item. Probed directly:
 [{"signal":"itemsRendered","items":0},{"signal":"done","items":3},{"signal":"completed","items":3}]
 ```
 
+✅ **Fixed by P109 ISL-001 (P78 D85), 2026-10-01:** the op returns `refresh()`'s promise and the rebuild iterates a
+snapshot. The order now reads `done, completed, itemsRendered`, each with the rows on screen; the same dropped promise was
+how a list fed twice drew both sets of rows.
+
 That is the defect NDA-004 §3 added the port to prevent, still live on one of the two paths into
 a rebuild. A corpus row pins the measured ordering; repairing it changes *when* an existing
 signal fires, which is a behaviour change and was not this slice's to make. **The one-character
@@ -1422,7 +1426,8 @@ and worth separating from them.
 §25). Left verbatim.
 
 ⚠️ **`Items Rendered` fires with zero item nodes existing after a `Refresh`** — filed, not fixed,
-last session. Still live. The one-character fix is `() => this.refresh()`.
+last session. Still live. The one-character fix is `() => this.refresh()`. ✅ **Fixed by P109 ISL-001, 2026-10-01** (it was
+also D85's cause).
 
 ---
 

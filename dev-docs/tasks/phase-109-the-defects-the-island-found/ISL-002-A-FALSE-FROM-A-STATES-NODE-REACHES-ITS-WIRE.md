@@ -1,0 +1,110 @@
+# ISL-002 — A `false` from a States node's first state reaches its wire as `false`
+
+**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F02 ·
+[P106 IG-003](../phase-106-the-island-grows/IG-003-DRIVE-TEACH-PLAY.md) §7, deviation 4 (line 169-172) · the template's
+note at `packages/noodl-mcp/tests/cg003Components.ts:1072-1074` · **Side:** product (runtime, the `States` node; the
+exported States library too)
+
+Olive's Island has a Drive mode and a Teach mode. Its States node said `record: false` in Drive, the first state, and
+four Drive presses still recorded four blocks. The same state's strings arrived. The template now sends `'yes'`/`'no'`.
+
+## 1. The person sentence
+
+**Someone gives a States node a yes/no value, or an empty text, and the node starts in its first state. The wire
+carries exactly what that state says, `false` or `''`, from the moment the page opens.**
+
+## 2. What was measured
+
+| reading | where |
+|---|---|
+| 🔴 **The first state is entered by `jumpToState`, which writes `stateParameters[prefix + v] \|\| 0` for every value, whatever its type.** So a `false` is published as the number `0`, and so is an empty string `''`. A non-empty string survives the `\|\|`, which is why the strings in the same state arrived. *Re-read at HEAD* | `packages/noodl-viewer-react/src/nodes/std-library/states.ts:580-615` (the line is `:592`) |
+| Every later move goes through `goToState`'s typed branch. A boolean becomes `_b === undefined ? false : !!_b`, and a string is assigned as it is. So the same `false` is correct when the node comes **back** to the first state. *Re-read at HEAD* | `states.ts:765-768` (first call → `jumpToState`), `:780-788` |
+| The first entry is scheduled by the `states` setter (`scheduleGoToState(startState \|\| states[0])`), after every input of the update, so the `value-…` parameters are already stored when `jumpToState` reads them. *Re-read at HEAD* | `states.ts:277-290`, `:640` |
+| A `value-` parameter that arrives later, while the node is in that state, writes the raw value and flags it. That path does not coerce. *Re-read at HEAD* | `states.ts:494-509` |
+| `0` is sent: `sendValue` drops only `undefined`. *Re-read at HEAD* | `packages/noodl-runtime/src/node.ts:814-835` |
+| The template's reader is `var record = Inputs.record !== false && String(Inputs.record) !== 'no'`. A `0` passes both tests, so it records. That alone explains "four Drive presses recorded four blocks". *Re-read at HEAD* | `packages/noodl-mcp/tests/cg003Scripts.ts:365` |
+| IG-003 wrote that the `false` *"never reached Record step (the input stayed unset, and unset records)"*. The file does not say whether the input was read or inferred from the behaviour. ⚠️ **The source predicts the input arrived as `0`, not unset.** AC1 decides | `phase-106…/IG-003-DRIVE-TEACH-PLAY.md:169-172`, as recorded 2026-09-28 or 09-29 (IG-003 session dates), not re-driven |
+| The same template still uses first-state booleans that happen to be harmless. Examples are `teaching: false` and `padShown: true` in `plMode`, and `iwPayState`'s `shown: false`, where a reader that treats `0` as false sees no difference. *Re-read at HEAD* | `cg003Components.ts:1068-1078`, `:1757` |
+| A comment in the same file already names the `\|\| 0` pattern as a past defect in the transition code (it *"animated every value to 0"*). *Re-read at HEAD* | `states.ts:387-396` (NDA-004 §2's note on `onStart`); also `:178` (`targetValues[v] = … \|\| 0`, numbers only) |
+| 🔴 **The export copies it.** The exported States library's `jumpToState` writes `m.def.values[v].byState[state] \|\| 0`. *Re-read at HEAD* | `packages/nodegx-export/src/emit/statesLib.ts:324-334` (`:330`) |
+
+## 3. Where it bites a person
+
+- **Anyone who starts a yes/no in its "no" state.** That is the commonest shape there is: closed, off, not editing, not
+  recording. The wire carries `0`. A reader that tests `=== false`, `!== false`, `typeof === 'boolean'`, or shows the
+  value as text then sees something else: a Function, a Condition with strict checking, a Text that shows `0`.
+- **An empty text in the first state shows `0`.** That covers a placeholder, a cleared label, or a CSS class that should
+  be empty. Predicted from the same line, not yet seen in a template.
+- **It is invisible on the canvas.** The editor shows the parameter as `false`, and the inspector of a running node may
+  show `0`. Nobody thinks to look, because after the first move it is right.
+
+## 4. Related work and collisions
+
+- **D49 / [GAM-006](../phase-88-the-defects-the-games-found/GAM-006-A-COLOUR-SWITCHED-BY-STATES-REACHES-THE-SCREEN.md)**
+  is a different line. It is colours through **transitions** (`onStart`'s parse, `states.ts:161-195`), and it is
+  🟢 built. This defect is the first **jump**, with transitions on or off, and the template has `useTransitions: false`
+  on every States node (`cg003Components.ts:185`). AC1 keeps them apart: transitions off in both arms.
+- **Memory "LASTSENT"** (an output can never go back to `undefined` on a wire) does not explain this. `0` is a defined
+  value and is sent. Memory "a States node driven by a value stays in its first state" (D43) is about the
+  `currentState` **input**. This is about a value **output**.
+- **P107 [NSP-013](../phase-107-the-node-says-what-it-does/NSP-013-BATCH-DATES-PARSERS-UTILITIES.md)** will spec States
+  (T1 machine plus T2 clock, lines 23 and 37). If NSP-013 specs it first, its spec will either pin `|| 0` as the
+  reference or record it as a row for a ruling. Whichever goes first tells the other. The spec and the runtime must
+  agree on the ruled answer.
+- **P18 EXP-011** owns `statesLib.ts`. The export fix is the same one line and its golden. It needs a
+  `coverage-ledger.json` note only if the behaviour changes.
+- **P79 [DEFECTS-LESSON-6](../phase-79-the-syllabus/DEFECTS-LESSON-6-FOUND.md)** line 38 teaches that a States node
+  starts in its first state. That is unchanged.
+- Owner grep: `grep -rln "jumpToState" dev-docs/tasks --include='*.md'` returns SYL-009, DEFECTS-LESSON-6 and GAM-006.
+  None of them owns the first-jump coercion. `grep -rn -i "first state" dev-docs/tasks --include='*.md'` turns up no
+  owner either. The hits are IG-003's record and RKT-008/006's use of first states.
+
+## 5. Design
+
+🔒 **Ruling 1 (plain words): what should the first state hand out for a value it leaves empty?** Today any empty-ish
+value becomes `0`.
+- (a) **Exactly what the state says, typed like a later move.** A boolean gives `false` (and `false` when unset, as
+  `goToState` does). A string gives `''` (or unset). A number gives `0` when unset. A colour gives what it gives today.
+- (b) The same as (a), but a value the state never set stays **unset** for every type, so nothing is sent.
+- (c) Leave the runtime alone and document "use strings".
+
+**Recommendation: (a).** It makes the first entry and every later entry the same rule, which is the rule the editor
+already shows. (b) changes numbers that work today, and (c) leaves a trap that no author can see.
+
+🔒 **Ruling 2: does the export change with it, in the same commit?** (a) Yes, one rule in both places. (b) The runtime
+first, with the export recorded as a known divergence. **Recommendation: (a).** P107 exists so that two targets do not
+quietly disagree.
+
+Design constraints:
+- One helper decides a state's value by type, and both `jumpToState` and `goToState` call it, so the two paths cannot
+  drift again.
+- Numbers and colours keep their current first-state behaviour (`0` for an unset number). Only booleans and strings
+  change. The census (AC4) shows the size of that change.
+- `stateChanged` still does not fire on the first entry (`states.ts:601-612`, deliberate).
+
+## 6. Acceptance criteria
+
+| AC | Clause |
+|---|---|
+| AC1 | **RED at HEAD, recorded in §8, before any change.** A runtime spec places a States node (`useTransitions: false`, states `off,on`, values `flag` boolean `false/true`, `label` string `''/'x'`, `word` string `'no'/'yes'`), wires each output to a recorder, and runs one update. It asserts `flag === false` and `label === ''` and is expected RED, reading `0` and `0`. **Known-firing beside it:** `word === 'no'` in the same run is green. **Cause isolation:** the same spec with `to-on` then `to-off` reads `flag === false`, which shows the coercion is in the first jump, not in the wire. A second arm with transitions **on** must give the same first-entry reading, which separates it from D49. Record the recorder's raw value and its `typeof`. |
+| AC2 | Ruling 1 lands in `states.ts`, and AC1 is green. The existing States specs (`nda-001-states-reactivity`, `erg-001-states-outcomes`, `nda-004-states-unknown-state`, `gam-006-*`, `fb-020-checkbox-shows-its-state`) stay green. **Sabotage arm:** put back `\|\| 0` at the jump and AC1's two rows go RED, the `word` row stays green. |
+| AC3 | **Export (ruling 2).** `statesLib.ts`'s `jumpToState` follows the same rule. A paired spec drives the runtime and the emitted library through AC1's script and compares every published value, with its type. The same sabotage arm turns it RED. |
+| AC4 | **Blast radius before landing.** A census of every States node in `templates/`, `library/prefabs/`, the embedded templates and the P86 corpus. It lists each boolean or string value whose **first-state** value is `false`, `''` or unset, and what each one's wire feeds. Every row is classed "harmless" (a reader that treats `0` as false) or "was wrong" (a strict reader, or text shown). The known-firing row is `Pages/Workshop`'s `plMode.teaching`. |
+| AC5 | **The person sentence, in a browser.** A minimal project built through the door: a States node that starts `off`, its `flag` wired into a Function that shows `typeof Inputs.flag + ':' + Inputs.flag` in a Text, and its `label` into a second Text. Deployed with `nodegx deploy`, the first paint reads `boolean:false` and an empty label. **Control arm:** the same project over HEAD's runtime reads `number:0` and `0`. |
+| AC6 | **The template's workaround.** Say whether Olive's Island's `record` can go back to a boolean. Do not change the template here. Write the sentence into README §6 for P108's next session. |
+
+## 7. Traps
+
+- 🔴 **A loose reader hides it.** `if (Inputs.flag)` and a Condition without strict checking treat `0` like `false`. That
+  is why most first-state `false`s in the template look fine. AC1 must read the raw value and its type.
+- **A test that moves the node first grades the wrong path.** Only the first entry goes through `jumpToState`. A spec
+  that pulses `to-off` before reading reads `goToState`'s correct branch and passes at HEAD.
+- **"The input stayed unset" is not established.** Do not write an "unset" fix. Measure what arrives (AC1) before
+  choosing between ruling 1's (a) and (b).
+- **The template's string workaround hides it from every garden drive.** No Olive's Island reading can grade this
+  task.
+- The editor's inspector and the deployed page can show the value differently. Grade on the deployed DOM (AC5).
+
+## 8. Session log
+
+None yet.

@@ -1,7 +1,8 @@
 ---
 id: P78-D85
 title: A For Each given a new list while it is still building its first draws both row sets
-status: scheduled
+status: fixed
+commit: 3df5adb82
 phase: P109
 task: ISL-001
 severity: high
@@ -30,3 +31,10 @@ No spec reproduces it yet (ISL-001 AC1). Re-read at HEAD `d2b2f0101`: `foreach.t
 **Proposed:** in `refresh()`, iterate a snapshot taken before the first `await`, and drop the `add`/`remove` ops
 `scheduleCopyItems` queued while it ran (diff once at the end); make the queued op return `refresh()`'s promise.
 Small–medium (one file plus a yielding corpus spec).
+
+**Fixed 2026-10-01, `3df5adb82` (P109 ISL-001 s1).** Both halves of the proposal: the queued op returns `refresh()`'s
+promise, and the rebuild iterates a snapshot. Measured by
+`packages/noodl-viewer-react/tests/corpus/isl-001-repeater-list-given-twice.test.ts`: at HEAD 8 rows for 5 with ids and
+10 for 5 id-less (both `repeaterCreateComponentsAsync` settings); 5 after. Each sabotage arm alone re-reddens it. The
+templates' workarounds (TPL-011's slots, the island's 120 ms latch) are ISL-025's rows W3 and need a rebuilt viewer
+bundle before a drive can see the fix.
