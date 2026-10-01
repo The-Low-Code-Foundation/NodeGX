@@ -1,7 +1,7 @@
 ---
 id: P107-C23
 title: Parent Component Object binds the GRANDPARENT's object when the parent's Component Object is created after the child
-status: needs-ruling
+status: fixed
 severity: high
 area: runtime / Parent Component Object (viewer)
 found: P107 NSP-015 s15, 2026-10-01
@@ -35,3 +35,8 @@ Object created BEFORE its parent's Component Object …" (row C23) beside the co
 Proposed: in `nodeScopeDidInitialize`'s deferred callback, re-resolve unconditionally (drop the
 `!modelId` guard) and rebind when the id differs — the same comparison `onComponentStateNodesChanged`
 already makes.
+
+**Ruling (Richard, 2026-10-01, P107 s16):** fix it. **Fixed:** `nodeScopeDidInitialize`'s deferred callback now
+calls `onComponentStateNodesChanged()` — re-walk always, rebind only when the id differs. The t09 scenario lost
+its `row` mark and its `expect` was re-recorded; its claims (near reads 7 from Page, not 8 from Shell; reads the
+5 Set Parent writes) now pass on the runtime, and failed before the change (the row).

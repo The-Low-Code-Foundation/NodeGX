@@ -640,7 +640,7 @@
     "clauses": [
       "N"
     ],
-    "because": "parentcomponentobject.ts `targetComponent`: \"leave blank for the nearest one that has a Component Object\". The deferral in `nodeScopeDidInitialize` re-resolves only when nothing was found (`if (!this._internal.modelId)`), and the editor-only `componentStateNodesChanged` re-walk (setup, `isRunningLocally`) never runs in a deployed app. Node creation order here is one an app can have: NodeScope.setComponentModel creates nodes in `Object.values(componentModel.nodes)` order and a child instance's whole graph is built when it is created",
+    "because": "parentcomponentobject.ts `targetComponent`: \"leave blank for the nearest one that has a Component Object\". The deferral in `nodeScopeDidInitialize` re-resolves unconditionally since C23 was fixed (it used to run only `if (!this._internal.modelId)`, binding the grandparent here), because the editor-only `componentStateNodesChanged` re-walk (setup, `isRunningLocally`) never runs in a deployed app. Node creation order here is one an app can have: NodeScope.setComponentModel creates nodes in `Object.values(componentModel.nodes)` order and a child instance's whole graph is built when it is created",
     "world": {},
     "components": {
       "shell": {
@@ -785,6 +785,16 @@
         "t": "settle"
       },
       {
+        "t": "signal",
+        "port": "changed",
+        "subject": "near"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "near"
+      },
+      {
         "t": "set",
         "port": "value-x",
         "value": 7,
@@ -797,12 +807,29 @@
         "t": "value",
         "port": "value-x",
         "value": 7,
+        "subject": "near"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "near"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 7,
         "subject": "cop"
       },
       {
         "t": "signal",
         "port": "changed",
         "subject": "cop"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 7,
+        "subject": "sr"
       },
       {
         "t": "value",
@@ -825,23 +852,6 @@
         "subject": "cot"
       },
       {
-        "t": "value",
-        "port": "value-x",
-        "value": 8,
-        "subject": "near"
-      },
-      {
-        "t": "signal",
-        "port": "changed",
-        "subject": "near"
-      },
-      {
-        "t": "value",
-        "port": "value",
-        "value": 8,
-        "subject": "sr"
-      },
-      {
         "t": "set",
         "port": "prop-x",
         "value": 5,
@@ -859,12 +869,29 @@
         "t": "value",
         "port": "value-x",
         "value": 5,
+        "subject": "near"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "near"
+      },
+      {
+        "t": "value",
+        "port": "value-x",
+        "value": 5,
         "subject": "cop"
       },
       {
         "t": "signal",
         "port": "changed",
         "subject": "cop"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "sr"
       },
       {
         "t": "outcome",
@@ -888,7 +915,6 @@
         "from": "cop.value-x",
         "to": "sp.value"
       }
-    ],
-    "row": "NSP-015 §6 C23"
+    ]
   }
 ]
