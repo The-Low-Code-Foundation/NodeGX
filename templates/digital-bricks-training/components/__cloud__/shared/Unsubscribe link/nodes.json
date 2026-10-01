@@ -1,0 +1,172 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "291abfc3-12bd-55ff-84d2-0aa0dc35d5e8",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ul_in",
+      "type": "Component Inputs",
+      "label": "In",
+      "x": 40,
+      "y": 40,
+      "parameters": {},
+      "ports": [
+        {
+          "name": "userId",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "ul_start",
+      "type": "JavaScriptFunction",
+      "label": "What gets signed",
+      "x": 280,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * WHAT GETS SIGNED (TASK-L187 §3). The purpose string is what stops this\n * signature ever meaning anything else: nothing else in the template signs with\n * UNSUBSCRIBE_KEY, and this string names the one thing it permits. `v1` lets a\n * later version change the rule without accepting the old one by accident.\n */\nif (Inputs.userId !== undefined) {\n  Outputs.value = 'dbt-unsubscribe:v1:' + String(Inputs.userId || '');\n  Outputs.go();\n}\n",
+        "runOnChange-in-userId": true
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-value",
+          "plug": "output",
+          "type": "*",
+          "displayName": "value",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ul_site",
+      "type": "noodl.cloud.secret",
+      "label": "The site, as configured — never the request's headers",
+      "x": 520,
+      "y": 40,
+      "parameters": {
+        "name": "SITE_ORIGIN"
+      }
+    },
+    {
+      "id": "ul_key",
+      "type": "noodl.cloud.secret",
+      "label": "The signing key",
+      "x": 520,
+      "y": 220,
+      "parameters": {
+        "name": "UNSUBSCRIBE_KEY"
+      }
+    },
+    {
+      "id": "ul_hmac",
+      "type": "noodl.cloud.hmac",
+      "label": "HMAC-SHA256, hex",
+      "x": 760,
+      "y": 220,
+      "parameters": {}
+    },
+    {
+      "id": "ul_build",
+      "type": "JavaScriptFunction",
+      "label": "The link",
+      "x": 1000,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * THE LINK (TASK-L187 §3): <site>/unsubscribe?u=<account>&s=<signature>.\n * It never expires and is never stored — the product's L54: an expired opt-out\n * link produces a person who cannot opt out. The site is SITE_ORIGIN, the\n * deployment's configured address, and NEVER the request's own headers: this\n * link goes into mail somebody ELSE reads, and a caller-supplied Origin would\n * let a learner aim their coach's link anywhere (requestOrigin.ts says so).\n */\nconst origin = String(Inputs.origin || '').replace(/\\/+$/, '');\nif (!/^https?:\\/\\/[^/]+$/.test(origin)) {\n  console.error('[dbt:Unsubscribe link] SITE_ORIGIN is not an origin (scheme and host, no path)');\n  Outputs.failed();\n} else {\n  Outputs.url = origin + '/unsubscribe?u=' + encodeURIComponent(String(Inputs.userId || '')) + '&s=' + String(Inputs.signature || '');\n  Outputs.origin = origin;\n  Outputs.done();\n}\n",
+        "runOnChange-in-userId": false,
+        "runOnChange-in-origin": false,
+        "runOnChange-in-signature": false
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-origin",
+          "plug": "input",
+          "type": "*",
+          "displayName": "origin",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-signature",
+          "plug": "input",
+          "type": "*",
+          "displayName": "signature",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-url",
+          "plug": "output",
+          "type": "*",
+          "displayName": "url",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-origin",
+          "plug": "output",
+          "type": "*",
+          "displayName": "origin",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "ul_out",
+      "type": "Component Outputs",
+      "label": "Out",
+      "x": 1260,
+      "y": 40,
+      "parameters": {},
+      "ports": [
+        {
+          "name": "url",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "origin",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "failed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

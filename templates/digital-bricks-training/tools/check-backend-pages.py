@@ -40,7 +40,9 @@ FIXTURE_OUTPUTS = {
 APPENDED = {'Data/Lesson': ['found'], 'Data/Programme': ['work']}
 # Privacy joined 2026-10-01 (TASK-L185): anybody may read what would be held before they have an
 # account, and a person who declines the notice must still be able to read it.
-PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette', 'Pages/Privacy']
+# Unsubscribe joined 2026-10-01 (TASK-L187): the link in a message email carries no session, and
+# a person must be able to stop mail without signing in. It only ever turns mail OFF.
+PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette', 'Pages/Privacy', 'Pages/Unsubscribe']
 STAFF = ['Pages/People', 'Pages/Learner']
 
 

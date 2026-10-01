@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "291abfc3-12bd-55ff-84d2-0aa0dc35d5e8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ul_in",
+      "fromProperty": "userId",
+      "toId": "ul_start",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "ul_start",
+      "fromProperty": "out-go",
+      "toId": "ul_site",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "ul_site",
+      "fromProperty": "done",
+      "toId": "ul_key",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "ul_start",
+      "fromProperty": "out-value",
+      "toId": "ul_hmac",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "ul_key",
+      "fromProperty": "value",
+      "toId": "ul_hmac",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "ul_key",
+      "fromProperty": "done",
+      "toId": "ul_hmac",
+      "toProperty": "sign"
+    },
+    {
+      "fromId": "ul_in",
+      "fromProperty": "userId",
+      "toId": "ul_build",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "ul_site",
+      "fromProperty": "value",
+      "toId": "ul_build",
+      "toProperty": "in-origin"
+    },
+    {
+      "fromId": "ul_hmac",
+      "fromProperty": "signature",
+      "toId": "ul_build",
+      "toProperty": "in-signature"
+    },
+    {
+      "fromId": "ul_hmac",
+      "fromProperty": "done",
+      "toId": "ul_build",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ul_build",
+      "fromProperty": "out-url",
+      "toId": "ul_out",
+      "toProperty": "url"
+    },
+    {
+      "fromId": "ul_build",
+      "fromProperty": "out-origin",
+      "toId": "ul_out",
+      "toProperty": "origin"
+    },
+    {
+      "fromId": "ul_build",
+      "fromProperty": "out-done",
+      "toId": "ul_out",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "ul_build",
+      "fromProperty": "out-failed",
+      "toId": "ul_out",
+      "toProperty": "failed"
+    },
+    {
+      "fromId": "ul_site",
+      "fromProperty": "failure",
+      "toId": "ul_out",
+      "toProperty": "failed"
+    },
+    {
+      "fromId": "ul_key",
+      "fromProperty": "failure",
+      "toId": "ul_out",
+      "toProperty": "failed"
+    },
+    {
+      "fromId": "ul_hmac",
+      "fromProperty": "failure",
+      "toId": "ul_out",
+      "toProperty": "failed"
+    }
+  ]
+}

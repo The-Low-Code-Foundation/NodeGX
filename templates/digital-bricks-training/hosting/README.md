@@ -66,8 +66,14 @@ printf '%s' '<Brevo SMTP key>' > ~/.dbt-brevo-key && chmod 600 ~/.dbt-brevo-key
 node tools/setup-signin.mjs --backend http://127.0.0.1:18691 --app-origin https://training.digitalbricks.io \
   --smtp smtp-relay.brevo.com:587 --smtp-user <Brevo login> --smtp-key-file ~/.dbt-brevo-key \
   --from no-reply@digitalbricks.io --base-url https://training.digitalbricks.io
+node tools/setup-mail.mjs --backend http://127.0.0.1:18691 --site https://training.digitalbricks.io
 node tools/check-production.mjs --backend http://127.0.0.1:18691 --app-origin https://training.digitalbricks.io
 ```
+
+`setup-mail` (TASK-L187) provisions two function secrets: `SITE_ORIGIN`, the address every link in a
+message email is built on, and `UNSUBSCRIBE_KEY`, which signs each mail's one-click unsubscribe link.
+It mints the key ONCE and leaves it alone on every later run: replacing it would break every
+unsubscribe link already in somebody's inbox. `--rotate` replaces it on purpose.
 
 `check-production` fails on a sandbox relay, an empty `baseUrl` (every sign-in link would point at
 `127.0.0.1`), a loosened policy, a redirect allow-list with anything but the served origin, and any
@@ -89,7 +95,8 @@ trace of the demo world. Each of those was demonstrated failing by name (TASK-L1
 - **The site:** rebuild (§2), then `rsync -a --delete` into `/srv/dbtraining/site/`. It holds no
   data.
 - **The backend:** rsync `cli.js`, `systemctl restart dbtraining-backend`.
-- **The functions:** `deploy-functions.mjs` through the tunnel.
+- **The functions:** `deploy-functions.mjs` through the tunnel. Sprint 54 (TASK-L186–L188) also
+  needs `setup-mail.mjs` run once against production before its functions can send anything.
 - `provision.sh` refuses a second run on purpose; it is not how you redeploy.
 
 ## Known, not fixed

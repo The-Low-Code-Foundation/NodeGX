@@ -121,6 +121,12 @@ if (!ALLOW_SANDBOX) {
 }
 check(String(mail.baseUrl || '').replace(/\/$/, '') === ORIGINS[0], `mail baseUrl is '${mail.baseUrl || ''}', expected ${ORIGINS[0]} — sign-in links would point elsewhere`);
 
+// ── Message mail (TASK-L187) ───────────────────────────────────────────────
+// Names only: a function secret is never readable back, by design.
+const secretNames = new Set(((await api.call('GET', '/admin/secrets')).secrets || []).map((x) => x.name));
+check(secretNames.has('SITE_ORIGIN'), 'SITE_ORIGIN is not provisioned, so every link in a message email would fail to build — run tools/setup-mail.mjs');
+check(secretNames.has('UNSUBSCRIBE_KEY'), 'UNSUBSCRIBE_KEY is not provisioned, so no message email can carry its one-click link — run tools/setup-mail.mjs');
+
 // ── An anonymous client is refused ────────────────────────────────────────
 const anon = await fetch(`${BACKEND}/classes/Concept?limit=1`);
 check(anon.status >= 400, `an anonymous read of Concept answered ${anon.status}`);

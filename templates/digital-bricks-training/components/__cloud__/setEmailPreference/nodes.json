@@ -1,0 +1,86 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e403d422-c321-5c18-b4d1-e9f09873e344",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Signed in (security: authenticated)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "state",
+        "allowNoAuth": false,
+        "ptype-state": "string",
+        "preq-state": true
+      }
+    },
+    {
+      "id": "fn",
+      "type": "JavaScriptFunction",
+      "label": "The one job",
+      "x": 320,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * TURN MESSAGE EMAILS ON OR OFF FOR THE SIGNED-IN ACCOUNT (TASK-L187 §6).\n *\n * The ONLY thing that clears `emailOptOutAt` (L54: never a migration, never a\n * campaign, never the link). Turning it off keeps the FIRST stamp if one is\n * there, so \"when did they ask\" stays the moment they first asked. No notice\n * gate: stopping mail must work whatever they have or have not accepted.\n */\nif (Inputs.userId !== undefined && Inputs.state !== undefined) {\n  (async () => {\n    try {\n      const userId = String(Inputs.userId || '');\n      const state = String(Inputs.state || '');\n      if (state !== 'on' && state !== 'off') throw new Error('state must be on or off');\n      const users = await Noodl.Records.query('_User', { objectId: { equalTo: userId } }, { limit: 2, plain: true });\n      if (users.length !== 1) throw new Error(users.length ? 'two accounts' : 'no account');\n      const stamp = state === 'on' ? null : users[0].emailOptOutAt || new Date().toISOString();\n      await Noodl.Records.save(userId, { emailOptOutAt: stamp }, { className: '_User' });\n      Outputs.on = state === 'on';\n      Outputs.done();\n    } catch (e) {\n      console.error('[dbt:setEmailPreference] ' + String((e && e.message) || e) + ' user=' + String(Inputs.userId || '-'));\n      Outputs.failed();\n    }\n  })();\n}\n",
+        "runOnChange-in-state": true,
+        "runOnChange-in-userId": true
+      },
+      "ports": [
+        {
+          "name": "in-state",
+          "plug": "input",
+          "type": "*",
+          "displayName": "state",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-on",
+          "plug": "output",
+          "type": "*",
+          "displayName": "on",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "on",
+      "x": 620,
+      "y": 40,
+      "parameters": {
+        "params": "on"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "One refusal",
+      "x": 620,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be done."
+      }
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c055987d-c708-50bf-8db8-cbe0d6db7410",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "me_in",
+      "type": "Component Inputs",
+      "label": "In",
+      "x": 40,
+      "y": 40,
+      "parameters": {},
+      "ports": [
+        {
+          "name": "userId",
+          "plug": "output",
+          "type": "*"
+        }
+      ]
+    },
+    {
+      "id": "me_fn",
+      "type": "JavaScriptFunction",
+      "label": "Opted out, or no address, is no",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * MAY WE EMAIL THIS ACCOUNT ABOUT A MESSAGE? (TASK-L187 §2)\n *\n * THE ONE GATE every notification passes — the product's `canEmail` (L54). It\n * answers false when the account has asked not to be emailed (`emailOptOutAt`)\n * OR has no address. A sender that read `_User` itself would be a second\n * spelling of this rule, and tools/check-opt-out.mjs fails on any cloud\n * component that places a Send Email node without this gate in front of it.\n *\n * SIGN-IN LINKS NEVER PASS THROUGH HERE. The backend sends those itself, and the\n * control that reverses an opt-out is behind the login (L125's lockout).\n */\nif (Inputs.userId !== undefined) {\n  (async () => {\n    try {\n      const userId = String(Inputs.userId || '');\n      const users = userId ? await Noodl.Records.query('_User', { objectId: { equalTo: userId } }, { limit: 2, plain: true }) : [];\n      if (users.length > 1) throw new Error('two accounts for one id');\n      const u = users[0];\n      const to = u && typeof u.email === 'string' && /@/.test(u.email) ? u.email : '';\n      const optedOut = Boolean(u && u.emailOptOutAt);\n      Outputs.to = to;\n      Outputs.may = Boolean(u) && !optedOut && to !== '';\n      Outputs.done();\n    } catch (e) {\n      Outputs.may = false;\n      console.error('[dbt:May email] ' + String((e && e.message) || e) + ' user=' + String(Inputs.userId || '-'));\n      Outputs.done();\n    }\n  })();\n}\n",
+        "runOnChange-in-userId": true
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-may",
+          "plug": "output",
+          "type": "*",
+          "displayName": "may",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-to",
+          "plug": "output",
+          "type": "*",
+          "displayName": "to",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "me_out",
+      "type": "Component Outputs",
+      "label": "Out",
+      "x": 600,
+      "y": 40,
+      "parameters": {},
+      "ports": [
+        {
+          "name": "may",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "to",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

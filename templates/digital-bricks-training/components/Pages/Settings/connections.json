@@ -272,6 +272,144 @@
       "fromProperty": "done",
       "toId": "st_gone",
       "toProperty": "run"
+    },
+    {
+      "fromId": "t_st_mail_h",
+      "fromProperty": "Translation",
+      "toId": "st_mail_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_mail_b",
+      "fromProperty": "Translation",
+      "toId": "st_mail_b",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_mail_on",
+      "fromProperty": "Translation",
+      "toId": "st_mail_view",
+      "toProperty": "in-onText"
+    },
+    {
+      "fromId": "t_st_mail_off",
+      "fromProperty": "Translation",
+      "toId": "st_mail_view",
+      "toProperty": "in-offText"
+    },
+    {
+      "fromId": "t_st_mail_stop",
+      "fromProperty": "Translation",
+      "toId": "st_mail_view",
+      "toProperty": "in-stopText"
+    },
+    {
+      "fromId": "t_st_mail_start",
+      "fromProperty": "Translation",
+      "toId": "st_mail_view",
+      "toProperty": "in-startText"
+    },
+    {
+      "fromId": "t_st_mail_wait",
+      "fromProperty": "Translation",
+      "toId": "st_mail_wait",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_mail_fail",
+      "fromProperty": "Translation",
+      "toId": "st_mail_fail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "st_mail_ask",
+      "fromProperty": "out-call",
+      "toId": "st_pref_get",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "st_pref_get",
+      "fromProperty": "out-on",
+      "toId": "st_mail_view",
+      "toProperty": "in-on"
+    },
+    {
+      "fromId": "st_pref_set",
+      "fromProperty": "out-on",
+      "toId": "st_mail_view",
+      "toProperty": "in-on"
+    },
+    {
+      "fromId": "st_mail_view",
+      "fromProperty": "out-state",
+      "toId": "st_mail_state",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "st_mail_view",
+      "fromProperty": "out-label",
+      "toId": "st_mail_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "st_mail_view",
+      "fromProperty": "out-known",
+      "toId": "st_mail_btn",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "st_mail_view",
+      "fromProperty": "out-next",
+      "toId": "st_pref_set",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "st_mail_btn",
+      "fromProperty": "onClick",
+      "toId": "st_pref_set",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "st_mail_btn",
+      "fromProperty": "onClick",
+      "toId": "st_mail_wait_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_mail_btn",
+      "fromProperty": "onClick",
+      "toId": "st_mail_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_pref_set",
+      "fromProperty": "done",
+      "toId": "st_mail_wait_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_pref_set",
+      "fromProperty": "failure",
+      "toId": "st_mail_wait_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_pref_set",
+      "fromProperty": "failure",
+      "toId": "st_mail_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_mail_wait_sw",
+      "fromProperty": "state",
+      "toId": "st_mail_wait",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "st_mail_fail_sw",
+      "fromProperty": "state",
+      "toId": "st_mail_fail",
+      "toProperty": "mounted"
     }
   ]
 }

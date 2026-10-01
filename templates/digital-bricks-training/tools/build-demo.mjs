@@ -33,6 +33,8 @@
  *     two doors go straight to /Pages/Course and /Pages/People.
  *   - Pages/Sign in and __cloud__/ are not copied; the router loses the Sign in
  *     route; the registry follows.
+ *   - THE UNSUBSCRIBE PAGE GOES (TASK-L187): the demo sends no mail, so a page
+ *     for stopping it would answer a link nobody was ever sent.
  *   - THE PRIVACY SURFACE GOES (TASK-L185): Pages/Privacy, Pages/Settings and
  *     Privacy/ are not copied, the router loses both routes, App loses its
  *     notice gate and the acceptance screen, and Home loses its "Your data" and
@@ -82,7 +84,7 @@ export const DEMO = join(TEMPLATE, '..', 'digital-bricks-training-demo');
 
 /** Components the demo does not carry, as path prefixes under components/. */
 export const DROPPED_COMPONENTS = [
-  '__cloud__/', 'Pages/Sign in/', 'Pages/Privacy/', 'Pages/Settings/', 'Privacy/',
+  '__cloud__/', 'Pages/Sign in/', 'Pages/Privacy/', 'Pages/Settings/', 'Pages/Unsubscribe/', 'Privacy/',
   'People/Add a learner/', 'People/Their path/', 'People/Path step row/', 'People/Path concept row/'
 ];
 /** Components whose files the demo changes. Every other file is byte-identical. */
@@ -310,7 +312,7 @@ function transformNodes(component, doc) {
     }
     if (node.id === 'app_router') {
       const routes = node.parameters.pages.routes;
-      const DROP_ROUTES = ['/Pages/Sign in', '/Pages/Privacy', '/Pages/Settings'];
+      const DROP_ROUTES = ['/Pages/Sign in', '/Pages/Privacy', '/Pages/Settings', '/Pages/Unsubscribe'];
       for (const r of DROP_ROUTES) if (!routes.includes(r)) throw new Error(`build-demo: the router no longer lists ${r}`);
       node.parameters.pages.routes = routes.filter((r) => !DROP_ROUTES.includes(r));
     }

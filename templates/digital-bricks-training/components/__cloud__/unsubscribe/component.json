@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "486559e1-9798-51e8-8a99-e01476097cc1",
+  "name": "unsubscribe",
+  "path": "/#__cloud__/unsubscribe",
+  "type": "cloud",
+  "created": "2026-10-01T20:00:00.000Z",
+  "modified": "2026-10-01T20:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Stop message emails for the account a signed link names — public, because the link has no session; one answer for every outcome; only ever turns mail off (TASK-L187)."
+}

@@ -12,7 +12,7 @@
       {
         "id": "account",
         "heading": "Your account",
-        "body": "Your email address, and your name if you or your coach gave one. There is no password. To sign in you ask for a link, and we email you one that works once and lasts fifteen minutes. Once you are in, that browser stays signed in until you sign out — there is no automatic time limit — so sign out on a computer you share. We also hold whether your account belongs to a coach."
+        "body": "Your email address, and your name if you or your coach gave one. There is no password. To sign in you ask for a link, and we email you one that works once and lasts fifteen minutes. Once you are in, that browser stays signed in until you sign out — there is no automatic time limit — so sign out on a computer you share. We also hold whether your account belongs to a coach. And whether you have asked us not to email you about messages, and when."
       },
       {
         "id": "acceptance",
@@ -71,7 +71,7 @@
       {
         "id": "rights",
         "heading": "What you can do about it",
-        "body": "On your settings page you can download everything we hold about you as one file, and you can delete your account. Deleting is one action, with no support request and no waiting period, and it removes everything listed here. Nothing is kept afterwards, not even with your name taken off, because nothing here needs to be."
+        "body": "On your settings page you can download everything we hold about you as one file, and you can delete your account. Deleting is one action, with no support request and no waiting period, and it removes everything listed here. Nothing is kept afterwards, not even with your name taken off, because nothing here needs to be. Every email about a message has a link that stops them in one press, and a switch on your settings page does the same; neither stops your sign-in links."
       },
       {
         "id": "contact",
@@ -115,8 +115,28 @@
       "delete": "Delete my account",
       "deleting": "Deleting…",
       "deleteFailed": "That did not finish. Your account is still here; please try again, and if it keeps happening, write to {{email}}.",
-      "back": "Back"
+      "back": "Back",
+      "emailHeading": "Email about messages",
+      "emailBody": "When there is a new message for you on your course, we email you, with the message and a link to it. Turned off, you will only see new messages when you next open the course. Your sign-in links still arrive either way.",
+      "emailOn": "These emails are on.",
+      "emailOff": "These emails are off.",
+      "emailStop": "Stop these emails",
+      "emailStart": "Email me again",
+      "emailSaving": "Saving…",
+      "emailFailed": "That did not save. Please try again."
     },
-    "deleted": "Your account has been deleted. Everything we held about you is gone."
+    "deleted": "Your account has been deleted. Everything we held about you is gone.",
+    "unsubscribe": {
+      "pageTitle": "Stop emails",
+      "eyebrow": "Email",
+      "title": "Stop emails about messages?",
+      "body": "This stops the emails we send when there is a new message for you on your course. Your sign-in links still arrive, because without them you could not get back in to turn these on again.",
+      "confirm": "Stop these emails",
+      "saving": "Stopping…",
+      "done": "Done. You will not get these emails again. You can turn them back on from your settings page.",
+      "failed": "That did not work. Please try again, or turn them off from your settings page.",
+      "noLink": "This link is not complete. Open the whole link from the email, or turn these emails off from your settings page.",
+      "home": "Home"
+    }
   }
 }

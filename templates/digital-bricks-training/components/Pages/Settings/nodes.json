@@ -54,6 +54,7 @@
         "st_lede",
         "st_notice",
         "st_out-2",
+        "st_mail",
         "st_exp",
         "st_del",
         "st_back"
@@ -851,6 +852,353 @@
       "y": 1840,
       "parameters": {
         "functionScript": "/*\n * THE ACCOUNT IS GONE: FORGET IT HERE TOO, THEN SAY SO ON HOME (TASK-L185 §4).\n *\n * deleteMine removed the account's sessions on the server, so the ordinary\n * Log Out node FAILS here (measured: \"Invalid session token\") and leaves the\n * stored session in the browser. Home then still believes somebody is signed\n * in, the notice gate holds it, and the person who just deleted their account\n * is shown the acceptance screen instead of the sentence saying it is done.\n *\n * So: ask to log out and ignore the answer, remove the stored session\n * ourselves, and load Home FRESH, so nothing in memory survives either. Every\n * key this removes is the browser's own copy of an account that no longer\n * exists anywhere.\n */\n(async () => {\n  try { if (Noodl.Users && Noodl.Users.Current) await Noodl.Users.Current.logOut(); } catch (e) { /* the server already ended it */ }\n  try {\n    for (const k of Object.keys(localStorage)) if (/\\/currentUser$/.test(k)) localStorage.removeItem(k);\n  } catch (e) { /* storage blocked: the fresh load below still drops the in-memory copy */ }\n  const hash = location.hash || '';\n  if (hash.indexOf('#/') === 0) location.replace(location.pathname + '#/home?deleted=1');\n  else location.replace('/home?deleted=1');\n})();\n"
+      }
+    },
+    {
+      "id": "st_mail",
+      "type": "Group",
+      "label": "Email about messages (TASK-L187)",
+      "x": 360,
+      "y": 1400,
+      "parent": "st_shell",
+      "children": [
+        "st_mail_h",
+        "st_mail_b",
+        "st_mail_state",
+        "st_mail_btn",
+        "st_mail_wait",
+        "st_mail_fail"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-6)"
+      }
+    },
+    {
+      "id": "st_mail_h",
+      "type": "Text",
+      "label": "Heading",
+      "x": 400,
+      "y": 1460,
+      "parent": "st_mail",
+      "parameters": {
+        "as": "h2",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": 800,
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_mail_b",
+      "type": "Text",
+      "label": "What it does, and what turning it off costs",
+      "x": 400,
+      "y": 1520,
+      "parent": "st_mail",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_mail_state",
+      "type": "Text",
+      "label": "On or off, in words",
+      "x": 400,
+      "y": 1580,
+      "parent": "st_mail",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_mail_btn",
+      "type": "net.noodl.controls.button",
+      "label": "Stop / Email me again",
+      "x": 400,
+      "y": 1640,
+      "parent": "st_mail",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "enabled": false
+      }
+    },
+    {
+      "id": "st_mail_wait",
+      "type": "Text",
+      "label": "Saving…",
+      "x": 400,
+      "y": 1700,
+      "parent": "st_mail",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "st_mail_fail",
+      "type": "Text",
+      "label": "Did not save",
+      "x": 400,
+      "y": 1760,
+      "parent": "st_mail",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_mail_ask",
+      "type": "JavaScriptFunction",
+      "label": "Read the switch once, on arrival",
+      "x": 1100,
+      "y": 1400,
+      "parameters": {
+        "functionScript": "/* TASK-L187 §6. `page` is a fixed parameter, so this runs once as the page mounts. */\nOutputs.call();\n",
+        "runOnChange-in-page": true,
+        "in-page": "settings"
+      },
+      "ports": [
+        {
+          "name": "in-page",
+          "plug": "input",
+          "type": "*",
+          "displayName": "page",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-call",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "st_pref_get",
+      "type": "CloudFunction2",
+      "label": "emailPreference — this account's switch",
+      "x": 1360,
+      "y": 1400,
+      "parameters": {
+        "function": "emailPreference"
+      }
+    },
+    {
+      "id": "st_pref_set",
+      "type": "CloudFunction2",
+      "label": "setEmailPreference — the only thing that turns it back on",
+      "x": 1360,
+      "y": 1560,
+      "parameters": {
+        "function": "setEmailPreference"
+      }
+    },
+    {
+      "id": "st_mail_view",
+      "type": "JavaScriptFunction",
+      "label": "What the switch says",
+      "x": 1100,
+      "y": 1560,
+      "parameters": {
+        "functionScript": "/* TASK-L187 §6. Nothing is said, and the button sleeps, until the backend has\n   answered: \"we could not ask\" is not \"off\". */\nconst known = Inputs.on === true || Inputs.on === false;\nOutputs.known = known;\nif (known) {\n  Outputs.state = Inputs.on ? Inputs.onText : Inputs.offText;\n  Outputs.label = Inputs.on ? Inputs.stopText : Inputs.startText;\n  Outputs.next = Inputs.on ? 'off' : 'on';\n}\n",
+        "runOnChange-in-on": true,
+        "runOnChange-in-onText": true,
+        "runOnChange-in-offText": true,
+        "runOnChange-in-stopText": true,
+        "runOnChange-in-startText": true
+      },
+      "ports": [
+        {
+          "name": "in-on",
+          "plug": "input",
+          "type": "*",
+          "displayName": "on",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-onText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "onText",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-offText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "offText",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stopText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "stopText",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-startText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "startText",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-known",
+          "plug": "output",
+          "type": "*",
+          "displayName": "known",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-state",
+          "plug": "output",
+          "type": "*",
+          "displayName": "state",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-label",
+          "plug": "output",
+          "type": "*",
+          "displayName": "label",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-next",
+          "plug": "output",
+          "type": "*",
+          "displayName": "next",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "st_mail_wait_sw",
+      "type": "Switch",
+      "label": "Saving",
+      "x": 1600,
+      "y": 1640,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "st_mail_fail_sw",
+      "type": "Switch",
+      "label": "Did not save",
+      "x": 1600,
+      "y": 1720,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "t_st_mail_h",
+      "type": "Translation",
+      "label": "privacy:settings.emailHeading",
+      "x": 820,
+      "y": 1400,
+      "parameters": {
+        "Key": "settings.emailHeading",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_b",
+      "type": "Translation",
+      "label": "privacy:settings.emailBody",
+      "x": 820,
+      "y": 1460,
+      "parameters": {
+        "Key": "settings.emailBody",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_on",
+      "type": "Translation",
+      "label": "privacy:settings.emailOn",
+      "x": 820,
+      "y": 1520,
+      "parameters": {
+        "Key": "settings.emailOn",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_off",
+      "type": "Translation",
+      "label": "privacy:settings.emailOff",
+      "x": 820,
+      "y": 1580,
+      "parameters": {
+        "Key": "settings.emailOff",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_stop",
+      "type": "Translation",
+      "label": "privacy:settings.emailStop",
+      "x": 820,
+      "y": 1640,
+      "parameters": {
+        "Key": "settings.emailStop",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_start",
+      "type": "Translation",
+      "label": "privacy:settings.emailStart",
+      "x": 820,
+      "y": 1700,
+      "parameters": {
+        "Key": "settings.emailStart",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_wait",
+      "type": "Translation",
+      "label": "privacy:settings.emailSaving",
+      "x": 820,
+      "y": 1760,
+      "parameters": {
+        "Key": "settings.emailSaving",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_fail",
+      "type": "Translation",
+      "label": "privacy:settings.emailFailed",
+      "x": 820,
+      "y": 1820,
+      "parameters": {
+        "Key": "settings.emailFailed",
+        "Namespace": "privacy"
       }
     }
   ],

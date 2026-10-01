@@ -1,0 +1,449 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3dd1e6dd-8113-5ed8-956d-c8bdfd4c295e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "un_page",
+      "type": "Page",
+      "label": "/unsubscribe",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "un_band"
+      ],
+      "parameters": {
+        "urlPath": "unsubscribe",
+        "title": "Stop emails"
+      }
+    },
+    {
+      "id": "un_band",
+      "type": "Group",
+      "label": "Band",
+      "x": 80,
+      "y": 120,
+      "parent": "un_page",
+      "children": [
+        "un_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-24)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "un_shell",
+      "type": "Group",
+      "label": "Shell",
+      "x": 120,
+      "y": 200,
+      "parent": "un_band",
+      "children": [
+        "un_eyebrow",
+        "un_title",
+        "un_body",
+        "un_btn",
+        "un_wait",
+        "un_done",
+        "un_fail",
+        "un_nolink",
+        "un_home"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-5)"
+      }
+    },
+    {
+      "id": "un_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 160,
+      "y": 280,
+      "parent": "un_shell",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "un_title",
+      "type": "Text",
+      "label": "Title",
+      "x": 160,
+      "y": 340,
+      "parent": "un_shell",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-4xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "un_body",
+      "type": "Text",
+      "label": "What it does, and what it does not",
+      "x": 160,
+      "y": 400,
+      "parent": "un_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "un_btn",
+      "type": "net.noodl.controls.button",
+      "label": "Stop these emails — the press, never the load",
+      "x": 160,
+      "y": 460,
+      "parent": "un_shell",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "mounted": false
+      }
+    },
+    {
+      "id": "un_wait",
+      "type": "Text",
+      "label": "Stopping…",
+      "x": 160,
+      "y": 520,
+      "parent": "un_shell",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "un_done",
+      "type": "Text",
+      "label": "Done",
+      "x": 160,
+      "y": 580,
+      "parent": "un_shell",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "un_fail",
+      "type": "Text",
+      "label": "Did not work",
+      "x": 160,
+      "y": 640,
+      "parent": "un_shell",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "un_nolink",
+      "type": "Text",
+      "label": "An incomplete link",
+      "x": 160,
+      "y": 700,
+      "parent": "un_shell",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "un_home",
+      "type": "net.noodl.controls.button",
+      "label": "Home",
+      "x": 160,
+      "y": 760,
+      "parent": "un_shell",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "un_url",
+      "type": "PageInputs",
+      "label": "?u=&s= — from the link",
+      "x": 700,
+      "y": 40,
+      "parameters": {
+        "queryParams": "u,s"
+      }
+    },
+    {
+      "id": "un_view",
+      "type": "JavaScriptFunction",
+      "label": "What the page offers",
+      "x": 960,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * TASK-L187 §5. The button is offered only for a link that LOOKS whole — an\n * account id and a 64-character signature — and only until it has been\n * pressed. Whether the signature is right is the server's question, and its\n * answer is the same either way, so this page cannot be used to test links.\n */\nconst u = String(Inputs.u || '');\nconst s = String(Inputs.s || '');\nconst whole = u.length > 0 && /^[0-9a-f]{64}$/i.test(s);\nconst done = Inputs.done === true;\nOutputs.showButton = whole && !done;\nOutputs.showNoLink = !whole;\n",
+        "runOnChange-in-u": true,
+        "runOnChange-in-s": true,
+        "runOnChange-in-done": true
+      },
+      "ports": [
+        {
+          "name": "in-u",
+          "plug": "input",
+          "type": "*",
+          "displayName": "u",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-s",
+          "plug": "input",
+          "type": "*",
+          "displayName": "s",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-done",
+          "plug": "input",
+          "type": "*",
+          "displayName": "done",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-showButton",
+          "plug": "output",
+          "type": "*",
+          "displayName": "showButton",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showNoLink",
+          "plug": "output",
+          "type": "*",
+          "displayName": "showNoLink",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "un_call",
+      "type": "CloudFunction2",
+      "label": "unsubscribe — public, one answer for every outcome",
+      "x": 1220,
+      "y": 40,
+      "parameters": {
+        "function": "unsubscribe"
+      }
+    },
+    {
+      "id": "un_wait_sw",
+      "type": "Switch",
+      "label": "Stopping",
+      "x": 1220,
+      "y": 220,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "un_done_sw",
+      "type": "Switch",
+      "label": "Done",
+      "x": 1220,
+      "y": 300,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "un_fail_sw",
+      "type": "Switch",
+      "label": "Did not work",
+      "x": 1220,
+      "y": 380,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "un_to_home",
+      "type": "RouterNavigate",
+      "label": "→ Home",
+      "x": 1220,
+      "y": 460,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      }
+    },
+    {
+      "id": "seo_un_page",
+      "type": "JavaScriptFunction",
+      "label": "The tab's title",
+      "x": 960,
+      "y": 460,
+      "parameters": {
+        "functionScript": "// The tab title (TASK-L161 §1): Page.title is the build-time fallback; this overrides it.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) Noodl.SEO.setTitle(t);\n",
+        "runOnChange-in-title": true
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*",
+          "displayName": "title",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "t_un_eyebrow",
+      "type": "Translation",
+      "label": "privacy:unsubscribe.eyebrow",
+      "x": 420,
+      "y": 40,
+      "parameters": {
+        "Key": "unsubscribe.eyebrow",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_un_title",
+      "type": "Translation",
+      "label": "privacy:unsubscribe.title",
+      "x": 420,
+      "y": 100,
+      "parameters": {
+        "Key": "unsubscribe.title",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_un_body",
+      "type": "Translation",
+      "label": "privacy:unsubscribe.body",
+      "x": 420,
+      "y": 160,
+      "parameters": {
+        "Key": "unsubscribe.body",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_un_confirm",
+      "type": "Translation",
+      "label": "privacy:unsubscribe.confirm",
+      "x": 420,
+      "y": 220,
+      "parameters": {
+        "Key": "unsubscribe.confirm",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_un_saving",
+      "type": "Translation",
+      "label": "privacy:unsubscribe.saving",
+      "x": 420,
+      "y": 280,
+      "parameters": {
+        "Key": "unsubscribe.saving",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_un_done",
+      "type": "Translation",
+      "label": "privacy:unsubscribe.done",
+      "x": 420,
+      "y": 340,
+      "parameters": {
+        "Key": "unsubscribe.done",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_un_failed",
+      "type": "Translation",
+      "label": "privacy:unsubscribe.failed",
+      "x": 420,
+      "y": 400,
+      "parameters": {
+        "Key": "unsubscribe.failed",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_un_noLink",
+      "type": "Translation",
+      "label": "privacy:unsubscribe.noLink",
+      "x": 420,
+      "y": 460,
+      "parameters": {
+        "Key": "unsubscribe.noLink",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_un_home",
+      "type": "Translation",
+      "label": "privacy:unsubscribe.home",
+      "x": 420,
+      "y": 520,
+      "parameters": {
+        "Key": "unsubscribe.home",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_un_pageTitle",
+      "type": "Translation",
+      "label": "privacy:unsubscribe.pageTitle",
+      "x": 420,
+      "y": 580,
+      "parameters": {
+        "Key": "unsubscribe.pageTitle",
+        "Namespace": "privacy"
+      }
+    }
+  ]
+}

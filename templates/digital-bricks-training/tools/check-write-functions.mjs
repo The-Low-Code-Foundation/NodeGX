@@ -105,7 +105,8 @@ check(/className: 'ProjectContext', ifMatch: \{ version \}/.test(script('capture
   // TASK-L185 added three: acceptPrivacy (the acceptance screen), exportMine and deleteMine (settings).
   // TASK-L184 added three on the coach's side: addLearner (People/Add a learner), conceptList and setLearnerPath (People/Their path).
   // TASK-L186 added four in Course/Timeline row: openThread, sendMessage, openThreadAsCoach, replyAsCoach.
-  check(clientCalls === 16, `wiring: expected 16 client Cloud Function nodes (4 reads, capture, finishStep, acceptPrivacy, exportMine, deleteMine, addLearner, conceptList, setLearnerPath, openThread, sendMessage, openThreadAsCoach, replyAsCoach), found ${clientCalls}`);
+  // TASK-L187 added three: emailPreference and setEmailPreference (settings), unsubscribe (the link's page).
+  check(clientCalls === 19, `wiring: expected 19 client Cloud Function nodes (4 reads, capture, finishStep, acceptPrivacy, exportMine, deleteMine, addLearner, conceptList, setLearnerPath, openThread, sendMessage, openThreadAsCoach, replyAsCoach, emailPreference, setEmailPreference, unsubscribe), found ${clientCalls}`);
 }
 
 

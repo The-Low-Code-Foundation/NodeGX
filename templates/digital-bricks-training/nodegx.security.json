@@ -60,6 +60,15 @@
     },
     "replyAsCoach": {
       "call": "role:staff"
+    },
+    "emailPreference": {
+      "call": "authenticated"
+    },
+    "setEmailPreference": {
+      "call": "authenticated"
+    },
+    "unsubscribe": {
+      "call": "public"
     }
   },
   "files": {
