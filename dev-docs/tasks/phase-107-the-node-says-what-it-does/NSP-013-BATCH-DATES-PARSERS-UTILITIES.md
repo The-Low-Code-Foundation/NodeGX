@@ -1,7 +1,7 @@
 # NSP-013 — Batch: dates, time, randomness, parsers, animation
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world) and R4 = continue.
-**Status: 🟡 s11 (2026-10-01) — 12 of 24 built and conform on the runtime; the other 12 named in §6.4.**
+**Status: 🟡 s12 (2026-10-01) — 16 of 24 built and conform on the runtime; the other 8 named in §6.4.**
 
 ## 1. The person sentence
 
@@ -103,6 +103,49 @@ it (C16's first predicate missed nine of twenty-two).
 in the exporter's own words" regex lagged the reason s10 added for a scenario that declares a world. One line; the
 s10 handoff's "12 passed" on that gate was wrong.
 
+### 6.1b s12, 2026-10-01 — the four agent parsers, and a scanner that never returns
+
+**The number: 4 of 4 conform on the runtime at 200, every mutant killed or declared — 62 of 147.** JSON Stream
+Parser (54 mutants), Pattern Extractor (18), Text Accumulator (81 + 1 declared), Stream Buffer (58 + 1 declared).
+Specs in `packages/nodegx-node-spec/src/nodes/`: stream-parsers.ts (the runtime's helpers verbatim but for types
+and ONE marked line, C17), json-stream-parser.ts, pattern-extractor.ts, text-accumulator.ts, stream-buffer.ts
+(`needs: ['clock']` — the interval flush is a host `setTimeout`, one per arming). Scenarios
+`scenarios/net.noodl.{JSONStreamParser,PatternExtractor,TextAccumulator,StreamBuffer}.json` (60 hand cases). Read
+on five days' seeds (20727–20731, `NSP_SEED`, new in conformance.test.ts): conforms on all five, both known rows
+fire on all five — but see T4 below: those five seeds are nearly one seed.
+
+**What the source does that its words do not say** (each pinned by a scenario, none a row): every one of the four
+RETAINS its input between pulses, so a second Parse / Add with no new chunk appends the same text again (the
+port descriptions of Text Accumulator and Stream Buffer say so; JSON Stream Parser's Parse description says
+"retained" and means the same); a Clear never clears that retained input; JSON Stream Parser's Clear does not
+re-send `Parsed`, and its Max Pending give-up does not re-send `Pending Characters` or `Is Complete` (the wire keeps
+the last parse's); in Single format a SECOND whole document in the same buffer is dropped with no error, and a
+malformed one with an incomplete one behind it is re-reported on every Parse; Text Accumulator refuses a non-text
+chunk on ARRIVAL — `Failure` pulses from the setter with no invocation behind it — and an Add after it is
+`Unchanged`; Stream Buffer counts an `undefined` write as data having arrived; its `Error` is never cleared.
+
+**C17 — a hang, and how a hang is graded.** `scanJsonValues` (stream-parsers.ts :234-241) never advances on a
+stray `}` where a value should start (and, with no array framing, `]` or `,`): `scanOneValue` returns the index it
+was given, `JSON.parse('')` throws, the error is pushed and `i = end` — forever, on the main thread, the errors array
+growing until the process dies. Measured outside jest in a worker with a 1 s deadline: `"1}"` and `"}"` framed,
+`"}"`, `","`, `"]"` unframed all hang; `{"a":1}` returns. The first runtime run of this batch spun for seven minutes
+on a generated sequence before it was stopped. A target that spins cannot be graded, so the runtime conformance
+test loads the runtime's OWN stream-parsers.ts through `jest.mock` with one line inserted before `i = end;` — no
+progress throws `C17: scanJsonValues made no progress…` — compiled in memory (the Counter copy's technique; the
+file on disk is untouched; the factory refuses to load if the anchor moves). Everything up to the hang is the
+runtime's code. The spec steps over the stray character after recording the error the first pass records — the
+proposed fix. KNOWN_ROWS predicate: the seam's own message. Two hand scenarios carry `row` (Stream `1}`, Single
+`"a",3`).
+
+**C6 again**: Stream Buffer's `Data` is type `*`, so a number after a `{ value, unit }` is merged into it by node.ts
+(R7) — added to the known row with a hand scenario.
+
+**T4 — the daily rotation is nearly one seed** (found reading why five seeds each gave "known: 1" with the SAME
+example sequence). `sequenceSeed` (runner/random.ts) mixes `runSeed ^ (index + 1)`: day *d* index *i* is the same
+sequence as day *d′* index *i′* whenever `d ^ (i+1) = d′ ^ (i′+1)`, and adjacent days differ in low bits. Measured:
+day 20727 and 20728 share 192 of their 200 sequences; thirty days of PR-CI (6,000 plays) reach **429** distinct
+sequences. Fixed in its own commit (README §6 has the reading before and after).
+
 ### 6.2 Rows for a ruling (R3 (a): the runtime wins until ruled; each counted every run)
 
 | row | where | what the wire shows | plain words | proposed |
@@ -110,11 +153,12 @@ s10 handoff's "12 passed" on that gate was wrong.
 | **C16** | Date Add (dateadd.ts :77-78; datemath.ts :88) | a `Unit` that is not one of the eight and not empty — a wire can carry any string — is STORED, then `addToDate` THROWS inside the setter: the node is dead from then on (every later recompute throws). Date Difference, Date Compare and Date To String take the same value without throwing | *"A Unit value Date Add does not know crashes the node in the setter instead of refusing or ignoring it."* 22 sequences counted; one scenario under the row | refuse: `Invalid Date`-style failure, or read as days (`\|\| 'days'` already handles empty) |
 | **D14** | Date To String (datetostring.ts :264-273, :39-71) | with NO Timezone, `null` and a numeric timestamp on `Date` render blank with `Invalid Date` (getDate throws); WITH a Timezone the same timestamp RENDERS and `null` renders the epoch (`formatToParts` accepts anything `Number()` accepts) — one port, two validity rules | *"Whether a timestamp or a null on Date is 'invalid' depends on whether a Timezone is set."* Two scenarios record both arms | one rule: read through `toDate` as the rest of the family does (a timestamp renders in both; null is invalid in both) |
 | **D15** | Date Difference (datemath.ts :98-115) | a `Unit` not in the list misses every fixed unit and lands on the month path, whose last line reads anything but `'months'` as YEARS | *"An unknown Unit on Date Difference is counted in years; the same value on Date Add throws (C16)."* One scenario | the C16 answer, applied to both |
+| **C17** | JSON Stream Parser (stream-parsers.ts :234-241 `scanJsonValues`; json-stream-parser.ts :287-300) | Stream or Single format, a stray `}` (Single: also `]`, `,`) where a value should start: the scanner records `Could not parse JSON value: Unexpected end of JSON input` and does not advance — an infinite loop on the main thread, memory growing until the process dies. Any format that is none of the three reads as Stream and hangs too | *"One stray `}` from an agent stream freezes the whole app, for good."* Graded through a seam that throws where the runtime loops (§6.1b); two scenarios and the generated sequences counted | step over the character after recording the error once — `i = end > i ? end : i + 1` (the spec's line) |
 | **T3** | the runner — compare.ts `eventKey` (NSP-003) | **two traces whose nested values differed compared EQUAL** — a Date, NaN, a registry array, a unit — from NSP-003 to NSP-012 | a hole shaped like the defect in the gate itself; fixed in s11, the 46 earlier specs re-graded green | closed by the fix; recorded so the s3–s10 readings are read with it |
 
 ### 6.3 Acceptance, measured
 
-1. ✅ for the 12 (specced, mutants killed or declared — DateParts ×2: a cleared part is never sent so its store is
+1. ✅ for the 16 — s12's four: conform on the runtime at 200 on five seeds (20727–20731), every mutant killed or declared (Text Accumulator and Stream Buffer: a Clear with nothing to clear writes values every key already holds). ✅ for the 12 (specced, mutants killed or declared — DateParts ×2: a cleared part is never sent so its store is
    unobservable; ParseCSV / ToCSV: the stuck-flag shape — conform on the runtime at 200: `NSP_ONLY=… npx jest
    test/node-spec/conformance.test.ts`, 2026-10-01).
 2. ✗ not run: no node here has an export reach (NSP-005 declares one per node after a spike).
@@ -131,8 +175,7 @@ s10 handoff's "12 passed" on that gate was wrong.
 
 ### 6.4 Not done, named
 
-The other 12: **JSON Stream Parser, Pattern Extractor, Stream Buffer, Text Accumulator** (the agent parsers,
-375 / 267 / 396 / 477 lines — pure T1 with outcome ports, nothing the world lacks), **Parse XML, Parse Feed**
+The other 8 (the four agent parsers are s12's, §6.1b): **Parse XML, Parse Feed**
 (need the XML parser the runtime uses, read first), **Animate To Value** (the scheduler's `onRunning` with an
 ease curve — Repeat's pass plus `easecurves.ts`), **States** (1191 lines, dynamic ports — a session of its own),
 **Screen Resolution** and **On App Error** (each needs a seam the world does not have: a viewport with a resize

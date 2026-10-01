@@ -39,6 +39,10 @@ import { Or } from './or';
 import { ParseCSV } from './parse-csv';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
+import { JSONStreamParser } from './json-stream-parser';
+import { PatternExtractor } from './pattern-extractor';
+import { TextAccumulator } from './text-accumulator';
+import { StreamBuffer } from './stream-buffer';
 import { SetModelProperties } from './set-object-properties';
 import { SetVariable } from './set-variable';
 import { StaticData } from './static-array';
@@ -104,7 +108,11 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [UniqueId.type]: UniqueId,
   [ParseCSV.type]: ParseCSV,
   [ToCSV.type]: ToCSV,
-  [Repeat.type]: Repeat
+  [Repeat.type]: Repeat,
+  [JSONStreamParser.type]: JSONStreamParser,
+  [PatternExtractor.type]: PatternExtractor,
+  [TextAccumulator.type]: TextAccumulator,
+  [StreamBuffer.type]: StreamBuffer
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
@@ -146,6 +154,10 @@ export {
   ParseCSV,
   RandomBytes,
   Repeat,
+  JSONStreamParser,
+  PatternExtractor,
+  TextAccumulator,
+  StreamBuffer,
   ToCSV,
   UniqueId,
   Inverter,

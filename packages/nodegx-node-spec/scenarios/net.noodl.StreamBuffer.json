@@ -1,0 +1,398 @@
+[
+  {
+    "name": "Add buffers the current Data and is Done; the data is retained, so a second Add buffers it again",
+    "because": "stream-buffer.ts :80-84, :271-302",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "data",
+        "value": "tok"
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Add before any Data has arrived fails with the sentence on Error; Error stays after a later Add works",
+    "because": ":273-278, :304-313 — lastError is never cleared",
+    "params": {},
+    "steps": [
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "set": "data",
+        "value": 1
+      },
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an undefined write still counts as data having arrived — undefined is buffered",
+    "because": ":80-84 hasPendingData is set on ANY write",
+    "params": {},
+    "steps": [
+      {
+        "set": "data"
+      },
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Flush hands the buffer over, starts a fresh one, Flushed then Done; a second Flush finds nothing — Unchanged, no Flushed",
+    "because": ":315-339",
+    "params": {},
+    "steps": [
+      {
+        "set": "data",
+        "value": "a"
+      },
+      {
+        "signal": "add"
+      },
+      {
+        "set": "data",
+        "value": "b"
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "signal": "flush"
+      },
+      "settle",
+      {
+        "signal": "flush"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Flush Size: the Add that reaches it flushes in the same invocation — one Done, Flushed",
+    "because": ":294-298",
+    "params": {
+      "flushSize": 2
+    },
+    "steps": [
+      {
+        "set": "data",
+        "value": "x"
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Max Size drops the oldest: Dropped Items counts them, Overflowed pulses inside a Done Add",
+    "because": ":281-289",
+    "params": {
+      "maxSize": 2
+    },
+    "steps": [
+      {
+        "set": "data",
+        "value": 1
+      },
+      {
+        "signal": "add"
+      },
+      {
+        "set": "data",
+        "value": 2
+      },
+      {
+        "signal": "add"
+      },
+      {
+        "set": "data",
+        "value": 3
+      },
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the interval: the first Add arms one timer; it flushes when the clock reaches it, with no outcome; Adds while it runs do not re-arm it",
+    "because": ":300, :365-374 — `if (internal.timer !== null) return`; :136-137 the timer's flush is not an invocation",
+    "params": {
+      "flushInterval": 100
+    },
+    "steps": [
+      {
+        "set": "data",
+        "value": "a"
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "advance": 60
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "advance": 40
+      },
+      "settle",
+      {
+        "advance": 200
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a manual Flush stops the timer: nothing fires at the old due time; the next Add arms a fresh one",
+    "because": ":317 stopTimer, then :300 on the next Add",
+    "params": {
+      "flushInterval": 100
+    },
+    "steps": [
+      {
+        "set": "data",
+        "value": "a"
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "advance": 50
+      },
+      {
+        "signal": "flush"
+      },
+      "settle",
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "advance": 60
+      },
+      "settle",
+      {
+        "advance": 40
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "changing Flush Interval re-arms at the new period while items wait; setting it to 0 stops the timer",
+    "because": ":107-115",
+    "params": {
+      "flushInterval": 100
+    },
+    "steps": [
+      {
+        "set": "data",
+        "value": "a"
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "advance": 30
+      },
+      {
+        "set": "flushInterval",
+        "value": 50
+      },
+      "settle",
+      {
+        "advance": 49
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "add"
+      },
+      {
+        "set": "flushInterval",
+        "value": 0
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the same Flush Interval again is a no-op — the running timer keeps its due time",
+    "because": ":110 `if (next === internal.flushInterval) return`",
+    "params": {
+      "flushInterval": 100
+    },
+    "steps": [
+      {
+        "set": "data",
+        "value": "a"
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "advance": 70
+      },
+      {
+        "set": "flushInterval",
+        "value": 100
+      },
+      {
+        "advance": 30
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Clear: Done and Cleared, buffer, Flushed Data and both counts reset, the timer stopped — Error stays; Clear again is Unchanged",
+    "because": ":341-363",
+    "params": {
+      "flushInterval": 100,
+      "maxSize": 1
+    },
+    "steps": [
+      {
+        "signal": "add"
+      },
+      {
+        "set": "data",
+        "value": "a"
+      },
+      {
+        "signal": "add"
+      },
+      {
+        "signal": "add"
+      },
+      {
+        "signal": "flush"
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "advance": 150
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Max Size 0 is no cap; negative Flush Size, Max Size and Flush Interval read as 0",
+    "because": ":94-96, :109, :127-129",
+    "params": {
+      "maxSize": -1,
+      "flushSize": -1,
+      "flushInterval": -5
+    },
+    "steps": [
+      {
+        "set": "data",
+        "value": "z"
+      },
+      {
+        "signal": "add"
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Flushed Data is the batch as it was: a later Add does not change it",
+    "because": ":183 the description; :329-330 the buffer is handed over and a new one started",
+    "params": {
+      "flushSize": 1
+    },
+    "steps": [
+      {
+        "set": "data",
+        "value": {
+          "n": 1
+        }
+      },
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "set": "data",
+        "value": {
+          "n": 2
+        }
+      },
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "ROW C6 — a number after a unit object on Data is merged into it by node.ts: the runtime buffers { value: 5, unit } where the spec buffers 5",
+    "because": "node.ts setInputValue :410-420 (NSP-011 §6 C6, R7) — Data is type * and keeps whatever arrives",
+    "row": "NSP-011 §6 C6",
+    "params": {},
+    "steps": [
+      {
+        "set": "data",
+        "value": {
+          "value": 1,
+          "unit": "px"
+        }
+      },
+      {
+        "set": "data",
+        "value": 5
+      },
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  }
+]

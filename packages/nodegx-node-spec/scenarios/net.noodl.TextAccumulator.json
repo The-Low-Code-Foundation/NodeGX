@@ -1,0 +1,98 @@
+[
+  {
+    "name": "lines arriving in pieces: a partial line waits on Accumulated; a completed one moves to Messages and Last Message; Message Received then Changed, then Done",
+    "because": "text-accumulator.ts :400-442",
+    "params": {},
+    "steps": ["settle", { "set": "chunk", "value": "Hel" }, { "signal": "add" }, "settle", { "set": "chunk", "value": "lo\nWor" }, { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "the chunk is retained: a second Add with no new chunk appends it again",
+    "because": ":176-180 the port description; :390",
+    "params": { "delimiter": "" },
+    "steps": [{ "set": "chunk", "value": "ab" }, { "signal": "add" }, "settle", { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "an empty Delimiter never splits — a token stream grows one Accumulated; three messages in one chunk are one Message Received",
+    "because": "stream-parsers.ts :169-174; :438 once per Add, not per message",
+    "params": { "delimiter": "" },
+    "steps": [{ "set": "chunk", "value": "a\nb\nc\n" }, { "signal": "add" }, "settle", { "set": "delimiter", "value": "\n" }, { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "an empty chunk is a keep-alive: Unchanged, nothing sent; null is the same",
+    "because": ":118-119, :390-397",
+    "params": {},
+    "steps": [{ "signal": "add" }, "settle", { "set": "chunk", "value": null }, { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "an object on Chunk is refused on ARRIVAL: Error names it and Failure pulses with no Add; an Add after it is Unchanged; text clears Error",
+    "because": ":126-129, :343-365 — no token, so the setter's plain pulse; :390-397",
+    "params": {},
+    "steps": [{ "set": "chunk", "value": { "delta": "Hi" } }, "settle", { "signal": "add" }, "settle", { "set": "chunk", "value": "Hi" }, "settle"]
+  },
+  {
+    "name": "the same refusal again while it stands pulses nothing; a different shape is a new sentence and pulses",
+    "because": ":345, :357 isRepeat; :45-52 the shape names",
+    "params": {},
+    "steps": [{ "set": "chunk", "value": { "a": 1 } }, "settle", { "set": "chunk", "value": { "b": 2 } }, "settle", { "set": "chunk", "value": ["x"] }, "settle", { "set": "chunk", "value": { "$date": "2026-01-01T00:00:00.000Z" } }, "settle"]
+  },
+  {
+    "name": "a number and a boolean are their text",
+    "because": ":122-125",
+    "params": { "delimiter": "" },
+    "steps": [{ "set": "chunk", "value": 7 }, { "signal": "add" }, { "set": "chunk", "value": true }, { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "Max Length keeps the TAIL: the oldest characters go, Dropped Characters counts them, Overflowed then Changed",
+    "because": ":402-408; stream-parsers.ts :492-495",
+    "params": { "maxLength": 4, "delimiter": "" },
+    "steps": [{ "set": "chunk", "value": "abcdef" }, { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "the cap applies before the split: a delimiter in the dropped head is lost with it",
+    "because": ":402 truncateHead runs before :410 splitDelimited",
+    "params": { "maxLength": 3 },
+    "steps": [{ "set": "chunk", "value": "x\nyz" }, { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "Max Messages keeps the newest: Dropped Messages counts the rest, and Overflowed pulses before Message Received",
+    "because": ":417-424, :438",
+    "params": { "maxMessages": 2 },
+    "steps": [{ "set": "chunk", "value": "1\n2\n3\n" }, { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "both caps in one Add: two Overflowed pulses",
+    "because": ":407 and :423 — one per cap",
+    "params": { "maxMessages": 1, "maxLength": 5 },
+    "steps": [{ "set": "chunk", "value": "abcd\ne\nf\n" }, { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "Max Length and Max Messages at 0 are no cap; a negative one reads as 0",
+    "because": ":159, :172; stream-parsers.ts :493 `!(maxLength > 0)`; :418 `max > 0`",
+    "params": { "maxLength": -2, "maxMessages": -1 },
+    "steps": [{ "set": "chunk", "value": "aaaa\nbbbb\ncccc\n" }, { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "Byte Count counts UTF-8: an accent is two bytes, an emoji four, a lone surrogate three",
+    "because": "stream-parsers.ts :466-487",
+    "params": { "delimiter": "" },
+    "steps": [{ "set": "chunk", "value": "é😀" }, { "signal": "add" }, "settle", { "set": "chunk", "value": "\uD800" }, { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "Clear after work: Done, Cleared, everything reset — and the retained chunk is still there for the next Add",
+    "because": ":445-471; the chunk is not part of what Clear empties",
+    "params": {},
+    "steps": [{ "set": "chunk", "value": "a\nb" }, { "signal": "add" }, "settle", { "signal": "clear" }, "settle", { "signal": "add" }, "settle"]
+  },
+  {
+    "name": "Clear on an empty accumulator is Unchanged; a standing Error alone is something to clear",
+    "because": ":448-453 `!!internal.error`",
+    "params": {},
+    "steps": [{ "signal": "clear" }, "settle", { "set": "chunk", "value": [1] }, { "signal": "clear" }, "settle"]
+  },
+  {
+    "name": "a multi-character delimiter, and two Adds in one frame",
+    "because": "stream-parsers.ts :171 split; :181-185 inline",
+    "params": { "delimiter": ";;" },
+    "steps": [{ "set": "chunk", "value": "a;" }, { "signal": "add" }, { "signal": "add" }, "settle"]
+  }
+]

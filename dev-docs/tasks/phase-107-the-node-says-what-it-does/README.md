@@ -134,7 +134,7 @@ Full detail in NSP-001 to NSP-003. The shape:
 | [NSP-010](NSP-010-A-CHANGE-IS-A-VERSION.md) | A behaviour change is a version, a trace diff, and a migration answer | 009 | — |
 | [NSP-011](NSP-011-BATCH-LOGIC-MATH-STRINGS.md) ✅ | Batch — logic, math, strings, variables, converters (**13**). **Built s4** (13 / 13 conform at 200; rows C4–C6, D6–D9; AC2 waits for NSP-005, the deep run for a quiet box) | 004 | T1 |
 | [NSP-012](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md) 🟡 | Batch — arrays, objects, variables, stores, events (**26**: 13 + 13). **s9: the 13 T1 built** — the registry seam, 13 / 13 conform on the runtime at 200 (rows C9–C11, D13), 6 shared-state graph scenarios. **s10: the T4 half** — the component tree in the graph format, 22 `N` scenarios, 12 of 13 T4 nodes recorded on the runtime (rows C12–C15), Run Tasks exempt (NSP-015's boundary); AC2 not run | 008 | T1, T4 |
-| [NSP-013](NSP-013-BATCH-DATES-PARSERS-UTILITIES.md) 🟡 | Batch — dates, time, randomness, parsers, animation (**24**: 14 + 10). **s11: 12 built** — the world's TIME ZONE and DIGEST seams, 12 / 12 conform on the runtime at 200 in two zones each (rows C16, D14, D15); the runner's comparison hole found and closed (T3); the other 12 named in its §6.4 | 007 | T1, T2 |
+| [NSP-013](NSP-013-BATCH-DATES-PARSERS-UTILITIES.md) 🟡 | Batch — dates, time, randomness, parsers, animation (**24**: 14 + 10). **s11: 12 built** — the world's TIME ZONE and DIGEST seams, 12 / 12 conform on the runtime at 200 in two zones each (rows C16, D14, D15); the runner's comparison hole found and closed (T3). **s12: +4, the agent parsers** (JSON Stream Parser, Pattern Extractor, Text Accumulator, Stream Buffer) — 16 / 16 conform; row **C17** (the JSON scanner hangs the app on a stray `}`); the other 8 named in its §6.4 | 007 | T1, T2 |
 | [NSP-014](NSP-014-BATCH-DATA-AND-CLOUD.md) | Batch — records, users, files, HTTP, streams, cloud-only nodes (**41**: 39 T3, 17 of them cloud-only; Filter Records is T1, Open File Picker T2) | 007 | T3 |
 | [NSP-015](NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md) | Batch — navigation, popups, component utilities (**14**) | 008 | T4 |
 | [NSP-016](NSP-016-VISUAL-NODES.md) | Visual nodes — research first: layout semantics that are not CSS (**19**) | 008 | T5 |
@@ -166,6 +166,7 @@ npm run spec-ledger            # NSP-009 — ratcheted in PR CI
 > **s9 (NSP-012): 34 of 147 conform on the runtime (23.1%) — T1 31/46 · T2 2/11 · T3 1/39; 2 on the export (unchanged). GRAPH: 20 scenarios (14 contract + 6 shared-state), 20 / 20 on the runtime (2 known rows: G1, C11). Ports derivable without a viewer: 10 of 68 (+ Object, Create New Object, Set Object Properties, Set Variable, Array Filter); catalog parity: 34.**
 > **s10 (NSP-012 T4): 46 of 147 conform on the runtime (31.3%) — T1 31/46 · T2 2/11 · T3 1/39 · T4 12/27 (a T4 node conforms when every `N` graph scenario naming it passes on the runtime, claims from its own sentences; Repeater Item's handshake half is out of reach until the Repeater is specced); 1 exempt (Run Tasks — NSP-015's component boundary); 2 on the export (unchanged). GRAPH: 42 scenarios (14 contract + 6 shared-state + 22 node), 42 / 42 on the runtime (5 known rows: G1, C11, C12, C13, C14); on the export 1 passed + 2 declared differences + 1 known, 39 outside in its words. Catalog parity: 34 (T4 nodes have no reducer spec).**
 > **s11 (NSP-013 first half): 58 of 147 conform on the runtime (39.5%) — T1 42/46 · T2 7/11 (Delay, UUID, Now, Random Bytes, Unique Id, Repeat; Hash is T1 in the census) · T3 1/39 · T4 12/27; 1 exempt; 2 on the export (unchanged). Every date node graded in two zones, one across a DST change; Hash and Random Bytes byte for byte under a seed. GRAPH: 42 / 42 on the runtime (unchanged). Catalog parity: 46. ⚠️ Every number before this one was read through a comparison that saw no nested key (NSP-013 §6.2 T3); re-graded under the real one, nothing moved.**
+> **s12 (NSP-013, the agent parsers): 62 of 147 conform on the runtime (42.2%) — T1 46/46 · T2 7/11 · T3 1/39 · T4 12/27; 1 exempt; 2 on the export (unchanged). JSON Stream Parser is graded through a seam that turns the runtime's infinite loop into a throw (row C17, counted). GRAPH: 42 / 42 (unchanged). Catalog parity: 50.**
 
 Reported per target: *conforms on the runtime · conforms on the export · exempt with a reason* —
 and, from R6, *ports derivable without a viewer: N of 147* and *catalog parity: N of 147*.
@@ -271,8 +272,12 @@ waiting; after the wait for a handler expires it keeps the refused type. One lin
 Failure. Count admitted after the refusal, or rewrite the two sentences?"*. The rows an author meets first: C12
 and C15.
 
-**Also for a ruling, the time batch's rows** ([NSP-013 §6.2](NSP-013-BATCH-DATES-PARSERS-UTILITIES.md), s11,
-2026-10-01 — none graded by any test before). **C16** — plain words: *"A Unit value Date Add does not know (any
+**Also for a ruling, the time batch's rows** ([NSP-013 §6.2](NSP-013-BATCH-DATES-PARSERS-UTILITIES.md), s11 and
+s12, 2026-10-01 — none graded by any test before). **C17 first — it freezes an app.** Plain words: *"JSON Stream
+Parser set to Stream or Single freezes the whole app, for good, the moment a stray `}` (or, in Single, a stray `]`
+or `,`) arrives where a value should start — an agent stream that hiccups once is enough. The scanner records the
+same error forever and never moves on. Fix: step over the stray character after recording the error once (one
+line in stream-parsers.ts, which is what the spec does). Ship it alone?"* **C16** — plain words: *"A Unit value Date Add does not know (any
 text a wire can carry) crashes the node in its setter and kills it for good; Date Difference reads the same value as
 years (D15) and Date Compare ignores it. Refuse it, or read it as days?"*; **D14** — *"On Date To String a
 timestamp or a null on Date is 'Invalid Date' when no Timezone is set and a rendered date when one is. One rule

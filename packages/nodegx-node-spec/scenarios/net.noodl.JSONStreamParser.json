@@ -1,0 +1,432 @@
+[
+  {
+    "name": "NDJSON: two whole lines and a tail in one chunk — two values, Parsed is the last, the tail waits on Pending Characters; Success then Done",
+    "because": "json-stream-parser.ts :277-286, :302-313, :320, :338",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "chunk",
+        "value": "{\"a\":1}\n{\"b\":2}\n{\"c\":"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a boundary inside a value: the first half is Done with no Success and Is Complete false; the second half completes it",
+    "because": ":306 values only when some completed; :320 Success is narrower than Done (the outcomeOutputs description)",
+    "params": {},
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "{\"text\":\"a\\nb"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "set": "chunk",
+        "value": "\"}\n"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the chunk is retained between pulses: a second Parse with no new chunk appends the same text again",
+    "because": ":117-120 the port description; :79-81 the setter keeps it, :250-251 every Parse appends it",
+    "params": {},
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "{\"n\":1}\n"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "NDJSON is strict: a bad line fails the Parse with the reason on Error, and a good line beside it still comes out on Values",
+    "because": ":283-285, :315-316, :322; settleParse's docblock (:325-332) — partly worked is failure",
+    "params": {},
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "not json\n{\"ok\":true}\n"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "blank lines are skipped, not errors; a whitespace-only chunk is Done with nothing out and Is Complete true — and a Clear after it is Unchanged yet still sends Is Complete false",
+    "because": ":281-282; :351-352 hadSomething does not look at isComplete, :359 resets it, :364 sends it",
+    "params": {},
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "\n  \n"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Stream: a JSON array arriving element by element yields each element as it completes; a scalar at the end waits for what follows it",
+    "because": ":295-300; stream-parsers.ts :216-245 array framing, :297-304 a scalar is complete only once something that cannot belong to it arrives",
+    "params": {
+      "format": "stream"
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "[1,2"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "set": "chunk",
+        "value": ",3]"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Stream: a brace inside a string does not close the object, and an escaped quote does not end the string",
+    "because": "stream-parsers.ts :251-276",
+    "params": {
+      "format": "stream"
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "{\"x\":\"}\\\"{\"} \"s\""
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Stream: a value that scans whole but does not parse is skipped with its error, and the stream goes on",
+    "because": "stream-parsers.ts :236-241 — one bad record cannot stall the stream",
+    "params": {
+      "format": "stream"
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "{bad} {\"after\":1} "
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Single: an incomplete document waits; once whole it comes out — and a SECOND whole document in the same buffer is dropped with no error",
+    "because": ":287-294 — `scan.rest` is '' once the scan reached the end, so values after the first are discarded",
+    "params": {
+      "format": "single"
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "{\"a\":"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "set": "chunk",
+        "value": "1} {\"b\":2}"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Single: a malformed document with an incomplete one behind it stays in the buffer, so every Parse reports it again and Error Count climbs",
+    "because": ":288-294 — the buffer moves only when a value came out; the scan's errors are reported every time",
+    "params": {
+      "format": "single"
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "{bad} {\"ok\":"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "set": "chunk",
+        "value": ""
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "past Max Pending the buffer is dropped, Error says so and the Parse fails — Pending Characters still reads the last parse's count",
+    "because": ":259-272 — reportError flags error and errorCount only",
+    "params": {
+      "maxLength": 10
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "{\"a\":"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "set": "chunk",
+        "value": "\"0123456789\"}"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Max Pending 0 is no cap; a negative or non-numeric value reads as 0",
+    "because": ":112-114, :259",
+    "params": {
+      "maxLength": -5
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "{\"a\":\"a long value that would pass any small cap\"}\n"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "set": "maxLength",
+        "value": "x"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Parse with nothing pending is Unchanged; null and undefined on Chunk are nothing",
+    "because": ":79-81, :252-257",
+    "params": {},
+    "steps": [
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "set": "chunk",
+        "value": null
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "set": "chunk"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Clear after values: Done and Cleared; Values, both counts, Error and Pending reset — Parsed is not re-sent — and the retained chunk parses again after it",
+    "because": ":349-369 — `parsed` is not flagged (:361-366); the chunk is not part of what Clear discards",
+    "params": {},
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "{\"a\":1}\nbad\n"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Clear with nothing to clear is Unchanged and still pulses Cleared",
+    "because": ":351-352, :367-368",
+    "params": {},
+    "steps": [
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "chunk",
+        "value": "12"
+      },
+      {
+        "signal": "parse"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Format cleared reads as NDJSON; a Format that is none of the three reads as Stream",
+    "because": ":98-100 `value || 'ndjson'`; :295 the else",
+    "params": {
+      "format": ""
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "1 2 "
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "set": "format",
+        "value": "xml"
+      },
+      {
+        "set": "chunk",
+        "value": "\n"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two Parses in one frame are two invocations, two outcomes; the second appends the chunk again",
+    "because": ":122-126 — inline, no deferral to coalesce into",
+    "params": {
+      "format": "stream"
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "7 "
+      },
+      {
+        "signal": "parse"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a number on Chunk is its text",
+    "because": ":80 String(value)",
+    "params": {},
+    "steps": [
+      {
+        "set": "chunk",
+        "value": 42
+      },
+      {
+        "signal": "parse"
+      },
+      "settle",
+      {
+        "set": "chunk",
+        "value": "\n"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "ROW C17 — a stray } where a value should start: the runtime's scanner never advances and the app freezes; the spec records the scanner's first error and steps over it",
+    "because": "stream-parsers.ts :234-241 — scanOneValue returns i for a closer, JSON.parse('') throws, `i = end` makes no progress",
+    "row": "NSP-013 §6 C17",
+    "params": {
+      "format": "stream"
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "1}"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "ROW C17, the Single arm — a stray comma after a whole document",
+    "because": "stream-parsers.ts :222-224 — without array framing a comma is not skipped, and a scalar that starts on one ends on it",
+    "row": "NSP-013 §6 C17",
+    "params": {
+      "format": "single"
+    },
+    "steps": [
+      {
+        "set": "chunk",
+        "value": "\"a\",3"
+      },
+      {
+        "signal": "parse"
+      },
+      "settle"
+    ]
+  }
+]
