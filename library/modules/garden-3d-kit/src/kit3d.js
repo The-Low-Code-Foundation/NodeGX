@@ -1151,11 +1151,129 @@
     return g;
   };
 
+  // ── P108 IW-007 (lane B): her land — the tree's planks, a carried plank, a building by stage, the ghost, the puff ────
+  // garden-kit draws the same four stages (its buildingEls): 0 pegs and string · 1 the frame · 2 the walls · 3 finished.
+  // A building is ONE ROW of parts; the part at its first tile (`bx`) builds the whole building, centred across its
+  // `bw` tiles; every other part lays only its ground. A finished refuge has its pen's fence on the row below it.
+  var BUILD_STAGES = { spa: 4, refuge: 4 };
+  var PUFF_MS = 1200;
+  function buildingStage(t) {
+    var n = BUILD_STAGES[t && t.build] || 4;
+    var st = Math.max(0, Math.min(n - 1, wholeOf(t && t.bstage) || 0));
+    return { stage: st, done: st >= n - 1, n: n };
+  }
+  JOB_LOOK.buildingStage = buildingStage;
+  JOB_LOOK.BUILD_STAGES = BUILD_STAGES;
+  PALETTE.wood = 0xb9844c;
+  PALETTE.woodDark = 0x8b5a2b;
+  PALETTE.spaWater = 0x7cc6f0;
+  PALETTE.refugeRoof = 0xc8423a;
+  PALETTE.ghostOk = 0x3fa66b;
+  PALETTE.ghostNo = 0xe04e4e;
+  var benchSiteBuilder = THING_BUILDERS.site;
+  THING_BUILDERS.site = function (THREE, mat, t, out) {
+    if (!t || !BUILD_STAGES[t.build]) return benchSiteBuilder(THREE, mat, t, out);
+    var g = new THREE.Group();
+    var b = buildingStage(t);
+    var add = function (m, name) {
+      g.add(m);
+      out.meshCount += 1;
+      if (name) m.name = name;
+      return m;
+    };
+    // The ground under every part: dirt while it is built, gravel once it stands.
+    add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.96, 0.05, 0.96), mat(b.done ? PALETTE.gravel : PALETTE.dirt), 0, 0.025, 0));
+    g.userData.stage = t.build + b.stage;
+    g.userData.bstage = b.stage;
+    g.userData.of = t.of === undefined ? '' : String(t.of);
+    var first = Number(t.x) === Number(t.bx === undefined ? t.x : t.bx);
+    if (!first) return g;
+    var w = Math.max(1, wholeOf(t.bw) || 1), cx = (w - 1) / 2, wide = w - 0.1;
+    var part = function (geo, colour, x, y, z, name) { return add(mesh(THREE, geo, mat(colour), cx + x, y, z), name); };
+    // Stage 0: the pegs at the four corners and the string between them (the plan on the ground).
+    if (b.stage === 0) {
+      [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(function (c) { part(G(THREE, out, 'BoxGeometry', 0.05, 0.32, 0.05), PALETTE.fence, (c[0] * wide) / 2, 0.16, c[1] * 0.4, 'peg'); });
+      part(G(THREE, out, 'BoxGeometry', wide, 0.012, 0.012), PALETTE.white, 0, 0.3, -0.4, 'string');
+      part(G(THREE, out, 'BoxGeometry', wide, 0.012, 0.012), PALETTE.white, 0, 0.3, 0.4, 'string');
+    }
+    // Stage 1 on: the frame — posts at the corners and the middle, a beam along the top.
+    if (b.stage >= 1 && b.stage < 3) {
+      [-wide / 2, 0, wide / 2].forEach(function (x) { part(G(THREE, out, 'BoxGeometry', 0.08, 0.7, 0.08), PALETTE.wood, x, 0.35, -0.38, 'post'); part(G(THREE, out, 'BoxGeometry', 0.08, 0.7, 0.08), PALETTE.wood, x, 0.35, 0.38, 'post'); });
+      part(G(THREE, out, 'BoxGeometry', wide, 0.07, 0.07), PALETTE.woodDark, 0, 0.72, -0.38, 'beam');
+      part(G(THREE, out, 'BoxGeometry', wide, 0.07, 0.07), PALETTE.woodDark, 0, 0.72, 0.38, 'beam');
+    }
+    // Stage 2 on: the walls — stone below, planks above.
+    if (b.stage >= 2) {
+      part(G(THREE, out, 'BoxGeometry', wide, 0.3, 0.8), t.build === 'refuge' ? PALETTE.rock : PALETTE.stoneWall, 0, 0.18, 0, 'wall');
+      part(G(THREE, out, 'BoxGeometry', wide, 0.3, 0.8), PALETTE.wood, 0, 0.48, 0, 'wall');
+    }
+    // Stage 3: finished — the roof; the spa's steaming bath, the refuge's door.
+    if (b.done) {
+      var roof = part(G(THREE, out, 'CylinderGeometry', 0.5, 0.5, wide + 0.12, 3), t.build === 'refuge' ? PALETTE.refugeRoof : PALETTE.roof, 0, 0.8, 0, 'roof');
+      roof.rotation.z = Math.PI / 2;
+      roof.scale.set(1, 1, 0.9);
+      if (t.build === 'spa') part(G(THREE, out, 'BoxGeometry', 0.5, 0.06, 0.3), PALETTE.spaWater, 0, 0.35, 0.42, 'bath');
+      else part(G(THREE, out, 'BoxGeometry', 0.26, 0.4, 0.04), PALETTE.door, 0, 0.2, 0.41, 'door');
+      if (t.build === 'refuge') {
+        // The pen: a low fence along the row below it (one place per animal).
+        part(G(THREE, out, 'BoxGeometry', wide, 0.05, 0.05), PALETTE.fence, 0, 0.22, 1.45, 'pen');
+        part(G(THREE, out, 'BoxGeometry', wide, 0.05, 0.05), PALETTE.fence, 0, 0.12, 1.45, 'pen');
+        [-wide / 2, wide / 2].forEach(function (x) { part(G(THREE, out, 'BoxGeometry', 0.05, 0.28, 0.9), PALETTE.fence, x, 0.14, 1.0, 'pen'); });
+      }
+      // The puff (hidden until the last drop shows it: the engine's anims.puffs).
+      var puff = new THREE.Group();
+      puff.name = 'puff';
+      puff.visible = false;
+      [[-0.45, 0.3], [0, 0.6], [0.45, 0.3], [-0.2, 0.15], [0.25, 0.15]].forEach(function (c) {
+        puff.add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.22, 8, 6), mat(PALETTE.white), c[0], 0.5 + c[1], 0.5));
+        out.meshCount += 1;
+      });
+      puff.position.x = cx;
+      g.add(puff);
+    }
+    g.userData.building = true;
+    g.userData.done = b.done;
+    return g;
+  };
+  /** Her land's tree: the tree with its planks stacked at its foot (by what is left), a stump with a sprout when none. */
+  THING_BUILDERS.tree = function (THREE, mat, t, out) {
+    var g = new THREE.Group();
+    var left = wholeOf(t.left);
+    if (left === null) left = 3;
+    var add = function (m, name) { g.add(m); out.meshCount += 1; if (name) m.name = name; return m; };
+    if (left > 0) {
+      add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.07, 0.09, 0.5, 6), mat(PALETTE.trunk), 0, 0.25, 0), 'trunk');
+      add(mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 0.34, 0), mat(PALETTE.canopy), 0, 0.68, 0), 'canopy');
+      add(mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 0.22, 0), mat(PALETTE.canopyLight), 0.14, 0.88, 0.06), 'canopy');
+      for (var p = 0; p < Math.min(3, left); p++) add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.36, 0.05, 0.1), mat(PALETTE.wood), 0.22, 0.03 + p * 0.055, 0.28), 'plank');
+    } else {
+      add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.12, 0.14, 0.16, 7), mat(PALETTE.trunk), 0, 0.08, 0), 'stump');
+      add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.04, 0.14, 0.04), mat(PALETTE.stem), 0.05, 0.22, 0), 'sprout');
+    }
+    g.userData.left = left;
+    return g;
+  };
+  /** A blueprint's ghost on her land: its footprint (and its pen) green where it fits, red where it does not. */
+  THING_BUILDERS.ghost = function (THREE, mat, t, out) {
+    var g = new THREE.Group();
+    var w = Math.max(1, wholeOf(t.w) || 1), rows = 1 + (wholeOf(t.pen) ? 1 : 0);
+    var c = t.ok ? PALETTE.ghostOk : PALETTE.ghostNo;
+    var slab = mesh(THREE, G(THREE, out, 'BoxGeometry', w - 0.08, 0.5, rows - 0.08), mat(c, { transparent: true, opacity: 0.45 }), (w - 1) / 2, 0.25, (rows - 1) / 2);
+    slab.name = 'ghost';
+    g.add(slab);
+    out.meshCount += 1;
+    g.userData.ok = !!t.ok;
+    g.userData.bp = String(t.bp || '');
+    return g;
+  };
+
   /**
    * The load a robot shows on its back: the LAST entry of `carry` (brief §4). stone, letter, egg and food are drawn as
    * themselves (as the 2D kit draws them, lane A's IG-002); anything else is the generic parcel.
    */
   var LOADS = ['stone', 'letter', 'egg', 'food', 'ball'];
+  // P108 IW-007 (lane B): a plank from her land's tree is carried as itself.
+  LOADS.push('plank');
   function loadOf(r) {
     var carry = Array.isArray(r.carry) ? r.carry : [];
     if (!carry.length) return null;
@@ -1299,6 +1417,10 @@
         out.meshCount += 1;
       } else if (load === 'ball') {
         back.add(ballOf(THREE, mat, out, 0.11, 0));
+      } else if (load === 'plank') {
+        // P108 IW-007 (lane B): a plank across its back.
+        back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.42, 0.06, 0.12), mat(PALETTE.wood), 0, 0, 0));
+        out.meshCount += 1;
       } else if (load === 'letter') {
         back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.28, 0.2, 0.03), mat(PALETTE.letter), 0, 0, 0));
         back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.08, 0.02), mat(PALETTE.letterInk), 0, 0.04, 0.02));
@@ -1746,7 +1868,7 @@
     var destroyed = false;
     var width = 1;
     var height = 1;
-    var anims = { robots: [], camera: null, hop: 0, tulips: {}, pops: {} };
+    var anims = { robots: [], camera: null, hop: 0, tulips: {}, pops: {}, puffs: {} };
     var overlayEls = { names: [], labels: [], bubble: null, says: [], meters: [], rings: [] };
     var stepMs = 380;
     var bubble = null;
@@ -2105,6 +2227,15 @@
             return t.kind === 'puddle' && Number(t.x) === g.userData.x && Number(t.y) === g.userData.y;
           });
           if (!had && !first) anims.pops[key] = t0;
+        } else if (g.userData.building && g.userData.done) {
+          // P108 IW-007 (lane B): the last drop — this building was below its last stage before: it pops and puffs.
+          var was2 = previous && previous.things.some(function (t) {
+            return t.kind === 'site' && String(t.of) === g.userData.of && buildingStage(t).done;
+          });
+          var there = previous && previous.things.some(function (t) {
+            return t.kind === 'site' && String(t.of) === g.userData.of;
+          });
+          if (there && !was2 && !first) { anims.pops[key] = t0; anims.puffs[key] = t0; }
         }
       });
     };
@@ -2266,6 +2397,14 @@
           g.scale.set(s, 1, s);
           if (k6 >= 1) delete anims.pops[key];
         }
+        // P108 IW-007 (lane B): the puff over a building just finished rises, swells and is gone.
+        if (anims.puffs[key] !== undefined) {
+          var pf = g.getObjectByName ? g.getObjectByName('puff') : null;
+          var k7 = Math.min(1, (t - anims.puffs[key]) / PUFF_MS);
+          if (pf) { pf.visible = k7 < 1 && !reduced; pf.scale.set(0.4 + 1.1 * k7, 0.4 + 1.1 * k7, 0.4 + 1.1 * k7); pf.position.y = 0.3 * k7; }
+          g.userData.puffing = k7 < 1;
+          if (k7 >= 1) delete anims.puffs[key];
+        }
         // P108 IW-002 (Picking): the things on the tile under the pointer are lifted while a child picks.
         var lifted = !!(eng.picking && eng.hover && eng.hover.x === g.userData.x && eng.hover.y === g.userData.y);
         if (g.userData.baseY !== undefined) g.position.y = g.userData.baseY + (lifted ? PICK_LIFT : 0);
@@ -2339,6 +2478,7 @@
       var k;
       for (k in anims.tulips) return true;
       for (k in anims.pops) return true;
+      for (k in anims.puffs) return true;
       for (var i = 0; i < anims.robots.length; i++) {
         var a = anims.robots[i];
         if (a && (a.from || a.yawStart || a.bumpStart)) return true;

@@ -4286,6 +4286,116 @@ var gardenKitBlocks = (function () {
     if (st === 4 && !t.vacant) extras.push(spriteEl('islSami', 'bench-sami-' + i, 'gd-bench-sami', { 'data-who': 'sami', 'data-sits': 'bench' }));
   }
 
+  // ── P108 IW-007 (lane B): her land — the tree's planks, a carried plank, a building by stage, the ghost, the puff ────
+  // A building is ONE ROW of parts (sites with the same `of`, `build` its blueprint); the engine writes the building's
+  // stage on every part (`bstage`: 0 pegs and string · 1 the frame · 2 the walls · 3 finished) and Draw world its first
+  // tile and width (`bx`, `bw`). Each part's tile lays the ground (dirt, gravel once it stands) and keeps its meter; the
+  // building itself is ONE sprite across its parts, drawn over the grid (buildingEls, like the fence). The 3D kit builds
+  // the same four stages (garden-3d-kit, THING_BUILDERS.site's building branch). The last drop's puff: a building seen
+  // below its last stage and then at it puffs for PUFF_MS (a module memory per building id: a page opened on a finished
+  // building never puffs).
+  var BUILD_STAGES = { spa: 4, refuge: 4 };
+  var PUFF_MS = 1600;
+  var BUILT_SEEN = {};
+  var PUFFS = {};
+  /** A building part's stage (0 .. n − 1) and whether that is its last (finished). */
+  function buildingStage(t) {
+    var n = BUILD_STAGES[t && t.build] || 4;
+    var st = Math.max(0, Math.min(n - 1, wholeOf(t && t.bstage) || 0));
+    return { stage: st, done: st >= n - 1, n: n };
+  }
+  JOB_LOOK.buildingStage = buildingStage;
+  JOB_LOOK.BUILD_STAGES = BUILD_STAGES;
+  (function () {
+    var wood = '#B9844C', woodDark = '#8B5A2B', stoneC = '#A3A0AB', ghostLine = { fill: 'none', stroke: '#FFFFFF', strokeWidth: 2.5, strokeDasharray: '6 5', opacity: 0.95 };
+    // Two tiles wide and two tall (its parts' row and the row above it): the foot on its parts, the roof above them.
+    var BOX = '0 0 128 128';
+    var shadow = ['ellipse', { cx: 64, cy: 122, rx: 58, ry: 5, fill: 'rgba(0,0,0,.14)' }];
+    var pegs = [['rect', { x: 6, y: 90, width: 4, height: 32, rx: 1, fill: woodDark }], ['rect', { x: 118, y: 90, width: 4, height: 32, rx: 1, fill: woodDark }], ['path', { d: 'M8 93H120', stroke: '#FFFFFF', strokeWidth: 2, opacity: 0.9 }]];
+    var plan = function (d) { var o = { d: d }; for (var k in ghostLine) o[k] = ghostLine[k]; return ['path', o]; };
+    var frame = [['rect', { x: 10, y: 54, width: 7, height: 68, fill: wood }], ['rect', { x: 60, y: 54, width: 7, height: 68, fill: wood }], ['rect', { x: 111, y: 54, width: 7, height: 68, fill: wood }], ['rect', { x: 7, y: 50, width: 114, height: 7, fill: wood }], ['path', { d: 'M14 118L63 56M114 118L64 56', stroke: woodDark, strokeWidth: 3.5 }]];
+    var stoneWall = [['rect', { x: 8, y: 90, width: 112, height: 32, rx: 3, fill: stoneC, stroke: '#7E7B8C', strokeWidth: 2 }], ['path', { d: 'M8 106H120M30 90V106M60 90V106M90 90V106M45 106V122M75 106V122M105 106V122', stroke: '#7E7B8C', strokeWidth: 1.5 }]];
+    var plankWall = [['rect', { x: 8, y: 58, width: 112, height: 32, fill: wood, stroke: woodDark, strokeWidth: 2 }], ['path', { d: 'M8 69H120M8 80H120', stroke: woodDark, strokeWidth: 1.5 }]];
+    // The spa: a stone bath house with plank walls; finished, a red roof, the steaming water and a little sign.
+    SPRITES.spa0 = { box: BOX, shapes: [shadow].concat(pegs, [plan('M10 122V58H118V122Z'), plan('M10 58L64 22L118 58')]) };
+    SPRITES.spa1 = { box: BOX, shapes: [shadow].concat(pegs, frame, [plan('M8 50L64 16L120 50')]) };
+    SPRITES.spa2 = { box: BOX, shapes: [shadow].concat(frame, stoneWall, plankWall, [plan('M8 54L64 18L120 54')]) };
+    SPRITES.spa3 = { box: BOX, shapes: [shadow].concat(stoneWall, plankWall, [
+      ['path', { d: 'M2 60L64 14L126 60Z', fill: '#E86A5E', stroke: '#B8483E', strokeWidth: 3, strokeLinejoin: 'round' }],
+      ['path', { d: 'M20 46H108', stroke: '#B8483E', strokeWidth: 2, opacity: 0.6 }],
+      ['rect', { x: 40, y: 98, width: 48, height: 16, rx: 7, fill: '#7CC6F0', stroke: '#4FA7DC', strokeWidth: 2.5 }],
+      ['path', { d: 'M52 94c-4-5 4-8 0-13M64 94c-4-5 4-8 0-13M76 94c-4-5 4-8 0-13', fill: 'none', stroke: '#FFFFFF', strokeWidth: 3, strokeLinecap: 'round' }],
+      ['rect', { x: 96, y: 66, width: 16, height: 12, rx: 2, fill: '#FFF7E8', stroke: woodDark, strokeWidth: 2 }]
+    ]) };
+    // The refuge: a plank barn on a stone foot; finished, its red roof, a round door and a window.
+    var refFoot = ['rect', { x: 8, y: 108, width: 112, height: 14, rx: 2, fill: stoneC, stroke: '#7E7B8C', strokeWidth: 2 }];
+    var refPlanks = [['rect', { x: 8, y: 58, width: 112, height: 50, fill: wood, stroke: woodDark, strokeWidth: 2 }], ['path', { d: 'M8 70H120M8 83H120M8 96H120', stroke: woodDark, strokeWidth: 1.5 }]];
+    SPRITES.refuge0 = { box: BOX, shapes: [shadow].concat(pegs, [plan('M10 122V58H118V122Z'), plan('M6 58L64 16L122 58')]) };
+    SPRITES.refuge1 = { box: BOX, shapes: [shadow].concat(pegs, frame, [plan('M6 50L64 12L122 50')]) };
+    SPRITES.refuge2 = { box: BOX, shapes: [shadow].concat(frame, [refFoot], refPlanks, [plan('M6 58L64 16L122 58')]) };
+    SPRITES.refuge3 = { box: BOX, shapes: [shadow, refFoot].concat(refPlanks, [
+      ['path', { d: 'M0 62L64 12L128 62Z', fill: '#C8423A', stroke: '#8E2A24', strokeWidth: 3, strokeLinejoin: 'round' }],
+      ['path', { d: 'M50 122V100a14 14 0 0128 0V122Z', fill: woodDark }],
+      ['circle', { cx: 64, cy: 44, r: 7, fill: '#FFF7E8', stroke: '#8E2A24', strokeWidth: 2 }]
+    ]) };
+    // The tree a robot takes planks from: the tree with its planks stacked at its foot (by what is left), a stump when none.
+    var treeTop = [['rect', { x: 28, y: 36, width: 8, height: 18, rx: 3, fill: '#A9773F' }], ['circle', { cx: 32, cy: 22, r: 15, fill: '#3E9B62' }], ['circle', { cx: 20, cy: 30, r: 10, fill: '#48AF70' }], ['circle', { cx: 44, cy: 30, r: 10, fill: '#48AF70' }]];
+    var plankAt = function (y) { return ['rect', { x: 38, y: y, width: 22, height: 5, rx: 1.5, fill: wood, stroke: woodDark, strokeWidth: 1 }]; };
+    SPRITES.treeSrc = { box: '0 0 64 64', shapes: [['ellipse', { cx: 32, cy: 58, rx: 22, ry: 3, fill: 'rgba(0,0,0,.14)' }]].concat(treeTop, [plankAt(54), plankAt(48), plankAt(42)]) };
+    SPRITES.treeSrcFew = { box: '0 0 64 64', shapes: [['ellipse', { cx: 32, cy: 58, rx: 22, ry: 3, fill: 'rgba(0,0,0,.14)' }]].concat(treeTop, [plankAt(54)]) };
+    SPRITES.treeStump = { box: '0 0 64 64', shapes: [['ellipse', { cx: 32, cy: 56, rx: 16, ry: 3, fill: 'rgba(0,0,0,.14)' }], ['rect', { x: 24, y: 40, width: 16, height: 14, rx: 3, fill: '#A9773F' }], ['ellipse', { cx: 32, cy: 40, rx: 8, ry: 3, fill: '#D9B07A', stroke: '#8B5A2B', strokeWidth: 1 }], ['path', { d: 'M36 34c4-4 8-4 10-2', stroke: '#48AF70', strokeWidth: 3, fill: 'none', strokeLinecap: 'round' }]] };
+    // A plank on a robot's back.
+    SPRITES.plank = { box: '0 0 64 64', shapes: [['rect', { x: 8, y: 24, width: 48, height: 12, rx: 2, fill: wood, stroke: woodDark, strokeWidth: 2 }], ['path', { d: 'M14 30H50', stroke: woodDark, strokeWidth: 1.5 }]] };
+  })();
+  LOAD_SPRITES.plank = 1;
+  WORLD_CSS +=
+    '\n.gd-cell>.gd-treesrc{z-index:1}\n' +
+    '.gd-bld{position:absolute;z-index:1;pointer-events:none}.gd-bld>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}\n' +
+    '.gd-bld-pen{position:absolute;z-index:1;box-sizing:border-box;border:3px solid #A9773F;border-top-style:dashed;border-radius:4px;pointer-events:none}\n' +
+    '.gd-ghost{position:absolute;z-index:3;box-sizing:border-box;border:3px dashed #2FA35A;border-radius:8px;background:rgba(63,166,107,.30);pointer-events:none}\n' +
+    '.gd-ghost>svg{position:absolute;inset:0;width:100%;height:100%;opacity:.55}\n' +
+    '.gd-ghost-no{border-color:#E04E4E;background:rgba(224,78,78,.32)}\n' +
+    '.gd-puff{position:absolute;z-index:4;pointer-events:none}.gd-puff>i{position:absolute;width:36%;height:60%;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 0 6px rgba(255,255,255,.9);animation:gd-puff 1.2s ease-out forwards}\n' +
+    '.gd-puff>i:nth-child(1){left:-6%;top:20%}.gd-puff>i:nth-child(2){left:30%;top:-10%;animation-delay:.08s}.gd-puff>i:nth-child(3){left:66%;top:20%;animation-delay:.16s}.gd-puff>i:nth-child(4){left:14%;top:52%;animation-delay:.12s}.gd-puff>i:nth-child(5){left:50%;top:52%;animation-delay:.04s}\n' +
+    '@keyframes gd-puff{0%{transform:scale(.2);opacity:1}60%{opacity:.9}100%{transform:scale(1.5) translateY(-30%);opacity:0}}\n' +
+    '@media (prefers-reduced-motion: reduce){.gd-puff>i{animation:none;opacity:.6}}\n';
+  /** The tree a robot takes planks from, on its tile: by the planks it has left (3 or more · 1–2 · none, a stump). */
+  function treeSrcEls(t, i, extras) {
+    var left = wholeOf(t.left);
+    if (left === null) left = 3;
+    extras.push(spriteEl(left >= 3 ? 'treeSrc' : left >= 1 ? 'treeSrcFew' : 'treeStump', 'treesrc-' + i, 'gd-thing gd-treesrc', { 'data-left': String(left) }));
+  }
+  /** A building part's tile: the ground it stands on — dirt while it is built, gravel once it stands (the sprite is over the grid). */
+  function buildGroundEls(t, i, ground) {
+    var b = buildingStage(t);
+    ground.push(h('div', { key: 'site-' + i, className: 'gd-site gd-site-' + (b.done ? 'gravel' : 'dirt'), 'data-site': b.done ? 'gravel' : 'dirt', 'data-part': String(t.of === undefined ? '' : t.of) }));
+  }
+  /** Each building drawn ONCE across its parts (at its first tile), its refuge pen once finished, its puff; and the ghost. */
+  function buildingEls(things, grid) {
+    var out = [], at = function (x, y, w, hh) {
+      return { left: (grid.w ? (x * 100) / grid.w : 0).toFixed(4) + '%', top: (grid.h ? (y * 100) / grid.h : 0).toFixed(4) + '%', width: (grid.w ? (w * 100) / grid.w : 0).toFixed(4) + '%', height: (grid.h ? (hh * 100) / grid.h : 0).toFixed(4) + '%' };
+    };
+    var nowMs = Date.now();
+    things.forEach(function (t, i) {
+      if (t.kind === 'ghost') {
+        var gw = Math.max(1, wholeOf(t.w) || 1), gp = wholeOf(t.pen) ? 1 : 0, gx = Number(t.x), gy = Number(t.y);
+        out.push(h('div', { key: 'ghost-' + i, className: 'gd-ghost' + (t.ok ? ' gd-ghost-ok' : ' gd-ghost-no'), 'data-ghost': t.ok ? 'ok' : 'no', 'data-bp': String(t.bp || ''), 'data-pen': String(gp), 'data-at': gx + ',' + gy, style: at(gx, gy, gw, 1 + gp) }, spriteEl((BUILD_STAGES[t.bp] ? t.bp : 'spa') + '0', 'ghost-svg')));
+        return;
+      }
+      if (t.kind !== 'site' || !BUILD_STAGES[t.build] || Number(t.x) !== Number(t.bx === undefined ? t.x : t.bx)) return;
+      var b = buildingStage(t), id = String(t.of === undefined ? t.x + ',' + t.y : t.of);
+      var w = Math.max(1, wholeOf(t.bw) || 1), x = Number(t.x), y = Number(t.y);
+      // The last drop: seen below the last stage, now at it — the puff (a page opened on a finished building never puffs).
+      if (BUILT_SEEN[id] !== undefined && BUILT_SEEN[id] < b.n - 1 && b.done) PUFFS[id] = nowMs;
+      BUILT_SEEN[id] = b.stage;
+      // The sprite stands a tile taller than its row (a building is taller than a bench), its foot on its parts.
+      out.push(h('div', { key: 'bld-' + id, className: 'gd-bld gd-bld-' + t.build + ' gd-bld-' + b.stage, 'data-building': id, 'data-build': String(t.build), 'data-bstage': String(b.stage), 'data-done': b.done ? 'true' : undefined, style: at(x, y - 1, w, 2) }, spriteEl(t.build + b.stage, 'bld-svg')));
+      if (b.done && t.build === 'refuge') out.push(h('div', { key: 'pen-' + id, className: 'gd-bld-pen', 'data-pen-of': id, style: at(x, y + 1, w, 1) }));
+      if (PUFFS[id] && nowMs - PUFFS[id] < PUFF_MS) out.push(h('div', { key: 'puff-' + id + '-' + PUFFS[id], className: 'gd-puff', 'data-puff': id, style: at(x - 0.25, y - 1, w + 0.5, 2) }, [h('i', { key: 1 }), h('i', { key: 2 }), h('i', { key: 3 }), h('i', { key: 4 }), h('i', { key: 5 })]));
+    });
+    return out;
+  }
+
   /** A rising count is a new event; a mount, the same value, a fall or junk is not (the Boost-count rule). */
   function rose(before, after) {
     var a = Number(before);
@@ -4479,6 +4589,10 @@ var gardenKitBlocks = (function () {
             }
             // P108 IW-003 (lane S): a site with a build is Sami's bench, drawn by stage (benchEls, below WORLD_CSS).
             else if (t.kind === 'site' && t.build === 'bench') benchEls(t, i, ground, extras);
+            // P108 IW-007 (lane B): a building's part lays its ground (the building is drawn once over the grid, buildingEls).
+            else if (t.kind === 'site' && BUILD_STAGES[t.build]) buildGroundEls(t, i, ground);
+            // P108 IW-007 (lane B): her land's tree, by the planks it has left.
+            else if (t.kind === 'tree') treeSrcEls(t, i, extras);
             else if (t.kind === 'site') ground.push(h('div', { key: 'site-' + i, className: 'gd-site gd-site-' + siteStage(t), 'data-site': siteStage(t) }));
             else if (t.kind === 'basket') extras.push(spriteEl(m && m.have > 0 ? (t.item === 'ball' ? 'basketBall' : 'basketEggs') : 'basket', 'basket-' + i, 'gd-thing gd-basket'));
             // P108 IW-003 (lane B): a store of food (Biscuit's sack, his treat jar) shows food on top, not stones.
@@ -4653,6 +4767,8 @@ var gardenKitBlocks = (function () {
           cellEls,
           fenceEls,
           penEls,
+          // P108 IW-007 (lane B): her land's buildings (one sprite across their parts), the refuge's pen, the puff, the ghost.
+          buildingEls(things, grid),
           robotEls,
           bubbleEl
         );

@@ -1616,3 +1616,59 @@ describe('P108 IW-003 look (lane L) — garden-3d-kit builds a vacant bench with
     expect(names(false)).toEqual([4, 'back leg leg sami seat']);
   });
 });
+
+// ── P108 IW-007 (lane B): her land in 3D — a building by stage across its parts, the tree's planks, a plank carried, the ghost ──
+describe('P108 IW-007 lane B — garden-3d-kit builds her land: the spa and the refuge by stage (garden-kit’s four), the tree, a plank, the ghost', () => {
+  let kit: KitModule;
+  let kit2d: KitModule;
+  beforeAll(() => {
+    const both = loadKits(BUILT_2D);
+    kit = both.kit;
+    kit2d = both.modules[0];
+  });
+  const node = () => kit.reactNodes.find((n) => n.name === 'garden-3d-kit.Garden3D')! as any;
+  const node2d = () => kit2d.reactNodes.find((n) => n.name === 'garden-kit.Garden')! as any;
+  const names = (g: any) => {
+    const out: string[] = [];
+    g.traverse((o: any) => o !== g && o.name && out.push(o.name));
+    return [...new Set(out)].sort().join(' ');
+  };
+  const part = (build: string, x: number, bstage: number, item: string) => ({ kind: 'site', id: `b-${item}`, of: 'b', build, x, y: 1, bx: 1, bw: 2, bstage, item, have: 0, need: 4, keep: true });
+  const scene = (things: any[], robots: any[] = []) => {
+    const st = threeStub();
+    const W = node().world;
+    const built = node().scene.buildScene({ map: W.parseMap({ rows: ['GGGG', 'GGGG', 'GGGG'] }), things: W.parseThings(things), robots: W.parseRobots(robots) }, st.THREE);
+    expect(st.counts.Mesh + (st.counts.InstancedMesh || 0)).toBe(built.meshCount);
+    return built;
+  };
+
+  it('🔴 the spa and the refuge: the first part builds the whole building by stage (pegs+string · frame · walls · roof), the other part only its ground; stages pinned to garden-kit’s', () => {
+    const got: unknown[] = [];
+    for (const build of ['spa', 'refuge']) for (const st of [0, 1, 2, 3]) {
+      const b = scene([part(build, 1, st, 'stone'), part(build, 2, st, 'plank')]);
+      const [first, other] = b.things;
+      expect(node().job.buildingStage(part(build, 1, st, 'stone'))).toEqual(node2d().world.job.buildingStage(part(build, 1, st, 'stone')));
+      got.push([build, st, first.userData.stage, names(first), names(other)]);
+    }
+    expect(got).toEqual([
+      ['spa', 0, 'spa0', 'peg string', ''], ['spa', 1, 'spa1', 'beam post', ''], ['spa', 2, 'spa2', 'beam post wall', ''], ['spa', 3, 'spa3', 'bath puff roof wall', ''],
+      ['refuge', 0, 'refuge0', 'peg string', ''], ['refuge', 1, 'refuge1', 'beam post', ''], ['refuge', 2, 'refuge2', 'beam post wall', ''], ['refuge', 3, 'refuge3', 'door pen puff roof wall', '']
+    ]);
+    // Known-firing: Sami's bench and a path square keep their own builders.
+    const bench = scene([{ kind: 'site', x: 1, y: 0, have: 8, need: 8, item: 'stone', build: 'bench' }]).things[0];
+    expect([bench.userData.bench, scene([{ kind: 'site', x: 1, y: 0, have: 4, need: 4 }]).things[0].userData.stage]).toEqual([4, 'path']);
+  });
+
+  it('🔴 her land’s tree: its planks stacked by what is left, a stump when none; a robot carrying a plank carries a plank (not a parcel); the ghost green or red', () => {
+    const tree = (left: number) => names(scene([{ kind: 'tree', x: 1, y: 1, left, max: 8 }]).things[0]);
+    expect([tree(6), tree(2), tree(0)]).toEqual(['canopy plank trunk', 'canopy plank trunk', 'sprout stump']);
+    const planks = (left: number) => { const out: string[] = []; scene([{ kind: 'tree', x: 1, y: 1, left, max: 8 }]).things[0].traverse((o: any) => o.name === 'plank' && out.push(o.name)); return out.length; };
+    expect([planks(6), planks(2), planks(1)]).toEqual([3, 2, 1]);
+    const bot = scene([], [{ x: 0, y: 0, d: 1, carry: ['plank'] }]).robots[0];
+    let load = '';
+    bot.traverse((o: any) => { if (o.name === 'load') load = o.userData.load; });
+    expect(load).toBe('plank');
+    const ghost = (ok: boolean) => scene([{ kind: 'ghost', bp: 'refuge', x: 1, y: 1, w: 2, pen: 2, ok }]).things[0];
+    expect([ghost(true).userData.ok, ghost(false).userData.ok, names(ghost(true))]).toEqual([true, false, 'ghost']);
+  });
+});

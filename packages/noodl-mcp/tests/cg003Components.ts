@@ -344,7 +344,9 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Island keep': 'go',
   // P108 IW-006 owed (s5, lane O): the win card's shop news (after Complete request); a robot sent from My robots.
   'Logic/Shop news': 'go',
-  'Logic/Send robot': 'go'
+  'Logic/Send robot': 'go',
+  // P108 IW-007 (lane B): a blueprint's ghost out, moved, placed, put away.
+  'Logic/Land ghost': 'go'
 };
 
 /**
@@ -1697,7 +1699,7 @@ const ISLE_WORLD: CgComponent = {
   path: 'Island/World',
   description: 'Her island as one world (IG-004): every plot stamped from its request, the robots she taught working on theirs (the island tick, one step every two Step Ms), the islanders by their next plot, a fenced, padlocked plot her band cannot do yet; the 3D island, or the flat one by the renderer rule. A tap on a plot or an islander opens the plot card (Pick with Pick Id does it for a request card); Open fires with the Request Id when the child goes to help; Write (with Model) when a robot is brought home.',
   nodes: [
-    inputs('iwIn', [['requests', 'array'], ['words', 'array'], ['lang', 'string'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['band', 'number'], ['done', 'array'], ['plots', 'object'], ['robots', 'array'], ['pins', 'array'], ['model', 'object'], ['findText', 'string'], ['tapText', 'string'], ['pickId', 'string'], ['pick', 'signal']]),
+    inputs('iwIn', [['requests', 'array'], ['words', 'array'], ['lang', 'string'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['band', 'number'], ['done', 'array'], ['plots', 'object'], ['robots', 'array'], ['pins', 'array'], ['model', 'object'], ['findText', 'string'], ['tapText', 'string'], ['pickId', 'string'], ['pick', 'signal'], ['land', 'object']]),
     // ── What the child sees ──
     group('iwRoot', 'The island and its card', undefined, column({ rowGap: sp(12) }), ['iwIsle', 'iwCard']),
     // P108 IW-006 (lane E): the island's "+N 🐚" line (iwPay) after a lap pays.
@@ -1710,7 +1712,8 @@ const ISLE_WORLD: CgComponent = {
     text('iwTap', 'How to use it', 'iwIsle', '', { ...T_SMALL, sizeMode: 'contentSize', cssClassName: 'bg-isle-tap' }),
     group('iwCard', 'The plot card', 'iwRoot', { ...row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap', alignItems: 'flex-start', columnGap: sp(12) }), ...PANEL, cssClassName: 'bg-panel bg-plot-card', mounted: false }, ['iwCardFace', 'iwCardText']),
     group('iwCardFace', 'Who asks', 'iwCard', { sizeMode: 'explicit', width: px(52), height: px(52) }),
-    group('iwCardText', 'What, and what now', 'iwCard', column({ rowGap: sp(6) }), ['iwCardWho', 'iwCardTitle', 'iwCardLine', 'iwCrew', 'iwCardBtns']),
+    // P108 IW-007 (lane B): her land's part of the card (iwLand) after the crew.
+    group('iwCardText', 'What, and what now', 'iwCard', column({ rowGap: sp(6) }), ['iwCardWho', 'iwCardTitle', 'iwCardLine', 'iwCrew', 'iwLand', 'iwCardBtns']),
     text('iwCardWho', 'Who asks', 'iwCardText', '', { ...T_H3, fontSize: px(17), cssClassName: 'bg-plot-who' }),
     text('iwCardTitle', 'What', 'iwCardText', '', { ...T_STRONG, cssClassName: 'bg-plot-title' }),
     text('iwCardLine', 'The line: what now', 'iwCardText', '', { ...T_BODY, cssClassName: 'bg-plot-line' }),
@@ -1772,11 +1775,34 @@ const ISLE_WORLD: CgComponent = {
     withStates('iwPayState', 'The shells line shown a moment', ['hidden', 'shown'], { shown: { type: 'boolean', by: { hidden: false, shown: true } } }),
     gate('iwPayIs', 'Did a lap earn shells?'),
     logic('iwPayWait', TIMER_NODE, 'The shells line stays a moment', { duration: 4000 }),
+    // ── P108 IW-007 (lane B): her land's card — what stands on it, a blueprint to place, its ghost moved by a tap, placed ──
+    group('iwLand', 'Her land', 'iwCardText', { ...column({ rowGap: sp(6) }), cssClassName: 'bg-land', mounted: false }, ['iwLandLine', 'iwLandL', 'iwLandRow', 'iwGhostLine', 'iwGhostBtns']),
+    text('iwLandLine', 'What stands on her land', 'iwLand', '', { ...T_STRONG, cssClassName: 'bg-land-line' }),
+    text('iwLandL', 'A blueprint to place', 'iwLand', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps', mounted: false }),
+    group('iwLandRow', 'The blueprints to place', 'iwLand', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(8), rowGap: sp(8) }), cssClassName: 'bg-land-row', mounted: false }, ['iwLandEach']),
+    { ...logic('iwLandEach', FOR_EACH_NODE, 'One chip per blueprint to place', { template: C.chip, templateType: 'explicit' }), parent: 'iwLandRow' },
+    text('iwGhostLine', 'Where the ghost is, and why not there', 'iwLand', '', { ...T_BODY, cssClassName: 'bg-ghost-line', mounted: false }),
+    group('iwGhostBtns', 'Put it here, or not now', 'iwLand', { ...row({ columnGap: sp(8), rowGap: sp(8) }), mounted: false }, ['iwGhostPut', 'iwGhostNo']),
+    place('iwGhostPut', BUTTON_NODE, 'Put it here', 'iwGhostBtns', { ...btn('primary', '', { cssClassName: 'bg-ghost-put' }), label: 'Put it here', mounted: false }),
+    place('iwGhostNo', BUTTON_NODE, 'Not now', 'iwGhostBtns', { ...btn('quiet', '', { cssClassName: 'bg-ghost-no' }), label: 'Not now' }),
+    logic('iwLandCard', L('Land card'), 'Her land’s card'),
+    logic('iwLandSettle', TIMER_NODE, 'The blueprints, once they stop changing', { duration: PAD_SETTLE_MS }),
+    logic('iwLandHold', L('Latch'), 'The settled blueprints'),
+    variable('iwGhostVar', 'gardenGhost', 'The ghost of a blueprint on her land'),
+    setVariable('iwSetGhost', 'gardenGhost', 'The ghost, out, moved or gone'),
+    logic('iwGhostStart', L('Land ghost'), 'A blueprint’s ghost out', { mode: 'start' }),
+    logic('iwGhostMove', L('Land ghost'), 'The ghost moved by a tap on her land', { mode: 'move' }),
+    logic('iwGhostPlace', L('Land ghost'), 'The ghost placed', { mode: 'place' }),
+    logic('iwGhostCancel', L('Land ghost'), 'The ghost put away', { mode: 'cancel' }),
+    gate('iwGhostPlaced', 'Was it placed?'),
+    logic('iwWithGhost', L('With ghost'), 'The island with the ghost on it'),
     outputs('iwOut', [['requestId', 'string'], ['open', 'signal'], ['model', 'object'], ['write', 'signal']])
   ],
   connections: [
     // Her island, built from her save whenever it changes; the tick starts once it is held.
     ...(['requests', 'plots', 'robots', 'done', 'band', 'pins'] as const).map((f) => wire('iwIn', f, 'iwWorld', f)),
+    // P108 IW-007 (lane B): her land, a plot of the island.
+    wire('iwIn', 'land', 'iwWorld', 'land'),
     wire('iwWorld', 'state', 'iwSetBuilt', 'value'),
     // P108 IW-003 (lane M, IW-002 AC3): the island held (quiet) — the page opened again goes on from it on the same build.
     wire('iwVar', 'value', 'iwWorld', 'kept'),
@@ -1791,8 +1817,12 @@ const ISLE_WORLD: CgComponent = {
     wire('iwTick', 'ran', 'iwSetTick', 'do'),
     wire('iwSetTick', 'done', 'iwTimer', 'start'),
     // Drawn: as built, then after every tick.
-    wire('iwWorld', 'world', 'iwDraw', 'world'),
-    wire('iwTick', 'world', 'iwDraw', 'world'),
+    // P108 IW-007 (lane B): through With ghost — the ghost of a blueprint on her land drawn over it while she places it.
+    wire('iwWorld', 'world', 'iwWithGhost', 'world'),
+    wire('iwTick', 'world', 'iwWithGhost', 'world'),
+    wire('iwLandCard', 'ghostThing', 'iwWithGhost', 'ghost'),
+    wire('iwLandCard', 'ghostShow', 'iwWithGhost', 'showGhost'),
+    wire('iwWithGhost', 'world', 'iwDraw', 'world'),
     ...(['words', 'lang', 'botName', 'color', 'eye', 'hat'] as const).map((f) => wire('iwIn', f, 'iwDraw', f)),
     ...(['iwGarden', 'iwGarden3d'] as const).flatMap((g) => [wire('iwDraw', 'map', g, 'map'), wire('iwDraw', 'things', g, 'things'), wire('iwDraw', 'robots', g, 'robots')]),
     wire('iwWorld', 'focus', 'iwGarden3d', 'focus'),
@@ -1902,7 +1932,40 @@ const ISLE_WORLD: CgComponent = {
     wire('iwPayIs', 'ontrue', 'iwPayState', 'to-shown'),
     wire('iwPayIs', 'ontrue', 'iwPayWait', 'start'),
     wire('iwPayWait', 'timerFinished', 'iwPayState', 'to-hidden'),
-    wire('iwPayState', 'shown', 'iwPay', 'mounted')
+    wire('iwPayState', 'shown', 'iwPay', 'mounted'),
+    // ── P108 IW-007 (lane B): her land's card and the ghost ──
+    wire('iwIn', 'model', 'iwLandCard', 'model'),
+    wire('iwChoose', 'requestId', 'iwLandCard', 'requestId'),
+    wire('iwGhostVar', 'value', 'iwLandCard', 'ghost'),
+    wire('iwIn', 'words', 'iwLandCard', 'words'),
+    wire('iwIn', 'lang', 'iwLandCard', 'lang'),
+    wire('iwLandCard', 'show', 'iwLand', 'mounted'),
+    wire('iwLandCard', 'line', 'iwLandLine', 'text'),
+    wire('iwLandCard', 'chipsLabel', 'iwLandL', 'text'),
+    wire('iwLandCard', 'showChips', 'iwLandL', 'mounted'),
+    wire('iwLandCard', 'showChips', 'iwLandRow', 'mounted'),
+    wire('iwLandCard', 'chips', 'iwLandHold', 'value'),
+    wire('iwLandCard', 'ran', 'iwLandSettle', 'restart'),
+    wire('iwLandSettle', 'timerFinished', 'iwLandHold', 'go'),
+    wire('iwLandHold', 'value', 'iwLandEach', 'items'),
+    wire('iwLandCard', 'ghostLine', 'iwGhostLine', 'text'),
+    wire('iwLandCard', 'ghostShow', 'iwGhostLine', 'mounted'),
+    wire('iwLandCard', 'ghostShow', 'iwGhostBtns', 'mounted'),
+    wire('iwLandCard', 'ghostOk', 'iwGhostPut', 'mounted'),
+    wire('iwLandCard', 'putText', 'iwGhostPut', 'label'),
+    wire('iwLandCard', 'cancelText', 'iwGhostNo', 'label'),
+    ...(['iwGhostStart', 'iwGhostMove', 'iwGhostPlace', 'iwGhostCancel'] as const).flatMap((g) => [wire('iwGhostVar', 'value', g, 'ghost'), wire('iwIn', 'model', g, 'model'), wire(g, 'ghost', 'iwSetGhost', 'value'), wire(g, 'ran', 'iwSetGhost', 'do')]),
+    wire('iwLandEach', 'itemOutput-id', 'iwGhostStart', 'bp'),
+    wire('iwLandEach', 'itemOutputSignal-picked', 'iwGhostStart', 'go'),
+    // A tap on her land while a ghost is out moves it there (the card stays her land's: Plot at names the land too).
+    ...(['iwGarden', 'iwGarden3d'] as const).flatMap((g) => [wire(g, 'onTileX', 'iwGhostMove', 'x'), wire(g, 'onTileY', 'iwGhostMove', 'y'), wire(g, 'onTileTapped', 'iwGhostMove', 'go')]),
+    wire('iwGhostPut', 'onClick', 'iwGhostPlace', 'go'),
+    wire('iwGhostNo', 'onClick', 'iwGhostCancel', 'go'),
+    // Placed: her land written through the page's store, as every writer does.
+    wire('iwGhostPlace', 'model', 'iwOut', 'model'),
+    wire('iwGhostPlace', 'ok', 'iwGhostPlaced', 'condition'),
+    wire('iwGhostPlace', 'ran', 'iwGhostPlaced', 'eval'),
+    wire('iwGhostPlaced', 'ontrue', 'iwOut', 'write')
   ]
 };
 
@@ -2688,6 +2751,8 @@ const PAGE_ISLAND: CgComponent = (() => {
       wire('isRequests', 'requests', 'isWorld', 'requests'),
       wire('isWords', 'words', 'isWorld', 'words'),
       ...(['lang', 'botName', 'color', 'eye', 'hat', 'band', 'done', 'plots', 'robots'] as const).map((f) => wire('isFam', f, 'isWorld', f)),
+    // P108 IW-007 (lane B): her land.
+    wire('isFam', 'land', 'isWorld', 'land'),
       wire('isPins', 'pins', 'isWorld', 'pins'),
       wire('isT', 'ig4Find', 'isWorld', 'findText'),
       wire('isT', 'ig4Tap', 'isWorld', 'tapText'),
@@ -2730,6 +2795,8 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       place('wsPlay', C.play, 'The workshop', 'wsWrap', { stepMs: TICK_MS }),
       variable('wsReqVar', 'gardenRequestId', 'The chosen request'),
       logic('wsRequests', C.requests, 'The requests'),
+      // P108 IW-007 (lane B): the requests with her land as one more (gardenRequestId 'land' opens it).
+      logic('wsLandReqs', L('Land request'), 'The requests and her land'),
       logic('wsHints', C.hints, 'The hints'),
       logic('wsComplete', L('Complete request'), 'Done: the island, the tricks, the reward'),
       // P108 IW-006 (lane E): what the win earns, read from her island BEFORE Complete request records it.
@@ -2751,12 +2818,15 @@ const PAGE_WORKSHOP: CgComponent = (() => {
     connections: [
       ...base.connections,
       wire('wsReqVar', 'value', 'wsPlay', 'requestId'),
-      wire('wsRequests', 'requests', 'wsPlay', 'requests'),
+      // P108 IW-007 (lane B): her land among the requests.
+      wire('wsRequests', 'requests', 'wsLandReqs', 'requests'),
+      wire('wsFam', 'land', 'wsLandReqs', 'land'),
+      wire('wsLandReqs', 'requests', 'wsPlay', 'requests'),
       wire('wsHints', 'hints', 'wsPlay', 'hints'),
       wire('wsWords', 'words', 'wsPlay', 'words'),
       ...(['lang', 'band'] as const).map((f) => wire('wsFam', f, 'wsPlay', f)),
       // P106 IG-005: the Workshop's robot is the job's — its name in every line, its look, its palette, its boots.
-      wire('wsRequests', 'requests', 'wsJob', 'requests'),
+      wire('wsLandReqs', 'requests', 'wsJob', 'requests'),
       wire('wsReqVar', 'value', 'wsJob', 'requestId'),
       wire('wsFam', 'robots', 'wsJob', 'robots'),
       wire('wsFam', 'lang', 'wsJob', 'lang'),
@@ -2781,7 +2851,7 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsProgVar', 'value', 'wsComplete', 'program'),
       // P108 IW-006 (lane E): a win → Win pay (her island as it stood) → Complete request (the pay and the plot's done job).
       wire('wsPlay', 'wonRequest', 'wsPay', 'requestId'),
-      wire('wsRequests', 'requests', 'wsPay', 'requests'),
+      wire('wsLandReqs', 'requests', 'wsPay', 'requests'),
       ...(['plots', 'done', 'lang'] as const).map((f) => wire('wsFam', f, 'wsPay', f)),
       wire('wsWords', 'words', 'wsPay', 'words'),
       wire('wsPlay', 'won', 'wsPay', 'go'),

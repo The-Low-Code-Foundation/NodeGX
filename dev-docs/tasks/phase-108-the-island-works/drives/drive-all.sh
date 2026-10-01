@@ -37,6 +37,8 @@ done
 ALL=(look earn shop crew crew-perf modes iw001 iw004 iw004-3d island island-3d robots robots-3d ws3d wsnogl olive mamie-ws mamie-isl mamie-isl3d mamie-look3d stones stones-3d post post-3d biscuit kit2d kit3d)
 # P108 s5 lane O (iw006-owed): the owed items' drive.
 ALL+=(owed)
+# P108 s5 lane B (IW-007 building): her land — the Build tab, the ghost, the spa built by two robots, 2D and 3D.
+ALL+=(build build-3d)
 (( $# )) && ALL=("$@")
 for n in $ALL; do
   waitload
@@ -72,6 +74,9 @@ for n in $ALL; do
     kit3d) node scripts/devtools/drive-ig007-3d.js $X/kit3d/deploy --shots $X/kit3d/shots --json $X/kit3d/kit3d.json ;;
     # P108 s5 lane O (iw006-owed).
     owed) node scripts/devtools/drive-iw006-owed.js $D $J --shots $P/owed-shots --json $P/owed.json ;;
+    # P108 s5 lane B (IW-007 building).
+    build) node scripts/devtools/drive-iw007-build.js $D $J --shots $P/build-shots --json $P/build.json ;;
+    build-3d) node scripts/devtools/drive-iw007-build.js $D $J --mode 3d --shots $P/build-3d-shots --json $P/build-3d.json ;;
     *) echo "unknown drive $n"; (exit 2) ;;
   esac > $P/$n.log 2>&1
   rc=$?

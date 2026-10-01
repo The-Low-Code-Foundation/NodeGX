@@ -1040,7 +1040,9 @@ describe('CG-002 — the engine', () => {
       expect(at(FREE_PLAY_PLOT)).toEqual(FREE_PLAY.map);
       expect(at(ISLAND_HOME_PLOT)).toEqual([...ISLAND_HOME_MAP]);
       expect(rows.join('')).not.toContain('.');
-      expect(out.cards.map((c: any) => c.id)).toEqual([...REQUESTS.map((r) => r.id), 'free']);
+      // P108 IW-007 (lane B): her land is a plot of the island too (brief §4.2) — last, on the meadow R6 kept for it.
+      expect(out.cards.map((c: any) => c.id)).toEqual([...REQUESTS.map((r) => r.id), 'free', 'land']);
+      expect(at({ x: 46, y: 15 })).toEqual([...ISLAND_MEADOW_MAP]);
     });
 
     describe('arms: a bad plot, and the check that names it', () => {

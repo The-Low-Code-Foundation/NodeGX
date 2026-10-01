@@ -1,0 +1,90 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2b3b639c-e4d6-526b-8521-ae8b846a0556",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "withghostIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "ghost",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "showGhost",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "world",
+          "plug": "output",
+          "type": "object"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "withghostFn",
+      "type": "JavaScriptFunction",
+      "label": "With ghost",
+      "parameters": {
+        "functionScript": "\nvar w = Inputs.world && typeof Inputs.world === 'object' ? Inputs.world : null;\nvar g = Inputs.ghost && typeof Inputs.ghost === 'object' && Inputs.ghost.kind === 'ghost' ? Inputs.ghost : null;\nif (w && g && Inputs.showGhost === true) {\n  var out = {};\n  for (var k in w) out[k] = w[k];\n  out.things = (Array.isArray(w.things) ? w.things : []).concat([g]);\n  Outputs.world = out;\n} else Outputs.world = w;\n"
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-world",
+          "displayName": "world",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ghost",
+          "displayName": "ghost",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-showGhost",
+          "displayName": "showGhost",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-world",
+          "displayName": "world",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "withghostOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "world",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ran",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

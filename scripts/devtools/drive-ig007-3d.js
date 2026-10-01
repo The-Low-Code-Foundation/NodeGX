@@ -45,6 +45,9 @@
  *          back, in the basket; the food sack with biscuits (shots)
  *   BARS   a 46×22 world of job things, the island camera: every compact chip is a 12 px bar, no two touching (shot)
  *   0 console errors.
+ * P108 IW-007 (lane B), at the end — her land in 3D, from worlds the ENGINE wrote: the spa put by put (one building
+ * across its parts, four stages, the chips), the puff on the last plank and gone after; the refuge with its pen, the tree
+ * by its planks, a plank carried; the ghost green and red (screenshots).
  * Exits 0 when every clause passed, 1 when any did, 2 on a usage error.
  */
 const fs = require('fs');
@@ -218,6 +221,26 @@ function engineRun(ENG, world, program) {
     run = st.run;
   }
   return w;
+}
+// ── P108 IW-007 (lane B): her land's buildings, from worlds the ENGINE wrote (shared by the 2D and 3D kit drives) ──
+/** Her land's map (the meadow) and its parts and sources as the engine lays them; a spa built put by put. */
+const IW7B_ROWS = ['GGGGGGTG', 'GGGGGGGG', 'GTGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGTGG'];
+function iw7bParts(bp, x, y, items) {
+  return items.map(([item, need], i) => ({ kind: 'site', id: 'b-' + bp + '-' + item, of: 'b-' + bp, build: bp, keep: true, item, need, have: 0, x: x + i, y }));
+}
+/** Draw world's own rule (cg003Scripts, lane B): each part carries its building's first tile and width. */
+function iw7bSpan(things) {
+  const span = {};
+  for (const t of things) if (t.kind === 'site' && t.of !== undefined) { const s = (span[t.of] = span[t.of] || { x: t.x, n: 0 }); s.x = Math.min(s.x, t.x); s.n++; }
+  return things.map((t) => (t.kind === 'site' && span[t.of] ? { ...t, bx: span[t.of].x, bw: span[t.of].n } : t));
+}
+/** The spa after Cobble puts `stones` (from below its stone part) and Pip puts `planks` (from below its plank part). */
+function iw7bSpa(ENG, stones, planks) {
+  let w = ENG.worldOf({ map: IW7B_ROWS, things: iw7bParts('spa', 3, 1, [['stone', 6], ['plank', 4]]).concat([{ kind: 'tree', id: 'tree', x: 7, y: 0, left: 6, max: 8 }, { kind: 'rock', id: 'rock', x: 7, y: 5, left: 6, max: 8 }]), robots: [{ id: 'pip', x: 3, y: 2, d: 0, carry: Array(6).fill('stone'), basket: 8, name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' }] });
+  w = engineRun(ENG, w, Array.from({ length: stones }, (_, i) => ({ id: i + 1, t: 'put' })));
+  w.robots = [{ id: 'pip', x: 4, y: 2, d: 0, carry: Array(4).fill('plank'), basket: 8, name: 'Pip' }];
+  w = engineRun(ENG, w, Array.from({ length: planks }, (_, i) => ({ id: i + 1, t: 'put' })));
+  return { ...w, things: iw7bSpan(w.things) };
 }
 /** One 8×6 job world with every new thing: worldOf (site stages), then Pip waters the first tulip once (1 → 2 drinks, can 2 → 1). */
 function jobWorld(ENG) {
@@ -711,6 +734,56 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
     readings.iw003s = { benches: benches3 };
     check('IW-003 lane S (3D): the engine’s bench, put by put — pegs (0/8) · a leg · two legs · the seat · the back with Sami sitting (8/8, green); the full path square beside it stays a path square',
       JSON.stringify(benches3.map((b) => [b.bench, b.parts, b.chip])) === JSON.stringify([[0, '', '0/8'], [1, 'leg', '2/8'], [2, 'leg leg', '4/8'], [3, 'leg leg seat', '6/8'], [4, 'back leg leg sami seat', '8/8:full']]) && benches3.every((b) => b.path === 'path'), benches3);
+  }
+
+  // ══ P108 IW-007 (lane B): her land in 3D — the spa put by put (the ENGINE's worlds), the puff, the refuge's pen, the tree, a plank, the ghost ══
+  {
+    await page.setViewport({ width: 1024, height: 800 });
+    await setVar('watch', '');
+    await setVar('picking', false);
+    await setVar('bubble', '');
+    const BLD3 = `(() => { const eng = ${ROOT}.gd3; const sites = eng.built.things.filter((g) => g.userData.kind === 'site'); const b = sites.find((g) => g.userData.building); const names = []; if (b) b.traverse((o) => { if (o !== b && o.name && names.indexOf(o.name) === -1) names.push(o.name); }); const puff = b ? b.getObjectByName('puff') : null; const chips = [...document.querySelectorAll('.gd3-meter')].filter((c) => c.getAttribute('data-kind') === 'site').map((c) => c.getAttribute('data-meter') + (c.classList.contains('gd3-full') ? ':full' : '')); return { stage: b ? b.userData.stage : null, parts: names.sort().join(' '), others: sites.filter((g) => !g.userData.building).map((g) => g.userData.stage).join(','), chips: chips.sort().join(' '), puffing: !!(puff && puff.visible), meshes: eng.meshCount }; })()`;
+    const spas3 = [];
+    for (const [stones, planks] of [[0, 0], [2, 0], [6, 1], [6, 3], [6, 4]]) {
+      const w = iw7bSpa(ENG, stones, planks);
+      await setJson('map', { rows: w.map });
+      await setJson('things', w.things);
+      await setJson('robots', w.robots);
+      await setJson('focus', { x: 0, y: 0, w: 8, h: 6 });
+      await setVar('camera', 'plot');
+      await wait(stones === 6 && planks === 4 ? 200 : 900);
+      spas3.push({ stones, planks, ...(await evaluate(BLD3)) });
+      await shot(`iw7b-3d-spa-${stones}-${planks}`);
+    }
+    readings.iw7b = { spas: spas3 };
+    check('IW-007 lane B (3D): the engine’s spa, put by put — one building across its two parts: pegs and string · the frame · the walls · the roof and its bath (the other part only its ground); the chips count the stones and planks',
+      JSON.stringify(spas3.map((b) => [b.stage, b.parts, b.others, b.chips])) === JSON.stringify([['spa0', 'peg string', 'spa0', '0/4 0/6'], ['spa1', 'beam post', 'spa1', '0/4 2/6'], ['spa2', 'beam post wall', 'spa2', '1/4 6/6:full'], ['spa2', 'beam post wall', 'spa2', '3/4 6/6:full'], ['spa3', 'bath puff roof wall', 'spa3', '4/4:full 6/6:full']]), spas3);
+    check('IW-007 lane B (3D): the last drop puffs — the dust shows over the spa the moment its last plank lands', spas3[4].puffing === true && spas3.slice(0, 4).every((b) => !b.puffing), spas3.map((b) => b.puffing));
+    await wait(1500);
+    const after = await evaluate(BLD3);
+    check('IW-007 lane B (3D): …and is gone a moment later (the spa stays finished)', after.puffing === false && after.stage === 'spa3', after);
+    // The refuge finished with its pen, the tree three ways, Pip carrying a plank, then the ghost green and red.
+    const refuge = iw7bSpan(iw7bParts('refuge', 3, 3, [['plank', 6], ['stone', 4]]).map((t) => ({ ...t, have: t.need, bstage: 3 })));
+    const trees = [{ kind: 'tree', id: 't6', x: 7, y: 0, left: 6, max: 8 }, { kind: 'tree', id: 't2', x: 7, y: 2, left: 2, max: 8 }, { kind: 'tree', id: 't0', x: 7, y: 4, left: 0, max: 8 }];
+    await setJson('things', refuge.concat(trees));
+    await setJson('robots', [{ x: 5, y: 1, d: 1, carry: ['plank'], name: 'Pip', colour: '#FF7A59' }]);
+    await wait(900);
+    const LAND3 = `(() => { const eng = ${ROOT}.gd3; const nm = (g) => { const o = []; g.traverse((c) => { if (c !== g && c.name && o.indexOf(c.name) === -1) o.push(c.name); }); return o.sort().join(' '); }; const r = eng.built.things.find((g) => g.userData.building); const trees = eng.built.things.filter((g) => g.userData.kind === 'tree').sort((a, b) => a.userData.y - b.userData.y).map(nm); let load = ''; eng.built.robots[0].traverse((o) => { if (o.name === 'load') load = o.userData.load; }); return { refuge: r ? r.userData.stage + ': ' + nm(r) : null, trees: trees, load: load }; })()`;
+    const land3 = await evaluate(LAND3);
+    readings.iw7b.land = land3;
+    await shot('iw7b-3d-refuge-tree-plank');
+    check('IW-007 lane B (3D): the refuge finished with its door and its pen’s fence, her land’s tree by its planks (canopy and planks · a stump), Pip carrying a plank',
+      land3.refuge === 'refuge3: door pen puff roof wall' && JSON.stringify(land3.trees) === JSON.stringify(['canopy plank trunk', 'canopy plank trunk', 'sprout stump']) && land3.load === 'plank', land3);
+    const ghosts3 = [];
+    for (const g of [{ kind: 'ghost', bp: 'spa', x: 3, y: 1, w: 2, pen: 0, ok: true }, { kind: 'ghost', bp: 'refuge', x: 6, y: 4, w: 2, pen: 2, ok: false }]) {
+      await setJson('things', [{ kind: 'rock', id: 'rock', x: 7, y: 5, left: 6, max: 8 }, g]);
+      await setJson('robots', []);
+      await wait(900);
+      ghosts3.push(await evaluate(`(() => { const eng = ${ROOT}.gd3; const g = eng.built.things.find((t) => t.userData.kind === 'ghost'); return g ? { ok: g.userData.ok, bp: g.userData.bp } : null; })()`));
+      await shot(`iw7b-3d-ghost-${g.ok ? 'ok' : 'no'}`);
+    }
+    readings.iw7b.ghosts = ghosts3;
+    check('IW-007 lane B (3D): the ghost — the spa green on its spot, the refuge red over the rock', JSON.stringify(ghosts3) === JSON.stringify([{ ok: true, bp: 'spa' }, { ok: false, bp: 'refuge' }]), ghosts3);
   }
 
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));

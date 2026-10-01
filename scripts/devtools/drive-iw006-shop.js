@@ -216,7 +216,12 @@ withDeployedSite({ dir: DIR }, async (page) => {
         readings[`tab-${tag}-${t}`] = got;
         await shot(`iw6h-${tag}-tab-${t}`);
         const inPage = got.sw <= got.vw + 1 && got.panel[0] >= 0 && got.panel[1] <= got.vw + 1;
-        if (t === 'build' || t === 'animals') {
+        // P108 IW-007 (lane B): the Build tab sells its blueprints now, with its line on where a bought one goes.
+        if (t === 'build') {
+          const want = SHOP.filter((s) => s.tab === 'build');
+          const same = got.items.length === want.length && want.every((s, i) => got.items[i].pic === s.icon && got.items[i].price === `🐚 ${s.price}` && got.items[i].name === s.name[lang] && got.items[i].line === s.line[lang]);
+          check(`TAB ${tag} build: sells the ${want.length} blueprints (picture, price, name, line) and says "${w(lang, 'iw7bBuildHow')}"; inside the page`, same && got.later === w(lang, 'iw7bBuildHow') && got.tabs === 5 && inPage, got);
+        } else if (t === 'animals') {
           const later = w(lang, t === 'build' ? 'iw6hLaterBuild' : 'iw6hLaterAnimals');
           check(`TAB ${tag} ${t}: says "${later}" and sells nothing yet; inside the page`, got.later === later && got.items.length === 0 && got.tabs === 5 && inPage, got);
         } else {

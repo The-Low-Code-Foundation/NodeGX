@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "275d3b34-cc7b-5551-8c47-894cbdf05a7d",
+  "name": "Land card",
+  "path": "/Logic/Land card",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Her land’s card: what stands on it, the blueprints to place, where the ghost is and why not there. Runs when an input changes; Ran after each run."
+}

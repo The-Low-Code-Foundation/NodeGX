@@ -58,6 +58,8 @@ import { ISLAND_KEEP_SCRIPT, winPayScript } from './iw006Earn';
 import { IWL_REQUEST_HELPERS } from './cg002Scripts';
 // P108 IW-006 owed (s5, lane O): the upgrade slot, the win card's shop news, a robot sent from My robots.
 import { IW6O_CARD_HELPERS, sendRobotScript, shopNewsScript } from './iw006Owed';
+// P108 IW-007 (lane B): building — the Workshop on her land.
+import { IW007_BUILD_SCRIPTS } from './iw007Building';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -229,6 +231,9 @@ var JOB_THINGS = { site: 1, basket: 1, store: 1, can: 1, hen: 1, postbox: 1 };
 // P108 IW-003 (lane P): a door (its letters and its owner's name) reaches the kits too.
 JOB_FIELDS.push('owner');
 JOB_THINGS.door = 1;
+// P108 IW-007 (lane B): a building's part carries its building (of), the building's stage (bstage), and — written below,
+// per building — its first tile and width (bx, bw), so a kit draws ONE sprite across its parts.
+JOB_FIELDS.push('bstage', 'of');
 function withJob(o, t) {
   for (var f = 0; f < JOB_FIELDS.length; f++) { var v = t[JOB_FIELDS[f]]; if (v !== undefined && v !== null) o[JOB_FIELDS[f]] = Array.isArray(v) ? v.slice() : v; }
   return o;
@@ -255,7 +260,14 @@ for (var i = 0; i < list.length; i++) {
   else if (JOB_THINGS[t.kind]) things.push(withJob({ kind: t.kind, x: t.x, y: t.y }, t));
   // P108 IW-003 (lane B): Biscuit's ball, drawn by both kits.
   else if (t.kind === 'ball') things.push(withJob({ kind: 'ball', x: t.x, y: t.y }, t));
+  // P108 IW-007 (lane B): her land's tree (planks by what it has left) and a blueprint's ghost (green where it fits).
+  else if (t.kind === 'tree') things.push(withJob({ kind: 'tree', x: t.x, y: t.y, left: Math.max(0, Math.floor(Number(t.left)) || 0) }, t));
+  else if (t.kind === 'ghost') things.push({ kind: 'ghost', bp: String(t.bp || ''), x: t.x, y: t.y, w: Number(t.w) || 1, pen: Number(t.pen) || 0, ok: !!t.ok });
 }
+// P108 IW-007 (lane B): each building's first tile and width on every part (one sprite across its parts).
+var iw7bSpan = {};
+for (var bq = 0; bq < things.length; bq++) { var bt = things[bq]; if (bt.kind !== 'site' || bt.of === undefined) continue; var sk = String(bt.of); if (!iw7bSpan[sk]) iw7bSpan[sk] = { x: bt.x, n: 0 }; iw7bSpan[sk].x = Math.min(iw7bSpan[sk].x, bt.x); iw7bSpan[sk].n++; }
+for (var bz = 0; bz < things.length; bz++) { var bu = things[bz]; if (bu.kind === 'site' && bu.of !== undefined && iw7bSpan[String(bu.of)]) { bu.bx = iw7bSpan[String(bu.of)].x; bu.bw = iw7bSpan[String(bu.of)].n; } }
 // P108 IW-003 look (lane L): one Sami on the island. A built bench seats him (both kits draw him on it) while his islander
 // pin stands by a plot: with a bubble (a request he is asking) he stands and the bench is drawn vacant; with nothing to
 // ask he sits on his bench and does not stand as well. Read each draw, so the bench wearing and mended keeps one Sami.
@@ -518,6 +530,8 @@ Outputs.plots = active ? JSON.parse(JSON.stringify(active.island.plots)) : {};
 Outputs.robots = active ? robotRowsOf(active) : [];
 // P108 IW-001 F8: the block cards she has seen, hers (a sibling's are her own).
 Outputs.cardsSeen = active && active.cardsSeen ? active.cardsSeen.slice() : [];
+// P108 IW-007 (lane B): her land (what stands on it), or null when nothing does.
+Outputs.land = active && active.island.land ? JSON.parse(JSON.stringify(active.island.land)) : null;
 var rows = [];
 for (var j = 0; j < model.profiles.length; j++) {
   var p = model.profiles[j];
@@ -1539,5 +1553,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Island keep', script: ISLAND_KEEP_SCRIPT, seam: 'the island\u2019s live jobs and what its laps earned, written into her save at the moments that matter' },
   // P108 IW-006 owed (s5, lane O).
   { component: 'Logic/Shop news', script: SHOP_NEWS_SCRIPT, seam: 'the win card\u2019s line when this first win puts an upgrade on the shop\u2019s shelf' },
-  { component: 'Logic/Send robot', script: SEND_ROBOT_SCRIPT, seam: 'My robots: a robot sent to a job she has won, by the crew\u2019s assign rule, said on its card' }
+  { component: 'Logic/Send robot', script: SEND_ROBOT_SCRIPT, seam: 'My robots: a robot sent to a job she has won, by the crew\u2019s assign rule, said on its card' },
+  // P108 IW-007 (lane B): building.
+  ...IW007_BUILD_SCRIPTS
 ];
