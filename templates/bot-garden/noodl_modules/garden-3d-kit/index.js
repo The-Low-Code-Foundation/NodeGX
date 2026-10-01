@@ -1245,6 +1245,9 @@
     var holder = new THREE.Group();
     holder.position.set(-0.14, 0, -0.06);
     holder.rotation.y = -0.6;
+    // Half as big again as her first build (the s5 kit drive, looked at: a 0.3-tall rabbit beside a 0.9-tall robot was
+    // hard to find on a plot); she still stands inside her tile.
+    holder.scale.set(1.5, 1.5, 1.5);
     holder.add(pet);
     g.add(holder);
     g.userData.animal = kind;
@@ -1263,8 +1266,8 @@
     for (var i = 0; i < spots.length; i++) {
       if (i < left) {
         // A carrot: its orange shoulder out of the soil, its leaves up.
-        g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.06, 0.045, 0.05, 6), mat(PALETTE.carrot), spots[i][0], 0.1, spots[i][1]));
-        g.add(mesh(THREE, G(THREE, out, 'ConeGeometry', 0.07, 0.16, 4), mat(PALETTE.leaf), spots[i][0], 0.2, spots[i][1]));
+        g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.09, 0.06, 0.08, 6), mat(PALETTE.carrot), spots[i][0], 0.12, spots[i][1]));
+        g.add(mesh(THREE, G(THREE, out, 'ConeGeometry', 0.09, 0.22, 4), mat(PALETTE.leaf), spots[i][0], 0.27, spots[i][1]));
         out.meshCount += 2;
       } else if (!left) {
         // Used up: a sprout where each carrot will grow back.

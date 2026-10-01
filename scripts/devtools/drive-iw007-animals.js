@@ -130,9 +130,10 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   /** A close-up of her land (the 8 × 6 plot's cells, measured on the page), three times larger. */
   const landShot = async (name) => {
     if (!SHOTS) return;
-    const r = await evaluate(`(() => { const a = document.querySelector('.bg-isle .gd-cell[data-x="${LAND_PLOT.x}"][data-y="${LAND_PLOT.y}"]'); const b = document.querySelector('.bg-isle .gd-cell[data-x="${LAND_PLOT.x + 7}"][data-y="${LAND_PLOT.y + 5}"]'); if (!a || !b) return null; a.scrollIntoView({ block: 'center', inline: 'center' }); const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(); return { x: ra.left - 4, y: ra.top - 14, width: rb.right - ra.left + 8, height: rb.bottom - ra.top + 30 }; })()`);
+    const r = await evaluate(`(() => { const a = document.querySelector('.bg-isle .gd-cell[data-x="${LAND_PLOT.x}"][data-y="${LAND_PLOT.y}"]'); const b = document.querySelector('.bg-isle .gd-cell[data-x="${LAND_PLOT.x + 7}"][data-y="${LAND_PLOT.y + 5}"]'); if (!a || !b) return null; a.scrollIntoView({ block: 'center', inline: 'center' }); const ra = a.getBoundingClientRect(), rb = b.getBoundingClientRect(); return { x: ra.left - 4 + scrollX, y: ra.top - 14 + scrollY, width: rb.right - ra.left + 8, height: rb.bottom - ra.top + 30, seen: !!document.elementFromPoint((ra.left + rb.right) / 2, (ra.top + rb.bottom) / 2) && a.closest('.bg-isle').contains(document.elementFromPoint((ra.left + rb.right) / 2, (ra.top + rb.bottom) / 2)) }; })()`);
     if (!r) return;
-    const { data } = await client.send('Page.captureScreenshot', { format: 'png', clip: { ...r, scale: 3 } });
+    readings[`landShot-${name}`] = r;
+    const { data } = await client.send('Page.captureScreenshot', { format: 'png', clip: { x: r.x, y: r.y, width: r.width, height: r.height, scale: 3 } });
     fs.writeFileSync(path.join(SHOTS, `${name}.png`), Buffer.from(data, 'base64'));
   };
   const where = (finder, scroll = true) =>
