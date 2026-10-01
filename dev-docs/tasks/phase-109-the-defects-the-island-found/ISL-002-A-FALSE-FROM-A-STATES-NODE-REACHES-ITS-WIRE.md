@@ -1,6 +1,6 @@
 # ISL-002 — A `false` from a States node's first state reaches its wire as `false`
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F02 ·
+**Status: 🟡 AC1 measured 2026-10-01 (session 1): the first state hands out the number `0` for a boolean `false` and for `''`, in both transition settings; the ruling (§5) is now asked. No fix yet.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F02 ·
 [P106 IG-003](../phase-106-the-island-grows/IG-003-DRIVE-TEACH-PLAY.md) §7, deviation 4 (line 169-172) · the template's
 note at `packages/noodl-mcp/tests/cg003Components.ts:1072-1074` · **Side:** product (runtime, the `States` node; the
 exported States library too)
@@ -106,5 +106,31 @@ Design constraints:
 - The editor's inspector and the deployed page can show the value differently. Grade on the deployed DOM (AC5).
 
 ## 8. Session log
+
+### Session 1 — 2026-10-01, P109 s1: AC1 measured, nothing changed in `states.ts`
+
+Spec `packages/noodl-viewer-react/tests/corpus/isl-002-states-first-state-false.test.ts` (the corpus harness; a States
+node `off,on` with `flag` boolean `false/true`, `label` string `''/'x'`, `word` string `'no'/'yes'`, each output **wired**
+to a recorder that writes the value and its `typeof`). Run under `useTransitions: false` and `true`:
+
+| row | reading at HEAD (both settings) |
+|---|---|
+| known-firing control: `word` in the first state | `'no'`, `string` ✓ |
+| **AC1 `flag`** (predicted red) | **`0`, `number`** ✕ — not `false`, and not unset |
+| **AC1 `label`** (predicted red) | **`0`, `number`** ✕ — not `''`, and not unset |
+| cause isolation: `to-on` then `to-off` (back to the first state through `goToState`) | `flag` `false` `boolean`, `label` `''` `string`, `word` `'no'` ✓ |
+
+So the coercion is in the first jump only (`states.ts:633`, `stateParameters[prefix + v] || 0`), as §2 predicted, and
+**IG-003's "the input stayed unset" is corrected: the input arrived as `0`.** The transitions-on arm reads the same, which
+separates this from D49. The two red rows are declared `test.failing` so the shared suite stays green until the ruling's
+fix lands; a third row pins the `0`/`0` reading in the suite's own words and is deleted with the fix.
+
+**Not done, by design:** no change to `states.ts` or `statesLib.ts` — ruling 1 ((a) typed value / (b) skip unset / (c)
+document) and ruling 2 (export in the same commit) are Richard's. AC4's census, AC5's browser arm and AC6's sentence for
+P108 wait on the ruling too.
+
+🔒 **Ruling to ask, in plain words:** *"A States node that starts in its first state currently sends the number 0 where
+that state says `false` or an empty text. Should it send exactly what the state says, typed (false, ''), as every later
+move already does? And should the exported app's States library change in the same commit?"* Recommended: yes and yes.
 
 None yet.
