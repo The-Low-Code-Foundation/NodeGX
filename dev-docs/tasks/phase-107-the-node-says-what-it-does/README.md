@@ -133,7 +133,7 @@ Full detail in NSP-001 to NSP-003. The shape:
 | [NSP-009](NSP-009-THE-RATCHET.md) | The ratchet — spec coverage in PR CI; new picker nodes ship specced | 004 | — |
 | [NSP-010](NSP-010-A-CHANGE-IS-A-VERSION.md) | A behaviour change is a version, a trace diff, and a migration answer | 009 | — |
 | [NSP-011](NSP-011-BATCH-LOGIC-MATH-STRINGS.md) ✅ | Batch — logic, math, strings, variables, converters (**13**). **Built s4** (13 / 13 conform at 200; rows C4–C6, D6–D9; AC2 waits for NSP-005, the deep run for a quiet box) | 004 | T1 |
-| [NSP-012](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md) 🟡 | Batch — arrays, objects, variables, stores, events (**26**: 13 + 13). **s9: the 13 T1 built** — the registry seam, 13 / 13 conform on the runtime at 200 (rows C9–C11, D13), 6 shared-state graph scenarios; the 13 T4 not started, AC2 not run | 008 | T1, T4 |
+| [NSP-012](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md) 🟡 | Batch — arrays, objects, variables, stores, events (**26**: 13 + 13). **s9: the 13 T1 built** — the registry seam, 13 / 13 conform on the runtime at 200 (rows C9–C11, D13), 6 shared-state graph scenarios. **s10: the T4 half** — the component tree in the graph format, 22 `N` scenarios, 12 of 13 T4 nodes recorded on the runtime (rows C12–C15), Run Tasks exempt (NSP-015's boundary); AC2 not run | 008 | T1, T4 |
 | [NSP-013](NSP-013-BATCH-DATES-PARSERS-UTILITIES.md) | Batch — dates, time, randomness, parsers, animation (**24**: 14 + 10) | 007 | T1, T2 |
 | [NSP-014](NSP-014-BATCH-DATA-AND-CLOUD.md) | Batch — records, users, files, HTTP, streams, cloud-only nodes (**41**: 39 T3, 17 of them cloud-only; Filter Records is T1, Open File Picker T2) | 007 | T3 |
 | [NSP-015](NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md) | Batch — navigation, popups, component utilities (**14**) | 008 | T4 |
@@ -164,6 +164,7 @@ npm run spec-ledger            # NSP-009 — ratcheted in PR CI
 > **GRAPH: 11 of 11 CONTRACT clauses graded by 14 scenarios; 14 / 14 on the runtime (1 known row); on the export 1 passed + 2 declared differences + 1 known, 10 outside.** (s7, NSP-008)
 > **s8 (NSP-007): 21 of 147 conform on the runtime (14.3%) — T1 18/46 · T2 2/11 (Delay, UUID) · T3 1/39 (HTTP Request); 2 on the export (unchanged). The world grades a clock-, entropy- or network-dependent node the way Counter is graded.**
 > **s9 (NSP-012): 34 of 147 conform on the runtime (23.1%) — T1 31/46 · T2 2/11 · T3 1/39; 2 on the export (unchanged). GRAPH: 20 scenarios (14 contract + 6 shared-state), 20 / 20 on the runtime (2 known rows: G1, C11). Ports derivable without a viewer: 10 of 68 (+ Object, Create New Object, Set Object Properties, Set Variable, Array Filter); catalog parity: 34.**
+> **s10 (NSP-012 T4): 46 of 147 conform on the runtime (31.3%) — T1 31/46 · T2 2/11 · T3 1/39 · T4 12/27 (a T4 node conforms when every `N` graph scenario naming it passes on the runtime, claims from its own sentences; Repeater Item's handshake half is out of reach until the Repeater is specced); 1 exempt (Run Tasks — NSP-015's component boundary); 2 on the export (unchanged). GRAPH: 42 scenarios (14 contract + 6 shared-state + 22 node), 42 / 42 on the runtime (5 known rows: G1, C11, C12, C13, C14); on the export 1 passed + 2 declared differences + 1 known, 39 outside in its words. Catalog parity: 34 (T4 nodes have no reducer spec).**
 
 Reported per target: *conforms on the runtime · conforms on the export · exempt with a reason* —
 and, from R6, *ports derivable without a viewer: N of 147* and *catalog parity: N of 147*.
@@ -256,6 +257,18 @@ sent a credential. Fix it (a behaviour change, alone), or remove the presets?"*;
 loses a Fetch's outcome silently; **D10** Delay's Stop cancels a just-started countdown and says Unchanged; **D11** a body
 that will not parse is reported as a network error; **D12** one abort controller per HTTP node — an earlier request's
 completion disarms Cancel for a later one. The rows an author meets first: **C7** and **D12**.
+
+**Also for a ruling, the T4 half's rows** ([NSP-012 §6.2](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md), s10,
+2026-10-01 — none graded by any test before; each found by a claim written from the node's own sentence before
+the runtime was recorded). **C12** — plain words: *"Receive Event's Consume says it stops an event reaching the
+other receivers on the channel. For a Global event — the default — it never has: every receiver fires. Make it
+stop (a behaviour change, alone), or say it applies to Parent / Children / Siblings only?"*; **C13** — *"Consume
+inside one child component does not stop a Children or Siblings event reaching the next child — a `return` inside
+a `forEach`. One line each, ships alone?"*; **C14** — *"Action Dispatcher's Waiting For says blank when nothing is
+waiting; after the wait for a handler expires it keeps the refused type. One line, ships alone?"*; **C15** —
+*"Dispatch reports Done when the one action it was handed was refused on the spot; its Failure sentence says
+Failure. Count admitted after the refusal, or rewrite the two sentences?"*. The rows an author meets first: C12
+and C15.
 
 **Also for a ruling, the second batch's rows** ([NSP-012 §6.2](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md), s9,
 2026-10-01 — none graded by any test before). The row an author meets first: **C11** — plain words: *"Every

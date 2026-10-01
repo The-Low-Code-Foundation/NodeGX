@@ -43,6 +43,41 @@ describe('AC1 — every clause has a scenario', () => {
   });
 });
 
+/**
+ * NSP-012 §2 — the batch's thirteen T4 nodes. A graph-by-construction node is specced by graph
+ * scenarios tagged `N` that name its type (the runtime records them; the claims come from the
+ * node's own sentences) — or it is exempt with a reason, counted and never hidden (NSP-011 §4 AC1).
+ */
+const T4_NODES = ['Event Receiver', 'Event Sender', 'For Each Actions', 'net.noodl.ActionDispatcher', 'net.noodl.ActionHandler', 'net.noodl.GlobalStore', 'net.noodl.GlobalStore.Set', 'net.noodl.GlobalStore.Subscribe', 'net.noodl.OptimisticUpdate', 'net.noodl.StateHistory', 'net.noodl.StateHistory.Undo', 'net.noodl.StateSnapshot', 'RunTasks'] as const;
+const T4_EXEMPT: Record<string, string> = {
+  RunTasks: 'runs a template COMPONENT by name once per item (runtasks.ts :407 `nodeScope.createNode(template, …)`) — needs the component boundary (a component with ports, Component Inputs / Outputs), which is NSP-015\'s; the graph format holds a tree of instances only (graph.ts COMPONENTS)'
+};
+
+describe('NSP-012 — every T4 node of the batch is named by an N scenario or exempt with a reason', () => {
+  for (const type of T4_NODES) {
+    test(`${type}`, () => {
+      const named = scenarios.filter((s) => s.clauses.includes('N') && Object.values(s.nodes).some((n) => n.type === type));
+      if (type in T4_EXEMPT) {
+        expect(named).toHaveLength(0);
+        expect(T4_EXEMPT[type].length).toBeGreaterThan(20);
+      } else {
+        expect(named.map((s) => s.name)).not.toHaveLength(0);
+      }
+    });
+  }
+  test('the exempt list is short and every entry is a T4 node', () => {
+    expect(Object.keys(T4_EXEMPT)).toEqual(['RunTasks']);
+    for (const t of Object.keys(T4_EXEMPT)) expect(T4_NODES).toContain(t);
+  });
+  test('a scenario with components places every node in a declared component or the root, and a component in a declared parent or the root', () => {
+    for (const s of scenarios) {
+      const components = s.components ?? {};
+      for (const n of Object.values(s.nodes)) if (n.in !== undefined) expect(components).toHaveProperty(n.in);
+      for (const c of Object.values(components)) if (c.parent !== undefined) expect(components).toHaveProperty(c.parent);
+    }
+  });
+});
+
 describe('every recorded trace is well-formed and bears its claims out', () => {
   for (const sc of scenarios) {
     test(`[${sc.clauses.join(' ')}] ${sc.name}`, () => {

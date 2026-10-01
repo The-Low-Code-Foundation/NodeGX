@@ -1,0 +1,2639 @@
+[
+  {
+    "name": "Action Dispatcher runs an action through the Action Handler that registered its type and reports the handler's Result; a type nothing on this channel handles is refused as unknown; a handler on another channel is never reached",
+    "clauses": [
+      "N",
+      "S2"
+    ],
+    "because": "actionhandlernode.ts header: \"This node IS the allow-list\"; `trigger`: \"Fires when a dispatcher has an action of this type to run\"; `registered`: \"True while this handler is in the allow-list\"; actiondispatchernode.ts `actionCompleted`: \"Fires once one action has finished and Result holds its answer\"; `idle`: \"Fires when the queue has drained after doing at least one thing\"; `refused` / `refusalReason`: \"unknown\"; `actionId`: \"taken from the message when it carried one\". RECORDED (row C15, in the trace \u2014 outcomes are not claimable): the Dispatch of PONG at frame 3 reports `done`, where `failure`'s sentence says it \"Fires when a Dispatch admitted nothing at all, because every action in it was refused\" \u2014 `dispatch()` counts an action admitted once it is QUEUED (action-dispatcher.ts :453-501) and the refusal happens in the same call's pump (:573-578)",
+    "world": {},
+    "nodes": {
+      "h": {
+        "type": "net.noodl.ActionHandler",
+        "params": {
+          "actionType": "PING",
+          "result": "pong"
+        }
+      },
+      "other": {
+        "type": "net.noodl.ActionHandler",
+        "params": {
+          "channel": "x",
+          "actionType": "PONG"
+        }
+      },
+      "d": {
+        "type": "net.noodl.ActionDispatcher",
+        "params": {
+          "waitForHandler": 0,
+          "handlerTimeout": 0
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "d",
+        "set": "action",
+        "value": {
+          "type": "PING",
+          "id": "p1",
+          "payload": {
+            "a": 1
+          }
+        }
+      },
+      {
+        "node": "d",
+        "signal": "dispatch"
+      },
+      "settle",
+      {
+        "node": "d",
+        "set": "action",
+        "value": {
+          "type": "PONG",
+          "id": "p2"
+        }
+      },
+      {
+        "node": "d",
+        "signal": "dispatch"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "h",
+        "port": "registered",
+        "value": true
+      },
+      {
+        "at": 1,
+        "subject": "other",
+        "port": "registered",
+        "value": true
+      },
+      {
+        "at": 1,
+        "subject": "d",
+        "port": "isExecuting",
+        "value": false
+      },
+      {
+        "at": 1,
+        "subject": "d",
+        "port": "queueSize",
+        "value": 0
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "signal": "dispatched",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "port": "actionType",
+        "value": "PING"
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "port": "actionId",
+        "value": "p1"
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "port": "payload",
+        "value": {
+          "a": 1
+        }
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "signal": "actionCompleted",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "port": "result",
+        "value": "pong"
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "port": "completedCount",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "signal": "idle",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "signal": "refused",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "h",
+        "signal": "trigger",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "h",
+        "port": "payload",
+        "value": {
+          "a": 1
+        }
+      },
+      {
+        "at": 2,
+        "subject": "h",
+        "port": "actionId",
+        "value": "p1"
+      },
+      {
+        "at": 2,
+        "subject": "h",
+        "port": "triggeredCount",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "other",
+        "signal": "trigger",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "signal": "refused",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "port": "refusalReason",
+        "value": "unknown"
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "port": "refusedType",
+        "value": "PONG"
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "port": "refusedCount",
+        "value": 1
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "signal": "dispatched",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "other",
+        "signal": "trigger",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "actionType",
+        "value": "PING",
+        "subject": "h"
+      },
+      {
+        "t": "set",
+        "port": "result",
+        "value": "pong",
+        "subject": "h"
+      },
+      {
+        "t": "set",
+        "port": "channel",
+        "value": "x",
+        "subject": "other"
+      },
+      {
+        "t": "set",
+        "port": "actionType",
+        "value": "PONG",
+        "subject": "other"
+      },
+      {
+        "t": "set",
+        "port": "waitForHandler",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "handlerTimeout",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "",
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "registered",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 0,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "other"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "",
+        "subject": "other"
+      },
+      {
+        "t": "value",
+        "port": "registered",
+        "value": true,
+        "subject": "other"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 0,
+        "subject": "other"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "cancelledCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "completedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "failedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "isExecuting",
+        "value": false,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "queueSize",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": {
+          "id": "p1",
+          "payload": {
+            "a": 1
+          },
+          "type": "PING"
+        },
+        "subject": "d"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "p1",
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "payload",
+        "value": {
+          "a": 1
+        },
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "trigger",
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "p1",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "PING",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "completedCount",
+        "value": 1,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "payload",
+        "value": {
+          "a": 1
+        },
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": "pong",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "dispatched",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "actionCompleted",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": {
+          "id": "p2",
+          "type": "PONG"
+        },
+        "subject": "d"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "no handler is registered for \"PONG\"",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "no handler is registered for \"PONG\"",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "unknown",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 1,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "PONG",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "refused",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d"
+      }
+    ]
+  },
+  {
+    "name": "the built-in store actions are off by default and refused as not-allowed; enabled, SET_STORE writes only the dispatcher's store and only an allowed key; CLEAR_STORE is refused while allowed keys are set",
+    "clauses": [
+      "N"
+    ],
+    "because": "actiondispatchernode.ts `builtIns`: \"empty, the default, means a server cannot write to the store at all\"; `allowedKeys`: \"blank means any key, and setting any key also refuses CLEAR_STORE\"; action-dispatcher.ts header: \"They write only to the store named on the dispatcher node, never to a store named in the message\". RECORDED (row C15): d0's Dispatch at frame 2 reports `done` beside its `refused` \u2014 admitted means queued, and the not-allowed refusal happens inside the same call",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "d0": {
+        "type": "net.noodl.ActionDispatcher",
+        "params": {
+          "waitForHandler": 0
+        }
+      },
+      "d1": {
+        "type": "net.noodl.ActionDispatcher",
+        "params": {
+          "waitForHandler": 0,
+          "builtIns": "SET_STORE,CLEAR_STORE",
+          "allowedKeys": "count"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "d0",
+        "set": "action",
+        "value": {
+          "type": "SET_STORE",
+          "id": "s1",
+          "key": "count",
+          "value": 3
+        }
+      },
+      {
+        "node": "d0",
+        "signal": "dispatch"
+      },
+      "settle",
+      {
+        "node": "d1",
+        "set": "action",
+        "value": {
+          "type": "SET_STORE",
+          "id": "s1",
+          "key": "count",
+          "value": 3,
+          "storeName": "elsewhere"
+        }
+      },
+      {
+        "node": "d1",
+        "signal": "dispatch"
+      },
+      "settle",
+      {
+        "node": "d1",
+        "set": "action",
+        "value": {
+          "type": "SET_STORE",
+          "id": "s2",
+          "key": "secret",
+          "value": 1
+        }
+      },
+      {
+        "node": "d1",
+        "signal": "dispatch"
+      },
+      "settle",
+      {
+        "node": "d1",
+        "set": "action",
+        "value": {
+          "type": "CLEAR_STORE",
+          "id": "c1"
+        }
+      },
+      {
+        "node": "d1",
+        "signal": "dispatch"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "d0",
+        "signal": "refused",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "d0",
+        "port": "refusalReason",
+        "value": "not-allowed"
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "state",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "d0",
+        "signal": "dispatched",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "d1",
+        "signal": "actionCompleted",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 3
+        }
+      },
+      {
+        "at": 3,
+        "subject": "d1",
+        "port": "result",
+        "value": {
+          "storeName": "app",
+          "key": "count"
+        }
+      },
+      {
+        "at": 4,
+        "subject": "d1",
+        "signal": "refused",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "d1",
+        "port": "refusalReason",
+        "value": "not-allowed"
+      },
+      {
+        "at": 4,
+        "subject": "a",
+        "port": "state",
+        "absent": true
+      },
+      {
+        "at": 5,
+        "subject": "d1",
+        "signal": "refused",
+        "count": 1
+      },
+      {
+        "at": 5,
+        "subject": "d1",
+        "port": "refusedCount",
+        "value": 2
+      },
+      {
+        "at": 5,
+        "subject": "a",
+        "port": "state",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "waitForHandler",
+        "value": 0,
+        "subject": "d0"
+      },
+      {
+        "t": "set",
+        "port": "waitForHandler",
+        "value": 0,
+        "subject": "d1"
+      },
+      {
+        "t": "set",
+        "port": "builtIns",
+        "value": "SET_STORE,CLEAR_STORE",
+        "subject": "d1"
+      },
+      {
+        "t": "set",
+        "port": "allowedKeys",
+        "value": "count",
+        "subject": "d1"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "",
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "cancelledCount",
+        "value": 0,
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "completedCount",
+        "value": 0,
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "failedCount",
+        "value": 0,
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "isExecuting",
+        "value": false,
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "",
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "queueSize",
+        "value": 0,
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "",
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "",
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 0,
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "",
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "",
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "cancelledCount",
+        "value": 0,
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "completedCount",
+        "value": 0,
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "failedCount",
+        "value": 0,
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "isExecuting",
+        "value": false,
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "queueSize",
+        "value": 0,
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 0,
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "",
+        "subject": "d1"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": {
+          "id": "s1",
+          "key": "count",
+          "type": "SET_STORE",
+          "value": 3
+        },
+        "subject": "d0"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d0"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "\"SET_STORE\" is a built-in action but this dispatcher does not have it enabled",
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "\"SET_STORE\" is a built-in action but this dispatcher does not have it enabled",
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "not-allowed",
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 1,
+        "subject": "d0"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "SET_STORE",
+        "subject": "d0"
+      },
+      {
+        "t": "signal",
+        "port": "refused",
+        "subject": "d0"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d0"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d0"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": {
+          "id": "s1",
+          "key": "count",
+          "storeName": "elsewhere",
+          "type": "SET_STORE",
+          "value": 3
+        },
+        "subject": "d1"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d1"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 3
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "s1",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "SET_STORE",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "completedCount",
+        "value": 1,
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "payload",
+        "value": {
+          "id": "s1",
+          "key": "count",
+          "storeName": "elsewhere",
+          "type": "SET_STORE",
+          "value": 3
+        },
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "result",
+        "value": {
+          "key": "count",
+          "storeName": "app"
+        },
+        "subject": "d1"
+      },
+      {
+        "t": "signal",
+        "port": "dispatched",
+        "subject": "d1"
+      },
+      {
+        "t": "signal",
+        "port": "actionCompleted",
+        "subject": "d1"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d1"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d1"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": {
+          "id": "s2",
+          "key": "secret",
+          "type": "SET_STORE",
+          "value": 1
+        },
+        "subject": "d1"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d1"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "the key \"secret\" is not in this dispatcher's allowed keys",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "the key \"secret\" is not in this dispatcher's allowed keys",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "not-allowed",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 1,
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "SET_STORE",
+        "subject": "d1"
+      },
+      {
+        "t": "signal",
+        "port": "refused",
+        "subject": "d1"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d1"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d1"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": {
+          "id": "c1",
+          "type": "CLEAR_STORE"
+        },
+        "subject": "d1"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d1"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "CLEAR_STORE is refused while allowed keys are set, because it would remove keys outside them",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "CLEAR_STORE is refused while allowed keys are set, because it would remove keys outside them",
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 2,
+        "subject": "d1"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "CLEAR_STORE",
+        "subject": "d1"
+      },
+      {
+        "t": "signal",
+        "port": "refused",
+        "subject": "d1"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d1"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d1"
+      }
+    ]
+  },
+  {
+    "name": "an array of actions runs in order, one at a time; an action whose handler has not registered yet waits for it and runs the moment it does; a handler with Auto Complete off holds the queue until Complete or Fail",
+    "clauses": [
+      "N"
+    ],
+    "because": "action-dispatcher.ts header: \"Actions execute strictly one at a time, in arrival order ... A multi-step flow sent as an array arrives as an array and runs in sequence\"; actiondispatchernode.ts `waitForHandler`: \"the window in which a component can still mount\"; `waitingFor`; actionhandlernode.ts `autoComplete`: \"turn it off when a later step must finish first\"; `fail`: \"Reports the action failed, so the dispatcher fires Failed with Error Message as the reason\"",
+    "world": {},
+    "nodes": {
+      "hA": {
+        "type": "net.noodl.ActionHandler",
+        "params": {
+          "actionType": "A"
+        }
+      },
+      "hB": {
+        "type": "net.noodl.ActionHandler",
+        "params": {
+          "actionType": "B"
+        }
+      },
+      "late": {
+        "type": "net.noodl.ActionHandler",
+        "params": {
+          "actionType": "LATE",
+          "enabled": false
+        }
+      },
+      "hM": {
+        "type": "net.noodl.ActionHandler",
+        "params": {
+          "actionType": "M",
+          "autoComplete": false,
+          "errorMessage": "nope"
+        }
+      },
+      "d": {
+        "type": "net.noodl.ActionDispatcher",
+        "params": {
+          "waitForHandler": 1000,
+          "handlerTimeout": 0
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "d",
+        "set": "action",
+        "value": [
+          {
+            "type": "A",
+            "id": "a1"
+          },
+          {
+            "type": "B",
+            "id": "b1"
+          }
+        ]
+      },
+      {
+        "node": "d",
+        "signal": "dispatch"
+      },
+      "settle",
+      {
+        "node": "d",
+        "set": "action",
+        "value": {
+          "type": "LATE",
+          "id": "l1"
+        }
+      },
+      {
+        "node": "d",
+        "signal": "dispatch"
+      },
+      "settle",
+      {
+        "node": "late",
+        "set": "enabled",
+        "value": true
+      },
+      "settle",
+      {
+        "node": "d",
+        "set": "action",
+        "value": {
+          "type": "M",
+          "id": "m1"
+        }
+      },
+      {
+        "node": "d",
+        "signal": "dispatch"
+      },
+      "settle",
+      {
+        "node": "hM",
+        "signal": "fail"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "late",
+        "port": "registered",
+        "value": false
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "signal": "dispatched",
+        "count": 2
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "signal": "actionCompleted",
+        "count": 2
+      },
+      {
+        "at": 2,
+        "subject": "hA",
+        "signal": "trigger",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "hB",
+        "signal": "trigger",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "port": "completedCount",
+        "value": 2
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "signal": "idle",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "port": "waitingFor",
+        "value": "LATE"
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "signal": "dispatched",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "late",
+        "signal": "trigger",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "signal": "refused",
+        "count": 0
+      },
+      {
+        "at": 4,
+        "subject": "late",
+        "port": "registered",
+        "value": true
+      },
+      {
+        "at": 4,
+        "subject": "late",
+        "signal": "trigger",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "d",
+        "signal": "dispatched",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "d",
+        "signal": "actionCompleted",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "d",
+        "port": "waitingFor",
+        "value": ""
+      },
+      {
+        "at": 5,
+        "subject": "hM",
+        "signal": "trigger",
+        "count": 1
+      },
+      {
+        "at": 5,
+        "subject": "d",
+        "signal": "dispatched",
+        "count": 1
+      },
+      {
+        "at": 5,
+        "subject": "d",
+        "signal": "actionCompleted",
+        "count": 0
+      },
+      {
+        "at": 5,
+        "subject": "d",
+        "port": "isExecuting",
+        "value": true
+      },
+      {
+        "at": 6,
+        "subject": "d",
+        "signal": "failed",
+        "count": 1
+      },
+      {
+        "at": 6,
+        "subject": "d",
+        "port": "lastError",
+        "value": "nope"
+      },
+      {
+        "at": 6,
+        "subject": "d",
+        "port": "isExecuting",
+        "value": false
+      },
+      {
+        "at": 6,
+        "subject": "d",
+        "port": "failedCount",
+        "value": 1
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "actionType",
+        "value": "A",
+        "subject": "hA"
+      },
+      {
+        "t": "set",
+        "port": "actionType",
+        "value": "B",
+        "subject": "hB"
+      },
+      {
+        "t": "set",
+        "port": "actionType",
+        "value": "LATE",
+        "subject": "late"
+      },
+      {
+        "t": "set",
+        "port": "enabled",
+        "value": false,
+        "subject": "late"
+      },
+      {
+        "t": "set",
+        "port": "actionType",
+        "value": "M",
+        "subject": "hM"
+      },
+      {
+        "t": "set",
+        "port": "autoComplete",
+        "value": false,
+        "subject": "hM"
+      },
+      {
+        "t": "set",
+        "port": "errorMessage",
+        "value": "nope",
+        "subject": "hM"
+      },
+      {
+        "t": "set",
+        "port": "waitForHandler",
+        "value": 1000,
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "handlerTimeout",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "hA"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "",
+        "subject": "hA"
+      },
+      {
+        "t": "value",
+        "port": "registered",
+        "value": true,
+        "subject": "hA"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 0,
+        "subject": "hA"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "hB"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "",
+        "subject": "hB"
+      },
+      {
+        "t": "value",
+        "port": "registered",
+        "value": true,
+        "subject": "hB"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 0,
+        "subject": "hB"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "late"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "",
+        "subject": "late"
+      },
+      {
+        "t": "value",
+        "port": "registered",
+        "value": false,
+        "subject": "late"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 0,
+        "subject": "late"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "hM"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "",
+        "subject": "hM"
+      },
+      {
+        "t": "value",
+        "port": "registered",
+        "value": true,
+        "subject": "hM"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 0,
+        "subject": "hM"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "cancelledCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "completedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "failedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "isExecuting",
+        "value": false,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "queueSize",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": [
+          {
+            "id": "a1",
+            "type": "A"
+          },
+          {
+            "id": "b1",
+            "type": "B"
+          }
+        ],
+        "subject": "d"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "a1",
+        "subject": "hA"
+      },
+      {
+        "t": "value",
+        "port": "payload",
+        "value": {
+          "id": "a1",
+          "type": "A"
+        },
+        "subject": "hA"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 1,
+        "subject": "hA"
+      },
+      {
+        "t": "signal",
+        "port": "trigger",
+        "subject": "hA"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "b1",
+        "subject": "hB"
+      },
+      {
+        "t": "value",
+        "port": "payload",
+        "value": {
+          "id": "b1",
+          "type": "B"
+        },
+        "subject": "hB"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 1,
+        "subject": "hB"
+      },
+      {
+        "t": "signal",
+        "port": "trigger",
+        "subject": "hB"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "b1",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "B",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "completedCount",
+        "value": 2,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "payload",
+        "value": {
+          "id": "b1",
+          "type": "B"
+        },
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "dispatched",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "actionCompleted",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "dispatched",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "actionCompleted",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": {
+          "id": "l1",
+          "type": "LATE"
+        },
+        "subject": "d"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "LATE",
+        "subject": "d"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "enabled",
+        "value": true,
+        "subject": "late"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "l1",
+        "subject": "late"
+      },
+      {
+        "t": "value",
+        "port": "payload",
+        "value": {
+          "id": "l1",
+          "type": "LATE"
+        },
+        "subject": "late"
+      },
+      {
+        "t": "value",
+        "port": "registered",
+        "value": true,
+        "subject": "late"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 1,
+        "subject": "late"
+      },
+      {
+        "t": "signal",
+        "port": "trigger",
+        "subject": "late"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "l1",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "LATE",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "completedCount",
+        "value": 3,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "payload",
+        "value": {
+          "id": "l1",
+          "type": "LATE"
+        },
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "dispatched",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "actionCompleted",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": {
+          "id": "m1",
+          "type": "M"
+        },
+        "subject": "d"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "m1",
+        "subject": "hM"
+      },
+      {
+        "t": "value",
+        "port": "payload",
+        "value": {
+          "id": "m1",
+          "type": "M"
+        },
+        "subject": "hM"
+      },
+      {
+        "t": "value",
+        "port": "triggeredCount",
+        "value": 1,
+        "subject": "hM"
+      },
+      {
+        "t": "signal",
+        "port": "trigger",
+        "subject": "hM"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "m1",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "M",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "isExecuting",
+        "value": true,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "payload",
+        "value": {
+          "id": "m1",
+          "type": "M"
+        },
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "dispatched",
+        "subject": "d"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d"
+      },
+      {
+        "t": "in",
+        "port": "fail",
+        "subject": "hM"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "fail",
+        "value": "done",
+        "subject": "hM"
+      },
+      {
+        "t": "value",
+        "port": "failedCount",
+        "value": 1,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "isExecuting",
+        "value": false,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "nope",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "failed",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d"
+      }
+    ]
+  },
+  {
+    "name": "text that is not JSON is refused as invalid; an action whose handler never appears is refused as unknown when Wait For Handler expires",
+    "clauses": [
+      "N"
+    ],
+    "because": "action-dispatcher.ts `coerce`: 'the action is not valid JSON'; actiondispatchernode.ts `waitForHandler`: \"Milliseconds an action waits for its handler to appear before being refused as unknown\"; `refusalReason`: \"invalid, unknown, not-allowed, rate-limited or queue-full\"",
+    "world": {},
+    "nodes": {
+      "d": {
+        "type": "net.noodl.ActionDispatcher",
+        "params": {
+          "waitForHandler": 500
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "d",
+        "set": "action",
+        "value": "not json{"
+      },
+      {
+        "node": "d",
+        "signal": "dispatch"
+      },
+      "settle",
+      {
+        "node": "d",
+        "set": "action",
+        "value": {
+          "type": "GHOST",
+          "id": "g1"
+        }
+      },
+      {
+        "node": "d",
+        "signal": "dispatch"
+      },
+      "settle",
+      {
+        "node": "d",
+        "advance": 499
+      },
+      "settle",
+      {
+        "node": "d",
+        "advance": 1
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "d",
+        "signal": "refused",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "port": "refusalReason",
+        "value": "invalid"
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "port": "waitingFor",
+        "value": "GHOST"
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "signal": "refused",
+        "count": 0
+      },
+      {
+        "at": 4,
+        "subject": "d",
+        "signal": "refused",
+        "count": 0
+      },
+      {
+        "at": 5,
+        "subject": "d",
+        "signal": "refused",
+        "count": 1
+      },
+      {
+        "at": 5,
+        "subject": "d",
+        "port": "refusalReason",
+        "value": "unknown"
+      },
+      {
+        "at": 5,
+        "subject": "d",
+        "port": "refusedType",
+        "value": "GHOST"
+      },
+      {
+        "at": 5,
+        "subject": "d",
+        "port": "refusedCount",
+        "value": 2
+      },
+      {
+        "at": 1,
+        "subject": "d",
+        "port": "refusedType",
+        "value": ""
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "waitForHandler",
+        "value": 500,
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "cancelledCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "completedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "failedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "isExecuting",
+        "value": false,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "queueSize",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": "not json{",
+        "subject": "d"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "the action is not valid JSON: Unexpected token 'o', \"not json{\" is not valid JSON",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "the action is not valid JSON: Unexpected token 'o', \"not json{\" is not valid JSON",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "invalid",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 1,
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "refused",
+        "subject": "d"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "failure",
+        "error": "action-dispatcher/nothing-admitted",
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": {
+          "id": "g1",
+          "type": "GHOST"
+        },
+        "subject": "d"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "GHOST",
+        "subject": "d"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d"
+      },
+      {
+        "t": "advance",
+        "ms": 499,
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "advance",
+        "ms": 1,
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "no handler is registered for \"GHOST\"",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "no handler is registered for \"GHOST\"",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "unknown",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 2,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "GHOST",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "refused",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d"
+      }
+    ]
+  },
+  {
+    "name": "Waiting For goes blank once the wait for a handler expires and the action is refused",
+    "clauses": [
+      "N"
+    ],
+    "row": "NSP-012 \u00a76 C14",
+    "because": "actiondispatchernode.ts `waitingFor`: \"Action type holding the head of the queue because its handler has not registered yet; blank when nothing is waiting\" \u2014 the claim is the sentence. RECORDED: the wire keeps the refused type \u2014 the expiry path (`park`'s wait timer \u2192 `unpark` \u2192 `refuseEntry`, action-dispatcher.ts :614-622, :894-905) flags no queue change, so `Waiting For` is never re-sent and a label wired to it reads the refused type until the next queue change",
+    "world": {},
+    "nodes": {
+      "d": {
+        "type": "net.noodl.ActionDispatcher",
+        "params": {
+          "waitForHandler": 500
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "d",
+        "set": "action",
+        "value": {
+          "type": "GHOST",
+          "id": "g1"
+        }
+      },
+      {
+        "node": "d",
+        "signal": "dispatch"
+      },
+      "settle",
+      {
+        "node": "d",
+        "advance": 500
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "d",
+        "port": "waitingFor",
+        "value": "GHOST"
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "signal": "refused",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "d",
+        "port": "waitingFor",
+        "value": ""
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "waitForHandler",
+        "value": 500,
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "actionId",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "actionType",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "cancelledCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "completedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "failedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "isExecuting",
+        "value": false,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "queueSize",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 0,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "",
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "action",
+        "value": {
+          "id": "g1",
+          "type": "GHOST"
+        },
+        "subject": "d"
+      },
+      {
+        "t": "in",
+        "port": "dispatch",
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "GHOST",
+        "subject": "d"
+      },
+      {
+        "t": "outcome",
+        "port": "dispatch",
+        "value": "done",
+        "subject": "d"
+      },
+      {
+        "t": "advance",
+        "ms": 500,
+        "subject": "d"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "lastError",
+        "value": "no handler is registered for \"GHOST\"",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalMessage",
+        "value": "no handler is registered for \"GHOST\"",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusalReason",
+        "value": "unknown",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedCount",
+        "value": 1,
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "refusedType",
+        "value": "GHOST",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "refused",
+        "subject": "d"
+      },
+      {
+        "t": "signal",
+        "port": "idle",
+        "subject": "d"
+      }
+    ]
+  }
+]

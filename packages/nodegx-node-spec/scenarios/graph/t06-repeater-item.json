@@ -1,0 +1,88 @@
+[
+  {
+    "name": "Repeater Item reads the item its enclosing component instance carries; one outside any Repeater or Run Tasks template has no Item Id and says so on the error channel; Remove Completed with nothing waiting is Unchanged",
+    "clauses": [
+      "N",
+      "S2"
+    ],
+    "because": "foreachactions.ts `itemId`: \"Id of the record this repeated item was created for\"; foreachitem.ts: \"a node that is not inside a Repeater or Run Tasks template at all now says so, once\" (the handle's `errors`, outside the trace); `unchanged`: \"Fires when no removal was waiting\". The handshake itself (`tryRemove` → `removeCompleted` → Done) is driven by the Repeater, a T5 node — not here",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "name": "x"
+          }
+        }
+      }
+    },
+    "components": {
+      "tpl": {
+        "item": "m1"
+      },
+      "plain": {}
+    },
+    "nodes": {
+      "ri": {
+        "type": "For Each Actions",
+        "in": "tpl"
+      },
+      "lone": {
+        "type": "For Each Actions",
+        "in": "plain"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "ri",
+        "signal": "removeCompleted"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "ri",
+        "port": "itemId",
+        "value": "m1"
+      },
+      {
+        "at": 1,
+        "subject": "lone",
+        "port": "itemId",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "ri",
+        "port": "itemId",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "itemId",
+        "value": "m1",
+        "subject": "ri"
+      },
+      {
+        "t": "in",
+        "port": "removeCompleted",
+        "subject": "ri"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "removeCompleted",
+        "value": "unchanged",
+        "subject": "ri"
+      }
+    ]
+  }
+]

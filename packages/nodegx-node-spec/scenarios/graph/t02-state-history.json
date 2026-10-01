@@ -1,0 +1,2596 @@
+[
+  {
+    "name": "State History records each commit; Undo steps back and the store's own views see it as a write; Redo steps forward; a Redo at the end and a second Undo at the beginning are no-ops",
+    "clauses": [
+      "N"
+    ],
+    "because": "statehistorynode.ts `historySize`: \"including the baseline it started from\"; `canUndo`/`canRedo`; `historyChanged`: \"Fires whenever an entry is added, the position moves, or the history is cleared\"; undonode.ts `undone`: \"Fires when a step back actually happened, and not when the history was already at its beginning\"; `redone`: \"... not when the history was already at its end\"; statehistory.ts header: \"a node watching the store sees an undo exactly as it sees any other write\"",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "set": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 1
+        }
+      },
+      "h": {
+        "type": "net.noodl.StateHistory",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "u": {
+        "type": "net.noodl.StateHistory.Undo",
+        "params": {
+          "storeName": "app"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "set",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "u",
+        "signal": "undo"
+      },
+      "settle",
+      {
+        "node": "u",
+        "signal": "redo"
+      },
+      "settle",
+      {
+        "node": "u",
+        "signal": "redo"
+      },
+      "settle",
+      {
+        "node": "u",
+        "signal": "undo"
+      },
+      {
+        "node": "u",
+        "signal": "undo"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "h",
+        "port": "historySize",
+        "value": 1
+      },
+      {
+        "at": 1,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 0
+      },
+      {
+        "at": 1,
+        "subject": "h",
+        "port": "canUndo",
+        "value": false
+      },
+      {
+        "at": 1,
+        "subject": "h",
+        "port": "canRedo",
+        "value": false
+      },
+      {
+        "at": 2,
+        "subject": "h",
+        "port": "historySize",
+        "value": 2
+      },
+      {
+        "at": 2,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "h",
+        "port": "canUndo",
+        "value": true
+      },
+      {
+        "at": 2,
+        "subject": "h",
+        "signal": "historyChanged",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 1
+        }
+      },
+      {
+        "at": 3,
+        "subject": "u",
+        "signal": "undone",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "port": "state",
+        "value": {}
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "signal": "stateChanged",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 0
+      },
+      {
+        "at": 3,
+        "subject": "h",
+        "port": "canRedo",
+        "value": true
+      },
+      {
+        "at": 3,
+        "subject": "h",
+        "port": "canUndo",
+        "value": false
+      },
+      {
+        "at": 3,
+        "subject": "h",
+        "signal": "historyChanged",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "u",
+        "signal": "redone",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 1
+        }
+      },
+      {
+        "at": 4,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 1
+      },
+      {
+        "at": 4,
+        "subject": "h",
+        "port": "canRedo",
+        "value": false
+      },
+      {
+        "at": 5,
+        "subject": "u",
+        "signal": "redone",
+        "count": 0
+      },
+      {
+        "at": 5,
+        "subject": "a",
+        "port": "state",
+        "absent": true
+      },
+      {
+        "at": 5,
+        "subject": "h",
+        "signal": "historyChanged",
+        "count": 0
+      },
+      {
+        "at": 6,
+        "subject": "u",
+        "signal": "undone",
+        "count": 1
+      },
+      {
+        "at": 6,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 0
+      },
+      {
+        "at": 6,
+        "subject": "a",
+        "port": "state",
+        "value": {}
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "h"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 0,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "set"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 2,
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "in",
+        "port": "undo",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 0,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "undone",
+        "subject": "u"
+      },
+      {
+        "t": "outcome",
+        "port": "undo",
+        "value": "done",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "redo",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "redone",
+        "subject": "u"
+      },
+      {
+        "t": "outcome",
+        "port": "redo",
+        "value": "done",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "redo",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "redo",
+        "value": "unchanged",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "undo",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "undo",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 0,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "undone",
+        "subject": "u"
+      },
+      {
+        "t": "outcome",
+        "port": "undo",
+        "value": "done",
+        "subject": "u"
+      },
+      {
+        "t": "outcome",
+        "port": "undo",
+        "value": "unchanged",
+        "subject": "u"
+      }
+    ]
+  },
+  {
+    "name": "a new write after an Undo discards the redo stack",
+    "clauses": [
+      "N"
+    ],
+    "because": "statehistory.ts header §2: \"A new write after an undo must discard the redo stack. Otherwise redo would jump to a future that no longer follows from the present\". historySize stays 3 across the undo and the new write (the redo entry dropped, the new one pushed), so the wire carries no new value at frame 5",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "s1": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 1
+        }
+      },
+      "s2": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 2
+        }
+      },
+      "s3": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 3
+        }
+      },
+      "h": {
+        "type": "net.noodl.StateHistory",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "u": {
+        "type": "net.noodl.StateHistory.Undo",
+        "params": {
+          "storeName": "app"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "s1",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "s2",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "u",
+        "signal": "undo"
+      },
+      "settle",
+      {
+        "node": "s3",
+        "signal": "set"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 3,
+        "subject": "h",
+        "port": "historySize",
+        "value": 3
+      },
+      {
+        "at": 3,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 2
+      },
+      {
+        "at": 4,
+        "subject": "h",
+        "port": "canRedo",
+        "value": true
+      },
+      {
+        "at": 4,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 1
+        }
+      },
+      {
+        "at": 4,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 1
+      },
+      {
+        "at": 5,
+        "subject": "h",
+        "port": "canRedo",
+        "value": false
+      },
+      {
+        "at": 5,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 2
+      },
+      {
+        "at": 5,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 3
+        }
+      },
+      {
+        "at": 5,
+        "subject": "h",
+        "port": "historySize",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "s1"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "s1"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "s1"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "s2"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "s2"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 2,
+        "subject": "s2"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "s3"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "s3"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 3,
+        "subject": "s3"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "h"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 0,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "s1"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "s1"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 2,
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "s2"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 2
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "s2"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 2,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 2,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 3,
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "in",
+        "port": "undo",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 2,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "undone",
+        "subject": "u"
+      },
+      {
+        "t": "outcome",
+        "port": "undo",
+        "value": "done",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "s3"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 3
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "s3"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 2,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 2,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      }
+    ]
+  },
+  {
+    "name": "Undo at a store nothing tracks is a failure that says so; Jump To outside the history is a failure that says so; Jump To inside it moves the store",
+    "clauses": [
+      "N"
+    ],
+    "because": "undonode.ts header: \"A jumpTo outside the history IS reported, because that is a graph that computed the wrong number, and so is driving any of this at a store nothing is tracking\"; `error`: \"Why the last step failed; blank once one succeeds\"; `jumped`: \"Fires once the store holds the entry Target Index named\"",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "set": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 1
+        }
+      },
+      "h": {
+        "type": "net.noodl.StateHistory",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "u": {
+        "type": "net.noodl.StateHistory.Undo",
+        "params": {
+          "storeName": "other"
+        }
+      },
+      "j": {
+        "type": "net.noodl.StateHistory.Undo",
+        "params": {
+          "storeName": "app",
+          "targetIndex": 5
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "u",
+        "signal": "undo"
+      },
+      "settle",
+      {
+        "node": "j",
+        "signal": "jumpTo"
+      },
+      "settle",
+      {
+        "node": "set",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "j",
+        "set": "targetIndex",
+        "value": 0
+      },
+      {
+        "node": "j",
+        "signal": "jumpTo"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "error",
+        "value": "No State History node is tracking store \"other\""
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "signal": "undone",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "j",
+        "port": "error",
+        "value": "Target index 5 is outside the history"
+      },
+      {
+        "at": 3,
+        "subject": "j",
+        "signal": "jumped",
+        "count": 0
+      },
+      {
+        "at": 4,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 1
+        }
+      },
+      {
+        "at": 4,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 1
+      },
+      {
+        "at": 5,
+        "subject": "j",
+        "signal": "jumped",
+        "count": 1
+      },
+      {
+        "at": 5,
+        "subject": "a",
+        "port": "state",
+        "value": {}
+      },
+      {
+        "at": 5,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 0
+      },
+      {
+        "at": 5,
+        "subject": "j",
+        "port": "error",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "h"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "other",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "j"
+      },
+      {
+        "t": "set",
+        "port": "targetIndex",
+        "value": 5,
+        "subject": "j"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 0,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "j"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "j"
+      },
+      {
+        "t": "in",
+        "port": "undo",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "No State History node is tracking store \"other\"",
+        "subject": "u"
+      },
+      {
+        "t": "outcome",
+        "port": "undo",
+        "value": "failure",
+        "error": "undo/operation-failed",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "jumpTo",
+        "subject": "j"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "Target index 5 is outside the history",
+        "subject": "j"
+      },
+      {
+        "t": "outcome",
+        "port": "jumpTo",
+        "value": "failure",
+        "error": "undo/operation-failed",
+        "subject": "j"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "set"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 2,
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "set",
+        "port": "targetIndex",
+        "value": 0,
+        "subject": "j"
+      },
+      {
+        "t": "in",
+        "port": "jumpTo",
+        "subject": "j"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 0,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "jumped",
+        "subject": "j"
+      },
+      {
+        "t": "outcome",
+        "port": "jumpTo",
+        "value": "done",
+        "subject": "j"
+      }
+    ]
+  },
+  {
+    "name": "State Snapshot: Save keeps a checkpoint without disturbing the undo stack; Restore is an ordinary write that appears in the history and can itself be undone; Save with no name is a failure that says so",
+    "clauses": [
+      "N"
+    ],
+    "because": "statesnapshotnode.ts header: \"Saving one does not disturb the undo stack, and restoring one is an ordinary write — so it appears in the history and can itself be undone\"; `snapshotName`: \"required to save\"; statehistory.ts `saveNamedSnapshot`: 'State Snapshot: a snapshot name is required'",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "set1": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 1
+        }
+      },
+      "set2": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 2
+        }
+      },
+      "snap": {
+        "type": "net.noodl.StateSnapshot",
+        "params": {
+          "storeName": "app",
+          "snapshotName": "cp"
+        }
+      },
+      "noName": {
+        "type": "net.noodl.StateSnapshot",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "h": {
+        "type": "net.noodl.StateHistory",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "u": {
+        "type": "net.noodl.StateHistory.Undo",
+        "params": {
+          "storeName": "app"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "set1",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "snap",
+        "signal": "save"
+      },
+      "settle",
+      {
+        "node": "set2",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "snap",
+        "signal": "restore"
+      },
+      "settle",
+      {
+        "node": "u",
+        "signal": "undo"
+      },
+      "settle",
+      {
+        "node": "noName",
+        "signal": "save"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "snap",
+        "port": "fullyRestorable",
+        "value": true
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 1
+        }
+      },
+      {
+        "at": 2,
+        "subject": "h",
+        "port": "historySize",
+        "value": 2
+      },
+      {
+        "at": 3,
+        "subject": "snap",
+        "signal": "saved",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "h",
+        "port": "historySize",
+        "absent": true
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "port": "state",
+        "absent": true
+      },
+      {
+        "at": 4,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 2
+        }
+      },
+      {
+        "at": 4,
+        "subject": "h",
+        "port": "historySize",
+        "value": 3
+      },
+      {
+        "at": 5,
+        "subject": "snap",
+        "signal": "restored",
+        "count": 1
+      },
+      {
+        "at": 5,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 1
+        }
+      },
+      {
+        "at": 5,
+        "subject": "h",
+        "port": "historySize",
+        "value": 4
+      },
+      {
+        "at": 5,
+        "subject": "h",
+        "port": "currentIndex",
+        "value": 3
+      },
+      {
+        "at": 6,
+        "subject": "u",
+        "signal": "undone",
+        "count": 1
+      },
+      {
+        "at": 6,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 2
+        }
+      },
+      {
+        "at": 7,
+        "subject": "noName",
+        "signal": "saved",
+        "count": 0
+      },
+      {
+        "at": 7,
+        "subject": "noName",
+        "port": "error",
+        "value": "State Snapshot: a snapshot name is required"
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "set1"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "set1"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "set1"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "set2"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "set2"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 2,
+        "subject": "set2"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "snap"
+      },
+      {
+        "t": "set",
+        "port": "snapshotName",
+        "value": "cp",
+        "subject": "snap"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "noName"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "h"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "snap"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "snap"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "noName"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "noName"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": false,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 0,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "byReferenceKeys",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "fullyRestorable",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "set1"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "set1"
+      },
+      {
+        "t": "value",
+        "port": "canUndo",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 1,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 2,
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "in",
+        "port": "save",
+        "subject": "snap"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "snapshot",
+        "value": {
+          "byReference": [],
+          "revision": 1,
+          "state": {
+            "count": 1
+          },
+          "storeName": "app",
+          "takenAt": 0
+        },
+        "subject": "snap"
+      },
+      {
+        "t": "signal",
+        "port": "saved",
+        "subject": "snap"
+      },
+      {
+        "t": "outcome",
+        "port": "save",
+        "value": "done",
+        "subject": "snap"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "set2"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 2
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "set2"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 2,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 2,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 3,
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "in",
+        "port": "restore",
+        "subject": "snap"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "restored",
+        "subject": "snap"
+      },
+      {
+        "t": "outcome",
+        "port": "restore",
+        "value": "done",
+        "subject": "snap"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 3,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 2,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 3,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "historySize",
+        "value": 4,
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "in",
+        "port": "undo",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 2
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "canRedo",
+        "value": true,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "currentIndex",
+        "value": 2,
+        "subject": "h"
+      },
+      {
+        "t": "value",
+        "port": "history",
+        "value": [
+          {
+            "byReference": "",
+            "changedKeys": "",
+            "description": "Initial state",
+            "index": 0,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 1,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 2,
+            "isCurrent": true,
+            "partial": false,
+            "timestamp": 0
+          },
+          {
+            "byReference": "",
+            "changedKeys": "count",
+            "description": "Changed: count",
+            "index": 3,
+            "isCurrent": false,
+            "partial": false,
+            "timestamp": 0
+          }
+        ],
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "historyChanged",
+        "subject": "h"
+      },
+      {
+        "t": "signal",
+        "port": "undone",
+        "subject": "u"
+      },
+      {
+        "t": "outcome",
+        "port": "undo",
+        "value": "done",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "save",
+        "subject": "noName"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "State Snapshot: a snapshot name is required",
+        "subject": "noName"
+      },
+      {
+        "t": "outcome",
+        "port": "save",
+        "value": "failure",
+        "error": "state-snapshot/operation-failed",
+        "subject": "noName"
+      }
+    ]
+  }
+]

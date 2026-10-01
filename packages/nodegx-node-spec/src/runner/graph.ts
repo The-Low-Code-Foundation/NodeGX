@@ -23,12 +23,16 @@ import { compareTraces, differenceWithThrow, formatDifference, hasObservation, t
  */
 function worldFor(sc: GraphScenario): World | undefined {
   const needs = Object.values(sc.nodes).some((n) => (specFor(n.type)?.needs?.length ?? 0) > 0);
-  return sc.world !== undefined || needs ? new World(sc.world ?? {}) : undefined;
+  // a component carrying an item names a registry record — the world holds the registry
+  const items = Object.values(sc.components ?? {}).some((c) => c.item !== undefined);
+  return sc.world !== undefined || needs || items ? new World(sc.world ?? {}) : undefined;
 }
 
 /**
  * Plays the scenario from a fresh graph and returns the graph trace. Every node is disposed
  * whatever happens; a throw from the target is rethrown as a `PlayError` holding the trace so far.
+ * A scenario with `components` (NSP-012) is handed to `mountGraph` as declared; a target that
+ * holds no component tree says so through `canPlay`, and the runner reports it `outside`.
  */
 export async function playGraph<H extends Handle>(target: GraphTarget<H>, sc: GraphScenario): Promise<TraceEvent[]> {
   const ids = Object.keys(sc.nodes);
@@ -57,7 +61,7 @@ export async function playGraph<H extends Handle>(target: GraphTarget<H>, sc: Gr
     restore = target.install(world);
   }
   try {
-    handles = target.mountGraph(sc.nodes, sc.wires ?? []);
+    handles = target.mountGraph(sc.nodes, sc.wires ?? [], sc.components);
     for (const id of ids) drain(id);
     for (const step of sc.steps) {
       if (step === 'settle') {
@@ -71,6 +75,10 @@ export async function playGraph<H extends Handle>(target: GraphTarget<H>, sc: Gr
         target.connect(handle(from.node), from.port, handle(to.node), to.port);
       } else if ('signal' in step) {
         target.signal(handle(step.node), step.signal);
+        drain(step.node);
+      } else if ('advance' in step) {
+        if (!target.advance) throw new Error(`${target.name} has no advance(): it cannot move a world's clock`);
+        await target.advance(handle(step.node), step.advance);
         drain(step.node);
       } else {
         target.set(handle(step.node), step.set, step.value);

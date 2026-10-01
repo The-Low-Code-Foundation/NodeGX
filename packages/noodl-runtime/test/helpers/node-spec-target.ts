@@ -75,7 +75,24 @@
  *     per-port input queues (C2, C7), the first-update consolidation (C8) and the breakers (C9)
  *     are all the runtime's; nothing is reproduced here. Stimulus still goes through
  *     `setInputValue` directly; what travels BETWEEN nodes goes through the queues. `connect` is
- *     the same call made later — a scenario's `wire` step.
+ *     the same call made later — a scenario's `wire` step. After every node is mounted and every
+ *     wire made, each node's `nodeScopeDidInitialize` runs in declaration order — the hook
+ *     `NodeScope.setComponentModel` runs once a component's whole graph is in place (nodescope.ts
+ *     :487-490), which is how a Global Store left on its defaults attaches at all.
+ *   - **the component tree** (NSP-012, graph.ts COMPONENTS): a graph that declares `components`
+ *     gets one real `NodeScope` per component instance and one for the root; a child instance is
+ *     placed inside its parent's scope the way a loaded app places it — as an entry of the scope's
+ *     `nodes` and as a child of a visual node of that scope (a `node-spec/host` entry standing for
+ *     the Group it would hang under), and its name is a registered component model — so Send
+ *     Event's `parent` / `children` / `siblings` walk (nodescope.ts `sendEventFromThisScope`) and
+ *     the "From repeater" scope chain (componentwalk.ts) run unchanged over it. A component's
+ *     `item` is `Model.get(id)` from the seeded registry, hung on the instance as `_forEachModel`,
+ *     exactly as a Repeater or Run Tasks hangs it (runtasks.ts :407-408). What a component IS is
+ *     not modelled (NSP-015's boundary).
+ *   - **the three process-wide managers** behind the store, history and action nodes
+ *     (`globalStoreManager`, `stateHistoryManager`, `actionRegistry`) are reset at `install` like
+ *     the registry tables, and the history manager's clock becomes the world's — one play, one
+ *     store, one history, one allow-list.
  */
 
 import { AsyncLocalStorage } from 'async_hooks';
@@ -83,7 +100,7 @@ import { AsyncLocalStorage } from 'async_hooks';
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { GraphNodeDecl, GraphTarget, Handle, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
+import type { ComponentDecl, GraphNodeDecl, GraphTarget, Handle, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
 import { canonicalise, installWorld, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
 
@@ -91,6 +108,11 @@ import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
 import Model = require('../../src/model');
 import Collection = require('../../src/collection');
+import NodeScope = require('../../src/nodescope');
+
+import { globalStoreManager } from '../../src/nodes/std-library/agent/globalstore';
+import { stateHistoryManager } from '../../src/nodes/std-library/agent/statehistory';
+import { actionRegistry } from '../../src/nodes/std-library/agent/action-dispatcher';
 
 /**
  * NSP-012 — one registry per play: the runtime's two named tables emptied, then seeded from the
@@ -123,7 +145,7 @@ function resetRegistry(world: World): void {
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -361,6 +383,106 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     s.frame.requests.push(event);
   }
 
+  /** A line a node wrote through its scope's log sink lands on that node's handle; the entry names the node (runcontext.ts). */
+  const logSink = (fallback: LogLine[]) => (entry: { level: string; message: string; data?: unknown; nodeId?: string }) => {
+    const line: LogLine = entry.data === undefined ? { level: entry.level, message: entry.message } : { level: entry.level, message: entry.message, data: entry.data };
+    const owner = entry.nodeId !== undefined ? byNodeId.get(entry.nodeId) : undefined;
+    (owner ? owner.h.logs : fallback).push(line);
+  };
+
+  /**
+   * A lone node's scope: the one a browser app's root component has — no model scope (so the
+   * global `Model`), a component owner named after the handle whose walk stops here (`getRoots`
+   * and no `parentNodeScope`), and the log sink.
+   */
+  const loneScope = (id: string, logs: LogLine[]) => ({
+    modelScope: undefined,
+    componentOwner: { name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] },
+    context,
+    runContext: { log: logSink(logs) }
+  });
+
+  /** Mounts one node into `scope` (a lone scope when absent), applying `params` as `set` events. */
+  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>): RuntimeHandle {
+    if (!context.nodeRegister.hasNode(type)) throw new Error(`runtime: no node type "${type}" is registered`);
+    const id = `${type}#${next++}`;
+    const logs: LogLine[] = [];
+    const nodeScope = scope ?? loneScope(id, logs);
+    const node = context.nodeRegister.createNode(type, id, nodeScope as never) as unknown as RuntimeNode;
+    if (!node.nodeScope) node.nodeScope = nodeScope as never;
+    // a node in a component's scope is one of the scope's nodes — what `getNodesWithType` reads
+    if (scope) scope.nodes[id] = node as never;
+    // the graph's parameters, for the two nodes that read them off `this.model` (NSP-012)
+    (node as unknown as { model?: unknown }).model = { type, parameters: { ...params } };
+    // the derived outputs the spec declares for these params — registered as a wire would make the runtime do
+    const spec = specFor(type);
+    if (spec?.derived?.outputs) {
+      for (const name of Object.keys(spec.derived.outputs(params))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
+    }
+    const h: RuntimeHandle = { id, type, node, metadata: context.nodeRegister.getNodeMetadata(type), errors: [], logs };
+    const s: State = { h, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
+    states.set(id, s);
+    byNodeId.set(id, s);
+    intercept(s);
+    for (const name of Object.keys(params)) target.set(h, name, params[name]);
+    return h;
+  }
+
+  /** The owner a real `NodeScope` is built around — what the propagation walk and the scope chain read of a component instance. */
+  interface Owner {
+    name: string;
+    nodeScope?: InstanceType<typeof NodeScope>;
+    parentNodeScope?: InstanceType<typeof NodeScope>;
+    children?: Owner[];
+    getInstanceId(): string;
+    getRoots(): never[];
+    _forEachModel?: unknown;
+  }
+
+  /** A real scope around `owner`, with the log sink; `owner.nodeScope` is set to it. */
+  function scopeFor(owner: Owner, logs: LogLine[]): InstanceType<typeof NodeScope> {
+    const scope = new NodeScope(context as never, owner);
+    (scope as unknown as { runContext: unknown }).runContext = { log: logSink(logs) };
+    owner.nodeScope = scope;
+    return scope;
+  }
+
+  /**
+   * The component tree (graph.ts COMPONENTS): one scope per declared instance, each placed in its
+   * parent's scope as a loaded app places it — an entry of `nodes` (nodescope.ts :310-312) and a
+   * child of a visual node of that scope (the `node-spec/host` entry, standing for the Group),
+   * its name a component model the context knows (`hasComponentModelWithName`, what the
+   * `children` / `siblings` walk asks). Returns the root scope and the scope of each component.
+   */
+  function componentTree(components: Readonly<Record<string, ComponentDecl>>, orphanLogs: LogLine[]) {
+    const rootOwner: Owner = { name: 'node-spec/root', getInstanceId: () => 'node-spec/root', getRoots: () => [] as never[] };
+    const root = scopeFor(rootOwner, orphanLogs);
+    const scopes: Record<string, InstanceType<typeof NodeScope>> = {};
+    const hostOf = (scope: InstanceType<typeof NodeScope>): Owner => {
+      const id = 'node-spec/host';
+      const nodes = scope.nodes as unknown as Record<string, Owner>;
+      if (!nodes[id]) nodes[id] = { name: id, children: [], getInstanceId: () => id, getRoots: () => [] as never[] };
+      return nodes[id];
+    };
+    const build = (cid: string): InstanceType<typeof NodeScope> => {
+      if (scopes[cid]) return scopes[cid];
+      const decl = components[cid];
+      const parentScope = decl.parent !== undefined ? build(decl.parent) : root;
+      const owner: Owner = { name: cid, parentNodeScope: parentScope, getInstanceId: () => `node-spec/instance/${cid}`, getRoots: () => [] as never[] };
+      if (decl.item !== undefined) owner._forEachModel = Model.get(decl.item);
+      scopes[cid] = scopeFor(owner, orphanLogs);
+      (parentScope.nodes as unknown as Record<string, Owner>)[`node-spec/instance/${cid}`] = owner;
+      (parentScope.componentInstanceChildren as unknown as Record<string, Owner>)[`node-spec/instance/${cid}`] = owner;
+      hostOf(parentScope).children!.push(owner);
+      // the context's component-model table, written directly: a target plays many scenarios and
+      // `registerComponentModel` refuses a name it has seen; only `hasComponentModelWithName` reads it here
+      (context as unknown as { componentModels: Record<string, unknown> }).componentModels[cid] = { name: cid, on: () => undefined, removeListenersWithRef: () => undefined };
+      return scopes[cid];
+    };
+    for (const cid of Object.keys(components)) build(cid);
+    return { root, scopes };
+  }
+
   const target: RuntimeTarget = {
     name: 'runtime',
     context,
@@ -368,36 +490,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     hasType: (type) => context.nodeRegister.hasNode(type),
 
     mount(type, params) {
-      if (!context.nodeRegister.hasNode(type)) throw new Error(`runtime: no node type "${type}" is registered`);
-      const id = `${type}#${next++}`;
-      const logs: LogLine[] = [];
-      const scope = {
-        modelScope: undefined,
-        // `getRoots` and no `parentNodeScope`: the component walk (componentwalk.ts) stops here
-        componentOwner: { name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] },
-        context,
-        runContext: {
-          log: (entry: { level: string; message: string; data?: unknown }) => {
-            logs.push(entry.data === undefined ? { level: entry.level, message: entry.message } : { level: entry.level, message: entry.message, data: entry.data });
-          }
-        }
-      };
-      const node = context.nodeRegister.createNode(type, id, scope as never) as unknown as RuntimeNode;
-      if (!node.nodeScope) node.nodeScope = scope as never;
-      // the graph's parameters, for the two nodes that read them off `this.model` (NSP-012)
-      (node as unknown as { model?: unknown }).model = { type, parameters: { ...params } };
-      // the derived outputs the spec declares for these params — registered as a wire would make the runtime do
-      const spec = specFor(type);
-      if (spec?.derived?.outputs) {
-        for (const name of Object.keys(spec.derived.outputs(params))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
-      }
-      const h: RuntimeHandle = { id, type, node, metadata: context.nodeRegister.getNodeMetadata(type), errors: [], logs };
-      const s: State = { h, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
-      states.set(id, s);
-      byNodeId.set(id, s);
-      intercept(s);
-      for (const name of Object.keys(params)) target.set(h, name, params[name]);
-      return h;
+      return mountIn(type, params);
     },
 
     set(h, port, value) {
@@ -442,9 +535,15 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       world = w;
       w.network.onRequest(recordRequest);
       const installed = installWorld(w);
+      // the three process-wide managers behind the store, history and action nodes (NSP-012 T4): one play, one of each
+      globalStoreManager.reset({ clearState: true });
+      stateHistoryManager.reset();
+      actionRegistry.reset();
+      stateHistoryManager.setClock(() => w.clock.now());
       resetRegistry(w);
       return () => {
         installed.restore();
+        stateHistoryManager.setClock(null);
         world = undefined;
       };
     },
@@ -477,14 +576,26 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       }
     },
 
-    mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[]) {
+    mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[], components?: Readonly<Record<string, ComponentDecl>>) {
       const handles: Record<string, RuntimeHandle> = {};
-      for (const id of Object.keys(nodes)) handles[id] = target.mount(nodes[id].type, nodes[id].params ?? {});
+      const orphanLogs: LogLine[] = [];
+      // a flat graph mounts as before (lone scopes); a graph with components gets the tree
+      const tree = components && Object.keys(components).length ? componentTree(components, orphanLogs) : undefined;
+      for (const id of Object.keys(nodes)) {
+        const decl = nodes[id];
+        const scope = tree ? (decl.in !== undefined ? tree.scopes[decl.in] : tree.root) : undefined;
+        handles[id] = mountIn(decl.type, decl.params ?? {}, scope);
+      }
       for (const w of wires) {
         const from = parseEndpoint(w.from);
         const to = parseEndpoint(w.to);
         if (!(from.node in handles) || !(to.node in handles)) throw new Error(`runtime: wire ${w.from} → ${w.to} names a node the graph does not declare`);
         target.connect!(handles[from.node], from.port, handles[to.node], to.port);
+      }
+      // nodescope.ts :487-490 — once the whole graph is in place, in declaration order
+      for (const id of Object.keys(nodes)) {
+        const node = handles[id].node as unknown as { nodeScopeDidInitialize?: () => void };
+        if (node.nodeScopeDidInitialize) node.nodeScopeDidInitialize();
       }
       return handles;
     },
@@ -493,6 +604,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       if (!states.has(from.id) || !states.has(to.id)) throw new Error('runtime: a wire to or from a disposed node');
       const source = from.node as unknown as NodeInstance;
       const sink = to.node as unknown as NodeInstance;
+      // nodescope.ts `addConnection` :133-153 — a wire registers a runtime-discovered OUTPUT as well as the input (Receive Event's payload ports)
+      source.registerOutputIfNeeded(fromPort);
       if (!source.hasOutput(fromPort)) throw new Error(`${from.type}: no output "${fromPort}" on the runtime`);
       sink.registerInputIfNeeded(toPort);
       if (!sink.hasInput(toPort)) throw new Error(`${to.type}: no input "${toPort}" on the runtime`);

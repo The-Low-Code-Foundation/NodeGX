@@ -1,0 +1,885 @@
+[
+  {
+    "name": "a global Send Event reaches every enabled Receive Event on its channel, the payload landing before Received; a disabled receiver and one on another channel hear nothing; a sender with no channel name fails and says so",
+    "clauses": [
+      "N",
+      "S2"
+    ],
+    "because": "eventsender.ts `sendEvent`: \"Sends one event on Channel Name, after every payload input has settled\"; `channelName`: \"Name every Receive Event must match to hear this\"; eventreceiver.ts `eventReceived`: \"Fires when an event arrives on Channel, once the payload outputs carry that event's values\" (NDA-012: the payload lands before Received \u2014 the sink behind the payload port reads the new value in the frame Received fires); `enabled`: \"while off they are ignored\"; eventsender.ts `error`: 'No channel name, so the event was not sent'",
+    "world": {},
+    "nodes": {
+      "s": {
+        "type": "Event Sender",
+        "params": {
+          "channelName": "c",
+          "propagation": "global"
+        }
+      },
+      "r": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        }
+      },
+      "off": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c",
+          "enabled": false
+        }
+      },
+      "d": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "d"
+        }
+      },
+      "sink": {
+        "type": "net.noodl.Log"
+      },
+      "n": {
+        "type": "Event Sender",
+        "params": {
+          "channelName": ""
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "r.a",
+        "to": "sink.value"
+      }
+    ],
+    "steps": [
+      {
+        "node": "s",
+        "set": "a",
+        "value": 7
+      },
+      "settle",
+      {
+        "node": "s",
+        "signal": "sendEvent"
+      },
+      "settle",
+      {
+        "node": "n",
+        "signal": "sendEvent"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "r",
+        "signal": "eventReceived",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "r",
+        "signal": "eventReceived",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "r",
+        "port": "a",
+        "value": 7
+      },
+      {
+        "at": 2,
+        "subject": "sink",
+        "port": "value",
+        "value": 7
+      },
+      {
+        "at": 2,
+        "subject": "off",
+        "signal": "eventReceived",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "d",
+        "signal": "eventReceived",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "n",
+        "port": "error",
+        "value": "No channel name, so the event was not sent"
+      },
+      {
+        "at": 3,
+        "subject": "r",
+        "signal": "eventReceived",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "propagation",
+        "value": "global",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "r"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "off"
+      },
+      {
+        "t": "set",
+        "port": "enabled",
+        "value": false,
+        "subject": "off"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "d",
+        "subject": "d"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "",
+        "subject": "n"
+      },
+      {
+        "t": "set",
+        "port": "a",
+        "value": 7,
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "sendEvent",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "sendEvent",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "a",
+        "value": 7,
+        "subject": "r"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 7,
+        "subject": "sink"
+      },
+      {
+        "t": "in",
+        "port": "sendEvent",
+        "subject": "n"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "No channel name, so the event was not sent",
+        "subject": "n"
+      },
+      {
+        "t": "outcome",
+        "port": "sendEvent",
+        "value": "failure",
+        "error": "event-sender/no-channel",
+        "subject": "n"
+      }
+    ]
+  },
+  {
+    "name": "Consume = Always on one receiver stops a global event reaching the other receiver on the same channel",
+    "clauses": [
+      "N"
+    ],
+    "because": "eventreceiver.ts `consume`: \"Whether receiving an event stops it reaching other receivers on the same channel\" \u2014 the claim is the sentence; the global path (nodecontext.ts :1148-1149 `eventSenderEmitter.emit`) is what is graded. RECORDED: both receivers fire \u2014 the global path emits to every listener and `onEventReceived` drops `handleEvent`'s return (eventreceiver.ts :142-143); Consume has never applied to a Global event",
+    "world": {},
+    "nodes": {
+      "s": {
+        "type": "Event Sender",
+        "params": {
+          "channelName": "c",
+          "propagation": "global"
+        }
+      },
+      "r1": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c",
+          "consume": "always"
+        }
+      },
+      "r2": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "s",
+        "signal": "sendEvent"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "r1",
+        "signal": "eventReceived",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "r2",
+        "signal": "eventReceived",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "propagation",
+        "value": "global",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "r1"
+      },
+      {
+        "t": "set",
+        "port": "consume",
+        "value": "always",
+        "subject": "r1"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "r2"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "sendEvent",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "sendEvent",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "r1"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "r2"
+      }
+    ],
+    "row": "NSP-012 \u00a76 C12"
+  },
+  {
+    "name": "Send to = Parent reaches the receivers in the enclosing component only: not the sender's own component, not a sibling component",
+    "clauses": [
+      "N"
+    ],
+    "because": "eventsender.ts `propagation`: \"the whole app, or only the receivers above, below or beside this node\"; nodescope.ts `sendEventFromThisScope` :561-568 \u2014 `parent` skips this scope and delivers in the parent scope",
+    "world": {},
+    "components": {
+      "child": {},
+      "sib": {}
+    },
+    "nodes": {
+      "s": {
+        "type": "Event Sender",
+        "params": {
+          "channelName": "c",
+          "propagation": "parent"
+        },
+        "in": "child"
+      },
+      "rRoot": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        }
+      },
+      "rChild": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        },
+        "in": "child"
+      },
+      "rSib": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        },
+        "in": "sib"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "s",
+        "signal": "sendEvent"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "rRoot",
+        "signal": "eventReceived",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "rChild",
+        "signal": "eventReceived",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "rSib",
+        "signal": "eventReceived",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "propagation",
+        "value": "parent",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rRoot"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rChild"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rSib"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "sendEvent",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "sendEvent",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "rRoot"
+      }
+    ]
+  },
+  {
+    "name": "Send to = Children reaches the receivers in every component placed below the sender's, grandchildren included, and none in the sender's own component",
+    "clauses": [
+      "N"
+    ],
+    "because": "eventsender.ts `propagation`: \"only the receivers ... below\"; nodescope.ts :569-582 \u2014 `children` walks every component-instance child of this scope's nodes and recurses",
+    "world": {},
+    "components": {
+      "a": {},
+      "b": {},
+      "grand": {
+        "parent": "a"
+      }
+    },
+    "nodes": {
+      "s": {
+        "type": "Event Sender",
+        "params": {
+          "channelName": "c",
+          "propagation": "children"
+        }
+      },
+      "rRoot": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        }
+      },
+      "rA": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        },
+        "in": "a"
+      },
+      "rB": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        },
+        "in": "b"
+      },
+      "rG": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        },
+        "in": "grand"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "s",
+        "signal": "sendEvent"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "rA",
+        "signal": "eventReceived",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "rB",
+        "signal": "eventReceived",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "rG",
+        "signal": "eventReceived",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "rRoot",
+        "signal": "eventReceived",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "propagation",
+        "value": "children",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rRoot"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rA"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rB"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rG"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "sendEvent",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "sendEvent",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "rA"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "rB"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "rG"
+      }
+    ]
+  },
+  {
+    "name": "Send to = Siblings reaches the receivers in the components placed beside the sender's, and none in its own component or in the enclosing one",
+    "clauses": [
+      "N"
+    ],
+    "because": "eventsender.ts `propagation`: \"only the receivers ... beside this node\"; nodescope.ts :583-607 \u2014 `siblings` walks the parent scope's component-instance children except this scope",
+    "world": {},
+    "components": {
+      "a": {},
+      "b": {},
+      "c": {}
+    },
+    "nodes": {
+      "s": {
+        "type": "Event Sender",
+        "params": {
+          "channelName": "c",
+          "propagation": "siblings"
+        },
+        "in": "a"
+      },
+      "rA": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        },
+        "in": "a"
+      },
+      "rB": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        },
+        "in": "b"
+      },
+      "rC": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        },
+        "in": "c"
+      },
+      "rRoot": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "s",
+        "signal": "sendEvent"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "rB",
+        "signal": "eventReceived",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "rC",
+        "signal": "eventReceived",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "rA",
+        "signal": "eventReceived",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "rRoot",
+        "signal": "eventReceived",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "propagation",
+        "value": "siblings",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rA"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rB"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rC"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rRoot"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "sendEvent",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "sendEvent",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "rB"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "rC"
+      }
+    ]
+  },
+  {
+    "name": "Consume = Always in the first child component stops a Children event reaching the second",
+    "clauses": [
+      "N"
+    ],
+    "because": "eventreceiver.ts `consume`: \"Whether receiving an event stops it reaching other receivers on the same channel\" \u2014 the claim is the sentence, on the `children` walk (nodescope.ts :573-581). RECORDED: the second child fires too \u2014 the `return true` at nodescope.ts :579 returns from the forEach callback, not from the walk, so a consumed Children (and Siblings, :603) event stops only within the component that consumed it",
+    "world": {},
+    "components": {
+      "a": {},
+      "b": {}
+    },
+    "nodes": {
+      "s": {
+        "type": "Event Sender",
+        "params": {
+          "channelName": "c",
+          "propagation": "children"
+        }
+      },
+      "rA": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c",
+          "consume": "always"
+        },
+        "in": "a"
+      },
+      "rB": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        },
+        "in": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "s",
+        "signal": "sendEvent"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "rA",
+        "signal": "eventReceived",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "rB",
+        "signal": "eventReceived",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "propagation",
+        "value": "children",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rA"
+      },
+      {
+        "t": "set",
+        "port": "consume",
+        "value": "always",
+        "subject": "rA"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rB"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "sendEvent",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "sendEvent",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "rA"
+      },
+      {
+        "t": "signal",
+        "port": "eventReceived",
+        "subject": "rB"
+      }
+    ],
+    "row": "NSP-012 \u00a76 C13"
+  }
+]

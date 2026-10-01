@@ -453,9 +453,14 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
     name: 'export',
 
     canPlay(sc: GraphScenario) {
+      // NSP-012: the export has no world (no seeded registry, no store, no clock) and emits ONE
+      // component — a scenario that declares a world or a tree of component instances is outside
+      if (sc.world !== undefined) return 'the export has no world to install — a scenario that declares one (a registry, a store, a clock) is outside';
+      if (sc.components && Object.keys(sc.components).length) return 'the export emits one component — a tree of component instances is outside (the component boundary is NSP-015)';
       for (const step of sc.steps) {
         if (step === 'settle') continue;
         if ('wire' in step) return 'the export emits a component whole — no wire is made after mount';
+        if ('advance' in step) return 'the export has no world clock to advance';
         if ('set' in step) return `a value input reaches the export only as a literal param — set on ${step.node}.${step.set} is not drivable`;
       }
       const { refused } = emitGraph(sc.nodes, sc.wires ?? []);
