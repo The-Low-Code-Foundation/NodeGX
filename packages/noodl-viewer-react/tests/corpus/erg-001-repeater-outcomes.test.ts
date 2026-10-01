@@ -302,22 +302,21 @@ describe('ERG-001 §4: Repeater Refresh', () => {
   });
 
   /**
-   * ⚠️ **A defect found by building this, measured rather than inferred, and deliberately not
-   * fixed here.**
+   * A defect found by building this, filed here as "(filed, not fixed)" and **fixed by ISL-001
+   * (P78 D85)**.
    *
    * `Items Rendered` promises "once every item component exists and has been added" — NDA-004
    * §3 added it precisely so that list-then-scroll and list-then-measure stopped being a
-   * guessed Delay. On the `Refresh` path it does not keep that promise: `_queueOperation` is
-   * handed `() => { this.refresh(); }`, whose block body drops the promise, so
-   * `_runQueueOperations`' `await op()` returns immediately and the queue drains — firing
-   * `Items Rendered` — while the rebuild is still awaiting `addItem` per item.
-   *
-   * This row pins the measured behaviour rather than the intended one, because repairing it
-   * changes *when* an existing signal fires, which is a behaviour change and not this slice's
-   * to make. `Done` is honest about the same moment and is the answer for anything sequencing
-   * off a `Refresh` until the ordering is fixed. The one-character fix is `() => this.refresh()`.
+   * guessed Delay. On the `Refresh` path it used not to keep that promise: `_queueOperation`
+   * was handed `() => { this.refresh(); }`, whose block body dropped the promise, so
+   * `_runQueueOperations`' `await op()` returned immediately and the queue drained — firing
+   * `Items Rendered` with 0 items — while the rebuild was still awaiting `addItem` per item.
+   * The same dropped promise let a second `Items` value's ops run beside the rebuild, which is
+   * how a list fed twice drew both sets of rows (D85). ISL-001 made the op return the promise,
+   * so this row now pins the honest order: `Done` as the last row is attached, then
+   * `Items Rendered` once the queue has drained with every row on screen.
    */
-  it('(filed, not fixed) fires Items Rendered before a Refresh\'s items exist, while Done waits for them', async () => {
+  it('fires Items Rendered once a Refresh\'s items exist, after Done (ISL-001)', async () => {
     const graph = await repeaterGraph();
     const repeater = graph.node<NodeInstance & { _internal: { itemNodes?: unknown[] } }>('repeater');
     graph.node('repeater').setInputValue('items', [Model.create({ id: 'a' })]);
@@ -334,9 +333,9 @@ describe('ERG-001 §4: Repeater Refresh', () => {
     await graph.settle();
 
     expect(observed).toEqual([
-      { signal: 'itemsRendered', items: 0 },
       { signal: 'done', items: 1 },
-      { signal: 'completed', items: 1 }
+      { signal: 'completed', items: 1 },
+      { signal: 'itemsRendered', items: 1 }
     ]);
   });
 

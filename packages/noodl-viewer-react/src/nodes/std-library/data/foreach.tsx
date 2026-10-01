@@ -453,9 +453,14 @@ const ForEachDefinition: NodeDefinitionOptions = {
       if (!internal.hasScheduledRefresh) {
         internal.hasScheduledRefresh = true;
         this.scheduleAfterInputsHaveUpdated(() => {
-          this._queueOperation(() => {
-            this.refresh();
-          });
+          // ISL-001 (P78 D85). The op RETURNS the rebuild's promise, so the queue runner waits for
+          // it. It used to be `() => { this.refresh(); }` — a block body that returned `undefined`
+          // — and the runner awaited that, drained, cleared `runningOperations` and fired
+          // `Items Rendered` while `refresh()` was still creating rows. Any `add`/`remove` a second
+          // `Items` value queued meanwhile then ran BESIDE the rebuild instead of after it: a
+          // record the new list added was built twice, and one it dropped was "removed" before it
+          // existed and attached afterwards. Three templates met that and each hid it with a wait.
+          this._queueOperation(() => this.refresh());
         });
       }
     },
@@ -780,11 +785,21 @@ const ForEachDefinition: NodeDefinitionOptions = {
       // figure out our index in our target
       const baseIndex = this._internal.target.getChildren().indexOf(this as unknown as ForEachItemNode) + 1;
 
-      // Iterate over all models and create items
+      // ISL-001 (P78 D85). Iterate a SNAPSHOT taken before the first `await`, not the live
+      // collection. `addItem` yields on every row, and a second `Items` value can reach
+      // `collection.set` in that gap — from a node later in the same update pass, or a frame
+      // later under chunked creation. Reading the live collection made this loop build the new
+      // list's records as well, while the `add` ops `set` queued for the same records waited
+      // behind this op to build them again. With a snapshot the rebuild makes exactly the list
+      // the diff was taken against, and the queued ops then move it to the new one, once.
+      const models: ModelLike[] = [];
       for (let i = 0; i < internal.collection.size(); i++) {
-        const model = internal.collection.get(i);
+        models.push(internal.collection.get(i));
+      }
 
-        await this.addItem(model, baseIndex + i);
+      // Iterate over all models and create items
+      for (let i = 0; i < models.length; i++) {
+        await this.addItem(models[i], baseIndex + i);
       }
 
       // Last, once every item node for this pass exists. ⚠️ Not `Items Rendered`'s moment and
