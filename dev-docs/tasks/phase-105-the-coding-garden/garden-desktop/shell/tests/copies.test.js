@@ -291,6 +291,38 @@ test('the save code is byte-identical to the page’s own encoder, and the page�
   const crewBack = decode({ code: C.saveCodeOf(crew) });
   assert.deepEqual(crewBack.model.profiles[0].island.robots.filter((r) => r.helps).map((r) => [r.id, r.helps]), [['rk4', pinnedId]]);
   assert.deepEqual(crewBack.model.profiles[0].island.robots.find((r) => r.id === 'rk7').program, [{ id: 5, t: 'fwd' }]);
+  // P108 IW-007 (s5 base): her land packs as the page packs it (row 18), and the unsound is dropped the same way — a second
+  // spa, a building off the plot, a part over its need, an animal by no refuge, two animals in one place, a hungry count.
+  const built = JSON.parse(JSON.stringify(crew));
+  built.profiles[0].island.land = {
+    buildings: [
+      { id: 'b1', bp: 'spa', x: 3, y: 1, have: { stone: 9, plank: 2.7 } },
+      { id: 'b2', bp: 'refuge', x: 3, y: 3, have: { plank: 6, stone: 4 } },
+      { id: 'b3', bp: 'spa', x: 0, y: 4, have: {} },
+      { id: 'b4', bp: 'castle', x: 0, y: 0 },
+      { id: 'b5', bp: 'refuge', x: 7, y: 5 }
+    ],
+    animals: [
+      { id: 'a1', kind: 'rabbit', name: '  Flopsy  ', at: 'b2', slot: 0, fed: 9 },
+      { id: 'a2', kind: 'sheep', name: 'Woolly', at: 'b2', slot: 0, fed: 1 },
+      { id: 'a3', kind: 'sheep', name: 'Cloud', at: 'b1', slot: 0, fed: 1 },
+      { id: 'a4', kind: 'sheep', name: 'Nimbus', at: 'b2', slot: 1, fed: 2 }
+    ]
+  };
+  assert.equal(C.saveCodeOf(built), encode({ model: built }).code, 'her land packs as the page packs it');
+  const builtBack = decode({ code: C.saveCodeOf(built) });
+  assert.deepEqual(builtBack.model.profiles[0].island.land, {
+    buildings: [
+      { id: 'b1', bp: 'spa', x: 3, y: 1, have: { stone: 6, plank: 2 } },
+      { id: 'b2', bp: 'refuge', x: 3, y: 3, have: { plank: 6, stone: 4 } }
+    ],
+    animals: [
+      { id: 'a1', kind: 'rabbit', name: 'Flopsy', at: 'b2', slot: 0, fed: 3 },
+      { id: 'a4', kind: 'sheep', name: 'Nimbus', at: 'b2', slot: 1, fed: 2 }
+    ]
+  });
+  // A profile with no land packs with no row 18: the code of a family that never built is the code it had.
+  assert.equal(builtBack.model.profiles[1].island.land, undefined);
 });
 
 // ── The restore ─────────────────────────────────────────────────────────────

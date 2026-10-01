@@ -66,6 +66,8 @@ import { BLOCK_WORD, OLIVE_ENGINE, OLIVE_HELPERS, RUNG_SHAPE, RUNG_TEMPERATURE }
 import { ENVELOPE_NOTES } from './cg005Olive';
 // P108 IW-002: the job model's vocabulary, its wear clock and its seeded layouts.
 import { HEN_CAPACITY, JOB_ITEMS, JOB_KINDS, SITE_STAGES, WALL_TILE, WEAR } from './cg002Content';
+// P108 IW-007 (s5 base): the sources a pick mines, the blueprints' stages, the land's save shape.
+import { ANIMALS_JSON, BLUEPRINTS, BLUEPRINTS_JSON, PLOT_H, PLOT_W, SOURCE_ITEMS } from './cg002Content';
 // P108 IW-006 / IW-008 (session-4 base): the economy's names.
 import { BRAIN_SIZE, BRAIN_SIZES, CREW_CAP, SHOP_JSON } from './cg002Content';
 
@@ -240,7 +242,7 @@ export const ENGINE = `
 var DX = [0, 1, 0, -1], DY = [-1, 0, 1, 0];
 var BLOCKING_TILES = { W: 1, R: 1, T: 1, H: 1, L: 1 };
 // IG-002: a rock (a mineable thing on grass) and a sign block a move like a tulip; a note on the ground does not.
-var BLOCKING_THINGS = { tulip: 1, bowl: 1, rock: 1, sign: 1, basket: 1, store: 1, can: 1, hen: 1, postbox: 1, door: 1 };
+var BLOCKING_THINGS = { tulip: 1, bowl: 1, rock: 1, sign: 1, basket: 1, store: 1, can: 1, hen: 1, postbox: 1, door: 1, tree: 1, patch: 1 };
 // P108 IW-002: the job model (brief §4.2) — its kinds and their roles, a container's item, the wear clock (island ticks only).
 var JOB_KINDS = ${JSON.stringify(JOB_KINDS)};
 var JOB_ITEMS = ${JSON.stringify(JOB_ITEMS)};
@@ -248,7 +250,11 @@ var WEAR = ${JSON.stringify(WEAR)};
 var HEN_CAPACITY = ${HEN_CAPACITY};
 var SITE_STAGES = ${JSON.stringify(SITE_STAGES)};
 var CAN_MAX = ${CAN_MAX};
-var PICKABLE = { letter: 1, egg: 1, stone: 1, food: 1, ball: 1 };
+var PICKABLE = { letter: 1, egg: 1, stone: 1, food: 1, ball: 1, plank: 1, carrot: 1 };
+// P108 IW-007 (s5 base): a source a pick mines (one of its item per pick, its left shrinking; one with a max regrows) and
+// each blueprint's number of stages (a building's parts share one stage, bstage, by the share of ALL its materials in).
+var SOURCE_ITEMS = ${JSON.stringify(SOURCE_ITEMS)};
+var BUILD_STAGES = ${JSON.stringify(Object.fromEntries(BLUEPRINTS.map((b) => [b.id, b.stages])))};
 var UNTIL_GUARD = ${UNTIL_GUARD};
 var MAX_TRICK_DEPTH = ${MAX_TRICK_DEPTH};
 var MAX_TICKS = ${MAX_TICKS};
@@ -288,7 +294,24 @@ function worldOf(raw) {
     }
   }
   for (var si = 0; si < w.things.length; si++) if (w.things[si] && w.things[si].kind === 'site') w.things[si].stage = stageOf(w.things[si]);
+  restage(w);
   return w;
+}
+/**
+ * P108 IW-007 (s5 base): a building's stage. Its parts (sites with the same of) share ONE stage by the share of all their
+ * materials delivered: 0 nothing yet (the pegs) · 1 .. n − 2 on the way · n − 1 finished (every part full). n is its
+ * blueprint's stages (BUILD_STAGES by its build; 4 when unknown). Written on every part as bstage.
+ */
+function buildStage(have, need, n) {
+  var k = Math.max(2, Math.floor(Number(n)) || 4);
+  if (!(have > 0)) return 0;
+  if (have >= need) return k - 1;
+  return Math.min(k - 2, 1 + Math.floor((k - 2) * have / need));
+}
+function restage(w) {
+  var sum = {};
+  for (var i = 0; i < w.things.length; i++) { var t = w.things[i]; if (!t || t.kind !== 'site' || !isSet(t.of)) continue; var m = meterOf(t), k = String(t.of); if (!sum[k]) sum[k] = { have: 0, need: 0, n: BUILD_STAGES[String(t.build)] || 4 }; sum[k].have += m.have; sum[k].need += m.need; }
+  for (var j = 0; j < w.things.length; j++) { var u = w.things[j]; if (u && u.kind === 'site' && isSet(u.of) && sum[String(u.of)]) u.bstage = buildStage(sum[String(u.of)].have, sum[String(u.of)].need, sum[String(u.of)].n); }
 }
 /** IW-002: a full path site reads as path (P) whatever the map says under it; the site thing stays (wear can take a stone back). */
 function tileAt(w, x, y) {
@@ -442,10 +465,12 @@ function wearOf(worldIn, age) {
   }
   if (due('site')) {
     var best = null;
-    for (var s2 = 0; s2 < w.things.length; s2++) { var st = w.things[s2]; if (st && st.kind === 'site' && meterOf(st).have > 0 && (!best || (Number(st.walked) || 0) > (Number(best.walked) || 0))) best = st; }
+    // P108 IW-007 (s5 base): a building's part (keep) never wears — a building never un-builds (R2, IW-007 AC3).
+    for (var s2 = 0; s2 < w.things.length; s2++) { var st = w.things[s2]; if (st && st.kind === 'site' && !st.keep && meterOf(st).have > 0 && (!best || (Number(st.walked) || 0) > (Number(best.walked) || 0))) best = st; }
     if (best) out.push({ wear: { id: String(best.id || ''), kind: 'site', x: best.x, y: best.y, have: meterOf(best).have - 1 } });
   }
-  if (due('rock')) for (var r2 = 0; r2 < w.things.length; r2++) { var rk = w.things[r2]; if (rk && rk.kind === 'rock' && Number(rk.max) > 0 && (Math.floor(Number(rk.left)) || 0) < Math.floor(Number(rk.max))) out.push({ regrow: { id: String(rk.id || ''), x: rk.x, y: rk.y, left: (Math.floor(Number(rk.left)) || 0) + 1 } }); }
+  // P108 IW-007 (s5 base): every source with a max regrows one on its own clock (rock 30, tree 40, patch 30).
+  for (var r2 = 0; r2 < w.things.length; r2++) { var rk = w.things[r2]; if (rk && SOURCE_ITEMS[rk.kind] && due(rk.kind) && Number(rk.max) > 0 && (Math.floor(Number(rk.left)) || 0) < Math.floor(Number(rk.max))) out.push({ regrow: { id: String(rk.id || ''), kind: rk.kind, x: rk.x, y: rk.y, left: (Math.floor(Number(rk.left)) || 0) + 1 } }); }
   if (due('hen')) for (var h = 0; h < w.things.length; h++) {
     var hen = w.things[h];
     if (!hen || hen.kind !== 'hen' || !Array.isArray(hen.pen) || hen.pen.length !== 4) continue;
@@ -574,7 +599,7 @@ function levelIn(w, r, it) {
   if (it.held) return it.kind === 'can' ? canOf(r) || 0 : r.carry.length;
   var t = it.thing;
   if (t.kind === 'can') return Math.max(0, Math.floor(Number(t.level)) || 0);
-  if (t.kind === 'rock') return Math.max(0, Math.floor(Number(t.left)) || 0);
+  if (SOURCE_ITEMS[t.kind]) return Math.max(0, Math.floor(Number(t.left)) || 0);
   if (t.kind === 'tulip' || t.kind === 'site' || JOB_KINDS[t.kind] === 'container') return meterOf(t).have;
   return 0;
 }
@@ -605,7 +630,8 @@ function stateOf(w, r, it, state, n, what) {
   if (JOB_KINDS[t.kind] === 'container') { if (state === 'empty') return m.have <= 0; if (state === 'full') return isFinite(m.need) && m.have >= m.need; if (state === 'has') return m.have >= need; return false; }
   if (t.kind === 'tulip') { if (state === 'drunk') return isFull(t); if (state === 'thirsty') return !isFull(t); return false; }
   if (t.kind === 'site') { if (state === 'done') return isFull(t); if (state === 'dirt') return m.have <= 0; return false; }
-  if (t.kind === 'rock') { var left = Math.floor(Number(t.left)) || 0; if (state === 'stones') return left > 0; if (state === 'used') return left <= 0; return false; }
+  // P108 IW-007 (s5 base): every source reads like the rock (stones: something left to pick; used: nothing left).
+  if (SOURCE_ITEMS[t.kind]) { var left = Math.floor(Number(t.left)) || 0; if (state === 'stones') return left > 0; if (state === 'used') return left <= 0; return false; }
   return false;
 }
 function valOf(w, run, r, v, depth) {
@@ -933,7 +959,7 @@ function rollOut(w, t) {
  */
 function seekSkips(t) {
   if (!t) return true;
-  if (t.kind === 'rock') return !(Number(t.left) > 0);
+  if (SOURCE_ITEMS[t.kind]) return !(Number(t.left) > 0);
   if (JOB_KINDS[t.kind] === 'target') return isFull(t);
   return false;
 }
@@ -1059,16 +1085,17 @@ function exec(w, run, s, delta) {
   if (s.op === 'pick') {
     var th = thingsAt(w, f.x, f.y), it = null, rock = null, box = null, rock0 = null, canT = null;
     for (var i = 0; i < th.length && !it; i++) if (PICKABLE[th[i].kind]) it = th[i];
-    for (var ri = 0; ri < th.length && !rock; ri++) if (th[ri].kind === 'rock' && Number(th[ri].left) > 0) rock = th[ri];
+    // P108 IW-007 (s5 base): any source (SOURCE_ITEMS: the rock, a tree, a patch) gives its item; the delta keeps rock: true.
+    for (var ri = 0; ri < th.length && !rock; ri++) if (SOURCE_ITEMS[th[ri].kind] && Number(th[ri].left) > 0) rock = th[ri];
     // P108 IW-002: the can is a thing the robot picks up (it holds it; the can leaves the map with its level)…
     for (var ci = 0; ci < th.length && !canT; ci++) if (th[ci].kind === 'can') canT = th[ci];
     if (canT && r.holds !== 'can') { delta.holds = { id: r.id, what: 'can', x: f.x, y: f.y, level: Math.max(0, Math.floor(Number(canT.level)) || 0), max: Number(canT.max) > 0 ? Math.floor(Number(canT.max)) : 0 }; delta.sayKey = 'sayPick'; return; }
     // …a container gives one of its item; a rock with a max stays on the map at 0 (it regrows on island ticks).
     for (var bi = 0; bi < th.length && !box; bi++) if (JOB_KINDS[th[bi].kind] === 'container' && meterOf(th[bi]).have > 0) box = th[bi];
-    for (var r0 = 0; r0 < th.length && !rock0; r0++) if (th[r0].kind === 'rock' && !(Number(th[r0].left) > 0) && Number(th[r0].max) > 0) rock0 = th[r0];
+    for (var r0 = 0; r0 < th.length && !rock0; r0++) if (SOURCE_ITEMS[th[r0].kind] && !(Number(th[r0].left) > 0) && Number(th[r0].max) > 0) rock0 = th[r0];
     if (it && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: it.kind, x: f.x, y: f.y }; mailPick(it, delta); delta.sayKey = 'sayPick'; return; }
     // IG-002: a rock ahead gives one stone per pick (the basket bounds it); apply shrinks the rock and removes it at 0.
-    if (!it && rock && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: 'stone', x: f.x, y: f.y, rock: true }; delta.sayKey = 'sayPick'; return; }
+    if (!it && rock && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: SOURCE_ITEMS[rock.kind], x: f.x, y: f.y, rock: true }; if (rock.kind !== 'rock') delta.pick.source = rock.kind; delta.sayKey = 'sayPick'; return; }
     if (!it && !rock && box && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: itemOf(box), x: f.x, y: f.y, box: true, from: String(box.id || '') }; delta.meter = meterDelta(box, f.x, f.y, meterOf(box).have - 1); mailPick(box, delta); delta.sayKey = 'sayPick'; return; }
     // A pick where a rock was used up: a bump with nothing carried (the rockGone hint names why).
     if (!it && !rock && (spentAt(w, f.x, f.y) || rock0)) { run.rockGone++; run.bumps++; delta.bump = { id: r.id, x: f.x, y: f.y }; delta.rockGone = { x: f.x, y: f.y }; delta.sayKey = 'sayBump'; return; }
@@ -1097,7 +1124,8 @@ function exec(w, run, s, delta) {
     // IW-002: a bowl with a capacity refuses when full and shows its meter; one without fills as before.
     if (bowl.length && kind === itemOf(bowl[0]) && isFull(bowl[0])) { delta.full = { id: String(bowl[0].id || ''), x: f.x, y: f.y }; delta.sayKey = 'sayFull'; return; }
     if (bowl.length && kind === itemOf(bowl[0]) && Number(bowl[0].capacity) > 0) delta.meter = meterDelta(bowl[0], f.x, f.y, meterOf(bowl[0]).have + 1);
-    if (bowl.length) { if (kind === 'food') { delta.feed = { id: r.id, x: f.x, y: f.y }; delta.sayKey = 'sayPut'; return; } delta.nothing = true; return; }
+    // P108 IW-007 (s5 base): a bowl takes its own item (food, or an animal's carrots), nothing else.
+    if (bowl.length) { if (kind === itemOf(bowl[0])) { delta.feed = { id: r.id, x: f.x, y: f.y }; delta.sayKey = 'sayPut'; return; } delta.nothing = true; return; }
     if (tileAt(w, f.x, f.y) !== '' && !blocked(w, f.x, f.y)) { delta.put = { id: r.id, kind: kind, x: f.x, y: f.y }; delta.sayKey = 'sayPut'; return; }
     delta.nothing = true; return;
   }
@@ -1260,7 +1288,7 @@ function apply(worldIn, delta) {
       // IG-002: the rock ahead gives a stone and shrinks; at 0 it is removed and its tile remembered as spent.
       for (var k = 0; k < w.things.length; k++) {
         var rk = w.things[k];
-        if (rk.x !== d.pick.x || rk.y !== d.pick.y || rk.kind !== 'rock') continue;
+        if (rk.x !== d.pick.x || rk.y !== d.pick.y || rk.kind !== (d.pick.source || 'rock')) continue;
         rk.left = Math.max(0, Math.floor(Number(rk.left)) - 1);
         if (!(rk.left > 0) && !(Number(rk.max) > 0)) { w.things.splice(k, 1); w.spent = (Array.isArray(w.spent) ? w.spent : []).concat([d.pick.x + ',' + d.pick.y]); }
         break;
@@ -1282,7 +1310,7 @@ function apply(worldIn, delta) {
     } else if (rh) { w.things.push({ kind: 'can', x: d.holds.x, y: d.holds.y, level: canOf(rh) || 0, max: canMaxOf(rh) }); delete rh.holds; rh.can = null; }
   }
   if (d.wear) { var wt = thingOf(w, d.wear); if (wt) { setMeter(wt, d.wear.have); if (wt.kind === 'tulip') wt.droop = true; rollOut(w, wt); } }
-  if (d.regrow) { var rg = thingOf(w, { id: d.regrow.id, x: d.regrow.x, y: d.regrow.y, kind: 'rock' }); if (rg) rg.left = Math.max(0, Math.min(Math.floor(Number(rg.max)) || 0, Math.floor(Number(d.regrow.left)) || 0)); }
+  if (d.regrow) { var rg = thingOf(w, { id: d.regrow.id, x: d.regrow.x, y: d.regrow.y, kind: d.regrow.kind || 'rock' }); if (rg) rg.left = Math.max(0, Math.min(Math.floor(Number(rg.max)) || 0, Math.floor(Number(d.regrow.left)) || 0)); }
   if (d.lay) w.things.push({ kind: 'egg', x: d.lay.x, y: d.lay.y });
   if (d.letter) w.things.push({ kind: 'letter', x: d.letter.x, y: d.letter.y });
   if (d.seed !== undefined && d.seed !== null && isFinite(Number(d.seed))) w.seed = Number(d.seed) >>> 0;
@@ -1298,6 +1326,8 @@ function apply(worldIn, delta) {
   }
   // P108 IW-003 (lane P): a letter through a door, the names beside the carry, an addressed letter in the post box.
   mailApply(w, d);
+  // P108 IW-007 (s5 base): a drop on a building's part moves the whole building's stage.
+  if (d.stow || d.wear) restage(w);
   return w;
 }
 /** Run a program to its end with no Olive (every ask takes the fallback). For Predict and the gate. */
@@ -1775,6 +1805,10 @@ var BRAIN_SIZE = ${BRAIN_SIZE};
 var BRAIN_SIZES = ${JSON.stringify(BRAIN_SIZES)};
 var CREW_CAP = ${CREW_CAP};
 var SHOP = ${SHOP_JSON};
+// P108 IW-007 (session-5 base): her land — the blueprints, the animals, the plot's size.
+var BLUEPRINTS = ${BLUEPRINTS_JSON};
+var ANIMALS = ${ANIMALS_JSON};
+var LAND_W = ${PLOT_W}, LAND_H = ${PLOT_H};
 function newId(prefix) { return prefix + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }
 function tricksOf(raw) {
   var out = {};
@@ -1963,7 +1997,57 @@ function islandOf(raw) {
   var plots = plotsOf(i.plots, robots);
   // P108 IW-008 (lane C): a second robot only where it may be.
   crewHelps(robots, plots);
-  return { done: done, plots: plots, robots: robots };
+  var out = { done: done, plots: plots, robots: robots };
+  // P108 IW-007 (s5 base): her land, only when something stands on it (an island without one reads as before).
+  var land = landOf(i.land);
+  if (land.buildings.length || land.animals.length) out.land = land;
+  return out;
+}
+/** P108 IW-007: a blueprint's spec, or null. */
+function blueprintSpec(id) { for (var i = 0; i < BLUEPRINTS.length; i++) if (BLUEPRINTS[i].id === String(id)) return BLUEPRINTS[i]; return null; }
+/** P108 IW-007: an animal kind's spec, or null. */
+function animalSpec(id) { for (var i = 0; i < ANIMALS.length; i++) if (ANIMALS[i].id === String(id)) return ANIMALS[i]; return null; }
+/** P108 IW-007: a building on the land is finished when every part has its whole need. */
+function buildingDone(b) {
+  var spec = b ? blueprintSpec(b.bp) : null;
+  if (!spec) return false;
+  for (var i = 0; i < spec.parts.length; i++) if (!(Number(b.have && b.have[spec.parts[i].item]) >= spec.parts[i].need)) return false;
+  return true;
+}
+/**
+ * P108 IW-007 (s5 base): her land as the save keeps it — buildings '{ id, bp, x, y, have: { item: n } }' (one of each
+ * blueprint, every part and pen tile inside the plot, have clipped to each part's need) and animals '{ id, kind, name, at,
+ * slot, fed }' (at: the id of a refuge on this land; slot: a place of its pen, one animal each; fed: her bowl, clipped to
+ * its capacity). Anything unsound is dropped. Never un-builds: the island writes have back only upwards (landKeep).
+ */
+function landOf(raw) {
+  var r = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  var out = { buildings: [], animals: [] }, ids = {}, bps = {}, slots = {};
+  var bl = Array.isArray(r.buildings) ? r.buildings : [];
+  for (var i = 0; i < bl.length; i++) {
+    var b = bl[i], spec = b && typeof b === 'object' ? blueprintSpec(b.bp) : null;
+    var id = spec && typeof b.id === 'string' ? b.id.trim().slice(0, 40) : '';
+    if (!spec || !id || ids[id] || bps[spec.id]) continue;
+    var x = Math.floor(Number(b.x)), y = Math.floor(Number(b.y)), w = spec.parts.length, h = spec.pen ? 2 : 1;
+    if (!(x >= 0 && y >= 0 && x + w <= LAND_W && y + h <= LAND_H)) continue;
+    var have = {};
+    for (var k = 0; k < spec.parts.length; k++) { var pt = spec.parts[k]; have[pt.item] = Math.max(0, Math.min(pt.need, Math.floor(Number(b.have && b.have[pt.item])) || 0)); }
+    ids[id] = 1; bps[spec.id] = 1;
+    out.buildings.push({ id: id, bp: spec.id, x: x, y: y, have: have });
+  }
+  var al = Array.isArray(r.animals) ? r.animals : [];
+  for (var j = 0; j < al.length; j++) {
+    var a = al[j], as = a && typeof a === 'object' ? animalSpec(a.kind) : null;
+    var aid = as && typeof a.id === 'string' ? a.id.trim().slice(0, 40) : '';
+    if (!as || !aid || ids[aid]) continue;
+    var home = null;
+    for (var q = 0; q < out.buildings.length; q++) if (out.buildings[q].id === String(a.at) && (blueprintSpec(out.buildings[q].bp) || {}).pen) home = out.buildings[q];
+    var slot = Math.floor(Number(a.slot));
+    if (!home || !(slot >= 0 && slot < blueprintSpec(home.bp).pen) || slots[home.id + ':' + slot]) continue;
+    ids[aid] = 1; slots[home.id + ':' + slot] = 1;
+    out.animals.push({ id: aid, kind: as.id, name: typeof a.name === 'string' ? a.name.trim().slice(0, ROBOT_NAME_MAX) : '', at: home.id, slot: slot, fed: Math.max(0, Math.min(as.capacity, Math.floor(Number(a.fed)) || 0)) });
+  }
+  return out;
 }
 /** IG-004: the plot a robot is pinned to on an island, or ''. */
 function plotOfRobot(island, robotId) {
@@ -2024,6 +2108,9 @@ function earnShells(p, n) { var k = Math.max(0, Math.floor(Number(n)) || 0); if 
  * '{ ok, error, short, left, robotId }': error '' | 'unknown' | 'short' (short = how many more shells) | 'kind' (a copy of a
  * robot kind the island does not have) | 'cap' (CREW_CAP robots) | 'robot' (a brain for no robot of hers) | 'size' (that
  * robot's brain is not the size before this one) | 'held' (that helper is held already, unused) | 'owned' (that upgrade is hers).
+ * P108 IW-007 (s5 base): a blueprint goes into 'owned' once ('owned' again after); an animal needs a FINISHED refuge on her
+ * land ('refuge' when there is none, 'pen' when every place of its pen is taken), takes 'opts.name', and is placed in the
+ * first free place ('animalId' its id). A blueprint is placed on the land by landPlace (iw007Land), never by buying it.
  * 'opts.robotId' names the robot a brain is for; 'opts.name' a copy's name (else the kind's name and its number).
  */
 function buyItem(p, id, opts) {
@@ -2039,6 +2126,17 @@ function buyItem(p, id, opts) {
     if (!row) { out.error = 'robot'; return out; }
     var at = BRAIN_SIZES.indexOf(Number(row.brain) > BRAIN_SIZE ? Number(row.brain) : BRAIN_SIZE);
     if (BRAIN_SIZES[at + 1] !== it.size) { out.error = 'size'; return out; }
+  } else if (it.kind === 'animal') {
+    // P108 IW-007 (s5 base): an animal only beside a finished refuge, in a free place of its pen.
+    var lnd = p.island.land || { buildings: [], animals: [] }, pen = null;
+    for (var rf = 0; rf < lnd.buildings.length && !pen; rf++) {
+      var rb = lnd.buildings[rf], rs = blueprintSpec(rb.bp);
+      if (!rs || !rs.pen || !buildingDone(rb)) continue;
+      for (var sl = 0; sl < rs.pen && !pen; sl++) { var used = false; for (var an = 0; an < lnd.animals.length; an++) if (lnd.animals[an].at === rb.id && lnd.animals[an].slot === sl) used = true; if (!used) pen = { at: rb.id, slot: sl }; }
+      if (!pen) { out.error = 'pen'; }
+    }
+    if (!pen) { if (!out.error) out.error = 'refuge'; return out; }
+    out.error = '';
   } else if (p.owned.indexOf(it.id) !== -1 || (it.kind === 'upgrade' && p.stickers.indexOf(it.upgrade) !== -1)) { out.error = it.kind === 'helper' ? 'held' : 'owned'; return out; }
   if (balanceOf(p) < it.price) { out.error = 'short'; out.short = it.price - balanceOf(p); return out; }
   p.shells.spent += it.price;
@@ -2050,6 +2148,14 @@ function buyItem(p, id, opts) {
     p.island.robots.push({ id: nid, kind: spec.id, name: nm || (spec.defaultName[lang] + ' ' + n).slice(0, ROBOT_NAME_MAX), color: spec.colour, eye: 'round', hat: 'none' });
     out.robotId = nid;
   } else if (it.kind === 'brain') row.brain = it.size;
+  else if (it.kind === 'animal') {
+    // P108 IW-007 (s5 base): her name for it, else the shop's name; its bowl starts empty (she feeds it).
+    var anm = typeof o.name === 'string' ? o.name.trim().slice(0, ROBOT_NAME_MAX) : '';
+    var aid = newId('a');
+    if (!p.island.land) p.island.land = { buildings: [], animals: [] };
+    p.island.land.animals.push({ id: aid, kind: it.animal, name: anm, at: pen.at, slot: pen.slot, fed: 0 });
+    out.animalId = aid;
+  }
   else p.owned.push(it.id);
   out.ok = true;
   out.left = balanceOf(p);
@@ -2081,6 +2187,8 @@ function activate(model, id) {
   var active = null;
   for (var j = 0; j < model.profiles.length; j++) if (model.profiles[j].id === id) active = model.profiles[j];
   model.island = { activeId: String(id || ''), done: active ? active.island.done : [], plots: active ? active.island.plots : {}, robots: active ? active.island.robots : [{ id: FIRST_ROBOT_ID }] };
+  // P108 IW-007 (s5 base): her land, the same object, when she has one.
+  if (active && active.island.land) model.island.land = active.island.land;
   return model;
 }
 function toB64(str) {
@@ -2255,6 +2363,8 @@ for (var i = 0; i < model.profiles.length; i++) {
   var row = [p.id, p.name, p.band, p.lang, p.face, p.robot.name, p.robot.color, p.robot.eye, p.robot.hat, tr, p.stickers, p.hats, p.island.done, plots, robots];
   // P108 IW-001 F8: row 15, the cards seen (null when none). P108 IW-006 (v5): row 16 the shells [earned, spent], row 17 owned.
   row.push(p.cardsSeen && p.cardsSeen.length ? p.cardsSeen : null, [p.shells.earned, p.shells.spent], p.owned);
+  // P108 IW-007 (s5 base): row 18, her land — only when something stands on it (a code without one is as before).
+  if (p.island.land) row.push(p.island.land);
   packed.p.push(row);
 }
 var code = 'BG1.' + toB64(JSON.stringify(packed));
@@ -2290,6 +2400,8 @@ try {
     var robots = [];
     if (v4 && Array.isArray(a[14])) for (var rb = 0; rb < a[14].length; rb++) { var ro = a[14][rb]; robots.push(Array.isArray(ro) ? { id: ro[0], kind: ro[1], name: ro[2], color: ro[3], eye: ro[4], hat: ro[5], brain: v5 ? ro[6] : undefined, program: v5 ? ro[7] : undefined, helps: v5 ? ro[8] : undefined } : ro); }
     var island = v4 ? { done: a[12], plots: plots, robots: robots } : v3 ? { done: a[12] } : family;
+    // P108 IW-007 (s5 base): row 18, her land (landOf in islandOf keeps only what is sound).
+    if (v5 && a[18] && typeof a[18] === 'object') island.land = a[18];
     profiles.push({ id: a[0], name: a[1], band: a[2], lang: a[3], face: a[4], robot: { name: a[5], color: a[6], eye: a[7], hat: a[8] }, tricks: v2 ? tricks : undefined, stickers: v2 ? a[10] : [], hats: v2 ? a[11] : [], island: island, cardsSeen: v4 && Array.isArray(a[15]) ? a[15] : undefined, shells: v5 && Array.isArray(a[16]) ? { earned: a[16][0], spent: a[16][1] } : undefined, owned: v5 ? a[17] : undefined });
   }
   model = modelOf({ v: SAVE_VERSION, family: { id: packed.f[0], created: packed.f[1] }, profiles: profiles, island: { activeId: packed.a } });

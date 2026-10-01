@@ -1822,8 +1822,9 @@ describe('IW-002 (P108 s1) — the job model: a target takes exactly its need, a
 
   it('🔴 the vocabulary is one table: ten kinds by the brief’s names (IW-003 s3: + door), the engine blocks exactly the kinds the table says, the wall tile L blocks, three new sayKeys in EN and FR', () => {
     // P108 IW-003 (s3 base): + door (a container of letters with an owner — the post missions' target).
-    expect(JOB_VOCABULARY.map((k) => k.kind)).toEqual(['tulip', 'site', 'basket', 'bowl', 'store', 'can', 'rock', 'hen', 'postbox', 'door']);
-    expect(JOB_KINDS).toEqual({ tulip: 'target', site: 'target', basket: 'container', bowl: 'container', store: 'container', can: 'carrier', rock: 'source', hen: 'source', postbox: 'source', door: 'container' });
+    expect(JOB_VOCABULARY.map((k) => k.kind)).toEqual(['tulip', 'site', 'basket', 'bowl', 'store', 'can', 'rock', 'hen', 'postbox', 'door', 'tree', 'patch']);
+    // P108 IW-007 (s5 base): + tree and patch, two sources (planks, carrots).
+    expect(JOB_KINDS).toEqual({ tulip: 'target', site: 'target', basket: 'container', bowl: 'container', store: 'container', can: 'carrier', rock: 'source', hen: 'source', postbox: 'source', door: 'container', tree: 'source', patch: 'source' });
     expect(WALL_TILE).toBe('L');
     expect(SITE_STAGES).toEqual(['dirt', 'gravel', 'cobbles', 'path']);
     for (const k of JOB_VOCABULARY) {
@@ -3097,7 +3098,8 @@ describe('IW-003 lane S (P108 s3) — go to nearest skips a used-up rock and a f
 
   describe('arms: each lane S rule mutated in the engine text, and the row that kills it', () => {
     it('a used-up rock not skipped → go to nearest rock walks to the near rock with nothing in it', () => {
-      const A = api(mutate("if (t.kind === 'rock') return !(Number(t.left) > 0);", "if (t.kind === 'rock') return false;"));
+      // P108 IW-007 (s5 base): the rule now reads every source (SOURCE_ITEMS), the rock among them.
+      const A = api(mutate("if (SOURCE_ITEMS[t.kind]) return !(Number(t.left) > 0);", "if (SOURCE_ITEMS[t.kind]) return false;"));
       expect(walk(A, [seek('rock')], QUARRY(0)).deltas[0].reserve.thing).toBe('near');
       expect(walk(E, [seek('rock')], QUARRY(0)).deltas[0].reserve.thing).toBe('far');
     });

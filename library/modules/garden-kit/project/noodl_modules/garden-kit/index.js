@@ -4000,15 +4000,18 @@ var gardenKitBlocks = (function () {
   var SITE_STAGES = ['dirt', 'gravel', 'cobbles', 'path'];
   var JOB_VOCABULARY = [
     { kind: 'tulip', role: 'target', fields: ['have', 'need', 'watered', 'droop'], blocks: true, wear: 'tulip' },
-    { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked', 'build'], item: 'stone', blocks: false, wear: 'site' },
+    { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked', 'build', 'of', 'keep', 'bstage'], item: 'stone', blocks: false, wear: 'site' },
     { kind: 'basket', role: 'container', fields: ['count', 'capacity', 'item'], item: 'egg', blocks: true, wear: 'basket' },
-    { kind: 'bowl', role: 'container', fields: ['count', 'capacity', 'item', 'food'], item: 'food', blocks: true, wear: 'bowl' },
+    { kind: 'bowl', role: 'container', fields: ['count', 'capacity', 'item', 'food', 'animal', 'name'], item: 'food', blocks: true, wear: 'bowl' },
     { kind: 'store', role: 'container', fields: ['count', 'capacity', 'item'], item: 'stone', blocks: true, wear: 'store' },
     { kind: 'can', role: 'carrier', fields: ['level', 'max'], blocks: true },
-    { kind: 'rock', role: 'source', fields: ['left', 'max'], blocks: true, wear: 'rock' },
+    { kind: 'rock', role: 'source', fields: ['left', 'max'], item: 'stone', blocks: true, wear: 'rock' },
     { kind: 'hen', role: 'source', fields: ['pen', 'capacity'], blocks: true, wear: 'hen' },
     { kind: 'postbox', role: 'source', fields: [], blocks: true, wear: 'postbox' },
-    { kind: 'door', role: 'container', fields: ['count', 'capacity', 'item', 'owner'], item: 'letter', blocks: true, wear: 'door' }
+    { kind: 'door', role: 'container', fields: ['count', 'capacity', 'item', 'owner'], item: 'letter', blocks: true, wear: 'door' },
+    // P108 IW-007 (s5 base): planks from a tree, carrots from a patch (drawn by lanes B and A).
+    { kind: 'tree', role: 'source', fields: ['left', 'max'], item: 'plank', blocks: true, wear: 'tree' },
+    { kind: 'patch', role: 'source', fields: ['left', 'max'], item: 'carrot', blocks: true, wear: 'patch' }
   ];
   /** The most pips a meter draws (the mockup's); a bigger need shows its numbers only. */
   var METER_PIPS_MAX = 8;

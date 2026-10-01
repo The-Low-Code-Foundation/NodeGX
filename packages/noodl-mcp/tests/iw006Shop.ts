@@ -70,6 +70,9 @@ function shShows(p, it) {
     for (var i = 0; i < rows.length; i++) if (up.fits.indexOf(rows[i].kind) !== -1) return true;
     return false;
   }
+  // P108 IW-007 (s5 base): the blueprints and animals are in the catalogue, but their shelves stay shut (the "later" line)
+  // until lane B opens Build and lane A opens Animals.
+  if (it.kind === 'blueprint' || it.kind === 'animal') return false;
   return true;
 }
 `;

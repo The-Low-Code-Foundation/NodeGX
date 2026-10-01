@@ -109,6 +109,52 @@ function trickLetters(raw) {
   return out;
 }
 
+/**
+ * P108 IW-007 (s5 base): the page's land tables (`cg002Content.ts` BLUEPRINTS, ANIMALS, PLOT_W × PLOT_H) — what landOf needs
+ * to keep a land exactly as the page keeps it. tests/iw007Build.test.ts pins them to the content.
+ */
+const LAND_BLUEPRINTS = {
+  spa: { parts: [['stone', 6], ['plank', 4]], pen: 0 },
+  refuge: { parts: [['plank', 6], ['stone', 4]], pen: 2 }
+};
+const LAND_ANIMALS = { rabbit: 3, sheep: 4 };
+const LAND_W = 8;
+const LAND_H = 6;
+
+/** P108 IW-007 (s5 base): the page's landOf — buildings and animals, each only when sound (see cg002Scripts SAVE_HELPERS). */
+function landOf(raw) {
+  const r = raw && typeof raw === 'object' && !Array.isArray(raw) ? raw : {};
+  const out = { buildings: [], animals: [] };
+  const ids = {};
+  const bps = {};
+  const slots = {};
+  for (const b of Array.isArray(r.buildings) ? r.buildings : []) {
+    const spec = b && typeof b === 'object' && Object.prototype.hasOwnProperty.call(LAND_BLUEPRINTS, String(b.bp)) ? LAND_BLUEPRINTS[String(b.bp)] : null;
+    const id = spec && typeof b.id === 'string' ? b.id.trim().slice(0, 40) : '';
+    if (!spec || !id || ids[id] || bps[b.bp]) continue;
+    const x = Math.floor(Number(b.x));
+    const y = Math.floor(Number(b.y));
+    if (!(x >= 0 && y >= 0 && x + spec.parts.length <= LAND_W && y + (spec.pen ? 2 : 1) <= LAND_H)) continue;
+    const have = {};
+    for (const [item, need] of spec.parts) have[item] = Math.max(0, Math.min(need, Math.floor(Number(b.have && b.have[item])) || 0));
+    ids[id] = 1;
+    bps[b.bp] = 1;
+    out.buildings.push({ id, bp: String(b.bp), x, y, have });
+  }
+  for (const a of Array.isArray(r.animals) ? r.animals : []) {
+    const cap = a && typeof a === 'object' && Object.prototype.hasOwnProperty.call(LAND_ANIMALS, String(a.kind)) ? LAND_ANIMALS[String(a.kind)] : 0;
+    const id = cap && typeof a.id === 'string' ? a.id.trim().slice(0, 40) : '';
+    if (!cap || !id || ids[id]) continue;
+    const home = out.buildings.find((b) => b.id === String(a.at) && LAND_BLUEPRINTS[b.bp].pen);
+    const slot = Math.floor(Number(a.slot));
+    if (!home || !(slot >= 0 && slot < LAND_BLUEPRINTS[home.bp].pen) || slots[home.id + ':' + slot]) continue;
+    ids[id] = 1;
+    slots[home.id + ':' + slot] = 1;
+    out.animals.push({ id, kind: String(a.kind), name: typeof a.name === 'string' ? a.name.trim().slice(0, ROBOT_NAME_MAX) : '', at: home.id, slot, fed: Math.max(0, Math.min(cap, Math.floor(Number(a.fed)) || 0)) });
+  }
+  return out;
+}
+
 /** P106 IG-005: the robot kinds of the page's catalogue (`cg002Content.ts` ROBOTS) — a row's kind is kept only when it is one. */
 const ROBOT_KINDS = ['pip', 'cobble', 'pocket', 'echo'];
 
@@ -248,7 +294,11 @@ function islandOf(raw) {
   const robots = robotsOf(i.robots);
   const plots = plotsOf(i.plots, robots);
   crewHelps(robots, plots);
-  return { done, plots, robots };
+  const out = { done, plots, robots };
+  // P108 IW-007 (s5 base): her land, only when something stands on it.
+  const land = landOf(i.land);
+  if (land.buildings.length || land.animals.length) out.land = land;
+  return out;
 }
 
 /**
@@ -307,6 +357,8 @@ function saveCodeOf(model) {
     const seen = cardsOf(x.cardsSeen);
     const shells = shellsOf(x.shells);
     row.push(seen.length ? seen : null, [shells.earned, shells.spent], ownedOf(x.owned));
+    // P108 IW-007 (s5 base): row 18, her land — only when something stands on it.
+    if (island.land) row.push(island.land);
     p.push(row);
   }
   const packed = { v: SAVE_VERSION, f: [String(fam.id), Number(fam.created)], p, a: String(isl.activeId || (list[0] ? list[0].id : '')) };
@@ -627,6 +679,8 @@ function createShellDoors(api, o = {}) {
 }
 
 module.exports = {
+  LAND_BLUEPRINTS,
+  LAND_ANIMALS,
   STORE_PREFIX,
   PREFIX,
   HEADER,

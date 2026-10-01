@@ -117,7 +117,9 @@ export interface Thing {
   kind:
     | 'tulip' | 'bowl' | 'letter' | 'egg' | 'stone' | 'food' | 'label' | 'puddle' | 'rock' | 'sign' | 'note'
     // P108 IW-003 (s3 base): the job kinds (JOB_VOCABULARY) and the ball, so a request states them without a cast.
-    | 'site' | 'basket' | 'store' | 'can' | 'hen' | 'postbox' | 'door' | 'ball';
+    | 'site' | 'basket' | 'store' | 'can' | 'hen' | 'postbox' | 'door' | 'ball'
+    // P108 IW-007 (s5 base): two more sources — a tree that gives planks, a patch that gives carrots.
+    | 'tree' | 'patch';
   x: number;
   y: number;
   watered?: boolean;
@@ -138,6 +140,12 @@ export interface Thing {
   color?: string;
   build?: string;
   pen?: ReadonlyArray<number>;
+  /** P108 IW-007 (s5 base): a building's part — `of` the building's id on the land; `keep` never wears (a building never un-builds, R2). */
+  of?: string;
+  keep?: boolean;
+  /** P108 IW-007 (s5 base): an animal's bowl — the animal kind (ANIMALS) that eats from it, and her name for it. */
+  animal?: string;
+  name?: string;
 }
 
 /**
@@ -1373,11 +1381,11 @@ export const HEN_CAPACITY = 4;
 /** What a job thing is for (README §4.1): a target has a meter, a container counts an item, a carrier is held, a source gives. */
 export type JobRole = 'target' | 'container' | 'carrier' | 'source';
 export interface JobKind {
-  kind: 'tulip' | 'site' | 'basket' | 'bowl' | 'store' | 'can' | 'rock' | 'hen' | 'postbox' | 'door';
+  kind: 'tulip' | 'site' | 'basket' | 'bowl' | 'store' | 'can' | 'rock' | 'hen' | 'postbox' | 'door' | 'tree' | 'patch';
   role: JobRole;
   /** The fields the engine reads and writes on it (renderers draw from these). */
   fields: ReadonlyArray<string>;
-  /** A container's item when it names none; a site's too. */
+  /** A container's item when it names none; a site's too; a source's: what one pick takes from it (P108 IW-007). */
   item?: string;
   /** Does it stop a robot walking onto its tile (the engine's BLOCKING_THINGS)? */
   blocks: boolean;
@@ -1395,25 +1403,31 @@ export interface JobKind {
  * faster than the targets they feed so a reopened job never waits on them: the rock regrows a stone every 30 ticks (four
  * in two minutes, one path square's worth), the hen lays every 20 (a pen of four in about a minute), a letter every 90.
  */
-export const WEAR = { tulip: 60, site: 120, bowl: 60, basket: 90, store: 120, rock: 30, hen: 20, postbox: 90, door: 90 } as const;
+export const WEAR = { tulip: 60, site: 120, bowl: 60, basket: 90, store: 120, rock: 30, hen: 20, postbox: 90, door: 90, tree: 40, patch: 30 } as const;
 
 /** The job vocabulary (brief §4.2) — ONE table the engine, the mockup and both renderers read by these names. */
 export const JOB_VOCABULARY: ReadonlyArray<JobKind> = [
   { kind: 'tulip', role: 'target', fields: ['have', 'need', 'watered', 'droop'], blocks: true, wear: 'tulip' },
-  { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked', 'build'], item: 'stone', blocks: false, wear: 'site' },
+  { kind: 'site', role: 'target', fields: ['have', 'need', 'item', 'stage', 'walked', 'build', 'of', 'keep', 'bstage'], item: 'stone', blocks: false, wear: 'site' },
   { kind: 'basket', role: 'container', fields: ['count', 'capacity', 'item'], item: 'egg', blocks: true, wear: 'basket' },
-  { kind: 'bowl', role: 'container', fields: ['count', 'capacity', 'item', 'food'], item: 'food', blocks: true, wear: 'bowl' },
+  { kind: 'bowl', role: 'container', fields: ['count', 'capacity', 'item', 'food', 'animal', 'name'], item: 'food', blocks: true, wear: 'bowl' },
   { kind: 'store', role: 'container', fields: ['count', 'capacity', 'item'], item: 'stone', blocks: true, wear: 'store' },
   { kind: 'can', role: 'carrier', fields: ['level', 'max'], blocks: true },
-  { kind: 'rock', role: 'source', fields: ['left', 'max'], blocks: true, wear: 'rock' },
+  { kind: 'rock', role: 'source', fields: ['left', 'max'], item: 'stone', blocks: true, wear: 'rock' },
   { kind: 'hen', role: 'source', fields: ['pen', 'capacity'], blocks: true, wear: 'hen' },
   { kind: 'postbox', role: 'source', fields: [], blocks: true, wear: 'postbox' },
-  { kind: 'door', role: 'container', fields: ['count', 'capacity', 'item', 'owner'], item: 'letter', blocks: true, wear: 'door' }
+  { kind: 'door', role: 'container', fields: ['count', 'capacity', 'item', 'owner'], item: 'letter', blocks: true, wear: 'door' },
+  // P108 IW-007 (s5 base): planks from a tree (one pick, one plank — band 7–9's "planks direct from the tree"), carrots from
+  // a patch; each regrows one on its wear clock, like the rock.
+  { kind: 'tree', role: 'source', fields: ['left', 'max'], item: 'plank', blocks: true, wear: 'tree' },
+  { kind: 'patch', role: 'source', fields: ['left', 'max'], item: 'carrot', blocks: true, wear: 'patch' }
 ];
 /** The kinds by role, for the engine (`JOB_KINDS[kind]` is its role). */
 export const JOB_KINDS: Readonly<Record<string, JobRole>> = Object.fromEntries(JOB_VOCABULARY.map((k) => [k.kind, k.role]));
 /** A container's (or a site's) item when it names none. */
 export const JOB_ITEMS: Readonly<Record<string, string>> = Object.fromEntries(JOB_VOCABULARY.filter((k) => k.item).map((k) => [k.kind, k.item as string]));
+/** P108 IW-007 (s5 base): what one pick takes from each mineable source — rock → stone, tree → plank, patch → carrot. */
+export const SOURCE_ITEMS: Readonly<Record<string, string>> = Object.fromEntries(JOB_VOCABULARY.filter((k) => k.role === 'source' && k.item).map((k) => [k.kind, k.item as string]));
 
 // ── P108 IW-004 (lane B): the robot's brain ────────────────────────────────────────────────────────────────────────
 
@@ -1447,18 +1461,25 @@ export type ShopTab = (typeof SHOP_TABS)[number];
  * - `robot` — a new row of that robot kind (a copy, IW-008): only a kind the island already has, never past CREW_CAP;
  * - `upgrade` — an upgrade id into `owned` (today's can+, basket+, boots: the shop sells them; islanders' gifts stay stickers);
  * - `brain` — ONE robot's brain to `size` (only from the size before it);
- * - `helper` — one helper into `owned`, used up by the job it helps (IW-006 AC4); one of each held at a time.
+ * - `helper` — one helper into `owned`, used up by the job it helps (IW-006 AC4); one of each held at a time;
+ * - `blueprint` (P108 IW-007, s5 base) — a building's blueprint into `owned`, once each: placed on her land as a ghost
+ *   (`island.land.buildings`), it is built by robots delivering its materials;
+ * - `animal` (P108 IW-007, s5 base) — an animal onto her land (`island.land.animals`): only beside a FINISHED refuge, in
+ *   a free place of its pen, named by her.
  */
 export interface ShopItem {
   id: string;
   tab: ShopTab;
   price: number;
-  kind: 'robot' | 'upgrade' | 'brain' | 'helper';
+  kind: 'robot' | 'upgrade' | 'brain' | 'helper' | 'blueprint' | 'animal';
   robot?: RobotKind;
   upgrade?: UpgradeId;
   size?: number;
   /** A helper's effect, read by the lane that builds it (IW-006 §2): the rain cloud, the self-filling can, the wheelbarrow. */
   helper?: 'rain' | 'selfcan' | 'barrow';
+  /** P108 IW-007: the blueprint (BLUEPRINTS) a build item is, the animal kind (ANIMALS) an animal item is. */
+  blueprint?: 'spa' | 'refuge';
+  animal?: 'rabbit' | 'sheep';
   icon: string;
   name: Bi;
   line: Bi;
@@ -1481,7 +1502,13 @@ export const SHOP: ReadonlyArray<ShopItem> = [
   { id: 'brain20', tab: 'upgrades', price: 40, kind: 'brain', size: 20, icon: '🧠', name: s('The biggest brain', 'Le plus grand cerveau'), line: s('One robot remembers 20 blocks.', 'Un robot retient 20 blocs.') },
   { id: 'rain', tab: 'helpers', price: 6, kind: 'helper', helper: 'rain', icon: '🌧️', name: s('A rain cloud', 'Un nuage de pluie'), line: s('Waters every tulip on one plot, once.', 'Arrose toutes les tulipes d’un terrain, une fois.') },
   { id: 'selfcan', tab: 'helpers', price: 8, kind: 'helper', helper: 'selfcan', icon: '✨', name: s('A self-filling can', 'Un arrosoir magique'), line: s('Never needs the pond, for one job.', 'Jamais besoin de la mare, pour un travail.') },
-  { id: 'barrow', tab: 'helpers', price: 10, kind: 'helper', helper: 'barrow', icon: '🛒', name: s('A wheelbarrow', 'Une brouette'), line: s('Carries eight, for one job.', 'Porte huit choses, pour un travail.') }
+  { id: 'barrow', tab: 'helpers', price: 10, kind: 'helper', helper: 'barrow', icon: '🛒', name: s('A wheelbarrow', 'Une brouette'), line: s('Carries eight, for one job.', 'Porte huit choses, pour un travail.') },
+  // P108 IW-007 (s5 base): the Build and Animals tabs. Prices are the base's guesses (lane O retunes every price from
+  // IW-006's earnings table, saying why): a blueprint about four finished jobs, an animal about two.
+  { id: 'spa', tab: 'build', price: 40, kind: 'blueprint', blueprint: 'spa', icon: '🛁', name: s('The robot spa', 'Le spa des robots'), line: s('Stones and planks. Robots rest there when a job is done.', 'Des pierres et des planches. Les robots s’y reposent quand un travail est fini.') },
+  { id: 'refuge', tab: 'build', price: 50, kind: 'blueprint', blueprint: 'refuge', icon: '🏡', name: s('The animal refuge', 'Le refuge des animaux'), line: s('Planks and stones. Then animals can come and live.', 'Des planches et des pierres. Puis des animaux peuvent venir vivre.') },
+  { id: 'rabbit', tab: 'animals', price: 20, kind: 'animal', animal: 'rabbit', icon: '🐇', name: s('A rabbit', 'Un lapin'), line: s('Eats carrots from her bowl. You name her.', 'Mange des carottes dans son bol. Tu lui donnes un nom.') },
+  { id: 'sheep', tab: 'animals', price: 25, kind: 'animal', animal: 'sheep', icon: '🐑', name: s('A sheep', 'Un mouton'), line: s('Eats carrots from his bowl. You name him.', 'Mange des carottes dans son bol. Tu lui donnes un nom.') }
 ];
 export const SHOP_JSON = JSON.stringify(SHOP);
 
@@ -1517,3 +1544,66 @@ export const JOB_BONUS: Readonly<Record<string, number>> = {
   'sami-thanks': 7,
   envelopes: 10
 };
+
+// ── P108 IW-007 (session-5 base): building and animals — the land, the blueprints, the animals ─────────────────────
+
+/**
+ * The land (IW-007 §2 "free land"; R6 kept the meadow at (46, 15) on Biscuit's row for it): the one slot no request, free
+ * play or home claims. It is hers to build on. Its map is the meadow's (ISLAND_MEADOW_MAP — grass and three trees that are
+ * only scenery); its sources are things on it (LAND_SOURCES). Its id on the island, in the save's plots and to the
+ * Workshop is LAND_ID. "More land" (IW-008) is Richard's question: one land in session 5.
+ */
+export const LAND_ID = 'land';
+export const LAND_PLOT: { x: number; y: number } = { x: 46, y: 15 };
+export const LAND_MAP: ReadonlyArray<string> = ISLAND_MEADOW_MAP;
+/** Where a robot working the land starts and comes home to (plot coordinates; it faces right, d 1). */
+export const LAND_HOME: { x: number; y: number; d: number } = { x: 0, y: 0, d: 1 };
+/**
+ * The land's sources, always there (each regrows on its own wear clock, WEAR): a tree beside the meadow's scenery tree
+ * (planks), a rock (stones), a carrot patch (carrots — the animals' food). Their tiles are never a legal footprint. A fresh
+ * land holds enough for the first blueprint in one go (6 stones, 6 planks: the spa needs 6 + 4); the second waits on
+ * regrowth, which only the island's tick gives (R2).
+ */
+export const LAND_SOURCES: ReadonlyArray<Thing> = [
+  { kind: 'tree', id: 'tree', x: 7, y: 0, left: 6, max: 8 },
+  { kind: 'rock', id: 'rock', x: 7, y: 5, left: 6, max: 8 },
+  { kind: 'patch', id: 'patch', x: 0, y: 5, left: 3, max: 4 }
+];
+
+/**
+ * One blueprint (IW-007 §2): a building is ONE ROW of parts, one tile and one material each (a `site` thing per part: `of`
+ * the building's id, `build` the blueprint's id, `item` and `need` the part's, `keep` true — a building never wears), so
+ * the engine's put, meter and finish line work unchanged; the building's stage is the share of ALL its parts' materials
+ * delivered (`buildStage`), written on every part as `bstage` (0 .. stages − 1; the last is finished). `pen` (the refuge)
+ * is the row below it: one tile per animal, where her bowl sits. `spot` is the default place the ghost first appears.
+ * `does`: what a finished one is for — `rest` (robots rest there; a later session), `animals` (unlocks the Animals tab).
+ */
+export interface Blueprint {
+  id: 'spa' | 'refuge';
+  parts: ReadonlyArray<{ dx: number; item: 'stone' | 'plank'; need: number }>;
+  pen?: number;
+  stages: number;
+  spot: { x: number; y: number };
+  does: 'rest' | 'animals';
+}
+export const BLUEPRINTS: ReadonlyArray<Blueprint> = [
+  { id: 'spa', parts: [{ dx: 0, item: 'stone', need: 6 }, { dx: 1, item: 'plank', need: 4 }], stages: 4, spot: { x: 3, y: 1 }, does: 'rest' },
+  { id: 'refuge', parts: [{ dx: 0, item: 'plank', need: 6 }, { dx: 1, item: 'stone', need: 4 }], pen: 2, stages: 4, spot: { x: 3, y: 3 }, does: 'animals' }
+];
+export const BLUEPRINTS_JSON = JSON.stringify(BLUEPRINTS);
+
+/**
+ * The animals (IW-007 §2): each lives in a place of a finished refuge's pen, by her bowl — a `bowl` thing (a container,
+ * item `eats`, capacity) with `animal` and `name` on it, so feeding is the engine's put into a container and hunger is
+ * the bowl's wear (WEAR.bowl). A fed animal is happy; a hungry one waits; nothing dies or leaves (R2, AC3).
+ */
+export interface AnimalSpec {
+  id: 'rabbit' | 'sheep';
+  eats: 'carrot';
+  capacity: number;
+}
+export const ANIMALS: ReadonlyArray<AnimalSpec> = [
+  { id: 'rabbit', eats: 'carrot', capacity: 3 },
+  { id: 'sheep', eats: 'carrot', capacity: 4 }
+];
+export const ANIMALS_JSON = JSON.stringify(ANIMALS);
