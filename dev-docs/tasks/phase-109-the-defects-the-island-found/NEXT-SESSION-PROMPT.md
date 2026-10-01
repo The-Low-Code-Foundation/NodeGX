@@ -2,7 +2,7 @@
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
 **Session 1 (2026-10-01, on `cline-dev` from `22303a534`):** the phase scaffold committed; **ISL-001's fix landed
-(`3df5adb82`), ISL-014's fix landed (`aab96a056`), ISL-002's AC1 measured** (`a0…` this session's last commit). 0 of 25
+(`3df5adb82`), ISL-014's fix landed (`aab96a056`), ISL-002's AC1 measured** (its own commit `b5c1b6453`, then this handoff's). 0 of 25
 closed; three rulings asked (README §8).
 
 ## Read first
@@ -28,7 +28,7 @@ closed; three rulings asked (README §8).
    `goToState` (`states.ts:633` is the `|| 0`); flip the spec's two `test.failing` rows to `test` and delete its
    "what arrives at HEAD" row; AC2's sabotage arm; `statesLib.ts:330` under ruling 2; AC4's census before landing.
 2. **ISL-025 W1 and W2** (slice 0) — 🔴 **blocked all of session 1 by P108 session 7**, which had `cg003Components.ts`,
-   `cg003Template.test.ts` and `drives/drive-all.sh` dirty and a `drive-all.sh` run on the box. ISL-025 §4: no row lands
+   `cg003Template.test.ts` and `drives/drive-all.sh` dirty and a `drive-all.sh` run on the box. **P108 s7 then committed `c051ca68d` at about 23:40**, so a merge point may now exist. ISL-025 §4: no row lands
    while a P108 lane is open. Check `git status` and `stat` on those three files, and the peer list, before starting.
    ISL-001's AC6 and ISL-025 W3 (the three 120 ms waits) join W1/W2 at the same merge point if ruling 1 is yes.
 3. **ISL-011** on its recommended route ((1a) docs/types/scaffold sentence; (2a) the export shim applies `defaultCss`).
@@ -43,7 +43,7 @@ closed; three rulings asked (README §8).
 
 ## Facts measured this session that are not in a task file
 
-- 🔴 **Local `cline-dev` is 320 commits ahead of `origin/cline-dev`.** Pushing is Richard's decision; do not push unasked.
+- 🔴 **Local `cline-dev` is 381 commits ahead of `origin/cline-dev`** (23:45; peers commit through the evening). Pushing is Richard's decision; do not push unasked.
 - **P78's register (`DEFECTS-THE-TEMPLATES-FOUND.md`) is a peer's uncommitted hunk since 09-27 (+159 lines), and the D83
   and D85 rows exist only there.** Session 1 set both owner cells (`ISL-014`, `ISL-001`) and statuses to 🟡 **in the
   working tree**; they ride with whoever commits the register. The committed record is the bug ledger
