@@ -117,7 +117,7 @@ export interface Instance {
   /** Derived outputs for this instance's params (NSP-012). */
   derivedOutputs: Readonly<Record<string, ErasedValueOutput | SignalOutputDecl>>;
   readonly trace: TraceEvent[];
-  pending: { signals: string[]; outcomes: OutcomeSlot[]; requests: TraceEvent[] };
+  pending: { signals: string[]; outcomes: OutcomeSlot[]; requests: TraceEvent[]; opens: TraceEvent[] };
   /** The last DEFINED canonical value each output produced this frame (see the frame model above). */
   frameLast: Record<string, unknown>;
   lastSent: Record<string, string>;
@@ -228,7 +228,8 @@ function viewOf(inst: Instance): WorldView {
       if (event !== 'resize' || !inst.resizeOff) return;
       inst.resizeOff();
       inst.resizeOff = undefined;
-    }
+    },
+    userActivation: () => world.location?.activation
   };
 }
 
@@ -259,7 +260,7 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
     derivedValues: deepFreeze(derivedValues),
     derivedOutputs: deepFreeze(derivedOutputs),
     trace: [],
-    pending: { signals: [], outcomes: [], requests: [] },
+    pending: { signals: [], outcomes: [], requests: [], opens: [] },
     frameLast: {},
     lastSent: {},
     settles: 0,
@@ -416,6 +417,7 @@ interface PatchLike {
   cancel?: readonly string[];
   request?: SpecRequest;
   abort?: readonly string[];
+  open?: { url: unknown; target: unknown; features: unknown };
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -498,7 +500,7 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
   return [...(patch.send ?? []), ...(patch.sendDerived ?? [])];
 }
 
-/** The world effects of a patch (spec.ts `Patch`): timers, requests, aborts — in the order the patch names them. */
+/** The world effects of a patch (spec.ts `Patch`): timers, requests, aborts, an open — in the order the patch names them. */
 function effects(inst: Instance, port: string, patch: PatchLike): void {
   const { world, spec } = inst;
   for (const a of patch.after ?? []) {
@@ -535,6 +537,13 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
   for (const id of patch.abort ?? []) {
     const worldId = inst.requests.get(id);
     if (worldId !== undefined) world.network.abort(worldId);
+  }
+  if (patch.open) {
+    // LOCATION (world.ts): only with a window — a spec reads `viewport()` first, as a node checks `typeof window`
+    if (!world.location) throw new SpecError(`${spec.type}.${port}: opened a URL in a play with no window`);
+    const o = patch.open;
+    world.location.open(o.url, o.target, o.features);
+    inst.pending.opens.push({ t: 'open', url: canonicalise(o.url), target: canonicalise(o.target), features: canonicalise(o.features) });
   }
 }
 
@@ -636,7 +645,8 @@ export function settle(inst: Instance): void {
     inst.trace.push(o.error === undefined ? { t: 'outcome', port: o.port, value } : { t: 'outcome', port: o.port, value, error: o.error });
   }
   for (const r of inst.pending.requests) inst.trace.push(r);
-  inst.pending = { signals: [], outcomes: inst.pending.outcomes.filter((o) => o.reportedAt === undefined), requests: [] };
+  for (const o of inst.pending.opens) inst.trace.push(o);
+  inst.pending = { signals: [], outcomes: inst.pending.outcomes.filter((o) => o.reportedAt === undefined), requests: [], opens: [] };
 }
 
 /**

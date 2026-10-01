@@ -110,7 +110,7 @@ import { AsyncLocalStorage } from 'async_hooks';
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
+import type { ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, OpenRecord, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
 import { canonicalise, installWorld, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
 
@@ -159,7 +159,7 @@ function resetRegistry(world: World): void {
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -213,6 +213,8 @@ interface Frame {
   signals: string[];
   outcomes: TraceEvent[];
   requests: TraceEvent[];
+  /** NSP-015 s16 — the frame's `window.open` calls (world.ts LOCATION), after its requests. */
+  opens: TraceEvent[];
 }
 
 interface State {
@@ -283,7 +285,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (s) s.h.errors.push(event);
   });
 
-  const newFrame = (): Frame => ({ values: new Map(), signals: [], outcomes: [], requests: [] });
+  const newFrame = (): Frame => ({ values: new Map(), signals: [], outcomes: [], requests: [], opens: [] });
 
   /**
    * One frame as `NoodlRuntime._doUpdate` runs it (noodl-runtime.ts :743-753): the frame time
@@ -429,6 +431,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     for (const name of s.frame.signals) s.trace.push({ t: 'signal', port: name });
     for (const o of s.frame.outcomes) s.trace.push(o);
     for (const r of s.frame.requests) s.trace.push(r);
+    for (const o of s.frame.opens) s.trace.push(o);
     s.frame = newFrame();
     s.settles++;
   }
@@ -440,6 +443,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const event: TraceEvent = { t: 'request', method: canonicalise(record.method), url: record.url, headers: { ...record.headers } };
     if (record.body !== undefined) event.body = canonicalise(record.body);
     s.frame.requests.push(event);
+  }
+
+  /** A `window.open` the world saw (LOCATION), as the trace records it, attributed as a request is. */
+  function recordOpen(record: OpenRecord): void {
+    const s = updating.getStore() ?? (states.size === 1 ? [...states.values()][0] : undefined);
+    if (!s) throw new Error('runtime: a window.open was made outside any node\'s update, and more than one node is mounted — it cannot be attributed');
+    s.frame.opens.push({ t: 'open', url: canonicalise(record.url), target: canonicalise(record.target), features: canonicalise(record.features) });
   }
 
   /** A line a node wrote through its scope's log sink lands on that node's handle; the entry names the node (runcontext.ts). */
@@ -686,6 +696,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       if (world) throw new Error('runtime: a world is already installed — one play at a time');
       world = w;
       w.network.onRequest(recordRequest);
+      w.location?.onOpen(recordOpen);
       const installed = installWorld(w);
       // the three process-wide managers behind the store, history and action nodes (NSP-012 T4): one play, one of each
       globalStoreManager.reset({ clearState: true });

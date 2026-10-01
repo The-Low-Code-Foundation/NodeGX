@@ -140,6 +140,12 @@ export interface WorldView {
    */
   listen(event: 'resize'): void;
   unlisten(event: 'resize'): void;
+  /**
+   * NSP-015 s16 — `navigator.userActivation.isActive` (world.ts LOCATION): whether the press came
+   * from a person, a fact of the play. `undefined` when the browser has no `userActivation`, and
+   * when there is no window at all.
+   */
+  userActivation(): boolean | undefined;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -318,11 +324,16 @@ export interface Patch<S, O> {
    *             in; the answer arrives at `WorldHandlers.response` with the request's `id`.
    *   `abort`   aborts requests by id: the answer, if still due, is dropped and `response` is
    *             called with `{ aborted }` (an `AbortController`).
+   *   `open`    NSP-015 s16 — `window.open(url, target, features)`, recorded as an `open` event in
+   *             the frame it is made, each of the three as handed (world.ts LOCATION). Nothing comes
+   *             back: the call returns `null`. Only with a window — read `viewport()` first, as a
+   *             node checks `typeof window`.
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
   request?: SpecRequest;
   abort?: readonly string[];
+  open?: { url: unknown; target: unknown; features: unknown };
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -495,6 +506,8 @@ export interface WorldPool {
   timeZones?: readonly string[];
   /** NSP-013 s13: the viewports a `viewport` spec's sequences start from (one is drawn per sequence; `null` is a server render — no window). */
   viewports?: ReadonlyArray<import('./world').ViewportScript | null>;
+  /** NSP-015 s16: the user activations a `location` spec's sequences play with (one is drawn per sequence; `null` is a browser with no `userActivation`). */
+  activations?: ReadonlyArray<boolean | null>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -551,9 +564,11 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * digest (`crypto.subtle.digest`), which the world answers itself so the answer lands in the
  * microtask after the call and never on a thread the clock cannot see (world.ts DIGEST). s13 adds
  * `viewport` — the node reads the browser window's size or listens for its resize, so the play has
- * a scripted viewport, or none (a server render: no `window`) (world.ts VIEWPORT).
+ * a scripted viewport, or none (a server render: no `window`) (world.ts VIEWPORT). NSP-015 s16 adds
+ * `location` — the node opens a URL or reads whether the press came from a person (world.ts
+ * LOCATION); the play has a window or none, as for `viewport`, and an activation or none.
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'backend';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'backend';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;

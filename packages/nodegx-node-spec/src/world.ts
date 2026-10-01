@@ -78,6 +78,22 @@
  *           the `advance` that reaches it, as a DOM event's listeners run at its dispatch. A target
  *           with a real window (a browser, jsdom) refuses a `viewport` need it cannot size; on Node
  *           the world defines the `window` for the play (`installWorld`) and removes it after.
+ *   LOCATION. (NSP-015 s16) A play with a window has a LOCATION, the seam the navigation family
+ *           writes through. The family reaches the browser's location through exactly two calls,
+ *           and the world RECORDS each as handed and opens, loads and parses nothing — as the
+ *           network parses nothing on the way in:
+ *             `window.open(url, target, features)` — a trace `open` event `{ url, target,
+ *               features }`, each canonical, in the frame it is made. It returns `null`: what a
+ *               browser returns for a `noopener` open, and the world has no second window.
+ *             `history.pushState(state, title, url)` — arrives with Navigate (NSP-015): a trace
+ *               `history` event `{ op: 'push', url }`, and the location's path, search and hash
+ *               become the URL resolved against the current one. A push fires neither `popstate`
+ *               nor `hashchange` — a hash change is not a navigation; a node that wants its router
+ *               to hear it dispatches the `popstate` itself.
+ *           USER ACTIVATION — whether the press came from a person — is a fact of the play, the
+ *           script's `activation`: `true` / `false` is `navigator.userActivation.isActive` for
+ *           the whole play; absent, the browser has no `userActivation` (Safari before 16.4,
+ *           Firefox before 120). Without a window there is no location and no activation.
  *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
@@ -116,6 +132,8 @@ export interface WorldScript {
   timeZone?: string;
   /** NSP-013 s13: the browser viewport (VIEWPORT above). Absent: no window — a server render. */
   viewport?: ViewportScript;
+  /** NSP-015 s16: `navigator.userActivation.isActive` for the play (LOCATION above). Absent: no `userActivation`. Read only with a window. */
+  activation?: boolean;
 }
 
 /** VIEWPORT above: the size at the start, and the resizes the clock will deliver. */
@@ -413,6 +431,35 @@ export class Viewport {
   }
 }
 
+/** One `window.open` call, as handed (LOCATION above). */
+export interface OpenRecord {
+  url: unknown;
+  target: unknown;
+  features: unknown;
+}
+
+/** The location of a play with a window (LOCATION above): what was opened, and the user activation. */
+export class WorldLocation {
+  /** Every `window.open`, in order. */
+  readonly opened: OpenRecord[] = [];
+  private listeners: Array<(r: OpenRecord) => void> = [];
+
+  constructor(readonly activation: boolean | undefined) {}
+
+  /** Called with every open as it is made — how a target attributes it to the node that made it. */
+  onOpen(listener: (r: OpenRecord) => void): void {
+    this.listeners.push(listener);
+  }
+
+  /** `window.open`: records the call as handed; opens nothing; returns `null`. */
+  open(url: unknown, target: unknown, features: unknown): null {
+    const record: OpenRecord = { url, target, features };
+    this.opened.push(record);
+    for (const l of this.listeners) l(record);
+    return null;
+  }
+}
+
 export class World {
   readonly script: WorldScript;
   readonly clock = new Clock();
@@ -423,6 +470,8 @@ export class World {
   readonly timeZone: string;
   /** The viewport (VIEWPORT above), or none: a server render. */
   readonly viewport: Viewport | undefined;
+  /** The location (LOCATION above) — exactly when there is a window. */
+  readonly location: WorldLocation | undefined;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -431,6 +480,7 @@ export class World {
     this.registry = new Registry(this.random, script.registry);
     this.timeZone = script.timeZone ?? 'UTC';
     this.viewport = script.viewport ? new Viewport(this.clock, script.viewport) : undefined;
+    this.location = this.viewport ? new WorldLocation(script.activation) : undefined;
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */
@@ -569,9 +619,14 @@ export function installWorld(world: World): Installed {
   });
   // VIEWPORT: a window only when the script has a viewport — none is a server render, left as the host has it
   const viewport = world.viewport;
-  if (viewport) {
+  const location = world.location;
+  if (viewport && location) {
     const subscribed = new Map<unknown, () => void>();
+    // LOCATION: `navigator.userActivation` only when the script says what it is
+    const navigator = location.activation === undefined ? {} : { userActivation: { isActive: location.activation } };
     define('window', {
+      navigator,
+      open: (url: unknown, target: unknown, features: unknown) => location.open(url, target, features),
       get innerWidth() {
         return viewport.width;
       },

@@ -70,7 +70,9 @@ export const DEFAULT_WORLD_POOL = Object.freeze({
     { width: 1280, height: 800 },
     { width: 390, height: 844, resizes: [{ at: 100, width: 844, height: 390 }] },
     { width: 1024, height: 768, resizes: [{ at: 1, width: 1024, height: 0 }, { at: 1000, width: 0, height: 0 }, { at: 30000, width: 1440, height: 900 }] }
-  ] as ReadonlyArray<ViewportScript | null>)
+  ] as ReadonlyArray<ViewportScript | null>),
+  // NSP-015 s16: a press a person made, one the graph made, and a browser that cannot say
+  activations: Object.freeze([true, false, null] as ReadonlyArray<boolean | null>)
 });
 
 export interface GenerateOptions {
@@ -195,6 +197,15 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   if (needs.includes('viewport')) {
     const viewport = rng.pick(pool.viewports ?? DEFAULT_WORLD_POOL.viewports);
     if (viewport) world.viewport = viewport;
+  }
+  // NSP-015 s16 — LOCATION: a window or none (a `location` spec that does not also need `viewport` draws one here), and an activation or none
+  if (needs.includes('location')) {
+    if (!needs.includes('viewport')) {
+      const viewport = rng.pick(pool.viewports ?? DEFAULT_WORLD_POOL.viewports);
+      if (viewport) world.viewport = viewport;
+    }
+    const activation = rng.pick(pool.activations ?? DEFAULT_WORLD_POOL.activations);
+    if (activation !== null) world.activation = activation;
   }
   return { seed, params, steps, world };
 }

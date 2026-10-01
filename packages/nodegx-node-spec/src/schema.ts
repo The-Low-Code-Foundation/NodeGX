@@ -26,7 +26,7 @@ const traceSchema = require('../schema/trace.schema.json') as Record<string, unk
 /** The JSON schema, as data — for a target that wants to embed it. */
 export const TRACE_SCHEMA = traceSchema;
 
-export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request'] as const;
+export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open'] as const;
 export const OUTCOME_VALUES = ['done', 'unchanged', 'failure'] as const;
 
 /** Fields each kind requires and allows, beyond `t` and the always-optional `subject`. */
@@ -39,7 +39,9 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   outcome: { required: ['port', 'value'], optional: ['error'] },
   // NSP-007 — the world
   advance: { required: ['ms'], optional: [] },
-  request: { required: ['method', 'url', 'headers'], optional: ['body'] }
+  request: { required: ['method', 'url', 'headers'], optional: ['body'] },
+  // NSP-015 — the location
+  open: { required: ['url', 'target', 'features'], optional: [] }
 });
 
 export type Validation = { ok: true; events: TraceEvent[] } | { ok: false; path: string; message: string };
@@ -81,6 +83,11 @@ export function validateTrace(input: unknown): Validation {
       if ('body' in e && e.body !== undefined) {
         const ncb = findNonCanonical(e.body, `${at}.body`);
         if (ncb) return bad(ncb, 'body is not in canonical form');
+      }
+    } else if (t === 'open') {
+      for (const f of ['url', 'target', 'features'] as const) {
+        const nc = findNonCanonical(e[f], `${at}.${f}`);
+        if (nc) return bad(nc, `${f} is not in canonical form`);
       }
     } else if ('value' in e) {
       if (t === 'value' && e.value === undefined) return bad(`${at}.value`, 'a value event never carries undefined (C3)');

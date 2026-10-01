@@ -4,7 +4,8 @@
  * Inputs and outputs in one ordered stream; `settle` marks where the target drains its frame.
  * Between two settles the events are grouped canonically: `value` events SORTED BY PORT NAME
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
- * events in the order they were REPORTED, then `request` events in the order they were issued.
+ * events in the order they were REPORTED, then `request` events in the order they were issued, then
+ * `open` events in the order they were made (NSP-015).
  * "Changed" is canonical inequality with the last value RECORDED for
  * the port (nothing before the first settle, so the first settle records every defined output),
  * "sorted by port name" is code-unit order, and what a frame records for an output is the last
@@ -19,7 +20,9 @@
  * Two events for the WORLD (NSP-007): `advance` is a stimulus — the clock moved by `ms`; `request`
  * is an observation — the node handed the world a request (`method`, `url`, `headers` with
  * lower-cased names, `body` as it travelled: a string, `{ "$form": [[name, value], …] }`, or
- * absent). The world's answers are not events: they are scripted (world.ts), so what they were is
+ * absent). NSP-015 adds a third: `open` is an observation — the node asked the browser to open a
+ * URL (`window.open(url, target, features)`), each of the three canonical AS HANDED (world.ts
+ * LOCATION). The world's answers are not events: they are scripted (world.ts), so what they were is
  * known from the scenario, and what the node did with them is on the wire.
  * That grouping is a rule of the FORMAT, so that a runtime which
  * pulses a signal synchronously inside a setter and delivers the value at frame end (the
@@ -53,7 +56,9 @@ export type TraceEvent =
   /** stimulus (NSP-007): the world's clock moved by `ms` milliseconds. */
   | (Base & { t: 'advance'; ms: number })
   /** observation (NSP-007): the node handed the world a request. `method` is canonical (a node may hand a non-string). */
-  | (Base & { t: 'request'; method: unknown; url: string; headers: Record<string, string>; body?: unknown });
+  | (Base & { t: 'request'; method: unknown; url: string; headers: Record<string, string>; body?: unknown })
+  /** observation (NSP-015): the node asked the browser to open a URL — `window.open(url, target, features)`, each canonical, as handed. */
+  | (Base & { t: 'open'; url: unknown; target: unknown; features: unknown });
 
 /** Trace-format version — must match the `/v1.json` in the schema's `$id` (tests/schema.test.ts). */
 export const TRACE_FORMAT_VERSION = 1;

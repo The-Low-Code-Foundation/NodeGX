@@ -11,7 +11,7 @@
   "scenarios/Timer.json": "7c0efe794030738f54537d0aa685bf6490f84f02e5bdfaffbddd4f737a62f127",
   "scenarios/net.noodl.UUID.json": "f5aaa5d63702f97d8ce3de12517d3eb77708276e2dae69da5dcde3faf0fc0f40",
   "scenarios/net.noodl.animatetovalue.json": "d735e71de5c038d2ca8ebff51197d17c9599e3d3da30f22610b9640eed2d2dae",
-  "schema/trace.schema.json": "db9f723adc80cbb3d3b74d374ebd2c2520487c8ebc7bc478d0c034c821550066",
+  "schema/trace.schema.json": "a7c47f440806de2c0d138b86d606a15fef637dab185c82e4566f7f703d4b35e6",
   "src/adapter.ts": "2bb8e74bfa2b902a2bdfd3487fff944e58c5217dda47038c790d1a073df6ece1",
   "src/canonical.ts": "082efa5af075263f31f416393caaf5018a0dc1522444d1ec3e6cfa058e422dd6",
   "src/coerce.ts": "8cde509bfd132094d2f1d0a372d3cc258211ef917e99616157c4dc7fa02bafdd",
@@ -28,7 +28,7 @@
   "src/nodes/string-format.ts": "f363e0359ca05bc7a16e938c0d745ca7652873084df6c55b7763d96bb4f20a5d",
   "src/nodes/switch.ts": "15896daa7c22306f9a2220a1a0daf7cf71262db7e8b587c926bd27ea107d8680",
   "src/nodes/uuid.ts": "d5e2f60d7f81ca7ebee8083955d58b7534b5d4d2589bfc1716c0d0bdca03aadf",
-  "src/spec.ts": "d0b5674ab90ece84e255770edf2c430075633c96577ad109b957708ad58d987d",
-  "src/trace.ts": "bbab071e3bd5a6a115a226559f8afb91bfca66b2b84ded27642189f1a06551a8",
-  "src/world.ts": "f7ccc2a78e794d45b984ec52ed6cbb3497d0f31df3ee34d0069bb94f585ed4ff"
+  "src/spec.ts": "31e476a9bcdf79dc5b2fdcf28d400021d3eb4f72219661fe9354ce2537f643c1",
+  "src/trace.ts": "740dd0a9f90c2c9a9b0c21c8c1c3fc05584acd76385fd04e860deb343dca696d",
+  "src/world.ts": "e5621d9ecf0fe6f52d60842948e7af11994996b260eabcf3352ccdc684ac7f61"
 }

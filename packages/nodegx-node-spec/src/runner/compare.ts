@@ -66,5 +66,5 @@ export function formatDifference(d: Difference, referenceName = 'reference', act
 
 /** Whether a trace grades anything: an observation event exists (an arm with no predicate grades nothing). */
 export function hasObservation(trace: readonly TraceEvent[]): boolean {
-  return trace.some((e) => e.t === 'value' || e.t === 'signal' || e.t === 'outcome' || e.t === 'request');
+  return trace.some((e) => e.t === 'value' || e.t === 'signal' || e.t === 'outcome' || e.t === 'request' || e.t === 'open');
 }

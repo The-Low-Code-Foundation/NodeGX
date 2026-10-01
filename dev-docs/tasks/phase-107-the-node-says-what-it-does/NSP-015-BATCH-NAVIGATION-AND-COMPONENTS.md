@@ -103,6 +103,50 @@ NSP-016's visual layer or a stand-in for it. Navigate / Navigate To Path / Pop /
 the world's LOCATION (§3). AC2 (export): this harness emits ONE component — every boundary and definition
 scenario is `outside` in those words.
 
+### 6.1b s16 (2026-10-01) — the world's LOCATION, and External Link (7 of 14)
+
+**The design step (§3), decided from what the family calls, not from what it renders.** Every node in this batch
+writes the browser's location through exactly two calls: `window.open(url, target, features)` (External Link,
+Navigate's new tab, Navigate To Path's new tab) and `history.pushState({}, '', url)` (Router, Page Stack, Navigate
+To Path, `api/navigation.ts`), and reads `location.hash` / `pathname` / `search` and listens for `popstate` /
+`hashchange` (router.tsx :152-169, :678-708; navigation-stack.tsx :193-210, :648-671). Path versus hash is only the
+SHAPE of the URL handed to `pushState` (router.tsx :805-818, the project's `navigationPathType`), and a `pushState`
+never fires `hashchange` — the memory's "a hash change is not a navigation" is a browser rule the world keeps.
+So the world records each call AS HANDED, exactly as the network does a request, and parses nothing on the way in
+(world.ts LOCATION, the header every target reads):
+
+| call | trace event | built |
+|---|---|---|
+| `window.open(url, target, features)` | `{ t: 'open', url, target, features }` — each canonical, as handed; grouped after `request` | ✅ s16 |
+| `history.pushState(state, title, url)` | `{ t: 'history', op: 'push', url }`; the location's path / search / hash become the URL resolved against the current one; no `popstate`, no `hashchange` | named, for Navigate |
+| user activation | not an event: the script's `activation` (`true` / `false` / absent = no `userActivation` API) — a fact of the play | ✅ s16 |
+
+A location exists exactly when the play has a window (VIEWPORT): a server render has neither. `window.open`
+returns `null` (what a `noopener` open returns, and the world has no second window).
+
+**Format** (guarded: `src/trace.ts`, `schema/trace.schema.json`, `src/spec.ts`, `src/world.ts` — hashes refreshed,
+all three stranger rounds re-graded green, `17 skipped, 101 passed` with schema and world): the `open` event;
+`WorldNeed` `location`; `WorldView.userActivation()`; a patch's `open` effect (only with a window — the
+interpreter refuses one without); `WorldPool.activations` (default `true`, `false`, none). The generator gives a
+`location` spec a window or none (the viewport pool) and an activation or none. The runtime target attributes
+each `window.open` to the updating node, as it does a request.
+
+**External Link** — [external-link.ts](../../../packages/nodegx-node-spec/src/nodes/external-link.ts), 9 hand
+scenarios. CONFORMS on the runtime on its first run (9/9, 200/200, 12/12 mutants) and on the interpreter
+(`tests/batch-navigation.test.ts`). A first-run green corrects no guess, so the runtime's own traces were read
+(probe): the blocked press still carries its `open` after the Failure; `'yes'` opens `_self` with the new-tab
+features; two presses in a frame open twice. Not graded: the export (AC1's export half — the export harness plays
+the latch nodes only; routed to P18 with the other navigation nodes).
+
+**Read in the source, worth a sentence (not rows — each is what the code says it does):** the two reads of Open
+In New Tab disagree for a truthy non-`true` value (features from truthiness :52, target from `=== true` :53 —
+`'yes'` gives the same tab with `noopener`); `Error` is never cleared (a blocked press then a Done leaves the
+blocked message); Link is handed to the browser unconverted.
+
+**Left: 7** — Show Popup, Close Popup, Push Component To Stack, Pop Component Stack, Navigate To Path, Navigate,
+Page Inputs. The `history` half of LOCATION is theirs (Navigate To Path and Pop need nothing visual beyond it;
+Navigate needs a Router, which is a visual node — a stand-in or NSP-016), and popups need the viewer's visual layer.
+
 ### 6.2 Rows
 
 | row | what | where | proposed |

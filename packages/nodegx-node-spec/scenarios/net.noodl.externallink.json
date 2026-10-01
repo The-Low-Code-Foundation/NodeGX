@@ -1,0 +1,56 @@
+[
+  {
+    "name": "no window (a server render): Do is Unchanged and nothing is opened",
+    "because": "externallink.ts :46-49 — `typeof window === 'undefined'` reports Unchanged before anything else",
+    "steps": [{ "set": "link", "value": "https://example.com" }, { "signal": "do" }, "settle"]
+  },
+  {
+    "name": "a window and no Link: Failure external-link/no-link, Error says why, nothing is opened",
+    "because": ":60-64",
+    "world": { "viewport": { "width": 1280, "height": 800 }, "activation": true },
+    "steps": [{ "signal": "do" }, "settle", { "set": "link", "value": "" }, { "signal": "do" }, "settle"]
+  },
+  {
+    "name": "a person's press opens Link in a new tab, without opener or referrer, and is Done",
+    "because": ":52-53 — Open In New Tab starts true: target _blank, features noopener,noreferrer; :100, :114",
+    "world": { "viewport": { "width": 1280, "height": 800 }, "activation": true },
+    "steps": [{ "set": "link", "value": "https://example.com" }, { "signal": "do" }, "settle"]
+  },
+  {
+    "name": "a press the graph made (no user activation) still opens, then reports Failure external-link/blocked with the reason on Error",
+    "because": ":97-111 — the open is attempted unconditionally; isActive false with a _blank target is reported as blocked",
+    "world": { "viewport": { "width": 1280, "height": 800 }, "activation": false },
+    "steps": [{ "set": "link", "value": "https://example.com" }, { "signal": "do" }, "settle"]
+  },
+  {
+    "name": "a browser that cannot say whether the press was a person's: the new tab is opened and Done",
+    "because": ":97-98 — no `userActivation` makes no claim",
+    "world": { "viewport": { "width": 1280, "height": 800 } },
+    "steps": [{ "set": "link", "value": "https://example.com" }, { "signal": "do" }, "settle"]
+  },
+  {
+    "name": "Open In New Tab off replaces the page (_self, no features) and is Done even without user activation",
+    "because": ":52-53, :98 — only a _blank target is ever reported as blocked",
+    "params": { "openInNewTab": false },
+    "world": { "viewport": { "width": 1280, "height": 800 }, "activation": false },
+    "steps": [{ "set": "link", "value": "/elsewhere" }, { "signal": "do" }, "settle"]
+  },
+  {
+    "name": "a truthy Open In New Tab that is not true ('yes') opens in the SAME tab with the new-tab features — the two reads disagree",
+    "because": ":52 reads truthiness, :53 reads `=== true`",
+    "world": { "viewport": { "width": 1280, "height": 800 }, "activation": false },
+    "steps": [{ "set": "openInNewTab", "value": "yes" }, { "set": "link", "value": "https://example.com" }, { "signal": "do" }, "settle"]
+  },
+  {
+    "name": "Error keeps its last message: a blocked press, then a plain one that is Done, leaves 'blocked' on Error",
+    "because": ":104 sets it, nothing clears it",
+    "world": { "viewport": { "width": 1280, "height": 800 }, "activation": false },
+    "steps": [{ "set": "link", "value": "https://example.com" }, { "signal": "do" }, "settle", { "set": "openInNewTab", "value": false }, { "signal": "do" }, "settle"]
+  },
+  {
+    "name": "Link is handed to the browser as it is: a number is opened as the number, and two presses in one frame open twice",
+    "because": ":54, :100 — no conversion; every press is its own invocation",
+    "world": { "viewport": { "width": 1280, "height": 800 }, "activation": true },
+    "steps": [{ "set": "link", "value": 5 }, { "signal": "do" }, { "signal": "do" }, "settle"]
+  }
+]
