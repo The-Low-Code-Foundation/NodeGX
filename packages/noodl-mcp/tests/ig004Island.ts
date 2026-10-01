@@ -43,6 +43,8 @@ import { OLIVE_SLIM } from './cg005Olive';
 import { CREW_PICK } from './iw008Crew';
 // P108 IW-006 (lane E): the earning rule and the live job's resume, appended to the island engine.
 import { EARN_ENGINE } from './iw006Earn';
+// P108 IW-007 (lane B): her land — a plot of the island, its drops written to her save, teach again judged by its team.
+import { LAND_TICK, LAND_WORLD } from './iw007Building';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { writtenAnswer: islWritten } = require('../../../dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/olive-written.js');
 
@@ -132,6 +134,8 @@ function islStepJob(plot, cur) {
 function islStepPlot(plot, cur) {
   // P108 IW-003 (lane B): a stale plot (teach again) is not stepped: its robot waits at home, where it started.
   if (plot.stale) return cur;
+  // P108 IW-007 (lane B): on her land, a drop that raises a building is a moment the save is written at (every drop kept).
+  if (plot.job && plot.land) return iw7bDropMoment(cur, plot.mate ? islWithMate(plot, cur, islHelped(plot, cur)) : islHelped(plot, cur));
   // P108 IW-008 (lane C): a job plot's second robot steps after the first, on the world the first left.
   // P108 IW-006 (lane H): a job with a shop helper riding on it steps with the helper on (islHelped).
   // Merge (s4): the helper rides the first robot's step; the second robot steps on the world that step left.
@@ -276,6 +280,7 @@ function islHelped(plot, cur) {
   return out;
 }
 ${EARN_ENGINE}
+${LAND_TICK}
 `;
 
 /**
@@ -291,7 +296,7 @@ ${EARN_ENGINE}
  * request's reference program run to its end, no Olive), **open**, **locked** (a band above hers: a fence, a padlock),
  * or **free** (free play, "the garden": never pinned, its own dry tulips).
  */
-export const islandWorldScript = (o: { free: unknown; base: ReadonlyArray<string>; home: { x: number; y: number }; freePlot: { x: number; y: number }; plotW: number; plotH: number }): string => `${ISLAND_ENGINE}
+export const islandWorldScript = (o: { free: unknown; base: ReadonlyArray<string>; home: { x: number; y: number }; freePlot: { x: number; y: number }; plotW: number; plotH: number }): string => `${ISLAND_ENGINE}${LAND_WORLD}
 var FREE = ${JSON.stringify(o.free)};
 var FREE_PLOT = ${JSON.stringify(o.freePlot)};
 var BASE = ${JSON.stringify(o.base)};
@@ -314,6 +319,8 @@ var list = [];
 for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].plot && isFinite(Number(reqs[i].plot.x))) list.push(reqs[i]);
 var freeReq = islClone(FREE); freeReq.plot = FREE_PLOT;
 list.push(freeReq);
+// P108 IW-007 (lane B): her land (Read family's), a plot like the others — drawn whether or not anything stands on it.
+list.push(iw7bLandRequest(Inputs.land));
 var plots = [], still = [], deco = [], live = {}, cards = [], busy = {};
 function hasRobot(id) { return !!rowOf(id); }
 function wonThings(req, laid) {
@@ -335,10 +342,12 @@ for (var p = 0; p < list.length; p++) {
   if (laid) map = laid.map;
   for (var y = 0; y < map.length; y++) for (var x = 0; x < String(map[y]).length; x++) if (rows[py + y] && py + y < H && px + x < W) rows[py + y][px + x] = String(map[y]).charAt(x);
   var sv = saved[req.id], isFree = req.id === 'free';
+  // P108 IW-007 (lane B): her land needs no kind and no band; it works when a robot is pinned AND something stands on it.
+  var isLand = req.id === LAND_ID;
   // IG-005: a plot is also locked while she has no robot of the kind it needs (the lock line names who lends it).
-  var needs = isFree ? '' : String(req.needs || 'pip');
-  var lock = isFree ? '' : Number(req.band) > band ? 'band' : !ownsKind(needs) ? 'robot' : '';
-  var status = isFree ? 'free' : lock ? 'locked' : (sv && Array.isArray(sv.program) && sv.program.length && sv.robotId && hasRobot(sv.robotId) && !busy[sv.robotId]) ? 'working' : done.indexOf(req.id) !== -1 ? 'won' : 'open';
+  var needs = isFree || isLand ? '' : String(req.needs || 'pip');
+  var lock = isFree || isLand ? '' : Number(req.band) > band ? 'band' : !ownsKind(needs) ? 'robot' : '';
+  var status = isFree ? 'free' : lock ? 'locked' : isLand && !(laid && laid.job) ? 'open' : (sv && Array.isArray(sv.program) && sv.program.length && sv.robotId && hasRobot(sv.robotId) && !busy[sv.robotId]) ? 'working' : done.indexOf(req.id) !== -1 && !isLand ? 'won' : 'open';
   var robotId = status === 'working' ? String(sv.robotId) : '';
   if (robotId) busy[robotId] = req.id;
   var start = islStart(req, robotId || 'me', robotId ? rowOf(robotId) : null);
@@ -346,8 +355,10 @@ for (var p = 0; p < list.length; p++) {
   var plot = { id: req.id, x: px, y: py, w: PW, h: PH, map: map.slice(), schedule: islClone(req.schedule || []), status: status, islander: String(req.islander || ''), band: Number(req.band) || 1, robotId: robotId, program: robotId ? islClone(sv.program) : null, start: start };
   // P108 IW-002: a job plot's job (its targets by id) and its seed; its tick is the job tick (islStepJob), never a reset.
   if (laid && laid.job) { plot.job = laid.job; plot.seed = Number(laid.seed) >>> 0; }
+  if (isLand) plot.land = true;
   // P108 IW-003 (lane B): teach again — the pinned program no longer wins this (rewritten) job: flagged, never stepped.
-  if (status === 'working' && laid && laid.job && islStale(req, plot.program, laid, start.robot)) plot.stale = true;
+  // P108 IW-007 (lane B): not on her land — its team is judged below, once the helper is known.
+  if (status === 'working' && !isLand && laid && laid.job && islStale(req, plot.program, laid, start.robot)) plot.stale = true;
   plots.push(plot);
   cards.push({ id: req.id, x: px, y: py, w: PW, h: PH, status: status, islander: plot.islander, band: plot.band, robotId: robotId, door: null, needs: needs, lock: lock });
   if (plot.stale) cards[cards.length - 1].stale = true;
@@ -356,15 +367,24 @@ for (var p = 0; p < list.length; p++) {
     if (plot.job) { live[req.id].phase = plot.stale ? 'teach' : 'work'; live[req.id].age = 0; live[req.id].seed = plot.seed; }
     // P108 IW-006 (lane E): a job plot goes on from the live job its save kept (robot at home; waiting if the job is done).
     if (plot.job && sv.live) iw6Resume(live[req.id], plot, sv.live);
+    // P108 IW-007 (lane B): on her land the buildings and bowls are the land's (what Island keep wrote), the sources the live job's.
+    // (a robot waiting at home beside a job a new building reopened goes back on the first tick: islStepJob's own rule.)
+    if (isLand && plot.job && sv.live) iw7bLandOnto(live[req.id], laid.things);
     // P108 IW-008 (lane C): a robot of hers that helps on this job plot (its kind, its own program), on the tile beside.
     if (plot.job && !plot.stale) for (var hm = 0; hm < mine.length && !plot.mate; hm++) {
       var mh = mine[hm];
-      if (!mh || String(mh.helps || '') !== req.id || mh.id === robotId || busy[mh.id] || kindOf(mh) !== needs || !Array.isArray(mh.program) || !mh.program.length) continue;
+      // P108 IW-007 (lane B): on her land a helper of ANY kind (the land needs no one kind).
+      if (!mh || String(mh.helps || '') !== req.id || mh.id === robotId || busy[mh.id] || (!isLand && kindOf(mh) !== needs) || !Array.isArray(mh.program) || !mh.program.length) continue;
       var mbot = islStart(req, mh.id, mh).robot, spot = islBeside(plot.map, start.things, mbot);
       mbot.x = spot.x; mbot.y = spot.y; mbot.home = { x: spot.x, y: spot.y, d: mbot.d };
       plot.mate = { robotId: String(mh.id), program: islClone(mh.program) };
       busy[mh.id] = req.id;
       live[req.id].mate = { run: islMateRun(plot, 0), robot: mbot, phase: 'work', lap: 0 };
+    }
+    // P108 IW-007 (lane B): teach again on her land — judged by its team (iw007Building): neither program fills a step.
+    if (isLand && plot.job && iw7bLandStale(plot, live[req.id])) {
+      plot.stale = true; cards[cards.length - 1].stale = true; live[req.id].phase = 'teach';
+      if (plot.mate) { delete busy[plot.mate.robotId]; delete plot.mate; delete live[req.id].mate; }
     }
     continue;
   }
@@ -418,6 +438,9 @@ for (var hp = 0; hp < plots.length; hp++) { var hsv = saved[plots[hp].id]; if (p
 // the rebuild's) starts again from this one — so a robot brought home never walks back to its plot.
 // P108 IW-006 (lane E): the saved plots WITHOUT their live jobs — a lap's end writes one; the build must not move with it.
 var build = islHash(JSON.stringify([iw6Unlive(saved), done, band, mine, pins.map(function (x) { return x ? [x.id, x.requestId, x.isOpen] : null; }), list.map(function (r) { return [r.id, r.plot, r.band]; })]));
+// P108 IW-007 (lane B): and which buildings stand on her land and where, which animals — never have or fed (a drop is kept, not rebuilt).
+var landKey = iw7bLandKey(Inputs.land);
+if (landKey) build = islHash(build + '|' + JSON.stringify(landKey));
 var state = { v: 1, build: build, w: W, h: H, map: rows.map(function (r) { return r.join(''); }), plots: plots, still: still, deco: deco, home: home, live: live, tick: 0 };
 // P108 IW-003 (lane M, IW-002 AC3): the Island page opened again on the SAME island (nothing she saved changed: the same
 // build) goes on from the island it left — each plot's live state as the last tick left it (meters, robots, laps, the

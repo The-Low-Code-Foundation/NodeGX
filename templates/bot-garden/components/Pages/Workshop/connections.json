@@ -132,6 +132,18 @@
     {
       "fromId": "wsRequests",
       "fromProperty": "requests",
+      "toId": "wsLandReqs",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "wsFam",
+      "fromProperty": "land",
+      "toId": "wsLandReqs",
+      "toProperty": "land"
+    },
+    {
+      "fromId": "wsLandReqs",
+      "fromProperty": "requests",
       "toId": "wsPlay",
       "toProperty": "requests"
     },
@@ -160,7 +172,7 @@
       "toProperty": "band"
     },
     {
-      "fromId": "wsRequests",
+      "fromId": "wsLandReqs",
       "fromProperty": "requests",
       "toId": "wsJob",
       "toProperty": "requests"
@@ -334,7 +346,7 @@
       "toProperty": "requestId"
     },
     {
-      "fromId": "wsRequests",
+      "fromId": "wsLandReqs",
       "fromProperty": "requests",
       "toId": "wsPay",
       "toProperty": "requests"

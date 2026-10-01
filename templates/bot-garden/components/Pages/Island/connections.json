@@ -322,6 +322,12 @@
       "toProperty": "robots"
     },
     {
+      "fromId": "isFam",
+      "fromProperty": "land",
+      "toId": "isWorld",
+      "toProperty": "land"
+    },
+    {
       "fromId": "isPins",
       "fromProperty": "pins",
       "toId": "isWorld",

@@ -23,6 +23,12 @@
     },
     {
       "fromId": "islandworldIn",
+      "fromProperty": "land",
+      "toId": "islandworldFn",
+      "toProperty": "in-land"
+    },
+    {
+      "fromId": "islandworldIn",
       "fromProperty": "pins",
       "toId": "islandworldFn",
       "toProperty": "in-pins"

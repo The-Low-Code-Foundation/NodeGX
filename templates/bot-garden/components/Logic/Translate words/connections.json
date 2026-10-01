@@ -2255,6 +2255,24 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bLandBlurb",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bLandBlurb"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bLandLine",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bLandLine"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bLandTitle",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bLandTitle"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw8cBrainL",
       "toId": "translatewordsOut",
       "toProperty": "iw8cBrainL"

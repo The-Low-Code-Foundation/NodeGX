@@ -332,7 +332,11 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw6eIslePay: s('{r} +{n} 🐚', '{r} +{n} 🐚'),
   // ── P108 IW-003 look (lane L): Olive's read on the envelopes reads the envelope (the drawer's block, the pad's key, its card) ──
   iwlReadEnvelope: s('read the envelope', 'lire l’enveloppe'),
-  iwlCdReadEnvelope: s('Olive reads the name on the envelope {b} holds. Then “go to” what Olive read takes {b} to that door.', 'Olive lit le nom sur l’enveloppe que tient {b}. Ensuite, « aller à » ce qu’Olive a lu emmène {b} à cette porte.')
+  iwlCdReadEnvelope: s('Olive reads the name on the envelope {b} holds. Then “go to” what Olive read takes {b} to that door.', 'Olive lit le nom sur l’enveloppe que tient {b}. Ensuite, « aller à » ce qu’Olive a lu emmène {b} à cette porte.'),
+  // ── P108 IW-007 (lane B): building — her land, the Build tab, placing a blueprint ──
+  iw7bLandTitle: s('Your land', 'Ton terrain'),
+  iw7bLandBlurb: s('Build', 'Construire'),
+  iw7bLandLine: s('Your own land: a tree for planks, a rock for stones, a carrot patch. Teach {b} to carry them to what you build here.', 'Ton terrain à toi : un arbre pour les planches, un rocher pour les pierres, un carré de carottes. Apprends à {b} à les porter jusqu’à ce que tu construis ici.')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);

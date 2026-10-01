@@ -92,6 +92,11 @@
           "name": "pick",
           "plug": "output",
           "type": "signal"
+        },
+        {
+          "name": "land",
+          "plug": "output",
+          "type": "object"
         }
       ],
       "x": 590,
