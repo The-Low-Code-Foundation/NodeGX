@@ -1,6 +1,6 @@
 # ISL-014 — A missing kit reader is named as one
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** Takes ownership of register **D83** (owner was
+**Status: 🟡 fix landed 2026-10-01 (session 1, `aab96a056`, route (a)) — AC1–AC4 green; AC5 waits on the 🔒 ruling (a)/(b); AC6 owed.** Scoped 2026-10-01 at `27d891bf3`. Takes ownership of register **D83** (owner was
 `NONE`). **Source:** [the island audit](AUDIT-2026-10-01.md) row **F18** · [P78 D83](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md)
 (TPL-011 on `ubuntu-latest`, 2026-09-26) · met again by P106 [IG-001](../phase-106-the-island-grows/IG-001-THE-FIXES.md)
 deviation 8 and every garden worktree lane · **Side:** product (MCP door: kit overlay and write refusals; dev tooling)
@@ -110,4 +110,58 @@ Design constraints, whatever the ruling:
 
 ## 8. Record
 
-None yet.
+### Session 1 — 2026-10-01, P109 s1, on `cline-dev` from `22303a534` (committed at `aab96a056`)
+
+**AC1, RED at HEAD, recorded before any change.** New spec `packages/noodl-mcp/tests/isl014KitRefusal.test.ts`: a copy
+of `fixtures/kit-app` bound with `NODEGX_KIT_EXTRACT` at a path that does not exist (never the shared `dist/`), and the
+control bound with `buildKitExtractor`'s fresh bundle. `create_component` placing `demo.kit.Badge`:
+
+| arm | at HEAD | after |
+|---|---|---|
+| control, reader built: kit node accepted; `Buttn` → `Unknown node type "Buttn" — not found in the node catalog.` + did you mean `Button` (byte for byte) | ✓ | ✓ unchanged (AC4) |
+| **reader missing**, `get_project_info` says `kits.unavailable: NODEGX_KIT_EXTRACT points at … does not exist` | ✓ said there | — |
+| **reader missing**, the refusal | *"…If this is a module-provided node, ensure the module is installed; otherwise it may be a legacy or misspelt type."* ✕ | *"…this project's own kit node types could not be read, so a kit node is not recognised here: NODEGX_KIT_EXTRACT points at "…", which does not exist. The module may well be installed. Build the reader with `npm run build` in packages/noodl-mcp, or point NODEGX_KIT_EXTRACT at a built kit-extract.cjs, and restart or re-bind this server afterwards — a project's kits are read once, when it is bound."* ✓ |
+| reader missing, `Buttn` | did you mean `Button`, nothing about kits ✕ | did you mean `Button` kept, plus the could-not-be-read sentence ✓ |
+| **AC3 near-miss trap**: module folder `Texts`, type `Texts` (one edit from `Text`), reader missing | *"Unknown node type "Texts" — not found in the node catalog."* + did you mean `Text` — the module sentence dropped entirely ✕ | the reader sentence, no suggestion ✓ |
+| **second arm**: `throwing-kit` copied beside `demo-kit`, reader built; `demo.kit.Badge` accepted; `throwing.kit.Thing` | the module sentence ✕ | *"A kit in this project failed to load, so its node types are unknown: Throwing Kit (noodl_modules/throwing-kit): this kit is deliberately broken. If this node comes from that kit, the module is installed — fix the kit, and restart or re-bind…"* ✓ |
+
+4 red / 1 green at HEAD → 5/5 after.
+
+**The fix, route (a) of §5** (no ruling needed for it): `packages/noodl-mcp/src/kitRefusal.ts` — `KitAwareValidator extends
+SemanticValidator`, overriding `validate` (which `validateComponent` goes through) to run `explainUnknownNodeTypes`
+over the report from `currentKitOverlay()`. Constructed in `validate.ts` and `tools/planTools.ts` in place of the bare
+`SemanticValidator`, so the write gate, the plan door, `validate_project` and the lesson grader all say it. Untouched
+when there is no overlay, when the project has no `noodl_modules` (then "ensure installed" is right), or when every
+kit loaded. **The editor's rule is not edited**, so the editor and `scripts/validate-project.ts` read as before (AC4,
+also pinned by the control's byte-for-byte clause).
+
+Kit-shaped (drops the near-miss when the reader is missing): a module folder's name, `<folder>.<Name>`, or a dotted
+name whose suggestion is not itself dotted — so `net.noodl.ParseFeeed` still gets `net.noodl.ParseFeed`.
+
+**AC2 reverted arm** (`explainUnknownNodeTypes` returning its input, restored `cmp`-identical): 4 failed / 1 passed —
+the control stays green, every rewritten arm returns to AC1's text.
+
+**Neighbours:** `kitOverlay`, `gam-014`, `gam-018`, `cn009`, `cn010`, `capability`: green. `cn004` has one red,
+*"still errors under strict"* (2 `unknown-node-type` for one stray node), **which the control with HEAD's `validate.ts`
+and `planTools.ts` also reads** — pre-existing, filed as `dev-docs/bugs/p109-s1-cn004-…md`, not this task's.
+`tsc -p packages/noodl-mcp --noEmit`: no error in any file this task touched (the errors it prints are in peers'
+uncommitted P105–P108 specs).
+
+**Owed, with why:**
+- 🔒 **AC5 needs the ruling** (§5): (a) stop here, or (b) build the reader on demand from a checkout with a staleness
+  check, so worktrees stop sharing one bundle. Recommended (a) now, then (b). Under (a), `make-worktree.sh`'s link stays
+  because a worktree has no `dist/` and the refusal now names the one command.
+- **AC6** (an agent from a fresh-checkout state reads the refusal, runs the command, re-binds, places the node, the page
+  deploys with the kit node drawing, screenshot looked at): a deploy plus a screenshot, one job; not run beside a
+  peer's drive.
+- **`noodl-mcp/dist` is not rebuilt.** Twelve installed servers were running from it this session and the worktrees
+  link it; the installed server carries the old sentence until `npm run build` in `packages/noodl-mcp` is run at a
+  quiet moment.
+
+**Register:** D83's owner cell set to `ISL-014` and its status to 🟡, in the working tree only — the row lives in a
+peer's uncommitted hunk of the register (since 09-27). The ledger `dev-docs/bugs/p78-d83-…md` is the committed record
+(`status: fixed`, `commit: aab96a056`).
+
+🔒 **Ruling to ask (§5):** *"When the kit reader is missing from a checkout, should the door only say so and name the
+command (done), or also build it on demand the first time, so a fresh worktree never shares the primary's bundle?"*
+Recommended: say so now, build on demand next; never commit the 3.7 MB bundle.

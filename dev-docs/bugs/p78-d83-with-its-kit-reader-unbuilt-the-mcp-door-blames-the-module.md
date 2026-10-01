@@ -1,7 +1,8 @@
 ---
 id: P78-D83
 title: With its kit reader unbuilt, the MCP door refuses every kit node as "ensure the module is installed"
-status: scheduled
+status: fixed
+commit: aab96a056
 phase: P109
 task: ISL-014
 severity: medium
@@ -30,3 +31,10 @@ start without the reader.
 
 **Proposed:** when a type is unknown AND the overlay is unavailable (no reader) or that kit failed, say so and name
 `npm run build --workspace @noodl/mcp` (or the kit's failure) instead of "ensure the module is installed". Small.
+
+**Fixed 2026-10-01, `aab96a056` (P109 ISL-014 s1), on the recommended route (a): say so.** The door's validator
+(`packages/noodl-mcp/src/kitRefusal.ts`) rewrites an `unknown-node-type` refusal when the kit overlay is `unavailable`
+or a kit failed: the true reason, "the module may well be installed", the build command, and re-bind/restart (kits are
+read once per bind). Measured by `packages/noodl-mcp/tests/isl014KitRefusal.test.ts`: 4 red at HEAD (the module
+sentence; `Texts` pointed at `Text`), 5 green after. Not yet done: route (b) build-on-demand (ISL-014 AC5, needs
+Richard's ruling), the end-to-end page (AC6), and a rebuild of `noodl-mcp/dist` so the installed server carries it.

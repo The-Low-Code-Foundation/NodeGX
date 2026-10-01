@@ -3,7 +3,7 @@
 **Scoped:** 2026-10-01, at HEAD `27d891bf3`, from [the island audit](AUDIT-2026-10-01.md). The audit read P105, P106 and
 P108 (Olive's Island, [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md)): their task files, 225 commits, 57
 session and lane transcripts, the generator, both kits, the desktop shell and the shipped template.
-**Status: 🟡 OPEN — session 1 (2026-10-01): ISL-001's fix landed (AC1–AC4, AC8; AC5–AC7 owed as drives), 0 of 25 closed.** One ruling asked (ISL-001 §5, below). **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+**Status: 🟡 OPEN — session 1 (2026-10-01): ISL-001's fix landed (`3df5adb82`; AC1–AC4, AC8; AC5–AC7 owed as drives) and ISL-014's (`aab96a056`; AC1–AC4; AC5 on a ruling, AC6 owed), 0 of 25 closed.** Two rulings asked (ISL-001 §5, ISL-014 §5, below). **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
 > "Phase 108 has been a beast. I forgot to tell the model to record learnings about NodeGX during the push. I'm sure
 > there must be a tonne of stuff we can fix and improve in NodeGX and the way the MCP works. Can you do an audit and start
@@ -109,7 +109,7 @@ the work:
 | [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display (`defaultCss` lands inline, undocumented; the export ignores it) | F15 | kit bridge, docs, export | — |
 | [ISL-012](ISL-012-A-KIT-CAN-SHIP-A-MODERN-LIBRARY.md) | A kit can ship a modern library | F16 | kit loader, extractor | ✓ |
 | [ISL-013](ISL-013-TWO-KITS-SHARE-CODE-WITHOUT-A-COPY.md) | Two kits share code without a copy | F17 | kit system | ✓ |
-| [ISL-014](ISL-014-A-MISSING-KIT-READER-IS-NAMED-AS-ONE.md) | A missing kit reader is named as one | F18, **D83** | MCP door | — |
+| [ISL-014](ISL-014-A-MISSING-KIT-READER-IS-NAMED-AS-ONE.md) | A missing kit reader is named as one — **🟡 s1: the refusal names it (route a); build-on-demand on a ruling, AC6 owed** | F18, **D83** | MCP door | §5 for AC5 |
 | [ISL-015](ISL-015-A-KIT-AUTHOR-READS-THE-TRAPS-BEFORE-MEETING-THEM.md) | A kit author reads the traps before meeting them | F20, F14 | docs, gate | — |
 | **Track D** | | | | |
 | [ISL-016](ISL-016-THE-DOOR-WRITES-THE-PROJECT-SETTINGS-AND-THE-HOME-PAGE.md) | The door writes the project settings and the home page | F23 | MCP | ✓ |
@@ -174,6 +174,8 @@ This rule is also saved as a feedback memory for the model, because a README is 
 
 **Asked after session 1 (2026-10-01):** ISL-001 §5 — *"The Repeater no longer needs the 120 ms wait in front of a list it is given twice. Should Olive's Island drop its three waits (pad, crew, My robots)?"* Recommended: yes, as ISL-025 W3.
 
+**Asked after session 1 (2026-10-01):** ISL-014 §5 — *"When the kit reader is missing from a checkout, should the door only say so and name the command (done), or also build it on demand the first time, so a fresh worktree never shares the primary's bundle?"* Recommended: say so now (done), build on demand next; never commit the bundle.
+
 Each task's §5 has the full question, the options and the trade-offs. Ask in plain words, one decision
 per question, and only when the task is next to build. This table is the index, with the recommendation in brackets.
 
@@ -232,6 +234,6 @@ job each.
 |---|---|---|
 | A | 0 (ISL-001 🟡 fix landed) | 4 |
 | B | 0 | 6 |
-| C | 0 | 5 |
+| C | 0 (ISL-014 🟡 fix landed) | 5 |
 | D | 0 | 7 |
 | E | 0 | 3 |
