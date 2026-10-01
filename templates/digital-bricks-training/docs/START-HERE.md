@@ -652,8 +652,10 @@ PostgreSQL runs. Two things the move found, both worth knowing:
 ## What is not here yet
 
 Every write but those above — the coach's composers, answers to a brief, the confidence check —
-each a later write on the pattern `capture` set. The engine: a lesson
-nobody has written says *not written yet*, and that is every step Sam has not reached yet. Every coach
+each a later write on the pattern `capture` set. The lesson writer: a lesson
+nobody has written says *not written yet*, and that is every step Sam has not reached yet. **There
+will be no engine.** Lessons are written by the trainer's Claude over MCP and by nothing else, and a
+learner cannot revise or regenerate one (decision 008); that MCP server is not built yet. Every coach
 composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every
 string has one owner" above for exactly which strings the table owns today and which are still
 English in place.
