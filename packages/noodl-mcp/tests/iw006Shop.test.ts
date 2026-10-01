@@ -61,7 +61,9 @@ describe('IW-006 AC3 — the shop: what it shows', () => {
       expect(r.tabs.map((t: any) => [t.id, t.label, t.selected])).toEqual(SHOP_TABS.map((t) => [SHOP_IDS.tab + t, word(`iw6hTab${t[0].toUpperCase()}${t.slice(1)}`, lang), t === SHOP_FIRST_TAB]));
       for (const t of ['build', 'animals'] as const) {
         const e = rows(m, SHOP_IDS.tab + t, lang);
-        expect([e.items, e.showItems, e.showLater, e.later]).toEqual([[], false, true, word(t === 'build' ? 'iw6hLaterBuild' : 'iw6hLaterAnimals', lang)]);
+        // P108 IW-007 (lane A): Animals, shut until a refuge on her land is finished, says build the refuge first (iw7aShut);
+        // it opens with the refuge (iw007Animals.test.ts).
+        expect([e.items, e.showItems, e.showLater, e.later]).toEqual([[], false, true, word(t === 'build' ? 'iw6hLaterBuild' : 'iw7aShut', lang)]);
       }
     }
     // Known-firing: Robots, Upgrades and Helpers sell something, and say nothing about later.

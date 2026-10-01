@@ -32,6 +32,8 @@
 import { BRAIN_SIZE, SHOP_TABS } from './cg002Content';
 import { SAVE_HELPERS } from './cg002Scripts';
 import { ISLAND_ENGINE } from './ig004Island';
+// P108 IW-007 (lane A): the Animals shelf's rules, appended to SHOP_SHARED.
+import { IW7A_SHOP_SHARED } from './iw007Animals';
 
 /** The shop's two components (cg003Components builds them in lane H's block; the Island page places the shop). */
 export const SHOP_PATHS = { shop: '/Island/Shop', item: '/Island/Shop item' } as const;
@@ -70,11 +72,14 @@ function shShows(p, it) {
     for (var i = 0; i < rows.length; i++) if (up.fits.indexOf(rows[i].kind) !== -1) return true;
     return false;
   }
+  // P108 IW-007 (lane A): an animal shows once a refuge on her land is finished (iw7aShows, iw007Animals.ts).
+  if (it.kind === 'animal') return iw7aShows(p, it);
   // P108 IW-007 (s5 base): the blueprints and animals are in the catalogue, but their shelves stay shut (the "later" line)
   // until lane B opens Build and lane A opens Animals.
   if (it.kind === 'blueprint' || it.kind === 'animal') return false;
   return true;
 }
+${IW7A_SHOP_SHARED}
 `;
 
 /**
@@ -99,6 +104,8 @@ for (var i = 0; i < SHOP.length; i++) {
   items.push({ id: SHOP_IDS.item + it.id, icon: it.icon, name: it.name[lang] || it.name.en, price: shFill(W.iw6hPrice, { n: it.price }), line: it.line[lang] || it.line.en, tag: tag, hasTag: !!tag, cls: 'bg-shop-item bg-press' + (yours ? ' bg-shop-item-yours' : '') + (held ? ' bg-shop-item-held' : '') });
 }
 var later = tab === 'build' ? W.iw6hLaterBuild || '' : tab === 'animals' ? W.iw6hLaterAnimals || '' : '';
+// P108 IW-007 (lane A): the Animals tab, shut, says build the refuge first; open, its animals and no line.
+later = iw7aLater(tab, later, p, W);
 Outputs.hasProfile = !!p;
 Outputs.balance = bal;
 Outputs.btnText = shFill(W.iw6hBtn, { n: bal });
@@ -177,6 +184,12 @@ if (it && shShows(p, it)) {
       out.showRobots = okIds.length > 0;
       if (!okIds.length) { blocked = true; out.none = W.iw6hNoBrain || ''; }
       else if (!out.robotId) blocked = true;
+    } else if (it.kind === 'animal') {
+      // P108 IW-007 (lane A): an animal's card has the copy's name box (an empty box takes iw7aDefaultName); a pen with no
+      // free place (or no finished refuge) says so and has no Buy.
+      var iw7aWhy = iw7aRefusal(p, W);
+      if (iw7aWhy) { blocked = true; out.none = iw7aWhy; }
+      else { out.namePlaceholder = iw7aDefaultName(p, it.animal); out.showName = can; }
     }
     if (can) { out.left = shFill(W.iw6hLeft, { n: bal - it.price }); out.showLeft = true; }
     else { var more = it.price - bal; out.short = shFill(more === 1 ? W.iw6hShort1 : W.iw6hShort, { n: more }); out.showShort = true; }
@@ -186,6 +199,8 @@ if (it && shShows(p, it)) {
   // "It's yours!" (the drive's first look at the card just bought). A helper just bought goes on to its jobs.
   var used = String(Inputs.used || '').split('|'), justBought = String(Inputs.bought || '') === it.id, justUsed = used[0] === it.id && !!used[1];
   if (justBought) out.done = W.iw6hBought || '';
+  // P108 IW-007 (lane A): an animal just bought — who is waiting by her bowl on her land.
+  if (justBought && it.kind === 'animal') out.done = iw7aBoughtLine(p, it, W) || out.done;
   if (justUsed) out.done = shFill(W.iw6hUsed, { what: out.name, plot: titleOf(used[1], nameOfRobot(p.island.plots[used[1]] ? p.island.plots[used[1]].robotId : '')) });
   if ((justBought && !held) || justUsed) { out.showFigures = false; out.showLeft = false; out.showShort = false; out.canBuy = false; out.showName = false; out.showRobots = false; out.none = ''; }
   out.showDone = !!out.done;
@@ -227,7 +242,11 @@ export const BUY_SCRIPT = `${SAVE_HELPERS}
 ${SHOP_SHARED}
 var model = shModel(Inputs.model), p = shActive(model);
 var id = shBare(Inputs.itemId, SHOP_IDS.item);
-var r = p ? buyItem(p, id, { robotId: shBare(Inputs.robotId, SHOP_IDS.robot), name: typeof Inputs.name === 'string' ? Inputs.name : '' }) : { ok: false, error: 'unknown', short: 0, left: 0, robotId: '' };
+var name = typeof Inputs.name === 'string' ? Inputs.name : '';
+// P108 IW-007 (lane A): an animal she did not name takes the name its card showed in the box.
+var iw7aIt = shopItem(id);
+if (p && iw7aIt && iw7aIt.kind === 'animal' && !name.trim()) name = iw7aDefaultName(p, iw7aIt.animal);
+var r = p ? buyItem(p, id, { robotId: shBare(Inputs.robotId, SHOP_IDS.robot), name: name }) : { ok: false, error: 'unknown', short: 0, left: 0, robotId: '' };
 Outputs.model = model;
 Outputs.ok = !!r.ok;
 Outputs.error = String(r.error || '');

@@ -110,6 +110,8 @@ var gardenKitBlocks = (function () {
   /** What a tile may have, what a container may count, what `go to nearest` may seek. */
   var WHAT_KINDS = ['egg', 'stone', 'tulip', 'rock', 'letter', 'food', 'can', 'water'];
   var SEEK_KINDS = ['egg', 'rock', 'tulip', 'can', 'well', 'basket', 'site', 'letter', 'stone', 'bowl', 'hen', 'postbox'];
+  // P108 IW-007 (lane A): her land's two new sources — the carrot patch (her animals' food) and the tree (planks).
+  SEEK_KINDS.push('patch', 'tree');
   var VAR_NAMES = ['count', 'eggs', 'stones', 'water', 'steps'];
   var TEXT_WORDS = ['red tulip', 'yellow tulip', 'tulip', 'rock', 'stone', 'letter', 'bowl', 'egg'];
 
@@ -603,6 +605,9 @@ var gardenKitBlocks = (function () {
     iw4B_trick: { en: 'trick', fr: 'astuce' },
     iw4B_do: { en: 'do trick', fr: 'faire l’astuce' }
   };
+  // P108 IW-007 (lane A): the land's two sources, as the drawer's "go to nearest" names them — the fallback for the page's
+  // iw7aK_ words (kept apart from WORDS: the page's table carries every iw4 key of WORDS, and these are lane A's).
+  var IW7A_KIND_WORDS = { patch: { en: '🥕 carrot patch', fr: '🥕 carré de carottes' }, tree: { en: '🌳 tree', fr: '🌳 arbre' } };
 
   function wordsOf(rows, lang) {
     var out = {};
@@ -612,7 +617,8 @@ var gardenKitBlocks = (function () {
       for (var i = 0; i < list.length; i++) {
         var r = list[i];
         // P108 IW-003 (lane S): + a thing's own name by its id (iw3sK_<id>) and its states' words (iw3sS_<state>_<id>).
-        if (r && typeof r.key === 'string' && (r.key.indexOf('iw4') === 0 || r.key.indexOf('iw3sK_') === 0 || r.key.indexOf('iw3sS_') === 0)) out[r.key] = String(r[lang] || r.en || out[r.key] || '');
+        // P108 IW-007 (lane A): + the land's sources' words (iw7aK_<kind>).
+        if (r && typeof r.key === 'string' && (r.key.indexOf('iw4') === 0 || r.key.indexOf('iw3sK_') === 0 || r.key.indexOf('iw3sS_') === 0 || r.key.indexOf('iw7aK_') === 0)) out[r.key] = String(r[lang] || r.en || out[r.key] || '');
       }
     }
     return out;
@@ -735,6 +741,9 @@ var gardenKitBlocks = (function () {
 
   function kindWord(ctx, k) {
     var key = 'iw4K_' + k;
+    // P108 IW-007 (lane A): a kind lane A added (the patch, the tree) wears its iw7aK_ word (the page's, else the node's own).
+    if (ctx.words[key] === undefined && ctx.words['iw7aK_' + k] !== undefined) key = 'iw7aK_' + k;
+    if (ctx.words[key] === undefined && IW7A_KIND_WORDS[k]) return IW7A_KIND_WORDS[k][ctx.lang === 'fr' ? 'fr' : 'en'];
     return ctx.words[key] !== undefined ? ctx.words[key] : k;
   }
 

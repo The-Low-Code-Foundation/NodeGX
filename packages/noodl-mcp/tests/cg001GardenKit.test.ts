@@ -497,7 +497,8 @@ describe('CG-001 — garden-kit, the built artefact', () => {
 
   describe('the motion is stilled for a child who asked for reduced motion, and the ports are documented', () => {
     it('every animation the world starts is stilled', () => {
-      expect(reducedMotionReport(node('garden-kit.Garden').css as string)).toEqual({ animated: ['gd-bump', 'gd-puddle', 'gd-turn'], unstilled: [] });
+      // P108 IW-007 (lane A): + a fed animal's small hop (gd-pet-happy) — stilled like the rest.
+      expect(reducedMotionReport(node('garden-kit.Garden').css as string)).toEqual({ animated: ['gd-bump', 'gd-pet-happy', 'gd-puddle', 'gd-turn'], unstilled: [] });
       expect(reducedMotionReport(node('garden-kit.BlockList').css as string)).toEqual({ animated: [], unstilled: [] });
     });
 

@@ -1381,6 +1381,12 @@
       need = wholeOf(t.max);
       have = wholeOf(t.left) || 0;
       icon = 'stone';
+    } else if (t.kind === 'patch') {
+      // P108 IW-007 (lane A): the carrot patch, like a rock — the carrots left of its max (a source: never "done").
+      if (!wholeOf(t.max)) return null;
+      need = wholeOf(t.max);
+      have = wholeOf(t.left) || 0;
+      icon = 'carrot';
     } else return null;
     if (need > 0 && have > need) have = need;
     return {
@@ -1597,6 +1603,135 @@
     if (st === 4 && !t.vacant) extras.push(spriteEl('islSami', 'bench-sami-' + i, 'gd-bench-sami', { 'data-who': 'sami', 'data-sits': 'bench' }));
   }
 
+  // ── P108 IW-007 (lane A): her animals and the carrot patch ─────────────────────────────────────────────────────────
+  // An animal is drawn BY her bowl (the engine has no animal thing: a bowl with `animal` and `name` on it): fed (her bowl's
+  // count > 0) she stands, happy, with a small hop now and then; hungry (0) she sits by her bowl and waits — never sad,
+  // never gone (R2). Her name is a pill under her like a robot's; the bowl's meter counts carrots (2/3, a carrot icon).
+  // The patch shows its carrots by what is left (four places; used up, bare soil with sprouts — it regrows). A carried
+  // carrot rides on a robot's back. The 3D kit draws the same (garden-3d-kit, lane A's block); both expose petMood.
+  /** Her mood by her bowl: 'happy' when it has a carrot in it, else 'waiting' (never anything sadder). */
+  function petMood(t) {
+    var m = meterOf(t);
+    var n = m ? m.have : wholeOf(t && t.count) || 0;
+    return n > 0 ? 'happy' : 'waiting';
+  }
+  JOB_LOOK.petMood = petMood;
+  METER_ICONS.carrot = 1;
+  LOAD_SPRITES.carrot = 1;
+  (function () {
+    var carrotTop = function (cx, cy) {
+      return [
+        ['path', { d: 'M' + (cx - 4) + ' ' + (cy + 1) + 'c1-5 3-8 4-9 1 1 3 4 4 9z', fill: '#FF8A3D', stroke: '#D9651E', strokeWidth: 1 }],
+        ['path', { d: 'M' + cx + ' ' + (cy - 8) + 'c-4-3-6-7-5-10 3 1 5 5 5 10zM' + cx + ' ' + (cy - 8) + 'c4-3 6-7 5-10-3 1-5 5-5 10zM' + cx + ' ' + (cy - 8) + 'v-11', stroke: '#3FA66B', strokeWidth: 2.5, fill: '#48AF70', strokeLinecap: 'round' }]
+      ];
+    };
+    var spots = [[20, 28], [44, 28], [20, 46], [44, 46]];
+    for (var n = 0; n <= 4; n++) {
+      var shapes = [
+        ['ellipse', { cx: 32, cy: 56, rx: 26, ry: 4, fill: 'rgba(0,0,0,.12)' }],
+        ['rect', { x: 6, y: 16, width: 52, height: 40, rx: 12, fill: '#9E7248' }],
+        ['path', { d: 'M12 30h40M12 44h40', stroke: '#86603A', strokeWidth: 3, strokeLinecap: 'round' }]
+      ];
+      for (var k = 0; k < n; k++) shapes = shapes.concat(carrotTop(spots[k][0], spots[k][1]));
+      // Used up: bare soil with a sprout in each place — it grows back (a source regrows on its clock).
+      if (n === 0) for (var q = 0; q < spots.length; q++) shapes.push(['path', { d: 'M' + spots[q][0] + ' ' + spots[q][1] + 'c-2-3-4-4-5-4M' + spots[q][0] + ' ' + spots[q][1] + 'c2-3 4-4 5-4', stroke: '#48AF70', strokeWidth: 2, fill: 'none', strokeLinecap: 'round' }]);
+      SPRITES['patch' + n] = { box: '0 0 64 64', shapes: shapes };
+    }
+    SPRITES.carrot = { box: '0 0 64 64', shapes: [
+      ['ellipse', { cx: 32, cy: 54, rx: 14, ry: 3, fill: 'rgba(0,0,0,.12)' }],
+      ['path', { d: 'M26 24c4-2 10-1 13 3L30 52c-2 2-4 1-4-1z', fill: '#FF8A3D', stroke: '#D9651E', strokeWidth: 2, strokeLinejoin: 'round' }],
+      ['path', { d: 'M29 31l5 2M28 39l4 2', stroke: '#D9651E', strokeWidth: 2, strokeLinecap: 'round' }],
+      ['path', { d: 'M33 24c-2-6-6-10-11-11 1 5 5 9 11 11zM33 24c2-7 6-11 12-12-1 6-5 10-12 12zM33 24c0-7 1-12 3-15', stroke: '#3FA66B', strokeWidth: 2.5, fill: '#48AF70', strokeLinecap: 'round' }]
+    ] };
+    // Her bowl with carrots in it (count > 0) — the empty one is the plain bowl.
+    SPRITES.bowlCarrots = { box: '0 0 64 64', shapes: [
+      ['path', { d: 'M8 30h48c0 14-10 22-24 22S8 44 8 30z', fill: '#7CC6F0' }],
+      ['ellipse', { cx: 32, cy: 30, rx: 24, ry: 6, fill: '#4FA7DC' }],
+      ['path', { d: 'M18 30l10-10 4 4-10 8zM30 31l12-12 4 4-12 9zM24 32l3-14 5 1-4 13z', fill: '#FF8A3D', stroke: '#D9651E', strokeWidth: 1.5, strokeLinejoin: 'round' }],
+      ['path', { d: 'M29 19l3-6M44 18l4-5M30 17l-2-6', stroke: '#3FA66B', strokeWidth: 2.5, strokeLinecap: 'round' }]
+    ] };
+    var shadow = ['ellipse', { cx: 30, cy: 57, rx: 20, ry: 3.5, fill: 'rgba(0,0,0,.14)' }];
+    var eye = function (cx, cy) { return ['circle', { cx: cx, cy: cy, r: 2, fill: '#2E2A3D' }]; };
+    var shine = function (cx, cy) { return ['circle', { cx: cx + 0.7, cy: cy - 0.7, r: 0.7, fill: '#fff' }]; };
+    // The rabbit, happy: up on her feet, ears high, a smile. Waiting: sitting low by her bowl, ears laid back, eyes on it.
+    SPRITES.rabbitHappy = { box: '0 0 64 64', shapes: [
+      shadow,
+      ['ellipse', { cx: 26, cy: 42, rx: 15, ry: 11, fill: '#D9C3AA' }],
+      ['circle', { cx: 12, cy: 38, r: 4.5, fill: '#FFFFFF' }],
+      ['ellipse', { cx: 33, cy: 53, rx: 6, ry: 3, fill: '#C9AF93' }],
+      ['ellipse', { cx: 18, cy: 53, rx: 5, ry: 3, fill: '#C9AF93' }],
+      ['ellipse', { cx: 37, cy: 14, rx: 3.6, ry: 11, fill: '#D9C3AA', transform: 'rotate(-8 37 14)' }],
+      ['ellipse', { cx: 37, cy: 14, rx: 1.6, ry: 8, fill: '#F5B3C4', transform: 'rotate(-8 37 14)' }],
+      ['ellipse', { cx: 45, cy: 15, rx: 3.6, ry: 11, fill: '#D9C3AA', transform: 'rotate(12 45 15)' }],
+      ['ellipse', { cx: 45, cy: 15, rx: 1.6, ry: 8, fill: '#F5B3C4', transform: 'rotate(12 45 15)' }],
+      ['circle', { cx: 41, cy: 30, r: 10, fill: '#E6D3BE' }],
+      eye(44, 28), shine(44, 28),
+      ['ellipse', { cx: 50, cy: 31.5, rx: 2, ry: 1.5, fill: '#E86A8A' }],
+      ['path', { d: 'M45 34.5q2.5 2.5 5 0', stroke: '#2E2A3D', strokeWidth: 1.4, fill: 'none', strokeLinecap: 'round' }]
+    ] };
+    SPRITES.rabbitWait = { box: '0 0 64 64', shapes: [
+      shadow,
+      ['ellipse', { cx: 27, cy: 46, rx: 16, ry: 10, fill: '#D9C3AA' }],
+      ['circle', { cx: 12, cy: 46, r: 4.5, fill: '#FFFFFF' }],
+      ['ellipse', { cx: 24, cy: 30, rx: 3.4, ry: 11, fill: '#D9C3AA', transform: 'rotate(-62 24 30)' }],
+      ['ellipse', { cx: 24, cy: 30, rx: 1.5, ry: 8, fill: '#F5B3C4', transform: 'rotate(-62 24 30)' }],
+      ['ellipse', { cx: 27, cy: 35, rx: 3.4, ry: 11, fill: '#C9AF93', transform: 'rotate(-48 27 35)' }],
+      ['circle', { cx: 40, cy: 40, r: 10, fill: '#E6D3BE' }],
+      eye(44, 41), shine(44, 41),
+      ['ellipse', { cx: 49, cy: 43.5, rx: 2, ry: 1.5, fill: '#E86A8A' }],
+      ['path', { d: 'M44 46.5h4', stroke: '#2E2A3D', strokeWidth: 1.4, strokeLinecap: 'round' }]
+    ] };
+    var wool = function (pts, fill) { return pts.map(function (q) { return ['circle', { cx: q[0], cy: q[1], r: q[2], fill: fill, stroke: '#D8D2E4', strokeWidth: 1 }]; }); };
+    // The sheep, happy: up on his legs, a smile. Waiting: lying in his wool by his bowl, head on the ground, eyes on it.
+    SPRITES.sheepHappy = { box: '0 0 64 64', shapes: [shadow].concat(
+      [['rect', { x: 15, y: 44, width: 4, height: 11, rx: 2, fill: '#4A4458' }], ['rect', { x: 32, y: 44, width: 4, height: 11, rx: 2, fill: '#4A4458' }]],
+      wool([[14, 36, 8], [24, 30, 9], [34, 32, 9], [24, 40, 9], [34, 41, 8], [16, 44, 6]], '#FFFFFF'),
+      [
+        ['ellipse', { cx: 45, cy: 31, rx: 8, ry: 9.5, fill: '#4A4458' }],
+        ['ellipse', { cx: 38, cy: 26, rx: 4.5, ry: 2.2, fill: '#4A4458', transform: 'rotate(-25 38 26)' }],
+        ['circle', { cx: 44, cy: 22, r: 4.5, fill: '#FFFFFF', stroke: '#D8D2E4', strokeWidth: 1 }],
+        ['circle', { cx: 47.5, cy: 29, r: 2, fill: '#FFFFFF' }], ['circle', { cx: 48, cy: 29, r: 1.1, fill: '#2E2A3D' }],
+        ['path', { d: 'M44 36.5q3 2 6 0', stroke: '#FFFFFF', strokeWidth: 1.4, fill: 'none', strokeLinecap: 'round' }]
+      ]) };
+    SPRITES.sheepWait = { box: '0 0 64 64', shapes: [shadow].concat(
+      wool([[14, 46, 8], [24, 40, 9], [34, 42, 9], [24, 49, 7], [34, 50, 6], [44, 48, 6]], '#FFFFFF'),
+      [
+        ['ellipse', { cx: 47, cy: 45, rx: 8, ry: 8, fill: '#4A4458' }],
+        ['ellipse', { cx: 40, cy: 40, rx: 4.5, ry: 2.2, fill: '#4A4458', transform: 'rotate(-10 40 40)' }],
+        ['circle', { cx: 46, cy: 37, r: 4, fill: '#FFFFFF', stroke: '#D8D2E4', strokeWidth: 1 }],
+        ['circle', { cx: 50, cy: 44, r: 2, fill: '#FFFFFF' }], ['circle', { cx: 50.5, cy: 44.5, r: 1.1, fill: '#2E2A3D' }],
+        ['path', { d: 'M46 50h5', stroke: '#FFFFFF', strokeWidth: 1.4, strokeLinecap: 'round' }]
+      ]) };
+  })();
+  var PET_SPRITES = { rabbit: { happy: 'rabbitHappy', waiting: 'rabbitWait' }, sheep: { happy: 'sheepHappy', waiting: 'sheepWait' } };
+  WORLD_CSS +=
+    '\n.gd-cell>.gd-pet{inset:auto;left:-8%;top:-6%;width:80%;height:80%;z-index:2;transform-origin:50% 90%}\n' +
+    '.gd-cell>.gd-pet-bowl{inset:auto;right:-2%;bottom:2%;width:52%;height:52%;z-index:1}\n' +
+    '.gd-pet.gd-pet-happy{animation:gd-hop 2.6s ease-in-out infinite}\n' +
+    '@keyframes gd-hop{0%,72%,100%{transform:none}80%{transform:translateY(-16%) scale(1.03,.97)}88%{transform:translateY(0) scale(1.04,.95)}94%{transform:none}}\n' +
+    '.gd-pet-name{position:absolute;top:92%;left:40%;transform:translateX(-50%);background:#FFF7E8;border:1.5px solid #C79A63;border-radius:999px;padding:0 7px;font-size:11px;font-weight:800;line-height:1.4;white-space:nowrap;z-index:3;color:#2E2A3D;pointer-events:none}\n' +
+    '.gd-world[data-wide="1"] .gd-pet-name{font-size:9px;padding:0 4px;border-width:1px}\n' +
+    '.gd-cell>.gd-patch{z-index:1}\n' +
+    '.gd-mi-carrot{background:#FF8A3D;border-radius:50% 50% 50% 50%/30% 30% 70% 70%;width:7px;height:10px;box-shadow:inset 0 2px 0 #48AF70}.gd-m-carrot .gd-pip.gd-on{background:#FF8A3D}\n' +
+    '.gd-world[data-wide="1"] .gd-meter.gd-m-carrot{--c:#E06A1E}\n' +
+    '.gd-meter.gd-watch .gd-mi-carrot{width:9px;height:13px}\n' +
+    '@media (prefers-reduced-motion: reduce){.gd-pet.gd-pet-happy{animation:none}}\n';
+  /** Her bowl and her by it (on the bowl's tile): the bowl with carrots or empty, her sprite by mood, her name pill. */
+  function petEls(t, i, m, extras) {
+    var mood = petMood(t);
+    var kind = PET_SPRITES[t.animal] ? String(t.animal) : 'rabbit';
+    var fed = mood === 'happy';
+    extras.push(spriteEl(fed ? 'bowlCarrots' : 'bowl', 'pet-bowl-' + i, 'gd-thing gd-bowl gd-pet-bowl' + (fed ? ' gd-full' : ''), { 'data-bowl': m ? m.text : String(wholeOf(t.count) || 0) }));
+    extras.push(spriteEl(PET_SPRITES[kind][mood], 'pet-' + i, 'gd-pet gd-pet-' + mood, { 'data-animal': kind, 'data-mood': mood, 'data-name': String(t.name || '') }));
+    if (t.name) extras.push(h('span', { key: 'pet-name-' + i, className: 'gd-pet-name', 'data-pet-name': String(t.name) }, String(t.name)));
+  }
+  /** The carrot patch: its carrots by what is left (four places at most); used up, bare soil with sprouts. */
+  function patchEls(t, i, m, extras) {
+    var left = wholeOf(t.left);
+    if (left === null) left = 4;
+    extras.push(spriteEl('patch' + Math.min(4, left), 'patch-' + i, 'gd-thing gd-patch' + (left ? '' : ' gd-used'), { 'data-left': String(left), 'data-patch': String(Math.min(4, left)) }));
+  }
+
   /** A rising count is a new event; a mount, the same value, a fall or junk is not (the Boost-count rule). */
   function rose(before, after) {
     var a = Number(before);
@@ -1778,6 +1913,9 @@
             if (t.kind === 'tulip') tulip = t;
             else if (t.kind === 'puddle') extras.push(h('div', { key: 'puddle-' + i, className: 'gd-puddle', 'data-puddle': 'true' }));
             else if (t.kind === 'letter') extras.push(spriteEl('letter', 'letter-' + i, 'gd-thing' + (boxHere ? ' gd-letter-in' : '')));
+            // P108 IW-007 (lane A): an animal's bowl (animal + name on it) is drawn with her by it; the carrot patch.
+            else if (t.kind === 'bowl' && t.animal) petEls(t, i, m, extras);
+            else if (t.kind === 'patch') patchEls(t, i, m, extras);
             else if (t.kind === 'bowl') {
               var fed = !!t.full || (m !== null && m.have > 0);
               extras.push(spriteEl(fed ? 'bowlFull' : 'bowl', 'bowl-' + i, 'gd-thing gd-bowl' + (fed ? ' gd-full' : '')));

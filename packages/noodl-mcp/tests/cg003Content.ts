@@ -332,7 +332,16 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw6eIslePay: s('{r} +{n} 🐚', '{r} +{n} 🐚'),
   // ── P108 IW-003 look (lane L): Olive's read on the envelopes reads the envelope (the drawer's block, the pad's key, its card) ──
   iwlReadEnvelope: s('read the envelope', 'lire l’enveloppe'),
-  iwlCdReadEnvelope: s('Olive reads the name on the envelope {b} holds. Then “go to” what Olive read takes {b} to that door.', 'Olive lit le nom sur l’enveloppe que tient {b}. Ensuite, « aller à » ce qu’Olive a lu emmène {b} à cette porte.')
+  iwlCdReadEnvelope: s('Olive reads the name on the envelope {b} holds. Then “go to” what Olive read takes {b} to that door.', 'Olive lit le nom sur l’enveloppe que tient {b}. Ensuite, « aller à » ce qu’Olive a lu emmène {b} à cette porte.'),
+  // ── P108 IW-007 (lane A): the animals — the Animals tab shut until the refuge is finished, the purchase card's refusals,
+  // the line after Buy (her name, by her bowl), and the two land sources in the drawer's "go to nearest" (blocks.js's copy) ──
+  iw7aShut: s('Build the refuge first: your animals will live there.', 'Construis d’abord le refuge : tes animaux y vivront.'),
+  iw7aNoRefuge: s('The refuge isn’t finished yet. Your robots can build it!', 'Le refuge n’est pas encore fini. Tes robots peuvent le construire !'),
+  iw7aPenFull: s('Every place in the refuge’s pen is taken.', 'Toutes les places de l’enclos du refuge sont prises.'),
+  iw7aBought_rabbit: s('{name} is waiting by her bowl on your land. A robot can bring her carrots!', '{name} t’attend près de son bol, sur ton terrain. Un robot peut lui apporter des carottes !'),
+  iw7aBought_sheep: s('{name} is waiting by his bowl on your land. A robot can bring him carrots!', '{name} t’attend près de son bol, sur ton terrain. Un robot peut lui apporter des carottes !'),
+  iw7aK_patch: s('🥕 carrot patch', '🥕 carré de carottes'),
+  iw7aK_tree: s('🌳 tree', '🌳 arbre')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);
