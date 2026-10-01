@@ -1,8 +1,9 @@
 # IW-006 — Shells and the shop
 
-**Opened 2026-09-29** from README §0 and ruling R1 (*"Yep reverse it"*), defaults D1–D4, D8. **Status: 🟡 s4 (lanes E and H, merged 2026-10-01) — AC1 ✅ AC2 ✅ (earning, the wallet; lane E), AC3 ✅ AC4 ✅ (the shop,
-the helpers; lane H), AC5 🟡: v4 → v5 driven on a deployed page in EN/FR, the packaged upgrade drive over a real v4 app is
-session 5's. §5 "Session 4 merge" lists what is owed.**
+**Opened 2026-09-29** from README §0 and ruling R1 (*"Yep reverse it"*), defaults D1–D4, D8. **Status: ✅ s5 (lane O, merged 2026-10-01) — AC1–AC4 ✅ (s4); AC5 ✅: the packaged upgrade drive over a REAL v4 app
+(`garden-desktop/drive-upgrade-v4.js` 18/18: the v4 package's own page stored a v4 family, the current package migrated it
+to v5 at once, nothing lost, EN + FR). The s4 owed items paid (§5 lane O): the upgrade slot names the shop, prices
+retuned, "now in the shop" on the win card, a robot sent from My robots.**
 Depends on IW-002. Lane E.
 
 ## 1. The person sentence

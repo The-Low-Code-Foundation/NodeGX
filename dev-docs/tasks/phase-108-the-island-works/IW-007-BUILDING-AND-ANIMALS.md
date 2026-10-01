@@ -1,7 +1,12 @@
 # IW-007 — Building and animals
 
 **Opened 2026-09-29** from README §0 ("the more they drop the resources the more the house pops up … a robot spa or an
-animal refuge … buy a sheep and a rabbit … task a robot with collecting food and feeding them"). **Status: ⬜.**
+animal refuge … buy a sheep and a rabbit … task a robot with collecting food and feeding them"). **Status: 🟡 s5 (base
+`b40be26c8`, lanes B and A, merged 2026-10-01): AC1 🟡 — bought, placed on a legal footprint, built by two robots with two
+materials on the island, each stage in 2D and 3D, the puff — but a SECOND robot reaches the land only by a seeded save (no
+touch path: the land card's crew pills / My robots' send-to-land hook, §4 "Session 5 merge"); AC2 🟡 — the Animals tab,
+a rabbit bought and named, fed / worn / fed again on the island — the feeding pin seeded, its teaching in the Workshop on
+the land not driven; AC3 ✅; AC4 ✅ (2D + 3D drives, p95 16.7 ms at CPU ×4 with two buildings and two animals).**
 Depends on IW-005 (seek), IW-006 (the shop). Lane B or E.
 
 ## 1. The person sentence
@@ -229,3 +234,44 @@ près de son bol, sur ton terrain. Un robot peut lui apporter des carottes ! » 
 - The tablet (her size on a real island tile, the hop by touch); a real GPU (swiftshader hands the 3D island to the flat
   one within a few ticks, as before); two animals both fed by one program on the page (the perf run's program feeds the
   rabbit first, the sheep after — the patch's four carrots and its regrowth mean the sheep waits; not graded).
+
+### Session 5 merge (orchestrator, 2026-10-01, `p108-s5`) — the base, then lanes O → B → A
+
+**Order:** a base (`b40be26c8`: her land, BLUEPRINTS, ANIMALS, the tree and the patch as sources, a building's `bstage`,
+`keep`, a bowl's own food, `island.land` in the save, `tests/iw007Land.ts`, the gate `iw007Build.test.ts`, BRIEF-s5.md),
+then lanes O (IW-006, fast-forward), B (`dea17b77e`), A (`7673e3fab`). Lane B committed the island plumbing first
+(`b37112fdb`); the orchestrator handed that sha to lane A mid-session, and lane A merged it.
+
+**What the merge decided:** B × O — four appended blocks side by side (drive-all, DRIVE, PAGE_WORDS, GLUE_SCRIPTS and the
+imports). A onto O + B — both kits had B's block and A's block appended at one spot and git shared B's closing line with
+the common tail (`}` in kit.js, `return g; };` in kit3d.js): restored, `node --check` on both, then every doubly-touched
+file checked line for line against base + each lane's adds and removes — exact but for the hand joins: the kits' `LOADS`
+(plank, carrot), `anims` (`puffs`, `hops`) and `busy`; the shop's shared tail (`BUILD_SHOP`, `IW7A_SHOP_SHARED`), its
+`later` line (B's Build line, then A's `iw7aLater`), its bought line (B's blueprint line, then A's animal line); the tab
+row and the shop drive's TAB clause (Build B's, Animals A's); the reduced-motion list (+ `gd-puff`, + `gd-pet-happy`);
+the kit fixtures' A clauses re-inserted whole after B's. **One red at the join, a spec:** lane A's control row "the Build
+tab is not mine, it says its old line" pinned `iw6hLaterBuild`, which lane B had replaced with `iw7bBuildHow` — re-pointed
+(`6a2685fa1`). Lane A's "save lags her bowl by a carrot" had been fixed by lane B (`0126a13d1`, a land bowl's change is a
+keep moment).
+
+**Readings on the merged tree** (`p108-s5` at `6a2685fa1`, 2026-10-01; every exit 0): specs, one file at a time — cg002Engine
+259 · cg003Template 148 · cg005Olive 41 · cg006Requests 83 · ig004Island 38 · cg001GardenKit 62 · ig007Garden3d 52 ·
+iw004Blocks 59 · p108s2Join 4 · iw003Missions 63 · iw006Save 17 · iw006Earn 34 · iw006Shop 34 · iw008Crew 25 · iwLook 15 ·
+p108s4Join 3 · **iw007Build 22 · iw006Owed 19 · iw007Building 21 · iw007Animals 22** = **1021** in 20 files; shell 92/92;
+`template:garden` exit 0, 0 drift. The whole drive set on ONE deploy (`drives/drive-all.sh`, DONE): page drive **331/331** · look 143 · earn 15 · shop 60 · crew 39 + `--perf` 5 · modes 90 · IW-001 38 · IW-004 19 + 3D 3 · island `--perf` 69 + 3D 5 · robots 60 + 3D 4 · Workshop 3D 24 + nogl 8 · Olive 22 · Mamie 34 + 7 + 3 + 6 · stones 32 + 3D 14 · post 17 + 3D 10 · Biscuit 24 · kit fixtures 2D **50** (+4 B, +2 A) and 3D **37** (+5 B, +2 A) · **owed 19 · build 26 + 3D 4 · animals 16 + 3D 4 + `--perf` 5** (new).
+
+**Looked at:** `build-shots/iw7b-1368-en-07-reloaded-land.png` — after a reload the spa stands finished (red roof, the bath
+and its steam), both its meters green; the tree with its planks, the patch, the rock at the land's edges; Cobble and Pip at
+home. `animals-perf/iw7a-perf-land-1368.png` — the spa and the refuge both finished, Flopsy and Bramble by their bowls, the
+names staggered; **a look item:** the rabbit stands half hidden behind the sheep and the two animals sit over the refuge's
+meter chips.
+
+**Measured at the merge (not a drive):** on the engine, with the spa and the refuge standing, a feeding program
+(`until [her bowl] is full { go to nearest patch; pick; go to her bowl; put }`) WINS on the land in 46 ticks (job_done 5/5);
+with the spa unfinished it cannot (4/5). So AC2's "taught" is reachable in the Workshop on the land once she has built —
+not yet driven on the page.
+
+**Owed (session 6):** a second robot sent onto the land BY TOUCH (AC1: today only a seeded save puts a helper there — the
+land card's crew pills, or lane O's hook in `tests/iw006Owed.ts` for My robots' send); teaching on the land driven (AC2);
+the look item above; the spa's `rest`; a tune on the last drop; a helper's drops earning; two drives that type a price.
+
