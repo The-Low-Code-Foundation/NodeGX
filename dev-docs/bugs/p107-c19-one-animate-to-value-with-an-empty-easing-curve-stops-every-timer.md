@@ -1,7 +1,7 @@
 ---
 id: P107-C19
 title: One Animate To Value with an empty or unknown Easing Curve stops every animation and Repeat in the app
-status: needs-ruling
+status: fixed
 severity: blocker
 area: runtime / Animate To Value (and the timer scheduler)
 found: P107 NSP-013 s13, 2026-10-01
@@ -26,3 +26,15 @@ throws at the frame); app-wide: two real Animate nodes + a Repeat in one corpus 
 Proposed: fall back to Ease Out on an unknown name (one line in the setter); separately, catch a timer's throw
 in `runTimers` so one node cannot stop the others. The deprecated Transition (:175) and Animation (:286) nodes
 look curves up the same way (a grep — not measured).
+
+**Ruled (Richard, 2026-10-01, P107 s16):** both fixes. **Fixed:**
+
+1. **The fallback** (`animate-to-value.ts` setter): a name that is not one of `EaseCurves`' own keys moves along
+   Ease Out. The spec is v2 and the scenario lost its `row` mark; a second scenario pins `''` / `null` mid-run (Ease
+   Out 8.75 at t = 0.5, where Linear gives 5). The runtime conformance test's known row is gone. Stranger round 3b
+   (a fresh agent, the v2 spec alone) brought round 3's target up to v2 in one change; all three rounds green.
+2. **The timer pass** (`timerscheduler.ts` `runTimers`): each `onStart` / `onRunning` / `onFinish` is caught and
+   logged (`console.error`, as `updateDirtyNodes` does), so one timer's throw cannot hold the others; the throwing
+   timer runs to its normal end. `packages/noodl-runtime/test/timerscheduler-isolation.test.ts` — red before, green
+   after. The deprecated Transition and Animation nodes' own curve lookups were not changed (not ruled, not
+   measured); the timer pass now contains whatever they throw.
