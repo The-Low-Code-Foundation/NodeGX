@@ -9,7 +9,8 @@
  * | `landParts(b)` | a building's part tiles (plot coordinates), one per material: '{ x, y, item, need }' |
  * | `landPen(b)` | a refuge's pen tiles (the row below it), one per animal place: '{ x, y, slot }' |
  * | `landThings(land)` | the land's things: its three sources (LAND_SOURCES), every building's parts as `site` things (`of` the building, `build` its blueprint, `keep`), every animal's bowl at its pen place (`animal`, `name`, item its food, count = fed) |
- * | `landJob(land)` | the job its robots work: every part and every bowl a target (a finished building's parts stay full: they count as done), home LAND_HOME — or null when nothing stands there |
+ * | `landJob(land)` | the job its robots work: every part and every bowl a target (a finished building's parts stay full: they count as done), home LAND_HOME, and (P108 s7) `rest` — the spa's id and a tile per robot in front of it — or null when nothing stands there |
+ * | `landRestTiles(land, b)` | (P108 s7) up to two free, reachable grass tiles in front of building b, facing it |
  * | `landRequest(land)` | the land as a request the island and the Workshop read like any other: id LAND_ID, plot LAND_PLOT, map LAND_MAP, its things and job, goal job_done, no reference program |
  * | `landLegal(land, bp, x, y)` | '' when the blueprint may go there (the ghost is green), else why: 'unknown' · 'built' (that blueprint stands already) · 'edge' · 'ground' (not grass) · 'taken' (a thing, home, or another building or its pen) · 'reach' (a robot could not reach a part or a pen place from home, or a source or another building would be cut off) |
  * | `landPlace(land, bp, x, y, id)` | the ghost placed: '{ ok, error, id }' — error is landLegal's; the building starts with nothing delivered |
@@ -63,7 +64,43 @@ function landThings(raw) {
 function landJob(raw) {
   var things = landThings(raw), targets = [];
   for (var i = 0; i < things.length; i++) if (things[i].kind === 'site' || (things[i].kind === 'bowl' && things[i].animal)) targets.push(String(things[i].id));
-  return targets.length ? { targets: targets, home: { x: LAND_HOME.x, y: LAND_HOME.y, d: LAND_HOME.d } } : null;
+  if (!targets.length) return null;
+  var job = { targets: targets, home: { x: LAND_HOME.x, y: LAND_HOME.y, d: LAND_HOME.d } };
+  // P108 s7: a building that is for resting (the spa, does 'rest') gives its robots a tile each in front of it; the engine
+  // walks them there once it is finished (restOf).
+  var land = landOf(raw);
+  for (var b = 0; b < land.buildings.length && !job.rest; b++) {
+    var spec = blueprintSpec(land.buildings[b].bp);
+    if (!spec || spec.does !== 'rest') continue;
+    var tiles = landRestTiles(land, land.buildings[b]);
+    if (tiles.length) job.rest = { of: String(land.buildings[b].id), tiles: tiles };
+  }
+  return job;
+}
+/**
+ * P108 s7: where robots rest at a building — up to two grass tiles a robot can reach, nothing on them and no pen. First
+ * two rows in front of it, one tile out at each end (on the 2D island a robot is ~2½ tiles wide: on the row right under
+ * the building the two robots hid it and each other — seen on the touch drive's shot); then under each part, over each
+ * part, its two ends. Plot coordinates, d facing it.
+ */
+function landRestTiles(land, b) {
+  var parts = landParts(b), cand = [];
+  if (parts.length) { cand.push({ x: parts[0].x - 1, y: parts[0].y + 2, d: 0 }); cand.push({ x: parts[parts.length - 1].x + 1, y: parts[0].y + 2, d: 0 }); }
+  for (var i = 0; i < parts.length; i++) cand.push({ x: parts[i].x, y: parts[i].y + 1, d: 0 });
+  for (var j = 0; j < parts.length; j++) cand.push({ x: parts[j].x, y: parts[j].y - 1, d: 2 });
+  if (parts.length) { cand.push({ x: parts[0].x - 1, y: parts[0].y, d: 1 }); cand.push({ x: parts[parts.length - 1].x + 1, y: parts[0].y, d: 3 }); }
+  var things = landThings(land), taken = {};
+  for (var t = 0; t < things.length; t++) taken[things[t].x + ',' + things[t].y] = 1;
+  for (var o = 0; o < land.buildings.length; o++) { var pen = landPen(land.buildings[o]); for (var p = 0; p < pen.length; p++) taken[pen[p].x + ',' + pen[p].y] = 1; }
+  taken[LAND_HOME.x + ',' + LAND_HOME.y] = 1;
+  var seen = landReach(worldOf({ map: LAND_MAP.slice(), things: things, robots: [] })), out = [];
+  for (var c = 0; c < cand.length && out.length < 2; c++) {
+    var x = cand[c].x, y = cand[c].y, k = x + ',' + y;
+    if (!(x >= 0 && y >= 0 && x < LAND_W && y < LAND_H) || String(LAND_MAP[y]).charAt(x) !== 'G' || taken[k] || !seen[k]) continue;
+    taken[k] = 1;
+    out.push(cand[c]);
+  }
+  return out;
 }
 function landRequest(raw) {
   var job = landJob(raw), req = { id: LAND_ID, islander: '', band: 1, plot: { x: LAND_PLOT.x, y: LAND_PLOT.y }, tricks: [], map: LAND_MAP.slice(), things: landThings(raw), robotStart: { x: LAND_HOME.x, y: LAND_HOME.y, d: LAND_HOME.d }, goal: { name: 'job_done' }, palette: [], referenceProgram: [] };

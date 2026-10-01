@@ -199,7 +199,8 @@ describe('[base] IW-007 land helpers — where a ghost may go, the job, what the
   it('[base] landJob: nothing on the land is no job; every part and every animal’s bowl is a target; home is LAND_HOME', () => {
     expect(L.landJob(empty())).toBeNull();
     const land = { buildings: [{ id: 'b1', bp: 'spa', x: 3, y: 1, have: { stone: 6, plank: 4 } }, { id: 'b2', bp: 'refuge', x: 3, y: 3, have: { plank: 6, stone: 4 } }], animals: [{ id: 'a1', kind: 'rabbit', name: 'Flopsy', at: 'b2', slot: 1, fed: 2 }] };
-    expect(L.landJob(land)).toEqual({ targets: ['b1-stone', 'b1-plank', 'b2-plank', 'b2-stone', 'a1'], home: LAND_HOME });
+    // P108 s7: and the spa's rest — a tile per robot two rows in front of it, one out at each end, facing it.
+    expect(L.landJob(land)).toEqual({ targets: ['b1-stone', 'b1-plank', 'b2-plank', 'b2-stone', 'a1'], home: LAND_HOME, rest: { of: 'b1', tiles: [{ x: 2, y: 3, d: 0 }, { x: 5, y: 3, d: 0 }] } });
     const bowl = L.landThings(land).find((t: any) => t.id === 'a1');
     expect(bowl).toEqual({ kind: 'bowl', id: 'a1', item: 'carrot', capacity: 3, count: 2, food: 2, animal: 'rabbit', name: 'Flopsy', x: 4, y: 4 });
     const req = L.landRequest(land);

@@ -140,7 +140,8 @@ function isSet(v) { return v !== undefined && v !== null && v !== ''; }
  * sources, every part and bowl a target), so the Workshop opens the land like any plot (`gardenRequestId` = `land`).
  * Inputs: `requests` (the catalogue's), `land` (Read family's). Outputs: `requests`.
  */
-export const LAND_REQUEST_SCRIPT = `${SAVE_HELPERS}${LAND_HELPERS}
+// P108 s7: ENGINE first too — landJob's rest tiles ask which tiles a robot can reach (worldOf, blocked), as the card does.
+export const LAND_REQUEST_SCRIPT = `${ENGINE}${SAVE_HELPERS}${LAND_HELPERS}
 function isSet(v) { return v !== undefined && v !== null && v !== ''; }
 ${LAND_REQUEST_FN}
 var reqs = Array.isArray(Inputs.requests) ? Inputs.requests.slice() : [];

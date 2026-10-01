@@ -4,7 +4,10 @@
  * `templates/bot-garden` and deploys it to `$OUT/deploy`): a second robot onto her land, and teaching on the land.
  *
  * Usage:
- *   node scripts/devtools/drive-iw007-touch.js <deploy-dir> --project <assembled-project> [--shots <dir>] [--json <file>]
+ *   node scripts/devtools/drive-iw007-touch.js <deploy-dir> --project <assembled-project> [--shots <dir>] [--json <file>] [--mode 2d|3d]
+ *
+ * --mode 3d (P108 s7): the same taps on Garden 3D under software GL (swiftshader) — a tile is tapped where the 3D kit's
+ * own `screenOfTile` puts it on the canvas (her land on the island, a part or her bowl picked in the Workshop).
  *
  * The family is made the game's way (a new player on the page; Cobble lent by the page's own Complete request; shells by
  * the page's own earnShells). Then EVERYTHING is done by touch, 1368 × 900 EN, headless (the flat island):
@@ -18,10 +21,15 @@
  *          with Cobble; until [the spa's planks] is done { go to nearest tree, … }; the win card. The store: Cobble HELPS
  *          on the land with his own program, Pip still at work there.
  *   BUILD  the island: the spa at every stage, Pip seen carrying stones and Cobble planks, finished; the store 6/6 · 4/4.
+ *   REST   (s7) Pip and Cobble walk to the finished spa and rest in front of it, a tile each (the page's landJob says
+ *          which) — not at her land's home.
+ *   PILLS  (s7, flat island) while the two build, at every settled moment (400 ms after a robot moved: its glide
+ *          done), no two name pills cover each other — and the robots WERE close enough for that (one pill went over).
+ *   PAY    (s7) Cobble's planks earn: his own "+N 🐚" line on the island, and the wallet holds what the lines said.
  *   HERE   her land's card: "Pip works here · Cobble helps"; Cobble chosen → "Cobble helps here, …", Bring Cobble home.
  *   FEED   the refuge finished and Hazel the rabbit seeded; Cobble re-taught on her land by touch: until [her bowl] is
  *          full { go to nearest carrot patch, … } — WON while the land holds two buildings; the store: Cobble helps with
- *          the feeding program; on the island her bowl reaches 3/3.
+ *          the feeding program; on the island her bowl reaches 3/3 — and (s7) she gives her clover: its line is seen.
  *   FR     390 × 844: the card's robots line and "Apprendre à Pip ici" in French.
  *   0 console errors.
  *
@@ -39,10 +47,13 @@ const DIR = process.argv[2];
 const PROJECT = arg('--project');
 const SHOTS = arg('--shots');
 const JSON_OUT = arg('--json');
-if (!DIR || DIR.startsWith('--') || !PROJECT) {
-  console.error('usage: drive-iw007-touch.js <deploy-dir> --project <assembled-project> [--shots <dir>] [--json <file>]');
+const MODE = arg('--mode') || '2d';
+if (!DIR || DIR.startsWith('--') || !PROJECT || !['2d', '3d'].includes(MODE)) {
+  console.error('usage: drive-iw007-touch.js <deploy-dir> --project <assembled-project> [--shots <dir>] [--json <file>] [--mode 2d|3d]');
   process.exit(2);
 }
+// 3D: Chrome with SOFTWARE WebGL (swiftshader), as drive-iw004-blocks.js --mode 3d.
+const CHROME = MODE === '3d' ? { gpu: true, chromeArgs: ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] } : {};
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 
 // ── What the deployed project says (never typed here) ──
@@ -87,7 +98,7 @@ const STUB = {
   olive: () => ({ ok: true, text: 'Thank you! (stub)', ms: 5 })
 };
 
-withDeployedSite({ dir: DIR }, async (page) => {
+withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   const { client } = page;
   const evaluate = (expr) => page.evaluate(expr);
   const errors = [];
@@ -155,6 +166,41 @@ withDeployedSite({ dir: DIR }, async (page) => {
     return m ? m.profiles.find((p) => p.id === m.island.activeId) : null;
   };
   const cellOf = (x, y) => `document.querySelector('.bg-isle .gd-cell[data-x="${x}"][data-y="${y}"]')`;
+  /**
+   * P108 s7: where a finger meets tile (x, y) of the world in `scope` ('.bg-isle' the island, '.bg-stage' the Workshop):
+   * the 2D cell's centre, or in 3D the kit's own screenOfTile on its canvas — `hit` when nothing covers it there.
+   */
+  /**
+   * Which world is drawn in `scope` now: '3d' (Garden 3D ready), '2d' (the flat cells — the page, or Garden 3D's own
+   * fallback: under software GL the 55 × 22 island can trip Too Slow and the flat island takes over), or '' (neither yet).
+   */
+  const drawn = (scope) => evaluate(`(() => { const e = document.querySelector('${scope} [data-gd3-world]'); if (e && e.gd3 && e.getAttribute('data-ready') === 'true') return '3d'; return document.querySelector('${scope} .gd-cell') ? '2d' : ''; })()`);
+  const tileAt = async (scope, x, y) => {
+    const now = MODE === '3d' ? await until(`(() => { const e = document.querySelector('${scope} [data-gd3-world]'); if (e && e.gd3 && e.getAttribute('data-ready') === 'true') return '3d'; return document.querySelector('${scope} .gd-cell') ? '2d' : ''; })()`, Boolean, 15000) : '2d';
+    if (now !== '3d') return where(`document.querySelector('${scope} .gd-cell[data-x="${x}"][data-y="${y}"]')`);
+    const ROOT = `document.querySelector('${scope} [data-gd3-world]')`;
+    return evaluate(`(() => { const r = ${ROOT}; if (!r || !r.gd3) return { found: false }; r.scrollIntoView({ block: 'center' }); const c = r.querySelector('[data-gd3-canvas]').getBoundingClientRect(); const s = r.gd3.screenOfTile(${x}, ${y}); const px = c.left + s.sx, py = c.top + s.sy; const at = document.elementFromPoint(px, py); return { found: true, x: px, y: py, hit: !!at && !!at.getAttribute && at.getAttribute('data-gd3-canvas') !== null, top: at ? at.className || at.tagName : null }; })()`);
+  };
+  const tapTile = async (scope, x, y, label) => {
+    if (MODE !== '3d' || (await drawn(scope)) === '2d') return tap(`document.querySelector('${scope} .gd-cell[data-x="${x}"][data-y="${y}"]')`, label);
+    const p = await tileAt(scope, x, y);
+    if (!p.found || !p.hit) {
+      check(`tap ${label}`, false, p);
+      return false;
+    }
+    for (const type of ['mousePressed', 'mouseReleased']) await client.send('Input.dispatchMouseEvent', { type, x: Math.round(p.x), y: Math.round(p.y), button: 'left', clickCount: 1 });
+    await wait(250);
+    return true;
+  };
+  /** The robots on the island (island tiles) and, in 2D, their name pills' boxes on the page. */
+  const BOTS = `(() => { const e = document.querySelector('.bg-isle [data-gd3-world]'); if (e && e.gd3 && e.gd3.world) return e.gd3.world.robots.map((r) => ({ name: r.name || '', x: r.x, y: r.y, load: (r.carry || [])[(r.carry || []).length - 1] || null, in3d: true }));
+    return [...document.querySelectorAll('.bg-isle .gd-bot')].map((b) => { const n = b.querySelector('.gd-name'); const r = n ? n.getBoundingClientRect() : null; const l = b.querySelector('.gd-load'); return { name: n ? n.innerText.trim() : '', x: Number(b.getAttribute('data-x')), y: Number(b.getAttribute('data-y')), load: l ? l.getAttribute('data-load') : null, up: !!n && n.hasAttribute('data-up'), pill: r ? { l: r.left, r: r.right, t: r.top, b: r.bottom } : null }; }); })()`;
+  /** The island's "+N 🐚" lines from now on (each line as it appears), and the wallet as it stood when this began. */
+  const payWatch = () => evaluate(`(() => { const m = JSON.parse(localStorage.getItem(${STORE_KEY})).model; const a = m.profiles.find((x) => x.id === m.island.activeId);
+    const w = window.__iw7tPay = { lines: [], earned0: a.shells.earned, seen: new WeakSet() };
+    const read = () => document.querySelectorAll('.bg-isle-pay').forEach((e) => { if (w.seen.has(e) || !e.innerText.trim()) return; w.seen.add(e); w.lines.push(e.innerText.trim()); });
+    if (w.obs) w.obs.disconnect(); w.obs = new MutationObserver(read); w.obs.observe(document.body, { childList: true, subtree: true, characterData: true }); read(); return true; })()`);
+  const said = (lines) => lines.join(' · ').split(' · ').reduce((n, l) => n + Number((/\+(\d+)/.exec(l) || [0, 0])[1]), 0);
   const nameOf = (lang, id) => item(id).name[lang];
   const freshFamily = async (tag, lang) => {
     const origin = await evaluate('location.origin');
@@ -198,13 +244,13 @@ withDeployedSite({ dir: DIR }, async (page) => {
     // A free tile of her land a finger can reach (a building, a pen animal or a robot may stand over one).
     let spot = null;
     for (const [dx, dy] of [[2, 4], [1, 3], [5, 2], [6, 4], [1, 1], [2, 2]]) {
-      const p = await where(cellOf(LP.x + dx, LP.y + dy));
+      const p = await tileAt('.bg-isle', LP.x + dx, LP.y + dy);
       if (p.found && p.hit) {
         spot = [dx, dy];
         break;
       }
     }
-    await tap(cellOf(LP.x + (spot ? spot[0] : 2), LP.y + (spot ? spot[1] : 4)), `her land (${tag})`);
+    await tapTile('.bg-isle', LP.x + (spot ? spot[0] : 2), LP.y + (spot ? spot[1] : 4), `her land (${tag})`);
     return until(CARD, (c) => c.up && c.title === w('en', 'iw7bLandTitle') || (c.up && c.title === w('fr', 'iw7bLandTitle')), 3000);
   };
 
@@ -256,12 +302,12 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const pickOnWorld = async (chipFinder, x, y, label) => {
     await tapInWs(chipFinder, `${label}: the chip (pick on the world)`);
     await until(`!!document.querySelector('.bg-blocks-box .gd-bk.gd-picking')`, Boolean, 2000);
-    return tap(`document.querySelector('.bg-stage .gd-cell[data-x="${x}"][data-y="${y}"]')`, `${label}: the tile ${x},${y}`);
+    return tapTile('.bg-stage', x, y, `${label}: the tile ${x},${y}`);
   };
   const PROGRAM = `(() => { const p = Noodl.Variables.gardenProgram; const l = typeof p === 'string' ? JSON.parse(p || '[]') : p; return Array.isArray(l) ? l : []; })()`;
   const WON = `(() => { const e = document.querySelector('.bg-win-card'); return !!e && e.offsetParent !== null; })()`;
   const WIN_TEXT = `(() => { const c = document.querySelector('.bg-win-card'); return c && c.offsetParent !== null ? c.innerText.replace(/\\s+/g, ' ').trim() : ''; })()`;
-  const WS_BOT = `(() => { const n = document.querySelector('.bg-stage .gd-bot .gd-name'); return { bot: n ? n.innerText.trim() : '', req: Noodl.Variables.gardenRequestId || '' }; })()`;
+  const WS_BOT = `(() => { const n = document.querySelector('.bg-stage .gd-bot .gd-name') || document.querySelector('.bg-stage .gd3-name'); return { bot: n ? n.textContent.trim() : '', req: Noodl.Variables.gardenRequestId || '' }; })()`;
   /** What the child reads on an until: its chip's words and its state's (P108 s6: a land part's own words). */
   const CHIP_WORDS = (u) => `((b) => { const c = b && b.getInputTargetBlock('THING'); const tx = (r) => (r ? r.textContent.replace(/\u00a0/g, ' ').trim() : ''); return { chip: tx(c && c.getSvgRoot()), state: tx(b && b.getField('STATE').getSvgRoot()) }; })(${condOf(u)})`;
   /** until [part] is done { go to nearest <source>, pick up, go to [part], put down } — the part picked on the world. */
@@ -283,7 +329,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await selectRep(u, `${label}: until (the put)`);
     await palTap('put');
     readings[`${label}-words`] = await evaluate(CHIP_WORDS(u));
-    return evaluate(PROGRAM);
+    // s7: the last tap's block can land a moment after the tap (software GL, 3D): read the program once it holds the put.
+    return until(PROGRAM, (l) => JSON.stringify(l).includes('"t":"put"'), 4000);
   };
   const teachHere = async (label, part, source) => {
     await tap(first('.bg-plot-open'), `${label}: Teach … here`);
@@ -293,6 +340,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await gotIt(`${label}: the first card`);
     const who = await evaluate(WS_BOT);
     const prog = await buildCarry(part, source, label);
+    readings[`${label}-world`] = await drawn('.bg-stage');
     await shot(`iw7t-${label}-program`);
     await tap(first('.bg-controls .bg-i-play'), `${label}: Play`);
     const won = await until(WON, Boolean, 150000);
@@ -342,6 +390,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const pw = readings['pip-stones-words'] || {};
   check(`PIP ${tag}: the chip says "${w('en', 'iw7tK_spa_stone')}" and "${w('en', 'iw7tS_done')}" (not the path square's words)`, pw.chip === w('en', 'iw7tK_spa_stone') && pw.state === w('en', 'iw7tS_done'), pw);
   check(`PIP ${tag}: Played — one material WINS on her land (the win card)`, pip.won, pip.text);
+  if (MODE === '3d') check(`3D ${tag}: the Workshop on her land is Garden 3D while Pip's parts are picked by taps on its world (not the flat fallback)`, readings['pip-stones-world'] === '3d', readings['pip-stones-world']);
   let p = await active();
   check(`PIP ${tag}: the store — Pip at work on her land with that program, the land not in done`, p.island.plots[LAND_ID] && p.island.plots[LAND_ID].robotId === 'r1' && shape(p.island.plots[LAND_ID].program) === shape(pip.prog) && !p.island.done.includes(LAND_ID), { plot: p.island.plots[LAND_ID], done: p.island.done });
 
@@ -363,8 +412,25 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await tab(0);
   await until('location.pathname', (x) => x === '/island', 3000);
   await wait(1200);
-  await evaluate(`(() => { window.__iw7t = { stages: [], loads: {}, t0: performance.now() };
+  await payWatch();
+  if (MODE === '3d')
+    await evaluate(`(() => { window.__iw7t = { stages: [], loads: {}, t0: performance.now(), worlds: [] };
+    setInterval(() => { const e = document.querySelector('.bg-isle [data-gd3-world]'); const wv = e && e.gd3 && e.gd3.built ? '3d' : '2d'; const ws = window.__iw7t.worlds; if (ws[ws.length - 1] !== wv) ws.push(wv);
+      if (wv === '2d') { const bd = document.querySelector('.bg-isle .gd-bld[data-build="spa"]'); const st2 = bd ? bd.getAttribute('data-bstage') : null; const s2 = window.__iw7t.stages; if (st2 !== null && s2[s2.length - 1] !== st2) s2.push(st2);
+        document.querySelectorAll('.bg-isle .gd-bot').forEach((r) => { const l = r.querySelector('.gd-load'); const n = (r.querySelector('.gd-name') || {}).innerText || ''; if (l) { window.__iw7t.loads[n] = window.__iw7t.loads[n] || []; const v = l.getAttribute('data-load'); if (window.__iw7t.loads[n].indexOf(v) === -1) window.__iw7t.loads[n].push(v); } }); return; } const b = e.gd3.built.things.find((g) => g.userData.building && String(g.userData.stage || '').indexOf('spa') === 0); const st = b ? String(b.userData.stage).replace('spa', '') : null; const s = window.__iw7t.stages; if (st !== null && s[s.length - 1] !== st) s.push(st);
+      (e.gd3.world.robots || []).forEach((r) => { const v = (r.carry || [])[(r.carry || []).length - 1]; if (!v) return; const n = r.name || ''; window.__iw7t.loads[n] = window.__iw7t.loads[n] || []; if (window.__iw7t.loads[n].indexOf(v) === -1) window.__iw7t.loads[n].push(v); }); }, 100);
+    return true; })()`);
+  else await evaluate(`(() => { window.__iw7t = { stages: [], loads: {}, t0: performance.now(), pills: { settled: 0, near: 0, nearUp: 0, meets: 0, first: null } };
     const box = document.querySelector('.bg-isle');
+    // s7: the pills, measured once each glide is done (a robot moved → 400 ms; a step glides in ~380 ms).
+    let pt = null;
+    const pills = () => { const P = window.__iw7t.pills; const l = [...box.querySelectorAll('.gd-bot')].map((b) => { const n = b.querySelector('.gd-name'); return n ? { name: n.innerText.trim(), x: +b.getAttribute('data-x'), y: +b.getAttribute('data-y'), up: n.hasAttribute('data-up'), r: n.getBoundingClientRect() } : null; }).filter(Boolean);
+      P.settled++;
+      for (let i = 0; i < l.length; i++) for (let k = i + 1; k < l.length; k++) { const a = l[i], c = l[k];
+        const near = Math.abs(a.x - c.x) <= 3 && Math.abs(a.y - c.y) <= 2; const meet = a.r.left < c.r.right && c.r.left < a.r.right && a.r.top < c.r.bottom && c.r.top < a.r.bottom;
+        if (near) { P.near++; if (a.up || c.up) P.nearUp++; }
+        if (meet) { P.meets++; if (!P.first) P.first = [a, c].map((q) => ({ name: q.name, x: q.x, y: q.y, up: q.up })); } } };
+    new MutationObserver(() => { clearTimeout(pt); pt = setTimeout(pills, 400); }).observe(box, { subtree: true, attributes: true, attributeFilter: ['data-x', 'data-y'] });
     const read = () => { const b = box.querySelector('.gd-bld[data-build="spa"]'); const st = b ? b.getAttribute('data-bstage') : null; const s = window.__iw7t.stages; if (st !== null && s[s.length - 1] !== st) s.push(st);
       box.querySelectorAll('.gd-bot').forEach((r) => { const l = r.querySelector('.gd-load'); const n = (r.querySelector('.gd-name') || {}).innerText || ''; if (l) { window.__iw7t.loads[n] = window.__iw7t.loads[n] || []; const v = l.getAttribute('data-load'); if (window.__iw7t.loads[n].indexOf(v) === -1) window.__iw7t.loads[n].push(v); } }); };
     new MutationObserver(read).observe(box, { childList: true, subtree: true, attributes: true, attributeFilter: ['data-bstage', 'data-load', 'data-x', 'data-y'] });
@@ -384,6 +450,25 @@ withDeployedSite({ dir: DIR }, async (page) => {
   p = await active();
   const sb = p.island.land.buildings[0];
   check(`BUILD ${tag}: the store holds the spa finished — 6/6 stones, 4/4 planks`, sb.have.stone === 6 && sb.have.plank === 4, sb);
+
+  // REST (s7) — the job done, the two walk to the finished spa and rest in front of it, a tile each (under its parts).
+  // Where the page's own landJob says they rest (plot tiles), on the island.
+  const restAt = pageRun('Logic/Land card', { model: {} }, `\n;Outputs.rest = landJob(${JSON.stringify(p.island.land)}).rest;`).rest.tiles.map((t) => ({ x: LP.x + t.x, y: LP.y + t.y }));
+  const atRest = (bots) => ['Pip', 'Cobble'].every((n, i) => bots.some((r) => r.name === n && r.x === restAt[i].x && r.y === restAt[i].y));
+  const resting = await until(BOTS, atRest, 60000);
+  readings.rest = { want: restAt, bots: resting, home: { x: LP.x, y: LP.y }, world: await drawn('.bg-isle'), worlds: rec && rec.worlds };
+  await shot('iw7t-03b-rest');
+  check(`REST ${tag}: Pip and Cobble rest in front of the finished spa — island (${restAt[0].x}, ${restAt[0].y}) and (${restAt[1].x}, ${restAt[1].y}), not her land's home (${LP.x}, ${LP.y})`, atRest(resting), resting);
+  if (rec && rec.pills) {
+    const P = rec.pills;
+    readings.pills = P;
+    // Known-firing: the robots came close (within 3 tiles across, 2 down) and a pill went over — the case the rule is for.
+    check(`PILLS ${tag}: while the two built, no two name pills covered each other at any of ${P.settled} settled moments — and ${P.near} times they stood close, ${P.nearUp} with a pill sent over`, P.settled > 20 && P.meets === 0 && P.near > 0 && P.nearUp > 0, P);
+  }
+  const pay = await evaluate('window.__iw7tPay');
+  const nowEarned = (await active()).shells.earned;
+  readings.pay = { lines: pay.lines, earned0: pay.earned0, earned: nowEarned };
+  check(`PAY ${tag}: Cobble's planks earn — his own "Cobble +N 🐚" line on the island beside Pip's; the wallet rose by what the lines said (${said(pay.lines)})`, pay.lines.some((l) => /Cobble \+\d+/.test(l)) && pay.lines.some((l) => /Pip \+\d+/.test(l)) && nowEarned - pay.earned0 === said(pay.lines), readings.pay);
 
   // HERE — who works her land, said on its card; the helper chosen.
   c = await openLand(tag);
@@ -431,7 +516,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
     await selectRep(u, 'feed: until (the put)');
     await palTap('put');
     readings.feedWords = await evaluate(CHIP_WORDS(u));
-    const feedProg = await evaluate(PROGRAM);
+    const feedProg = await until(PROGRAM, (l) => JSON.stringify(l).includes('"t":"put"'), 4000);
     await shot('iw7t-feed-program');
     await tap(first('.bg-controls .bg-i-play'), 'feed: Play');
     const fed = await until(WON, Boolean, 150000);
@@ -445,11 +530,16 @@ withDeployedSite({ dir: DIR }, async (page) => {
     check(`FEED ${tag}: the store — Cobble helps on her land with the feeding program (it replaced his planks), Pip still at work there`, fc && fc.helps === LAND_ID && shape(fc.program) === shape(feedProg) && p.island.plots[LAND_ID].robotId === 'r1', { cobble: fc, plot: p.island.plots[LAND_ID] });
     await tab(0);
     await until('location.pathname', (x) => x === '/island', 3000);
+    await payWatch();
     const t1 = Date.now();
     const full = await until(`(() => { const m = JSON.parse(localStorage.getItem(${STORE_KEY})).model; const a = m.profiles.find((x) => x.id === m.island.activeId); return a.island.land.animals[0].fed; })()`, (n) => n >= 3, 180000);
     readings.feed.islandSeconds = Math.round((Date.now() - t1) / 1000);
     await shot('iw7t-feed-island');
     check(`FEED ${tag}: on the island Cobble fills Hazel's bowl — 3/3 in the store after ${readings.feed.islandSeconds} s`, full >= 3, full);
+    const clover = fill(w('en', 'iw7sGiftClover'), { a: 'Hazel', n: 1 });
+    const gift = await until('window.__iw7tPay.lines', (l) => l.includes(clover), 6000);
+    readings.gift = gift;
+    check(`GIFT ${tag}: her bowl filled right up, Hazel gives her present — "${clover}" on the island`, gift.includes(clover), gift);
   }
 
   // FR — the card's words on a phone.

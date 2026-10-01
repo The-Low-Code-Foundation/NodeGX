@@ -1,7 +1,7 @@
 # Phase 108 — The island works: jobs with a finish line, real blocks, and something to build
 
 **Scoped:** 2026-09-29, from Richard's notes after playing Olive's Island at the end of P106 session 4.
-**Status: 🟡 session 6 done 2026-10-01 (on `cline-dev`) — IW-001 ✅, IW-002 ✅, IW-005 ✅, IW-006 ✅, IW-007 ✅ (s6: her land by touch — a second robot taught there and helping, building and feeding taught on the land, `drive-iw007-touch.js` 23/23; small items owed); IW-008 🟡 (more land: Richard's); IW-003 🟡 / IW-004 🟡 / IW-000 🟡 (Richard's reads, the tablet). Rulings R1–R4, R6 (§3); R5 open; D10–D11 decided in s6 (§3). Next: session 7 — IW-007's small owed items, then IW-009 with the build. Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).**
+**Status: 🟡 BUILD DONE — session 7 (2026-10-01, on `cline-dev`): every buildable item of the phase is built and driven; what is left is Richard's (the children's sitting IW-009, the tablet, the FR read, the look beside IW-000, the prices). IW-001 ✅, IW-002 ✅, IW-005 ✅, IW-006 ✅, IW-007 ✅ (s7: robots rest at the finished spa, a helper's drops earn, a fed animal's present, name pills never cover each other, the touch path in 3D); IW-008 🟡 (more land ruled LATER; the tablet); IW-003 🟡 / IW-004 🟡 / IW-000 🟡 (Richard's reads, the tablet); IW-009 ⬜ READY (the Mac app, IW-009 §4–§5). Rulings R1–R6 (§3; R5 = a 400-tick run cap, s7); D1–D13. Next: Richard's sitting; then a session for what the children found. Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).**
 **Prefix: `IW`.** Parent: [Phase 106](../phase-106-the-island-grows/README.md) (the world, the robots, 3D, Olive reads).
 Grandparent: [Phase 105](../phase-105-the-coding-garden/README.md). Research: [TPL-012 briefing](../phase-78-the-templates/tpl-012-research-briefing.md),
 Rocket School's [rewards research](../phase-87-the-first-play-test/rkt-010-rewards-research.md), and §5 below (new, 2026-09-29).
@@ -150,7 +150,22 @@ Paths are shortened: **C** = `packages/noodl-mcp/tests/cg002Content.ts`, **E** =
 | D10 | **Her land is taught robot by robot.** Her land's card names her robots of any kind; a tap chooses who learns; a Workshop win on the land is a PART finished (a building's part, an animal's bowl), not the whole job; a robot that wins there while another works it becomes its helper with its own program. At most two robots on her land (the save's one helper per plot). | The person sentence ("teaches Cobble to carry stones and a new robot to carry planks"). Measured: a robot sent with a COPY of the first's program stands still on the land (one rock, one tree, reserved) — so My robots' send does not list the land. |
 | D11 | **A new building does not take the feeding robot.** The land is judged by its team: a feeding program still fills a step, so its robot keeps feeding; the new building waits for a robot taught to build it (she can re-teach either). | No robot is ever taken off a job she taught it without her doing it (R1's spirit). |
 
-**Open, asked after session 1 (2026-09-30):**
+**Decided in session 7 (2026-10-01; no ruling asked — change either by saying so):**
+
+| # | Default | Why |
+|---|---|---|
+| D12 | **A fed animal gives her present when a robot fills her bowl right up on the island** (it was not full): the rabbit a clover (+1 🐚), the sheep wool (+2 🐚) — shells at once and a line ("🍀 Hazel found you a clover +1 🐚"). Not random. | IW-007 §2 "sometimes gives something": a bowl only empties as the island's time passes, so "sometimes" is the wear, not a dice roll (a child can tell why). A present that is only a thing would be a thing with no use; shells buy. |
+| D13 | **Robots rest two rows in front of the finished spa, one tile out at each end**, facing it. | On the 2D island a robot is 56 px on a 16 px tile (3½ tiles): on the row right under the spa the two hid it and each other (seen on the touch drive's shot). |
+
+**Ruled in session 7 (2026-10-01), asked in plain words at the start:**
+
+| # | Question | Answer |
+|---|---|---|
+| R5 | A Workshop program that loops forever stops by itself only after ~14 minutes. Re-measured first: the longest mission run is 110 ticks (path-stones), a one-part job on her land 134, a whole spa by one robot 194 — **so the recommended 200 (below) would have cut a winning run short.** | *"~400 ticks (≈2¾ min)"* — **ruled.** `RUN_CAP` = 400 (`cg002Scripts.ts`), Olive's "going round and round" line at the cap (IW-001's), a gate keeps it ≥ twice the longest winning run (`p108s7.test.ts`); MAX_TICKS (2000) still bounds Predict and the gate. |
+| — | More land beyond 55 × 22 (IW-008)? | *"Not in this phase"* — **ruled: later**, after the children have played and said whether they ran out of room. |
+| — | Restore the repo's root `package.json` (Nightbook's since 2026-09-28)? | *"Restore it"* — done (`dev-docs/bugs/p108-repo-pkgjson-…`). |
+
+**Asked after session 1 (2026-09-30) — ruled in session 7 (above):**
 
 | # | Question | Options |
 |---|---|---|
@@ -285,9 +300,9 @@ A sensed `until` before the 3e text is an inference, not a source.
 | [IW-004 — real blocks](IW-004-REAL-BLOCKS.md) | Blockly 12 vendored, Zelos, the kid customisations, thing + state conditions picked on the island, value blocks by band, values drawn on things, brain size, Teach/fold/hints/cards on Blockly, stored programs migrated | 000 (look), 001 | 🟡 s2 (lane B) · s3: AC4 on a page (lane M), teach again + the 1024 fit (lane B) · s4: the widest program whole at 1024/1368/390, the drawer to the foot when it must (lane L); AC9's tablet is Richard's |
 | [IW-005 — seek and regrow](IW-005-SEEK-AND-REGROW.md) | `go to nearest`, `if here/ahead has`, reservation, `go to [what Olive read]`; regrowth rules | 002 | ✅ s2 engine (lane J) · s3 AC5 seen in 2D and 3D (lane M); `sayNone` by kind; seek skips a used-up rock / a full target (lane S) |
 | [IW-006 — shells and the shop](IW-006-SHELLS-AND-THE-SHOP.md) | earning rules D2/D3, the wallet D4, the shop, helpers, save v5 | 002 | ✅ s4 (lanes E, H): AC1–AC4 · s5 (lane O): AC5 — the packaged upgrade drive over a REAL v4 app 18/18 (`garden-desktop/drive-upgrade-v4.js`); the owed items paid: the upgrade slot names the shop, prices retuned (spa 30, refuge 35, rabbit 15, sheep 20, boots 15), "now in the shop" on the win card, a robot sent from My robots |
-| [IW-007 — building and animals](IW-007-BUILDING-AND-ANIMALS.md) | blueprints on free plots, materials delivered, staged rise, the refuge, animals and feeding jobs | 005, 006 | ✅ s5 (base + lanes B, A): her land, the Build tab, the ghost, the spa and the refuge by stage in 2D + 3D, the puff, animals fed / worn / fed again, p95 16.7 ms · **s6: by touch** — her land's card names her robots of any kind, a tap chooses who learns there, a win on the land is a PART finished (`part_done`) and a second robot's win makes it the helper; Pip (stones) and Cobble (planks) taught by touch build the spa in 104 s; feeding taught there with two buildings standing; `drive-iw007-touch.js` 23/23 (25 with the chips' words); the pen's look and the chips' words fixed. Owed (small): the spa's `rest`, a tune, a fed animal giving something, a helper's drops earning, two robots' name pills at home |
-| [IW-008 — the crew and more land](IW-008-THE-CREW-AND-MORE-LAND.md) | named robot copies, copy a program, assign to a plot, more land; the frame gate with many robots | 005, 006 | 🟡 s4 (lane C): AC1–AC5 ✅ on the Mac (cap 12, p95 16.7 ms at CPU ×4); more land NOT built — Richard's question; the tablet is Richard's |
-| [IW-009 — the kids' verdict](IW-009-THE-KIDS-VERDICT.md) | the two children play the mockup (after IW-000) and the build (last); their words the same day | 000; all | ⬜ |
+| [IW-007 — building and animals](IW-007-BUILDING-AND-ANIMALS.md) | blueprints on free plots, materials delivered, staged rise, the refuge, animals and feeding jobs | 005, 006 | ✅ s5 (base + lanes B, A): her land, the Build tab, the ghost, the spa and the refuge by stage in 2D + 3D, the puff, animals fed / worn / fed again, p95 16.7 ms · **s6: by touch** — her land's card names her robots of any kind, a tap chooses who learns there, a win on the land is a PART finished (`part_done`) and a second robot's win makes it the helper; Pip (stones) and Cobble (planks) taught by touch build the spa in 104 s; feeding taught there with two buildings standing; `drive-iw007-touch.js` 23/23 (25 with the chips' words); the pen's look and the chips' words fixed. · **s7: the owed items paid** — robots rest at the finished spa (the shop's promise), a helper's drops earn, a fed animal gives her present, name pills never cover each other (both kits), `drive-iw007-touch.js` 29/29 and `--mode 3d`; not built: a tune (no sound in the kit) |
+| [IW-008 — the crew and more land](IW-008-THE-CREW-AND-MORE-LAND.md) | named robot copies, copy a program, assign to a plot, more land; the frame gate with many robots | 005, 006 | 🟡 s4 (lane C): AC1–AC5 ✅ on the Mac (cap 12, p95 16.7 ms at CPU ×4); more land — **ruled s7: not in this phase**; the tablet is Richard's |
+| [IW-009 — the kids' verdict](IW-009-THE-KIDS-VERDICT.md) | the two children play the mockup (after IW-000) and the build (last); their words the same day | 000; all | ⬜ **ready** (s7): the Mac app of the s7 tree, a path through it (§4); the sitting is Richard's |
 
 ### Order (R4: the order is ours)
 
@@ -299,7 +314,8 @@ A sensed `until` before the 3e text is an inference, not a source.
 - **Session 4 (done, merged 2026-10-01):** a base (save v5, the catalogue), then IW-006 earning (lane E) ∥ the shop (lane H) ∥ IW-008 the crew (lane C) ∥ IW-003's look items (lane L).
 - **Session 5 (done, merged 2026-10-01):** a base (her land, blueprints, animals, tree and patch sources, the gate `iw007Build`), then IW-007 building (lane B) ∥ animals (lane A) ∥ IW-006's owed items and AC5 (lane O).
 - **Session 6 (done, 2026-10-01, on `cline-dev`):** the touch path onto the land — her robots of any kind on her land's card, a tap chooses who learns, a win there is a part finished, a second robot's win makes the helper; building and feeding taught on the land and driven (IW-007 §4 "Session 6"). My robots' send does not list the land (a copy stands still there, measured).
-- **Session 7:** IW-007's small owed items, then IW-009 with the build (Richard's sitting).
+- **Session 7 (done, 2026-10-01, on `cline-dev`):** R5 and more land ruled at the start; IW-007's owed items (the spa's rest, a helper's pay, an animal's present, name pills, the touch path in 3D); the Mac app for IW-009.
+- **Next:** Richard's sitting with the children on the Mac app (IW-009); then a session for what they found.
 
 **Why this order:** the fixes are cheap and survive the Blockly swap (Stop, the run cap, the pad, the saved cards) — the
 parts that do not (drawer drag, tap-delete) get the cheapest fix that stops the harm. The mockup settles the look of

@@ -2519,6 +2519,18 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7sGiftClover",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7sGiftClover"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7sGiftWool",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7sGiftWool"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw7tCrewL",
       "toId": "translatewordsOut",
       "toProperty": "iw7tCrewL"

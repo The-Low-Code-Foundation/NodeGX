@@ -13,7 +13,8 @@
  * `earned` rises only through `earnShells` (SAVE_HELPERS), and `spent` is never touched here (D4).
  *
  * - **On the island** (D3; only while the Island page ticks, R2) a pinned robot's lap is a run: `islStepJob` counts the
- *   robot's own fill (never the wear's) into the lap's gain; the program run to its end pays it. A done job waits at home;
+ *   robot's own fill (never the wear's) into the lap's gain; the program run to its end pays it. P108 s7: a robot that
+ *   HELPS on the plot (`islWithMate`) earns the same way from its own fill (`matePaid`, its own "+N 🐚" line). A done job waits at home;
  *   wear reopens it and the robot goes back and earns again. `Logic/Island keep` writes the plot's live job and the
  *   shells into HER profile (one island per kid, ruling 8 — the island ticking is the active profile's) at the moments
  *   that matter: a lap's end (the finish line is one) and wear reopening a job — never every tick.
@@ -114,6 +115,11 @@ function iw6Resume(cur, plot, lv) {
   cur.spent = Array.isArray(lv.spent) ? islClone(lv.spent) : [];
   if (typeof lv.helper === 'string' && lv.helper) cur.helper = lv.helper;
   if (cur.phase !== 'teach' && jobDone(worldOf(islView(plot, cur)))) cur.phase = 'wait';
+  // P108 s7: a job done when the save was kept — the robot waits where it rests (her finished spa), not at its start.
+  if (cur.phase === 'wait' && cur.robot) {
+    var rw = worldOf(islView(plot, cur)), rest = restOf(rw, rw.robots[0]);
+    if (rest) { cur.robot.x = Number(rest.x); cur.robot.y = Number(rest.y); cur.robot.d = Number(rest.d) || 0; }
+  }
   return cur;
 }
 `;
@@ -195,6 +201,20 @@ Outputs.has = pay.shells > 0;
  */
 export const ISLAND_KEEP_SCRIPT = `${SAVE_HELPERS}
 ${EARN_WORDS}${LAND_KEEP}
+/** P108 s7: the animals on her land whose bowl (in the plot's things) is full and was not in her save: their presents. */
+function iw7sGifts(land, things) {
+  var out = [], as = land && Array.isArray(land.animals) ? land.animals : [], list = Array.isArray(things) ? things : [];
+  for (var a = 0; a < as.length; a++) {
+    var spec = animalSpec(as[a].kind);
+    if (!spec || !spec.gift) continue;
+    for (var t = 0; t < list.length; t++) {
+      var b = list[t];
+      if (!b || b.kind !== 'bowl' || !b.animal || String(b.id) !== String(as[a].id)) continue;
+      if ((Math.floor(Number(b.count)) || 0) >= spec.capacity && (Math.floor(Number(as[a].fed)) || 0) < spec.capacity) out.push({ name: String(as[a].name || ''), word: spec.gift.word, shells: spec.gift.shells });
+    }
+  }
+  return out;
+}
 var s = Inputs.state && typeof Inputs.state === 'object' && Array.isArray(Inputs.state.plots) ? Inputs.state : null;
 var marked = [];
 if (s && s.live) for (var i = 0; i < s.plots.length; i++) { var pl = s.plots[i], cur = s.live[pl.id]; if (pl && pl.job && cur && cur.moment) marked.push(pl); }
@@ -212,6 +232,15 @@ if (marked.length) {
     var old = sv.live || null;
     var lv = liveOf({ things: iw6CanBack(c.things, c.robot, plot.start ? plot.start.things : []), age: c.age, seed: c.seed, spent: c.spent, helper: 'helper' in c ? c.helper : old ? old.helper : '' });
     if (lv) sv.live = lv;
+    // P108 s7: an animal whose bowl a robot filled right up (it was not full in her save) gives her present — read
+    // BEFORE landKeep writes her fed. Wear only ever lowers a bowl, so a bowl that rose to full was a robot's put.
+    if (plot.id === LAND_ID && p.island.land) {
+      var gifts = iw7sGifts(p.island.land, c.things);
+      for (var gi = 0; gi < gifts.length; gi++) {
+        var gg = earnShells(p, gifts[gi].shells);
+        if (gg > 0) { shells += gg; lines.push(iw6Fill(w[gifts[gi].word], { a: gifts[gi].name, n: gg })); }
+      }
+    }
     // P108 IW-007 (lane B): her land's buildings written back from the plot — a part's have only rises (AC3).
     if (plot.id === LAND_ID && p.island.land) landKeep(p.island.land, c.things);
     due = true;
@@ -221,6 +250,14 @@ if (marked.length) {
       var name = '';
       for (var r = 0; r < rows.length; r++) if (rows[r] && rows[r].id === plot.robotId) name = String(rows[r].name || '');
       lines.push(iw6Fill(w.iw6eIslePay, { r: name, n: got }));
+    }
+    // P108 s7: and what the robot helping there earned (its own lap, its own line).
+    var gotM = c.matePaid && typeof c.matePaid === 'object' && plot.mate ? earnShells(p, c.matePaid.shells) : 0;
+    if (gotM > 0) {
+      shells += gotM;
+      var mname = '';
+      for (var rm = 0; rm < rows.length; rm++) if (rows[rm] && rows[rm].id === plot.mate.robotId) mname = String(rows[rm].name || '');
+      lines.push(iw6Fill(w.iw6eIslePay, { r: mname, n: gotM }));
     }
   }
   if (due) Outputs.model = model;

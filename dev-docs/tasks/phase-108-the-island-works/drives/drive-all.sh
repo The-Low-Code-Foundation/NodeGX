@@ -17,8 +17,8 @@ waitload() { until [ $(uptime | awk -F'load averages: ' '{print $2}' | cut -d' '
 cd $R || exit 2
 waitload
 # the page drive: drive-pages.sh's steps against THIS tree
-# P108 s6: the generator called directly — `npm run template:garden` is this command, but the primary checkout's root
-# package.json was overwritten (dev-docs/bugs/p108-repo-pkgjson-…), so npm found no script there.
+# P108 s6: the generator called directly — `npm run template:garden` is this command (s6 found the root package.json
+# overwritten; restored in s7, Richard's ruling — the direct call is kept: it works with or without npm).
 TS_NODE_COMPILER_OPTIONS='{"module":"CommonJS"}' npx ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-garden-template.ts > $P/generate.log 2>&1; echo $? > $P/generate.exit
 git -C $R status --short templates/bot-garden | head -5 > $P/drift.txt
 node scripts/devtools/drive-cg003-pages.js assemble $P/project > $P/assemble.log 2>&1; echo $? > $P/assemble.exit
@@ -45,6 +45,8 @@ ALL+=(build build-3d)
 ALL+=(animals animals-3d animals-perf)
 # P108 s6: her land by touch — Pip and Cobble taught there, the spa built, feeding taught (drive-iw007-touch.js).
 ALL+=(touch)
+# P108 s7: the touch path on Garden 3D.
+ALL+=(touch-3d)
 (( $# )) && ALL=("$@")
 for n in $ALL; do
   waitload
@@ -84,6 +86,8 @@ for n in $ALL; do
     build) node scripts/devtools/drive-iw007-build.js $D $J --shots $P/build-shots --json $P/build.json ;;
     # P108 s6 (IW-007 by touch).
     touch) node scripts/devtools/drive-iw007-touch.js $D $J --shots $P/touch-shots --json $P/touch.json ;;
+    # P108 s7: the same taps on Garden 3D (swiftshader).
+    touch-3d) node scripts/devtools/drive-iw007-touch.js $D $J --mode 3d --shots $P/touch-3d-shots --json $P/touch-3d.json ;;
     build-3d) node scripts/devtools/drive-iw007-build.js $D $J --mode 3d --shots $P/build-3d-shots --json $P/build-3d.json ;;
     # P108 IW-007 (lane A).
     animals) node scripts/devtools/drive-iw007-animals.js $D $J --shots $P/animals --json $P/animals.json ;;

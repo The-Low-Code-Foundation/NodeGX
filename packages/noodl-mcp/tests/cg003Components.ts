@@ -672,7 +672,7 @@ const PAD: CgComponent = {
  */
 const RUNNER: CgComponent = {
   path: 'Workshop/Runner',
-  description: 'Runs a program on the world, one engine step per tick: Play runs it to the end, Step one tick (starting a fresh run when none is live), Stop halts and resets the run. A run parked on Olive fires Parked with the Request and waits (Waiting is on; a Step meanwhile does nothing); Answered (the Answer set first) resumes it, playing or paused. Finished fires once the run is done; Reset once Stop has emptied the run. P108 IW-001 F2: a played run that reaches the engine\u2019s MAX_TICKS stops by itself (Capped is on, Cap fires); the run is kept, so the hint can say why.',
+  description: 'Runs a program on the world, one engine step per tick: Play runs it to the end, Step one tick (starting a fresh run when none is live), Stop halts and resets the run. A run parked on Olive fires Parked with the Request and waits (Waiting is on; a Step meanwhile does nothing); Answered (the Answer set first) resumes it, playing or paused. Finished fires once the run is done; Reset once Stop has emptied the run. P108 IW-001 F2: a played run that reaches the cap (RUN_CAP, 400 ticks) stops by itself (Capped is on, Cap fires); the run is kept, so the hint can say why.',
   nodes: [
     inputs('rnIn', [['program', '*'], ['start', 'object'], ['answer', 'object'], ['lang', 'string'], ['stepMs', 'number'], ['play', 'signal'], ['step', 'signal'], ['stop', 'signal'], ['answered', 'signal']]),
     logic('rnNew', L('New run'), 'A fresh run', { robotId: 'me' }),

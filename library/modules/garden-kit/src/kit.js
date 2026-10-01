@@ -1500,6 +1500,8 @@
     '.gd-load{position:absolute;right:-6%;top:50%;width:36%;height:36%;transform:translateY(-50%);box-sizing:border-box;padding:2px;background:#fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,.22);z-index:4;pointer-events:none}\n' +
     '.gd-load>svg{width:100%;height:100%;display:block;overflow:visible}\n' +
     '.gd-name{position:absolute;top:92%;left:50%;transform:translateX(-50%);background:#fff;border-radius:999px;padding:1px 8px;font-size:12px;font-weight:800;white-space:nowrap;box-shadow:0 2px 6px rgba(0,0,0,.15);z-index:4;color:#2E2A3D}\n' +
+    // P108 s7: a name pill that would cover another robot's goes over its robot (pillSides, set after each draw).
+    '.gd-name[data-up]{top:auto;bottom:92%}\n' +
     '.gd-bubble{position:absolute;z-index:5;background:#fff;border-radius:14px;padding:8px 12px;font-weight:800;font-size:14px;box-shadow:0 6px 18px rgba(72,52,20,.10);max-width:230px;pointer-events:none;transform:translate(-30%,-115%);color:#2E2A3D}\n' +
     '.gd-bubble:after{content:"";position:absolute;left:34%;bottom:-8px;border:8px solid transparent;border-top-color:#fff;border-bottom:0}\n' +
     '.gd-bubble.gd-olive{background:#EEE8FF;color:#4A2FA6}.gd-bubble.gd-olive:after{border-top-color:#EEE8FF}\n' +
@@ -1897,6 +1899,47 @@
     });
   }
 
+  /**
+   * P108 s7: which robots' name pills go ABOVE their robot (true), so no two pills cover each other — at a plot's home a
+   * helper stands on the next tile, and on the island a tile is far narrower than a name ("Cobble ²ip"). Items in robot
+   * order, in px: { x, below, above, w, h } — x the pill's centre, below the top edge of a pill under the robot, above the
+   * bottom edge of a pill over it. Greedy, the LOWEST on screen first (then robot order): a pill stays under its robot
+   * unless that meets a pill already placed; then it goes over, unless that meets one too (then under, as before) — so of
+   * a robot standing right above another, it is the upper one whose pill goes over. No width (no name) takes no room. Both kits
+   * hold this one function (garden-3d-kit's copy is pinned to it).
+   */
+  function pillSides(items) {
+    var placed = [], out = [];
+    function meets(a) {
+      for (var k = 0; k < placed.length; k++) {
+        var b = placed[k];
+        if (a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b) return true;
+      }
+      return false;
+    }
+    var list = Array.isArray(items) ? items : [], order = [];
+    for (var n = 0; n < list.length; n++) {
+      out.push(false);
+      order.push(n);
+    }
+    var lowOf = function (k) {
+      return Number((list[k] || {}).below) || 0;
+    };
+    order.sort(function (a, b) {
+      return lowOf(b) - lowOf(a) || a - b;
+    });
+    for (var o = 0; o < order.length; o++) {
+      var i = order[o], it = list[i] || {}, w = Number(it.w) || 0, hh = Number(it.h) || 0, x = Number(it.x) || 0, lo = Number(it.below) || 0, hi = Number(it.above) || 0;
+      if (!(w > 0) || !(hh > 0)) continue;
+      var down = { l: x - w / 2, r: x + w / 2, t: lo, b: lo + hh };
+      var up = { l: x - w / 2, r: x + w / 2, t: hi - hh, b: hi };
+      var goUp = meets(down) && !meets(up);
+      placed.push(goUp ? up : down);
+      out[i] = goUp;
+    }
+    return out;
+  }
+
   /** @type {import('./types/node-kit').ReactNodeDefinition} */
   var Garden = {
     name: 'garden-kit.Garden',
@@ -1912,7 +1955,7 @@
     noodlNodeAsProp: true,
 
     /** The pure parts, for the kit gate. */
-    world: { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf, job: JOB_LOOK },
+    world: { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, pillSides: pillSides, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf, job: JOB_LOOK },
     sprite: { minPx: ROBOT_MIN_PX, svgPct: ROBOT_SVG_PCT, face: { x: FACE_X, y: FACE_Y, w: FACE_W, h: FACE_H }, faceFraction: FACE_FRACTION, robotSvg: robotSvg, sprites: SPRITES },
     css: WORLD_CSS,
 
@@ -1942,6 +1985,31 @@
           if (bumps.current.seen[i] !== r.bump) {
             if (rose(bumps.current.seen[i], r.bump)) bumps.current.n[i]++;
             bumps.current.seen[i] = r.bump;
+          }
+        });
+
+        // P108 s7: after each draw, a name pill that would cover another robot's goes over its robot (pillSides). Read from
+        // where each robot is GOING (its left/top), not where its glide is, so a pill does not flip mid-step.
+        (typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect)(function () {
+          var el = root.current;
+          if (!el || typeof el.querySelectorAll !== 'function') return;
+          var bots = el.querySelectorAll('.gd-bot');
+          var names = [], items = [];
+          for (var b = 0; b < bots.length; b++) {
+            var bot = bots[b], n = bot.querySelector('.gd-name'), host = bot.offsetParent;
+            if (!n || !host) continue;
+            var s = parseFloat(bot.getAttribute('data-share'));
+            var o = !isFinite(s) ? -50 : s === 0 ? -90 : s === 1 ? -10 : -50, k = !isFinite(s) ? 1 : 0.78;
+            var bw = bot.offsetWidth, bh = bot.offsetHeight;
+            var cx = (host.clientWidth * parseFloat(bot.style.left)) / 100 + ((o + 50) / 100) * bw;
+            var cy = (host.clientHeight * parseFloat(bot.style.top)) / 100 + ((o + 50) / 100) * bh;
+            names.push(n);
+            items.push({ x: cx, below: cy + 0.42 * bh * k, above: cy - 0.42 * bh * k, w: (n.offsetWidth + 2) * k, h: n.offsetHeight * k });
+          }
+          var up = names.length > 1 ? pillSides(items) : [];
+          for (var q = 0; q < names.length; q++) {
+            if (up[q]) names[q].setAttribute('data-up', '1');
+            else if (names[q].hasAttribute('data-up')) names[q].removeAttribute('data-up');
           }
         });
 

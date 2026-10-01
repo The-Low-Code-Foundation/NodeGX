@@ -1582,7 +1582,7 @@ export const LAND_SOURCES: ReadonlyArray<Thing> = [
  * the engine's put, meter and finish line work unchanged; the building's stage is the share of ALL its parts' materials
  * delivered (`buildStage`), written on every part as `bstage` (0 .. stages − 1; the last is finished). `pen` (the refuge)
  * is the row below it: one tile per animal, where her bowl sits. `spot` is the default place the ghost first appears.
- * `does`: what a finished one is for — `rest` (robots rest there; a later session), `animals` (unlocks the Animals tab).
+ * `does`: what a finished one is for — `rest` (robots rest there when a job is done: P108 s7, landJob's `rest`), `animals` (unlocks the Animals tab).
  */
 export interface Blueprint {
   id: 'spa' | 'refuge';
@@ -1607,9 +1607,15 @@ export interface AnimalSpec {
   id: 'rabbit' | 'sheep';
   eats: 'carrot';
   capacity: number;
+  /**
+   * P108 s7 (IW-007 §2 "a fed animal sometimes gives something"): when a robot fills her bowl right up on the island (it
+   * was not full), she gives her present — `shells` into the wallet at once, and the island's line in words `word`
+   * (PAGE_WORDS, `{a}` her name, `{n}` the shells). Not random: a bowl only empties as the island's time passes (wear).
+   */
+  gift: { word: string; shells: number };
 }
 export const ANIMALS: ReadonlyArray<AnimalSpec> = [
-  { id: 'rabbit', eats: 'carrot', capacity: 3 },
-  { id: 'sheep', eats: 'carrot', capacity: 4 }
+  { id: 'rabbit', eats: 'carrot', capacity: 3, gift: { word: 'iw7sGiftClover', shells: 1 } },
+  { id: 'sheep', eats: 'carrot', capacity: 4, gift: { word: 'iw7sGiftWool', shells: 2 } }
 ];
 export const ANIMALS_JSON = JSON.stringify(ANIMALS);

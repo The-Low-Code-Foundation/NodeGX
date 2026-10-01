@@ -1,6 +1,6 @@
 # IW-001 — The Workshop fixes
 
-**Opened 2026-09-29** from README §1.3. **Status: ✅ s1 (lane A), AC1–AC8 driven — §6.** Depends on nothing. Lane A. **First job of session 1.**
+**Opened 2026-09-29** from README §1.3. **Status: ✅ s1 (lane A), AC1–AC8 driven — §6. P108 s7: R5 ruled — the Workshop's run cap is `RUN_CAP` = 400 ticks (≈ 2¾ min), not MAX_TICKS (README §3; `drive-iw001-workshop.js` reads the deployed cap: 38/38).** Depends on nothing. Lane A. **First job of session 1.**
 
 ## 1. The person sentence
 

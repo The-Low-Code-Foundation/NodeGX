@@ -66,7 +66,7 @@ import {
 import { PAD_ANSWER_SCRIPT, RUN_CAP_SCRIPT } from './cg003Scripts';
 // P108 IW-003 (lane M): the job card.
 import { JOB_CARD_SCRIPT } from './cg003Scripts';
-import { DECODE_SAVE_SCRIPT, ENCODE_SAVE_SCRIPT, MAX_TICKS } from './cg002Scripts';
+import { DECODE_SAVE_SCRIPT, ENCODE_SAVE_SCRIPT, MAX_TICKS, RUN_CAP } from './cg002Scripts';
 import { AuthoredGarden, buildGardenTemplateProject, prepareGardenArtefact, START_HERE_FILE, TEMPLATE_ID } from './cg003Template';
 import { ROBOT_NAME_MAX } from './cg002Scripts';
 import { DARKENED_FILLS, GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } from './cg007Look';
@@ -1213,7 +1213,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect([PAGE_WORDS.iw1Stop.en, PAGE_WORDS.iw1Stop.fr]).toEqual(['Stop', 'Arrêter']);
     });
 
-    it('🔴 F2: the run cap is counted in the Runner against the engine’s MAX_TICKS — after every tick that is not done and not parked; at the cap the run stops and is KEPT, and Choose hint is asked', () => {
+    it('🔴 F2: the run cap is counted in the Runner against RUN_CAP (R5) — after every tick that is not done and not parked; at the cap the run stops and is KEPT, and Choose hint is asked', () => {
       expect(rnode('rnCapTest').type).toBe('/Logic/Run cap');
       expect(rinto('rnCapTest')).toEqual(['rnPark.onfalse>go', 'rnStep.tick>tick']);
       expect(rinto('rnCap')).toEqual(['rnCapTest.over>condition', 'rnCapTest.ran>eval']);
@@ -1224,13 +1224,14 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(rinto('rnCapped')).toEqual(['rnCap.ontrue>to-capped', 'rnIn.play>to-free', 'rnIn.stop>to-free', 'rnLive.onfalse>to-free']);
       expect(rinto('rnOut', 'capped')).toEqual(['rnCapped.capped>capped']);
       expect([pinto('plChoose', 'capped'), pinto('plChoose', 'go')]).toEqual([['plRunner.capped>capped'], expect.arrayContaining(['plRunner.cap>go'])]);
-      // The script: the engine's own constant, never a copy of the number.
-      expect(RUN_CAP_SCRIPT).toContain(`var MAX = ${MAX_TICKS};`);
-      expect([run(RUN_CAP_SCRIPT, { tick: MAX_TICKS - 1 }).over, run(RUN_CAP_SCRIPT, { tick: MAX_TICKS }).over, run(RUN_CAP_SCRIPT, {}).over]).toEqual([false, true, false]);
+      // The script: the one constant, never a copy of the number. P108 s7 (R5): RUN_CAP (400), under the engine's MAX_TICKS.
+      expect(RUN_CAP_SCRIPT).toContain(`var MAX = ${RUN_CAP};`);
+      expect([RUN_CAP, RUN_CAP < MAX_TICKS]).toEqual([400, true]);
+      expect([run(RUN_CAP_SCRIPT, { tick: RUN_CAP - 1 }).over, run(RUN_CAP_SCRIPT, { tick: RUN_CAP }).over, run(RUN_CAP_SCRIPT, {}).over]).toEqual([false, true, false]);
     });
 
     it('🔴 F2: a capped run says the loop line (EN/FR, the robot named); an un-run program never does', () => {
-      const ran = { tick: MAX_TICKS, bumps: 0, puddles: 0 };
+      const ran = { tick: RUN_CAP, bumps: 0, puddles: 0 };
       const base = { world: run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' }).world, program: [{ id: 1, t: 'repeat', n: 9, body: [{ id: 2, t: 'until', slots: { sensor: 'wall_ahead' }, body: [{ id: 3, t: 'left' }] }] }] };
       expect(run(CHOOSE_HINT_SCRIPT, { ...base, run: ran, capped: true }).key).toBe('iw1Loop');
       expect(run(CHOOSE_HINT_SCRIPT, { ...base, run: ran, capped: false }).key).not.toBe('iw1Loop');

@@ -2,7 +2,8 @@
 
 **Opened 2026-09-29** from README §0 ("an army of robots … copies of pip or rubble, with their own name, with a job …
 multiple plots needed"). **Status: 🟡 s4 (lane C, merged 2026-10-01) — the crew: AC1–AC5 ✅ on the Mac (crew cap 12, p95 16.7 ms at CPU ×4);
-the tablet with Olive in flight is Richard's; "more land" not built — a question for Richard (R6 stands).** Depends on IW-005, IW-006. Lane D.
+the tablet with Olive in flight is Richard's; "more land" not built — **Richard ruled 2026-10-01 (P108 s7): not in this
+phase** (later, after the children have played and said whether they ran out of room). s7: a helper's drops now earn (IW-007 §4 "Session 7"); two robots' name pills never cover each other.** Depends on IW-005, IW-006. Lane D.
 
 ## 1. The person sentence
 

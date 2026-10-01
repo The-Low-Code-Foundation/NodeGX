@@ -205,13 +205,18 @@ function islWithMate(plot, cur, out) {
   if (!plot.mate || !cur.mate || !out || out === cur) return out;
   out.mate = cur.mate;
   var w = worldOf(islView(plot, out)), m = cur.mate, run = m.run, phase = m.phase || 'work', lap = Number(m.lap) || 0, delta = null;
+  // P108 s7: the helper earns as the first robot does (iw6Pay): its own fill is its lap's gain, its program's end pays it.
+  var mgain = m.gain && typeof m.gain === 'object' ? m.gain : {}, mpaid = null;
   if (phase === 'wait' && !jobDone(w)) { lap++; run = islMateRun(plot, lap); phase = 'work'; }
   if (phase !== 'wait') {
     var r = step(run, w, null);
     if (r.waiting && r.request) r = step(r.run, w, islAnswer(r.request));
+    var mm0 = iw6Meters(w);
     w = apply(w, r.delta);
+    mgain = iw6Gain(mgain, mm0, iw6Meters(w));
     run = r.run; delta = r.delta;
     if (r.done) {
+      if (phase === 'work') { mpaid = iw6Pay(plot.id, iw6Steps(mgain), iw6Total(w), jobDone(w)); mgain = {}; out.moment = true; }
       if (jobDone(w)) phase = 'wait';
       else if (phase === 'return') { lap++; run = islMateRun(plot, lap); phase = 'work'; }
       else { phase = 'return'; run = islMateHome(plot, lap); }
@@ -220,7 +225,8 @@ function islWithMate(plot, cur, out) {
   out.things = w.things;
   out.robot = w.robots[0];
   out.spent = Array.isArray(w.spent) ? w.spent : [];
-  out.mate = { run: run, robot: w.robots[1], phase: phase, lap: lap, delta: delta };
+  out.mate = { run: run, robot: w.robots[1], phase: phase, lap: lap, delta: delta, gain: mgain };
+  out.matePaid = mpaid;
   return islKeep(out, w);
 }
 

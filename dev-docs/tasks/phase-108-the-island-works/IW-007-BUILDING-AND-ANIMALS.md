@@ -6,8 +6,9 @@ animal refuge … buy a sheep and a rabbit … task a robot with collecting food
 touch (her land's card names her robots of any kind, a tap chooses who learns, a win there makes the second robot the
 helper), the spa finished in 104 s on the island; AC2 ✅ — feeding taught on her land by touch and won while two
 buildings stand, her bowl filled on the island (wear and refill: lane A's drive); AC3 ✅; AC4 ✅. The pen's look and the
-chips' words fixed (s6). Owed, small: the spa's `rest`, a tune, a fed animal giving something, a helper's drops earning,
-two robots' name pills at home (§4 "Session 6").** Depends on IW-005 (seek), IW-006 (the shop). Lane B or E.
+chips' words fixed (s6). **s7: the owed items paid** — robots rest at the finished spa, a helper's drops earn, a fed
+animal gives her present, two robots' name pills never cover each other (both kits), the touch path driven in 3D
+(§4 "Session 7"). Not built: a tune on the last drop (the kit has no sound).** Depends on IW-005 (seek), IW-006 (the shop). Lane B or E.
 
 ## 1. The person sentence
 
@@ -368,4 +369,57 @@ overlapping at home; 3D for the touch path (the 2D island and Workshop only; the
 
 **Found, not this phase's:** the primary checkout's root `package.json` is Nightbook's app manifest since 2026-09-28
 (`dev-docs/bugs/p108-repo-pkgjson-…`): every `npm run` fails there. Not restored here.
+
+### Session 7 (2026-10-01, on `cline-dev` from `a91b73247`) — the owed small items, and R5
+
+**Asked first, in plain words** (README §3): R5 → *"~400 ticks"*; more land → *"not in this phase"*; the root
+`package.json` → *"restore it"* (done). **R5 was re-measured before it was asked:** the session-1 reading (longest
+reference run 41 ticks, "a cap of 200 leaves five times that") was stale — path-stones takes 110, a one-part job on her
+land 134 (the spa's stones), a whole spa by one program 194. The old recommendation would have cut a winning run.
+
+**Built** (hunks under `// P108 s7`; new: `tests/p108s7.test.ts`):
+- **R5:** `RUN_CAP` = 400 (`cg002Scripts.ts`); `Logic/Run cap` uses it (≈ 2¾ min at 420 ms a tick, Olive's "going round
+  and round" line at the cap, IW-001's); MAX_TICKS (2000) still bounds Predict and the gate. A gate row keeps it at least
+  twice the longest winning run (every mission on seeds 1–3, a part on her land) — a longer job turns it red.
+- **Two robots' name pills** (`pillSides`, garden-kit; garden-3d-kit's copy pinned to it): a pill stays under its robot
+  unless it would meet one already placed, then it goes over its robot; placed lowest-on-screen first, so of two robots
+  one above the other it is the upper one whose pill goes over (the first version, in robot order, left that case
+  covered: seen while writing the drive's clause, then pinned by a spec row with the kit's real 56 px robot box). 2D: after each draw, from where each robot is GOING (`data-up`); 3D: every frame from
+  the projected points, a pill's size read once per name.
+- **The spa's rest** (`P108-S7-SPAREST`: the shop says "Robots rest there when a job is done" — nothing did): `landJob`
+  gives a placed spa's `rest` (its id; a free, reachable grass tile per robot, D13: two rows in front of it, one tile out
+  at each end — the first version, the row right under it, hid the spa and each robot behind the other on the island:
+  seen on the touch drive's shot, not by any check); the engine's `homeOf` asks `restOf` first — the spa FINISHED, read
+  live, so the walk after the last plank goes there; a save kept with the job done puts the robot at its rest on the
+  next build (`iw6Resume`). `Logic/Land request` now carries ENGINE (the rest asks which tiles a robot can reach).
+- **A helper's drops earn** (`P108-S7-HELPERPAY`): `islWithMate` counts the helper's own fill and pays it at its
+  program's end by the one rule (`iw6Pay`); Island keep adds it with its own "Cobble +N 🐚" line. Holds for a crew helper
+  on a request plot too (IW-008).
+- **A fed animal's present** (D12): ANIMALS' `gift` (rabbit: a clover +1, sheep: wool +2, words `iw7sGiftClover` /
+  `iw7sGiftWool`); Island keep gives it when a robot filled her bowl right up (full on the plot, not full in her save —
+  read before `landKeep` writes her fed; wear only ever lowers a bowl).
+- **The touch path in 3D:** `drive-iw007-touch.js --mode 3d` (`drives/drive-all.sh` `touch-3d`): every tap on a world is
+  the 3D kit's own `screenOfTile` on its canvas; the drive follows whichever world is drawn (the 55 × 22 island can trip
+  Too Slow under software GL and the flat island takes over — recorded, not hidden). New clauses in both modes: REST
+  (the tiles from the page's own `landJob`), PILLS (every settled moment while the two build: no pill covers another,
+  and the robots did come close with a pill sent over — the known-firing half), PAY, GIFT; 3D: the Workshop on her land
+  is Garden 3D while Pip's parts are picked on its world.
+
+**Readings** (2026-10-01; every exit 0 unless said):
+
+| gate | total | previous |
+|---|---|---|
+| `p108s7.test.ts` (NEW: 17 rows, 5 of them arms — each rule mutated at one anchor, red asserted) | **17 / 17** | — |
+| all 22 spec files, one run, the final tree | **1059**, exit 0 (the crew's 12-robot tick p95 2.0 ms; one earlier run read 6.6 ms > 5 with a peer's jest at 86% CPU beside it — alone: 1.7, 1.9) | 1042 in 21 |
+| shell `node --test` | 92 / 92 | 92 |
+| generator (`npm run template:garden` — the root `package.json` restored) | exit 0; cg003Template's byte-for-byte row green | 0 |
+| **drive set 1** (`drive-all.sh`, every drive, one deploy of the tree before the last two kit edits) | page **331/331** · look 143 · earn 15 · shop 60 · crew 39 · crew `--perf` 5 · modes 90 · iw001 **38** (reads the deployed cap: 400) · iw004 19 · iw004-3d 3 · island `--perf` 69 · island-3d 5 · robots 60 · wsnogl 8 · olive 22/22 · mamie-ws 34 · mamie-isl 7 · mamie-isl3d 3 · mamie-look3d 6 · stones 32 · post 17 · post-3d 10 · biscuit 24 · kit2d 50 · kit3d 37 · owed 19 · build 26 · build-3d 4 · animals 16 — 🔴 **ws3d** red (Too Slow under software GL in Play) and **stones-3d** 13/14 (a meter sampler missed a count): a peer's Docker VM at 163% CPU, load 9.5; **ws3d on the SAME build, quiet: 24/24, p95 18.5 ms** (contention, not the change). The set hit the 2-hour limit before animals-3d/perf, touch, touch-3d | 331 · … |
+| **drive set 2** (fresh deploy of the FINAL tree) | page **331/331** · ws3d **24/24** · stones-3d **14/14** · animals-3d 4/4 · animals `--perf` 6/6 · touch **29/29** · kit3d 37/37 · touch-3d **29/29** (below) | — |
+| `drive-iw007-touch.js` (2D) | **29/29** — REST: Pip and Cobble at (48, 18) and (51, 18) island, not home; PILLS: 85 settled moments while they built, 0 with a pill covering another — 38 times two robots stood close, 24 of them with a pill sent over; PAY: "Cobble +4 🐚", "Pip +6 🐚", the wallet +10; GIFT: "🍀 Hazel found you a clover +1 🐚"; the spa in 105 s | 25 |
+| `drive-iw007-touch.js --mode 3d` (final tree; a first run on it at load 5.5 stopped when the drawer's `is` had not scrolled under the finger — alone, quiet: green) | **29/29** — Pip and Cobble taught by taps on Garden 3D's world in the Workshop on her land (both `3d`); the island began in 3D and fell back to flat under software GL (Too Slow, 55 × 22), where REST, PAY and GIFT were read; no PILLS clause in this mode (the 3D sampler reads no pills) | — |
+
+**Not done, and why:** a tune on the last drop (garden-kit has no sound; game-kit's `Sound` is not on the island page —
+a sound is a new port on the kit, and nothing a child does waits on it); the rest on the 3D island seen under a real GPU
+(swiftshader fell back to the flat island on the 55 × 22 island; the Workshop stayed 3D).
+
 

@@ -27,7 +27,7 @@
       "type": "JavaScriptFunction",
       "label": "Run cap",
       "parameters": {
-        "functionScript": "\nvar MAX = 2000;\nvar tick = Math.floor(Number(Inputs.tick)) || 0;\nOutputs.over = tick >= MAX;\n",
+        "functionScript": "\nvar MAX = 400;\nvar tick = Math.floor(Number(Inputs.tick)) || 0;\nOutputs.over = tick >= MAX;\n",
         "runOnChange-in-tick": false
       },
       "x": 40,

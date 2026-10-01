@@ -335,7 +335,48 @@
   }
   var JOB_LOOK = { JOB_VOCABULARY: JOB_VOCABULARY, SITE_STAGES: SITE_STAGES, WALL_TILE: WALL_TILE, METER_PIPS_MAX: METER_PIPS_MAX, meterOf: meterOf, siteStage: siteStage, penOf: penOf, watchRefs: watchRefs, resolveWatch: resolveWatch };
 
-  var LOCAL_WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, job: JOB_LOOK, source: 'local' };
+  /**
+   * P108 s7: which robots' name pills go ABOVE their robot (true), so no two pills cover each other — at a plot's home a
+   * helper stands on the next tile, and on the island a tile is far narrower than a name ("Cobble ²ip"). Items in robot
+   * order, in px: { x, below, above, w, h } — x the pill's centre, below the top edge of a pill under the robot, above the
+   * bottom edge of a pill over it. Greedy, the LOWEST on screen first (then robot order): a pill stays under its robot
+   * unless that meets a pill already placed; then it goes over, unless that meets one too (then under, as before) — so of
+   * a robot standing right above another, it is the upper one whose pill goes over. No width (no name) takes no room. A COPY of
+   * garden-kit's (pinned by ig007Garden3d): here the pills are placed in screen px every frame.
+   */
+  function pillSides(items) {
+    var placed = [], out = [];
+    function meets(a) {
+      for (var k = 0; k < placed.length; k++) {
+        var b = placed[k];
+        if (a.l < b.r && b.l < a.r && a.t < b.b && b.t < a.b) return true;
+      }
+      return false;
+    }
+    var list = Array.isArray(items) ? items : [], order = [];
+    for (var n = 0; n < list.length; n++) {
+      out.push(false);
+      order.push(n);
+    }
+    var lowOf = function (k) {
+      return Number((list[k] || {}).below) || 0;
+    };
+    order.sort(function (a, b) {
+      return lowOf(b) - lowOf(a) || a - b;
+    });
+    for (var o = 0; o < order.length; o++) {
+      var i = order[o], it = list[i] || {}, w = Number(it.w) || 0, hh = Number(it.h) || 0, x = Number(it.x) || 0, lo = Number(it.below) || 0, hi = Number(it.above) || 0;
+      if (!(w > 0) || !(hh > 0)) continue;
+      var down = { l: x - w / 2, r: x + w / 2, t: lo, b: lo + hh };
+      var up = { l: x - w / 2, r: x + w / 2, t: hi - hh, b: hi };
+      var goUp = meets(down) && !meets(up);
+      placed.push(goUp ? up : down);
+      out[i] = goUp;
+    }
+    return out;
+  }
+
+  var LOCAL_WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, rose: rose, pillSides: pillSides, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, job: JOB_LOOK, source: 'local' };
 
   /**
    * garden-kit’s `Garden.world` if that kit is on the page. Modules land in `window.__noodl_modules` in load order and
@@ -2228,13 +2269,36 @@
       }
     };
     var positionOverlay = function () {
+      // P108 s7: a name pill that would cover another robot's goes over its robot's head (pillSides). A pill's size is
+      // read once per name (cached on it), never every frame.
+      // One robot (the Workshop): placed as before — no second projection, no size read, nothing to keep apart.
+      var pills = [], many = overlayEls.names.length > 1;
       overlayEls.names.forEach(function (e, i) {
         var g = eng.built.robots[i];
         if (!g) return;
         var s = screenOf([g.position.x, g.position.y + 0.02, g.position.z + 0.3]);
-        place(e, s.sx, s.sy + 6);
-        e.setAttribute('data-sx', s.sx.toFixed(1));
-        e.setAttribute('data-sy', s.sy.toFixed(1));
+        if (!many) {
+          place(e, s.sx, s.sy + 6);
+          e.setAttribute('data-sx', s.sx.toFixed(1));
+          e.setAttribute('data-sy', s.sy.toFixed(1));
+          return;
+        }
+        var top = screenOf([g.position.x, g.position.y + 0.8 * g.scale.y, g.position.z]);
+        if (e.__gdText !== e.textContent || !e.__gdW) { e.__gdText = e.textContent; e.__gdW = e.offsetWidth || 0; e.__gdH = e.offsetHeight || 0; }
+        pills.push({ e: e, s: s, top: top, item: { x: s.sx, below: s.sy + 6, above: top.sy - 2, w: e.style.visibility === 'hidden' ? 0 : e.__gdW + 2, h: e.__gdH } });
+      });
+      var ups = pills.length > 1 ? pillSides(pills.map(function (p) { return p.item; })) : [];
+      pills.forEach(function (p, i) {
+        var up = !!ups[i];
+        place(p.e, p.s.sx, up ? p.item.above - p.item.h : p.s.sy + 6);
+        // The side remembered on the pill: the DOM is touched only when it changes.
+        if (!!p.e.__gdUp !== up) {
+          p.e.__gdUp = up;
+          if (up) p.e.setAttribute('data-up', '1');
+          else if (typeof p.e.removeAttribute === 'function') p.e.removeAttribute('data-up');
+        }
+        p.e.setAttribute('data-sx', p.s.sx.toFixed(1));
+        p.e.setAttribute('data-sy', p.s.sy.toFixed(1));
       });
       overlayEls.labels.forEach(function (l) {
         // P108 IW-003 (lane P): a door's plate sits on its step (centred), not a tile in front where it hid the post box.

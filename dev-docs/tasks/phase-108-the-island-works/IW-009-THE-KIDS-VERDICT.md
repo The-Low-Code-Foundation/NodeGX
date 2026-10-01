@@ -1,6 +1,6 @@
 # IW-009 — The children's verdict
 
-**Opened 2026-09-29.** Merges P106 IG-008 (⬜). **Status: ⬜.** Two sittings: after IW-000 (the mockup), and after the
+**Opened 2026-09-29.** Merges P106 IG-008 (⬜). **Status: ⬜ — the build sitting is READY (s7: the Mac app, §4–§5); the sitting itself is Richard's.** Two sittings: after IW-000 (the mockup), and after the
 build. Richard's task; the notes stay untracked (no names or ages in the repo).
 
 ## 1. Why twice
@@ -22,6 +22,32 @@ meters, dragging blocks and tapping a thing to make a block are fun **before** t
 The same, plus the shop: what do they buy first, do they understand the purchase card, do they want a second robot,
 do they name it.
 
-## 4. Notes
+## 4. Ready for the build sitting (P108 s7, 2026-10-01)
 
-(empty)
+Richard chose the **Mac** for it (not a new Windows installer): the packaged app built from the session-7 tree,
+`dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/dist/mac-arm64/Olive's Island.app` (§5 says how it was
+built and what was checked). Each child makes her own player on the first screen (one island each, no cloud).
+
+**A path through it in about 30 minutes, in the order the game opens up** (a suggestion, not a script — follow what
+she wants to do):
+1. The first requests on the island (Sami's letter, Mamie's tulip): the Workshop, the drawer, Play, Stop.
+2. A job she has won goes on by itself on the island; time passing wears it and her robot goes back. The shells.
+3. The shop: a second robot (Cobble comes with Sami's letter), then the spa (30 🐚) in the Build tab, its ghost put
+   on her land (the meadow at the bottom right).
+4. Her land's card: tap Pip, "Teach Pip here" — the spa's stones; back, tap Cobble — the planks. The spa rises on the
+   island; when it is finished both robots go and rest in front of it.
+5. The refuge, then a rabbit or a sheep (named by her); a robot taught to feed her; a present when her bowl is filled.
+
+**To make it quicker:** there is no "give shells" button. A session can write a save code (shells earned, the first
+requests won) and the Grown-ups page takes it ("Paste a code" → "Replace the islands") — ask for one before the sitting.
+
+**What to watch** is §2 and §3. Add: does she understand that a robot taught on her land keeps working there? Does she
+notice the robots resting at the spa, the "+N 🐚" lines, the present? Does anything feel like waiting?
+
+## 5. The build (P108 s7)
+
+(filled in when built)
+
+## 6. Notes
+
+(empty — her words, the same day)

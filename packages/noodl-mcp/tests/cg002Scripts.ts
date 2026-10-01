@@ -80,6 +80,14 @@ export const MAX_TRICK_DEPTH = 8;
 /** A run that has not finished after this many ticks is declared not finishing (Predict, the gate). */
 export const MAX_TICKS = 2000;
 
+/**
+ * P108 s7, R5 (Richard ruled 2026-10-01: "~400 ticks"): a PLAYED run in the Workshop stops by itself here (≈ 2¾ min at
+ * 420 ms a tick), not at MAX_TICKS (≈ 14 min). Measured the same day: the longest reference run is 110 ticks
+ * (path-stones), the longest one-part run on her land 134 (the spa's stones); a whole spa by one program 194. The gate
+ * (iw007Touch) keeps it at least twice the longest winning run. MAX_TICKS still bounds Predict and the gate.
+ */
+export const RUN_CAP = 400;
+
 /** A finished request with more blocks than this is "done, but it could be shorter" (the mockup's `winMany`). */
 export const MANY_BLOCKS = 8;
 /**
@@ -397,8 +405,30 @@ function jobProgress(w) {
   return { full: full, total: total };
 }
 function jobDone(w) { var p = jobProgress(w); return p.total > 0 && p.full === p.total; }
-/** The robot's home: its own (r.home as a tile) or the job's. */
+/**
+ * P108 s7: her land's spa, once FINISHED (every part of building job.rest.of full), is where its robots rest when a job
+ * is done — a tile each in front of it (job.rest.tiles, by the robot's place in the world: the first robot the first tile).
+ * Read live, so the walk after the last plank already goes there. Null while the spa is going up, or with no job.rest.
+ */
+function restOf(w, r) {
+  var j = jobOf(w);
+  if (!j || !j.rest || !Array.isArray(j.rest.tiles) || !j.rest.tiles.length) return null;
+  var parts = 0;
+  for (var i = 0; i < w.things.length; i++) {
+    var t = w.things[i];
+    if (!t || t.kind !== 'site' || String(t.of) !== String(j.rest.of)) continue;
+    if (!(Number(t.have) >= Number(t.need))) return null;
+    parts++;
+  }
+  if (!parts) return null;
+  var k = 0;
+  for (var q = 0; q < w.robots.length; q++) if (r && w.robots[q] && String(w.robots[q].id) === String(r.id)) { k = q; break; }
+  return j.rest.tiles[Math.min(k, j.rest.tiles.length - 1)];
+}
+/** The robot's home: the finished spa's rest (P108 s7), else its own (r.home as a tile), else the job's. */
 function homeOf(w, r) {
+  var rest = restOf(w, r);
+  if (rest) return rest;
   if (r && r.home && typeof r.home === 'object' && isFinite(Number(r.home.x)) && isFinite(Number(r.home.y))) return r.home;
   var j = jobOf(w);
   return j && j.home && typeof j.home === 'object' && isFinite(Number(j.home.x)) && isFinite(Number(j.home.y)) ? j.home : null;

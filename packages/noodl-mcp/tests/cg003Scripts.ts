@@ -35,7 +35,7 @@ import { OLIVE_RUNGS, WORDS, WORD_KEYS } from './cg002Content';
 import { OLIVE_HELPERS, OLIVE_LESSON_IDS, OLIVE_OBJECTS, OLIVE_SLIM, OLIVE_TABLE, OLIVE_WORDS, OLIVE_WORD_KEYS, PALETTE_RUNG_IDS, rungWordKey } from './cg005Olive';
 import { BLOCK_META, CAN_MAX, ENGINE, FOLD_HELPERS, MANY_BLOCKS, ROBOT_NAME_MAX, SAVE_HELPERS } from './cg002Scripts';
 // P108 IW-001 F2: the run cap the page's Runner applies to a played run (the engine's own constant, imported).
-import { MAX_TICKS } from './cg002Scripts';
+import { RUN_CAP } from './cg002Scripts';
 import { BLOCK_CARDS, CardBlock, EYES, HATS, IG006_WORDS, IG006_WORD_KEYS, ISLANDERS, ISLAND_PINS, PAD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS, REQUEST_SUBS, SKILL_BLOCKS } from './cg003Content';
 // P108 IW-003 (lane M): the pad's go keys; the job card.
 import { JOB_CARDS, PAD_GO } from './cg003Content';
@@ -1371,9 +1371,10 @@ Outputs.said = text;
  * `Logic/Run cap` (the Runner's, F2): is this run at the cap? The engine's `MAX_TICKS` bounded only `runToEnd`
  * (Predict, the gate); a played run on the page had no bound, so `repeat 9 { until … }` ground on with no way out.
  * Go-driven, after each tick that is neither done nor parked: Over is true once the run's tick reaches the cap.
+ * P108 s7 (R5): the cap is `RUN_CAP` (400), no longer MAX_TICKS (2000).
  */
 export const RUN_CAP_SCRIPT = `
-var MAX = ${MAX_TICKS};
+var MAX = ${RUN_CAP};
 var tick = Math.floor(Number(Inputs.tick)) || 0;
 Outputs.over = tick >= MAX;
 `;
