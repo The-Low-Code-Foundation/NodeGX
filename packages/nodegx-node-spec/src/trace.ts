@@ -5,7 +5,8 @@
  * Between two settles the events are grouped canonically: `value` events SORTED BY PORT NAME
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
  * events in the order they were REPORTED, then `request` events in the order they were issued, then
- * `open` events in the order they were made (NSP-015).
+ * the LOCATION events — `open`, `history` and `dispatch`, one group — in the order they were made
+ * (NSP-015).
  * "Changed" is canonical inequality with the last value RECORDED for
  * the port (nothing before the first settle, so the first settle records every defined output),
  * "sorted by port name" is code-unit order, and what a frame records for an output is the last
@@ -20,9 +21,11 @@
  * Two events for the WORLD (NSP-007): `advance` is a stimulus — the clock moved by `ms`; `request`
  * is an observation — the node handed the world a request (`method`, `url`, `headers` with
  * lower-cased names, `body` as it travelled: a string, `{ "$form": [[name, value], …] }`, or
- * absent). NSP-015 adds a third: `open` is an observation — the node asked the browser to open a
- * URL (`window.open(url, target, features)`), each of the three canonical AS HANDED (world.ts
- * LOCATION). The world's answers are not events: they are scripted (world.ts), so what they were is
+ * absent). NSP-015 adds three, the LOCATION's, each an observation of a call AS HANDED (world.ts
+ * LOCATION): `open` — the node asked the browser to open a URL (`window.open(url, target,
+ * features)`), each canonical, a `target` or `features` not handed absent; `history` — it pushed a
+ * history entry (`history.pushState(state, title, url)`: `op: 'push'`, `url` canonical); `dispatch`
+ * — it dispatched an event on the window (`window.dispatchEvent(event)`: `event` is its type). The world's answers are not events: they are scripted (world.ts), so what they were is
  * known from the scenario, and what the node did with them is on the wire.
  * That grouping is a rule of the FORMAT, so that a runtime which
  * pulses a signal synchronously inside a setter and delivers the value at frame end (the
@@ -58,7 +61,11 @@ export type TraceEvent =
   /** observation (NSP-007): the node handed the world a request. `method` is canonical (a node may hand a non-string). */
   | (Base & { t: 'request'; method: unknown; url: string; headers: Record<string, string>; body?: unknown })
   /** observation (NSP-015): the node asked the browser to open a URL — `window.open(url, target, features)`, each canonical, as handed. */
-  | (Base & { t: 'open'; url: unknown; target: unknown; features: unknown });
+  | (Base & { t: 'open'; url: unknown; target?: unknown; features?: unknown })
+  /** observation (NSP-015 s17): the node pushed a history entry — `history.pushState(state, title, url)`, `url` canonical, as handed. */
+  | (Base & { t: 'history'; op: 'push'; url: unknown })
+  /** observation (NSP-015 s17): the node dispatched an event on the window — `window.dispatchEvent(event)`, named by its type. */
+  | (Base & { t: 'dispatch'; event: string });
 
 /** Trace-format version — must match the `/v1.json` in the schema's `$id` (tests/schema.test.ts). */
 export const TRACE_FORMAT_VERSION = 1;

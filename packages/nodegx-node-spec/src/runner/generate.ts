@@ -72,7 +72,9 @@ export const DEFAULT_WORLD_POOL = Object.freeze({
     { width: 1024, height: 768, resizes: [{ at: 1, width: 1024, height: 0 }, { at: 1000, width: 0, height: 0 }, { at: 30000, width: 1440, height: 900 }] }
   ] as ReadonlyArray<ViewportScript | null>),
   // NSP-015 s16: a press a person made, one the graph made, and a browser that cannot say
-  activations: Object.freeze([true, false, null] as ReadonlyArray<boolean | null>)
+  activations: Object.freeze([true, false, null] as ReadonlyArray<boolean | null>),
+  // NSP-015 s17: a project that set nothing
+  projectSettings: Object.freeze([{}] as ReadonlyArray<Record<string, unknown>>)
 });
 
 export interface GenerateOptions {
@@ -206,6 +208,11 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
     }
     const activation = rng.pick(pool.activations ?? DEFAULT_WORLD_POOL.activations);
     if (activation !== null) world.activation = activation;
+  }
+  // NSP-015 s17 — PROJECT: one of the pool's settings (the default pool is the project that set nothing)
+  if (needs.includes('project')) {
+    const settings = rng.pick(pool.projectSettings ?? DEFAULT_WORLD_POOL.projectSettings);
+    if (Object.keys(settings).length > 0) world.projectSettings = { ...settings };
   }
   return { seed, params, steps, world };
 }

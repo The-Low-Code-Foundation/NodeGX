@@ -78,22 +78,40 @@
  *           the `advance` that reaches it, as a DOM event's listeners run at its dispatch. A target
  *           with a real window (a browser, jsdom) refuses a `viewport` need it cannot size; on Node
  *           the world defines the `window` for the play (`installWorld`) and removes it after.
- *   LOCATION. (NSP-015 s16) A play with a window has a LOCATION, the seam the navigation family
- *           writes through. The family reaches the browser's location through exactly two calls,
- *           and the world RECORDS each as handed and opens, loads and parses nothing — as the
- *           network parses nothing on the way in:
- *             `window.open(url, target, features)` — a trace `open` event `{ url, target,
- *               features }`, each canonical, in the frame it is made. It returns `null`: what a
- *               browser returns for a `noopener` open, and the world has no second window.
- *             `history.pushState(state, title, url)` — arrives with Navigate (NSP-015): a trace
- *               `history` event `{ op: 'push', url }`, and the location's path, search and hash
- *               become the URL resolved against the current one. A push fires neither `popstate`
- *               nor `hashchange` — a hash change is not a navigation; a node that wants its router
- *               to hear it dispatches the `popstate` itself.
+ *   LOCATION. (NSP-015 s16, s17) A play with a window has a LOCATION, the seam the navigation
+ *           family writes through. The family reaches the browser through exactly three calls, and
+ *           the world RECORDS each as handed and loads, renders and parses nothing on the way in —
+ *           as the network parses nothing — each a trace event in the frame it is made, the three
+ *           kinds in ONE group in the order made (trace.ts):
+ *             `window.open(url, target, features)` — an `open` event `{ url, target, features }`,
+ *               each canonical, a `target` or `features` not handed absent. It returns `null` when
+ *               the features name `noopener` or `noreferrer` (a browser hands no handle then), or
+ *               when the popup blocker refuses it: the activation is `false` and the target is not
+ *               the page itself (`_self`, `_parent`, `_top`). Otherwise it returns a stand-in for the
+ *               new window, `{ closed: false }` — the world has no second window to load.
+ *             `history.pushState(state, title, url)` — a `history` event `{ op: 'push', url }`,
+ *               `url` canonical as handed. The location's href becomes `url` resolved against the
+ *               current href (`new URL(String(url), href)`). A url that does not resolve, or that
+ *               resolves to another ORIGIN, is refused as a browser refuses it: the call is
+ *               recorded, the href does not move, and the call THROWS a `SecurityError`
+ *               (`DOMException`). A push fires neither `popstate` nor `hashchange` — a hash change
+ *               is not a navigation; a node that wants its router to hear one dispatches it.
+ *             `window.dispatchEvent(event)` (the global `dispatchEvent` in a page) — a `dispatch`
+ *               event `{ event: <its type> }`; the play's listeners for that type
+ *               (`addEventListener('popstate' | 'hashchange', fn)`) run at once, in the order they
+ *               subscribed, as a DOM dispatch runs them. `PopStateEvent` is the play's too.
+ *           The href STARTS at the script's `location` (absent: `https://app.example/`); a page
+ *           reads it as `location.href` / `pathname` / `search` / `hash`, live.
  *           USER ACTIVATION — whether the press came from a person — is a fact of the play, the
  *           script's `activation`: `true` / `false` is `navigator.userActivation.isActive` for
  *           the whole play; absent, the browser has no `userActivation` (Safari before 16.4,
- *           Firefox before 120). Without a window there is no location and no activation.
+ *           Firefox before 120) and its popup blocker lets the open through. Without a window
+ *           there is no location and no activation.
+ *   PROJECT. (NSP-015 s17) The project's settings, as a node reads them
+ *           (`NoodlRuntime.instance.getProjectSettings()`) — the script's `projectSettings`, an
+ *           object of setting name → value; absent, `{}`: a project that set nothing, where every
+ *           reader takes its own default (Navigate To Path: `navigationPathType` unset is `hash`).
+ *           Fixed for the play.
  *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
@@ -115,7 +133,9 @@
 
 import * as nodeCrypto from 'crypto';
 
+import { canonicalise } from './canonical';
 import { Registry, type RegistryScript } from './registry';
+import type { TraceEvent } from './trace';
 import { mulberry32, type Rng } from './runner/random';
 
 // ------------------------------------------------------------------------------------------------
@@ -134,6 +154,10 @@ export interface WorldScript {
   viewport?: ViewportScript;
   /** NSP-015 s16: `navigator.userActivation.isActive` for the play (LOCATION above). Absent: no `userActivation`. Read only with a window. */
   activation?: boolean;
+  /** NSP-015 s17: the href the play's location starts at (LOCATION above). Absent: `https://app.example/`. Read only with a window. */
+  location?: string;
+  /** NSP-015 s17: the project's settings (PROJECT above). Absent: `{}`. */
+  projectSettings?: Record<string, unknown>;
 }
 
 /** VIEWPORT above: the size at the start, and the resizes the clock will deliver. */
@@ -438,25 +462,114 @@ export interface OpenRecord {
   features: unknown;
 }
 
-/** The location of a play with a window (LOCATION above): what was opened, and the user activation. */
+/** One call the location recorded, in the order made (LOCATION above): an open, a push, a dispatch. */
+export type LocationCall =
+  | ({ call: 'open' } & OpenRecord)
+  | { call: 'push'; url: unknown }
+  | { call: 'dispatch'; event: string };
+
+/** Where a play's location starts when its script names none (LOCATION above). */
+export const DEFAULT_HREF = 'https://app.example/';
+
+/** The targets a popup blocker never refuses: the page itself (LOCATION above). */
+const SAME_PAGE_TARGETS = ['_self', '_parent', '_top'];
+
+/**
+ * What `window.open` hands back (LOCATION above): `null` with `noopener` / `noreferrer` in the
+ * features, or when the popup blocker refuses — activation `false` and a target that is not the
+ * page itself; a window otherwise. A spec reads it through `WorldView.opens`.
+ */
+export function openReturnsWindow(target: unknown, features: unknown, activation: boolean | undefined): boolean {
+  const tokens = typeof features === 'string' ? features.toLowerCase().split(/[\s,]+/) : [];
+  if (tokens.some((t) => t === 'noopener' || t.startsWith('noopener=') || t === 'noreferrer' || t.startsWith('noreferrer='))) return false;
+  const samePage = typeof target === 'string' && SAME_PAGE_TARGETS.includes(target.toLowerCase());
+  return !(activation === false && !samePage);
+}
+
+/** The trace event a location call is recorded as (LOCATION above; trace.ts) — the one translation every target shares. */
+export function locationEvent(c: LocationCall): TraceEvent {
+  if (c.call === 'push') return { t: 'history', op: 'push', url: canonicalise(c.url) };
+  if (c.call === 'dispatch') return { t: 'dispatch', event: c.event };
+  const e: TraceEvent = { t: 'open', url: canonicalise(c.url) };
+  if (c.target !== undefined) e.target = canonicalise(c.target);
+  if (c.features !== undefined) e.features = canonicalise(c.features);
+  return e;
+}
+
+/**
+ * Where `history.pushState(…, url)` takes a location at `href` (LOCATION above): `url` resolved
+ * against it, or `null` when the browser refuses — a url that does not resolve, or one on another
+ * origin. A spec reads it through `WorldView.pushes`.
+ */
+export function pushTarget(url: unknown, href: string): string | null {
+  let next: URL;
+  try {
+    next = new URL(String(url), href);
+  } catch {
+    return null;
+  }
+  return next.origin === new URL(href).origin ? next.href : null;
+}
+
+/** The location of a play with a window (LOCATION above): its href, every call made, and the user activation. */
 export class WorldLocation {
   /** Every `window.open`, in order. */
   readonly opened: OpenRecord[] = [];
-  private listeners: Array<(r: OpenRecord) => void> = [];
+  /** Every call, opens included, in the order made. */
+  readonly calls: LocationCall[] = [];
+  /** The current href. */
+  href: string;
+  private listeners: Array<(c: LocationCall) => void> = [];
+  private eventListeners: Array<{ type: string; fn: (e: unknown) => void }> = [];
 
-  constructor(readonly activation: boolean | undefined) {}
+  constructor(
+    readonly activation: boolean | undefined,
+    start: string = DEFAULT_HREF
+  ) {
+    this.href = new URL(start).href;
+  }
 
-  /** Called with every open as it is made — how a target attributes it to the node that made it. */
-  onOpen(listener: (r: OpenRecord) => void): void {
+  /** Called with every call as it is made — how a target attributes it to the node that made it. */
+  onCall(listener: (c: LocationCall) => void): void {
     this.listeners.push(listener);
   }
 
-  /** `window.open`: records the call as handed; opens nothing; returns `null`. */
-  open(url: unknown, target: unknown, features: unknown): null {
+  private record(c: LocationCall): void {
+    this.calls.push(c);
+    for (const l of this.listeners) l(c);
+  }
+
+  /** `window.open`: records the call as handed; opens nothing; returns a stand-in window or `null` (`openReturnsWindow`). */
+  open(url: unknown, target: unknown, features: unknown): { closed: false } | null {
     const record: OpenRecord = { url, target, features };
     this.opened.push(record);
-    for (const l of this.listeners) l(record);
-    return null;
+    this.record({ call: 'open', ...record });
+    return openReturnsWindow(target, features, this.activation) ? { closed: false } : null;
+  }
+
+  /** `history.pushState`: records the call as handed; moves the href, or throws a `SecurityError` for a url another origin's or none (`pushTarget`). */
+  push(url: unknown): void {
+    this.record({ call: 'push', url });
+    const next = pushTarget(url, this.href);
+    if (next === null) {
+      throw new DOMException(`Failed to execute 'pushState' on 'History': A history state object with URL '${String(url)}' cannot be created in a document with origin '${new URL(this.href).origin}'`, 'SecurityError');
+    }
+    this.href = next;
+  }
+
+  /** `window.dispatchEvent`: records the event's type, then runs that type's listeners in subscription order. */
+  dispatch(event: { type: string }): true {
+    this.record({ call: 'dispatch', event: event.type });
+    for (const l of this.eventListeners.filter((x) => x.type === event.type)) l.fn(event);
+    return true;
+  }
+
+  /** `addEventListener` for a location event (`popstate`, `hashchange`); returns the unsubscribe. A listener already subscribed to that type is not added twice. */
+  listen(type: string, fn: (e: unknown) => void): () => void {
+    if (!this.eventListeners.some((x) => x.type === type && x.fn === fn)) this.eventListeners.push({ type, fn });
+    return () => {
+      this.eventListeners = this.eventListeners.filter((x) => !(x.type === type && x.fn === fn));
+    };
   }
 }
 
@@ -472,6 +585,8 @@ export class World {
   readonly viewport: Viewport | undefined;
   /** The location (LOCATION above) — exactly when there is a window. */
   readonly location: WorldLocation | undefined;
+  /** The project's settings (PROJECT above). */
+  readonly projectSettings: Readonly<Record<string, unknown>>;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -480,7 +595,8 @@ export class World {
     this.registry = new Registry(this.random, script.registry);
     this.timeZone = script.timeZone ?? 'UTC';
     this.viewport = script.viewport ? new Viewport(this.clock, script.viewport) : undefined;
-    this.location = this.viewport ? new WorldLocation(script.activation) : undefined;
+    this.location = this.viewport ? new WorldLocation(script.activation, script.location) : undefined;
+    this.projectSettings = { ...(script.projectSettings ?? {}) };
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */
@@ -624,8 +740,32 @@ export function installWorld(world: World): Installed {
     const subscribed = new Map<unknown, () => void>();
     // LOCATION: `navigator.userActivation` only when the script says what it is
     const navigator = location.activation === undefined ? {} : { userActivation: { isActive: location.activation } };
+    const parts = () => new URL(location.href);
+    const pageLocation = {
+      get href() {
+        return location.href;
+      },
+      get origin() {
+        return parts().origin;
+      },
+      get pathname() {
+        return parts().pathname;
+      },
+      get search() {
+        return parts().search;
+      },
+      get hash() {
+        return parts().hash;
+      }
+    };
+    const history = { pushState: (_state: unknown, _title: unknown, url?: unknown) => location.push(url) };
+    const dispatchEvent = (event: { type: string }) => location.dispatch(event);
+    const unsubscribe = new Map<string, Map<unknown, () => void>>();
     define('window', {
       navigator,
+      location: pageLocation,
+      history,
+      dispatchEvent,
       open: (url: unknown, target: unknown, features: unknown) => location.open(url, target, features),
       get innerWidth() {
         return viewport.width;
@@ -634,16 +774,43 @@ export function installWorld(world: World): Installed {
         return viewport.height;
       },
       addEventListener(type: string, fn: (e: unknown) => void) {
-        if (type !== 'resize' || subscribed.has(fn)) return;
-        subscribed.set(fn, viewport.listen(() => fn({ type: 'resize' })));
+        if (type === 'resize') {
+          if (subscribed.has(fn)) return;
+          subscribed.set(fn, viewport.listen(() => fn({ type: 'resize' })));
+          return;
+        }
+        if (type !== 'popstate' && type !== 'hashchange') return;
+        const byFn = unsubscribe.get(type) ?? new Map<unknown, () => void>();
+        unsubscribe.set(type, byFn);
+        if (!byFn.has(fn)) byFn.set(fn, location.listen(type, fn));
       },
       removeEventListener(type: string, fn: unknown) {
-        if (type !== 'resize') return;
-        subscribed.get(fn)?.();
-        subscribed.delete(fn);
+        if (type === 'resize') {
+          subscribed.get(fn)?.();
+          subscribed.delete(fn);
+          return;
+        }
+        unsubscribe.get(type)?.get(fn)?.();
+        unsubscribe.get(type)?.delete(fn);
       }
     });
+    // a page's globals ARE its window's: `location.hash`, `history.pushState`, a bare `dispatchEvent(…)`
+    define('location', pageLocation);
+    define('history', history);
+    define('dispatchEvent', dispatchEvent);
+    define(
+      'PopStateEvent',
+      class PopStateEvent {
+        readonly type: string;
+        readonly state: unknown;
+        constructor(type: string, init?: { state?: unknown }) {
+          this.type = type;
+          this.state = init?.state ?? null;
+        }
+      }
+    );
   }
+  // PROJECT: the settings a node reads through the runtime are the target's to install (the runtime target's `install`)
   Math.random = () => world.random.next();
   Date.now = () => world.clock.now();
   if (perf && perfNow) perf.now = () => world.clock.now();

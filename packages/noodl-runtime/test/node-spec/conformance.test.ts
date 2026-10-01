@@ -154,7 +154,27 @@ const unknownUnitThrows = (d: Divergence) => {
  */
 const C6_ANY_PORT: KnownRow = { row: 'NSP-011 §6 C6 (any port — node.ts) — a later value merged into a unit object the port once held (R7)', matches: unitMergeOnAny(() => true) };
 
+/**
+ * NSP-015 §6.2 C24 / C25 — Navigate To Path's frame-end callback THROWS (the scheduler logs it,
+ * nodecontext.ts :466-472) and the frame's presses are never answered. Narrow: the first difference
+ * is the spec's own answer for that case (Error's message or the outcome's code), and for C24 the
+ * last Path written before it is defined and not text.
+ */
+const navigateToPathAnswer = (message: string, code: string) => (e: TraceEvent | undefined) =>
+  !!e && ((e.t === 'value' && e.port === 'error' && e.value === message) || (e.t === 'outcome' && e.port === 'navigate' && e.value === 'failure' && e.error === code));
+const nonTextPath = (d: Divergence) => {
+  if (!navigateToPathAnswer('No path to navigate to', 'navigate-to-path/no-path')(d.difference.reference)) return false;
+  const sets = d.reference.slice(0, d.difference.index).filter((e) => e.t === 'set' && e.port === 'path');
+  const last = sets[sets.length - 1] as { value?: unknown } | undefined;
+  return !!last && last.value !== undefined && typeof last.value !== 'string';
+};
+const refusedPush = (d: Divergence) => navigateToPathAnswer('The browser refused to navigate to this path', 'navigate-to-path/refused')(d.difference.reference);
+
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
+  PageStackNavigateToPath: [
+    { row: 'NSP-015 §6.2 C24 — a Path that is not text throws at `.match` in the frame-end callback; the presses are never answered', matches: nonTextPath },
+    { row: 'NSP-015 §6.2 C25 — a push the browser refuses (another origin) throws in the frame-end callback; no popstate, the presses are never answered', matches: refusedPush }
+  ],
   'net.noodl.DateAdd': [{ row: 'NSP-013 §6 C16 — an unknown Unit throws in Date Add\'s setter', matches: unknownUnitThrows }],
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],

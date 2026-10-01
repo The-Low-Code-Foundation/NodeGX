@@ -8,14 +8,18 @@
  *          runtime-side reading is packages/noodl-runtime/test/node-spec/conformance.test.ts; the
  *          component nodes are graph-graded, tests/graph.test.ts);
  *   LOCATION the mechanism: with no window there is no location and no activation; with one,
- *          `window.open` is recorded and returns null, `navigator.userActivation` exists only when
- *          the script says what it is, and the globals are restored after the play.
+ *          `window.open` is recorded and returns a window or null by the blocker's rule,
+ *          `navigator.userActivation` exists only when the script says what it is, and the globals
+ *          are restored after the play. s17: `history.pushState` is recorded and moves the href
+ *          (another origin is refused with a SecurityError, the href stays), a dispatched event
+ *          is recorded and heard by its listeners, a page's `location` reads the href live, and
+ *          the project's settings are the script's.
  */
 
 import type { AnyNodeSpec } from '../src';
 import { DEFAULT_WORLD_POOL, EQUIVALENT_MUTANTS, generateSequence, installWorld, interpreterAdapter, runConformance, specs, World } from '../src';
 
-const BATCH = ['net.noodl.externallink'];
+const BATCH = ['net.noodl.externallink', 'PageStackNavigateToPath'];
 
 describe('NSP-015 — every batch spec with a reducer conforms on the interpreter: scenarios, 200 sequences, every mutant killed or declared', () => {
   for (const type of BATCH) {
@@ -50,10 +54,10 @@ describe('LOCATION — the world records an open and says whether the press was 
     }
   });
 
-  test('a window: window.open is recorded as handed and returns null; the activation is the script\'s; restored after', () => {
+  test('a window: window.open is recorded as handed; noopener returns null; the activation is the script\'s; restored after', () => {
     const world = new World({ viewport: { width: 800, height: 600 }, activation: false });
     const seen: unknown[] = [];
-    world.location!.onOpen((r) => seen.push(r));
+    world.location!.onCall((c) => seen.push(c));
     const installed = installWorld(world);
     try {
       const w = g.window as { open(...a: unknown[]): unknown; navigator: { userActivation?: { isActive: boolean } } };
@@ -63,7 +67,7 @@ describe('LOCATION — the world records an open and says whether the press was 
       installed.restore();
     }
     expect(world.location!.opened).toEqual([{ url: 5, target: '_blank', features: 'noopener' }]);
-    expect(seen).toEqual(world.location!.opened);
+    expect(seen).toEqual([{ call: 'open', url: 5, target: '_blank', features: 'noopener' }]);
     expect(g.window).toBeUndefined();
   });
 
@@ -81,5 +85,80 @@ describe('LOCATION — the world records an open and says whether the press was 
     const worlds = Array.from({ length: 60 }, (_, i) => generateSequence(spec, 1, i).world ?? {});
     expect(new Set(worlds.map((w) => (w.viewport ? 'window' : 'none')))).toEqual(new Set(['window', 'none']));
     expect(new Set(worlds.map((w) => String(w.activation)))).toEqual(new Set(DEFAULT_WORLD_POOL.activations.map((a) => String(a ?? undefined))));
+  });
+
+  test('window.open returns a window unless noopener / noreferrer, or the blocker refuses a new window without activation', () => {
+    const at = (activation?: boolean) => {
+      const world = new World(activation === undefined ? { viewport: { width: 800, height: 600 } } : { viewport: { width: 800, height: 600 }, activation });
+      const installed = installWorld(world);
+      try {
+        const w = g.window as { open(...a: unknown[]): unknown };
+        return [w.open('/a', '_blank'), w.open('/a', '_blank', 'noreferrer'), w.open('/a', '_self'), w.open('/a', '_top'), w.open('/a')];
+      } finally {
+        installed.restore();
+      }
+    };
+    expect(at(true)).toEqual([{ closed: false }, null, { closed: false }, { closed: false }, { closed: false }]);
+    expect(at(false)).toEqual([null, null, { closed: false }, { closed: false }, null]);
+    expect(at(undefined)).toEqual([{ closed: false }, null, { closed: false }, { closed: false }, { closed: false }]);
+  });
+
+  test('history.pushState is recorded and moves the href; another origin is refused with a SecurityError and the href stays; a page reads location live', () => {
+    const world = new World({ viewport: { width: 800, height: 600 }, location: 'https://shop.example/app/' });
+    const installed = installWorld(world);
+    try {
+      const w = g.window as { history: { pushState(...a: unknown[]): void }; location: { href: string; pathname: string; search: string; hash: string } };
+      expect(w.location.href).toBe('https://shop.example/app/');
+      w.history.pushState({}, '', '#/a');
+      expect([w.location.pathname, w.location.hash]).toEqual(['/app/', '#/a']);
+      w.history.pushState({}, '', 'b?x=1');
+      expect([w.location.href, w.location.search, w.location.hash]).toEqual(['https://shop.example/app/b?x=1', '?x=1', '']);
+      expect(() => w.history.pushState({}, '', 'https://other.example/')).toThrow(expect.objectContaining({ name: 'SecurityError' }));
+      expect(() => w.history.pushState({}, '', '//other.example/x')).toThrow(expect.objectContaining({ name: 'SecurityError' }));
+      expect((g.location as { href: string }).href).toBe('https://shop.example/app/b?x=1');
+    } finally {
+      installed.restore();
+    }
+    expect(world.location!.calls).toEqual([
+      { call: 'push', url: '#/a' },
+      { call: 'push', url: 'b?x=1' },
+      { call: 'push', url: 'https://other.example/' },
+      { call: 'push', url: '//other.example/x' }
+    ]);
+    expect(g.location).toBeUndefined();
+    expect(g.history).toBeUndefined();
+  });
+
+  test('a dispatched event is recorded and heard by its listeners in subscription order; a push alone fires nothing', () => {
+    const world = new World({ viewport: { width: 800, height: 600 } });
+    const heard: string[] = [];
+    const installed = installWorld(world);
+    try {
+      const w = g.window as { addEventListener(t: string, f: (e: { type: string }) => void): void; removeEventListener(t: string, f: unknown): void; history: { pushState(...a: unknown[]): void } };
+      const one = (e: { type: string }) => heard.push('one ' + e.type);
+      w.addEventListener('popstate', one);
+      w.addEventListener('popstate', (e) => heard.push('two ' + e.type));
+      w.addEventListener('hashchange', () => heard.push('hash'));
+      w.history.pushState({}, '', '#/x');
+      expect(heard).toEqual([]);
+      const PopState = g.PopStateEvent as new (type: string, init?: object) => { type: string };
+      (g.dispatchEvent as (e: unknown) => boolean)(new PopState('popstate', {}));
+      w.removeEventListener('popstate', one);
+      (g.dispatchEvent as (e: unknown) => boolean)(new PopState('popstate', {}));
+    } finally {
+      installed.restore();
+    }
+    expect(heard).toEqual(['one popstate', 'two popstate', 'two popstate']);
+    expect(world.location!.calls.map((c) => c.call)).toEqual(['push', 'dispatch', 'dispatch']);
+    expect(g.dispatchEvent).toBeUndefined();
+    expect(g.PopStateEvent).toBeUndefined();
+  });
+
+  test('the project\'s settings are the script\'s, and {} when it names none; a `project` spec draws them from its pool', () => {
+    expect(new World().projectSettings).toEqual({});
+    expect(new World({ projectSettings: { navigationPathType: 'path' } }).projectSettings).toEqual({ navigationPathType: 'path' });
+    const spec = specs['PageStackNavigateToPath'] as AnyNodeSpec;
+    const drawn = Array.from({ length: 60 }, (_, i) => JSON.stringify(generateSequence(spec, 1, i).world?.projectSettings ?? {}));
+    expect(new Set(drawn)).toEqual(new Set(['{}', '{"navigationPathType":"hash"}', '{"navigationPathType":"path"}']));
   });
 });

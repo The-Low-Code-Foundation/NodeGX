@@ -101,7 +101,7 @@
           "additionalProperties": false
         },
         {
-          "description": "observation (NSP-015): the node asked the browser to open a URL — `window.open(url, target, features)` — each of the three canonical, as handed. The world opens nothing (src/world.ts LOCATION).",
+          "description": "observation (NSP-015): the node asked the browser to open a URL — `window.open(url, target, features)` — each canonical, as handed; a target or features not handed is absent (s17). The world opens nothing (src/world.ts LOCATION).",
           "properties": {
             "t": { "const": "open" },
             "url": { "$ref": "#/definitions/canonical" },
@@ -109,7 +109,28 @@
             "features": { "$ref": "#/definitions/canonical" },
             "subject": { "$ref": "#/definitions/subject" }
           },
-          "required": ["t", "url", "target", "features"],
+          "required": ["t", "url"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-015 s17): the node pushed a history entry — `history.pushState(state, title, url)` — `url` canonical, as handed (src/world.ts LOCATION).",
+          "properties": {
+            "t": { "const": "history" },
+            "op": { "const": "push" },
+            "url": { "$ref": "#/definitions/canonical" },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "op", "url"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-015 s17): the node dispatched an event on the window — `window.dispatchEvent(event)` — named by its type (src/world.ts LOCATION).",
+          "properties": {
+            "t": { "const": "dispatch" },
+            "event": { "type": "string", "minLength": 1 },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "event"],
           "additionalProperties": false
         }
       ]

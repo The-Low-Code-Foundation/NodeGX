@@ -26,7 +26,7 @@ const traceSchema = require('../schema/trace.schema.json') as Record<string, unk
 /** The JSON schema, as data — for a target that wants to embed it. */
 export const TRACE_SCHEMA = traceSchema;
 
-export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open'] as const;
+export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch'] as const;
 export const OUTCOME_VALUES = ['done', 'unchanged', 'failure'] as const;
 
 /** Fields each kind requires and allows, beyond `t` and the always-optional `subject`. */
@@ -41,7 +41,10 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   advance: { required: ['ms'], optional: [] },
   request: { required: ['method', 'url', 'headers'], optional: ['body'] },
   // NSP-015 — the location
-  open: { required: ['url', 'target', 'features'], optional: [] }
+  // s17: a target or features not handed is absent
+  open: { required: ['url'], optional: ['target', 'features'] },
+  history: { required: ['op', 'url'], optional: [] },
+  dispatch: { required: ['event'], optional: [] }
 });
 
 export type Validation = { ok: true; events: TraceEvent[] } | { ok: false; path: string; message: string };
@@ -86,9 +89,16 @@ export function validateTrace(input: unknown): Validation {
       }
     } else if (t === 'open') {
       for (const f of ['url', 'target', 'features'] as const) {
+        if (!(f in e)) continue;
         const nc = findNonCanonical(e[f], `${at}.${f}`);
         if (nc) return bad(nc, `${f} is not in canonical form`);
       }
+    } else if (t === 'history') {
+      if (e.op !== 'push') return bad(`${at}.op`, 'op is push');
+      const nc = findNonCanonical(e.url, `${at}.url`);
+      if (nc) return bad(nc, 'url is not in canonical form');
+    } else if (t === 'dispatch') {
+      if (typeof e.event !== 'string' || e.event.length === 0) return bad(`${at}.event`, 'event is the dispatched event\'s type');
     } else if ('value' in e) {
       if (t === 'value' && e.value === undefined) return bad(`${at}.value`, 'a value event never carries undefined (C3)');
       if (e.value !== undefined) {

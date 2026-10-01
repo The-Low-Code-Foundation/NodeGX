@@ -146,6 +146,21 @@ export interface WorldView {
    * when there is no window at all.
    */
   userActivation(): boolean | undefined;
+  /**
+   * NSP-015 s17 — what `window.open(…, target, features)` would hand back in this play (world.ts
+   * LOCATION): `true` a window, `false` `null` (`noopener` / `noreferrer` in the features, or the
+   * popup blocker refused). A node that checks the handle (`if (!opened)`) reads this before it
+   * names the `open` in its patch; the open is recorded either way. `false` with no window.
+   */
+  opens(target: unknown, features: unknown): boolean;
+  /**
+   * NSP-015 s17 — whether `history.pushState(…, url)` would be accepted in this play (world.ts
+   * LOCATION): `false` for a url on another origin, which the browser refuses by throwing. `false`
+   * with no window.
+   */
+  pushes(url: unknown): boolean;
+  /** NSP-015 s17 — the project's settings (world.ts PROJECT): what `NoodlRuntime.instance.getProjectSettings()` reads. */
+  projectSettings(): Readonly<Record<string, unknown>>;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -325,15 +340,24 @@ export interface Patch<S, O> {
    *   `abort`   aborts requests by id: the answer, if still due, is dropped and `response` is
    *             called with `{ aborted }` (an `AbortController`).
    *   `open`    NSP-015 s16 — `window.open(url, target, features)`, recorded as an `open` event in
-   *             the frame it is made, each of the three as handed (world.ts LOCATION). Nothing comes
-   *             back: the call returns `null`. Only with a window — read `viewport()` first, as a
-   *             node checks `typeof window`.
+   *             the frame it is made, each as handed (world.ts LOCATION); a `target` or `features`
+   *             left `undefined` is one the node did not hand. What the call returns is
+   *             `WorldView.opens` (s17). Only with a window — read `viewport()` first, as a node
+   *             checks `typeof window`.
+   *   `push`    NSP-015 s17 — `history.pushState(state, title, url)`: a `history` event; the
+   *             location's href moves (world.ts LOCATION). A url the browser refuses (another
+   *             origin — `WorldView.pushes` says) is still recorded, as the call was made, and the
+   *             href stays.
+   *   `dispatch` NSP-015 s17 — `window.dispatchEvent(new <Event>(type))`: a `dispatch` event, after
+   *             the push when a patch names both. Only with a window, as `open`.
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
   request?: SpecRequest;
   abort?: readonly string[];
-  open?: { url: unknown; target: unknown; features: unknown };
+  open?: { url: unknown; target?: unknown; features?: unknown };
+  push?: { url: unknown };
+  dispatch?: string;
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -508,6 +532,8 @@ export interface WorldPool {
   viewports?: ReadonlyArray<import('./world').ViewportScript | null>;
   /** NSP-015 s16: the user activations a `location` spec's sequences play with (one is drawn per sequence; `null` is a browser with no `userActivation`). */
   activations?: ReadonlyArray<boolean | null>;
+  /** NSP-015 s17: the project settings a `project` spec's sequences play with (one is drawn per sequence; the default is `{}` alone). */
+  projectSettings?: ReadonlyArray<Record<string, unknown>>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -566,9 +592,10 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * `viewport` — the node reads the browser window's size or listens for its resize, so the play has
  * a scripted viewport, or none (a server render: no `window`) (world.ts VIEWPORT). NSP-015 s16 adds
  * `location` — the node opens a URL or reads whether the press came from a person (world.ts
- * LOCATION); the play has a window or none, as for `viewport`, and an activation or none.
+ * LOCATION); the play has a window or none, as for `viewport`, and an activation or none. s17
+ * adds `project` — the node reads a project setting (world.ts PROJECT).
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'backend';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'backend';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;

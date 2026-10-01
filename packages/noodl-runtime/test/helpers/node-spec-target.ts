@@ -110,9 +110,9 @@ import { AsyncLocalStorage } from 'async_hooks';
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, OpenRecord, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
+import type { ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
-import { canonicalise, installWorld, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
+import { canonicalise, installWorld, locationEvent, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -161,6 +161,9 @@ function resetRegistry(world: World): void {
  */
 export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink'] as const;
 
+/** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (Navigate To Path). */
+export const VIEWER_NAVIGATION_NODES = ['navigate-to-path'] as const;
+
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
  * registers (its :64-65 note: "HTTP node — temporarily here for debugging (normally in
@@ -180,6 +183,8 @@ export function withViewerNodes(target: RuntimeTarget): RuntimeTarget {
   };
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   for (const file of VIEWER_NODES) register(require('../../../noodl-viewer-react/src/nodes/std-library/' + file));
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  for (const file of VIEWER_NAVIGATION_NODES) register(require('../../../noodl-viewer-react/src/nodes/navigation/' + file));
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   for (const file of VIEWER_REGISTERED_RUNTIME_NODES) register(require('../../src/nodes/std-library/' + file));
   return target;
@@ -213,8 +218,8 @@ interface Frame {
   signals: string[];
   outcomes: TraceEvent[];
   requests: TraceEvent[];
-  /** NSP-015 s16 — the frame's `window.open` calls (world.ts LOCATION), after its requests. */
-  opens: TraceEvent[];
+  /** NSP-015 — the frame's LOCATION calls (`window.open`, `history.pushState`, `window.dispatchEvent`; world.ts), after its requests, in the order made. */
+  location: TraceEvent[];
 }
 
 interface State {
@@ -285,7 +290,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (s) s.h.errors.push(event);
   });
 
-  const newFrame = (): Frame => ({ values: new Map(), signals: [], outcomes: [], requests: [], opens: [] });
+  const newFrame = (): Frame => ({ values: new Map(), signals: [], outcomes: [], requests: [], location: [] });
 
   /**
    * One frame as `NoodlRuntime._doUpdate` runs it (noodl-runtime.ts :743-753): the frame time
@@ -431,7 +436,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     for (const name of s.frame.signals) s.trace.push({ t: 'signal', port: name });
     for (const o of s.frame.outcomes) s.trace.push(o);
     for (const r of s.frame.requests) s.trace.push(r);
-    for (const o of s.frame.opens) s.trace.push(o);
+    for (const l of s.frame.location) s.trace.push(l);
     s.frame = newFrame();
     s.settles++;
   }
@@ -445,11 +450,11 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     s.frame.requests.push(event);
   }
 
-  /** A `window.open` the world saw (LOCATION), as the trace records it, attributed as a request is. */
-  function recordOpen(record: OpenRecord): void {
+  /** A LOCATION call the world saw (an open, a push, a dispatch), as the trace records it, attributed as a request is. */
+  function recordLocation(call: LocationCall): void {
     const s = updating.getStore() ?? (states.size === 1 ? [...states.values()][0] : undefined);
-    if (!s) throw new Error('runtime: a window.open was made outside any node\'s update, and more than one node is mounted — it cannot be attributed');
-    s.frame.opens.push({ t: 'open', url: canonicalise(record.url), target: canonicalise(record.target), features: canonicalise(record.features) });
+    if (!s) throw new Error(`runtime: a location call (${call.call}) was made outside any node's update, and more than one node is mounted — it cannot be attributed`);
+    s.frame.location.push(locationEvent(call));
   }
 
   /** A line a node wrote through its scope's log sink lands on that node's handle; the entry names the node (runcontext.ts). */
@@ -696,7 +701,12 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       if (world) throw new Error('runtime: a world is already installed — one play at a time');
       world = w;
       w.network.onRequest(recordRequest);
-      w.location?.onOpen(recordOpen);
+      w.location?.onCall(recordLocation);
+      // PROJECT (world.ts, NSP-015 s17) — the settings a node reads through `NoodlRuntime.instance`:
+      // the app has one runtime, so the static is this target's for the play, and its project's
+      // settings are the script's (graphmodel.ts `setSettings`, what `importEditorData` calls)
+      (NoodlRuntime as unknown as { instance: unknown }).instance = rt;
+      (rt as unknown as { graphModel: { setSettings(s: Record<string, unknown>): void } }).graphModel.setSettings({ ...w.projectSettings });
       const installed = installWorld(w);
       // the three process-wide managers behind the store, history and action nodes (NSP-012 T4): one play, one of each
       globalStoreManager.reset({ clearState: true });

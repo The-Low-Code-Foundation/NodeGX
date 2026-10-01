@@ -88,7 +88,7 @@ import { isRegistryEntry } from './registry';
 import type { AnyNodeSpec, ChangeEvent, Outcome, InputDecl, ReducerOutcome, SignalOutputDecl, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
-import { installTimeZone, World, type Delivery } from './world';
+import { installTimeZone, locationEvent, openReturnsWindow, pushTarget, World, type Delivery, type LocationCall } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
 type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'resize' };
@@ -117,7 +117,7 @@ export interface Instance {
   /** Derived outputs for this instance's params (NSP-012). */
   derivedOutputs: Readonly<Record<string, ErasedValueOutput | SignalOutputDecl>>;
   readonly trace: TraceEvent[];
-  pending: { signals: string[]; outcomes: OutcomeSlot[]; requests: TraceEvent[]; opens: TraceEvent[] };
+  pending: { signals: string[]; outcomes: OutcomeSlot[]; requests: TraceEvent[]; location: TraceEvent[] };
   /** The last DEFINED canonical value each output produced this frame (see the frame model above). */
   frameLast: Record<string, unknown>;
   lastSent: Record<string, string>;
@@ -229,7 +229,10 @@ function viewOf(inst: Instance): WorldView {
       inst.resizeOff();
       inst.resizeOff = undefined;
     },
-    userActivation: () => world.location?.activation
+    userActivation: () => world.location?.activation,
+    opens: (target, features) => !!world.location && openReturnsWindow(target, features, world.location.activation),
+    pushes: (url) => !!world.location && pushTarget(url, world.location.href) !== null,
+    projectSettings: () => world.projectSettings
   };
 }
 
@@ -260,7 +263,7 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
     derivedValues: deepFreeze(derivedValues),
     derivedOutputs: deepFreeze(derivedOutputs),
     trace: [],
-    pending: { signals: [], outcomes: [], requests: [], opens: [] },
+    pending: { signals: [], outcomes: [], requests: [], location: [] },
     frameLast: {},
     lastSent: {},
     settles: 0,
@@ -417,7 +420,9 @@ interface PatchLike {
   cancel?: readonly string[];
   request?: SpecRequest;
   abort?: readonly string[];
-  open?: { url: unknown; target: unknown; features: unknown };
+  open?: { url: unknown; target?: unknown; features?: unknown };
+  push?: { url: unknown };
+  dispatch?: string;
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -538,12 +543,30 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     const worldId = inst.requests.get(id);
     if (worldId !== undefined) world.network.abort(worldId);
   }
+  // LOCATION (world.ts): only with a window — a spec reads `viewport()` first, as a node checks `typeof window`
+  if ((patch.open || patch.push || patch.dispatch !== undefined) && !world.location) {
+    throw new SpecError(`${spec.type}.${port}: used the location in a play with no window`);
+  }
+  const location = world.location!;
+  const record = (c: LocationCall) => inst.pending.location.push(locationEvent(c));
   if (patch.open) {
-    // LOCATION (world.ts): only with a window — a spec reads `viewport()` first, as a node checks `typeof window`
-    if (!world.location) throw new SpecError(`${spec.type}.${port}: opened a URL in a play with no window`);
     const o = patch.open;
-    world.location.open(o.url, o.target, o.features);
-    inst.pending.opens.push({ t: 'open', url: canonicalise(o.url), target: canonicalise(o.target), features: canonicalise(o.features) });
+    location.open(o.url, o.target, o.features);
+    record({ call: 'open', url: o.url, target: o.target, features: o.features });
+  }
+  if (patch.push) {
+    // a refused push is still a call the node made: recorded, and the href stays (world.ts LOCATION)
+    try {
+      location.push(patch.push.url);
+    } catch {
+      /* the spec said what follows a refusal; the world only keeps the href */
+    }
+    record({ call: 'push', url: patch.push.url });
+  }
+  if (patch.dispatch !== undefined) {
+    // recorded BEFORE the listeners run: a listener's own calls come after the dispatch, as they are made
+    record({ call: 'dispatch', event: patch.dispatch });
+    location.dispatch({ type: patch.dispatch });
   }
 }
 
@@ -645,8 +668,8 @@ export function settle(inst: Instance): void {
     inst.trace.push(o.error === undefined ? { t: 'outcome', port: o.port, value } : { t: 'outcome', port: o.port, value, error: o.error });
   }
   for (const r of inst.pending.requests) inst.trace.push(r);
-  for (const o of inst.pending.opens) inst.trace.push(o);
-  inst.pending = { signals: [], outcomes: inst.pending.outcomes.filter((o) => o.reportedAt === undefined), requests: [], opens: [] };
+  for (const l of inst.pending.location) inst.trace.push(l);
+  inst.pending = { signals: [], outcomes: inst.pending.outcomes.filter((o) => o.reportedAt === undefined), requests: [], location: [] };
 }
 
 /**

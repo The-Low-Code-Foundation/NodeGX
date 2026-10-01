@@ -1,7 +1,7 @@
 # NSP-015 — Batch: navigation, popups, component utilities
 
 **Opened 2026-09-29.** **Depends on NSP-008** (graph scenarios) and R4 = continue.
-**Status: 🟡 6 of 14 (+ NSP-012's Run Tasks) — s15 (2026-10-01): the component boundary, the Component Object family, component DEFINITIONS. Left: the 8 navigation / popup nodes, AC2.**
+**Status: 🟡 8 of 14 (+ NSP-012's Run Tasks) — s15 (2026-10-01): the component boundary, the Component Object family, component DEFINITIONS; s16: the world's LOCATION (`open`), External Link; s17: LOCATION's `history` and `dispatch`, the world's PROJECT, Navigate To Path (rows C24, C25, D20, D21). Left: 6 — Show / Close Popup, Push Component To Stack, Pop Component Stack, Navigate, Page Inputs; AC2.**
 
 ## 1. The person sentence
 
@@ -147,8 +147,60 @@ blocked message); Link is handed to the browser unconverted.
 Page Inputs. The `history` half of LOCATION is theirs (Navigate To Path and Pop need nothing visual beyond it;
 Navigate needs a Router, which is a visual node — a stand-in or NSP-016), and popups need the viewer's visual layer.
 
+### 6.1c s17 (2026-10-01) — LOCATION's `history` and `dispatch`, the world's PROJECT, Navigate To Path (8 of 14)
+
+**The design step, finished from what the family calls.** s16 named two calls; reading Navigate To Path, Router,
+Page Stack and `api/navigation.ts` again found THREE: `window.open`, `history.pushState` and a bare
+`dispatchEvent(new PopStateEvent('popstate'))` (navigate-to-path.ts :219, navigation.ts :83 — a push fires no
+`popstate`, so the node tells its router itself). Each is recorded as handed, and the three are ONE group in the trace
+in the order made, after the requests (trace.ts) — so "push, then dispatch" is graded as an order:
+
+| call | trace event | the world |
+|---|---|---|
+| `window.open(url, target, features)` | `{ t: 'open', url, target?, features? }` — a target or features not handed is ABSENT (s17: Navigate To Path hands no features) | returns `null` for `noopener` / `noreferrer`, or when the popup blocker refuses (activation `false`, a target that is not the page itself); otherwise a stand-in window. **s16's "always `null`" was wrong for any node that checks the handle** — Navigate To Path's new-tab arm would have read every open as blocked |
+| `history.pushState(state, title, url)` | `{ t: 'history', op: 'push', url }` | the href moves to `url` resolved against it; a url on another origin is refused with a `SecurityError` (`DOMException`), recorded, href unmoved — as a browser does; no `popstate`, no `hashchange` |
+| `window.dispatchEvent(event)` | `{ t: 'dispatch', event: <type> }` | the play's listeners for that type run at once, in subscription order; `PopStateEvent` and the bare `dispatchEvent` are the play's |
+
+The href starts at the script's `location` (default `https://app.example/`); a page reads `location.href` / `pathname`
+/ `search` / `hash` live (the router's reads, for Navigate later). **PROJECT** is a seventh seam: the script's
+`projectSettings`, what a node reads through `NoodlRuntime.instance.getProjectSettings()` — Navigate To Path's
+`navigationPathType` (`hash` when unset). The runtime target installs it with `graphModel.setSettings` and makes its
+runtime the static `instance` for the play.
+
+**Format** (guarded: `src/trace.ts`, `schema/trace.schema.json`, `src/spec.ts`, `src/world.ts` — hashes refreshed;
+the three stranger rounds green in the full run): the `history` and `dispatch` events; `open`'s `target` / `features`
+optional; a patch's `push` and `dispatch` effects; `WorldView.opens(target, features)`, `pushes(url)`,
+`projectSettings()`; `WorldNeed` `project`; `WorldPool.projectSettings`; `locationEvent(call)` — the one translation
+from a call to its event, shared by the interpreter and the runtime target.
+
+**Navigate To Path** — [navigate-to-path.ts](../../../packages/nodegx-node-spec/src/nodes/navigate-to-path.ts),
+19 hand scenarios, claims written from the source before the runtime was recorded. On the runtime: **CONFORMS** —
+17 / 19 + 2 known (C24, C25), 200 / 200 (33 attributed to C24), 26 / 26 mutants; on the interpreter 19 / 19, 200 / 200,
+every mutant killed. A first-run green corrects no guess, so the runtime's own traces were read (a probe): the hash
+push is `#/product/42` and the href moves to `https://app.example/#/product/42`; the path type pushes
+`/product/42`; two presses push once and answer Done twice; a blocked new tab opens `#/home` with no features and
+reports blocked; the refused push is recorded and nothing follows. The rule in one paragraph is the spec's header:
+every press in a frame is answered with the outcome of ONE navigation made against the frame's final inputs.
+
+**Rows (§6.2)**: C24 and C25 — the frame-end callback THROWS (the scheduler logs it) and the frame's presses are
+never answered: a Path that is not text (`.match` on `null`), and a push the browser refuses (another origin with
+the Path URL type). The spec answers both with a Failure (proposed). D20 (`$&` in a parameter value, String Format's
+D3 again) and D21 (Query values unencoded — `a&b` is two parameters, a `#` moves the hash) are what the code does;
+the spec follows it.
+
+**Read in the source, worth a sentence (not rows):** Open in new tab opens the HASH url (`#/home`) in the new tab,
+relative to the current page; the Query names are neither trimmed nor de-duplicated (`a, b` names ` b`); an empty
+Path navigates to the bare `#`; `null` on a Query value is appended as `null` (part of D21).
+
+**Not graded:** the export (AC1's export half; routed to P18 with the family). Pop Component Stack, Push Component To
+Stack and Navigate read and write the location too, but through the Page Stack / Router, which are visual nodes.
+
 ### 6.2 Rows
 
 | row | what | where | proposed |
 |---|---|---|---|
+| **C24** — needs a ruling | Navigate To Path never answers a press when Path is not text (`null`, a number): `.match` throws at :162 in the frame-end callback, after the tokens were drained; the scheduler logs it (nodecontext.ts :466-472) | navigate-to-path.ts :151, :162 | read it as no Path — Failure `navigate-to-path/no-path` (one line). [Ledger](../../bugs/p107-c24-navigate-to-path-never-answers-when-path-is-not-text.md) |
+| **C25** — needs a ruling | Navigate To Path never answers a press when the browser refuses the push — the Path URL type with a Path on another origin (`https://…`, `//…`): `pushState` throws a SecurityError at :218; no `popstate` | navigate-to-path.ts :218 | catch it — Failure `navigate-to-path/refused` (or open another origin's address as External Link does: a product choice). [Ledger](../../bugs/p107-c25-navigate-to-path-never-answers-when-the-browser-refuses-the-push.md) |
+| **D20** — needs a ruling | A parameter value holding `$&` puts the placeholder back; `$$`, `` $` ``, `$'` are expanded — the description says the placeholder is filled "from their input ports" | navigate-to-path.ts :172 | replace with a function. [Ledger](../../bugs/p107-d20-navigate-to-path-expands-dollar-patterns-inside-a-parameter-value.md) |
+| **D21** — needs a ruling | Query values are appended unencoded: `a&b` is two parameters, a `#` moves the hash (the wrong page in the default Hash type); `null` is appended as `null` | navigate-to-path.ts :183-184, navigation.ts :70-73 | `encodeURIComponent` name and value; `null` as unset. [Ledger](../../bugs/p107-d21-navigate-to-path-does-not-encode-query-values.md) |
 | **C23** ✅ ruled "fix it" 2026-10-01 (s16), fixed — the deferred callback re-walks unconditionally (`onComponentStateNodesChanged`); the scenario lost its `row` mark and was re-recorded | A Parent Component Object (blank Parent Component) whose parent's Component Object is created AFTER the child instance binds the **grandparent's** record for good — reads 8 when the grandparent is written, nothing when the parent is. The Set Parent … beside it resolves at Do and writes the PARENT's (measured: 5 into Page, `near` never sees it). Control: the same tree with the parent's object first binds the parent. Reachable: nodes are created in `Object.values(componentModel.nodes)` order and a child instance's graph is built when it is created ("place the Row, then add the Component Object"). | parentcomponentobject.ts `initialize` walks at creation; the deferred re-walk in `nodeScopeDidInitialize` runs only `if (!modelId)`; the `componentStateNodesChanged` re-walk is editor-only and edit-time | re-resolve unconditionally in the deferred callback and rebind when the id differs. [Ledger](../../bugs/p107-c23-parent-component-object-binds-the-grandparent-when-the-parent-s-object-is-created-later.md) |
