@@ -5,7 +5,7 @@
  * Between two settles the events are grouped canonically: `value` events SORTED BY PORT NAME
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
  * events in the order they were REPORTED, then `request` events in the order they were issued, then
- * the LOCATION events — `open`, `history`, `dispatch` and (s18) `stack`, one group — in the order they were made
+ * the LOCATION events — `open`, `history`, `dispatch`, (s18) `stack` and (s19) `route`, one group — in the order they were made
  * (NSP-015).
  * "Changed" is canonical inequality with the last value RECORDED for
  * the port (nothing before the first settle, so the first settle records every defined output),
@@ -26,7 +26,8 @@
  * features)`), each canonical, a `target` or `features` not handed absent; `history` — it pushed a
  * history entry (`history.pushState(state, title, url)`: `op: 'push'`, `url` canonical); `dispatch`
  * — it dispatched an event on the window (`window.dispatchEvent(event)`: `event` is its type). s18 adds `stack` — it handed a
- * Component Stack a push, a replace or a pop (world.ts STACK). The world's answers are not events: they are scripted (world.ts), so what they were is
+ * Component Stack a push, a replace or a pop (world.ts STACK); s19 `route` — it handed the Routers a navigate
+ * (world.ts ROUTE). The world's answers are not events: they are scripted (world.ts), so what they were is
  * known from the scenario, and what the node did with them is on the wire.
  * That grouping is a rule of the FORMAT, so that a runtime which
  * pulses a signal synchronously inside a setter and delivers the value at frame end (the
@@ -72,7 +73,12 @@ export type TraceEvent =
    * (`stack` / `target` as handed, absent when not; `params` / `transition` canonical at the call) or a `back`
    * (`action` absent when none; `results` canonical at the call).
    */
-  | (Base & { t: 'stack'; op: 'push' | 'replace' | 'back'; stack?: unknown; target?: unknown; params?: unknown; transition?: unknown; action?: unknown; results?: unknown });
+  | (Base & { t: 'stack'; op: 'push' | 'replace' | 'back'; stack?: unknown; target?: unknown; params?: unknown; transition?: unknown; action?: unknown; results?: unknown })
+  /**
+   * observation (NSP-015 s19): the node handed the Routers a navigate (world.ts ROUTE) — `RouterHandler.navigate(router, args)`:
+   * `router` / `target` as handed, absent when not; `params` and `openInNewTab` canonical at the call.
+   */
+  | (Base & { t: 'route'; router?: unknown; target?: unknown; params: unknown; openInNewTab: unknown });
 
 /** Trace-format version — must match the `/v1.json` in the schema's `$id` (tests/schema.test.ts). */
 export const TRACE_FORMAT_VERSION = 1;

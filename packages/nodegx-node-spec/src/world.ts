@@ -138,6 +138,31 @@
  *               first page) or a `failure` (still animating) — returned from the call.
  *           The pushing node's back channel (the stack calling a pushed request's `backCallback`
  *           when its page is popped) is not scripted: on the runtime it reaches nothing (row C26).
+ *   ROUTE.  (NSP-015 s19) The Routers a play's Navigate nodes hand their requests to, and the Router
+ *           whose page a Page Inputs sits in — played by the world as STACK plays the Component
+ *           Stacks: which page a Router builds, its URL, its transition, are the Router's own spec (a
+ *           visual node, NSP-016); what the NODE hands it and what it is told back is the node's.
+ *             a navigate (`RouterHandler.instance.navigate(name, args)`, Navigate) — a `route` trace
+ *               event in the LOCATION group, `{ router, target, params, openInNewTab }`, each canonical
+ *               AT THE CALL, `router` / `target` absent when not handed. The HANDLER's rules are the
+ *               world's (router-handler.ts :51-67): it hands the request on ONE MILLISECOND LATER, a
+ *               world timer (`setTimeout(…, 1)`), and only then picks the routers: when the script
+ *               registers routers under exactly ONE name, that name, whatever the node handed;
+ *               otherwise the name AS HANDED, as a property key — there is no blank-is-`Main` rule on
+ *               this side (a router registers under `name || 'Main'`, :70, but `navigate` looks up
+ *               `String(name)`). A name with no router is QUEUED and, since no router registers during
+ *               a play, never answered. Every router under the name answers; the node settles once. A
+ *               router answers by the script's `answers`, the first rule whose `match` fits (`target`
+ *               equal canonically; `noTarget: true` — Target never set; `openInNewTab`), `done` when none
+ *               does — told inside that +1 ms timer (a `done` a microtask later, once the page is
+ *               built), so the answer lands in the `advance` that reaches it.
+ *             the params a Router hands the page it built (`_setPageParams`, router.tsx :604, :926)
+ *               — the script's `page`, in order: an entry with no `at` (or 0) when the page is built,
+ *               i.e. at the node's mount, before its first frame; an entry `at` > 0 at that time on the
+ *               clock (a Router reset onto the same page with other params, router.tsx :528-531). Absent:
+ *               the node sits in no Router's page (a Component Stack hands a page its params as the
+ *               page component's own inputs, navigation-stack.tsx :974-977, never to a Page Inputs).
+ *               Not a trace event — the world's hand-off, as a timer's firing is not.
  *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
@@ -186,6 +211,8 @@ export interface WorldScript {
   projectSettings?: Record<string, unknown>;
   /** NSP-015 s18: the Component Stacks (STACK above). Absent: none — a push is queued for good, and no Pop Component Stack sits in a pushed page. */
   stack?: StackScript;
+  /** NSP-015 s19: the Routers (ROUTE above). Absent: none — every navigate is queued, and no Page Inputs sits in a Router's page. */
+  router?: RouterScript;
 }
 
 /** What a Component Stack tells a request (STACK above). */
@@ -205,6 +232,23 @@ export interface StackScript {
   answers?: readonly StackRule[];
   /** What the n-th pop is told (the last repeating); absent: no Pop Component Stack sits in a pushed page. */
   back?: StackAnswer | readonly StackAnswer[];
+}
+
+/** ROUTE above: one answer rule — first match wins; absent `match` fits every request. `target` matches canonically. */
+export interface RouteRule {
+  /** `noTarget: true` fits a navigate whose Target was never set (`undefined`, which JSON cannot say); `target` never fits that one. */
+  match?: { target?: unknown; noTarget?: true; openInNewTab?: boolean };
+  answer: StackAnswer;
+}
+
+/** ROUTE above: the registered routers, how they answer, and the params a Router hands the page a Page Inputs sits in. */
+export interface RouterScript {
+  /** The names routers are registered under (`''` is `Main`); absent: none. */
+  names?: readonly string[];
+  /** How a registered router answers a navigate; absent or no match: `done`. */
+  answers?: readonly RouteRule[];
+  /** What the Router hands its page's Page Inputs, in order: no `at` (or 0) at the build (mount), `at` > 0 on the clock. Absent: the node sits in no Router's page. */
+  page?: ReadonlyArray<{ at?: number; params: Record<string, unknown> }>;
 }
 
 /** VIEWPORT above: the size at the start, and the resizes the clock will deliver. */
@@ -644,6 +688,85 @@ export class WorldStack {
   }
 }
 
+/** One navigate a Navigate node handed the RouterHandler (ROUTE above), as handed. */
+export interface RouteCall {
+  router: unknown;
+  target: unknown;
+  params: unknown;
+  openInNewTab: unknown;
+}
+
+/** The trace event a navigate is recorded as (ROUTE above; trace.ts) — canonical NOW, since a node hands its live objects. */
+export function routeEvent(c: RouteCall): TraceEvent {
+  const e: TraceEvent = { t: 'route', params: canonicalise(c.params) ?? null, openInNewTab: canonicalise(c.openInNewTab) ?? null };
+  if (c.router !== undefined) e.router = canonicalise(c.router);
+  if (c.target !== undefined) e.target = canonicalise(c.target);
+  return e;
+}
+
+/** A router registers under `name || 'Main'` (router-handler.ts :70), as a property key. */
+export function routerName(name: unknown): string {
+  return String(name || 'Main');
+}
+
+function sameCanonical(a: unknown, b: unknown): boolean {
+  if (a === undefined || b === undefined) return a === b;
+  return JSON.stringify(canonicalise(a)) === JSON.stringify(canonicalise(b));
+}
+
+/** The Routers of a play (ROUTE above): who is registered, what they answer, every navigate handed. */
+export class WorldRouter {
+  /** Every navigate, as its trace event, in the order handed. */
+  readonly calls: TraceEvent[] = [];
+  private listeners: Array<(e: TraceEvent) => void> = [];
+
+  constructor(readonly script: RouterScript) {}
+
+  /** Called with every navigate's event as it is handed — how a target attributes it to the node that made it. */
+  onCall(listener: (e: TraceEvent) => void): void {
+    this.listeners.push(listener);
+  }
+
+  /** Records a navigate as handed. */
+  record(c: RouteCall): void {
+    const e = routeEvent(c);
+    this.calls.push(e);
+    for (const l of this.listeners) l(e);
+  }
+
+  /** The handler's lookup at +1 ms (router-handler.ts :54-59): the one registered name when there is exactly one, else the name as handed. */
+  resolve(name: unknown): string {
+    const keys = Array.from(new Set((this.script.names ?? []).map(routerName)));
+    return keys.length === 1 ? keys[0] : String(name);
+  }
+
+  /** How many routers answer a navigate handed under `name`. */
+  registered(name: unknown): number {
+    const key = this.resolve(name);
+    return (this.script.names ?? []).filter((n) => routerName(n) === key).length;
+  }
+
+  /** What ONE registered router tells a navigate to this target (first rule, `done` when none fits). */
+  answerFor(target: unknown, openInNewTab: unknown): StackAnswer {
+    const rule = (this.script.answers ?? []).find(
+      (r) =>
+        r.match === undefined ||
+        ((!('target' in r.match) || sameCanonical(r.match.target, target)) && (!r.match.noTarget || target === undefined) && (r.match.openInNewTab === undefined || r.match.openInNewTab === openInNewTab))
+    );
+    return rule ? rule.answer : 'done';
+  }
+
+  /** What the node is told at +1 ms — `undefined` when no router answers to the name: queued, for good. */
+  answer(name: unknown, target: unknown, openInNewTab: unknown): StackAnswer | undefined {
+    return this.registered(name) > 0 ? this.answerFor(target, openInNewTab) : undefined;
+  }
+
+  /** The params the Router hands its page (`page`), in order; empty when the node sits in no Router's page. */
+  get pages(): ReadonlyArray<{ at: number; params: Record<string, unknown> }> {
+    return (this.script.page ?? []).map((p) => ({ at: Number(p.at ?? 0) || 0, params: p.params }));
+  }
+}
+
 /** The location of a play with a window (LOCATION above): its href, every call made, and the user activation. */
 export class WorldLocation {
   /** Every `window.open`, in order. */
@@ -722,6 +845,8 @@ export class World {
   readonly projectSettings: Readonly<Record<string, unknown>>;
   /** The Component Stacks (STACK above) — always: a play with none registered queues every push. */
   readonly stack: WorldStack;
+  /** The Routers (ROUTE above) — always: a play with none registered queues every navigate. */
+  readonly router: WorldRouter;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -733,6 +858,7 @@ export class World {
     this.location = this.viewport ? new WorldLocation(script.activation, script.location) : undefined;
     this.projectSettings = { ...(script.projectSettings ?? {}) };
     this.stack = new WorldStack(script.stack ?? {});
+    this.router = new WorldRouter(script.router ?? {});
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */

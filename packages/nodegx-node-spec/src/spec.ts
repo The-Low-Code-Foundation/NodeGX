@@ -174,6 +174,12 @@ export interface WorldView {
    * back callback was installed). Reads; the `back` effect is what consumes.
    */
   backAnswer(ahead?: number): import('./world').StackAnswer | undefined;
+  /**
+   * NSP-015 s19 — what the Routers tell a navigate handed under `router` for `target` (world.ts
+   * ROUTE), read when the handler hands it on (+1 ms): `done`, `unchanged` or a `failure`;
+   * `undefined` when no router answers to the name — queued, never answered in the play.
+   */
+  routeAnswer(router: unknown, target: unknown, openInNewTab: unknown): import('./world').StackAnswer | undefined;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -369,6 +375,9 @@ export interface Patch<S, O> {
    *   `back`    NSP-015 s18 — pops through the back callback of the stack that pushed this node's
    *             page, in order: a `stack` event each; what each is told is `WorldView.backAnswer`.
    *             Only in a pushed page.
+   *   `route`   NSP-015 s19 — a navigate handed to the Routers (`RouterHandler.navigate`, world.ts
+   *             ROUTE): a `route` event, as handed. The handler hands it on 1 ms later — a spec asks
+   *             the clock for that with `after` and reads `WorldView.routeAnswer` when it fires.
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
@@ -379,6 +388,7 @@ export interface Patch<S, O> {
   dispatch?: string;
   stack?: { op: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown };
   back?: ReadonlyArray<{ action: unknown; results: unknown }>;
+  route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -527,6 +537,12 @@ export interface WorldHandlers<S, I, O> {
   change?: (state: Readonly<S>, inputs: Inputs<I>, event: ChangeEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
   /** NSP-013 s13 — the viewport was resized (`WorldView.listen`): called at the resize, `world.viewport()` already the new size. */
   resize?: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-015 s19 — the Router whose page this node sits in handed it params (world.ts ROUTE `page`):
+   * the script's first entries when the page is built (the mount; they land in the first settle),
+   * later ones at their time on the clock. Only a spec that needs `router` is handed any.
+   */
+  page?: (state: Readonly<S>, inputs: Inputs<I>, params: Readonly<Record<string, unknown>>, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -557,6 +573,8 @@ export interface WorldPool {
   projectSettings?: ReadonlyArray<Record<string, unknown>>;
   /** NSP-015 s18: the Component Stacks a `stack` spec's sequences play with (one is drawn per sequence; the default is none registered alone). */
   stacks?: ReadonlyArray<import('./world').StackScript>;
+  /** NSP-015 s19: the Routers a `router` spec's sequences play with (one is drawn per sequence; the default is none registered alone). */
+  routers?: ReadonlyArray<import('./world').RouterScript>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -617,9 +635,10 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * `location` — the node opens a URL or reads whether the press came from a person (world.ts
  * LOCATION); the play has a window or none, as for `viewport`, and an activation or none. s17
  * adds `project` — the node reads a project setting (world.ts PROJECT). s18 adds `stack` — the node
- * hands a Component Stack a request (world.ts STACK).
+ * hands a Component Stack a request (world.ts STACK). s19 adds `router` — the node hands the Routers a
+ * navigate, or sits in a Router's page (world.ts ROUTE).
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'backend';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'backend';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
@@ -699,6 +718,7 @@ export interface AnyNodeSpec {
     response?: (state: never, inputs: never, response: WorldResponse, world: WorldView) => unknown;
     change?: (state: never, inputs: never, event: ChangeEvent, world: WorldView) => unknown;
     resize?: (state: never, inputs: never, world: WorldView) => unknown;
+    page?: (state: never, inputs: never, params: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

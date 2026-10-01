@@ -23,7 +23,7 @@
  *
  * The world handlers (NSP-007, `spec.world.timer` / `spec.world.response`; NSP-012's
  * `spec.world.change`) are reducers like any
- * other here, named `world.timer`, `world.response`, `world.change` and (s13) `world.resize`; whether a branch issues a request is part
+ * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize` and (s19) `world.page`; whether a branch issues a request is part
  * of its shape. A branch's `after` / `cancel` / `abort` effects are NOT in the shape and have no
  * mutant of their own yet (a dropped timeout timer shows only in a sequence that waits past it
  * with an answer that never comes) — named in NSP-007 §5 as the runner's next hole.
@@ -92,6 +92,7 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.response) names.push('world.response');
   if (spec.world?.change) names.push('world.change');
   if (spec.world?.resize) names.push('world.resize');
+  if (spec.world?.page) names.push('world.page');
   return names;
 }
 
@@ -117,6 +118,7 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     if (spec.world.response) w.response = wrap('world.response', spec.world.response as unknown as ErasedReducer) as unknown as typeof spec.world.response;
     if (spec.world.change) w.change = wrap('world.change', spec.world.change as unknown as ErasedReducer) as unknown as typeof spec.world.change;
     if (spec.world.resize) w.resize = wrap('world.resize', spec.world.resize as unknown as ErasedReducer) as unknown as typeof spec.world.resize;
+    if (spec.world.page) w.page = wrap('world.page', spec.world.page as unknown as ErasedReducer) as unknown as typeof spec.world.page;
     out.world = w;
   }
   return out;

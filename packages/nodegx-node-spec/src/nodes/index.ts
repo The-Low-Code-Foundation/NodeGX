@@ -45,6 +45,8 @@ import { ExternalLink } from './external-link';
 import { NavigateToPath } from './navigate-to-path';
 import { PushComponentToStack } from './push-component-to-stack';
 import { PopComponentStack } from './pop-component-stack';
+import { RouterNavigate } from './router-navigate';
+import { PageInputs } from './page-inputs';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
 import { JSONStreamParser } from './json-stream-parser';
@@ -124,6 +126,8 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [NavigateToPath.type]: NavigateToPath,
   [PushComponentToStack.type]: PushComponentToStack,
   [PopComponentStack.type]: PopComponentStack,
+  [RouterNavigate.type]: RouterNavigate,
+  [PageInputs.type]: PageInputs,
   [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
@@ -178,6 +182,8 @@ export {
   NavigateToPath,
   PushComponentToStack,
   PopComponentStack,
+  RouterNavigate,
+  PageInputs,
   States,
   RandomBytes,
   Repeat,

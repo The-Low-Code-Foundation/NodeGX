@@ -1,7 +1,7 @@
 # NSP-015 — Batch: navigation, popups, component utilities
 
 **Opened 2026-09-29.** **Depends on NSP-008** (graph scenarios) and R4 = continue.
-**Status: 🟡 10 of 14 (+ NSP-012's Run Tasks) — s15 (2026-10-01): the component boundary, the Component Object family, component DEFINITIONS; s16: the world's LOCATION (`open`), External Link; s17: LOCATION's `history` and `dispatch`, the world's PROJECT, Navigate To Path (rows C24, C25, D20, D21); s18: the world's STACK, Push Component To Stack, Pop Component Stack (rows C26, C27, C28). Left: 4 — Show / Close Popup, Navigate, Page Inputs; AC2, AC6.**
+**Status: 🟡 12 of 14 (+ NSP-012's Run Tasks) — s15 (2026-10-01): the component boundary, the Component Object family, component DEFINITIONS; s16: the world's LOCATION (`open`), External Link; s17: LOCATION's `history` and `dispatch`, the world's PROJECT, Navigate To Path (rows C24, C25, D20, D21); s18: the world's STACK, Push Component To Stack, Pop Component Stack (rows C26, C27, C28); s19: the world's ROUTE, Navigate, Page Inputs (row C29). Left: 2 — Show / Close Popup (the POPUP seam, named in §6.1e); AC2; AC6 is the Router's (§6.1e).**
 
 ## 1. The person sentence
 
@@ -258,6 +258,78 @@ named Stack, its pages, the target component's inputs) — not derivable from th
 **Not graded:** the back channel to the pusher (C26 makes it reach nothing on the runtime; once fixed, the world's
 STACK grows a scripted pop of a pushed request); the export (AC1's export half, P18); AC6 (needs Navigate).
 
+### 6.1e s19 (2026-10-01) — the world's ROUTE, Navigate and Page Inputs (12 of 14)
+
+**The seam, from what the two nodes call.** Navigate (`RouterNavigate`) hands `{ target, params, openInNewTab }` and
+three callbacks to `RouterHandler.instance.navigate(router, …)` (router-navigate.ts :129-147) — STACK's shape, so the
+world plays the Routers the same way. But it is its own event, not a `stack` op: a Router is not a Component Stack, and
+its HANDLER has other rules, all read from router-handler.ts :51-94 and graded against the real one: it hands a request
+on **1 ms later** (`setTimeout`, the world's clock), and only then picks the routers; **one registered name takes every
+request** whatever the node named; otherwise the name is looked up AS HANDED — **there is no blank-is-`Main` rule on
+this side** (only `registerRouter` maps `name || 'Main'`), so with two Routers a Navigate whose Router is blank or unset
+is queued for good (the editor's adapter fills Router with the first Router's name when it is unset, so an author meets
+this only by clearing it). Page Inputs has no behaviour of its own: the Router that built its page hands it the params
+(`_setPageParams`, router.tsx :604, :926), and they are merged in. **The Component Stack never calls it** — it sets the
+page component's own inputs (navigation-stack.tsx :974-977) — so Page Inputs only ever hears from a Router; its two
+docblocks (:54, :82) say "the Router / Component Stack".
+
+**ROUTE, the ninth seam** (world.ts header): a navigate is a `route` trace event in the LOCATION group, `{ router?,
+target?, params, openInNewTab }`, canonical at the call; the script's `router` is `{ names, answers, page }` — `answers`
+first-match on `target` (canonically), `noTarget: true` (Target never set — JSON cannot say `undefined`, and a `null`
+Target is the Router's page-not-found, not its no-target) and `openInNewTab`, `done` when none fits; a failure or
+`unchanged` told inside the +1 ms timer, `done` a microtask later. `page` is what the Router hands its page's Page
+Inputs: entries with no `at` at the build (the mount — they land in the first settle), later ones at `at` on the clock
+(a reset onto the same page). **On the runtime target the handler is the viewer's REAL `RouterHandler`**, fresh per play
+(a process-wide static with a queue), the node's call recorded at it, a stand-in router registered per name; a Page
+Inputs is handed the script's params at mount and on the clock, as the Router hands them. Measured (probe): a
+navigate's answer lands only after `advance 1` (`advance 0` answers nothing), so the handler's `setTimeout` is the
+world's; an unanswered navigate sits in the real handler's `_navigationQueue` under its name; the handler is restored
+after the play.
+
+**Format** (guarded: `src/trace.ts`, `schema/trace.schema.json`, `src/spec.ts`, `src/world.ts` — hashes refreshed, the
+three stranger rounds green in the full run): the `route` event; `WorldNeed` `router`; a patch's `route` effect;
+`WorldView.routeAnswer(router, target, openInNewTab)`; the world handler `page(state, inputs, params)`; `WorldPool.routers`;
+`routeEvent`, `routerName`, `WorldRouter`, `RouterScript`, `RouteRule`. The spec asks the clock for the handler's
+millisecond itself (`after: [{ ms: 1, tag: 'route' }]`) and reads `routeAnswer` when it fires. The mutant runner wraps
+`world.page` like the other handlers.
+
+**Navigate** — [router-navigate.ts](../../../packages/nodegx-node-spec/src/nodes/router-navigate.ts), 19 hand scenarios,
+claims from the source before the runtime ran. **CONFORMS on its first run**: 19 / 19, 200 / 200, 33 / 33 mutants (the
+interpreter's first run left two `world.timer` drop-set survivors — the request queue not shifted after a queued or an
+Unchanged answer — killed by two scenarios with a second navigate inside the millisecond). A first-run green corrects no
+guess, so the runtime's own traces were read (probe above): the navigate is recorded at the frame end, Done lands in the
+settle after `advance 1`.
+
+**Page Inputs** — [page-inputs.ts](../../../packages/nodegx-node-spec/src/nodes/page-inputs.ts), 8 hand scenarios.
+**CONFORMS on its first run**: 8 / 8, 200 / 200, 1 / 1 mutant. Read in the probe: params `{ id: 1, tab: 'a' }` at the
+build send both ports in the first frame; `{ id: 2 }` at +5 moves `pm-id` and leaves `pm-tab` at `a` — the merge the
+Router's own TODO admits (router.tsx :520). Its ports are DERIVED from its params (one `pm-<name>` per distinct non-empty
+name in Path / Query Parameters, split on `,`, untrimmed) — NSP-020's good case: drawable without a viewer.
+
+**Row C29 (§6.2)** — Push Component To Stack's C27 on the Router: the node hands its LIVE `pageParams` (:132), the
+Router keeps it as `currentParams` (router.tsx :917), so a second navigate from the same node to the same page with new
+parameters compares an object with itself and answers Unchanged; the page stays. Measured: two presses hand the same
+object (`===`), the first navigate's params read `{ id: 2 }` after the second write; the real `_navigateInCurrentWindow`
+(the Router's own definition, `default.node.methods`) with that object as `currentParams` answers `unchanged`, with a
+copy `{ id: 1 }` builds. The method's docblock (:882-883) names this case as the one the params keep safe.
+
+**AC6 is the Router's, not Navigate's.** The handoff framed it as "Navigate → back → Navigate needs `history.back` and
+a `popstate` the world fires". Read: Navigate never touches the location — the ROUTER pushes the URL
+(`_updateUrlWithTopPage`, router.tsx :822-830) and listens for `popstate` to route back. With the Router played by the
+world, a "location stack" after Navigate → back → Navigate is the Router's behaviour. AC6 moves to the Router's spec
+(NSP-016, a visual node) and the export (P18); nothing in NSP-015's nodes can grade it.
+
+**Not graded:** the export (AC1's export half, P18); the Router itself (NSP-016).
+
+**Next, named: POPUP, the tenth seam (Show Popup, Close Popup).** Show Popup calls `this.context.showPopup(target,
+popupParams, { stackPolicy, closeOnEscape, modal, accessibleName, onCancelPopup, onDismissPopup, onClosePopup })`
+(showpopup.ts :249-276) and settles on the promise it returns (Done) or its rejection (Failure `show-popup/target-failed`);
+no Target is Failure `show-popup/no-target` before anything is handed. Closed / Dismissed / Cancelled / a close action
+come back LATER through the callbacks — world deliveries on the clock. Close Popup resolves a close handler the popup
+publishes (`_popupCloseHandler`, closepopup.ts :192-240) — Pop Component Stack's back callback, the other side. The world
+can play `NodeContext.showPopup` as STACK plays a stack; the stacking policy and the overlay are the context's / a visual
+node's. Show Popup also hands its LIVE `popupParams` — check whether `showPopup` keeps it before calling it a row.
+
 ### 6.2 Rows
 
 | row | what | where | proposed |
@@ -269,4 +341,5 @@ STACK grows a scripted pop of a pushed request); the export (AC1's export half, 
 | **C26** — needs a ruling | Push Component To Stack's `backResult-<name>` / `backAction-<name>` outputs (drawn by the editor from the target component's Pop nodes) never connect: no `registerOutputIfNeeded`, so `NodeScope.addConnection` → `getOutput` throws and the wire is dropped; the back callback's `hasOutput` guard sends nothing, `sendSignalOnOutput(action)` logs. The JS original had the method; PLAT-003 slice 8 (`efc19ebbb`, 2026-07-24) dropped it | navigate.ts (no `registerOutputIfNeeded`); node.ts :520; nodescope.ts :148-155 | put the method back (Show Popup's shape). [Ledger](../../bugs/p107-c26-push-component-to-stack-back-results-and-back-actions-never-connect.md) |
 | **C27** — needs a ruling | One Push Component To Stack pushing (or replacing) the SAME page with NEW `pm-` values reports Unchanged from the second press on and the old page stays: the node hands its live `pageParams`, the stack keeps it on the entry, and `_isAlreadyShowing` compares the object with itself | navigate.ts :181, :210; navigation-stack.tsx :430-457, :878, :1000 | hand a copy (`{ ...pageParams }`). [Ledger](../../bugs/p107-c27-a-second-push-of-the-same-page-with-new-parameters-reports-unchanged.md) |
 | **C28** — needs a ruling | A Mode that is neither `push` nor `replace` (`'Push'`, `''`, `null` over a wire) hands nothing and answers no press | navigate.ts :177, :203 (no else) | Failure `push-component-stack/unknown-mode`. [Ledger](../../bugs/p107-c28-push-component-to-stack-never-answers-a-mode-that-is-not-push-or-replace.md) |
+| **C29** — needs a ruling | One Navigate pushing the SAME page with NEW `pm-` values reports Unchanged from the second press on and the Router keeps the old page: the node hands its live `pageParams`, the Router keeps it as `currentParams`, and `_navigateInCurrentWindow` compares the object with itself. C27's twin | router-navigate.ts :132, :149-151; router.tsx :888-895, :917 | hand a copy (`{ ...pageParams }`) — same ruling as C27. [Ledger](../../bugs/p107-c29-a-second-navigate-to-the-same-page-with-new-parameters-reports-unchanged.md) |
 | **C23** ✅ ruled "fix it" 2026-10-01 (s16), fixed — the deferred callback re-walks unconditionally (`onComponentStateNodesChanged`); the scenario lost its `row` mark and was re-recorded | A Parent Component Object (blank Parent Component) whose parent's Component Object is created AFTER the child instance binds the **grandparent's** record for good — reads 8 when the grandparent is written, nothing when the parent is. The Set Parent … beside it resolves at Do and writes the PARENT's (measured: 5 into Page, `near` never sees it). Control: the same tree with the parent's object first binds the parent. Reachable: nodes are created in `Object.values(componentModel.nodes)` order and a child instance's graph is built when it is created ("place the Row, then add the Component Object"). | parentcomponentobject.ts `initialize` walks at creation; the deferred re-walk in `nodeScopeDidInitialize` runs only `if (!modelId)`; the `componentStateNodesChanged` re-walk is editor-only and edit-time | re-resolve unconditionally in the deferred callback and rebind when the id differs. [Ledger](../../bugs/p107-c23-parent-component-object-binds-the-grandparent-when-the-parent-s-object-is-created-later.md) |

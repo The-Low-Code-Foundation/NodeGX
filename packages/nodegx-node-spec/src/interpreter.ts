@@ -91,7 +91,7 @@ import type { TraceEvent } from './trace';
 import { installTimeZone, locationEvent, openReturnsWindow, pushTarget, World, type Delivery, type LocationCall } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
-type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'resize' };
+type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'resize' } | { kind: 'page'; params: Readonly<Record<string, unknown>> };
 
 interface OutcomeSlot {
   port: string;
@@ -234,7 +234,8 @@ function viewOf(inst: Instance): WorldView {
     pushes: (url) => !!world.location && pushTarget(url, world.location.href) !== null,
     projectSettings: () => world.projectSettings,
     stackAnswer: (op, stack, target) => world.stack.answer(op, stack, target),
-    backAnswer: (ahead) => world.stack.backAnswer(ahead ?? 0)
+    backAnswer: (ahead) => world.stack.backAnswer(ahead ?? 0),
+    routeAnswer: (router, target, openInNewTab) => world.router.answer(router, target, openInNewTab)
   };
 }
 
@@ -295,6 +296,15 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
   }
   deliverChanges(inst);
   for (const name of Object.keys(params)) set(inst, name, params[name]);
+  // ROUTE (world.ts, NSP-015 s19): the params the Router hands the page this node sits in — at the build
+  // (now: they land with the first settle's deliveries), then each later one at its time on the clock
+  if (spec.needs?.includes('router')) {
+    for (const p of world.router.pages) {
+      const item: Inbound = { kind: 'page', params: deepFreeze({ ...p.params }) };
+      if (p.at > 0) world.clock.schedule(p.at, () => handleInbound(inst, item));
+      else inst.inbox.push(item);
+    }
+  }
   return inst;
 }
 
@@ -427,6 +437,7 @@ interface PatchLike {
   dispatch?: string;
   stack?: { op: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown };
   back?: ReadonlyArray<{ action: unknown; results: unknown }>;
+  route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -590,6 +601,11 @@ function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
     world.stack.back(b.action, b.results);
     inst.pending.location.push(world.stack.calls[world.stack.calls.length - 1]);
   }
+  // ROUTE (world.ts, NSP-015 s19): a navigate recorded as handed — a `route` event in the same group
+  if (patch.route) {
+    world.router.record(patch.route);
+    inst.pending.location.push(world.router.calls[world.router.calls.length - 1]);
+  }
 }
 
 /**
@@ -618,6 +634,10 @@ function handleInbound(inst: Instance, item: Inbound): void {
     name = 'world.resize';
     if (!spec.world?.resize) throw new SpecError(`${spec.type}: the viewport was resized and the spec listens with no world.resize handler`);
     patch = asWriter(inst, () => spec.world!.resize!(inst.state as never, inst.inputs as never, view));
+  } else if (item.kind === 'page') {
+    name = 'world.page';
+    if (!spec.world?.page) throw new SpecError(`${spec.type}: a Router handed its page params and the spec has no world.page handler`);
+    patch = asWriter(inst, () => spec.world!.page!(inst.state as never, inst.inputs as never, item.params, view));
   } else {
     name = 'world.response';
     if (!spec.world?.response) throw new SpecError(`${spec.type}: an answer landed and the spec has no world.response handler`);

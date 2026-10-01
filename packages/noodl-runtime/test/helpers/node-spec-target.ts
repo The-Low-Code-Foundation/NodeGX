@@ -185,6 +185,57 @@ function installStacks(w: World, record: (e: TraceEvent) => void): () => void {
   };
 }
 
+/** The Navigate side of a request (router-handler.ts `NavigateArgs`), as a stand-in router sees it. */
+interface RouteArgs {
+  target?: unknown;
+  params?: unknown;
+  openInNewTab?: unknown;
+  hasNavigated?(): void;
+  hasUnchanged?(): void;
+  hasFailed?(code: string, message: string): void;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const RouterHandler = require('../../../noodl-viewer-react/src/nodes/navigation/router-handler').RouterHandler as {
+  new (): { navigate(name: unknown, args: RouteArgs): void; registerRouter(name: unknown, router: unknown): void };
+  instance: unknown;
+};
+
+/**
+ * ROUTE (world.ts, NSP-015 s19) for one play, as `installStacks` does STACK. The handler is the viewer's REAL
+ * `RouterHandler`, a fresh one (its `instance` is process-wide and its queue would outlive the play), so its
+ * rules — the 1 ms `setTimeout` (the world's clock: `installWorld` owns the timers), one registered name takes
+ * everything, a name with no router is queued — run as in the app. The node's call is recorded at the handler,
+ * AS HANDED; each name the script registers gets a stand-in router (`registerRouter`, which resets it — a
+ * stand-in has no start page) that answers by the script: a failure or `unchanged` inside the call (a real
+ * Router's checks run before its first `await`, router.tsx :846-895), `done` a microtask later (once it built
+ * the page, :897-936). Returns the undo.
+ */
+function installRouters(w: World, record: (e: TraceEvent) => void): () => void {
+  w.router.onCall(record);
+  const saved = RouterHandler.instance;
+  const handler = new RouterHandler();
+  const real = handler.navigate.bind(handler);
+  handler.navigate = (name: unknown, args: RouteArgs) => {
+    w.router.record({ router: name, target: args.target, params: args.params, openInNewTab: args.openInNewTab });
+    real(name, args);
+  };
+  const router = {
+    navigate: (args: RouteArgs) => {
+      const a = w.router.answerFor(args.target, args.openInNewTab);
+      if (a === 'done') void Promise.resolve().then(() => args.hasNavigated?.());
+      else if (a === 'unchanged') args.hasUnchanged?.();
+      else args.hasFailed?.(a.failure.code, a.failure.message);
+    },
+    reset: () => undefined
+  };
+  RouterHandler.instance = handler;
+  for (const name of w.router.script.names ?? []) handler.registerRouter(name, router);
+  return () => {
+    RouterHandler.instance = saved;
+  };
+}
+
 /** What a stack's `back` returns to a Pop Component Stack (navigation-stack.tsx `StackBackResult`) for the world's answer. */
 function backResult(a: StackAnswer): unknown {
   if (a === 'done') return { ok: true };
@@ -227,7 +278,7 @@ function resetRegistry(world: World): void {
 export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink'] as const;
 
 /** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (Navigate To Path). */
-export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back'] as const;
+export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -580,7 +631,18 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (spec?.derived?.outputs) {
       for (const name of Object.keys(spec.derived.outputs(params))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
     }
-    return adopt(node, id, type, context.nodeRegister.getNodeMetadata(type), params, logs);
+    const h = adopt(node, id, type, context.nodeRegister.getNodeMetadata(type), params, logs);
+    // ROUTE (world.ts, NSP-015 s19) — a Page Inputs in a page a Router built: the Router hands it the page's
+    // params once the page's nodes exist (router.tsx :923-927), and again on a reset onto the same page (:528-531)
+    if (type === 'PageInputs' && world) {
+      const w = world;
+      const hand = (p: Record<string, unknown>) => (node as unknown as { _setPageParams(p: Record<string, unknown>): void })._setPageParams({ ...p });
+      for (const p of w.router.pages) {
+        if (p.at > 0) w.clock.schedule(p.at, () => hand(p.params));
+        else hand(p.params);
+      }
+    }
+    return h;
   }
 
   /** Makes `node` a handle: recorded, intercepted, its `params` applied as `set` events. */
@@ -788,6 +850,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // STACK (world.ts, NSP-015 s18) — the REAL handler, fresh for the play (it is a process-wide static and
       // queues what no stack took), the node's call recorded as handed, and a stand-in stack per scripted name
       const restoreStacks = installStacks(w, recordStack);
+      // ROUTE (world.ts, NSP-015 s19) — likewise the REAL RouterHandler, fresh, with a stand-in router per scripted name
+      const restoreRouters = installRouters(w, recordStack);
       const installed = installWorld(w);
       // the three process-wide managers behind the store, history and action nodes (NSP-012 T4): one play, one of each
       globalStoreManager.reset({ clearState: true });
@@ -811,6 +875,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       return () => {
         consoleMethods.forEach((m, i) => (console[m] = hostConsole[i]));
         restoreStacks();
+        restoreRouters();
         installed.restore();
         stateHistoryManager.setClock(null);
         world = undefined;

@@ -28,7 +28,7 @@ import type { Step } from '../adapter';
 import type { AnyNodeSpec, InputDecl } from '../spec';
 import { isSignalInput } from '../spec';
 import type { RegistryScript } from '../registry';
-import type { Answer, StackScript, ViewportScript, WorldScript } from '../world';
+import type { Answer, RouterScript, StackScript, ViewportScript, WorldScript } from '../world';
 import { mulberry32, sequenceSeed, type Rng } from './random';
 import type { Reach } from './reach';
 
@@ -76,7 +76,9 @@ export const DEFAULT_WORLD_POOL = Object.freeze({
   // NSP-015 s17: a project that set nothing
   projectSettings: Object.freeze([{}] as ReadonlyArray<Record<string, unknown>>),
   // NSP-015 s18: no Component Stack registered (every push queued, no page pushed)
-  stacks: Object.freeze([{}] as ReadonlyArray<StackScript>)
+  stacks: Object.freeze([{}] as ReadonlyArray<StackScript>),
+  // NSP-015 s19: no Router registered (every navigate queued, no page built)
+  routers: Object.freeze([{}] as ReadonlyArray<RouterScript>)
 });
 
 export interface GenerateOptions {
@@ -220,6 +222,11 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   if (needs.includes('stack')) {
     const stack = rng.pick(pool.stacks ?? DEFAULT_WORLD_POOL.stacks);
     if (Object.keys(stack).length > 0) world.stack = stack;
+  }
+  // NSP-015 s19 — ROUTE: one of the pool's (the default pool registers none)
+  if (needs.includes('router')) {
+    const router = rng.pick(pool.routers ?? DEFAULT_WORLD_POOL.routers);
+    if (Object.keys(router).length > 0) world.router = router;
   }
   return { seed, params, steps, world };
 }
