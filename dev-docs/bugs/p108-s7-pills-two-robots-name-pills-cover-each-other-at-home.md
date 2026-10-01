@@ -2,7 +2,7 @@
 id: P108-S7-PILLS
 title: Two robots side by side — their name pills cover each other ("Cobble ²ip")
 status: fixed
-commit: (P108 s7)
+commit: c051ca68d
 severity: low
 area: library garden-kit (2D) + garden-3d-kit (3D) / robot name pills
 found: P108 IW-007 s6, 2026-10-01 (the touch drive's screenshot iw7t-04-here.png)

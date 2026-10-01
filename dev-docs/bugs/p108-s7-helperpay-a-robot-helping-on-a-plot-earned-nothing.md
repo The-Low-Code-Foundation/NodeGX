@@ -2,7 +2,7 @@
 id: P108-S7-HELPERPAY
 title: A robot helping on a plot earned nothing for what it delivered
 status: fixed
-commit: (P108 s7)
+commit: c051ca68d
 severity: medium
 area: template bot-garden / the island tick (islWithMate) + Island keep
 found: P108 IW-007 s5 (lane B, "could not verify: earning from the helper's drops"); listed owed in s6

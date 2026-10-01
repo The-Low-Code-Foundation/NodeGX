@@ -2,7 +2,7 @@
 id: P108-S7-UPGRADEDRIVE
 title: The packaged upgrade drive's robot rename no longer saved (a stale drive step, not the game)
 status: fixed
-commit: (P108 s7)
+commit: 106953c10
 severity: low
 area: dev-docs garden-desktop / drive-upgrade.js (the packaged-app drive)
 found: P108 s7, 2026-10-01 (the Mac app built for IW-009: verdict FAIL — family1, family2, islandBackup)

@@ -2,7 +2,7 @@
 id: P108-S7-SPAREST
 title: The shop says "Robots rest there when a job is done" — no robot ever walked to the spa
 status: fixed
-commit: (P108 s7)
+commit: c051ca68d
 severity: medium
 area: template bot-garden / her land (landJob) + the engine's walk home (homeOf)
 found: P108 s7, 2026-10-01 (IW-007 §4 "Session 6" → Not done: the spa's `rest`)
