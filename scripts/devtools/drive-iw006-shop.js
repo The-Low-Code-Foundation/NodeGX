@@ -217,7 +217,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
         await shot(`iw6h-${tag}-tab-${t}`);
         const inPage = got.sw <= got.vw + 1 && got.panel[0] >= 0 && got.panel[1] <= got.vw + 1;
         if (t === 'build' || t === 'animals') {
-          const later = w(lang, t === 'build' ? 'iw6hLaterBuild' : 'iw6hLaterAnimals');
+          // P108 IW-007 (lane A): Animals, shut until a refuge on her land is finished, says build the refuge first (iw7aShut).
+          const later = w(lang, t === 'build' ? 'iw6hLaterBuild' : 'iw7aShut');
           check(`TAB ${tag} ${t}: says "${later}" and sells nothing yet; inside the page`, got.later === later && got.items.length === 0 && got.tabs === 5 && inPage, got);
         } else {
           const want = SHOP.filter((s) => s.tab === t && (t !== 'robots' || ['pip', 'cobble'].includes(s.robot)) && (t !== 'upgrades' || s.kind === 'brain' || s.id === 'can+' || s.id === 'basket+'));

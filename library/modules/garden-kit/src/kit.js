@@ -1711,6 +1711,13 @@
     '@keyframes gd-hop{0%,72%,100%{transform:none}80%{transform:translateY(-16%) scale(1.03,.97)}88%{transform:translateY(0) scale(1.04,.95)}94%{transform:none}}\n' +
     '.gd-pet-name{position:absolute;top:92%;left:40%;transform:translateX(-50%);background:#FFF7E8;border:1.5px solid #C79A63;border-radius:999px;padding:0 7px;font-size:11px;font-weight:800;line-height:1.4;white-space:nowrap;z-index:3;color:#2E2A3D;pointer-events:none}\n' +
     '.gd-world[data-wide="1"] .gd-pet-name{font-size:9px;padding:0 4px;border-width:1px}\n' +
+    // On the island a tile is ~16 px: she is drawn about two tiles tall (as a robot is drawn bigger than its tile), in
+    // front of her refuge — a 13 px rabbit was a speck beside her name (s5 drive, looked at).
+    '.gd-world[data-wide="1"] .gd-cell>.gd-pet{left:-70%;top:-110%;width:180%;height:180%;z-index:3}\n' +
+    '.gd-world[data-wide="1"] .gd-cell>.gd-pet-bowl{right:-20%;bottom:-6%;width:80%;height:80%}\n' +
+    // Two pen places side by side: on the island their names would overlap (a name is wider than a tile), so the one on
+    // an odd column sits a line lower.
+    '.gd-world[data-wide="1"] .gd-pet-name.gd-pet-name-odd{top:178%}\n' +
     '.gd-cell>.gd-patch{z-index:1}\n' +
     '.gd-mi-carrot{background:#FF8A3D;border-radius:50% 50% 50% 50%/30% 30% 70% 70%;width:7px;height:10px;box-shadow:inset 0 2px 0 #48AF70}.gd-m-carrot .gd-pip.gd-on{background:#FF8A3D}\n' +
     '.gd-world[data-wide="1"] .gd-meter.gd-m-carrot{--c:#E06A1E}\n' +
@@ -1723,7 +1730,7 @@
     var fed = mood === 'happy';
     extras.push(spriteEl(fed ? 'bowlCarrots' : 'bowl', 'pet-bowl-' + i, 'gd-thing gd-bowl gd-pet-bowl' + (fed ? ' gd-full' : ''), { 'data-bowl': m ? m.text : String(wholeOf(t.count) || 0) }));
     extras.push(spriteEl(PET_SPRITES[kind][mood], 'pet-' + i, 'gd-pet gd-pet-' + mood, { 'data-animal': kind, 'data-mood': mood, 'data-name': String(t.name || '') }));
-    if (t.name) extras.push(h('span', { key: 'pet-name-' + i, className: 'gd-pet-name', 'data-pet-name': String(t.name) }, String(t.name)));
+    if (t.name) extras.push(h('span', { key: 'pet-name-' + i, className: 'gd-pet-name' + (Math.abs(Math.floor(Number(t.x))) % 2 ? ' gd-pet-name-odd' : ''), 'data-pet-name': String(t.name) }, String(t.name)));
   }
   /** The carrot patch: its carrots by what is left (four places at most); used up, bare soil with sprouts. */
   function patchEls(t, i, m, extras) {

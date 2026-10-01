@@ -35,6 +35,8 @@ for k in kit2d kit3d; do
   [[ $X/$k/deploy/index.html -nt $X/$k/.before ]] && echo "$k deploy fresh" >> $X/summary.txt || echo "$k deploy STALE" >> $X/summary.txt
 done
 ALL=(look earn shop crew crew-perf modes iw001 iw004 iw004-3d island island-3d robots robots-3d ws3d wsnogl olive mamie-ws mamie-isl mamie-isl3d mamie-look3d stones stones-3d post post-3d biscuit kit2d kit3d)
+# P108 IW-007 (lane A): her animals — the Animals tab, a rabbit bought, fed, worn, fed again (2D, 3D) and AC4's frame gate.
+ALL+=(animals animals-3d animals-perf)
 (( $# )) && ALL=("$@")
 for n in $ALL; do
   waitload
@@ -68,6 +70,10 @@ for n in $ALL; do
     biscuit) node scripts/devtools/drive-iw003-biscuit.js $D $J --shots $P/biscuit --json $P/biscuit.json ;;
     kit2d) node scripts/devtools/drive-cg001-kit.js $X/kit2d/deploy --shots $X/kit2d/shots --json $X/kit2d/kit2d.json ;;
     kit3d) node scripts/devtools/drive-ig007-3d.js $X/kit3d/deploy --shots $X/kit3d/shots --json $X/kit3d/kit3d.json ;;
+    # P108 IW-007 (lane A).
+    animals) node scripts/devtools/drive-iw007-animals.js $D $J --shots $P/animals --json $P/animals.json ;;
+    animals-3d) node scripts/devtools/drive-iw007-animals.js $D $J --mode 3d --shots $P/animals-3d --json $P/animals-3d.json ;;
+    animals-perf) node scripts/devtools/drive-iw007-animals.js $D $J --perf --shots $P/animals-perf --json $P/animals-perf.json ;;
     *) echo "unknown drive $n"; (exit 2) ;;
   esac > $P/$n.log 2>&1
   rc=$?
