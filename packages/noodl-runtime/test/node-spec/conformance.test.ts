@@ -189,6 +189,19 @@ const scannerNoProgress = (d: Divergence) => d.difference.threw !== undefined &&
 const easeIsNotAFunction = (d: Divergence) => d.difference.threw !== undefined && /this\.ease is not a function/.test(d.difference.threw);
 
 /**
+ * NSP-013 §6 C21 — States builds each animated value's bezier from its transition's `curve` inside
+ * the frame-end callback (states.ts :811); bezier-easing 1.1.1 THROWS for anything but four finite
+ * numbers with both x in [0, 1] (`{}`, `true`, text, `{ dur, delay }` with no `curve`). The scheduler
+ * logs it and the move is abandoned half-done, with no outcome. Narrow: a `transition…` port was
+ * written, before the divergence, with a truthy value whose `curve` the library refuses — the only
+ * values that reach `BezierEasing` and throw (a falsy one reads the state's Default, :792-793).
+ */
+const acceptedCurve = (points: unknown) =>
+  Array.isArray(points) && points.length === 4 && points.every((p) => typeof p === 'number' && isFinite(p)) && points[0] >= 0 && points[0] <= 1 && points[2] >= 0 && points[2] <= 1;
+const refusedCurveWritten = (d: Divergence) =>
+  d.reference.some((e, i) => i < d.difference.index && e.t === 'set' && /^transition/.test(e.port) && !!(e as { value?: unknown }).value && !acceptedCurve(((e as { value?: { curve?: unknown } }).value as { curve?: unknown }).curve));
+
+/**
  * NSP-011 §6 C6 is node.ts's, not a node's: `setInputValue` merges a later value into a `{ value, unit }`
  * the port once held, on EVERY port of EVERY node. The per-node entries below each carry a hand scenario
  * and must keep firing; this one is the same narrow predicate on any port, counted for every spec, so a
@@ -199,6 +212,7 @@ const C6_ANY_PORT: KnownRow = { row: 'NSP-011 §6 C6 (any port — node.ts) — 
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   'net.noodl.JSONStreamParser': [{ row: 'NSP-013 §6 C17 — a stray `}` (Stream) or `}` `]` `,` (Single) where a value should start: the scanner never advances, the runtime loops forever', matches: scannerNoProgress }],
+  States: [{ row: 'NSP-013 §6 C21 — a transition whose curve bezier-easing refuses throws in the frame-end callback: the move is abandoned half-done, the rest of the queue dropped, no outcome reported', matches: refusedCurveWritten }],
   'net.noodl.animatetovalue': [{ row: 'NSP-013 §6 C19 — an Easing Curve the set does not have (`\'\'`, null, unknown text) throws in the scheduler\'s timer pass, and every timer in the app stops', matches: easeIsNotAFunction }],
   'net.noodl.DateAdd': [{ row: 'NSP-013 §6 C16 — an unknown Unit throws in Date Add\'s setter', matches: unknownUnitThrows }],
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],

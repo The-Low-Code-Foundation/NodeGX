@@ -86,15 +86,18 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
       // list draws ports by the catalog's own patterns (`prop-<property>`, NSP-012's Object family)
       if (node.parameterEncoding?.known && node.parameterEncoding.seededBy) {
         const patterns = (node.parameterEncoding as { patterns?: Array<{ pattern: string; plug: string }> }).patterns ?? [];
+        // every seed at once: a pattern may name two (States' `value-<state>-<value>`, NSP-013 s14) —
+        // for a one-seed node this is the same single parameter it always was
+        const probe = Object.fromEntries(node.parameterEncoding.seededBy.map((seed) => [seed, 'probe']));
         for (const seed of node.parameterEncoding.seededBy) {
           if (patterns.length === 0 || 'probe' in spec.derived!.inputs({ [seed]: 'x {probe}' })) {
             expect(Object.keys(spec.derived!.inputs({ [seed]: 'x {probe}' }))).toContain('probe');
             continue;
           }
-          const inputs = Object.keys(spec.derived!.inputs({ [seed]: 'probe' }));
-          const outputs = Object.keys(spec.derived!.outputs?.({ [seed]: 'probe' }) ?? {});
+          const inputs = Object.keys(spec.derived!.inputs(probe));
+          const outputs = Object.keys(spec.derived!.outputs?.(probe) ?? {});
           for (const p of patterns) {
-            const name = p.pattern.replace(/<[^>]+>/, 'probe');
+            const name = p.pattern.replace(/<[^>]+>/g, 'probe');
             if (p.plug === 'input' || p.plug === 'input/output') expect(inputs).toContain(name);
             if (p.plug === 'output' || p.plug === 'input/output') expect(outputs).toContain(name);
           }

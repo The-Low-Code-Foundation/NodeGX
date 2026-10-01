@@ -87,6 +87,14 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
       branch: '"outcome":"unchanged"',
       why: 'a Clear with nothing to clear writes the reset values every key already holds (text-accumulator.ts :448-453 — Last Message is only ever set beside a non-empty Messages, which Max Messages > 0 never empties)'
     }
+  ],
+  // NSP-013 s14
+  States: [
+    {
+      reducer: 'afterInputs',
+      kind: 'drop-set',
+      why:
+        "the frame end sends every output where the runtime flags it (`world.send` from its working copy, node.ts :832-835), so the frame's observations stand without its `set`; only the NEXT settle shows the state it failed to keep — the queue re-run, the move undone. A sequence ending at that settle cannot show it, and the branch keys are combinations of state names, so which branches end a sequence moves with the seed (seed 13: 1, seed 20727: 9). As Model2's frame end; every hand scenario settles again after its moves, and a frame end reached there is killed"
+    }
   ]
-
 });

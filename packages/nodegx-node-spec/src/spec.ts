@@ -299,6 +299,15 @@ export interface Patch<S, O> {
   emitDerived?: readonly string[];
   sendDerived?: readonly string[];
   /**
+   * NSP-013 s14 — declared and derived pulses in ONE order, for a node that interleaves them:
+   * States pulses `State Changed` (declared) and then `Has Reached <state>` (derived) for every
+   * state a frame passes through, which `emit` and `emitDerived` — derived first, always — cannot
+   * say. An entry is a declared signal output (or an outcome port pulsed outside an invocation,
+   * as `emit` allows) or `{ derived: <name> }`. Queued after `emitDerived` and `emit`; a spec that
+   * needs it uses it alone.
+   */
+  pulses?: ReadonlyArray<SignalKeys<O> | Outcome | { derived: string }>;
+  /**
    * Effects on the world (NSP-007), applied after `set` in this order. None is observable on the
    * wire by itself; each shows through what the world later hands back.
    *   `after`   world timers: `WorldHandlers.timer` is called with the `tag` when the clock passes
@@ -323,9 +332,13 @@ export interface OutcomePatch<S, O> extends Patch<S, O> {
   error?: string;
 }
 
-/** An outcome `afterInputs` resolves for an invocation that reported `deferred`. */
+/**
+ * An outcome `afterInputs` resolves for an invocation that reported `deferred`. `port` names a
+ * declared `outcome: true` input — or a DERIVED one (NSP-013 s14: States' `To <state>`), whose
+ * name the type system cannot know; the interpreter refuses a port no invocation deferred.
+ */
 export interface ResolvedOutcome<I> {
-  port: OutcomeKeys<I>;
+  port: OutcomeKeys<I> | (string & {});
   outcome: Outcome;
   error?: string;
 }
@@ -378,7 +391,7 @@ export interface DerivedPorts<S, O> {
    * per `{placeholder}` in `format`. And: `input 0 … input N+1`, one spare beyond the highest
    * mentioned, as `collectPorts` (nodedefinition.ts) does.
    */
-  inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
+  inputs: (params: Readonly<Record<string, unknown>>) => Record<string, InputDecl>;
   /**
    * The OUTPUT ports these params derive (NSP-012): the Object node's `prop-<p>` value and
    * `changed-<p>` signal per property named. A target registers them at mount the way a graph
@@ -390,15 +403,24 @@ export interface DerivedPorts<S, O> {
   outputs?: (params: Readonly<Record<string, unknown>>) => Record<string, OutputDecl<S>>;
   on: (state: Readonly<S>, port: string, value: unknown, derived: Readonly<Record<string, unknown>>, world: WorldView) => Patch<S, O>;
   /**
+   * NSP-013 s14 — the reducer for a derived SIGNAL input: a port `inputs` or `discover` declares
+   * `{ type: 'signal' }` (States' `To <state>`, one per state named, and any `to-<name>` on first
+   * write). Such a port is pulsed — `signal()`, never `set()` — and reaches this, never `on`. With
+   * `outcome: true` on its declaration the patch carries an outcome on every path (rule 3, checked
+   * at run time only: the type system cannot name a derived port), reported against the port's
+   * own name. A spec with no derived signal input needs none.
+   */
+  signal?: (state: Readonly<S>, port: string, derived: Readonly<Record<string, unknown>>, world: WorldView) => Patch<S, O> | OutcomePatch<S, O>;
+  /**
    * A port the target registers ON FIRST WRITE, whatever the params — the runtime's
    * `registerInputIfNeeded` (node.ts): And accepts any `input <n>`, String Format any name at
    * all, and stores the value for a format that may only later mention it. Returns the port's
    * declaration, or `undefined` for a name the target would refuse. Without this, a spec's
    * derived ports are fixed at mount, which is not what either runtime mechanism does (NSP-004).
    */
-  discover?: (port: string) => ValueInputDecl | undefined;
+  discover?: (port: string) => InputDecl | undefined;
   /**
-   * Port names the GENERATOR may write to, beyond `inputs(params)`, because `discover` accepts
+   * Port names the GENERATOR may write to (or, for a derived signal, pulse), beyond `inputs(params)`, because `discover` accepts
    * them. The generator cannot invent `input 3` or a placeholder name; the spec offers a few.
    */
   candidates?: readonly string[];
@@ -598,10 +620,11 @@ export interface AnyNodeSpec {
   worldPool?: WorldPool;
   on: Record<string, ErasedReducer | undefined>;
   derived?: {
-    inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
+    inputs: (params: Readonly<Record<string, unknown>>) => Record<string, InputDecl>;
     outputs?: (params: Readonly<Record<string, unknown>>) => Record<string, ErasedValueOutput | SignalOutputDecl>;
     on: (state: never, port: string, value: unknown, derived: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
-    discover?: (port: string) => ValueInputDecl | undefined;
+    signal?: (state: never, port: string, derived: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
+    discover?: (port: string) => InputDecl | undefined;
     candidates?: readonly string[];
   };
   afterInputs?: (state: never, inputs: never, world: WorldView) => unknown;

@@ -132,7 +132,7 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   const inReachInputs = (name: string) => !reach || reach.inputs.includes(name);
   // a port with an empty pool (an edit-only port with no examples, NSP-012) is never driven
   const valuePorts = Object.entries(spec.inputs).filter(([, d]) => !isSignalInput(d) && poolFor(d).length > 0);
-  const signalPorts = Object.entries(spec.inputs).filter(([name, d]) => isSignalInput(d) && inReachInputs(name));
+  let signalPorts = Object.entries(spec.inputs).filter(([name, d]) => isSignalInput(d) && inReachInputs(name));
 
   const params: Record<string, unknown> = {};
   for (const [name, decl] of valuePorts) {
@@ -155,6 +155,18 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
     for (const [name, decl] of drivable.slice(valuePorts.length)) {
       if (inReachParams(name) && rng.chance(paramChance)) params[name] = rng.pick(poolFor(decl));
     }
+    // NSP-013 s14 — derived SIGNAL inputs (States' `To <state>`) are pulsed like declared ones: the
+    // ports these params draw, then the candidates `discover` declares a signal. Appended only when
+    // there are any, after every param draw, so a spec without one draws exactly what it drew before
+    const derivedSignals: Array<[string, InputDecl]> = [];
+    for (const [name, decl] of Object.entries(spec.derived.inputs(params))) {
+      if (isSignalInput(decl) && !(name in spec.inputs) && inReachInputs(name)) derivedSignals.push([name, decl]);
+    }
+    for (const name of spec.derived.candidates ?? []) {
+      const decl = spec.derived.discover?.(name);
+      if (decl && isSignalInput(decl) && !(name in spec.inputs) && inReachInputs(name) && !derivedSignals.some(([n]) => n === name)) derivedSignals.push([name, decl]);
+    }
+    if (derivedSignals.length > 0) signalPorts = [...signalPorts, ...derivedSignals];
   }
   const steppable = reach ? drivable.filter(([name]) => inReachInputs(name)) : drivable;
 

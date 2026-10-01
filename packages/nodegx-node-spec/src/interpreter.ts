@@ -243,7 +243,7 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
   const derivedValues: Record<string, unknown> = {};
   for (const [name, decl] of Object.entries(derivedInputs)) {
     if (name in spec.inputs) throw new SpecError(`${spec.type}: derived port "${name}" shadows a declared input`);
-    derivedValues[name] = decl.default;
+    if (!isSignalInput(decl)) derivedValues[name] = decl.default;
   }
   const derivedOutputs = spec.derived?.outputs ? spec.derived.outputs(frozenParams) : {};
   for (const name of Object.keys(derivedOutputs)) {
@@ -305,7 +305,7 @@ function discover(inst: Instance, port: string): InputDecl | undefined {
   if (!decl) return undefined;
   if (port in inst.spec.inputs) throw new SpecError(`${inst.spec.type}: discovered port "${port}" shadows a declared input`);
   inst.derivedInputs = deepFreeze({ ...inst.derivedInputs, [port]: decl });
-  inst.derivedValues = deepFreeze({ ...inst.derivedValues, [port]: decl.default });
+  if (!isSignalInput(decl)) inst.derivedValues = deepFreeze({ ...inst.derivedValues, [port]: decl.default });
   return decl;
 }
 
@@ -339,13 +339,25 @@ export function set(inst: Instance, port: string, value: unknown): void {
     deliverChanges(inst);
     return;
   }
+  if (derived) throw new SpecError(`${spec.type}: "${port}" is a signal input — use signal()`);
   throw new SpecError(`${spec.type}: no value input "${port}"`);
 }
 
 export function signal(inst: Instance, port: string): void {
   const { spec } = inst;
   const declared = spec.inputs[port];
-  if (!declared) throw new SpecError(`${spec.type}: no input "${port}"`);
+  if (!declared) {
+    // NSP-013 s14 — a derived signal input (spec.ts `DerivedPorts.signal`): States' `To <state>`
+    const derived = inst.derivedInputs[port] ?? discover(inst, port);
+    if (!derived) throw new SpecError(`${spec.type}: no input "${port}"`);
+    if (!isSignalInput(derived)) throw new SpecError(`${spec.type}: "${port}" is a value input — use set()`);
+    const reducer = spec.derived?.signal;
+    if (typeof reducer !== 'function') throw new SpecError(`${spec.type}: derived signal input "${port}" and no derived.signal reducer`);
+    inst.trace.push({ t: 'in', port });
+    observe(inst, apply(inst, port, asWriter(inst, () => reducer(inst.state as never, port, inst.derivedValues, inst.view)), derived.outcome === true));
+    deliverChanges(inst);
+    return;
+  }
   if (!isSignalInput(declared)) throw new SpecError(`${spec.type}: "${port}" is a value input — use set()`);
   const reducer = spec.on[port];
   if (typeof reducer !== 'function') throw new SpecError(`${spec.type}: signal input "${port}" has no reducer`);
@@ -395,6 +407,7 @@ interface PatchLike {
   set?: Record<string, unknown>;
   emit?: string[];
   emitDerived?: string[];
+  pulses?: ReadonlyArray<string | { derived: string }>;
   outcome?: ReducerOutcome;
   error?: string;
   send?: readonly string[];
@@ -433,6 +446,22 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
       const outcomePort = spec.outcomes !== undefined && (spec.outcomes as readonly string[]).includes(name);
       if (!outcomePort && (!out || out.type !== 'signal')) throw new SpecError(`${spec.type}.${port}: emit names undeclared signal output "${name}"`);
       inst.pending.signals.push(name);
+    }
+  }
+  // NSP-013 s14 — declared and derived pulses in one order (spec.ts `pulses`)
+  if (patch.pulses) {
+    for (const p of patch.pulses) {
+      if (typeof p === 'string') {
+        const out = spec.outputs[p];
+        const outcomePort = spec.outcomes !== undefined && (spec.outcomes as readonly string[]).includes(p);
+        if (!outcomePort && (!out || out.type !== 'signal')) throw new SpecError(`${spec.type}.${port}: pulses names undeclared signal output "${p}"`);
+        inst.pending.signals.push(p);
+      } else {
+        const name = (p as { derived: string }).derived;
+        const out = inst.derivedOutputs[name];
+        if (!out || out.type !== 'signal') throw new SpecError(`${spec.type}.${port}: pulses names no derived signal output "${name}"`);
+        inst.pending.signals.push(name);
+      }
     }
   }
   if (outcomeRequired) {

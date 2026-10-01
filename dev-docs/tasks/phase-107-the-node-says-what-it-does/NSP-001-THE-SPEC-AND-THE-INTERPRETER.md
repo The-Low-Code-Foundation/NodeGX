@@ -170,3 +170,11 @@ rule 3 at run time (an unresolved slot, a resolution nobody deferred, or a `defe
 `SpecError` at settle). And a patch may carry **`send: [<value outputs>]`** — the runtime's `flagOutputDirty` calls, named
 only where they are conditional (Boolean To String), because a wire holds the last DEFINED value a frame sent (NSP-002 §5
 addendum). NSP-011 §6.3 has the derivations.
+
+**s14 (2026-10-01, NSP-013's States):** a derived input may be a **signal** — `derived.inputs` / `discover` declare
+`{ type: 'signal', outcome? }`, the port is pulsed with `signal()` (a `set()` on it is refused) and reaches
+**`derived.signal(state, port, derived, world)`**, which owes an outcome on every path when its declaration says
+`outcome: true` (checked at run time; `ResolvedOutcome.port` accepts a derived name). And a patch may carry
+**`pulses`** — declared and derived pulses in ONE order (`'stateChanged'`, `{ derived: 'reached-B' }`), queued after
+`emitDerived` and `emit`, for a node that interleaves the two. The generator pulses derived signals only for a spec
+that declares one; the mutants wrap `derived.signal` and read `pulses` into a branch's shape. NSP-013 §6.1g.

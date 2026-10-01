@@ -1,7 +1,7 @@
 # NSP-013 — Batch: dates, time, randomness, parsers, animation
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world) and R4 = continue.
-**Status: 🟡 s13 (2026-10-01) — 23 of 24 conform on the runtime (UUID and Delay are NSP-007's; s11–s13 built the other 21; On App Error by graph scenarios); States is left (§6.4).**
+**Status: 🟡 s14 (2026-10-01) — 24 of 24 conform on the runtime (UUID and Delay are NSP-007's; s11–s14 built the other 22; On App Error by graph scenarios). AC2 (the export) and the deep run are left (§6.4).**
 
 ## 1. The person sentence
 
@@ -305,6 +305,45 @@ What the scenarios pin: a server render sends NO Width or Height but DOES send A
 undefined` is NaN, which is a value; a window of height 0 is Aspect Ratio Infinity, 0 × 0 is NaN. Not rows: the
 description does not promise otherwise. No row.
 
+### 6.1g s14, 2026-10-01 — States: the machine, then its run on the scheduler
+
+**Built:** `src/nodes/states.ts` (the machine — the queue, the first move that jumps, every later move,
+the refusals — then the one timer as Animate To Value's spec keeps it: queued, running, `onStart` once a
+run, `onRunning(t)`, `onFinish`), `bezier-easing.ts` (bezier-easing 1.1.1, the version the viewer pins —
+copied as ease-curves.ts is, because a target owes the same numbers: a single-precision sample table),
+`nearest-name.ts` (diagnostics.ts's, for the Error sentence), 20 hand scenarios; the runtime target
+registers the viewer's node. **Conforms on the runtime at 200** (seed 20727: 19/20 scenarios + 1 under
+C21, 200/200 sequences, 5 attributed to C21) and on seeds 3, 77, 20728, 20729, 99991 (C21 6–11 a run, C6 0–2) → **68 of 147** (T2 10/11).
+
+1. **The format grew two things, both for the first node that needed them** (NSP-001; spec.ts guarded,
+   hashes refreshed, all three stranger rounds re-graded green): a derived input may be a SIGNAL —
+   `{ type: 'signal', outcome? }`, pulsed with `signal()`, reaching `derived.signal` (States' `To
+   <state>`, one per state named and any `to-<name>` on first write); and `pulses`, one ordered list of
+   declared and derived pulses (`State Changed` then `Has Reached <state>`, per state a frame passes
+   through — `emitDerived` always queued first and could not say it). The generator pulses derived
+   signals only for a spec that declares one (every other spec draws what it drew; the pinned digest
+   holds); the mutants wrap `derived.signal` and read `pulses` into a branch's shape. The runtime target
+   asks the spec's declaration whether a port the type's metadata does not list is a signal.
+2. **The runtime target now has the styles the viewer always gives the context** — a project with no
+   colour styles: `resolveColor` is the identity (styles.ts :122-127). Without it every colour transition
+   threw `context.styles` in the timer pass, which would have stopped every timer (C19's mechanism).
+   node.ts :431 resolves every `color` input through it too; the identity changes nothing Color or Color
+   Blend read. Named palette colours are NOT graded; `var(--token)` reads only its own fallback (a play has
+   no document).
+3. **A frame end that writes one output three times leaves the wire on the last DEFINED one** — the first
+   run diverged twice on exactly that (0, then false, then `undefined`: the runtime's wire said false, a
+   read at the end said nothing). The spec sends every output where the runtime flags it (`world.send` at
+   each `flagOutputDirty` site), as Boolean To String's `send` (NSP-011).
+4. **Rows (§6.2): C21, C22, D19**, each measured on the runtime from its own trace, each in the bug
+   ledger. C21 is the only one the spec cannot write: an invocation the runtime never answers.
+5. Mutants: 3986 at seed 20727, 3613 at seed 13; the frame end's `drop-set` is declared equivalent for the
+   whole reducer (equivalent-mutants.ts — the frame's sends stand without its `set`, so only a NEXT settle
+   shows it, and which branch ends a sequence moves with the seed), as Model2's.
+6. **Not graded:** the `values` setter's refusal of a reserved name (it raises on the error channel and
+   registers nothing — no trace event), `states/unreadable-color` (reported only where `CSS.supports` can
+   be asked), palette colours, the editor's `updatePorts` and its rename hints (NSP-020's), a States node
+   in a graph (a wire into `To <state>` — the format allows it; no graph scenario yet).
+
 ### 6.2 Rows for a ruling (R3 (a): the runtime wins until ruled; each counted every run)
 
 | row | where | what the wire shows | plain words | proposed |
@@ -319,6 +358,9 @@ description does not promise otherwise. No row.
 | **D18** | Parse Feed (parsefeed.ts :257-263; model.ts :243-252) | every item carries an `id`, so `collection.set` makes each a NAMED record: two items with one id in a feed are one record — `Items` holds it ONCE with the LATER item's fields, while `Count` (`items.length`) says two. The same id is also the same record app-wide (an Object node with that id, another Parse Feed) — by design for FED-002's store-once, but nothing on the node says the records are shared | *"A feed that repeats a guid shows Count 2 and one item, and the item is the second one."* One scenario | `Count` = what `Items` holds; say on `Items` that an item IS the record of that id |
 | **C19** | Animate To Value (animate-to-value.ts :226, :108; timerscheduler.ts :116-198; nodecontext.ts :500-503) | an Easing Curve the set does not have — `''`, `null`, `undefined`, unknown text — is stored as `undefined`; the run's first curve call throws `this.ease is not a function` inside the scheduler's timer pass, uncaught, EVERY frame from then on; the loop dies before `runningTimers` is reassigned and before `newTimers` join, so every timer in the app stops where it is — other animations freeze or never fire their end signal, Repeat never ticks | *"One Animate To Value with an empty or unknown Easing Curve stops every animation and every Repeat in the app, for good."* Measured app-wide (§6.1d); one scenario + 10 generated per run counted | fall back to Ease Out on an unknown name (one line); separately, catch a timer's throw in `runTimers` so one node cannot stop the others |
 | **C20** | Animate To Value (animate-to-value.ts :208; timerscheduler.ts :180, :185) | `Delay` is stored raw and added to the frame time with a JS `+`: text (`'100'`) CONCATENATES — at time 1000 the run starts at 1000100 (16 minutes); after an hour, weeks — and `undefined` gives a NaN start no frame reaches, so the value does not move and At Target Value does not fire until a number reaches Delay and a new target restarts the run | *"A Delay that arrives as text, or is disconnected, makes the move wait forever."* Two scenarios | `Number(value) \|\| 0` in the setter (one line) |
+| **C21** | States (states.ts :811; bezier-easing 1.1.1 :63-79; node.ts :743-746) | a transition that is not a curve — `{ dur }` with no `curve`, `"easeOut"`, `true`, `{}`, an x outside [0, 1] — throws `BezierEasing` inside the frame-end callback: the queue is already spliced, so the move and every later request of the frame are lost; State does not change and NO outcome is reported (no Done, Failure or Completed); values earlier in the list have already taken the new state's text and true/false. Measured: after `to-B` nothing moves and the next `to-A` reads Unchanged | *"A transition setting that isn't a curve makes every move into that state silently do nothing — no Done, no Failure."* One scenario; 5 of 200 generated (seed 20727) counted. Reached by an agent writing parameters (MCP) or a `*` wire; the curve editor always writes a curve | read a refused transition as the state's Default (or a 0 ms jump — the spec writes the jump), checked before `BezierEasing`; report it once on the node |
+| **C22** | States (states.ts :824-829, :196-258) | the timer is started — and so stopped — only when a move animates something. A move that sets every value at once (Use Transitions off, all curves 0 ms) leaves a run still going: it keeps writing the PREVIOUS state's targets and lands on them, and Has Reached fires for the new state twice. Measured: 0 in A, 100 in B, at 50 ms Use Transitions off + To A → x reads 50, 70, 100 and stays at B's value in A | *"Switch transitions off (or go to a state with 0 ms curves) while a move is running, and the value ends on the old state's value."* One scenario; the spec writes it (R3 (a)) | stop the timer at the start of every move, as `jumpToState` does (:586) |
+| **D19** | States (states.ts :592, :787) | the FIRST move reads `value \|\| 0` whatever the type: a text value the starting state leaves empty is the number 0 (a Text shows "0"), a false is 0. Later moves read the type, but a text a state leaves empty is `undefined` — never sent — so after A → B → A the wire keeps B's text | *"A States text value shows 0 when the node starts, and after a round trip keeps the other state's text."* One scenario; the spec writes it | one empty value per type in both paths (`''`, `false`, 0) |
 | **T3** | the runner — compare.ts `eventKey` (NSP-003) | **two traces whose nested values differed compared EQUAL** — a Date, NaN, a registry array, a unit — from NSP-003 to NSP-012 | a hole shaped like the defect in the gate itself; fixed in s11, the 46 earlier specs re-graded green | closed by the fix; recorded so the s3–s10 readings are read with it |
 
 ### 6.3 Acceptance, measured
@@ -340,7 +382,8 @@ description does not promise otherwise. No row.
 
 ### 6.4 Not done, named
 
-One is left (the four agent parsers are s12's, §6.1b; Parse XML, Parse Feed, Animate To Value, On App Error and
-Screen Resolution s13's, §6.1c–f; UUID and Delay NSP-007's): **States** (1191 lines, dynamic ports — a session of
-its own). The deep run (`NSP_DEEP=10000 NSP_ONLY=…`, a quiet box). AC2. The
-third stranger round is s13's — five world nodes, NSP-006 §5.7; round 4 (digest, zone, registry, graph) is named there.
+Every node is specced (States s14's, §6.1g). Left: the deep run for s11–s14 (`NSP_DEEP=10000 NSP_ONLY=…`, a
+quiet box). AC2 (no node here has an export reach). States' ungraded corners (§6.1g item 6) — a graph scenario
+with a wire into `To <state>` is the cheapest next. The third stranger round is s13's — five world nodes,
+NSP-006 §5.7; round 4 (digest, zone, registry, graph) is named there; States would test the derived-signal
+sentence.

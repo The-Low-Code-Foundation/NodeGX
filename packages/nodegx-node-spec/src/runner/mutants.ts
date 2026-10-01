@@ -57,6 +57,8 @@ export interface PatchLike {
   emit?: readonly string[];
   /** NSP-012: derived pulses, part of the shape like `emit`. */
   emitDerived?: readonly string[];
+  /** NSP-013 s14: declared and derived pulses in one order — part of the shape like `emit`. */
+  pulses?: ReadonlyArray<string | { derived: string }>;
   outcome?: string;
   error?: string;
   /** An `afterInputs` patch: the deferred outcomes it resolves (spec.ts `AfterInputsPatch`). */
@@ -71,7 +73,7 @@ export function shapeOf(patch: unknown): string {
     set: p.set ? Object.keys(p.set).sort() : [],
     // WHICH signals, not how many — the rule `outcomes` already has: an Object node pulsing
     // `changed` once per key written is one branch, not one per count (NSP-012)
-    emit: [...new Set([...(p.emitDerived ?? []), ...(p.emit ?? [])])],
+    emit: [...new Set([...(p.emitDerived ?? []), ...(p.emit ?? []), ...(p.pulses ?? []).map((x) => (typeof x === 'string' ? x : x.derived))])],
     outcome: p.outcome ?? null,
     // the resolved outcomes are part of the shape — WHICH outcomes, not how many: "Set → done" and
     // "Set → unchanged" are two branches; four Sets all unchanged is the same branch as one
@@ -84,6 +86,7 @@ export function shapeOf(patch: unknown): string {
 export function reducerNames(spec: AnyNodeSpec): string[] {
   const names = Object.keys(spec.on).filter((k) => typeof spec.on[k] === 'function');
   if (spec.derived) names.push('derived');
+  if (spec.derived?.signal) names.push('derived.signal');
   if (spec.afterInputs) names.push('afterInputs');
   if (spec.world?.timer) names.push('world.timer');
   if (spec.world?.response) names.push('world.response');
@@ -103,6 +106,7 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
   if (spec.derived) {
     const original = spec.derived.on as unknown as ErasedReducer;
     out.derived = { ...spec.derived, on: wrap('derived', original) as unknown as typeof spec.derived.on };
+    if (spec.derived.signal) out.derived.signal = wrap('derived.signal', spec.derived.signal as unknown as ErasedReducer) as unknown as typeof spec.derived.signal;
   }
   if (spec.afterInputs) {
     out.afterInputs = wrap('afterInputs', spec.afterInputs as unknown as ErasedReducer) as unknown as typeof spec.afterInputs;
@@ -156,7 +160,7 @@ function flip(outcome: string | undefined): string | undefined {
 function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike): PatchLike {
   switch (kind) {
     case 'drop-emit': {
-      const { emit: _e, emitDerived: _d, ...rest } = patch;
+      const { emit: _e, emitDerived: _d, pulses: _p, ...rest } = patch;
       return rest;
     }
     case 'drop-set': {
@@ -198,7 +202,7 @@ export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mut
   for (const b of branches.values()) {
     const ex = b.example;
     const kinds: Array<[MutationKind, Branch | undefined]> = [];
-    if ((ex.emit && ex.emit.length > 0) || (ex.emitDerived && ex.emitDerived.length > 0)) kinds.push(['drop-emit', undefined]);
+    if ((ex.emit && ex.emit.length > 0) || (ex.emitDerived && ex.emitDerived.length > 0) || (ex.pulses && ex.pulses.length > 0)) kinds.push(['drop-emit', undefined]);
     if (ex.set && Object.keys(ex.set).length > 0) kinds.push(['drop-set', undefined]);
     // a `deferred` outcome has nothing to flip (its resolution is afterInputs' branch, mutated there)
     if ((ex.outcome !== undefined && ex.outcome !== 'deferred' && ex.outcome !== 'pending') || (ex.outcomes && ex.outcomes.length > 0)) kinds.push(['flip-outcome', undefined]);

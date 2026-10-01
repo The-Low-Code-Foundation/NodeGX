@@ -50,6 +50,7 @@ import { StreamBuffer } from './stream-buffer';
 import { SetModelProperties } from './set-object-properties';
 import { SetVariable } from './set-variable';
 import { StaticData } from './static-array';
+import { States } from './states';
 import { StringVariable } from './string';
 import { StringFormat } from './string-format';
 import { StringMapper } from './string-mapper';
@@ -115,6 +116,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [ParseFeed.type]: ParseFeed,
   [AnimateToValue.type]: AnimateToValue,
   [ScreenResolution.type]: ScreenResolution,
+  [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
   [JSONStreamParser.type]: JSONStreamParser,
@@ -164,6 +166,7 @@ export {
   ParseFeed,
   AnimateToValue,
   ScreenResolution,
+  States,
   RandomBytes,
   Repeat,
   JSONStreamParser,

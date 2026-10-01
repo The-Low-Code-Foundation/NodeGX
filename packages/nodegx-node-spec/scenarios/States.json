@@ -1,0 +1,123 @@
+[
+  {
+    "name": "the first state is where the node starts: every value jumps to it, State and the At ports are set, and State Changed does NOT fire",
+    "because": "states.ts :277-289 the list arriving queues the first state; :765-768 → jumpToState :580-616 (:601-613 no State Changed on the first)",
+    "params": { "states": "A,B", "values": "x", "value-A-x": 10, "value-B-x": 20 },
+    "steps": ["settle", { "advance": 400 }, "settle"]
+  },
+  {
+    "name": "a later move animates a number on the default curve (ease-out, 300 ms): State and State Changed at once, Done after, the value moves on later frames and Has Reached fires when it lands",
+    "because": "states.ts :769-850 (:791-797 the default curve, :824-829 start, :849 Done); timerscheduler.ts :177-194 join + onRunning(0), :130-174 run and finish; :255-258 onFinish",
+    "params": { "states": "A,B", "values": "x", "value-A-x": 0, "value-B-x": 100 },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 100 }, "settle", { "advance": 100 }, "settle", { "advance": 99 }, "settle", { "advance": 1 }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "Toggle moves to the next state and wraps round after the last; with transitions off every move lands at once and Has Reached fires with it",
+    "because": "states.ts :333-357 Toggle; :359-369 Use Transitions; :799-808 set at once; :839-843 Has Reached when nothing animates",
+    "params": { "states": "A,B,C", "values": "x", "useTransitions": false, "value-A-x": 1, "value-B-x": 2, "value-C-x": 3 },
+    "steps": ["settle", { "signal": "toggle" }, "settle", { "signal": "toggle" }, "settle", { "signal": "toggle" }, "settle", { "signal": "toggle" }, "settle"]
+  },
+  {
+    "name": "asking for the state the node is in is Unchanged; asking twice in a frame for where it is heading is Unchanged at once and queues nothing",
+    "because": "states.ts :672-680 the pending target; :749-754 already there",
+    "params": { "states": "A,B", "values": "x", "useTransitions": false, "value-A-x": 1, "value-B-x": 2 },
+    "steps": ["settle", { "signal": "to-A" }, "settle", { "signal": "to-B" }, { "signal": "to-B" }, { "signal": "toggle" }, "settle"]
+  },
+  {
+    "name": "a state the node does not have: it stays where it is, Error names the states and the nearest one, and the invocation is a Failure (states/unknown-state)",
+    "because": "states.ts :756-762, :708-741 (nearest-name.ts: equal ignoring case wins outright); :465 any `to-<name>` is accepted",
+    "params": { "states": "clicked,idle", "values": "x", "value-clicked-x": 1, "value-idle-x": 2 },
+    "steps": ["settle", { "signal": "to-Clicked" }, "settle", { "signal": "to-idel" }, "settle", { "signal": "to-nothing" }, "settle", { "signal": "to-idle" }, "settle"]
+  },
+  {
+    "name": "a state that does not exist arriving on State (nobody invoked it) pulses Failure bare — no outcome",
+    "because": "states.ts :485-488 the setter route carries no token; :736-740 the bare pulse",
+    "params": { "states": "A,B", "values": "x" },
+    "steps": ["settle", { "set": "currentState", "value": "Z" }, "settle", { "set": "currentState", "value": "B" }, "settle", { "set": "currentState", "value": "B" }, "settle"]
+  },
+  {
+    "name": "with no States at all, Toggle fails at once (states/no-states) and To <state> fails at the frame's end; a State value is dropped silently",
+    "because": "states.ts :339-345, :634-639; :744-747 no list → the invocation fails, a setter's request is dropped",
+    "params": {},
+    "steps": ["settle", { "signal": "toggle" }, "settle", { "signal": "to-A" }, "settle", { "set": "currentState", "value": "A" }, "settle"]
+  },
+  {
+    "name": "A → B → A inside one frame: the state passed through is settled and reports (State Changed, Has Reached B, Done), and only the last move animates",
+    "because": "states.ts :617-632, :688-698 the queue; :804 settleImmediately; NDA-002 §4",
+    "params": { "states": "A,B", "values": "x", "value-A-x": 0, "value-B-x": 50, "transition-A-x": { "curve": [0, 0, 1, 1], "dur": 100, "delay": 0 } },
+    "steps": ["settle", { "signal": "to-B" }, { "signal": "to-A" }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle"]
+  },
+  {
+    "name": "text, true/false and text-style values are set at once on a move, never animated; a true/false the state does not name is false",
+    "because": "states.ts :779-788",
+    "params": { "states": "A,B", "values": "y,label,on", "type-label": "string", "type-on": "boolean", "type-y": "textStyle", "value-A-label": "off", "value-B-label": "on", "value-A-on": 1, "value-A-y": "Body", "value-B-y": "Title" },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "signal": "to-A" }, "settle", { "advance": 400 }, "settle"]
+  },
+  {
+    "name": "the first state's text that the state does not name, and its false, are published as 0 — the first move reads `|| 0` whatever the type",
+    "because": "states.ts :592 (jumpToState) — the later moves read the type (:779-788); NSP-013 §6 D19 (the runtime and the spec agree, R3 (a))",
+    "params": { "states": "A,B", "values": "label,on", "type-label": "string", "type-on": "boolean", "value-A-on": false, "value-B-label": "hello", "value-B-on": true },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "signal": "to-A" }, "settle"]
+  },
+  {
+    "name": "a colour transitions per channel, floored, as #rrggbbaa, and lands on the value its state names (a token's own fallback is read; the document has none)",
+    "because": "states.ts :179-193 onStart, :241-249 the tween, :222-235 lands on the authored value (GAM-006 (b)); color-reader.ts :57-67",
+    "params": { "states": "A,B", "values": "x", "type-x": "color", "value-A-x": "#000000", "value-B-x": "var(--brand, #ff8040)", "transition-B-x": { "curve": [0, 0, 1, 1], "dur": 100, "delay": 0 } },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle"]
+  },
+  {
+    "name": "a colour the reader cannot read (red, an undefined token, transparent is read as no alpha) holds the colour on screen until the end, then lands",
+    "because": "states.ts :188-192, :205-221 holding, :101-105 transparent; P88 R7 — no page to ask, nothing is reported",
+    "params": { "states": "A,B,C", "values": "x", "type-x": "color", "value-A-x": "#102030", "value-B-x": "red", "value-C-x": "transparent", "transitiondef-B": { "curve": [0, 0, 1, 1], "dur": 100, "delay": 0 }, "transitiondef-C": { "curve": [0, 0, 1, 1], "dur": 100, "delay": 0 } },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle", { "signal": "to-C" }, "settle", { "advance": 50 }, "settle", { "advance": 60 }, "settle"]
+  },
+  {
+    "name": "a curve of 0 ms with no delay is a jump; a value's own curve beats the state's Default; a delay holds the value until it passes",
+    "because": "states.ts :791-797 own curve, then Default; :800 0 ms and no delay; :205-206 holding before the delay; :813-814 the run is the longest dur + delay",
+    "params": { "states": "A,B", "values": "x,y", "value-A-x": 0, "value-B-x": 10, "value-A-y": 0, "value-B-y": 10, "transitiondef-B": { "curve": [0, 0, 1, 1], "dur": 0, "delay": 0 }, "transition-B-y": { "curve": [0, 0, 1, 1], "dur": 100, "delay": 50 } },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 25 }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle", { "advance": 30 }, "settle"]
+  },
+  {
+    "name": "a negative delay starts the run in the past: nothing at the join, the next frame is already part-way",
+    "because": "states.ts :813 Math.min(delay, c.delay); timerscheduler.ts :180 start = now + delay, :185 onRunning(0) only for a delay of exactly 0, :132 the next frame",
+    "params": { "states": "A,B", "values": "x", "value-A-x": 0, "value-B-x": 100, "transition-B-x": { "curve": [0, 0, 1, 1], "dur": 100, "delay": -50 } },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 10 }, "settle", { "advance": 10 }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "a new move mid-run restarts from wherever the value is, and the interrupted run never reaches",
+    "because": "states.ts :777 the start values are the values on screen; timerscheduler.ts :43-57 start stops a running timer, a stopped one never finishes",
+    "params": { "states": "A,B", "values": "x", "value-A-x": 0, "value-B-x": 100, "transitiondef-A": { "curve": [0, 0, 1, 1], "dur": 100, "delay": 0 }, "transitiondef-B": { "curve": [0, 0, 1, 1], "dur": 100, "delay": 0 } },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 50 }, "settle", { "signal": "to-A" }, "settle", { "advance": 50 }, "settle", { "advance": 60 }, "settle"]
+  },
+  {
+    "name": "a move that animates nothing does not stop a run still going: the old run carries on and lands the value on the PREVIOUS state's target",
+    "because": "states.ts :824-829 the timer is only started (and so only stopped) when something animates; :231-232 the run lands on the target onStart read; :256 Has Reached names the state the node is in by then; NSP-013 §6 C22 (the runtime and the spec agree, R3 (a))",
+    "params": { "states": "A,B", "values": "x", "value-A-x": 0, "value-B-x": 100, "transitiondef-B": { "curve": [0, 0, 1, 1], "dur": 100, "delay": 0 } },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 50 }, "settle", { "set": "useTransitions", "value": false }, { "signal": "to-A" }, "settle", { "advance": 20 }, "settle", { "advance": 40 }, "settle"]
+  },
+  {
+    "name": "a value's input written while the node is in that state reaches the output at once; in another state it waits for the move",
+    "because": "states.ts :501-509",
+    "params": { "states": "A,B", "values": "x", "useTransitions": false, "value-A-x": 1, "value-B-x": 2 },
+    "steps": ["settle", { "set": "value-A-x", "value": 5 }, "settle", { "set": "value-B-x", "value": 9 }, "settle", { "signal": "to-B" }, "settle"]
+  },
+  {
+    "name": "State drives the machine; the old Start State input still moves it, and the States list arriving moves a node that is in no state to it",
+    "because": "states.ts :474-488; :284 `startState || states[0]` when the list arrives and the node is in no state",
+    "params": { "values": "x", "useTransitions": false },
+    "steps": [{ "set": "startState", "value": "B" }, "settle", { "set": "states", "value": "A,B" }, "settle", { "set": "currentState", "value": "A" }, "settle"]
+  },
+  {
+    "name": "a State value that arrives BEFORE the States list is overruled by it: the list queues the first state after, and the node ends there",
+    "because": "states.ts :485-488 queues B; :284 the list arriving finds no state and queues A after it; :688-698 B is passed through, A is where it ends",
+    "params": { "currentState": "B", "states": "A,B", "values": "x", "value-A-x": 1, "value-B-x": 2 },
+    "steps": ["settle", { "advance": 400 }, "settle"]
+  },
+  {
+    "name": "a transition that is not a curve (no `curve`, or x outside [0, 1]): the spec sets the value at once — on the runtime the move throws inside the frame-end callback, the state does not move and no outcome is reported",
+    "because": "states.ts :811 BezierEasing(transitionCurve.curve); bezier-easing 1.1.1 :63-79 throws; node.ts :743-746 the callback, nodecontext.ts :465-472 logs it",
+    "row": "NSP-013 §6 C21",
+    "params": { "states": "A,B", "values": "x,y", "value-A-x": 0, "value-B-x": 10, "value-A-y": 0, "value-B-y": 10, "transition-B-y": { "dur": 100, "delay": 0 } },
+    "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 100 }, "settle", { "signal": "to-A" }, "settle"]
+  }
+]

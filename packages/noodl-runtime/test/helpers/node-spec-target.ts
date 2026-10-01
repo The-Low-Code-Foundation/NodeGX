@@ -140,13 +140,13 @@ function resetRegistry(world: World): void {
 /**
  * The picker nodes the VIEWER provides (census `providedBy: noodl-viewer-react`) that this phase
  * has specced (NSP-011: Color, Value Changed, Color Blend; NSP-007: Delay; NSP-012: the event
- * pair and Repeater Item; NSP-013: Repeat, Animate To Value, Screen Resolution). `NoodlRuntime` registers the
+ * pair and Repeater Item; NSP-013: Repeat, Animate To Value, Screen Resolution, States). `NoodlRuntime` registers the
  * runtime's own list; the viewer's `register-nodes.js` adds these on top in the app. The same
  * definition objects are registered here, loaded from the viewer's source through jest's require
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -237,6 +237,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     }
   });
   const context = rt.context;
+  // NSP-013 s14 — the viewer always gives the context its project's styles (viewer.jsx :185, :322);
+  // the headless runtime gives none, and States' colour tween calls `context.styles.resolveColor` in
+  // the scheduler's timer pass, so without one every colour transition threw there. This is a
+  // project with no colour styles: `resolveColor` hands back what it is given (styles.ts :122-127).
+  // node.ts :431 resolves every `color` input through it too — the identity, so Color and Color
+  // Blend read exactly what they read before. Named palette colours are not graded (NSP-013 §6.4).
+  (context as unknown as { styles: { resolveColor(color: unknown): unknown } }).styles = { resolveColor: (color) => color };
   const states = new Map<string, State>();
   const byNodeId = new Map<string, State>();
   let next = 0;
@@ -278,8 +285,22 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
 
   function isSignalInput(s: State, port: string): boolean {
     const input = s.h.metadata.inputs[port];
-    const t = input && input.type;
+    if (!input) return derivedSignal(s, port);
+    const t = input.type;
     return !!t && (t === 'signal' || (typeof t === 'object' && (t as { name?: string }).name === 'signal'));
+  }
+  /**
+   * NSP-013 s14 — a port the type's metadata does not list is one the node registers itself
+   * (`registerInputIfNeeded`), with a setter and no type: States' `to-<state>` is an
+   * `EdgeTriggeredInput`, a signal by its setter alone. What it IS is the spec's derived
+   * declaration for the graph's parameters — the same thing the editor draws the port from.
+   */
+  function derivedSignal(s: State, port: string): boolean {
+    const derived = specFor(s.h.type)?.derived;
+    if (!derived) return false;
+    const params = ((s.h.node as unknown as { model?: { parameters?: Record<string, unknown> } }).model?.parameters ?? {}) as Record<string, unknown>;
+    const decl = derived.inputs(params)[port] ?? derived.discover?.(port);
+    return !!decl && decl.type === 'signal';
   }
   function isSignalOutput(s: State, port: string): boolean {
     const output = s.h.metadata.outputs[port];
