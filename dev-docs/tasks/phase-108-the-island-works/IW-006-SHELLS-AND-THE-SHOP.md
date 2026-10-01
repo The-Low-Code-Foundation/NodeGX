@@ -371,7 +371,41 @@ drawer, Play 4 px below the first screen on the French eggs at 390 (lane L); "mo
    day's backup rewritten as v5 and its save code decoded by the current template; every request on 127.0.0.1.
    GARDEN_OLIVE_STUB=1 on every launch (no model loaded: the owl is CG-004's drive, not this one's).
 
-**Readings** — READINGS-PLACEHOLDER (filled in the next commit, after the last drive run).
+**Readings** (worktree `iw006-owed`; each exit 0 unless said; previous = brief §8 on `b40be26c8`):
+
+| gate | exit | total | previous |
+|---|---|---|---|
+| `iw006Owed.test.ts` (NEW: O1 3 · O2 3 · O3 3 · O4 3 rows + 7 arms) | 0 | **19 / 19** | — |
+| cg002Engine · cg003Template · cg005Olive · cg006Requests · ig004Island | 0 each | 259 · 148 · 41 · 83 · 38 | same |
+| cg001GardenKit · ig007Garden3d · iw004Blocks · p108s2Join · iw003Missions | 0 each | 57 · 50 · 59 · 4 · 63 | same |
+| iw006Save · iw006Earn · iw006Shop · iw008Crew · iwLook · p108s4Join | 0 each | 17 · 34 · 34 · 25 · 15 · 3 | same |
+| `iw007Build` | 1 | **18 passed, 4 failed, 22** — the 2 `[B]` and 2 `[A]` rows (by design); the two `[base]` rows the retune reddened read SHOP and are green | 18 / 4 / 22 |
+| shell `node --test tests/*.test.js` | 0 | 92 / 92 (with and without `build-output`) | 92 |
+| `npm run template:garden` | 0 | regenerated and committed with each group; drive-all's generate: 0 drift | 0 |
+| `drive-all.sh owed robots robots-3d earn shop crew iw001 stones` (one deploy, `iw006-owed-scratch/drives/`) | 0 | page drive **331 / 331** (generate 0, drift none, assemble 0, deploy 0 fresh) · **owed 19 / 19** (NEW) · robots 60 / 60 · robots 3D 4 / 4 · earn 15 / 15 · shop 60 / 60 · crew 39 / 39 · IW-001 38 / 38 · stones 32 / 32 | 331 · — · 60 · 4 · 15 · 60 · 39 · 38 · 32 |
+| `drive-upgrade-v4.js --v4-exe <the 2026-09-29 v4 package> --exe <this lane's package>` (AC5) | 0 | **18 / 18** (`iw006-owed-scratch/upgrade/final.{log,json}`) | — |
+| `drive-upgrade.js --exe <this lane's package>` (CG-004 AC8/AC9, the same build relaunched) | 0 | **10 / 10** PASS (`upgrade/orig.json`) | — |
+
+AC5's readings: band 10–12 (Noa FR, Sam EN): the v4 app stored v 4 with both kids; launch 2 found it **v5 2 ms** after the
+page was drawn (no tap); Noa's 4 robots, 9 stickers, 3 hats, 9 plots (each its robot and its program's blocks) and Sam's
+2 / 1 / 1 / 2 identical before and after; Noa's island in French (9 requests' titles), Sam's in English (2); the day's
+backup v4 after launch 1, v5 after launch 2, its code decoded by the current template to both kids. Band 7–9 (Léa FR):
+the stored family IS the fixture's model; v5 in 1 ms; her island in French. Hosts: 127.0.0.1 (199) and data: (56) only.
+The packaged app's page declares SAVE_VERSION 5, the v4 one 4 (read from each bundle on disk).
+
+**Screenshots looked at** (`iw006-owed-scratch/drives/pages/owed-shots/`): `iw6o-1368-fr-win-shop.png` — « Merci,
+Cobble ! » 26 px, « +17 🐚 coquillages pour le travail », then « Nouveau dans la boutique : une plus grande hotte, 🐚 15 »
+the same small grey; `iw6o-1024-en-win-shop.png` (the dev deploy) — the same in English; `iw6o-1368-fr-robots-slot.png` —
+four cards: Pip « … après « Arrose les deux rangées de la même façon » : un plus grand arrosoir, 🐚 15 », Cobble « dans la
+boutique de l’île : une plus grande hotte, 🐚 15 », Poche (boots, after « Rapporte ma balle du mur »), Écho (the can) — no
+islander named; `iw6o-1024-en-robots-sent.png` — "Send Bubbles to a job", his post-box chip ink, "Bubbles works on “Bring
+my letter from the post box” now."; Pip's chip on the tulip door ink; `iw6o-1368-fr-island-card.png` — the island: Bubbles
+drawn on the post box's plot, its card « Bubbles travaille ici », the request list « ✓ fait · Bubbles travaille ici »;
+`iw6o-390-fr-robots-send.png` — the send chips wrapping on two lines inside the card.
+
+**Deleted after the drives (disk):** `garden-desktop/shell/dist` (the package, 706 MB), `garden-desktop/shell/build-output`
+(26 MB, no model), the v4 package's copy in this lane's scratch (1.1 GB; primary's `shell/dist` was only read), the drives'
+throwaway homes, the dev deploy, every drive's screenshots but `owed-shots/`.
 
 **Not done / not mine:** opening the shop from My robots' slot (it says where — above); the land in My robots' send list
 (the hook — lane B's); a Windows run of the v4 drive (CI's job builds Windows; the v4 app here is a Mac package).
@@ -397,4 +431,7 @@ aide {m} sur « {plot} » maintenant. » · « Deux robots travaillent déjà su
 
 **Could not verify:** the tablet; Windows (the v4 drive runs on a Mac package); the owl in the upgraded app (stubbed — a
 model on a shared box is the exam's CPU); notarisation (`dist:mac` skips it: no notarize options); the cause of one
-renderer console line in launch 2 of the v4 drive (READINGS-PLACEHOLDER).
+renderer console line in launch 2 of the v4 drive, both bands — « Electron sandboxed_renderer.bundle.js script failed to
+run: TypeError: Cannot destructure property 'preloadScripts' of 'binding.startupData' as it is null » — the page ran and
+every clause held; the v4 app's launches and CG-004's drive relaunching one build (both Electron 43.2.0, the same
+webPreferences) did not log it: it appears when the current build opens a home a DIFFERENT build left. Not chased.
