@@ -48,8 +48,8 @@
     ]
   },
   {
-    "name": "Two Do pulses in one frame: done then unchanged, in press order",
-    "because": ":42 a token per press, :44 each press's callback in order",
+    "name": "Two Do pulses in one frame: done then unchanged, in press order — and the next frame re-reports nothing",
+    "because": ":42 a token per press, :44 each press's callback in order; the presses are consumed (NSP-013 s12: the trailing settle is what grades the reset — the generated sequences only killed it by luck, T4)",
     "world": {
       "registry": {
         "models": {
@@ -80,6 +80,7 @@
       {
         "signal": "clear"
       },
+      "settle",
       "settle"
     ]
   },

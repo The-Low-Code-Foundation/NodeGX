@@ -414,7 +414,10 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // a node in a component's scope is one of the scope's nodes — what `getNodesWithType` reads
     if (scope) scope.nodes[id] = node as never;
     // the graph's parameters, for the two nodes that read them off `this.model` (NSP-012)
-    (node as unknown as { model?: unknown }).model = { type, parameters: { ...params } };
+    // `removeListenersWithRef` because `_onNodeDeleted` calls it FIRST (node.ts :1312-1315): without it
+    // every teardown threw on its first line, `dispose` swallowed the throw, and no node's delete
+    // listeners ever ran — Delay's and Repeat's timers were never stopped (NSP-013 s12, T7)
+    (node as unknown as { model?: unknown }).model = { type, parameters: { ...params }, removeListenersWithRef: () => undefined };
     // the derived outputs the spec declares for these params — registered as a wire would make the runtime do
     const spec = specFor(type);
     if (spec?.derived?.outputs) {
@@ -542,7 +545,21 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       actionRegistry.reset();
       stateHistoryManager.setClock(() => w.clock.now());
       resetRegistry(w);
+      // NSP-013 s12 — the last frame's time is the context's, so it outlived the play that ran the
+      // frame: a Repeat started before a play's first settle read the PREVIOUS play's last frame time
+      // (repeat.ts :120-122) and ticked early or late. Found only once the runner's sequences stopped
+      // repeating across days (T4); a fresh context starts at 0 (nodecontext.ts :257), so each play does.
+      context.currentFrameTime = 0;
+      // NSP-013 s12 (T8) — the play's console goes to a sink. Jest formats a logged Error through
+      // `source-map`, whose quick-sort calls `Math.random` — which during a play IS the world's
+      // stream — once per process, while the map cache is cold: the first play that logs one (an
+      // array port's bad literal, node.ts :456) lost world draws to the host and minted other ids.
+      // What the runtime prints is not in the trace; nothing a node does reads it back.
+      const consoleMethods = ['log', 'info', 'warn', 'error', 'debug'] as const;
+      const hostConsole = consoleMethods.map((m) => console[m]);
+      for (const m of consoleMethods) console[m] = () => undefined;
       return () => {
+        consoleMethods.forEach((m, i) => (console[m] = hostConsole[i]));
         installed.restore();
         stateHistoryManager.setClock(null);
         world = undefined;
@@ -555,7 +572,15 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       if (!world) throw new Error('runtime: advance() without a world — install one for the play');
       s.trace.push({ t: 'advance', ms });
       await yieldToEventLoop(); // what the world already delivered lands before time passes
-      world.clock.advance(ms);
+      // Timer by timer, yielding between (world.ts CLOCK, T6 — NSP-013 s12): one sweep fired an
+      // answer due at +100 and a timeout due at +30000 back to back, and the answer's `.then` chain
+      // never ran before the timeout aborted it. An event loop runs those microtasks in between.
+      const target = world.clock.now() + Math.max(0, ms);
+      for (let due = world.clock.nextDue(); due !== undefined && due <= target; due = world.clock.nextDue()) {
+        world.clock.advance(due - world.clock.now());
+        await yieldToEventLoop();
+      }
+      world.clock.advance(target - world.clock.now());
       await yieldToEventLoop(); // and what the move delivered lands before the next step
     },
 
@@ -575,6 +600,16 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       } catch {
         // a node whose teardown assumes a scope it never had; the instance is unreachable anyway
       }
+      // NSP-013 s12 (T7) — the play is over, so is its work. A disposed node left in the context's
+      // dirty list or after-update callbacks ran in the NEXT play's first frame and drew from THAT
+      // play's random stream (Filter Collection minted other ids: a divergence that vanished on a
+      // fresh target). Timers too: a teardown that throws part-way (see the stand-in `model` at
+      // mount) leaves them in the scheduler, and a play must not inherit them either.
+      const c = context as unknown as { _dirtyNodes: unknown[]; callbacksAfterUpdate: unknown[]; timerScheduler: { runningTimers: unknown[]; newTimers: unknown[] } };
+      c._dirtyNodes = [];
+      c.callbacksAfterUpdate = [];
+      c.timerScheduler.runningTimers = [];
+      c.timerScheduler.newTimers = [];
     },
 
     mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[], components?: Readonly<Record<string, ComponentDecl>>) {

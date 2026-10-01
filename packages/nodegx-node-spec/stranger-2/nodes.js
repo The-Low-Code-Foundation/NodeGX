@@ -182,8 +182,9 @@ class BooleanToString {
   static get outputs() { return { currentValue: 'value', inputChanged: 'signal' }; }
   constructor() { this.sel = undefined; this.yes = ''; this.no = ''; }
   read() { return { currentValue: this.sel ? this.yes : this.no }; }
-  trueString(fx, v) { this.yes = v; fx.only.apply(fx, this.sel ? ['currentValue'] : []); }
-  falseString(fx, v) { this.no = v; fx.only.apply(fx, this.sel ? [] : ['currentValue']); }
+  // v2: a string identical (===) to the one held does nothing at all, not even a send
+  trueString(fx, v) { if (this.yes === v) return fx.only(); this.yes = v; fx.only.apply(fx, this.sel ? ['currentValue'] : []); }
+  falseString(fx, v) { if (this.no === v) return fx.only(); this.no = v; fx.only.apply(fx, this.sel ? [] : ['currentValue']); }
   input(fx, v) {
     if (this.sel === v) return fx.only();
     this.sel = v;

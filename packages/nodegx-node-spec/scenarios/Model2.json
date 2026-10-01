@@ -285,5 +285,263 @@
       "settle"
     ],
     "row": "NSP-012 §6 C11"
+  },
+  {
+    "name": "A value written and then written BACK in one frame stores the last one: the write equal to what the record holds still replaces the held value, so nothing changes",
+    "because": ":479-490 userInputSetter — inputValues takes the value before :485 compares; the store at the frame end writes the held value (NSP-013 s12: only luck in the generated sequences graded this, T4)",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "properties": "a",
+      "modelId": "m1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "prop-a",
+        "value": 9
+      },
+      {
+        "set": "prop-a",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "after null on Id unbinds, a property value is HELD, not written into the record the node was bound to",
+    "because": ":394-398 setModelID with an empty id → setModel(undefined); :325 a store with nothing bound keeps the value (NSP-013 s12: the generated sequences only graded the unbind's state by luck, T4)",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "properties": "a",
+      "modelId": "m1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": null
+      },
+      "settle",
+      {
+        "set": "prop-a",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "ROW C6 — a later value after a unit object held on a property input is merged into it by node.ts: the Fetch that binds writes { value: false, unit }",
+    "because": "node.ts setInputValue :410-420 (NSP-011 §6 C6, R7) — the runner's shrink of generated seed 4128598514 (s12). The held value reaches the record only when a Fetch binds it; Properties left empty so no `<p> Changed` port (row C11) is in the way",
+    "row": "NSP-011 §6 C6",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "prop-a": {
+        "unit": "px",
+        "value": 1
+      }
+    },
+    "steps": [
+      {
+        "set": "prop-a",
+        "value": false
+      },
+      {
+        "set": "modelId",
+        "value": -1
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Id changes unticked: a new Id is stored and sent but binds nothing — the next Fetch binds the STORED Id",
+    "because": ":265-270 — with `runOnChange-modelId` off only the id is kept; :349-354 Fetch binds `this._internal.modelId` (NSP-013 s12: the store was graded only by luck in the generated sequences, T4)",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "runOnChange-modelId": false
+    },
+    "steps": [
+      {
+        "set": "modelId",
+        "value": "m1"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a plain object on Id naming the record already bound writes its fields INTO it: the node hears that write — Changed for a key that differs, nothing for one that does not",
+    "because": ":259-260 Model.create sets every other key (model.ts `set` notifies on !==); :107-116 the bound record's listener pulses Changed (NSP-013 s12: reduced from generated seed 1104497702 on run seed 24680, T4). Properties left empty so no `<p> Changed` (row C11) is in the way",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "modelId": "m1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": {
+          "id": "m1",
+          "a": 1
+        }
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": {
+          "id": "m1",
+          "a": 9
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Id changes unticked, bound to m1, Id m2 stored: a plain object naming m1 writes into the bound m1 (Changed) AND is stored as the Id — the next Fetch binds m1",
+    "because": ":259-260, :265-270 the converted id is stored whatever binds; :349-354 Fetch binds the stored id (NSP-013 s12, the store beside the own-write reaction)",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "modelId": "m1",
+      "runOnChange-modelId": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "m2"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": {
+          "id": "m1",
+          "a": 9
+        }
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ]
   }
 ]

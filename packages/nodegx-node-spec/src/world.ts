@@ -14,7 +14,8 @@
  *   CLOCK.  Time starts at 0 and moves ONLY on an `advance` step — never on its own. `advance(ms)`
  *           first lets any answer already delivered land (a target with an event loop flushes
  *           its microtasks), then moves the clock, firing every timer due on the way in order of
- *           (due time, order scheduled). A settle is a frame AT the current time; it does not move
+ *           (due time, order scheduled) — and what each timer delivers lands BEFORE the next one
+ *           fires, as on an event loop (a target with one yields between timers, `nextDue`; T6). A settle is a frame AT the current time; it does not move
  *           the clock. Every world timer is a JavaScript timer and keeps Node's rule for the
  *           delay: `Number(ms)`, and anything that is not a number from 1 to 2^31-1 is 1 — so a
  *           timer never fires in less than 1 ms, `setTimeout(fn, 0)` fires at +1, `NaN` is 1.
@@ -182,6 +183,18 @@ export class Clock {
 
   pending(): number {
     return this.timers.length;
+  }
+
+  /**
+   * The earliest due time of a pending timer, or undefined. A target with an event loop steps an
+   * `advance` timer by timer with this, yielding between them (NSP-013 s12, T6): in a browser the
+   * microtasks a timer starts — a fetch's `.then` chain — run before the next timer fires, so an
+   * answer due at +100 lands before a timeout due at +30000 in the same `advance`.
+   */
+  nextDue(): number | undefined {
+    let due: number | undefined;
+    for (const t of this.timers) if (due === undefined || t.due < due) due = t.due;
+    return due;
   }
 }
 

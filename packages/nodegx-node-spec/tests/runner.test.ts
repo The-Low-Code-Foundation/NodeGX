@@ -38,8 +38,8 @@ import type { AnyNodeSpec, Scenario, Step } from '../src';
 
 const interpreter = interpreterAdapter();
 
-/** sha256 (first 16 hex) of JSON.stringify(generateRun(Counter, 1, 50)), pinned 2026-09-30. */
-const PINNED_DIGEST_SEED_1 = 'daa8363541ba2c3e';
+/** sha256 (first 16 hex) of JSON.stringify(generateRun(Counter, 1, 50)), pinned 2026-09-30; re-pinned 2026-10-01 when `sequenceSeed` stopped sharing sequences across runs (NSP-013 §6.1b T4). */
+const PINNED_DIGEST_SEED_1 = 'b004e4695898d2d3';
 
 describe('AC2 — the seed is the only input', () => {
   test('mulberry32 and sequenceSeed are pure', () => {
@@ -48,6 +48,18 @@ describe('AC2 — the seed is the only input', () => {
     expect([a.next(), a.next(), a.int(10)]).toEqual([b.next(), b.next(), b.int(10)]);
     expect(sequenceSeed(7, 3)).toBe(sequenceSeed(7, 3));
     expect(sequenceSeed(7, 3)).not.toBe(sequenceSeed(7, 4));
+  });
+
+  test('T4 — a run seed is a new rotation: adjacent days share no sequence in their first 200, and thirty days are 6,000 distinct sequences', () => {
+    // NSP-013 §6.1b — `runSeed ^ (index + 1)` made day d's sequence i day d′'s sequence i′; adjacent days shared 192 of 200
+    const run = (seed: number) => Array.from({ length: 200 }, (_, i) => sequenceSeed(seed, i));
+    for (const day of [20727, 20728, 1, 0x7fffffff]) {
+      const today = new Set(run(day));
+      expect(run(day + 1).filter((s) => today.has(s))).toEqual([]);
+    }
+    const month = new Set<number>();
+    for (let day = 20727; day < 20757; day++) for (const s of run(day)) month.add(s);
+    expect(month.size).toBe(6000);
   });
 
   test('two generations of one run are identical, and the run matches its pinned digest', () => {

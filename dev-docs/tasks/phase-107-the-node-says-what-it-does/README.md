@@ -167,6 +167,7 @@ npm run spec-ledger            # NSP-009 — ratcheted in PR CI
 > **s10 (NSP-012 T4): 46 of 147 conform on the runtime (31.3%) — T1 31/46 · T2 2/11 · T3 1/39 · T4 12/27 (a T4 node conforms when every `N` graph scenario naming it passes on the runtime, claims from its own sentences; Repeater Item's handshake half is out of reach until the Repeater is specced); 1 exempt (Run Tasks — NSP-015's component boundary); 2 on the export (unchanged). GRAPH: 42 scenarios (14 contract + 6 shared-state + 22 node), 42 / 42 on the runtime (5 known rows: G1, C11, C12, C13, C14); on the export 1 passed + 2 declared differences + 1 known, 39 outside in its words. Catalog parity: 34 (T4 nodes have no reducer spec).**
 > **s11 (NSP-013 first half): 58 of 147 conform on the runtime (39.5%) — T1 42/46 · T2 7/11 (Delay, UUID, Now, Random Bytes, Unique Id, Repeat; Hash is T1 in the census) · T3 1/39 · T4 12/27; 1 exempt; 2 on the export (unchanged). Every date node graded in two zones, one across a DST change; Hash and Random Bytes byte for byte under a seed. GRAPH: 42 / 42 on the runtime (unchanged). Catalog parity: 46. ⚠️ Every number before this one was read through a comparison that saw no nested key (NSP-013 §6.2 T3); re-graded under the real one, nothing moved.**
 > **s12 (NSP-013, the agent parsers): 62 of 147 conform on the runtime (42.2%) — T1 46/46 · T2 7/11 · T3 1/39 · T4 12/27; 1 exempt; 2 on the export (unchanged). JSON Stream Parser is graded through a seam that turns the runtime's infinite loop into a throw (row C17, counted). GRAPH: 42 / 42 (unchanged). Catalog parity: 50.**
+> **⚠️ s12, T4: every daily reading from s2 to s12 was nearly ONE reading.** The runner's `sequenceSeed` made adjacent days share 192 of their 200 sequences — thirty days of PR-CI reached 429 distinct sequences, not 6,000. Fixed (NSP-013 §6.1b); under a real rotation ten mutants turned out to have been killed by luck (now each has a scenario), Boolean To String's s4 spec turned out wrong (v2, stranger round 2 re-handed) and the Object node's s9 spec incomplete (v2), row C6 reached Object, Variable and HTTP's Headers (and is now counted on any port), and four harness defects surfaced and were fixed: the runtime target leaked the last frame's time between plays (T5), fired every due timer in one sweep with no microtasks between (T6), never finished a teardown so timers and dirty nodes outlived their play (T7), and let jest's source-map formatting draw from the world's random stream (T8). The 62 stand.**
 
 Reported per target: *conforms on the runtime · conforms on the export · exempt with a reason* —
 and, from R6, *ports derivable without a viewer: N of 147* and *catalog parity: N of 147*.
@@ -283,6 +284,11 @@ years (D15) and Date Compare ignores it. Refuse it, or read it as days?"*; **D14
 timestamp or a null on Date is 'Invalid Date' when no Timezone is set and a rendered date when one is. One rule
 for both — read it as the rest of the family does?"*. **T3** is not a ruling: the runner's own comparison compared
 every nested value as `{}` from s2 to s10 and is fixed; it is written down so the earlier readings are read with it.
+Nor are **T4** (s12: the daily seed rotation repeated almost every sequence from day to day — fixed), **T5** (s12:
+the runtime target leaked the last frame's time from one play into the next — fixed) **T6** (s12: the runtime
+target's clock fired due timers back to back with no microtasks between — fixed), **T7** (s12: no teardown in the
+runtime target ever finished — fixed) and **T8** (s12: jest's source-map formatting drew from the world's random
+stream — fixed).
 
 **Also for a ruling, the second batch's rows** ([NSP-012 §6.2](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md), s9,
 2026-10-01 — none graded by any test before). The row an author meets first: **C11** — plain words: *"Every

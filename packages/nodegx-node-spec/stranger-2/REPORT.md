@@ -264,3 +264,45 @@ sorted by name, pulses, outcomes, then empties it. Derived ports are a small reg
 (`atMount(params)` and `accept(name)` on the node class), consulted only after the declared ports. There are
 no reducers, no patches, no frozen state and no spec object; the coercion table and the canonicaliser are
 re-written from the tables in `coerce.ts` and `canonical.ts`.
+
+## Round 2b (NSP-013 s12) — Boolean To String v2
+
+**What changed, as read from the spec.** `version: 2` adds a same-value guard to the two string inputs.
+Writing `String for true` (or `String for false`) with a value `===` to the one the node already holds now
+does nothing at all: no state change and an empty `send` list (`{ send: [] }`), so the write records nothing
+on the wire. Only a *different* value is stored, and it is sent exactly as in v1 (true string only while
+Selector is truthy, false string only while it is not). `Selector` already had this guard in v1; the strings
+now match it. It is observable in one case, which the new scenario pins: the initial strings are `''`, so
+`falseString = ''` at mount sends nothing; if Selector then flips to true while `String for true` is unset
+(`undefined`) in the same frame, Current Value ends the frame `undefined` and the wire stays empty, where v1
+would have carried the `''` the mount write sent.
+
+**What I changed** (`nodes.js`, Boolean To String only):
+
+```js
+// v2: a string identical (===) to the one held does nothing at all, not even a send
+trueString(fx, v) { if (this.yes === v) return fx.only(); this.yes = v; fx.only.apply(fx, this.sel ? ['currentValue'] : []); }
+falseString(fx, v) { if (this.no === v) return fx.only(); this.no = v; fx.only.apply(fx, this.sel ? [] : ['currentValue']); }
+```
+
+`fx.only()` with no arguments is my engine's "send nothing", the same verb the v1 `input` guard used.
+
+**Readings.**
+- Before the change: `npx jest tests/stranger.test.ts -t "round 2"` → exit 1, `Tests: 1 failed, 25 skipped,
+  15 passed, 41 total`. The one failure was the new scenario "String for false = '' at mount equals what the
+  node already holds: nothing is sent, so a Selector picking an unset String for true in the same frame
+  leaves the wire empty".
+- After: `npx jest tests/stranger.test.ts -t "round 2"` → exit 0, `Tests: 25 skipped, 16 passed, 41 total`.
+- After, both rounds: `npx jest tests/stranger.test.ts` → exit 0, `Tests: 12 skipped, 29 passed, 41 total`.
+
+**Where the spec alone was thin.**
+1. The spec carries no changelog. `version: 2 // NSP-013 s12: the :43 / :57 same-value guard (v1 dropped
+   it)` names the change only by line numbers in a runtime file a stranger may not read. I found the change by
+   comparing the reducers with my own v1 code. One line in prose ("v2: a string write equal (`===`) to the
+   held string sends nothing and stores nothing") would let a stranger find it without a diff.
+2. The behaviour itself was unambiguous from the reducer code (`s.t === v ? { send: [] } : …`). The prose
+   comment explains why it matters (the empty-wire case) well. Two edge cases follow from `===` without being
+   said: `NaN` written twice is never "the same" (it stores and sends each time), and `undefined` after the
+   initial `''` is a change. I followed `===` literally. The scenarios did not need either case.
+3. The port descriptions are unchanged and still do not mention the guard. That is fine for an author, but
+   it means the description is not enough to implement the node.

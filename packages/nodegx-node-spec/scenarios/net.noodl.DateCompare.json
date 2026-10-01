@@ -280,5 +280,31 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "a readable Date that turns unreadable is replaced, not kept: a later Granularity change re-announces Invalid Date rather than comparing the old Date",
+    "because": "datecompare.ts :47-51 the setter stores toDate(value) — undefined for an unreadable one — before :153-166 recompute (NSP-013 s12: a dropped store here was graded only by luck in the generated sequences, T4)",
+    "params": {},
+    "steps": [
+      {
+        "set": "a",
+        "value": "2024-05-05T10:00:00.000Z"
+      },
+      {
+        "set": "b",
+        "value": "2024-05-05T11:00:00.000Z"
+      },
+      "settle",
+      {
+        "set": "a",
+        "value": "nope"
+      },
+      "settle",
+      {
+        "set": "granularity",
+        "value": "hour"
+      },
+      "settle"
+    ]
   }
 ]

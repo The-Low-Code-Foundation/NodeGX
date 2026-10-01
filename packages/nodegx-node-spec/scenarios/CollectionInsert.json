@@ -26,8 +26,8 @@
     ]
   },
   {
-    "name": "Insert into a named array: done; the same object again: unchanged (the ERG-001 reference case)",
-    "because": ":92-95 — add is a silent no-op on a member (collection.ts :663)",
+    "name": "Insert into a named array: done; the same object again: unchanged (the ERG-001 reference case) — and the next frame re-reports nothing",
+    "because": ":92-95 — add is a silent no-op on a member (collection.ts :663) (NSP-013 s12: the trailing settle grades the consumed press; seeds 31 and 424242 found it graded by luck, T4)",
     "world": {
       "registry": {
         "models": {
@@ -54,6 +54,7 @@
       {
         "signal": "add"
       },
+      "settle",
       "settle"
     ]
   },

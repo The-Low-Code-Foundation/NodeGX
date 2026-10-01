@@ -27,8 +27,8 @@
     ]
   },
   {
-    "name": "A seeded member: done; a loaded record that is not a member: unchanged",
-    "because": ":100-103 — the third path ERG-001 §0 found",
+    "name": "A seeded member: done; a loaded record that is not a member: unchanged — and the next frame re-reports nothing",
+    "because": ":100-103 — the third path ERG-001 §0 found (NSP-013 s12: the trailing settle grades the consumed press; a 20-seed sweep found it graded by luck, T4)",
     "world": {
       "registry": {
         "models": {
@@ -61,6 +61,7 @@
       {
         "signal": "remove"
       },
+      "settle",
       "settle"
     ]
   },
@@ -90,5 +91,36 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Two Do pulses in one frame on a member: done then unchanged, in press order — and the next frame re-reports nothing",
+    "because": "collectionnode-remove.ts: a token per press, each press's callback in order; the presses are consumed (NSP-013 s12: the reset was graded only by luck, T4)",
+    "params": {
+      "collectionId": "abc",
+      "modifyId": "m1"
+    },
+    "steps": [
+      {
+        "signal": "remove"
+      },
+      {
+        "signal": "remove"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {},
+          "m2": {}
+        },
+        "collections": {
+          "abc": [
+            "m1"
+          ]
+        }
+      }
+    }
   }
 ]

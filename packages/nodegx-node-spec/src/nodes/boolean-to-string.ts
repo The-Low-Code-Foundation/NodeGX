@@ -15,7 +15,11 @@ import { defineNode } from '../spec';
 
 export const BooleanToString = defineNode({
   type: 'Boolean To String',
-  version: 1,
+  // v2 (NSP-013 s12): writing String for true or String for false with the value it already holds
+  // (`===`) does nothing — nothing stored, nothing sent. v1 stored and sent it. Visible only on a frame
+  // that has sent nothing yet (the scenario "String for false = '' at mount …"). Note `===`: NaN never
+  // equals itself, so NaN twice is sent twice; `undefined` after the initial '' is a change.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/booleantostring.ts',
 
   // initialize (:28-35): trueString '', falseString ''; `currentInput` is never seeded (:20, :73).
@@ -24,7 +28,7 @@ export const BooleanToString = defineNode({
   state: { sel: undefined as unknown, t: '' as unknown, f: '' as unknown },
 
   inputs: {
-    // :37-49 — stored raw (:44); the :43 same-value guard is not carried (the wire dedups)
+    // :37-49 — stored raw (:44) behind the :43 same-value guard (`===` against what is held)
     trueString: {
       type: 'string',
       coerce: 'none',
@@ -68,11 +72,16 @@ export const BooleanToString = defineNode({
     }
   }
 }).on({
-  // :42-49 — store; the output is SENT only while this is the selected string (:46-48). Which
-  // writes send is what a wire holds when the output ends a frame `undefined` (spec.ts `send`).
-  trueString: (s, v) => ({ set: { t: v }, send: s.sel ? ['currentValue'] : [] }),
-  // :56-63 — the mirror (:60-62)
-  falseString: (s, v) => ({ set: { f: v }, send: s.sel ? [] : ['currentValue'] }),
+  // :42-49 — the same value (`===`, :43) does nothing, not even a send; otherwise store, and the
+  // output is SENT only while this is the selected string (:46-48). Which writes send is what a
+  // wire holds when the output ends a frame `undefined` (spec.ts `send`). ⚠️ s4 dropped the :43
+  // guard as "the wire dedups" — it does not on a frame that has sent nothing yet: `''` at mount
+  // equals the initial `''` and sends nothing, so a Selector flip to a missing string in the same
+  // frame leaves the wire EMPTY, not `''` (found s12 by generated seed 799069363 once the daily
+  // rotation stopped replaying one corpus, NSP-013 §6.1b T4).
+  trueString: (s, v) => (s.t === v ? { send: [] } : { set: { t: v }, send: s.sel ? ['currentValue'] : [] }),
+  // :56-63 — the mirror (:57, :60-62)
+  falseString: (s, v) => (s.f === v ? { send: [] } : { set: { f: v }, send: s.sel ? [] : ['currentValue'] }),
   // :70-76 — same raw value (`===`) → nothing, not even a send; otherwise store, flag, pulse
   input: (s, v) => (s.sel === v ? { send: [] } : { set: { sel: v }, emit: ['inputChanged'] })
 });

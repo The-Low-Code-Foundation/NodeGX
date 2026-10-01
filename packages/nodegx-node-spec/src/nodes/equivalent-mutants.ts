@@ -61,6 +61,15 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   ],
   'net.noodl.ParseCSV': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on CSV yet, or nothing due)' }],
   'net.noodl.ToCSV': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on Items yet, or nothing due)' }],
+  CollectionClear: [
+    {
+      reducer: 'afterInputs',
+      kind: 'swap-branch',
+      branch: '"set":["clears"],"emit":[],"outcome":null,"outcomes":["clear:failure"]',
+      swappedWith: '"set":["clears","error"]',
+      why: 'the two no-array failure branches differ only in whether Error is written, and the one that writes it writes the same constant sentence (collection-failure.ts :149-157) the other branch already holds — found by a 20-seed sweep (NSP-013 s12, T4)'
+    }
+  ],
   'net.noodl.StreamBuffer': [
     {
       reducer: 'clear',

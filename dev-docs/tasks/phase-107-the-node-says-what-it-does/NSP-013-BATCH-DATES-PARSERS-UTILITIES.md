@@ -144,7 +144,74 @@ proposed fix. KNOWN_ROWS predicate: the seam's own message. Two hand scenarios c
 example sequence). `sequenceSeed` (runner/random.ts) mixes `runSeed ^ (index + 1)`: day *d* index *i* is the same
 sequence as day *d′* index *i′* whenever `d ^ (i+1) = d′ ^ (i′+1)`, and adjacent days differ in low bits. Measured:
 day 20727 and 20728 share 192 of their 200 sequences; thirty days of PR-CI (6,000 plays) reach **429** distinct
-sequences. Fixed in its own commit (README §6 has the reading before and after).
+sequences. Fixed in its own commit: `sequenceSeed` mixes the run seed on its own before the index joins it
+(murmur3's finaliser twice) — thirty days are 6,000 distinct sequences and adjacent days share none (pinned in
+tests/runner.test.ts; the seed-1 digest re-pinned). **What a real rotation found at once**, every item hidden by
+T4 since NSP-003:
+
+- **Ten mutants were killed by luck, not by a scenario** — the frozen corpus happened to contain the one
+  sequence that told them apart: Clear Array's, Remove Object From Array's (twice) and Insert Object Into Array's
+  consumed presses (the reset only shows at the NEXT settle), the Object node's write-then-write-back in one frame, its
+  unbind-then-write, its Id stored with binding off, Set Object Properties' consumed re-resolve, Date Compare's
+  readable-then-unreadable Date, and String Mapper's null on a numbered port (a `swap-branch` replays the FIRST
+  recorded patch of that shape — the file's first scenario's `{ 0: 'A' }`). Each now has a hand scenario; one
+  more (Clear Array's two failure branches, the same constant sentence) is declared equivalent. Found by
+  sweeping: the runtime suite on 13 seeds, then every spec's mutants on the interpreter over 20 more (mutants are
+  interpreter-side — the cheap way to look).
+- **Row C6 reaches three more nodes**: Object (a held `prop-…` value, written when a Fetch binds), Variable
+  (`Value`) and HTTP Request (`Headers` — the Fetch sends no request); known rows plus hand scenarios. The Object
+  one was reduced step by step from generated seed 4128598514 — three guesses at it (a `set` step, a bound
+  record, no Fetch) did not reproduce. C6 is node.ts's, on every port of every node, so the runtime test also
+  counts it on ANY port (`C6_ANY_PORT`, never asserted to fire) — otherwise each day's rotation could find it on a
+  port nobody listed and read red.
+- **The "known rows still fire" rule was calibrated on the frozen corpus.** It demanded every row fire in the
+  GENERATED sequences of every run; a rare row (Value Changed's C6: 0, 2, 1 on three seeds) reads 0 on some days.
+  Now per row: its hand scenario reproduces OR the generated sequences hit it.
+- **A second-batch spec was incomplete.** The Object node's `Id` reducer wrote a plain object's fields with
+  `Model.create` and wrote NO reaction beside it — but when the object names the record the node is already
+  bound to, that write lands on the node's own record and the runtime's listener pulses `Changed` for each key
+  that differs (modelnode2.ts :107-116; model.ts `set` notifies on `!==`). Reduced from generated seed 1104497702
+  (run seed 24680) to two steps. Object spec → **version 2**, two scenarios (the reaction, and the Id stored
+  beside it while Id changes are unticked).
+- **A first-batch spec was wrong.** Boolean To String's s4 spec dropped the runtime's same-value guard on both
+  strings (booleantostring.ts :43, :57) as "the wire dedups" — it does not on a frame that has sent nothing yet:
+  `String for false = ''` at mount equals the held `''` and sends nothing, so a Selector picking an unset String
+  for true in that frame leaves the wire empty where the spec said `''` (generated seed 799069363 on run seed 31).
+  The spec carries the guard and is **version 2**; one scenario pins it. Its file is stranger-guarded: hashes
+  refreshed, and round 2's target — which implemented v1 faithfully, the thesis working as intended — was
+  re-handed the v2 spec alone (round 2b, `stranger-2/REPORT.md`): a fresh agent, reading only the format files,
+  the spec, the scenarios and its own code, found the change by comparing handlers, added the guard, and both
+  rounds read green (`npx jest tests/stranger.test.ts`: 29 passed, 12 skipped, exit 0). Its notes: the version
+  line cited runtime line numbers a stranger may not read (rewritten as a plain-words rule — the format's own
+  NSP-006 §5 authoring rule, broken by s12 and caught by the stranger); `===` leaves NaN-twice and
+  undefined-after-'' unscenarioed; the PORT DESCRIPTIONS (the catalog's) still do not say a repeated value is
+  ignored — NSP-018's, when descriptions come from the spec.
+- **T5 — plays leaked the last frame's time.** `context.currentFrameTime` outlived the play that ran the frame,
+  so a Repeat started before a play's first settle read the PREVIOUS play's time and ticked early or late: three
+  "divergences" on seeds 20800 and 1 that vanished when the same sequence was played on a fresh target. The
+  runtime target's `install` now sets it to 0, what a fresh context holds (nodecontext.ts :257). Not a runtime
+  defect — the app has one context and one clock.
+- **T6 — the runtime target's clock fired every due timer in one synchronous sweep.** An HTTP answer due at +100
+  and its timeout due at +30000, crossed by one `advance`, fired back to back; the answer's `.then` chain never
+  ran and the timeout aborted it ("Request timed out" where the interpreter read the body). Reproduced on a fresh
+  target, so not isolation. An event loop runs microtasks between timers: `Clock.nextDue()` (world.ts, the CLOCK
+  rule now says so) and the runtime target's `advance` steps timer by timer, yielding between.
+- **T7 — no teardown in the runtime target ever finished.** The stand-in graph `model` the target hands a node
+  (NSP-012) had no `removeListenersWithRef`, which `_onNodeDeleted` calls on its FIRST line (node.ts :1312), so
+  every dispose threw there, `dispose` swallowed it, and no delete listener ever ran — Delay's and Repeat's timers
+  stayed in the scheduler (a probe counted ~200 plays per run starting with a previous play's timers) and a
+  disposed node still in the dirty list ran in the next play's first frame (Filter Collection, seed 73757, minted
+  other ids; it vanished on a fresh target). The stand-in has the method now, and dispose also empties the
+  context's dirty list, after-update callbacks and the scheduler's queues: a finished play's work is not the
+  next play's.
+- **T8 — the host stole world draws.** With teardowns finishing, a Filter Collection sequence failed on its FIRST
+  play on a fresh target and passed on the second and third, with a different id every run. A `Math.random`
+  trace named the caller: an array port given the literal `x` evals it, throws, and node.ts :456 `console.log`s the
+  error; jest formats a logged Error through `source-map`, whose quick-sort calls `Math.random` — the WORLD's during
+  a play — once per process while the map cache is cold. The runtime target now routes the console to a sink for
+  the length of a world play (what the runtime prints is not in the trace).
+
+**Readings after the fixes** (2026-10-01): see the commit message — the sweep is the last thing run before it.
 
 ### 6.2 Rows for a ruling (R3 (a): the runtime wins until ruled; each counted every run)
 
