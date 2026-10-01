@@ -1,6 +1,6 @@
 # IW-003 — The missions as jobs
 
-**Opened 2026-09-29** from README §0, §1.1. **Status: 🟡 s3 (2026-09-30, four lanes merged, §7) — all fifteen missions are jobs (the thirteen + the envelopes + Sami's bench); AC1 ✅, AC2 ✅ (the gate `iw003Missions` 63/63), AC4 ✅, AC5 ✅ on the drives; AC3's FR lines and AC5's look beside IW-000 are Richard's read; four look items open (§7, the merge).** Depends on IW-002 (the job model), IW-004 (the blocks the
+**Opened 2026-09-29** from README §0, §1.1. **Status: 🟡 s3 (2026-09-30, four lanes merged, §7) — all fifteen missions are jobs (the thirteen + the envelopes + Sami's bench); AC1 ✅, AC2 ✅ (the gate `iw003Missions` 63/63), AC4 ✅, AC5 ✅ on the drives; AC3's FR lines and AC5's look beside IW-000 are Richard's read. s4 (lane L): the seven look items fixed and driven (§7, "Session 4"; `drive-iw-look.js` 143/143 on the merged tree).** Depends on IW-002 (the job model), IW-004 (the blocks the
 reference programs are written in), IW-005 (`go to nearest`). One lane per islander family in session 3.
 
 ## 1. The person sentence

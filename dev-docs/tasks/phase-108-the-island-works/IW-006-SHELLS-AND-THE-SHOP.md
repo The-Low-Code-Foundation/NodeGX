@@ -1,6 +1,8 @@
 # IW-006 — Shells and the shop
 
-**Opened 2026-09-29** from README §0 and ruling R1 (*"Yep reverse it"*), defaults D1–D4, D8. **Status: ⬜.**
+**Opened 2026-09-29** from README §0 and ruling R1 (*"Yep reverse it"*), defaults D1–D4, D8. **Status: 🟡 s4 (lanes E and H, merged 2026-10-01) — AC1 ✅ AC2 ✅ (earning, the wallet; lane E), AC3 ✅ AC4 ✅ (the shop,
+the helpers; lane H), AC5 🟡: v4 → v5 driven on a deployed page in EN/FR, the packaged upgrade drive over a real v4 app is
+session 5's. §5 "Session 4 merge" lists what is owed.**
 Depends on IW-002. Lane E.
 
 ## 1. The person sentence
@@ -245,3 +247,59 @@ travail : », « L’utiliser », « Aucun robot ne fait un travail qu’il aide
 tablet; the self-filling can on a program that loops `until the can is empty` (the can never empties, so such a loop runs
 to the until guard — no reference program does it; for Richard: is "never needs the pond" meant to change a program's
 path, or only its can?).
+
+### Session 4 merge (orchestrator, 2026-09-30 → 10-01, `p108-s4-merge` then `p108-s4m`) — all four lanes
+
+**Order:** a base first (`81a1e7ba2`: save v5 — shells, owned, a plot's live job, brains, robot copies — the shop's
+catalogue and the one purchase rule), then lanes C (IW-008 the crew) ∥ H (the shop) ∥ E (earning) ∥ L (IW-003's seven
+look items), merged C → H → E (`a0a532c88`), then L (`1ed916d65`), then `cline-dev` (P107 nsp-007, dbt-template l183; no
+shared file).
+
+**What the merge decided:** the appended blocks of C, H, E and L kept side by side (DRIVE, PAGE_WORDS, GLUE_SCRIPTS, the
+imports); the island's build hash is lane E's line (`iw6Unlive`: a plot's `live` is left out of it — the brief's rule;
+lane H's `buildPlots` loop dropped, its arm re-anchored); a job plot starts from lane E's saved live job, then lane C's
+second robot; lane H's `islHelped` writes `helper: ''` at the finish line, so lane E's Island keep drops the helper from
+the save. `p108s4Join.test.ts` (new) grades the two seams no lane could see: the helper leaves the save at its finish line
+(with its arm), and a copy bought in the shop is sent to a plot by the crew's rule and works it. `templates/bot-garden`
+regenerated after each merge.
+
+**Interrupted:** the disk filled (143 MB free) after E's merge, while lane L's last drives ran; the worktree folder was
+deleted to free it (2026-10-01). Every lane's commits survived on their branches. Lane L's IW-003 notes never reached a
+commit; they were rebuilt from the lane's own edits (IW-003 §7, "Session 4"). The merge resumed in a new worktree
+`p108-s4m` from `a0a532c88`.
+
+**Readings on the merged tree** (`p108-s4m` at `b4aeeeef1` + the drive fix below, 2026-10-01; every exit 0):
+
+| gate | total |
+|---|---|
+| specs, one file at a time (`packages/noodl-mcp`, `npx jest tests/<f>.test.ts`) | cg002Engine 259 · cg003Template 148 · cg005Olive 41 · cg006Requests 83 · ig004Island 38 · cg001GardenKit 57 · ig007Garden3d 50 · iw004Blocks 59 · p108s2Join 4 · iw003Missions 63 · iw006Save 17 · **iw006Earn 34 · iw006Shop 34 · iw008Crew 25 · iwLook 15 · p108s4Join 3** = **930** |
+| shell `node --test` | 92 / 92 |
+| `npm run template:garden` | exit 0, 0 drift |
+| page drive (`--mockup`) | **331 / 331** |
+| the s4 drives | look 143/143 · earn 15/15 · shop 60/60 · crew 39/39 · crew `--perf` at the cap 5/5 |
+| the earlier drives | modes 90 · IW-001 38 · IW-004 19 + 3D 3 · island `--perf` 69 + 3D 5 · robots 60 + 3D 4 · Workshop 3D 24 + nogl 8 · Olive 22 · Mamie workshop 34, island 7, island 3D 3, look3d 6 · stones 32 + 3D 14 · post 17 + 3D 10 · Biscuit 24 · kit fixtures 2D 44, 3D 30 |
+
+All of them on one deploy, by `drives/drive-all.sh` (new: the runner every session kept in a scratch folder, now in the
+repo). Screenshots looked at: the shop's card at 1368 and the crew on the island (C/H/E merge); the bench's program whole at
+1024 FR with the drawer at the foot, the phone's pad under the world at 390 FR (L merge).
+
+**One red at the join, and it was the drive:** stones 3D read 13/14 twice on the merged tree — sami-bench's "Cobble says
+'Home! All done.'" never seen — and 14/14 on `a0a532c88` (C+H+E) and on lane L's tip alone. Garden 3D's bubble lasts
+1.1 s; the 3D sampler reads every 1.8 s or more, so whether a sample lands on it is a matter of phase, and lane L's
+per-draw work moved the phase. The drive now records every bubble as it appears (a MutationObserver installed before
+Play) beside the samples: on the merged tree the bubbles were *Got it! · There. · Got it! · There. · Home! All done.*,
+the samples alone still missed it (`homeSampled: false` in the readings) — 14/14; stones 2D 32/32 with the same drive.
+
+**Owed (not done this session):**
+- **My robots' upgrade slot still says "Empty slot · Bigger can · from Mamie Rose"** (`ROBOT_CARDS_SCRIPT`, `ig5UpEmpty`):
+  the islanders no longer give upgrades — they are sold in the shop (lane H, "Not done / owed", for lane C; the merge did
+  not settle it). A child is told to wait for a gift that never comes.
+- **Prices are the base's first guesses** (a copy 30, upgrades 15–20, brains 25 / 40, helpers 6–10): lane E's earnings
+  table (above) is what a mission pays; retune from it (lane H's deviation 5).
+- The win card never names an upgrade now; a "now in the shop" line under the thanks (lane H).
+- A crew robot sent from My robots (lane C: only from the plot card).
+- AC5's packaged upgrade drive over a real v4 app (session 5, with IW-007).
+
+**For Richard:** each lane's FR lines (E, H above; C in IW-008 §5; L in IW-003 §7); the self-filling can — is "never
+needs the pond" meant to change a program's path, or only its can? (lane H); the strip drawer at 1024 vs a narrower side
+drawer, Play 4 px below the first screen on the French eggs at 390 (lane L); "more land" beyond 55 × 22 (IW-008).

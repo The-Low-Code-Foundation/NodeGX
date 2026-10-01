@@ -1,7 +1,8 @@
 # IW-008 — The crew and more land
 
 **Opened 2026-09-29** from README §0 ("an army of robots … copies of pip or rubble, with their own name, with a job …
-multiple plots needed"). **Status: ⬜.** Depends on IW-005, IW-006. Lane D.
+multiple plots needed"). **Status: 🟡 s4 (lane C, merged 2026-10-01) — the crew: AC1–AC5 ✅ on the Mac (crew cap 12, p95 16.7 ms at CPU ×4);
+the tablet with Olive in flight is Richard's; "more land" not built — a question for Richard (R6 stands).** Depends on IW-005, IW-006. Lane D.
 
 ## 1. The person sentence
 

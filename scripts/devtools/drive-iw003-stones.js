@@ -309,6 +309,9 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
   /** Play, and watch the run to its end: every state a child sees, sampled; returns them and the end. */
   const playAndWatch = async (ms, onSample) => {
     const samples = [];
+    // P108 s4 merge: every bubble shown during the run, recorded as it appears. Garden 3D's bubble lasts 1.1 s and the
+    // 3D sampler reads every 1.8 s or more, so the samples alone can miss "Home! All done." (they did, 2 of 2, at the merge).
+    await evaluate(`(() => { window.__iwBubbles = []; if (window.__iwBubbleObs) window.__iwBubbleObs.disconnect(); const seenB = () => document.querySelectorAll('.bg-stage .gd3-bubble, .bg-stage .gd-bubble').forEach((e) => { const t = e.innerText.trim(); if (t && window.__iwBubbles[window.__iwBubbles.length - 1] !== t) window.__iwBubbles.push(t); }); window.__iwBubbleObs = new MutationObserver(seenB); window.__iwBubbleObs.observe(document.body, { childList: true, subtree: true, characterData: true }); return true; })()`);
     await control('play');
     const end = Date.now() + ms;
     let won = false;
@@ -325,7 +328,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     // The last sample that still shows the job's chips (Garden 3D's overlay is hidden under the win card).
     const now = await seen();
     const last = now.chips.length ? now : [...samples].reverse().find((x) => x.chips.length) || now;
-    return { samples, won, last, world: await evaluate(WORLD), owl: await owl() };
+    const bubbles = (await evaluate(`(() => { if (window.__iwBubbleObs) window.__iwBubbleObs.disconnect(); return window.__iwBubbles || []; })()`)) || [];
+    return { samples, bubbles, won, last, world: await evaluate(WORLD), owl: await owl() };
   };
   const leaveWin = async (lang) => {
     if (await evaluate(WON)) await tap(byText('.bg-win-card button', w(lang, 'winStay')), 'Keep tinkering');
@@ -458,7 +462,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const stages = new Set(p.samples.flatMap((s) => s.sites.map((x) => x.split(':')[1])));
     const loads = new Set(p.samples.map((s) => s.load).filter(Boolean));
     const rocksSeen = new Set(p.samples.flatMap((s) => rockChips(s)));
-    const homeSaid = p.samples.some((s) => s.bubble.includes(w(run.lang, 'sayHome')));
+    const homeSaid = p.samples.some((s) => s.bubble.includes(w(run.lang, 'sayHome'))) || p.bubbles.some((t) => t.includes(w(run.lang, 'sayHome')));
     const midShot = p.samples.findIndex((s) => s.sites.some((x) => /gravel|cobbles/.test(x)));
     readings[`ps-${run.tag}`] = { stages: [...stages], loads: [...loads], rocks: [...rocksSeen], samples: p.samples.length, owl: p.owl };
     await shot(`iw3s-ps-${run.tag}-04-won`);
@@ -496,8 +500,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     });
     const stages = new Set(p.samples.map((s) => s.bench).filter((b) => b !== null));
     const metersSeen = new Set(p.samples.map(benchChip).filter(Boolean));
-    const homeSaid = p.samples.some((s) => s.bubble.includes(w(run.lang, 'sayHome')));
-    readings[`sb-${run.tag}`] = { stages: [...stages], meters: [...metersSeen], owl: p.owl };
+    const homeSaid = p.samples.some((s) => s.bubble.includes(w(run.lang, 'sayHome'))) || p.bubbles.some((t) => t.includes(w(run.lang, 'sayHome')));
+    readings[`sb-${run.tag}`] = { stages: [...stages], meters: [...metersSeen], owl: p.owl, bubbles: p.bubbles, homeSampled: p.samples.some((s) => s.bubble.includes(w(run.lang, 'sayHome'))) };
     await shot(`iw3s-sb-${run.tag}-04-built`);
     if (MODE === '2d') check(`SB ${run.tag}: played, the bench rose through every stage — ${[...stages].join(' → ')} — and Sami sits on it built`, ['0', '1', '2', '3', '4'].every((k) => stages.has(k)) && p.last.sits, { stages: [...stages], sits: p.last.sits });
     check(`SB ${run.tag}: its meter counted the stones up (${[...metersSeen].join(' ')}) to 8/8, green`, metersSeen.size >= 4 && benchChip(p.last) === '8/8' && p.last.chips.find((c) => c.kind === 'site').full, { meters: [...metersSeen], last: p.last.chips });
@@ -525,7 +529,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       });
       const asks = stubCalls.filter((c) => c.body && c.body.rung === 'is-it-a').slice(asked0).map((c) => String(c.body.slots && c.body.slots.thing));
       const puddles = await evaluate(`document.querySelectorAll('.bg-stage [data-puddle]').length`);
-      const homeSaid = p.samples.some((s) => s.bubble.includes(w(run.lang, 'sayHome')));
+      const homeSaid = p.samples.some((s) => s.bubble.includes(w(run.lang, 'sayHome'))) || p.bubbles.some((t) => t.includes(w(run.lang, 'sayHome')));
       readings[`rf-${run.tag}`] = { asks, owl: p.owl };
       await shot(`iw3s-rf-${run.tag}-04-won`);
       check(`RF ${run.tag}: Olive asked three times about each of the four things ahead (${asks.length} asks); the two flowers drank (1/1, green), no puddle`, asks.length === 12 && JSON.stringify(tulipChips(p.last)) === JSON.stringify(['1/1', '1/1']) && p.last.chips.filter((c) => c.kind === 'tulip').every((c) => c.full) && puddles === 0, { asks, last: p.last.chips, puddles });
