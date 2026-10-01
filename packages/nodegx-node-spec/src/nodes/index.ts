@@ -20,15 +20,25 @@ import { ColorVariable } from './color';
 import { ColorBlend } from './color-blend';
 import { Condition } from './condition';
 import { Counter } from './counter';
+import { DateAdd } from './date-add';
+import { DateCompare } from './date-compare';
+import { DateDifference } from './date-difference';
+import { DateParts } from './date-parts';
+import { DateToString } from './date-to-string';
 import { Delay } from './delay';
+import { Hash } from './hash';
 import { HttpRequest } from './http';
 import { Inverter } from './inverter';
 import { Log } from './log';
 import { NewModel } from './new-object';
+import { Now } from './now';
 import { NumberVariable } from './number';
 import { Model2 } from './object';
 import { NumberRemapper } from './number-remapper';
 import { Or } from './or';
+import { ParseCSV } from './parse-csv';
+import { RandomBytes } from './random-bytes';
+import { Repeat } from './repeat';
 import { SetModelProperties } from './set-object-properties';
 import { SetVariable } from './set-variable';
 import { StaticData } from './static-array';
@@ -37,6 +47,8 @@ import { StringFormat } from './string-format';
 import { StringMapper } from './string-mapper';
 import { Substring } from './substring';
 import { Switch } from './switch';
+import { ToCSV } from './to-csv';
+import { UniqueId } from './unique-id';
 import { Uuid } from './uuid';
 import { ValueChanged } from './value-changed';
 import { Variable2 } from './variable2';
@@ -79,7 +91,20 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [SetModelProperties.type]: SetModelProperties,
   [StaticData.type]: StaticData,
   [Variable2.type]: Variable2,
-  [SetVariable.type]: SetVariable
+  [SetVariable.type]: SetVariable,
+  // NSP-013 — dates, time, randomness, parsers
+  [DateAdd.type]: DateAdd,
+  [DateCompare.type]: DateCompare,
+  [DateDifference.type]: DateDifference,
+  [DateParts.type]: DateParts,
+  [DateToString.type]: DateToString,
+  [Now.type]: Now,
+  [Hash.type]: Hash,
+  [RandomBytes.type]: RandomBytes,
+  [UniqueId.type]: UniqueId,
+  [ParseCSV.type]: ParseCSV,
+  [ToCSV.type]: ToCSV,
+  [Repeat.type]: Repeat
 });
 
 export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
@@ -109,8 +134,20 @@ export {
   ColorVariable,
   Condition,
   Counter,
+  DateAdd,
+  DateCompare,
+  DateDifference,
+  DateParts,
+  DateToString,
   Delay,
+  Hash,
   HttpRequest,
+  Now,
+  ParseCSV,
+  RandomBytes,
+  Repeat,
+  ToCSV,
+  UniqueId,
   Inverter,
   Log,
   NumberRemapper,

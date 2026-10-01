@@ -1,0 +1,40 @@
+[
+  {
+    "name": "New draws 32 bytes from the world's stream as hex, done; a second New draws the next 32",
+    "because": "randombytes.ts :108-134; world.ts RANDOM — getRandomValues is world.bytes",
+    "params": {},
+    "steps": ["settle", { "signal": "generate" }, "settle", { "signal": "generate" }, "settle"]
+  },
+  {
+    "name": "the seed decides the bytes: the same steps under seed 7",
+    "because": "world.ts RANDOM; NSP-013 AC6",
+    "params": {},
+    "world": { "seed": 7 },
+    "steps": ["settle", { "signal": "generate" }, "settle"]
+  },
+  {
+    "name": "Length 0, 4097, 2.5 and 'abc' each fail with the reason and draw nothing: a Length of 1 after them draws the stream's FIRST byte",
+    "because": "randombytes.ts :121-124 the range check before the draw; :49 Number(value) — 'abc' is NaN; the first byte under seed 1 is scenario 1's first byte",
+    "params": { "length": 0 },
+    "steps": [{ "signal": "generate" }, "settle", { "set": "length", "value": 4097 }, { "signal": "generate" }, "settle", { "set": "length", "value": 2.5 }, { "signal": "generate" }, "settle", { "set": "length", "value": "abc" }, { "signal": "generate" }, "settle", { "set": "length", "value": 1 }, { "signal": "generate" }, "settle"]
+  },
+  {
+    "name": "an Encoding not in the list fails AFTER the draw: the next New (hex, 2 bytes) renders the stream's third and fourth bytes",
+    "because": "randombytes.ts :127 `encodeBytes(randomBytes(length), encoding)` — the draw is the argument; encoding.ts :113 throws",
+    "params": { "length": 2, "encoding": "base32" },
+    "steps": [{ "signal": "generate" }, "settle", { "set": "encoding", "value": "hex" }, { "signal": "generate" }, "settle"]
+  },
+  {
+    "name": "base64url of 3 bytes under seed 5, then base64 of the next 3, then '' on Encoding reads as hex",
+    "because": "encoding.ts :87-99; randombytes.ts :113 `|| 'hex'`",
+    "params": { "length": 3, "encoding": "base64url" },
+    "world": { "seed": 5 },
+    "steps": [{ "signal": "generate" }, "settle", { "set": "encoding", "value": "base64" }, { "signal": "generate" }, "settle", { "set": "encoding", "value": "" }, { "signal": "generate" }, "settle"]
+  },
+  {
+    "name": "two News in one frame: the wire carries the second draw, two dones; a success clears Error so the wire keeps the last reason",
+    "because": "randombytes.ts :133-134 flagged on every success; :112-114",
+    "params": { "length": 4 },
+    "steps": [{ "set": "length", "value": -1 }, { "signal": "generate" }, "settle", { "set": "length", "value": 4 }, { "signal": "generate" }, { "signal": "generate" }, "settle"]
+  }
+]

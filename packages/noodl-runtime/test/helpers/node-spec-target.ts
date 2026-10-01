@@ -139,13 +139,14 @@ function resetRegistry(world: World): void {
 
 /**
  * The picker nodes the VIEWER provides (census `providedBy: noodl-viewer-react`) that this phase
- * has specced (NSP-011: Color, Value Changed, Color Blend). `NoodlRuntime` registers the
+ * has specced (NSP-011: Color, Value Changed, Color Blend; NSP-007: Delay; NSP-012: the event
+ * pair and Repeater Item; NSP-013: Repeat). `NoodlRuntime` registers the
  * runtime's own list; the viewer's `register-nodes.js` adds these on top in the app. The same
  * definition objects are registered here, loaded from the viewer's source through jest's require
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`

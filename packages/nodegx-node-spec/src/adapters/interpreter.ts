@@ -8,7 +8,9 @@
  *
  * The world (NSP-007): `install(world)` makes it the world every instance mounted until `restore`
  * is handed (the play's world); without one, each instance gets a fresh default world — the
- * behaviour every spec without `needs` had before. `advance` is the interpreter's own.
+ * behaviour every spec without `needs` had before. `advance` is the interpreter's own. The
+ * process's zone becomes the world's for the play (NSP-013, world.ts TIME ZONE): a reducer that
+ * reads a calendar reads it in the script's zone, exactly as the runtime target's nodes do.
  */
 
 import type { AnyNodeSpec } from '../spec';
@@ -16,7 +18,7 @@ import type { Handle, TargetAdapter } from '../adapter';
 import type { TraceEvent } from '../trace';
 import { advance, mount, set, signal, settle, trace, type Instance } from '../interpreter';
 import { specFor } from '../nodes';
-import type { World } from '../world';
+import { installTimeZone, type World } from '../world';
 
 export interface InterpreterHandle extends Handle {
   readonly inst: Instance;
@@ -59,7 +61,9 @@ export function interpreterAdapter(options: InterpreterAdapterOptions = {}): Tar
     install(world) {
       const previous = current;
       current = world;
+      const restoreZone = installTimeZone(world);
       return () => {
+        restoreZone();
         current = previous;
       };
     },

@@ -1,0 +1,62 @@
+[
+  {
+    "name": "a header and two rows: two records in a fresh anonymous array, Count 2, Changed",
+    "because": "parsecsv.ts :194-204, :212-214; csv.ts :189-201 rowsToRecords",
+    "params": {},
+    "steps": [{ "set": "text", "value": "name,age\nAda,36\nLin,9" }, "settle"]
+  },
+  {
+    "name": "Has Header off: rows of cells, plain nested arrays, every cell a string; '' on it is off too",
+    "because": "parsecsv.ts :205-210; :98 `!!value`",
+    "params": { "hasHeader": false },
+    "steps": [{ "set": "text", "value": "name,age\nAda,36\nLin,9" }, "settle", { "set": "hasHeader", "value": "" }, "settle"]
+  },
+  {
+    "name": "a byte-order mark is stripped, \\r\\n ends a row, and a trailing newline is a trailing row with one empty cell (a short row leaves its missing column undefined)",
+    "because": "csv.ts :78-80 stripBOM; :32-34 the trailing-row behaviour carried over; :195-199",
+    "params": {},
+    "steps": [{ "set": "text", "value": "﻿name,team\r\nAda,x\r\n" }, "settle"]
+  },
+  {
+    "name": "an unpaired quote fails with the line it gave up on, leaving Items and Count as they were: Error, Failure, no Changed; the next good parse clears Error (the wire keeps the sentence)",
+    "because": "csv.ts :93-104 contiguity, :163-181; parsecsv.ts :183-192, :194-195",
+    "params": {},
+    "steps": [{ "set": "text", "value": "a,b\n1,2" }, "settle", { "set": "text", "value": "3,\"unterminated\n5,6" }, "settle", { "set": "text", "value": "a\n9" }, "settle"]
+  },
+  {
+    "name": "an unpaired quote at the very end of the text is the other half of the verdict: the scanner stops with input left",
+    "because": "csv.ts :138-140",
+    "params": {},
+    "steps": [{ "set": "text", "value": "x,\"never closed" }, "settle"]
+  },
+  {
+    "name": "';' and a tab parse a European export and a TSV; a Delimiter cleared to '' reads as ','",
+    "because": "parsecsv.ts :109 `value || ','`; csv.ts :107-118 the pattern is built from the delimiter",
+    "params": { "delimiter": ";" },
+    "steps": [{ "set": "text", "value": "a;b\n1;2" }, "settle", { "set": "delimiter", "value": "\t" }, { "set": "text", "value": "a\tb\n1\t2" }, "settle", { "set": "delimiter", "value": "" }, "settle"]
+  },
+  {
+    "name": "three inputs in one frame parse once: one Changed, under the delimiter that arrived last",
+    "because": "parsecsv.ts :166-175 _schedule's guard — the reason a graph that sets Delimiter and CSV together does not parse with the old delimiter first",
+    "params": {},
+    "steps": [{ "set": "text", "value": "a;b\n1;2" }, { "set": "hasHeader", "value": false }, { "set": "delimiter", "value": ";" }, "settle"]
+  },
+  {
+    "name": "an empty quoted cell is '' (not undefined), a doubled quote is one quote, a short row leaves its missing columns undefined",
+    "because": "csv.ts :36-43 the one behaviour changed; :131 `!== undefined`",
+    "params": {},
+    "steps": [{ "set": "text", "value": "q,r\n\"\",y\n\"say \"\"hi\"\"\"" }, "settle"]
+  },
+  {
+    "name": "null is not an arrival (nothing, not even Failure); a number parses as its text — a header-only file yields no records, Count 0, Changed",
+    "because": "parsecsv.ts :85 textSupplied; :179; csv.ts :165 String(text); :194 header-only → no records",
+    "params": {},
+    "steps": [{ "set": "text", "value": null }, "settle", { "set": "text", "value": 5 }, "settle"]
+  },
+  {
+    "name": "a second successful parse replaces Items with a FRESH array — its name on the wire moves — and the records inside are minted anew",
+    "because": "parsecsv.ts :201 Collection.get() with no name every parse; NSP-012 AC6 the $array wire form",
+    "params": {},
+    "steps": [{ "set": "text", "value": "a\n1" }, "settle", { "set": "text", "value": "a\n1" }, "settle"]
+  }
+]

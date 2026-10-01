@@ -48,10 +48,30 @@
  *           entries draw their ids from the random stream above. The rule in full is the header
  *           of registry.ts; a target that has its own tables (the runtime's process-wide
  *           `Model` / `Collection`) empties them for the play and seeds them from the same script.
+ *   TIME ZONE. (NSP-013) The play runs in ONE IANA zone, the script's `timeZone`, `UTC` when the
+ *           script names none — never the machine's. Everything a node reads of a calendar in
+ *           "the host's local zone" (`getHours`, `setMonth`, `new Date(y, m, d)`, an `Intl` call
+ *           with no `timeZone` option) reads it in that zone, DST rules included, and a node that
+ *           names a zone of its own (Date To String's Timezone port) still reads that one. A
+ *           target that cannot set its zone for a play (a browser) refuses a `timezone` need; on
+ *           Node the zone is `process.env.TZ`, which V8 re-reads on every change
+ *           (`installTimeZone`). Two plays of one script in two zones are two scenarios: the
+ *           date nodes are graded in at least two, one crossing a DST change (NSP-013 AC5).
+ *   DIGEST. (NSP-013) A SHA-2 digest a node asks the host for (`crypto.subtle.digest`) is
+ *           answered by the WORLD, computed synchronously (`digestBytes`) and handed back as an
+ *           already-resolved promise — so the answer lands in the microtask after the call, in
+ *           the same frame, where a target's `settle` flushes it; on the host it lands on a
+ *           thread-pool completion the clock cannot see and a frame boundary may or may not
+ *           carry. The bytes are the standard's (FIPS 180-4), so a digest is byte-for-byte the
+ *           host's; an algorithm the world does not know (`SHA-1`, `MD5`, a typo) is refused with
+ *           the message `digestBytes` throws, as WebCrypto refuses it with `NotSupportedError`.
+ *           `importKey` / `sign` (HMAC, JWT — cloud-only nodes) stay the host's.
  *
  * Backend (records, users, files, cloud functions) is the fifth seam NSP-007 names; it arrives
  * with NSP-014, reusing the request seam at the HTTP level (README §8, NSP-007 §2).
  */
+
+import * as nodeCrypto from 'crypto';
 
 import { Registry, type RegistryScript } from './registry';
 import { mulberry32, type Rng } from './runner/random';
@@ -66,6 +86,8 @@ export interface WorldScript {
   network?: readonly NetworkRule[];
   /** NSP-012: the records and arrays the play starts with (registry.ts). Absent: an empty registry. */
   registry?: RegistryScript;
+  /** NSP-013: the IANA zone the play runs in (TIME ZONE above). Absent: `UTC`. */
+  timeZone?: string;
 }
 
 export interface NetworkRule {
@@ -322,12 +344,15 @@ export class World {
   readonly random: Random;
   readonly network: Network;
   readonly registry: Registry;
+  /** The IANA zone the play runs in (TIME ZONE above): the script's, or `UTC`. */
+  readonly timeZone: string;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
     this.random = new Random(script.seed ?? 1);
     this.network = new Network(this.clock, script.network ?? []);
     this.registry = new Registry(this.random, script.registry);
+    this.timeZone = script.timeZone ?? 'UTC';
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */
@@ -370,9 +395,45 @@ export function worldFetch(world: World): (input: unknown, init?: RequestInit) =
 const NULL_BODY_STATUSES = new Set([101, 103, 204, 205, 304]);
 
 /**
+ * Makes the world's zone the process's for a play (TIME ZONE above) and hands back the undo.
+ * `process.env.TZ` is the one seam Node has: V8 drops its cached zone on every assignment, so a
+ * `Date` constructed after the assignment reads the new rules — measured on Node 20 (2026-10-01,
+ * NSP-013) before it was relied on. A target with no `process` (a browser) gets the undo and
+ * nothing else, and must refuse a `timezone` need itself. A test file that plays a `timezone`
+ * spec runs under tests/jest-env-real-process.js (see its header): jest's sandboxed
+ * `process.env` is a copy, and a write to it moves nothing.
+ */
+export function installTimeZone(world: World): () => void {
+  // under jest the sandbox's `process.env` is a copy V8 never hears about (jest-util
+  // createProcessObject); tests/jest-env-real-process.js hands the real one over on this global
+  const g = globalThis as { process?: { env?: Record<string, string | undefined> }; __nodeSpecRealProcessEnv?: Record<string, string | undefined> };
+  const env = g.__nodeSpecRealProcessEnv ?? g.process?.env;
+  if (!env) return () => undefined;
+  const previous = env.TZ;
+  env.TZ = world.timeZone;
+  return () => {
+    if (previous === undefined) delete env.TZ;
+    else env.TZ = previous;
+  };
+}
+
+/** WebCrypto's digest names and Node's, the three WebCrypto has (crypto/encoding.ts `DigestAlgorithm`). */
+const DIGESTS: Readonly<Record<string, string>> = Object.freeze({ 'SHA-256': 'sha256', 'SHA-384': 'sha384', 'SHA-512': 'sha512' });
+
+/**
+ * The world's digest (DIGEST above): the standard's bytes for a name WebCrypto knows, computed
+ * now. An unknown name throws — the message a node's `Error` port then carries, on every target.
+ */
+export function digestBytes(algorithm: unknown, data: Uint8Array): Uint8Array {
+  const name = DIGESTS[String(algorithm)];
+  if (!name) throw new Error(`Unrecognized algorithm name: ${String(algorithm)}`);
+  return new Uint8Array(nodeCrypto.createHash(name).update(data).digest());
+}
+
+/**
  * Installs the world into the globals for the duration of a play. Everything is restored by
- * `restore()`, whatever happened. `crypto.subtle` stays the host's (deterministic anyway; the
- * digest nodes need it).
+ * `restore()`, whatever happened. `crypto.subtle.digest` is the world's (DIGEST above); the rest
+ * of `subtle` stays the host's. The process's zone becomes the world's (TIME ZONE above).
  */
 export function installWorld(world: World): Installed {
   const g = globalThis as unknown as Record<string, unknown>;
@@ -407,9 +468,21 @@ export function installWorld(world: World): Installed {
   define('setTimeout', fakeSetTimeout);
   define('clearTimeout', fakeClearTimeout);
   define('fetch', worldFetch(world));
-  const hostCrypto = g.crypto as { subtle?: unknown } | undefined;
+  const hostCrypto = g.crypto as { subtle?: Record<string, unknown> } | undefined;
+  const hostSubtle = hostCrypto?.subtle;
+  const restoreZone = installTimeZone(world);
   define('crypto', {
-    subtle: hostCrypto?.subtle,
+    subtle: {
+      ...(hostSubtle ? { importKey: (hostSubtle.importKey as (...a: unknown[]) => unknown).bind(hostSubtle), sign: (hostSubtle.sign as (...a: unknown[]) => unknown).bind(hostSubtle) } : {}),
+      digest: (algorithm: unknown, data: Uint8Array): Promise<ArrayBuffer> => {
+        try {
+          const bytes = digestBytes(algorithm, data);
+          return Promise.resolve(bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer);
+        } catch (e) {
+          return Promise.reject(e);
+        }
+      }
+    },
     getRandomValues: (arr: Uint8Array) => {
       arr.set(world.random.bytes(arr.length));
       return arr;
@@ -430,6 +503,7 @@ export function installWorld(world: World): Installed {
       Math.random = mathRandom;
       Date.now = dateNow;
       if (perf && perfNow) perf.now = perfNow;
+      restoreZone();
     }
   };
 }

@@ -1,0 +1,66 @@
+[
+  {
+    "name": "Amount and Unit set before any Date say nothing; the first Date computes with both — 31 January + 5 months clamps to 30 June",
+    "because": "dateadd.ts :118-121 inputSupplied abstains; :130-133; datemath.ts :71-90 months clamp to the target month's last day",
+    "params": {},
+    "steps": [{ "set": "amount", "value": 5 }, { "set": "unit", "value": "months" }, "settle", { "set": "input", "value": "2024-01-31T13:45:30.123Z" }, "settle"]
+  },
+  {
+    "name": "months clamp: 31 January 2024 + 1 month is 29 February (a leap year), Changed after Result",
+    "because": "datemath.ts :71-90; the export's date-family grid",
+    "params": { "amount": 1, "unit": "months" },
+    "steps": [{ "set": "input", "value": "2024-01-31T13:45:30.123Z" }, "settle"]
+  },
+  {
+    "name": "years clamp: 29 February 2024 + 1 year is 28 February 2025; − 1 year is 28 February 2023",
+    "because": "datemath.ts :78-90",
+    "params": { "amount": 1, "unit": "years" },
+    "steps": [{ "set": "input", "value": "2024-02-29T00:00:00.000Z" }, "settle", { "set": "amount", "value": -1 }, "settle"]
+  },
+  {
+    "name": "an unreadable Date clears Result and pulses Invalid Date; a readable one after it (0 = the epoch) computes again",
+    "because": "dateadd.ts :123-128, :130-133; datemath.ts :56-64 a number is epoch milliseconds",
+    "params": { "amount": 1 },
+    "steps": [{ "set": "input", "value": "2024-01-31T00:00:00.000Z" }, "settle", { "set": "input", "value": "nope" }, "settle", { "set": "input", "value": 0 }, "settle"]
+  },
+  {
+    "name": "every setter re-announces Invalid Date while Date is unreadable, and a Unit and Amount set then apply once a readable Date arrives",
+    "because": "dateadd.ts :52-80 every setter recomputes; :77-78 the unit is stored before the recompute — the store survives the failure",
+    "params": {},
+    "steps": [{ "set": "input", "value": "nope" }, "settle", { "set": "unit", "value": "weeks" }, { "set": "amount", "value": 2 }, "settle", { "set": "input", "value": "2024-01-01T00:00:00.000Z" }, "settle"]
+  },
+  {
+    "name": "'' and null are not arrivals: nothing, not even Invalid Date; a non-finite Amount adds nothing and '5' adds 5",
+    "because": "dateadd.ts :54 inputSupplied; :65 Number(value); :130 Number.isFinite ? amount : 0",
+    "params": { "amount": "abc" },
+    "steps": [{ "set": "input", "value": "" }, { "set": "input", "value": null }, "settle", { "set": "input", "value": "2024-01-01T00:00:00.000Z" }, "settle", { "set": "amount", "value": "5" }, "settle", { "set": "amount", "value": { "$num": "Infinity" } }, "settle"]
+  },
+  {
+    "name": "the calendar is the world's zone — UTC: 2024-01-30T23:30Z + 1 month is 29 February 23:30Z (30 clamps to 29)",
+    "because": "world.ts TIME ZONE; datemath.ts :71-90 read the local calendar. NSP-013 AC5, the UTC arm",
+    "params": { "amount": 1, "unit": "months" },
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": "2024-01-30T23:30:00.000Z" }, "settle"]
+  },
+  {
+    "name": "the calendar is the world's zone — Europe/Paris: the same instant is already 31 January 00:30 there, so + 1 month is 29 February 00:30 local = 28 February 23:30Z",
+    "because": "world.ts TIME ZONE; the same steps as the UTC arm, a different answer. NSP-013 AC5, the second zone",
+    "params": { "amount": 1, "unit": "months" },
+    "world": { "timeZone": "Europe/Paris" },
+    "steps": [{ "set": "input", "value": "2024-01-30T23:30:00.000Z" }, "settle"]
+  },
+  {
+    "name": "across the spring-forward night in America/New_York: + 1 hour is exact (01:30 EST → 03:30 EDT), + 1 month keeps the local time (01:30 → 01:30 EDT = 05:30Z)",
+    "because": "datemath.ts :29-36 fixed units are milliseconds; :71-90 a month step is a local calendar step. NSP-013 AC5, the DST arm",
+    "params": { "amount": 1, "unit": "hours" },
+    "world": { "timeZone": "America/New_York" },
+    "steps": [{ "set": "input", "value": "2026-03-08T06:30:00.000Z" }, "settle", { "set": "unit", "value": "months" }, "settle"]
+  },
+  {
+    "name": "C16: a Unit that is not one of the eight THROWS in the setter on the runtime (the unit stored, the node dead); the spec stores it and abstains",
+    "because": "datemath.ts :88 `Unknown unit`; dateadd.ts :77-78 store then recompute. NSP-013 §6 row C16",
+    "row": "NSP-013 §6 C16 — an unknown Unit throws in Date Add's setter",
+    "params": {},
+    "steps": [{ "set": "input", "value": "2024-01-01T00:00:00.000Z" }, "settle", { "set": "unit", "value": "fortnights" }, "settle"]
+  }
+]

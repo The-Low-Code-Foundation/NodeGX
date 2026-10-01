@@ -1,0 +1,50 @@
+[
+  {
+    "name": "Do on 'abc': the SHA-256 hex digest lands in the same frame, Error cleared, done",
+    "because": "hash.ts :97-110 schedule; :139-160 _run and its continuation; world.ts DIGEST — the answer lands in the microtask after the call",
+    "params": { "value": "abc" },
+    "steps": [{ "signal": "hash" }, "settle"]
+  },
+  {
+    "name": "two Dos in one frame: one digest, two dones",
+    "because": "hash.ts :101-110 every press takes a token, only the first schedules the run; :159 every token reported",
+    "params": { "value": "abc" },
+    "steps": [{ "signal": "hash" }, { "signal": "hash" }, "settle"]
+  },
+  {
+    "name": "SHA-512 as base64url of the empty string: Value never set hashes as ''",
+    "because": "hash.ts :142 `value || ''`; encoding.ts :97-99",
+    "params": { "algorithm": "SHA-512", "encoding": "base64url" },
+    "steps": [{ "signal": "hash" }, "settle"]
+  },
+  {
+    "name": "SHA-384 as base64 of a UTF-8 string",
+    "because": "encoding.ts :77-79 utf8Bytes; :87-95",
+    "params": { "value": "ünïcödé ☃", "algorithm": "SHA-384", "encoding": "base64" },
+    "steps": [{ "signal": "hash" }, "settle"]
+  },
+  {
+    "name": "an Algorithm WebCrypto does not have fails every press of the frame with the reason on Error (hash/failed); Digest untouched",
+    "because": "hash.ts :134-138 _fail; world.ts DIGEST refuses an unknown name as WebCrypto does; :146-150",
+    "params": { "value": "abc" },
+    "steps": [{ "signal": "hash" }, "settle", { "set": "algorithm", "value": "SHA-1" }, { "signal": "hash" }, { "signal": "hash" }, "settle"]
+  },
+  {
+    "name": "an Encoding not in the list fails after the digest was computed, with encodeBytes's message; a success after it clears Error (the wire keeps the message)",
+    "because": "hash.ts :153-161 the encoding's throw lands in the same catch; :156-157 error cleared and flagged",
+    "params": { "value": "abc", "encoding": "base32" },
+    "steps": [{ "signal": "hash" }, "settle", { "set": "encoding", "value": "hex" }, { "signal": "hash" }, "settle"]
+  },
+  {
+    "name": "a Value set after Do in the same frame is what gets hashed; 0 and false hash as the empty string; '' on Algorithm and Encoding read as the defaults",
+    "because": "hash.ts :106-109 the run reads the inputs at the frame end; :140-142 `||`",
+    "params": {},
+    "steps": [{ "signal": "hash" }, { "set": "value", "value": "abc" }, "settle", { "set": "value", "value": 0 }, { "set": "algorithm", "value": "" }, { "set": "encoding", "value": "" }, { "signal": "hash" }, "settle", { "set": "value", "value": false }, { "signal": "hash" }, "settle"]
+  },
+  {
+    "name": "a non-string Value hashes as its text: 5 as '5', an object as '[object Object]'",
+    "because": "encoding.ts :77-79 TextEncoder converts as WebIDL does",
+    "params": {},
+    "steps": [{ "set": "value", "value": 5 }, { "signal": "hash" }, "settle", { "set": "value", "value": { "a": 1 } }, { "signal": "hash" }, "settle"]
+  }
+]

@@ -1,0 +1,65 @@
+[
+  {
+    "name": "fixed units are exact and fractional: 36 hours is 1.5 days, Changed after Difference",
+    "because": "datemath.ts :98-100; datedifference.ts :144-147",
+    "params": {},
+    "steps": [{ "set": "from", "value": "2024-01-01T00:00:00.000Z" }, { "set": "to", "value": "2024-01-02T12:00:00.000Z" }, "settle"]
+  },
+  {
+    "name": "negative when To is earlier than From; Absolute drops the sign; in hours it is 36",
+    "because": "datedifference.ts :145 Math.abs when absolute; :88 `!!value`",
+    "params": {},
+    "steps": [{ "set": "from", "value": "2024-01-02T12:00:00.000Z" }, { "set": "to", "value": "2024-01-01T00:00:00.000Z" }, "settle", { "set": "absolute", "value": true }, "settle", { "set": "unit", "value": "hours" }, "settle"]
+  },
+  {
+    "name": "months are whole steps that do not overshoot: 31 January → 28 February 2023 is 1 month (clamping lands Add exactly there), → 27 February is 0",
+    "because": "datemath.ts :102-115 the trim; the invariant `addToDate(from, difference) never lands past to`",
+    "params": { "unit": "months" },
+    "steps": [{ "set": "from", "value": "2023-01-31T00:00:00.000Z" }, { "set": "to", "value": "2023-02-28T00:00:00.000Z" }, "settle", { "set": "to", "value": "2023-02-27T00:00:00.000Z" }, "settle"]
+  },
+  {
+    "name": "years: 29 February 2024 → 28 February 2025 is 1 year; → 27 February 2025 is 0; backwards it is −1",
+    "because": "datemath.ts :115 trunc(whole / 12); :102-113 the sign and the trim",
+    "params": { "unit": "years" },
+    "steps": [{ "set": "from", "value": "2024-02-29T00:00:00.000Z" }, { "set": "to", "value": "2025-02-28T00:00:00.000Z" }, "settle", { "set": "to", "value": "2025-02-27T00:00:00.000Z" }, "settle", { "set": "to", "value": "2023-02-28T00:00:00.000Z" }, "settle"]
+  },
+  {
+    "name": "D15: a Unit not in the list is counted in YEARS (it misses every fixed unit and lands on the month path's last line)",
+    "because": "datemath.ts :98-115 — `unit === 'months' ? whole : trunc(whole / 12)`. NSP-013 §6 row D15; Date Add throws for the same unit (C16)",
+    "params": { "unit": "fortnights" },
+    "steps": [{ "set": "from", "value": "2020-01-01T00:00:00.000Z" }, { "set": "to", "value": "2023-06-01T00:00:00.000Z" }, "settle"]
+  },
+  {
+    "name": "an unreadable From clears Difference and pulses Invalid Date; a To set after it fails again (From is still unreadable); a readable From computes again",
+    "because": "datedifference.ts :51-53 the from is stored (undefined) before the recompute; :136-142",
+    "params": {},
+    "steps": [{ "set": "from", "value": "2024-01-01T00:00:00.000Z" }, { "set": "to", "value": "2024-01-03T00:00:00.000Z" }, "settle", { "set": "from", "value": "nope" }, "settle", { "set": "to", "value": "2024-01-05T00:00:00.000Z" }, "settle", { "set": "from", "value": "2024-01-04T00:00:00.000Z" }, "settle"]
+  },
+  {
+    "name": "Unit and Absolute set while a side is unreadable apply once both are readable; nothing until both have arrived",
+    "because": "datedifference.ts :134 both supplied; :77, :88 stored before the recompute — the stores survive the failure",
+    "params": {},
+    "steps": [{ "set": "from", "value": "nope" }, "settle", { "set": "to", "value": "2024-01-01T00:00:00.000Z" }, "settle", { "set": "unit", "value": "hours" }, { "set": "absolute", "value": 1 }, "settle", { "set": "from", "value": "2024-01-02T00:00:00.000Z" }, "settle"]
+  },
+  {
+    "name": "the calendar is the world's zone — UTC: 30 January 23:30Z → 28 February 23:30Z is 0 months (Add would overshoot to the 29th)",
+    "because": "datemath.ts :102-113; world.ts TIME ZONE. NSP-013 AC5, the UTC arm",
+    "params": { "unit": "months" },
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "from", "value": "2024-01-30T23:30:00.000Z" }, { "set": "to", "value": "2024-02-28T23:30:00.000Z" }, "settle"]
+  },
+  {
+    "name": "the calendar is the world's zone — Europe/Paris: the same instants are 31 January 00:30 and 29 February 00:30 there, so 1 month",
+    "because": "the same steps as the UTC arm, a different answer. NSP-013 AC5, the second zone",
+    "params": { "unit": "months" },
+    "world": { "timeZone": "Europe/Paris" },
+    "steps": [{ "set": "from", "value": "2024-01-30T23:30:00.000Z" }, { "set": "to", "value": "2024-02-28T23:30:00.000Z" }, "settle"]
+  },
+  {
+    "name": "across the fall-back night in America/New_York, in hours: 00:30 EDT → 01:30 EST is 2 hours (the hour is repeated); '' on Unit reads as days",
+    "because": "datemath.ts :29-36 fixed units are exact milliseconds; datedifference.ts :144 `|| 'days'`. NSP-013 AC5, the DST arm",
+    "params": { "unit": "hours" },
+    "world": { "timeZone": "America/New_York" },
+    "steps": [{ "set": "from", "value": "2026-11-01T04:30:00.000Z" }, { "set": "to", "value": "2026-11-01T06:30:00.000Z" }, "settle", { "set": "unit", "value": "" }, "settle"]
+  }
+]

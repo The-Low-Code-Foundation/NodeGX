@@ -1,0 +1,93 @@
+[
+  {
+    "name": "the default Format in UTC: 2024-02-29T13:45:30.123Z renders 2024-02-29, then Date Changed",
+    "because": "datetostring.ts :101 the default format; :190-197; :366-367",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle"]
+  },
+  {
+    "name": "every token, in UTC: Thursday 29 February 2024, 1:45 PM (29th, Thu Feb 24, 13:45:30 13 01pm 2/29)",
+    "because": "datetostring.ts :276-341 — the original chain and CMP-005's tokens",
+    "params": { "formatString": "{dayName} {d} {monthName} {year}, {h12}:{minutes} {AMPM} ({ordinal}, {dayShort} {monthShort} {yearShort}, {hours}:{min}:{s} {h} {hours12}{ampm} {m}/{date})" },
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle"]
+  },
+  {
+    "name": "Locale fr-FR renders the names only — {ordinal} stays English; de-DE after it re-renders; the same tag again is ignored",
+    "because": "datetostring.ts :84-95 ordinalSuffix is English on purpose; :170-178 the locale setter; :172 an unchanged one returns",
+    "params": { "formatString": "{dayName} {ordinal} {monthName}", "locale": "fr-FR" },
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle", { "set": "locale", "value": "de-DE" }, "settle", { "set": "locale", "value": "de-DE" }, "settle"]
+  },
+  {
+    "name": "Timezone renders the same instant elsewhere: 2024-02-29T22:45:30Z is 2024-03-01 07:45 in Asia/Tokyo, whatever the world's zone",
+    "because": "datetostring.ts :39-71 fieldsInZone — a re-read of the same instant, no arithmetic of its own",
+    "params": { "formatString": "{year}-{month}-{date} {hours}:{minutes}", "timeZone": "Asia/Tokyo" },
+    "world": { "timeZone": "America/New_York" },
+    "steps": [{ "set": "input", "value": "2024-02-29T22:45:30.000Z" }, "settle"]
+  },
+  {
+    "name": "an empty Timezone is the world's zone — UTC: 2024-02-29T22:45:30Z renders 2024-02-29 22:45",
+    "because": "datetostring.ts :264-273 the no-zone branch reads getDate and friends; world.ts TIME ZONE. NSP-013 AC5",
+    "params": { "formatString": "{year}-{month}-{date} {hours}:{minutes}" },
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": "2024-02-29T22:45:30.000Z" }, "settle"]
+  },
+  {
+    "name": "an empty Timezone is the world's zone — Pacific/Auckland: the same instant renders 2024-03-01 11:45",
+    "because": "the same steps as the UTC arm. NSP-013 AC5, the second zone",
+    "params": { "formatString": "{year}-{month}-{date} {hours}:{minutes}" },
+    "world": { "timeZone": "Pacific/Auckland" },
+    "steps": [{ "set": "input", "value": "2024-02-29T22:45:30.000Z" }, "settle"]
+  },
+  {
+    "name": "the repeated hour on Europe/Paris's fall-back night: 00:30Z and 01:30Z both render 02:30 am; {dayName} in the zone",
+    "because": "NSP-013 AC5, the DST arm; datetostring.ts :328-332 hours12 and the meridiem from the hour",
+    "params": { "formatString": "{dayShort} {hours}:{minutes} {ampm}" },
+    "world": { "timeZone": "Europe/Paris" },
+    "steps": [{ "set": "input", "value": "2026-10-25T00:30:00.000Z" }, "settle", { "set": "input", "value": "2026-10-25T01:30:00.000Z" }, "settle"]
+  },
+  {
+    "name": "an unknown zone, then an unknown locale, render blank with Invalid Date before Date Changed; clearing them renders again",
+    "because": "datetostring.ts :39-71 RangeError from the Intl constructor; :281 the eager monthShort call; :344-367",
+    "params": { "formatString": "{monthShort} {date}" },
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle", { "set": "timeZone", "value": "Not/AZone" }, "settle", { "set": "timeZone", "value": "" }, { "set": "locale", "value": "not a locale" }, "settle", { "set": "locale", "value": null }, "settle"]
+  },
+  {
+    "name": "a Format set before any Date says nothing; a Format that is already held is ignored; a changed one re-renders once a date has arrived",
+    "because": "datetostring.ts :126-134",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "formatString", "value": "{year}" }, "settle", { "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle", { "set": "formatString", "value": "{year}" }, "settle", { "set": "formatString", "value": "{yearShort}" }, "settle"]
+  },
+  {
+    "name": "a Format that is not a string renders blank with Invalid Date; no tokens copies the text through; {} is left alone",
+    "because": "datetostring.ts :297 `.replace` on a number throws into the catch; :344-351",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle", { "set": "formatString", "value": 5 }, "settle", { "set": "formatString", "value": "no tokens {}" }, "settle"]
+  },
+  {
+    "name": "D14, no zone: null and a numeric timestamp cannot be read — blank and Invalid Date; the same value arriving again is ignored; an unparseable string too",
+    "because": "datetostring.ts :264-273 getDate on null / a number throws; :194 `currentInput === _value`. NSP-013 §6 row D14, the no-zone arm",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": null }, "settle", { "set": "input", "value": null }, "settle", { "set": "input", "value": 1709214330123 }, "settle", { "set": "input", "value": 1709214330123 }, "settle", { "set": "input", "value": "nope" }, "settle"]
+  },
+  {
+    "name": "D14, with a zone: the same numeric timestamp RENDERS (2024-02-29) and null renders the epoch (1970-01-01)",
+    "because": "datetostring.ts :39-71 formatToParts accepts anything Number() accepts. NSP-013 §6 row D14, the zone arm",
+    "params": { "timeZone": "UTC" },
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": 1709214330123 }, "settle", { "set": "input", "value": null }, "settle"]
+  },
+  {
+    "name": "a string is parsed to a fresh Date every time, so the same text twice renders twice; a Date object twice renders once",
+    "because": "datetostring.ts :191 `new Date(value)`; :194 reference equality",
+    "params": {},
+    "world": { "timeZone": "UTC" },
+    "steps": [{ "set": "input", "value": "2024-02-29" }, "settle", { "set": "input", "value": "2024-02-29" }, "settle", { "set": "input", "value": { "$date": "2024-03-01T00:00:00.000Z" } }, "settle", { "set": "input", "value": { "$date": "2024-03-01T00:00:00.000Z" } }, "settle"]
+  }
+]

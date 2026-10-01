@@ -88,7 +88,7 @@ import { isRegistryEntry } from './registry';
 import type { AnyNodeSpec, ChangeEvent, Outcome, InputDecl, ReducerOutcome, SignalOutputDecl, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
-import { World, type Delivery } from './world';
+import { installTimeZone, World, type Delivery } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
 type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse };
@@ -626,12 +626,18 @@ export function trace(inst: Instance): TraceEvent[] {
 
 /** Runs a scripted sequence from a fresh mount and returns its trace. */
 export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: readonly Step[], world?: World): TraceEvent[] {
-  const inst = mount(spec, params, world);
-  for (const step of steps) {
-    if (step === 'settle') settle(inst);
-    else if ('signal' in step) signal(inst, step.signal);
-    else if ('advance' in step) advance(inst, step.advance);
-    else set(inst, step.set, step.value);
+  // a play under a world runs in its zone (NSP-013, world.ts TIME ZONE), as the adapter's does
+  const restoreZone = world ? installTimeZone(world) : () => undefined;
+  try {
+    const inst = mount(spec, params, world);
+    for (const step of steps) {
+      if (step === 'settle') settle(inst);
+      else if ('signal' in step) signal(inst, step.signal);
+      else if ('advance' in step) advance(inst, step.advance);
+      else set(inst, step.set, step.value);
+    }
+    return trace(inst);
+  } finally {
+    restoreZone();
   }
-  return trace(inst);
 }
