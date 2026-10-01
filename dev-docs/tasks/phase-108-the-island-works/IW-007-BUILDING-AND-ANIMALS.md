@@ -66,15 +66,67 @@ hunks elsewhere each under `// P108 IW-007 (lane A): …`; lane B's land plumbin
   pinned on the land (`plots.land`) it fills her bowl on the island's tick, wear (WEAR.bowl) takes a carrot, the robot
   goes back. Lane B's plumbing carries it (the island, the keep); this lane adds nothing to the tick.
 
-**Readings** — _placeholder: filled in the next commit, after the last drive run._
+**Readings** (worktree at `87f677253`, lane B's plumbing `b37112fdb` merged; spec files one at a time; drives on ONE deploy
+made by `drives/drive-all.sh island island-3d shop kit2d kit3d animals animals-3d animals-perf`; every exit 0):
 
-**Not done, and why** — _placeholder._
+| gate | total | previous |
+|---|---|---|
+| `iw007Animals.test.ts` (NEW) | **22 / 22** (shelf, card, Buy, name, pen; feeding fills · wear empties · fills again · never removed · the keep; both kits from engine worlds; the island through Read family → Island world → tick → Draw world → kit; the drawer through a real Blockly; 6 arms) | — |
+| `iw007Build.test.ts` | **22 / 22** — `[A]` 2/2 (green with lane B's plumbing alone; this lane's code is not what they grade — the drawing, the tab and the drive are) | 18 + 4 red on the base |
+| cg002Engine 259 · cg003Template 148 · cg005Olive 41 · cg006Requests 83 · ig004Island 38 · cg001GardenKit 57 · ig007Garden3d 50 · iw004Blocks 59 · p108s2Join 4 · iw003Missions 63 · iw006Save 17 · iw006Earn 34 · iw006Shop 34 · iw008Crew 25 · iwLook 15 · p108s4Join 3 · iw007Building 13 | all exit 0 | the base's (iw007Building is lane B's) |
+| shell `node --test` | 92 / 92 | 92 |
+| `npm run template:garden` | exit 0, 0 drift (committed with the source) | 0 |
+| page drive (`--mockup`) | **331 / 331** | 331 |
+| `drive-iw007-animals.js` 2D (NEW) | **16 / 16** | — |
+| `drive-iw007-animals.js --mode 3d` | **4 / 4** (this run: Garden 3D drew her pill "Flopsy · waiting", then Too Slow handed the island to the flat one, where she turned happy; the run before: waiting → happy in Garden 3D itself) | — |
+| `drive-iw007-animals.js --perf` (AC4) | **5 / 5** — p95 **16.7 ms** at CPU ×4 (×4.1 measured), 1199 frames, max 33.4 ms, 0 over 50, 22 robot moves in 20 s; her land with the spa and the refuge finished, a rabbit and a sheep, Cobble feeding there beside Pip on the tulips | s4: 16.7 ms (the crew at its cap) |
+| island 2D `--perf` · 3D | 69/69 · 5/5 | 69 · 5 |
+| shop | 60/60 (its Animals TAB half now expects the shut line) | 60 |
+| kit fixtures 2D · 3D | **46/46** · **32/32** (+2 each: lane A's clauses) | 44 · 30 |
 
-**Deviations, with reasons** — _placeholder._
+FEED / WEAR, recorded on her tile by a MutationObserver from the island's start (1368 EN): 0/3 waiting → 7.8 s 1/3 happy →
+16.6 s 2/3 → 25.4 s 3/3 → 47.0 s 2/3 (wear: WEAR.bowl = 60 ticks ≈ 46 s) → 55.0 s 3/3 (the robot went back); every record
+has her (never GONE), only "waiting" or "happy". RELOAD: the store's land kept "Flopsy" the rabbit, `fed` 2 (see below).
+
+Screenshots looked at (`iw007-animals-scratch/drives/pages/animals`, `…/animals-perf`, `…/animals-3d`, `…/kit2d/shots`,
+`…/kit3d/shots`): `iw7a-1368-en-05-land` (3× close-up: she sits by her empty blue bowl at the refuge's pen, ears back, her
+pill "Flopsy", the patch with its carrots and its orange bar, the rock); `iw7a-390-fr-05-land` ("Noisette", the default
+name, the same); `iw7a-1368-en-04-bought` (the card: "Flopsy is waiting by her bowl on your land. A robot can bring her
+carrots!", Not now, no Buy); `iw7a-390-fr-01-shut` (« Construis d’abord le refuge : tes animaux y vivront. », the five
+chips wrapping); `iw7a-perf-land-1368` (the rabbit and the sheep side by side, two bowls, the names staggered, Cobble at
+work); `iw7a-2d-rabbit-0/3`, `iw7a-2d-sheep-0/4` (sitting · standing with carrots heaped in the bowl, the meter 0/3 →
+3/3 green); `iw7a-3d-rabbit-0/3`, `iw7a-3d-sheep-0/4` (in the round, her pill in the overlay, the chip in carrots);
+`iw7a-3d-island-first` (the 3D island, "Flopsy" on her land). Two looks changed what was built: on the island she was a
+13 px speck (now about two tiles tall), and the two pen names overlapped (now staggered); in 3D she was a third of a
+robot's height (now half as big again).
+
+**Not done, and why**
+- **The feeding job taught in the Workshop on the land** by the drive: the drive SEEDS the pin (`plots.land = { program,
+  robotId }`, as the crew drive seeds its programs; the program is the one a child teaches). The Workshop on the land is
+  lane B's (`Logic/Land request`, merged); teaching it there by touch was not driven by this lane.
+- **The land's card** (what tapping her land says and does, pinning a robot from it) is lane B's; this lane pins by seed.
+- **A fed animal "sometimes gives something"** (IW-007 §2: wool, an egg) — not built; no AC asks it.
+
+**Deviations, with reasons**
+1. **3D hop only when a carrot lands** (2D: a small hop now and then while fed). A hop that never stops would keep Garden
+   3D drawing every frame (its loop draws only while something moves — the CPU is Olive's when the scene is still); fed,
+   she stands, and each carrot that lands makes her hop.
+2. **An empty name box takes a default name** (Hazel / Noisette, Cloud / Nuage — numbered only when taken) in `Logic/Buy`,
+   as a robot copy's does in `buyItem`; the base's `buyItem` keeps `name: ''` for an animal (its gate row), so the default
+   is the shop's, not the save rule's.
+3. **Draw world** (a shared page script) passes `animal`, `name` and the patch: without it the kits never saw her.
+4. **Three spec / drive clauses changed in place**: iw006Shop's "Build and Animals sell nothing yet" (its Animals half
+   now `iw7aShut`), cg001GardenKit's reduced-motion list (+ the hop, stilled), drive-iw006-shop's TAB Animals half.
 
 **FR lines for Richard's read:** « Construis d’abord le refuge : tes animaux y vivront. » · « Le refuge n’est pas encore
 fini. Tes robots peuvent le construire ! » · « Toutes les places de l’enclos du refuge sont prises. » · « {name} t’attend
 près de son bol, sur ton terrain. Un robot peut lui apporter des carottes ! » (rabbit and sheep alike: « son bol ») ·
 « 🥕 carré de carottes » · « 🌳 arbre » · the default names « Noisette » (the rabbit), « Nuage » (the sheep).
 
-**Could not verify** — _placeholder._
+**Could not verify**
+- **The save lags the island by up to one carrot**: the keep writes her `fed` at its moments, so a refill a moment before
+  a reload is not in the save (the drive: 3/3 on the island, `fed` 2 in the store, 2/3 after the reload — her name and she
+  herself always kept). For lane B / the merge: a bowl's rise as a keep moment, as a building's drop already is.
+- The tablet (her size on a real island tile, the hop by touch); a real GPU (swiftshader hands the 3D island to the flat
+  one within a few ticks, as before); two animals both fed by one program on the page (the perf run's program feeds the
+  rabbit first, the sheep after — the patch's four carrots and its regrowth mean the sheep waits; not graded).
