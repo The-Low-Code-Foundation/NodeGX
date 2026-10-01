@@ -2,6 +2,7 @@
 id: P107-C19
 title: One Animate To Value with an empty or unknown Easing Curve stops every animation and Repeat in the app
 status: fixed
+commit: fec895706 808714114
 severity: blocker
 area: runtime / Animate To Value (and the timer scheduler)
 found: P107 NSP-013 s13, 2026-10-01

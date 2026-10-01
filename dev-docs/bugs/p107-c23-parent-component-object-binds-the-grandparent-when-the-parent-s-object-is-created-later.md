@@ -2,6 +2,7 @@
 id: P107-C23
 title: Parent Component Object binds the GRANDPARENT's object when the parent's Component Object is created after the child
 status: fixed
+commit: 7c0a58369
 severity: high
 area: runtime / Parent Component Object (viewer)
 found: P107 NSP-015 s15, 2026-10-01

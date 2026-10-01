@@ -2,6 +2,7 @@
 id: P107-C17
 title: JSON Stream Parser freezes the whole app on a stray `}` in Stream or Single format
 status: fixed
+commit: 6b3361189
 severity: blocker
 area: runtime / JSON Stream Parser
 found: P107 (the node says what it does) s12, 2026-09-30/10-01

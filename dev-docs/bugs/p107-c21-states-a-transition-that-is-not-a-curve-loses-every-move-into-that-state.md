@@ -2,6 +2,7 @@
 id: P107-C21
 title: States — a transition setting that is not a curve makes every move into that state silently do nothing
 status: fixed
+commit: d7746dc26
 severity: high
 area: runtime / States
 found: P107 NSP-013 s14, 2026-10-01
