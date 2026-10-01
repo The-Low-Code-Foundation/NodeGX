@@ -6,12 +6,13 @@
  * @module noodl-mcp/tests/iw007Building.test
  */
 import * as vm from 'vm';
-import { LAND_ID, LAND_PLOT, LAND_SOURCES, REQUESTS } from './cg002Content';
+import { LAND_ID, LAND_PLOT, LAND_SOURCES, REQUESTS, SHOP } from './cg002Content';
 import { ADD_PROFILE_SCRIPT, runScript } from './cg002Scripts';
-import { ALL_WORDS_JSON, FAMILY_SCRIPT, ISLAND_WORLD_SCRIPT, START_WORLD_SCRIPT, WIN_PAY_SCRIPT } from './cg003Scripts';
-import { ISLAND_TICK_SCRIPT } from './ig004Island';
+import { ALL_WORDS_JSON, DRAW_WORLD_SCRIPT, FAMILY_SCRIPT, ISLAND_CHOOSE_SCRIPT, ISLAND_WORLD_SCRIPT, START_WORLD_SCRIPT, WIN_PAY_SCRIPT } from './cg003Scripts';
+import { ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT } from './ig004Island';
 import { ISLAND_KEEP_SCRIPT } from './iw006Earn';
-import { LAND_PALETTE, LAND_REQUEST_SCRIPT } from './iw007Building';
+import { BUY_SCRIPT, SHOP_CARD_SCRIPT, SHOP_IDS, SHOP_ROWS_SCRIPT } from './iw006Shop';
+import { LAND_CARD_SCRIPT, LAND_GHOST_SCRIPT, LAND_PALETTE, LAND_REQUEST_SCRIPT, WITH_GHOST_SCRIPT } from './iw007Building';
 
 const compiled = new Map<string, vm.Script>();
 /** A page script run as the runtime runs it: its own context, inputs and outputs through JSON. */
@@ -239,5 +240,122 @@ describe('[B] plumbing — her land is a plot of the island (brief §4.2)', () =
     expect([other.pay > 0, !!other.jobLive]).toEqual([true, true]);
     const A = arm(WIN_PAY_SCRIPT, "id !== 'free' && id !== 'land'", "id !== 'free'");
     expect(bare(A, { requestId: LAND_ID, requests: reqs, plots: f.plots, done: f.done, words: WORDS, lang: 'en' }).jobLive).not.toBeNull();
+  });
+});
+
+// ── [B] the Build tab, placing a blueprint, her land's card ──────────────────────────────────────────────────────────
+
+describe('[B] the Build tab — a blueprint bought, placed on a legal footprint only, its card in words (EN + FR)', () => {
+  const W = (key: string, lang: 'en' | 'fr' = 'en') => WORDS.find((w: any) => w.key === key)[lang];
+  const rich = (n = 200) => {
+    const m = kid();
+    active(m).shells = { earned: n, spent: 0 };
+    return m;
+  };
+  const shopRows = (model: any, lang = 'en') => bare(SHOP_ROWS_SCRIPT, { model, words: WORDS, lang, tab: SHOP_IDS.tab + 'build' });
+  const shopCard = (model: any, id: string, extra: Record<string, unknown> = {}, lang = 'en') => bare(SHOP_CARD_SCRIPT, { model, words: WORDS, lang, requests: REQUESTS, itemId: SHOP_IDS.item + id, ...extra });
+  const landCard = (model: any, ghost: unknown = null, lang = 'en') => bare(LAND_CARD_SCRIPT, { model, ghost, requestId: LAND_ID, words: WORDS, lang });
+  const ghostDo = (mode: string, model: any, ghost: unknown, extra: Record<string, unknown> = {}) => bare(LAND_GHOST_SCRIPT, { mode, model, ghost, ...extra });
+
+  it('the spa bought from its card (the purchase rule); its row then says “to place” and its card where it goes — no second Buy', () => {
+    const m = rich();
+    const before = shopCard(m, 'spa');
+    expect([before.canBuy, before.showFigures, before.cost]).toEqual([true, true, W('iw6hCost').replace('{n}', String(SHOP.find((i) => i.id === 'spa')!.price))]);
+    const b = bare(BUY_SCRIPT, { model: m, itemId: SHOP_IDS.item + 'spa' });
+    expect([b.ok, active(b.model).owned]).toEqual([true, ['spa']]);
+    expect(shopCard(b.model, 'spa', { bought: 'spa' }).done).toBe(W('iw7bCardPlace'));
+    const row = shopRows(b.model).items.find((i: any) => i.id === SHOP_IDS.item + 'spa');
+    expect([row.tag, row.hasTag]).toEqual([W('iw7bTagPlace'), true]);
+    const after = shopCard(b.model, 'spa', {}, 'fr');
+    expect([after.canBuy, after.showFigures, after.done]).toEqual([false, false, W('iw7bCardPlace', 'fr')]);
+  });
+
+  it('her land’s card offers the bought blueprint; the ghost starts at its spot, green; a tap on her land moves it; a refused tile says why (EN + FR); Place writes it there', () => {
+    const m = rich();
+    const b = bare(BUY_SCRIPT, { model: m, itemId: SHOP_IDS.item + 'spa' });
+    const c0 = landCard(b.model);
+    expect([c0.show, c0.showChips, c0.chips.map((c: any) => c.id), c0.ghostShow]).toEqual([true, true, ['landbp|spa'], false]);
+    const g1 = ghostDo('start', b.model, null, { bp: 'landbp|spa' }).ghost;
+    expect(g1).toEqual({ bp: 'spa', x: 3, y: 1 });
+    const c1 = landCard(b.model, g1);
+    expect([c1.ghostShow, c1.ghostOk, c1.ghostLine, c1.ghostThing]).toEqual([true, true, W('iw7bGhostOk'), { kind: 'ghost', bp: 'spa', x: LAND_PLOT.x + 3, y: LAND_PLOT.y + 1, w: 2, pen: 0, ok: true, why: '' }]);
+    // A tap on the tile left of the rock (6, 5): the spa would sit on the rock — taken, in words, and no Put.
+    const g2 = ghostDo('move', b.model, g1, { x: LAND_PLOT.x + 6, y: LAND_PLOT.y + 5 }).ghost;
+    const c2 = landCard(b.model, g2);
+    expect([g2, c2.ghostOk, c2.why, c2.ghostLine]).toEqual([{ bp: 'spa', x: 6, y: 5 }, false, 'taken', W('iw7bGhostNo').replace('{why}', W('iw7bWhyTaken'))]);
+    expect(landCard(b.model, g2, 'fr').ghostLine).toBe(W('iw7bGhostNo', 'fr').replace('{why}', W('iw7bWhyTaken', 'fr')));
+    for (const [x, y, why] of [[7, 1, 'edge'], [0, 2, 'ground'], [6, 4, 'reach']] as const) expect({ why: landCard(b.model, { bp: 'spa', x, y }).why, line: !!landCard(b.model, { bp: 'spa', x, y }).ghostLine }).toEqual({ why, line: true });
+    // Place on a refused tile: nothing changes. A tap OFF her land: the ghost stays.
+    const no = ghostDo('place', b.model, g2);
+    expect([no.ok, no.placed, active(no.model).island.land]).toEqual([false, '', undefined]);
+    expect(ghostDo('move', b.model, g2, { x: 3, y: 3 }).ghost).toEqual(g2);
+    // Moved back to a legal tile and placed: her land has the spa there, nothing delivered; the ghost is gone.
+    const g3 = ghostDo('move', b.model, g2, { x: LAND_PLOT.x + 3, y: LAND_PLOT.y + 1 }).ghost;
+    const yes = ghostDo('place', b.model, g3);
+    expect([yes.ok, yes.placed, yes.ghost]).toEqual([true, 'spa', { bp: '' }]);
+    expect(active(yes.model).island.land.buildings.map((x: any) => [x.bp, x.x, x.y, x.have])).toEqual([['spa', 3, 1, { stone: 0, plank: 0 }]]);
+    // The card now says what stands, at its first stage; no chip (nothing left to place); the shop's row: being built.
+    const c4 = landCard(yes.model);
+    expect([c4.line, c4.showChips]).toEqual([W('iw7bStands').replace('{what}', 'The robot spa').replace('{stage}', W('iw7bStage0')).replace('{n}', '0').replace('{m}', '10'), false]);
+    expect(shopRows(yes.model).items.find((i: any) => i.id === SHOP_IDS.item + 'spa').tag).toBe(W('iw7bTagBuilding'));
+  });
+
+  it('a ghost cannot come out for a blueprint she has not bought, nor one already placed; cancel puts it away', () => {
+    const m = rich();
+    expect(ghostDo('start', m, null, { bp: 'landbp|spa' }).ghost).toEqual({ bp: '' });
+    const b = bare(BUY_SCRIPT, { model: m, itemId: SHOP_IDS.item + 'spa' });
+    const placed = ghostDo('place', b.model, { bp: 'spa', x: 3, y: 1 });
+    expect(ghostDo('start', placed.model, null, { bp: 'landbp|spa' }).ghost).toEqual({ bp: '' });
+    expect(ghostDo('cancel', b.model, { bp: 'spa', x: 3, y: 1 }).ghost).toEqual({ bp: '' });
+    expect(landCard(m).line).toBe(W('iw7bLandEmpty'));
+  });
+
+  it('the stage words follow the spa as it rises, and finished says so; the shop row says built', () => {
+    const at = (stone: number, plank: number) => {
+      const m = kid();
+      active(m).owned = ['spa'];
+      active(m).island.land = spa(stone, plank);
+      return m;
+    };
+    const line = (m: any) => landCard(m).line;
+    expect([line(at(0, 0)), line(at(3, 0)), line(at(6, 1)), line(at(6, 4))]).toEqual([
+      ['iw7bStage0', 0],
+      ['iw7bStage1', 3],
+      ['iw7bStage2', 7],
+      ['iw7bStageDone', 10]
+    ].map(([k, n]) => W('iw7bStands').replace('{what}', 'The robot spa').replace('{stage}', W(k as string)).replace('{n}', String(n)).replace('{m}', '10')));
+    expect(shopRows(at(6, 4)).items.find((i: any) => i.id === SHOP_IDS.item + 'spa').tag).toBe(W('iw7bTagBuilt'));
+  });
+
+  it('a tap on her land opens its card (Plot at → Island choose): “Your land”, Go and help opens the Workshop on it; at work there, any robot of hers is named', () => {
+    const m = crew();
+    const f = runScript(FAMILY_SCRIPT, { model: m });
+    const w = isle(m);
+    const at = bare(PLOT_AT_SCRIPT, { cards: w.cards, x: LAND_PLOT.x + 2, y: LAND_PLOT.y + 4 });
+    expect(at.requestId).toBe(LAND_ID);
+    const ch = bare(ISLAND_CHOOSE_SCRIPT, { requestId: LAND_ID, cards: w.cards, requests: REQUESTS, plots: f.plots, robots: f.robots, words: WORDS, lang: 'fr', botName: 'Pip' });
+    expect([ch.found, ch.title, ch.canOpen, ch.showHome, ch.robotId, ch.status]).toEqual([true, W('iw7bLandTitle', 'fr'), true, true, 'r1', 'working']);
+    // Cobble alone pinned on her land (another kind): the card names Cobble, and Bring home takes Cobble.
+    const n = kid();
+    n.profiles[0].island.robots.push(cobble('', carry(STONE, 'rock')));
+    delete n.profiles[0].island.robots[1].helps;
+    n.profiles[0].island.land = spa();
+    n.profiles[0].island.plots[LAND_ID] = { program: carry(STONE, 'rock'), robotId: 'cobble', wonAt: 1 };
+    const g = runScript(FAMILY_SCRIPT, { model: n });
+    const c2 = bare(ISLAND_CHOOSE_SCRIPT, { requestId: LAND_ID, cards: isle(n).cards, requests: REQUESTS, plots: g.plots, robots: g.robots, words: WORDS, lang: 'en', botName: 'Pip' });
+    expect([c2.robotId, c2.showHome]).toEqual(['cobble', true]);
+  });
+
+  it('the island draws the ghost over her land while one is out (With ghost), and Draw world hands the kits the tree, the ghost and each building’s span', () => {
+    const m = kid();
+    active(m).island.land = spa(2, 1);
+    const w = isle(m).world;
+    const g = { kind: 'ghost', bp: 'refuge', x: LAND_PLOT.x + 3, y: LAND_PLOT.y + 3, w: 2, pen: 2, ok: false, why: 'taken' };
+    expect(bare(WITH_GHOST_SCRIPT, { world: w, ghost: g, showGhost: false }).world.things.length).toBe(w.things.length);
+    const wg = bare(WITH_GHOST_SCRIPT, { world: w, ghost: g, showGhost: true }).world;
+    const d = bare(DRAW_WORLD_SCRIPT, { world: wg, words: WORDS, lang: 'en' });
+    expect(d.things.find((t: any) => t.kind === 'ghost')).toEqual({ kind: 'ghost', bp: 'refuge', x: LAND_PLOT.x + 3, y: LAND_PLOT.y + 3, w: 2, pen: 2, ok: false });
+    expect(d.things.find((t: any) => t.kind === 'tree' && t.id === 'tree')).toMatchObject({ x: LAND_PLOT.x + 7, y: LAND_PLOT.y, left: 6, max: 8 });
+    expect(d.things.filter((t: any) => t.of === 'b1').map((t: any) => [t.build, t.bstage, t.bx, t.bw, t.item, t.have, t.need])).toEqual([['spa', 1, LAND_PLOT.x + 3, 2, 'stone', 2, 6], ['spa', 1, LAND_PLOT.x + 3, 2, 'plank', 1, 4]]);
   });
 });

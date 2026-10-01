@@ -37,7 +37,7 @@
  * @module noodl-mcp/tests/iw007Building
  */
 import { LAND_ID } from './cg002Content';
-import { SAVE_HELPERS } from './cg002Scripts';
+import { ENGINE, SAVE_HELPERS } from './cg002Scripts';
 import { LAND_HELPERS } from './iw007Land';
 
 /** The blocks the land's Workshop offers (a carrying job: walk, pick, put, loop until a part is done). */
@@ -135,7 +135,141 @@ out.push(iw7bLandRequest(Inputs.land));
 Outputs.requests = out;
 `;
 
+// ── The Build tab (iw006Shop's rows and card include BUILD_SHOP after SAVE_HELPERS) ─────────────────────────────────
+
+/**
+ * The shop's blueprint rules: a blueprint she has not bought is sold like anything else; bought, its tag and card say
+ * where it is — to place (tap her land), being built, built. Reads the land (SAVE_HELPERS' landOf, buildingDone).
+ */
+export const BUILD_SHOP = `
+// ── P108 IW-007 (lane B): the Build tab ──
+function iw7bBuiltOf(p, bp) { var l = landOf(p && p.island ? p.island.land : null); for (var i = 0; i < l.buildings.length; i++) if (l.buildings[i].bp === bp) return l.buildings[i]; return null; }
+/** Where a blueprint she owns is: 'place' (bought, not placed), 'building', 'built' — '' when she does not own it. */
+function iw7bBpState(p, it) {
+  if (!p || !it || it.kind !== 'blueprint' || p.owned.indexOf(it.id) === -1) return '';
+  var b = iw7bBuiltOf(p, it.blueprint);
+  return !b ? 'place' : buildingDone(b) ? 'built' : 'building';
+}
+function iw7bBpTag(p, it, W) { var st = iw7bBpState(p, it); return st === 'place' ? W.iw7bTagPlace || '' : st === 'building' ? W.iw7bTagBuilding || '' : st === 'built' ? W.iw7bTagBuilt || '' : ''; }
+function iw7bBpCardLine(p, it, W) { var st = iw7bBpState(p, it); return st === 'place' ? W.iw7bCardPlace || '' : st === 'building' ? W.iw7bCardBuilding || '' : st === 'built' ? W.iw7bCardBuilt || '' : ''; }
+`;
+
+// ── Placing a blueprint on her land, and the land's card ─────────────────────────────────────────────────────────
+
+/** What the land card and the ghost share (ENGINE + SAVE_HELPERS + LAND_HELPERS before it). */
+const PLACE_SHARED = `
+// ── P108 IW-007 (lane B): placing ──
+var IW7B_SHOP = SHOP;
+function iw7bW(rows, lang) { var map = {}, list = Array.isArray(rows) ? rows : []; for (var i = 0; i < list.length; i++) if (list[i] && list[i].key) map[list[i].key] = String(list[i][lang] || list[i].en || ''); return map; }
+function iw7bFill(text, vars) { var t = String(text || ''); for (var k in vars) t = t.split('{' + k + '}').join(String(vars[k])); return t; }
+function iw7bActive(model) { for (var i = 0; i < model.profiles.length; i++) if (model.profiles[i].id === model.island.activeId) return model.profiles[i]; return null; }
+function iw7bItemOf(bp) { for (var i = 0; i < IW7B_SHOP.length; i++) if (IW7B_SHOP[i].kind === 'blueprint' && IW7B_SHOP[i].blueprint === String(bp)) return IW7B_SHOP[i]; return null; }
+/** The blueprints she owns and has not placed yet, in the shop's order. */
+function iw7bToPlace(p) {
+  var out = [], land = landOf(p && p.island ? p.island.land : null);
+  for (var i = 0; i < IW7B_SHOP.length; i++) {
+    var it = IW7B_SHOP[i];
+    if (it.kind !== 'blueprint' || !p || p.owned.indexOf(it.id) === -1) continue;
+    var placed = false;
+    for (var b = 0; b < land.buildings.length; b++) if (land.buildings[b].bp === it.blueprint) placed = true;
+    if (!placed) out.push(it.blueprint);
+  }
+  return out;
+}
+/** The ghost as the Variable holds it: '{ bp, x, y }' (plot coordinates), or none ('{ bp: "" }'). */
+function iw7bGhostOf(v) { var g = v && typeof v === 'object' ? v : {}; return blueprintSpec(g.bp) ? { bp: String(g.bp), x: Math.floor(Number(g.x)) || 0, y: Math.floor(Number(g.y)) || 0 } : null; }
+`;
+
+/**
+ * `Logic/Land card` — her land's part of the plot card (shown when the card is the land's): what stands on it (each
+ * building, its stage and its materials), the blueprints she has to place (a chip each), and while a ghost is out, where
+ * it is and why not there (EN + FR), and the ghost thing for the island to draw (island coordinates, ok or not).
+ * Inputs: `requestId` (the card's plot), `model`, `ghost` (the Variable), `words`, `lang`.
+ */
+export const LAND_CARD_SCRIPT = `${ENGINE}${SAVE_HELPERS}${LAND_HELPERS}${PLACE_SHARED}
+var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en', W = iw7bW(Inputs.words, lang);
+var model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {}), p = iw7bActive(model);
+var land = landOf(p && p.island ? p.island.land : null);
+var ghost = iw7bGhostOf(Inputs.ghost);
+var STAGE_WORDS = ['iw7bStage0', 'iw7bStage1', 'iw7bStage2'];
+var stands = [];
+for (var i = 0; i < land.buildings.length; i++) {
+  var b = land.buildings[i], spec = blueprintSpec(b.bp), it = iw7bItemOf(b.bp), have = 0, need = 0;
+  for (var k = 0; k < spec.parts.length; k++) { need += spec.parts[k].need; have += Math.min(spec.parts[k].need, Number(b.have[spec.parts[k].item]) || 0); }
+  var st = buildStage(have, need, spec.stages);
+  var stage = st >= spec.stages - 1 ? W.iw7bStageDone || '' : W[STAGE_WORDS[Math.min(st, STAGE_WORDS.length - 1)]] || '';
+  stands.push(iw7bFill(W.iw7bStands, { what: it ? it.name[lang] || it.name.en : b.bp, stage: stage, n: have, m: need }));
+}
+var toPlace = p ? iw7bToPlace(p) : [];
+var chips = [];
+for (var c = 0; c < toPlace.length; c++) { var ci = iw7bItemOf(toPlace[c]); chips.push({ id: 'landbp|' + toPlace[c], label: iw7bFill(W.iw7bPlaceChip, { what: ci ? ci.name[lang] || ci.name.en : toPlace[c] }), selected: !!ghost && ghost.bp === toPlace[c], locked: false }); }
+var why = ghost ? landLegal(land, ghost.bp, ghost.x, ghost.y) : '';
+var WHY = { edge: 'iw7bWhyEdge', ground: 'iw7bWhyGround', taken: 'iw7bWhyTaken', reach: 'iw7bWhyReach', built: 'iw7bWhyBuilt' };
+var lines = stands.slice();
+if (!land.buildings.length && !toPlace.length) lines.push(W.iw7bLandEmpty || '');
+Outputs.show = String(Inputs.requestId || '') === LAND_ID;
+Outputs.line = lines.join(' · ');
+Outputs.chips = ghost ? [] : chips;
+Outputs.showChips = !ghost && chips.length > 0;
+Outputs.chipsLabel = W.iw7bLandToPlace || '';
+Outputs.ghostShow = !!ghost;
+Outputs.ghostOk = !!ghost && !why;
+Outputs.ghostLine = !ghost ? '' : why ? iw7bFill(W.iw7bGhostNo, { why: W[WHY[why]] || why }) : W.iw7bGhostOk || '';
+Outputs.why = why;
+Outputs.putText = W.iw7bPutHere || '';
+Outputs.cancelText = W.iw7bNotNow || '';
+var gs = ghost ? blueprintSpec(ghost.bp) : null;
+Outputs.ghostThing = ghost ? { kind: 'ghost', bp: ghost.bp, x: LAND_PLOT.x + ghost.x, y: LAND_PLOT.y + ghost.y, w: gs.parts.length, pen: gs.pen || 0, ok: !why, why: why } : null;
+`;
+
+/**
+ * `Logic/Land ghost` (go) — the ghost of a blueprint on her land, by its `mode` (a parameter of each instance):
+ * `start` (a chip: Bp is the chip's id — the ghost at the blueprint's spot), `move` (a tapped island tile: the ghost's
+ * left part there, when the tile is on her land), `place` (landPlace where the ghost stands: written to her land, the
+ * ghost gone — refused, nothing changes), `cancel`. Outputs `ghost` (for the Variable), `model`, `placed`, `ok`.
+ */
+export const LAND_GHOST_SCRIPT = `${ENGINE}${SAVE_HELPERS}${LAND_HELPERS}${PLACE_SHARED}
+var mode = String(Inputs.mode || '');
+var model = modelOf(Inputs.model && typeof Inputs.model === 'object' ? Inputs.model : {}), p = iw7bActive(model);
+var ghost = iw7bGhostOf(Inputs.ghost), next = ghost, placed = '', ok = false;
+if (mode === 'start' && p) {
+  var raw = String(Inputs.bp || ''), bp = raw.slice(raw.lastIndexOf('|') + 1), todo = iw7bToPlace(p);
+  if (todo.indexOf(bp) === -1) bp = todo.length ? todo[0] : '';
+  var spec = blueprintSpec(bp);
+  if (spec) { next = { bp: bp, x: spec.spot.x, y: spec.spot.y }; ok = true; }
+} else if (mode === 'move' && ghost) {
+  var lx = Math.floor(Number(Inputs.x)) - LAND_PLOT.x, ly = Math.floor(Number(Inputs.y)) - LAND_PLOT.y;
+  if (lx >= 0 && ly >= 0 && lx < LAND_W && ly < LAND_H) { next = { bp: ghost.bp, x: lx, y: ly }; ok = true; }
+} else if (mode === 'place' && ghost && p) {
+  var land = p.island.land ? p.island.land : { buildings: [], animals: [] };
+  var r = landPlace(land, ghost.bp, ghost.x, ghost.y);
+  if (r.ok) { p.island.land = land; next = null; placed = ghost.bp; ok = true; }
+} else if (mode === 'cancel') { next = null; ok = true; }
+Outputs.ghost = next ? next : { bp: '' };
+Outputs.model = model;
+Outputs.placed = placed;
+Outputs.ok = ok;
+`;
+
+/**
+ * `Logic/With ghost` — the island's world with the ghost on it (the Land card's ghost thing), for Draw world, while Show
+ * Ghost is on (a ghost is out); otherwise the world as it is.
+ */
+export const WITH_GHOST_SCRIPT = `
+var w = Inputs.world && typeof Inputs.world === 'object' ? Inputs.world : null;
+var g = Inputs.ghost && typeof Inputs.ghost === 'object' && Inputs.ghost.kind === 'ghost' ? Inputs.ghost : null;
+if (w && g && Inputs.showGhost === true) {
+  var out = {};
+  for (var k in w) out[k] = w[k];
+  out.things = (Array.isArray(w.things) ? w.things : []).concat([g]);
+  Outputs.world = out;
+} else Outputs.world = w;
+`;
+
 /** Lane B's glue scripts, registered at the END of GLUE_SCRIPTS (cg003Scripts). */
 export const IW007_BUILD_SCRIPTS: ReadonlyArray<{ component: string; script: string; seam: string }> = [
-  { component: 'Logic/Land request', script: LAND_REQUEST_SCRIPT, seam: 'the requests with her land as one more, so the Workshop opens the land like any plot' }
+  { component: 'Logic/Land request', script: LAND_REQUEST_SCRIPT, seam: 'the requests with her land as one more, so the Workshop opens the land like any plot' },
+  { component: 'Logic/Land card', script: LAND_CARD_SCRIPT, seam: 'her land\u2019s card: what stands on it, the blueprints to place, where the ghost is and why not there' },
+  { component: 'Logic/Land ghost', script: LAND_GHOST_SCRIPT, seam: 'a blueprint\u2019s ghost on her land: out, moved by a tap, placed where it is legal, or put away' },
+  { component: 'Logic/With ghost', script: WITH_GHOST_SCRIPT, seam: 'the island\u2019s world with the ghost of a blueprint on it, for the drawing' }
 ];

@@ -341,7 +341,9 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Use helper': 'go',
   // P108 IW-006 (lane E).
   'Logic/Win pay': 'go',
-  'Logic/Island keep': 'go'
+  'Logic/Island keep': 'go',
+  // P108 IW-007 (lane B): a blueprint's ghost out, moved, placed, put away.
+  'Logic/Land ghost': 'go'
 };
 
 /**
@@ -1695,7 +1697,8 @@ const ISLE_WORLD: CgComponent = {
     text('iwTap', 'How to use it', 'iwIsle', '', { ...T_SMALL, sizeMode: 'contentSize', cssClassName: 'bg-isle-tap' }),
     group('iwCard', 'The plot card', 'iwRoot', { ...row({ width: pct(100), sizeMode: 'contentHeight', flexWrap: 'nowrap', alignItems: 'flex-start', columnGap: sp(12) }), ...PANEL, cssClassName: 'bg-panel bg-plot-card', mounted: false }, ['iwCardFace', 'iwCardText']),
     group('iwCardFace', 'Who asks', 'iwCard', { sizeMode: 'explicit', width: px(52), height: px(52) }),
-    group('iwCardText', 'What, and what now', 'iwCard', column({ rowGap: sp(6) }), ['iwCardWho', 'iwCardTitle', 'iwCardLine', 'iwCrew', 'iwCardBtns']),
+    // P108 IW-007 (lane B): her land's part of the card (iwLand) after the crew.
+    group('iwCardText', 'What, and what now', 'iwCard', column({ rowGap: sp(6) }), ['iwCardWho', 'iwCardTitle', 'iwCardLine', 'iwCrew', 'iwLand', 'iwCardBtns']),
     text('iwCardWho', 'Who asks', 'iwCardText', '', { ...T_H3, fontSize: px(17), cssClassName: 'bg-plot-who' }),
     text('iwCardTitle', 'What', 'iwCardText', '', { ...T_STRONG, cssClassName: 'bg-plot-title' }),
     text('iwCardLine', 'The line: what now', 'iwCardText', '', { ...T_BODY, cssClassName: 'bg-plot-line' }),
@@ -1757,6 +1760,27 @@ const ISLE_WORLD: CgComponent = {
     withStates('iwPayState', 'The shells line shown a moment', ['hidden', 'shown'], { shown: { type: 'boolean', by: { hidden: false, shown: true } } }),
     gate('iwPayIs', 'Did a lap earn shells?'),
     logic('iwPayWait', TIMER_NODE, 'The shells line stays a moment', { duration: 4000 }),
+    // ── P108 IW-007 (lane B): her land's card — what stands on it, a blueprint to place, its ghost moved by a tap, placed ──
+    group('iwLand', 'Her land', 'iwCardText', { ...column({ rowGap: sp(6) }), cssClassName: 'bg-land', mounted: false }, ['iwLandLine', 'iwLandL', 'iwLandRow', 'iwGhostLine', 'iwGhostBtns']),
+    text('iwLandLine', 'What stands on her land', 'iwLand', '', { ...T_STRONG, cssClassName: 'bg-land-line' }),
+    text('iwLandL', 'A blueprint to place', 'iwLand', '', { fontSize: px(12), fontWeight: '800', color: 'var(--ink-2)', cssClassName: 'bg-caps', mounted: false }),
+    group('iwLandRow', 'The blueprints to place', 'iwLand', { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(8), rowGap: sp(8) }), cssClassName: 'bg-land-row', mounted: false }, ['iwLandEach']),
+    { ...logic('iwLandEach', FOR_EACH_NODE, 'One chip per blueprint to place', { template: C.chip, templateType: 'explicit' }), parent: 'iwLandRow' },
+    text('iwGhostLine', 'Where the ghost is, and why not there', 'iwLand', '', { ...T_BODY, cssClassName: 'bg-ghost-line', mounted: false }),
+    group('iwGhostBtns', 'Put it here, or not now', 'iwLand', { ...row({ columnGap: sp(8), rowGap: sp(8) }), mounted: false }, ['iwGhostPut', 'iwGhostNo']),
+    place('iwGhostPut', BUTTON_NODE, 'Put it here', 'iwGhostBtns', { ...btn('primary', '', { cssClassName: 'bg-ghost-put' }), label: 'Put it here', mounted: false }),
+    place('iwGhostNo', BUTTON_NODE, 'Not now', 'iwGhostBtns', { ...btn('quiet', '', { cssClassName: 'bg-ghost-no' }), label: 'Not now' }),
+    logic('iwLandCard', L('Land card'), 'Her land’s card'),
+    logic('iwLandSettle', TIMER_NODE, 'The blueprints, once they stop changing', { duration: PAD_SETTLE_MS }),
+    logic('iwLandHold', L('Latch'), 'The settled blueprints'),
+    variable('iwGhostVar', 'gardenGhost', 'The ghost of a blueprint on her land'),
+    setVariable('iwSetGhost', 'gardenGhost', 'The ghost, out, moved or gone'),
+    logic('iwGhostStart', L('Land ghost'), 'A blueprint’s ghost out', { mode: 'start' }),
+    logic('iwGhostMove', L('Land ghost'), 'The ghost moved by a tap on her land', { mode: 'move' }),
+    logic('iwGhostPlace', L('Land ghost'), 'The ghost placed', { mode: 'place' }),
+    logic('iwGhostCancel', L('Land ghost'), 'The ghost put away', { mode: 'cancel' }),
+    gate('iwGhostPlaced', 'Was it placed?'),
+    logic('iwWithGhost', L('With ghost'), 'The island with the ghost on it'),
     outputs('iwOut', [['requestId', 'string'], ['open', 'signal'], ['model', 'object'], ['write', 'signal']])
   ],
   connections: [
@@ -1778,8 +1802,12 @@ const ISLE_WORLD: CgComponent = {
     wire('iwTick', 'ran', 'iwSetTick', 'do'),
     wire('iwSetTick', 'done', 'iwTimer', 'start'),
     // Drawn: as built, then after every tick.
-    wire('iwWorld', 'world', 'iwDraw', 'world'),
-    wire('iwTick', 'world', 'iwDraw', 'world'),
+    // P108 IW-007 (lane B): through With ghost — the ghost of a blueprint on her land drawn over it while she places it.
+    wire('iwWorld', 'world', 'iwWithGhost', 'world'),
+    wire('iwTick', 'world', 'iwWithGhost', 'world'),
+    wire('iwLandCard', 'ghostThing', 'iwWithGhost', 'ghost'),
+    wire('iwLandCard', 'ghostShow', 'iwWithGhost', 'showGhost'),
+    wire('iwWithGhost', 'world', 'iwDraw', 'world'),
     ...(['words', 'lang', 'botName', 'color', 'eye', 'hat'] as const).map((f) => wire('iwIn', f, 'iwDraw', f)),
     ...(['iwGarden', 'iwGarden3d'] as const).flatMap((g) => [wire('iwDraw', 'map', g, 'map'), wire('iwDraw', 'things', g, 'things'), wire('iwDraw', 'robots', g, 'robots')]),
     wire('iwWorld', 'focus', 'iwGarden3d', 'focus'),
@@ -1889,7 +1917,40 @@ const ISLE_WORLD: CgComponent = {
     wire('iwPayIs', 'ontrue', 'iwPayState', 'to-shown'),
     wire('iwPayIs', 'ontrue', 'iwPayWait', 'start'),
     wire('iwPayWait', 'timerFinished', 'iwPayState', 'to-hidden'),
-    wire('iwPayState', 'shown', 'iwPay', 'mounted')
+    wire('iwPayState', 'shown', 'iwPay', 'mounted'),
+    // ── P108 IW-007 (lane B): her land's card and the ghost ──
+    wire('iwIn', 'model', 'iwLandCard', 'model'),
+    wire('iwChoose', 'requestId', 'iwLandCard', 'requestId'),
+    wire('iwGhostVar', 'value', 'iwLandCard', 'ghost'),
+    wire('iwIn', 'words', 'iwLandCard', 'words'),
+    wire('iwIn', 'lang', 'iwLandCard', 'lang'),
+    wire('iwLandCard', 'show', 'iwLand', 'mounted'),
+    wire('iwLandCard', 'line', 'iwLandLine', 'text'),
+    wire('iwLandCard', 'chipsLabel', 'iwLandL', 'text'),
+    wire('iwLandCard', 'showChips', 'iwLandL', 'mounted'),
+    wire('iwLandCard', 'showChips', 'iwLandRow', 'mounted'),
+    wire('iwLandCard', 'chips', 'iwLandHold', 'value'),
+    wire('iwLandCard', 'ran', 'iwLandSettle', 'restart'),
+    wire('iwLandSettle', 'timerFinished', 'iwLandHold', 'go'),
+    wire('iwLandHold', 'value', 'iwLandEach', 'items'),
+    wire('iwLandCard', 'ghostLine', 'iwGhostLine', 'text'),
+    wire('iwLandCard', 'ghostShow', 'iwGhostLine', 'mounted'),
+    wire('iwLandCard', 'ghostShow', 'iwGhostBtns', 'mounted'),
+    wire('iwLandCard', 'ghostOk', 'iwGhostPut', 'mounted'),
+    wire('iwLandCard', 'putText', 'iwGhostPut', 'label'),
+    wire('iwLandCard', 'cancelText', 'iwGhostNo', 'label'),
+    ...(['iwGhostStart', 'iwGhostMove', 'iwGhostPlace', 'iwGhostCancel'] as const).flatMap((g) => [wire('iwGhostVar', 'value', g, 'ghost'), wire('iwIn', 'model', g, 'model'), wire(g, 'ghost', 'iwSetGhost', 'value'), wire(g, 'ran', 'iwSetGhost', 'do')]),
+    wire('iwLandEach', 'itemOutput-id', 'iwGhostStart', 'bp'),
+    wire('iwLandEach', 'itemOutputSignal-picked', 'iwGhostStart', 'go'),
+    // A tap on her land while a ghost is out moves it there (the card stays her land's: Plot at names the land too).
+    ...(['iwGarden', 'iwGarden3d'] as const).flatMap((g) => [wire(g, 'onTileX', 'iwGhostMove', 'x'), wire(g, 'onTileY', 'iwGhostMove', 'y'), wire(g, 'onTileTapped', 'iwGhostMove', 'go')]),
+    wire('iwGhostPut', 'onClick', 'iwGhostPlace', 'go'),
+    wire('iwGhostNo', 'onClick', 'iwGhostCancel', 'go'),
+    // Placed: her land written through the page's store, as every writer does.
+    wire('iwGhostPlace', 'model', 'iwOut', 'model'),
+    wire('iwGhostPlace', 'ok', 'iwGhostPlaced', 'condition'),
+    wire('iwGhostPlace', 'ran', 'iwGhostPlaced', 'eval'),
+    wire('iwGhostPlaced', 'ontrue', 'iwOut', 'write')
   ]
 };
 

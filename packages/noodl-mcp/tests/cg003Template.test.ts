@@ -499,7 +499,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       // The tick: a Timer of two Step Ms, the state held in ONE Variable by name (only one island on screen), looped.
       const timer = world.find((n) => n.id === 'iwTimer')!;
       expect(params(timer).duration).toBe(760);
-      expect(world.filter((n) => n.type === 'Variable2').map((n) => params(n).name)).toEqual(['gardenIsland']);
+      // P108 IW-007 (lane B): and the ghost of a blueprint while she places it — held by name for the same reason (one island on screen).
+      expect(world.filter((n) => n.type === 'Variable2').map((n) => params(n).name)).toEqual(['gardenIsland', 'gardenGhost']);
       expect(into('iwTick')).toEqual(['iwTimer.timerFinished>go', 'iwVar.value>state', 'iwWorld.state>built']);
       expect(into('iwTimer')).toEqual(['iwSetBuilt.done>start', 'iwSetTick.done>start']);
       // A tap on either renderer asks Plot at, then the card; the page's pick opens the same card.

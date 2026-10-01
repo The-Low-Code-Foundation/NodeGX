@@ -54,15 +54,16 @@ const tick = (state: any) => bare(ISLAND_TICK_SCRIPT, { state, built: state }).s
 const use = (model: any, itemId: string, plotId: string, state: any) => bare(USE_HELPER_SCRIPT, { model, itemId: SHOP_IDS.item + itemId, plotId: SHOP_IDS.plot + plotId, state });
 
 describe('IW-006 AC3 — the shop: what it shows', () => {
-  it('🔴 five tabs in order, in both languages; it opens on Robots; Build and Animals sell nothing yet and say so in one line', () => {
+  it('🔴 five tabs in order, in both languages; it opens on Robots; Build sells the blueprints (and says where they go); Animals sells nothing yet and says so in one line', () => {
     const m = kid();
     for (const lang of ['en', 'fr'] as const) {
       const r = rows(m, undefined, lang);
       expect(r.tabs.map((t: any) => [t.id, t.label, t.selected])).toEqual(SHOP_TABS.map((t) => [SHOP_IDS.tab + t, word(`iw6hTab${t[0].toUpperCase()}${t.slice(1)}`, lang), t === SHOP_FIRST_TAB]));
-      for (const t of ['build', 'animals'] as const) {
-        const e = rows(m, SHOP_IDS.tab + t, lang);
-        expect([e.items, e.showItems, e.showLater, e.later]).toEqual([[], false, true, word(t === 'build' ? 'iw6hLaterBuild' : 'iw6hLaterAnimals', lang)]);
-      }
+      // P108 IW-007 (lane B): the Build tab is open — every blueprint, and one line: buy one, then tap your land to place it.
+      const b = rows(m, SHOP_IDS.tab + 'build', lang);
+      expect([ids(b.items), b.showItems, b.showLater, b.later]).toEqual([SHOP.filter((i) => i.kind === 'blueprint').map((i) => i.id), true, true, word('iw7bBuildHow', lang)]);
+      const e = rows(m, SHOP_IDS.tab + 'animals', lang);
+      expect([e.items, e.showItems, e.showLater, e.later]).toEqual([[], false, true, word('iw6hLaterAnimals', lang)]);
     }
     // Known-firing: Robots, Upgrades and Helpers sell something, and say nothing about later.
     for (const t of ['robots', 'upgrades', 'helpers']) expect([t, rows(m, t).showItems, rows(m, t).showLater]).toEqual([t, true, false]);

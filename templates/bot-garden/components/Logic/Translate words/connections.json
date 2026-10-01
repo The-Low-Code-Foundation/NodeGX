@@ -2255,9 +2255,51 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bBuildHow",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bBuildHow"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bCardBuilding",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bCardBuilding"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bCardBuilt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bCardBuilt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bCardPlace",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bCardPlace"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bGhostNo",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bGhostNo"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bGhostOk",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bGhostOk"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw7bLandBlurb",
       "toId": "translatewordsOut",
       "toProperty": "iw7bLandBlurb"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bLandEmpty",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bLandEmpty"
     },
     {
       "fromId": "translatewordsFn",
@@ -2270,6 +2312,108 @@
       "fromProperty": "out-iw7bLandTitle",
       "toId": "translatewordsOut",
       "toProperty": "iw7bLandTitle"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bLandToPlace",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bLandToPlace"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bNotNow",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bNotNow"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bPlaceChip",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bPlaceChip"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bPutHere",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bPutHere"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bStage0",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bStage0"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bStage1",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bStage1"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bStage2",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bStage2"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bStageDone",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bStageDone"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bStands",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bStands"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bTagBuilding",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bTagBuilding"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bTagBuilt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bTagBuilt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bTagPlace",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bTagPlace"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bWhyBuilt",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bWhyBuilt"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bWhyEdge",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bWhyEdge"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bWhyGround",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bWhyGround"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bWhyReach",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bWhyReach"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bWhyTaken",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bWhyTaken"
     },
     {
       "fromId": "translatewordsFn",

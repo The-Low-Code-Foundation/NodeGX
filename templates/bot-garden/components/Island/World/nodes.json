@@ -100,7 +100,7 @@
         }
       ],
       "x": 590,
-      "y": 1240
+      "y": 1360
     },
     {
       "id": "iwRoot",
@@ -310,6 +310,7 @@
         "iwCardTitle",
         "iwCardLine",
         "iwCrew",
+        "iwLand",
         "iwCardBtns"
       ],
       "parameters": {
@@ -402,7 +403,7 @@
         "rowGap": "var(--space-2)"
       },
       "x": 220,
-      "y": 2560
+      "y": 3640
     },
     {
       "id": "iwOpen",
@@ -445,7 +446,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 2680
+      "y": 3760
     },
     {
       "id": "iwHomeBtn",
@@ -488,7 +489,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 2800
+      "y": 3880
     },
     {
       "id": "iwClose",
@@ -530,7 +531,7 @@
         "label": "✕"
       },
       "x": 280,
-      "y": 2920
+      "y": 4000
     },
     {
       "id": "iwCrew",
@@ -673,7 +674,7 @@
       "type": "/Logic/Crew chips",
       "label": "The crew for this job",
       "x": 590,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "iwCrewSettle",
@@ -683,21 +684,21 @@
         "duration": 120
       },
       "x": 590,
-      "y": 2920
+      "y": 4000
     },
     {
       "id": "iwCrewHold",
       "type": "/Logic/Latch",
       "label": "The settled crew",
       "x": 590,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "iwAssign",
       "type": "/Logic/Assign robot",
       "label": "A robot sent here, or home",
       "x": 590,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "iwAssignOk",
@@ -707,7 +708,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 3040
+      "y": 4120
     },
     {
       "id": "iwCardState",
@@ -722,7 +723,7 @@
         "value-shown-shown": true
       },
       "x": 590,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "iwFound",
@@ -732,21 +733,21 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 3160
+      "y": 4240
     },
     {
       "id": "iwWorld",
       "type": "/Logic/Island world",
       "label": "Her island, as it stands",
       "x": 590,
-      "y": 760
+      "y": 880
     },
     {
       "id": "iwTick",
       "type": "/Logic/Island tick",
       "label": "One tick of the island",
       "x": 590,
-      "y": 3280
+      "y": 4360
     },
     {
       "id": "iwVar",
@@ -756,7 +757,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 3400
+      "y": 4480
     },
     {
       "id": "iwSetBuilt",
@@ -766,7 +767,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 3520
+      "y": 4600
     },
     {
       "id": "iwSetTick",
@@ -776,7 +777,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 3640
+      "y": 4720
     },
     {
       "id": "iwTimer",
@@ -786,7 +787,7 @@
         "duration": 760
       },
       "x": 590,
-      "y": 3760
+      "y": 4840
     },
     {
       "id": "iwDraw",
@@ -810,14 +811,14 @@
       "type": "/Logic/Island choose",
       "label": "The plot card",
       "x": 590,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "iwHome",
       "type": "/Logic/Bring home",
       "label": "Bring the robot home",
       "x": 590,
-      "y": 2800
+      "y": 3880
     },
     {
       "id": "iwAgain",
@@ -827,7 +828,7 @@
         "duration": 400
       },
       "x": 590,
-      "y": 3880
+      "y": 4960
     },
     {
       "id": "iwRevealWait",
@@ -837,7 +838,7 @@
         "duration": 80
       },
       "x": 590,
-      "y": 4000
+      "y": 5080
     },
     {
       "id": "iwReveal",
@@ -847,7 +848,7 @@
         "what": "card"
       },
       "x": 590,
-      "y": 4120
+      "y": 5200
     },
     {
       "id": "iwFindFn",
@@ -857,7 +858,7 @@
         "what": "robots"
       },
       "x": 590,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "iwView",
@@ -875,7 +876,7 @@
         "value-robots-onRobots": true
       },
       "x": 590,
-      "y": 880
+      "y": 1000
     },
     {
       "id": "iwViewIs",
@@ -885,7 +886,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "iwRenderer",
@@ -914,28 +915,28 @@
         "keys": "renderer"
       },
       "x": 590,
-      "y": 4240
+      "y": 5320
     },
     {
       "id": "iwRendRead",
       "type": "/Logic/Renderer",
       "label": "Draw in 3D here?",
       "x": 590,
-      "y": 4360
+      "y": 5440
     },
     {
       "id": "iwRendIs3d",
       "type": "Condition",
       "label": "In 3D?",
       "x": 590,
-      "y": 4480
+      "y": 5560
     },
     {
       "id": "iwRendOk",
       "type": "Condition",
       "label": "Can this computer draw 3D?",
       "x": 590,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "iwRendNoGl",
@@ -945,7 +946,7 @@
         "event": "unsupported"
       },
       "x": 590,
-      "y": 4600
+      "y": 5680
     },
     {
       "id": "iwRendSlow",
@@ -955,7 +956,7 @@
         "event": "slow"
       },
       "x": 590,
-      "y": 1120
+      "y": 1240
     },
     {
       "id": "iwRendWrite",
@@ -967,14 +968,14 @@
         "merge": false
       },
       "x": 590,
-      "y": 4720
+      "y": 5800
     },
     {
       "id": "iwKeep",
       "type": "/Logic/Island keep",
       "label": "The island’s jobs and shells, into her save",
       "x": 590,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "iwKeepDue",
@@ -984,7 +985,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 4840
+      "y": 5920
     },
     {
       "id": "iwPay",
@@ -1019,7 +1020,7 @@
         "value-shown-shown": true
       },
       "x": 590,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "iwPayIs",
@@ -1029,7 +1030,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 4960
+      "y": 6040
     },
     {
       "id": "iwPayWait",
@@ -1039,7 +1040,335 @@
         "duration": 4000
       },
       "x": 590,
-      "y": 5080
+      "y": 6160
+    },
+    {
+      "id": "iwLand",
+      "type": "Group",
+      "label": "Her land",
+      "parent": "iwCardText",
+      "children": [
+        "iwLandLine",
+        "iwLandL",
+        "iwLandRow",
+        "iwGhostLine",
+        "iwGhostBtns"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-1-5)",
+        "cssClassName": "bg-land",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 2560
+    },
+    {
+      "id": "iwLandLine",
+      "type": "Text",
+      "label": "What stands on her land",
+      "parent": "iwLand",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink)",
+        "cssClassName": "bg-land-line"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "iwLandL",
+      "type": "Text",
+      "label": "A blueprint to place",
+      "parent": "iwLand",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 12,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "color": "var(--ink-2)",
+        "cssClassName": "bg-caps",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "iwLandRow",
+      "type": "Group",
+      "label": "The blueprints to place",
+      "parent": "iwLand",
+      "children": [
+        "iwLandEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "bg-land-row",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2920
+    },
+    {
+      "id": "iwLandEach",
+      "type": "For Each",
+      "label": "One chip per blueprint to place",
+      "parent": "iwLandRow",
+      "parameters": {
+        "template": "/Robot/Chip",
+        "templateType": "explicit"
+      },
+      "x": 340,
+      "y": 3040
+    },
+    {
+      "id": "iwGhostLine",
+      "type": "Text",
+      "label": "Where the ghost is, and why not there",
+      "parent": "iwLand",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "color": "var(--ink)",
+        "cssClassName": "bg-ghost-line",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3160
+    },
+    {
+      "id": "iwGhostBtns",
+      "type": "Group",
+      "label": "Put it here, or not now",
+      "parent": "iwLand",
+      "children": [
+        "iwGhostPut",
+        "iwGhostNo"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3280
+    },
+    {
+      "id": "iwGhostPut",
+      "type": "net.noodl.controls.button",
+      "label": "Put it here",
+      "parent": "iwGhostBtns",
+      "parameters": {
+        "backgroundColor": "var(--leaf)",
+        "color": "var(--on-fill)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-ghost-put",
+        "label": "Put it here",
+        "mounted": false
+      },
+      "x": 340,
+      "y": 3400
+    },
+    {
+      "id": "iwGhostNo",
+      "type": "net.noodl.controls.button",
+      "label": "Not now",
+      "parent": "iwGhostBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--ink-2)",
+        "borderStyle": "none",
+        "borderRadius": {
+          "value": 999,
+          "unit": "px"
+        },
+        "paddingTop": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingBottom": {
+          "value": 11,
+          "unit": "px"
+        },
+        "paddingLeft": {
+          "value": 18,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 18,
+          "unit": "px"
+        },
+        "fontSize": {
+          "value": 16,
+          "unit": "px"
+        },
+        "fontWeight": "800",
+        "fontFamily": "Nunito",
+        "sizeMode": "contentSize",
+        "cssClassName": "bg-btn bg-ghost-no",
+        "label": "Not now"
+      },
+      "x": 340,
+      "y": 3520
+    },
+    {
+      "id": "iwLandCard",
+      "type": "/Logic/Land card",
+      "label": "Her land’s card",
+      "x": 590,
+      "y": 2560
+    },
+    {
+      "id": "iwLandSettle",
+      "type": "Timer",
+      "label": "The blueprints, once they stop changing",
+      "parameters": {
+        "duration": 120
+      },
+      "x": 590,
+      "y": 6280
+    },
+    {
+      "id": "iwLandHold",
+      "type": "/Logic/Latch",
+      "label": "The settled blueprints",
+      "x": 590,
+      "y": 3040
+    },
+    {
+      "id": "iwGhostVar",
+      "type": "Variable2",
+      "label": "The ghost of a blueprint on her land",
+      "parameters": {
+        "name": "gardenGhost"
+      },
+      "x": 590,
+      "y": 6400
+    },
+    {
+      "id": "iwSetGhost",
+      "type": "Set Variable",
+      "label": "The ghost, out, moved or gone",
+      "parameters": {
+        "name": "gardenGhost"
+      },
+      "x": 590,
+      "y": 6520
+    },
+    {
+      "id": "iwGhostStart",
+      "type": "/Logic/Land ghost",
+      "label": "A blueprint’s ghost out",
+      "parameters": {
+        "mode": "start"
+      },
+      "x": 590,
+      "y": 3160
+    },
+    {
+      "id": "iwGhostMove",
+      "type": "/Logic/Land ghost",
+      "label": "The ghost moved by a tap on her land",
+      "parameters": {
+        "mode": "move"
+      },
+      "x": 590,
+      "y": 760
+    },
+    {
+      "id": "iwGhostPlace",
+      "type": "/Logic/Land ghost",
+      "label": "The ghost placed",
+      "parameters": {
+        "mode": "place"
+      },
+      "x": 590,
+      "y": 3400
+    },
+    {
+      "id": "iwGhostCancel",
+      "type": "/Logic/Land ghost",
+      "label": "The ghost put away",
+      "parameters": {
+        "mode": "cancel"
+      },
+      "x": 590,
+      "y": 3520
+    },
+    {
+      "id": "iwGhostPlaced",
+      "type": "Condition",
+      "label": "Was it placed?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 590,
+      "y": 6640
+    },
+    {
+      "id": "iwWithGhost",
+      "type": "/Logic/With ghost",
+      "label": "The island with the ghost on it",
+      "x": 590,
+      "y": 6760
     },
     {
       "id": "iwOut",
@@ -1068,7 +1397,7 @@
         }
       ],
       "x": 590,
-      "y": 2680
+      "y": 3760
     }
   ],
   "visualRoots": [

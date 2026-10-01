@@ -32,6 +32,8 @@
 import { BRAIN_SIZE, SHOP_TABS } from './cg002Content';
 import { SAVE_HELPERS } from './cg002Scripts';
 import { ISLAND_ENGINE } from './ig004Island';
+// P108 IW-007 (lane B): the Build tab — where a blueprint she bought is (to place, being built, built).
+import { BUILD_SHOP } from './iw007Building';
 
 /** The shop's two components (cg003Components builds them in lane H's block; the Island page places the shop). */
 export const SHOP_PATHS = { shop: '/Island/Shop', item: '/Island/Shop item' } as const;
@@ -72,10 +74,12 @@ function shShows(p, it) {
   }
   // P108 IW-007 (s5 base): the blueprints and animals are in the catalogue, but their shelves stay shut (the "later" line)
   // until lane B opens Build and lane A opens Animals.
-  if (it.kind === 'blueprint' || it.kind === 'animal') return false;
+  // P108 IW-007 (lane B): the Build tab is open — every blueprint (one she bought says where it is: BUILD_SHOP).
+  if (it.kind === 'blueprint') return true;
+  if (it.kind === 'animal') return false;
   return true;
 }
-`;
+${BUILD_SHOP}`;
 
 /**
  * `Logic/Shop rows` — the button's words (the balance on it), the five tabs as chips, the open tab's items. Tab is the
@@ -96,9 +100,12 @@ for (var i = 0; i < SHOP.length; i++) {
   if (it.tab !== tab || !shShows(p, it)) continue;
   var yours = it.kind === 'upgrade' && shHasUpgrade(p, it.upgrade), held = it.kind === 'helper' && p.owned.indexOf(it.id) !== -1;
   var tag = yours ? W.iw6hYours || '' : held ? W.iw6hHeld || '' : '';
+  // P108 IW-007 (lane B): a blueprint she bought: to place, being built, built.
+  if (it.kind === 'blueprint' && iw7bBpState(p, it)) { tag = iw7bBpTag(p, it, W); yours = true; }
   items.push({ id: SHOP_IDS.item + it.id, icon: it.icon, name: it.name[lang] || it.name.en, price: shFill(W.iw6hPrice, { n: it.price }), line: it.line[lang] || it.line.en, tag: tag, hasTag: !!tag, cls: 'bg-shop-item bg-press' + (yours ? ' bg-shop-item-yours' : '') + (held ? ' bg-shop-item-held' : '') });
 }
-var later = tab === 'build' ? W.iw6hLaterBuild || '' : tab === 'animals' ? W.iw6hLaterAnimals || '' : '';
+// P108 IW-007 (lane B): Build sells its blueprints now; its line says where a bought one goes.
+var later = tab === 'build' ? W.iw7bBuildHow || '' : tab === 'animals' ? W.iw6hLaterAnimals || '' : '';
 Outputs.hasProfile = !!p;
 Outputs.balance = bal;
 Outputs.btnText = shFill(W.iw6hBtn, { n: bal });
@@ -136,6 +143,9 @@ if (it && shShows(p, it)) {
   out.line = it.line[lang] || it.line.en;
   var held = it.kind === 'helper' && p.owned.indexOf(it.id) !== -1;
   var yours = it.kind === 'upgrade' && shHasUpgrade(p, it.upgrade);
+  // P108 IW-007 (lane B): a blueprint she bought has no Buy: its card says where it is (to place on her land, built…).
+  var bpLine = it.kind === 'blueprint' ? iw7bBpCardLine(p, it, W) : '';
+  if (bpLine) { yours = true; }
   if (held) {
     // A held helper: the jobs it helps now — a pinned robot at work on a job not done yet, the helper fitting it.
     var st = Inputs.state && typeof Inputs.state === 'object' && Array.isArray(Inputs.state.plots) ? Inputs.state : null, ids = [];
@@ -153,7 +163,7 @@ if (it && shShows(p, it)) {
     out.canUse = !!out.plotId;
     if (!ids.length) out.none = W.iw6hNoJob || '';
   } else if (yours) {
-    out.done = W.iw6hYoursLine || '';
+    out.done = bpLine || W.iw6hYoursLine || '';
   } else {
     out.showFigures = true;
     out.have = shFill(W.iw6hHave, { n: bal });
@@ -185,7 +195,8 @@ if (it && shShows(p, it)) {
   // What the last Buy / Use it did, on this item's card — and, the moment after, only that: never "you need N more" under
   // "It's yours!" (the drive's first look at the card just bought). A helper just bought goes on to its jobs.
   var used = String(Inputs.used || '').split('|'), justBought = String(Inputs.bought || '') === it.id, justUsed = used[0] === it.id && !!used[1];
-  if (justBought) out.done = W.iw6hBought || '';
+  // P108 IW-007 (lane B): a blueprint just bought says where it goes ("It's yours! Tap your land…").
+  if (justBought) out.done = (it.kind === 'blueprint' && bpLine) || W.iw6hBought || '';
   if (justUsed) out.done = shFill(W.iw6hUsed, { what: out.name, plot: titleOf(used[1], nameOfRobot(p.island.plots[used[1]] ? p.island.plots[used[1]].robotId : '')) });
   if ((justBought && !held) || justUsed) { out.showFigures = false; out.showLeft = false; out.showShort = false; out.canBuy = false; out.showName = false; out.showRobots = false; out.none = ''; }
   out.showDone = !!out.done;

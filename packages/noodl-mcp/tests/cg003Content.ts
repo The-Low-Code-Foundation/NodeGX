@@ -336,7 +336,31 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   // ── P108 IW-007 (lane B): building — her land, the Build tab, placing a blueprint ──
   iw7bLandTitle: s('Your land', 'Ton terrain'),
   iw7bLandBlurb: s('Build', 'Construire'),
-  iw7bLandLine: s('Your own land: a tree for planks, a rock for stones, a carrot patch. Teach {b} to carry them to what you build here.', 'Ton terrain à toi : un arbre pour les planches, un rocher pour les pierres, un carré de carottes. Apprends à {b} à les porter jusqu’à ce que tu construis ici.')
+  iw7bLandLine: s('Your own land: a tree for planks, a rock for stones, a carrot patch. Teach {b} to carry them to what you build here.', 'Ton terrain à toi : un arbre pour les planches, un rocher pour les pierres, un carré de carottes. Apprends à {b} à les porter jusqu’à ce que tu construis ici.'),
+  iw7bBuildHow: s('Buy a blueprint here, then tap your land on the island (the meadow at the bottom right) to place it.', 'Achète un plan ici, puis touche ton terrain sur l’île (le pré en bas à droite) pour le poser.'),
+  iw7bTagPlace: s('Yours · to place', 'À toi · à poser'),
+  iw7bTagBuilding: s('Being built', 'En construction'),
+  iw7bTagBuilt: s('Built', 'Construit'),
+  iw7bCardPlace: s('It’s yours! Tap your land on the island to place it.', 'C’est à toi ! Touche ton terrain sur l’île pour le poser.'),
+  iw7bCardBuilding: s('It’s marked out on your land: the robots are building it.', 'Il est tracé sur ton terrain : les robots le construisent.'),
+  iw7bCardBuilt: s('It stands on your land.', 'Il est construit sur ton terrain.'),
+  iw7bLandEmpty: s('Nothing stands here yet. Buy a blueprint in the shop’s Build tab, then place it here.', 'Rien n’est construit ici pour l’instant. Achète un plan dans l’onglet Construire de la boutique, puis pose-le ici.'),
+  iw7bLandToPlace: s('A blueprint to place:', 'Un plan à poser :'),
+  iw7bPlaceChip: s('📐 {what}', '📐 {what}'),
+  iw7bGhostOk: s('It fits here! Tap another tile of your land to move it.', 'Il tient ici ! Touche une autre case de ton terrain pour le déplacer.'),
+  iw7bGhostNo: s('Not here: {why} Tap another tile of your land.', 'Pas ici : {why} Touche une autre case de ton terrain.'),
+  iw7bWhyEdge: s('it would stick out of your land.', 'il dépasserait de ton terrain.'),
+  iw7bWhyGround: s('it needs grass, not a tree.', 'il lui faut de l’herbe, pas un arbre.'),
+  iw7bWhyTaken: s('something is already there.', 'il y a déjà quelque chose.'),
+  iw7bWhyReach: s('it would block the robots’ way.', 'il bloquerait le chemin des robots.'),
+  iw7bWhyBuilt: s('that one is built already.', 'celui-là est déjà construit.'),
+  iw7bPutHere: s('Put it here', 'Le poser ici'),
+  iw7bNotNow: s('Not now', 'Pas maintenant'),
+  iw7bStands: s('{what}: {stage} · {n}/{m}', '{what} : {stage} · {n}/{m}'),
+  iw7bStage0: s('pegs and string', 'piquets et ficelle'),
+  iw7bStage1: s('the frame', 'la charpente'),
+  iw7bStage2: s('the walls', 'les murs'),
+  iw7bStageDone: s('finished!', 'terminé !')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);

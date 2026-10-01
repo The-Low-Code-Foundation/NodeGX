@@ -108,11 +108,29 @@
     {
       "fromId": "iwWorld",
       "fromProperty": "world",
-      "toId": "iwDraw",
+      "toId": "iwWithGhost",
       "toProperty": "world"
     },
     {
       "fromId": "iwTick",
+      "fromProperty": "world",
+      "toId": "iwWithGhost",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostThing",
+      "toId": "iwWithGhost",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostShow",
+      "toId": "iwWithGhost",
+      "toProperty": "showGhost"
+    },
+    {
+      "fromId": "iwWithGhost",
       "fromProperty": "world",
       "toId": "iwDraw",
       "toProperty": "world"
@@ -878,6 +896,306 @@
       "fromProperty": "shown",
       "toId": "iwPay",
       "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwLandCard",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwChoose",
+      "fromProperty": "requestId",
+      "toId": "iwLandCard",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "iwGhostVar",
+      "fromProperty": "value",
+      "toId": "iwLandCard",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "words",
+      "toId": "iwLandCard",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "lang",
+      "toId": "iwLandCard",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "show",
+      "toId": "iwLand",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "line",
+      "toId": "iwLandLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "chipsLabel",
+      "toId": "iwLandL",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "showChips",
+      "toId": "iwLandL",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "showChips",
+      "toId": "iwLandRow",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "chips",
+      "toId": "iwLandHold",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ran",
+      "toId": "iwLandSettle",
+      "toProperty": "restart"
+    },
+    {
+      "fromId": "iwLandSettle",
+      "fromProperty": "timerFinished",
+      "toId": "iwLandHold",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwLandHold",
+      "fromProperty": "value",
+      "toId": "iwLandEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostLine",
+      "toId": "iwGhostLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostShow",
+      "toId": "iwGhostLine",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostShow",
+      "toId": "iwGhostBtns",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "ghostOk",
+      "toId": "iwGhostPut",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "putText",
+      "toId": "iwGhostPut",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwLandCard",
+      "fromProperty": "cancelText",
+      "toId": "iwGhostNo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "iwGhostVar",
+      "fromProperty": "value",
+      "toId": "iwGhostStart",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwGhostStart",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwGhostStart",
+      "fromProperty": "ghost",
+      "toId": "iwSetGhost",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwGhostStart",
+      "fromProperty": "ran",
+      "toId": "iwSetGhost",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwGhostVar",
+      "fromProperty": "value",
+      "toId": "iwGhostMove",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwGhostMove",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwGhostMove",
+      "fromProperty": "ghost",
+      "toId": "iwSetGhost",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwGhostMove",
+      "fromProperty": "ran",
+      "toId": "iwSetGhost",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwGhostVar",
+      "fromProperty": "value",
+      "toId": "iwGhostPlace",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwGhostPlace",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwGhostPlace",
+      "fromProperty": "ghost",
+      "toId": "iwSetGhost",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwGhostPlace",
+      "fromProperty": "ran",
+      "toId": "iwSetGhost",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwGhostVar",
+      "fromProperty": "value",
+      "toId": "iwGhostCancel",
+      "toProperty": "ghost"
+    },
+    {
+      "fromId": "iwIn",
+      "fromProperty": "model",
+      "toId": "iwGhostCancel",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwGhostCancel",
+      "fromProperty": "ghost",
+      "toId": "iwSetGhost",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "iwGhostCancel",
+      "fromProperty": "ran",
+      "toId": "iwSetGhost",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "iwLandEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "iwGhostStart",
+      "toProperty": "bp"
+    },
+    {
+      "fromId": "iwLandEach",
+      "fromProperty": "itemOutputSignal-picked",
+      "toId": "iwGhostStart",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileX",
+      "toId": "iwGhostMove",
+      "toProperty": "x"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileY",
+      "toId": "iwGhostMove",
+      "toProperty": "y"
+    },
+    {
+      "fromId": "iwGarden",
+      "fromProperty": "onTileTapped",
+      "toId": "iwGhostMove",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileX",
+      "toId": "iwGhostMove",
+      "toProperty": "x"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileY",
+      "toId": "iwGhostMove",
+      "toProperty": "y"
+    },
+    {
+      "fromId": "iwGarden3d",
+      "fromProperty": "onTileTapped",
+      "toId": "iwGhostMove",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGhostPut",
+      "fromProperty": "onClick",
+      "toId": "iwGhostPlace",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGhostNo",
+      "fromProperty": "onClick",
+      "toId": "iwGhostCancel",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "iwGhostPlace",
+      "fromProperty": "model",
+      "toId": "iwOut",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "iwGhostPlace",
+      "fromProperty": "ok",
+      "toId": "iwGhostPlaced",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "iwGhostPlace",
+      "fromProperty": "ran",
+      "toId": "iwGhostPlaced",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "iwGhostPlaced",
+      "fromProperty": "ontrue",
+      "toId": "iwOut",
+      "toProperty": "write"
     }
   ]
 }

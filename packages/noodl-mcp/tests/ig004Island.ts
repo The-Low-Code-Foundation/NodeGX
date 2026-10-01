@@ -513,11 +513,16 @@ var card = null, req = null;
 for (var i = 0; i < cards.length; i++) if (cards[i] && cards[i].id === id) card = cards[i];
 for (var j = 0; j < reqs.length; j++) if (reqs[j] && reqs[j].id === id) req = reqs[j];
 if (!req && id === 'free') req = FREE;
+// P108 IW-007 (lane B): her land's card — its title and line (the land's own words), any robot of hers may work it.
+var isLandCard = !req && id === 'land';
+if (isLandCard) req = { id: 'land', islander: '', band: 1, needs: '', copyKeys: { title: 'iw7bLandTitle', blurb: 'iw7bLandBlurb', line: 'iw7bLandLine', reward: '' } };
 // P106 IG-005: the robot for this job — hers of the kind the request needs (free play: Pip) — and where IT is at work.
 function kindOf(m) { return m && m.kind ? String(m.kind) : m && m.id && m.id !== 'r1' ? String(m.id) : 'pip'; }
 var needs = req && req.id !== 'free' && req.needs ? String(req.needs) : 'pip';
 // P108 IW-008 (lane C): with a crew, the robot at work HERE, else one of that kind at home, else the first (busy elsewhere).
 var job = crewPick(mine, plots, id, needs);
+// P108 IW-007 (lane B): on her land, the robot pinned there whatever its kind (else her Pip, as above).
+if (isLandCard) for (var lj = 0; lj < mine.length; lj++) if (mine[lj] && crewWorkOf(mine[lj], plots) === 'land') job = mine[lj];
 var spec = null;
 for (var s = 0; s < ROBOTS.length; s++) if (ROBOTS[s].id === needs) spec = ROBOTS[s];
 var jobName = job && job.name ? String(job.name) : job ? name : spec ? String(spec.defaultName[lang] || spec.defaultName.en) : name;
@@ -531,6 +536,8 @@ var isl = req ? ISLANDERS[req.islander] : null;
 var who = isl ? (w[isl.nameKey] || '') : '';
 var title = req ? (id === 'free' ? (w.sandH || '') : (w[req.copyKeys.title] || '')) : '';
 var workTitle = workReq ? (w[workReq.copyKeys.title] || '') : '';
+// P108 IW-007 (lane B): a robot at work on her land is at work on "Your land".
+if (workingAt === 'land') workTitle = w.iw7bLandTitle || '';
 var canOpen = false, showHome = false, line = '';
 if (!req) line = '';
 else if (status === 'locked' && card && card.lock === 'robot' && spec) {
