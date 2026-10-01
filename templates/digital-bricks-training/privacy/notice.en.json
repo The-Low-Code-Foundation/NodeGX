@@ -56,12 +56,12 @@
       {
         "id": "where",
         "heading": "Where it lives",
-        "body": "On one server we rent from Hetzner, in Falkenstein, Germany. Two other companies are involved. Anthropic, an AI company based in the United States, runs Claude, the assistant your coach writes your lessons with: when your coach asks it to write one, what it reads (described above) is sent to Anthropic. Brevo, an email service based in France, sends our emails, so it sees your email address and what each email says. That is your sign-in links, and an email when there is a new message for you: when your coach replies, it carries their reply; when you ask your coach something, the email to them carries your question. It never carries the rest of the conversation. Nothing else leaves the server. The pages load nothing from anyone else's site."
+        "body": "On one server we rent from Hetzner, in Falkenstein, Germany, with an encrypted copy in Hetzner's storage in Nuremberg, Germany (see the next section). Two other companies are involved. Anthropic, an AI company based in the United States, runs Claude, the assistant your coach writes your lessons with: when your coach asks it to write one, what it reads (described above) is sent to Anthropic. Brevo, an email service based in France, sends our emails, so it sees your email address and what each email says. That is your sign-in links, and an email when there is a new message for you: when your coach replies, it carries their reply; when you ask your coach something, the email to them carries your question. It never carries the rest of the conversation. Apart from the encrypted copies, nothing else leaves the server. The pages load nothing from anyone else's site."
       },
       {
         "id": "backups",
         "heading": "Copies we keep in case something breaks",
-        "body": "Every night the server takes a copy of the database and keeps the last seven, on the same server. A copy holds everything above, as it was that night."
+        "body": "Every night the server takes a copy of the database and keeps the last seven. It also encrypts that night's copy and stores it in Hetzner's storage service in Nuremberg, Germany, so that losing the server does not lose your work. The key that opens those copies is not on the server and Hetzner does not have it. A copy holds everything above, as it was that night, and the stored copies are deleted after seven days, the same as the ones on the server."
       },
       {
         "id": "howLong",

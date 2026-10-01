@@ -11,6 +11,7 @@ the todo list's backend.
 | Backend bundle | `/opt/dbtraining/backend/cli.js`, systemd `dbtraining-backend`, user `dbtraining`, `127.0.0.1:8691`, `--no-admin` |
 | Data (SQLite), policy, ops, secrets | `/var/lib/dbtraining/data` — **never rsync or delete into it** |
 | Caddy | `/etc/caddy/conf.d/dbtraining.caddy`, written by `add-caddy.sh` only once DNS points here |
+| Off-box backup | `dbtraining-offsite-backup.timer` 03:45 UTC → `training-digitalbricks` bucket (Hetzner Object Storage, nbg1), gpg-encrypted; config `/etc/dbtraining/backup.env` (root, 0600) |
 
 `--no-admin` removes the `/_admin` dashboard only. The `/admin/*` API is still served on
 `127.0.0.1:8691` behind the admin credential the backend minted into `secrets.json` on its first
@@ -98,9 +99,53 @@ trace of the demo world. Each of those was demonstrated failing by name (TASK-L1
 - **The schema and the policy, FIRST:** `update-backend.mjs` (dry run, then `--apply`) through the
   tunnel. A backend keeps the policy it started with; sprint 55 (TASK-L189–L191) adds `LessonDraft`
   and eight `role:staff` functions, which would otherwise run for any signed-in caller.
+- **The off-box backup:** `install-offsite-backup.sh` (see Off-box backups).
+- **`/mcp` must be in the Caddy block's backend paths** for the trainer's Claude (sprint 55). It was not
+  until the release on 2026-10-01: the public `/mcp` fell through to the static site and answered 405,
+  so a key that worked through the tunnel could not be used from anywhere else. `add-caddy.sh` carries
+  it now; on the box it was added by hand (validated, then `systemctl reload caddy`).
 - **The functions:** `deploy-functions.mjs` through the tunnel. Sprint 54 (TASK-L186–L188) also
   needs `setup-mail.mjs` run once against production before its functions can send anything.
 - `provision.sh` refuses a second run on purpose; it is not how you redeploy.
+
+## Off-box backups (2026-10-01, sprint 53 §3.4)
+
+NodeGX takes its own backup at 03:15 UTC and keeps seven in `<data dir>/backups`, on the same disk.
+At 03:45 UTC `dbtraining-offsite-backup.timer` runs `offsite-backup.sh`:
+
+1. takes the NEWEST NodeGX archive, and fails if it is more than 26 hours old (the backend's own
+   schedule stopped);
+2. proves it: every entry's sha256 against the archive's manifest, `PRAGMA integrity_check`, and a
+   table for every collection in the archive's own schema;
+3. bundles it with `secrets.json` and `auth.json`, which a NodeGX archive leaves out (without them a
+   restore loses `UNSUBSCRIBE_KEY`, so every unsubscribe link already sent stops working, and the
+   sign-in setup);
+4. encrypts the bundle to the PUBLIC half of "Anchor DB backups"
+   (`DBEFAE899AD5B2E1076A303EB49028CA034380CC`, `backup-public-key.asc`). The private half is in
+   Richard's password manager and laptop keyring, never on the box, so **the server cannot read its
+   own backups**;
+5. uploads to `training-digitalbricks/dbtraining/`, reads it back (size and md5), and
+6. prunes the bucket at `OFFSITE_PRUNE_AGE` (156h). **That is a promise, not a setting:** the privacy
+   notice says a deleted account is gone from the copies within seven days, and
+   `tools/check-privacy.mjs` reads the constant out of the script and fails over 168h.
+
+`/var/backups/dbtraining/last-offsite.json` is written on every outcome. Install or update with
+`install-offsite-backup.sh` (its header has the commands); `/etc/dbtraining/backup.env` is written by
+hand and holds `NODEGX_BACKUP_DIR`, `STAGING_DIR`, `OFFSITE_BUCKET`, `OFFSITE_PREFIX`, `MAX_AGE_HOURS`,
+`GPG_RECIPIENT` and the `RCLONE_CONFIG_OFFSITE_*` values (type s3, provider Other, endpoint
+`https://nbg1.your-objectstorage.com`, region nbg1, path style).
+
+**Restoring** (drilled 2026-10-01): download the object, `gpg --decrypt` on Richard's laptop, untar.
+The NodeGX archive restores with `POST /admin/backups/restore {"archive": "<file in backups/>"}`;
+put `secrets.json` and `auth.json` back into the data directory before starting the restored backend.
+The drill restored the newest copy into a throwaway backend on the same build: 1 account, 29
+concepts, the functions loaded and gated.
+
+**A new Hetzner key answers some requests with 403 for a while.** Measured the day the bucket and
+key were made: about a quarter of PUT, LIST and HEAD calls refused, while the older community key on
+the same endpoint answered 30 of 30. It settled within the hour. The script retries every remote call
+(`--retries 8 --retries-sleep 15s`) and loops the read-back, so a blip costs minutes rather than a
+night; a key that is really wrong still fails every attempt.
 
 ## Known, not fixed
 

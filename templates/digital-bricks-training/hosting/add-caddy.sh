@@ -41,7 +41,7 @@ ${DOMAIN} {
 		respond 404
 	}
 
-	@backend path_regexp backend ^/(aggregate|api|apps|auth|classes|config|files|functions|health|hooks|login|logout|oauth|realtime|requestPasswordReset|users|verificationEmailRequest)(/|$)
+	@backend path_regexp backend ^/(aggregate|api|apps|auth|classes|config|files|functions|health|hooks|login|logout|mcp|oauth|realtime|requestPasswordReset|users|verificationEmailRequest)(/|$)
 	handle @backend {
 		reverse_proxy 127.0.0.1:${PORT}
 	}

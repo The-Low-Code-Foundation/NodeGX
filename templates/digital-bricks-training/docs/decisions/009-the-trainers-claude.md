@@ -53,9 +53,19 @@ Richard took five on 2026-10-01. The full record is the sprint index
   `deploy-functions` now refuses to finish with an unruled endpoint, and `update-backend` brings a
   live backend's schema and policy up to the files, refusing anything destructive.
 
-## Not done
+## Released, 2026-10-01
 
-- **No production change.** Deploying, applying the schema and policy, and minting the key are
-  Richard's steps (START-HERE).
-- **The trainer's tools do not check that a learner has accepted `2026-10-03`** before their
-  project is read. That is a decision, put to Richard rather than defaulted.
+Deployed to `training.digitalbricks.io` with sprint 54 as one release (one re-ask, at `2026-10-03`):
+`update-backend --apply` (the `LessonDraft` table and the rules for fifteen functions), then
+`deploy-functions` (27 endpoints), `setup-mail`, the site, and `setup-trainer-key` for
+richard@digitalbricks.io, registered in his Claude Code as `dbt-lessons`. Over the public URL the key
+is offered exactly the nine tools. **One thing only the release could find:** the public `/mcp` was
+not in the Caddy block's backend paths, so it answered 405 from the static site; it is now, in
+`hosting/add-caddy.sh` and on the box.
+
+## Ruled after the release (Richard, 2026-10-01)
+
+- **The trainer's tools do NOT refuse a learner who has not yet accepted `2026-10-03`.** Asked
+  with both sides stated (refusing is the strict reading of the product's L53; it also stops lessons
+  being written for anyone who has not been back) and answered *"Don't block Claude."* The notice
+  and the release's re-ask carry it. A task adding that refusal is a reversal: escalate it.

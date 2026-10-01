@@ -19,7 +19,7 @@
  *
  * Run: node tools/check-privacy.mjs      (exit 1 on any failure, each by name)
  */
-import { readFileSync, readdirSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -129,6 +129,17 @@ if (trainerDoor) {
   check(!/nothing you do is sent to an AI model(\.|, and)/i.test(text), 'notice: it still says nothing you do is sent to an AI model, and the trainer\'s assistant reads their project (TASK-L189 §6)');
 }
 check(/Hetzner/.test(text) && /Germany/.test(text), 'notice: it does not say where the data lives (Hetzner, Germany)');
+/* The off-box copy (hosting/offsite-backup.sh, 2026-10-01) takes the database off the server,
+   so the notice must say where it goes and that it is encrypted, and the script's prune must
+   keep the notice's "deleted after seven days" true. The age is read out of the script: a
+   promise in the notice and a constant in a shell script drift unless something reads both. */
+const offsite = join(TEMPLATE, 'hosting', 'offsite-backup.sh');
+if (existsSync(offsite)) {
+  check(/Nuremberg/.test(text) && /encrypt/i.test(text), 'notice: the nightly copy leaves the server (hosting/offsite-backup.sh) and the notice does not say it is encrypted and kept in Nuremberg');
+  check(!/on the same server\./.test(text), 'notice: it still says the copies are kept on the same server, and one of them is not');
+  const m = readFileSync(offsite, 'utf8').match(/^OFFSITE_PRUNE_AGE="(\d+)h"/m);
+  check(Boolean(m) && Number(m[1]) < 168, `offsite-backup.sh: OFFSITE_PRUNE_AGE must be a whole number of hours under 168, or a copy can outlive the notice's seven days (found ${m ? m[1] + 'h' : 'none'})`);
+}
 check(!/GDPR compliant|RGPD compliant|fully compliant/i.test(text), 'notice: it claims compliance — a legal judgement nobody here may assert (sprint 17)');
 
 if (fails.length) {
