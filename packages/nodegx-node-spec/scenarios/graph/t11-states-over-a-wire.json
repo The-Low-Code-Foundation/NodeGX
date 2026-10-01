@@ -1,0 +1,298 @@
+[
+  {
+    "name": "a pulse WIRED into States' To B moves it as a direct press does: State says B, the value jumps (Use Transitions off), State Changed and Has Reached B fire once; a second pulse while in B changes nothing",
+    "clauses": [
+      "N",
+      "C4"
+    ],
+    "because": "NSP-013 s14: States' `to-<state>` is a DERIVED signal input (spec.ts `derived.signal`) and every States scenario pressed it directly — the path over a wire (the drain's setInputValue(name, true) into an EdgeTriggeredInput the node registers itself) was graded by nothing. states.ts `currentState`: \"Which state the node is in now\"; `stateChanged`: \"Fires on every state change except entering the first, which is where the node starts\"; `useTransitions` off: values move at once",
+    "nodes": {
+      "c": {
+        "type": "Counter"
+      },
+      "st": {
+        "type": "States",
+        "params": {
+          "states": "A,B",
+          "values": "x",
+          "value-A-x": 10,
+          "value-B-x": 20,
+          "useTransitions": false
+        }
+      },
+      "sink": {
+        "type": "net.noodl.Log"
+      }
+    },
+    "wires": [
+      {
+        "from": "c.countChanged",
+        "to": "st.to-B"
+      },
+      {
+        "from": "st.x",
+        "to": "sink.value"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "c",
+        "signal": "increase"
+      },
+      "settle",
+      {
+        "node": "c",
+        "signal": "increase"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "st",
+        "port": "currentState",
+        "value": "A"
+      },
+      {
+        "at": 1,
+        "subject": "sink",
+        "port": "value",
+        "value": 10
+      },
+      {
+        "at": 1,
+        "subject": "st",
+        "signal": "stateChanged",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "st",
+        "port": "currentState",
+        "value": "B"
+      },
+      {
+        "at": 2,
+        "subject": "st",
+        "port": "x",
+        "value": 20
+      },
+      {
+        "at": 2,
+        "subject": "sink",
+        "port": "value",
+        "value": 20
+      },
+      {
+        "at": 2,
+        "subject": "st",
+        "signal": "stateChanged",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "st",
+        "signal": "reached-B",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "st",
+        "port": "currentState",
+        "absent": true
+      },
+      {
+        "at": 3,
+        "subject": "st",
+        "signal": "stateChanged",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "st",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "st",
+        "outcome": "unchanged",
+        "count": 1
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "states",
+        "value": "A,B",
+        "subject": "st"
+      },
+      {
+        "t": "set",
+        "port": "values",
+        "value": "x",
+        "subject": "st"
+      },
+      {
+        "t": "set",
+        "port": "value-A-x",
+        "value": 10,
+        "subject": "st"
+      },
+      {
+        "t": "set",
+        "port": "value-B-x",
+        "value": 20,
+        "subject": "st"
+      },
+      {
+        "t": "set",
+        "port": "useTransitions",
+        "value": false,
+        "subject": "st"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 0,
+        "subject": "c"
+      },
+      {
+        "t": "value",
+        "port": "at-A",
+        "value": true,
+        "subject": "st"
+      },
+      {
+        "t": "value",
+        "port": "at-B",
+        "value": false,
+        "subject": "st"
+      },
+      {
+        "t": "value",
+        "port": "currentState",
+        "value": "A",
+        "subject": "st"
+      },
+      {
+        "t": "value",
+        "port": "x",
+        "value": 10,
+        "subject": "st"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 10,
+        "subject": "sink"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "c"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 1,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "value",
+        "port": "at-A",
+        "value": false,
+        "subject": "st"
+      },
+      {
+        "t": "value",
+        "port": "at-B",
+        "value": true,
+        "subject": "st"
+      },
+      {
+        "t": "value",
+        "port": "currentState",
+        "value": "B",
+        "subject": "st"
+      },
+      {
+        "t": "value",
+        "port": "x",
+        "value": 20,
+        "subject": "st"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "st"
+      },
+      {
+        "t": "signal",
+        "port": "reached-B",
+        "subject": "st"
+      },
+      {
+        "t": "outcome",
+        "port": "to-B",
+        "value": "done",
+        "subject": "st"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 20,
+        "subject": "sink"
+      },
+      {
+        "t": "in",
+        "port": "increase",
+        "subject": "c"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "currentCount",
+        "value": 2,
+        "subject": "c"
+      },
+      {
+        "t": "signal",
+        "port": "countChanged",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "increase",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "to-B",
+        "value": "unchanged",
+        "subject": "st"
+      }
+    ]
+  }
+]
