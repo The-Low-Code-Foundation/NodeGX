@@ -176,7 +176,9 @@ from a call to its event, shared by the interpreter and the runtime target.
 **Navigate To Path** — [navigate-to-path.ts](../../../packages/nodegx-node-spec/src/nodes/navigate-to-path.ts),
 19 hand scenarios, claims written from the source before the runtime was recorded. On the runtime: **CONFORMS** —
 17 / 19 + 2 known (C24, C25), 200 / 200 (33 attributed to C24), 26 / 26 mutants; on the interpreter 19 / 19, 200 / 200,
-every mutant killed. A first-run green corrects no guess, so the runtime's own traces were read (a probe): the hash
+every mutant killed. **Deep (10,000, shrink on, seed 20727):** Navigate To Path CONFORMS, 10,000 / 10,000, 26 / 26
+mutants (known: C24 1,959, C25 45, C6 2); External Link CONFORMS, 10,000 / 10,000, 12 / 12 — the s16 spec under the
+s17 world (its opens now return a window or `null` by the blocker's rule, which it never reads). A first-run green corrects no guess, so the runtime's own traces were read (a probe): the hash
 push is `#/product/42` and the href moves to `https://app.example/#/product/42`; the path type pushes
 `/product/42`; two presses push once and answer Done twice; a blocked new tab opens `#/home` with no features and
 reports blocked; the refused push is recorded and nothing follows. The rule in one paragraph is the spec's header:
