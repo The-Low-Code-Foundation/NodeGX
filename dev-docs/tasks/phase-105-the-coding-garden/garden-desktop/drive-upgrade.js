@@ -190,6 +190,23 @@ const type = (page, finder, value) =>
       el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); el.blur(); return true; })()`
   );
 const visibleInputs = `[...document.querySelectorAll('input')].filter((e) => e.offsetParent !== null)`;
+/**
+ * P108 s7: type the way a child does — a tap on the box, its text selected, the new text typed, Enter. The scripted
+ * `type` above (focus/blur in script) no longer reaches My robot's save: in a window the OS has not focused, a scripted
+ * blur is not a focus change, and the name box saves on its blur/Enter (measured 2026-10-01 on the deployed build: the
+ * scripted way left the store at the old name; these keys saved it, in both name boxes).
+ */
+const typeKeys = async (page, finder, value) => {
+  const at = await safe(page, `(() => { const el = (${finder}); if (!el) return null; el.scrollIntoView({ block: 'center' }); const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()`);
+  if (!at) return false;
+  for (const type of ['mousePressed', 'mouseReleased']) await page.send('Input.dispatchMouseEvent', { type, x: at.x, y: at.y, button: 'left', clickCount: 1 });
+  await wait(200);
+  await safe(page, 'document.activeElement && document.activeElement.select && document.activeElement.select()');
+  await page.send('Input.insertText', { text: value });
+  await wait(150);
+  for (const type of ['keyDown', 'keyUp']) await page.send('Input.dispatchKeyEvent', { type, key: 'Enter', code: 'Enter', windowsVirtualKeyCode: 13 });
+  return true;
+};
 const go = (page, where) => safe(page, `location.assign(${JSON.stringify(ORIGIN + where)})`);
 const pathIs = (page, want, ms = 10_000) =>
   until(`location ${want}`, () => safe(page, 'location.pathname'), (p) => p === want, ms).then(
@@ -223,7 +240,7 @@ async function makeFamily(page) {
     // Ruling 7: the kids may rename the robot (My robot, opSetName on blur/enter). Verify it, do not rebuild it.
     await go(page, '/robot');
     c.myRobotBox = await becomes('My robot’s name box', () => safe(page, `${visibleInputs}.some((e) => e.value === ${JSON.stringify(ROBOT_FIRST)})`), (b) => b === true, 15_000);
-    c.typedRename = await type(page, `${visibleInputs}.find((e) => e.value === ${JSON.stringify(ROBOT_FIRST)})`, ROBOT_RENAMED);
+    c.typedRename = await typeKeys(page, `${visibleInputs}.find((e) => e.value === ${JSON.stringify(ROBOT_FIRST)})`, ROBOT_RENAMED);
     await wait(1500);
     c.afterRename = await family(page);
     c.storedAfterRename = holds(c.afterRename, PLAYER, ROBOT_RENAMED);

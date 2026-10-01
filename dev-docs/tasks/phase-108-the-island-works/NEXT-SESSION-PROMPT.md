@@ -24,7 +24,9 @@
 > - **A helper's drops earn** (its own lap, its own "+N 🐚" line); **a fed animal's present** (D12: clover +1, wool +2,
 >   when a robot fills her bowl right up); **name pills never cover each other** (`pillSides`, both kits, lowest first).
 > - **The touch path in 3D:** `drive-iw007-touch.js --mode 3d` (`touch-3d` in `drives/drive-all.sh`).
-> - Bugs filed: `p108-s7-sparest`, `-helperpay`, `-pills` (fixed), **`p108-s7-meters3d` (open, low)**: in the 3D Workshop
+> - **The Mac app for IW-009:** `garden-desktop/shell/dist/mac-arm64/Olive's Island.app` (dev engine, local), the
+>   packaged upgrade drive PASS 10/10 after its stale rename step was re-pointed to real keys (IW-009 §5).
+> - Bugs filed: `p108-s7-sparest`, `-helperpay`, `-pills`, `-upgradedrive` (fixed), **`p108-s7-meters3d` (open, low)**: in the 3D Workshop
 >   on her land the spa's two parts' meter chips overlap ("0/6" over "0/4").
 >
 > **Readings (2026-10-01):** specs **1059** in 22 files, exit 0 · shell 92/92 · generator 0, no drift · final tree, one

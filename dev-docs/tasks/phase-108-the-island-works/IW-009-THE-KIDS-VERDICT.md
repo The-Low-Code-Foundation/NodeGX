@@ -46,7 +46,24 @@ notice the robots resting at the spa, the "+N 🐚" lines, the present? Does any
 
 ## 5. The build (P108 s7)
 
-(filled in when built)
+Built 2026-10-01 from the session-7 tree (`c051ca68d`), on Richard's Mac:
+- `node dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/build-app.js --allow-development-engine` → exit 0
+  (`index-6375d994abd3bbd5.js`, origin `http://127.0.0.1:47633`, the model present and its sha256 verified). The
+  **development engine**, as every Mac build of this game so far: fine for a sitting on this Mac, never for an installer
+  anyone else gets (a production engine is a viewer build first).
+- `(cd …/garden-desktop/shell && npm run dist:mac)` → exit 0: `shell/dist/mac-arm64/Olive's Island.app`, signed with the
+  Developer ID, not notarized (a local app: macOS opens it on the Mac that built it).
+- **Checked:** `drive-upgrade.js --exe "<the app>/Contents/MacOS/Olive's Island"` → **PASS, 10/10 clauses** (the window
+  up in 1.6 s, Olive's model ready, a new player and her robot made and renamed, the day's island backup written, all of
+  it kept across a relaunch as 0.0.2, the control launch clean, no backend left running). The drive's rename step had
+  gone stale (a scripted focus/blur no longer reached My robot's save; real key presses do, measured on the deployed
+  build) — re-pointed to real keys (`dev-docs/bugs/p108-s7-upgradedrive-…`).
+- Not graded, seen in the drive's log: Electron prints "sandboxed_renderer.bundle.js script failed to run" (a preload
+  in a sandboxed renderer) — twice in three launches; the page and every clause were unaffected.
+- Everything the island does in this build was driven on the deployed web build of the same tree (IW-007 §4 "Session 7").
+
+To open it: Finder → `dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/dist/mac-arm64/` → Olive's
+Island. It keeps its islands in its own data folder (not the browser), so a sitting starts clean.
 
 ## 6. Notes
 
