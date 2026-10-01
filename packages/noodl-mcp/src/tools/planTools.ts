@@ -63,6 +63,7 @@ import {
 } from '../editor-deps';
 import type { ConnectionV2 } from '../editor-deps';
 import { catalogGeneration, catalogIndex } from '../catalog';
+import { KitAwareValidator } from '../kitRefusal';
 import { ToolError } from '../errors';
 import { automaticRenderDisabled, runRenderReport } from '../render';
 import type { RenderLedger, RenderVerdict } from '../renderVerdict';
@@ -192,7 +193,8 @@ function validator(): SemanticValidator {
   // generation, not forever, because the project overlay is installed after this
   // module loads and a validator that predates it silently knows no kit types.
   if (!semanticValidator || validatorGeneration !== catalogGeneration()) {
-    semanticValidator = new SemanticValidator(catalogIndex());
+    // ISL-014 — the same kit-aware validator as `validate.ts`, so both doors refuse in one voice.
+    semanticValidator = new KitAwareValidator(catalogIndex());
     validatorGeneration = catalogGeneration();
   }
   return semanticValidator;

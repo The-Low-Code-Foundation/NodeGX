@@ -30,6 +30,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { catalogGeneration, catalogIndex } from './catalog';
+import { KitAwareValidator } from './kitRefusal';
 import {
   authoredNodes,
   authoredPreconditionDiagnostics,
@@ -69,7 +70,8 @@ function validator(): SemanticValidator {
   // only, and its failure mode is invisible — it looks exactly like a project
   // whose kit types are unknown, which is the state the overlay exists to end.
   if (!semanticValidator || validatorGeneration !== catalogGeneration()) {
-    semanticValidator = new SemanticValidator(catalogIndex());
+    // ISL-014 — the door's validator explains an unknown type from the kit overlay's state.
+    semanticValidator = new KitAwareValidator(catalogIndex());
     validatorGeneration = catalogGeneration();
   }
   return semanticValidator;
