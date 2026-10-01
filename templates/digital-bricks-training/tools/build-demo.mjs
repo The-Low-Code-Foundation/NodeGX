@@ -33,6 +33,13 @@
  *     two doors go straight to /Pages/Course and /Pages/People.
  *   - Pages/Sign in and __cloud__/ are not copied; the router loses the Sign in
  *     route; the registry follows.
+ *   - THE PRIVACY SURFACE GOES (TASK-L185): Pages/Privacy, Pages/Settings and
+ *     Privacy/ are not copied, the router loses both routes, App loses its
+ *     notice gate and the acceptance screen, and Home loses its "Your data" and
+ *     "Your settings" links and its account-deleted line. The template's notice
+ *     describes a real deployment (where data lives, who sends mail, how an
+ *     account is deleted), and a browser-only demo of made-up people holds
+ *     nothing and does none of it; carrying the notice here would make it false.
  *   - Home gains a THIRD door, straight to the one written lesson (the same
  *     page and `?concept=` the dossier dialog's link uses) — three nodes, two
  *     wires, one string.
@@ -61,21 +68,25 @@ export const TEMPLATE = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const DEMO = join(TEMPLATE, '..', 'digital-bricks-training-demo');
 
 /** Components the demo does not carry, as path prefixes under components/. */
-export const DROPPED_COMPONENTS = ['__cloud__/', 'Pages/Sign in/'];
+export const DROPPED_COMPONENTS = ['__cloud__/', 'Pages/Sign in/', 'Pages/Privacy/', 'Pages/Settings/', 'Privacy/'];
 /** Components whose files the demo changes. Every other file is byte-identical. */
 export const CHANGED_COMPONENTS = ['App', 'Pages/Home', 'Data/Programme', 'Data/Lesson', 'Data/Roster', 'Data/Strings', 'Lesson/Section row', 'Pages/Lesson'];
 /** Node ids removed, per component. */
 export const REMOVED_NODES = {
-  App: ['app_user', 'app_gate', 'app_to_signin', 'app_to_home'],
-  'Pages/Home': ['hm_user', 'hm_logout'],
+  App: ['app_user', 'app_gate', 'app_to_signin', 'app_to_home', 'app_accept_box', 'app_accept', 'app_notice_gate', 'app_user_tick'],
+  'Pages/Home': [
+    'hm_user', 'hm_logout',
+    'hm_links', 'hm_privacy_link', 'hm_settings_link', 'hm_to_privacy', 'hm_to_settings', 't_hm_privacy_link', 't_hm_settings_link',
+    'hm_deleted', 'hm_url', 'hm_was_deleted', 't_hm_deleted'
+  ],
   'Data/Programme': ['pr_refused'],
   'Data/Lesson': ['le_refused'],
   'Data/Roster': ['ro_refused'],
 };
 /** Node ids whose content changes (same id, same place in the graph). */
 export const REWRITTEN_NODES = {
-  App: ['app_router'],
-  'Pages/Home': ['hm_actions', 'hm_go', 'hm_go_people'],
+  App: ['app_router', 'app_root'],
+  'Pages/Home': ['hm_actions', 'hm_go', 'hm_go_people', 'hm_shell'],
   'Data/Programme': ['pr_own', 'pr_about'],
   'Data/Lesson': ['le_call'],
   'Data/Roster': ['ro_call'],
@@ -223,8 +234,9 @@ function transformNodes(component, doc) {
     }
     if (node.id === 'app_router') {
       const routes = node.parameters.pages.routes;
-      if (!routes.includes('/Pages/Sign in')) throw new Error('build-demo: the router no longer lists /Pages/Sign in');
-      node.parameters.pages.routes = routes.filter((r) => r !== '/Pages/Sign in');
+      const DROP_ROUTES = ['/Pages/Sign in', '/Pages/Privacy', '/Pages/Settings'];
+      for (const r of DROP_ROUTES) if (!routes.includes(r)) throw new Error(`build-demo: the router no longer lists ${r}`);
+      node.parameters.pages.routes = routes.filter((r) => !DROP_ROUTES.includes(r));
     }
     if (node.id === 'hm_go' || node.id === 'hm_go_people') {
       if (node.parameters.target !== '/Pages/Sign in') throw new Error(`build-demo: ${node.id} no longer goes to Sign in`);
@@ -243,6 +255,12 @@ function transformNodes(component, doc) {
         home[k] = v;
       }
       node.parameters.json = json(data);
+    }
+    // A removed node leaves its parent's children list (TASK-L185: App's acceptance box, Home's links).
+    if ((node.id === 'app_root' || node.id === 'hm_shell') && Array.isArray(node.children)) {
+      const before = node.children.length;
+      node.children = node.children.filter((c) => !removed.has(c));
+      if (node.children.length === before) throw new Error(`build-demo: ${node.id} lost none of its children — the named list is out of date`);
     }
     if (node.id === 'hm_actions') {
       const at = node.children.indexOf('hm_coach');

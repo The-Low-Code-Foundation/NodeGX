@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "d49d2eaa-3f1a-5a3b-aa94-59a8be0ac57e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "who",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "who",
+      "fromProperty": "learnerId",
+      "toId": "rows",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "erase",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-confirm",
+      "toId": "erase",
+      "toProperty": "in-confirm"
+    },
+    {
+      "fromId": "rows",
+      "fromProperty": "rows",
+      "toId": "erase",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "rows",
+      "fromProperty": "order",
+      "toId": "erase",
+      "toProperty": "in-order"
+    },
+    {
+      "fromId": "erase",
+      "fromProperty": "out-deleted",
+      "toId": "res",
+      "toProperty": "pm-deleted"
+    },
+    {
+      "fromId": "erase",
+      "fromProperty": "out-done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "who",
+      "fromProperty": "failed",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "rows",
+      "fromProperty": "failed",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "erase",
+      "fromProperty": "out-failed",
+      "toId": "deny",
+      "toProperty": "send"
+    }
+  ]
+}

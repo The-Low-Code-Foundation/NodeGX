@@ -1,0 +1,102 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "830fbed3-fb18-50ef-9b6a-f505fc400720",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Signed in (security: authenticated)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      }
+    },
+    {
+      "id": "notice",
+      "type": "/#__cloud__/shared/Notice",
+      "label": "Which version is current",
+      "x": 300,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "write",
+      "type": "JavaScriptFunction",
+      "label": "Write it on their account",
+      "x": 560,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * RECORD THAT THE SIGNED-IN PERSON ACCEPTED THE CURRENT NOTICE (TASK-L185 \u00a72).\n *\n * The ONLY writer of `_User.privacyVersion` and `_User.privacyAcceptedAt`.\n * The version comes from `shared/Notice`, never from the caller: a client that\n * could say which version it accepted could accept one that does not exist.\n * Accepting twice is harmless \u2014 the version is the same and the moment moves.\n * Staff accept too: the notice also describes what a coach's account holds.\n */\nif (Inputs.userId !== undefined && Inputs.version !== undefined) {\n  (async () => {\n    try {\n      const userId = String(Inputs.userId || '');\n      const version = String(Inputs.version || '');\n      if (!userId) throw new Error('no account');\n      if (!version) throw new Error('no notice version');\n      await Noodl.Records.save(\n        userId,\n        { privacyVersion: version, privacyAcceptedAt: new Date().toISOString() },\n        { className: '_User' }\n      );\n      Outputs.version = version;\n      Outputs.done();\n    } catch (e) {\n      Outputs.error = String((e && e.message) || e);\n      console.error('[dbt:acceptPrivacy] refused: ' + Outputs.error + ' user=' + String(Inputs.userId || '-'));\n      Outputs.failed();\n    }\n  })();\n}\n",
+        "runOnChange-in-userId": true,
+        "runOnChange-in-version": true
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-version",
+          "plug": "input",
+          "type": "*",
+          "displayName": "version",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-version",
+          "plug": "output",
+          "type": "*",
+          "displayName": "version",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "*",
+          "displayName": "error",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "RECORDS CALLS PER ACCEPT: 1 read (shared/Notice) and 1 write."
+      }
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "version",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "params": "version"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "One refusal, whatever went wrong",
+      "x": 1080,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be saved."
+      }
+    }
+  ]
+}

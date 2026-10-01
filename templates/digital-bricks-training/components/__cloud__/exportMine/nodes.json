@@ -1,0 +1,110 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3889084c-6d22-56fe-a7c0-fe7cb9067538",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Signed in (security: authenticated)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      }
+    },
+    {
+      "id": "who",
+      "type": "/#__cloud__/shared/Caller learner",
+      "label": "Their learner",
+      "x": 300,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "rows",
+      "type": "/#__cloud__/shared/Rows about",
+      "label": "Every row about them",
+      "x": 560,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "doc",
+      "type": "JavaScriptFunction",
+      "label": "One document, with what it leaves out said at the top",
+      "x": 820,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * EVERYTHING HELD ABOUT THE SIGNED-IN PERSON, AS ONE DOCUMENT (TASK-L185 \u00a73).\n *\n * The rows come from `shared/Rows about` \u2014 the one plan deletion also reads \u2014\n * and the account from `_User` by the session's id. A staff account has no\n * learner, so its document is the account alone.\n *\n * Left out, and the document's own readme says so, because a file that opens\n * \"everything\" with a quiet gap is a technicality rather than an answer:\n *   - a coach's INTERNAL notes (the product's L128): written for the coach's own\n *     use; whether they could be withheld from a formal subject-access request\n *     is a legal question this file does not answer;\n *   - session and sign-in-link TOKENS: only when each was made is included,\n *     because the token itself would be a key to the account;\n *   - a group's own brief or session: it belongs to the group. Their answers\n *     to a group's brief ARE included.\n *\n * Nothing here is written: an export changes no row.\n */\nif (Inputs.userId !== undefined && Inputs.rows !== undefined) {\n  (async () => {\n    try {\n      const userId = String(Inputs.userId || '');\n      if (!userId) throw new Error('no account');\n      const q = (c, where) => Noodl.Records.query(c, where, { limit: 1000, plain: true });\n      const users = await q('_User', { objectId: { equalTo: userId } });\n      if (users.length !== 1) throw new Error(users.length ? 'two accounts for one id' : 'no account');\n      const u = users[0];\n      const sessions = await q('_Session', { userId: { equalTo: userId } });\n      const current = Noodl.Users.Current;\n      const roles = current && current.Properties && typeof current.Properties.get === 'function'\n        ? current.Properties.get('roles') || []\n        : [];\n\n      const DROP = new Set(['ACL', 'sessionToken', '_hashed_password', 'password', 'authData']);\n      const clean = (r) => {\n        const out = {};\n        for (const k of Object.keys(r)) if (!DROP.has(k)) out[k] = r[k];\n        return out;\n      };\n\n      const rows = Inputs.rows || {};\n      const collections = {};\n      let internalNotes = 0;\n      for (const c of Object.keys(rows)) {\n        let list = rows[c] || [];\n        if (c === 'CoachNote') {\n          internalNotes = list.filter((n) => n.visibility === 'internal').length;\n          list = list.filter((n) => n.visibility !== 'internal');\n        }\n        collections[c] = list.map(clean);\n      }\n\n      const doc = {\n        readme: [\n          'Everything Digital Bricks Training holds about you, as of ' + new Date().toISOString() + '.',\n          'It leaves out three things, on purpose. Notes your coach marked as for their own use only' +\n            (internalNotes ? ' (' + internalNotes + ' of them)' : ' (there are none)') +\n            '. The session and sign-in-link tokens themselves, because each is a key to your account: only when each was made is here. ' +\n            \"And a group's own brief or meeting, which belongs to the group; your answers to a group's brief are here.\",\n          'If you think something is missing, write to the address in the privacy notice.'\n        ],\n        account: {\n          email: u.email || null,\n          firstName: u.firstName || null,\n          lastName: u.lastName || null,\n          roles: roles,\n          createdAt: u.createdAt || null,\n          privacyVersion: u.privacyVersion || null,\n          privacyAcceptedAt: u.privacyAcceptedAt || null,\n          sessions: sessions.map((s) => ({ createdAt: s.createdAt || null }))\n        },\n        collections: collections\n      };\n      Outputs.document = doc;\n      Outputs.done();\n    } catch (e) {\n      Outputs.error = String((e && e.message) || e);\n      console.error('[dbt:exportMine] refused: ' + Outputs.error + ' user=' + String(Inputs.userId || '-'));\n      Outputs.failed();\n    }\n  })();\n}\n",
+        "runOnChange-in-userId": true,
+        "runOnChange-in-rows": true
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rows",
+          "plug": "input",
+          "type": "*",
+          "displayName": "rows",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-document",
+          "plug": "output",
+          "type": "*",
+          "displayName": "document",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "*",
+          "displayName": "error",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "RECORDS QUERIES PER EXPORT: 1 (Caller learner) + 23 (Rows about) + 2 (the account and its sessions). Writes: none."
+      }
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "document",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "params": "document"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "One refusal, whatever went wrong",
+      "x": 1080,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be read."
+      }
+    }
+  ]
+}

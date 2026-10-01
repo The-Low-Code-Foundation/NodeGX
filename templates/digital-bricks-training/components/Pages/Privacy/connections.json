@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "70fcc78b-6310-49ed-9167-3d7e5560a596",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pv_lang_var",
+      "fromProperty": "value",
+      "toId": "pv_strings",
+      "toProperty": "language"
+    },
+    {
+      "fromId": "pv_strings",
+      "fromProperty": "privacy",
+      "toId": "pv_sections",
+      "toProperty": "in-privacy"
+    },
+    {
+      "fromId": "pv_sections",
+      "fromProperty": "out-items",
+      "toId": "pv_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "t_pv_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "pv_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pv_title",
+      "fromProperty": "Translation",
+      "toId": "pv_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pv_version",
+      "fromProperty": "Translation",
+      "toId": "pv_version",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pv_lede",
+      "fromProperty": "Translation",
+      "toId": "pv_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_pv_back",
+      "fromProperty": "Translation",
+      "toId": "pv_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_pv_page_title",
+      "fromProperty": "Translation",
+      "toId": "seo_pv_page",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "pv_back",
+      "fromProperty": "onClick",
+      "toId": "pv_home",
+      "toProperty": "navigate"
+    }
+  ]
+}

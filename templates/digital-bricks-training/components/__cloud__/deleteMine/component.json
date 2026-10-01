@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "d49d2eaa-3f1a-5a3b-aa94-59a8be0ac57e",
+  "name": "deleteMine",
+  "path": "/#__cloud__/deleteMine",
+  "type": "cloud",
+  "created": "2026-10-01T09:00:00.000Z",
+  "modified": "2026-10-01T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Delete the signed-in person's account and every row about them, children first and the account last, so a second run finishes a crashed first one (TASK-L185)."
+}

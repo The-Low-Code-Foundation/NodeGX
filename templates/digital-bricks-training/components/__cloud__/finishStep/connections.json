@@ -44,6 +44,30 @@
       "fromProperty": "out-failed",
       "toId": "deny",
       "toProperty": "send"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "notice",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "notice",
+      "fromProperty": "current",
+      "toId": "write",
+      "toProperty": "in-noticeCurrent"
+    },
+    {
+      "fromId": "write",
+      "fromProperty": "out-stale",
+      "toId": "deny_notice",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "notice",
+      "fromProperty": "failed",
+      "toId": "deny",
+      "toProperty": "send"
     }
   ]
 }

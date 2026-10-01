@@ -140,6 +140,60 @@
       "fromProperty": "out-toHome",
       "toId": "app_to_home",
       "toProperty": "navigate"
+    },
+    {
+      "fromId": "app_router",
+      "fromProperty": "currentPageComponent",
+      "toId": "app_notice_gate",
+      "toProperty": "in-page"
+    },
+    {
+      "fromId": "app_user",
+      "fromProperty": "authenticated",
+      "toId": "app_notice_gate",
+      "toProperty": "in-signedIn"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "privacy",
+      "toId": "app_notice_gate",
+      "toProperty": "in-privacy"
+    },
+    {
+      "fromId": "app_notice_gate",
+      "fromProperty": "out-hold",
+      "toId": "app_accept_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "app_notice_gate",
+      "fromProperty": "out-pagesClass",
+      "toId": "app_pages",
+      "toProperty": "cssClassName"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "contentLanguage",
+      "toId": "app_ns_privacy",
+      "toProperty": "Language"
+    },
+    {
+      "fromId": "app_strings",
+      "fromProperty": "jsonPrivacy",
+      "toId": "app_ns_privacy",
+      "toProperty": "Bundle"
+    },
+    {
+      "fromId": "app_user",
+      "fromProperty": "changed",
+      "toId": "app_user_tick",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "app_user_tick",
+      "fromProperty": "out-tick",
+      "toId": "app_notice_gate",
+      "toProperty": "in-userTick"
     }
   ]
 }

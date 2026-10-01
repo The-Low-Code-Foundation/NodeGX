@@ -723,3 +723,44 @@ the live site, **after checking it carries the NDA-017 `.value` fix** (the i18ne
   formatted by the graph. The kit's assignment card lists them through the one markdown path. A
   coach-read brief (the product's default) says *Your coach reads this…* rather than looking
   unfinished. The coach's programme view shows the same answers, in the coach's own words.
+
+## The privacy floor (TASK-L185)
+
+No real person's data goes in until the app can say what it holds, ask them to accept that, hand it
+all back and delete it. Four pieces, each with one owner:
+
+- **The notice is `privacy/notice.en.json`**: its words AND its version. It is this template's own,
+  not the product's (which describes model calls, uploads and Google sign-in the template does not
+  have). Edit it, bump `version` when anything that matters changes, then run
+  `node tools/build-privacy.mjs`. That writes the GENERATED `str_privacy` half of `Data/Strings`
+  (the `privacy` namespace, with `{{version}}` and `{{email}}` filled in) and the one server-side
+  copy of the version in `__cloud__/shared/Notice`. Redeploy the functions and the site afterwards.
+- **Acceptance.** `acceptPrivacy` is the only writer of `_User.privacyVersion` / `privacyAcceptedAt`,
+  compared for EQUALITY, never back-filled. In `App`, the notice gate HOLDS the page (class
+  `dbt-pages-held`, `display: none`, router still mounted) and renders `Privacy/Accept` in its place,
+  so the address survives and accepting reloads it. `/privacy`, `/settings`, sign-in and the
+  specimen are never held. The gate re-reads the account when the `User` node says it `changed`
+  (through a tick node, because a run-driven Function may not also run on value changes — L165).
+  **The browser's gate decides what is drawn; `capture` and `finishStep` refuse the WRITE** with
+  their own body, `notice-not-accepted`, while the caller's version is stale.
+- **Export and deletion read ONE plan**, `__cloud__/shared/Rows about`. `exportMine` hands the rows
+  over as one file (leaving out a coach's internal notes and token values, and saying so at the
+  top); `deleteMine` removes them children first, the learner profile after them, sessions just
+  before the account and the account last. There is no transaction, so that ORDER is what makes a
+  crash recoverable: a second run finishes it. The page asks for the word DELETE and the server
+  checks it too. Nothing is kept afterwards.
+- **`tools/check-privacy.mjs`** fails if a collection in `backend/schema.json` is neither in the plan
+  nor excused with a reason, if any copy of the version disagrees with the notice, or if the notice
+  names something (an AI company, Google, uploads, tokens, a connector, payments) the template has no
+  node, function or setting for. Demonstrated failing by name all three ways.
+
+**Two things only driving found.** After `deleteMine` the account's sessions are gone, so the Log Out
+node FAILS and leaves the stored session behind; Home then held itself behind the acceptance screen
+for somebody who had just deleted their account. Settings now forgets the session itself and loads
+Home fresh with `?deleted=1`. And a component instance does not take `mounted` (the validator said
+so before any render did), so `App` mounts a Group around `Privacy/Accept`.
+
+**NodeGX sessions do not expire** (`oauth-routes.ts:475` writes no `expiresAt`), so the notice says a
+sign-in lasts until you sign out. **The demo carries none of this**: `build-demo` drops the privacy
+pages, the gate and Home's links by name, because the notice describes a real deployment and the demo
+holds nothing.

@@ -102,7 +102,8 @@ check(/className: 'ProjectContext', ifMatch: \{ version \}/.test(script('capture
       check(['done', 'failure', 'error'].includes(w.fromProperty) || w.fromProperty.startsWith('out-'), `wiring: ${f.split('components/')[1]} wires ${w.fromId}.${w.fromProperty}, which a Cloud Function does not have`);
     }
   }
-  check(clientCalls === 6, `wiring: expected 6 client Cloud Function nodes (4 reads, capture, finishStep), found ${clientCalls}`);
+  // TASK-L185 added three: acceptPrivacy (the acceptance screen), exportMine and deleteMine (settings).
+  check(clientCalls === 9, `wiring: expected 9 client Cloud Function nodes (4 reads, capture, finishStep, acceptPrivacy, exportMine, deleteMine), found ${clientCalls}`);
 }
 
 // ── The fake ─────────────────────────────────────────────────────────────────
@@ -167,7 +168,7 @@ function makeRecords(table, { beforeRead } = {}) {
 /** One node's script: resolves with Outputs on `done`, with `{ refused }` on `failed`. */
 const run = (code, Inputs, Records) =>
   new Promise((resolve_) => {
-    const Outputs = { done: () => resolve_({ ok: true, ...Outputs }), failed: () => resolve_({ ok: false, refused: Outputs.error }) };
+    const Outputs = { done: () => resolve_({ ok: true, ...Outputs }), failed: () => resolve_({ ok: false, refused: Outputs.error }), stale: () => resolve_({ ok: false, stale: true }) };
     new Function('Inputs', 'Outputs', 'Noodl', code)(Inputs, Outputs, { Records });
   });
 const quiet = async (fn) => {
@@ -187,7 +188,7 @@ const status = (table, concept) => stepsOf(table).find((s) => s.conceptId === co
 
 // ── capture ──────────────────────────────────────────────────────────────────
 const CAPTURE = script('capture', 'write');
-const capture = (table, input, records = makeRecords(table).Records, code = CAPTURE) => run(code, { learnerId: SAM, ...input }, records);
+const capture = (table, input, records = makeRecords(table).Records, code = CAPTURE) => run(code, { learnerId: SAM, noticeCurrent: true, ...input }, records);
 /** Every field Sam can be asked for on a step he has reached: the capture sections and the fact-capturing activities. */
 function askable(table) {
   const open = new Set(stepsOf(table).filter((s) => s.status !== 'locked').map((s) => s.conceptId));
@@ -230,13 +231,21 @@ function askable(table) {
     const { result } = await quiet(() => capture(table, input));
     check(result.ok === false, `capture: ${label} was not refused`);
   }
-  const { result: nobody } = await quiet(() => run(CAPTURE, { learnerId: 'l-newstart', conceptId: 'css-making-it-look-right', field: 'howThePageShouldFeel', value: 'x' }, makeRecords(table).Records));
+  const { result: nobody } = await quiet(() => run(CAPTURE, { noticeCurrent: true, learnerId: 'l-newstart', conceptId: 'css-making-it-look-right', field: 'howThePageShouldFeel', value: 'x' }, makeRecords(table).Records));
   check(nobody.ok === false, 'capture: a learner with no path could write');
-  const { result: signedOut } = await quiet(() => run(CAPTURE, { learnerId: '', conceptId: 'css-making-it-look-right', field: 'howThePageShouldFeel', value: 'x' }, makeRecords(table).Records));
+  const { result: signedOut } = await quiet(() => run(CAPTURE, { noticeCurrent: true, learnerId: '', conceptId: 'css-making-it-look-right', field: 'howThePageShouldFeel', value: 'x' }, makeRecords(table).Records));
   check(signedOut.ok === false, 'capture: an account with no learner could write');
   check(JSON.stringify(ctxOf(table)) === before, 'capture: a refusal changed the project context');
   const okCap = await capture(table, { conceptId: 'css-making-it-look-right', field: 'howThePageShouldFeel', value: 'x'.repeat(2000) });
   check(okCap.ok, 'capture: exactly 2,000 characters was refused — the cap is off by one');
+
+  // TASK-L185 §2: under an out-of-date privacy notice the write is refused with its OWN body,
+  // and nothing is written — not even a read-then-skip that could move a version.
+  const { Records: rs, stats: ss } = makeRecords(table);
+  const beforeStale = JSON.stringify(ctxOf(table));
+  const { result: stale } = await quiet(() => capture(table, { conceptId: 'css-making-it-look-right', field: 'howThePageShouldFeel', value: 'under a stale notice', noticeCurrent: false }, rs));
+  check(stale.ok === false && stale.stale === true, `capture: a stale notice was not refused as stale (${JSON.stringify(stale)})`);
+  check(ss.writes === 0 && JSON.stringify(ctxOf(table)) === beforeStale, 'capture: a stale notice still wrote');
 }
 
 /** Every caller's FIRST read of the project waits until all of them have read it: the losing interleaving, every run. */
@@ -279,7 +288,7 @@ async function race(code) {
 
 // ── finishStep ───────────────────────────────────────────────────────────────
 const FINISH = script('finishStep', 'write');
-const finish = (table, conceptId, records = makeRecords(table).Records) => run(FINISH, { learnerId: SAM, conceptId }, records);
+const finish = (table, conceptId, records = makeRecords(table).Records) => run(FINISH, { learnerId: SAM, noticeCurrent: true, conceptId }, records);
 {
   const table = makeWorld();
   check(status(table, 'css-making-it-look-right') === 'in_progress' && status(table, 'javascript-making-it-do-things') === 'locked', 'finishStep: the seed is not step 5 in progress, step 6 locked');
@@ -294,6 +303,16 @@ const finish = (table, conceptId, records = makeRecords(table).Records) => run(F
 
   const again = await finish(table, 'css-making-it-look-right');
   check(again.ok && status(table, 'javascript-making-it-do-things') === 'available', 'finishStep: pressing it again on a finished step was not harmless');
+
+  // TASK-L185 §2: a stale privacy notice refuses the finish, as its own refusal, and moves nothing.
+  {
+    const t2 = makeWorld();
+    const { Records: rs, stats: ss } = makeRecords(t2);
+    const before2 = JSON.stringify(stepsOf(t2));
+    const { result: stale } = await quiet(() => run(FINISH, { learnerId: SAM, noticeCurrent: false, conceptId: 'css-making-it-look-right' }, rs));
+    check(stale.ok === false && stale.stale === true, `finishStep: a stale notice was not refused as stale (${JSON.stringify(stale)})`);
+    check(ss.writes === 0 && JSON.stringify(stepsOf(t2)) === before2, 'finishStep: a stale notice still moved a step');
+  }
 
   const before = JSON.stringify(stepsOf(table));
   for (const [label, concept] of [['a locked step', 'reading-what-the-ai-did'], ['an unknown concept', 'no-such-concept']]) {

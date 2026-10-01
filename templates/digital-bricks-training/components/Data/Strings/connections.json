@@ -140,6 +140,24 @@
       "fromProperty": "out-jsonDossier",
       "toId": "str_out",
       "toProperty": "jsonDossier"
+    },
+    {
+      "fromId": "str_privacy",
+      "fromProperty": "items",
+      "toId": "str_split",
+      "toProperty": "in-privacy"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-privacy",
+      "toId": "str_out",
+      "toProperty": "privacy"
+    },
+    {
+      "fromId": "str_split",
+      "fromProperty": "out-jsonPrivacy",
+      "toId": "str_out",
+      "toProperty": "jsonPrivacy"
     }
   ]
 }

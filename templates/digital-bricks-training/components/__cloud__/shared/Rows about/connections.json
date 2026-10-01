@@ -1,0 +1,43 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3477f59d-b255-5eef-9f74-628328b48fba",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ra_in",
+      "fromProperty": "learnerId",
+      "toId": "ra_fn",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "ra_fn",
+      "fromProperty": "out-rows",
+      "toId": "ra_out",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "ra_fn",
+      "fromProperty": "out-order",
+      "toId": "ra_out",
+      "toProperty": "order"
+    },
+    {
+      "fromId": "ra_fn",
+      "fromProperty": "out-error",
+      "toId": "ra_out",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "ra_fn",
+      "fromProperty": "out-done",
+      "toId": "ra_out",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "ra_fn",
+      "fromProperty": "out-failed",
+      "toId": "ra_out",
+      "toProperty": "failed"
+    }
+  ]
+}

@@ -1,0 +1,128 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d49d2eaa-3f1a-5a3b-aa94-59a8be0ac57e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Signed in (security: authenticated)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "confirm",
+        "allowNoAuth": false,
+        "ptype-confirm": "string",
+        "preq-confirm": true
+      }
+    },
+    {
+      "id": "who",
+      "type": "/#__cloud__/shared/Caller learner",
+      "label": "Their learner",
+      "x": 300,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "rows",
+      "type": "/#__cloud__/shared/Rows about",
+      "label": "Every row about them",
+      "x": 560,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "erase",
+      "type": "JavaScriptFunction",
+      "label": "Remove them in the plan's order, the account last",
+      "x": 820,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * DELETE THE SIGNED-IN PERSON'S ACCOUNT AND EVERYTHING ABOUT THEM (TASK-L185 \u00a74).\n *\n * The rows come from `shared/Rows about`, the same plan the export reads, and\n * are removed in its `order`: every collection before anything it hangs off,\n * the learner profile after all of them, the account last.\n *\n * THERE IS NO TRANSACTION (NodeGX HLT-016 (b) is ruled out), so the ORDER is\n * the safety property, as in finishStep (L178). A crash part-way leaves an\n * account that can still sign in and press delete again, and the second run\n * finds whatever is left and finishes. A crash can never leave rows about a\n * person with no account left to delete them from, because the account is the\n * last thing to go, and its sessions go just before it.\n *\n * NOTHING IS KEPT. The product keeps confusion signals unlinked (for its\n * curriculum loop) and the credit ledger (accounting law); this template has\n * neither a loop nor a ledger, so both reasons are absent and those rows go.\n * The notice and the settings page say so before the button is pressed.\n *\n * `confirm` must be the word DELETE: the page asks the person to type it, and\n * the server checks it too, so a stray call cannot erase somebody.\n */\nif (Inputs.userId !== undefined && Inputs.rows !== undefined && Inputs.order !== undefined && Inputs.confirm !== undefined) {\n  (async () => {\n    try {\n      const userId = String(Inputs.userId || '');\n      if (!userId) throw new Error('no account');\n      if (String(Inputs.confirm) !== 'DELETE') throw new Error('not confirmed');\n      const R = Noodl.Records;\n      const del = (c, r) => R.delete(r.objectId, { className: c });\n      const rows = Inputs.rows || {};\n      const counts = {};\n      for (const c of Inputs.order || []) {\n        const list = rows[c] || [];\n        for (const r of list) await del(c, r);\n        counts[c] = list.length;\n      }\n\n      // \u2500\u2500 The account. Role memberships, sign-in identities and email tokens\n      //    first, then sessions, then the account itself.\n      const q = (c, where) => R.query(c, where, { limit: 1000, plain: true });\n      const roleList = await q('_Role', {});\n      for (const role of roleList) {\n        await R.removeRelation({ className: '_Role', recordId: role.objectId, key: 'users', targetRecordId: userId, targetClassName: '_User' });\n      }\n      for (const c of ['_UserIdentity', '_EmailToken', '_Session']) {\n        const list = await q(c, { userId: { equalTo: userId } });\n        for (const r of list) await del(c, r);\n        counts[c] = list.length;\n      }\n      await R.delete(userId, { className: '_User' });\n      counts._User = 1;\n\n      console.log('[dbt:deleteMine] done user=' + userId + ' rows=' + Object.values(counts).reduce((a, b) => a + b, 0));\n      Outputs.deleted = true;\n      Outputs.done();\n    } catch (e) {\n      Outputs.error = String((e && e.message) || e);\n      console.error('[dbt:deleteMine] stopped: ' + Outputs.error + ' user=' + String(Inputs.userId || '-'));\n      Outputs.failed();\n    }\n  })();\n}\n",
+        "runOnChange-in-userId": true,
+        "runOnChange-in-rows": true,
+        "runOnChange-in-order": true,
+        "runOnChange-in-confirm": true
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-rows",
+          "plug": "input",
+          "type": "*",
+          "displayName": "rows",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-order",
+          "plug": "input",
+          "type": "*",
+          "displayName": "order",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-confirm",
+          "plug": "input",
+          "type": "*",
+          "displayName": "confirm",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-deleted",
+          "plug": "output",
+          "type": "*",
+          "displayName": "deleted",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "*",
+          "displayName": "error",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "RECORDS CALLS PER DELETION: the reads of Rows about, then one delete per row, one relation removal per role, three account reads and their deletes, and the account. No transaction: the ORDER is what makes a crash recoverable."
+      }
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "deleted",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "params": "deleted"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "One refusal, whatever went wrong",
+      "x": 1080,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be finished."
+      }
+    }
+  ]
+}

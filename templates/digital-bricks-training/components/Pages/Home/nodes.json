@@ -50,10 +50,12 @@
       "parent": "hm_band",
       "children": [
         "hm_eyebrow",
+        "hm_deleted",
         "hm_title",
         "hm_line",
         "hm_actions",
-        "hm_note"
+        "hm_note",
+        "hm_links"
       ],
       "parameters": {
         "width": {
@@ -565,6 +567,167 @@
           "group": "Outputs"
         }
       ]
+    },
+    {
+      "id": "hm_deleted",
+      "type": "Text",
+      "label": "Your account has been deleted",
+      "x": 40,
+      "y": 300,
+      "parent": "hm_shell",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      },
+      "metadata": {
+        "comment": "TASK-L185 §4: afterwards the session ends and Home says so. Mounted only when Settings navigates here with ?deleted=1; ink, no colour, because it is a fact rather than an alarm or a celebration."
+      }
+    },
+    {
+      "id": "hm_links",
+      "type": "Group",
+      "label": "Your data, your settings",
+      "x": 40,
+      "y": 900,
+      "parent": "hm_shell",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-6)"
+      },
+      "metadata": {
+        "comment": "TASK-L185: the notice is reachable from the front door by anybody, signed in or not; settings only once there is an account to manage."
+      },
+      "children": [
+        "hm_privacy_link",
+        "hm_settings_link"
+      ]
+    },
+    {
+      "id": "hm_privacy_link",
+      "type": "net.noodl.controls.button",
+      "label": "Your data",
+      "x": 100,
+      "y": 960,
+      "parent": "hm_links",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "hm_settings_link",
+      "type": "net.noodl.controls.button",
+      "label": "Your settings",
+      "x": 100,
+      "y": 1040,
+      "parent": "hm_links",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "mounted": false,
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "hm_url",
+      "type": "PageInputs",
+      "label": "Arrived after deleting an account? ?deleted=",
+      "x": 700,
+      "y": 300,
+      "parameters": {
+        "queryParams": "deleted"
+      }
+    },
+    {
+      "id": "hm_was_deleted",
+      "type": "JavaScriptFunction",
+      "label": "Only the word 1 means it",
+      "x": 1000,
+      "y": 300,
+      "parameters": {
+        "functionScript": "// TASK-L185: the line shows only for ?deleted=1, the value Settings sends after a\n// deletion finished. Any other value shows nothing rather than a claim nobody made.\nOutputs.show = String(Inputs.deleted || '') === '1';\n"
+      },
+      "ports": [
+        {
+          "name": "in-deleted",
+          "plug": "input",
+          "type": "*",
+          "displayName": "deleted",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-show",
+          "plug": "output",
+          "type": "*",
+          "displayName": "show",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "hm_to_privacy",
+      "type": "RouterNavigate",
+      "label": "→ Privacy",
+      "x": 700,
+      "y": 960,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Privacy"
+      }
+    },
+    {
+      "id": "hm_to_settings",
+      "type": "RouterNavigate",
+      "label": "→ Settings",
+      "x": 700,
+      "y": 1040,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Settings"
+      }
+    },
+    {
+      "id": "t_hm_deleted",
+      "type": "Translation",
+      "label": "privacy:deleted",
+      "x": 1300,
+      "y": 300,
+      "parameters": {
+        "Key": "deleted",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_hm_privacy_link",
+      "type": "Translation",
+      "label": "privacy:pageTitle",
+      "x": 1300,
+      "y": 960,
+      "parameters": {
+        "Key": "pageTitle",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_hm_settings_link",
+      "type": "Translation",
+      "label": "privacy:settings.pageTitle",
+      "x": 1300,
+      "y": 1040,
+      "parameters": {
+        "Key": "settings.pageTitle",
+        "Namespace": "privacy"
+      }
     }
   ],
   "visualRoots": [

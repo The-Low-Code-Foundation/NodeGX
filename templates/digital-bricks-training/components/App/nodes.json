@@ -10,7 +10,8 @@
       "x": 40,
       "y": 40,
       "children": [
-        "app_router"
+        "app_pages",
+        "app_accept_box"
       ],
       "parameters": {
         "sizeMode": "explicit",
@@ -30,12 +31,35 @@
       }
     },
     {
+      "id": "app_pages",
+      "type": "Group",
+      "label": "The page they asked for — held, never replaced, while the notice is answered",
+      "x": 100,
+      "y": 160,
+      "parent": "app_root",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "cssClassName": "dbt-pages"
+      },
+      "children": [
+        "app_router"
+      ],
+      "metadata": {
+        "comment": "TASK-L185 §2. While the current notice is unanswered this Group takes the class dbt-pages-held (display: none). The ROUTER STAYS MOUNTED, so the address the person asked for is still the page underneath and accepting reloads it in place (the product's L53). Unmounting the router instead would deregister it and take RouterNavigate with it."
+      }
+    },
+    {
       "id": "app_router",
       "type": "Router",
       "label": "Main router",
       "x": 100,
-      "y": 160,
-      "parent": "app_root",
+      "y": 240,
+      "parent": "app_pages",
       "parameters": {
         "name": "Main",
         "pages": {
@@ -47,10 +71,44 @@
             "/Pages/Palette",
             "/Pages/People",
             "/Pages/Learner",
-            "/Pages/Sign in"
+            "/Pages/Sign in",
+            "/Pages/Privacy",
+            "/Pages/Settings"
           ]
         }
       }
+    },
+    {
+      "id": "app_accept_box",
+      "type": "Group",
+      "label": "Shown only while the notice is unanswered",
+      "x": 100,
+      "y": 360,
+      "parent": "app_root",
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "app_accept"
+      ],
+      "metadata": {
+        "comment": "A component instance does not take `mounted` (the validator: it reaches nothing), so the Group carries it. NOT mounted, never merely hidden: unmounted, the acceptance screen makes no call and holds no focus."
+      }
+    },
+    {
+      "id": "app_accept",
+      "type": "/Privacy/Accept",
+      "label": "The acceptance screen, in place of the page",
+      "x": 100,
+      "y": 440,
+      "parent": "app_accept_box",
+      "parameters": {}
     },
     {
       "id": "app_css",
@@ -59,7 +117,7 @@
       "x": 400,
       "y": 40,
       "parameters": {
-        "style": "/* Digital Bricks Training — the page ground and the pointer. The lesson CSS is the kit's stylesheet. */\nhtml, body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); }\n.pressable { cursor: pointer; }\n@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }\n"
+        "style": "/* Digital Bricks Training — the page ground and the pointer. The lesson CSS is the kit's stylesheet. */\nhtml, body { background: var(--background); color: var(--foreground); font-family: var(--font-sans); }\n.pressable { cursor: pointer; }\n@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }\n/* TASK-L185: the page held while the current privacy notice is answered. display:none, so it is out of\n   the layout, the tab order and the accessibility tree, while the router behind it stays mounted. */\n.dbt-pages-held { display: none !important; }\n"
       },
       "metadata": {
         "comment": "Everything else this template styles lives in noodl_modules/dbt-lesson/styles.css (the product's token aliases and the lesson CSS lifted from globals.css) — TASK-L154 §2. This node holds only what needs the document itself."
@@ -204,7 +262,7 @@
       "x": 700,
       "y": 160,
       "parameters": {
-        "functionScript": "/*\n * THE ONE GATE (TASK-L171 §2). Two rules, in ONE place, never a check per page:\n * a page that forgot its own check would be the one somebody could read.\n *\n *   1. Signed out, every page but the public ones goes to sign-in.\n *   2. Signed in WITHOUT the `staff` role, the coach's pages go to Home.\n *\n * PUBLIC and STAFF are lists of what is allowed, never of what is forbidden to\n * everybody else: a page added later is gated for the signed-out by default,\n * which is the safe way for the first list to be wrong.\n *\n *   Home     the front door, with its two demo doors\n *   Sign in  the way in\n *   Palette  the kit's specimen, not anybody's data (TASK-L171 decision 9)\n *\n * NONE OF THIS IS WHAT KEEPS DATA PRIVATE. Every read is a cloud function behind\n * nodegx.security.json, and the page asks before this can send it anywhere, so a\n * learner at /people is refused by the backend first (403, read off the network\n * — criterion 5). Rule 2 exists because of what the page would otherwise SAY:\n * the roster's empty state is \"Nobody has signed up yet\", which is false.\n *\n * ROLES THAT ARE NOT KNOWN YET ARE WAITED FOR, NEVER GUESSED. `roles` is\n * undefined while the backend has not said (user.ts, DEF-005: \"we could not\n * ask\" is not \"in no roles\"), so rule 2 acts only on an answer. Nothing here\n * asks for one: every arrival already carries them — a magic link's\n * `POST /oauth/exchange` since NodeGX HLT-024, and a stored session through\n * the runtime's own `/users/me` on load. Until HLT-024 this gate asked once,\n * through a Switch; with the exchange fixed the ask never fired, and it was\n * deleted (TASK-L171 follow-up, measured: 0 asks after a link, and a stored\n * session with no roles still resolved with the ask unwired).\n */\nconst PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette'];\nconst STAFF = ['Pages/People', 'Pages/Learner'];\nconst page = String(Inputs.page || '').replace(/^\\/+/, '');\nconst signedIn = Inputs.signedIn === true;\nconst roles = Array.isArray(Inputs.roles) ? Inputs.roles : undefined;\nif (!page) return;\nif (!signedIn) {\n  if (PUBLIC.indexOf(page) === -1) Outputs.toSignIn();\n  return;\n}\nif (roles && roles.indexOf('staff') === -1 && STAFF.indexOf(page) !== -1) Outputs.toHome();\n"
+        "functionScript": "/*\n * THE ONE GATE (TASK-L171 §2). Two rules, in ONE place, never a check per page:\n * a page that forgot its own check would be the one somebody could read.\n *\n *   1. Signed out, every page but the public ones goes to sign-in.\n *   2. Signed in WITHOUT the `staff` role, the coach's pages go to Home.\n *\n * PUBLIC and STAFF are lists of what is allowed, never of what is forbidden to\n * everybody else: a page added later is gated for the signed-out by default,\n * which is the safe way for the first list to be wrong.\n *\n *   Home     the front door, with its two demo doors\n *   Sign in  the way in\n *   Palette  the kit's specimen, not anybody's data (TASK-L171 decision 9)\n *   Privacy  the notice: anybody may read what we would hold before they have an\n *            account, and a person who declines it must still be able to (L185)\n *\n * NONE OF THIS IS WHAT KEEPS DATA PRIVATE. Every read is a cloud function behind\n * nodegx.security.json, and the page asks before this can send it anywhere, so a\n * learner at /people is refused by the backend first (403, read off the network\n * — criterion 5). Rule 2 exists because of what the page would otherwise SAY:\n * the roster's empty state is \"Nobody has signed up yet\", which is false.\n *\n * ROLES THAT ARE NOT KNOWN YET ARE WAITED FOR, NEVER GUESSED. `roles` is\n * undefined while the backend has not said (user.ts, DEF-005: \"we could not\n * ask\" is not \"in no roles\"), so rule 2 acts only on an answer. Nothing here\n * asks for one: every arrival already carries them — a magic link's\n * `POST /oauth/exchange` since NodeGX HLT-024, and a stored session through\n * the runtime's own `/users/me` on load. Until HLT-024 this gate asked once,\n * through a Switch; with the exchange fixed the ask never fired, and it was\n * deleted (TASK-L171 follow-up, measured: 0 asks after a link, and a stored\n * session with no roles still resolved with the ask unwired).\n */\nconst PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette', 'Pages/Privacy'];\nconst STAFF = ['Pages/People', 'Pages/Learner'];\nconst page = String(Inputs.page || '').replace(/^\\/+/, '');\nconst signedIn = Inputs.signedIn === true;\nconst roles = Array.isArray(Inputs.roles) ? Inputs.roles : undefined;\nif (!page) return;\nif (!signedIn) {\n  if (PUBLIC.indexOf(page) === -1) Outputs.toSignIn();\n  return;\n}\nif (roles && roles.indexOf('staff') === -1 && STAFF.indexOf(page) !== -1) Outputs.toHome();\n"
       },
       "ports": [
         {
@@ -265,6 +323,89 @@
         "router": "Main",
         "target": "/Pages/Home"
       }
+    },
+    {
+      "id": "app_ns_privacy",
+      "type": "Language Bundle",
+      "label": "privacy → i18next",
+      "x": 1060,
+      "y": 840,
+      "parameters": {
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "app_notice_gate",
+      "type": "JavaScriptFunction",
+      "label": "THE NOTICE GATE — hold the page until the current notice is answered",
+      "x": 700,
+      "y": 360,
+      "parameters": {
+        "functionScript": "/*\n * THE NOTICE GATE (TASK-L185 §2), beside the sign-in gate and deliberately not\n * folded into it: that one decides WHERE a person may go, this one decides\n * WHETHER the page they are on may be drawn yet.\n *\n * Signed in and not on the CURRENT notice → the page is HELD (hidden, still\n * mounted) and the acceptance screen renders in its place. Equality, never \"at\n * least\" (the product's L53): a changed notice asks everybody again. Nothing is\n * back-filled, so an account that never accepted has no version and is asked.\n *\n * NEVER HELD: the notice itself, settings (declining must never take away the\n * way out — L54), sign-in, and the kit's specimen. Staff are asked too: the\n * notice describes what a coach's account holds.\n *\n * NONE OF THIS IS WHAT PROTECTS A WRITE. capture and finishStep refuse under a\n * stale version on the server; this decides what the browser DRAWS. While the\n * notice's version has not arrived from Data/Strings nothing is held — the\n * gate acts on an answer, never on \"not loaded yet\" (the roles rule above).\n */\nconst EXEMPT = ['Pages/Privacy', 'Pages/Settings', 'Pages/Sign in', 'Pages/Palette'];\nconst page = String(Inputs.page || '').replace(/^\\/+/, '');\nconst signedIn = Inputs.signedIn === true;\nconst version = Inputs.privacy && typeof Inputs.privacy === 'object' ? String(Inputs.privacy.version || '') : '';\nlet hold = false;\nif (page && signedIn && version && EXEMPT.indexOf(page) === -1) {\n  const u = typeof Noodl !== 'undefined' && Noodl.Users ? Noodl.Users.Current : undefined;\n  const accepted = u && u.Properties && typeof u.Properties.get === 'function' ? u.Properties.get('privacyVersion') : undefined;\n  hold = accepted !== version;\n}\nOutputs.hold = hold;\nOutputs.pagesClass = hold ? 'dbt-pages dbt-pages-held' : 'dbt-pages';\n"
+      },
+      "ports": [
+        {
+          "name": "in-page",
+          "displayName": "page",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-signedIn",
+          "displayName": "signedIn",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-privacy",
+          "displayName": "privacy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userTick",
+          "displayName": "userTick",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hold",
+          "displayName": "hold",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pagesClass",
+          "displayName": "pagesClass",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "app_user_tick",
+      "type": "JavaScriptFunction",
+      "label": "The account was re-read — a value the gate can watch",
+      "x": 700,
+      "y": 520,
+      "parameters": {
+        "functionScript": "// TASK-L185: the User node says its account changed with a SIGNAL (`changed`), and\n// the notice gate must re-read `privacyVersion` when it does — a stored session is\n// refetched on load, and the stored copy can predate an acceptance. A Function run\n// by a signal must not also run on value changes (L165), so this one has no value\n// inputs at all: it turns the signal into a value, and the gate watches the value.\nOutputs.tick = Date.now();\n"
+      },
+      "ports": [
+        {
+          "name": "out-tick",
+          "displayName": "tick",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
     }
   ],
   "visualRoots": [

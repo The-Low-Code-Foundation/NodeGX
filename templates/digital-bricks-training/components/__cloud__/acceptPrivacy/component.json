@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "830fbed3-fb18-50ef-9b6a-f505fc400720",
+  "name": "acceptPrivacy",
+  "path": "/#__cloud__/acceptPrivacy",
+  "type": "cloud",
+  "created": "2026-10-01T09:00:00.000Z",
+  "modified": "2026-10-01T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Record that the signed-in person accepted the current privacy notice. The version comes from shared/Notice, never from the caller (TASK-L185)."
+}

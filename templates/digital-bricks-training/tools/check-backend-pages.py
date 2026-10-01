@@ -38,7 +38,9 @@ FIXTURE_OUTPUTS = {
 # Data/Programme appends `work` (TASK-L182): the words a learner sent in and what came back, which
 # the fixture carried nowhere before L182 — appended, never interleaved, like `found`.
 APPENDED = {'Data/Lesson': ['found'], 'Data/Programme': ['work']}
-PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette']
+# Privacy joined 2026-10-01 (TASK-L185): anybody may read what would be held before they have an
+# account, and a person who declines the notice must still be able to read it.
+PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette', 'Pages/Privacy']
 STAFF = ['Pages/People', 'Pages/Learner']
 
 
