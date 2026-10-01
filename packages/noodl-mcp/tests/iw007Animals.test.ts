@@ -17,9 +17,10 @@ import * as vm from 'vm';
 import * as React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { ANIMALS, SHOP, WEAR } from './cg002Content';
+import { ANIMALS, LAND_ID, LAND_PLOT, REQUESTS, SHOP, WEAR } from './cg002Content';
 import { ADD_PROFILE_SCRIPT, DECODE_SAVE_SCRIPT, ENCODE_SAVE_SCRIPT, SAVE_HELPERS, helper, runScript } from './cg002Scripts';
-import { ALL_WORDS_JSON } from './cg003Scripts';
+import { ALL_WORDS_JSON, DRAW_WORLD_SCRIPT, FAMILY_SCRIPT, ISLAND_WORLD_SCRIPT } from './cg003Scripts';
+import { ISLAND_TICK_SCRIPT } from './ig004Island';
 import { BUY_SCRIPT, SHOP_CARD_SCRIPT, SHOP_IDS, SHOP_ROWS_SCRIPT } from './iw006Shop';
 import { IW7A_DEFAULT_NAMES, IW7A_SHOP_SHARED } from './iw007Animals';
 import { LAND_SCRIPT } from './iw007Land';
@@ -224,7 +225,8 @@ function loadKits(sources: string[]): any[] {
   return modules;
 }
 const garden = (src = fs.readFileSync(BUILT_2D, 'utf8')) => loadKits([src])[0].reactNodes.find((n: any) => n.name === 'garden-kit.Garden');
-const draw = (node: any, w: { map: string[]; things: unknown[]; robots: unknown[] }) => renderToStaticMarkup(React.createElement(node.getReactComponent(), { map: { rows: w.map }, things: w.things, robots: w.robots }));
+/** Garden drawn as a page draws it: Map as rows (a world the engine wrote) or as Draw world's { rows, legend }. */
+const draw = (node: any, w: { map: unknown; things: unknown[]; robots: unknown[] }) => renderToStaticMarkup(React.createElement(node.getReactComponent(), { map: Array.isArray(w.map) ? { rows: w.map } : w.map, things: w.things, robots: w.robots }));
 const cellOf = (html: string, x: number, y: number) => {
   const at = html.indexOf(`data-x="${x}" data-y="${y}"`);
   return html.slice(html.lastIndexOf('<button', at), html.indexOf('</button>', at));
@@ -529,5 +531,54 @@ describe('IW-007 (lane A) — the drawer’s “go to nearest” offers the carr
     // The two land sources close the list (a value the list lacks would be appended raw: the words prove they are listed).
     expect([got.opts.slice(-2), got.labels, got.text]).toEqual([['patch', 'tree'], ['🥕 carrot patch', '🌳 tree'], '🥕 carrot patch']);
     expect(got.opts.slice(0, 2)).toEqual(['egg', 'rock']);
+  });
+});
+
+// ── on the island: her land drawn through the page's own scripts (Read family → Island world → tick → Draw world → kit) ──
+
+describe('IW-007 AC2 (lane A) — on the island: a bought rabbit appears at once by her empty bowl, waiting; fed by a pinned robot she is happy', () => {
+  /** The island as the Island page builds it, ticked n times, then Draw world: what the kits are given. */
+  const island = (model: any, ticks = 0) => {
+    const f = runScript(FAMILY_SCRIPT, { model });
+    let out = bare(ISLAND_WORLD_SCRIPT, { requests: REQUESTS, plots: f.plots, robots: f.robots, done: f.done, band: f.band, pins: [], land: f.land });
+    for (let i = 0; i < ticks; i++) out = bare(ISLAND_TICK_SCRIPT, { state: out.state, built: out.state });
+    return bare(DRAW_WORLD_SCRIPT, { world: out.world, words: WORDS, lang: 'en', botName: 'Pip' });
+  };
+  const near = (d: any, x: number, y: number, kind: string) => d.things.find((t: any) => t.kind === kind && t.x === LAND_PLOT.x + x && t.y === LAND_PLOT.y + y);
+
+  it('🔴 bought: her bowl reaches the kits with her kind and name, empty (0/3) — the kit draws her waiting there; the patch reaches them with its carrots', () => {
+    const m = buy(withRefuge(funded(kid(), 100)), 'rabbit', 'Flopsy').model;
+    const d = island(m);
+    expect(near(d, 3, 4, 'bowl')).toMatchObject({ animal: 'rabbit', name: 'Flopsy', count: 0, capacity: capacity('rabbit'), item: 'carrot' });
+    expect(near(d, 0, 5, 'patch')).toMatchObject({ left: 3, max: 4 });
+    const html = draw(garden(), { map: d.map, things: d.things, robots: d.robots });
+    expect(PET_READ(cellOf(html, LAND_PLOT.x + 3, LAND_PLOT.y + 4))).toMatchObject({ animal: 'rabbit', mood: 'waiting', name: 'Flopsy' });
+    expect((cellOf(html, LAND_PLOT.x, LAND_PLOT.y + 5).match(/data-patch="(\d)"/) || [])[1]).toBe('3');
+    // Known-firing beside it: before Buy, no animal stands on her land.
+    expect(island(withRefuge(funded(kid(), 100))).things.some((t: any) => t.animal)).toBe(false);
+  });
+
+  it('🔴 a feeding robot pinned on her land: within a few island ticks her bowl has carrots and the kit draws her happy', () => {
+    const m = buy(withRefuge(funded(kid(), 100)), 'rabbit', 'Flopsy').model;
+    const p = active(m);
+    const id = p.island.land.animals[0].id;
+    p.island.plots[LAND_ID] = { program: feeding({ id, x: 3, y: 4 }), robotId: p.island.robots[0].id, wonAt: 1 };
+    let ticks = 0;
+    let d: any = island(m);
+    while (ticks < 200 && !(near(d, 3, 4, 'bowl').count > 0)) d = island(m, (ticks += 5));
+    expect([ticks > 0 && ticks < 200, near(d, 3, 4, 'bowl').name]).toEqual([true, 'Flopsy']);
+    expect(PET_READ(cellOf(draw(garden(), { map: d.map, things: d.things, robots: d.robots }), LAND_PLOT.x + 3, LAND_PLOT.y + 4)).mood).toBe('happy');
+  });
+
+  it('🔴 arm: Draw world without lane A’s bowl line → her bowl reaches the kits as a plain bowl, no animal (the first row fails)', () => {
+    const anchor = "else if (t.kind === 'bowl' && t.animal) things.push(";
+    expect(DRAW_WORLD_SCRIPT.split(anchor).length).toBe(2);
+    const line = DRAW_WORLD_SCRIPT.slice(DRAW_WORLD_SCRIPT.indexOf(anchor), DRAW_WORLD_SCRIPT.indexOf('\n', DRAW_WORLD_SCRIPT.indexOf(anchor)));
+    const mutant = DRAW_WORLD_SCRIPT.replace(line, '');
+    const m = buy(withRefuge(funded(kid(), 100)), 'rabbit', 'Flopsy').model;
+    const f = runScript(FAMILY_SCRIPT, { model: m });
+    const world = bare(ISLAND_WORLD_SCRIPT, { requests: REQUESTS, plots: f.plots, robots: f.robots, done: f.done, band: f.band, pins: [], land: f.land }).world;
+    const bowl = bare(mutant, { world, words: WORDS, lang: 'en', botName: 'Pip' }).things.find((t: any) => t.kind === 'bowl' && t.x === LAND_PLOT.x + 3);
+    expect([bowl.animal, bowl.name]).toEqual([undefined, undefined]);
   });
 });
