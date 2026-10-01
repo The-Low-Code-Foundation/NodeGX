@@ -1,0 +1,275 @@
+[
+  {
+    "name": "Run Tasks runs its Template once per item: every task signals Success → Done; one task signals Failure → Failure; an empty Items list → Done; Aborted never fires on a run that ends by itself",
+    "clauses": [
+      "N"
+    ],
+    "because": "runtasks.ts `items`: \"The list to run the template once for; each entry becomes one task and is passed to it as a record\"; `taskTemplate`: \"The component to run once per item, which must expose the ports named under Template Contract\" (defaults Do / Success / Failure); `done`: \"Fires when the run ended having done its work: every task completed without failing, the Items list was empty, or an Abort was honoured\"; `failure`: \"Fires when at least one task failed\"; `aborted`: \"Fires when a run ended early\". The template is a DEFINITION the node instantiates by name (graph.ts DEFINITIONS); each item's `ok` reaches it as a component input (createTaskComponent pushes the record's fields onto inputs that exist). When in the run each answer lands is the runtime's timing (the task component is built through awaits, its Do is queued) — the frames the claims name were read from the recording; WHAT is answered is the sentence's",
+    "definitions": {
+      "Job": {
+        "inputs": {
+          "Do": "signal",
+          "ok": "value"
+        },
+        "outputs": {
+          "Success": "signal",
+          "Failure": "signal"
+        },
+        "nodes": {
+          "ci": {
+            "type": "Component Inputs"
+          },
+          "c": {
+            "type": "Condition"
+          },
+          "co": {
+            "type": "Component Outputs"
+          }
+        },
+        "wires": [
+          {
+            "from": "ci.ok",
+            "to": "c.condition"
+          },
+          {
+            "from": "ci.Do",
+            "to": "c.eval"
+          },
+          {
+            "from": "c.ontrue",
+            "to": "co.Success"
+          },
+          {
+            "from": "c.onfalse",
+            "to": "co.Failure"
+          }
+        ]
+      }
+    },
+    "nodes": {
+      "good": {
+        "type": "RunTasks",
+        "params": {
+          "taskTemplate": "Job",
+          "items": [
+            {
+              "ok": true
+            },
+            {
+              "ok": true
+            }
+          ]
+        }
+      },
+      "bad": {
+        "type": "RunTasks",
+        "params": {
+          "taskTemplate": "Job",
+          "items": [
+            {
+              "ok": true
+            },
+            {
+              "ok": false
+            }
+          ]
+        }
+      },
+      "none": {
+        "type": "RunTasks",
+        "params": {
+          "taskTemplate": "Job",
+          "items": []
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "good",
+        "signal": "run"
+      },
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      {
+        "node": "bad",
+        "signal": "run"
+      },
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      {
+        "node": "none",
+        "signal": "run"
+      },
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 3,
+        "subject": "good",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "good",
+        "outcome": "failure",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "good",
+        "signal": "aborted",
+        "count": 0
+      },
+      {
+        "at": 7,
+        "subject": "bad",
+        "outcome": "failure",
+        "count": 1
+      },
+      {
+        "at": 7,
+        "subject": "bad",
+        "outcome": "done",
+        "count": 0
+      },
+      {
+        "at": 7,
+        "subject": "bad",
+        "signal": "aborted",
+        "count": 0
+      },
+      {
+        "at": 10,
+        "subject": "none",
+        "outcome": "done",
+        "count": 1
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "taskTemplate",
+        "value": "Job",
+        "subject": "good"
+      },
+      {
+        "t": "set",
+        "port": "items",
+        "value": [
+          {
+            "ok": true
+          },
+          {
+            "ok": true
+          }
+        ],
+        "subject": "good"
+      },
+      {
+        "t": "set",
+        "port": "taskTemplate",
+        "value": "Job",
+        "subject": "bad"
+      },
+      {
+        "t": "set",
+        "port": "items",
+        "value": [
+          {
+            "ok": true
+          },
+          {
+            "ok": false
+          }
+        ],
+        "subject": "bad"
+      },
+      {
+        "t": "set",
+        "port": "taskTemplate",
+        "value": "Job",
+        "subject": "none"
+      },
+      {
+        "t": "set",
+        "port": "items",
+        "value": [],
+        "subject": "none"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "good"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "done",
+        "subject": "good"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "bad"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "failure",
+        "error": "run-tasks/tasks-failed",
+        "subject": "bad"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "run",
+        "subject": "none"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "run",
+        "value": "done",
+        "subject": "none"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  }
+]

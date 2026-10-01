@@ -458,7 +458,7 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
       if (sc.world !== undefined) return 'the export has no world to install — a scenario that declares one (a registry, a store, a clock) is outside';
       // NSP-015 s15: the boundary is in the format now; THIS harness emits the graph as one component,
       // so a tree of instances (and the ports between them) needs a multi-component emit — the harness's limit
-      if (sc.components && Object.keys(sc.components).length) return 'this harness emits ONE component — a tree of component instances needs a multi-component emit (NSP-015 AC2, not built)';
+      if ((sc.components && Object.keys(sc.components).length) || (sc.definitions && Object.keys(sc.definitions).length)) return 'this harness emits ONE component — a tree of component instances needs a multi-component emit (NSP-015 AC2, not built)';
       for (const step of sc.steps) {
         if (step === 'settle') continue;
         if ('wire' in step) return 'the export emits a component whole — no wire is made after mount';

@@ -63,7 +63,7 @@ export async function playGraph<H extends Handle>(target: GraphTarget<H>, sc: Gr
     restore = target.install(world);
   }
   try {
-    handles = target.mountGraph(sc.nodes, sc.wires ?? [], sc.components);
+    handles = await target.mountGraph(sc.nodes, sc.wires ?? [], sc.components, sc.definitions);
     for (const id of ids) drain(id);
     for (const step of sc.steps) {
       if (step === 'settle') {

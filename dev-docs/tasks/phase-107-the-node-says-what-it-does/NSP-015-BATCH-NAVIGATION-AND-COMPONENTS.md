@@ -1,7 +1,7 @@
 # NSP-015 — Batch: navigation, popups, component utilities
 
 **Opened 2026-09-29.** **Depends on NSP-008** (graph scenarios) and R4 = continue.
-**Status: 🟡 6 of 14 — s15 (2026-10-01): the component boundary and the Component Object family. Left: the 8 navigation / popup nodes, AC2.**
+**Status: 🟡 6 of 14 (+ NSP-012's Run Tasks) — s15 (2026-10-01): the component boundary, the Component Object family, component DEFINITIONS. Left: the 8 navigation / popup nodes, AC2.**
 
 ## 1. The person sentence
 
@@ -81,11 +81,27 @@ sentence before recording:
 | Parent Component Object: nearest / named ancestor; Set Parent …: writes it; a name not an ancestor fails with its error | Parent Component Object, Set Parent Component Object Properties | ✅ (two claims of mine named unwired outputs — a Component Object output exists only once wired; sinks added) |
 | Parent Component Object created BEFORE its parent's Component Object | the "nearest" sentence | ❌ **row C23** |
 
-**Not done**: the eight navigation / popup nodes — Show Popup, Push Component To Stack and Run Tasks make a
-component instance BY NAME, so the runtime instantiates it itself: the target needs a component DEFINITION
-registered as a real component model (and a subject naming for nodes in runtime-made instances); Navigate /
-Navigate To Path / Pop / Page Inputs / External Link need the world's LOCATION (§3). AC2 (export): this harness
-emits ONE component — every boundary scenario is `outside` in those words.
+**Then DEFINITIONS** (graph.ts DEFINITIONS): a component a NODE makes by name — a scenario's `definitions`
+(name → ports, its own nodes with params, its own wires), which the runtime target registers as the app's project
+does: a real `ComponentModel` from export data (componentmodel.ts `createFromExportData`), so the node's own
+`nodeScope.createNode(name)` builds it with the runtime's `setComponentModel`. A definition's nodes are not
+subjects (the runtime mints their ids per instance); they are seen through the node that made them. `mountGraph`
+may be async now (the model is built asynchronously, as the loader builds it); a new claim kind counts OUTCOMES
+(a pulse on an outcome port is folded into the outcome event, so no `signal` claim could see Run Tasks' answer —
+the gap s10 named on C15). One harness fact: the headless runtime loads no project, so the graph model had no
+`variants` list and every runtime-made instance threw in `setNodeParameters`; the target now has a project with
+no variants (as it has one with no colour styles).
+
+| scenario | grades | result |
+|---|---|---|
+| Run Tasks over a Job template (Component Inputs → Condition → Component Outputs): two ok items → Done; one not ok → Failure (`run-tasks/tasks-failed`); no items → Done; Aborted 0 | Run Tasks (NSP-012's exempt T4 node) | ✅ — the frames are the recording's (the task is built through awaits), the answers are the sentences' |
+
+**Not done**: the eight navigation / popup nodes. Show Popup and Push Component To Stack make an instance by name
+(a definition now covers that half) but hang it under the viewer's visual nodes — `showPopup` builds a `Group`
+in the ROOT component's scope and needs `onShowPopup`; the page stack is a visual node — so they wait on
+NSP-016's visual layer or a stand-in for it. Navigate / Navigate To Path / Pop / Page Inputs / External Link need
+the world's LOCATION (§3). AC2 (export): this harness emits ONE component — every boundary and definition
+scenario is `outside` in those words.
 
 ### 6.2 Rows
 

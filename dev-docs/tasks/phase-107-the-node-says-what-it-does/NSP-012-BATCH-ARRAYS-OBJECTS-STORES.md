@@ -1,7 +1,7 @@
 # NSP-012 — Batch: arrays, objects, variables, stores, events
 
 **Opened 2026-09-29.** **Depends on NSP-008** (graph scenarios) and R4 = continue.
-**Status: 🟡 the 13 T1 nodes built (s9, 2026-10-01) — all 13 conform on the runtime at 200; the T4 half built (s10, 2026-10-01) — 12 of 13 named by 22 graph scenarios recorded on the runtime, claims from their own sentences, 4 rows (C12–C15); Run Tasks exempt (the component boundary, NSP-015); AC2 (export) not run.**
+**Status: 🟡 the 13 T1 nodes built (s9, 2026-10-01) — all 13 conform on the runtime at 200; the T4 half built (s10, 2026-10-01) — 12 of 13 named by 22 graph scenarios recorded on the runtime, claims from their own sentences, 4 rows (C12–C15); Run Tasks exempt (the component boundary, NSP-015) — **graded s15 (NSP-015): its template is a component DEFINITION the node instantiates by name; 13 of 13 named**; AC2 (export) not run.**
 
 ## 1. The person sentence
 

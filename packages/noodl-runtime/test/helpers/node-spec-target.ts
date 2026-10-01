@@ -94,9 +94,11 @@
  *     `setComponentModel` does, and becomes a handle — a subject — so a wire, a step or a claim
  *     can name it. Its params are set after the wires. A component SIGNAL port crosses as the
  *     runtime carries it (`true` then `false`, sent at once) and is recorded as a `signal` event,
- *     on the instance's signal outputs and on the matching `Component Inputs` outputs. What the
- *     runtime instantiates ITSELF by name (a Repeater's or Run Tasks' template, a popup, a page)
- *     needs a component DEFINITION registered as a real component model — not built.
+ *     on the instance's signal outputs and on the matching `Component Inputs` outputs.
+ *   - **definitions** (NSP-015, graph.ts DEFINITIONS): a component a node instantiates ITSELF by
+ *     name (Run Tasks' template) is registered as a real `ComponentModel` from export data, so the
+ *     runtime builds every instance with its own `setComponentModel`; the context's graph model
+ *     gets the empty `variants` list a loaded project always has.
  *   - **the three process-wide managers** behind the store, history and action nodes
  *     (`globalStoreManager`, `stateHistoryManager`, `actionRegistry`) are reset at `install` like
  *     the registry tables, and the history manager's clock becomes the world's — one play, one
@@ -108,7 +110,7 @@ import { AsyncLocalStorage } from 'async_hooks';
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { ComponentDecl, GraphNodeDecl, GraphTarget, Handle, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
+import type { ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
 import { canonicalise, installWorld, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
 
@@ -118,6 +120,7 @@ import Model = require('../../src/model');
 import Collection = require('../../src/collection');
 import NodeScope = require('../../src/nodescope');
 import ComponentInstanceNode = require('../../src/nodes/componentinstance');
+import ComponentModel = require('../../src/models/componentmodel');
 import Node = require('../../src/node');
 
 import { globalStoreManager } from '../../src/nodes/std-library/agent/globalstore';
@@ -262,6 +265,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   // node.ts :431 resolves every `color` input through it too — the identity, so Color and Color
   // Blend read exactly what they read before. Named palette colours are not graded (NSP-013 §6.4).
   (context as unknown as { styles: { resolveColor(color: unknown): unknown } }).styles = { resolveColor: (color) => color };
+  // NSP-015 s15 — likewise the project's variants: `importEditorData` always sets the list
+  // (graphmodel.ts :171, `exportData.variants || []`), and a component built by its model reads it
+  // for every node (nodescope.ts `setNodeParameters` → `variants.getVariant` → `this.variants.find`);
+  // the headless runtime loads no project, so the list was undefined and every instance a node
+  // makes by name (Run Tasks' template) threw there. This is a project with no variants.
+  const graphModel = (context as unknown as { graphModel: { variants?: unknown[] } }).graphModel;
+  if (graphModel && !graphModel.variants) graphModel.variants = [];
   const states = new Map<string, State>();
   const byNodeId = new Map<string, State>();
   let next = 0;
@@ -556,11 +566,46 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       hostOf(parentScope).children!.push(instance);
       // the context's component-model table, written directly: a target plays many scenarios and
       // `registerComponentModel` refuses a name it has seen; only `hasComponentModelWithName` reads it here
-      (context as unknown as { componentModels: Record<string, unknown> }).componentModels[instance.name] = { name: instance.name, on: () => undefined, removeListenersWithRef: () => undefined };
+      const models = (context as unknown as { componentModels: Record<string, unknown> }).componentModels;
+      if (!defined.includes(instance.name)) models[instance.name] = { name: instance.name, on: () => undefined, removeListenersWithRef: () => undefined };
       return instance;
     };
     for (const cid of Object.keys(components)) build(cid);
     return { root, instances };
+  }
+
+  /** The component models the previous play's definitions registered — removed when the next graph mounts. */
+  let defined: string[] = [];
+
+  /**
+   * NSP-015 — the DEFINITIONS (graph.ts): each registered as the app's project registers a
+   * component — a real `ComponentModel` built from export data (componentmodel.ts
+   * `createFromExportData`: ports, nodes with their parameters, connections) in the context's
+   * component-model table — so a node that instantiates a component by name (Run Tasks'
+   * `nodeScope.createNode(template)` → `createComponentInstanceNode` → `getComponentModel`) builds
+   * it with the runtime's own `setComponentModel`. Written into the table directly for the reason
+   * the instance stand-ins are: a target plays many scenarios and `registerComponentModel` refuses
+   * a name it has seen.
+   */
+  async function registerDefinitions(definitions: Readonly<Record<string, ComponentDefinition>>): Promise<void> {
+    const models = (context as unknown as { componentModels: Record<string, unknown> }).componentModels;
+    for (const name of defined) delete models[name];
+    defined = [];
+    for (const [name, def] of Object.entries(definitions)) {
+      const port = (plug: 'input' | 'output') => ([portName, kind]: [string, string]) => ({ name: portName, plug, type: kind === 'signal' ? { name: 'signal' } : '*' });
+      const model = await ComponentModel.createFromExportData({
+        name,
+        ports: [...Object.entries(def.inputs ?? {}).map(port('input')), ...Object.entries(def.outputs ?? {}).map(port('output'))] as never,
+        nodes: Object.entries(def.nodes).map(([id, n]) => ({ id, type: n.type, parameters: { ...(n.params ?? {}) } })) as never,
+        connections: (def.wires ?? []).map((w) => {
+          const from = parseEndpoint(w.from);
+          const to = parseEndpoint(w.to);
+          return { sourceId: from.node, sourcePort: from.port, targetId: to.node, targetPort: to.port };
+        })
+      });
+      models[name] = model;
+      defined.push(name);
+    }
   }
 
   /**
@@ -719,18 +764,21 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       c.timerScheduler.newTimers = [];
     },
 
-    mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[], components?: Readonly<Record<string, ComponentDecl>>) {
+    async mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[], components?: Readonly<Record<string, ComponentDecl>>, definitions?: Readonly<Record<string, ComponentDefinition>>) {
       const handles: Record<string, RuntimeHandle> = {};
       const orphanLogs: LogLine[] = [];
-      // a flat graph mounts as before (lone scopes); a graph with components gets the tree
-      const tree = components && Object.keys(components).length ? componentTree(components, orphanLogs) : undefined;
+      await registerDefinitions(definitions ?? {});
+      // a flat graph mounts as before (lone scopes); a graph with components gets the tree — and so
+      // does one with definitions, which a node instantiates in its own scope (a real `NodeScope`)
+      const hasDefinitions = !!definitions && Object.keys(definitions).length > 0;
+      const tree = (components && Object.keys(components).length) || hasDefinitions ? componentTree(components ?? {}, orphanLogs) : undefined;
       for (const id of Object.keys(nodes)) {
         const decl = nodes[id];
         const scope = tree ? (decl.in !== undefined ? (tree.instances[decl.in].nodeScope as unknown as InstanceType<typeof NodeScope>) : tree.root) : undefined;
         handles[id] = mountIn(decl.type, decl.params ?? {}, scope, id);
       }
       // NSP-015 — each instance's ports once its nodes exist; then it is a subject (graph.ts BOUNDARY)
-      if (tree) for (const cid of Object.keys(components!)) handles[cid] = boundary(cid, tree.instances[cid], components![cid], orphanLogs);
+      if (tree) for (const cid of Object.keys(components ?? {})) handles[cid] = boundary(cid, tree.instances[cid], components![cid], orphanLogs);
       for (const w of wires) {
         const from = parseEndpoint(w.from);
         const to = parseEndpoint(w.to);
@@ -740,7 +788,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // NSP-015 — the parent sets each instance's parameters (nodescope.ts `setNodeParameters`),
       // after the wires: inside the instance its own wires exist by then (`setComponentModel` made
       // them before the parent got the node back)
-      if (tree) for (const cid of Object.keys(components!)) for (const [name, value] of Object.entries(components![cid].params ?? {})) target.set(handles[cid], name, value);
+      if (tree) for (const cid of Object.keys(components ?? {})) for (const [name, value] of Object.entries(components![cid].params ?? {})) target.set(handles[cid], name, value);
       // nodescope.ts :487-490 — once the whole graph is in place, in declaration order
       for (const id of Object.keys(nodes)) {
         const node = handles[id].node as unknown as { nodeScopeDidInitialize?: () => void };

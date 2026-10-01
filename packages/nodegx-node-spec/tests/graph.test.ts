@@ -49,9 +49,8 @@ describe('AC1 — every clause has a scenario', () => {
  * node's own sentences) — or it is exempt with a reason, counted and never hidden (NSP-011 §4 AC1).
  */
 const T4_NODES = ['Event Receiver', 'Event Sender', 'For Each Actions', 'net.noodl.ActionDispatcher', 'net.noodl.ActionHandler', 'net.noodl.GlobalStore', 'net.noodl.GlobalStore.Set', 'net.noodl.GlobalStore.Subscribe', 'net.noodl.OptimisticUpdate', 'net.noodl.StateHistory', 'net.noodl.StateHistory.Undo', 'net.noodl.StateSnapshot', 'RunTasks'] as const;
-const T4_EXEMPT: Record<string, string> = {
-  RunTasks: 'runs a template COMPONENT by name once per item (runtasks.ts :407 `nodeScope.createNode(template, …)`) — the runtime instantiates it itself, so it needs a component DEFINITION the target registers as a real component model; the graph format declares INSTANCES (graph.ts COMPONENTS, BOUNDARY — NSP-015 s15), never a definition'
-};
+// NSP-015 s15: Run Tasks left the list — its template is a DEFINITION now (graph.ts DEFINITIONS)
+const T4_EXEMPT: Record<string, string> = {};
 
 /**
  * NSP-013 s13 — nodes of OTHER tiers whose input is other nodes' behaviour, graded the same way: On
@@ -112,7 +111,7 @@ describe('NSP-012 — every T4 node of the batch is named by an N scenario or ex
     });
   }
   test('the exempt list is short and every entry is a T4 node', () => {
-    expect(Object.keys(T4_EXEMPT)).toEqual(['RunTasks']);
+    expect(Object.keys(T4_EXEMPT)).toEqual([]);
     for (const t of Object.keys(T4_EXEMPT)) expect(T4_NODES).toContain(t);
   });
   test('a scenario with components places every node in a declared component or the root, and a component in a declared parent or the root', () => {

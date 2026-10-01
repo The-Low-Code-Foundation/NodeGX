@@ -49,9 +49,18 @@
  * the instance's input), a claim may name it, and its events are in the trace stamped with its
  * id. Declaration order: the component instances (in `components` key order), then the nodes.
  * An instance with no ports records nothing. Node ids and component ids are one namespace.
- * A component placed twice is two instances, each with its own nodes: the format has no shared
- * component DEFINITION — what is graded is what each instance does, which is per instance in the
- * runtime too (one scope each).
+ * A component placed twice is two instances, each with its own nodes — what is graded is what
+ * each instance does, which is per instance in the runtime too (one scope each).
+ *
+ * DEFINITIONS (NSP-015 s15). Some nodes make a component instance THEMSELVES, by name: Run Tasks'
+ * Template (once per item), Show Popup's target, a page. For those a scenario declares
+ * `definitions` — a component by NAME with its ports, its own nodes (by local id, with params)
+ * and its own wires — which a target registers as the app's project would, so the node's own
+ * code instantiates it. A definition's nodes are NOT subjects: they exist once per instance the
+ * runtime makes, under ids the runtime mints; what they do is observed through the scenario's
+ * subjects (the node that made them, a shared registry, an event). A definition's name and an
+ * instance's `component` name may coincide only if they mean the same component — a target
+ * holds one component per name.
  */
 
 import * as fs from 'fs';
@@ -107,6 +116,16 @@ export interface ComponentDecl {
   params?: Record<string, unknown>;
 }
 
+/** NSP-015: a component the RUNTIME instantiates by name (the header's DEFINITIONS paragraph). */
+export interface ComponentDefinition {
+  inputs?: Record<string, PortKind>;
+  outputs?: Record<string, PortKind>;
+  /** The component's own nodes by LOCAL id — not subjects; a `Component Inputs` / `Component Outputs` among them is the boundary. */
+  nodes: Record<string, { type: string; params?: Record<string, unknown> }>;
+  /** Wires between the component's own nodes, by local id. */
+  wires?: Wire[];
+}
+
 /** NSP-015: what a component port carries. */
 export type PortKind = 'value' | 'signal';
 
@@ -152,7 +171,13 @@ export type Claim =
   /** The frame records NO value event for the port (the wire carried nothing new — assert it beside a frame where it did). */
   | { at: number; subject: string; port: string; absent: true }
   /** The frame records exactly `count` pulses of the signal. */
-  | { at: number; subject: string; signal: string; count: number };
+  | { at: number; subject: string; signal: string; count: number }
+  /**
+   * NSP-015: the frame records exactly `count` outcomes of this value (`done`, `failure`,
+   * `unchanged`) on the subject — what a node that answers through the outcome contract says;
+   * a pulse on an outcome port is folded into the outcome event, so a `signal` claim cannot see it.
+   */
+  | { at: number; subject: string; outcome: string; count: number };
 
 export interface GraphScenario {
   name: string;
@@ -161,6 +186,8 @@ export interface GraphScenario {
   nodes: Record<string, GraphNodeDecl>;
   /** NSP-012: the component instances the nodes sit in; absent: every node is in the root. */
   components?: Record<string, ComponentDecl>;
+  /** NSP-015: components a node instantiates by name, keyed by component name (the header's DEFINITIONS). */
+  definitions?: Record<string, ComponentDefinition>;
   wires?: Wire[];
   steps: GraphStep[];
   /** The clause as facts about the trace; checked against `expect` and against every target. */
@@ -215,6 +242,7 @@ export function projectGraphTrace(trace: readonly TraceEvent[], reach: GraphReac
 export function projectClaims(claims: readonly Claim[], reach: GraphReach): Claim[] {
   return claims.filter((c) => {
     if ('signal' in c) return reach.signals;
+    if ('outcome' in c) return reach.outcomes;
     return reach.output ? reach.output(c.subject, c.port) : true;
   });
 }
@@ -235,9 +263,10 @@ export interface GraphTarget<H extends Handle = Handle> extends TargetAdapter<H>
    * recorded as `set` events on that node) and then every wire in order, and returns a handle per
    * node id. A wire's making seeds the receiver with the source's current value (C11) — that is
    * the target's business, and the first settle shows it. NSP-015: the handles include one per
-   * component INSTANCE, by its id — a subject like a node (the header's BOUNDARY paragraph).
+   * component INSTANCE, by its id — a subject like a node (the header's BOUNDARY paragraph). It may
+   * be async (the runtime builds a definition's component model asynchronously, as its loader does).
    */
-  mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[], components?: Readonly<Record<string, ComponentDecl>>): Record<string, H>;
+  mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[], components?: Readonly<Record<string, ComponentDecl>>, definitions?: Readonly<Record<string, ComponentDefinition>>): Record<string, H> | Promise<Record<string, H>>;
   /** A wire made after mount. A target that cannot (the export: a component is emitted whole) omits it; a `wire` step then throws. */
   connect?(from: H, fromPort: string, to: H, toPort: string): void;
 }
@@ -279,6 +308,12 @@ export function loadGraphScenarios(dir = GRAPH_SCENARIOS_DIR): GraphScenario[] {
           }
         }
       }
+      for (const [name, def] of Object.entries(sc.definitions ?? {})) {
+        if (!def || typeof def.nodes !== 'object') throw new Error(`${file}[${i}]: definition ${JSON.stringify(name)} needs nodes`);
+        for (const w of def.wires ?? []) {
+          for (const end of [w.from, w.to]) if (!(parseEndpoint(end).node in def.nodes)) throw new Error(`${file}[${i}]: definition ${JSON.stringify(name)} wire ${end} names a node it does not declare`);
+        }
+      }
       const nodes: Record<string, GraphNodeDecl> = {};
       for (const id of Object.keys(sc.nodes)) {
         if (id.includes('.')) throw new Error(`${file}[${i}]: node id ${JSON.stringify(id)} contains a dot`);
@@ -291,6 +326,7 @@ export function loadGraphScenarios(dir = GRAPH_SCENARIOS_DIR): GraphScenario[] {
       out.push({
         ...sc,
         nodes,
+        ...(sc.definitions ? { definitions: Object.fromEntries(Object.entries(sc.definitions).map(([name, d]) => [name, { ...d, nodes: Object.fromEntries(Object.entries(d.nodes).map(([id, n]) => [id, n.params ? { ...n, params: reviveRecord(n.params) } : n])) }])) } : {}),
         ...(components ? { components: Object.fromEntries(Object.entries(components).map(([cid, c]) => [cid, c.params ? { ...c, params: reviveRecord(c.params) } : c])) } : {}),
         wires: sc.wires ?? [],
         steps: sc.steps.map(reviveStep),
@@ -343,6 +379,11 @@ export function checkClaims(trace: readonly TraceEvent[], claims: readonly Claim
     if ('signal' in c) {
       const n = frame.filter((e) => e.t === 'signal' && e.subject === c.subject && e.port === c.signal).length;
       if (n !== c.count) failures.push(`frame ${c.at}: ${c.subject}.${c.signal} pulsed ${n} time(s), the claim says ${c.count}`);
+      continue;
+    }
+    if ('outcome' in c) {
+      const n = frame.filter((e) => e.t === 'outcome' && e.subject === c.subject && e.value === c.outcome).length;
+      if (n !== c.count) failures.push(`frame ${c.at}: ${c.subject} reported ${c.outcome} ${n} time(s), the claim says ${c.count}`);
       continue;
     }
     const values = frame.filter((e) => e.t === 'value' && e.subject === c.subject && e.port === c.port) as Array<TraceEvent & { t: 'value' }>;
