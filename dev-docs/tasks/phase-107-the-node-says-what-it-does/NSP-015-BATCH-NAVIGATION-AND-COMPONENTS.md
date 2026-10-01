@@ -1,7 +1,7 @@
 # NSP-015 — Batch: navigation, popups, component utilities
 
 **Opened 2026-09-29.** **Depends on NSP-008** (graph scenarios) and R4 = continue.
-**Status: 🟡 8 of 14 (+ NSP-012's Run Tasks) — s15 (2026-10-01): the component boundary, the Component Object family, component DEFINITIONS; s16: the world's LOCATION (`open`), External Link; s17: LOCATION's `history` and `dispatch`, the world's PROJECT, Navigate To Path (rows C24, C25, D20, D21). Left: 6 — Show / Close Popup, Push Component To Stack, Pop Component Stack, Navigate, Page Inputs; AC2.**
+**Status: 🟡 10 of 14 (+ NSP-012's Run Tasks) — s15 (2026-10-01): the component boundary, the Component Object family, component DEFINITIONS; s16: the world's LOCATION (`open`), External Link; s17: LOCATION's `history` and `dispatch`, the world's PROJECT, Navigate To Path (rows C24, C25, D20, D21); s18: the world's STACK, Push Component To Stack, Pop Component Stack (rows C26, C27, C28). Left: 4 — Show / Close Popup, Navigate, Page Inputs; AC2, AC6.**
 
 ## 1. The person sentence
 
@@ -197,6 +197,67 @@ Path navigates to the bare `#`; `null` on a Query value is appended as `null` (p
 **Not graded:** the export (AC1's export half; routed to P18 with the family). Pop Component Stack, Push Component To
 Stack and Navigate read and write the location too, but through the Page Stack / Router, which are visual nodes.
 
+### 6.1d s18 (2026-10-01) — the world's STACK, Push Component To Stack and Pop Component Stack (10 of 14)
+
+**The decision s17 left open — a stand-in, not a wait for NSP-016 — made from what the two nodes call.** Neither node
+touches the Page Stack's visual tree. Push Component To Stack hands `{ target, transition, params }` and three callbacks
+to `NavigationHandler.instance.navigate(name, …)` / `.replace(name, …)` (navigate.ts :176-232); Pop Component Stack
+calls a `backCallback` the stack installed on it when it built the page (navigate-back.ts :154-168,
+navigation-stack.tsx :981-991) and reads the `{ ok }` / `{ unchanged }` / `{ code, message }` it returns. That is a
+protocol against something outside the node — HTTP Request's shape — so the world plays the stack's side, and what a
+real stack does with a request (which page, how deep, the transition) stays the Component Stack's own spec (NSP-016).
+The Router (`RouterHandler.instance.navigate`, router-handler.ts) has the same shape, so Navigate can reuse the seam.
+
+**STACK, the eighth seam** (world.ts header, the rule every target reads): each call recorded AS HANDED, a `stack`
+trace event in the LOCATION group, in the order made — `{ op: 'push' | 'replace', stack?, target?, params, transition }`
+(canonical AT THE CALL: the node hands live objects) and `{ op: 'back', action?, results }`. The handler's rules are
+the world's: a blank name is `Main`, a name nobody registered is queued and never answered in a play, every stack
+under the name answers and the node settles once. A stack's answer is the script's (`answers`, first match on `op` /
+`target`, `done` otherwise): `unchanged` / a failure inside the call, `done` a microtask later — both in the same
+settle. A pop's answer is the n-th of the script's `back` (absent: the node is not in a pushed page). **On the runtime
+target the handler is the viewer's REAL `NavigationHandler`**, a fresh one per play (its `instance` is process-wide
+and its queue would outlive the play), with the node's call recorded at it and a stand-in stack registered per name —
+so its queue / fan-out / `Main` rules run for real and are graded against the world's model of them (measured: a push
+to an unregistered name sits in the real handler's queue; the play's handler is restored after). A Pop Component Stack
+in a play that puts it in a pushed page gets the world's back callback at mount, as the stack installs its own.
+
+**Format** (guarded: `src/trace.ts`, `schema/trace.schema.json`, `src/spec.ts`, `src/world.ts` — hashes refreshed, the
+three stranger rounds green in the full run): the `stack` event; `WorldNeed` `stack`; a patch's `stack` and `back`
+effects; `WorldView.stackAnswer(op, stack, target)`, `backAnswer(ahead)`; `WorldPool.stacks`; `stackEvent`,
+`stackName`, `WorldStack`.
+
+**Push Component To Stack** — [push-component-to-stack.ts](../../../packages/nodegx-node-spec/src/nodes/push-component-to-stack.ts),
+14 hand scenarios, claims from the source before the runtime ran. First run: 3 / 14 — ONE wrong claim, everywhere: the
+spec started Stack at its declared default `Main`, and the runtime hands `undefined`. **A declared `default` never runs
+its setter** (nodedefinition.ts :539, :575 write it into `_inputValues` only — filtercollectionnode.ts :170 says so);
+the handler maps `undefined` to `Main`, so the app never noticed. Fixed in the spec; the same wrong sentence was in
+External Link's and Navigate To Path's specs (harmless there — one reads `getInputValue`, the other's `initialize` sets
+`false`) and is corrected. Then **CONFORMS**: 14 / 14, 200 / 200, 46 / 46 mutants; on the interpreter likewise.
+**Deep (10,000, seed 20727): CONFORMS, 10,000 / 10,000, 46 / 46 mutants** (known C6 129).
+
+**Pop Component Stack** — [pop-component-stack.ts](../../../packages/nodegx-node-spec/src/nodes/pop-component-stack.ts),
+11 hand scenarios. **CONFORMS** on its first run: 11 / 11, 200 / 200, 928 / 933 mutants with 5 declared equivalent —
+Results and Back Actions are stored and never read (they name the editor's ports, nothing more), and the frame end's
+drop-set on branches only a sequence's LAST settle reaches (States' case exactly: a scenario that settles again kills
+it, and every two-press scenario does). Deep run NOT RUN (933 mutants; the box was at load 7 — a quiet-box job). The
+runtime's traces were read (probe): two presses in one frame pop twice, the first carrying the action, the second told
+"still animating"; the queued push keeps the params of its call (`{ id: 1 }`, not the later 9).
+
+**Read in the source, worth a sentence:** the code comment at navigate-back.ts :116-117 says a frame's later pops "land
+on the stack's end-stop and report Unchanged" — a real stack tells them "still animating" (Failure): `back()` sets
+`isTransitioning` before the next pop asks (navigation-stack.tsx :1048-1050, :1067). The Failure port's own description
+is right. Two back actions in one frame: the first pop carries the LAST one pressed.
+
+**Rows (§6.2)**: **C26** (Back Results / Back Actions never connect — the TypeScript port dropped
+`registerOutputIfNeeded`; measured with Show Popup's twin as the control), **C27** (the node hands its live parameter
+object, so a second push of the same page with new parameters is "already showing" — measured on the real
+`_isAlreadyShowing`; the stand-in cannot show it), **C28** (a Mode that is neither push nor replace answers nothing —
+graded; the spec follows the runtime). The ports `target` and `pm-<name>` come from the PROJECT (the Component Stack
+named Stack, its pages, the target component's inputs) — not derivable from the node's params alone: NSP-020's case.
+
+**Not graded:** the back channel to the pusher (C26 makes it reach nothing on the runtime; once fixed, the world's
+STACK grows a scripted pop of a pushed request); the export (AC1's export half, P18); AC6 (needs Navigate).
+
 ### 6.2 Rows
 
 | row | what | where | proposed |
@@ -205,4 +266,7 @@ Stack and Navigate read and write the location too, but through the Page Stack /
 | **C25** — needs a ruling | Navigate To Path never answers a press when the browser refuses the push — the Path URL type with a Path on another origin (`https://…`, `//…`): `pushState` throws a SecurityError at :218; no `popstate` | navigate-to-path.ts :218 | catch it — Failure `navigate-to-path/refused` (or open another origin's address as External Link does: a product choice). [Ledger](../../bugs/p107-c25-navigate-to-path-never-answers-when-the-browser-refuses-the-push.md) |
 | **D20** — needs a ruling | A parameter value holding `$&` puts the placeholder back; `$$`, `` $` ``, `$'` are expanded — the description says the placeholder is filled "from their input ports" | navigate-to-path.ts :172 | replace with a function. [Ledger](../../bugs/p107-d20-navigate-to-path-expands-dollar-patterns-inside-a-parameter-value.md) |
 | **D21** — needs a ruling | Query values are appended unencoded: `a&b` is two parameters, a `#` moves the hash (the wrong page in the default Hash type); `null` is appended as `null` | navigate-to-path.ts :183-184, navigation.ts :70-73 | `encodeURIComponent` name and value; `null` as unset. [Ledger](../../bugs/p107-d21-navigate-to-path-does-not-encode-query-values.md) |
+| **C26** — needs a ruling | Push Component To Stack's `backResult-<name>` / `backAction-<name>` outputs (drawn by the editor from the target component's Pop nodes) never connect: no `registerOutputIfNeeded`, so `NodeScope.addConnection` → `getOutput` throws and the wire is dropped; the back callback's `hasOutput` guard sends nothing, `sendSignalOnOutput(action)` logs. The JS original had the method; PLAT-003 slice 8 (`efc19ebbb`, 2026-07-24) dropped it | navigate.ts (no `registerOutputIfNeeded`); node.ts :520; nodescope.ts :148-155 | put the method back (Show Popup's shape). [Ledger](../../bugs/p107-c26-push-component-to-stack-back-results-and-back-actions-never-connect.md) |
+| **C27** — needs a ruling | One Push Component To Stack pushing (or replacing) the SAME page with NEW `pm-` values reports Unchanged from the second press on and the old page stays: the node hands its live `pageParams`, the stack keeps it on the entry, and `_isAlreadyShowing` compares the object with itself | navigate.ts :181, :210; navigation-stack.tsx :430-457, :878, :1000 | hand a copy (`{ ...pageParams }`). [Ledger](../../bugs/p107-c27-a-second-push-of-the-same-page-with-new-parameters-reports-unchanged.md) |
+| **C28** — needs a ruling | A Mode that is neither `push` nor `replace` (`'Push'`, `''`, `null` over a wire) hands nothing and answers no press | navigate.ts :177, :203 (no else) | Failure `push-component-stack/unknown-mode`. [Ledger](../../bugs/p107-c28-push-component-to-stack-never-answers-a-mode-that-is-not-push-or-replace.md) |
 | **C23** ✅ ruled "fix it" 2026-10-01 (s16), fixed — the deferred callback re-walks unconditionally (`onComponentStateNodesChanged`); the scenario lost its `row` mark and was re-recorded | A Parent Component Object (blank Parent Component) whose parent's Component Object is created AFTER the child instance binds the **grandparent's** record for good — reads 8 when the grandparent is written, nothing when the parent is. The Set Parent … beside it resolves at Do and writes the PARENT's (measured: 5 into Page, `near` never sees it). Control: the same tree with the parent's object first binds the parent. Reachable: nodes are created in `Object.values(componentModel.nodes)` order and a child instance's graph is built when it is created ("place the Row, then add the Component Object"). | parentcomponentobject.ts `initialize` walks at creation; the deferred re-walk in `nodeScopeDidInitialize` runs only `if (!modelId)`; the `componentStateNodesChanged` re-walk is editor-only and edit-time | re-resolve unconditionally in the deferred callback and rebind when the id differs. [Ledger](../../bugs/p107-c23-parent-component-object-binds-the-grandparent-when-the-parent-s-object-is-created-later.md) |

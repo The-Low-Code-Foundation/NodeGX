@@ -1,0 +1,377 @@
+[
+  {
+    "name": "no Component Stack registered: the push is handed to the handler, queued, and never answered",
+    "because": "navigation-handler.ts :63-72 queues a name with no stack; nothing registers during a play",
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Main registered: Navigate pushes Target with its parameters and the stack's Done answers the press",
+    "because": "navigate.ts :176-202; the stack calls hasNavigated once it built the page (world.ts STACK)",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "detail"
+      },
+      {
+        "set": "pm-id",
+        "value": 1
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a blank Stack is the handler's Main — handed as '' and answered",
+    "because": "navigation-handler.ts :61, :75 `name || 'Main'`",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "params": {
+      "stack": ""
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Stack name nobody registered is queued even when Main is: no answer",
+    "because": "navigation-handler.ts :63-72",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "params": {
+      "stack": "Other"
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a null Stack is the handler's Main too",
+    "because": "`null || 'Main'`",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "stack",
+        "value": null
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Replace hands a replace, the transition None when Transition is empty",
+    "because": "navigate.ts :203-231, :209",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "params": {
+      "mode": "replace"
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the transition is Transition spread with every tr- value by name; push leaves type absent when Transition was never set",
+    "because": "navigate.ts :180 — `{ ...{ type }, ...transitionParams }`",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "tr-direction",
+        "value": "Up"
+      },
+      {
+        "set": "tr-crossfade",
+        "value": true
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "transition",
+        "value": "Popup"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the stack's failure: Error is its message, then Failure with its code",
+    "because": "navigate.ts :153-159",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "target": "nope"
+            },
+            "answer": {
+              "failure": {
+                "code": "push-component-stack/component-not-found",
+                "message": "The Component Stack \"Main\" has no component \"nope\" — check the Target Page against its Components list"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "nope"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the stack's Unchanged answers a replace of the page it already shows",
+    "because": "navigate.ts :218-222 hasUnchanged (deferred to the frame end, the same settle)",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "op": "replace",
+              "target": "detail"
+            },
+            "answer": "unchanged"
+          }
+        ]
+      }
+    },
+    "params": {
+      "mode": "replace"
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "detail"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two presses in one frame hand ONE request and both are answered",
+    "because": "navigate.ts :160-175 — one navigation per frame, every token settled",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two frames, two requests: the parameters are handed as they are at each call",
+    "because": "navigate.ts :181 hands the live object; the trace records it at the call (C27 is the stack's reading of that object, not graded here)",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "detail"
+      },
+      {
+        "set": "pm-id",
+        "value": 1
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "pm-id",
+        "value": 2
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C28 — a Mode that is neither push nor replace hands nothing and never answers; push again answers",
+    "because": "navigate.ts :177, :203 — no else branch",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "mode",
+        "value": "Push"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "mode",
+        "value": "push"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two stacks under one name: one request, the presses answered once (the node settles once)",
+    "because": "navigation-handler.ts :63-66 fans out; navigate.ts :142-152 settles once",
+    "world": {
+      "stack": {
+        "names": [
+          "Main",
+          "Main"
+        ],
+        "answers": [
+          {
+            "answer": {
+              "failure": {
+                "code": "push-component-stack/component-not-found",
+                "message": "The Component Stack \"Main\" has no component \"nope\" — check the Target Page against its Components list"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Error keeps its last message after a later Done",
+    "because": "nothing clears lastError",
+    "world": {
+      "stack": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "target": "nope"
+            },
+            "answer": {
+              "failure": {
+                "code": "push-component-stack/component-not-found",
+                "message": "The Component Stack \"Main\" has no component \"nope\" — check the Target Page against its Components list"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "nope"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "detail"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  }
+]

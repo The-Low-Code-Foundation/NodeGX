@@ -28,7 +28,7 @@ import type { Step } from '../adapter';
 import type { AnyNodeSpec, InputDecl } from '../spec';
 import { isSignalInput } from '../spec';
 import type { RegistryScript } from '../registry';
-import type { Answer, ViewportScript, WorldScript } from '../world';
+import type { Answer, StackScript, ViewportScript, WorldScript } from '../world';
 import { mulberry32, sequenceSeed, type Rng } from './random';
 import type { Reach } from './reach';
 
@@ -74,7 +74,9 @@ export const DEFAULT_WORLD_POOL = Object.freeze({
   // NSP-015 s16: a press a person made, one the graph made, and a browser that cannot say
   activations: Object.freeze([true, false, null] as ReadonlyArray<boolean | null>),
   // NSP-015 s17: a project that set nothing
-  projectSettings: Object.freeze([{}] as ReadonlyArray<Record<string, unknown>>)
+  projectSettings: Object.freeze([{}] as ReadonlyArray<Record<string, unknown>>),
+  // NSP-015 s18: no Component Stack registered (every push queued, no page pushed)
+  stacks: Object.freeze([{}] as ReadonlyArray<StackScript>)
 });
 
 export interface GenerateOptions {
@@ -213,6 +215,11 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   if (needs.includes('project')) {
     const settings = rng.pick(pool.projectSettings ?? DEFAULT_WORLD_POOL.projectSettings);
     if (Object.keys(settings).length > 0) world.projectSettings = { ...settings };
+  }
+  // NSP-015 s18 — STACK: one of the pool's (the default pool registers none)
+  if (needs.includes('stack')) {
+    const stack = rng.pick(pool.stacks ?? DEFAULT_WORLD_POOL.stacks);
+    if (Object.keys(stack).length > 0) world.stack = stack;
   }
   return { seed, params, steps, world };
 }

@@ -112,6 +112,32 @@
  *           object of setting name → value; absent, `{}`: a project that set nothing, where every
  *           reader takes its own default (Navigate To Path: `navigationPathType` unset is `hash`).
  *           Fixed for the play.
+ *   STACK.  (NSP-015 s18) The Component Stacks a play's navigation nodes hand their requests to —
+ *           played by the world as the network plays a server: what a stack DOES with a request
+ *           (which page, how deep, the transition) is the Component Stack's own behaviour (a visual
+ *           node, NSP-016); what the NODE hands it and what it is told back is the node's. Two
+ *           protocols, each call recorded AS HANDED, a `stack` trace event in the LOCATION group
+ *           (trace.ts), in the order made:
+ *             a push or a replace (`NavigationHandler.instance.navigate(name, args)` /
+ *               `.replace(name, args)`, Push Component To Stack) — `{ op: 'push' | 'replace', stack,
+ *               target, params, transition }`, each canonical, `stack` / `target` absent when not
+ *               handed. The HANDLER's rules are the world's: a blank name (`name || 'Main'`) is
+ *               `Main`; a name with no registered stack (the script's `names`, absent: none) is
+ *               QUEUED and, since no stack registers during a play, never answered; every stack
+ *               registered under the name answers (the node settles once). A stack answers by the
+ *               script's `answers`, the first rule whose `match` fits (`op`, `target` canonically
+ *               equal), `done` when none does: `unchanged` or a `failure` (`code`, `message`) is
+ *               told inside the call, as a stack's checks run before it builds anything; `done` is
+ *               told a microtask later, once it has built the page — both land in the settle whose
+ *               frame made the call.
+ *             a pop (the back callback a stack installs on every Pop Component Stack in a page it
+ *               pushed) — `{ op: 'back', action, results }`, `action` absent when none. Whether the
+ *               node SITS in a pushed page is the script's: `back` absent, it does not (no callback,
+ *               nothing is called); present, the n-th pop of the play is answered with the n-th
+ *               entry (the last repeating) — `done` (`{ ok: true }`), `unchanged` (the stack is at its
+ *               first page) or a `failure` (still animating) — returned from the call.
+ *           The pushing node's back channel (the stack calling a pushed request's `backCallback`
+ *           when its page is popped) is not scripted: on the runtime it reaches nothing (row C26).
  *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
@@ -158,6 +184,27 @@ export interface WorldScript {
   location?: string;
   /** NSP-015 s17: the project's settings (PROJECT above). Absent: `{}`. */
   projectSettings?: Record<string, unknown>;
+  /** NSP-015 s18: the Component Stacks (STACK above). Absent: none — a push is queued for good, and no Pop Component Stack sits in a pushed page. */
+  stack?: StackScript;
+}
+
+/** What a Component Stack tells a request (STACK above). */
+export type StackAnswer = 'done' | 'unchanged' | { failure: { code: string; message: string } };
+
+/** STACK above: one answer rule — first match wins; absent `match` fits every request. `target` matches canonically. */
+export interface StackRule {
+  match?: { op?: 'push' | 'replace'; target?: unknown };
+  answer: StackAnswer;
+}
+
+/** STACK above: the registered stacks, how they answer, and what a pop is told. */
+export interface StackScript {
+  /** The names stacks are registered under (`''` is `Main`); absent: none. */
+  names?: readonly string[];
+  /** How a registered stack answers a push or a replace; absent or no match: `done`. */
+  answers?: readonly StackRule[];
+  /** What the n-th pop is told (the last repeating); absent: no Pop Component Stack sits in a pushed page. */
+  back?: StackAnswer | readonly StackAnswer[];
 }
 
 /** VIEWPORT above: the size at the start, and the resizes the clock will deliver. */
@@ -511,6 +558,92 @@ export function pushTarget(url: unknown, href: string): string | null {
   return next.origin === new URL(href).origin ? next.href : null;
 }
 
+/** One call a navigation node made to a Component Stack (STACK above), as handed. */
+export type StackCall =
+  | { call: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown }
+  | { call: 'back'; action: unknown; results: unknown };
+
+/** The trace event a stack call is recorded as (STACK above; trace.ts) — canonical NOW, since a node hands its live objects. */
+export function stackEvent(c: StackCall): TraceEvent {
+  if (c.call === 'back') {
+    const e: TraceEvent = { t: 'stack', op: 'back', results: canonicalise(c.results) ?? null };
+    if (c.action !== undefined) e.action = canonicalise(c.action);
+    return e;
+  }
+  const e: TraceEvent = { t: 'stack', op: c.call, params: canonicalise(c.params) ?? null, transition: canonicalise(c.transition) ?? null };
+  if (c.stack !== undefined) e.stack = canonicalise(c.stack);
+  if (c.target !== undefined) e.target = canonicalise(c.target);
+  return e;
+}
+
+/** The handler's name rule (STACK above): `name || 'Main'`, as a property key. */
+export function stackName(name: unknown): string {
+  return String(name || 'Main');
+}
+
+/** The Component Stacks of a play (STACK above): who is registered, what they answer, every call made. */
+export class WorldStack {
+  /** Every call, as its trace event, in the order made. */
+  readonly calls: TraceEvent[] = [];
+  private listeners: Array<(e: TraceEvent) => void> = [];
+  private pops = 0;
+
+  constructor(readonly script: StackScript) {}
+
+  /** Called with every call's event as it is made — how a target attributes it to the node that made it. */
+  onCall(listener: (e: TraceEvent) => void): void {
+    this.listeners.push(listener);
+  }
+
+  /** Records a call as handed. */
+  record(c: StackCall): void {
+    const e = stackEvent(c);
+    this.calls.push(e);
+    for (const l of this.listeners) l(e);
+  }
+
+  /** How many stacks are registered under the name a node handed (`stackName`). */
+  registered(name: unknown): number {
+    const key = stackName(name);
+    return (this.script.names ?? []).filter((n) => stackName(n) === key).length;
+  }
+
+  /** What ONE registered stack tells a push or a replace for this target (first rule, `done` when none fits). */
+  answerFor(op: 'push' | 'replace', target: unknown): StackAnswer {
+    const key = JSON.stringify(canonicalise(target) ?? null);
+    const rule = (this.script.answers ?? []).find((r) => (r.match?.op === undefined || r.match.op === op) && (r.match === undefined || !('target' in r.match) || JSON.stringify(canonicalise(r.match.target) ?? null) === key));
+    return rule ? rule.answer : 'done';
+  }
+
+  /** What the node is told for a push or a replace — `undefined` when no stack is registered under the name: queued, for good. */
+  answer(op: 'push' | 'replace', name: unknown, target: unknown): StackAnswer | undefined {
+    return this.registered(name) > 0 ? this.answerFor(op, target) : undefined;
+  }
+
+  /** Whether a Pop Component Stack sits in a pushed page (the stack installed its back callback). */
+  get inPushedPage(): boolean {
+    return this.script.back !== undefined;
+  }
+
+  /** What the pop `ahead` calls from now is told (0 = the next); `undefined` when not in a pushed page. Reads; consumes nothing. */
+  backAnswer(ahead = 0): StackAnswer | undefined {
+    const b = this.script.back;
+    if (b === undefined) return undefined;
+    const list: readonly StackAnswer[] = Array.isArray(b) ? b : [b as StackAnswer];
+    if (list.length === 0) return 'done';
+    return list[Math.min(this.pops + ahead, list.length - 1)];
+  }
+
+  /** A pop: records it as handed and returns what the stack tells it (consumes one answer). Only in a pushed page. */
+  back(action: unknown, results: unknown): StackAnswer {
+    const answer = this.backAnswer(0);
+    if (answer === undefined) throw new Error('world: a pop with no stack to pop — the node is not in a pushed page');
+    this.record({ call: 'back', action, results });
+    this.pops++;
+    return answer;
+  }
+}
+
 /** The location of a play with a window (LOCATION above): its href, every call made, and the user activation. */
 export class WorldLocation {
   /** Every `window.open`, in order. */
@@ -587,6 +720,8 @@ export class World {
   readonly location: WorldLocation | undefined;
   /** The project's settings (PROJECT above). */
   readonly projectSettings: Readonly<Record<string, unknown>>;
+  /** The Component Stacks (STACK above) — always: a play with none registered queues every push. */
+  readonly stack: WorldStack;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -597,6 +732,7 @@ export class World {
     this.viewport = script.viewport ? new Viewport(this.clock, script.viewport) : undefined;
     this.location = this.viewport ? new WorldLocation(script.activation, script.location) : undefined;
     this.projectSettings = { ...(script.projectSettings ?? {}) };
+    this.stack = new WorldStack(script.stack ?? {});
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */

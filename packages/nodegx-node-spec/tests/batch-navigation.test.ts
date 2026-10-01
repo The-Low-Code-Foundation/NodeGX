@@ -13,13 +13,15 @@
  *          are restored after the play. s17: `history.pushState` is recorded and moves the href
  *          (another origin is refused with a SecurityError, the href stays), a dispatched event
  *          is recorded and heard by its listeners, a page's `location` reads the href live, and
- *          the project's settings are the script's.
+ *          the project's settings are the script's. s18 STACK: a blank or null name is Main, a name nobody
+ *          registered is queued, answers are first-match, a call is canonical at the call, a pop is told the
+ *          n-th scripted answer.
  */
 
 import type { AnyNodeSpec } from '../src';
 import { DEFAULT_WORLD_POOL, EQUIVALENT_MUTANTS, generateSequence, installWorld, interpreterAdapter, runConformance, specs, World } from '../src';
 
-const BATCH = ['net.noodl.externallink', 'PageStackNavigateToPath'];
+const BATCH = ['net.noodl.externallink', 'PageStackNavigateToPath', 'PageStackNavigate', 'PageStackNavigateBack'];
 
 describe('NSP-015 — every batch spec with a reducer conforms on the interpreter: scenarios, 200 sequences, every mutant killed or declared', () => {
   for (const type of BATCH) {
@@ -160,5 +162,45 @@ describe('LOCATION — the world records an open and says whether the press was 
     const spec = specs['PageStackNavigateToPath'] as AnyNodeSpec;
     const drawn = Array.from({ length: 60 }, (_, i) => JSON.stringify(generateSequence(spec, 1, i).world?.projectSettings ?? {}));
     expect(new Set(drawn)).toEqual(new Set(['{}', '{"navigationPathType":"hash"}', '{"navigationPathType":"path"}']));
+  });
+});
+
+describe('STACK — the Component Stacks a navigation node hands its requests to (world.ts, NSP-015 s18)', () => {
+  test('a blank or null name is Main; a name nobody registered is queued (no answer); answers are first-match, done when none fits', () => {
+    const stack = new World({ stack: { names: ['Main', ''], answers: [{ match: { op: 'replace', target: 'a' }, answer: 'unchanged' }, { match: { target: 'nope' }, answer: { failure: { code: 'c', message: 'm' } } }] } }).stack;
+    expect(stack.registered('')).toBe(2);
+    expect(stack.registered(null)).toBe(2);
+    expect(stack.registered('Other')).toBe(0);
+    expect(stack.answer('push', 'Other', 'a')).toBeUndefined();
+    expect(stack.answer('push', undefined, 'a')).toBe('done');
+    expect(stack.answer('replace', 'Main', 'a')).toBe('unchanged');
+    expect(stack.answer('push', 'Main', 'nope')).toEqual({ failure: { code: 'c', message: 'm' } });
+    expect(new World({}).stack.answer('push', 'Main', 'a')).toBeUndefined();
+  });
+
+  test('a call is recorded as handed and canonical AT THE CALL — a later write to the live object is not in the event', () => {
+    const stack = new World({}).stack;
+    const seen: unknown[] = [];
+    stack.onCall((e) => seen.push(e));
+    const params: Record<string, unknown> = { id: 1 };
+    stack.record({ call: 'push', stack: undefined, target: 'detail', params, transition: { type: undefined } });
+    params.id = 2;
+    expect(seen).toEqual([{ t: 'stack', op: 'push', params: { id: 1 }, transition: {}, target: 'detail' }]);
+    expect(stack.calls).toEqual(seen);
+  });
+
+  test('a pop is told the n-th scripted answer, the last repeating; with no back the node is in no pushed page', () => {
+    const stack = new World({ stack: { back: ['done', 'unchanged'] } }).stack;
+    expect(stack.inPushedPage).toBe(true);
+    expect(stack.backAnswer(0)).toBe('done');
+    expect(stack.backAnswer(1)).toBe('unchanged');
+    expect(stack.back('backAction-Save', { x: 1 })).toBe('done');
+    expect(stack.back(undefined, {})).toBe('unchanged');
+    expect(stack.back(undefined, {})).toBe('unchanged');
+    expect(stack.calls[0]).toEqual({ t: 'stack', op: 'back', results: { x: 1 }, action: 'backAction-Save' });
+    const none = new World({}).stack;
+    expect(none.inPushedPage).toBe(false);
+    expect(none.backAnswer()).toBeUndefined();
+    expect(() => none.back(undefined, {})).toThrow(/not in a pushed page/);
   });
 });

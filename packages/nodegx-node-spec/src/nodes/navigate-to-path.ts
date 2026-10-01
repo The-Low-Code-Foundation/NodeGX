@@ -122,7 +122,7 @@ export const NavigateToPath = defineNode({
       description: 'Names of query-string parameters to append, one input port each; a parameter left unset is omitted from the URL',
       examples: ['page', 'page,sort', 'a, b', '']
     },
-    // :81-91 — `!!value`; the default is seeded at creation
+    // :81-91 — `!!value`; `initialize` sets `false` (:59) — a declared default never runs its setter (nodedefinition.ts :539)
     openInNewTab: {
       type: 'boolean',
       default: false,

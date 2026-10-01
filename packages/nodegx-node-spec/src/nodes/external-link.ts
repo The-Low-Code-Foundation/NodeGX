@@ -54,7 +54,7 @@ export const ExternalLink = defineNode({
       description: 'Web address to open; one with no scheme is resolved relative to the page the app is served from',
       examples: ['https://example.com', 'relative/page', '', null, 5]
     },
-    // :23-29 — stored raw; the default is seeded at creation
+    // :23-29 — read through `getInputValue` (:51), which holds the declared default from creation (nodedefinition.ts :539); the setter never runs for a default
     openInNewTab: {
       type: 'boolean',
       default: true,

@@ -43,6 +43,8 @@ import { AnimateToValue } from './animate-to-value';
 import { ScreenResolution } from './screen-resolution';
 import { ExternalLink } from './external-link';
 import { NavigateToPath } from './navigate-to-path';
+import { PushComponentToStack } from './push-component-to-stack';
+import { PopComponentStack } from './pop-component-stack';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
 import { JSONStreamParser } from './json-stream-parser';
@@ -120,6 +122,8 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [ScreenResolution.type]: ScreenResolution,
   [ExternalLink.type]: ExternalLink,
   [NavigateToPath.type]: NavigateToPath,
+  [PushComponentToStack.type]: PushComponentToStack,
+  [PopComponentStack.type]: PopComponentStack,
   [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
@@ -172,6 +176,8 @@ export {
   ScreenResolution,
   ExternalLink,
   NavigateToPath,
+  PushComponentToStack,
+  PopComponentStack,
   States,
   RandomBytes,
   Repeat,

@@ -96,5 +96,18 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
       why:
         "the frame end sends every output where the runtime flags it (`world.send` from its working copy, node.ts :832-835), so the frame's observations stand without its `set`; only the NEXT settle shows the state it failed to keep — the queue re-run, the move undone. A sequence ending at that settle cannot show it, and the branch keys are combinations of state names, so which branches end a sequence moves with the seed (seed 13: 1, seed 20727: 9). As Model2's frame end; every hand scenario settles again after its moves, and a frame end reached there is killed"
     }
-  ]
+  ],
+  // NSP-015 s18 — Pop Component Stack keeps its two parameters and never reads them (navigate-back.ts :57-59, :67-69):
+  // they decide only which ports the EDITOR draws; a `result-` / `backAction-` port works whatever they say
+  PageStackNavigateBack: [
+    { reducer: 'results', kind: 'drop-set', branch: '"set":["results"],"emit":[]', why: 'Results is stored and never read: it names the ports the editor draws, nothing more' },
+    { reducer: 'backActions', kind: 'drop-set', branch: '"set":["backActions"],"emit":[]', why: 'Back Actions is stored and never read: it names the ports the editor draws, nothing more' },
+    {
+      reducer: 'afterInputs',
+      kind: 'drop-set',
+      branch: '"set":["backAction","error","pending"]',
+      why:
+        "the frame end's outcomes and pops stand without its `set`; only the NEXT settle shows the presses it failed to take (they pop again). A sequence ending at that settle cannot show it, and the branch keys are combinations of press ports and answers, so which branches end a sequence moves with the seed — States' frame end exactly. Every hand scenario with two presses in a frame settles again after it, and a frame end reached there is killed"
+    }
+  ],
 });

@@ -161,6 +161,19 @@ export interface WorldView {
   pushes(url: unknown): boolean;
   /** NSP-015 s17 — the project's settings (world.ts PROJECT): what `NoodlRuntime.instance.getProjectSettings()` reads. */
   projectSettings(): Readonly<Record<string, unknown>>;
+  /**
+   * NSP-015 s18 — what the Component Stacks tell a push or a replace handed under `stack` for
+   * `target` (world.ts STACK): `done`, `unchanged` or a `failure`; `undefined` when no stack is
+   * registered under the name — the request is queued and never answered in the play. A node that
+   * names the `stack` effect reads this to settle its presses.
+   */
+  stackAnswer(op: 'push' | 'replace', stack: unknown, target: unknown): import('./world').StackAnswer | undefined;
+  /**
+   * NSP-015 s18 — what the pop `ahead` calls from now (0 = the next) is told by the stack that pushed
+   * this node's page (world.ts STACK); `undefined` when the node does not sit in a pushed page (no
+   * back callback was installed). Reads; the `back` effect is what consumes.
+   */
+  backAnswer(ahead?: number): import('./world').StackAnswer | undefined;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -350,6 +363,12 @@ export interface Patch<S, O> {
    *             href stays.
    *   `dispatch` NSP-015 s17 — `window.dispatchEvent(new <Event>(type))`: a `dispatch` event, after
    *             the push when a patch names both. Only with a window, as `open`.
+   *   `stack`   NSP-015 s18 — a push or a replace handed to the Component Stacks
+   *             (`NavigationHandler.navigate` / `.replace`, world.ts STACK): a `stack` event, as
+   *             handed; what it is told is `WorldView.stackAnswer`. No window needed.
+   *   `back`    NSP-015 s18 — pops through the back callback of the stack that pushed this node's
+   *             page, in order: a `stack` event each; what each is told is `WorldView.backAnswer`.
+   *             Only in a pushed page.
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
@@ -358,6 +377,8 @@ export interface Patch<S, O> {
   open?: { url: unknown; target?: unknown; features?: unknown };
   push?: { url: unknown };
   dispatch?: string;
+  stack?: { op: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown };
+  back?: ReadonlyArray<{ action: unknown; results: unknown }>;
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -534,6 +555,8 @@ export interface WorldPool {
   activations?: ReadonlyArray<boolean | null>;
   /** NSP-015 s17: the project settings a `project` spec's sequences play with (one is drawn per sequence; the default is `{}` alone). */
   projectSettings?: ReadonlyArray<Record<string, unknown>>;
+  /** NSP-015 s18: the Component Stacks a `stack` spec's sequences play with (one is drawn per sequence; the default is none registered alone). */
+  stacks?: ReadonlyArray<import('./world').StackScript>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -593,9 +616,10 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * a scripted viewport, or none (a server render: no `window`) (world.ts VIEWPORT). NSP-015 s16 adds
  * `location` — the node opens a URL or reads whether the press came from a person (world.ts
  * LOCATION); the play has a window or none, as for `viewport`, and an activation or none. s17
- * adds `project` — the node reads a project setting (world.ts PROJECT).
+ * adds `project` — the node reads a project setting (world.ts PROJECT). s18 adds `stack` — the node
+ * hands a Component Stack a request (world.ts STACK).
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'backend';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'backend';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;

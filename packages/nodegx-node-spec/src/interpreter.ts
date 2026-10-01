@@ -232,7 +232,9 @@ function viewOf(inst: Instance): WorldView {
     userActivation: () => world.location?.activation,
     opens: (target, features) => !!world.location && openReturnsWindow(target, features, world.location.activation),
     pushes: (url) => !!world.location && pushTarget(url, world.location.href) !== null,
-    projectSettings: () => world.projectSettings
+    projectSettings: () => world.projectSettings,
+    stackAnswer: (op, stack, target) => world.stack.answer(op, stack, target),
+    backAnswer: (ahead) => world.stack.backAnswer(ahead ?? 0)
   };
 }
 
@@ -423,6 +425,8 @@ interface PatchLike {
   open?: { url: unknown; target?: unknown; features?: unknown };
   push?: { url: unknown };
   dispatch?: string;
+  stack?: { op: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown };
+  back?: ReadonlyArray<{ action: unknown; results: unknown }>;
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -547,6 +551,7 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
   if ((patch.open || patch.push || patch.dispatch !== undefined) && !world.location) {
     throw new SpecError(`${spec.type}.${port}: used the location in a play with no window`);
   }
+  if (!world.location) return stackEffects(inst, port, patch);
   const location = world.location!;
   const record = (c: LocationCall) => inst.pending.location.push(locationEvent(c));
   if (patch.open) {
@@ -567,6 +572,23 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     // recorded BEFORE the listeners run: a listener's own calls come after the dispatch, as they are made
     record({ call: 'dispatch', event: patch.dispatch });
     location.dispatch({ type: patch.dispatch });
+  }
+  stackEffects(inst, port, patch);
+}
+
+/** STACK (world.ts, NSP-015 s18): a push or replace recorded as handed, then the pops in order — each a `stack` event in the LOCATION group. */
+function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
+  const { world, spec } = inst;
+  if (patch.stack) {
+    const c = patch.stack;
+    if (c.op !== 'push' && c.op !== 'replace') throw new SpecError(`${spec.type}.${port}: a stack effect's op is push or replace, not ${String(c.op)}`);
+    world.stack.record({ call: c.op, stack: c.stack, target: c.target, params: c.params, transition: c.transition });
+    inst.pending.location.push(world.stack.calls[world.stack.calls.length - 1]);
+  }
+  for (const b of patch.back ?? []) {
+    if (!world.stack.inPushedPage) throw new SpecError(`${spec.type}.${port}: popped a stack in a play where the node sits in no pushed page`);
+    world.stack.back(b.action, b.results);
+    inst.pending.location.push(world.stack.calls[world.stack.calls.length - 1]);
   }
 }
 

@@ -99,6 +99,13 @@
  *     name (Run Tasks' template) is registered as a real `ComponentModel` from export data, so the
  *     runtime builds every instance with its own `setComponentModel`; the context's graph model
  *     gets the empty `variants` list a loaded project always has.
+ *   - **the Component Stacks** (NSP-015 s18, world.ts STACK): `install` gives the play a FRESH real
+ *     `NavigationHandler` (its `instance` is a process-wide static, and its queue of what no stack took
+ *     would outlive the play), records each push / replace at the handler as handed, and registers a
+ *     stand-in stack per scripted name that answers by the script — `unchanged` / a failure inside the
+ *     call, `done` a microtask later, as a real stack does after building the page. A Pop Component
+ *     Stack mounted in a play whose script puts it in a pushed page gets the world's back callback, as
+ *     the stack installs its own on every one in the page it builds (navigation-stack.tsx :981-991).
  *   - **the three process-wide managers** behind the store, history and action nodes
  *     (`globalStoreManager`, `stateHistoryManager`, `actionRegistry`) are reset at `install` like
  *     the registry tables, and the history manager's clock becomes the world's — one play, one
@@ -110,7 +117,7 @@ import { AsyncLocalStorage } from 'async_hooks';
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
+import type { ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
 import { canonicalise, installWorld, locationEvent, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
 
@@ -126,6 +133,64 @@ import Node = require('../../src/node');
 import { globalStoreManager } from '../../src/nodes/std-library/agent/globalstore';
 import { stateHistoryManager } from '../../src/nodes/std-library/agent/statehistory';
 import { actionRegistry } from '../../src/nodes/std-library/agent/action-dispatcher';
+
+/** The Push Component To Stack side of a request (navigation-handler.ts `StackNavigateArgs`), as a stand-in stack sees it. */
+interface StackArgs {
+  target?: unknown;
+  params?: unknown;
+  transition?: unknown;
+  hasNavigated?(): void;
+  hasUnchanged?(): void;
+  hasFailed?(code: string, message: string): void;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const NavigationHandler = require('../../../noodl-viewer-react/src/nodes/navigation/navigation-handler').default as {
+  new (): { navigate(name: unknown, args: StackArgs): void; replace(name: unknown, args: StackArgs): void; registerPageStack(name: unknown, stack: unknown): void };
+  instance: unknown;
+};
+
+/**
+ * STACK (world.ts, NSP-015 s18) for one play. The handler is the viewer's REAL `NavigationHandler`,
+ * a fresh one (its `instance` is process-wide, and it queues what no stack took — a queue that would
+ * outlive the play), so its rules — a blank name is `Main`, a name nobody registered is queued, every
+ * stack under the name is asked — run as in the app and are graded against the world's model of them.
+ * The node's call is recorded at the handler, AS HANDED (`navigate` is a push); each name the script
+ * registers gets a stand-in stack (`registerPageStack`, which resets it — a stand-in has no page to
+ * reset) that answers by the script: `unchanged` / a failure inside the call (a real stack's checks run
+ * before its first `await`, navigation-stack.tsx :916-966), `done` a microtask later (after it built the
+ * page, :968-1027). Returns the undo.
+ */
+function installStacks(w: World, record: (e: TraceEvent) => void): () => void {
+  w.stack.onCall(record);
+  const saved = NavigationHandler.instance;
+  const handler = new NavigationHandler();
+  for (const op of ['navigate', 'replace'] as const) {
+    const real = handler[op].bind(handler);
+    handler[op] = (name: unknown, args: StackArgs) => {
+      w.stack.record({ call: op === 'navigate' ? 'push' : 'replace', stack: name, target: args.target, params: args.params, transition: args.transition });
+      real(name, args);
+    };
+  }
+  const answer = (op: 'push' | 'replace') => (args: StackArgs) => {
+    const a = w.stack.answerFor(op, args.target);
+    if (a === 'done') void Promise.resolve().then(() => args.hasNavigated?.());
+    else if (a === 'unchanged') (args.hasUnchanged ?? args.hasNavigated)?.();
+    else args.hasFailed?.(a.failure.code, a.failure.message);
+  };
+  NavigationHandler.instance = handler;
+  for (const name of w.stack.script.names ?? []) handler.registerPageStack(name, { navigate: answer('push'), replace: answer('replace'), reset: () => undefined });
+  return () => {
+    NavigationHandler.instance = saved;
+  };
+}
+
+/** What a stack's `back` returns to a Pop Component Stack (navigation-stack.tsx `StackBackResult`) for the world's answer. */
+function backResult(a: StackAnswer): unknown {
+  if (a === 'done') return { ok: true };
+  if (a === 'unchanged') return { ok: false, unchanged: true };
+  return { ok: false, code: a.failure.code, message: a.failure.message };
+}
 
 /**
  * NSP-012 — one registry per play: the runtime's two named tables emptied, then seeded from the
@@ -162,7 +227,7 @@ function resetRegistry(world: World): void {
 export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink'] as const;
 
 /** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (Navigate To Path). */
-export const VIEWER_NAVIGATION_NODES = ['navigate-to-path'] as const;
+export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -457,6 +522,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     s.frame.location.push(locationEvent(call));
   }
 
+  /** A STACK call the world saw (a push, a replace, a pop; world.ts, NSP-015 s18), in the LOCATION group, attributed as a request is. */
+  function recordStack(event: TraceEvent): void {
+    const s = updating.getStore() ?? (states.size === 1 ? [...states.values()][0] : undefined);
+    if (!s) throw new Error(`runtime: a stack call (${String((event as { op?: unknown }).op)}) was made outside any node's update, and more than one node is mounted — it cannot be attributed`);
+    s.frame.location.push(event);
+  }
+
   /** A line a node wrote through its scope's log sink lands on that node's handle; the entry names the node (runcontext.ts). */
   const logSink = (fallback: LogLine[]) => (entry: { level: string; message: string; data?: unknown; nodeId?: string }) => {
     const line: LogLine = entry.data === undefined ? { level: entry.level, message: entry.message } : { level: entry.level, message: entry.message, data: entry.data };
@@ -492,6 +564,12 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     if (!node.nodeScope) node.nodeScope = nodeScope as never;
     // a node in a component's scope is one of the scope's nodes — what `getNodesWithType` reads
     if (scope) scope.nodes[id] = node as never;
+    // STACK (world.ts, NSP-015 s18) — a Pop Component Stack in a page a stack pushed: the stack installs
+    // its back callback on every one in the page it builds (navigation-stack.tsx :981-991); here the world's
+    if (type === 'PageStackNavigateBack' && world?.stack.inPushedPage) {
+      const w = world;
+      (node as unknown as { _setBackCallback(cb: (a: { backAction?: unknown; results?: unknown }) => unknown): void })._setBackCallback((a) => backResult(w.stack.back(a.backAction, a.results)));
+    }
     // the graph's parameters, for the two nodes that read them off `this.model` (NSP-012)
     // `removeListenersWithRef` because `_onNodeDeleted` calls it FIRST (node.ts :1312-1315): without it
     // every teardown threw on its first line, `dispose` swallowed the throw, and no node's delete
@@ -707,6 +785,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // settings are the script's (graphmodel.ts `setSettings`, what `importEditorData` calls)
       (NoodlRuntime as unknown as { instance: unknown }).instance = rt;
       (rt as unknown as { graphModel: { setSettings(s: Record<string, unknown>): void } }).graphModel.setSettings({ ...w.projectSettings });
+      // STACK (world.ts, NSP-015 s18) — the REAL handler, fresh for the play (it is a process-wide static and
+      // queues what no stack took), the node's call recorded as handed, and a stand-in stack per scripted name
+      const restoreStacks = installStacks(w, recordStack);
       const installed = installWorld(w);
       // the three process-wide managers behind the store, history and action nodes (NSP-012 T4): one play, one of each
       globalStoreManager.reset({ clearState: true });
@@ -729,6 +810,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       for (const m of consoleMethods) console[m] = () => undefined;
       return () => {
         consoleMethods.forEach((m, i) => (console[m] = hostConsole[i]));
+        restoreStacks();
         installed.restore();
         stateHistoryManager.setClock(null);
         world = undefined;
