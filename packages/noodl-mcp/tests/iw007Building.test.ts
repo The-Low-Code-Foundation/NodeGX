@@ -344,6 +344,14 @@ describe('[B] the Build tab — a blueprint bought, placed on a legal footprint 
     const g = runScript(FAMILY_SCRIPT, { model: n });
     const c2 = bare(ISLAND_CHOOSE_SCRIPT, { requestId: LAND_ID, cards: isle(n).cards, requests: REQUESTS, plots: g.plots, robots: g.robots, words: WORDS, lang: 'en', botName: 'Pip' });
     expect([c2.robotId, c2.showHome]).toEqual(['cobble', true]);
+    // Pip at work on another plot: her land's card says where, and that he comes home from THAT card (no Bring home here).
+    const o = kid();
+    o.profiles[0].island.done.push('path-postbox');
+    o.profiles[0].island.plots['path-postbox'] = { program: REQUESTS.find((r) => r.id === 'path-postbox')!.referenceProgram, robotId: 'r1', wonAt: 1 };
+    const h = runScript(FAMILY_SCRIPT, { model: o });
+    const c3 = bare(ISLAND_CHOOSE_SCRIPT, { requestId: LAND_ID, cards: isle(o).cards, requests: REQUESTS, plots: h.plots, robots: h.robots, words: WORDS, lang: 'en', botName: 'Pip' });
+    const title = W(REQUESTS.find((r) => r.id === 'path-postbox')!.copyKeys.title);
+    expect([c3.line, c3.showHome, c3.canOpen]).toEqual([W('iw7bLandBusy').split('{b}').join('Pip').replace('{plot}', title), false, false]);
   });
 
   it('the island draws the ghost over her land while one is out (With ghost), and Draw world hands the kits the tree, the ghost and each building’s span', () => {

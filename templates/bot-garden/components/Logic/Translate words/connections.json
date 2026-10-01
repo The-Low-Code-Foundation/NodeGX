@@ -2297,6 +2297,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7bLandBusy",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7bLandBusy"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw7bLandEmpty",
       "toId": "translatewordsOut",
       "toProperty": "iw7bLandEmpty"

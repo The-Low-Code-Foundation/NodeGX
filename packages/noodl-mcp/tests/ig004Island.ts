@@ -552,6 +552,8 @@ else if (id === 'free') { canOpen = true; line = w.sandP || ''; }
 // P108 IW-003 (lane B): the job changed under a pinned program — the robot waits at home until she teaches it again.
 else if (workingAt && workingAt === id && card && card.stale) { canOpen = true; showHome = true; line = fill(w.iw3bTeachAgain, { b: jobName }); }
 else if (workingAt && workingAt === id) { canOpen = true; showHome = true; line = w.ig4WorksHere || ''; }
+// P108 IW-007 (lane B): on her land, a robot at work elsewhere is brought home from THAT plot's card (this card is for building).
+else if (isLandCard && workingAt) { line = fill(w.iw7bLandBusy, { plot: workTitle }); }
 else if (workingAt) { showHome = true; line = fill(w.ig4AtWork, { plot: workTitle }); }
 else if (status === 'won') { canOpen = true; line = w.ig4Won || ''; }
 else { canOpen = true; line = w[req.copyKeys.line] || title; }

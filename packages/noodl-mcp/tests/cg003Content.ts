@@ -360,7 +360,8 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw7bStage0: s('pegs and string', 'piquets et ficelle'),
   iw7bStage1: s('the frame', 'la charpente'),
   iw7bStage2: s('the walls', 'les murs'),
-  iw7bStageDone: s('finished!', 'terminé !')
+  iw7bStageDone: s('finished!', 'terminé !'),
+  iw7bLandBusy: s('{b} is at work on “{plot}”. To teach {b} a job on your land, bring {b} home from there first.', '{b} travaille sur « {plot} ». Pour lui apprendre un travail sur ton terrain, ramène d’abord {b} à la maison depuis là-bas.')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);

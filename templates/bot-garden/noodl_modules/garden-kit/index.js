@@ -4307,32 +4307,37 @@ var gardenKitBlocks = (function () {
   JOB_LOOK.buildingStage = buildingStage;
   JOB_LOOK.BUILD_STAGES = BUILD_STAGES;
   (function () {
-    var wood = '#B9844C', woodDark = '#8B5A2B', stoneC = '#A3A0AB', stoneL = '#C9C6D2', ghostLine = { fill: 'none', stroke: '#FFFFFF', strokeWidth: 2, strokeDasharray: '5 4', opacity: 0.95 };
-    var shadow = ['ellipse', { cx: 64, cy: 58, rx: 56, ry: 5, fill: 'rgba(0,0,0,.14)' }];
-    var pegs = [['rect', { x: 6, y: 34, width: 4, height: 24, rx: 1, fill: woodDark }], ['rect', { x: 118, y: 34, width: 4, height: 24, rx: 1, fill: woodDark }], ['path', { d: 'M8 36H120', stroke: '#FFFFFF', strokeWidth: 1.5, opacity: 0.9 }]];
+    var wood = '#B9844C', woodDark = '#8B5A2B', stoneC = '#A3A0AB', ghostLine = { fill: 'none', stroke: '#FFFFFF', strokeWidth: 2.5, strokeDasharray: '6 5', opacity: 0.95 };
+    // Two tiles wide and two tall (its parts' row and the row above it): the foot on its parts, the roof above them.
+    var BOX = '0 0 128 128';
+    var shadow = ['ellipse', { cx: 64, cy: 122, rx: 58, ry: 5, fill: 'rgba(0,0,0,.14)' }];
+    var pegs = [['rect', { x: 6, y: 90, width: 4, height: 32, rx: 1, fill: woodDark }], ['rect', { x: 118, y: 90, width: 4, height: 32, rx: 1, fill: woodDark }], ['path', { d: 'M8 93H120', stroke: '#FFFFFF', strokeWidth: 2, opacity: 0.9 }]];
     var plan = function (d) { var o = { d: d }; for (var k in ghostLine) o[k] = ghostLine[k]; return ['path', o]; };
-    var frame = [['rect', { x: 10, y: 22, width: 6, height: 36, fill: wood }], ['rect', { x: 61, y: 22, width: 6, height: 36, fill: wood }], ['rect', { x: 112, y: 22, width: 6, height: 36, fill: wood }], ['rect', { x: 8, y: 18, width: 112, height: 6, fill: wood }], ['path', { d: 'M13 56L64 24M115 56L64 24', stroke: woodDark, strokeWidth: 3 }]];
-    var stoneWall = [['rect', { x: 8, y: 34, width: 112, height: 24, rx: 3, fill: stoneC, stroke: '#7E7B8C', strokeWidth: 1.5 }], ['path', { d: 'M8 46H120M30 34V46M60 34V46M90 34V46M45 46V58M75 46V58M105 46V58', stroke: '#7E7B8C', strokeWidth: 1.2 }]];
-    var plankWall = [['rect', { x: 8, y: 20, width: 112, height: 16, fill: wood, stroke: woodDark, strokeWidth: 1.5 }], ['path', { d: 'M8 28H120', stroke: woodDark, strokeWidth: 1.2 }]];
-    // The spa: a stone bath with plank walls; finished, a roof, the steaming water and a little sign.
-    SPRITES.spa0 = { box: '0 0 128 64', shapes: [shadow].concat(pegs, [plan('M10 58V22H118V58Z'), plan('M10 22L64 6L118 22')]) };
-    SPRITES.spa1 = { box: '0 0 128 64', shapes: [shadow].concat(pegs, frame, [plan('M10 22L64 6L118 22')]) };
-    SPRITES.spa2 = { box: '0 0 128 64', shapes: [shadow].concat(frame, stoneWall, plankWall, [plan('M10 20L64 4L118 20')]) };
-    SPRITES.spa3 = { box: '0 0 128 64', shapes: [shadow].concat(stoneWall, plankWall, [
-      ['path', { d: 'M2 22L64 2L126 22Z', fill: '#E86A5E', stroke: '#B8483E', strokeWidth: 2, strokeLinejoin: 'round' }],
-      ['rect', { x: 46, y: 38, width: 36, height: 14, rx: 6, fill: '#7CC6F0', stroke: '#4FA7DC', strokeWidth: 2 }],
-      ['path', { d: 'M54 34c-3-4 3-6 0-10M64 34c-3-4 3-6 0-10M74 34c-3-4 3-6 0-10', fill: 'none', stroke: '#FFFFFF', strokeWidth: 2, strokeLinecap: 'round' }],
-      ['rect', { x: 96, y: 40, width: 14, height: 10, rx: 2, fill: '#FFF7E8', stroke: woodDark, strokeWidth: 1.5 }]
+    var frame = [['rect', { x: 10, y: 54, width: 7, height: 68, fill: wood }], ['rect', { x: 60, y: 54, width: 7, height: 68, fill: wood }], ['rect', { x: 111, y: 54, width: 7, height: 68, fill: wood }], ['rect', { x: 7, y: 50, width: 114, height: 7, fill: wood }], ['path', { d: 'M14 118L63 56M114 118L64 56', stroke: woodDark, strokeWidth: 3.5 }]];
+    var stoneWall = [['rect', { x: 8, y: 90, width: 112, height: 32, rx: 3, fill: stoneC, stroke: '#7E7B8C', strokeWidth: 2 }], ['path', { d: 'M8 106H120M30 90V106M60 90V106M90 90V106M45 106V122M75 106V122M105 106V122', stroke: '#7E7B8C', strokeWidth: 1.5 }]];
+    var plankWall = [['rect', { x: 8, y: 58, width: 112, height: 32, fill: wood, stroke: woodDark, strokeWidth: 2 }], ['path', { d: 'M8 69H120M8 80H120', stroke: woodDark, strokeWidth: 1.5 }]];
+    // The spa: a stone bath house with plank walls; finished, a red roof, the steaming water and a little sign.
+    SPRITES.spa0 = { box: BOX, shapes: [shadow].concat(pegs, [plan('M10 122V58H118V122Z'), plan('M10 58L64 22L118 58')]) };
+    SPRITES.spa1 = { box: BOX, shapes: [shadow].concat(pegs, frame, [plan('M8 50L64 16L120 50')]) };
+    SPRITES.spa2 = { box: BOX, shapes: [shadow].concat(frame, stoneWall, plankWall, [plan('M8 54L64 18L120 54')]) };
+    SPRITES.spa3 = { box: BOX, shapes: [shadow].concat(stoneWall, plankWall, [
+      ['path', { d: 'M2 60L64 14L126 60Z', fill: '#E86A5E', stroke: '#B8483E', strokeWidth: 3, strokeLinejoin: 'round' }],
+      ['path', { d: 'M20 46H108', stroke: '#B8483E', strokeWidth: 2, opacity: 0.6 }],
+      ['rect', { x: 40, y: 98, width: 48, height: 16, rx: 7, fill: '#7CC6F0', stroke: '#4FA7DC', strokeWidth: 2.5 }],
+      ['path', { d: 'M52 94c-4-5 4-8 0-13M64 94c-4-5 4-8 0-13M76 94c-4-5 4-8 0-13', fill: 'none', stroke: '#FFFFFF', strokeWidth: 3, strokeLinecap: 'round' }],
+      ['rect', { x: 96, y: 66, width: 16, height: 12, rx: 2, fill: '#FFF7E8', stroke: woodDark, strokeWidth: 2 }]
     ]) };
-    // The refuge: a plank barn on a stone foot; finished, its red roof and a round door.
-    SPRITES.refuge0 = { box: '0 0 128 64', shapes: [shadow].concat(pegs, [plan('M10 58V24H118V58Z'), plan('M6 24L64 4L122 24')]) };
-    SPRITES.refuge1 = { box: '0 0 128 64', shapes: [shadow].concat(pegs, frame, [plan('M6 24L64 4L122 24')]) };
-    SPRITES.refuge2 = { box: '0 0 128 64', shapes: [shadow].concat(frame, [['rect', { x: 8, y: 48, width: 112, height: 10, rx: 2, fill: stoneC, stroke: '#7E7B8C', strokeWidth: 1.5 }], ['rect', { x: 8, y: 22, width: 112, height: 26, fill: wood, stroke: woodDark, strokeWidth: 1.5 }], ['path', { d: 'M8 30H120M8 39H120', stroke: woodDark, strokeWidth: 1.2 }], plan('M6 22L64 4L122 22')]) };
-    SPRITES.refuge3 = { box: '0 0 128 64', shapes: [shadow, ['rect', { x: 8, y: 48, width: 112, height: 10, rx: 2, fill: stoneC, stroke: '#7E7B8C', strokeWidth: 1.5 }], ['rect', { x: 8, y: 22, width: 112, height: 26, fill: wood, stroke: woodDark, strokeWidth: 1.5 }], ['path', { d: 'M8 30H120M8 39H120', stroke: woodDark, strokeWidth: 1.2 }],
-      ['path', { d: 'M0 24L64 0L128 24Z', fill: '#C8423A', stroke: '#8E2A24', strokeWidth: 2, strokeLinejoin: 'round' }],
-      ['path', { d: 'M52 58V40a12 12 0 0124 0V58Z', fill: woodDark }],
-      ['circle', { cx: 64, cy: 14, r: 4, fill: '#FFF7E8' }]
-    ] };
+    // The refuge: a plank barn on a stone foot; finished, its red roof, a round door and a window.
+    var refFoot = ['rect', { x: 8, y: 108, width: 112, height: 14, rx: 2, fill: stoneC, stroke: '#7E7B8C', strokeWidth: 2 }];
+    var refPlanks = [['rect', { x: 8, y: 58, width: 112, height: 50, fill: wood, stroke: woodDark, strokeWidth: 2 }], ['path', { d: 'M8 70H120M8 83H120M8 96H120', stroke: woodDark, strokeWidth: 1.5 }]];
+    SPRITES.refuge0 = { box: BOX, shapes: [shadow].concat(pegs, [plan('M10 122V58H118V122Z'), plan('M6 58L64 16L122 58')]) };
+    SPRITES.refuge1 = { box: BOX, shapes: [shadow].concat(pegs, frame, [plan('M6 50L64 12L122 50')]) };
+    SPRITES.refuge2 = { box: BOX, shapes: [shadow].concat(frame, [refFoot], refPlanks, [plan('M6 58L64 16L122 58')]) };
+    SPRITES.refuge3 = { box: BOX, shapes: [shadow, refFoot].concat(refPlanks, [
+      ['path', { d: 'M0 62L64 12L128 62Z', fill: '#C8423A', stroke: '#8E2A24', strokeWidth: 3, strokeLinejoin: 'round' }],
+      ['path', { d: 'M50 122V100a14 14 0 0128 0V122Z', fill: woodDark }],
+      ['circle', { cx: 64, cy: 44, r: 7, fill: '#FFF7E8', stroke: '#8E2A24', strokeWidth: 2 }]
+    ]) };
     // The tree a robot takes planks from: the tree with its planks stacked at its foot (by what is left), a stump when none.
     var treeTop = [['rect', { x: 28, y: 36, width: 8, height: 18, rx: 3, fill: '#A9773F' }], ['circle', { cx: 32, cy: 22, r: 15, fill: '#3E9B62' }], ['circle', { cx: 20, cy: 30, r: 10, fill: '#48AF70' }], ['circle', { cx: 44, cy: 30, r: 10, fill: '#48AF70' }]];
     var plankAt = function (y) { return ['rect', { x: 38, y: y, width: 22, height: 5, rx: 1.5, fill: wood, stroke: woodDark, strokeWidth: 1 }]; };
@@ -4348,7 +4353,7 @@ var gardenKitBlocks = (function () {
     '.gd-bld{position:absolute;z-index:1;pointer-events:none}.gd-bld>svg{position:absolute;inset:0;width:100%;height:100%;overflow:visible}\n' +
     '.gd-bld-pen{position:absolute;z-index:1;box-sizing:border-box;border:3px solid #A9773F;border-top-style:dashed;border-radius:4px;pointer-events:none}\n' +
     '.gd-ghost{position:absolute;z-index:3;box-sizing:border-box;border:3px dashed #2FA35A;border-radius:8px;background:rgba(63,166,107,.30);pointer-events:none}\n' +
-    '.gd-ghost>svg{position:absolute;inset:0;width:100%;height:50%;opacity:.55}.gd-ghost[data-pen="0"]>svg{height:100%}\n' +
+    '.gd-ghost>svg{position:absolute;inset:0;width:100%;height:100%;opacity:.55}\n' +
     '.gd-ghost-no{border-color:#E04E4E;background:rgba(224,78,78,.32)}\n' +
     '.gd-puff{position:absolute;z-index:4;pointer-events:none}.gd-puff>i{position:absolute;width:36%;height:60%;border-radius:50%;background:rgba(255,255,255,.92);box-shadow:0 0 6px rgba(255,255,255,.9);animation:gd-puff 1.2s ease-out forwards}\n' +
     '.gd-puff>i:nth-child(1){left:-6%;top:20%}.gd-puff>i:nth-child(2){left:30%;top:-10%;animation-delay:.08s}.gd-puff>i:nth-child(3){left:66%;top:20%;animation-delay:.16s}.gd-puff>i:nth-child(4){left:14%;top:52%;animation-delay:.12s}.gd-puff>i:nth-child(5){left:50%;top:52%;animation-delay:.04s}\n' +
