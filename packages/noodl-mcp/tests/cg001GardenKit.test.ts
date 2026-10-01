@@ -497,7 +497,8 @@ describe('CG-001 — garden-kit, the built artefact', () => {
 
   describe('the motion is stilled for a child who asked for reduced motion, and the ports are documented', () => {
     it('every animation the world starts is stilled', () => {
-      expect(reducedMotionReport(node('garden-kit.Garden').css as string)).toEqual({ animated: ['gd-bump', 'gd-puddle', 'gd-turn'], unstilled: [] });
+      // P108 IW-007 (lane B): + the last drop's puff over a finished building (stilled too).
+      expect(reducedMotionReport(node('garden-kit.Garden').css as string)).toEqual({ animated: ['gd-bump', 'gd-puddle', 'gd-puff', 'gd-turn'], unstilled: [] });
       expect(reducedMotionReport(node('garden-kit.BlockList').css as string)).toEqual({ animated: [], unstilled: [] });
     });
 
@@ -1252,5 +1253,72 @@ describe('P108 IW-003 look (lane L) — garden-kit draws a built bench without S
     const sits = draw([bench()]);
     expect([/data-bench="4"/.test(vacant), /data-sits="bench"/.test(vacant)]).toEqual([true, false]);
     expect([/data-bench="4"/.test(sits), /data-sits="bench"/.test(sits)]).toEqual([true, true]);
+  });
+});
+
+// ── P108 IW-007 (lane B): her land drawn — a building by stage across its parts, the tree's planks, a plank carried, the ghost, the puff ──
+describe('P108 IW-007 lane B — garden-kit draws her land: the spa and the refuge by stage as one sprite, the tree, a plank, the ghost, the puff', () => {
+  /* eslint-disable @typescript-eslint/no-var-requires */
+  const { DRAW_WORLD_SCRIPT, ALL_WORDS_JSON } = require('./cg003Scripts');
+  const { LAND_SCRIPT } = require('./iw007Land');
+  const { LAND_MAP } = require('./cg002Content');
+  const { runScript } = require('./cg002Scripts');
+  /* eslint-enable @typescript-eslint/no-var-requires */
+  const L = new Function(`${LAND_SCRIPT}; return { landThings: landThings, worldOf: worldOf };`)() as any;
+  let kit: KitModule;
+  beforeAll(() => {
+    ({ kit } = loadKit());
+  });
+  const node = () => kit.reactNodes.find((n) => n.name === 'garden-kit.Garden')! as any;
+  /** Her land as the island's Draw world hands it to the kit (the engine's world → the kit's things). */
+  const land = (buildings: any[], extra: any[] = [], robots: any[] = []) => {
+    const w = L.worldOf({ map: LAND_MAP.slice(), things: L.landThings({ buildings, animals: [] }).concat(extra), robots: [] });
+    const d = runScript(DRAW_WORLD_SCRIPT, { world: w, words: JSON.parse(ALL_WORDS_JSON), lang: 'en' });
+    // The world without its stylesheet (the CSS names every class it styles).
+    return renderToStaticMarkup(React.createElement(node().getReactComponent(), { map: d.map, things: d.things, robots })).replace(/<style>[\s\S]*?<\/style>/, '');
+  };
+  const spa = (stone: number, plank: number, id = 'b1') => ({ id, bp: 'spa', x: 3, y: 1, have: { stone, plank } });
+  const one = (html: string, re: RegExp) => (html.match(new RegExp(re.source, 'g')) || []).length;
+
+  it('🔴 the spa: ONE sprite across its two parts at each of its four stages (pegs · frame · walls · finished), its parts’ ground dirt then gravel, a meter on each part; never a path square', () => {
+    const seen: unknown[] = [];
+    for (const [stone, plank] of [[0, 0], [2, 0], [6, 1], [6, 4]]) {
+      const html = land([spa(stone, plank, `s${stone}${plank}`)]);
+      const meters = [3, 4].map((x) => { const at = html.indexOf(`data-x="${x}" data-y="1"`); return /data-meter=/.test(html.slice(at, html.indexOf('</button>', at))) ? 1 : 0; }).reduce((a, b) => a + b, 0);
+      seen.push([one(html, /data-building="/), (html.match(/data-bstage="(\d)"/) || [])[1], (html.match(/data-sprite="(spa\d)"/) || [])[1], one(html, /data-part="s/), (html.match(/data-site="(\w+)" data-part/) || [])[1], meters]);
+      expect(html).not.toMatch(/gd-site-path|gd-site-cobbles/);
+    }
+    expect(seen).toEqual([[1, '0', 'spa0', 2, 'dirt', 2], [1, '1', 'spa1', 2, 'dirt', 2], [1, '2', 'spa2', 2, 'dirt', 2], [1, '3', 'spa3', 2, 'gravel', 2]]);
+    // Spanning two tiles of an 8-wide land from its first tile (x 3): left 37.5%, width 25%.
+    expect(land([spa(0, 0, 'sp')])).toMatch(/data-building="sp"[^>]*style="left:37.5000%;top:0.0000%;width:25.0000%;height:33.3333%"/);
+  });
+
+  it('🔴 the refuge: its four stages, and once finished its pen’s fence on the row below (not before; never on a spa)', () => {
+    const ref = (plank: number, stone: number) => ({ id: `r${plank}${stone}`, bp: 'refuge', x: 3, y: 3, have: { plank, stone } });
+    const st = [[0, 0], [3, 0], [6, 2], [6, 4]].map(([p, s]) => (land([ref(p, s)]).match(/data-sprite="(refuge\d)"/) || [])[1]);
+    expect(st).toEqual(['refuge0', 'refuge1', 'refuge2', 'refuge3']);
+    expect([one(land([ref(6, 3)]), /data-pen-of=/), one(land([ref(6, 4)]), /data-pen-of=/), one(land([spa(6, 4, 'sf')]), /data-pen-of=/)]).toEqual([0, 1, 0]);
+  });
+
+  it('🔴 her land’s tree by the planks it has left (stacked · a few · a stump); a robot carrying a plank shows a plank', () => {
+    const tree = (left: number) => renderToStaticMarkup(React.createElement(node().getReactComponent(), { map: { rows: ['GG'] }, things: [{ kind: 'tree', x: 1, y: 0, left, max: 8 }], robots: [] })).match(/data-sprite="(tree\w+)"/)![1];
+    expect([tree(6), tree(2), tree(0)]).toEqual(['treeSrc', 'treeSrcFew', 'treeStump']);
+    const carry = renderToStaticMarkup(React.createElement(node().getReactComponent(), { map: { rows: ['GG'] }, things: [], robots: [{ x: 0, y: 0, d: 1, carry: ['plank'], name: 'Pip' }] }));
+    expect(carry).toMatch(/data-load="plank"[\s\S]*data-sprite="plank"/);
+    // Known-firing: the scenery tree of the map is still the map's tree.
+    expect(land([])).toMatch(/class="gd-cell gd-tree"[^>]*>[\s\S]*?data-sprite="tree"/);
+  });
+
+  it('🔴 the ghost: its footprint (with its pen) over the tiles, green where it fits, red where it does not; taps go through to the tiles', () => {
+    const g = (ok: boolean, pen: number) => land([], [{ kind: 'ghost', bp: pen ? 'refuge' : 'spa', x: 3, y: 1, w: 2, pen, ok }]);
+    expect(g(true, 0)).toMatch(/class="gd-ghost gd-ghost-ok" data-ghost="ok" data-bp="spa" data-pen="0" data-at="3,1" style="left:37.5000%;top:16.6667%;width:25.0000%;height:16.6667%"/);
+    expect(g(false, 2)).toMatch(/class="gd-ghost gd-ghost-no" data-ghost="no" data-bp="refuge" data-pen="1" data-at="3,1" style="[^"]*height:33.3333%"/);
+    expect(g(true, 0)).toMatch(/data-ghost="ok"[^>]*>[\s\S]*?data-sprite="spa0"/);
+  });
+
+  it('🔴 the last drop puffs: seen below its last stage then at it — a puff; a building first seen finished never puffs', () => {
+    expect(one(land([spa(6, 3, 'pf')]), /data-puff=/)).toBe(0);
+    expect(one(land([spa(6, 4, 'pf')]), /data-puff="pf"/)).toBe(1);
+    expect(one(land([spa(6, 4, 'never')]), /data-puff=/)).toBe(0);
   });
 });

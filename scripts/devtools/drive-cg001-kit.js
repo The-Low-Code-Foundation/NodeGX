@@ -41,6 +41,11 @@
  *   BALL   wall-until on seed 1: the wall, the ball in its corner, then on Pip's back, then in Biscuit's basket (shots)
  *   FOOD   bowl-if's sack and meow-when's jar drawn with biscuits (never stones); the seeded bowls 0/1 · 0/1 · 1/1 (shot)
  *   BARS   the 46×22 island at 1368: every compact meter a bar no wider than its tile, no two touching (shot)
+ * P108 IW-007 (lane B), at the end — her land, from worlds the ENGINE wrote (worldOf, then puts through step + apply):
+ *   SPA    the spa put by put: one sprite two tiles wide at each of its four stages, its meters, its ground; the puff on
+ *          the last plank (screenshots)
+ *   LAND   the refuge finished with its pen's fence, the tree by its planks, Pip carrying a plank (screenshot)
+ *   GHOST  the ghost green (the spa) and red (the refuge over the rock, with its pen), taps going through it (screenshots)
  * Exits 0 when every clause passed, 1 when any did, 2 on a usage error.
  */
 const fs = require('fs');
@@ -122,6 +127,26 @@ function engineRun(ENG, world, program) {
     run = st.run;
   }
   return w;
+}
+// ── P108 IW-007 (lane B): her land's buildings, from worlds the ENGINE wrote (shared by the 2D and 3D kit drives) ──
+/** Her land's map (the meadow) and its parts and sources as the engine lays them; a spa built put by put. */
+const IW7B_ROWS = ['GGGGGGTG', 'GGGGGGGG', 'GTGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGTGG'];
+function iw7bParts(bp, x, y, items) {
+  return items.map(([item, need], i) => ({ kind: 'site', id: 'b-' + bp + '-' + item, of: 'b-' + bp, build: bp, keep: true, item, need, have: 0, x: x + i, y }));
+}
+/** Draw world's own rule (cg003Scripts, lane B): each part carries its building's first tile and width. */
+function iw7bSpan(things) {
+  const span = {};
+  for (const t of things) if (t.kind === 'site' && t.of !== undefined) { const s = (span[t.of] = span[t.of] || { x: t.x, n: 0 }); s.x = Math.min(s.x, t.x); s.n++; }
+  return things.map((t) => (t.kind === 'site' && span[t.of] ? { ...t, bx: span[t.of].x, bw: span[t.of].n } : t));
+}
+/** The spa after Cobble puts `stones` (from below its stone part) and Pip puts `planks` (from below its plank part). */
+function iw7bSpa(ENG, stones, planks) {
+  let w = ENG.worldOf({ map: IW7B_ROWS, things: iw7bParts('spa', 3, 1, [['stone', 6], ['plank', 4]]).concat([{ kind: 'tree', id: 'tree', x: 7, y: 0, left: 6, max: 8 }, { kind: 'rock', id: 'rock', x: 7, y: 5, left: 6, max: 8 }]), robots: [{ id: 'pip', x: 3, y: 2, d: 0, carry: Array(6).fill('stone'), basket: 8, name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' }] });
+  w = engineRun(ENG, w, Array.from({ length: stones }, (_, i) => ({ id: i + 1, t: 'put' })));
+  w.robots = [{ id: 'pip', x: 4, y: 2, d: 0, carry: Array(4).fill('plank'), basket: 8, name: 'Pip' }];
+  w = engineRun(ENG, w, Array.from({ length: planks }, (_, i) => ({ id: i + 1, t: 'put' })));
+  return { ...w, things: iw7bSpan(w.things) };
 }
 /** One 8×6 job world with every new thing: worldOf (site stages), then Pip waters the first tulip once (1 → 2 drinks, can 2 → 1). */
 function jobWorld(ENG) {
@@ -700,6 +725,54 @@ withDeployedSite({ dir: DIR }, async (page) => {
     readings.iw003s = { benches };
     check('IW-003 lane S (2D): the engine’s bench, put by put — stage 0 (pegs, 0/8) · 1 a leg (2/8) · 2 two legs (4/8) · 3 the seat (6/8) · 4 built (8/8, green) with Sami sitting on it; never a path square, beside a full path square that is',
       JSON.stringify(benches.map((b) => [b.have, b.stage, b.meter, b.sits])) === JSON.stringify([[0, '0', '0/8', false], [2, '1', '2/8', false], [4, '2', '4/8', false], [6, '3', '6/8', false], [8, '4', '8/8:full', true]]) && benches.every((b) => b.ground !== 'path' && b.pathSquare === 'path') && benches[4].samiH > 10, benches);
+  }
+
+  // ══ P108 IW-007 (lane B): her land — the spa by stage put by put (the ENGINE's worlds), the puff, the refuge's pen, the tree, a plank, the ghost ══
+  {
+    await page.setViewport({ width: 1024, height: 800, mobile: false });
+    await setVar('watch', '');
+    await setVar('picking', false);
+    await setVar('bubble', '');
+    const BLD_READ = `(() => { const b = [...document.querySelectorAll('.gd-bld')].find((e) => e.getAttribute('data-build') === 'spa'); const svg = b && b.querySelector('svg'); const cell = (x, y) => document.querySelector('.gd-cell[data-x="' + x + '"][data-y="' + y + '"]'); const m = (x, y) => { const e = cell(x, y) && cell(x, y).querySelector('.gd-meter'); return e ? e.getAttribute('data-meter') + (e.classList.contains('gd-full') ? ':full' : '') : null; }; const g = (x, y) => { const e = cell(x, y) && cell(x, y).querySelector('.gd-site'); return e ? e.getAttribute('data-site') : null; }; const r = b ? b.getBoundingClientRect() : null; const c = cell(3, 1).getBoundingClientRect(); return { n: document.querySelectorAll('.gd-bld').length, stage: b ? b.getAttribute('data-bstage') : null, sprite: svg ? svg.getAttribute('data-sprite') : null, w: r ? Math.round(r.width / c.width * 10) / 10 : 0, meters: [m(3, 1), m(4, 1)], ground: [g(3, 1), g(4, 1)], puff: !!document.querySelector('.gd-puff[data-puff="b-spa"]') }; })()`;
+    const spas = [];
+    for (const [stones, planks] of [[0, 0], [2, 0], [6, 1], [6, 3], [6, 4]]) {
+      const w = iw7bSpa(ENG, stones, planks);
+      await setJson('map', { rows: w.map });
+      await setJson('things', w.things);
+      await setJson('robots', w.robots);
+      await wait(stones === 6 && planks === 4 ? 250 : 500);
+      spas.push({ stones, planks, bstage: w.things.find((t) => t.id === 'b-spa-stone').bstage, ...(await evaluate(BLD_READ)) });
+      await shot(`iw7b-2d-spa-${stones}-${planks}`);
+    }
+    readings.iw7b = { spas };
+    check('IW-007 lane B (2D): the engine’s spa, put by put — ONE sprite two tiles wide at each stage: pegs (0/6 · 0/4) · the frame · the walls · finished (6/6 · 4/4, green), its parts’ ground dirt then gravel',
+      JSON.stringify(spas.map((b) => [b.bstage, b.n, b.stage, b.sprite, b.meters.join(' '), b.ground.join(' ')])) === JSON.stringify([[0, 1, '0', 'spa0', '0/6 0/4', 'dirt dirt'], [1, 1, '1', 'spa1', '2/6 0/4', 'dirt dirt'], [2, 1, '2', 'spa2', '6/6:full 1/4', 'dirt dirt'], [2, 1, '2', 'spa2', '6/6:full 3/4', 'dirt dirt'], [3, 1, '3', 'spa3', '6/6:full 4/4:full', 'gravel gravel']]) && spas.every((b) => b.w >= 1.9 && b.w <= 2.1), spas);
+    check('IW-007 lane B (2D): the last drop puffs — the puff over the spa the moment its last plank lands, and not before', spas[4].puff === true && spas.slice(0, 4).every((b) => !b.puff), spas.map((b) => b.puff));
+    // The refuge finished with its pen; her land's tree three ways; a robot carrying a plank.
+    const refuge = iw7bSpan(iw7bParts('refuge', 3, 3, [['plank', 6], ['stone', 4]]).map((t) => ({ ...t, have: t.need, bstage: 3 })));
+    const trees = [{ kind: 'tree', id: 't6', x: 7, y: 0, left: 6, max: 8 }, { kind: 'tree', id: 't2', x: 7, y: 2, left: 2, max: 8 }, { kind: 'tree', id: 't0', x: 7, y: 4, left: 0, max: 8 }];
+    await setJson('map', { rows: IW7B_ROWS });
+    await setJson('things', refuge.concat(trees));
+    await setJson('robots', [{ x: 5, y: 1, d: 1, carry: ['plank'], name: 'Pip', colour: '#FF7A59' }]);
+    await wait(500);
+    const LAND_READ = `(() => { const t = (x, y) => { const e = document.querySelector('.gd-cell[data-x="' + x + '"][data-y="' + y + '"] [data-sprite^="tree"]'); return e ? e.getAttribute('data-sprite') : null; }; const pen = document.querySelector('.gd-bld-pen'); const pr = pen ? pen.getBoundingClientRect() : null; const c = document.querySelector('.gd-cell[data-x="3"][data-y="4"]').getBoundingClientRect(); return { refuge: (document.querySelector('.gd-bld[data-build="refuge"] svg') || { getAttribute: () => null }).getAttribute('data-sprite'), pen: pr ? [Math.round(pr.left - c.left), Math.round(pr.top - c.top), Math.round(pr.width / c.width * 10) / 10] : null, trees: [t(7, 0), t(7, 2), t(7, 4)], load: (document.querySelector('.gd-load') || { getAttribute: () => null }).getAttribute('data-load') }; })()`;
+    const land = await evaluate(LAND_READ);
+    readings.iw7b.land = land;
+    await shot('iw7b-2d-refuge-tree-plank');
+    check('IW-007 lane B (2D): the refuge finished with its pen’s fence on the row below it (two tiles), her land’s tree by its planks (stacked · a few · a stump), Pip carrying a plank',
+      land.refuge === 'refuge3' && !!land.pen && land.pen[0] === 0 && land.pen[1] === 0 && land.pen[2] >= 1.9 && JSON.stringify(land.trees) === JSON.stringify(['treeSrc', 'treeSrcFew', 'treeStump']) && land.load === 'plank', land);
+    // The ghost: the spa green on a free spot, the refuge red over the rock.
+    const ghosts = [];
+    for (const g of [{ kind: 'ghost', bp: 'spa', x: 3, y: 1, w: 2, pen: 0, ok: true }, { kind: 'ghost', bp: 'refuge', x: 6, y: 4, w: 2, pen: 2, ok: false }]) {
+      await setJson('things', [{ kind: 'rock', id: 'rock', x: 7, y: 5, left: 6, max: 8 }, g]);
+      await setJson('robots', []);
+      await wait(400);
+      ghosts.push(await evaluate(`(() => { const e = document.querySelector('.gd-ghost'); if (!e) return null; const r = e.getBoundingClientRect(); const c = document.querySelector('.gd-cell[data-x="${g.x}"][data-y="${g.y}"]').getBoundingClientRect(); return { ghost: e.getAttribute('data-ghost'), bg: getComputedStyle(e).backgroundColor, x: Math.round(r.left - c.left), y: Math.round(r.top - c.top), w: Math.round(r.width / c.width * 10) / 10, h: Math.round(r.height / c.height * 10) / 10, through: getComputedStyle(e).pointerEvents }; })()`));
+      await shot(`iw7b-2d-ghost-${g.ok ? 'ok' : 'no'}`);
+    }
+    readings.iw7b.ghosts = ghosts;
+    check('IW-007 lane B (2D): the ghost over its footprint — the spa green (2 × 1), the refuge red over the rock with its pen (2 × 2); a tap goes through it to the tiles',
+      !!ghosts[0] && !!ghosts[1] && ghosts[0].ghost === 'ok' && ghosts[1].ghost === 'no' && /\(63, 166, 107/.test(ghosts[0].bg) && /\(224, 78, 78/.test(ghosts[1].bg) && ghosts[0].w === 2 && ghosts[0].h === 1 && ghosts[1].w === 2 && ghosts[1].h === 2 && ghosts.every((g) => g.x === 0 && g.y === 0 && g.through === 'none'), ghosts);
   }
 
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
