@@ -3,7 +3,7 @@
 **Scoped:** 2026-10-01, at HEAD `27d891bf3`, from [the island audit](AUDIT-2026-10-01.md). The audit read P105, P106 and
 P108 (Olive's Island, [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md)): their task files, 225 commits, 57
 session and lane transcripts, the generator, both kits, the desktop shell and the shipped template.
-**Status: 🟡 OPEN — session 1 (2026-10-01): ISL-001's fix landed (`3df5adb82`; AC1–AC4, AC8; AC5–AC7 owed as drives) and ISL-014's (`aab96a056`; AC1–AC4; AC5 on a ruling, AC6 owed), 0 of 25 closed.** Two rulings asked (ISL-001 §5, ISL-014 §5, below). **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+**Status: 🟡 OPEN — session 1 (2026-10-01): ISL-001's fix landed (`3df5adb82`; AC1–AC4, AC8; AC5–AC7 owed as drives) and ISL-014's (`aab96a056`; AC1–AC4; AC5 on a ruling, AC6 owed), 0 of 25 closed; ISL-002's AC1 measured (`0`/`0`), its ruling asked.** Three rulings asked (ISL-001 §5, ISL-014 §5, ISL-002 §5, below). **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
 > "Phase 108 has been a beast. I forgot to tell the model to record learnings about NodeGX during the push. I'm sure
 > there must be a tonne of stuff we can fix and improve in NodeGX and the way the MCP works. Can you do an audit and start
@@ -95,7 +95,7 @@ the work:
 |---|---|---|---|---|
 | **Track A** | | | | |
 | [ISL-001](ISL-001-A-LIST-GIVEN-TWICE-DRAWS-ONE-SET-OF-ROWS.md) | A list given twice while it is building draws one set of rows — **🟡 s1: fix landed; AC5–AC7 owed** | F01, F06, **D85** | runtime | §5 after AC2 |
-| [ISL-002](ISL-002-A-FALSE-FROM-A-STATES-NODE-REACHES-ITS-WIRE.md) | A `false` from a States node's first state reaches its wire (it leaves as `0`: `states.ts:592`, and the exporter too) | F02 | runtime, export | ✓ |
+| [ISL-002](ISL-002-A-FALSE-FROM-A-STATES-NODE-REACHES-ITS-WIRE.md) | A `false` from a States node's first state reaches its wire (it leaves as `0`: `states.ts:633`, and the exporter too) — **🟡 s1: AC1 measured, ruling asked** | F02 | runtime, export | ✓ asked |
 | [ISL-003](ISL-003-TWO-LISTS-WITH-THE-SAME-ROW-IDS-KEEP-THEIR-OWN-ROWS.md) | Two lists that reuse row ids keep their own rows | F03 | runtime | ✓ |
 | [ISL-004](ISL-004-A-COMPONENT-KEEPS-ITS-OWN-STATE.md) | A page you come back to can be as you left it (instances already have their own store; leaving a page destroys it) | F04, F05 | runtime | ✓ |
 | **Track B** | | | | |
@@ -181,7 +181,7 @@ per question, and only when the task is next to build. This table is the index, 
 
 | task | the question | recommended |
 |---|---|---|
-| ISL-002 | Should the first state send the typed value, skip unset values, or only be documented? Should the export change in the same commit? | typed value; yes |
+| ISL-002 | **Measured s1:** the first state sends the number `0` for a boolean `false` and for `''` (both transition settings); the return path sends `false`/`''`. Should the first state send the typed value, skip unset values, or only be documented? Should the export change in the same commit? | typed value; yes |
 | ISL-003 | Should each list keep its own rows, or should rows stay shared with a warning when one id arrives with different data? | shared, plus a warning with GAM-005's "shared on purpose" escape |
 | ISL-004 | Should a page you come back to be as you left it? What is a component's own state? Should the product stop a stale write? | an opt-in "keep this page"; promote Component Object; not now |
 | ISL-005 | Where does shared code live, and how does a Function say it uses it? Does it run in server render and cloud functions? | a project script file and a "Uses" list on the node |
