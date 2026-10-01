@@ -35,6 +35,8 @@ for k in kit2d kit3d; do
   [[ $X/$k/deploy/index.html -nt $X/$k/.before ]] && echo "$k deploy fresh" >> $X/summary.txt || echo "$k deploy STALE" >> $X/summary.txt
 done
 ALL=(look earn shop crew crew-perf modes iw001 iw004 iw004-3d island island-3d robots robots-3d ws3d wsnogl olive mamie-ws mamie-isl mamie-isl3d mamie-look3d stones stones-3d post post-3d biscuit kit2d kit3d)
+# P108 s5 lane O (iw006-owed): the owed items' drive.
+ALL+=(owed)
 (( $# )) && ALL=("$@")
 for n in $ALL; do
   waitload
@@ -68,6 +70,8 @@ for n in $ALL; do
     biscuit) node scripts/devtools/drive-iw003-biscuit.js $D $J --shots $P/biscuit --json $P/biscuit.json ;;
     kit2d) node scripts/devtools/drive-cg001-kit.js $X/kit2d/deploy --shots $X/kit2d/shots --json $X/kit2d/kit2d.json ;;
     kit3d) node scripts/devtools/drive-ig007-3d.js $X/kit3d/deploy --shots $X/kit3d/shots --json $X/kit3d/kit3d.json ;;
+    # P108 s5 lane O (iw006-owed).
+    owed) node scripts/devtools/drive-iw006-owed.js $D $J --shots $P/owed-shots --json $P/owed.json ;;
     *) echo "unknown drive $n"; (exit 2) ;;
   esac > $P/$n.log 2>&1
   rc=$?
