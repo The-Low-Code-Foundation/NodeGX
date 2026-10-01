@@ -180,6 +180,15 @@ const unknownUnitThrows = (d: Divergence) => {
 const scannerNoProgress = (d: Divergence) => d.difference.threw !== undefined && /C17: scanJsonValues made no progress/.test(d.difference.threw);
 
 /**
+ * NSP-013 §6 C19 — Animate To Value looks its Easing Curve up by name (animate-to-value.ts :226); a
+ * name the set does not have — `''`, `null`, `undefined` or unknown text — stores `undefined`, and the
+ * run's first curve call throws inside the scheduler's timer pass, which nothing catches
+ * (nodecontext.ts :500-503). Narrow: the throw's own message; no other node in the registry has
+ * `this.ease`.
+ */
+const easeIsNotAFunction = (d: Divergence) => d.difference.threw !== undefined && /this\.ease is not a function/.test(d.difference.threw);
+
+/**
  * NSP-011 §6 C6 is node.ts's, not a node's: `setInputValue` merges a later value into a `{ value, unit }`
  * the port once held, on EVERY port of EVERY node. The per-node entries below each carry a hand scenario
  * and must keep firing; this one is the same narrow predicate on any port, counted for every spec, so a
@@ -190,6 +199,7 @@ const C6_ANY_PORT: KnownRow = { row: 'NSP-011 §6 C6 (any port — node.ts) — 
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   'net.noodl.JSONStreamParser': [{ row: 'NSP-013 §6 C17 — a stray `}` (Stream) or `}` `]` `,` (Single) where a value should start: the scanner never advances, the runtime loops forever', matches: scannerNoProgress }],
+  'net.noodl.animatetovalue': [{ row: 'NSP-013 §6 C19 — an Easing Curve the set does not have (`\'\'`, null, unknown text) throws in the scheduler\'s timer pass, and every timer in the app stops', matches: easeIsNotAFunction }],
   'net.noodl.DateAdd': [{ row: 'NSP-013 §6 C16 — an unknown Unit throws in Date Add\'s setter', matches: unknownUnitThrows }],
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],

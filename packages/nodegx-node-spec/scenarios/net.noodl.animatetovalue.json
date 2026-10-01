@@ -1,0 +1,93 @@
+[
+  {
+    "name": "the first Target Value is adopted outright — Current Value IS it, no run, no At Target Value",
+    "because": "animate-to-value.ts :155-160",
+    "params": {},
+    "steps": [{ "set": "targetValue", "value": 40 }, "settle", { "advance": 400 }, "settle"]
+  },
+  {
+    "name": "a second target runs over Duration on Ease Out: the run joins at the next frame at t=0, moves on later frames, lands exactly and fires At Target Value once",
+    "because": "animate-to-value.ts :166-168; timerscheduler.ts :177-194 join + onRunning(0), :132-174 t, finish, onFinish",
+    "params": { "duration": 300 },
+    "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "set": "targetValue", "value": 100 }, "settle", { "advance": 100 }, "settle", { "advance": 100 }, "settle", { "advance": 100 }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "Linear and Ease In give their own midpoints; a curve outside the editor's four (Ease In Quartic) is a curve all the same",
+    "because": "easecurves.ts :40-42, :80-82, :86-88; animate-to-value.ts :226 looks the name up",
+    "params": { "easingCurve": "linear", "duration": 200 },
+    "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "set": "targetValue", "value": 10 }, "settle", { "advance": 50 }, "settle", { "advance": 150 }, "settle", { "set": "easingCurve", "value": "easeIn" }, { "set": "targetValue", "value": 20 }, "settle", { "advance": 100 }, "settle", { "set": "easingCurve", "value": "easeInQuartic" }, { "advance": 50 }, "settle", { "advance": 50 }, "settle"]
+  },
+  {
+    "name": "a new target mid-run restarts from wherever the value is — the interrupted run never fires At Target Value; the same target again does nothing",
+    "because": "animate-to-value.ts :161-168; timerscheduler.ts :43-50 start stops a running timer, :52-57 a stopped timer never finishes",
+    "params": { "easingCurve": "linear", "duration": 100 },
+    "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "set": "targetValue", "value": 100 }, "settle", { "advance": 50 }, "settle", { "set": "targetValue", "value": 0 }, "settle", { "set": "targetValue", "value": 0 }, { "advance": 50 }, "settle", { "advance": 60 }, "settle"]
+  },
+  {
+    "name": "two targets in one frame make ONE move, from where the value is, to the last (GAM-008's R-glide)",
+    "because": "animate-to-value.ts :143 the description; :166-168 — the second start finds the timer queued",
+    "params": { "easingCurve": "linear", "duration": 100 },
+    "steps": [{ "set": "targetValue", "value": 50 }, "settle", { "set": "targetValue", "value": 100 }, { "set": "targetValue", "value": 0 }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle"]
+  },
+  {
+    "name": "Jump To puts Current Value at Jump Value at once and carries on towards the target; the jump itself is not an arrival",
+    "because": "animate-to-value.ts :38-76 (GAM-008, ruled R9)",
+    "params": { "easingCurve": "linear", "duration": 100, "jumpValue": 100 },
+    "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "signal": "jumpTo" }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle"]
+  },
+  {
+    "name": "a jump in the same frame as a new target, in either order, jumps and then runs from the jumped value",
+    "because": "animate-to-value.ts :46-49 — the decision waits for the frame end",
+    "params": { "easingCurve": "linear", "duration": 100, "jumpValue": 100 },
+    "steps": [{ "set": "targetValue", "value": 50 }, "settle", { "set": "targetValue", "value": 0 }, { "signal": "jumpTo" }, "settle", { "advance": 50 }, "settle", { "signal": "jumpTo" }, { "set": "targetValue", "value": 20 }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "a jump onto the target stops the run and starts none: no At Target Value; a jump before any target adopts the jump as the end",
+    "because": "animate-to-value.ts :61-66, :71",
+    "params": { "easingCurve": "linear", "duration": 100, "jumpValue": 7 },
+    "steps": [{ "signal": "jumpTo" }, "settle", { "advance": 200 }, "settle", { "set": "targetValue", "value": 7 }, "settle", { "set": "targetValue", "value": 9 }, "settle", { "advance": 50 }, { "set": "jumpValue", "value": 9 }, { "signal": "jumpTo" }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "NaN is ignored on both value ports; true and false are 1 and 0; numeric text is its number",
+    "because": "animate-to-value.ts :31-36, :56, :148-151",
+    "params": { "duration": 0 },
+    "steps": [{ "set": "targetValue", "value": "x" }, "settle", { "set": "targetValue", "value": true }, "settle", { "set": "targetValue", "value": "7" }, "settle", { "set": "jumpValue", "value": "x" }, { "signal": "jumpTo" }, "settle", { "set": "targetValue", "value": false }, "settle", { "advance": 1 }, "settle"]
+  },
+  {
+    "name": "Duration 0 (or below) lands on the frame AFTER the run joins — the join reads t=0, the next frame t=1 — and fires At Target Value",
+    "because": "timerscheduler.ts :139-143 `duration > 0` else t = 1; :185-194 the join's onRunning(0); GAM-008 R-zero",
+    "params": { "duration": 0 },
+    "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "set": "targetValue", "value": 10 }, "settle", "settle", { "set": "duration", "value": -5 }, { "set": "targetValue", "value": 20 }, "settle", "settle"]
+  },
+  {
+    "name": "Delay holds the run: no t=0 frame at the join, the value waits until now + Delay, then runs over Duration",
+    "because": "timerscheduler.ts :180 `_start = now + delay`, :185 only a delay of 0 plays at once, :132 `now >= _start`",
+    "params": { "easingCurve": "linear", "duration": 100, "delay": 100 },
+    "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "set": "targetValue", "value": 100 }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle"]
+  },
+  {
+    "name": "a Delay arriving as TEXT is concatenated onto the frame time: at time 0 '100' waits 100 ms, at time 1000 it waits until 1000100",
+    "because": "animate-to-value.ts :208 stores it raw; timerscheduler.ts :180 `currentTime + timer.delay` is a string join, :132 compares it as a number (row C20)",
+    "params": { "easingCurve": "linear", "duration": 100 },
+    "steps": [{ "set": "targetValue", "value": 0 }, { "set": "delay", "value": "100" }, "settle", { "advance": 1000 }, "settle", { "set": "targetValue", "value": 100 }, "settle", { "advance": 200 }, "settle", { "advance": 5000 }, "settle"]
+  },
+  {
+    "name": "a Delay written undefined (a wire let go) starts the run at NaN — a start no frame reaches: the value does not move and At Target Value does not fire, however long the clock runs, until a number reaches Delay and a new target restarts the run (C20)",
+    "because": "animate-to-value.ts :208 raw; timerscheduler.ts :180 `now + undefined` is NaN, :132 `now >= NaN` is false for ever",
+    "params": { "easingCurve": "linear", "duration": 100 },
+    "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "set": "delay" }, { "set": "targetValue", "value": 100 }, "settle", { "advance": 1000 }, "settle", { "set": "delay", "value": 0 }, { "set": "targetValue", "value": 50 }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "Duration changed mid-run stretches the run in place: the next frame reads t against the new duration",
+    "because": "timerscheduler.ts :139-140 — `timer.duration` read every frame",
+    "params": { "easingCurve": "linear", "duration": 100 },
+    "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "set": "targetValue", "value": 100 }, "settle", { "advance": 50 }, "settle", { "set": "duration", "value": 200 }, { "advance": 50 }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "an Easing Curve the set does not have: the run's first curve call throws inside the scheduler's timer pass (C19)",
+    "because": "animate-to-value.ts :226 `EaseCurves[value]` is undefined, :108 `this.ease(…)` throws; nodecontext.ts :500-503 nothing catches it",
+    "row": "NSP-013 §6 C19",
+    "params": { "duration": 100 },
+    "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "set": "easingCurve", "value": "bounce" }, { "set": "targetValue", "value": 10 }, "settle", { "advance": 100 }, "settle"]
+  }
+]

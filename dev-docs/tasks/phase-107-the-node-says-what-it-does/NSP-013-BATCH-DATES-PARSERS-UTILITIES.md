@@ -1,7 +1,7 @@
 # NSP-013 — Batch: dates, time, randomness, parsers, animation
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world) and R4 = continue.
-**Status: 🟡 s13 (2026-10-01) — 18 of 24 built and conform on the runtime; the other 6 named in §6.4.**
+**Status: 🟡 s13 (2026-10-01) — 21 of 24 conform on the runtime (UUID and Delay are NSP-007's; s11–s13 built the other 19); the last 3 named in §6.4.**
 
 ## 1. The person sentence
 
@@ -237,6 +237,29 @@ hand scenarios. **Both CONFORM on the runtime on their first run at 200** (seed 
 
 Rows: C18, D16, D17, D18 (§6.2), each in the bug ledger.
 
+### 6.1d s13, 2026-10-01 — Animate To Value: the scheduler's timer, frame by frame
+
+**Built:** `src/nodes/ease-curves.ts` (the viewer's `easecurves.ts` verbatim), `animate-to-value.ts` (the
+scheduler's bookkeeping for the one timer in state — queued, running, the raw `_start` — as Repeat's spec keeps
+it; the frame-end reducer runs the jump's callback and then `runTimers(now)`), 15 hand scenarios; the runtime
+target registers the viewer's node (`VIEWER_NODES`). **Conforms on the runtime on its first run at 200**
+(seed 20727: 14/15 scenarios + 1 under C19, 200/200 sequences, 10 attributed to C19, 25/25 mutants) and on five
+more seeds (3, 77, 20728, 20729, 99991 — every divergence C19); interpreter mutant sweep, 20 seeds × the three
+s13 specs: no survivors. → **65 of 147**.
+
+1. **Every input is stored RAW on the timer**, and the scheduler does JS arithmetic on them: a text Duration
+   works (`'100' > 0`, `'100' * 1`), a text Delay does not (`now + '100'` concatenates — C20), an undefined
+   Delay is a NaN start no frame reaches (C20). The spec does the same arithmetic on the same raw values.
+2. **The join reads t = 0, so a run only moves on a LATER frame** — Duration 0 included (GAM-008's R-zero, now a
+   scenario on both sides).
+3. **C19 is app-wide, measured, not reasoned.** A throwaway probe (real Animate ×2 + Repeat in one corpus
+   graph, deleted after): with one curve `bounce` or `''`, 31 of 31 frames threw; the other Animate froze at 0
+   (bad one queued first) or reached 100 and never fired At Target Value (queued second); Repeat ticked 0 times
+   against 9 in the control (both curves good: 0 throws, At Target ×1). `runTimers` reassigns `runningTimers`
+   and joins `newTimers` only after its loop, so one throw holds every timer where it is. `''`, `null` and
+   `undefined` throw too — what an emptied or disconnected wire carries. The same lookup (`EaseCurves[value]`)
+   is in Transition, Animation and Number Blend (easecurves.ts :28-31) — NOT measured here; NSP-016's.
+
 ### 6.2 Rows for a ruling (R3 (a): the runtime wins until ruled; each counted every run)
 
 | row | where | what the wire shows | plain words | proposed |
@@ -249,6 +272,8 @@ Rows: C18, D16, D17, D18 (§6.2), each in the bug ledger.
 | **D16** | Parse Feed (feed.ts :190-202 `toISODate`) | a date with no offset (`2026-09-15T08:00:00`, `2026-09-15 08:00:00`) is read in the PROCESS's zone — 08:00Z in a UTC cloud function, 06:00Z in a browser in Paris, for one feed; a named zone `Date.parse` declines (`CEST`, `BST`) is rewritten to ` UTC` and published hours wrong, where the module's own sentence says *"a feed whose date it cannot read gets null rather than a guess"*. Its example of a declined zone, `EST`, is one V8 reads correctly | *"The same feed gets different Published times depending on where it was parsed, and a CEST or BST date is published one or two hours wrong instead of being left empty."* Three scenarios, three zones | read a zoneless date as UTC (one answer everywhere); a named zone not in V8's list → `null`, as the sentence promises |
 | **D17** | Parse Feed (parsefeed.ts :269, :273-284) | `Feed Updated` is `\|\| undefined` and is flagged — an undefined is never sent, so after a feed that said when it changed, a feed that does not leaves the OLD date on the wire; the description says *"empty when it did not say"* and every other Feed output falls back to `''` | *"Feed Updated keeps the previous feed's date when the next feed has none."* One scenario | `\|\| ''`, as its five siblings |
 | **D18** | Parse Feed (parsefeed.ts :257-263; model.ts :243-252) | every item carries an `id`, so `collection.set` makes each a NAMED record: two items with one id in a feed are one record — `Items` holds it ONCE with the LATER item's fields, while `Count` (`items.length`) says two. The same id is also the same record app-wide (an Object node with that id, another Parse Feed) — by design for FED-002's store-once, but nothing on the node says the records are shared | *"A feed that repeats a guid shows Count 2 and one item, and the item is the second one."* One scenario | `Count` = what `Items` holds; say on `Items` that an item IS the record of that id |
+| **C19** | Animate To Value (animate-to-value.ts :226, :108; timerscheduler.ts :116-198; nodecontext.ts :500-503) | an Easing Curve the set does not have — `''`, `null`, `undefined`, unknown text — is stored as `undefined`; the run's first curve call throws `this.ease is not a function` inside the scheduler's timer pass, uncaught, EVERY frame from then on; the loop dies before `runningTimers` is reassigned and before `newTimers` join, so every timer in the app stops where it is — other animations freeze or never fire their end signal, Repeat never ticks | *"One Animate To Value with an empty or unknown Easing Curve stops every animation and every Repeat in the app, for good."* Measured app-wide (§6.1d); one scenario + 10 generated per run counted | fall back to Ease Out on an unknown name (one line); separately, catch a timer's throw in `runTimers` so one node cannot stop the others |
+| **C20** | Animate To Value (animate-to-value.ts :208; timerscheduler.ts :180, :185) | `Delay` is stored raw and added to the frame time with a JS `+`: text (`'100'`) CONCATENATES — at time 1000 the run starts at 1000100 (16 minutes); after an hour, weeks — and `undefined` gives a NaN start no frame reaches, so the value does not move and At Target Value does not fire until a number reaches Delay and a new target restarts the run | *"A Delay that arrives as text, or is disconnected, makes the move wait forever."* Two scenarios | `Number(value) \|\| 0` in the setter (one line) |
 | **T3** | the runner — compare.ts `eventKey` (NSP-003) | **two traces whose nested values differed compared EQUAL** — a Date, NaN, a registry array, a unit — from NSP-003 to NSP-012 | a hole shaped like the defect in the gate itself; fixed in s11, the 46 earlier specs re-graded green | closed by the fix; recorded so the s3–s10 readings are read with it |
 
 ### 6.3 Acceptance, measured
@@ -270,8 +295,7 @@ Rows: C18, D16, D17, D18 (§6.2), each in the bug ledger.
 
 ### 6.4 Not done, named
 
-The other 6 (the four agent parsers are s12's, §6.1b; Parse XML and Parse Feed s13's, §6.1c) — two of them, **UUID** and **Delay**, are NSP-007's and already conform; four are left: **Animate To Value** (the scheduler's `onRunning` with an
-ease curve — Repeat's pass plus `easecurves.ts`), **States** (1191 lines, dynamic ports — a session of its own),
+Three are left (the four agent parsers are s12's, §6.1b; Parse XML, Parse Feed and Animate To Value s13's, §6.1c–d; UUID and Delay NSP-007's): **States** (1191 lines, dynamic ports — a session of its own),
 **Screen Resolution** and **On App Error** (each needs a seam the world does not have: a viewport with a resize
 step; an error stream with a raise step). The deep run (`NSP_DEEP=10000 NSP_ONLY=…`, a quiet box). AC2. The
 third stranger round (due six times over: graphs s7, the world s8, the registry s9, the tree s10, the zone and
