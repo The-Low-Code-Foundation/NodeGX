@@ -602,5 +602,143 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "two navigates answered in one millisecond: the later one's Failure is reported before the earlier one's Done",
+    "because": "router-navigate.ts :134-138 defers Done to the frame's end, :144-146 reports Failure at once (deep run s19, seed 3333277567)",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "noTarget": true
+            },
+            "answer": {
+              "failure": {
+                "code": "navigate/no-target-page",
+                "message": "No Target Page is set on this Navigate node"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "target"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "answers are reported once: after a Done and an Unchanged land together, a later press waits for its own millisecond",
+    "because": "router-navigate.ts :134-143 — each settle callback runs once; the next press is answered only when its own navigate is handed on",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "target": "/Home"
+            },
+            "answer": "unchanged"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Detail"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press in the frame an Unchanged lands in: the answer is reported, and the new press waits for its own millisecond",
+    "because": "router-navigate.ts :139-143 registers the answer's callback before the press registers its own (:119-127); one frame end runs both",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ],
+        "answers": [
+          {
+            "match": {
+              "target": "/Home"
+            },
+            "answer": "unchanged"
+          }
+        ]
+      }
+    },
+    "steps": [
+      {
+        "set": "target",
+        "value": "/Home"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "set": "target",
+        "value": "/Detail"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
   }
 ]

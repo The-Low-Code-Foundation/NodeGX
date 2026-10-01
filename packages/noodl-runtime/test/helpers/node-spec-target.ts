@@ -891,11 +891,10 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // Timer by timer, yielding between (world.ts CLOCK, T6 — NSP-013 s12): one sweep fired an
       // answer due at +100 and a timeout due at +30000 back to back, and the answer's `.then` chain
       // never ran before the timeout aborted it. An event loop runs those microtasks in between.
+      // NSP-015 s19 (T9): ONE timer at a time, not one due TIME at a time — two timers due at the same moment (two
+      // Navigates' +1 ms) fired in one sweep, and the first's microtask answer landed after the second's.
       const target = world.clock.now() + Math.max(0, ms);
-      for (let due = world.clock.nextDue(); due !== undefined && due <= target; due = world.clock.nextDue()) {
-        world.clock.advance(due - world.clock.now());
-        await yieldToEventLoop();
-      }
+      while (world.clock.step(target)) await yieldToEventLoop();
       world.clock.advance(target - world.clock.now());
       await yieldToEventLoop(); // and what the move delivered lands before the next step
     },

@@ -348,6 +348,25 @@ export class Clock {
     this._now = target;
   }
 
+  /**
+   * NSP-015 s19 (T9) — fires the ONE earliest timer due at or before `until` (due, then scheduled
+   * order) and returns true, or returns false when none is due. A target with an event loop steps an
+   * `advance` with this and yields after EVERY timer — two timers due at the same moment included:
+   * on an event loop a timer's microtasks run before the next timer fires, whatever its due time
+   * (two Navigates answered in one millisecond; stepping by due TIME fired both in one sweep).
+   */
+  step(until: number): boolean {
+    let next: Scheduled | undefined;
+    for (const t of this.timers) {
+      if (t.due <= until && (!next || t.due < next.due || (t.due === next.due && t.seq < next.seq))) next = t;
+    }
+    if (!next) return false;
+    this.timers = this.timers.filter((t) => t !== next);
+    if (next.due > this._now) this._now = next.due;
+    next.fn();
+    return true;
+  }
+
   pending(): number {
     return this.timers.length;
   }

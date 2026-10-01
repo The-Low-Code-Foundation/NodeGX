@@ -12,7 +12,9 @@
  * timer, router-handler.ts :53) and only then is it answered — never in the frame that asked:
  *   - a failure (the Router's own checks: no Target, a Target that is not one of its pages) sets Error to its
  *     message and is Failure with its code AT ONCE (:144-146, :104-111);
- *   - `done` / `unchanged` settle the presses at the end of the frame the answer lands in (:134-143).
+ *   - `done` / `unchanged` settle the presses at the end of the frame the answer lands in (:134-143) — so when two
+ *     navigates are answered in one millisecond, a LATER one's Failure is reported before an earlier one's Done
+ *     (found by the deep run, s19: the first spec settled both in arrival order).
  * A navigate no router answers to (world.ts ROUTE: one registered name takes everything; otherwise the name
  * as handed, a blank one included — there is no `Main` rule on this side) is queued and, in a play, never
  * answered. One settle per navigate even when two routers share the name (:99-103). Error keeps its last
@@ -52,6 +54,8 @@ type State = {
   presses: number;
   /** navigates handed, waiting for the handler's +1 ms, oldest first */
   requests: readonly Request[];
+  /** :134-143 — Done / Unchanged answers waiting for the frame's end (`scheduleAfterInputsHaveUpdated`), in arrival order */
+  answered: ReadonlyArray<Readonly<{ outcome: 'done' | 'unchanged'; presses: number }>>;
 };
 
 // :158-176 `registerInputIfNeeded` — `registerInput(name, { set })`: no type, no conversion, stored raw
@@ -71,7 +75,10 @@ const NOT_A_PAGE = { failure: { code: 'navigate/page-not-found', message: '"/Nop
 
 export const RouterNavigate = defineNode({
   type: 'RouterNavigate',
-  version: 1,
+  // v2 (NSP-015 s19, the same session): a Done or Unchanged is reported at the end of the frame its answer lands in,
+  // a Failure at once — so when two navigates are answered in one millisecond, a later one's Failure comes before an
+  // earlier one's Done. v1 reported every answer at once, in arrival order. Found by the 10,000 deep run.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/router-navigate.ts',
   needs: ['router'],
   worldPool: {
@@ -87,7 +94,7 @@ export const RouterNavigate = defineNode({
   },
 
   // :37-40 initialize; the declared default reaches `_inputValues`, never the setter
-  state: { router: undefined, target: undefined, pageParams: {}, openInNewTab: false, error: undefined, scheduled: false, presses: 0, requests: [] } as State,
+  state: { router: undefined, target: undefined, pageParams: {}, openInNewTab: false, error: undefined, scheduled: false, presses: 0, requests: [], answered: [] } as State,
   // :71-79 outcomeOutputs({ done, unchanged, failure })
   outcomes: ['done', 'unchanged', 'failure'],
 
@@ -117,13 +124,18 @@ export const RouterNavigate = defineNode({
     navigate: (s) => ({ set: { scheduled: true, presses: s.presses + 1 }, send: [], outcome: 'pending' })
   },
   {
-    // :119-127, :129-133 — ONE navigate for the frame's presses, handed now and handed on at +1 ms (router-handler.ts :53)
+    // The frame's end, in the runtime's callback order: first the Done / Unchanged answers that landed since the last
+    // frame (:134-143 — each registered when its answer landed, before any press of this frame registered its own),
+    // then :119-127, :129-133 — ONE navigate for the frame's presses, handed now and handed on at +1 ms (router-handler.ts :53)
     afterInputs: (s) => {
-      if (!s.scheduled) return { send: [] };
+      if (!s.scheduled && s.answered.length === 0) return { send: [] };
+      const outcomes = s.answered.flatMap((a) => Array.from({ length: a.presses }, () => ({ port: 'navigate', outcome: a.outcome })));
+      if (!s.scheduled) return { set: { answered: [] }, send: [], outcomes };
       const request: Request = { presses: s.presses, router: s.router, target: s.target, openInNewTab: s.openInNewTab };
       return {
-        set: { scheduled: false, presses: 0, requests: [...s.requests, request] },
+        set: { scheduled: false, presses: 0, requests: [...s.requests, request], answered: [] },
         send: [],
+        outcomes,
         route: { router: s.router, target: s.target, params: s.pageParams, openInNewTab: s.openInNewTab },
         after: [{ ms: 1, tag: 'route' }]
       };
@@ -145,12 +157,11 @@ export const RouterNavigate = defineNode({
         const [request, ...rest] = s.requests;
         const answer = world.routeAnswer(request.router, request.target, request.openInNewTab);
         if (answer === undefined) return { set: { requests: rest }, send: [] }; // queued — never answered in a play
-        const answerAll = (outcome: 'done' | 'unchanged' | 'failure', error?: string) =>
-          Array.from({ length: request.presses }, () => (error === undefined ? { port: 'navigate', outcome } : { port: 'navigate', outcome, error }));
-        if (answer === 'done') return { set: { requests: rest }, send: [], outcomes: answerAll('done') };
-        if (answer === 'unchanged') return { set: { requests: rest }, send: [], outcomes: answerAll('unchanged') };
-        // :104-111 reportFailure — Error first, then Failure
-        return { set: { requests: rest, error: answer.failure.message }, send: ['error'], outcomes: answerAll('failure', answer.failure.code) };
+        // :134-143 — Done / Unchanged wait for the frame's end; a later navigate's Failure (below, at once) overtakes them
+        if (answer === 'done' || answer === 'unchanged') return { set: { requests: rest, answered: [...s.answered, { outcome: answer, presses: request.presses }] }, send: [] };
+        // :144-146, :104-111 reportFailure — at once: Error first, then Failure
+        const failures = Array.from({ length: request.presses }, () => ({ port: 'navigate', outcome: 'failure' as const, error: answer.failure.code }));
+        return { set: { requests: rest, error: answer.failure.message }, send: ['error'], outcomes: failures };
       }
     }
   }

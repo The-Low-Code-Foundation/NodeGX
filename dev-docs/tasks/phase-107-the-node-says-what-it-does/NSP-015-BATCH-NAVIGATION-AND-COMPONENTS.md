@@ -289,19 +289,29 @@ after the play.
 **Format** (guarded: `src/trace.ts`, `schema/trace.schema.json`, `src/spec.ts`, `src/world.ts` — hashes refreshed, the
 three stranger rounds green in the full run): the `route` event; `WorldNeed` `router`; a patch's `route` effect;
 `WorldView.routeAnswer(router, target, openInNewTab)`; the world handler `page(state, inputs, params)`; `WorldPool.routers`;
-`routeEvent`, `routerName`, `WorldRouter`, `RouterScript`, `RouteRule`. The spec asks the clock for the handler's
+`routeEvent`, `routerName`, `WorldRouter`, `RouterScript`, `RouteRule`; `Clock.step(until)` (T9 below). The spec asks the clock for the handler's
 millisecond itself (`after: [{ ms: 1, tag: 'route' }]`) and reads `routeAnswer` when it fires. The mutant runner wraps
 `world.page` like the other handlers.
 
-**Navigate** — [router-navigate.ts](../../../packages/nodegx-node-spec/src/nodes/router-navigate.ts), 19 hand scenarios,
-claims from the source before the runtime ran. **CONFORMS on its first run**: 19 / 19, 200 / 200, 33 / 33 mutants (the
-interpreter's first run left two `world.timer` drop-set survivors — the request queue not shifted after a queued or an
-Unchanged answer — killed by two scenarios with a second navigate inside the millisecond). A first-run green corrects no
-guess, so the runtime's own traces were read (probe above): the navigate is recorded at the frame end, Done lands in the
-settle after `advance 1`.
+**Navigate** — [router-navigate.ts](../../../packages/nodegx-node-spec/src/nodes/router-navigate.ts), **v2**, 22 hand
+scenarios, claims from the source before the runtime ran. v1 conformed at 200 on its first run (19 / 19, 33 / 33 — the
+interpreter's first run left two `world.timer` drop-set survivors, killed by two scenarios with a second navigate inside
+the millisecond) and the probe read its traces — **and the 10,000 deep run found one divergence** (seed 3333277567,
+shrunk to 7 steps): two navigates answered in one millisecond, the first Done, the second a no-target Failure; the
+runtime reports the FAILURE first. Read: `hasNavigated` / `hasUnchanged` settle at the frame's end
+(`scheduleAfterInputsHaveUpdated`, :134-143), `hasFailed` at once (:144-146) — so a later navigate's Failure overtakes an
+earlier one's Done. The spec's header said so; its reducer settled both in arrival order. **v2**: the timer queues
+Done / Unchanged (`answered`) and the frame-end reducer reports them, before the frame's own new navigate (the runtime's
+callback order). Writing v2's scenario found a second thing — **T9, a hole in the runtime TARGET**: its `advance` stepped
+the clock one due TIME at a time, so two timers due at the same moment (two navigates' +1 ms) fired in one sweep and the
+first's microtask answer (a stand-in router's `done`) landed after the second's — against world.ts CLOCK's own rule
+("what each timer delivers lands BEFORE the next one fires"; Node and browsers run microtasks between same-time timers).
+Fixed: `Clock.step(until)` fires ONE timer, and the target yields after each; every other runtime spec re-graded green
+under it (3 suites, 147 passed). Then **v2 CONFORMS**: 22 / 22, 200 / 200, 74 / 74 mutants; **deep (10,000, seed 20727):
+CONFORMS, 10,000 / 10,000, 74 / 74** (known C6 93).
 
 **Page Inputs** — [page-inputs.ts](../../../packages/nodegx-node-spec/src/nodes/page-inputs.ts), 8 hand scenarios.
-**CONFORMS on its first run**: 8 / 8, 200 / 200, 1 / 1 mutant. Read in the probe: params `{ id: 1, tab: 'a' }` at the
+**CONFORMS on its first run**: 8 / 8, 200 / 200, 1 / 1 mutant; **deep (10,000): CONFORMS, 10,000 / 10,000**. Read in the probe: params `{ id: 1, tab: 'a' }` at the
 build send both ports in the first frame; `{ id: 2 }` at +5 moves `pm-id` and leaves `pm-tab` at `a` — the merge the
 Router's own TODO admits (router.tsx :520). Its ports are DERIVED from its params (one `pm-<name>` per distinct non-empty
 name in Path / Query Parameters, split on `,`, untrimmed) — NSP-020's good case: drawable without a viewer.
