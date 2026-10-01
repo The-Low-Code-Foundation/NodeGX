@@ -1,6 +1,6 @@
 {
   "scenarios/And.json": "39da4bec7240198164009d0f611b3956c60ec039edd2678bbb30298e68345c9a",
-  "scenarios/Boolean To String.json": "cbc736862646f820eecf197c5bc2f312be1349d809cbe186e7a65e6b67312750",
+  "scenarios/Boolean To String.json": "b3e0198f9d919e0cd4193bf6802c7c24099ca7e46c4ac811a1619d09260989ce",
   "scenarios/Condition.json": "31c331f56dc4ffcd533e0f19588614954d2501f91b82e8feef11d38b818a6ec4",
   "scenarios/Counter.json": "6ed4795ca94f92b688e80bfff4d1589ceba5508054dca4f510aa5bdb04b1f181",
   "scenarios/Inverter.json": "7f8acc1c02c208134bb90d8db49efb8047f6430dc5b8bba33fa91a8d6f5ed789",
@@ -11,12 +11,12 @@
   "src/canonical.ts": "082efa5af075263f31f416393caaf5018a0dc1522444d1ec3e6cfa058e422dd6",
   "src/coerce.ts": "8cde509bfd132094d2f1d0a372d3cc258211ef917e99616157c4dc7fa02bafdd",
   "src/nodes/and.ts": "d25fadf899b0d6cfaf8b96ea1ef1c583e31a59f019f9c88ca920b9cf76e46408",
-  "src/nodes/boolean-to-string.ts": "5a7ce198f2373cf53a5709c31b17dfe14a777ad3443a0277bcd577c381623b99",
+  "src/nodes/boolean-to-string.ts": "ea8a223679ebc8a6f698dd1963ac6fdabe70bcfd1487aeae886b3f639e7c1b0c",
   "src/nodes/condition.ts": "31d92e2571f3c7394e99fe1c95add5909df84c354ff1c5919128b2de85f73c4d",
   "src/nodes/counter.ts": "fcfd9c92d5e39ff059eb569c54985102920b8d8d4a1de87cfeba96fa246889a1",
   "src/nodes/inverter.ts": "cded868c740e9b566311077125efadccfacda3354a41263cc3fb34aefc6d9455",
   "src/nodes/string-format.ts": "f363e0359ca05bc7a16e938c0d745ca7652873084df6c55b7763d96bb4f20a5d",
   "src/nodes/switch.ts": "15896daa7c22306f9a2220a1a0daf7cf71262db7e8b587c926bd27ea107d8680",
-  "src/spec.ts": "bd4244e8c69d47e54902212e2821b991bebd9a2dc3bd07240382f19b889f7e7d",
+  "src/spec.ts": "b9c4bf3ce49d23e9dbf3edb5f3984dcc2163d2aebbd7690394d5f456cd3990af",
   "src/trace.ts": "bbab071e3bd5a6a115a226559f8afb91bfca66b2b84ded27642189f1a06551a8"
 }

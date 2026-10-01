@@ -1,0 +1,175 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3dd1e6dd-8113-5ed8-956d-c8bdfd4c295e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "t_un_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "un_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_un_title",
+      "fromProperty": "Translation",
+      "toId": "un_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_un_body",
+      "fromProperty": "Translation",
+      "toId": "un_body",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_un_confirm",
+      "fromProperty": "Translation",
+      "toId": "un_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_un_saving",
+      "fromProperty": "Translation",
+      "toId": "un_wait",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_un_done",
+      "fromProperty": "Translation",
+      "toId": "un_done",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_un_failed",
+      "fromProperty": "Translation",
+      "toId": "un_fail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_un_noLink",
+      "fromProperty": "Translation",
+      "toId": "un_nolink",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_un_home",
+      "fromProperty": "Translation",
+      "toId": "un_home",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_un_pageTitle",
+      "fromProperty": "Translation",
+      "toId": "seo_un_page",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "un_url",
+      "fromProperty": "pm-u",
+      "toId": "un_view",
+      "toProperty": "in-u"
+    },
+    {
+      "fromId": "un_url",
+      "fromProperty": "pm-s",
+      "toId": "un_view",
+      "toProperty": "in-s"
+    },
+    {
+      "fromId": "un_url",
+      "fromProperty": "pm-u",
+      "toId": "un_call",
+      "toProperty": "in-u"
+    },
+    {
+      "fromId": "un_url",
+      "fromProperty": "pm-s",
+      "toId": "un_call",
+      "toProperty": "in-s"
+    },
+    {
+      "fromId": "un_view",
+      "fromProperty": "out-showButton",
+      "toId": "un_btn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "un_view",
+      "fromProperty": "out-showNoLink",
+      "toId": "un_nolink",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "un_btn",
+      "fromProperty": "onClick",
+      "toId": "un_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "un_btn",
+      "fromProperty": "onClick",
+      "toId": "un_wait_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "un_btn",
+      "fromProperty": "onClick",
+      "toId": "un_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "un_call",
+      "fromProperty": "done",
+      "toId": "un_wait_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "un_call",
+      "fromProperty": "done",
+      "toId": "un_done_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "un_call",
+      "fromProperty": "failure",
+      "toId": "un_wait_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "un_call",
+      "fromProperty": "failure",
+      "toId": "un_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "un_done_sw",
+      "fromProperty": "state",
+      "toId": "un_view",
+      "toProperty": "in-done"
+    },
+    {
+      "fromId": "un_wait_sw",
+      "fromProperty": "state",
+      "toId": "un_wait",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "un_done_sw",
+      "fromProperty": "state",
+      "toId": "un_done",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "un_fail_sw",
+      "fromProperty": "state",
+      "toId": "un_fail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "un_home",
+      "fromProperty": "onClick",
+      "toId": "un_to_home",
+      "toProperty": "navigate"
+    }
+  ]
+}

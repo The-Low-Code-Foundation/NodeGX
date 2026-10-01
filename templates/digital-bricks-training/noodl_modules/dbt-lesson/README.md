@@ -51,7 +51,8 @@ product's design-token names as aliases of NodeGX's and the lesson CSS lifted fr
 | node | ports in | ports out |
 |---|---|---|
 | `Section` | `copy` (object), `section` (object), `facts`, `done`, `current`, `assetBase` | every lesson output below, forwarded |
-| `TimelineRow` | `entry` (object), `kindLabel`, `title`, `when`, `collapsed`, `notes[]`, `comments`, `audience`, `copy`, `assetBase` | Toggled, Opened, Ask requested, Anchor kind, Anchor id |
+| `TimelineRow` | `entry` (object), `kindLabel`, `title`, `when`, `collapsed`, `notes[]`, `comments`, `focus`, `audience`, `copy`, `assetBase` | Toggled, Opened, Ask requested, Anchor kind, Anchor id, Reply requested, Conversation id |
+| `ConversationPanel` | `turns[]`, `status`, `audience`, `sending`, `rejected`, `sent`, `scrollTo`, `copy` | Send requested, Body, Close requested |
 | `PaceTracker` | `view` (object), `par` (array), `headline`, `legendActual`, `legendPar` | — |
 | `RatingGauge` | `gauge` (object) | — |
 | `DossierSegment` | `label`, `ariaLabel`, `hasFacts`, `fillPct`, `caption` | Opened |
@@ -122,9 +123,35 @@ is the first of those. A folded row's card is not in the tree at all.
   as they wrote them, with where it happened above; no red, no warm, no ✗, and no count of them
   anywhere. Its glyph is a pause, not a cross. WHERE it happened is resolved by the graph, which is
   the only place the other entries are — this node is handed the answer, not the lookup.
+- **The ask control renders only on what a thread can be about** — `THREAD_ANCHOR_KINDS`, the
+  product's `NOTE_ANCHOR_KINDS` verbatim. A coach's note carries none, as in the product; until
+  TASK-L186 this kit offered one on every kind.
+- **A coach gets one control of their own: Reply, on an open `message` card** (TASK-L186). A coach
+  answers a thread the learner started and never starts one, so there is no coach control on any
+  other kind.
 - **A message's voice is the row's, not the kind's.** `authorRole` says who wrote it; attributing it
   to the kind would paint a coach's reply and a learner's question in the same wash.
 
+
+## `ConversationPanel` — the thread under a card (TASK-L186)
+
+The product's `ConversationPanel.tsx`, minus the fetching: the graph opens the thread, writes each
+turn and hands back `turns`, and this node renders them and emits what the reader asked for.
+
+- **Every turn through the one sanitised markdown path.** A `<script>`, an `onerror` image and a
+  `javascript:` link render inert (driven, TASK-L186).
+- **One plain "New" mark on an unread turn.** No count, no dot, no red. Unread is decided by the
+  server for THIS reader; the node never sees when anybody read anything.
+- **The 4,000-character limit is named before the press**, and Send is disabled over it. The server
+  refuses rather than trims, and a refused send keeps the words in the box. The box clears only when
+  `sent` changes, a token the graph makes new for each write that landed.
+- **Who wrote it is the label, not only the colour**: *You wrote* / *Your coach wrote* for a learner,
+  *They wrote* / *You wrote* for a coach (the coach overlay in Data/Strings). A coach's turns wear
+  `--warm-tint`, as in the product: a human's words.
+- **It promises nothing it cannot keep**: no response time, no "we'll get back to you".
+- **A link can ask for it (TASK-L188).** `TimelineRow.focus` opens the row (it never folds one), and
+  `ConversationPanel.scrollTo` brings the panel into view ONCE its thread is ready — not on mount,
+  because a loading panel is about to grow and the grown thread would land below the fold.
 
 ## `PaceTracker` and `RatingGauge` — two panels that must be able to not exist
 

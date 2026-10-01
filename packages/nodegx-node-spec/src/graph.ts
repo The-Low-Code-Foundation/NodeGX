@@ -25,6 +25,19 @@
  * settle shows.
  *
  * ENDPOINTS are `"<node id>.<port>"`; a node id may not contain a dot, a port may.
+ *
+ * COMPONENTS (NSP-012, the T4 half). A node's behaviour can depend on WHERE it sits: Send Event's
+ * `parent` / `children` / `siblings` propagation walks the component tree, and Repeater Item reads
+ * the item its enclosing component instance carries. So a scenario may declare `components` — a
+ * tree of component INSTANCES by id, each with its parent (absent: placed in the root) and,
+ * optionally, the registry record it carries as its current item (the Repeater's row) — and a
+ * node may say which component it sits `in` (absent: the root). A target that holds a component
+ * tree builds one scope per component, places each child instance inside its parent as a loaded
+ * app would (under a visual node of the parent's scope), and mounts each node in its component's
+ * scope; the node ids stay global, so wires and claims are unchanged. What a component IS (its
+ * ports, Component Inputs / Outputs) is NOT declared here — that boundary is NSP-015's; this is
+ * only the tree a node sits in. A target without a component tree refuses a scenario that
+ * declares one (`canPlay`).
  */
 
 import * as fs from 'fs';
@@ -41,14 +54,35 @@ export const CLAUSES = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C
  * datum; S2 — two nodes naming different ids do not (the control beside the firing arm).
  */
 export const SHARED = ['S1', 'S2'] as const;
-export type Clause = (typeof CLAUSES)[number] | (typeof SHARED)[number];
-export const TAGS: readonly Clause[] = [...CLAUSES, ...SHARED];
+/**
+ * NSP-012's T4 half: `N` — a graph-by-construction node's OWN sentence (a port description, a
+ * docblock rule), graded in the smallest graph that can show it. Such a node has no reducer spec;
+ * its scenarios ARE its spec, and `tests/graph.test.ts` requires every T4 node of the batch to be
+ * named by at least one or exempted with a reason.
+ */
+export const NODE = ['N'] as const;
+export type Clause = (typeof CLAUSES)[number] | (typeof SHARED)[number] | (typeof NODE)[number];
+export const TAGS: readonly Clause[] = [...CLAUSES, ...SHARED, ...NODE];
 
 export interface GraphNodeDecl {
   /** The catalog type name, as `mount` takes it. */
   type: string;
   /** Applied at mount as `mount(type, params)` does: in key order, recorded as `set` events. */
   params?: Record<string, unknown>;
+  /** NSP-012: the component instance (a key of `components`) this node sits in; absent: the root. */
+  in?: string;
+}
+
+/** NSP-012: one component INSTANCE in the scenario's tree (the header's COMPONENTS paragraph). */
+export interface ComponentDecl {
+  /** The component instance this one is placed inside; absent: the root. */
+  parent?: string;
+  /**
+   * The registry record (by id, from the world's script) this instance carries as its current
+   * item — what a Repeater or Run Tasks hangs on the template instance it creates, and what
+   * Repeater Item reads. Absent: the instance carries no item.
+   */
+  item?: string;
 }
 
 export interface Wire {
@@ -74,6 +108,8 @@ export type GraphStep =
   | { node: string; signal: string }
   /** A connection made after mount — C11. The target's `connect` seeds the receiver as a loaded project's wire would. */
   | { wire: Wire }
+  /** NSP-012: the world's clock moves (adapter.ts `advance`), recorded on the named node's trace. */
+  | { node: string; advance: number }
   | 'settle';
 
 /**
@@ -93,6 +129,8 @@ export interface GraphScenario {
   /** The clauses this scenario grades. */
   clauses: Clause[];
   nodes: Record<string, GraphNodeDecl>;
+  /** NSP-012: the component instances the nodes sit in; absent: every node is in the root. */
+  components?: Record<string, ComponentDecl>;
   wires?: Wire[];
   steps: GraphStep[];
   /** The clause as facts about the trace; checked against `expect` and against every target. */
@@ -168,7 +206,7 @@ export interface GraphTarget<H extends Handle = Handle> extends TargetAdapter<H>
    * node id. A wire's making seeds the receiver with the source's current value (C11) — that is
    * the target's business, and the first settle shows it.
    */
-  mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[]): Record<string, H>;
+  mountGraph(nodes: Readonly<Record<string, GraphNodeDecl>>, wires: readonly Wire[], components?: Readonly<Record<string, ComponentDecl>>): Record<string, H>;
   /** A wire made after mount. A target that cannot (the export: a component is emitted whole) omits it; a `wire` step then throws. */
   connect?(from: H, fromPort: string, to: H, toPort: string): void;
 }
@@ -193,11 +231,27 @@ export function loadGraphScenarios(dir = GRAPH_SCENARIOS_DIR): GraphScenario[] {
       if (!sc || typeof sc.name !== 'string' || !sc.nodes || !Array.isArray(sc.steps) || !Array.isArray(sc.clauses) || !Array.isArray(sc.claims)) {
         throw new Error(`${file}[${i}]: a graph scenario needs name, clauses, nodes, steps and claims`);
       }
+      const components = sc.components;
+      if (components) {
+        for (const cid of Object.keys(components)) {
+          if (cid.includes('.')) throw new Error(`${file}[${i}]: component id ${JSON.stringify(cid)} contains a dot`);
+          // the parent chain ends in the root and names declared components only
+          const seen = new Set<string>();
+          for (let c: string | undefined = cid; c !== undefined; c = components[c].parent) {
+            if (!(c in components)) throw new Error(`${file}[${i}]: component ${JSON.stringify(cid)} is inside ${JSON.stringify(c)}, which is not declared`);
+            if (seen.has(c)) throw new Error(`${file}[${i}]: component ${JSON.stringify(cid)} is inside itself`);
+            seen.add(c);
+          }
+        }
+      }
       const nodes: Record<string, GraphNodeDecl> = {};
       for (const id of Object.keys(sc.nodes)) {
         if (id.includes('.')) throw new Error(`${file}[${i}]: node id ${JSON.stringify(id)} contains a dot`);
         const n = sc.nodes[id];
-        nodes[id] = n.params ? { type: n.type, params: reviveRecord(n.params) } : { type: n.type };
+        if (n.in !== undefined && !(components && n.in in components)) throw new Error(`${file}[${i}]: node ${JSON.stringify(id)} sits in component ${JSON.stringify(n.in)}, which is not declared`);
+        const decl: GraphNodeDecl = n.params ? { type: n.type, params: reviveRecord(n.params) } : { type: n.type };
+        if (n.in !== undefined) decl.in = n.in;
+        nodes[id] = decl;
       }
       out.push({
         ...sc,

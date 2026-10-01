@@ -416,6 +416,42 @@
       "fromProperty": "onLessonConceptId",
       "toId": "cs_dos_lesson",
       "toProperty": "pm-concept"
+    },
+    {
+      "fromId": "cs_programme_data",
+      "fromProperty": "entries",
+      "toId": "cs_haspath",
+      "toProperty": "in-entries"
+    },
+    {
+      "fromId": "cs_haspath",
+      "fromProperty": "out-hasPath",
+      "toId": "cs_whereat_box",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_haspath",
+      "fromProperty": "out-hasPath",
+      "toId": "cs_programme",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cs_haspath",
+      "fromProperty": "out-noPath",
+      "toId": "cs_nopath",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "t_cs_nopath",
+      "fromProperty": "Translation",
+      "toId": "cs_nopath",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cs_comment",
+      "fromProperty": "pm-comment",
+      "toId": "cs_focus_var",
+      "toProperty": "value"
     }
   ]
 }

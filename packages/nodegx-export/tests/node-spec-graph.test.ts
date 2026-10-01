@@ -64,7 +64,9 @@ describe('NSP-008 on the export', () => {
   test('the rest are outside, each in the exporter\'s own words', () => {
     const outside = report.results.filter((r) => r.status === 'outside');
     expect(outside.length).toBeGreaterThan(0);
-    for (const r of outside) expect(r.reason).toMatch(/refused part of the graph|not drivable|no wire is made after mount/);
+    // the fourth reason is s10's (NSP-012): a scenario that declares a world is outside the export's reach — this line
+    // lagged behind it, and the gate read red from s10's commit on (found s11, 2026-10-01)
+    for (const r of outside) expect(r.reason).toMatch(/refused part of the graph|not drivable|no wire is made after mount|no world to install/);
     // the C4 pulse-into-pulse graph: a consumed Count Changed defers the latch — phase 18's row, in its words
     expect(result('two pulses in one frame').reason).toMatch(/countChanged signal is consumed/);
   });

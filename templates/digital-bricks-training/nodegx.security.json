@@ -30,6 +30,69 @@
     },
     "roster": {
       "call": "role:staff"
+    },
+    "acceptPrivacy": {
+      "call": "authenticated"
+    },
+    "exportMine": {
+      "call": "authenticated"
+    },
+    "deleteMine": {
+      "call": "authenticated"
+    },
+    "addLearner": {
+      "call": "role:staff"
+    },
+    "setLearnerPath": {
+      "call": "role:staff"
+    },
+    "conceptList": {
+      "call": "role:staff"
+    },
+    "openThread": {
+      "call": "authenticated"
+    },
+    "sendMessage": {
+      "call": "authenticated"
+    },
+    "openThreadAsCoach": {
+      "call": "role:staff"
+    },
+    "replyAsCoach": {
+      "call": "role:staff"
+    },
+    "emailPreference": {
+      "call": "authenticated"
+    },
+    "setEmailPreference": {
+      "call": "authenticated"
+    },
+    "unsubscribe": {
+      "call": "public"
+    },
+    "authoringGuide": {
+      "call": "role:staff"
+    },
+    "learnersForLessons": {
+      "call": "role:staff"
+    },
+    "lessonContext": {
+      "call": "role:staff"
+    },
+    "saveLessonDraft": {
+      "call": "role:staff"
+    },
+    "readLesson": {
+      "call": "role:staff"
+    },
+    "publishLesson": {
+      "call": "role:staff"
+    },
+    "copyLesson": {
+      "call": "role:staff"
+    },
+    "previewLesson": {
+      "call": "role:staff"
     }
   },
   "files": {

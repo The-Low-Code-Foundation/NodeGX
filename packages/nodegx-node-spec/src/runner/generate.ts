@@ -61,7 +61,9 @@ export const DEFAULT_WORLD_POOL = Object.freeze({
     {},
     { models: { m1: { a: 1, b: 'x' }, m2: {} }, collections: { abc: ['m1'], empty: [] } },
     { models: { m1: { a: 1 }, m2: { a: 2 }, m3: { a: 3 } }, collections: { abc: ['m1', 'm2'], def: ['m2', 'm3'] } }
-  ] as readonly RegistryScript[])
+  ] as readonly RegistryScript[]),
+  // NSP-013: UTC, two zones with a DST change (one each side of the Atlantic), a half-hour offset, one west of the date line
+  timeZones: Object.freeze(['UTC', 'Europe/Paris', 'America/New_York', 'Asia/Kolkata', 'Pacific/Auckland'])
 });
 
 export interface GenerateOptions {
@@ -170,6 +172,7 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
     const registry = rng.pick(pool.registries ?? DEFAULT_WORLD_POOL.registries);
     if (Object.keys(registry).length > 0) world.registry = registry;
   }
+  if (needs.includes('timezone')) world.timeZone = rng.pick(pool.timeZones ?? DEFAULT_WORLD_POOL.timeZones);
   return { seed, params, steps, world };
 }
 

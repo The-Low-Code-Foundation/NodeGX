@@ -1,5 +1,9 @@
 /**
- * NSP-003 on the runtime — the runner pointed at the interpreted runtime.
+ * @jest-environment ../nodegx-node-spec/tests/jest-env-real-process.js
+ *
+ * NSP-003 on the runtime — the runner pointed at the interpreted runtime. The environment is the
+ * node one plus the REAL `process.env` (its header): a `timezone` spec's play sets the zone
+ * through it (world.ts TIME ZONE), and jest's sandboxed copy would move nothing.
  *
  * AC1  a planted divergence in a COPY of the runtime's Counter (never the real file: the copy is
  *      made in memory from the source text, transpiled, and registered on a fresh target) is
@@ -18,6 +22,33 @@ import type { Divergence, KnownRow, Report, TraceEvent } from '../../../nodegx-n
 import { runtimeTarget, withViewerNodes, type RuntimeTarget } from '../helpers/node-spec-target';
 
 import NodeDefinition = require('../../src/nodedefinition');
+
+/**
+ * NSP-013 §6 C17 — the agent family's JSON scanner (stream-parsers.ts `scanJsonValues`) never
+ * returns on a stray `}` (or, with no array framing, a stray `]` or `,`) where a value should
+ * start: `scanOneValue` ends where it starts and `i = end` makes no progress. A target that spins
+ * cannot be graded — the play never comes back. So THIS FILE loads the runtime's own source with
+ * ONE line added in front of `i = end;` (made in memory, the Counter copy's technique — the file
+ * on disk is never touched): no progress THROWS with the row's name, where the runtime would loop.
+ * Everything before that point is the runtime's code, unchanged. When C17 is ruled and fixed, the
+ * anchor moves, this factory throws, and the seam goes in the same commit as the row.
+ */
+jest.mock('../../src/nodes/std-library/agent/stream-parsers', () => {
+  /* eslint-disable @typescript-eslint/no-var-requires */
+  const mockFs = require('fs');
+  const mockPath = require('path');
+  const mockTs = require('typescript');
+  /* eslint-enable @typescript-eslint/no-var-requires */
+  const file = mockPath.join(__dirname, '..', '..', 'src', 'nodes', 'std-library', 'agent', 'stream-parsers.ts');
+  const source: string = mockFs.readFileSync(file, 'utf8');
+  const anchor = '    i = end;\n';
+  if (source.split(anchor).length !== 2) throw new Error('stream-parsers.ts no longer has exactly one `i = end;` — C17 moved; re-read the file and the row');
+  const guarded = source.replace(anchor, "    if (end === i) throw new Error('C17: scanJsonValues made no progress at ' + i + ' — the runtime loops here forever');\n" + anchor);
+  const js = mockTs.transpileModule(guarded, { compilerOptions: { module: mockTs.ModuleKind.CommonJS, target: mockTs.ScriptTarget.ES2019 } }).outputText;
+  const module = { exports: {} as Record<string, unknown> };
+  new Function('require', 'module', 'exports', js)(require, module, module.exports);
+  return module.exports;
+});
 
 /** The runtime target every spec is graded on: the runtime's own nodes plus the viewer-provided ones this phase specced. */
 const batchTarget = (): RuntimeTarget => withViewerNodes(runtimeTarget());
@@ -77,6 +108,12 @@ const unitMerge = (port: string) => (d: Divergence) => {
   return later >= 0 && d.difference.index > later;
 };
 
+/** C6 on every port a predicate names — the Object node's `prop-<name>` inputs are derived, any name. */
+const unitMergeOnAny = (portMatches: (port: string) => boolean) => (d: Divergence) => {
+  const ports = new Set(d.reference.filter((e) => e.t === 'set' && portMatches((e as { port: string }).port)).map((e) => (e as { port: string }).port));
+  return [...ports].some((port) => unitMerge(port)(d));
+};
+
 /**
  * NSP-012 §6 C9 — Create New Array, Create New Object and Set Object Properties coalesce two `Do`
  * presses in one frame into ONE outcome (the `hasScheduled…` guard sits before `beginOutcome`),
@@ -120,11 +157,46 @@ const deadPropertyChanged = (d: Divergence) => {
   return e !== undefined && e.t === 'signal' && /^changed-/.test(e.port);
 };
 
+/**
+ * NSP-013 §6 C16 — Date Add stores a Unit and then recomputes (dateadd.ts :77-78); a unit that is
+ * not one of the eight and not empty THROWS in `addToDate` (datemath.ts :88), so the setter
+ * throws and the runtime target dies at that step. Narrow: the throw's own message, at a `set`
+ * of `unit` to such a value, and the difference no later than the step after it.
+ */
+const unknownUnitThrows = (d: Divergence) => {
+  const m = d.difference.threw === undefined ? null : /^runtime threw: Unknown unit "(.*)"\.$/.exec(d.difference.threw);
+  if (!m) return false;
+  // the unit the throw names arrived on the port — as a mount parameter or a `set` before the difference
+  const named = m[1];
+  if (d.params.unit === named) return true;
+  return d.reference.findIndex((e, i) => i < d.difference.index + 1 && isSet(e, 'unit', (v) => v === named)) >= 0;
+};
+
+/**
+ * NSP-013 §6 C17 — JSON Stream Parser's scanner makes no progress on a stray closer and the
+ * runtime loops forever (the seam at the top of this file turns the loop into a throw). Narrow: the
+ * seam's own message; nothing else throws it.
+ */
+const scannerNoProgress = (d: Divergence) => d.difference.threw !== undefined && /C17: scanJsonValues made no progress/.test(d.difference.threw);
+
+/**
+ * NSP-011 §6 C6 is node.ts's, not a node's: `setInputValue` merges a later value into a `{ value, unit }`
+ * the port once held, on EVERY port of EVERY node. The per-node entries below each carry a hand scenario
+ * and must keep firing; this one is the same narrow predicate on any port, counted for every spec, so a
+ * daily rotation that first draws C6 on a port nobody listed (s12: Object, Variable, HTTP's Headers — one
+ * a day for three of seven seeds) reads as the known row, not as a red run. Never asserted to fire.
+ */
+const C6_ANY_PORT: KnownRow = { row: 'NSP-011 §6 C6 (any port — node.ts) — a later value merged into a unit object the port once held (R7)', matches: unitMergeOnAny(() => true) };
+
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
+  'net.noodl.JSONStreamParser': [{ row: 'NSP-013 §6 C17 — a stray `}` (Stream) or `}` `]` `,` (Single) where a value should start: the scanner never advances, the runtime loops forever', matches: scannerNoProgress }],
+  'net.noodl.DateAdd': [{ row: 'NSP-013 §6 C16 — an unknown Unit throws in Date Add\'s setter', matches: unknownUnitThrows }],
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   SetModelProperties: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('store') }],
-  Model2: [{ row: 'NSP-012 §6 C11 — `<property> Changed` never fires: nothing registers the output', matches: deadPropertyChanged }],
+  Model2: [{ row: 'NSP-012 §6 C11 — `<property> Changed` never fires: nothing registers the output', matches: deadPropertyChanged },
+    { row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMergeOnAny((p) => p.startsWith('prop-')) }
+  ],
   'Filter Collection': [{ row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems }],
   'Map Collection': [{ row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems }],
   'String Format': [
@@ -152,7 +224,10 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     }
   ],
   'Value Changed': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
-  'net.noodl.Log': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }]
+  'net.noodl.Log': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
+  'net.noodl.HTTP': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('headers') }],
+  Variable2: [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
+  'net.noodl.StreamBuffer': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('data') }]
 };
 
 /**
@@ -161,6 +236,7 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
  * node, the scenario or the seed, and the first differing line.
  *
  *   NSP_ONLY="String Format" npx jest test/node-spec/conformance.test.ts     one node (or a comma-separated list)
+ *   NSP_SEED=20731 …                                    another day's seed (the default rotates by UTC day)
  *   NSP_DEEP=10000 NSP_REPLAY_DIR=<dir> npx jest test/node-spec/conformance.test.ts -t deep
  *                                                       the deep run: shrink on, replays written
  */
@@ -168,9 +244,11 @@ describe('NSP-004 / NSP-011 — every registered spec on the runtime, 200 sequen
   const reports = new Map<string, Report>();
   const only = process.env.NSP_ONLY ? process.env.NSP_ONLY.split(',') : undefined;
   const pilot = Object.values(specs).filter((s) => !only || only.includes(s.type));
+  /** Another day's rotation, to check a known row fires on more than today's seed (NSP-013 s12). */
+  const daySeed = process.env.NSP_SEED ? Number(process.env.NSP_SEED) : undefined;
   beforeAll(async () => {
     for (const spec of pilot) {
-      const report = await runConformance(spec, batchTarget(), { sequences: 200, mutants: true, known: KNOWN_ROWS[spec.type], equivalent: EQUIVALENT_MUTANTS[spec.type] });
+      const report = await runConformance(spec, batchTarget(), { sequences: 200, seed: daySeed, mutants: true, known: [...(KNOWN_ROWS[spec.type] ?? []), C6_ANY_PORT], equivalent: EQUIVALENT_MUTANTS[spec.type] });
       // eslint-disable-next-line no-console
       console.log(formatReport(report));
       reports.set(spec.type, report);
@@ -195,8 +273,12 @@ describe('NSP-004 / NSP-011 — every registered spec on the runtime, 200 sequen
       if (only && !only.includes(type)) continue;
       const report = reports.get(type)!;
       for (const row of rows) {
+        // NSP-013 s12 (T4): a row fires when a hand scenario carrying it reproduces OR the generated
+        // sequences hit it. Generated alone was right only while every day replayed one corpus; under a
+        // real rotation a rare row (Value Changed's C6: 0, 2, 1 on three seeds) reads 0 on some days.
         const k = report.generated.known.find((x) => x.row === row.row)!;
-        expect(k.count).toBeGreaterThan(0);
+        const byScenario = report.scenarios.some((sc) => sc.status === 'known' && sc.row !== undefined && row.row.startsWith(sc.row));
+        expect({ type, row: row.row, fires: byScenario || k.count > 0 }).toEqual({ type, row: row.row, fires: true });
       }
       expect(report.scenarios.filter((s) => s.status === 'known').length).toBeGreaterThan(0);
       expect(report.scenarios.filter((s) => s.status === 'passed' && s.row)).toEqual([]);
@@ -230,7 +312,7 @@ const deep = Number(process.env.NSP_DEEP || 0);
         shrink: true,
         mutants: true,
         replayDir: process.env.NSP_REPLAY_DIR,
-        known: KNOWN_ROWS[spec.type],
+        known: [...(KNOWN_ROWS[spec.type] ?? []), C6_ANY_PORT],
         equivalent: EQUIVALENT_MUTANTS[spec.type]
       });
       // eslint-disable-next-line no-console

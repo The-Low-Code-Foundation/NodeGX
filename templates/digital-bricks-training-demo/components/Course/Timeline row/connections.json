@@ -52,24 +52,6 @@
       "toProperty": "notes"
     },
     {
-      "fromId": "tr_row",
-      "fromProperty": "onAnchorKind",
-      "toId": "tr_log",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "tr_row",
-      "fromProperty": "onAnchorId",
-      "toId": "tr_log",
-      "toProperty": "message"
-    },
-    {
-      "fromId": "tr_row",
-      "fromProperty": "onAskRequested",
-      "toId": "tr_log",
-      "toProperty": "log"
-    },
-    {
       "fromId": "tr_in",
       "fromProperty": "copy",
       "toId": "tr_row",
@@ -92,6 +74,378 @@
       "fromProperty": "onOpenLesson",
       "toId": "tr_out",
       "toProperty": "openLesson"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "audience",
+      "toId": "tr_panel",
+      "toProperty": "audience"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "copy",
+      "toId": "tr_panel",
+      "toProperty": "copy"
+    },
+    {
+      "fromId": "tr_row",
+      "fromProperty": "onAnchorKind",
+      "toId": "tr_ask",
+      "toProperty": "in-anchorKind"
+    },
+    {
+      "fromId": "tr_row",
+      "fromProperty": "onAnchorId",
+      "toId": "tr_ask",
+      "toProperty": "in-anchorId"
+    },
+    {
+      "fromId": "tr_row",
+      "fromProperty": "onAskRequested",
+      "toId": "tr_ask",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_row",
+      "fromProperty": "onConversationId",
+      "toId": "tr_reply",
+      "toProperty": "in-conversationId"
+    },
+    {
+      "fromId": "tr_row",
+      "fromProperty": "onReplyRequested",
+      "toId": "tr_reply",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_ask",
+      "fromProperty": "out-anchorKind",
+      "toId": "tr_open_l",
+      "toProperty": "in-anchorKind"
+    },
+    {
+      "fromId": "tr_ask",
+      "fromProperty": "out-anchorId",
+      "toId": "tr_open_l",
+      "toProperty": "in-anchorId"
+    },
+    {
+      "fromId": "tr_ask",
+      "fromProperty": "out-call",
+      "toId": "tr_open_l",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_ask",
+      "fromProperty": "out-anchorKind",
+      "toId": "tr_send_l",
+      "toProperty": "in-anchorKind"
+    },
+    {
+      "fromId": "tr_ask",
+      "fromProperty": "out-anchorId",
+      "toId": "tr_send_l",
+      "toProperty": "in-anchorId"
+    },
+    {
+      "fromId": "tr_reply",
+      "fromProperty": "out-conversationId",
+      "toId": "tr_open_c",
+      "toProperty": "in-conversationId"
+    },
+    {
+      "fromId": "tr_reply",
+      "fromProperty": "out-call",
+      "toId": "tr_open_c",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_reply",
+      "fromProperty": "out-conversationId",
+      "toId": "tr_send_c",
+      "toProperty": "in-conversationId"
+    },
+    {
+      "fromId": "tr_panel",
+      "fromProperty": "onBody",
+      "toId": "tr_send",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "audience",
+      "toId": "tr_send",
+      "toProperty": "in-audience"
+    },
+    {
+      "fromId": "tr_panel",
+      "fromProperty": "onSendRequested",
+      "toId": "tr_send",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_send",
+      "fromProperty": "out-body",
+      "toId": "tr_send_l",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "tr_send",
+      "fromProperty": "out-body",
+      "toId": "tr_send_c",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "tr_send",
+      "fromProperty": "out-callLearner",
+      "toId": "tr_send_l",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_send",
+      "fromProperty": "out-callCoach",
+      "toId": "tr_send_c",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_open_l",
+      "fromProperty": "out-turns",
+      "toId": "tr_loaded",
+      "toProperty": "in-turns"
+    },
+    {
+      "fromId": "tr_open_l",
+      "fromProperty": "out-done",
+      "toId": "tr_loaded",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_open_c",
+      "fromProperty": "out-turns",
+      "toId": "tr_loaded",
+      "toProperty": "in-turns"
+    },
+    {
+      "fromId": "tr_open_c",
+      "fromProperty": "out-done",
+      "toId": "tr_loaded",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_send_l",
+      "fromProperty": "out-turns",
+      "toId": "tr_sent",
+      "toProperty": "in-turns"
+    },
+    {
+      "fromId": "tr_send_l",
+      "fromProperty": "out-done",
+      "toId": "tr_sent",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_send_c",
+      "fromProperty": "out-turns",
+      "toId": "tr_sent",
+      "toProperty": "in-turns"
+    },
+    {
+      "fromId": "tr_send_c",
+      "fromProperty": "out-done",
+      "toId": "tr_sent",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_panel",
+      "fromProperty": "onCloseRequested",
+      "toId": "tr_close",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tr_ask",
+      "fromProperty": "out-open",
+      "toId": "tr_thread",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tr_reply",
+      "fromProperty": "out-open",
+      "toId": "tr_thread",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tr_close",
+      "fromProperty": "out-open",
+      "toId": "tr_thread",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tr_ask",
+      "fromProperty": "out-status",
+      "toId": "tr_panel",
+      "toProperty": "status"
+    },
+    {
+      "fromId": "tr_ask",
+      "fromProperty": "out-turns",
+      "toId": "tr_panel",
+      "toProperty": "turns"
+    },
+    {
+      "fromId": "tr_ask",
+      "fromProperty": "out-rejected",
+      "toId": "tr_panel",
+      "toProperty": "rejected"
+    },
+    {
+      "fromId": "tr_ask",
+      "fromProperty": "out-sending",
+      "toId": "tr_panel",
+      "toProperty": "sending"
+    },
+    {
+      "fromId": "tr_reply",
+      "fromProperty": "out-status",
+      "toId": "tr_panel",
+      "toProperty": "status"
+    },
+    {
+      "fromId": "tr_reply",
+      "fromProperty": "out-turns",
+      "toId": "tr_panel",
+      "toProperty": "turns"
+    },
+    {
+      "fromId": "tr_reply",
+      "fromProperty": "out-rejected",
+      "toId": "tr_panel",
+      "toProperty": "rejected"
+    },
+    {
+      "fromId": "tr_reply",
+      "fromProperty": "out-sending",
+      "toId": "tr_panel",
+      "toProperty": "sending"
+    },
+    {
+      "fromId": "tr_loaded",
+      "fromProperty": "out-turns",
+      "toId": "tr_panel",
+      "toProperty": "turns"
+    },
+    {
+      "fromId": "tr_loaded",
+      "fromProperty": "out-status",
+      "toId": "tr_panel",
+      "toProperty": "status"
+    },
+    {
+      "fromId": "tr_open_fail",
+      "fromProperty": "out-status",
+      "toId": "tr_panel",
+      "toProperty": "status"
+    },
+    {
+      "fromId": "tr_send",
+      "fromProperty": "out-sending",
+      "toId": "tr_panel",
+      "toProperty": "sending"
+    },
+    {
+      "fromId": "tr_send",
+      "fromProperty": "out-rejected",
+      "toId": "tr_panel",
+      "toProperty": "rejected"
+    },
+    {
+      "fromId": "tr_sent",
+      "fromProperty": "out-turns",
+      "toId": "tr_panel",
+      "toProperty": "turns"
+    },
+    {
+      "fromId": "tr_sent",
+      "fromProperty": "out-status",
+      "toId": "tr_panel",
+      "toProperty": "status"
+    },
+    {
+      "fromId": "tr_sent",
+      "fromProperty": "out-sending",
+      "toId": "tr_panel",
+      "toProperty": "sending"
+    },
+    {
+      "fromId": "tr_sent",
+      "fromProperty": "out-rejected",
+      "toId": "tr_panel",
+      "toProperty": "rejected"
+    },
+    {
+      "fromId": "tr_sent",
+      "fromProperty": "out-sent",
+      "toId": "tr_panel",
+      "toProperty": "sent"
+    },
+    {
+      "fromId": "tr_send_fail",
+      "fromProperty": "out-sending",
+      "toId": "tr_panel",
+      "toProperty": "sending"
+    },
+    {
+      "fromId": "tr_send_fail",
+      "fromProperty": "out-rejected",
+      "toId": "tr_panel",
+      "toProperty": "rejected"
+    },
+    {
+      "fromId": "tr_focus_var",
+      "fromProperty": "value",
+      "toId": "tr_focus",
+      "toProperty": "in-focus"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "entry",
+      "toId": "tr_focus",
+      "toProperty": "in-entry"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "audience",
+      "toId": "tr_focus",
+      "toProperty": "in-audience"
+    },
+    {
+      "fromId": "tr_focus",
+      "fromProperty": "out-focused",
+      "toId": "tr_row",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "tr_focus",
+      "fromProperty": "out-focused",
+      "toId": "tr_panel",
+      "toProperty": "scrollTo"
+    },
+    {
+      "fromId": "tr_focus",
+      "fromProperty": "out-anchorKind",
+      "toId": "tr_ask",
+      "toProperty": "in-anchorKind"
+    },
+    {
+      "fromId": "tr_focus",
+      "fromProperty": "out-anchorId",
+      "toId": "tr_ask",
+      "toProperty": "in-anchorId"
+    },
+    {
+      "fromId": "tr_focus",
+      "fromProperty": "out-go",
+      "toId": "tr_ask",
+      "toProperty": "run"
     }
   ]
 }

@@ -43,5 +43,48 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   'Set Variable': [
     { reducer: 'derived', why: GRAPH('the Value to write', 'scenarios/graph/s02-set-variable-then-read.json') },
     { reducer: 'setWith', kind: 'drop-set', why: GRAPH('the Set as choice', 'scenarios/graph/s02-set-variable-then-read.json') }
+  ],
+  // NSP-013
+  'net.noodl.DateParts': [
+    {
+      reducer: 'input',
+      kind: 'drop-set',
+      branch: '"set":["input","inputSupplied"],"emit":["failure"]',
+      why: 'an unreadable Date stores nothing a later read sees: every part reads as nothing (never sent, so the wire keeps the last readable part) and the next arrival stores afresh before anything reads'
+    },
+    {
+      reducer: 'input',
+      kind: 'drop-set',
+      branch: '"set":["input","inputSupplied"],"emit":[]',
+      why: 'an unsupplied Date (undefined, null, "") stores nothing a later read sees: nothing is sent, and the next arrival stores afresh before anything reads'
+    }
+  ],
+  'net.noodl.ParseCSV': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on CSV yet, or nothing due)' }],
+  'net.noodl.ToCSV': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on Items yet, or nothing due)' }],
+  CollectionClear: [
+    {
+      reducer: 'afterInputs',
+      kind: 'swap-branch',
+      branch: '"set":["clears"],"emit":[],"outcome":null,"outcomes":["clear:failure"]',
+      swappedWith: '"set":["clears","error"]',
+      why: 'the two no-array failure branches differ only in whether Error is written, and the one that writes it writes the same constant sentence (collection-failure.ts :149-157) the other branch already holds — found by a 20-seed sweep (NSP-013 s12, T4)'
+    }
+  ],
+  'net.noodl.StreamBuffer': [
+    {
+      reducer: 'clear',
+      kind: 'drop-set',
+      branch: '"outcome":"unchanged"',
+      why: 'a Clear with nothing to clear writes the reset values every key already holds (stream-buffer.ts :346-350; the timer is only armed while something is buffered, :300)'
+    }
+  ],
+  'net.noodl.TextAccumulator': [
+    {
+      reducer: 'clear',
+      kind: 'drop-set',
+      branch: '"outcome":"unchanged"',
+      why: 'a Clear with nothing to clear writes the reset values every key already holds (text-accumulator.ts :448-453 — Last Message is only ever set beside a non-empty Messages, which Max Messages > 0 never empties)'
+    }
   ]
+
 });

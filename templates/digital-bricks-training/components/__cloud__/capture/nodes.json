@@ -21,6 +21,14 @@
       }
     },
     {
+      "id": "notice",
+      "type": "/#__cloud__/shared/Notice",
+      "label": "Have they accepted the current notice?",
+      "x": 300,
+      "y": 220,
+      "parameters": {}
+    },
+    {
       "id": "who",
       "type": "/#__cloud__/shared/Caller learner",
       "label": "Their learner",
@@ -35,13 +43,21 @@
       "x": 560,
       "y": 40,
       "parameters": {
-        "functionScript": "/*\n * SAVE ONE OF THE LEARNER'S ANSWERS TO THEIR PROJECT — ONLY IF NOBODY ELSE HAS\n * CHANGED IT SINCE IT WAS READ (TASK-L177; OpenNoodl HLT-016 AC6).\n *\n * The product's `captureProjectFact`, on compare-and-swap instead of a row lock.\n * The product's L62: two captures both read version n, both wrote n+1, and the\n * second write replaced the first's whole `facts` map while both callers were\n * told it had worked. Here the write carries `ifMatch: { version: n }`, so the\n * backend applies it only if the row still holds n, in the same UPDATE; the\n * loser gets `precondition-failed`, reads again and merges onto what is there.\n *\n * IDENTITY COMES FROM THE SESSION (`Caller learner`), never from an argument. A\n * write that took a learner id is a write somebody can aim at somebody else.\n *\n * THE FIELD MUST BE ONE THEY CAN ACTUALLY BE ASKED FOR: a `capture` section, or\n * an `activity` that captures a fact, on their lesson for a live, unlocked step\n * of their newest path (the `lesson` function's gate, ported). The product's\n * route checks only the length, and sprint 31 recorded a typo'd namespace\n * landing in `facts` forever; this function's one legitimate caller is a section\n * on a lesson, so it has the list.\n *\n * A CONFLICT IS NEVER A 200 (L62: a swallowed conflict is worse than none). It is\n * re-read and retried, at most 8 times; after that the caller is refused and the\n * page says it could not save. A retry logs the learner id and the attempt —\n * never what they wrote.\n *\n * Every refusal is one body (the mcp/auth.ts rule): \"not yours\", \"not there\" and\n * \"not askable\" cannot be told apart.\n */\nif (Inputs.learnerId !== undefined && Inputs.conceptId !== undefined && Inputs.field !== undefined && Inputs.value !== undefined) {\n  (async () => {\n    const refuse = (why) => {\n      Outputs.error = why;\n      console.error('[dbt:capture] refused: ' + why + ' learner=' + String(Inputs.learnerId || '-'));\n      Outputs.failed();\n    };\n    try {\n      const q = (c, where, limit) => Noodl.Records.query(c, where, { limit: limit || 1000, plain: true });\n      const learnerId = String(Inputs.learnerId || '');\n      const conceptId = String(Inputs.conceptId || '');\n      const field = String(Inputs.field || '');\n      const value = String(Inputs.value === null ? '' : Inputs.value).trim();\n      // The product's route: field 1–128, value 1–2000 (after the trim its client does).\n      if (!learnerId) return refuse('no learner');\n      if (!conceptId) return refuse('no concept');\n      if (field.length < 1 || field.length > 128) return refuse('field length');\n      if (value.length < 1 || value.length > 2000) return refuse('value length');\n\n      // ── The gate: a live, unlocked step on their newest path, whose lesson asks for this field.\n      const [paths, lessons] = await Promise.all([\n        q('LearningPath', { learnerId: { equalTo: learnerId } }),\n        q('Lesson', { and: [{ learnerId: { equalTo: learnerId } }, { conceptId: { equalTo: conceptId } }] })\n      ]);\n      const live = [...paths].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];\n      if (!live) return refuse('no path');\n      const steps = await q('PathStep', { and: [{ pathId: { equalTo: live.pathId } }, { conceptId: { equalTo: conceptId } }] });\n      const step = steps.find((s) => (s.removedAt === undefined || s.removedAt === null) && s.status !== 'locked');\n      if (!step) return refuse('step not open');\n      const lesson = [...lessons].sort((a, b) => (b.generationVersion ?? 0) - (a.generationVersion ?? 0))[0];\n      if (!lesson) return refuse('no lesson');\n      const askable = (lesson.sections || []).some((s) =>\n        (s.kind === 'capture' && s.field === field) ||\n        (s.kind === 'activity' && s.capturesProjectFact && s.capturesProjectFact.field === field));\n      if (!askable) return refuse('field not asked');\n\n      // ── Read, merge ONE field, write only if unchanged; on a conflict, again.\n      const MAX_ATTEMPTS = 8;\n      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {\n        const contexts = await q('ProjectContext', { learnerId: { equalTo: learnerId } }, 2);\n        if (contexts.length !== 1) return refuse(contexts.length ? 'two contexts' : 'no context');\n        const ctx = contexts[0];\n        const version = Number(ctx.version);\n        const facts = ctx.facts && typeof ctx.facts === 'object' ? ctx.facts : {};\n        // Identical words are a no-op: nothing written, the version does not move.\n        if (facts[field] === value) {\n          Outputs.version = version;\n          Outputs.bumped = false;\n          Outputs.done();\n          return;\n        }\n        const next = Object.assign({}, facts);\n        next[field] = value;\n        try {\n          await Noodl.Records.save(ctx.objectId, { facts: next, version: version + 1 }, { className: 'ProjectContext', ifMatch: { version } });\n          Outputs.version = version + 1;\n          Outputs.bumped = true;\n          Outputs.done();\n          return;\n        } catch (e) {\n          if (!e || e.code !== 'precondition-failed') throw e;\n          // Somebody else wrote their project since it was read. Read it again.\n          console.warn('[dbt:capture] conflict learner=' + learnerId + ' attempt=' + attempt);\n          await new Promise((r) => setTimeout(r, 5 + Math.floor(Math.random() * 25)));\n        }\n      }\n      return refuse('still conflicting after ' + MAX_ATTEMPTS + ' attempts');\n    } catch (e) {\n      refuse(String((e && e.message) || e));\n    }\n  })();\n}\n",
+        "functionScript": "/*\n * SAVE ONE OF THE LEARNER'S ANSWERS TO THEIR PROJECT — ONLY IF NOBODY ELSE HAS\n * CHANGED IT SINCE IT WAS READ (TASK-L177; OpenNoodl HLT-016 AC6).\n *\n * The product's `captureProjectFact`, on compare-and-swap instead of a row lock.\n * The product's L62: two captures both read version n, both wrote n+1, and the\n * second write replaced the first's whole `facts` map while both callers were\n * told it had worked. Here the write carries `ifMatch: { version: n }`, so the\n * backend applies it only if the row still holds n, in the same UPDATE; the\n * loser gets `precondition-failed`, reads again and merges onto what is there.\n *\n * IDENTITY COMES FROM THE SESSION (`Caller learner`), never from an argument. A\n * write that took a learner id is a write somebody can aim at somebody else.\n *\n * THE FIELD MUST BE ONE THEY CAN ACTUALLY BE ASKED FOR: a `capture` section, or\n * an `activity` that captures a fact, on their lesson for a live, unlocked step\n * of their newest path (the `lesson` function's gate, ported). The product's\n * route checks only the length, and sprint 31 recorded a typo'd namespace\n * landing in `facts` forever; this function's one legitimate caller is a section\n * on a lesson, so it has the list.\n *\n * A CONFLICT IS NEVER A 200 (L62: a swallowed conflict is worse than none). It is\n * re-read and retried, at most 8 times; after that the caller is refused and the\n * page says it could not save. A retry logs the learner id and the attempt —\n * never what they wrote.\n *\n * Every refusal is one body (the mcp/auth.ts rule): \"not yours\", \"not there\" and\n * \"not askable\" cannot be told apart.\n */\n/*\n * NOT UNDER AN OUT-OF-DATE PRIVACY NOTICE (TASK-L185 §2). `noticeCurrent` is\n * shared/Notice's answer for this session's account. A stale one is refused\n * with its own body, so the page can tell \"accept the notice first\" from\n * \"could not be saved\". Reads are not gated here, as in the product: the gate\n * in App decides what the browser draws; the server refuses the WRITE.\n */\nif (Inputs.learnerId !== undefined && Inputs.conceptId !== undefined && Inputs.field !== undefined && Inputs.value !== undefined && Inputs.noticeCurrent !== undefined) {\n  (async () => {\n    const refuse = (why) => {\n      Outputs.error = why;\n      console.error('[dbt:capture] refused: ' + why + ' learner=' + String(Inputs.learnerId || '-'));\n      Outputs.failed();\n    };\n    if (Inputs.noticeCurrent !== true) {\n      console.warn('[dbt:capture] refused: notice not accepted learner=' + String(Inputs.learnerId || '-'));\n      Outputs.stale();\n      return;\n    }\n    try {\n      const q = (c, where, limit) => Noodl.Records.query(c, where, { limit: limit || 1000, plain: true });\n      const learnerId = String(Inputs.learnerId || '');\n      const conceptId = String(Inputs.conceptId || '');\n      const field = String(Inputs.field || '');\n      const value = String(Inputs.value === null ? '' : Inputs.value).trim();\n      // The product's route: field 1–128, value 1–2000 (after the trim its client does).\n      if (!learnerId) return refuse('no learner');\n      if (!conceptId) return refuse('no concept');\n      if (field.length < 1 || field.length > 128) return refuse('field length');\n      if (value.length < 1 || value.length > 2000) return refuse('value length');\n\n      // ── The gate: a live, unlocked step on their newest path, whose lesson asks for this field.\n      const [paths, lessons] = await Promise.all([\n        q('LearningPath', { learnerId: { equalTo: learnerId } }),\n        q('Lesson', { and: [{ learnerId: { equalTo: learnerId } }, { conceptId: { equalTo: conceptId } }] })\n      ]);\n      const live = [...paths].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0];\n      if (!live) return refuse('no path');\n      const steps = await q('PathStep', { and: [{ pathId: { equalTo: live.pathId } }, { conceptId: { equalTo: conceptId } }] });\n      const step = steps.find((s) => (s.removedAt === undefined || s.removedAt === null) && s.status !== 'locked');\n      if (!step) return refuse('step not open');\n      const lesson = [...lessons].sort((a, b) => (b.generationVersion ?? 0) - (a.generationVersion ?? 0))[0];\n      if (!lesson) return refuse('no lesson');\n      const askable = (lesson.sections || []).some((s) =>\n        (s.kind === 'capture' && s.field === field) ||\n        (s.kind === 'activity' && s.capturesProjectFact && s.capturesProjectFact.field === field));\n      if (!askable) return refuse('field not asked');\n\n      // ── Read, merge ONE field, write only if unchanged; on a conflict, again.\n      const MAX_ATTEMPTS = 8;\n      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {\n        const contexts = await q('ProjectContext', { learnerId: { equalTo: learnerId } }, 2);\n        if (contexts.length !== 1) return refuse(contexts.length ? 'two contexts' : 'no context');\n        const ctx = contexts[0];\n        const version = Number(ctx.version);\n        const facts = ctx.facts && typeof ctx.facts === 'object' ? ctx.facts : {};\n        // Identical words are a no-op: nothing written, the version does not move.\n        if (facts[field] === value) {\n          Outputs.version = version;\n          Outputs.bumped = false;\n          Outputs.done();\n          return;\n        }\n        const next = Object.assign({}, facts);\n        next[field] = value;\n        try {\n          await Noodl.Records.save(ctx.objectId, { facts: next, version: version + 1 }, { className: 'ProjectContext', ifMatch: { version } });\n          Outputs.version = version + 1;\n          Outputs.bumped = true;\n          Outputs.done();\n          return;\n        } catch (e) {\n          if (!e || e.code !== 'precondition-failed') throw e;\n          // Somebody else wrote their project since it was read. Read it again.\n          console.warn('[dbt:capture] conflict learner=' + learnerId + ' attempt=' + attempt);\n          await new Promise((r) => setTimeout(r, 5 + Math.floor(Math.random() * 25)));\n        }\n      }\n      return refuse('still conflicting after ' + MAX_ATTEMPTS + ' attempts');\n    } catch (e) {\n      refuse(String((e && e.message) || e));\n    }\n  })();\n}\n",
         "runOnChange-in-learnerId": true,
         "runOnChange-in-conceptId": true,
         "runOnChange-in-field": true,
-        "runOnChange-in-value": true
+        "runOnChange-in-value": true,
+        "runOnChange-in-noticeCurrent": true
       },
       "ports": [
+        {
+          "name": "in-noticeCurrent",
+          "plug": "input",
+          "type": "*",
+          "displayName": "noticeCurrent",
+          "group": "Inputs"
+        },
         {
           "name": "in-learnerId",
           "plug": "input",
@@ -100,6 +116,11 @@
           "type": "*",
           "displayName": "error",
           "group": "Outputs"
+        },
+        {
+          "name": "out-stale",
+          "plug": "output",
+          "type": "signal"
         }
       ],
       "metadata": {
@@ -125,6 +146,17 @@
       "parameters": {
         "status": "failure",
         "errorMessage": "This could not be saved."
+      }
+    },
+    {
+      "id": "deny_notice",
+      "type": "noodl.cloud.response",
+      "label": "Refused: the current privacy notice is not accepted",
+      "x": 820,
+      "y": 400,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "notice-not-accepted"
       }
     }
   ]

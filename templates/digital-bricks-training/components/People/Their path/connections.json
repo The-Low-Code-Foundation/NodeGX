@@ -1,0 +1,265 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c7e59d6a-6809-4ebe-9c9e-5a6695033039",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "t_tp_h",
+      "fromProperty": "Translation",
+      "toId": "tp_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_tp_lede",
+      "fromProperty": "Translation",
+      "toId": "tp_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_tp_change",
+      "fromProperty": "Translation",
+      "toId": "tp_change",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_tp_chosen",
+      "fromProperty": "Translation",
+      "toId": "tp_chosen_label",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_tp_none",
+      "fromProperty": "Translation",
+      "toId": "tp_none",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_tp_up",
+      "fromProperty": "Translation",
+      "toId": "tp_rows",
+      "toProperty": "in-upLabel"
+    },
+    {
+      "fromId": "t_tp_down",
+      "fromProperty": "Translation",
+      "toId": "tp_rows",
+      "toProperty": "in-downLabel"
+    },
+    {
+      "fromId": "t_tp_remove",
+      "fromProperty": "Translation",
+      "toId": "tp_rows",
+      "toProperty": "in-removeLabel"
+    },
+    {
+      "fromId": "t_tp_add",
+      "fromProperty": "Translation",
+      "toId": "tp_rows",
+      "toProperty": "in-addLabel"
+    },
+    {
+      "fromId": "t_tp_save",
+      "fromProperty": "Translation",
+      "toId": "tp_save",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_tp_avail",
+      "fromProperty": "Translation",
+      "toId": "tp_toggle",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_tp_saved",
+      "fromProperty": "Translation",
+      "toId": "tp_ok",
+      "toProperty": "in-savedText"
+    },
+    {
+      "fromId": "tp_ask",
+      "fromProperty": "out-ask",
+      "toId": "tp_concepts",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "tp_concepts",
+      "fromProperty": "out-concepts",
+      "toId": "tp_rows",
+      "toProperty": "in-concepts"
+    },
+    {
+      "fromId": "tp_in",
+      "fromProperty": "entries",
+      "toId": "tp_seed",
+      "toProperty": "in-entries"
+    },
+    {
+      "fromId": "tp_seed",
+      "fromProperty": "out-hasPath",
+      "toId": "tp_change",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tp_draft",
+      "fromProperty": "value",
+      "toId": "tp_rows",
+      "toProperty": "in-draft"
+    },
+    {
+      "fromId": "tp_rows",
+      "fromProperty": "out-chosen",
+      "toId": "tp_chosen_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tp_rows",
+      "fromProperty": "out-available",
+      "toId": "tp_avail_each",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tp_rows",
+      "fromProperty": "out-noneChosen",
+      "toId": "tp_none",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tp_chosen_each",
+      "fromProperty": "itemActionItemId",
+      "toId": "tp_up",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "tp_chosen_each",
+      "fromProperty": "itemOutputSignal-up",
+      "toId": "tp_up",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tp_chosen_each",
+      "fromProperty": "itemActionItemId",
+      "toId": "tp_down",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "tp_chosen_each",
+      "fromProperty": "itemOutputSignal-down",
+      "toId": "tp_down",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tp_chosen_each",
+      "fromProperty": "itemActionItemId",
+      "toId": "tp_remove",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "tp_chosen_each",
+      "fromProperty": "itemOutputSignal-remove",
+      "toId": "tp_remove",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tp_avail_each",
+      "fromProperty": "itemActionItemId",
+      "toId": "tp_add",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "tp_avail_each",
+      "fromProperty": "itemOutputSignal-add",
+      "toId": "tp_add",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tp_toggle",
+      "fromProperty": "onClick",
+      "toId": "tp_avail_sw",
+      "toProperty": "flip"
+    },
+    {
+      "fromId": "tp_avail_sw",
+      "fromProperty": "state",
+      "toId": "tp_avail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tp_in",
+      "fromProperty": "learnerId",
+      "toId": "tp_save_call",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "tp_rows",
+      "fromProperty": "out-conceptIds",
+      "toId": "tp_save_call",
+      "toProperty": "in-conceptIds"
+    },
+    {
+      "fromId": "tp_save",
+      "fromProperty": "onClick",
+      "toId": "tp_save_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "tp_save",
+      "fromProperty": "onClick",
+      "toId": "tp_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "tp_save_call",
+      "fromProperty": "done",
+      "toId": "tp_ok",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tp_save_call",
+      "fromProperty": "error",
+      "toId": "tp_fail",
+      "toProperty": "in-error"
+    },
+    {
+      "fromId": "tp_save_call",
+      "fromProperty": "failure",
+      "toId": "tp_fail",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tp_ok",
+      "fromProperty": "out-text",
+      "toId": "tp_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tp_fail",
+      "fromProperty": "out-text",
+      "toId": "tp_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tp_save_call",
+      "fromProperty": "done",
+      "toId": "tp_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "tp_save_call",
+      "fromProperty": "failure",
+      "toId": "tp_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "tp_msg_sw",
+      "fromProperty": "state",
+      "toId": "tp_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tp_save_call",
+      "fromProperty": "done",
+      "toId": "tp_out",
+      "toProperty": "saved"
+    }
+  ]
+}

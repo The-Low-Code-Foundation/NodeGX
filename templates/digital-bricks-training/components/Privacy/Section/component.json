@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f3ea6969-476c-42ed-b8f1-8bd9f69b8116",
+  "name": "Section",
+  "path": "/Privacy/Section",
+  "type": "visual",
+  "created": "2026-10-01T08:53:43.263Z",
+  "modified": "2026-10-01T08:53:43.263Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One section of the privacy notice: its heading and its paragraph. Its words come from the generated privacy namespace; it holds none (TASK-L185)."
+}

@@ -141,5 +141,28 @@
       "settle",
       "settle"
     ]
+  },
+  {
+    "name": "ROW C6 — a number after a unit object on Value is merged into it by node.ts: the runtime stores { value: 2, unit }",
+    "because": "node.ts setInputValue :410-420 (NSP-011 §6 C6, R7)",
+    "row": "NSP-011 §6 C6",
+    "params": {
+      "name": "x"
+    },
+    "steps": [
+      {
+        "set": "value",
+        "value": {
+          "value": 1,
+          "unit": "px"
+        }
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 2
+      },
+      "settle"
+    ]
   }
 ]

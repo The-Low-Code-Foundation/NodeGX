@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3477f59d-b255-5eef-9f74-628328b48fba",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ra_in",
+      "type": "Component Inputs",
+      "label": "Whose rows",
+      "x": 40,
+      "y": 40,
+      "ports": [
+        {
+          "name": "learnerId",
+          "plug": "output",
+          "type": "string"
+        }
+      ]
+    },
+    {
+      "id": "ra_fn",
+      "type": "JavaScriptFunction",
+      "label": "The plan: every row about them, and the order to remove them in",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * EVERY ROW ABOUT ONE PERSON, BY ONE PLAN (TASK-L185 §3, §4).\n *\n * The plan below is the ONLY statement of which rows belong to a person.\n * `exportMine` hands them over and `deleteMine` removes them, and both read it\n * from here, so a collection cannot be exported and forgotten by the deletion,\n * or the other way round (the product's L55, delete.ts enumerating the schema).\n * tools/check-privacy.mjs parses PLAN and NOTHING_ABOUT_THEM out of this node\n * and fails on any collection in backend/schema.json that is in neither — a\n * collection added later is a failure until somebody decides about it.\n *\n * A row is found one of two ways:\n *   by  — a field on the row holds their learner id;\n *   via — the row hangs off another row in the plan (a step off a path).\n * A `via` row is collected from what is left of its parent, which is why\n * deletion removes children before parents: a crash between two collections\n * then leaves parents behind (still findable, so a second run finishes), never\n * children that nothing can find any more.\n *\n * WHAT IS NOT HERE AND WHY:\n * - A group's brief and a group's session (`learnerId` empty, a `cohortId`\n *   instead) name nobody and outlive one member (the product's L105, L116).\n *   Their ANSWERS to a group's brief are theirs, and are in the plan.\n * - Rows a coach's account wrote about SOMEBODY ELSE (a note, a session) belong\n *   to that other learner and stay with them, carrying the coach's address.\n * - The account itself (`_User`, its sessions, sign-in identities, email\n *   tokens and role memberships) is read and removed by the two functions that\n *   use this node, because it is keyed on the account rather than the learner,\n *   and a staff account has no learner at all.\n *\n * Reads are `{ plain: true }` (NodeGX HLT-022). A read that comes back full\n * (1000 rows) is REFUSED rather than trusted: handing over or deleting a\n * partial set while saying it was everything is the failure this exists for.\n */\nconst PLAN = [\n  { c: 'ProjectContext', by: 'learnerId' },\n  { c: 'LearningPath', by: 'learnerId' },\n  { c: 'PathStep', via: 'LearningPath', key: 'pathId' },\n  { c: 'Progress', by: 'learnerId' },\n  { c: 'Lesson', by: 'learnerId' },\n  { c: 'LessonDraft', by: 'learnerId' },\n  { c: 'Signal', by: 'learnerId' },\n  { c: 'ArtifactSubmission', by: 'learnerId' },\n  { c: 'Assignment', by: 'learnerId' },\n  { c: 'AssignmentSubmission', by: 'learnerId' },\n  { c: 'CoachNote', by: 'learnerId' },\n  { c: 'CoachingSession', by: 'learnerId' },\n  { c: 'SessionPrep', via: 'CoachingSession', key: 'sessionId' },\n  { c: 'Conversation', by: 'learnerId' },\n  { c: 'ConversationMessage', via: 'Conversation', key: 'conversationId' },\n  { c: 'Programme', by: 'learnerId' },\n  { c: 'ProgrammeDimension', via: 'Programme', key: 'programmeId' },\n  { c: 'ProgrammeEvaluation', via: 'Programme', key: 'programmeId' },\n  { c: 'DimensionRating', via: 'ProgrammeDimension', key: 'dimensionId' },\n  { c: 'LearnerDeliverable', by: 'learnerId' },\n  { c: 'DeliverableConcept', via: 'LearnerDeliverable', key: 'deliverableId' },\n  { c: 'CohortMember', by: 'learnerId' },\n  { c: 'LearnerInvite', by: 'claimedByLearnerId' },\n  { c: 'LearnerProfile', by: 'learnerId' }\n];\n\nconst NOTHING_ABOUT_THEM = {\n  Concept: \"the course's list of topics: a title per topic, naming nobody\",\n  Cohort: \"a group's name; a group outlives any one member, and their membership is CohortMember, in the plan\"\n};\n\n/*\n * ROWS THAT GO WHEN THEY GO, BUT ARE NOT THEIRS TO TAKE AWAY (TASK-L189 §5).\n *\n * A lesson copied from this person's lesson to another learner (copyLesson)\n * lands as THAT learner's draft, carrying `copiedFromLearnerId`. Until a publish\n * passes the leak check and clears the pointer, it is still this person's words\n * about this person's project. So deletion removes it — and the export does NOT\n * hand it over, because it is the other learner's draft. tools/check-privacy.mjs\n * requires every collection here to be in PLAN as well.\n */\nconst ALSO_DELETED = [\n  { c: 'LessonDraft', by: 'copiedFromLearnerId' }\n];\n\n/* Deletion order: a collection goes before anything it hangs off, and the\n   learner profile goes last of all, because it is how a second run finds them. */\nfunction deletionOrder() {\n  const left = PLAN.filter((p) => p.c !== 'LearnerProfile').map((p) => p.c);\n  const order = [];\n  while (left.length) {\n    const i = left.findIndex((c) => !left.some((o) => PLAN.find((p) => p.c === o).via === c));\n    if (i === -1) throw new Error('the plan has a cycle');\n    order.push(left.splice(i, 1)[0]);\n  }\n  order.push('LearnerProfile');\n  return order;\n}\n\nif (Inputs.learnerId !== undefined) {\n  (async () => {\n    try {\n      const learnerId = String(Inputs.learnerId || '');\n      const rows = {};\n      if (learnerId) {\n        const q = async (c, where) => {\n          const r = await Noodl.Records.query(c, where, { limit: 1000, plain: true });\n          if (r.length >= 1000) throw new Error(c + ' returned a full page; refusing to treat it as everything');\n          return r;\n        };\n        for (const p of PLAN) {\n          if (p.by) {\n            rows[p.c] = await q(p.c, { [p.by]: { equalTo: learnerId } });\n          } else {\n            const ids = (rows[p.via] || []).map((r) => r[p.key]).filter((x) => x !== undefined && x !== null && x !== '');\n            rows[p.c] = ids.length ? await q(p.c, { [p.key]: { containedIn: ids } }) : [];\n          }\n        }\n      }\n      const alsoDeleted = {};\n      if (learnerId) {\n        for (const p of ALSO_DELETED) {\n          const r = await Noodl.Records.query(p.c, { [p.by]: { equalTo: learnerId } }, { limit: 1000, plain: true });\n          if (r.length >= 1000) throw new Error(p.c + ' returned a full page; refusing to treat it as everything');\n          alsoDeleted[p.c] = r;\n        }\n      }\n      Outputs.rows = rows;\n      Outputs.alsoDeleted = alsoDeleted;\n      Outputs.order = deletionOrder();\n      Outputs.done();\n    } catch (e) {\n      Outputs.error = String((e && e.message) || e);\n      console.error('[dbt:Rows about] ' + Outputs.error + ' learner=' + String(Inputs.learnerId || '-'));\n      Outputs.failed();\n    }\n  })();\n}\n",
+        "runOnChange-in-learnerId": true
+      },
+      "ports": [
+        {
+          "name": "in-learnerId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-rows",
+          "plug": "output",
+          "type": "*",
+          "displayName": "rows",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-order",
+          "plug": "output",
+          "type": "*",
+          "displayName": "order",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "*",
+          "displayName": "error",
+          "group": "Outputs"
+        }
+      ],
+      "metadata": {
+        "comment": "RECORDS QUERIES PER CALL: one per collection in PLAN (23), sequential because a `via` collection reads its parent first. An account with no learner (staff) makes none."
+      }
+    },
+    {
+      "id": "ra_out",
+      "type": "Component Outputs",
+      "label": "Their rows",
+      "x": 560,
+      "y": 40,
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "order",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "failed",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

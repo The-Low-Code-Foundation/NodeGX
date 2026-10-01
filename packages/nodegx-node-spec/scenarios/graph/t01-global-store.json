@@ -1,0 +1,1538 @@
+[
+  {
+    "name": "two Global Store nodes naming one store are one store: a Set moves both State outputs and pulses both State Changed; a third naming another store sees nothing; a Subscribe on the written key fires, one on another key does not",
+    "clauses": [
+      "N",
+      "S1",
+      "S2"
+    ],
+    "because": "globalstorenode.ts — `storeName`: \"several nodes may share a name and every one of them sees the same state\"; `stateChanged`: \"Fires once per commit to the store\"; `ready`: \"Fires once the store has been created and configured\"; globalstoresubscribenode.ts `changed`: \"Fires when one of the watched keys changed, and not for a commit that touched only other keys\"; `previousValue`: \"as it was immediately before the change that fired Changed\". AC5 with its control",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "a2": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "b": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "shop"
+        }
+      },
+      "sub": {
+        "type": "net.noodl.GlobalStore.Subscribe",
+        "params": {
+          "storeName": "app",
+          "keys": "count"
+        }
+      },
+      "subOther": {
+        "type": "net.noodl.GlobalStore.Subscribe",
+        "params": {
+          "storeName": "app",
+          "keys": "other"
+        }
+      },
+      "set": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "count",
+          "value": 1
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "set",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "set",
+        "set": "value",
+        "value": 2
+      },
+      {
+        "node": "set",
+        "signal": "set"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "a",
+        "signal": "ready",
+        "count": 1
+      },
+      {
+        "at": 1,
+        "subject": "a2",
+        "signal": "ready",
+        "count": 1
+      },
+      {
+        "at": 1,
+        "subject": "b",
+        "signal": "ready",
+        "count": 1
+      },
+      {
+        "at": 1,
+        "subject": "a",
+        "signal": "stateChanged",
+        "count": 0
+      },
+      {
+        "at": 1,
+        "subject": "a",
+        "port": "state",
+        "value": {}
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "count": 1
+        }
+      },
+      {
+        "at": 2,
+        "subject": "a2",
+        "port": "state",
+        "value": {
+          "count": 1
+        }
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "state",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "signal": "stateChanged",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "a2",
+        "signal": "stateChanged",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "signal": "stateChanged",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "changedKeys",
+        "value": "count"
+      },
+      {
+        "at": 2,
+        "subject": "sub",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "sub",
+        "port": "value",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "sub",
+        "port": "changedKeys",
+        "value": "count"
+      },
+      {
+        "at": 2,
+        "subject": "subOther",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "sub",
+        "port": "value",
+        "value": 2
+      },
+      {
+        "at": 3,
+        "subject": "sub",
+        "port": "previousValue",
+        "value": 1
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "signal": "stateChanged",
+        "count": 1
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a2"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "shop",
+        "subject": "b"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "sub"
+      },
+      {
+        "t": "set",
+        "port": "keys",
+        "value": "count",
+        "subject": "sub"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "subOther"
+      },
+      {
+        "t": "set",
+        "port": "keys",
+        "value": "other",
+        "subject": "subOther"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "count",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a2"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a2"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a2"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a2"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--shop",
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "subOther"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "a2"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 1
+        },
+        "subject": "a2"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a2"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "count",
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 1,
+        "subject": "sub"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "sub"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 2,
+        "subject": "set"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 2
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "count": 2
+        },
+        "subject": "a2"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a2"
+      },
+      {
+        "t": "value",
+        "port": "previousValue",
+        "value": 1,
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 2,
+        "subject": "sub"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "sub"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "set"
+      }
+    ]
+  },
+  {
+    "name": "Initial State fills in only the keys the store does not already have: a second Global Store's Initial State never overwrites a live value, and JSON text is accepted",
+    "clauses": [
+      "N"
+    ],
+    "because": "globalstorenode.ts `initialState`: \"Keys to fill in on stores that do not already have them, as an object or as JSON text; live values are never overwritten\". Three views set up in declaration order at the first frame's end; each later fill is a commit the earlier view hears (`stateChanged`: \"once per commit\")",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app",
+          "initialState": {
+            "a": 1,
+            "b": 2
+          }
+        }
+      },
+      "b": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app",
+          "initialState": {
+            "a": 9,
+            "c": 3
+          }
+        }
+      },
+      "t": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app",
+          "initialState": "{\"d\":4}"
+        }
+      },
+      "set": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "a",
+          "value": 5
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "set",
+        "signal": "set"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "a": 1,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        }
+      },
+      {
+        "at": 1,
+        "subject": "b",
+        "port": "state",
+        "value": {
+          "a": 1,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        }
+      },
+      {
+        "at": 1,
+        "subject": "t",
+        "port": "state",
+        "value": {
+          "a": 1,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        }
+      },
+      {
+        "at": 1,
+        "subject": "a",
+        "signal": "stateChanged",
+        "count": 2
+      },
+      {
+        "at": 1,
+        "subject": "a",
+        "port": "changedKeys",
+        "value": "d"
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "a": 5,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        }
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "port": "state",
+        "value": {
+          "a": 5,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        }
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "initialState",
+        "value": {
+          "a": 1,
+          "b": 2
+        },
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "b"
+      },
+      {
+        "t": "set",
+        "port": "initialState",
+        "value": {
+          "a": 9,
+          "c": 3
+        },
+        "subject": "b"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "t"
+      },
+      {
+        "t": "set",
+        "port": "initialState",
+        "value": "{\"d\":4}",
+        "subject": "t"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "a",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 5,
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "d",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "a": 1,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        },
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "d",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "a": 1,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        },
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "t"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "a": 1,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        },
+        "subject": "t"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "t"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "t"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "a",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "a": 5,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "a",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "a": 5,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        },
+        "subject": "b"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "b"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "a",
+        "subject": "t"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "a": 5,
+          "b": 2,
+          "c": 3,
+          "d": 4
+        },
+        "subject": "t"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "t"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "set"
+      }
+    ]
+  },
+  {
+    "name": "Set Global Store: no key is refused, not dropped; Merge Object shallow-merges; two writers with Batch With Others produce ONE change, two without produce two",
+    "clauses": [
+      "N"
+    ],
+    "because": "globalstoresetnode.ts `key`: \"a Set with no key is refused rather than dropped\"; `merge`: \"Shallow-merges into the existing value when both the old and the new value are plain objects\"; `transaction`: \"Holds the notification until the end of the current microtask so several writers in one turn produce a single change\"; `error`: \"Why the last write failed; blank once a write succeeds\"",
+    "world": {},
+    "nodes": {
+      "a": {
+        "type": "net.noodl.GlobalStore",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "sub": {
+        "type": "net.noodl.GlobalStore.Subscribe",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "noKey": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app"
+        }
+      },
+      "m1": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "cfg",
+          "value": {
+            "x": 1
+          }
+        }
+      },
+      "m2": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "cfg",
+          "value": {
+            "y": 2
+          },
+          "merge": true
+        }
+      },
+      "ta": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "p",
+          "value": 1,
+          "transaction": true
+        }
+      },
+      "tb": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "q",
+          "value": 2,
+          "transaction": true
+        }
+      },
+      "ua": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "r",
+          "value": 1
+        }
+      },
+      "ub": {
+        "type": "net.noodl.GlobalStore.Set",
+        "params": {
+          "storeName": "app",
+          "key": "s",
+          "value": 2
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "noKey",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "m1",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "m2",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "ta",
+        "signal": "set"
+      },
+      {
+        "node": "tb",
+        "signal": "set"
+      },
+      "settle",
+      {
+        "node": "ua",
+        "signal": "set"
+      },
+      {
+        "node": "ub",
+        "signal": "set"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "noKey",
+        "port": "error",
+        "value": "Key is required"
+      },
+      {
+        "at": 2,
+        "subject": "sub",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "port": "state",
+        "absent": true
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "cfg": {
+            "x": 1
+          }
+        }
+      },
+      {
+        "at": 4,
+        "subject": "a",
+        "port": "state",
+        "value": {
+          "cfg": {
+            "x": 1,
+            "y": 2
+          }
+        }
+      },
+      {
+        "at": 5,
+        "subject": "sub",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 5,
+        "subject": "sub",
+        "port": "changedKeys",
+        "value": "p,q"
+      },
+      {
+        "at": 5,
+        "subject": "a",
+        "signal": "stateChanged",
+        "count": 1
+      },
+      {
+        "at": 6,
+        "subject": "sub",
+        "signal": "changed",
+        "count": 2
+      },
+      {
+        "at": 6,
+        "subject": "a",
+        "signal": "stateChanged",
+        "count": 2
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "sub"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "noKey"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "m1"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "cfg",
+        "subject": "m1"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": {
+          "x": 1
+        },
+        "subject": "m1"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "m2"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "cfg",
+        "subject": "m2"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": {
+          "y": 2
+        },
+        "subject": "m2"
+      },
+      {
+        "t": "set",
+        "port": "merge",
+        "value": true,
+        "subject": "m2"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "ta"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "p",
+        "subject": "ta"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "ta"
+      },
+      {
+        "t": "set",
+        "port": "transaction",
+        "value": true,
+        "subject": "ta"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "tb"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "q",
+        "subject": "tb"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 2,
+        "subject": "tb"
+      },
+      {
+        "t": "set",
+        "port": "transaction",
+        "value": true,
+        "subject": "tb"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "ua"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "r",
+        "subject": "ua"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 1,
+        "subject": "ua"
+      },
+      {
+        "t": "set",
+        "port": "storeName",
+        "value": "app",
+        "subject": "ub"
+      },
+      {
+        "t": "set",
+        "port": "key",
+        "value": "s",
+        "subject": "ub"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 2,
+        "subject": "ub"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {},
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "storeId",
+        "value": "--ndl--global-store--app",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "ready",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "",
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {},
+        "subject": "sub"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "noKey"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "Key is required",
+        "subject": "noKey"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "failure",
+        "error": "global-store/set-failed",
+        "subject": "noKey"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "m1"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "cfg",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "cfg": {
+            "x": 1
+          }
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "cfg",
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "previousValue",
+        "value": {},
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "cfg": {
+            "x": 1
+          }
+        },
+        "subject": "sub"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "sub"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "m1"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "m2"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "cfg": {
+            "x": 1,
+            "y": 2
+          }
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "previousValue",
+        "value": {
+          "cfg": {
+            "x": 1
+          }
+        },
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "cfg": {
+            "x": 1,
+            "y": 2
+          }
+        },
+        "subject": "sub"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "sub"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "m2"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "ta"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "tb"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "p,q",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "cfg": {
+            "x": 1,
+            "y": 2
+          },
+          "p": 1,
+          "q": 2
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "p,q",
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "previousValue",
+        "value": {
+          "cfg": {
+            "x": 1,
+            "y": 2
+          }
+        },
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "cfg": {
+            "x": 1,
+            "y": 2
+          },
+          "p": 1,
+          "q": 2
+        },
+        "subject": "sub"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "sub"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "ta"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "tb"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "ua"
+      },
+      {
+        "t": "in",
+        "port": "set",
+        "subject": "ub"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "s",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "state",
+        "value": {
+          "cfg": {
+            "x": 1,
+            "y": 2
+          },
+          "p": 1,
+          "q": 2,
+          "r": 1,
+          "s": 2
+        },
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "stateChanged",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "changedKeys",
+        "value": "s",
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "previousValue",
+        "value": {
+          "cfg": {
+            "x": 1,
+            "y": 2
+          },
+          "p": 1,
+          "q": 2,
+          "r": 1
+        },
+        "subject": "sub"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "cfg": {
+            "x": 1,
+            "y": 2
+          },
+          "p": 1,
+          "q": 2,
+          "r": 1,
+          "s": 2
+        },
+        "subject": "sub"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "sub"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "sub"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "ua"
+      },
+      {
+        "t": "outcome",
+        "port": "set",
+        "value": "done",
+        "subject": "ub"
+      }
+    ]
+  }
+]

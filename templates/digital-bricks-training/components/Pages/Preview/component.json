@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "61704ee6-8152-4aca-9f4c-80fc9a24a251",
+  "name": "Preview",
+  "path": "/Pages/Preview",
+  "type": "page",
+  "created": "2026-10-01T19:00:00.000Z",
+  "modified": "2026-10-01T19:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A learner's draft lesson, drawn exactly as their lesson page draws it, for staff to review before it is published (TASK-L190). The rows carry no concept, so nothing on it can write on the learner's behalf — Palette's precedent."
+}

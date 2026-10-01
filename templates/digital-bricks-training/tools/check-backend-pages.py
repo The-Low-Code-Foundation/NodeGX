@@ -38,8 +38,14 @@ FIXTURE_OUTPUTS = {
 # Data/Programme appends `work` (TASK-L182): the words a learner sent in and what came back, which
 # the fixture carried nowhere before L182 — appended, never interleaved, like `found`.
 APPENDED = {'Data/Lesson': ['found'], 'Data/Programme': ['work']}
-PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette']
-STAFF = ['Pages/People', 'Pages/Learner']
+# Privacy joined 2026-10-01 (TASK-L185): anybody may read what would be held before they have an
+# account, and a person who declines the notice must still be able to read it.
+# Unsubscribe joined 2026-10-01 (TASK-L187): the link in a message email carries no session, and
+# a person must be able to stop mail without signing in. It only ever turns mail OFF.
+PUBLIC = ['Pages/Home', 'Pages/Sign in', 'Pages/Palette', 'Pages/Privacy', 'Pages/Unsubscribe']
+# TASK-L190: Pages/Preview draws a learner's DRAFT lesson; a learner there is sent home, and
+# previewLesson is role:staff besides (the gate is about what the page would SAY, not access).
+STAFF = ['Pages/People', 'Pages/Learner', 'Pages/Preview']
 
 
 def walk():

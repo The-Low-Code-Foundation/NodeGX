@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1e3dce53-9adb-511d-9865-afac2794a09b",
+  "name": "Notice",
+  "path": "/#__cloud__/shared/Notice",
+  "type": "cloud",
+  "created": "2026-10-01T09:00:00.000Z",
+  "modified": "2026-10-01T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Has this account accepted the current privacy notice? The one place the server knows the notice's version (TASK-L185)."
+}

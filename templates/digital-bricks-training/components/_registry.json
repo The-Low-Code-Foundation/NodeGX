@@ -1,22 +1,22 @@
 {
   "$schema": "https://opennoodl.dev/schemas/registry-v2.json",
   "version": 1,
-  "lastUpdated": "2026-09-30T15:30:00.000Z",
+  "lastUpdated": "2026-10-01T20:00:00.000Z",
   "components": {
     "App": {
       "path": "App",
       "type": "root",
-      "nodeCount": 18,
-      "connectionCount": 23,
-      "modified": "2026-09-23T13:54:30.691Z",
+      "nodeCount": 24,
+      "connectionCount": 32,
+      "modified": "2026-10-01T20:00:00.000Z",
       "created": "2026-09-19T20:51:44.992Z"
     },
     "Pages/Home": {
       "path": "Pages/Home",
       "type": "page",
-      "nodeCount": 33,
-      "connectionCount": 26,
-      "modified": "2026-09-23T14:03:10.767Z",
+      "nodeCount": 44,
+      "connectionCount": 34,
+      "modified": "2026-10-01T08:56:14.350Z",
       "created": "2026-09-19T20:51:44.992Z"
     },
     "Logic/Sections for step": {
@@ -62,9 +62,9 @@
     "Pages/Course": {
       "path": "Pages/Course",
       "type": "page",
-      "nodeCount": 52,
-      "connectionCount": 69,
-      "modified": "2026-09-23T13:44:39.931Z",
+      "nodeCount": 58,
+      "connectionCount": 75,
+      "modified": "2026-10-01T22:00:00.000Z",
       "created": "2026-09-19T21:11:24.317Z"
     },
     "Pages/Palette": {
@@ -86,9 +86,9 @@
     "Course/Timeline row": {
       "path": "Course/Timeline row",
       "type": "visual",
-      "nodeCount": 6,
-      "connectionCount": 15,
-      "modified": "2026-09-20T12:51:55.909Z",
+      "nodeCount": 21,
+      "connectionCount": 80,
+      "modified": "2026-10-01T22:00:00.000Z",
       "created": "2026-09-20T12:49:24.850Z"
     },
     "Logic/Standing": {
@@ -306,11 +306,99 @@
       "connectionCount": 22,
       "modified": "2026-09-23T13:49:02.747Z",
       "created": "2026-09-23T13:49:02.747Z"
+    },
+    "Privacy/Section": {
+      "path": "Privacy/Section",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 2,
+      "modified": "2026-10-01T08:53:43.380Z",
+      "created": "2026-10-01T08:53:43.380Z"
+    },
+    "Pages/Privacy": {
+      "path": "Pages/Privacy",
+      "type": "page",
+      "nodeCount": 21,
+      "connectionCount": 10,
+      "modified": "2026-10-01T08:54:12.583Z",
+      "created": "2026-10-01T08:54:12.583Z"
+    },
+    "Pages/Settings": {
+      "path": "Pages/Settings",
+      "type": "page",
+      "nodeCount": 80,
+      "connectionCount": 68,
+      "modified": "2026-10-01T20:00:00.000Z",
+      "created": "2026-10-01T08:55:46.827Z"
+    },
+    "Privacy/Accept": {
+      "path": "Privacy/Accept",
+      "type": "visual",
+      "nodeCount": 25,
+      "connectionCount": 20,
+      "modified": "2026-10-01T08:57:20.121Z",
+      "created": "2026-10-01T08:57:05.266Z"
+    },
+    "People/Add a learner": {
+      "path": "People/Add a learner",
+      "type": "visual",
+      "nodeCount": 31,
+      "connectionCount": 37,
+      "modified": "2026-10-01T09:20:57.055Z",
+      "created": "2026-10-01T09:20:57.055Z"
+    },
+    "People/Path step row": {
+      "path": "People/Path step row",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 11,
+      "modified": "2026-10-01T09:23:35.255Z",
+      "created": "2026-10-01T09:23:35.255Z"
+    },
+    "People/Path concept row": {
+      "path": "People/Path concept row",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 3,
+      "modified": "2026-10-01T09:23:35.406Z",
+      "created": "2026-10-01T09:23:35.406Z"
+    },
+    "People/Their path": {
+      "path": "People/Their path",
+      "type": "visual",
+      "nodeCount": 42,
+      "connectionCount": 43,
+      "modified": "2026-10-01T09:24:44.637Z",
+      "created": "2026-10-01T09:24:44.637Z"
+    },
+    "Pages/Unsubscribe": {
+      "path": "Pages/Unsubscribe",
+      "type": "page",
+      "nodeCount": 30,
+      "connectionCount": 28,
+      "modified": "2026-10-01T20:00:00.000Z",
+      "created": "2026-10-01T20:00:00.000Z"
+    },
+    "Pages/Preview": {
+      "path": "Pages/Preview",
+      "type": "page",
+      "nodeCount": 29,
+      "connectionCount": 39,
+      "modified": "2026-10-01T19:00:00.000Z",
+      "created": "2026-10-01T19:00:00.000Z"
+    },
+    "Data/Preview lesson": {
+      "path": "Data/Preview lesson",
+      "type": "logic",
+      "nodeCount": 6,
+      "connectionCount": 22,
+      "modified": "2026-10-01T19:00:00.000Z",
+      "created": "2026-10-01T19:00:00.000Z"
     }
   },
   "stats": {
-    "totalComponents": 38,
-    "totalNodes": 466,
-    "totalConnections": 690
+    "totalComponents": 46,
+    "totalNodes": 673,
+    "totalConnections": 869
   }
 }

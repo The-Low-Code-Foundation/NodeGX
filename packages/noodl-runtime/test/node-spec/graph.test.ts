@@ -2,7 +2,8 @@
  * NSP-008 — CONTRACT.md C1–C11 as graph scenarios on the runtime, the reference for graphs.
  *
  * Every scenario in `nodegx-node-spec/scenarios/graph/` is played on the runtime target
- * (`mountGraph`: the runtime's own `connectInput`, queues, breakers) and
+ * (`mountGraph`: the runtime's own `connectInput`, queues, breakers; NSP-012: one real `NodeScope`
+ * per declared component instance, the three process-wide managers reset per play) and
  *   - its trace validates against the schema (every event carries the node id as `subject`);
  *   - its CLAIMS hold — the clause's sentence as facts about the trace, hand-written from the
  *     clause (src/graph.ts). A scenario marked `row` is one whose recorded trace does NOT bear the

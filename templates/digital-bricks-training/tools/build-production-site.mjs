@@ -30,7 +30,7 @@
  * noodl.deploy.js is whatever a peer last built (L180), so the production
  * viewer is built separately (hosting/README.md §2) and passed as --engine. The
  * output is refused if the engine carries an inline source map, if backend/,
- * tools/, hosting/ or the security file were published, if any @example.test
+ * tools/, hosting/, privacy/ or the security file were published, if any @example.test
  * address or the Palette route survived, or if the origin is not in it.
  */
 import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
@@ -73,7 +73,7 @@ const work = mkdtempSync(join(tmpdir(), 'dbt-production-'));
 const proj = join(work, 'project');
 cpSync(TEMPLATE, proj, {
   recursive: true,
-  filter: (src) => !/[/\\](backend|tools|hosting|docs)([/\\]|$)/.test(src.slice(TEMPLATE.length))
+  filter: (src) => !/[/\\](backend|tools|hosting|docs|privacy)([/\\]|$)/.test(src.slice(TEMPLATE.length))
 });
 
 // ── 2. The named list ──────────────────────────────────────────────────────
@@ -152,7 +152,7 @@ const walk = (d) => {
   }
 };
 walk(OUT);
-for (const dir of ['backend', 'tools', 'hosting', 'docs']) if (existsSync(join(OUT, dir))) failures.push(`${dir}/ was published`);
+for (const dir of ['backend', 'tools', 'hosting', 'docs', 'privacy']) if (existsSync(join(OUT, dir))) failures.push(`${dir}/ was published`);
 if (existsSync(join(OUT, 'nodegx.security.json'))) failures.push('the security file was published');
 const engine = readFileSync(join(OUT, 'noodl.deploy.js'), 'utf8');
 // Searched in the WHOLE file: the map's marker opens a 10 MB base64 tail, so a

@@ -751,6 +751,69 @@
       ]
     },
     {
+      "name": "LessonDraft",
+      "columns": [
+        {
+          "name": "learnerId",
+          "type": "String"
+        },
+        {
+          "name": "conceptId",
+          "type": "String"
+        },
+        {
+          "name": "title",
+          "type": "String"
+        },
+        {
+          "name": "hook",
+          "type": "String"
+        },
+        {
+          "name": "landing",
+          "type": "String"
+        },
+        {
+          "name": "steps",
+          "type": "Array"
+        },
+        {
+          "name": "sections",
+          "type": "Array"
+        },
+        {
+          "name": "version",
+          "type": "Number"
+        },
+        {
+          "name": "publishedVersion",
+          "type": "Number"
+        },
+        {
+          "name": "copiedFromLearnerId",
+          "type": "String"
+        },
+        {
+          "name": "updatedByEmail",
+          "type": "String"
+        }
+      ],
+      "indexes": [
+        {
+          "fields": [
+            "learnerId",
+            "conceptId"
+          ],
+          "unique": true
+        },
+        {
+          "fields": [
+            "copiedFromLearnerId"
+          ]
+        }
+      ]
+    },
+    {
       "name": "PathStep",
       "columns": [
         {

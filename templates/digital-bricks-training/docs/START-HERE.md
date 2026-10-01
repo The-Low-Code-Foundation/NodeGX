@@ -651,9 +651,11 @@ PostgreSQL runs. Two things the move found, both worth knowing:
 
 ## What is not here yet
 
-Every write but the two above — the coach's composers, the learner's question on a card, answers
-to a brief, the confidence check — each a later write on the pattern `capture` set. The engine: a lesson
-nobody has written says *not written yet*, and that is every step Sam has not reached yet. Every coach
+Every write but those above — the coach's composers, answers to a brief, the confidence check —
+each a later write on the pattern `capture` set. The lesson writer: a lesson
+nobody has written says *not written yet*, and that is every step Sam has not reached yet. **There
+will be no engine.** Lessons are written by the trainer's Claude over MCP and by nothing else, and a
+learner cannot revise or regenerate one (decision 008). See "Your Claude writes the lessons" above. Every coach
 composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every
 string has one owner" above for exactly which strings the table owns today and which are still
 English in place.
@@ -723,3 +725,205 @@ the live site, **after checking it carries the NDA-017 `.value` fix** (the i18ne
   formatted by the graph. The kit's assignment card lists them through the one markdown path. A
   coach-read brief (the product's default) says *Your coach reads this…* rather than looking
   unfinished. The coach's programme view shows the same answers, in the coach's own words.
+
+## The privacy floor (TASK-L185)
+
+No real person's data goes in until the app can say what it holds, ask them to accept that, hand it
+all back and delete it. Four pieces, each with one owner:
+
+- **The notice is `privacy/notice.en.json`**: its words AND its version. It is this template's own,
+  not the product's (which describes model calls, uploads and Google sign-in the template does not
+  have). Edit it, bump `version` when anything that matters changes, then run
+  `node tools/build-privacy.mjs`. That writes the GENERATED `str_privacy` half of `Data/Strings`
+  (the `privacy` namespace, with `{{version}}` and `{{email}}` filled in) and the one server-side
+  copy of the version in `__cloud__/shared/Notice`. Redeploy the functions and the site afterwards.
+- **Acceptance.** `acceptPrivacy` is the only writer of `_User.privacyVersion` / `privacyAcceptedAt`,
+  compared for EQUALITY, never back-filled. In `App`, the notice gate HOLDS the page (class
+  `dbt-pages-held`, `display: none`, router still mounted) and renders `Privacy/Accept` in its place,
+  so the address survives and accepting reloads it. `/privacy`, `/settings`, sign-in and the
+  specimen are never held. The gate re-reads the account when the `User` node says it `changed`
+  (through a tick node, because a run-driven Function may not also run on value changes — L165).
+  **The browser's gate decides what is drawn; `capture` and `finishStep` refuse the WRITE** with
+  their own body, `notice-not-accepted`, while the caller's version is stale.
+- **Export and deletion read ONE plan**, `__cloud__/shared/Rows about`. `exportMine` hands the rows
+  over as one file (leaving out a coach's internal notes and token values, and saying so at the
+  top); `deleteMine` removes them children first, the learner profile after them, sessions just
+  before the account and the account last. There is no transaction, so that ORDER is what makes a
+  crash recoverable: a second run finishes it. The page asks for the word DELETE and the server
+  checks it too. Nothing is kept afterwards.
+- **`tools/check-privacy.mjs`** fails if a collection in `backend/schema.json` is neither in the plan
+  nor excused with a reason, if any copy of the version disagrees with the notice, or if the notice
+  names something (an AI company, Google, uploads, tokens, a connector, payments) the template has no
+  node, function or setting for. Demonstrated failing by name all three ways.
+
+**Two things only driving found.** After `deleteMine` the account's sessions are gone, so the Log Out
+node FAILS and leaves the stored session behind; Home then held itself behind the acceptance screen
+for somebody who had just deleted their account. Settings now forgets the session itself and loads
+Home fresh with `?deleted=1`. And a component instance does not take `mounted` (the validator said
+so before any render did), so `App` mounts a Group around `Privacy/Accept`.
+
+**NodeGX sessions do not expire** (`oauth-routes.ts:475` writes no `expiresAt`), so the notice says a
+sign-in lasts until you sign out. **The demo carries none of this**: `build-demo` drops the privacy
+pages, the gate and Home's links by name, because the notice describes a real deployment and the demo
+holds nothing.
+
+## A coach adds a learner (TASK-L184)
+
+Until now every learner this template showed was a fixture. On `/people` a coach (staff) adds a
+real one by address, and on that learner's page chooses their path by hand.
+
+- **`addLearner`** (`role:staff`) checks the address and the project's name BEFORE anything is
+  written, then makes the account with NodeGX's own **Create User** node — keyed on the username,
+  which is the trimmed, lower-cased address, so a second add with the same address is `Unchanged`
+  and hands back the same account rather than making another. A coach's address (the `staff` role)
+  is refused. Then, each only if missing, in this order so a crash is healed by pressing again: the
+  learner profile, the project at version 1 with empty facts, and the coach's private note as a
+  claimed `LearnerInvite.label` — where the roster reads it and nowhere a learner can. No name is
+  derived from the address, no password exists, and no sign-up is opened.
+- **`setLearnerPath`** (`role:staff`) writes a NEW path row and then its steps, in the coach's
+  order: what they already finished stays `complete`, the first unfinished step is `available`, the
+  rest `locked`, and no rationale is invented. Every concept is checked against `Concept` and an
+  unknown one is refused BY NAME. Path first, because steps written before a crash would be
+  steps no path names — and the deletion plan finds steps only through a path.
+- **`conceptList`** (`role:staff`) is the course's concepts, alphabetical, for the picker.
+- **`/people`** gains *Add a learner* (`People/Add a learner`), which can then email them a sign-in
+  link through the backend's own magic-link request. **Every learner's roster row now links to
+  their page** (it was one name until a backend existed — L165's own comment said so).
+- **`/learner`** gains *Their path* (`People/Their path`) on the programme surface: their current
+  path, in order, with Move up / Move down / Remove, and the course's other concepts to add. Saving
+  refreshes their programme and the roster head.
+- **A learner with a project and no path** reads *"Your coach is setting up your path"* on
+  `/course` instead of empty cards.
+
+`tools/check-write-functions.mjs` holds both writes to its rules (refusals by name and writing
+nothing, path before steps, finished stays finished, a coach refused, a second add writing
+nothing), each demonstrated failing by name. **The demo carries none of the coach's writes.**
+
+**"Ask your coach about this" used to do nothing**; TASK-L186 below is what it does now.
+
+## Your Claude writes the lessons (TASK-L189–L191)
+
+Lessons are written by the trainer's own Claude over MCP, and by nothing else (decision 008). A
+learner cannot change one. The door is NodeGX's own `POST /mcp`: a key **bound to a staff
+account** and **scoped to exactly nine functions** is offered exactly those nine tools.
+
+| tool | what it does |
+|---|---|
+| `authoringGuide` | how lessons are written here: the workflow, the product's projection prompt verbatim, and the exact JSON Schema of a lesson |
+| `learnersForLessons` | every learner, their path, and which steps have a lesson, a draft or nothing |
+| `lessonContext` | their project and saved answers, the step, the concept's teaching body, the capture fields already used, who has a lesson to copy |
+| `saveLessonDraft` | a DRAFT, after the product's own `validateLessonOutput`; replace one by sending its version |
+| `readLesson` | a draft or the published lesson, in full |
+| `publishLesson` | a new `Lesson` row beside the old ones; refuses a copy still about another learner |
+| `copyLesson` | another learner's published lesson as this one's draft, never published |
+| `conceptList`, `setLearnerPath` | the trainer's path tools (L184) |
+
+**A draft reaches no learner.** It is its own collection (`LessonDraft`), and the learner's
+`lesson` read never opens it. Staff see it at `/preview?learner=&concept=` (`Pages/Preview`): the
+learner's lesson page with every write taken out, under a band saying whose it is and whether it
+is live. `previewLesson` is the page's read and is **not** on the key.
+
+**Four blocks are generated, never edited,** by `tools/build-trainer-door.mjs` from the product's
+source: the gate (`LESSON_GATE`), the guide (`AUTHORING_GUIDE`), the concept bodies
+(`CONCEPT_BODIES`), and `tools/lib/trainer-door.lib.js` copied into each function as
+`TRAINER_DOOR_LIB`. `tools/check-trainer-door.mjs` runs the functions' own scripts against a fake as
+strict as the backend, with a control for each guarantee.
+
+**The copy check catches exact repeats, not paraphrase.** It names every place repeating the source
+learner's project name, problem statement or a saved answer of 12+ characters, and publish refuses
+while any remain. A paraphrase of the source's project survives it, so read the preview.
+
+```bash
+# On a backend that already holds data — production — in this order:
+node tools/update-backend.mjs   --backend <url> --token <admin>            # dry run: shows the diff
+node tools/update-backend.mjs   --backend <url> --token <admin> --apply    # LessonDraft + the policy
+node tools/deploy-functions.mjs --backend <url> --token <admin>            # refuses an unruled endpoint
+node tools/setup-trainer-key.mjs --backend <url> --token <admin> --as <your staff email>
+# It prints the secret ONCE, inside the line to add to Claude Code. It is stored nowhere.
+```
+
+**Deploy the functions only after `update-backend`.** A backend keeps the policy it started with,
+and a function deployed with no rule runs for ANY signed-in caller. `deploy-functions` catches this,
+but only after it has deployed.
+
+**claude.ai on the web and mobile cannot connect**: NodeGX's `/mcp` takes a key, not OAuth. Claude
+Code in the terminal or the desktop app's Code tab can.
+
+## Asking your coach, and the coach's reply (TASK-L186)
+
+A learner presses *Ask your coach about this* on an open card and a thread opens under it; their
+coach opens the same thread from that learner's programme and replies. Sprint 54 in the product repo
+(`dev-docs/sprints/sprint-54-the-coach-answers/`) holds the decisions: two-way threads, a coach
+answers and never starts one, and coach notes stay read-only.
+
+- **`shared/Thread` is the one owner of a thread's rules**, ported from the product's
+  `conversations/service.ts`: the anchor vocabulary (the product's `NOTE_ANCHOR_KINDS`), a message
+  refused — never trimmed — over 4,000 characters, the subject as the first line cut at 80, and who
+  marks what read. **Opening marks the OTHER party's turns read and still says which were new;
+  your own turns are never marked; sending marks nothing.** `readAt` never leaves the node.
+- **Four functions, each one request to that owner.** `openThread` and `sendMessage`
+  (`authenticated`) take the learner from `Caller learner` — the session — and name only the card.
+  `openThreadAsCoach` and `replyAsCoach` (`role:staff`) name a THREAD and never a learner: the
+  thread says whose it is. `reader` is typed in each function's own graph. A send under an
+  out-of-date notice is refused with `notice-not-accepted`; every other refusal is a reason, never a
+  sentence, so "not yours" and "not there" look the same.
+- **`Course/Timeline row`** places the kit's `ConversationPanel` under the row, `mounted` only
+  once Ask (a learner) or Reply (a coach, on an open message card) is pressed, and calls the
+  functions itself — the `Section row` precedent. Forty rows carry forty closed doors and no panels.
+- **What is not refreshed**: after a reply, the coach's programme does not grow a new message row
+  until the page is reloaded; the thread itself shows it at once.
+
+`tools/check-thread.mjs` runs `shared/Thread`'s own script over the seed — read-marking both ways,
+eight refusals writing nothing, the subject, one vocabulary across the node, the kit and the product
+— and carries a CONTROL: with the learner scope cut out of the lookup, another learner must read
+Sam's thread, or the check could not see the leak it guards. Three further mutations were driven
+and each failed by name.
+
+**The demo answers in the browser**: the two opens read the made-up messages, and a sent turn stays
+in that page only.
+
+## Telling the other person, and stopping it (TASK-L187, TASK-L188)
+
+When a learner asks, their coach is emailed the question and a link to that learner's programme;
+when a coach replies, the learner is emailed the reply and a link that opens that card's thread.
+Either can stop these emails, and sign-in links are never affected.
+
+- **`shared/Message mail` is the one owner of message mail**: who it goes to, whether they may be
+  emailed, the words, each recipient's own unsubscribe link, and the send. `sendMessage` and
+  `replyAsCoach` call it AFTER the turn is saved and answer AFTER it — and it always answers, so a
+  refused or failed mail never fails a write (driven against a dead relay: 200, the turn saved, the
+  log carrying ids and a count and no address or body).
+- **Who.** A question goes to the coach recorded on the learner's profile (`coachEmail`, which
+  `addLearner` now writes as the adding coach's address, on a NEW profile only). With nobody
+  recorded it goes to every staff account (`List Users In Role`), and that mail says so. Nothing is
+  back-filled from a guess. A reply goes to the learner.
+- **May we.** Per recipient: an account that opted out (`emailOptOutAt`) or has no address gets
+  nothing.
+- **What it carries.** The ONE turn that triggered it, what it is about (the card's title), and a
+  link — never the thread. The subject never quotes the message. The learner is named by the name on
+  their account, else their address, never by the coach's private label.
+- **Links are built on `SITE_ORIGIN`**, a configured function secret, never the request's headers:
+  a learner's request must not be able to aim the link in their coach's mail anywhere. The reply's
+  link is `/course?comment=<card>`: `/course` puts it in the `focusAnchor` variable, and the row whose
+  own entry it names opens, opens its thread and brings it into view once it is loaded. An unknown,
+  malformed or hostile value renders the plain page (driven, `#root` byte-identical).
+- **Stopping it.** A switch on `/settings` (`emailPreference`, `setEmailPreference` — the only thing
+  that turns mail back on), and a one-click link in every mail: `/unsubscribe?u=<account>&s=<HMAC>`,
+  signed with `UNSUBSCRIBE_KEY` over `dbt-unsubscribe:v1:<account>`, never stored and never
+  expiring. `/unsubscribe` needs no sign-in, sits outside the notice gate, and stops the mail on a
+  PRESS — a mail scanner's GET changes nothing. `unsubscribe` is `public` and answers one body for
+  every outcome, so it cannot be used to test which accounts exist.
+- **`tools/setup-mail.mjs`** provisions both secrets through NodeGX's admin route, mints the key ONCE
+  (replacing it would break every link already sent; `--rotate` does it on purpose), and
+  `check-production` fails without them.
+- **Why a script sends, not a Send Email node.** A node sends one mail per Do, and the staff fallback
+  is one mail PER recipient, each with its own gate and its own unsubscribe link — a loop a graph
+  cannot draw. The script uses `_noodl_send_email`, the seam the node itself calls. The node also has
+  no headers port, so the RFC 8058 `List-Unsubscribe` header cannot be set; the link is in the body.
+  Both are NodeGX core rows.
+
+`tools/check-opt-out.mjs` runs `shared/Message mail`'s own script against a fake mailer — the recorded
+coach alone, every staff account when nobody is, the learner, nobody opted out or without an address,
+the turn and never an earlier one, no label, each recipient's own signed link, no address or body in
+a log — and runs `unsubscribe`'s verifier and the switch's script. Eight mutations were driven and
+each failed by name.

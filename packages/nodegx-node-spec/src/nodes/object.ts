@@ -99,7 +99,10 @@ function setModelID(st: ObjectState, w: WorldView, id: unknown, emit: Array<'fet
 
 export const Model2 = defineNode({
   type: 'Model2',
-  version: 1,
+  // v2 (NSP-013 s12): a plain object on Id that names the record the node is ALREADY bound to writes its
+  // fields into that record, and the node reacts to that write as to any other on its record — Changed
+  // (and the property's output) for each key whose value differs. v1 wrote the fields and reacted to none.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/modelnode2.ts',
   needs: ['registry', 'random'],
 
@@ -206,17 +209,38 @@ export const Model2 = defineNode({
     // :250-272
     modelId: (s, value, i, w) => {
       let v: unknown = value;
+      // the bound record's own listener (:107-116) heard each key `Model.create` changed on it — written
+      // here, beside the write (a node never hears its own write, registry.ts); NSP-013 s12, found by
+      // generated seed 1104497702 once the daily rotation stopped replaying one corpus (T4)
+      const own: { emit: Array<'fetched' | 'changed'>; emitDerived: string[] } = { emit: [], emitDerived: [] };
       if (w.registry.isRecord(v)) v = v.getId(); // :251
-      else if (typeof v === 'object' && v !== null) v = w.registry.create(v).getId(); // :259-260
+      else if (typeof v === 'object' && v !== null) {
+        // :259-260 — `Model.create`: the record named by `id`, every other key `set` (model.ts — a `set` notifies when `!==`)
+        const data = v as Record<string, unknown>;
+        const bound = s.bound !== undefined ? w.registry.model(s.bound) : undefined;
+        const before = bound ? Object.fromEntries(Object.keys(data).map((k) => [k, bound.get(k)])) : {};
+        const created = w.registry.create(v);
+        v = created.getId();
+        if (bound && created.getId() === s.bound && i['runOnChange-object']) {
+          for (const key of Object.keys(data)) {
+            if (key === 'id' || before[key] === data[key]) continue;
+            if (s.properties.includes(key)) {
+              w.send('prop-' + key, s); // :111 — at the flag
+              own.emitDerived.push('changed-' + key); // :113
+            }
+            own.emit.push('changed'); // :115
+          }
+        }
+      }
       const previous = s.modelId; // :265
       if (valueDidChange(previous, v) && i['runOnChange-modelId']) {
         // :268 setModelID(v)
         const st: ObjectState = { ...s, modelId: v };
-        const emit: Array<'fetched' | 'changed'> = [];
+        const emit: Array<'fetched' | 'changed'> = [...own.emit];
         setModelID(st, w, v, emit);
-        return { set: { modelId: v, bound: st.bound, jobs: st.jobs, storeScheduled: st.storeScheduled }, send: [], emit };
+        return { set: { modelId: v, bound: st.bound, jobs: st.jobs, storeScheduled: st.storeScheduled }, send: [], emit, emitDerived: own.emitDerived };
       }
-      return { set: { modelId: v }, send: ['id'] }; // :270
+      return { set: { modelId: v }, send: ['id'], emit: own.emit, emitDerived: own.emitDerived }; // :270
     },
     // :274-280 — `set: function () {}`
     properties: () => ({ send: [] }),

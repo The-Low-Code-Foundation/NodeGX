@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3477f59d-b255-5eef-9f74-628328b48fba",
+  "name": "Rows about",
+  "path": "/#__cloud__/shared/Rows about",
+  "type": "cloud",
+  "created": "2026-10-01T09:00:00.000Z",
+  "modified": "2026-10-01T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Every row about one learner, by the one plan both export and deletion read (TASK-L185)."
+}

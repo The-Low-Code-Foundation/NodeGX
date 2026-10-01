@@ -158,6 +158,54 @@
       "fromProperty": "out-text",
       "toId": "hm_line",
       "toProperty": "text"
+    },
+    {
+      "fromId": "hm_url",
+      "fromProperty": "pm-deleted",
+      "toId": "hm_was_deleted",
+      "toProperty": "in-deleted"
+    },
+    {
+      "fromId": "hm_was_deleted",
+      "fromProperty": "out-show",
+      "toId": "hm_deleted",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "t_hm_deleted",
+      "fromProperty": "Translation",
+      "toId": "hm_deleted",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_hm_privacy_link",
+      "fromProperty": "Translation",
+      "toId": "hm_privacy_link",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_hm_settings_link",
+      "fromProperty": "Translation",
+      "toId": "hm_settings_link",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "hm_privacy_link",
+      "fromProperty": "onClick",
+      "toId": "hm_to_privacy",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hm_settings_link",
+      "fromProperty": "onClick",
+      "toId": "hm_to_settings",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "hm_who",
+      "fromProperty": "out-canSignOut",
+      "toId": "hm_settings_link",
+      "toProperty": "mounted"
     }
   ]
 }

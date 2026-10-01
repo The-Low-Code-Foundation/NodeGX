@@ -1,0 +1,573 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "61704ee6-8152-4aca-9f4c-80fc9a24a251",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lp_page",
+      "type": "Page",
+      "label": "Preview",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "lp_band"
+      ],
+      "parameters": {
+        "urlPath": "preview",
+        "title": "Lesson preview"
+      }
+    },
+    {
+      "id": "lp_band",
+      "type": "Group",
+      "label": "The ground",
+      "x": 100,
+      "y": 160,
+      "parent": "lp_page",
+      "children": [
+        "lp_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-10)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "lp_shell",
+      "type": "Group",
+      "label": "The shell",
+      "x": 160,
+      "y": 280,
+      "parent": "lp_band",
+      "children": [
+        "lp_band_box",
+        "lp_eyebrow",
+        "lp_title",
+        "lp_hook",
+        "lp_layout",
+        "lp_none"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 920,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "lp_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 220,
+      "y": 400,
+      "parent": "lp_shell",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "lp_title",
+      "type": "Text",
+      "label": "The lesson title",
+      "x": 220,
+      "y": 480,
+      "parent": "lp_shell",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "lp_hook",
+      "type": "Text",
+      "label": "The hook — the lede, a consequence on their project",
+      "x": 220,
+      "y": 560,
+      "parent": "lp_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)",
+        "maxWidth": {
+          "value": 680,
+          "unit": "px"
+        },
+        "marginBottom": "var(--space-6)"
+      }
+    },
+    {
+      "id": "lp_layout",
+      "type": "Group",
+      "label": "The thread — .lesson-layout",
+      "x": 220,
+      "y": 660,
+      "parent": "lp_shell",
+      "children": [
+        "lp_stepper",
+        "lp_rows",
+        "lp_close"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "cssClassName": "lesson-layout",
+        "styleCss": "display: grid;"
+      },
+      "metadata": {
+        "comment": "The lifted .lesson-layout is a 2-column CSS grid (32px thread gutter + content); its ::before draws the thread. The runtime writes display:flex inline on a Group, so styleCss restates grid to win. Every child must be a DIRECT child of this box — the Sprint-8 fragment contract — which is why the section rows come from a For Each placed here rather than inside a wrapper."
+      }
+    },
+    {
+      "id": "lp_stepper",
+      "type": "Group",
+      "label": "The stepper — .lesson-stepper",
+      "x": 280,
+      "y": 760,
+      "parent": "lp_layout",
+      "children": [
+        "lp_chips"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-2)",
+        "cssClassName": "lesson-stepper"
+      },
+      "metadata": {
+        "comment": "A wrapped row of content-sized chips (the layout-wrap-a-row-of-content-width-items recipe): each chip keeps its own width and flows to the next line, which is what a stepper wants at 390px. The validator's Columns suggestion is for grids of equal cells, which this is not."
+      }
+    },
+    {
+      "id": "lp_chips",
+      "type": "For Each",
+      "label": "One chip per step",
+      "x": 340,
+      "y": 860,
+      "parent": "lp_stepper",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Lesson/Step chip"
+      }
+    },
+    {
+      "id": "lp_rows",
+      "type": "For Each",
+      "label": "The active step's sections, as knots",
+      "x": 280,
+      "y": 960,
+      "parent": "lp_layout",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Lesson/Section row"
+      }
+    },
+    {
+      "id": "lp_close",
+      "type": "/Lesson/Step close",
+      "label": "Where this step leaves you",
+      "x": 280,
+      "y": 1060,
+      "parent": "lp_layout"
+    },
+    {
+      "id": "lp_fixture",
+      "type": "/Data/Preview lesson",
+      "label": "Their draft, from the backend (staff only)",
+      "x": 800,
+      "y": 160
+    },
+    {
+      "id": "lp_active",
+      "type": "Variable2",
+      "label": "Which step is open",
+      "x": 800,
+      "y": 400,
+      "parameters": {
+        "name": "dbtActiveStepId"
+      },
+      "metadata": {
+        "comment": "Empty means the first step. Set by a chip or by the step close; nothing else writes it."
+      }
+    },
+    {
+      "id": "lp_index",
+      "type": "/Logic/Sections for step",
+      "label": "This step, resolved",
+      "x": 800,
+      "y": 560
+    },
+    {
+      "id": "lp_pick",
+      "type": "Set Variable",
+      "label": "A chip was pressed",
+      "x": 800,
+      "y": 860,
+      "parameters": {
+        "name": "dbtActiveStepId",
+        "setWith": "string"
+      },
+      "metadata": {
+        "comment": "The repeater surfaces the chip's `select` as itemOutputSignal-select and the row's id as itemActionItemId; the id IS the step id."
+      }
+    },
+    {
+      "id": "lp_forward",
+      "type": "Set Variable",
+      "label": "One way forward",
+      "x": 800,
+      "y": 1060,
+      "parameters": {
+        "name": "dbtActiveStepId",
+        "setWith": "string"
+      }
+    },
+    {
+      "id": "lp_scroll",
+      "type": "JavaScriptFunction",
+      "label": "Changing step starts at the top",
+      "x": 1100,
+      "y": 400,
+      "parameters": {
+        "functionScript": "if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });\n"
+      },
+      "metadata": {
+        "comment": "The one thing a node cannot do. Runs only on the signal."
+      }
+    },
+    {
+      "id": "lp_strings",
+      "type": "/Data/Strings",
+      "label": "Every word on screen",
+      "x": 760,
+      "y": 40,
+      "metadata": {
+        "comment": "One instance per page. Its `copy` output is the whole bundle; Logic/Sections for step puts it on every row, and the For Each maps it onto Section row's Copy input by name. Delete this node and the lesson still renders — in the English the kit ships (TASK-L160). A lesson is the learner's surface. When a coach can read one, this is the line that changes — one word, in the instance, rather than a flag threaded through the kit (TASK-L163 §3)."
+      },
+      "parameters": {
+        "audience": "learner"
+      }
+    },
+    {
+      "id": "seo_lp_page",
+      "type": "JavaScriptFunction",
+      "label": "Set the browser tab",
+      "x": 1400,
+      "y": 1430,
+      "parameters": {
+        "functionScript": "// The page title is the browser TAB, and it is the one learner-facing string a\n// Translation node cannot reach: `Page.title` is read off the node's PARAMETERS at\n// export time into the router index (utils/exporter/router.ts), and the Router hands\n// that to Noodl.SEO.setTitle on mount. A connection to the port is silently ignored —\n// measured, TASK-L161 §1: with the parameter removed and a Translation wired, the tab\n// read \"Home\", the component name.\n//\n// So the parameter stays as the BUILD-TIME FALLBACK (the router index needs it, and it\n// is what the tab shows for the instant before this runs), and the translated value\n// overrides it here. Same shape as the kit's built-in English: a fallback is not a\n// second owner.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "string",
+          "displayName": "title",
+          "group": "Inputs"
+        }
+      ],
+      "metadata": {
+        "comment": "Why a JavaScript node and not a wire to Page.title: the port is build-time. See the script."
+      }
+    },
+    {
+      "id": "lp_lang_var",
+      "type": "Variable",
+      "label": "language — from the one owner in App",
+      "x": 1120,
+      "y": 40,
+      "parameters": {
+        "name": "language"
+      },
+      "metadata": {
+        "comment": "A TRANSPORT, NEVER A SECOND DECISION. `Data/Strings` is instantiated once per surface that needs the kit's copy object, and a component cannot wire across to another, so the resolved language is broadcast through this named Variable. The one OWNER is still the `i18next` node in App: this node only carries its answer. Every `/Data/Strings` instance in the project learns the language exactly this way — TASK-L162 §2."
+      }
+    },
+    {
+      "id": "lp_url",
+      "type": "PageInputs",
+      "label": "Whose, which step, draft or published — ?learner=&concept=&which=",
+      "x": 800,
+      "y": 40,
+      "parameters": {
+        "queryParams": "learner,concept,which"
+      },
+      "metadata": {
+        "comment": "The fixture was one lesson and the page never had to say which. The backend holds one per concept, so every link to this page passes the concept it names: the up-next card and the dossier's lesson link on /course (TASK-L171 §0b). A query parameter rather than a path one so /lesson with no concept is still a page, not a 404."
+      }
+    },
+    {
+      "id": "lp_state",
+      "type": "JavaScriptFunction",
+      "label": "Something to preview, or not",
+      "x": 1100,
+      "y": 160,
+      "parameters": {
+        "functionScript": "/*\n * WRITTEN, OR NOT YET (TASK-L171 §0b). `found` is undefined until the answer\n * arrives, so neither state draws while the lesson is on its way — the page does\n * not flash \"not written yet\" at somebody whose lesson is one request away.\n */\nOutputs.hasLesson = Inputs.found === true;\nOutputs.notWritten = Inputs.found === false;\n"
+      },
+      "ports": [
+        {
+          "name": "in-found",
+          "displayName": "found",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hasLesson",
+          "displayName": "hasLesson",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-notWritten",
+          "displayName": "notWritten",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "lp_none",
+      "type": "Group",
+      "label": "Not written yet",
+      "x": 220,
+      "y": 1180,
+      "parent": "lp_shell",
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-4)",
+        "mounted": false
+      },
+      "metadata": {
+        "comment": "Sprint 49 decision 7 promised this: Sam's next step has no lesson written for it until the engine sprint, and the up-next card opens it. MOUNTED, never visible (L157): visibility keeps the space. No colour of its own and no warning tone — a lesson not written yet is not something the learner did wrong."
+      },
+      "children": [
+        "lp_none_eyebrow",
+        "lp_none_title",
+        "lp_none_body"
+      ]
+    },
+    {
+      "id": "lp_none_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 280,
+      "y": 1260,
+      "parent": "lp_none",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "lp_none_title",
+      "type": "Text",
+      "label": "Headline",
+      "x": 280,
+      "y": 1340,
+      "parent": "lp_none",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "lp_none_body",
+      "type": "Text",
+      "label": "What it means",
+      "x": 280,
+      "y": 1420,
+      "parent": "lp_none",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 680,
+          "unit": "px"
+        }
+      }
+    },
+    {
+      "id": "lp_band_box",
+      "type": "Group",
+      "label": "The preview band",
+      "x": 220,
+      "y": 320,
+      "parent": "lp_shell",
+      "children": [
+        "lp_band_text"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "backgroundColor": "var(--thread-tint)",
+        "borderRadius": "var(--radius-md)",
+        "cssClassName": "preview-band"
+      }
+    },
+    {
+      "id": "lp_band_text",
+      "type": "Text",
+      "label": "Draft or published, and whose — the first thing on the page",
+      "x": 220,
+      "y": 400,
+      "parent": "lp_band_box",
+      "parameters": {
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-bold)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "lp_say",
+      "type": "JavaScriptFunction",
+      "label": "What the band and the empty state say",
+      "x": 1200,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * WHAT A PREVIEW SAYS ABOUT ITSELF (TASK-L190 §2). The page is the learner's\n * lesson page with every write taken out, so the one thing it must add is which\n * lesson this is: a DRAFT nobody else can see, or the published lesson they see,\n * and whose. Every word comes from the copy (lesson.preview), never a literal.\n */\nconst p = (Inputs.copy && Inputs.copy.lesson && Inputs.copy.lesson.preview) || null;\nif (!p) return;\nconst fill = (s, o) => String(s || '').replace(/{{(\\w+)}}/g, (_, k) => (o[k] === undefined ? '' : String(o[k])));\nconst state = Inputs.which === 'published' ? p.published : Inputs.live === true ? p.draftLive : p.draft;\nOutputs.band = fill(p.whose, { name: Inputs.name || '', step: Inputs.conceptTitle || '' }) + ' · ' + state;\nOutputs.noneEyebrow = p.eyebrow;\nOutputs.noneTitle = p.noneTitle;\nOutputs.noneBody = p.noneBody;\nOutputs.eyebrow = p.eyebrow;\nOutputs.tab = p.pageTitle;\n"
+      },
+      "ports": [
+        {
+          "name": "in-copy",
+          "displayName": "copy",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-which",
+          "displayName": "which",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-live",
+          "displayName": "live",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-conceptTitle",
+          "displayName": "conceptTitle",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-band",
+          "displayName": "band",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noneEyebrow",
+          "displayName": "noneEyebrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noneTitle",
+          "displayName": "noneTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noneBody",
+          "displayName": "noneBody",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-eyebrow",
+          "displayName": "eyebrow",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-tab",
+          "displayName": "tab",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "lp_page"
+  ]
+}

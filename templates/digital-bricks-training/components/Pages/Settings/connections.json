@@ -1,0 +1,415 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8cf6c926-8d4b-4ab1-b2ce-937c58486870",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "t_st_eyebrow",
+      "fromProperty": "Translation",
+      "toId": "st_eyebrow",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_title",
+      "fromProperty": "Translation",
+      "toId": "st_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_lede",
+      "fromProperty": "Translation",
+      "toId": "st_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_notice",
+      "fromProperty": "Translation",
+      "toId": "st_notice",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_st_out_h",
+      "fromProperty": "Translation",
+      "toId": "st_out_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_out_b",
+      "fromProperty": "Translation",
+      "toId": "st_out_b",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_out_btn",
+      "fromProperty": "Translation",
+      "toId": "st_out_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_st_exp_h",
+      "fromProperty": "Translation",
+      "toId": "st_exp_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_exp_b",
+      "fromProperty": "Translation",
+      "toId": "st_exp_b",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_exp_btn",
+      "fromProperty": "Translation",
+      "toId": "st_exp_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_st_exp_wait",
+      "fromProperty": "Translation",
+      "toId": "st_exp_wait",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_exp_fail",
+      "fromProperty": "Translation",
+      "toId": "st_exp_fail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_del_h",
+      "fromProperty": "Translation",
+      "toId": "st_del_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_del_b",
+      "fromProperty": "Translation",
+      "toId": "st_del_b",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_del_label",
+      "fromProperty": "Translation",
+      "toId": "st_del_word",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_st_del_word",
+      "fromProperty": "Translation",
+      "toId": "st_ready",
+      "toProperty": "in-word"
+    },
+    {
+      "fromId": "t_st_del_btn",
+      "fromProperty": "Translation",
+      "toId": "st_del_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_st_del_wait",
+      "fromProperty": "Translation",
+      "toId": "st_del_wait",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_del_fail",
+      "fromProperty": "Translation",
+      "toId": "st_del_fail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_back",
+      "fromProperty": "Translation",
+      "toId": "st_back",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_st_page_title",
+      "fromProperty": "Translation",
+      "toId": "seo_st_page",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "st_notice",
+      "fromProperty": "onClick",
+      "toId": "st_to_privacy",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "st_back",
+      "fromProperty": "onClick",
+      "toId": "st_to_home",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "st_out_btn",
+      "fromProperty": "onClick",
+      "toId": "st_logout",
+      "toProperty": "login"
+    },
+    {
+      "fromId": "st_logout",
+      "fromProperty": "done",
+      "toId": "st_to_home",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "st_exp_btn",
+      "fromProperty": "onClick",
+      "toId": "st_export",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "st_exp_btn",
+      "fromProperty": "onClick",
+      "toId": "st_exp_wait_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_exp_btn",
+      "fromProperty": "onClick",
+      "toId": "st_exp_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_export",
+      "fromProperty": "done",
+      "toId": "st_exp_wait_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_export",
+      "fromProperty": "failure",
+      "toId": "st_exp_wait_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_export",
+      "fromProperty": "failure",
+      "toId": "st_exp_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_export",
+      "fromProperty": "out-document",
+      "toId": "st_save",
+      "toProperty": "in-document"
+    },
+    {
+      "fromId": "st_exp_wait_sw",
+      "fromProperty": "state",
+      "toId": "st_exp_wait",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "st_exp_fail_sw",
+      "fromProperty": "state",
+      "toId": "st_exp_fail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "st_del_word",
+      "fromProperty": "onTextChanged",
+      "toId": "st_ready",
+      "toProperty": "in-typed"
+    },
+    {
+      "fromId": "st_ready",
+      "fromProperty": "out-ready",
+      "toId": "st_del_btn",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "st_ready",
+      "fromProperty": "out-confirm",
+      "toId": "st_delete",
+      "toProperty": "in-confirm"
+    },
+    {
+      "fromId": "st_del_btn",
+      "fromProperty": "onClick",
+      "toId": "st_delete",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "st_del_btn",
+      "fromProperty": "onClick",
+      "toId": "st_del_wait_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_del_btn",
+      "fromProperty": "onClick",
+      "toId": "st_del_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_delete",
+      "fromProperty": "failure",
+      "toId": "st_del_wait_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_delete",
+      "fromProperty": "failure",
+      "toId": "st_del_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_del_wait_sw",
+      "fromProperty": "state",
+      "toId": "st_del_wait",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "st_del_fail_sw",
+      "fromProperty": "state",
+      "toId": "st_del_fail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "st_delete",
+      "fromProperty": "done",
+      "toId": "st_gone",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "t_st_mail_h",
+      "fromProperty": "Translation",
+      "toId": "st_mail_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_mail_b",
+      "fromProperty": "Translation",
+      "toId": "st_mail_b",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_mail_on",
+      "fromProperty": "Translation",
+      "toId": "st_mail_view",
+      "toProperty": "in-onText"
+    },
+    {
+      "fromId": "t_st_mail_off",
+      "fromProperty": "Translation",
+      "toId": "st_mail_view",
+      "toProperty": "in-offText"
+    },
+    {
+      "fromId": "t_st_mail_stop",
+      "fromProperty": "Translation",
+      "toId": "st_mail_view",
+      "toProperty": "in-stopText"
+    },
+    {
+      "fromId": "t_st_mail_start",
+      "fromProperty": "Translation",
+      "toId": "st_mail_view",
+      "toProperty": "in-startText"
+    },
+    {
+      "fromId": "t_st_mail_wait",
+      "fromProperty": "Translation",
+      "toId": "st_mail_wait",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_st_mail_fail",
+      "fromProperty": "Translation",
+      "toId": "st_mail_fail",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "st_mail_ask",
+      "fromProperty": "out-call",
+      "toId": "st_pref_get",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "st_pref_get",
+      "fromProperty": "out-on",
+      "toId": "st_mail_view",
+      "toProperty": "in-on"
+    },
+    {
+      "fromId": "st_pref_set",
+      "fromProperty": "out-on",
+      "toId": "st_mail_view",
+      "toProperty": "in-on"
+    },
+    {
+      "fromId": "st_mail_view",
+      "fromProperty": "out-state",
+      "toId": "st_mail_state",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "st_mail_view",
+      "fromProperty": "out-label",
+      "toId": "st_mail_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "st_mail_view",
+      "fromProperty": "out-known",
+      "toId": "st_mail_btn",
+      "toProperty": "enabled"
+    },
+    {
+      "fromId": "st_mail_view",
+      "fromProperty": "out-next",
+      "toId": "st_pref_set",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "st_mail_btn",
+      "fromProperty": "onClick",
+      "toId": "st_pref_set",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "st_mail_btn",
+      "fromProperty": "onClick",
+      "toId": "st_mail_wait_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_mail_btn",
+      "fromProperty": "onClick",
+      "toId": "st_mail_fail_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_pref_set",
+      "fromProperty": "done",
+      "toId": "st_mail_wait_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_pref_set",
+      "fromProperty": "failure",
+      "toId": "st_mail_wait_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "st_pref_set",
+      "fromProperty": "failure",
+      "toId": "st_mail_fail_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "st_mail_wait_sw",
+      "fromProperty": "state",
+      "toId": "st_mail_wait",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "st_mail_fail_sw",
+      "fromProperty": "state",
+      "toId": "st_mail_fail",
+      "toProperty": "mounted"
+    }
+  ]
+}

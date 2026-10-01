@@ -1,0 +1,1208 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8cf6c926-8d4b-4ab1-b2ce-937c58486870",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "st_page",
+      "type": "Page",
+      "label": "Your settings",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "st_band"
+      ],
+      "parameters": {
+        "urlPath": "settings",
+        "title": "Your settings"
+      }
+    },
+    {
+      "id": "st_band",
+      "type": "Group",
+      "label": "The ground",
+      "x": 40,
+      "y": 140,
+      "parent": "st_page",
+      "children": [
+        "st_shell"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "paddingTop": "var(--space-24)",
+        "paddingBottom": "var(--space-24)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)"
+      }
+    },
+    {
+      "id": "st_shell",
+      "type": "Group",
+      "label": "The shell",
+      "x": 40,
+      "y": 240,
+      "parent": "st_band",
+      "children": [
+        "st_eyebrow",
+        "st_title",
+        "st_lede",
+        "st_notice",
+        "st_out-2",
+        "st_mail",
+        "st_exp",
+        "st_del",
+        "st_back"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        },
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-5)"
+      }
+    },
+    {
+      "id": "st_eyebrow",
+      "type": "Text",
+      "label": "Eyebrow",
+      "x": 40,
+      "y": 340,
+      "parent": "st_shell",
+      "parameters": {
+        "fontSize": "var(--text-xs)",
+        "fontWeight": "var(--font-bold)",
+        "letterSpacing": "var(--tracking-widest)",
+        "textTransform": "uppercase",
+        "color": "var(--thread-deep)"
+      }
+    },
+    {
+      "id": "st_title",
+      "type": "Text",
+      "label": "Headline",
+      "x": 40,
+      "y": 420,
+      "parent": "st_shell",
+      "parameters": {
+        "as": "h1",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-4xl)",
+        "fontWeight": 800,
+        "lineHeight": "var(--leading-tight)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_lede",
+      "type": "Text",
+      "label": "What this page is",
+      "x": 40,
+      "y": 500,
+      "parent": "st_shell",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "st_notice",
+      "type": "net.noodl.controls.button",
+      "label": "Read the privacy notice",
+      "x": 40,
+      "y": 580,
+      "parent": "st_shell",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_out-2",
+      "type": "Group",
+      "label": "Sign out",
+      "x": 40,
+      "y": 680,
+      "parent": "st_shell",
+      "children": [
+        "st_out_h",
+        "st_out_b",
+        "st_out_btn"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-6)"
+      }
+    },
+    {
+      "id": "st_out_h",
+      "type": "Text",
+      "label": "Heading",
+      "x": 100,
+      "y": 760,
+      "parent": "st_out-2",
+      "parameters": {
+        "as": "h2",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": 800,
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_out_b",
+      "type": "Text",
+      "label": "What it does",
+      "x": 100,
+      "y": 840,
+      "parent": "st_out-2",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_out_btn",
+      "type": "net.noodl.controls.button",
+      "label": "Sign out",
+      "x": 100,
+      "y": 920,
+      "parent": "st_out-2",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_exp",
+      "type": "Group",
+      "label": "Download your data",
+      "x": 40,
+      "y": 1020,
+      "parent": "st_shell",
+      "children": [
+        "st_exp_h",
+        "st_exp_b",
+        "st_exp_btn",
+        "st_exp_wait",
+        "st_exp_fail"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-6)"
+      }
+    },
+    {
+      "id": "st_exp_h",
+      "type": "Text",
+      "label": "Heading",
+      "x": 100,
+      "y": 1100,
+      "parent": "st_exp",
+      "parameters": {
+        "as": "h2",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": 800,
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_exp_b",
+      "type": "Text",
+      "label": "What it holds",
+      "x": 100,
+      "y": 1180,
+      "parent": "st_exp",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_exp_btn",
+      "type": "net.noodl.controls.button",
+      "label": "Download my data",
+      "x": 100,
+      "y": 1260,
+      "parent": "st_exp",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_exp_wait",
+      "type": "Text",
+      "label": "Preparing",
+      "x": 100,
+      "y": 1340,
+      "parent": "st_exp",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "st_exp_fail",
+      "type": "Text",
+      "label": "It did not work",
+      "x": 100,
+      "y": 1420,
+      "parent": "st_exp",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_del",
+      "type": "Group",
+      "label": "Delete your account",
+      "x": 40,
+      "y": 1520,
+      "parent": "st_shell",
+      "children": [
+        "st_del_h",
+        "st_del_b",
+        "st_del_word",
+        "st_del_btn",
+        "st_del_wait",
+        "st_del_fail"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-6)"
+      }
+    },
+    {
+      "id": "st_del_h",
+      "type": "Text",
+      "label": "Heading",
+      "x": 100,
+      "y": 1600,
+      "parent": "st_del",
+      "parameters": {
+        "as": "h2",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": 800,
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_del_b",
+      "type": "Text",
+      "label": "What goes, said before the button",
+      "x": 100,
+      "y": 1680,
+      "parent": "st_del",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_del_word",
+      "type": "net.noodl.controls.textinput",
+      "label": "Type the word",
+      "x": 100,
+      "y": 1760,
+      "parent": "st_del",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "labelfontSize": "var(--text-xs)",
+        "labelfontWeight": "var(--font-bold)",
+        "labeltextTransform": "uppercase",
+        "labelcolor": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 320,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      }
+    },
+    {
+      "id": "st_del_btn",
+      "type": "net.noodl.controls.button",
+      "label": "Delete my account",
+      "x": 100,
+      "y": 1840,
+      "parent": "st_del",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "enabled": false
+      }
+    },
+    {
+      "id": "st_del_wait",
+      "type": "Text",
+      "label": "Deleting",
+      "x": 100,
+      "y": 1920,
+      "parent": "st_del",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "st_del_fail",
+      "type": "Text",
+      "label": "It did not finish",
+      "x": 100,
+      "y": 2000,
+      "parent": "st_del",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_back",
+      "type": "net.noodl.controls.button",
+      "label": "Back",
+      "x": 40,
+      "y": 2100,
+      "parent": "st_shell",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_logout",
+      "type": "net.noodl.user.LogOut",
+      "label": "End this browser's session",
+      "x": 800,
+      "y": 920
+    },
+    {
+      "id": "st_to_home",
+      "type": "RouterNavigate",
+      "label": "→ Home",
+      "x": 1100,
+      "y": 920,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      }
+    },
+    {
+      "id": "st_to_privacy",
+      "type": "RouterNavigate",
+      "label": "→ Privacy",
+      "x": 800,
+      "y": 580,
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Privacy"
+      }
+    },
+    {
+      "id": "st_export",
+      "type": "CloudFunction2",
+      "label": "exportMine",
+      "x": 800,
+      "y": 1260,
+      "parameters": {
+        "function": "exportMine"
+      }
+    },
+    {
+      "id": "st_exp_wait_sw",
+      "type": "Switch",
+      "label": "Preparing, until it answers",
+      "x": 800,
+      "y": 1340,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "st_exp_fail_sw",
+      "type": "Switch",
+      "label": "Remember it failed",
+      "x": 800,
+      "y": 1420,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "st_save",
+      "type": "JavaScriptFunction",
+      "label": "Hand the document to the browser as a file",
+      "x": 1100,
+      "y": 1260,
+      "parameters": {
+        "functionScript": "/*\n * HAND THE EXPORT TO THE BROWSER AS A FILE (TASK-L185 §3). The document is the\n * whole answer from exportMine; nothing here filters it, so what the person\n * saves is exactly what the server said it holds. The name carries the date,\n * so two downloads a week apart do not overwrite each other.\n */\nconst doc = Inputs.document;\nif (doc && typeof doc === 'object' && typeof document !== 'undefined') {\n  const text = JSON.stringify(doc, null, 2);\n  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));\n  const a = document.createElement('a');\n  a.href = url;\n  a.download = 'digital-bricks-training-my-data-' + new Date().toISOString().slice(0, 10) + '.json';\n  document.body.appendChild(a);\n  a.click();\n  a.remove();\n  setTimeout(() => URL.revokeObjectURL(url), 1000);\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-document",
+          "plug": "input",
+          "type": "*",
+          "displayName": "document",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "st_ready",
+      "type": "JavaScriptFunction",
+      "label": "Only when they typed the word",
+      "x": 800,
+      "y": 1760,
+      "parameters": {
+        "functionScript": "/*\n * THE DELETE BUTTON WAKES ONLY FOR THE WORD (TASK-L185 §4). Exact, after\n * trimming spaces: a near miss leaves it asleep rather than guessing. The\n * server checks the same word again, so this is the courtesy and not the guard.\n */\nconst typed = String(Inputs.typed || '').trim();\nconst word = String(Inputs.word || '');\nOutputs.ready = word !== '' && typed === word;\nOutputs.confirm = typed;\n"
+      },
+      "ports": [
+        {
+          "name": "in-typed",
+          "plug": "input",
+          "type": "*",
+          "displayName": "typed",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-word",
+          "plug": "input",
+          "type": "*",
+          "displayName": "word",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-ready",
+          "plug": "output",
+          "type": "*",
+          "displayName": "ready",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-confirm",
+          "plug": "output",
+          "type": "*",
+          "displayName": "confirm",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "st_delete",
+      "type": "CloudFunction2",
+      "label": "deleteMine",
+      "x": 1100,
+      "y": 1840,
+      "parameters": {
+        "function": "deleteMine"
+      }
+    },
+    {
+      "id": "st_del_wait_sw",
+      "type": "Switch",
+      "label": "Deleting, until it answers",
+      "x": 800,
+      "y": 1920,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "st_del_fail_sw",
+      "type": "Switch",
+      "label": "Remember it did not finish",
+      "x": 800,
+      "y": 2000,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "t_st_eyebrow",
+      "type": "Translation",
+      "label": "privacy:settings.eyebrow",
+      "x": 1500,
+      "y": 340,
+      "parameters": {
+        "Key": "settings.eyebrow",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_title",
+      "type": "Translation",
+      "label": "privacy:settings.title",
+      "x": 1500,
+      "y": 420,
+      "parameters": {
+        "Key": "settings.title",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_lede",
+      "type": "Translation",
+      "label": "privacy:settings.lede",
+      "x": 1500,
+      "y": 500,
+      "parameters": {
+        "Key": "settings.lede",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_notice",
+      "type": "Translation",
+      "label": "privacy:settings.notice",
+      "x": 1500,
+      "y": 580,
+      "parameters": {
+        "Key": "settings.notice",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_out_h",
+      "type": "Translation",
+      "label": "privacy:settings.signOutHeading",
+      "x": 1500,
+      "y": 760,
+      "parameters": {
+        "Key": "settings.signOutHeading",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_out_b",
+      "type": "Translation",
+      "label": "privacy:settings.signOutBody",
+      "x": 1500,
+      "y": 840,
+      "parameters": {
+        "Key": "settings.signOutBody",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_out_btn",
+      "type": "Translation",
+      "label": "privacy:settings.signOut",
+      "x": 1500,
+      "y": 920,
+      "parameters": {
+        "Key": "settings.signOut",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_exp_h",
+      "type": "Translation",
+      "label": "privacy:settings.exportHeading",
+      "x": 1500,
+      "y": 1100,
+      "parameters": {
+        "Key": "settings.exportHeading",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_exp_b",
+      "type": "Translation",
+      "label": "privacy:settings.exportBody",
+      "x": 1500,
+      "y": 1180,
+      "parameters": {
+        "Key": "settings.exportBody",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_exp_btn",
+      "type": "Translation",
+      "label": "privacy:settings.export",
+      "x": 1500,
+      "y": 1260,
+      "parameters": {
+        "Key": "settings.export",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_exp_wait",
+      "type": "Translation",
+      "label": "privacy:settings.exporting",
+      "x": 1500,
+      "y": 1340,
+      "parameters": {
+        "Key": "settings.exporting",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_exp_fail",
+      "type": "Translation",
+      "label": "privacy:settings.exportFailed",
+      "x": 1500,
+      "y": 1420,
+      "parameters": {
+        "Key": "settings.exportFailed",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_del_h",
+      "type": "Translation",
+      "label": "privacy:settings.deleteHeading",
+      "x": 1800,
+      "y": 1600,
+      "parameters": {
+        "Key": "settings.deleteHeading",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_del_b",
+      "type": "Translation",
+      "label": "privacy:settings.deleteBody",
+      "x": 1800,
+      "y": 1680,
+      "parameters": {
+        "Key": "settings.deleteBody",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_del_label",
+      "type": "Translation",
+      "label": "privacy:settings.deleteLabel",
+      "x": 1800,
+      "y": 1760,
+      "parameters": {
+        "Key": "settings.deleteLabel",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_del_word",
+      "type": "Translation",
+      "label": "privacy:settings.deleteWord",
+      "x": 1800,
+      "y": 1700,
+      "parameters": {
+        "Key": "settings.deleteWord",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_del_btn",
+      "type": "Translation",
+      "label": "privacy:settings.delete",
+      "x": 1800,
+      "y": 1840,
+      "parameters": {
+        "Key": "settings.delete",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_del_wait",
+      "type": "Translation",
+      "label": "privacy:settings.deleting",
+      "x": 1800,
+      "y": 1920,
+      "parameters": {
+        "Key": "settings.deleting",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_del_fail",
+      "type": "Translation",
+      "label": "privacy:settings.deleteFailed",
+      "x": 1800,
+      "y": 2000,
+      "parameters": {
+        "Key": "settings.deleteFailed",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_back",
+      "type": "Translation",
+      "label": "privacy:settings.back",
+      "x": 1500,
+      "y": 2100,
+      "parameters": {
+        "Key": "settings.back",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_page_title",
+      "type": "Translation",
+      "label": "privacy:settings.pageTitle (the tab)",
+      "x": 1500,
+      "y": 2200,
+      "parameters": {
+        "Key": "settings.pageTitle",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "seo_st_page",
+      "type": "JavaScriptFunction",
+      "label": "Set the browser tab",
+      "x": 1800,
+      "y": 2200,
+      "parameters": {
+        "functionScript": "// The page title is the browser TAB. `Page.title` is read off the node's PARAMETERS at\n// export time, and a connection to the port is silently ignored (TASK-L161 §1), so the\n// parameter is the build-time fallback and the translated value overrides it here.\nconst t = Inputs.title;\nif (typeof t === 'string' && t !== '' && typeof Noodl !== 'undefined' && Noodl.SEO) {\n  Noodl.SEO.setTitle(t);\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-title",
+          "plug": "input",
+          "type": "*",
+          "displayName": "title",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "st_gone",
+      "type": "JavaScriptFunction",
+      "label": "Forget the session here, then Home, saying it is done",
+      "x": 1400,
+      "y": 1840,
+      "parameters": {
+        "functionScript": "/*\n * THE ACCOUNT IS GONE: FORGET IT HERE TOO, THEN SAY SO ON HOME (TASK-L185 §4).\n *\n * deleteMine removed the account's sessions on the server, so the ordinary\n * Log Out node FAILS here (measured: \"Invalid session token\") and leaves the\n * stored session in the browser. Home then still believes somebody is signed\n * in, the notice gate holds it, and the person who just deleted their account\n * is shown the acceptance screen instead of the sentence saying it is done.\n *\n * So: ask to log out and ignore the answer, remove the stored session\n * ourselves, and load Home FRESH, so nothing in memory survives either. Every\n * key this removes is the browser's own copy of an account that no longer\n * exists anywhere.\n */\n(async () => {\n  try { if (Noodl.Users && Noodl.Users.Current) await Noodl.Users.Current.logOut(); } catch (e) { /* the server already ended it */ }\n  try {\n    for (const k of Object.keys(localStorage)) if (/\\/currentUser$/.test(k)) localStorage.removeItem(k);\n  } catch (e) { /* storage blocked: the fresh load below still drops the in-memory copy */ }\n  const hash = location.hash || '';\n  if (hash.indexOf('#/') === 0) location.replace(location.pathname + '#/home?deleted=1');\n  else location.replace('/home?deleted=1');\n})();\n"
+      }
+    },
+    {
+      "id": "st_mail",
+      "type": "Group",
+      "label": "Email about messages (TASK-L187)",
+      "x": 360,
+      "y": 1400,
+      "parent": "st_shell",
+      "children": [
+        "st_mail_h",
+        "st_mail_b",
+        "st_mail_state",
+        "st_mail_btn",
+        "st_mail_wait",
+        "st_mail_fail"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-2)",
+        "paddingTop": "var(--space-6)"
+      }
+    },
+    {
+      "id": "st_mail_h",
+      "type": "Text",
+      "label": "Heading",
+      "x": 400,
+      "y": 1460,
+      "parent": "st_mail",
+      "parameters": {
+        "as": "h2",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": 800,
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_mail_b",
+      "type": "Text",
+      "label": "What it does, and what turning it off costs",
+      "x": 400,
+      "y": 1520,
+      "parent": "st_mail",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_mail_state",
+      "type": "Text",
+      "label": "On or off, in words",
+      "x": 400,
+      "y": 1580,
+      "parent": "st_mail",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_mail_btn",
+      "type": "net.noodl.controls.button",
+      "label": "Stop / Email me again",
+      "x": 400,
+      "y": 1640,
+      "parent": "st_mail",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "enabled": false
+      }
+    },
+    {
+      "id": "st_mail_wait",
+      "type": "Text",
+      "label": "Saving…",
+      "x": 400,
+      "y": 1700,
+      "parent": "st_mail",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "st_mail_fail",
+      "type": "Text",
+      "label": "Did not save",
+      "x": 400,
+      "y": 1760,
+      "parent": "st_mail",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "st_mail_ask",
+      "type": "JavaScriptFunction",
+      "label": "Read the switch once, on arrival",
+      "x": 1100,
+      "y": 1400,
+      "parameters": {
+        "functionScript": "/* TASK-L187 §6. `page` is a fixed parameter, so this runs once as the page mounts. */\nOutputs.call();\n",
+        "runOnChange-in-page": true,
+        "in-page": "settings"
+      },
+      "ports": [
+        {
+          "name": "in-page",
+          "plug": "input",
+          "type": "*",
+          "displayName": "page",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-call",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "st_pref_get",
+      "type": "CloudFunction2",
+      "label": "emailPreference — this account's switch",
+      "x": 1360,
+      "y": 1400,
+      "parameters": {
+        "function": "emailPreference"
+      }
+    },
+    {
+      "id": "st_pref_set",
+      "type": "CloudFunction2",
+      "label": "setEmailPreference — the only thing that turns it back on",
+      "x": 1360,
+      "y": 1560,
+      "parameters": {
+        "function": "setEmailPreference"
+      }
+    },
+    {
+      "id": "st_mail_view",
+      "type": "JavaScriptFunction",
+      "label": "What the switch says",
+      "x": 1100,
+      "y": 1560,
+      "parameters": {
+        "functionScript": "/* TASK-L187 §6. Nothing is said, and the button sleeps, until the backend has\n   answered: \"we could not ask\" is not \"off\". */\nconst known = Inputs.on === true || Inputs.on === false;\nOutputs.known = known;\nif (known) {\n  Outputs.state = Inputs.on ? Inputs.onText : Inputs.offText;\n  Outputs.label = Inputs.on ? Inputs.stopText : Inputs.startText;\n  Outputs.next = Inputs.on ? 'off' : 'on';\n}\n",
+        "runOnChange-in-on": true,
+        "runOnChange-in-onText": true,
+        "runOnChange-in-offText": true,
+        "runOnChange-in-stopText": true,
+        "runOnChange-in-startText": true
+      },
+      "ports": [
+        {
+          "name": "in-on",
+          "plug": "input",
+          "type": "*",
+          "displayName": "on",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-onText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "onText",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-offText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "offText",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-stopText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "stopText",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-startText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "startText",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-known",
+          "plug": "output",
+          "type": "*",
+          "displayName": "known",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-state",
+          "plug": "output",
+          "type": "*",
+          "displayName": "state",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-label",
+          "plug": "output",
+          "type": "*",
+          "displayName": "label",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-next",
+          "plug": "output",
+          "type": "*",
+          "displayName": "next",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "st_mail_wait_sw",
+      "type": "Switch",
+      "label": "Saving",
+      "x": 1600,
+      "y": 1640,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "st_mail_fail_sw",
+      "type": "Switch",
+      "label": "Did not save",
+      "x": 1600,
+      "y": 1720,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "t_st_mail_h",
+      "type": "Translation",
+      "label": "privacy:settings.emailHeading",
+      "x": 820,
+      "y": 1400,
+      "parameters": {
+        "Key": "settings.emailHeading",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_b",
+      "type": "Translation",
+      "label": "privacy:settings.emailBody",
+      "x": 820,
+      "y": 1460,
+      "parameters": {
+        "Key": "settings.emailBody",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_on",
+      "type": "Translation",
+      "label": "privacy:settings.emailOn",
+      "x": 820,
+      "y": 1520,
+      "parameters": {
+        "Key": "settings.emailOn",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_off",
+      "type": "Translation",
+      "label": "privacy:settings.emailOff",
+      "x": 820,
+      "y": 1580,
+      "parameters": {
+        "Key": "settings.emailOff",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_stop",
+      "type": "Translation",
+      "label": "privacy:settings.emailStop",
+      "x": 820,
+      "y": 1640,
+      "parameters": {
+        "Key": "settings.emailStop",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_start",
+      "type": "Translation",
+      "label": "privacy:settings.emailStart",
+      "x": 820,
+      "y": 1700,
+      "parameters": {
+        "Key": "settings.emailStart",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_wait",
+      "type": "Translation",
+      "label": "privacy:settings.emailSaving",
+      "x": 820,
+      "y": 1760,
+      "parameters": {
+        "Key": "settings.emailSaving",
+        "Namespace": "privacy"
+      }
+    },
+    {
+      "id": "t_st_mail_fail",
+      "type": "Translation",
+      "label": "privacy:settings.emailFailed",
+      "x": 820,
+      "y": 1820,
+      "parameters": {
+        "Key": "settings.emailFailed",
+        "Namespace": "privacy"
+      }
+    }
+  ],
+  "visualRoots": [
+    "st_page"
+  ]
+}

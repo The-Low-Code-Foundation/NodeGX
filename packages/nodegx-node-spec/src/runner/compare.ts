@@ -23,8 +23,28 @@ export function differenceWithThrow(reference: readonly TraceEvent[], partial: r
   return { index: partial.length, reference: reference[partial.length], threw };
 }
 
+/**
+ * The comparison key of one event: its JSON with the keys sorted AT EVERY LEVEL.
+ *
+ * ⚠️ Found 2026-10-01 (NSP-013, by a Date Add mutant that survived a scenario whose traces visibly
+ * differed): this was `JSON.stringify(e, Object.keys(e).sort())`, and a replacer ARRAY applies to
+ * every nested object too — so a value that is an object kept only the keys that happened to be
+ * event keys (`t`, `port`, `value`, …) and `{ "$date": … }`, `{ "$num": "NaN" }`, `{ "$array":
+ * …, "items": … }`, `{ value, unit }` (its `unit` gone) all compared as `{}`. Two traces whose
+ * dates, NaNs, arrays or records differed compared EQUAL, from NSP-003 to NSP-012. The README's
+ * §6 carries the row (T3); every earlier reading on an object-valued port was weaker than it said.
+ */
 export function eventKey(e: TraceEvent): string {
-  return JSON.stringify(e, Object.keys(e).sort());
+  return sortedJson(e);
+}
+
+function sortedJson(v: unknown): string {
+  if (Array.isArray(v)) return '[' + v.map(sortedJson).join(',') + ']';
+  if (v !== null && typeof v === 'object') {
+    const o = v as Record<string, unknown>;
+    return '{' + Object.keys(o).sort().map((k) => JSON.stringify(k) + ':' + sortedJson(o[k])).join(',') + '}';
+  }
+  return String(JSON.stringify(v));
 }
 
 export function compareTraces(reference: readonly TraceEvent[], actual: readonly TraceEvent[]): Difference {

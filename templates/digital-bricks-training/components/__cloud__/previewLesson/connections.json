@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ce3162d8-650a-4c9d-8433-f85d34a17499",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "receive",
+      "toId": "run",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "run",
+      "toProperty": "in-callerId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-learnerId",
+      "toId": "run",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-conceptId",
+      "toId": "run",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-which",
+      "toId": "run",
+      "toProperty": "in-which"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-rows",
+      "toId": "res",
+      "toProperty": "pm-rows"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-why",
+      "toId": "deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-refuse",
+      "toId": "deny",
+      "toProperty": "send"
+    }
+  ]
+}

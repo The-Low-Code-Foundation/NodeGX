@@ -117,5 +117,34 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "after a From-repeater re-resolve unbinds it, a new Id in the next frame binds again and Do writes: done",
+    "because": "modelcrudbase.ts :264, :300 the bind job runs once and is consumed; the next frame's Id binds afresh (NSP-013 s12: only luck in the generated sequences graded the consumed job, T4)",
+    "params": {
+      "idSource": "foreach",
+      "properties": "a",
+      "prop-a": 1
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "m1"
+      },
+      {
+        "set": "repeaterComponent",
+        "value": "Row"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "m2"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ]
   }
 ]

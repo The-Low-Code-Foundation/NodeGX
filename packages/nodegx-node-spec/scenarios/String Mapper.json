@@ -213,5 +213,23 @@
       "settle"
     ],
     "row": "NSP-011 §6 C4"
+  },
+  {
+    "name": "null on a numbered Mapping is ignored by the spec: nothing is scheduled, so the published mapping stands (the runtime throws, §6 row C4)",
+    "because": ":54 `value.toString()` throws on null (row C4); the spec ignores the write — nothing is scheduled, so nothing is published (NSP-013 s12: a swap of that branch survived on seed 20740, T4)",
+    "row": "NSP-011 §6 C4",
+    "params": {
+      "input 0": "a",
+      "output 0": "Q",
+      "inputString": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "output 1",
+        "value": null
+      },
+      "settle"
+    ]
   }
 ]

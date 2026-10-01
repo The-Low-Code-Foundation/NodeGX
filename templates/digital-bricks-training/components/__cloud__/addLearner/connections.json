@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "3161b99a-f65f-5c8f-8c41-ecc83691d693",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "pm-email",
+      "toId": "check",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-projectName",
+      "toId": "check",
+      "toProperty": "in-projectName"
+    },
+    {
+      "fromId": "check",
+      "fromProperty": "out-email",
+      "toId": "account",
+      "toProperty": "username"
+    },
+    {
+      "fromId": "check",
+      "fromProperty": "out-email",
+      "toId": "account",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "check",
+      "fromProperty": "out-go",
+      "toId": "account",
+      "toProperty": "create"
+    },
+    {
+      "fromId": "account",
+      "fromProperty": "userId",
+      "toId": "roles",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "account",
+      "fromProperty": "done",
+      "toId": "roles",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "account",
+      "fromProperty": "unchanged",
+      "toId": "roles",
+      "toProperty": "read"
+    },
+    {
+      "fromId": "account",
+      "fromProperty": "userId",
+      "toId": "give",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "roles",
+      "fromProperty": "roles",
+      "toId": "give",
+      "toProperty": "in-roles"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-projectName",
+      "toId": "give",
+      "toProperty": "in-projectName"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-problemStatement",
+      "toId": "give",
+      "toProperty": "in-problemStatement"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-label",
+      "toId": "give",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "give",
+      "fromProperty": "out-learnerId",
+      "toId": "res",
+      "toProperty": "pm-learnerId"
+    },
+    {
+      "fromId": "give",
+      "fromProperty": "out-created",
+      "toId": "res",
+      "toProperty": "pm-created"
+    },
+    {
+      "fromId": "give",
+      "fromProperty": "out-done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "check",
+      "fromProperty": "out-why",
+      "toId": "deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "check",
+      "fromProperty": "out-refuse",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "give",
+      "fromProperty": "out-why",
+      "toId": "deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "give",
+      "fromProperty": "out-refuse",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "account",
+      "fromProperty": "failure",
+      "toId": "deny_account",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "roles",
+      "fromProperty": "failure",
+      "toId": "deny_account",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "give",
+      "toProperty": "in-callerId"
+    }
+  ]
+}

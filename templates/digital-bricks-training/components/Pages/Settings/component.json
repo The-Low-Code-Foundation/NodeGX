@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8cf6c926-8d4b-4ab1-b2ce-937c58486870",
+  "name": "Settings",
+  "path": "/Pages/Settings",
+  "type": "page",
+  "created": "2026-10-01T08:55:46.756Z",
+  "modified": "2026-10-01T09:06:30.787Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Sign out, download everything held about you, or delete your account. Behind sign-in but OUTSIDE the privacy acceptance gate, because declining a notice must never take away the way out (TASK-L185, the product's L54)."
+}

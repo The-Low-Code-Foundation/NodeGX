@@ -1,0 +1,85 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "486559e1-9798-51e8-8a99-e01476097cc1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "pm-u",
+      "toId": "v_start",
+      "toProperty": "in-u"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-s",
+      "toId": "v_start",
+      "toProperty": "in-s"
+    },
+    {
+      "fromId": "v_start",
+      "fromProperty": "out-go",
+      "toId": "v_key",
+      "toProperty": "fetch"
+    },
+    {
+      "fromId": "v_start",
+      "fromProperty": "out-value",
+      "toId": "v_hmac",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "v_key",
+      "fromProperty": "value",
+      "toId": "v_hmac",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "v_key",
+      "fromProperty": "done",
+      "toId": "v_hmac",
+      "toProperty": "sign"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-u",
+      "toId": "v_fn",
+      "toProperty": "in-u"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-s",
+      "toId": "v_fn",
+      "toProperty": "in-s"
+    },
+    {
+      "fromId": "v_hmac",
+      "fromProperty": "signature",
+      "toId": "v_fn",
+      "toProperty": "in-signature"
+    },
+    {
+      "fromId": "v_hmac",
+      "fromProperty": "done",
+      "toId": "v_fn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "v_fn",
+      "fromProperty": "out-done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "v_key",
+      "fromProperty": "failure",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "v_hmac",
+      "fromProperty": "failure",
+      "toId": "deny",
+      "toProperty": "send"
+    }
+  ]
+}

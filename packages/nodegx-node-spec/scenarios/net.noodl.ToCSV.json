@@ -1,0 +1,62 @@
+[
+  {
+    "name": "records under the union of their keys in first-seen order, header on; a missing property writes an empty cell; Count 2; Changed",
+    "because": "tocsv.ts :181-185; csv.ts :204-215 unionOfKeys, :231-243 toCSV",
+    "params": {},
+    "steps": [{ "set": "items", "value": [{ "name": "Ada", "team": "x" }, { "name": "Lin", "age": 9 }] }, "settle"]
+  },
+  {
+    "name": "quoting: a cell holding the delimiter, a quote or a newline is quoted with its quotes doubled",
+    "because": "csv.ts :219-229 quoteCell — the whole correctness question",
+    "params": {},
+    "steps": [{ "set": "items", "value": [{ "a": "say \"hi\"", "b": "one,two", "c": "two\nlines" }] }, "settle"]
+  },
+  {
+    "name": "Columns picks and orders the properties, spaces trimmed, empties dropped; a named column nobody has writes empty cells",
+    "because": "tocsv.ts :166-171 — a stringlist is ONE comma-separated string",
+    "params": { "columns": " team , name,missing, " },
+    "steps": [{ "set": "items", "value": [{ "name": "Ada", "team": "x" }, { "name": "Lin" }] }, "settle"]
+  },
+  {
+    "name": "rows of cells are written cell for cell with no header, whatever Include Header says",
+    "because": "tocsv.ts :173-179; csv.ts :246-250 rowsToCSV",
+    "params": { "includeHeader": true },
+    "steps": [{ "set": "items", "value": [["a", "b"], ["1", "2"]] }, "settle"]
+  },
+  {
+    "name": "Include Header off writes the data rows only; 0 on it is off too",
+    "because": "tocsv.ts :116 `!!value`; csv.ts :237",
+    "params": { "includeHeader": false },
+    "steps": [{ "set": "items", "value": [{ "a": 1, "b": 2 }] }, "settle", { "set": "includeHeader", "value": 0 }, "settle"]
+  },
+  {
+    "name": "Delimiter ';' separates and quotes a cell holding ';'; a Delimiter cleared to '' reads as ','",
+    "because": "tocsv.ts :106 `value || ','`; csv.ts :225",
+    "params": { "delimiter": ";" },
+    "steps": [{ "set": "items", "value": [{ "a": "x;y", "b": 1 }] }, "settle", { "set": "delimiter", "value": "" }, "settle"]
+  },
+  {
+    "name": "a string on Items is a literal: '[{\"a\":1},{\"a\":2}]' writes two rows; one that will not evaluate is an empty array (an empty text, Count 0); a number has no length — an empty text, and Count reads nothing (the wire keeps 0)",
+    "because": "node.ts setInputValue evaluates a string on an array port (coerce.ts array-literal); tocsv.ts :161-164, :133",
+    "params": {},
+    "steps": [{ "set": "items", "value": "[{\"a\":1},{\"a\":2}]" }, "settle", { "set": "items", "value": "not a literal" }, "settle", { "set": "items", "value": 5 }, "settle"]
+  },
+  {
+    "name": "three inputs in one frame write once: one Changed",
+    "because": "tocsv.ts :147-155 _schedule's guard",
+    "params": {},
+    "steps": [{ "set": "items", "value": [{ "a": 1 }] }, { "set": "delimiter", "value": ";" }, { "set": "includeHeader", "value": false }, "settle"]
+  },
+  {
+    "name": "a mixed list is read as records: an array item by its indices, a number by nothing, null by nothing; null and undefined cells write empty",
+    "because": "tocsv.ts :176 every item an array, else records; :40-52 toPlainRecord; csv.ts :221",
+    "params": {},
+    "steps": [{ "set": "items", "value": [["a", "b"], { "c": 1 }, 7, null, { "c": null, "d": 0 }] }, "settle"]
+  },
+  {
+    "name": "null on Items is not an arrival: nothing, and a later array writes",
+    "because": "tocsv.ts :79 itemsSupplied; :159",
+    "params": {},
+    "steps": [{ "set": "items", "value": null }, "settle", { "set": "items", "value": [] }, "settle"]
+  }
+]

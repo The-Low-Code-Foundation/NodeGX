@@ -449,6 +449,8 @@ export interface WorldPool {
   advances?: readonly number[];
   /** NSP-012: the registries a `registry` spec's sequences start from (one is drawn per sequence; the defaults include an empty one). */
   registries?: readonly RegistryScript[];
+  /** NSP-013: the IANA zones a `timezone` spec's sequences run in (one is drawn per sequence; the defaults cross a DST change and a half-hour offset). */
+  timeZones?: readonly string[];
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -497,8 +499,15 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   worldPool?: WorldPool;
 }
 
-/** The parts of the world NSP-007 scripts, and the registry NSP-012 adds. */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'backend';
+/**
+ * The parts of the world NSP-007 scripts, the registry NSP-012 adds, and the two NSP-013 adds:
+ * `timezone` — the node reads a calendar in the host's local zone (`getHours`, `setMonth`, an
+ * `Intl` call with no `timeZone`), so the play runs in the zone the script names (world.ts
+ * TIME ZONE: `UTC` when the script names none); `digest` — the node asks the host for a SHA-2
+ * digest (`crypto.subtle.digest`), which the world answers itself so the answer lands in the
+ * microtask after the call and never on a thread the clock cannot see (world.ts DIGEST).
+ */
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'backend';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;

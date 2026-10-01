@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "ce3162d8-650a-4c9d-8433-f85d34a17499",
+  "name": "previewLesson",
+  "path": "/#__cloud__/previewLesson",
+  "type": "cloud",
+  "created": "2026-10-01T18:00:00.000Z",
+  "modified": "2026-10-01T18:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The staff preview page's read: one learner's draft (or published) lesson for one step, as the learner's lesson page draws it, with whose it is and whether it is live (TASK-L190). Not offered to the trainer's Claude."
+}

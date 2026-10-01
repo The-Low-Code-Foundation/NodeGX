@@ -1,0 +1,62 @@
+[
+  {
+    "name": "Start with Interval 100: done; nothing at 99 ms; Tick and Count 1 at 100",
+    "because": "repeat.ts :118-128 the first tick is due one interval after the last frame; timerscheduler.ts :177-197 the queued timer joins at the next frame, :132-159 finishes when the frame's time reaches start + duration",
+    "params": { "interval": 100 },
+    "steps": ["settle", { "signal": "start" }, "settle", { "advance": 99 }, "settle", { "advance": 1 }, "settle"]
+  },
+  {
+    "name": "the beat keeps its phase: ticks at 100, 200 and 300 across three advances of 100",
+    "because": "repeat.ts :186-193 the next due time is the last one plus the beat, and the timer is re-queued from onFinish",
+    "params": { "interval": 100 },
+    "steps": ["settle", { "signal": "start" }, "settle", { "advance": 100 }, "settle", { "advance": 100 }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "a tick due during a long advance fires ONCE at the next frame; the missed beats are skipped, not replayed, and the beat keeps its phase (350 → next at 400)",
+    "because": "repeat.ts :188-191 — ceil((now − nextAt) / beat + EPSILON) whole beats are skipped; GAM-013's 'no catch-up burst'",
+    "params": { "interval": 100 },
+    "steps": ["settle", { "signal": "start" }, "settle", { "advance": 350 }, "settle", { "advance": 49 }, "settle", { "advance": 1 }, "settle"]
+  },
+  {
+    "name": "Start while running reports unchanged; Stop reports done and no Tick follows; Stop again is unchanged",
+    "because": "repeat.ts :107-110, :133-141; timerscheduler.ts :96-114 stopTimer",
+    "params": { "interval": 100 },
+    "steps": ["settle", { "signal": "start" }, "settle", { "signal": "start" }, "settle", { "advance": 100 }, "settle", { "signal": "stop" }, "settle", { "advance": 200 }, "settle", { "signal": "stop" }, "settle"]
+  },
+  {
+    "name": "Count keeps its value after Stop and goes back to 0 on the next Start — sent then, before the new ticks",
+    "because": "repeat.ts :132 'Count keeps its value until the next Start'; :123-126 reset only when it was not 0",
+    "params": { "interval": 100 },
+    "steps": ["settle", { "signal": "start" }, "settle", { "advance": 100 }, "settle", { "advance": 100 }, "settle", { "signal": "stop" }, "settle", { "signal": "start" }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "an Interval that is the text '100', 0, −5 or NaN fails Start with repeat/interval-not-positive and nothing runs; 0.5 is usable",
+    "because": "repeat.ts :40-42 isUsableInterval — a number, finite, above zero; :111-117",
+    "params": { "interval": "100" },
+    "steps": [{ "signal": "start" }, "settle", { "set": "interval", "value": 0 }, { "signal": "start" }, "settle", { "set": "interval", "value": -5 }, { "signal": "start" }, "settle", { "set": "interval", "value": { "$num": "NaN" } }, { "signal": "start" }, "settle", { "advance": 1000 }, "settle", { "set": "interval", "value": 0.5 }, { "signal": "start" }, "settle", { "advance": 1 }, "settle"]
+  },
+  {
+    "name": "an Interval changed while running takes effect from the next tick (100 then 50); an unusable one keeps the last beat",
+    "because": "repeat.ts :186 `if (isUsableInterval(interval)) beat = interval` at every tick",
+    "params": { "interval": 100 },
+    "steps": ["settle", { "signal": "start" }, "settle", { "advance": 100 }, "settle", { "set": "interval", "value": 50 }, { "advance": 100 }, "settle", { "advance": 50 }, "settle", { "set": "interval", "value": 0 }, { "advance": 50 }, "settle"]
+  },
+  {
+    "name": "the first tick is due from the LAST FRAME's time, not the clock: a Start after an advance with no settle between joins at 500 and ticks at 600, then skips forward to 700",
+    "because": "repeat.ts :36-38 frameTimeOf reads currentFrameTime, the time of the frame most recently run; :120-122; :188-191 the skip",
+    "params": { "interval": 100 },
+    "steps": ["settle", { "advance": 500 }, { "signal": "start" }, "settle", { "advance": 100 }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "two Starts in one frame: the second is unchanged (the node's own flag, not the scheduler's)",
+    "because": "repeat.ts :22-24 'no stacking' — unlike Delay's guard on _isRunning",
+    "params": { "interval": 100 },
+    "steps": [{ "signal": "start" }, { "signal": "start" }, "settle", { "advance": 100 }, "settle"]
+  },
+  {
+    "name": "Stop before the first frame cancels the queued timer: done, and no Tick ever",
+    "because": "timerscheduler.ts :108-113 stopTimer removes a queued timer from newTimers",
+    "params": { "interval": 100 },
+    "steps": [{ "signal": "start" }, { "signal": "stop" }, "settle", { "advance": 1000 }, "settle"]
+  }
+]

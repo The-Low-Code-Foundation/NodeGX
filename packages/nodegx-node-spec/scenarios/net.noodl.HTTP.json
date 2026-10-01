@@ -117,5 +117,6 @@
     "params": { "url": 5 },
     "world": { "network": [{ "answer": { "status": 200, "body": "ok" } }] },
     "steps": [{ "signal": "fetch" }, "settle", { "set": "url", "value": "https://api.example.com/after" }, { "signal": "fetch" }, "settle"]
-  }
+  },
+  {"name": "ROW C6 — text after a unit object on Headers is merged into it by node.ts: the runtime's Fetch sends no request", "because": "node.ts setInputValue :410-420 (NSP-011 §6 C6, R7) — reduced by hand from generated seed 73021029 on run seed 777 (s12, the first rotation that drew it)", "row": "NSP-011 §6 C6", "params": {"url": "https://api.example.com/users", "headers": {"unit": "px", "value": 1}}, "world": {"network": [{"answer": {"status": 200, "body": {"users": [1, 2]}}}]}, "steps": [{"set": "headers", "value": "3"}, {"signal": "fetch"}, "settle"]}
 ]

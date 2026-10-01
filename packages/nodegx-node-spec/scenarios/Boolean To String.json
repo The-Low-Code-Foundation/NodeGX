@@ -46,5 +46,27 @@
     "because": "booleantostring.ts :56-63 stores undefined and flags; node.ts :820-822 never sends undefined; the '' the output held at mount was never a sample (NSP-006 §5.6 item 1)",
     "params": {},
     "steps": [{ "set": "falseString" }, "settle", { "set": "falseString", "value": "no" }, "settle"]
+  },
+  {
+    "name": "String for false = '' at mount equals what the node already holds: nothing is sent, so a Selector picking an unset String for true in the same frame leaves the wire empty",
+    "because": "booleantostring.ts :57 the same-value guard, :34 the initial '' — the s4 spec had dropped the guard (NSP-013 s12, reduced from generated seed 799069363)",
+    "params": {
+      "falseString": ""
+    },
+    "steps": [
+      {
+        "set": "trueString"
+      },
+      {
+        "set": "input",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "trueString",
+        "value": "T"
+      },
+      "settle"
+    ]
   }
 ]

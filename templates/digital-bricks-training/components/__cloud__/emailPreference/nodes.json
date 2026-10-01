@@ -1,0 +1,76 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5614bdf3-0ba7-58cb-b80a-388d4fc42bdb",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Signed in (security: authenticated)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "",
+        "allowNoAuth": false
+      }
+    },
+    {
+      "id": "fn",
+      "type": "JavaScriptFunction",
+      "label": "The one job",
+      "x": 320,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * IS THIS ACCOUNT EMAILED ABOUT MESSAGES? (TASK-L187 §6) For the switch on\n * /settings. The account is the session's; nobody can read anybody else's.\n */\nif (Inputs.userId !== undefined) {\n  (async () => {\n    try {\n      const users = await Noodl.Records.query('_User', { objectId: { equalTo: String(Inputs.userId || '') } }, { limit: 2, plain: true });\n      if (users.length !== 1) throw new Error(users.length ? 'two accounts' : 'no account');\n      Outputs.on = !users[0].emailOptOutAt;\n      Outputs.done();\n    } catch (e) {\n      console.error('[dbt:emailPreference] ' + String((e && e.message) || e));\n      Outputs.failed();\n    }\n  })();\n}\n",
+        "runOnChange-in-userId": true
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-on",
+          "plug": "output",
+          "type": "*",
+          "displayName": "on",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "on",
+      "x": 620,
+      "y": 40,
+      "parameters": {
+        "params": "on"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "One refusal",
+      "x": 620,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "This could not be done."
+      }
+    }
+  ]
+}

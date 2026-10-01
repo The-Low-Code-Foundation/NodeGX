@@ -33,6 +33,28 @@
  *     two doors go straight to /Pages/Course and /Pages/People.
  *   - Pages/Sign in and __cloud__/ are not copied; the router loses the Sign in
  *     route; the registry follows.
+ *   - THE UNSUBSCRIBE PAGE GOES (TASK-L187): the demo sends no mail, so a page
+ *     for stopping it would answer a link nobody was ever sent.
+ *   - THE PRIVACY SURFACE GOES (TASK-L185): Pages/Privacy, Pages/Settings and
+ *     Privacy/ are not copied, the router loses both routes, App loses its
+ *     notice gate and the acceptance screen, and Home loses its "Your data" and
+ *     "Your settings" links and its account-deleted line. The template's notice
+ *     describes a real deployment (where data lives, who sends mail, how an
+ *     account is deleted), and a browser-only demo of made-up people holds
+ *     nothing and does none of it; carrying the notice here would make it false.
+ *   - THE COACH'S WRITES GO (TASK-L184): People/Add a learner, People/Their
+ *     path and its two row components are not copied, and People and Learner
+ *     lose the nodes that place them. Adding a person and choosing their path
+ *     need the backend; the demo's coach reads the made-up people and changes
+ *     nobody.
+ *   - THE THREAD UNDER A CARD (TASK-L186): Course/Timeline row's four thread
+ *     calls (tr_open_l → `openThread`, tr_open_c → `openThreadAsCoach`,
+ *     tr_send_l → `sendMessage`, tr_send_c → `replyAsCoach`) become
+ *     JavaScriptFunctions AT THE SAME ID. The two opens read the thread from the
+ *     programme fixture's own `message` entries (moved to today); the two sends
+ *     answer the way a write that worked answers and keep the turn only in this
+ *     page's memory, so a reload shows the thread as it was. `call` becomes
+ *     `run`, `done` becomes `out-done`, and the `failure`/`error` wires go.
  *   - Home gains a THIRD door, straight to the one written lesson (the same
  *     page and `?concept=` the dossier dialog's link uses) — three nodes, two
  *     wires, one string.
@@ -61,27 +83,41 @@ export const TEMPLATE = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const DEMO = join(TEMPLATE, '..', 'digital-bricks-training-demo');
 
 /** Components the demo does not carry, as path prefixes under components/. */
-export const DROPPED_COMPONENTS = ['__cloud__/', 'Pages/Sign in/'];
+export const DROPPED_COMPONENTS = [
+  '__cloud__/', 'Pages/Sign in/', 'Pages/Privacy/', 'Pages/Settings/', 'Pages/Unsubscribe/', 'Privacy/',
+  'People/Add a learner/', 'People/Their path/', 'People/Path step row/', 'People/Path concept row/',
+  // TASK-L190: a draft's preview reads previewLesson, and the demo has no backend and no drafts.
+  'Pages/Preview/', 'Data/Preview lesson/'
+];
 /** Components whose files the demo changes. Every other file is byte-identical. */
-export const CHANGED_COMPONENTS = ['App', 'Pages/Home', 'Data/Programme', 'Data/Lesson', 'Data/Roster', 'Data/Strings', 'Lesson/Section row', 'Pages/Lesson'];
+export const CHANGED_COMPONENTS = ['App', 'Pages/Home', 'Data/Programme', 'Data/Lesson', 'Data/Roster', 'Data/Strings', 'Lesson/Section row', 'Pages/Lesson', 'Pages/People', 'Pages/Learner', 'Course/Timeline row'];
 /** Node ids removed, per component. */
 export const REMOVED_NODES = {
-  App: ['app_user', 'app_gate', 'app_to_signin', 'app_to_home'],
-  'Pages/Home': ['hm_user', 'hm_logout'],
+  App: ['app_user', 'app_gate', 'app_to_signin', 'app_to_home', 'app_accept_box', 'app_accept', 'app_notice_gate', 'app_user_tick'],
+  'Pages/Home': [
+    'hm_user', 'hm_logout',
+    'hm_links', 'hm_privacy_link', 'hm_settings_link', 'hm_to_privacy', 'hm_to_settings', 't_hm_privacy_link', 't_hm_settings_link',
+    'hm_deleted', 'hm_url', 'hm_was_deleted', 't_hm_deleted'
+  ],
   'Data/Programme': ['pr_refused'],
+  'Pages/People': ['pp_add'],
+  'Pages/Learner': ['lr_path'],
   'Data/Lesson': ['le_refused'],
   'Data/Roster': ['ro_refused'],
 };
 /** Node ids whose content changes (same id, same place in the graph). */
 export const REWRITTEN_NODES = {
-  App: ['app_router'],
-  'Pages/Home': ['hm_actions', 'hm_go', 'hm_go_people'],
+  App: ['app_router', 'app_root'],
+  'Pages/Home': ['hm_actions', 'hm_go', 'hm_go_people', 'hm_shell'],
   'Data/Programme': ['pr_own', 'pr_about'],
   'Data/Lesson': ['le_call'],
   'Data/Roster': ['ro_call'],
   'Data/Strings': ['str_graph'],
   'Lesson/Section row': ['sr_call'],
   'Pages/Lesson': ['ls_finish_call'],
+  'Pages/People': ['pp_shell'],
+  'Pages/Learner': ['lr_prog_surface'],
+  'Course/Timeline row': ['tr_open_l', 'tr_open_c', 'tr_send_l', 'tr_send_c'],
 };
 
 /** Node ids the demo ADDS, per component: Home's third door. */
@@ -206,6 +242,56 @@ function writer({ id, x, y, label, fn }) {
   };
 }
 
+/*
+ * THE THREAD, IN THE BROWSER (TASK-L186). In the template these are the
+ * backend's four thread functions; here the opens read the made-up thread from
+ * the programme fixture and the sends keep the new turn in this page's memory
+ * only (`globalThis.__dbtDemoThreads`), so the panel behaves as it does for
+ * real until a reload — and the demo's own note already says nothing is saved.
+ * The thread is keyed the way the backend keys it: an anchor for the learner,
+ * a conversation for the coach.
+ */
+const THREAD_HEAD = [
+  '/*',
+  ' * GENERATED by tools/build-demo.mjs (TASK-L186) — do not edit by hand.',
+  ' *',
+  " * Stands where the template's thread function stands. It reads the made-up",
+  ' * thread from the programme fixture and keeps a new turn in this page only.',
+  ' */',
+].join('\n');
+const THREAD_LIB =
+  'var mem = (globalThis.__dbtDemoThreads = globalThis.__dbtDemoThreads || {});\n' +
+  'function fixtureTurns(match, reader) {\n' +
+  '  var entries = (demoFresh(FIXTURE, Date.now())[0] || {}).entries || [];\n' +
+  '  return entries.filter(function (e) { return e.kind === \'message\' && match(e); })\n' +
+  '    .sort(function (a, b) { return String(a.at) < String(b.at) ? -1 : 1; })\n' +
+  '    .map(function (e) { return { id: e.id, authorRole: e.authorRole, body: e.body, createdAt: e.at, unread: e.authorRole !== reader && !e.read }; });\n' +
+  '}\n';
+export const THREADERS = {
+  tr_open_l: { fn: 'openThread', label: 'openThread — read in the browser (demo)', inputs: ['anchorKind', 'anchorId'],
+    body: "var key = 'a:' + String(Inputs.anchorId || '');\nOutputs.turns = fixtureTurns(function (e) { return e.threadAnchor && e.threadAnchor.id === Inputs.anchorId; }, 'learner').concat(mem[key] || []);\nOutputs.done();" },
+  tr_open_c: { fn: 'openThreadAsCoach', label: 'openThreadAsCoach — read in the browser (demo)', inputs: ['conversationId'],
+    body: "var key = 'c:' + String(Inputs.conversationId || '');\nOutputs.turns = fixtureTurns(function (e) { return e.conversationId === Inputs.conversationId; }, 'coach').concat(mem[key] || []);\nOutputs.done();" },
+  tr_send_l: { fn: 'sendMessage', label: 'sendMessage — kept in this page only (demo)', inputs: ['anchorKind', 'anchorId', 'body'],
+    body: "var key = 'a:' + String(Inputs.anchorId || '');\n(mem[key] = mem[key] || []).push({ id: 'demo:' + Date.now(), authorRole: 'learner', body: String(Inputs.body || ''), createdAt: new Date().toISOString(), unread: false });\nOutputs.turns = fixtureTurns(function (e) { return e.threadAnchor && e.threadAnchor.id === Inputs.anchorId; }, 'learner').concat(mem[key]);\nOutputs.done();" },
+  tr_send_c: { fn: 'replyAsCoach', label: 'replyAsCoach — kept in this page only (demo)', inputs: ['conversationId', 'body'],
+    body: "var key = 'c:' + String(Inputs.conversationId || '');\n(mem[key] = mem[key] || []).push({ id: 'demo:' + Date.now(), authorRole: 'coach', body: String(Inputs.body || ''), createdAt: new Date().toISOString(), unread: false });\nOutputs.turns = fixtureTurns(function (e) { return e.conversationId === Inputs.conversationId; }, 'coach').concat(mem[key]);\nOutputs.done();" },
+};
+function threader({ id, x, y, label, inputs, body }) {
+  const script = `${THREAD_HEAD}\n${CLOCK_SOURCE}var FIXTURE = /*FIXTURE-BEGIN*/${embed(fixture('programme'))}/*FIXTURE-END*/;\n${THREAD_LIB}${body}\n`;
+  return {
+    id, type: 'JavaScriptFunction', label, x, y,
+    parameters: Object.assign({ functionScript: script }, Object.fromEntries(inputs.map((i) => [`runOnChange-in-${i}`, false]))),
+    metadata: { comment: 'Demo stand-in for the backend\'s thread (TASK-L186). Reads the fixture; keeps a new turn in this page only.' },
+    ports: inputs
+      .map((i) => ({ name: `in-${i}`, displayName: i, plug: 'input', type: '*', group: 'Inputs' }))
+      .concat([
+        { name: 'out-turns', displayName: 'turns', plug: 'output', type: '*', group: 'Outputs' },
+        { name: 'out-done', displayName: 'done', plug: 'output', type: 'signal', group: 'Outputs' },
+      ]),
+  };
+}
+
 function transformNodes(component, doc) {
   const removed = new Set(REMOVED_NODES[component] || []);
   const nodes = [];
@@ -216,6 +302,11 @@ function transformNodes(component, doc) {
       nodes.push(responder({ id: node.id, x: node.x, y: node.y, ...RESPONDERS[node.id] }));
       continue;
     }
+    if (THREADERS[node.id]) {
+      if (node.type !== 'CloudFunction2' || node.parameters.function !== THREADERS[node.id].fn) throw new Error(`build-demo: ${component}/${node.id} is not the ${THREADERS[node.id].fn} call`);
+      nodes.push(threader({ id: node.id, x: node.x, y: node.y, ...THREADERS[node.id] }));
+      continue;
+    }
     if (WRITERS[node.id]) {
       if (node.type !== 'CloudFunction2' || node.parameters.function !== WRITERS[node.id].fn) throw new Error(`build-demo: ${component}/${node.id} is not the ${WRITERS[node.id].fn} call`);
       nodes.push(writer({ id: node.id, x: node.x, y: node.y, ...WRITERS[node.id] }));
@@ -223,8 +314,9 @@ function transformNodes(component, doc) {
     }
     if (node.id === 'app_router') {
       const routes = node.parameters.pages.routes;
-      if (!routes.includes('/Pages/Sign in')) throw new Error('build-demo: the router no longer lists /Pages/Sign in');
-      node.parameters.pages.routes = routes.filter((r) => r !== '/Pages/Sign in');
+      const DROP_ROUTES = ['/Pages/Sign in', '/Pages/Privacy', '/Pages/Settings', '/Pages/Unsubscribe', '/Pages/Preview'];
+      for (const r of DROP_ROUTES) if (!routes.includes(r)) throw new Error(`build-demo: the router no longer lists ${r}`);
+      node.parameters.pages.routes = routes.filter((r) => !DROP_ROUTES.includes(r));
     }
     if (node.id === 'hm_go' || node.id === 'hm_go_people') {
       if (node.parameters.target !== '/Pages/Sign in') throw new Error(`build-demo: ${node.id} no longer goes to Sign in`);
@@ -243,6 +335,12 @@ function transformNodes(component, doc) {
         home[k] = v;
       }
       node.parameters.json = json(data);
+    }
+    // A removed node leaves its parent's children list (TASK-L185: App's acceptance box, Home's links).
+    if (['app_root', 'hm_shell', 'pp_shell', 'lr_prog_surface'].includes(node.id) && Array.isArray(node.children)) {
+      const before = node.children.length;
+      node.children = node.children.filter((c) => !removed.has(c));
+      if (node.children.length === before) throw new Error(`build-demo: ${node.id} lost none of its children — the named list is out of date`);
     }
     if (node.id === 'hm_actions') {
       const at = node.children.indexOf('hm_coach');
@@ -277,12 +375,12 @@ function transformConnections(component, doc, nodeIds) {
   const connections = [];
   for (const c of doc.connections) {
     if (!nodeIds.has(c.fromId) || !nodeIds.has(c.toId)) continue;
-    if ((RESPONDERS[c.fromId] || WRITERS[c.fromId]) && c.fromProperty === 'failure') continue;
-    if (WRITERS[c.fromId] && c.fromProperty === 'done') {
+    if ((RESPONDERS[c.fromId] || WRITERS[c.fromId] || THREADERS[c.fromId]) && (c.fromProperty === 'failure' || (THREADERS[c.fromId] && c.fromProperty === 'error'))) continue;
+    if ((WRITERS[c.fromId] || THREADERS[c.fromId]) && c.fromProperty === 'done') {
       connections.push({ ...c, fromProperty: 'out-done' });
       continue;
     }
-    if ((RESPONDERS[c.toId] || WRITERS[c.toId]) && c.toProperty === 'call') {
+    if ((RESPONDERS[c.toId] || WRITERS[c.toId] || THREADERS[c.toId]) && c.toProperty === 'call') {
       connections.push({ ...c, toProperty: 'run' });
       continue;
     }
@@ -338,6 +436,9 @@ template and regenerate, and the demo follows (TASK-L180).
   goes to the course, because each answers the way a write that worked answers — but there is no
   backend, so a reload shows the programme as it was. In the template both are real
   (TASK-L177, TASK-L178).
+- **Asking your coach works, and keeps nothing.** *Ask your coach about this* opens the thread
+  about that card from the made-up messages, and a question or a coach's reply appears in it — but
+  only in this page: a reload shows the thread as it was. In the template it is real (TASK-L186).
 - **Hash URLs** (\`#/course\`), so a reload works on a static host with no fallback.
 
 To run it with a real backend, magic-link sign-in and the coach's gate, start from the

@@ -1,7 +1,7 @@
 # NSP-013 — Batch: dates, time, randomness, parsers, animation
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world) and R4 = continue.
-**Status: 📋 not started.**
+**Status: 🟡 s12 (2026-10-01) — 16 of 24 built and conform on the runtime; the other 8 named in §6.4.**
 
 ## 1. The person sentence
 
@@ -54,4 +54,198 @@ As NSP-011 §4, plus:
 
 ## 6. Built
 
-*(empty)*
+### 6.1 s11, 2026-10-01 — the time zone, the digest, and twelve nodes
+
+**The number: 12 of 12 conform on the runtime at 200 generated sequences, every mutant killed or declared
+(§6.3) — 58 of 147.** Date Add, Date Compare, Date Difference, Date Parts, Date To String, Now, Hash, Random
+Bytes, Unique Id, Parse CSV, To CSV, Repeat (UUID and Delay, which the census lists here too, were NSP-007's).
+Specs in `packages/nodegx-node-spec/src/nodes/` (date-math.ts — datemath.ts verbatim, date-add.ts,
+date-compare.ts, date-difference.ts, date-parts.ts, date-to-string.ts — `_format` verbatim, now.ts, hash.ts,
+random-bytes.ts, unique-id.ts, bytes.ts, csv.ts — csv.ts verbatim, parse-csv.ts, to-csv.ts, repeat.ts — the
+scheduler's timer pass as Delay's spec reads it), scenarios in `scenarios/<type>.json` (103 hand cases), the
+interpreter gate `tests/batch-time.test.ts`, the runtime gate `packages/noodl-runtime/test/node-spec/conformance.test.ts`
+(known row C16 counted, never hidden; Repeat registered from the viewer's source in `VIEWER_NODES`).
+
+**The world grew two seams** (`src/world.ts`, the header is the rule). **TIME ZONE**: a play runs in ONE IANA
+zone, the script's `timeZone` (`UTC` when it names none), never the machine's — `installTimeZone` writes
+`process.env.TZ`, which V8 re-reads on every assignment; a spec declares `needs: 'timezone'`; the generator draws a
+zone per sequence from `WorldPool.timeZones` (defaults: UTC, Europe/Paris, America/New_York, Asia/Kolkata,
+Pacific/Auckland — two DST zones, a half-hour offset, the date line); every date scenario file carries the same
+steps in two zones, one across a DST change (AC5). **DIGEST**: `crypto.subtle.digest` is answered by the world
+(`digestBytes`, Node's SHA-2, the standard's bytes) as an already-resolved promise, so a digest lands in the
+microtask after the call — the same settle on every target — where the host's lands on a thread-pool completion a
+frame boundary may or may not carry; a spec declares `needs: 'digest'`; `importKey` / `sign` stay the host's.
+Hash is written as a frame-end reducer settling `deferred` tokens, which is where the runtime's microtask lands.
+
+**Two traps, both in the harness, neither in a node:**
+
+1. **The trace comparison saw no nested key** (row T3, §6.2). `compare.ts` `eventKey` was
+   `JSON.stringify(e, Object.keys(e).sort())`, and a replacer ARRAY applies at every level: `{ "$date": … }`,
+   `{ "$num": "NaN" }`, `{ "$array": …, "items": … }` and a unit object's `unit` all compared as `{}`. Found by
+   a Date Add mutant that survived a scenario whose two traces visibly differed in a date. Fixed (a recursive
+   key-sorted stringify); the 46 earlier specs and both stranger rounds re-graded green under the real
+   comparison — the hole changed no verdict, but every earlier reading on an object-valued port was weaker than
+   it said.
+2. **Jest's `process.env` is a copy** V8 never hears about (jest-util `createProcessObject`): a write to
+   `process.env.TZ` inside a test moves nothing, though the same line under `node -e` moves the zone.
+   `tests/jest-env-real-process.js` (a `jest-environment-node` subclass) hands the real env over on a global
+   `installTimeZone` reads first; a test file opts in with the `@jest-environment` docblock (batch-time.test.ts;
+   the runtime's conformance.test.ts). The `run()` helper and both adapters install the zone per play and restore it.
+
+**Lessons for a spec author:** a reducer's `set` names ONLY the keys it changes — a spread-everything `set` puts
+every key in every branch's shape, and a `drop-set` mutant on such a branch is killed by nothing in particular (the
+first probe's six survivors were all this); a value input the reducer reads must be read from `inputs`, or have a
+reducer that stores it (Random Bytes read a `length` it never stored); the throw a known-row predicate matches
+should be the throw's own message, because a bad value can arrive as a mount parameter with no `set` event before
+it (C16's first predicate missed nine of twenty-two).
+
+**The export gate** (`nodegx-export/tests/node-spec-graph.test.ts`) had read red since s10's commit: its "outside
+in the exporter's own words" regex lagged the reason s10 added for a scenario that declares a world. One line; the
+s10 handoff's "12 passed" on that gate was wrong.
+
+### 6.1b s12, 2026-10-01 — the four agent parsers, and a scanner that never returns
+
+**The number: 4 of 4 conform on the runtime at 200, every mutant killed or declared — 62 of 147.** JSON Stream
+Parser (54 mutants), Pattern Extractor (18), Text Accumulator (81 + 1 declared), Stream Buffer (58 + 1 declared).
+Specs in `packages/nodegx-node-spec/src/nodes/`: stream-parsers.ts (the runtime's helpers verbatim but for types
+and ONE marked line, C17), json-stream-parser.ts, pattern-extractor.ts, text-accumulator.ts, stream-buffer.ts
+(`needs: ['clock']` — the interval flush is a host `setTimeout`, one per arming). Scenarios
+`scenarios/net.noodl.{JSONStreamParser,PatternExtractor,TextAccumulator,StreamBuffer}.json` (60 hand cases). Read
+on five days' seeds (20727–20731, `NSP_SEED`, new in conformance.test.ts): conforms on all five, both known rows
+fire on all five — but see T4 below: those five seeds are nearly one seed.
+
+**What the source does that its words do not say** (each pinned by a scenario, none a row): every one of the four
+RETAINS its input between pulses, so a second Parse / Add with no new chunk appends the same text again (the
+port descriptions of Text Accumulator and Stream Buffer say so; JSON Stream Parser's Parse description says
+"retained" and means the same); a Clear never clears that retained input; JSON Stream Parser's Clear does not
+re-send `Parsed`, and its Max Pending give-up does not re-send `Pending Characters` or `Is Complete` (the wire keeps
+the last parse's); in Single format a SECOND whole document in the same buffer is dropped with no error, and a
+malformed one with an incomplete one behind it is re-reported on every Parse; Text Accumulator refuses a non-text
+chunk on ARRIVAL — `Failure` pulses from the setter with no invocation behind it — and an Add after it is
+`Unchanged`; Stream Buffer counts an `undefined` write as data having arrived; its `Error` is never cleared.
+
+**C17 — a hang, and how a hang is graded.** `scanJsonValues` (stream-parsers.ts :234-241) never advances on a
+stray `}` where a value should start (and, with no array framing, `]` or `,`): `scanOneValue` returns the index it
+was given, `JSON.parse('')` throws, the error is pushed and `i = end` — forever, on the main thread, the errors array
+growing until the process dies. Measured outside jest in a worker with a 1 s deadline: `"1}"` and `"}"` framed,
+`"}"`, `","`, `"]"` unframed all hang; `{"a":1}` returns. The first runtime run of this batch spun for seven minutes
+on a generated sequence before it was stopped. A target that spins cannot be graded, so the runtime conformance
+test loads the runtime's OWN stream-parsers.ts through `jest.mock` with one line inserted before `i = end;` — no
+progress throws `C17: scanJsonValues made no progress…` — compiled in memory (the Counter copy's technique; the
+file on disk is untouched; the factory refuses to load if the anchor moves). Everything up to the hang is the
+runtime's code. The spec steps over the stray character after recording the error the first pass records — the
+proposed fix. KNOWN_ROWS predicate: the seam's own message. Two hand scenarios carry `row` (Stream `1}`, Single
+`"a",3`).
+
+**C6 again**: Stream Buffer's `Data` is type `*`, so a number after a `{ value, unit }` is merged into it by node.ts
+(R7) — added to the known row with a hand scenario.
+
+**T4 — the daily rotation is nearly one seed** (found reading why five seeds each gave "known: 1" with the SAME
+example sequence). `sequenceSeed` (runner/random.ts) mixes `runSeed ^ (index + 1)`: day *d* index *i* is the same
+sequence as day *d′* index *i′* whenever `d ^ (i+1) = d′ ^ (i′+1)`, and adjacent days differ in low bits. Measured:
+day 20727 and 20728 share 192 of their 200 sequences; thirty days of PR-CI (6,000 plays) reach **429** distinct
+sequences. Fixed in its own commit: `sequenceSeed` mixes the run seed on its own before the index joins it
+(murmur3's finaliser twice) — thirty days are 6,000 distinct sequences and adjacent days share none (pinned in
+tests/runner.test.ts; the seed-1 digest re-pinned). **What a real rotation found at once**, every item hidden by
+T4 since NSP-003:
+
+- **Ten mutants were killed by luck, not by a scenario** — the frozen corpus happened to contain the one
+  sequence that told them apart: Clear Array's, Remove Object From Array's (twice) and Insert Object Into Array's
+  consumed presses (the reset only shows at the NEXT settle), the Object node's write-then-write-back in one frame, its
+  unbind-then-write, its Id stored with binding off, Set Object Properties' consumed re-resolve, Date Compare's
+  readable-then-unreadable Date, and String Mapper's null on a numbered port (a `swap-branch` replays the FIRST
+  recorded patch of that shape — the file's first scenario's `{ 0: 'A' }`). Each now has a hand scenario; one
+  more (Clear Array's two failure branches, the same constant sentence) is declared equivalent. Found by
+  sweeping: the runtime suite on 13 seeds, then every spec's mutants on the interpreter over 20 more (mutants are
+  interpreter-side — the cheap way to look).
+- **Row C6 reaches three more nodes**: Object (a held `prop-…` value, written when a Fetch binds), Variable
+  (`Value`) and HTTP Request (`Headers` — the Fetch sends no request); known rows plus hand scenarios. The Object
+  one was reduced step by step from generated seed 4128598514 — three guesses at it (a `set` step, a bound
+  record, no Fetch) did not reproduce. C6 is node.ts's, on every port of every node, so the runtime test also
+  counts it on ANY port (`C6_ANY_PORT`, never asserted to fire) — otherwise each day's rotation could find it on a
+  port nobody listed and read red.
+- **The "known rows still fire" rule was calibrated on the frozen corpus.** It demanded every row fire in the
+  GENERATED sequences of every run; a rare row (Value Changed's C6: 0, 2, 1 on three seeds) reads 0 on some days.
+  Now per row: its hand scenario reproduces OR the generated sequences hit it.
+- **A second-batch spec was incomplete.** The Object node's `Id` reducer wrote a plain object's fields with
+  `Model.create` and wrote NO reaction beside it — but when the object names the record the node is already
+  bound to, that write lands on the node's own record and the runtime's listener pulses `Changed` for each key
+  that differs (modelnode2.ts :107-116; model.ts `set` notifies on `!==`). Reduced from generated seed 1104497702
+  (run seed 24680) to two steps. Object spec → **version 2**, two scenarios (the reaction, and the Id stored
+  beside it while Id changes are unticked).
+- **A first-batch spec was wrong.** Boolean To String's s4 spec dropped the runtime's same-value guard on both
+  strings (booleantostring.ts :43, :57) as "the wire dedups" — it does not on a frame that has sent nothing yet:
+  `String for false = ''` at mount equals the held `''` and sends nothing, so a Selector picking an unset String
+  for true in that frame leaves the wire empty where the spec said `''` (generated seed 799069363 on run seed 31).
+  The spec carries the guard and is **version 2**; one scenario pins it. Its file is stranger-guarded: hashes
+  refreshed, and round 2's target — which implemented v1 faithfully, the thesis working as intended — was
+  re-handed the v2 spec alone (round 2b, `stranger-2/REPORT.md`): a fresh agent, reading only the format files,
+  the spec, the scenarios and its own code, found the change by comparing handlers, added the guard, and both
+  rounds read green (`npx jest tests/stranger.test.ts`: 29 passed, 12 skipped, exit 0). Its notes: the version
+  line cited runtime line numbers a stranger may not read (rewritten as a plain-words rule — the format's own
+  NSP-006 §5 authoring rule, broken by s12 and caught by the stranger); `===` leaves NaN-twice and
+  undefined-after-'' unscenarioed; the PORT DESCRIPTIONS (the catalog's) still do not say a repeated value is
+  ignored — NSP-018's, when descriptions come from the spec.
+- **T5 — plays leaked the last frame's time.** `context.currentFrameTime` outlived the play that ran the frame,
+  so a Repeat started before a play's first settle read the PREVIOUS play's time and ticked early or late: three
+  "divergences" on seeds 20800 and 1 that vanished when the same sequence was played on a fresh target. The
+  runtime target's `install` now sets it to 0, what a fresh context holds (nodecontext.ts :257). Not a runtime
+  defect — the app has one context and one clock.
+- **T6 — the runtime target's clock fired every due timer in one synchronous sweep.** An HTTP answer due at +100
+  and its timeout due at +30000, crossed by one `advance`, fired back to back; the answer's `.then` chain never
+  ran and the timeout aborted it ("Request timed out" where the interpreter read the body). Reproduced on a fresh
+  target, so not isolation. An event loop runs microtasks between timers: `Clock.nextDue()` (world.ts, the CLOCK
+  rule now says so) and the runtime target's `advance` steps timer by timer, yielding between.
+- **T7 — no teardown in the runtime target ever finished.** The stand-in graph `model` the target hands a node
+  (NSP-012) had no `removeListenersWithRef`, which `_onNodeDeleted` calls on its FIRST line (node.ts :1312), so
+  every dispose threw there, `dispose` swallowed it, and no delete listener ever ran — Delay's and Repeat's timers
+  stayed in the scheduler (a probe counted ~200 plays per run starting with a previous play's timers) and a
+  disposed node still in the dirty list ran in the next play's first frame (Filter Collection, seed 73757, minted
+  other ids; it vanished on a fresh target). The stand-in has the method now, and dispose also empties the
+  context's dirty list, after-update callbacks and the scheduler's queues: a finished play's work is not the
+  next play's.
+- **T8 — the host stole world draws.** With teardowns finishing, a Filter Collection sequence failed on its FIRST
+  play on a fresh target and passed on the second and third, with a different id every run. A `Math.random`
+  trace named the caller: an array port given the literal `x` evals it, throws, and node.ts :456 `console.log`s the
+  error; jest formats a logged Error through `source-map`, whose quick-sort calls `Math.random` — the WORLD's during
+  a play — once per process while the map cache is cold. The runtime target now routes the console to a sink for
+  the length of a world play (what the runtime prints is not in the trace).
+
+**Readings after the fixes** (2026-10-01): see the commit message — the sweep is the last thing run before it.
+
+### 6.2 Rows for a ruling (R3 (a): the runtime wins until ruled; each counted every run)
+
+| row | where | what the wire shows | plain words | proposed |
+|---|---|---|---|---|
+| **C16** | Date Add (dateadd.ts :77-78; datemath.ts :88) | a `Unit` that is not one of the eight and not empty — a wire can carry any string — is STORED, then `addToDate` THROWS inside the setter: the node is dead from then on (every later recompute throws). Date Difference, Date Compare and Date To String take the same value without throwing | *"A Unit value Date Add does not know crashes the node in the setter instead of refusing or ignoring it."* 22 sequences counted; one scenario under the row | refuse: `Invalid Date`-style failure, or read as days (`\|\| 'days'` already handles empty) |
+| **D14** | Date To String (datetostring.ts :264-273, :39-71) | with NO Timezone, `null` and a numeric timestamp on `Date` render blank with `Invalid Date` (getDate throws); WITH a Timezone the same timestamp RENDERS and `null` renders the epoch (`formatToParts` accepts anything `Number()` accepts) — one port, two validity rules | *"Whether a timestamp or a null on Date is 'invalid' depends on whether a Timezone is set."* Two scenarios record both arms | one rule: read through `toDate` as the rest of the family does (a timestamp renders in both; null is invalid in both) |
+| **D15** | Date Difference (datemath.ts :98-115) | a `Unit` not in the list misses every fixed unit and lands on the month path, whose last line reads anything but `'months'` as YEARS | *"An unknown Unit on Date Difference is counted in years; the same value on Date Add throws (C16)."* One scenario | the C16 answer, applied to both |
+| **C17** | JSON Stream Parser (stream-parsers.ts :234-241 `scanJsonValues`; json-stream-parser.ts :287-300) | Stream or Single format, a stray `}` (Single: also `]`, `,`) where a value should start: the scanner records `Could not parse JSON value: Unexpected end of JSON input` and does not advance — an infinite loop on the main thread, memory growing until the process dies. Any format that is none of the three reads as Stream and hangs too | *"One stray `}` from an agent stream freezes the whole app, for good."* Graded through a seam that throws where the runtime loops (§6.1b); two scenarios and the generated sequences counted | step over the character after recording the error once — `i = end > i ? end : i + 1` (the spec's line) |
+| **T3** | the runner — compare.ts `eventKey` (NSP-003) | **two traces whose nested values differed compared EQUAL** — a Date, NaN, a registry array, a unit — from NSP-003 to NSP-012 | a hole shaped like the defect in the gate itself; fixed in s11, the 46 earlier specs re-graded green | closed by the fix; recorded so the s3–s10 readings are read with it |
+
+### 6.3 Acceptance, measured
+
+1. ✅ for the 16 — s12's four: conform on the runtime at 200 on five seeds (20727–20731), every mutant killed or declared (Text Accumulator and Stream Buffer: a Clear with nothing to clear writes values every key already holds). ✅ for the 12 (specced, mutants killed or declared — DateParts ×2: a cleared part is never sent so its store is
+   unobservable; ParseCSV / ToCSV: the stuck-flag shape — conform on the runtime at 200: `NSP_ONLY=… npx jest
+   test/node-spec/conformance.test.ts`, 2026-10-01).
+2. ✗ not run: no node here has an export reach (NSP-005 declares one per node after a spike).
+3. ✅ every divergence is a row with a hand scenario under it (`row`), a `KNOWN_ROWS` predicate and a proposed
+   answer; no runtime change rides here.
+4. ⏳ NSP-009's ledger is not built; README §6 says the number by hand.
+5. ✅ every date node's scenario file carries the same steps in two zones with a DST change in at least one arm
+   (UTC + Europe/Paris, America/New_York, Asia/Kolkata or Pacific/Auckland); the generator draws a zone per
+   sequence; `tests/batch-time.test.ts` AC5 asserts the two answers and the restore.
+6. ✅ Hash: SHA-256("abc") is the FIPS 180-4 vector on every target, base64url the same bytes; Random Bytes: the
+   first New is the hex of the world stream's first 32 bytes, a failed encoding still consumed its draw; a target with
+   no `install()` is refused for a `random` / `digest` / `timezone` spec with the reason (conformance.ts step 0) —
+   never graded against real entropy.
+
+### 6.4 Not done, named
+
+The other 8 (the four agent parsers are s12's, §6.1b): **Parse XML, Parse Feed**
+(need the XML parser the runtime uses, read first), **Animate To Value** (the scheduler's `onRunning` with an
+ease curve — Repeat's pass plus `easecurves.ts`), **States** (1191 lines, dynamic ports — a session of its own),
+**Screen Resolution** and **On App Error** (each needs a seam the world does not have: a viewport with a resize
+step; an error stream with a raise step). The deep run (`NSP_DEEP=10000 NSP_ONLY=…`, a quiet box). AC2. The
+third stranger round (due five times over: graphs s7, the world s8, the registry s9, the tree s10, the zone and
+digest s11).

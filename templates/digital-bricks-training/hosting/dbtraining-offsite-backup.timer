@@ -1,0 +1,9 @@
+[Unit]
+Description=Nightly off-box copy, half an hour after NodeGX's own 03:15 UTC backup
+
+[Timer]
+OnCalendar=*-*-* 03:45:00 UTC
+Persistent=true
+
+[Install]
+WantedBy=timers.target

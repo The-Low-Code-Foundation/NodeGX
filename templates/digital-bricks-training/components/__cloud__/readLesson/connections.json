@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c7305aaf-22ce-46bb-a203-8801eb7b5daa",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "receive",
+      "toId": "run",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "run",
+      "toProperty": "in-callerId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-learnerId",
+      "toId": "run",
+      "toProperty": "in-learnerId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-conceptId",
+      "toId": "run",
+      "toProperty": "in-conceptId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-which",
+      "toId": "run",
+      "toProperty": "in-which"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-which",
+      "toId": "res",
+      "toProperty": "pm-which"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-version",
+      "toId": "res",
+      "toProperty": "pm-version"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-publishedVersion",
+      "toId": "res",
+      "toProperty": "pm-publishedVersion"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-generationVersion",
+      "toId": "res",
+      "toProperty": "pm-generationVersion"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-copiedFromAnotherLearner",
+      "toId": "res",
+      "toProperty": "pm-copiedFromAnotherLearner"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-lesson",
+      "toId": "res",
+      "toProperty": "pm-lesson"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-why",
+      "toId": "deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "run",
+      "fromProperty": "out-refuse",
+      "toId": "deny",
+      "toProperty": "send"
+    }
+  ]
+}
