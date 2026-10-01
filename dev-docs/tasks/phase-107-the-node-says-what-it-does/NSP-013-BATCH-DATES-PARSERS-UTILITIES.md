@@ -258,7 +258,9 @@ s13 specs: no survivors. → **65 of 147**.
    against 9 in the control (both curves good: 0 throws, At Target ×1). `runTimers` reassigns `runningTimers`
    and joins `newTimers` only after its loop, so one throw holds every timer where it is. `''`, `null` and
    `undefined` throw too — what an emptied or disconnected wire carries. The same lookup (`EaseCurves[value]`)
-   is in Transition, Animation and Number Blend (easecurves.ts :28-31) — NOT measured here; NSP-016's.
+   is in Transition (:175) and Animation (:286), both under `nodes-deprecated/` and still loaded by old projects
+   (a grep, NOT measured); easecurves.ts :28-31 also names Number Blend, which has no such line; States' is
+   commented out (states.ts :821).
 
 ### 6.1e s13, 2026-10-01 — On App Error: graded by the nodes that raise, not by a seam
 
@@ -341,5 +343,4 @@ description does not promise otherwise. No row.
 One is left (the four agent parsers are s12's, §6.1b; Parse XML, Parse Feed, Animate To Value, On App Error and
 Screen Resolution s13's, §6.1c–f; UUID and Delay NSP-007's): **States** (1191 lines, dynamic ports — a session of
 its own). The deep run (`NSP_DEEP=10000 NSP_ONLY=…`, a quiet box). AC2. The
-third stranger round (due six times over: graphs s7, the world s8, the registry s9, the tree s10, the zone and
-digest s11, the clock's between-timers rule s12).
+third stranger round is s13's — five world nodes, NSP-006 §5.7; round 4 (digest, zone, registry, graph) is named there.

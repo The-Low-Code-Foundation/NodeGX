@@ -1,7 +1,7 @@
 # NSP-006 — A stranger's target
 
 **Opened 2026-09-29.** **Depends on NSP-004.**
-**Status: ✅ built and graded — s5, 2026-09-30. The thesis held: a stranger built the pilot five in plain JS from the spec and the suite alone, green on its FIRST run at 200 and 10,000, every mutant caught both ways; 15 ambiguities written up, 14 fixed as sentences in the format files + a schema fix; one hole the pilot five cannot see, measured (§5.4). **s6 (2026-09-30): round 2 — a fresh stranger handed Inverter + Boolean To String beside the five: 7 / 7 conform at 200 and 10,000, 78 / 78 mutants caught; Inverter (the §5.4 shape) right on run 1; one new hole (the mount-time read) → a procedure sentence; §5.6.**
+**Status: ✅ built and graded — s5, 2026-09-30. The thesis held: a stranger built the pilot five in plain JS from the spec and the suite alone, green on its FIRST run at 200 and 10,000, every mutant caught both ways; 15 ambiguities written up, 14 fixed as sentences in the format files + a schema fix; one hole the pilot five cannot see, measured (§5.4). **s6 (2026-09-30): round 2 — a fresh stranger handed Inverter + Boolean To String beside the five: 7 / 7 conform at 200 and 10,000, 78 / 78 mutants caught; Inverter (the §5.4 shape) right on run 1; one new hole (the mount-time read) → a procedure sentence; §5.6. **s13 (2026-10-01): round 3 — five nodes that live by the WORLD (Delay, Repeat, Animate To Value, UUID, Screen Resolution): 5 / 5 at 200 and 10,000, 81 / 81 mutants caught, on its FIRST run — which grades less than it sounds (§5.7).**
 
 ## 1. The person sentence
 
@@ -187,3 +187,47 @@ made before the first frame reads the getter; afterwards only sends reach a wire
 10,000 because no spec's `send: []` step changes an output that is still defined at settle. A spec that did would grade
 the two differently — the interpreter would record a change the runtime never sent. NSP-001 / NSP-018 own the sentence
 that settles which one the format means; the runtime's is the safer reading (R3 (a)).
+
+### 5.7 Round 3 — s13, 2026-10-01: five nodes that live by the world
+
+Due seven times over (graphs s7, the world s8, the registry s9, the tree s10, zone + digest s11, the clock rule s12,
+the viewport s13). The round takes the WORLD first — the seam every later target needs and no stranger had seen:
+Delay (timers, `cancel`, `pending` outcomes settled by a handler), Repeat (the frame time), Animate To Value (the
+scheduler, raw arithmetic, a `row` scenario), UUID (the random stream), Screen Resolution (the viewport, no window).
+None needs a Node built-in. Same lab recipe (a copy with no `.git`, trimmed to the five + `ease-curves.ts`;
+`src/world.ts` added to the read list and to the round's guarded files; `src/registry.ts` forbidden). Brief:
+[NSP-006-BRIEF-3.md](NSP-006-BRIEF-3.md). Fixture: `packages/nodegx-node-spec/stranger-3/` (`target.js`, `nodes.js`,
+`canon.js`, `curves.js`, its `REPORT.md`). The harness first learnt to hand each play a fresh `World` from the
+scenario's or sequence's script in the schema and AC2 tests (it played world specs worldless; rounds 1–2 unmoved).
+
+| | reading |
+|---|---|
+| iterations to green at 200 | **1** — no failing run at all |
+| at 200, seed 20727 | 5 / 5 CONFORM; mutants caught by the stranger **81 / 81** (32 · 21 · 25 · 2 · 1); the C19 `row` scenario "does not reproduce" on it, as on the interpreter |
+| at 10,000 | 5 / 5, 0 divergences (lab, and again in primary) |
+| in primary, three rounds | 41 green, 17 deep skipped |
+| cost | 4.5 min (15:18:49–15:23:09); 157 k tokens; 25 tool calls |
+| its design | imperative classes per node (`receive`, `trigger`, `frameEnd`, `read`) that never see the `World` — each gets a `link` closure (clock, a uuid, the screen size, a resize subscription) backed by what `install()` stored |
+
+**Checked, not trusted:** its 25 tool calls, read from the transcript: every read a `cat`/`sed` of a listed file;
+one `Read` of the harness's saved copy of its own `cat src/spec.ts` output (outside the lab, content = `spec.ts`);
+two jest logs written to the scratchpad above the lab and deleted. Nothing under `src/adapters/`, no runner body, no
+interpreter, no registry, no parent. Both breaches it reported itself.
+
+**What a first-run green grades, honestly.** Nothing failed, so the suite corrected none of its 12 guesses — and by
+its own account 8 of them cannot be seen through these five nodes (no output passes through `undefined` inside an
+`advance` or at mount, so the round-2 sampling hole is NOT re-checked here; no node makes a request; UUID has 2
+mutants and Screen Resolution 1). The round shows the world's RULES are enough to build against; it does not show
+the sampling procedure under world deliveries. A round 4 should carry a node whose output goes `undefined` inside an
+advance, and more mutants for the thin ones (a lazy first draw, a missing `listen`, a handler that does not re-read).
+
+**Its ambiguities, what each became:** (1) two world APIs and no map between them — a `WorldView` ↔ `World` table,
+"A TARGET'S VIEW", in world.ts's header; (2) what `dispose` owes the world and (3) what `advance` records with
+several instances mounted — the same paragraph; (7) "until nothing more is due" at a settle — spec.ts now says only
+what is ALREADY delivered can be (an at-once answer to this frame's request), never a timer or a resize. (4), (5),
+(6), (8)–(12) were read right and are not graded by these five; (10) `jumpTo` "a rising edge" vs a signal — the
+format's signal IS the edge. Hashes refreshed for `spec.ts` and `world.ts`; all three rounds re-graded green.
+
+Round 4, named: Hash (digest — a hand-written SHA-256 or a world `digest` member), the date nodes (the zone — and
+jest's `process.env` copy, a trap a stranger would meet), the registry nodes, and a graph target.
+

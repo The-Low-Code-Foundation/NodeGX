@@ -24,5 +24,5 @@ throws at the frame); app-wide: two real Animate nodes + a Repeat in one corpus 
 `bounce` — 31/31 frames throw, Repeat 0 ticks vs 9 in the control (NSP-013 §6.1d).
 
 Proposed: fall back to Ease Out on an unknown name (one line in the setter); separately, catch a timer's throw
-in `runTimers` so one node cannot stop the others. Transition, Animation and Number Blend look curves up the
-same way — not yet measured.
+in `runTimers` so one node cannot stop the others. The deprecated Transition (:175) and Animation (:286) nodes
+look curves up the same way (a grep — not measured).

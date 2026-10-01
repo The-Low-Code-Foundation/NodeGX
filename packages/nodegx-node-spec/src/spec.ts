@@ -426,7 +426,11 @@ export type AfterInputs<S, I, O> = (state: Readonly<S>, inputs: Inputs<I>, world
  * `pending` outcomes it settles (`outcomes`, oldest pending invocation of that port first —
  * the way `afterInputs` settles `deferred` ones). Called between steps as the world delivers:
  * on `advance` (after what was already delivered has landed, before the clock moves) and at
- * `settle` (after the frame-end reducer, until nothing more is due at the current time).
+ * `settle` (after the frame-end reducer, until nothing more is due at the current time). What can
+ * be due at a settle is only what is ALREADY DELIVERED — an answer the network script gives at once
+ * (no `after`) to a request this frame issued, and whatever that answer's handler causes; a timer,
+ * a resize or a delayed answer never is (a settle does not move the clock, and every world timer is
+ * at least 1 ms — world.ts CLOCK).
  */
 export interface WorldHandlers<S, I, O> {
   timer?: (state: Readonly<S>, inputs: Inputs<I>, tag: string, world: WorldView) => AfterInputsPatch<S, I, O>;

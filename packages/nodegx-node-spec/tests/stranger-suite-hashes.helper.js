@@ -20,21 +20,24 @@ const ROOT = path.join(__dirname, '..');
 const FORMAT_FILES = ['src/spec.ts', 'src/coerce.ts', 'src/canonical.ts', 'src/trace.ts', 'src/adapter.ts', 'schema/trace.schema.json'];
 
 const PILOT_FIVE = ['Counter', 'Switch', 'And', 'Condition', 'String Format'];
-const SPEC_FILE = { Counter: 'counter', Switch: 'switch', And: 'and', Condition: 'condition', 'String Format': 'string-format', Inverter: 'inverter', 'Boolean To String': 'boolean-to-string' };
+const SPEC_FILE = { Counter: 'counter', Switch: 'switch', And: 'and', Condition: 'condition', 'String Format': 'string-format', Inverter: 'inverter', 'Boolean To String': 'boolean-to-string', Timer: 'delay', Repeat: 'repeat', 'net.noodl.animatetovalue': 'animate-to-value', 'net.noodl.UUID': 'uuid', 'Screen Resolution': 'screen-resolution' };
 
-function round(number, dir, session, nodes) {
+/** `extra`: files a round is handed beyond the format and its specs (round 3: the world's rules, a module a spec imports). */
+function round(number, dir, session, nodes, extra = []) {
   return {
     round: number,
     dir,
     session,
     nodes,
-    guarded: [...FORMAT_FILES, ...nodes.map((n) => `src/nodes/${SPEC_FILE[n]}.ts`), ...nodes.map((n) => `scenarios/${n}.json`)]
+    guarded: [...FORMAT_FILES, ...extra, ...nodes.map((n) => `src/nodes/${SPEC_FILE[n]}.ts`), ...nodes.map((n) => `scenarios/${n}.json`)]
   };
 }
 
 const ROUNDS = [
   round(1, 'stranger', 's5', PILOT_FIVE),
-  round(2, 'stranger-2', 's6', [...PILOT_FIVE, 'Inverter', 'Boolean To String'])
+  round(2, 'stranger-2', 's6', [...PILOT_FIVE, 'Inverter', 'Boolean To String']),
+  // NSP-013 s13: five nodes that live by the world (clock, timers and pending outcomes, frame time, random, viewport)
+  round(3, 'stranger-3', 's13', ['Timer', 'Repeat', 'net.noodl.animatetovalue', 'net.noodl.UUID', 'Screen Resolution'], ['src/world.ts', 'src/nodes/ease-curves.ts'])
 ];
 
 /** The union, sorted — the hash file's keys. */

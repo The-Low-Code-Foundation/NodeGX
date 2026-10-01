@@ -31,7 +31,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import type { AnyNodeSpec, Step, TargetAdapter, TraceEvent } from '../src';
-import { compareTraces, discoverBranches, formatReport, generateSequence, interpreterAdapter, loadScenarios, mutantsOf, play, PlayError, runConformance, validateTrace } from '../src';
+import { compareTraces, discoverBranches, formatReport, generateSequence, interpreterAdapter, loadScenarios, mutantsOf, play, PlayError, runConformance, validateTrace, World, type WorldScript } from '../src';
 import { specFor } from '../src/nodes';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -45,6 +45,13 @@ const ROOT = path.join(__dirname, '..');
 const HASHES_FILE = path.join(__dirname, 'stranger-suite-hashes.json');
 const only = process.env.NSP_ONLY ? process.env.NSP_ONLY.split(',') : undefined;
 const deep = Number(process.env.NSP_DEEP || 0);
+
+/**
+ * NSP-013 s13 (round 3): a spec that needs the world is played in a FRESH world built from the
+ * scenario's or the sequence's script, one per play — as `runConformance` does; a spec with no
+ * `needs` gets none (rounds 1 and 2 are unchanged by this).
+ */
+const worldFor = (spec: AnyNodeSpec, script: WorldScript | undefined): World | undefined => (spec.needs && spec.needs.length > 0 ? new World(script ?? {}) : undefined);
 
 /** `<dir>/target.js` exports `strangerTarget(): TargetAdapter` — a FRESH target per call. */
 function loadTarget(targetFile: string): TargetAdapter {
@@ -133,7 +140,7 @@ for (const round of rounds.ROUNDS) {
       const offences: string[] = [];
       for (const spec of graded) {
         for (const sc of loadScenarios(spec.type)) {
-          const t = await play(strangerTarget(), spec.type, sc.params, sc.steps);
+          const t = await play(strangerTarget(), spec.type, sc.params, sc.steps, worldFor(spec, sc.world));
           const v = validateTrace(t);
           if (v.ok === false) offences.push(`${spec.type} / ${sc.name}: ${v.path} ${v.message}`);
         }
@@ -145,15 +152,15 @@ for (const round of rounds.ROUNDS) {
   describe(`NSP-006 AC2 ${label} — every mutant of a spec is caught by the stranger's target (the suite is not trivially satisfied)`, () => {
     for (const spec of graded) {
       test(`${spec.type}: with each mutant as the reference, the stranger disagrees somewhere`, async () => {
-        const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[] }> = loadScenarios(spec.type).map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps }));
+        const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript }> = loadScenarios(spec.type).map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world }));
         for (let i = 0; i < 200; i++) {
           const seq = generateSequence(spec, 20726, i);
-          suite.push({ name: `sequence ${i}`, params: seq.params, steps: seq.steps });
+          suite.push({ name: `sequence ${i}`, params: seq.params, steps: seq.steps, world: seq.world });
         }
         // branches are DISCOVERED by playing the suite through the wrapped spec (as runConformance does)
         const discovered = discoverBranches(spec);
         const probe = interpreterAdapter({ resolve: () => discovered.spec });
-        for (const item of suite) await play(probe, spec.type, item.params, item.steps);
+        for (const item of suite) await play(probe, spec.type, item.params, item.steps, worldFor(spec, item.world));
         const mutants = mutantsOf(spec, discovered.branches);
         expect(mutants.length).toBeGreaterThan(0);
         const survivors: string[] = [];
@@ -163,14 +170,14 @@ for (const round of rounds.ROUNDS) {
           for (const item of suite) {
             let reference: TraceEvent[];
             try {
-              reference = await play(mutant, spec.type, item.params, item.steps);
+              reference = await play(mutant, spec.type, item.params, item.steps, worldFor(spec, item.world));
             } catch (e) {
               caught = `${item.name}: the mutant broke a spec rule (${(e as Error).message})`;
               break;
             }
             let actual: TraceEvent[];
             try {
-              actual = await play(strangerTarget(), spec.type, item.params, item.steps);
+              actual = await play(strangerTarget(), spec.type, item.params, item.steps, worldFor(spec, item.world));
             } catch (e) {
               if (!(e instanceof PlayError)) throw e;
               caught = `${item.name}: the stranger threw (${e.message})`;

@@ -79,6 +79,20 @@
  *           with a real window (a browser, jsdom) refuses a `viewport` need it cannot size; on Node
  *           the world defines the `window` for the play (`installWorld`) and removes it after.
  *
+ * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
+ * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
+ *   `now()` = `world.clock.now()` · `random()` / `bytes(n)` / `uuid()` = `world.random.next()` /
+ *   `.bytes(n)` / `.uuid()` · a patch's `after` / `cancel` = `world.clock.schedule(ms, fn)` (returns
+ *   an id) / `world.clock.cancel(id)` · a `request` / `abort` = `world.network.issue(request,
+ *   deliver)` / `world.network.abort(id)` · `registry` = `world.registry` · `viewport()` =
+ *   `world.viewport` (`undefined`: no window) read as `{ width, height }` · `listen('resize')` =
+ *   `world.viewport.listen(fn)` (returns the unsubscribe). `dispose(h)` releases what the instance
+ *   holds in the world — cancels its timers, aborts its requests, unsubscribes its listeners: a
+ *   play's world is thrown away after the play, so nothing graded today depends on it, but a target
+ *   that keeps a world across plays would hear a disposed node. The clock is ONE per world:
+ *   `advance(h, ms)` moves it for every instance and records the `advance` event on `h`'s trace
+ *   only (a graph's trace is assembled per node, runner/graph.ts).
+ *
  * Backend (records, users, files, cloud functions) is the fifth seam NSP-007 names; it arrives
  * with NSP-014, reusing the request seam at the HTTP level (README §8, NSP-007 §2).
  */
