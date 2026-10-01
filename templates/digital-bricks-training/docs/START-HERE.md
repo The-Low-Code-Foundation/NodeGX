@@ -764,3 +764,39 @@ so before any render did), so `App` mounts a Group around `Privacy/Accept`.
 sign-in lasts until you sign out. **The demo carries none of this**: `build-demo` drops the privacy
 pages, the gate and Home's links by name, because the notice describes a real deployment and the demo
 holds nothing.
+
+## A coach adds a learner (TASK-L184)
+
+Until now every learner this template showed was a fixture. On `/people` a coach (staff) adds a
+real one by address, and on that learner's page chooses their path by hand.
+
+- **`addLearner`** (`role:staff`) checks the address and the project's name BEFORE anything is
+  written, then makes the account with NodeGX's own **Create User** node — keyed on the username,
+  which is the trimmed, lower-cased address, so a second add with the same address is `Unchanged`
+  and hands back the same account rather than making another. A coach's address (the `staff` role)
+  is refused. Then, each only if missing, in this order so a crash is healed by pressing again: the
+  learner profile, the project at version 1 with empty facts, and the coach's private note as a
+  claimed `LearnerInvite.label` — where the roster reads it and nowhere a learner can. No name is
+  derived from the address, no password exists, and no sign-up is opened.
+- **`setLearnerPath`** (`role:staff`) writes a NEW path row and then its steps, in the coach's
+  order: what they already finished stays `complete`, the first unfinished step is `available`, the
+  rest `locked`, and no rationale is invented. Every concept is checked against `Concept` and an
+  unknown one is refused BY NAME. Path first, because steps written before a crash would be
+  steps no path names — and the deletion plan finds steps only through a path.
+- **`conceptList`** (`role:staff`) is the course's concepts, alphabetical, for the picker.
+- **`/people`** gains *Add a learner* (`People/Add a learner`), which can then email them a sign-in
+  link through the backend's own magic-link request. **Every learner's roster row now links to
+  their page** (it was one name until a backend existed — L165's own comment said so).
+- **`/learner`** gains *Their path* (`People/Their path`) on the programme surface: their current
+  path, in order, with Move up / Move down / Remove, and the course's other concepts to add. Saving
+  refreshes their programme and the roster head.
+- **A learner with a project and no path** reads *"Your coach is setting up your path"* on
+  `/course` instead of empty cards.
+
+`tools/check-write-functions.mjs` holds both writes to its rules (refusals by name and writing
+nothing, path before steps, finished stays finished, a coach refused, a second add writing
+nothing), each demonstrated failing by name. **The demo carries none of the coach's writes.**
+
+**Found, not fixed: "Ask your coach about this" does nothing.** The learner's open cards offer it
+(L131), and the template has no function that writes a message, so the control only logs. A real
+learner will press it. Building conversations or hiding the control is its own decision.

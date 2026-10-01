@@ -1,0 +1,229 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "cddaeb00-128b-4ac4-90df-d884400864ca",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "t_al_h",
+      "fromProperty": "Translation",
+      "toId": "al_h",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_al_lede",
+      "fromProperty": "Translation",
+      "toId": "al_lede",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "t_al_email",
+      "fromProperty": "Translation",
+      "toId": "al_email",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_al_project",
+      "fromProperty": "Translation",
+      "toId": "al_project",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_al_problem",
+      "fromProperty": "Translation",
+      "toId": "al_problem",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_al_label",
+      "fromProperty": "Translation",
+      "toId": "al_label",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_al_submit",
+      "fromProperty": "Translation",
+      "toId": "al_submit",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_al_added",
+      "fromProperty": "Translation",
+      "toId": "al_ok",
+      "toProperty": "in-addedText"
+    },
+    {
+      "fromId": "t_al_already",
+      "fromProperty": "Translation",
+      "toId": "al_ok",
+      "toProperty": "in-alreadyText"
+    },
+    {
+      "fromId": "t_al_link",
+      "fromProperty": "Translation",
+      "toId": "al_link_btn",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "t_al_sent",
+      "fromProperty": "Translation",
+      "toId": "al_sent",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "al_email",
+      "fromProperty": "onTextChanged",
+      "toId": "al_call",
+      "toProperty": "in-email"
+    },
+    {
+      "fromId": "al_label",
+      "fromProperty": "onTextChanged",
+      "toId": "al_call",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "al_project",
+      "fromProperty": "onTextChanged",
+      "toId": "al_call",
+      "toProperty": "in-projectName"
+    },
+    {
+      "fromId": "al_problem",
+      "fromProperty": "onTextChanged",
+      "toId": "al_call",
+      "toProperty": "in-problemStatement"
+    },
+    {
+      "fromId": "al_submit",
+      "fromProperty": "onClick",
+      "toId": "al_call",
+      "toProperty": "call"
+    },
+    {
+      "fromId": "al_submit",
+      "fromProperty": "onClick",
+      "toId": "al_msg_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "al_submit",
+      "fromProperty": "onClick",
+      "toId": "al_link_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "al_submit",
+      "fromProperty": "onClick",
+      "toId": "al_sent_sw",
+      "toProperty": "off"
+    },
+    {
+      "fromId": "al_call",
+      "fromProperty": "out-created",
+      "toId": "al_ok",
+      "toProperty": "in-created"
+    },
+    {
+      "fromId": "al_call",
+      "fromProperty": "done",
+      "toId": "al_ok",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "al_call",
+      "fromProperty": "error",
+      "toId": "al_fail",
+      "toProperty": "in-error"
+    },
+    {
+      "fromId": "al_call",
+      "fromProperty": "failure",
+      "toId": "al_fail",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "al_ok",
+      "fromProperty": "out-text",
+      "toId": "al_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "al_fail",
+      "fromProperty": "out-text",
+      "toId": "al_msg",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "al_call",
+      "fromProperty": "done",
+      "toId": "al_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "al_call",
+      "fromProperty": "failure",
+      "toId": "al_msg_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "al_msg_sw",
+      "fromProperty": "state",
+      "toId": "al_msg",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "al_call",
+      "fromProperty": "done",
+      "toId": "al_link_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "al_link_sw",
+      "fromProperty": "state",
+      "toId": "al_link_btn",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "al_call",
+      "fromProperty": "done",
+      "toId": "al_out",
+      "toProperty": "added"
+    },
+    {
+      "fromId": "al_email",
+      "fromProperty": "onTextChanged",
+      "toId": "al_norm",
+      "toProperty": "in-typed"
+    },
+    {
+      "fromId": "al_norm",
+      "fromProperty": "out-email",
+      "toId": "al_link",
+      "toProperty": "email"
+    },
+    {
+      "fromId": "al_norm",
+      "fromProperty": "out-redirect",
+      "toId": "al_link",
+      "toProperty": "redirect"
+    },
+    {
+      "fromId": "al_link_btn",
+      "fromProperty": "onClick",
+      "toId": "al_link",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "al_link",
+      "fromProperty": "done",
+      "toId": "al_sent_sw",
+      "toProperty": "on"
+    },
+    {
+      "fromId": "al_sent_sw",
+      "fromProperty": "state",
+      "toId": "al_sent",
+      "toProperty": "mounted"
+    }
+  ]
+}

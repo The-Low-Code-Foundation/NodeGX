@@ -103,8 +103,10 @@ check(/className: 'ProjectContext', ifMatch: \{ version \}/.test(script('capture
     }
   }
   // TASK-L185 added three: acceptPrivacy (the acceptance screen), exportMine and deleteMine (settings).
-  check(clientCalls === 9, `wiring: expected 9 client Cloud Function nodes (4 reads, capture, finishStep, acceptPrivacy, exportMine, deleteMine), found ${clientCalls}`);
+  // TASK-L184 added three on the coach's side: addLearner (People/Add a learner), conceptList and setLearnerPath (People/Their path).
+  check(clientCalls === 12, `wiring: expected 12 client Cloud Function nodes (4 reads, capture, finishStep, acceptPrivacy, exportMine, deleteMine, addLearner, conceptList, setLearnerPath), found ${clientCalls}`);
 }
+
 
 // ── The fake ─────────────────────────────────────────────────────────────────
 const seed = json('backend/seed.json');
@@ -125,6 +127,7 @@ const matches = (row, where) => {
   if (k === 'and') return c.every((w) => matches(row, w));
   if (k === 'or') return c.some((w) => matches(row, w));
   if ('equalTo' in c) return row[k] === c.equalTo;
+  if ('containedIn' in c) return Array.isArray(c.containedIn) && c.containedIn.includes(row[k]);
   throw new Error(`the fake does not implement ${JSON.stringify(c)}`);
 };
 const copy = (x) => JSON.parse(JSON.stringify(x));
@@ -168,7 +171,7 @@ function makeRecords(table, { beforeRead } = {}) {
 /** One node's script: resolves with Outputs on `done`, with `{ refused }` on `failed`. */
 const run = (code, Inputs, Records) =>
   new Promise((resolve_) => {
-    const Outputs = { done: () => resolve_({ ok: true, ...Outputs }), failed: () => resolve_({ ok: false, refused: Outputs.error }), stale: () => resolve_({ ok: false, stale: true }) };
+    const Outputs = { done: () => resolve_({ ok: true, ...Outputs }), failed: () => resolve_({ ok: false, refused: Outputs.error }), stale: () => resolve_({ ok: false, stale: true }), refuse: () => resolve_({ ok: false, refused: Outputs.why }) };
     new Function('Inputs', 'Outputs', 'Noodl', code)(Inputs, Outputs, { Records });
   });
 const quiet = async (fn) => {
@@ -284,6 +287,64 @@ async function race(code) {
   const control = await race(cut);
   check(control.allOk && control.kept < control.n, `race: with ifMatch removed nothing was lost (${JSON.stringify(control)}) — the race is not being exercised`);
   console.log(`  race: guarded ${guarded.kept}/${guarded.n} kept, +${guarded.version}, ${guarded.conflicts} conflicts · control (no ifMatch) ${control.kept}/${control.n} kept, all ${control.n} told OK`);
+}
+
+// ── setLearnerPath and addLearner (TASK-L184) ────────────────────────────────
+{
+  const PATH = script('setLearnerPath', 'write');
+  const GIVE = script('addLearner', 'give');
+  const table = makeWorld();
+  const known = table.Concept.map((c) => c.conceptId);
+  const finished = table.Progress.filter((p) => p.learnerId === SAM && p.completedAt).map((p) => p.conceptId);
+  check(finished.length > 0 && known.length >= 4, 'setLearnerPath: the seed has no finished concept or too few concepts to test with');
+  const freshConcept = known.find((c) => finished.indexOf(c) === -1);
+  const snapshot = () => JSON.stringify([table.LearningPath, table.PathStep]);
+
+  // Refusals, each by name, each writing nothing.
+  const before = snapshot();
+  for (const [label, input, needle] of [
+    ['an unknown concept', { learnerId: SAM, conceptIds: [freshConcept, 'no-such-concept'] }, 'no-such-concept'],
+    ['an empty path', { learnerId: SAM, conceptIds: [] }, 'at least one'],
+    ['a concept twice', { learnerId: SAM, conceptIds: [freshConcept, freshConcept] }, 'twice'],
+    ['an unknown learner', { learnerId: 'l-nobody', conceptIds: [freshConcept] }, 'no learner']
+  ]) {
+    const { result } = await quiet(() => run(PATH, input, makeRecords(table).Records));
+    check(result.ok === false && String(result.refused || '').includes(needle), `setLearnerPath: ${label} was not refused by name (${JSON.stringify(result)})`);
+    if (label === 'an unknown concept') check(!String(result.refused).includes(freshConcept), 'setLearnerPath: the refusal named a concept that IS in the course');
+  }
+  check(snapshot() === before, 'setLearnerPath: a refusal wrote a path or a step');
+
+  // A path: a NEW row, the path written before its steps, the coach's order kept,
+  // what they finished still finished, the first unfinished step open, the rest locked.
+  const order = [finished[0], freshConcept, known.find((c) => c !== freshConcept && finished.indexOf(c) === -1 && c !== finished[0])];
+  const paths0 = table.LearningPath.length;
+  const r = await run(PATH, { learnerId: SAM, conceptIds: order }, makeRecords(table).Records);
+  check(r.ok && r.steps === 3, `setLearnerPath: a good path was not saved (${JSON.stringify(r)})`);
+  check(table.LearningPath.length === paths0 + 1, 'setLearnerPath: it did not write a NEW path row (a replan writes a new row and leaves the old one)');
+  const newPath = table.LearningPath[table.LearningPath.length - 1];
+  const steps = table.PathStep.filter((x) => x.pathId === newPath.pathId).sort((a, b) => a.position - b.position);
+  const serial = (o) => Number(String(o.objectId).split(':')[1]);
+  check(steps.every((x) => serial(x) > serial(newPath)), 'setLearnerPath: a step was written before its path row — a crash between would leave steps no path names');
+  check(JSON.stringify(steps.map((x) => x.conceptId)) === JSON.stringify(order), 'setLearnerPath: the coach\'s order was not kept');
+  check(JSON.stringify(steps.map((x) => x.status)) === JSON.stringify(['complete', 'available', 'locked']), `setLearnerPath: statuses are ${steps.map((x) => x.status)} — expected what they finished complete, the next open, the rest locked`);
+  check(steps.every((x) => x.rationale === ''), 'setLearnerPath: a step carries a rationale nobody wrote');
+
+  // addLearner's second half: a coach's account is refused and nothing is written;
+  // a new account gets a profile, a project and the label once; a second run writes nothing.
+  const accts = (n) => [table.LearnerProfile.length, table.ProjectContext.length, (table.LearnerInvite || []).length].join('/');
+  const a0 = accts();
+  const { result: staffR } = await quiet(() => run(GIVE, { userId: 'u:trainer@example.test', roles: ['staff'], projectName: 'X', problemStatement: '', label: 'L' }, makeRecords(table).Records));
+  check(staffR.ok === false && /coach/.test(String(staffR.refused)) && accts() === a0, 'addLearner: a coach\'s address was not refused, or something was written for it');
+  const first = await run(GIVE, { userId: 'u:new@example.org', roles: [], projectName: ' A choir sign-up sheet ', problemStatement: 'Paper list', label: 'Lena — spring' }, makeRecords(table).Records);
+  check(first.ok && first.created === true && /^l-/.test(first.learnerId), `addLearner: a new learner was not made (${JSON.stringify(first)})`);
+  const ctx = table.ProjectContext.find((x) => x.learnerId === first.learnerId);
+  check(ctx && ctx.version === 1 && ctx.projectName === 'A choir sign-up sheet' && JSON.stringify(ctx.facts) === '{}', 'addLearner: the project is not version 1, trimmed, with empty facts');
+  check((table.LearnerInvite || []).some((i) => i.claimedByLearnerId === first.learnerId && i.label === 'Lena — spring' && i.status === 'claimed'), 'addLearner: the label is not on a claimed invite, where the roster reads it');
+  const a1 = accts();
+  const { Records: rs2, stats: st2 } = makeRecords(table);
+  const again = await run(GIVE, { userId: 'u:new@example.org', roles: [], projectName: 'Something else', problemStatement: '', label: 'another label' }, rs2);
+  check(again.ok && again.created === false && again.learnerId === first.learnerId && st2.writes === 0 && accts() === a1, 'addLearner: a second run with the same account wrote something or made a second learner');
+  console.log(`  L184: setLearnerPath refused 4 ways by name, saved [${steps.map((x) => x.status)}] path-first; addLearner refused a coach, made one learner, and wrote nothing the second time`);
 }
 
 // ── finishStep ───────────────────────────────────────────────────────────────

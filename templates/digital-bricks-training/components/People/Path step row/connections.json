@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0116bf30-2c55-4101-a80a-d54a0c579ad8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ps_row_in",
+      "fromProperty": "title",
+      "toId": "ps_row_label",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "ps_row_in",
+      "fromProperty": "number",
+      "toId": "ps_row_label",
+      "toProperty": "in-number"
+    },
+    {
+      "fromId": "ps_row_label",
+      "fromProperty": "out-text",
+      "toId": "ps_row_title",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "ps_row_in",
+      "fromProperty": "canUp",
+      "toId": "ps_row_up",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ps_row_in",
+      "fromProperty": "canDown",
+      "toId": "ps_row_down",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "ps_row_in",
+      "fromProperty": "upLabel",
+      "toId": "ps_row_up",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ps_row_in",
+      "fromProperty": "downLabel",
+      "toId": "ps_row_down",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ps_row_in",
+      "fromProperty": "removeLabel",
+      "toId": "ps_row_remove",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "ps_row_up",
+      "fromProperty": "onClick",
+      "toId": "ps_row_out",
+      "toProperty": "up"
+    },
+    {
+      "fromId": "ps_row_down",
+      "fromProperty": "onClick",
+      "toId": "ps_row_out",
+      "toProperty": "down"
+    },
+    {
+      "fromId": "ps_row_remove",
+      "fromProperty": "onClick",
+      "toId": "ps_row_out",
+      "toProperty": "remove"
+    }
+  ]
+}

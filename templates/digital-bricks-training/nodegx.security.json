@@ -39,6 +39,15 @@
     },
     "deleteMine": {
       "call": "authenticated"
+    },
+    "addLearner": {
+      "call": "role:staff"
+    },
+    "setLearnerPath": {
+      "call": "role:staff"
+    },
+    "conceptList": {
+      "call": "role:staff"
     }
   },
   "files": {

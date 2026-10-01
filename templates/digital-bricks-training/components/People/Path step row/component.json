@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "0116bf30-2c55-4101-a80a-d54a0c579ad8",
+  "name": "Path step row",
+  "path": "/People/Path step row",
+  "type": "visual",
+  "created": "2026-10-01T09:23:35.151Z",
+  "modified": "2026-10-01T09:23:35.151Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One step on the path a coach is choosing: its title, and controls to move it up, down or off. Emits a signal per control; the page decides what each does (TASK-L184)."
+}

@@ -1,0 +1,554 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "cddaeb00-128b-4ac4-90df-d884400864ca",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "al_box",
+      "type": "Group",
+      "label": "The composer",
+      "x": 40,
+      "y": 40,
+      "children": [
+        "al_h",
+        "al_lede",
+        "al_email",
+        "al_project",
+        "al_problem",
+        "al_label",
+        "al_submit",
+        "al_msg",
+        "al_link_btn",
+        "al_sent"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "flex-start",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-4)"
+      }
+    },
+    {
+      "id": "al_h",
+      "type": "Text",
+      "label": "Heading",
+      "x": 100,
+      "y": 120,
+      "parent": "al_box",
+      "parameters": {
+        "as": "h2",
+        "fontFamily": "var(--font-display)",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": 800,
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "al_lede",
+      "type": "Text",
+      "label": "What adding does",
+      "x": 100,
+      "y": 200,
+      "parent": "al_box",
+      "parameters": {
+        "as": "p",
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "al_email",
+      "type": "net.noodl.controls.textinput",
+      "label": "Their email address",
+      "x": 100,
+      "y": 280,
+      "parent": "al_box",
+      "parameters": {
+        "type": "email",
+        "useLabel": true,
+        "labelfontSize": "var(--text-xs)",
+        "labelfontWeight": "var(--font-bold)",
+        "labeltextTransform": "uppercase",
+        "labelcolor": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      }
+    },
+    {
+      "id": "al_project",
+      "type": "net.noodl.controls.textinput",
+      "label": "Their project's name",
+      "x": 100,
+      "y": 360,
+      "parent": "al_box",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "labelfontSize": "var(--text-xs)",
+        "labelfontWeight": "var(--font-bold)",
+        "labeltextTransform": "uppercase",
+        "labelcolor": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      }
+    },
+    {
+      "id": "al_problem",
+      "type": "net.noodl.controls.textinput",
+      "label": "What they are building",
+      "x": 100,
+      "y": 440,
+      "parent": "al_box",
+      "parameters": {
+        "type": "textArea",
+        "useLabel": true,
+        "labelfontSize": "var(--text-xs)",
+        "labelfontWeight": "var(--font-bold)",
+        "labeltextTransform": "uppercase",
+        "labelcolor": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      }
+    },
+    {
+      "id": "al_label",
+      "type": "net.noodl.controls.textinput",
+      "label": "The coach's private note",
+      "x": 100,
+      "y": 520,
+      "parent": "al_box",
+      "parameters": {
+        "type": "text",
+        "useLabel": true,
+        "labelfontSize": "var(--text-xs)",
+        "labelfontWeight": "var(--font-bold)",
+        "labeltextTransform": "uppercase",
+        "labelcolor": "var(--muted-foreground)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "maxWidth": {
+          "value": 480,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      }
+    },
+    {
+      "id": "al_submit",
+      "type": "net.noodl.controls.button",
+      "label": "Add them",
+      "x": 100,
+      "y": 600,
+      "parent": "al_box",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "btn btn-thread pressable",
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)"
+      }
+    },
+    {
+      "id": "al_msg",
+      "type": "Text",
+      "label": "What happened, in a sentence",
+      "x": 100,
+      "y": 680,
+      "parent": "al_box",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-base)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "al_link_btn",
+      "type": "net.noodl.controls.button",
+      "label": "Email them a sign-in link",
+      "x": 100,
+      "y": 760,
+      "parent": "al_box",
+      "parameters": {
+        "sizeMode": "contentSize",
+        "mounted": false,
+        "cssClassName": "btn pressable",
+        "backgroundColor": "var(--surface-raised)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
+      "id": "al_sent",
+      "type": "Text",
+      "label": "The link is on its way",
+      "x": 100,
+      "y": 840,
+      "parent": "al_box",
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-sm)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)"
+      }
+    },
+    {
+      "id": "al_call",
+      "type": "CloudFunction2",
+      "label": "addLearner — staff only",
+      "x": 700,
+      "y": 600,
+      "parameters": {
+        "function": "addLearner"
+      }
+    },
+    {
+      "id": "al_ok",
+      "type": "JavaScriptFunction",
+      "label": "Added, or already there",
+      "x": 1000,
+      "y": 600,
+      "parameters": {
+        "functionScript": "// TASK-L184: say which, because \"already there\" means nothing was changed —\n// a coach who mistyped a project name on a second press needs to know it was ignored.\nOutputs.text = Inputs.created ? Inputs.addedText : Inputs.alreadyText;\n",
+        "runOnChange-in-created": false,
+        "runOnChange-in-addedText": false,
+        "runOnChange-in-alreadyText": false
+      },
+      "ports": [
+        {
+          "name": "in-created",
+          "plug": "input",
+          "type": "*",
+          "displayName": "created",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-addedText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "addedText",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-alreadyText",
+          "plug": "input",
+          "type": "*",
+          "displayName": "alreadyText",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "plug": "output",
+          "type": "*",
+          "displayName": "text",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "al_fail",
+      "type": "JavaScriptFunction",
+      "label": "The refusal, as the server worded it",
+      "x": 1000,
+      "y": 700,
+      "parameters": {
+        "functionScript": "// TASK-L184: every refusal from addLearner is already a sentence the coach can act on\n// (a malformed address, a coach's address, a blank project), so it is shown as written.\nOutputs.text = String(Inputs.error || '');\n",
+        "runOnChange-in-error": false
+      },
+      "ports": [
+        {
+          "name": "in-error",
+          "plug": "input",
+          "type": "*",
+          "displayName": "error",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-text",
+          "plug": "output",
+          "type": "*",
+          "displayName": "text",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "al_msg_sw",
+      "type": "Switch",
+      "label": "Show the sentence once there is one",
+      "x": 700,
+      "y": 680,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "al_link_sw",
+      "type": "Switch",
+      "label": "Offer the link once they exist",
+      "x": 700,
+      "y": 760,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "al_sent_sw",
+      "type": "Switch",
+      "label": "Say the link went",
+      "x": 700,
+      "y": 840,
+      "parameters": {
+        "onFromStart": false
+      }
+    },
+    {
+      "id": "al_norm",
+      "type": "JavaScriptFunction",
+      "label": "The address as the account holds it, and where the link lands",
+      "x": 700,
+      "y": 280,
+      "parameters": {
+        "functionScript": "// The account's username IS the address, trimmed and lower-cased (addLearner), so the\n// link is requested for exactly that. The link lands at the start of this app; the\n// backend refuses any destination not on its allow-list by sending nothing (L171).\nOutputs.email = String(Inputs.typed || '').trim().toLowerCase();\nif (typeof window !== 'undefined') Outputs.redirect = window.location.origin + '/';\n"
+      },
+      "ports": [
+        {
+          "name": "in-typed",
+          "plug": "input",
+          "type": "*",
+          "displayName": "typed",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-email",
+          "plug": "output",
+          "type": "*",
+          "displayName": "email",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-redirect",
+          "plug": "output",
+          "type": "*",
+          "displayName": "redirect",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "al_link",
+      "type": "net.noodl.user.RequestMagicLink",
+      "label": "Ask the backend to email them a link",
+      "x": 1000,
+      "y": 760
+    },
+    {
+      "id": "al_out",
+      "type": "Component Outputs",
+      "label": "Somebody was added",
+      "x": 1300,
+      "y": 600,
+      "ports": [
+        {
+          "name": "added",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "t_al_h",
+      "type": "Translation",
+      "label": "people:add.heading",
+      "x": 1300,
+      "y": 120,
+      "parameters": {
+        "Key": "add.heading",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_al_lede",
+      "type": "Translation",
+      "label": "people:add.lede",
+      "x": 1300,
+      "y": 200,
+      "parameters": {
+        "Key": "add.lede",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_al_email",
+      "type": "Translation",
+      "label": "people:add.email",
+      "x": 1300,
+      "y": 280,
+      "parameters": {
+        "Key": "add.email",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_al_project",
+      "type": "Translation",
+      "label": "people:add.project",
+      "x": 1300,
+      "y": 360,
+      "parameters": {
+        "Key": "add.project",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_al_problem",
+      "type": "Translation",
+      "label": "people:add.problem",
+      "x": 1300,
+      "y": 440,
+      "parameters": {
+        "Key": "add.problem",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_al_label",
+      "type": "Translation",
+      "label": "people:add.label",
+      "x": 1300,
+      "y": 520,
+      "parameters": {
+        "Key": "add.label",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_al_submit",
+      "type": "Translation",
+      "label": "people:add.submit",
+      "x": 1300,
+      "y": 680,
+      "parameters": {
+        "Key": "add.submit",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_al_added",
+      "type": "Translation",
+      "label": "people:add.added",
+      "x": 1300,
+      "y": 760,
+      "parameters": {
+        "Key": "add.added",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_al_already",
+      "type": "Translation",
+      "label": "people:add.already",
+      "x": 1300,
+      "y": 840,
+      "parameters": {
+        "Key": "add.already",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_al_link",
+      "type": "Translation",
+      "label": "people:add.sendLink",
+      "x": 1300,
+      "y": 920,
+      "parameters": {
+        "Key": "add.sendLink",
+        "Namespace": "people"
+      }
+    },
+    {
+      "id": "t_al_sent",
+      "type": "Translation",
+      "label": "people:add.linkSent",
+      "x": 1300,
+      "y": 1000,
+      "parameters": {
+        "Key": "add.linkSent",
+        "Namespace": "people"
+      }
+    }
+  ],
+  "visualRoots": [
+    "al_box"
+  ]
+}

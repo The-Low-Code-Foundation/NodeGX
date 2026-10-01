@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "3161b99a-f65f-5c8f-8c41-ecc83691d693",
+  "name": "addLearner",
+  "path": "/#__cloud__/addLearner",
+  "type": "cloud",
+  "created": "2026-10-01T09:00:00.000Z",
+  "modified": "2026-10-01T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A coach adds a learner by address: the account (NodeGX Create User, idempotent), a learner profile, a project at version 1 and the coach's private label. A second press with the same address writes nothing (TASK-L184)."
+}

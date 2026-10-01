@@ -52,7 +52,8 @@
         "cs_eyebrow",
         "cs_title",
         "cs_scope",
-        "cs_whereat",
+        "cs_nopath",
+        "cs_whereat_box",
         "cs_card",
         "cs_pace_wrap",
         "cs_traj",
@@ -266,7 +267,8 @@
         },
         "sizeMode": "contentHeight",
         "flexDirection": "column",
-        "marginTop": "var(--space-6)"
+        "marginTop": "var(--space-6)",
+        "mounted": false
       }
     },
     {
@@ -358,12 +360,50 @@
       }
     },
     {
+      "id": "cs_whereat_box",
+      "type": "Group",
+      "label": "Where you are — only once there is a path",
+      "parent": "cs_shell",
+      "x": 220,
+      "y": 620,
+      "parameters": {
+        "mounted": false,
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column"
+      },
+      "children": [
+        "cs_whereat"
+      ],
+      "metadata": {
+        "comment": "TASK-L184: a learner a coach has added but not yet given a path saw an empty \"Where you're at\" card and an empty \"Your programme\" heading. A component instance does not take `mounted`, so this Group carries it."
+      }
+    },
+    {
+      "id": "cs_nopath",
+      "type": "Text",
+      "label": "No path yet — said, never an empty card",
+      "parent": "cs_shell",
+      "x": 220,
+      "y": 560,
+      "parameters": {
+        "as": "p",
+        "mounted": false,
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--foreground)"
+      }
+    },
+    {
       "id": "cs_whereat",
       "type": "/Course/Where you're at",
       "label": "Where you are, in a sentence",
       "x": 220,
       "y": 620,
-      "parent": "cs_shell",
+      "parent": "cs_whereat_box",
       "metadata": {
         "comment": "Two counts and one line naming the order. It renders with no coach, no programme and no horizon — counts of your own finished work need no deadline to be true, which is exactly the opposite of the pace panel below."
       }
@@ -911,6 +951,50 @@
       },
       "metadata": {
         "comment": "The same page and ?concept= the up-next card and the dossier link use. Every lesson a row can offer is written (tools/check-lessons.mjs); a row on a locked step offers nothing."
+      }
+    },
+    {
+      "id": "cs_haspath",
+      "type": "JavaScriptFunction",
+      "label": "Do they have a path yet?",
+      "x": 900,
+      "y": 620,
+      "parameters": {
+        "functionScript": "/*\n * DO THEY HAVE A PATH YET? (TASK-L184 §4) A coach adds a learner first and sets their\n * path after, so for a while they have a project and no steps. That is a state to SAY,\n * never an empty card. Decided only once the entries have ARRIVED: before then\n * neither the sentence nor the cards show, so nothing flashes on a slow load.\n */\nfunction plain(x) { if (x && typeof x === 'object' && x.data) return x.data; if (x && Array.isArray(x.items)) return x.items; return x; }\nconst entries = plain(Inputs.entries);\nif (Array.isArray(entries)) {\n  const has = entries.map(plain).some((e) => e && e.kind === 'lesson');\n  Outputs.hasPath = has;\n  Outputs.noPath = !has;\n}\n"
+      },
+      "ports": [
+        {
+          "name": "in-entries",
+          "plug": "input",
+          "type": "*",
+          "displayName": "entries",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-hasPath",
+          "plug": "output",
+          "type": "*",
+          "displayName": "hasPath",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-noPath",
+          "plug": "output",
+          "type": "*",
+          "displayName": "noPath",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "t_cs_nopath",
+      "type": "Translation",
+      "label": "course:noPath",
+      "x": 1000,
+      "y": 2710,
+      "parameters": {
+        "Key": "noPath",
+        "Namespace": "course"
       }
     }
   ],

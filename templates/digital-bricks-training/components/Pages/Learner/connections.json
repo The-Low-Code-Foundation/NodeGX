@@ -620,6 +620,30 @@
       "fromProperty": "work",
       "toId": "lr_live",
       "toProperty": "work"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "learnerId",
+      "toId": "lr_path",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "lr_programme",
+      "fromProperty": "entries",
+      "toId": "lr_path",
+      "toProperty": "entries"
+    },
+    {
+      "fromId": "lr_path",
+      "fromProperty": "saved",
+      "toId": "lr_programme",
+      "toProperty": "refresh"
+    },
+    {
+      "fromId": "lr_path",
+      "fromProperty": "saved",
+      "toId": "lr_roster",
+      "toProperty": "refresh"
     }
   ]
 }

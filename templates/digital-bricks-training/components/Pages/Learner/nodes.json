@@ -285,12 +285,22 @@
         "comment": "`mounted`: the surface a coach is not reading does not exist, so nothing in it runs (L119's <details> finding)."
       },
       "children": [
+        "lr_path",
         "lr_pace",
         "lr_traj",
         "lr_thread"
       ],
       "x": 220,
       "y": 1480
+    },
+    {
+      "id": "lr_path",
+      "type": "/People/Their path",
+      "label": "Their path — chosen by hand (TASK-L184)",
+      "parent": "lr_prog_surface",
+      "x": 280,
+      "y": 1520,
+      "parameters": {}
     },
     {
       "id": "lr_pace",
@@ -689,7 +699,7 @@
       "x": 1800,
       "y": 40,
       "parameters": {
-        "functionScript": "/*\n * WHO THIS PAGE IS ABOUT (TASK-L165 §5).\n *\n * The programme fixture says whose programme it is; the roster says who that\n * is. An explicit join on the learner id, never a match on a project's name.\n *\n * TWO NAME CHAINS, DELIBERATELY DIFFERENT, AND MERGING THEM IS THE DEFECT.\n * PORTED: displayName / audienceName -> LearnerShell.tsx.\n *\n *  - displayName = coachLabel ?? projectName ?? email ?? learnerId. The page's\n *    <h1>: any label that identifies the row is fine in a heading.\n *  - audienceName = coachLabel ?? email ?? \"this learner\". Wherever the page\n *    speaks ABOUT the person — here, the browser tab. It SKIPS projectName,\n *    because L128's audience control read \"Shared with Bristol Community Garden\n *    Booking Site\": a project named as though it were a person. The last\n *    fallback is words, never an id.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst fill = (t, v) => String(t || '').replace(/\\{(\\w+)\\}/g, (m, k) => (k in v ? String(v[k]) : m));\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst W = ((plain(Inputs.copy) || {}).people || {}).learner;\nif (!W) throw new Error('Pages/Learner: no people.learner copy');\nconst people = plain(Inputs.people);\nconst id = String(Inputs.learnerId || '');\nif (!people || !id) return;\nconst person = people.find((p) => p.learnerId === id);\nif (!person) throw new Error('Pages/Learner: the programme belongs to \"' + id + '\", who is not on the roster — the two fixtures disagree about who this is');\nconst or = (...xs) => xs.find((x) => x !== null && x !== undefined && x !== '');\nconst displayName = or(person.coachLabel, person.projectName, person.email, person.learnerId);\nconst audienceName = or(person.coachLabel, person.email) || W.thisLearner;\nOutputs.person = person;\nOutputs.programmes = person.programmes || [];\nOutputs.displayName = displayName;\nOutputs.audienceName = audienceName;\nOutputs.meta = (person.email || W.noEmail) + (person.coachLabel && person.projectName ? ' · ' + person.projectName : '');\nOutputs.tabTitle = fill(W.tabTitle, { name: audienceName });\nOutputs.eyebrow = W.eyebrow;\nOutputs.back = W.back;\nOutputs.paceEyebrow = W.pace.eyebrow;\nOutputs.trajectoryEyebrow = W.trajectory.eyebrow;\n"
+        "functionScript": "/*\n * WHO THIS PAGE IS ABOUT (TASK-L165 §5).\n *\n * The programme fixture says whose programme it is; the roster says who that\n * is. An explicit join on the learner id, never a match on a project's name.\n *\n * TWO NAME CHAINS, DELIBERATELY DIFFERENT, AND MERGING THEM IS THE DEFECT.\n * PORTED: displayName / audienceName -> LearnerShell.tsx.\n *\n *  - displayName = coachLabel ?? projectName ?? email ?? learnerId. The page's\n *    <h1>: any label that identifies the row is fine in a heading.\n *  - audienceName = coachLabel ?? email ?? \"this learner\". Wherever the page\n *    speaks ABOUT the person — here, the browser tab. It SKIPS projectName,\n *    because L128's audience control read \"Shared with Bristol Community Garden\n *    Booking Site\": a project named as though it were a person. The last\n *    fallback is words, never an id.\n */\nfunction plain(x) {\n  if (x === null || x === undefined) return x;\n  if (Array.isArray(x)) return x.map(plain);\n  if (typeof x === 'object') {\n    if (typeof x.get === 'function' && x.data && typeof x.data === 'object') return plain(x.data);\n    if (Array.isArray(x.items)) return plain(x.items);\n    const out = {};\n    for (const k of Object.keys(x)) out[k] = plain(x[k]);\n    return out;\n  }\n  return x;\n}\nconst fill = (t, v) => String(t || '').replace(/\\{(\\w+)\\}/g, (m, k) => (k in v ? String(v[k]) : m));\nif (Inputs.copy === undefined || Inputs.copy === null) return;\nconst W = ((plain(Inputs.copy) || {}).people || {}).learner;\nif (!W) throw new Error('Pages/Learner: no people.learner copy');\nconst people = plain(Inputs.people);\nconst id = String(Inputs.learnerId || '');\n/* NOT ARRIVED YET IS NOT A DISAGREEMENT (TASK-L184). An empty list is the roster before\n   it has answered, or a refusal answered as `[]` (Data/Roster ro_refused); naming nobody\n   is right then, and throwing would report a race as a contradiction. */\nif (!people || !id || people.length === 0) return;\nconst person = people.find((p) => p.learnerId === id);\nif (!person) throw new Error('Pages/Learner: the programme belongs to \"' + id + '\", who is not on the roster — the two fixtures disagree about who this is');\nconst or = (...xs) => xs.find((x) => x !== null && x !== undefined && x !== '');\nconst displayName = or(person.coachLabel, person.projectName, person.email, person.learnerId);\nconst audienceName = or(person.coachLabel, person.email) || W.thisLearner;\nOutputs.person = person;\nOutputs.programmes = person.programmes || [];\nOutputs.displayName = displayName;\nOutputs.audienceName = audienceName;\nOutputs.meta = (person.email || W.noEmail) + (person.coachLabel && person.projectName ? ' · ' + person.projectName : '');\nOutputs.tabTitle = fill(W.tabTitle, { name: audienceName });\nOutputs.eyebrow = W.eyebrow;\nOutputs.back = W.back;\nOutputs.paceEyebrow = W.pace.eyebrow;\nOutputs.trajectoryEyebrow = W.trajectory.eyebrow;\n"
       },
       "ports": [
         {

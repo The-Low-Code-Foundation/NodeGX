@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "841598b1-cc69-5853-b049-7edd51f01c80",
+  "name": "setLearnerPath",
+  "path": "/#__cloud__/setLearnerPath",
+  "type": "cloud",
+  "created": "2026-10-01T09:00:00.000Z",
+  "modified": "2026-10-01T09:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A coach gives a learner a path, in the coach's order: a NEW path row and its steps, every concept checked by name, what they already finished kept finished (TASK-L184)."
+}

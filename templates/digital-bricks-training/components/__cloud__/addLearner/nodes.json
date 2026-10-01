@@ -1,0 +1,214 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "3161b99a-f65f-5c8f-8c41-ecc83691d693",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Staff only (security: role:staff)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "email,label,projectName,problemStatement",
+        "allowNoAuth": false,
+        "ptype-email": "string",
+        "preq-email": true,
+        "ptype-label": "string",
+        "preq-label": false,
+        "ptype-projectName": "string",
+        "preq-projectName": true,
+        "ptype-problemStatement": "string",
+        "preq-problemStatement": false
+      }
+    },
+    {
+      "id": "check",
+      "type": "JavaScriptFunction",
+      "label": "Is this a learner we can add? \u2014 before anything is written",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * IS THIS A LEARNER WE CAN ADD? (TASK-L184 \u00a71) \u2014 checked BEFORE anything is\n * written, so a malformed address or a blank project creates no account.\n *\n * The address is the identity: trimmed and lower-cased, because the magic link\n * finds an account by the address typed into the sign-in form and two spellings\n * of one address would be two people. It becomes the account's USERNAME as\n * well as its email, which is what NodeGX's Create User keys on \u2014 so a second\n * press with the same address finds the account rather than making another.\n *\n * Each refusal is its own sentence, so the coach can act on it; none of them\n * says whether an account exists for some other address.\n */\nif (Inputs.email !== undefined && Inputs.projectName !== undefined) {\n  const email = String(Inputs.email || '').trim().toLowerCase();\n  const projectName = String(Inputs.projectName || '').trim();\n  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email) || email.length > 254) {\n    Outputs.why = 'That does not look like an email address. Check it and try again.';\n    Outputs.refuse();\n  } else if (!projectName) {\n    Outputs.why = 'Give their project a name. It can be a working title; you can change it later.';\n    Outputs.refuse();\n  } else {\n    Outputs.email = email;\n    Outputs.go();\n  }\n}\n",
+        "runOnChange-in-email": true,
+        "runOnChange-in-projectName": true
+      },
+      "ports": [
+        {
+          "name": "in-email",
+          "plug": "input",
+          "type": "*",
+          "displayName": "email",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectName",
+          "plug": "input",
+          "type": "*",
+          "displayName": "projectName",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-email",
+          "plug": "output",
+          "type": "*",
+          "displayName": "email",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*",
+          "displayName": "why",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "account",
+      "type": "noodl.cloud.createuser",
+      "label": "The account \u2014 found, never made twice",
+      "x": 560,
+      "y": 40,
+      "parameters": {},
+      "metadata": {
+        "comment": "NodeGX Create User keys on the USERNAME, which is the address. Unchanged means it already exists and hands back that account, which is what makes a second press safe. It makes no session, sends no mail and cannot make a staff account (privilege comes only from a role)."
+      }
+    },
+    {
+      "id": "roles",
+      "type": "noodl.cloud.getuserroles",
+      "label": "Is that account a coach?",
+      "x": 820,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "give",
+      "type": "JavaScriptFunction",
+      "label": "A profile, a project, the label \u2014 only what is missing",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * GIVE THE ACCOUNT A LEARNER, A PROJECT AND THE COACH'S LABEL (TASK-L184 \u00a71).\n *\n * By here the account exists: Create User made it, or found it (Unchanged) \u2014\n * either way `userId` is the account behind this address. `roles` is that\n * account's roles, read fresh.\n *\n * A STAFF ADDRESS IS REFUSED. A coach's account is not a learner, and giving it\n * a learner profile would put a coach on their own roster. Create User never\n * makes a staff account (privilege comes only from a role), so a staff address\n * always arrives here as an EXISTING account and nothing has been written.\n *\n * IDEMPOTENT, AND IN THIS ORDER so a crash is healed by pressing again:\n *   1. the account   (Create User \u2014 \"already exists\" hands back its id)\n *   2. the profile   (found by the account, or made with a new learner id)\n *   3. the project   (found by the learner, or made at version 1, empty facts)\n *   4. the label     (a claimed invite carrying the coach's private shorthand,\n *                     only if a label was given and none is held yet)\n * Each step looks before it writes and fills only what is missing, so a second\n * press with the same address writes nothing, and never makes a second learner\n * behind one address (`Caller learner` refuses two profiles, rightly).\n *\n * THE LABEL IS THE COACH'S PRIVATE SHORTHAND (the product's L84). It lives on\n * `LearnerInvite.label`, where the roster reads it, and no learner function\n * reads that collection. Nothing here derives a name from the address (L106).\n */\nif (Inputs.userId !== undefined && Inputs.roles !== undefined && Inputs.projectName !== undefined) {\n  (async () => {\n    const R = Noodl.Records;\n    const q = (c, where, limit) => R.query(c, where, { limit: limit || 2, plain: true });\n    try {\n      const userId = String(Inputs.userId || '');\n      if (!userId) throw new Error('no account');\n      const roles = Array.isArray(Inputs.roles) ? Inputs.roles.map((r) => (r && r.name) || r) : [];\n      if (roles.indexOf('staff') !== -1) {\n        Outputs.why = 'That address belongs to a coach on this site, so it cannot be added as a learner.';\n        Outputs.refuse();\n        return;\n      }\n      const projectName = String(Inputs.projectName || '').trim();\n      const problemStatement = String(Inputs.problemStatement || '').trim();\n      const label = String(Inputs.label || '').trim();\n\n      let created = false;\n      const profiles = await q('LearnerProfile', { userId: { equalTo: userId } });\n      if (profiles.length > 1) throw new Error('two learner profiles for one account');\n      let learnerId = profiles.length ? profiles[0].learnerId : '';\n      if (!learnerId) {\n        learnerId = 'l-' + (typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(16).slice(2));\n        await R.create('LearnerProfile', { learnerId, userId, coachEmail: null });\n        created = true;\n      }\n\n      const contexts = await q('ProjectContext', { learnerId: { equalTo: learnerId } });\n      if (!contexts.length) {\n        await R.create('ProjectContext', { learnerId, projectName, problemStatement, facts: {}, version: 1 });\n        created = true;\n      }\n\n      if (label) {\n        const invites = await q('LearnerInvite', { claimedByLearnerId: { equalTo: learnerId } });\n        if (!invites.length) {\n          const me = Noodl.Users && Noodl.Users.Current;\n          const coach = me && me.Properties && typeof me.Properties.get === 'function' ? me.Properties.get('email') : null;\n          const now = new Date().toISOString();\n          await R.create('LearnerInvite', {\n            inviteId: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : 'inv-' + Date.now(),\n            label,\n            claimedByLearnerId: learnerId,\n            claimedAt: now,\n            status: 'claimed',\n            createdByEmail: coach || null\n          });\n          created = true;\n        }\n      }\n\n      console.log('[dbt:addLearner] ' + (created ? 'added' : 'already there') + ' learner=' + learnerId);\n      Outputs.learnerId = learnerId;\n      Outputs.created = created;\n      Outputs.done();\n    } catch (e) {\n      Outputs.why = 'That did not finish. Nothing you typed is lost; press Add again.';\n      console.error('[dbt:addLearner] stopped: ' + String((e && e.message) || e));\n      Outputs.refuse();\n    }\n  })();\n}\n",
+        "runOnChange-in-userId": true,
+        "runOnChange-in-roles": true,
+        "runOnChange-in-projectName": true,
+        "runOnChange-in-problemStatement": true,
+        "runOnChange-in-label": true
+      },
+      "ports": [
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-roles",
+          "plug": "input",
+          "type": "*",
+          "displayName": "roles",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectName",
+          "plug": "input",
+          "type": "*",
+          "displayName": "projectName",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-problemStatement",
+          "plug": "input",
+          "type": "*",
+          "displayName": "problemStatement",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-label",
+          "plug": "input",
+          "type": "*",
+          "displayName": "label",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-learnerId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-created",
+          "plug": "output",
+          "type": "*",
+          "displayName": "created",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "plug": "output",
+          "type": "*",
+          "displayName": "why",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-refuse",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "metadata": {
+        "comment": "RECORDS CALLS PER ADD: 3 reads (profile, project, invite) and at most 3 writes. Each step looks before it writes."
+      }
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "learnerId, created",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "params": "learnerId,created"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "A refusal, in a sentence the coach can act on",
+      "x": 1340,
+      "y": 220,
+      "parameters": {
+        "status": "failure"
+      }
+    },
+    {
+      "id": "deny_account",
+      "type": "noodl.cloud.response",
+      "label": "The account could not be made",
+      "x": 1340,
+      "y": 400,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "That account could not be made. Try again."
+      }
+    }
+  ]
+}

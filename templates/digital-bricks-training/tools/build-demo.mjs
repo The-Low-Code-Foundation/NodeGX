@@ -40,6 +40,11 @@
  *     describes a real deployment (where data lives, who sends mail, how an
  *     account is deleted), and a browser-only demo of made-up people holds
  *     nothing and does none of it; carrying the notice here would make it false.
+ *   - THE COACH'S WRITES GO (TASK-L184): People/Add a learner, People/Their
+ *     path and its two row components are not copied, and People and Learner
+ *     lose the nodes that place them. Adding a person and choosing their path
+ *     need the backend; the demo's coach reads the made-up people and changes
+ *     nobody.
  *   - Home gains a THIRD door, straight to the one written lesson (the same
  *     page and `?concept=` the dossier dialog's link uses) — three nodes, two
  *     wires, one string.
@@ -68,9 +73,12 @@ export const TEMPLATE = join(dirname(fileURLToPath(import.meta.url)), '..');
 export const DEMO = join(TEMPLATE, '..', 'digital-bricks-training-demo');
 
 /** Components the demo does not carry, as path prefixes under components/. */
-export const DROPPED_COMPONENTS = ['__cloud__/', 'Pages/Sign in/', 'Pages/Privacy/', 'Pages/Settings/', 'Privacy/'];
+export const DROPPED_COMPONENTS = [
+  '__cloud__/', 'Pages/Sign in/', 'Pages/Privacy/', 'Pages/Settings/', 'Privacy/',
+  'People/Add a learner/', 'People/Their path/', 'People/Path step row/', 'People/Path concept row/'
+];
 /** Components whose files the demo changes. Every other file is byte-identical. */
-export const CHANGED_COMPONENTS = ['App', 'Pages/Home', 'Data/Programme', 'Data/Lesson', 'Data/Roster', 'Data/Strings', 'Lesson/Section row', 'Pages/Lesson'];
+export const CHANGED_COMPONENTS = ['App', 'Pages/Home', 'Data/Programme', 'Data/Lesson', 'Data/Roster', 'Data/Strings', 'Lesson/Section row', 'Pages/Lesson', 'Pages/People', 'Pages/Learner'];
 /** Node ids removed, per component. */
 export const REMOVED_NODES = {
   App: ['app_user', 'app_gate', 'app_to_signin', 'app_to_home', 'app_accept_box', 'app_accept', 'app_notice_gate', 'app_user_tick'],
@@ -80,6 +88,8 @@ export const REMOVED_NODES = {
     'hm_deleted', 'hm_url', 'hm_was_deleted', 't_hm_deleted'
   ],
   'Data/Programme': ['pr_refused'],
+  'Pages/People': ['pp_add'],
+  'Pages/Learner': ['lr_path'],
   'Data/Lesson': ['le_refused'],
   'Data/Roster': ['ro_refused'],
 };
@@ -93,6 +103,8 @@ export const REWRITTEN_NODES = {
   'Data/Strings': ['str_graph'],
   'Lesson/Section row': ['sr_call'],
   'Pages/Lesson': ['ls_finish_call'],
+  'Pages/People': ['pp_shell'],
+  'Pages/Learner': ['lr_prog_surface'],
 };
 
 /** Node ids the demo ADDS, per component: Home's third door. */
@@ -257,7 +269,7 @@ function transformNodes(component, doc) {
       node.parameters.json = json(data);
     }
     // A removed node leaves its parent's children list (TASK-L185: App's acceptance box, Home's links).
-    if ((node.id === 'app_root' || node.id === 'hm_shell') && Array.isArray(node.children)) {
+    if (['app_root', 'hm_shell', 'pp_shell', 'lr_prog_surface'].includes(node.id) && Array.isArray(node.children)) {
       const before = node.children.length;
       node.children = node.children.filter((c) => !removed.has(c));
       if (node.children.length === before) throw new Error(`build-demo: ${node.id} lost none of its children — the named list is out of date`);
