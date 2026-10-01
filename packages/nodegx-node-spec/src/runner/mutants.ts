@@ -21,8 +21,9 @@
  * A mutation that would leave the patch unchanged (drop-emit on a branch with no emit) is not
  * generated: it could only survive, and would say nothing.
  *
- * The world handlers (NSP-007, `spec.world.timer` / `spec.world.response`) are reducers like any
- * other here, named `world.timer` and `world.response`; whether a branch issues a request is part
+ * The world handlers (NSP-007, `spec.world.timer` / `spec.world.response`; NSP-012's
+ * `spec.world.change`) are reducers like any
+ * other here, named `world.timer`, `world.response` and `world.change`; whether a branch issues a request is part
  * of its shape. A branch's `after` / `cancel` / `abort` effects are NOT in the shape and have no
  * mutant of their own yet (a dropped timeout timer shows only in a sequence that waits past it
  * with an answer that never comes) — named in NSP-007 §5 as the runner's next hole.
@@ -54,6 +55,8 @@ export interface Mutant {
 export interface PatchLike {
   set?: Record<string, unknown>;
   emit?: readonly string[];
+  /** NSP-012: derived pulses, part of the shape like `emit`. */
+  emitDerived?: readonly string[];
   outcome?: string;
   error?: string;
   /** An `afterInputs` patch: the deferred outcomes it resolves (spec.ts `AfterInputsPatch`). */
@@ -66,7 +69,9 @@ export function shapeOf(patch: unknown): string {
   const p = (patch && typeof patch === 'object' ? patch : {}) as PatchLike;
   return JSON.stringify({
     set: p.set ? Object.keys(p.set).sort() : [],
-    emit: p.emit ? [...p.emit] : [],
+    // WHICH signals, not how many — the rule `outcomes` already has: an Object node pulsing
+    // `changed` once per key written is one branch, not one per count (NSP-012)
+    emit: [...new Set([...(p.emitDerived ?? []), ...(p.emit ?? [])])],
     outcome: p.outcome ?? null,
     // the resolved outcomes are part of the shape — WHICH outcomes, not how many: "Set → done" and
     // "Set → unchanged" are two branches; four Sets all unchanged is the same branch as one
@@ -82,6 +87,7 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.afterInputs) names.push('afterInputs');
   if (spec.world?.timer) names.push('world.timer');
   if (spec.world?.response) names.push('world.response');
+  if (spec.world?.change) names.push('world.change');
   return names;
 }
 
@@ -104,6 +110,7 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     const w: NonNullable<AnyNodeSpec['world']> = {};
     if (spec.world.timer) w.timer = wrap('world.timer', spec.world.timer as unknown as ErasedReducer) as unknown as typeof spec.world.timer;
     if (spec.world.response) w.response = wrap('world.response', spec.world.response as unknown as ErasedReducer) as unknown as typeof spec.world.response;
+    if (spec.world.change) w.change = wrap('world.change', spec.world.change as unknown as ErasedReducer) as unknown as typeof spec.world.change;
     out.world = w;
   }
   return out;
@@ -147,7 +154,7 @@ function flip(outcome: string | undefined): string | undefined {
 function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike): PatchLike {
   switch (kind) {
     case 'drop-emit': {
-      const { emit: _e, ...rest } = patch;
+      const { emit: _e, emitDerived: _d, ...rest } = patch;
       return rest;
     }
     case 'drop-set': {
@@ -189,7 +196,7 @@ export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mut
   for (const b of branches.values()) {
     const ex = b.example;
     const kinds: Array<[MutationKind, Branch | undefined]> = [];
-    if (ex.emit && ex.emit.length > 0) kinds.push(['drop-emit', undefined]);
+    if ((ex.emit && ex.emit.length > 0) || (ex.emitDerived && ex.emitDerived.length > 0)) kinds.push(['drop-emit', undefined]);
     if (ex.set && Object.keys(ex.set).length > 0) kinds.push(['drop-set', undefined]);
     // a `deferred` outcome has nothing to flip (its resolution is afterInputs' branch, mutated there)
     if ((ex.outcome !== undefined && ex.outcome !== 'deferred' && ex.outcome !== 'pending') || (ex.outcomes && ex.outcomes.length > 0)) kinds.push(['flip-outcome', undefined]);

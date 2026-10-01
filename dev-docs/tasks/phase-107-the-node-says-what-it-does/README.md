@@ -69,6 +69,8 @@ Measured 2026-09-29 against the working tree. Read, not run.
 
 | 15 | **The graph (NSP-008, 2026-09-30):** CONTRACT.md C1–C11 as 14 two-to-six-node graph scenarios, the runtime's trace recorded as the reference and each clause's sentence written as a checkable claim BEFORE recording. **13 of 14 bear their clause out; one does not (G1)**: C6's *"never computes from a half-updated upstream"* is true of a frame-end node (String Format) and false of a per-setter node (And): under C7's lockstep `x AND NOT x` carries `true` then `false` inside one pass. The export computes it atomically — the sentence describes the export, not the runtime. Two holes in the runtime TARGET found by the graphs and fixed (a settle that only drains is not a frame — a breaker-tripped node never re-armed; a wired pulse's outcome had no port). The exporter emits 3 of 14 graphs whole; C7 and C8 differ on it exactly as Part 2 says | [NSP-008 §6](NSP-008-THE-GRAPH.md) |
 
+| 16 | **The second batch (NSP-012, 2026-10-01):** 13 data nodes conform on the runtime at 200 — **34 of 147**; the format grew its fourth seam, the REGISTRY (shared records and arrays, one store per play, the array diff ported verbatim), and the wire grew `$array` so *mutated in place* and *replaced* are gradable. **3 runtime-bug rows + 1 doc row, 0 graded by any existing test**: three `Do` nodes report ONE outcome for two presses where their siblings report two (C9); a non-array on Array Filter's / Map's `Items` crashes the setter (C10); **the Object node's `<property> Changed` signals have never fired — nothing registers the output, and a wire from one is dropped inside the connection (C11)**; Array's `Changed` description names the pre-checkbox rule (D13). Six shared-state graph scenarios (S1/S2) bear their claims out on the runtime. Format row F1 closed | [NSP-012 §6](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md) |
+
 So the phase is **generalising five things that already exist in part** (#4–#8), not inventing
 a discipline from nothing.
 
@@ -131,7 +133,7 @@ Full detail in NSP-001 to NSP-003. The shape:
 | [NSP-009](NSP-009-THE-RATCHET.md) | The ratchet — spec coverage in PR CI; new picker nodes ship specced | 004 | — |
 | [NSP-010](NSP-010-A-CHANGE-IS-A-VERSION.md) | A behaviour change is a version, a trace diff, and a migration answer | 009 | — |
 | [NSP-011](NSP-011-BATCH-LOGIC-MATH-STRINGS.md) ✅ | Batch — logic, math, strings, variables, converters (**13**). **Built s4** (13 / 13 conform at 200; rows C4–C6, D6–D9; AC2 waits for NSP-005, the deep run for a quiet box) | 004 | T1 |
-| [NSP-012](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md) | Batch — arrays, objects, variables, stores, events (**26**: 13 + 13) | 008 | T1, T4 |
+| [NSP-012](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md) 🟡 | Batch — arrays, objects, variables, stores, events (**26**: 13 + 13). **s9: the 13 T1 built** — the registry seam, 13 / 13 conform on the runtime at 200 (rows C9–C11, D13), 6 shared-state graph scenarios; the 13 T4 not started, AC2 not run | 008 | T1, T4 |
 | [NSP-013](NSP-013-BATCH-DATES-PARSERS-UTILITIES.md) | Batch — dates, time, randomness, parsers, animation (**24**: 14 + 10) | 007 | T1, T2 |
 | [NSP-014](NSP-014-BATCH-DATA-AND-CLOUD.md) | Batch — records, users, files, HTTP, streams, cloud-only nodes (**41**: 39 T3, 17 of them cloud-only; Filter Records is T1, Open File Picker T2) | 007 | T3 |
 | [NSP-015](NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md) | Batch — navigation, popups, component utilities (**14**) | 008 | T4 |
@@ -161,6 +163,7 @@ npm run spec-ledger            # NSP-009 — ratcheted in PR CI
 > without a viewer: 5 of the 68 dynamic-port nodes — And, Or, String Format, String Mapper, Color Blend; catalog parity: 18.)
 > **GRAPH: 11 of 11 CONTRACT clauses graded by 14 scenarios; 14 / 14 on the runtime (1 known row); on the export 1 passed + 2 declared differences + 1 known, 10 outside.** (s7, NSP-008)
 > **s8 (NSP-007): 21 of 147 conform on the runtime (14.3%) — T1 18/46 · T2 2/11 (Delay, UUID) · T3 1/39 (HTTP Request); 2 on the export (unchanged). The world grades a clock-, entropy- or network-dependent node the way Counter is graded.**
+> **s9 (NSP-012): 34 of 147 conform on the runtime (23.1%) — T1 31/46 · T2 2/11 · T3 1/39; 2 on the export (unchanged). GRAPH: 20 scenarios (14 contract + 6 shared-state), 20 / 20 on the runtime (2 known rows: G1, C11). Ports derivable without a viewer: 10 of 68 (+ Object, Create New Object, Set Object Properties, Set Variable, Array Filter); catalog parity: 34.**
 
 Reported per target: *conforms on the runtime · conforms on the export · exempt with a reason* —
 and, from R6, *ports derivable without a viewer: N of 147* and *catalog parity: N of 147*.
@@ -253,6 +256,16 @@ sent a credential. Fix it (a behaviour change, alone), or remove the presets?"*;
 loses a Fetch's outcome silently; **D10** Delay's Stop cancels a just-started countdown and says Unchanged; **D11** a body
 that will not parse is reported as a network error; **D12** one abort controller per HTTP node — an earlier request's
 completion disarms Cancel for a later one. The rows an author meets first: **C7** and **D12**.
+
+**Also for a ruling, the second batch's rows** ([NSP-012 §6.2](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md), s9,
+2026-10-01 — none graded by any test before). The row an author meets first: **C11** — plain words: *"Every
+Object node offers a '<name> Changed' signal per property. None of them has ever fired: the port is drawn and
+never registered, so a wire from it is dropped inside the connection. Register it — one line, a behaviour
+change shipped alone?"* Then **C9** — *"Create New Array, Create New Object and Set Object Properties answer
+ONCE for two Do presses in a frame; Array's Fetch, Set Variable and Array Filter answer twice, as ERG-001 §4
+says. Make the three answer per press?"*; **C10** — *"A number, a boolean or a plain object wired into Array
+Filter's or Array Map's Items crashes the node in the setter instead of refusing."*; **D13** — Array's
+`Changed` description still names the pre-checkbox rule.
 
 **R6 — Is the editor a target?** Asked by s1 as *"can we make sure the work in this phase prepares
 for a future where even the editor is exchangeable?"* — Richard's own words, 2026-09-30: **yes,

@@ -7,6 +7,13 @@
 
 import type { AnyNodeSpec } from '../spec';
 import { And } from './and';
+import { Collection2 } from './array';
+import { CollectionClear } from './array-clear';
+import { FilterCollection } from './array-filter';
+import { CollectionInsert } from './array-insert';
+import { MapCollection } from './array-map';
+import { CollectionNew } from './array-new';
+import { CollectionRemove } from './array-remove';
 import { BooleanVariable } from './boolean';
 import { BooleanToString } from './boolean-to-string';
 import { ColorVariable } from './color';
@@ -17,9 +24,14 @@ import { Delay } from './delay';
 import { HttpRequest } from './http';
 import { Inverter } from './inverter';
 import { Log } from './log';
+import { NewModel } from './new-object';
 import { NumberVariable } from './number';
+import { Model2 } from './object';
 import { NumberRemapper } from './number-remapper';
 import { Or } from './or';
+import { SetModelProperties } from './set-object-properties';
+import { SetVariable } from './set-variable';
+import { StaticData } from './static-array';
 import { StringVariable } from './string';
 import { StringFormat } from './string-format';
 import { StringMapper } from './string-mapper';
@@ -27,6 +39,7 @@ import { Substring } from './substring';
 import { Switch } from './switch';
 import { Uuid } from './uuid';
 import { ValueChanged } from './value-changed';
+import { Variable2 } from './variable2';
 
 export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   // NSP-004 — the pilot five
@@ -52,8 +65,24 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   // NSP-007 — the world: clock, randomness, network
   [Delay.type]: Delay,
   [Uuid.type]: Uuid,
-  [HttpRequest.type]: HttpRequest
+  [HttpRequest.type]: HttpRequest,
+  // NSP-012 — arrays, objects, variables, stores
+  [Collection2.type]: Collection2,
+  [CollectionNew.type]: CollectionNew,
+  [CollectionClear.type]: CollectionClear,
+  [CollectionInsert.type]: CollectionInsert,
+  [CollectionRemove.type]: CollectionRemove,
+  [FilterCollection.type]: FilterCollection,
+  [MapCollection.type]: MapCollection,
+  [Model2.type]: Model2,
+  [NewModel.type]: NewModel,
+  [SetModelProperties.type]: SetModelProperties,
+  [StaticData.type]: StaticData,
+  [Variable2.type]: Variable2,
+  [SetVariable.type]: SetVariable
 });
+
+export { EQUIVALENT_MUTANTS } from './equivalent-mutants';
 
 export function specFor(typeName: string): AnyNodeSpec | undefined {
   return specs[typeName];
@@ -61,6 +90,19 @@ export function specFor(typeName: string): AnyNodeSpec | undefined {
 
 export {
   And,
+  Collection2,
+  CollectionClear,
+  CollectionInsert,
+  CollectionNew,
+  CollectionRemove,
+  FilterCollection,
+  MapCollection,
+  Model2,
+  NewModel,
+  SetModelProperties,
+  SetVariable,
+  StaticData,
+  Variable2,
   BooleanToString,
   BooleanVariable,
   ColorBlend,

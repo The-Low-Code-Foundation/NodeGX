@@ -1,0 +1,314 @@
+[
+  {
+    "name": "Set Variable writes a key every Variable node reading that name sees: Value and Changed on the one named x, nothing on the one named y; Set as Object names a record, Boolean coerces",
+    "clauses": [
+      "S1",
+      "S2"
+    ],
+    "because": "NSP-012 §3 — one shared record `--ndl--global-variables` (variablenode2.ts :83, setvariablenode.ts :60); forceChange (:205-207); the Set as reading (:195-202). The lone Set Variable shows none of this on its own ports (equivalent-mutants.ts)",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1
+          }
+        }
+      }
+    },
+    "nodes": {
+      "set": {
+        "type": "Set Variable",
+        "params": {
+          "name": "x",
+          "value": 5
+        }
+      },
+      "v": {
+        "type": "Variable2",
+        "params": {
+          "name": "x"
+        }
+      },
+      "w": {
+        "type": "Variable2",
+        "params": {
+          "name": "y"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "set",
+        "signal": "do"
+      },
+      "settle",
+      {
+        "node": "set",
+        "set": "setWith",
+        "value": "object"
+      },
+      {
+        "node": "set",
+        "set": "value",
+        "value": "m1"
+      },
+      {
+        "node": "set",
+        "signal": "do"
+      },
+      "settle",
+      {
+        "node": "set",
+        "set": "setWith",
+        "value": "boolean"
+      },
+      {
+        "node": "set",
+        "set": "value",
+        "value": "yes"
+      },
+      {
+        "node": "set",
+        "signal": "do"
+      },
+      "settle",
+      {
+        "node": "set",
+        "signal": "do"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "v",
+        "port": "value",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "v",
+        "port": "value",
+        "value": 5
+      },
+      {
+        "at": 2,
+        "subject": "v",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "w",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "w",
+        "port": "value",
+        "absent": true
+      },
+      {
+        "at": 3,
+        "subject": "v",
+        "port": "value",
+        "value": {
+          "a": 1,
+          "id": "m1"
+        }
+      },
+      {
+        "at": 4,
+        "subject": "v",
+        "port": "value",
+        "value": true
+      },
+      {
+        "at": 5,
+        "subject": "v",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 5,
+        "subject": "v",
+        "port": "value",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "name",
+        "value": "x",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": 5,
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "name",
+        "value": "x",
+        "subject": "v"
+      },
+      {
+        "t": "set",
+        "port": "name",
+        "value": "y",
+        "subject": "w"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "name",
+        "value": "x",
+        "subject": "v"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "v"
+      },
+      {
+        "t": "value",
+        "port": "name",
+        "value": "y",
+        "subject": "w"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "w"
+      },
+      {
+        "t": "in",
+        "port": "do",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "do",
+        "value": "done",
+        "subject": "set"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": 5,
+        "subject": "v"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "v"
+      },
+      {
+        "t": "set",
+        "port": "setWith",
+        "value": "object",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": "m1",
+        "subject": "set"
+      },
+      {
+        "t": "in",
+        "port": "do",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "do",
+        "value": "done",
+        "subject": "set"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": {
+          "a": 1,
+          "id": "m1"
+        },
+        "subject": "v"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "v"
+      },
+      {
+        "t": "set",
+        "port": "setWith",
+        "value": "boolean",
+        "subject": "set"
+      },
+      {
+        "t": "set",
+        "port": "value",
+        "value": "yes",
+        "subject": "set"
+      },
+      {
+        "t": "in",
+        "port": "do",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "do",
+        "value": "done",
+        "subject": "set"
+      },
+      {
+        "t": "value",
+        "port": "value",
+        "value": true,
+        "subject": "v"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "v"
+      },
+      {
+        "t": "in",
+        "port": "do",
+        "subject": "set"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "do",
+        "value": "done",
+        "subject": "set"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "v"
+      }
+    ]
+  }
+]

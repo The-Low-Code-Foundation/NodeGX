@@ -1,0 +1,99 @@
+[
+  {
+    "name": "Do with a Name: the write lands, done",
+    "because": "setvariablenode.ts :205-210",
+    "params": {
+      "name": "x",
+      "value": 5
+    },
+    "steps": [
+      {
+        "signal": "do"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "No Name: failure no-name, the reason on Error",
+    "because": ":186-193",
+    "params": {
+      "value": 5
+    },
+    "steps": [
+      {
+        "signal": "do"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Two Do in one frame: one write, two done",
+    "because": ":137-145 a token per press, :159-161 one store",
+    "params": {
+      "name": "x",
+      "value": 1
+    },
+    "steps": [
+      {
+        "signal": "do"
+      },
+      {
+        "signal": "do"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Set as Empty string needs no Value",
+    "because": ":195",
+    "params": {
+      "name": "x",
+      "setWith": "emptyString"
+    },
+    "steps": [
+      {
+        "signal": "do"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Set as Object with a string names a record; Set as Array an array; Boolean coerces",
+    "because": ":199-202 (only the Variable node reading x shows it — the graph scenarios)",
+    "params": {
+      "name": "x",
+      "setWith": "object",
+      "value": "m1"
+    },
+    "steps": [
+      {
+        "signal": "do"
+      },
+      "settle",
+      {
+        "set": "setWith",
+        "value": "array"
+      },
+      {
+        "set": "value",
+        "value": "abc"
+      },
+      {
+        "signal": "do"
+      },
+      "settle",
+      {
+        "set": "setWith",
+        "value": "boolean"
+      },
+      {
+        "set": "value",
+        "value": "yes"
+      },
+      {
+        "signal": "do"
+      },
+      "settle"
+    ]
+  }
+]

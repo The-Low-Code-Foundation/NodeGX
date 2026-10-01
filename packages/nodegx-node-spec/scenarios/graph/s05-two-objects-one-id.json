@@ -1,0 +1,209 @@
+[
+  {
+    "name": "two Object nodes naming one id are one record: a property written through one is read by the other, and both hear the change; a third naming another id hears nothing",
+    "clauses": [
+      "S1",
+      "S2"
+    ],
+    "because": "NSP-012 §3 — Model.get(id) is one table (model.ts :218-241); modelnode2.ts :327-329 the write, :107-116 the listener on every holder",
+    "nodes": {
+      "o1": {
+        "type": "Model2",
+        "params": {
+          "modelId": "m1",
+          "properties": "a"
+        }
+      },
+      "o2": {
+        "type": "Model2",
+        "params": {
+          "modelId": "m1",
+          "properties": "a"
+        }
+      },
+      "o3": {
+        "type": "Model2",
+        "params": {
+          "modelId": "m2",
+          "properties": "a"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "o1",
+        "set": "prop-a",
+        "value": "hello"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "o2",
+        "port": "prop-a",
+        "value": "hello"
+      },
+      {
+        "at": 2,
+        "subject": "o2",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "o1",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "o1",
+        "port": "prop-a",
+        "value": "hello"
+      },
+      {
+        "at": 2,
+        "subject": "o3",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "o3",
+        "port": "prop-a",
+        "absent": true
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "m1",
+        "subject": "o1"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "a",
+        "subject": "o1"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "m1",
+        "subject": "o2"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "a",
+        "subject": "o2"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "m2",
+        "subject": "o3"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "a",
+        "subject": "o3"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "m1",
+        "subject": "o1"
+      },
+      {
+        "t": "value",
+        "port": "object",
+        "value": {
+          "id": "m1"
+        },
+        "subject": "o1"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "o1"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "m1",
+        "subject": "o2"
+      },
+      {
+        "t": "value",
+        "port": "object",
+        "value": {
+          "id": "m1"
+        },
+        "subject": "o2"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "o2"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "m2",
+        "subject": "o3"
+      },
+      {
+        "t": "value",
+        "port": "object",
+        "value": {
+          "id": "m2"
+        },
+        "subject": "o3"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "o3"
+      },
+      {
+        "t": "set",
+        "port": "prop-a",
+        "value": "hello",
+        "subject": "o1"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "prop-a",
+        "value": "hello",
+        "subject": "o1"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "o1"
+      },
+      {
+        "t": "value",
+        "port": "prop-a",
+        "value": "hello",
+        "subject": "o2"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "o2"
+      }
+    ]
+  }
+]

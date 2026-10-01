@@ -1,0 +1,197 @@
+[
+  {
+    "name": "Set Object Properties writes onto the record an Object node bound to the same id watches: the property re-sent, its Changed and Changed pulse; an Object bound to another id hears nothing (row C11: `<property> Changed` never fires on the runtime — the claim on changed-a is the finding)",
+    "clauses": [
+      "S1",
+      "S2"
+    ],
+    "because": "modelcrudbase.ts :566, model.ts :379-383 notify; modelnode2.ts :107-116 the listener. The lone node's ports never show the write (equivalent-mutants.ts)",
+    "nodes": {
+      "s": {
+        "type": "SetModelProperties",
+        "params": {
+          "modelId": "m1",
+          "properties": "a",
+          "prop-a": 7
+        }
+      },
+      "o": {
+        "type": "Model2",
+        "params": {
+          "modelId": "m1",
+          "properties": "a"
+        }
+      },
+      "p": {
+        "type": "Model2",
+        "params": {
+          "modelId": "m2",
+          "properties": "a"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "s",
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "o",
+        "port": "prop-a",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "o",
+        "port": "prop-a",
+        "value": 7
+      },
+      {
+        "at": 2,
+        "subject": "o",
+        "signal": "changed-a",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "o",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "p",
+        "signal": "changed",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "p",
+        "port": "prop-a",
+        "absent": true
+      }
+    ],
+    "row": "NSP-012 §6 C11",
+    "expect": [
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "m1",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "a",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "prop-a",
+        "value": 7,
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "m1",
+        "subject": "o"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "a",
+        "subject": "o"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "m2",
+        "subject": "p"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "a",
+        "subject": "p"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "m1",
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "m1",
+        "subject": "o"
+      },
+      {
+        "t": "value",
+        "port": "object",
+        "value": {
+          "id": "m1"
+        },
+        "subject": "o"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "o"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "m2",
+        "subject": "p"
+      },
+      {
+        "t": "value",
+        "port": "object",
+        "value": {
+          "id": "m2"
+        },
+        "subject": "p"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "p"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "s"
+      },
+      {
+        "t": "value",
+        "port": "prop-a",
+        "value": 7,
+        "subject": "o"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "o"
+      }
+    ]
+  }
+]

@@ -1,0 +1,68 @@
+[
+  {
+    "name": "Do writes the held properties onto a fresh record and publishes its id: done",
+    "because": "newmodelnode.ts :57-68; modelcrudbase.ts :454-525",
+    "params": {
+      "properties": "a,b",
+      "prop-a": 1,
+      "prop-b": "x"
+    },
+    "steps": [
+      {
+        "signal": "new"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A property not listed in Properties is not written; Id moves on a second Do",
+    "because": "modelcrudbase.ts :461-465; :59 a fresh record each time",
+    "params": {
+      "properties": "a",
+      "prop-a": 1,
+      "prop-zz": 2
+    },
+    "steps": [
+      {
+        "signal": "new"
+      },
+      "settle",
+      {
+        "signal": "new"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Two Do in one frame: one record, an outcome per press (row C9: the runtime reports one)",
+    "because": ":49-55 the guard before the token",
+    "row": "NSP-012 §6 C9",
+    "params": {},
+    "steps": [
+      {
+        "signal": "new"
+      },
+      {
+        "signal": "new"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "An Object-typed property with a string names a record; an Array-typed one with a literal reads it",
+    "because": "modelcrudbase.ts :483-518",
+    "params": {
+      "properties": "o,l",
+      "type-o": "object",
+      "prop-o": "m1",
+      "type-l": "array",
+      "prop-l": "[1,2]"
+    },
+    "steps": [
+      {
+        "signal": "new"
+      },
+      "settle"
+    ]
+  }
+]

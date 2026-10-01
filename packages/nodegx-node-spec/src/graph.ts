@@ -36,7 +36,13 @@ import type { TraceEvent } from './trace';
 
 /** The contract's clauses. `tests/graph.test.ts` requires at least one scenario tagged with each. */
 export const CLAUSES = ['C1', 'C2', 'C3', 'C4', 'C5', 'C6', 'C7', 'C8', 'C9', 'C10', 'C11'] as const;
-export type Clause = (typeof CLAUSES)[number];
+/**
+ * NSP-012's two shared-state sentences, graded the same way: S1 — two nodes naming one id see one
+ * datum; S2 — two nodes naming different ids do not (the control beside the firing arm).
+ */
+export const SHARED = ['S1', 'S2'] as const;
+export type Clause = (typeof CLAUSES)[number] | (typeof SHARED)[number];
+export const TAGS: readonly Clause[] = [...CLAUSES, ...SHARED];
 
 export interface GraphNodeDecl {
   /** The catalog type name, as `mount` takes it. */
@@ -108,6 +114,8 @@ export interface GraphScenario {
    * known — and red the day it passes. `expect` still records what the runtime does.
    */
   row?: string;
+  /** NSP-012: the world the play starts from (world.ts `WorldScript` — a seeded registry, a seed); a graph of registry nodes gets one even when absent. */
+  world?: import('./world').WorldScript;
   /** The file the scenario was loaded from; filled by `loadGraphScenarios`. */
   file?: string;
 }

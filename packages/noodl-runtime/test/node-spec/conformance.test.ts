@@ -13,7 +13,7 @@ import * as ts from 'typescript';
 
 import type { NodeModule } from '@noodl/types';
 
-import { Counter, specs, runConformance, formatReport } from '../../../nodegx-node-spec/src';
+import { Counter, EQUIVALENT_MUTANTS, specs, runConformance, formatReport } from '../../../nodegx-node-spec/src';
 import type { Divergence, KnownRow, Report, TraceEvent } from '../../../nodegx-node-spec/src';
 import { runtimeTarget, withViewerNodes, type RuntimeTarget } from '../helpers/node-spec-target';
 
@@ -77,7 +77,56 @@ const unitMerge = (port: string) => (d: Divergence) => {
   return later >= 0 && d.difference.index > later;
 };
 
+/**
+ * NSP-012 §6 C9 — Create New Array, Create New Object and Set Object Properties coalesce two `Do`
+ * presses in one frame into ONE outcome (the `hasScheduled…` guard sits before `beginOutcome`),
+ * where the spec, the contract and their siblings (Array's Fetch, Set Variable, Array Filter)
+ * report one per press. Narrow: a frame with two or more `in` on the port, and the difference at
+ * or after that frame's settle.
+ */
+const coalescedPress = (port: string) => (d: Divergence) => {
+  let presses = 0;
+  for (let i = 0; i < d.reference.length; i++) {
+    const e = d.reference[i];
+    if (e.t === 'in' && e.port === port) presses++;
+    else if (e.t === 'settle') {
+      if (presses >= 2 && d.difference.index >= i) return true;
+      presses = 0;
+    }
+  }
+  return false;
+};
+
+/**
+ * NSP-012 §6 C10 — Array Filter and Array Map bind `Items` with `collection.on('change', …)`
+ * (:343, :233): a value that is neither an array nor null/undefined — a number, a boolean, a plain
+ * object — has no `on` and the setter THROWS. Narrow: the throw's own message, at the set.
+ */
+const nonArrayOnItems = (d: Divergence) => {
+  if (d.difference.threw === undefined || !/\.on is not a function/.test(d.difference.threw)) return false;
+  const bad = d.reference.findIndex((e) => isSet(e, 'items', (v, present) => present && v !== null && typeof v !== 'string' && !Array.isArray(v) && typeof v === 'object' ? true : present && (typeof v === 'number' || typeof v === 'boolean')));
+  return bad >= 0 && d.difference.index <= bad + 1;
+};
+
+/**
+ * NSP-012 §6 C11 — the Object node's `<property> Changed` outputs are declared to the editor
+ * (modelnode2.ts :517-525) and never registered: `registerOutputIfNeeded` handles `prop-` only
+ * (:451-460), a wire from `<p> Changed` throws inside the connection and is dropped
+ * (nodescope.ts :149-153), and the pulse at :113 is guarded by `hasOutput`. Narrow: the first
+ * differing event in the reference is a `changed-…` signal.
+ */
+const deadPropertyChanged = (d: Divergence) => {
+  const e = d.reference[d.difference.index];
+  return e !== undefined && e.t === 'signal' && /^changed-/.test(e.port);
+};
+
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
+  CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
+  NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
+  SetModelProperties: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('store') }],
+  Model2: [{ row: 'NSP-012 §6 C11 — `<property> Changed` never fires: nothing registers the output', matches: deadPropertyChanged }],
+  'Filter Collection': [{ row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems }],
+  'Map Collection': [{ row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems }],
   'String Format': [
     {
       row: 'NSP-004 §6 C3 — a non-string Format is stored unconverted, `.match` throws in the after-inputs callback, the scheduler logs it, and `formatScheduled` is never cleared: the node never formats again',
@@ -121,7 +170,7 @@ describe('NSP-004 / NSP-011 — every registered spec on the runtime, 200 sequen
   const pilot = Object.values(specs).filter((s) => !only || only.includes(s.type));
   beforeAll(async () => {
     for (const spec of pilot) {
-      const report = await runConformance(spec, batchTarget(), { sequences: 200, mutants: true, known: KNOWN_ROWS[spec.type] });
+      const report = await runConformance(spec, batchTarget(), { sequences: 200, mutants: true, known: KNOWN_ROWS[spec.type], equivalent: EQUIVALENT_MUTANTS[spec.type] });
       // eslint-disable-next-line no-console
       console.log(formatReport(report));
       reports.set(spec.type, report);
@@ -181,7 +230,8 @@ const deep = Number(process.env.NSP_DEEP || 0);
         shrink: true,
         mutants: true,
         replayDir: process.env.NSP_REPLAY_DIR,
-        known: KNOWN_ROWS[spec.type]
+        known: KNOWN_ROWS[spec.type],
+        equivalent: EQUIVALENT_MUTANTS[spec.type]
       });
       // eslint-disable-next-line no-console
       console.log(formatReport(report));

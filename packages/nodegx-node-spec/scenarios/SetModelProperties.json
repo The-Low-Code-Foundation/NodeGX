@@ -1,0 +1,121 @@
+[
+  {
+    "name": "Do with no Id: failure no-object, the reason on Error",
+    "because": "modelcrudbase.ts :556-563, :79-105",
+    "params": {},
+    "steps": [
+      {
+        "signal": "store"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Id binds; Do writes the properties onto the record: done",
+    "because": "modelcrudbase.ts :289-301, :566-569",
+    "params": {
+      "properties": "a",
+      "modelId": "m1",
+      "prop-a": 1
+    },
+    "steps": [
+      {
+        "signal": "store"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Two Do in one frame: one write, an outcome per press (row C9: the runtime reports one)",
+    "because": "modelcrudbase.ts :538-543",
+    "row": "NSP-012 §6 C9",
+    "params": {
+      "properties": "a",
+      "modelId": "m1",
+      "prop-a": 1
+    },
+    "steps": [
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Id Source = From repeater outside a Repeater: Do fails with the repeater sentence",
+    "because": "modelcrudbase.ts :262-266, :80-82",
+    "params": {
+      "idSource": "foreach"
+    },
+    "steps": [
+      {
+        "signal": "store"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "An empty Id unbinds: Do then fails",
+    "because": "modelcrudbase.ts :290-293",
+    "params": {
+      "modelId": "m1"
+    },
+    "steps": [
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Repeater Component arriving in From repeater mode re-resolves: a node bound by Id is unbound, and Do then fails",
+    "because": "modelcrudbase.ts :215-220 — re-resolve only in the mode the input belongs to; :262-266",
+    "params": {
+      "idSource": "foreach"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "m1"
+      },
+      {
+        "set": "repeaterComponent",
+        "value": "Row"
+      },
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Repeater Component in explicit mode re-resolves nothing: the Id binding stays and Do succeeds",
+    "because": "modelcrudbase.ts :216-219 — `if (idSource === 'foreach')`",
+    "params": {
+      "modelId": "m1",
+      "properties": "a",
+      "prop-a": 1
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "repeaterComponent",
+        "value": "Row"
+      },
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ]
+  }
+]

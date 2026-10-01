@@ -59,6 +59,17 @@
  *     User, Query Records). A lone node gets the scope a browser app's root component has: no
  *     model scope (so the global `Model`), and a component owner named after the handle. What a
  *     scope MEANS for behaviour is NSP-008's (the graph); this only lets the node construct.
+ *   - **the registry** (NSP-012): the runtime's records and arrays are two PROCESS-WIDE tables
+ *     (`Model._models`, `Collection._collections`), so `install(world)` empties both for the play
+ *     and seeds them from the world's script — the one registry per play that registry.ts
+ *     promises; the anonymous (weak) tiers cannot be emptied from here and need not be: nothing
+ *     a play mints is named by a later one. A derived OUTPUT the spec declares for the params
+ *     (`derived.outputs`) is registered at mount (`registerOutputIfNeeded`), as a graph wiring it
+ *     would make the runtime do — a lone node here has every port its params derive. The node is
+ *     handed a graph `model` holding its mount params, the one thing two Object nodes read from
+ *     the graph rather than from an input (modelcrudbase.ts :461), and a component owner with an
+ *     empty root list so the "From repeater" walk (foreachitem.ts) misses and says so, as it does
+ *     for a node outside any Repeater, instead of throwing inside a scheduled callback.
  *   - **graphs** (NSP-008): `mountGraph` mounts every node as `mount` does and then makes every
  *     wire with `connectInput` — the runtime's own connection, so the wire's seed (C11), the
  *     per-port input queues (C2, C7), the first-update consolidation (C8) and the breakers (C9)
@@ -73,11 +84,36 @@ import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, R
 
 import type { RuntimeNode } from '../../src/internal';
 import type { GraphNodeDecl, GraphTarget, Handle, RequestRecord, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
-import { parseEndpoint } from '../../../nodegx-node-spec/src';
+import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
 import { canonicalise, installWorld, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
+import Model = require('../../src/model');
+import Collection = require('../../src/collection');
+
+/**
+ * NSP-012 — one registry per play: the runtime's two named tables emptied, then seeded from the
+ * script exactly as registry.ts seeds its own (named records with their data; named arrays with
+ * their members by id). `Model.get` / `Collection.get` are the runtime's, so what a node then
+ * reaches is what the app would reach.
+ */
+function resetRegistry(world: World): void {
+  const models = Model._models as Record<string, unknown>;
+  for (const key of Object.keys(models)) delete models[key];
+  const collections = Collection._collections as Record<string, unknown>;
+  for (const key of Object.keys(collections)) delete collections[key];
+  const script = world.script.registry;
+  if (!script) return;
+  for (const [id, data] of Object.entries(script.models ?? {})) {
+    const m = Model.get(id);
+    for (const key of Object.keys(data)) m.set(key, data[key]);
+  }
+  for (const [name, members] of Object.entries(script.collections ?? {})) {
+    const c = Collection.get(name);
+    for (const id of members) c.add(Model.get(id));
+  }
+}
 
 /**
  * The picker nodes the VIEWER provides (census `providedBy: noodl-viewer-react`) that this phase
@@ -337,7 +373,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       const logs: LogLine[] = [];
       const scope = {
         modelScope: undefined,
-        componentOwner: { name: `node-spec/${id}`, getInstanceId: () => id },
+        // `getRoots` and no `parentNodeScope`: the component walk (componentwalk.ts) stops here
+        componentOwner: { name: `node-spec/${id}`, getInstanceId: () => id, getRoots: () => [] as never[] },
         context,
         runContext: {
           log: (entry: { level: string; message: string; data?: unknown }) => {
@@ -347,6 +384,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       };
       const node = context.nodeRegister.createNode(type, id, scope as never) as unknown as RuntimeNode;
       if (!node.nodeScope) node.nodeScope = scope as never;
+      // the graph's parameters, for the two nodes that read them off `this.model` (NSP-012)
+      (node as unknown as { model?: unknown }).model = { type, parameters: { ...params } };
+      // the derived outputs the spec declares for these params — registered as a wire would make the runtime do
+      const spec = specFor(type);
+      if (spec?.derived?.outputs) {
+        for (const name of Object.keys(spec.derived.outputs(params))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
+      }
       const h: RuntimeHandle = { id, type, node, metadata: context.nodeRegister.getNodeMetadata(type), errors: [], logs };
       const s: State = { h, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
       states.set(id, s);
@@ -398,6 +442,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       world = w;
       w.network.onRequest(recordRequest);
       const installed = installWorld(w);
+      resetRegistry(w);
       return () => {
         installed.restore();
         world = undefined;

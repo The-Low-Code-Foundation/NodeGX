@@ -1,0 +1,237 @@
+[
+  {
+    "name": "an Array Filter fed an Array node's array re-runs when another node inserts into that array: Count moves and Filtered pulses",
+    "clauses": [
+      "S1"
+    ],
+    "because": "filtercollectionnode.ts :162-166 the change listener, :453-537 the run — the path a lone Filter can never take",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "cart": [
+            "m1"
+          ]
+        }
+      }
+    },
+    "nodes": {
+      "a": {
+        "type": "Collection2",
+        "params": {
+          "collectionId": "cart"
+        }
+      },
+      "f": {
+        "type": "Filter Collection",
+        "params": {
+          "filterFilter": "a",
+          "filterFilterValue-a": 2
+        }
+      },
+      "ins": {
+        "type": "CollectionInsert",
+        "params": {
+          "collectionId": "cart",
+          "modifyId": "m2"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "a.items",
+        "to": "f.items"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "ins",
+        "signal": "add"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "f",
+        "port": "count",
+        "value": 0
+      },
+      {
+        "at": 1,
+        "subject": "f",
+        "signal": "modified",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "f",
+        "port": "count",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "f",
+        "port": "firstItemId",
+        "value": "m2"
+      },
+      {
+        "at": 2,
+        "subject": "f",
+        "signal": "modified",
+        "count": 1
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "collectionId",
+        "value": "cart",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "filterFilter",
+        "value": "a",
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "filterFilterValue-a",
+        "value": 2,
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "collectionId",
+        "value": "cart",
+        "subject": "ins"
+      },
+      {
+        "t": "set",
+        "port": "modifyId",
+        "value": "m2",
+        "subject": "ins"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 1,
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "m1",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "cart",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "cart",
+          "items": [
+            {
+              "a": 1,
+              "id": "m1"
+            }
+          ]
+        },
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 0,
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "15iCnKz2Hk",
+          "items": []
+        },
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "modified",
+        "subject": "f"
+      },
+      {
+        "t": "in",
+        "port": "add",
+        "subject": "ins"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 2,
+        "subject": "a"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "a"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 1,
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "m2",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "Qr3xpUEPJ3",
+          "items": [
+            {
+              "a": 2,
+              "id": "m2"
+            }
+          ]
+        },
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "modified",
+        "subject": "f"
+      },
+      {
+        "t": "outcome",
+        "port": "add",
+        "value": "done",
+        "subject": "ins"
+      }
+    ]
+  }
+]

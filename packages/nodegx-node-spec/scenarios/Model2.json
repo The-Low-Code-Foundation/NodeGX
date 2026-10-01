@@ -1,0 +1,289 @@
+[
+  {
+    "name": "Id binds a seeded record: Id, Object (the record with its id), the property outputs it holds, Fetched",
+    "because": "modelnode2.ts :268 setModelID → :400-402, :404-423",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "properties": "a,b",
+      "modelId": "m1"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "A property value written: stored at the frame end; the record notifies: the property re-sent, its own Changed and Changed (row C11: `<property> Changed` never fires on the runtime — nothing registers the output)",
+    "because": ":479-490, :327-329, :107-116",
+    "params": {
+      "properties": "a",
+      "modelId": "m1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "prop-a",
+        "value": 5
+      },
+      "settle"
+    ],
+    "row": "NSP-012 §6 C11"
+  },
+  {
+    "name": "A value arriving before the object is held and written once one is (row C11: `<property> Changed` never fires on the runtime)",
+    "because": ":425-441",
+    "params": {
+      "properties": "a"
+    },
+    "steps": [
+      {
+        "set": "prop-a",
+        "value": 7
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "m1"
+      },
+      "settle"
+    ],
+    "row": "NSP-012 §6 C11"
+  },
+  {
+    "name": "Fetch with an empty Id fails with object/fetch-failed; with an Id, Fetched and done per press",
+    "because": ":361-372",
+    "params": {
+      "properties": "a"
+    },
+    "steps": [
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "m1"
+      },
+      {
+        "signal": "fetch"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A plain object on Id becomes a record named by its id field, its other fields written",
+    "because": ":259-260 Model.create",
+    "params": {
+      "properties": "a"
+    },
+    "steps": [
+      {
+        "set": "modelId",
+        "value": {
+          "id": "m9",
+          "a": 3
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "null on Id unbinds: Object is null, Id the null",
+    "because": ":394-398 — NDA-012",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "modelId": "m1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Get Id from = From repeater outside a Repeater binds nothing",
+    "because": ":302-306; foreachitem.ts :124-136",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "modelId": "m1",
+      "idSource": "foreach"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "Object properties unticked: a store on this node notifies nothing",
+    "because": ":109",
+    "params": {
+      "properties": "a",
+      "modelId": "m1",
+      "runOnChange-object": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "prop-a",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "The same value on a property again is not stored (nothing changes, nothing notifies)",
+    "because": ":485 valueChanged",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "properties": "a",
+      "modelId": "m1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "prop-a",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Repeater Component arriving in From repeater mode re-resolves: a node bound by Id is unbound",
+    "because": "modelnode2.ts :233-238, :302-306",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1
+          }
+        }
+      }
+    },
+    "params": {
+      "idSource": "foreach"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "m1"
+      },
+      "settle",
+      {
+        "set": "repeaterComponent",
+        "value": "Row"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A property written and Fetch pressed in one frame, then another frame: the store's pulses, Fetched, done — and nothing re-reported (row C11: `<property> Changed` never fires on the runtime)",
+    "because": ":312-331 then :356-373 in scheduling order; a frame end that forgot to clear its tokens would report again at the next",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1
+          }
+        }
+      }
+    },
+    "params": {
+      "properties": "a",
+      "modelId": "m1"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "prop-a",
+        "value": 2
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      "settle"
+    ],
+    "row": "NSP-012 §6 C11"
+  }
+]

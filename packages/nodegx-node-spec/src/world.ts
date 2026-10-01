@@ -43,10 +43,17 @@
  *     `content-type: text/plain;charset=UTF-8` and a JSON body (any scripted body that is not a
  *     string) gets `content-type: application/json`, unless the script named one.
  *
- * Backend (records, users, files, cloud functions) is the fourth seam NSP-007 names; it arrives
+ *   REGISTRY. (NSP-012, registry.ts) The shared records and arrays the data nodes read and
+ *           write — one registry per play, seeded from the script and nothing else; anonymous
+ *           entries draw their ids from the random stream above. The rule in full is the header
+ *           of registry.ts; a target that has its own tables (the runtime's process-wide
+ *           `Model` / `Collection`) empties them for the play and seeds them from the same script.
+ *
+ * Backend (records, users, files, cloud functions) is the fifth seam NSP-007 names; it arrives
  * with NSP-014, reusing the request seam at the HTTP level (README §8, NSP-007 §2).
  */
 
+import { Registry, type RegistryScript } from './registry';
 import { mulberry32, type Rng } from './runner/random';
 
 // ------------------------------------------------------------------------------------------------
@@ -57,6 +64,8 @@ export interface WorldScript {
   seed?: number;
   /** The network's scripted answers, first match wins. */
   network?: readonly NetworkRule[];
+  /** NSP-012: the records and arrays the play starts with (registry.ts). Absent: an empty registry. */
+  registry?: RegistryScript;
 }
 
 export interface NetworkRule {
@@ -312,11 +321,13 @@ export class World {
   readonly clock = new Clock();
   readonly random: Random;
   readonly network: Network;
+  readonly registry: Registry;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
     this.random = new Random(script.seed ?? 1);
     this.network = new Network(this.clock, script.network ?? []);
+    this.registry = new Registry(this.random, script.registry);
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */

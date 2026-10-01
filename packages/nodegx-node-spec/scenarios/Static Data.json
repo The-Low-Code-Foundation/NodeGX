@@ -1,0 +1,107 @@
+[
+  {
+    "name": "CSV: the first row names the properties, every cell is a string, Count follows",
+    "because": "staticdata.ts :199-206; csv.ts :189-201",
+    "params": {
+      "csv": "name,age\nAda,36\nLin,9"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "A trailing newline yields a trailing row; a short row leaves its missing columns undefined",
+    "because": "csv.ts :21-23, :185-200",
+    "params": {
+      "csv": "a,b\n1\n"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "JSON: numbers stay numbers; a new array each parse (Items replaced, a new name)",
+    "because": ":207-237, :233 Collection.get() per parse",
+    "params": {
+      "type": "json",
+      "json": "[{\"a\":1}]"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "json",
+        "value": "[{\"a\":2},{\"a\":3}]"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "JSON that will not parse: Error, Failure once; the same message again is not re-announced; a different one is; Items keeps the last parse",
+    "because": ":176-186, :220-229",
+    "params": {
+      "type": "json",
+      "json": "[{\"a\":1}]"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "json",
+        "value": "nope"
+      },
+      "settle",
+      {
+        "set": "json",
+        "value": "nope"
+      },
+      "settle",
+      {
+        "set": "json",
+        "value": "["
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Type json reads nothing from CSV",
+    "because": ":199, :207",
+    "params": {
+      "type": "json",
+      "csv": "a\n1",
+      "json": "[]"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "Quoted cells: an embedded comma, a doubled quote, an empty quoted cell",
+    "because": "csv.ts :96-107, :129-132",
+    "params": {
+      "csv": "q,r\n\"a,b\",\"say \"\"hi\"\"\"\n\"\",y"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "The same failure again is silent; Type then changing to CSV alone parses nothing (a stuck run flag would parse)",
+    "because": ":181 the dedup; :99-101 Type schedules nothing",
+    "params": {
+      "type": "json",
+      "json": "nope"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "json",
+        "value": "nope"
+      },
+      "settle",
+      {
+        "set": "type",
+        "value": "csv"
+      },
+      "settle"
+    ]
+  }
+]

@@ -1,0 +1,73 @@
+[
+  {
+    "name": "Do with nothing on Items: a fresh empty array, its id published, done",
+    "because": "collectionnode-new.ts :77-88 — Collection.get() with no name (a guid draw under the world's seed), setCollection flags Id, then done",
+    "params": {},
+    "steps": [
+      {
+        "signal": "new"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Items copied into the new array; a second Do makes a second array with a different id",
+    "because": ":81 copies sourceCollection when one was ever sent; :80 mints anew every time, so Id moves",
+    "params": {
+      "items": [
+        {
+          "a": 1
+        },
+        {
+          "a": 2
+        }
+      ]
+    },
+    "steps": [
+      {
+        "signal": "new"
+      },
+      "settle",
+      {
+        "signal": "new"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Two Do pulses in one frame: one array, and an outcome per press (row C9: the runtime reports one)",
+    "because": ":73-75 — the hasScheduledNew guard sits before beginOutcome; ERG-001 §4 and the Array node's Fetch report one per press",
+    "row": "NSP-012 §6 C9",
+    "params": {},
+    "steps": [
+      {
+        "signal": "new"
+      },
+      {
+        "signal": "new"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A string on Items is read as a literal; one that will not read is an empty array",
+    "because": "node.ts setInputValue — the array typecast evaluates a string on a declared array port, [] on failure",
+    "params": {
+      "items": "[{\"a\":1}]"
+    },
+    "steps": [
+      {
+        "signal": "new"
+      },
+      "settle",
+      {
+        "set": "items",
+        "value": "nope"
+      },
+      {
+        "signal": "new"
+      },
+      "settle"
+    ]
+  }
+]
