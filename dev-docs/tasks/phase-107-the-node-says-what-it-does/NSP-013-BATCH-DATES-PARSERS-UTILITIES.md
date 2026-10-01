@@ -1,7 +1,7 @@
 # NSP-013 — Batch: dates, time, randomness, parsers, animation
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world) and R4 = continue.
-**Status: 🟡 s13 (2026-10-01) — 21 of 24 conform on the runtime (UUID and Delay are NSP-007's; s11–s13 built the other 19); the last 3 named in §6.4.**
+**Status: 🟡 s13 (2026-10-01) — 22 of 24 conform on the runtime (UUID and Delay are NSP-007's; s11–s13 built the other 20; On App Error by graph scenarios); the last 2 named in §6.4.**
 
 ## 1. The person sentence
 
@@ -260,6 +260,26 @@ s13 specs: no survivors. → **65 of 147**.
    `undefined` throw too — what an emptied or disconnected wire carries. The same lookup (`EaseCurves[value]`)
    is in Transition, Animation and Number Blend (easecurves.ts :28-31) — NOT measured here; NSP-016's.
 
+### 6.1e s13, 2026-10-01 — On App Error: graded by the nodes that raise, not by a seam
+
+The census calls it T2 "world-fed"; its input is the errors OTHER nodes raise on `context.errorBus`. Rather than
+give the world an error-stream seam with a raise step (a format change, and a stand-in for a raiser), its
+scenarios mount REAL raisers beside it — Parse XML and Parse CSV, whose failures raise `parse-xml/parse-failed`
+and `parse-csv/parse-failed` — as the T4 nodes were graded (NSP-012 s10): `scenarios/graph/t07-on-app-error.json`,
+four `N` scenarios, 35 claims written from its port sentences and docblock BEFORE recording (no filter catches
+all, values set and Error pulsed once, a second instance fires too; Filter is a code prefix — `parse-csv`,
+the full code, `parse`; null clears it, a later error replaces the values; declared after the raiser it still
+hears the first frame's error). **All four bear their claims out on the runtime** → 66 of 147 (T2 8/11). No row.
+
+1. **The runtime target mounted graph nodes as `<type>#<n>`**, so "Node Id: the graph id of the node that
+   raised the error" could not be what a scenario names — the first record failed exactly the four Node Id
+   claims, read as the harness before as a finding. `mountGraph` now mounts each node under its scenario id
+   (what a loaded app does with a project id; a still-mounted id throws); the 42 earlier graph recordings did
+   not move.
+2. The export's graph harness emits from reducer specs; a graph-graded node has none, so a scenario with one is
+   `outside` with a reason naming the HARNESS's limit (`node-spec-graph.test.ts` admits that reason, commented).
+   `tests/graph.test.ts` gates it named-by-an-`N`-scenario (`GRAPH_GRADED`).
+
 ### 6.2 Rows for a ruling (R3 (a): the runtime wins until ruled; each counted every run)
 
 | row | where | what the wire shows | plain words | proposed |
@@ -295,8 +315,8 @@ s13 specs: no survivors. → **65 of 147**.
 
 ### 6.4 Not done, named
 
-Three are left (the four agent parsers are s12's, §6.1b; Parse XML, Parse Feed and Animate To Value s13's, §6.1c–d; UUID and Delay NSP-007's): **States** (1191 lines, dynamic ports — a session of its own),
-**Screen Resolution** and **On App Error** (each needs a seam the world does not have: a viewport with a resize
-step; an error stream with a raise step). The deep run (`NSP_DEEP=10000 NSP_ONLY=…`, a quiet box). AC2. The
+Two are left (the four agent parsers are s12's, §6.1b; Parse XML, Parse Feed, Animate To Value and On App Error
+s13's, §6.1c–e; UUID and Delay NSP-007's): **States** (1191 lines, dynamic ports — a session of its own) and
+**Screen Resolution** (needs a seam the world does not have: a viewport, and resizes on the world's clock). The deep run (`NSP_DEEP=10000 NSP_ONLY=…`, a quiet box). AC2. The
 third stranger round (due six times over: graphs s7, the world s8, the registry s9, the tree s10, the zone and
 digest s11, the clock's between-timers rule s12).

@@ -66,7 +66,8 @@ describe('NSP-008 on the export', () => {
     expect(outside.length).toBeGreaterThan(0);
     // the fourth reason is s10's (NSP-012): a scenario that declares a world is outside the export's reach — this line
     // lagged behind it, and the gate read red from s10's commit on (found s11, 2026-10-01)
-    for (const r of outside) expect(r.reason).toMatch(/refused part of the graph|not drivable|no wire is made after mount|no world to install/);
+    // the fifth is s13's (NSP-013): a graph-graded node with no reducer spec — the harness's limit, said as such
+    for (const r of outside) expect(r.reason).toMatch(/refused part of the graph|not drivable|no wire is made after mount|no world to install|emits only nodes with a reducer spec/);
     // the C4 pulse-into-pulse graph: a consumed Count Changed defers the latch — phase 18's row, in its words
     expect(result('two pulses in one frame').reason).toMatch(/countChanged signal is consumed/);
   });

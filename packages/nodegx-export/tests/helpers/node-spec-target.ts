@@ -463,6 +463,10 @@ export function exportGraphTarget(): GraphTarget<ExportGraphHandle> {
         if ('advance' in step) return 'the export has no world clock to advance';
         if ('set' in step) return `a value input reaches the export only as a literal param — set on ${step.node}.${step.set} is not drivable`;
       }
+      // NSP-013 s13: this harness builds the emitted graph from reducer specs; a node graded by graph
+      // scenarios only (On App Error) has none — the HARNESS's limit, named as such, not the exporter's
+      const unspecced = [...new Set(Object.values(sc.nodes).map((n) => n.type).filter((t) => !specFor(t)))];
+      if (unspecced.length) return `this harness emits only nodes with a reducer spec — ${unspecced.join(', ')} has none (graded by graph scenarios on the runtime)`;
       const { refused } = emitGraph(sc.nodes, sc.wires ?? []);
       if (refused.length) return `the exporter refused part of the graph: ${refused.map((n) => n.replace('Components/Probe: ', '')).join(' | ')}`;
       return undefined;

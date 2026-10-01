@@ -403,10 +403,16 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     runContext: { log: logSink(logs) }
   });
 
-  /** Mounts one node into `scope` (a lone scope when absent), applying `params` as `set` events. */
-  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>): RuntimeHandle {
+  /**
+   * Mounts one node into `scope` (a lone scope when absent), applying `params` as `set` events.
+   * `graphId`: a graph node is mounted under its scenario id, as a loaded app mounts a node under
+   * its project id — what a node that REPORTS ids reads (On App Error's Node Id, NSP-013 s13); a
+   * lone node keeps the generated `<type>#<n>`.
+   */
+  function mountIn(type: string, params: Record<string, unknown>, scope?: InstanceType<typeof NodeScope>, graphId?: string): RuntimeHandle {
     if (!context.nodeRegister.hasNode(type)) throw new Error(`runtime: no node type "${type}" is registered`);
-    const id = `${type}#${next++}`;
+    if (graphId !== undefined && states.has(graphId)) throw new Error(`runtime: a node "${graphId}" is still mounted — a previous play leaked it`);
+    const id = graphId ?? `${type}#${next++}`;
     const logs: LogLine[] = [];
     const nodeScope = scope ?? loneScope(id, logs);
     const node = context.nodeRegister.createNode(type, id, nodeScope as never) as unknown as RuntimeNode;
@@ -620,7 +626,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       for (const id of Object.keys(nodes)) {
         const decl = nodes[id];
         const scope = tree ? (decl.in !== undefined ? tree.scopes[decl.in] : tree.root) : undefined;
-        handles[id] = mountIn(decl.type, decl.params ?? {}, scope);
+        handles[id] = mountIn(decl.type, decl.params ?? {}, scope, id);
       }
       for (const w of wires) {
         const from = parseEndpoint(w.from);

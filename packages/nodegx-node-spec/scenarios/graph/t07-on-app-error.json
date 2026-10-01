@@ -1,0 +1,1038 @@
+[
+  {
+    "name": "On App Error with no Filter reports another node's raised error: Message, Code, Node Id, Node Type set and Error pulsed once; a second On App Error fires too — no claiming, no consumption",
+    "clauses": [
+      "N"
+    ],
+    "because": "onapperror.ts — `filter`: \"leave blank to catch every error in the app\"; `error`: \"Fires when an error passes the Filter, after every value output below has been updated to describe it\"; `nodeId`: \"Graph id of the node that raised the error\"; `nodeType`: \"Kind of node that raised the error\"; the docblock: \"Multiple instances all fire. There is deliberately no claiming or consumption\". The raiser is a real Parse XML handed empty text (parsexml.ts :218 raises parse-xml/parse-failed)",
+    "nodes": {
+      "boundary": {
+        "type": "On App Error",
+        "params": {}
+      },
+      "logger": {
+        "type": "On App Error",
+        "params": {}
+      },
+      "xml": {
+        "type": "net.noodl.ParseXML",
+        "params": {}
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "xml",
+        "set": "text",
+        "value": "   "
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "boundary",
+        "signal": "error",
+        "count": 0
+      },
+      {
+        "at": 1,
+        "subject": "boundary",
+        "port": "code",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "xml",
+        "signal": "failure",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "boundary",
+        "signal": "error",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "boundary",
+        "port": "code",
+        "value": "parse-xml/parse-failed"
+      },
+      {
+        "at": 2,
+        "subject": "boundary",
+        "port": "message",
+        "value": "There was no XML to parse — the text was empty"
+      },
+      {
+        "at": 2,
+        "subject": "boundary",
+        "port": "nodeId",
+        "value": "xml"
+      },
+      {
+        "at": 2,
+        "subject": "boundary",
+        "port": "nodeType",
+        "value": "net.noodl.ParseXML"
+      },
+      {
+        "at": 2,
+        "subject": "logger",
+        "signal": "error",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "logger",
+        "port": "code",
+        "value": "parse-xml/parse-failed"
+      }
+    ],
+    "expect": [
+      {
+        "t": "settle"
+      },
+      {
+        "t": "set",
+        "port": "text",
+        "value": "   ",
+        "subject": "xml"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "code",
+        "value": "parse-xml/parse-failed",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "componentName",
+        "value": "node-spec/xml",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "errorObject",
+        "value": {
+          "code": "parse-xml/parse-failed",
+          "componentName": "node-spec/xml",
+          "detail": {
+            "code": "xml/empty"
+          },
+          "message": "There was no XML to parse — the text was empty",
+          "nodeId": "xml",
+          "nodeType": "net.noodl.ParseXML"
+        },
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "message",
+        "value": "There was no XML to parse — the text was empty",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "nodeId",
+        "value": "xml",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "nodeType",
+        "value": "net.noodl.ParseXML",
+        "subject": "boundary"
+      },
+      {
+        "t": "signal",
+        "port": "error",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "code",
+        "value": "parse-xml/parse-failed",
+        "subject": "logger"
+      },
+      {
+        "t": "value",
+        "port": "componentName",
+        "value": "node-spec/xml",
+        "subject": "logger"
+      },
+      {
+        "t": "value",
+        "port": "errorObject",
+        "value": {
+          "code": "parse-xml/parse-failed",
+          "componentName": "node-spec/xml",
+          "detail": {
+            "code": "xml/empty"
+          },
+          "message": "There was no XML to parse — the text was empty",
+          "nodeId": "xml",
+          "nodeType": "net.noodl.ParseXML"
+        },
+        "subject": "logger"
+      },
+      {
+        "t": "value",
+        "port": "message",
+        "value": "There was no XML to parse — the text was empty",
+        "subject": "logger"
+      },
+      {
+        "t": "value",
+        "port": "nodeId",
+        "value": "xml",
+        "subject": "logger"
+      },
+      {
+        "t": "value",
+        "port": "nodeType",
+        "value": "net.noodl.ParseXML",
+        "subject": "logger"
+      },
+      {
+        "t": "signal",
+        "port": "error",
+        "subject": "logger"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "There was no XML to parse — the text was empty",
+        "subject": "xml"
+      },
+      {
+        "t": "value",
+        "port": "errorCode",
+        "value": "xml/empty",
+        "subject": "xml"
+      },
+      {
+        "t": "signal",
+        "port": "failure",
+        "subject": "xml"
+      }
+    ]
+  },
+  {
+    "name": "On App Error's Filter is a Code prefix: 'parse-csv' catches Parse CSV's error and not Parse XML's; the full code catches exactly one kind; 'parse' catches both",
+    "clauses": [
+      "N"
+    ],
+    "because": "onapperror.ts — `filter`: \"Only errors whose Code starts with this text are reported\"; the setter comment: \"`'run-tasks'` catches every failure Run Tasks can report, `'run-tasks/no-completion-output'` catches exactly one\". Raisers: Parse CSV with an unpaired quote (parsecsv.ts raises parse-csv/parse-failed), Parse XML with empty text",
+    "nodes": {
+      "csvOnly": {
+        "type": "On App Error",
+        "params": {
+          "filter": "parse-csv"
+        }
+      },
+      "xmlExact": {
+        "type": "On App Error",
+        "params": {
+          "filter": "parse-xml/parse-failed"
+        }
+      },
+      "both": {
+        "type": "On App Error",
+        "params": {
+          "filter": "parse"
+        }
+      },
+      "csv": {
+        "type": "net.noodl.ParseCSV",
+        "params": {}
+      },
+      "xml": {
+        "type": "net.noodl.ParseXML",
+        "params": {}
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "csv",
+        "set": "text",
+        "value": "a,\"never closed"
+      },
+      "settle",
+      {
+        "node": "xml",
+        "set": "text",
+        "value": ""
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "csv",
+        "signal": "failure",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "csvOnly",
+        "signal": "error",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "csvOnly",
+        "port": "code",
+        "value": "parse-csv/parse-failed"
+      },
+      {
+        "at": 2,
+        "subject": "csvOnly",
+        "port": "nodeType",
+        "value": "net.noodl.ParseCSV"
+      },
+      {
+        "at": 2,
+        "subject": "xmlExact",
+        "signal": "error",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "xmlExact",
+        "port": "code",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "both",
+        "signal": "error",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "xml",
+        "signal": "failure",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "xmlExact",
+        "signal": "error",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "xmlExact",
+        "port": "code",
+        "value": "parse-xml/parse-failed"
+      },
+      {
+        "at": 3,
+        "subject": "csvOnly",
+        "signal": "error",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "both",
+        "signal": "error",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "both",
+        "port": "code",
+        "value": "parse-xml/parse-failed"
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "filter",
+        "value": "parse-csv",
+        "subject": "csvOnly"
+      },
+      {
+        "t": "set",
+        "port": "filter",
+        "value": "parse-xml/parse-failed",
+        "subject": "xmlExact"
+      },
+      {
+        "t": "set",
+        "port": "filter",
+        "value": "parse",
+        "subject": "both"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 0,
+        "subject": "csv"
+      },
+      {
+        "t": "set",
+        "port": "text",
+        "value": "a,\"never closed",
+        "subject": "csv"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "code",
+        "value": "parse-csv/parse-failed",
+        "subject": "csvOnly"
+      },
+      {
+        "t": "value",
+        "port": "componentName",
+        "value": "node-spec/csv",
+        "subject": "csvOnly"
+      },
+      {
+        "t": "value",
+        "port": "errorObject",
+        "value": {
+          "code": "parse-csv/parse-failed",
+          "componentName": "node-spec/csv",
+          "detail": {
+            "line": 1
+          },
+          "message": "The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as \"\".",
+          "nodeId": "csv",
+          "nodeType": "net.noodl.ParseCSV"
+        },
+        "subject": "csvOnly"
+      },
+      {
+        "t": "value",
+        "port": "message",
+        "value": "The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as \"\".",
+        "subject": "csvOnly"
+      },
+      {
+        "t": "value",
+        "port": "nodeId",
+        "value": "csv",
+        "subject": "csvOnly"
+      },
+      {
+        "t": "value",
+        "port": "nodeType",
+        "value": "net.noodl.ParseCSV",
+        "subject": "csvOnly"
+      },
+      {
+        "t": "signal",
+        "port": "error",
+        "subject": "csvOnly"
+      },
+      {
+        "t": "value",
+        "port": "code",
+        "value": "parse-csv/parse-failed",
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "componentName",
+        "value": "node-spec/csv",
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "errorObject",
+        "value": {
+          "code": "parse-csv/parse-failed",
+          "componentName": "node-spec/csv",
+          "detail": {
+            "line": 1
+          },
+          "message": "The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as \"\".",
+          "nodeId": "csv",
+          "nodeType": "net.noodl.ParseCSV"
+        },
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "message",
+        "value": "The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as \"\".",
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "nodeId",
+        "value": "csv",
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "nodeType",
+        "value": "net.noodl.ParseCSV",
+        "subject": "both"
+      },
+      {
+        "t": "signal",
+        "port": "error",
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as \"\".",
+        "subject": "csv"
+      },
+      {
+        "t": "signal",
+        "port": "failure",
+        "subject": "csv"
+      },
+      {
+        "t": "set",
+        "port": "text",
+        "value": "",
+        "subject": "xml"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "code",
+        "value": "parse-xml/parse-failed",
+        "subject": "xmlExact"
+      },
+      {
+        "t": "value",
+        "port": "componentName",
+        "value": "node-spec/xml",
+        "subject": "xmlExact"
+      },
+      {
+        "t": "value",
+        "port": "errorObject",
+        "value": {
+          "code": "parse-xml/parse-failed",
+          "componentName": "node-spec/xml",
+          "detail": {
+            "code": "xml/empty"
+          },
+          "message": "There was no XML to parse — the text was empty",
+          "nodeId": "xml",
+          "nodeType": "net.noodl.ParseXML"
+        },
+        "subject": "xmlExact"
+      },
+      {
+        "t": "value",
+        "port": "message",
+        "value": "There was no XML to parse — the text was empty",
+        "subject": "xmlExact"
+      },
+      {
+        "t": "value",
+        "port": "nodeId",
+        "value": "xml",
+        "subject": "xmlExact"
+      },
+      {
+        "t": "value",
+        "port": "nodeType",
+        "value": "net.noodl.ParseXML",
+        "subject": "xmlExact"
+      },
+      {
+        "t": "signal",
+        "port": "error",
+        "subject": "xmlExact"
+      },
+      {
+        "t": "value",
+        "port": "code",
+        "value": "parse-xml/parse-failed",
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "componentName",
+        "value": "node-spec/xml",
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "errorObject",
+        "value": {
+          "code": "parse-xml/parse-failed",
+          "componentName": "node-spec/xml",
+          "detail": {
+            "code": "xml/empty"
+          },
+          "message": "There was no XML to parse — the text was empty",
+          "nodeId": "xml",
+          "nodeType": "net.noodl.ParseXML"
+        },
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "message",
+        "value": "There was no XML to parse — the text was empty",
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "nodeId",
+        "value": "xml",
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "nodeType",
+        "value": "net.noodl.ParseXML",
+        "subject": "both"
+      },
+      {
+        "t": "signal",
+        "port": "error",
+        "subject": "both"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "There was no XML to parse — the text was empty",
+        "subject": "xml"
+      },
+      {
+        "t": "value",
+        "port": "errorCode",
+        "value": "xml/empty",
+        "subject": "xml"
+      },
+      {
+        "t": "signal",
+        "port": "failure",
+        "subject": "xml"
+      }
+    ]
+  },
+  {
+    "name": "On App Error's Filter cleared to null catches everything again; a later error replaces the values of the earlier one",
+    "clauses": [
+      "N"
+    ],
+    "because": "onapperror.ts :70 — undefined / null → no filter; `message`: \"Human-readable account of what went wrong\" — of the error that fired, the last one",
+    "nodes": {
+      "boundary": {
+        "type": "On App Error",
+        "params": {
+          "filter": "nothing-raises-this"
+        }
+      },
+      "csv": {
+        "type": "net.noodl.ParseCSV",
+        "params": {}
+      },
+      "xml": {
+        "type": "net.noodl.ParseXML",
+        "params": {}
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "xml",
+        "set": "text",
+        "value": "   "
+      },
+      "settle",
+      {
+        "node": "boundary",
+        "set": "filter",
+        "value": null
+      },
+      {
+        "node": "csv",
+        "set": "text",
+        "value": "x,\"open"
+      },
+      "settle",
+      {
+        "node": "xml",
+        "set": "text",
+        "value": " "
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "xml",
+        "signal": "failure",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "boundary",
+        "signal": "error",
+        "count": 0
+      },
+      {
+        "at": 3,
+        "subject": "boundary",
+        "signal": "error",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "boundary",
+        "port": "code",
+        "value": "parse-csv/parse-failed"
+      },
+      {
+        "at": 3,
+        "subject": "boundary",
+        "port": "nodeId",
+        "value": "csv"
+      },
+      {
+        "at": 4,
+        "subject": "boundary",
+        "signal": "error",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "boundary",
+        "port": "code",
+        "value": "parse-xml/parse-failed"
+      },
+      {
+        "at": 4,
+        "subject": "boundary",
+        "port": "nodeId",
+        "value": "xml"
+      },
+      {
+        "at": 4,
+        "subject": "boundary",
+        "port": "message",
+        "value": "There was no XML to parse — the text was empty"
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "filter",
+        "value": "nothing-raises-this",
+        "subject": "boundary"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 0,
+        "subject": "csv"
+      },
+      {
+        "t": "set",
+        "port": "text",
+        "value": "   ",
+        "subject": "xml"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "There was no XML to parse — the text was empty",
+        "subject": "xml"
+      },
+      {
+        "t": "value",
+        "port": "errorCode",
+        "value": "xml/empty",
+        "subject": "xml"
+      },
+      {
+        "t": "signal",
+        "port": "failure",
+        "subject": "xml"
+      },
+      {
+        "t": "set",
+        "port": "filter",
+        "value": null,
+        "subject": "boundary"
+      },
+      {
+        "t": "set",
+        "port": "text",
+        "value": "x,\"open",
+        "subject": "csv"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "code",
+        "value": "parse-csv/parse-failed",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "componentName",
+        "value": "node-spec/csv",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "errorObject",
+        "value": {
+          "code": "parse-csv/parse-failed",
+          "componentName": "node-spec/csv",
+          "detail": {
+            "line": 1
+          },
+          "message": "The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as \"\".",
+          "nodeId": "csv",
+          "nodeType": "net.noodl.ParseCSV"
+        },
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "message",
+        "value": "The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as \"\".",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "nodeId",
+        "value": "csv",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "nodeType",
+        "value": "net.noodl.ParseCSV",
+        "subject": "boundary"
+      },
+      {
+        "t": "signal",
+        "port": "error",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "The CSV could not be parsed at line 1: a quote is never closed, so text around it would have been silently dropped. A quote inside a quoted cell has to be written as \"\".",
+        "subject": "csv"
+      },
+      {
+        "t": "signal",
+        "port": "failure",
+        "subject": "csv"
+      },
+      {
+        "t": "set",
+        "port": "text",
+        "value": " ",
+        "subject": "xml"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "code",
+        "value": "parse-xml/parse-failed",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "componentName",
+        "value": "node-spec/xml",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "errorObject",
+        "value": {
+          "code": "parse-xml/parse-failed",
+          "componentName": "node-spec/xml",
+          "detail": {
+            "code": "xml/empty"
+          },
+          "message": "There was no XML to parse — the text was empty",
+          "nodeId": "xml",
+          "nodeType": "net.noodl.ParseXML"
+        },
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "message",
+        "value": "There was no XML to parse — the text was empty",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "nodeId",
+        "value": "xml",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "nodeType",
+        "value": "net.noodl.ParseXML",
+        "subject": "boundary"
+      },
+      {
+        "t": "signal",
+        "port": "error",
+        "subject": "boundary"
+      },
+      {
+        "t": "signal",
+        "port": "failure",
+        "subject": "xml"
+      }
+    ]
+  },
+  {
+    "name": "On App Error declared AFTER the node that fails still hears an error raised in the very first frame — it subscribes in initialize",
+    "clauses": [
+      "N"
+    ],
+    "because": "onapperror.ts :40-45 — \"errors raised while the graph is still being built are exactly the ones an author has the hardest time seeing, and a boundary that only arms itself later would miss them\". The raiser is mounted first with its bad text as a parameter",
+    "nodes": {
+      "xml": {
+        "type": "net.noodl.ParseXML",
+        "params": {
+          "text": ""
+        }
+      },
+      "boundary": {
+        "type": "On App Error",
+        "params": {}
+      }
+    },
+    "steps": [
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "xml",
+        "signal": "failure",
+        "count": 1
+      },
+      {
+        "at": 1,
+        "subject": "boundary",
+        "signal": "error",
+        "count": 1
+      },
+      {
+        "at": 1,
+        "subject": "boundary",
+        "port": "nodeId",
+        "value": "xml"
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "text",
+        "value": "",
+        "subject": "xml"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "There was no XML to parse — the text was empty",
+        "subject": "xml"
+      },
+      {
+        "t": "value",
+        "port": "errorCode",
+        "value": "xml/empty",
+        "subject": "xml"
+      },
+      {
+        "t": "signal",
+        "port": "failure",
+        "subject": "xml"
+      },
+      {
+        "t": "value",
+        "port": "code",
+        "value": "parse-xml/parse-failed",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "componentName",
+        "value": "node-spec/xml",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "errorObject",
+        "value": {
+          "code": "parse-xml/parse-failed",
+          "componentName": "node-spec/xml",
+          "detail": {
+            "code": "xml/empty"
+          },
+          "message": "There was no XML to parse — the text was empty",
+          "nodeId": "xml",
+          "nodeType": "net.noodl.ParseXML"
+        },
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "message",
+        "value": "There was no XML to parse — the text was empty",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "nodeId",
+        "value": "xml",
+        "subject": "boundary"
+      },
+      {
+        "t": "value",
+        "port": "nodeType",
+        "value": "net.noodl.ParseXML",
+        "subject": "boundary"
+      },
+      {
+        "t": "signal",
+        "port": "error",
+        "subject": "boundary"
+      }
+    ]
+  }
+]

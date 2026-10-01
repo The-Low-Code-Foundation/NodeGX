@@ -53,6 +53,22 @@ const T4_EXEMPT: Record<string, string> = {
   RunTasks: 'runs a template COMPONENT by name once per item (runtasks.ts :407 `nodeScope.createNode(template, …)`) — needs the component boundary (a component with ports, Component Inputs / Outputs), which is NSP-015\'s; the graph format holds a tree of instances only (graph.ts COMPONENTS)'
 };
 
+/**
+ * NSP-013 s13 — nodes of OTHER tiers whose input is other nodes' behaviour, graded the same way: On
+ * App Error (T2, "world-fed") hears the errors OTHER nodes raise, so its scenarios mount real raisers
+ * (Parse XML, Parse CSV) beside it rather than give the world an error-stream seam. Each must stay
+ * named by an `N` scenario; it has no reducer spec (no catalog-parity row).
+ */
+const GRAPH_GRADED = ['On App Error'] as const;
+
+describe('NSP-013 — a node graded by graph scenarios rather than a reducer spec is named by an N scenario', () => {
+  for (const type of GRAPH_GRADED) {
+    test(`${type}`, () => {
+      expect(scenarios.filter((s) => s.clauses.includes('N') && Object.values(s.nodes).some((n) => n.type === type)).map((s) => s.name)).not.toHaveLength(0);
+    });
+  }
+});
+
 describe('NSP-012 — every T4 node of the batch is named by an N scenario or exempt with a reason', () => {
   for (const type of T4_NODES) {
     test(`${type}`, () => {
