@@ -303,3 +303,98 @@ the samples alone still missed it (`homeSampled: false` in the readings) — 14/
 **For Richard:** each lane's FR lines (E, H above; C in IW-008 §5; L in IW-003 §7); the self-filling can — is "never
 needs the pond" meant to change a program's path, or only its can? (lane H); the strip drawer at 1024 vs a narrower side
 drawer, Play 4 px below the first screen on the French eggs at 390 (lane L); "more land" beyond 55 × 22 (IW-008).
+
+### Session 5 (2026-10-01, lane O `iw006-owed`, base `b40be26c8`) — the owed items; AC5 driven on a real v4 app
+
+**Built** (new `packages/noodl-mcp/tests/iw006Owed.ts` + `iw006Owed.test.ts`; hunks elsewhere each under
+`// P108 IW-006 owed (lane O)`):
+
+1. **My robots' upgrade slot** (`ROBOT_CARDS_SCRIPT` → `iw6oUpText`): the islanders no longer give upgrades, so an empty
+   slot never names one. It names the upgrade **by the shop's own name** (the card she will look for — the old word was
+   "Bigger basket", the shop sells "a bigger hod"), says the island's shop and SHOP's price; not on the shelf yet (the
+   shop's own rule: its request done and a robot of hers it fits) it names the request that puts it there: "Empty slot ·
+   in the island's shop: a bigger hod, 🐚 15" / "Empty slot · in the shop after “Water both rows the same way”: a bigger
+   can, 🐚 15". A filled slot: a sticker (an islander's gift from before the shop) still says who gave it — it is true;
+   a purchase says "· from the shop". **A tap on the slot does not open the shop** (the shop's open state is a States node
+   local to `Island/Shop`; opening it from another page means a new global and a hunk in lane H's component): the slot
+   SAYS where (the brief's "else says where"). Robot cards now reads Read family's `stickers` and `done`.
+2. **Prices retuned** (numbers only): boots 20 → **15**, spa 40 → **30**, refuge 50 → **35**, rabbit 20 → **15**, sheep 25 →
+   **20**; copies 30, can+ / basket+ 15, brains 25 / 40, helpers 6 / 8 / 10 kept. The rules (each a row of
+   `iw006Owed.test.ts` O2, read from SHOP and from what the engine pays — a rule mutated to the base's prices goes red):
+   a helper < one average first win; the three upgrades ONE price, 1–1½ first wins; a copy 2–3 first wins; brain16 <
+   brain20 < 4 wins; band 7–9's four first wins (46) buy the refuge on their own; the refuge + her first animal within 3
+   more minutes of her robots on the island; spa < refuge, an animal < the refuge, rabbit < sheep. Measured by the spec
+   (Win pay on every job; ten minutes of Island tick + Island keep): every first win **173** 🐚 (avg **11.5**), band 7–9's
+   four **46**; band 7–9's two robots (Pip on tulips-three, Cobble on path-stones) **+29 / 10 min = 2.9/min**; band 10–12's
+   four robots (lane E's set) **+125 / 10 min = 12.5/min**.
+
+   | item | 🐚 | first wins | min, 7–9 (2 robots) | min, 10–12 (4 robots) |
+   |---|---|---|---|---|
+   | a robot copy (each kind) | 30 | 2.6 | 10.3 | 2.4 |
+   | can+ · basket+ · boots | 15 | 1.3 | 5.2 | 1.2 |
+   | brain 16 · brain 20 | 25 · 40 | 2.2 · 3.5 | 8.6 · 13.8 | 2.0 · 3.2 |
+   | rain · self-filling can · barrow | 6 · 8 · 10 | 0.5 · 0.7 · 0.9 | 2.1 · 2.8 · 3.4 | 0.5 · 0.6 · 0.8 |
+   | spa · refuge | 30 · 35 | 2.6 · 3.0 | 10.3 · 12.1 | 2.4 · 2.8 |
+   | rabbit · sheep | 15 · 20 | 1.3 · 1.7 | 5.2 · 6.9 | 1.2 · 1.6 |
+
+   (a band 7–9 child's purse is her four first wins, 46, then ~3 a minute: the refuge 35 is hers from the wins, the
+   rabbit 4 more minutes of watching — the materials are the real work.) **Literal price pins read from SHOP now:**
+   `iw006Shop.test.ts` (32 / 30 / 22 / 29 / 2 / 50 / 40 / 20 / 15 / 10 — a copy's, brain16's, can+'s, the helpers'),
+   `iw006Save.test.ts` (30 + 25 + 6, 22 / 8, 30), `iw007Build.test.ts` `[base]` (45 = rabbit + sheep, 40 = refuge − 10,
+   10 = rabbit − 10 — these two rows went red with the retune and read SHOP now), `p108s4Join.test.ts` (40 / left 10),
+   `iw008Crew.test.ts` (30, 25). `cg003Template.test.ts`'s Robot cards row pinned the owed defect itself ("… · from Mamie
+   Rose") — it reads the shop line now. Drives with a copy's 30 or a brain's 25 typed (still right): `drive-iw006-shop.js`
+   SHORT / BUY / BRAIN, `drive-iw008-crew.js`'s `buy` (lanes H / C — not edited; they read the catalogue elsewhere).
+3. **"Now in the shop"** (`Logic/Shop news`, Pages/Workshop after Complete request → Play → the win card's `wnShop`): a
+   FIRST win (Complete request's Newly Done) of the request an upgrade is unlocked by, when she does not have it and a
+   robot of hers fits it: "Now in the shop: a bigger hod, 🐚 15" — under the thanks and the "+N 🐚" line, 14 px against
+   the thanks' 26 (principle 2). Nothing on a replay, nothing for an upgrade she has, nothing when no robot fits
+   (wall-until without Pocket), nothing for a win that shelves none.
+4. **A crew robot sent from My robots** (`Logic/Send robot`, `Robot/Card`'s "Send {r} to a job" chips): a card of hers
+   lists the jobs she has WON that need its kind (her band), ringed where it works or helps; a tap is lane C's assign rule
+   run unchanged (`assignRobotScript`'s text, the request taken from the chip) — works a plot nobody works, helps the robot
+   there, home when tapped where it is, refused when two already work there — and the line is said on THAT robot's card,
+   in My robots' words ("Bubbles works on “…” now." — the plot card's "here" would be wrong on My robots). **Hook for the
+   land (lane B, not built):** `iw006Owed.ts` header + `iw6oSendPlots` — when Robot cards reads Read family's `land`, push a
+   `LAND_ID` chip for a robot of ANY kind, and `Logic/Send robot` hands `crewAssign` lane B's `landRequest` (it looks the
+   request up in `Inputs.requests` by id).
+5. **AC5 — the packaged upgrade drive over a REAL v4 app** (`garden-desktop/drive-upgrade-v4.js`, new). The v4 app is
+   real: the Mac package a P105/P108 session built on 2026-09-29 (its page declares `SAVE_VERSION = 4` — the drive reads it
+   from the bundle and refuses anything else), copied out of primary's `shell/dist` into this lane's scratch (read only).
+   The current app is this lane's ONE packaged build (`build-app.js --no-model --allow-development-engine`, then
+   `npm run dist:mac`; signed by the keychain's Developer ID, not notarised). Per band of the fixture, one throwaway home:
+   launch 1 = the v4 app — its own Grown-ups page takes the authentic v4 code ("Paste a code" → "Replace the islands"):
+   its own decoder and store write the family (storage v 4) and its shell backs it up at quit; launch 2 = the current
+   build over the same home — storage v5 within milliseconds with no tap, every profile field-for-field what the v4 app
+   stored but for the wallet {0, 0} and owned [] added, the robots, stickers, hats, plots and their programs listed and
+   equal, every kid on Profiles, each kid's island in HER language with her requests done by their titles in it; the
+   day's backup rewritten as v5 and its save code decoded by the current template; every request on 127.0.0.1.
+   GARDEN_OLIVE_STUB=1 on every launch (no model loaded: the owl is CG-004's drive, not this one's).
+
+**Readings** — READINGS-PLACEHOLDER (filled in the next commit, after the last drive run).
+
+**Not done / not mine:** opening the shop from My robots' slot (it says where — above); the land in My robots' send list
+(the hook — lane B's); a Windows run of the v4 drive (CI's job builds Windows; the v4 app here is a Mac package).
+
+**Deviations, with reasons:**
+1. **The slot names the upgrade by the SHOP's name** (the brief: "names the upgrade"): the robot card's own upgrade word
+   ("Bigger basket · 8 things") is not what the shop calls it ("A bigger hod") — a child sent to the shop must find that
+   card. Seen in the drive's readings (the slot and the shop side by side).
+2. **AC5's launch 1 is a real v4 BUILD, not the current build seeding storage** (the brief: "launch 1 seeds a v4 family …
+   as the v4 app left it"): a packaged v4 app was on this box; its own page decoded the fixture's code and wrote its own
+   store. Measured: band 7–9's stored family IS the fixture's model, field for field; band 10–12's differs in ONE field —
+   Noa's `cardsSeen` (IW-001 F8, added to the v4 save after that build): the v4 app's decoder dropped it, and "nothing
+   lost" is graded against what the v4 app stored.
+3. **A chip on My robots wraps inside its panel** (lane O's CSS block, `.bg-robot-card .bg-chip, .bg-robo .bg-chip`): at
+   390 FR the page scrolled sideways (scrollWidth 435) — a hat still to earn, "Chapeau tournesol · un cadeau de Mamie
+   Rose", 405 px, in the stage's options and on each card (pre-existing: IG-005's hats; lane C's 390 FR family had the sun
+   hat), and a long job title on the new send chips. Measured after: 390.
+
+**FR lines for Richard's read** (`iw6o…`): « Emplacement vide · dans la boutique de l’île : {up}, 🐚 {n} » · « Emplacement
+vide · dans la boutique après « {q} » : {up}, 🐚 {n} » · « {up} · de la boutique » · « Nouveau dans la boutique : {what} »
+(« une plus grande hotte, 🐚 15 ») · « Envoyer {r} sur un travail » · « {r} travaille sur « {plot} » maintenant. » · « {r}
+aide {m} sur « {plot} » maintenant. » · « Deux robots travaillent déjà sur « {plot} ». ».
+
+**Could not verify:** the tablet; Windows (the v4 drive runs on a Mac package); the owl in the upgraded app (stubbed — a
+model on a shared box is the exam's CPU); notarisation (`dist:mac` skips it: no notarize options); the cause of one
+renderer console line in launch 2 of the v4 drive (READINGS-PLACEHOLDER).
