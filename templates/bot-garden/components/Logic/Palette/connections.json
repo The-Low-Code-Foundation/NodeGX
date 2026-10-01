@@ -41,6 +41,12 @@
     },
     {
       "fromId": "paletteIn",
+      "fromProperty": "request",
+      "toId": "paletteFn",
+      "toProperty": "in-request"
+    },
+    {
+      "fromId": "paletteIn",
       "fromProperty": "robot",
       "toId": "paletteFn",
       "toProperty": "in-robot"

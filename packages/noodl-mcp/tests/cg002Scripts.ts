@@ -1577,6 +1577,8 @@ var dries = run ? Number(run.dries) || 0 : 0;
 var rockGone = run ? Number(run.rockGone) || 0 : 0;
 var noCans = run ? Number(run.noCans) || 0 : 0;
 var job = jobOf(w) ? jobProgress(w) : null;
+// P108 IW-003 look (lane L): the one target's meter, as the job card reads it ({ w: have, t: need }).
+function iwlOneMeter(wd) { var m = meterOf(thingById(wd, jobOf(wd).targets[0])); return { w: m.have, t: isFinite(m.need) ? m.need : 0 }; }
 var blocks = countBlocks(program);
 var rep = findRepeat(program);
 // IG-003 (P106 s3): a win is a run's. Goal met keeps its last answer until the next run finishes, so after Stop has
@@ -1614,6 +1616,9 @@ else if (freePlay && ran) key = 'hintFree';
 // P108 IW-003 (lane B): every target full and the robot home, yet no win — the goal wants the mission's own block (an if,
 // an until, a when): "3 of 3 done. What is still waiting?" would send her looking for a job that is not there.
 else if (ran && job && job.total > 0 && job.full === job.total) key = 'iw3bTrick';
+// P108 IW-003 look (lane L): a job of ONE target counts what fills it — the basket's eggs of its 4, the bench's stones of
+// its 8, the tulip's drinks of its 3 (the job card's rule); "0 of 1 done" on the eggs told a child nothing.
+else if (ran && job && job.total === 1 && iwlOneMeter(w).t > 1) { key = 'iw3Job'; vars = iwlOneMeter(w); }
 else if (ran && job && job.total > 0) { key = 'iw3Job'; vars = { w: job.full, t: job.total }; }
 else if (ran && total > 0) { key = 'hintMissed'; vars = { w: done, t: total }; }
 else if (ran) key = 'hintNotYet';
@@ -1642,6 +1647,28 @@ Outputs.key = key;
 `;
 
 // ── Palette ─────────────────────────────────────────────────────────────────
+
+/**
+ * P108 IW-003 look (lane L): two reads of a request a page script shares (Palette, Block card). `iwlFirstSeek` — the kind
+ * of a program's first `go to nearest`, depth first (what the job seeks first), or ''; `iwlReadsEnvelope` — the request's
+ * plot has a letter with a name on it (the envelopes), so Olive's read reads an envelope there, not a note.
+ */
+export const IWL_REQUEST_HELPERS = `function iwlFirstSeek(list) {
+  if (!Array.isArray(list)) return '';
+  for (var i = 0; i < list.length; i++) {
+    var b = list[i];
+    if (!b || typeof b !== 'object') continue;
+    if (b.t === 'go_nearest' && b.slots && typeof b.slots.kind === 'string' && b.slots.kind) return b.slots.kind;
+    var inner = iwlFirstSeek(b.body);
+    if (inner) return inner;
+  }
+  return '';
+}
+function iwlReadsEnvelope(req) {
+  var th = req && Array.isArray(req.things) ? req.things : [];
+  for (var i = 0; i < th.length; i++) if (th[i] && th[i].kind === 'letter' && typeof th[i].to === 'string' && th[i].to) return true;
+  return false;
+}`;
 
 /** The blocks a band may use, limited to a request's list when one is given, labelled for the kit: word for band 10–12, caption for band 7–9. */
 export const PALETTE_SCRIPT = `${OLIVE_HELPERS}
@@ -1675,6 +1702,13 @@ for (var j = 0; j < ids.length; j++) {
   var m = META[id];
   out.push({ id: id, kind: m.kind, label: word['b' + LABEL[id]] || id, caption: word['c' + LABEL[id]] || id, hasBody: m.body, hasCount: m.count, slots: m.slots, band: band });
 }
+// P108 IW-003 look (lane L): the request, when it is given (the Workshop's Start world) — "go to nearest" starts on the
+// first thing THIS job seeks (its reference program's first go to nearest; the drawer said "egg" on the stones and the
+// bench), and Olive's read says what it reads there (an envelope where the plot's letters carry a name).
+var iwlReq = Inputs.request && typeof Inputs.request === 'object' ? Inputs.request : null;
+${IWL_REQUEST_HELPERS}
+var iwlSeek = iwlFirstSeek(iwlReq ? iwlReq.referenceProgram : null);
+if (iwlSeek) for (var gs = 0; gs < out.length; gs++) if (out[gs].id === 'go_nearest') out[gs].seek = iwlSeek;
 // Olive's rungs (CG-005): one entry per rung the request offers ('all' = the ladder), each with its picker. The exam
 // gate: a rung this machine's exam FAILED is withheld (the Skills page shows it as "Olive can't do this here yet").
 var rungIds = Inputs.rungs === 'all' ? OLIVE_ORDER : Array.isArray(Inputs.rungs) ? Inputs.rungs : [];
@@ -1688,6 +1722,8 @@ for (var r = 0; r < rungIds.length; r++) {
   if (withheld.indexOf(rid) !== -1) { heldHere.push(rid); continue; }
   offered.push(rid);
   var title = word[OLIVE_RUNG_WORD[rid]] || rid;
+  // P108 IW-003 look (lane L): the envelopes' read reads the envelope.
+  if (rid === 'read' && iwlReadsEnvelope(iwlReq) && word.iwlReadEnvelope) title = word.iwlReadEnvelope;
   olive.push({ id: 'olive:' + rid, kind: 'ask', label: title, caption: title, hasBody: false, hasCount: false, slots: olivePickerSlots(rid, band, lang, Inputs.narrow, word), band: band, rung: rid, shape: rr.shape, shapeLabel: word[OLIVE_SHAPE_WORD[rr.shape]] || rr.shape, ladder: rr.ladder });
 }
 if (rungIds.length) { var kept = []; for (var o = 0; o < out.length; o++) if (out[o].id !== 'ask') kept.push(out[o]); out = kept.concat(olive); }

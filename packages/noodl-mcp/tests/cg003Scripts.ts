@@ -55,6 +55,7 @@ import { BRAIN_SIZE as IW8_BRAIN } from './cg002Content';
 import { IW006_SHOP_SCRIPTS } from './iw006Shop';
 // P108 IW-006 (lane E): earning — the win's pay (over the island engine) and the island's live jobs and shells kept.
 import { ISLAND_KEEP_SCRIPT, winPayScript } from './iw006Earn';
+import { IWL_REQUEST_HELPERS } from './cg002Scripts';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -253,6 +254,15 @@ for (var i = 0; i < list.length; i++) {
   // P108 IW-003 (lane B): Biscuit's ball, drawn by both kits.
   else if (t.kind === 'ball') things.push(withJob({ kind: 'ball', x: t.x, y: t.y }, t));
 }
+// P108 IW-003 look (lane L): one Sami on the island. A built bench seats him (both kits draw him on it) while his islander
+// pin stands by a plot: with a bubble (a request he is asking) he stands and the bench is drawn vacant; with nothing to
+// ask he sits on his bench and does not stand as well. Read each draw, so the bench wearing and mended keeps one Sami.
+var iwlSami = -1, iwlBench = -1;
+for (var q = 0; q < things.length; q++) {
+  if (things[q].kind === 'islander' && things[q].who === 'sami') iwlSami = q;
+  if (things[q].kind === 'site' && things[q].build === 'bench' && Number(things[q].need) > 0 && Number(things[q].have) >= Number(things[q].need)) iwlBench = q;
+}
+if (iwlSami !== -1 && iwlBench !== -1) { if (things[iwlSami].say) things[iwlBench].vacant = true; else things.splice(iwlSami, 1); }
 if (Inputs.showEnd === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'flag', x: Number(Inputs.endX), y: Number(Inputs.endY) });
 // IG-003 (R5): the challenge was right: a tick on the tile the child tapped (the real end).
 if (Inputs.showTick === true && Inputs.endX !== undefined && Inputs.endX !== null && Number(Inputs.endX) >= 0) things.push({ kind: 'tick', x: Number(Inputs.endX), y: Number(Inputs.endY) });
@@ -320,7 +330,10 @@ for (var i = 0; i < PAD.length; i++) {
   // 🔴 A stable row id per key (a row is a Noodl Object, global by id): the keys arrive twice as a request opens (its
   // allowed list, then the drawer's palette), and two lists of id-less rows in quick succession left the For Each
   // with BOTH sets (the page drive: ten keys on the tulips, each under its twin, so no press landed).
-  keys.push({ id: 'padkey-' + slug, op: op, cls: 'bg-key bg-key-' + slug + (place === 'bg-key-' + slug ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: W[PAD[i][3]] || op });
+  // P108 IW-003 look (lane L): an Olive key says what the drawer's block says (the envelopes' read reads the envelope).
+  var palLabel = '';
+  for (var pl = 0; pl < pal.length; pl++) if (pal[pl] && pal[pl].id === op && op.indexOf('olive:') === 0 && typeof pal[pl].label === 'string') palLabel = pal[pl].label;
+  keys.push({ id: 'padkey-' + slug, op: op, cls: 'bg-key bg-key-' + slug + (place === 'bg-key-' + slug ? '' : ' ' + place) + ' bg-i-' + PAD[i][2] + ' bg-press', label: palLabel || W[PAD[i][3]] || op });
 }
 // P108 IW-003 (lane M): go to nearest / go to — one key per kind on the plot as the request opens (PAD_GO), op
 // go_nearest:<kind> or go_to:<kind>, after the actions; its label says the whole step, its face shows the kind.
@@ -447,6 +460,8 @@ for (var i = 0; i < src.length; i++) {
   var names = Array.isArray(e.slots) ? e.slots : [];
   for (var s = 0; s < names.length; s++) { var made = names[s] && typeof names[s] === 'object' ? names[s] : slot(String(names[s])); if (made) slots.push(made); }
   out.push({ id: e.id, kind: e.kind, icon: ICON[e.id] || (e.id.indexOf('olive:') === 0 ? 'owl' : 'pick'), label: band === 1 ? String(e.caption || e.label || e.id) : String(e.label || e.id), hasBody: !!e.hasBody, hasCount: !!e.hasCount, slots: slots });
+  // P108 IW-003 look (lane L): the kind "go to nearest" starts on in the drawer (the job's first seek; Palette).
+  if (typeof e.seek === 'string' && e.seek) out[out.length - 1].seek = e.seek;
 }
 Outputs.palette = out;
 Outputs.count = out.length;
@@ -889,6 +904,12 @@ export const CARD_PALETTE = Object.entries(BLOCK_CARDS).map(([id, c]) => {
   return { id, kind: meta.kind, icon: olive ? 'owl' : KIT_ICON[id] || 'pick', label: BI_WORD(c.label), hasBody: meta.body, hasCount: meta.count, slots: meta.slots.map(cardSlot).filter(Boolean) };
 });
 
+/**
+ * P108 IW-003 look (lane L): Olive's read on the envelopes is the envelope's — "read the envelope", what it does there,
+ * and an example that reads then goes to that door (Mamie's note keeps "read the note", its line and its if).
+ */
+const IWL_ENVELOPE_CARD = { label: 'iwlReadEnvelope', line: 'iwlCdReadEnvelope', example: [{ id: 1, t: 'pick' }, { id: 2, t: 'olive:read' }, { id: 3, t: 'go_to' }, { id: 4, t: 'put' }] };
+
 /** The cards with their examples numbered (the kit needs an id per block). */
 const CARDS_DRAWN = Object.fromEntries(
   Object.entries(BLOCK_CARDS).map(([id, c]) => {
@@ -938,13 +959,19 @@ var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
 // A ? chip's row id is help:<block> (a row is a Noodl Object, global by id): the card is the block's.
 var id = String(Inputs.cardOpen || '').replace(/^help:/, '').replace(/:else$/, '');
 var c = CARDS[id] || null;
+// P108 IW-003 look (lane L): on the envelopes, read's card is the envelope's — its title, its line, go to in its example.
+${IWL_REQUEST_HELPERS}
+var iwlEnvelope = id === 'olive:read' && iwlReadsEnvelope(Inputs.request);
+if (iwlEnvelope) c = ${JSON.stringify(IWL_ENVELOPE_CARD)};
 var label = c ? c.label : '';
 if (c && band === 1 && w['c' + label.slice(1)] && label.charAt(0) === 'b') label = 'c' + label.slice(1);
 Outputs.show = !!c;
 Outputs.title = c ? (w[label] || id) : '';
 Outputs.line = c ? (w[c.line] || '') : '';
 Outputs.example = c ? JSON.parse(JSON.stringify(c.example)) : [];
-Outputs.palette = PALETTE;
+// P108 IW-003 look (lane L): the envelope card's example draws its read block with the envelope's word too.
+if (iwlEnvelope) { var iwlPal = JSON.parse(JSON.stringify(PALETTE)); for (var ip = 0; ip < iwlPal.length; ip++) if (iwlPal[ip].id === 'olive:read') iwlPal[ip].label = ${JSON.stringify(BI_WORD('iwlReadEnvelope'))}; Outputs.palette = iwlPal; }
+else Outputs.palette = PALETTE;
 Outputs.gotIt = w.cardGotIt || '';
 Outputs.exampleWord = w.cardExample || '';
 Outputs.cardId = c ? id : '';

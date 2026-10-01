@@ -127,7 +127,7 @@
       "path": "Logic/Palette",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 18,
+      "connectionCount": 19,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 697,
+      "connectionCount": 699,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -431,7 +431,7 @@
       "path": "Logic/Block card",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 14,
+      "connectionCount": 15,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -791,7 +791,7 @@
       "path": "Workshop/Play",
       "type": "visual",
       "nodeCount": 162,
-      "connectionCount": 446,
+      "connectionCount": 448,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1023,6 +1023,6 @@
   "stats": {
     "totalComponents": 127,
     "totalNodes": 1061,
-    "totalConnections": 3305
+    "totalConnections": 3311
   }
 }

@@ -329,7 +329,10 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw6hUsed: s('{what}: at work on “{plot}”!', '{what} : au travail sur « {plot} » !'),
   // P108 IW-006 (lane E): the shells a job earned — under the win card's thanks (smaller), and on the island after a lap.
   iw6eWinPay: s('+{n} 🐚 shells for the job', '+{n} 🐚 coquillages pour le travail'),
-  iw6eIslePay: s('{r} +{n} 🐚', '{r} +{n} 🐚')
+  iw6eIslePay: s('{r} +{n} 🐚', '{r} +{n} 🐚'),
+  // ── P108 IW-003 look (lane L): Olive's read on the envelopes reads the envelope (the drawer's block, the pad's key, its card) ──
+  iwlReadEnvelope: s('read the envelope', 'lire l’enveloppe'),
+  iwlCdReadEnvelope: s('Olive reads the name on the envelope {b} holds. Then “go to” what Olive read takes {b} to that door.', 'Olive lit le nom sur l’enveloppe que tient {b}. Ensuite, « aller à » ce qu’Olive a lu emmène {b} à cette porte.')
 };
 
 export const PAGE_WORD_KEYS: ReadonlyArray<string> = Object.keys(PAGE_WORDS);

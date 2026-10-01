@@ -29,6 +29,12 @@
     },
     {
       "fromId": "blockcardIn",
+      "fromProperty": "request",
+      "toId": "blockcardFn",
+      "toProperty": "in-request"
+    },
+    {
+      "fromId": "blockcardIn",
       "fromProperty": "words",
       "toId": "blockcardFn",
       "toProperty": "in-words"

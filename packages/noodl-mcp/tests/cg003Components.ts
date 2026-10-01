@@ -1250,6 +1250,9 @@ const PLAY: CgComponent = {
     // P106 IG-005 (R8): band × request × robot — the robot's blocks, and the kind the request needs.
     wire('plIn', 'paletteRobot', 'plPalette', 'robot'),
     wire('plStart', 'needs', 'plPalette', 'needs'),
+    // P108 IW-003 look (lane L): the request — go to nearest starts on what its job seeks; the envelopes' read says so.
+    wire('plStart', 'request', 'plPalette', 'request'),
+    wire('plStart', 'request', 'plCardInfo', 'request'),
     wire('plPalette', 'palette', 'plKitPal', 'palette'),
     wire('plIn', 'band', 'plKitPal', 'band'),
     wire('plIn', 'lang', 'plKitPal', 'lang'),

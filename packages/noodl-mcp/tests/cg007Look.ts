@@ -242,7 +242,8 @@ button:focus-visible, input:focus-visible, .bg-press:focus-visible { outline: 3p
   .bg-tab * { font-size: 14px !important; }
   .bg-ws-title { font-size: 26px !important; }
   .bg-ws-sub { display: none !important; }
-  .bg-controls .bg-btn { padding: 9px 14px !important; font-size: 15px !important; }
+  /* P108 IW-003 look (lane L): 8px 10px and 14 px (was 9px 14px and 15 px): the French Drive · Teach · Play in one row. */
+  .bg-controls .bg-btn { padding: 8px 10px !important; font-size: 14px !important; }
 }
 .bg-press { cursor: pointer; user-select: none; transition: transform 100ms, filter 100ms; }
 .bg-press:active { transform: scale(0.97); }
@@ -298,7 +299,26 @@ ${owlColourRule}
 /* The pad (the mockup's .pad), beside the world (P106 s4 (b), above), each key 56 px for a finger (AC5). On a phone it sits
    over the world's corner, as it did (the mockup's). */
 .bg-pad { position: relative !important; flex: none; z-index: 6; display: grid !important; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); grid-auto-rows: 56px; gap: 6px; }
-@media (max-width: 600px) { .bg-stage:has(> .bg-pad) { display: block !important; max-width: 640px; } .bg-pad { position: absolute !important; right: 10px !important; bottom: 10px !important; } }
+/* P108 IW-003 look (lane L): on a phone the pad sits UNDER the world, never over it (the mockup's ≤ 900 px rule: its keys
+   48 px in a row, the arrows first) — measured on the s3 merge, over the world's corner it covered the right half: five
+   to eight keys on the world, sami-thanks' door under the forward key. The room it takes back is Mamie's dots (the
+   tulips' own chips and the job card say how many are full; beside her line they squeezed it to four lines) and the
+   controls' spare margin; the controls a little tighter, so the French three fit two rows (CG-003 AC4: Play and the owl
+   on the first screen, re-measured). */
+@media (max-width: 600px) {
+  .bg-stage:has(> .bg-pad) { display: flex !important; flex-direction: column !important; flex-wrap: nowrap; align-items: stretch; gap: 4px; max-width: 640px; }
+  .bg-stage:has(> .bg-pad) > :not(.bg-pad):not(.bg-rec) { flex: none; width: 100%; max-width: 640px; }
+  .bg-pad { position: relative !important; right: auto !important; bottom: auto !important; width: 100% !important; grid-template-columns: repeat(auto-fill, 48px); grid-template-rows: none; grid-auto-rows: 48px; gap: 6px; justify-content: center; }
+  .bg-pad .bg-key { width: 48px !important; height: 48px !important; min-width: 48px; min-height: 48px; grid-column: auto; grid-row: auto; order: 4; }
+  .bg-pad .bg-key-left { order: 1; }
+  .bg-pad .bg-key-fwd { order: 2; }
+  .bg-pad .bg-key-right { order: 3; }
+  /* Seven keys or more (the go keys, free play's every step) stay ONE row that scrolls sideways, as the phone's drawer
+     does: two rows pushed the owl off the first screen in free play (865 of 844, the Olive drive's P-390). */
+  .bg-stage > .bg-pad:has(> .bg-key:nth-child(7)) { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 48px; grid-template-rows: 48px; overflow-x: auto; overflow-y: hidden; justify-content: start; padding-bottom: 4px; }
+  .bg-marks { display: none !important; }
+  .bg-controls { margin-top: 0 !important; }
+}
 .bg-key { width: 56px !important; height: 56px !important; min-width: 56px; min-height: 56px; border-radius: 14px; box-shadow: var(--shadow-key); display: grid !important; place-items: center; cursor: pointer; font-size: 0 !important; }
 .bg-key::before { margin: 0 !important; width: 26px !important; height: 26px !important; }
 .bg-key:active { transform: scale(0.94); }

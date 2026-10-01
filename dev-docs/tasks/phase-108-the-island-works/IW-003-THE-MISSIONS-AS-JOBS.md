@@ -720,3 +720,122 @@ eggs (the basket is one target); (6) full meters are 3.05:1 in both kits (the pa
 lane's block above), the look beside IW-000, and sami-thanks' Predict — with home = start, a finished job always ends at
 home, so the challenge now asks "does the job get done?" more than "where does it stop?" (lane P, deviation 5).
 
+### Session 4 (2026-09-30, lane L `iw-look`, base `81a1e7ba2`) — the seven look items
+
+> Restored at the merge (2026-10-01) from the lane's own edits: the lane wrote this block, the disk filled before it
+> could commit it, and the worktree folder was deleted to free the disk. Deviation 4 carries the lane's final report.
+
+**Built** (each hunk under a `P108 IW-003 look (lane L)` comment). Every item was shown red on the base's own deploy first
+(`drive-iw-look.js`, 80/126 on the base with the fit, read and seek clauses, 5/19 with the pad, hint and Sami ones;
+`iw-look-scratch/base/`), then built, then green.
+
+1. **The widest program whole at 1024 × 768, 1368 × 900 and 390** (`blocks.js`). Measured on the base, all fifteen
+   reference programs loaded into the workspace, EN and FR: 26 of 90 had a block past the view's edge. Two causes. (a) A
+   program the graph hands in whole or a block at a time (a pinned plot's program, the pad in Teach — `appendOne`) was
+   never fitted: that path runs with Blockly's events off, so the edit-time fit never saw it (the eggs' until 468 px in a
+   351 px view at 1368, scale 0.8); and the load-time fit measured before Blockly had drawn the blocks. Now `appendOne`
+   fits too, and every fit runs after Blockly's queued renders (`whenDrawn`). (b) Beside a side drawer some programs
+   cannot be whole even at the fit's floor 0.5 (Sami's bench at 1024: 263 px of stack for 168 px of room). Now, zoomed
+   to 0.5 and redrawn there (the side drawer's own width follows the zoom — 248 px at 0.8, 191 at 0.5 on one drawer),
+   a program still cut moves the drawer to the workspace's foot (the phone's strip; `stripIfCut` → `toStrip`, the
+   program, the lock and the ring kept), where the floor is 0.45 (the zoom's own minScale, `FIT_MIN_STRIP`); the drawer
+   goes back beside the program when it fits there again at 0.5 with 16 px to spare. At 1024 the drawer moves to the foot
+   for 5 of 15 programs in English and 10 of 15 in French (the drawer is 196–269 px of a 412 px box); at 1368 for none;
+   a phone's drawer was always the strip. The widest program is the eggs' until (`count of 🥚 in [🧺] = 4`): 0.63 at
+   1024 EN, 0.57 FR (strip); 0.53 at 1368 EN, 0.5 FR (beside the drawer); 0.5 at 390 EN, 0.46 FR. Sami's bench: 0.72 /
+   0.68 at 1024 (strip), 0.6 / 0.52 at 1368, 0.57 / 0.55 at 390.
+2. **The envelopes' read reads the envelope.** Palette (the engine's) takes the request (a new wire from Start world):
+   where the plot's letters carry a name (`iwlReadsEnvelope`), Olive's read is "read the envelope" / « lire l’enveloppe »
+   — in the drawer, on the placed block, on the pad's key (Pad keys take an Olive key's label from the palette) and on
+   its card (Block card, the request wired in too: its title, its line, and an example that reads then goes to the door,
+   drawn with the same word). Mamie's note keeps "read the note", its line and its if (the control in every row).
+3. **`go to nearest` starts on what the job seeks.** Palette's `go_nearest` entry carries `seek` — the kind of the
+   request's reference program's first go to nearest (`iwlFirstSeek`) — Kit palette passes it on, and the drawer block
+   starts on it: rock on the stones and the bench, egg on the eggs (the drawer said "egg" on all three).
+4. **The phone's pad under the world** (`cg007Look.ts`, the phone rule rewritten in place). Measured on the base: every
+   key of the pad on the world's right half (5 to 8 keys), sami-thanks' door under the forward key. Now under 600 px the
+   stage is a column — the world, then the pad, 48 px keys in a row, ← ↑ → first (the mockup's ≤ 900 rule) — and the room
+   is taken back from Mamie's dots (hidden on a phone: the tulips' chips and the job card say how many are full; beside
+   her line they squeezed it to four lines) and the controls' spare margin; the controls are a little tighter (8px 10px,
+   14 px) so the French Conduire · Apprendre · Jouer fit one row. AC4 on the tulips, re-measured: Play's bottom 756 (was
+   760 EN / 783 FR), the owl's top 812 (was 818 / 841), EN and FR.
+5. **"N of 4 done" on the eggs.** Choose hint: a job of ONE target counts that target's meter (the job card's rule) —
+   "2 of 4 done" on the basket, "4 of 8" on the bench, "1 of 3" on a tulip; a one-letter door and a job of many targets
+   say what they said.
+6. **The kits' full green** (`METER_FULL` in both kits): `#058149` — the page's own `--leaf` — on the full chip (its
+   numbers are text, white: 4.95:1, the 4.5:1 rule) and the island's full bar (a mark: 4.95:1 against its white ring, the
+   3:1 rule). The mockup's `#3FA66B` measured 3.05:1. The page's `--leaf` override (lane M) is now the kits' own colour.
+7. **One Sami on the island** — driven: two on the base (his pin standing, and on his built bench), with the bench won and
+   his other requests open, and with all his requests done. Draw world now reads each draw: a built bench seats him when
+   his pin has nothing to ask (he does not stand as well); with a request to ask (his bubble) he stands and the bench is
+   drawn `vacant` (both kits honour it). Read each draw, so a bench that wears and is mended keeps one Sami.
+
+**Readings** (worktree; spec files one at a time on the final tree `02d20a159`; the drives on ONE deploy from
+`drive-pages.sh` at `02d20a159` unless named; previous = the brief's §3 on `81a1e7ba2`):
+
+| gate | exit | total | previous |
+|---|---|---|---|
+| `iwLook` (new) | 0 | **15 / 15** | — (each 🔴 row red under its arm) |
+| `cg001GardenKit` · `ig007Garden3d` | 0 · 0 | **57** · **50** | 56 · 49 (+1 each: the vacant bench) |
+| `cg003Template` | 0 | 148 | 148 (one row re-cut: the phone's pad) |
+| `cg002Engine` · `iw006Save` · `cg005Olive` · `cg006Requests` · `ig004Island` · `iw004Blocks` · `p108s2Join` · `iw003Missions` | 0 each | 259 · 16 · 41 · 83 · 38 · 59 · 4 · 63/63 | same |
+| shell `node --test` | 0 | 92 / 92 | 92 |
+| `npm run template:garden` | 0 | 0 drift | 0 |
+| page drive `drive-pages.sh` (`--mockup`) | 0 (generate 0 · assemble 0 · deploy 0 · drive 0) | **331 / 331**; AC4 at 390: Play's bottom 752, the owl's top 808 (EN and FR) | 331 / 331 (760 / 818 EN, 783 / 841 FR) |
+| `drive-iw-look.js` (new) | 0 | **143 / 143** | the base: 80 / 126 (fit · read · seek), 5 / 19 (pad · hint · Sami) |
+| modes · IW-001 · IW-004 2D · 3D | 0 each | 90 / 90 · 38 / 38 · 19 / 19 · 3 / 3 | same |
+| island `--perf` · 3D | 0 · 0 | 65 / 65 (AC6 p95 16.7 ms at CPU ×4, 1198 frames) · 5 / 5 | 65 / 65 (16.8) · 5 / 5 |
+| Olive `drive-olive.sh pages` (the same source, deployed just before the commit) | 0 | 22 / 22 (P-390 red at 865 of 844 with a two-row pad; green with one row) | 22 / 22 |
+| robots (no screenshots: the disk was full) | the JSON write failed (ENOSPC) after the clauses | 60 / 60 clauses | 60 / 60 |
+| `drive-iw003-mamie.js` workshop (no screenshots) | 0 | 34 / 34 | 34 / 34 |
+| robots 3D · Workshop 3D · nogl | 0 each, on `f90473561` (before the two fixes) | 4 / 4 · 24 / 24 · 8 / 8 | same |
+| mamie island 2D / 3D / look3d · stones 2D / 3D · post 2D / 3D · biscuit · kit fixtures 2D / 3D | **not run on the final tree** — the box's disk filled (ENOSPC: 143 MB free of 460 GB, not this lane's) | — | 7 · 3 · 6 · 32 · 14 · 17 · 10 · 24 · 44 · 30 |
+
+**Arms** (each source mutated, the row red, restored by copy): the one-target hint off → item 5's row; `seek` never set
+→ item 3's two rows; Kit palette dropping `seek` → its row; the read label never the envelope → item 2's two rows; the
+envelope card never chosen → its two rows; Pad keys' Olive label off → item 2's two rows; Draw world's Sami rule off →
+item 7's two rows; each kit's `METER_FULL` back to `#3FA66B` → item 6's rows (2D, 3D); each kit ignoring `vacant` → the
+lane-L row in cg001GardenKit / ig007Garden3d.
+
+**Screenshots looked at** (`iw-look-scratch/pages/look-shots/`): `iwl-fit-1024-en-sami-bench` — the bench's program whole
+at 0.72, the drawer a strip at the workspace's foot (forward, turn left, turn right…), "go to the nearest 🪨 rock";
+`iwl-fit-1368-fr-eggs-count` — « jusqu’à nombre de 🥚 œuf dans 🧺 panier = 4 » whole at 0.8 over the strip;
+`iwl-fit-390-fr-eggs-count` — whole and small (0.46); `iwl-pad-390-fr-sami-thanks` — the whole world, Mamie Rose's door
+and its 0/1 under the house, the pad a row under it (↰ ↑ ↱ take drop), Conduire · Apprendre · Jouer on one row;
+`iwl-pad-390-en-envelopes` — the three doors whole, the pad in two rows (eight keys); `iwl-read-card-1368-fr-envelopes`
+— « lire l’enveloppe », its line, the example ramasser · lire l’enveloppe · aller à · poser; `iwl-read-drawer-*` — the
+drawer's violet read block; `iwl-hint-1368-*-eggs` — "3 of 4 done…" / « 1 sur 4, c’est fait… »; `iwl-sami-*` (cropped)
+— Sami sitting on his built bench under a dark-green full bar, no one standing by it; with a request open, he stands by
+that plot and the bench is empty.
+
+**Against §4.5 (brief s4):** 1 ✅ · 2 ✅ · 3 ✅ · 4 ✅ (with the cost below) · 5 ✅ · 6 ✅ (4.5:1 text rule; 3:1 mark rule for
+the bar) · 7 ✅ (it was a defect: driven, two Samis).
+
+**Deviations, with the reason:**
+
+1. **The strip drawer at 1024** (item 1): "the widest program whole" cannot be met beside a side drawer that takes
+   196–269 px of the 412 px box — Sami's bench would need 0.32 there. The drawer moves to the foot only for a program
+   still cut at 0.5 beside it (measured, per program); every other program keeps the side drawer. The cost: at 1024 a
+   child building a long program sees the drawer jump to the foot once, and the strip shows three or four blocks at a
+   time (a sideways scroll). Richard may prefer a narrower side drawer at 1024 — a look call, not measured with the
+   children.
+2. **0.45 on a phone's strip** (Blockly's own minScale, what − reaches): the French eggs' until is 650 units wide; the
+   phone's workspace is 330 px. It shows whole at 0.46 — small; a two-line until is the other way (a block shape).
+3. **Mamie's dots hidden on a phone** and **the phone's controls 8px 10px / 14 px** (the mockup's ≤ 560 is 9px 14px /
+   15 px): the room for the pad under the world without Play or the owl leaving the first screen (AC4).
+4. **Play still drops on some phone missions** (item 4, final tree `02d20a159`: a pad of seven keys or more is one row
+   that scrolls sideways, like the phone's drawer). Play's bottom is 825 on the eggs and 832 on the envelopes in English
+   (on the first screen), 848 on the eggs in French — 4 px below it (the base had 852 with the pad over the world). AC4
+   grades the tulips; this is flagged for Richard.
+5. **Spec rows re-cut** (each named): `cg003Template` "P106 s4 (b): the pad … absolute only in the phone rule" → the
+   phone's column, never absolute; `ig007Garden3d` "the island's compact meter …" → `--c:#058149`; `drive-cg001-kit.js`
+   `GREEN` → `rgb(5, 129, 73)`.
+
+**FR lines for Richard's read:** « lire l’enveloppe » · « Olive lit le nom sur l’enveloppe que tient {b}. Ensuite,
+« aller à » ce qu’Olive a lu emmène {b} à cette porte. » · (the hint, unchanged words) « 2 sur 4, c’est fait. Qu’est-ce
+qui attend encore ? »
+
+**Could not verify:** the tablet (touch on the strip drawer at 1024; a real 1024 × 768 screen's dpr); a real phone's text
+at 0.46; the island's one Sami in Garden 3D on a real GPU (the 3D kit's vacant bench is graded in its spec; the island 3D
+drive ran under swiftshader); the bench wearing and mended on the island in a long watch (Draw world's rule is per draw;
+spec rows only).
