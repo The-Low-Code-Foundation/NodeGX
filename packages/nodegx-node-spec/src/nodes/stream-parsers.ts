@@ -16,8 +16,8 @@
  * matches nothing, and a capture group that did not participate reads `''`. Truncation keeps the
  * TAIL (:492-495); a UTF-8 length counts a lone surrogate as three bytes (:466-487).
  *
- * ONE LINE DIFFERS from the runtime, marked at the line: where the runtime's scanner makes no
- * progress and loops forever (row C17), the spec steps over the stray character.
+ * The line marked C17 differed from the runtime until s16: the runtime's scanner made no progress
+ * on a stray character and looped forever. Ruled "fix it" (2026-10-01); the runtime now has it too.
  */
 
 // ------------------------------------------------------------------------------------------------
@@ -68,11 +68,11 @@ export function scanJsonValues(buffer: string, options?: { arrayFraming?: boolea
     } catch (e) {
       errors.push('Could not parse JSON value: ' + describeError(e));
     }
-    // ⚠️ ROW C17 (NSP-013 §6.2) — the one line that is NOT the runtime's. A stray `}` (and, with
+    // C17 (NSP-013 §6.2, fixed s16 — the runtime's line is now this one). A stray `}` (and, with
     // no array framing, a stray `]` or `,`) where a value should start is a "scalar" that ends
-    // where it starts: `scanOneValue` returns `i`, the slice is '', `JSON.parse('')` throws and
-    // the runtime sets `i = end` — no progress, so it records the same error again, forever, on
-    // the main thread. The spec records that first error and steps over the one character.
+    // where it starts: `scanOneValue` returns `i`, the slice is '', `JSON.parse('')` throws.
+    // `i = end` alone made no progress and recorded the same error forever, on the main thread.
+    // Record that first error and step over the one character.
     i = end > i ? end : i + 1;
   }
 

@@ -23,33 +23,6 @@ import { runtimeTarget, withViewerNodes, type RuntimeTarget } from '../helpers/n
 
 import NodeDefinition = require('../../src/nodedefinition');
 
-/**
- * NSP-013 §6 C17 — the agent family's JSON scanner (stream-parsers.ts `scanJsonValues`) never
- * returns on a stray `}` (or, with no array framing, a stray `]` or `,`) where a value should
- * start: `scanOneValue` ends where it starts and `i = end` makes no progress. A target that spins
- * cannot be graded — the play never comes back. So THIS FILE loads the runtime's own source with
- * ONE line added in front of `i = end;` (made in memory, the Counter copy's technique — the file
- * on disk is never touched): no progress THROWS with the row's name, where the runtime would loop.
- * Everything before that point is the runtime's code, unchanged. When C17 is ruled and fixed, the
- * anchor moves, this factory throws, and the seam goes in the same commit as the row.
- */
-jest.mock('../../src/nodes/std-library/agent/stream-parsers', () => {
-  /* eslint-disable @typescript-eslint/no-var-requires */
-  const mockFs = require('fs');
-  const mockPath = require('path');
-  const mockTs = require('typescript');
-  /* eslint-enable @typescript-eslint/no-var-requires */
-  const file = mockPath.join(__dirname, '..', '..', 'src', 'nodes', 'std-library', 'agent', 'stream-parsers.ts');
-  const source: string = mockFs.readFileSync(file, 'utf8');
-  const anchor = '    i = end;\n';
-  if (source.split(anchor).length !== 2) throw new Error('stream-parsers.ts no longer has exactly one `i = end;` — C17 moved; re-read the file and the row');
-  const guarded = source.replace(anchor, "    if (end === i) throw new Error('C17: scanJsonValues made no progress at ' + i + ' — the runtime loops here forever');\n" + anchor);
-  const js = mockTs.transpileModule(guarded, { compilerOptions: { module: mockTs.ModuleKind.CommonJS, target: mockTs.ScriptTarget.ES2019 } }).outputText;
-  const module = { exports: {} as Record<string, unknown> };
-  new Function('require', 'module', 'exports', js)(require, module, module.exports);
-  return module.exports;
-});
-
 /** The runtime target every spec is graded on: the runtime's own nodes plus the viewer-provided ones this phase specced. */
 const batchTarget = (): RuntimeTarget => withViewerNodes(runtimeTarget());
 
@@ -173,13 +146,6 @@ const unknownUnitThrows = (d: Divergence) => {
 };
 
 /**
- * NSP-013 §6 C17 — JSON Stream Parser's scanner makes no progress on a stray closer and the
- * runtime loops forever (the seam at the top of this file turns the loop into a throw). Narrow: the
- * seam's own message; nothing else throws it.
- */
-const scannerNoProgress = (d: Divergence) => d.difference.threw !== undefined && /C17: scanJsonValues made no progress/.test(d.difference.threw);
-
-/**
  * NSP-013 §6 C19 — Animate To Value looks its Easing Curve up by name (animate-to-value.ts :226); a
  * name the set does not have — `''`, `null`, `undefined` or unknown text — stores `undefined`, and the
  * run's first curve call throws inside the scheduler's timer pass, which nothing catches
@@ -211,7 +177,6 @@ const refusedCurveWritten = (d: Divergence) =>
 const C6_ANY_PORT: KnownRow = { row: 'NSP-011 §6 C6 (any port — node.ts) — a later value merged into a unit object the port once held (R7)', matches: unitMergeOnAny(() => true) };
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
-  'net.noodl.JSONStreamParser': [{ row: 'NSP-013 §6 C17 — a stray `}` (Stream) or `}` `]` `,` (Single) where a value should start: the scanner never advances, the runtime loops forever', matches: scannerNoProgress }],
   States: [{ row: 'NSP-013 §6 C21 — a transition whose curve bezier-easing refuses throws in the frame-end callback: the move is abandoned half-done, the rest of the queue dropped, no outcome reported', matches: refusedCurveWritten }],
   'net.noodl.animatetovalue': [{ row: 'NSP-013 §6 C19 — an Easing Curve the set does not have (`\'\'`, null, unknown text) throws in the scheduler\'s timer pass, and every timer in the app stops', matches: easeIsNotAFunction }],
   'net.noodl.DateAdd': [{ row: 'NSP-013 §6 C16 — an unknown Unit throws in Date Add\'s setter', matches: unknownUnitThrows }],

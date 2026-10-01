@@ -1,7 +1,7 @@
 ---
 id: P107-C17
 title: JSON Stream Parser freezes the whole app on a stray `}` in Stream or Single format
-status: needs-ruling
+status: fixed
 severity: blocker
 area: runtime / JSON Stream Parser
 found: P107 (the node says what it does) s12, 2026-09-30/10-01
@@ -21,3 +21,8 @@ JSON Stream Parser freezes the whole app on a stray `}` in Stream or Single form
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled (Richard, 2026-10-01, P107 s16):** fix it. **Fixed:** `scanJsonValues` records the error once and steps
+over the character (`i = end > i ? end : i + 1`, the spec's line). The runtime conformance test's `jest.mock` seam
+(which turned the loop into a throw), the known row and the two scenarios' `row` marks are gone; both scenarios now
+pass on the runtime. Runtime node-spec + agent suites: 304 passed, 55 skipped.

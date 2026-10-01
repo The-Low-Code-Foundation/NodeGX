@@ -238,7 +238,11 @@ export function scanJsonValues(buffer: string, options?: JsonScanOptions): JsonS
     } catch (e) {
       errors.push('Could not parse JSON value: ' + describeError(e));
     }
-    i = end;
+    // P107-C17: a stray `}` (and, with no array framing, a stray `]` or `,`) where a value
+    // should start is a "scalar" that ends where it starts — `scanOneValue` returns `i` and the
+    // slice is ''. `i = end` alone made no progress there and recorded the same error forever,
+    // freezing the main thread. Record it once and step over the character.
+    i = end > i ? end : i + 1;
   }
 
   return { values, rest: '', errors };

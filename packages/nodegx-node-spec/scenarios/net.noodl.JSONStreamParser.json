@@ -394,9 +394,8 @@
     ]
   },
   {
-    "name": "ROW C17 — a stray } where a value should start: the runtime's scanner never advances and the app freezes; the spec records the scanner's first error and steps over it",
-    "because": "stream-parsers.ts :234-241 — scanOneValue returns i for a closer, JSON.parse('') throws, `i = end` makes no progress",
-    "row": "NSP-013 §6 C17",
+    "name": "A stray } where a value should start: the scanner records one error and steps over it (was row C17 — the runtime looped forever; fixed s16)",
+    "because": "stream-parsers.ts :234-241 — scanOneValue returns i for a closer, JSON.parse('') throws, `i = end` makes no progress — until C17 was fixed (s16) `i = end` made no progress here; it now steps over the character",
     "params": {
       "format": "stream"
     },
@@ -412,9 +411,8 @@
     ]
   },
   {
-    "name": "ROW C17, the Single arm — a stray comma after a whole document",
-    "because": "stream-parsers.ts :222-224 — without array framing a comma is not skipped, and a scalar that starts on one ends on it",
-    "row": "NSP-013 §6 C17",
+    "name": "A stray comma after a whole document, Single format: one error, then the next value (was row C17, the Single arm; fixed s16)",
+    "because": "stream-parsers.ts :222-224 — without array framing a comma is not skipped, and a scalar that starts on one ends on it — until C17 was fixed (s16) `i = end` made no progress here; it now steps over the character",
     "params": {
       "format": "single"
     },

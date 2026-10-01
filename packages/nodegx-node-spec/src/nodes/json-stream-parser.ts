@@ -26,9 +26,9 @@
  * retained chunk — pulses `Cleared`, and is `done` when anything was there, else `unchanged`
  * (:349-369).
  *
- * ROW C17 (§6.2): a stray `}` (Stream), or a stray `}`, `]` or `,` (Single), where a value should
- * start makes the runtime's scanner loop forever on the main thread. The spec records the error
- * the scanner's first pass records and steps over the character (stream-parsers.ts, marked).
+ * C17 (§6.2, ruled "fix it" and fixed s16): a stray `}` (Stream), or a stray `}`, `]` or `,`
+ * (Single), where a value should start records the scanner's error once and steps over the
+ * character (stream-parsers.ts, marked). The runtime looped forever on the main thread before.
  */
 
 import { defineNode } from '../spec';
