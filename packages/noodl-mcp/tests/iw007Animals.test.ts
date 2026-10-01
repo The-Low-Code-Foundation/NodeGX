@@ -71,8 +71,9 @@ describe('IW-007 AC2 (lane A) — the refuge unlocks Animals; an animal bought a
       expect([itemIds(open), open.showItems, open.showLater]).toEqual([['rabbit', 'sheep'], true, false]);
       expect(open.items.map((i: any) => i.name)).toEqual(['rabbit', 'sheep'].map((id) => SHOP.find((s) => s.id === id)!.name[lang]));
     }
-    // Known-firing beside it: the Build tab is not lane A's — it says what it said (its "later" line), refuge or not.
-    expect(rows(withRefuge(kid()), 'build').later).toBe(word('iw6hLaterBuild'));
+    // Known-firing beside it: the Build tab is not lane A's — it says its own line, refuge or not. (s5 merge: lane B's
+    // Build tab is open and its line says where a bought blueprint goes — iw7bBuildHow, no longer iw6hLaterBuild.)
+    expect(rows(withRefuge(kid()), 'build').later).toBe(word('iw7bBuildHow'));
   });
 
   it('🔴 the card: what she has, the cost, what is left, and the name box (the default name in it); short, no name box and how many more', () => {
