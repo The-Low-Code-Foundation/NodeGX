@@ -541,8 +541,12 @@ ${Object.entries(PAD_GO.emoji).map(([k, e]) => `.bg-key-go-${k}::after { content
 .bg-shop-short { background-color: var(--tidy); border: 2px solid var(--tidy-edge); border-radius: 14px; padding: 6px 12px; }
 @media (max-width: 600px) { .bg-island-top { flex-wrap: wrap !important; } .bg-shop { padding: 8px; } .bg-shop-items { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; } }
 /* P108 IW-006 owed (s5, lane O): the win card's "Now in the shop" — quiet, after the thanks and the pay line (principle 2);
-   My robots' "Send to a job" chips under a hairline, as the copy chips are. */
+   My robots' "Send to a job" chips under a hairline, as the copy chips are. A chip on My robots (a card's, and the hats
+   of the stage's options) wraps inside its panel: a job's title, and a hat still to earn ("Chapeau tournesol · un cadeau
+   de Mamie Rose", 405 px at 390 FR, measured by this lane's drive — the page scrolled sideways), never wider. */
 .bg-win-shop { color: var(--ink-2) !important; }
 .bg-robot-send { border-top: 2px dashed var(--line); padding-top: 8px; }
 .bg-robot-send .bg-chip { min-height: 44px; }
+.bg-robot-card .bg-chip, .bg-robo .bg-chip { max-width: 100%; box-sizing: border-box; }
+.bg-robot-card .bg-chip *, .bg-robo .bg-chip * { white-space: normal !important; overflow-wrap: anywhere; max-width: 100%; }
 `;

@@ -70,6 +70,8 @@ function cards(m: any, lang: Lang = 'en', script = ROBOT_CARDS_SCRIPT, told: unk
 }
 const cardOf = (cs: any[], kind: string) => cs.find((c) => c.kind === kind)!;
 const upWord = (lang: Lang, upId: string) => word(lang, ({ 'can+': 'ig5UpCan', 'basket+': 'ig5UpBasket', boots: 'ig5UpBoots' } as Record<string, string>)[upId]);
+/** The shop's own name for an upgrade, first letter small — what the slot and the win card call it (she finds it by that name). */
+const shopWord = (lang: Lang, upId: string) => { const n = SHOP.find((i) => i.id === upId)!.name[lang]; return n.charAt(0).toLowerCase() + n.slice(1); };
 
 // ── O1: the slot ──
 /** The slot of every card, for a fresh kid: the upgrade, the shop, SHOP's price, the request that shelves it, never an islander. */
@@ -79,7 +81,7 @@ function slotsOfAFreshKid(script = ROBOT_CARDS_SCRIPT) {
     for (const c of cards(kid(lang), lang, script)) {
       const up = UPGRADES.find((u) => u.id === ({ pip: 'can+', cobble: 'basket+', pocket: 'boots', echo: 'can+' } as Record<string, string>)[c.kind])!;
       const t = String(c.upgradeText);
-      out.push({ kind: c.kind, lang, text: t, ok: { names: t.includes(upWord(lang, up.id)), shop: t.includes(lang === 'en' ? 'shop' : 'boutique'), price: t.includes(`🐚 ${price(up.id)}`), after: t.includes(titleOf(lang, up.unlockedBy)), noIslander: !ISLANDER_NAMES.some((n) => t.includes(n)) } });
+      out.push({ kind: c.kind, lang, text: t, ok: { names: t.includes(shopWord(lang, up.id)), shop: t.includes(lang === 'en' ? 'shop' : 'boutique'), price: t.includes(`🐚 ${price(up.id)}`), after: t.includes(titleOf(lang, up.unlockedBy)), noIslander: !ISLANDER_NAMES.some((n) => t.includes(n)) } });
     }
   }
   return out;
@@ -92,8 +94,8 @@ describe('O1 — My robots’ upgrade slot: the shop, never an islander', () => 
     for (const s of slots) expect({ kind: s.kind, lang: s.lang, ...s.ok }).toEqual({ kind: s.kind, lang: s.lang, names: true, shop: true, price: true, after: true, noIslander: true });
     // The words, whole: Pip's slot in both languages.
     const pip = (lang: Lang) => slots.find((s) => s.kind === 'pip' && s.lang === lang)!.text;
-    expect(pip('en')).toBe(fill(word('en', 'iw6oUpLater'), { up: upWord('en', 'can+'), q: titleOf('en', 'rows-trick'), n: price('can+') }));
-    expect(pip('fr')).toBe(fill(word('fr', 'iw6oUpLater'), { up: upWord('fr', 'can+'), q: titleOf('fr', 'rows-trick'), n: price('can+') }));
+    expect(pip('en')).toBe(fill(word('en', 'iw6oUpLater'), { up: shopWord('en', 'can+'), q: titleOf('en', 'rows-trick'), n: price('can+') }));
+    expect(pip('fr')).toBe(fill(word('fr', 'iw6oUpLater'), { up: shopWord('fr', 'can+'), q: titleOf('fr', 'rows-trick'), n: price('can+') }));
     // Known-firing beside the absence: the old slot said "from Mamie Rose" — the islander check reads it.
     const old = fill(word('en', 'ig5UpEmpty'), { up: upWord('en', 'can+'), who: word('en', 'islMamie') });
     expect(ISLANDER_NAMES.some((n) => old.includes(n))).toBe(true);
@@ -107,7 +109,7 @@ describe('O1 — My robots’ upgrade slot: the shop, never an islander', () => 
       expect(cardOf(cards(before, lang), 'pip').upgradeText).toContain(titleOf(lang, 'rows-trick'));
       const after = wins(before, ['rows-trick']);
       expect(shelf(after)).toContain(SHOP_IDS.item + 'can+');
-      expect(cardOf(cards(after, lang), 'pip').upgradeText).toBe(fill(word(lang, 'iw6oUpShop'), { up: upWord(lang, 'can+'), n: price('can+') }));
+      expect(cardOf(cards(after, lang), 'pip').upgradeText).toBe(fill(word(lang, 'iw6oUpShop'), { up: shopWord(lang, 'can+'), n: price('can+') }));
     }
   });
 

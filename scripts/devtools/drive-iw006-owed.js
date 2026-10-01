@@ -73,7 +73,6 @@ const SAVE = pageRun('Logic/Bring home', { model: {} }, '\n;Outputs.buyItem = bu
 const SHOP = SAVE.SHOP;
 const price = (id) => SHOP.find((i) => i.id === id).price;
 const shopName = (lang, id) => SHOP.find((i) => i.id === id).name[lang];
-const UP_WORD = { 'can+': 'ig5UpCan', 'basket+': 'ig5UpBasket', boots: 'ig5UpBoots' };
 const ISLANDER_NAMES = ['islMamie', 'islSami', 'islBiscuit'].flatMap((k) => [w('en', k), w('fr', k)]).filter(Boolean);
 const upOf = (id) => SAVE.UPGRADES.find((u) => u.id === id);
 /** The win card's shop line for an upgrade (Logic/Shop news's words). */
@@ -82,8 +81,9 @@ const newsLine = (lang, upId) => {
   return w(lang, 'iw6oNews', { what: w(lang, 'iw6oNewsItem', { up: nm.charAt(0).toLowerCase() + nm.slice(1), n: price(upId) }) });
 };
 /** A slot as Robot cards writes it, empty: on the shelf, or still after its request. */
-const slotShelf = (lang, upId) => w(lang, 'iw6oUpShop', { up: w(lang, UP_WORD[upId]), n: price(upId) });
-const slotLater = (lang, upId) => w(lang, 'iw6oUpLater', { up: w(lang, UP_WORD[upId]), n: price(upId), q: titleOf(lang, upOf(upId).unlockedBy) });
+const shopWord = (lang, upId) => { const nm = shopName(lang, upId); return nm.charAt(0).toLowerCase() + nm.slice(1); };
+const slotShelf = (lang, upId) => w(lang, 'iw6oUpShop', { up: shopWord(lang, upId), n: price(upId) });
+const slotLater = (lang, upId) => w(lang, 'iw6oUpLater', { up: shopWord(lang, upId), n: price(upId), q: titleOf(lang, upOf(upId).unlockedBy) });
 
 const win = (model, id, robotId = 'r1') =>
   pageRun('Logic/Complete request', { model, requestId: id, tricks: req(id).tricks, reward: req(id).reward, program: JSON.stringify(req(id).referenceProgram), robotId, now: 1759300000000 }).model;
@@ -385,12 +385,12 @@ withDeployedSite({ dir: DIR }, async (page) => {
   // ── S3: the phone (FR): the send chips wrap inside the card, no sideways scroll ──
   await page.setViewport({ width: 390, height: 844, mobile: true });
   await openRobots();
-  const phone = await evaluate(`(() => { const vw = document.documentElement.clientWidth; const cs = [...document.querySelectorAll('.bg-robot-send')].filter((e) => e.offsetParent !== null); const chips = cs.flatMap((s) => [...s.querySelectorAll('.bg-chip')].filter((e) => e.offsetParent !== null)); return { vw, sideways: document.scrollingElement.scrollWidth > vw + 1, sends: cs.length, chips: chips.length, outside: chips.filter((e) => { const r = e.getBoundingClientRect(); return r.left < -1 || r.right > vw + 1; }).length }; })()`);
+  const phone = await evaluate(`(() => { const vw = document.documentElement.clientWidth; const cs = [...document.querySelectorAll('.bg-robot-send')].filter((e) => e.offsetParent !== null); const chips = cs.flatMap((s) => [...s.querySelectorAll('.bg-chip')].filter((e) => e.offsetParent !== null)); const wide = [...document.querySelectorAll('.bg-robot-card *')].filter((e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.right > vw + 1; }).slice(0, 4).map((e) => String(e.className).slice(0, 40) + ': ' + (e.innerText || '').slice(0, 50)); return { vw, sideways: document.scrollingElement.scrollWidth > vw + 1, sends: cs.length, chips: chips.length, outside: chips.filter((e) => { const r = e.getBoundingClientRect(); return r.left < -1 || r.right > vw + 1; }).length, wide }; })()`);
   await evaluate(`(() => { const s = [...document.querySelectorAll('.bg-robot-send')].find((e) => e.offsetParent !== null); if (s) s.scrollIntoView({ block: 'center' }); })()`);
   await wait(300);
   await shot('iw6o-390-fr-robots-send');
   readings.s3 = phone;
-  check('S3 (390 × 844, FR): My robots’ send chips are inside the page — no sideways scroll, every chip within the width', phone.sends >= 2 && phone.chips >= 2 && !phone.sideways && phone.outside === 0, phone);
+  check('S3 (390 × 844, FR): My robots’ send chips are inside the page — no sideways scroll (a hat still to earn included), every chip within the width', phone.sends >= 2 && phone.chips >= 2 && !phone.sideways && phone.outside === 0, phone);
 
   check('E: 0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
   check('E: 0 network errors through the whole drive', page.networkErrors.length === 0, page.networkErrors.slice(0, 5));

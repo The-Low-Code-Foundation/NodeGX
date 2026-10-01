@@ -335,8 +335,8 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iwlCdReadEnvelope: s('Olive reads the name on the envelope {b} holds. Then “go to” what Olive read takes {b} to that door.', 'Olive lit le nom sur l’enveloppe que tient {b}. Ensuite, « aller à » ce qu’Olive a lu emmène {b} à cette porte.'),
   // ── P108 IW-006 owed (s5, lane O): My robots' upgrade slot sends her to the shop (never to an islander); "now in the
   // shop" under the win card's thanks; a robot sent to a job from its card on My robots ──
-  iw6oUpShop: s('Empty slot · {up} · in the island’s shop for 🐚 {n}', 'Emplacement vide · {up} · dans la boutique de l’île pour 🐚 {n}'),
-  iw6oUpLater: s('Empty slot · {up} · in the shop after “{q}”, for 🐚 {n}', 'Emplacement vide · {up} · dans la boutique après « {q} », pour 🐚 {n}'),
+  iw6oUpShop: s('Empty slot · in the island’s shop: {up}, 🐚 {n}', 'Emplacement vide · dans la boutique de l’île : {up}, 🐚 {n}'),
+  iw6oUpLater: s('Empty slot · in the shop after “{q}”: {up}, 🐚 {n}', 'Emplacement vide · dans la boutique après « {q} » : {up}, 🐚 {n}'),
   iw6oUpMine: s('{up} · from the shop', '{up} · de la boutique'),
   iw6oNews: s('Now in the shop: {what}', 'Nouveau dans la boutique : {what}'),
   iw6oNewsItem: s('{up}, 🐚 {n}', '{up}, 🐚 {n}'),

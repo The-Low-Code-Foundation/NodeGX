@@ -2121,7 +2121,7 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       // owed defect ("… · from Mamie Rose": a gift that never comes). The slot now names the shop, its price (SHOP's) and the
       // request that puts it on the shelf (iw006Owed.test.ts O1 grades every card, EN and FR).
       const canPrice = SHOP.find((i) => i.id === 'can+')!.price;
-      expect(cards[0].upgradeText).toBe(`Empty slot · Bigger can · 6 waters · in the shop after “Water both rows the same way”, for 🐚 ${canPrice}`);
+      expect(cards[0].upgradeText).toBe(`Empty slot · in the shop after “Water both rows the same way”: a bigger can, 🐚 ${canPrice}`);
       expect(cards[0].hats.find((h: any) => h.id === 'pip|sun')).toMatchObject({ locked: false });
       expect(cards[2].paints).toEqual([]);
       expect(cards[1].paints.find((p: any) => p.selected).id).toBe('cobble|#7A8CA3');

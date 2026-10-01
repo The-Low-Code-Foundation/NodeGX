@@ -36,7 +36,7 @@ import { LAND_ID, SHOP, UPGRADES } from './cg002Content';
 import { SAVE_HELPERS } from './cg002Scripts';
 import { assignRobotScript } from './iw008Crew';
 
-/** The shop's upgrade items by upgrade id: what the slot and the win card say (its name, its price — SHOP's own). */
+/** The shop's upgrade items by upgrade id: what the slot and the win card say (its name — the shop's, so she finds it there — and its price, SHOP's own). */
 export const IW6O_UPGRADE_ITEMS: Readonly<Record<string, { price: number; name: { en: string; fr: string } }>> = Object.fromEntries(
   SHOP.filter((i) => i.kind === 'upgrade' && i.upgrade).map((i) => [i.upgrade as string, { price: i.price, name: { en: i.name.en, fr: i.name.fr } }])
 );
@@ -55,14 +55,16 @@ var IW6O_ITEMS = ${JSON.stringify(IW6O_UPGRADE_ITEMS)};
 var IW6O_SEND_ID = ${JSON.stringify(IW6O_SEND_ID)};
 var iw6oStickers = Array.isArray(Inputs.stickers) ? Inputs.stickers : [];
 var iw6oDone = Array.isArray(Inputs.done) ? Inputs.done : [];
-/** The slot's words: a gift (a sticker) names who gave it; bought says the shop; empty says the shop, its price, and the request that shelves it. */
+/** The slot's words: a gift (a sticker) names who gave it; bought says the shop; empty says the shop, the shop's name for it, its price, and the request that shelves it. */
 function iw6oUpText(up, upWord, upWho, has, upgraded, kinds) {
   if (!up) return '';
   if (has && upgraded) return iw6oStickers.indexOf(up.id) !== -1 ? fill(w.ig5UpHas, { up: upWord, who: upWho }) : fill(w.iw6oUpMine, { up: upWord });
   var item = IW6O_ITEMS[up.id], price = item ? item.price : 0, fits = false;
+  // The shop's own name for it (the card she will look for), first letter small: "in the island's shop: a bigger hod".
+  var nm = item ? String(item.name[lang] || item.name.en) : upWord, shopWord = nm.charAt(0).toLowerCase() + nm.slice(1);
   for (var k = 0; k < kinds.length; k++) if (up.fits.indexOf(kinds[k]) !== -1) fits = true;
-  if (iw6oDone.indexOf(up.unlockedBy) !== -1 && fits) return fill(w.iw6oUpShop, { up: upWord, n: price });
-  return fill(w.iw6oUpLater, { up: upWord, n: price, q: titleOf(up.unlockedBy) });
+  if (iw6oDone.indexOf(up.unlockedBy) !== -1 && fits) return fill(w.iw6oUpShop, { up: shopWord, n: price });
+  return fill(w.iw6oUpLater, { up: shopWord, n: price, q: titleOf(up.unlockedBy) });
 }
 /** The plots this robot can be sent to: every request she has won whose job needs its kind, in her band; ringed where it works or helps. */
 function iw6oSendPlots(row, kind, pre) {
