@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "726623a6-638f-5ee7-b674-c9e60494d367",
+  "name": "sendMessage",
+  "path": "/#__cloud__/sendMessage",
+  "type": "cloud",
+  "created": "2026-10-01T18:00:00.000Z",
+  "modified": "2026-10-01T18:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Write the signed-in learner's question about one card, starting the thread if there is none. Refused, never trimmed, over 4,000 characters; refused under an out-of-date privacy notice (TASK-L186)."
+}

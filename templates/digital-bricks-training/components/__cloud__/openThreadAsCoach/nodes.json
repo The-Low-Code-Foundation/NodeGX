@@ -1,0 +1,84 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "b0f3b8d9-394c-50e2-9b88-1805ae5696f1",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Staff (security: role:staff)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "conversationId",
+        "allowNoAuth": false,
+        "ptype-conversationId": "string",
+        "preq-conversationId": true
+      }
+    },
+    {
+      "id": "ask",
+      "type": "JavaScriptFunction",
+      "label": "Who is asking, and about what",
+      "x": 560,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * BUILD THE ONE REQUEST openThreadAsCoach HANDS shared/Thread (TASK-L186).\n *\n * A coach names a THREAD, never a learner: the thread says whose it is. The role is checked by nodegx.security.json (role:staff) before this graph runs, and `reader: 'coach'` is typed here, never derived from the caller's roles (the product's L116).\n */\nif (Inputs.conversationId !== undefined && Inputs.userId !== undefined) {\n  Outputs.request = {\n    op: 'open',\n    reader: 'coach',\n    conversationId: Inputs.conversationId,\n    authorUserId: Inputs.userId\n  };\n}\n",
+        "runOnChange-in-conversationId": true,
+        "runOnChange-in-userId": true
+      },
+      "ports": [
+        {
+          "name": "in-conversationId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "conversationId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-request",
+          "plug": "output",
+          "type": "*",
+          "displayName": "request",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "thread",
+      "type": "/#__cloud__/shared/Thread",
+      "label": "The thread's rules",
+      "x": 820,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "turns",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "params": "turns"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "Refused: the reason, never a sentence",
+      "x": 1080,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "refused"
+      }
+    }
+  ]
+}

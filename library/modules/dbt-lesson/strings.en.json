@@ -119,7 +119,18 @@
     "submissionNotYet": "not assessed yet",
     "messageFromLearner": "You wrote",
     "messageFromCoach": "Your coach wrote",
-    "messageUnread": "New"
+    "messageUnread": "New",
+    "reply": "Reply",
+    "conversationIntro": "Ask your coach anything about this. Your question stays with this card.",
+    "conversationPlaceholder": "Write your question",
+    "conversationSend": "Send",
+    "conversationSending": "Sending…",
+    "conversationClose": "Close",
+    "conversationLoading": "Loading the conversation…",
+    "conversationError": "This could not be loaded or sent. Try again in a moment.",
+    "conversationTooLong": "That is longer than {limit} characters, so it would be cut short. Make it shorter, or send it in two.",
+    "conversationStale": "Accept the updated privacy notice first, then send this again.",
+    "conversationWhenTheySeeIt": "Your coach sees this on your programme."
   },
   "dossier": {
     "title": "Your dossier",

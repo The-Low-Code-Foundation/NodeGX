@@ -48,6 +48,18 @@
     },
     "conceptList": {
       "call": "role:staff"
+    },
+    "openThread": {
+      "call": "authenticated"
+    },
+    "sendMessage": {
+      "call": "authenticated"
+    },
+    "openThreadAsCoach": {
+      "call": "role:staff"
+    },
+    "replyAsCoach": {
+      "call": "role:staff"
     }
   },
   "files": {

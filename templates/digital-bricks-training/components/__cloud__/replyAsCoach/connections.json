@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "2ffaf7aa-751f-56ed-996a-fa988cc26062",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "pm-conversationId",
+      "toId": "ask",
+      "toProperty": "in-conversationId"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "pm-body",
+      "toId": "ask",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "ask",
+      "toProperty": "in-userId"
+    },
+    {
+      "fromId": "ask",
+      "fromProperty": "out-request",
+      "toId": "thread",
+      "toProperty": "request"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "turns",
+      "toId": "res",
+      "toProperty": "pm-turns"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "reason",
+      "toId": "deny",
+      "toProperty": "errorMessage"
+    },
+    {
+      "fromId": "thread",
+      "fromProperty": "failed",
+      "toId": "deny",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "userId",
+      "toId": "notice",
+      "toProperty": "userId"
+    },
+    {
+      "fromId": "notice",
+      "fromProperty": "current",
+      "toId": "ask",
+      "toProperty": "in-noticeCurrent"
+    },
+    {
+      "fromId": "notice",
+      "fromProperty": "failed",
+      "toId": "deny",
+      "toProperty": "send"
+    }
+  ]
+}

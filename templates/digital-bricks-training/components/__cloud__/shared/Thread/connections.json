@@ -1,0 +1,67 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "89e6fce7-19dc-5a5e-a7ff-f4fd5b31a4c5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "th_in",
+      "fromProperty": "request",
+      "toId": "th_fn",
+      "toProperty": "in-request"
+    },
+    {
+      "fromId": "th_fn",
+      "fromProperty": "out-turns",
+      "toId": "th_out",
+      "toProperty": "turns"
+    },
+    {
+      "fromId": "th_fn",
+      "fromProperty": "out-turn",
+      "toId": "th_out",
+      "toProperty": "turn"
+    },
+    {
+      "fromId": "th_fn",
+      "fromProperty": "out-reason",
+      "toId": "th_out",
+      "toProperty": "reason"
+    },
+    {
+      "fromId": "th_fn",
+      "fromProperty": "out-learnerId",
+      "toId": "th_out",
+      "toProperty": "learnerId"
+    },
+    {
+      "fromId": "th_fn",
+      "fromProperty": "out-conversationId",
+      "toId": "th_out",
+      "toProperty": "conversationId"
+    },
+    {
+      "fromId": "th_fn",
+      "fromProperty": "out-anchorKind",
+      "toId": "th_out",
+      "toProperty": "anchorKind"
+    },
+    {
+      "fromId": "th_fn",
+      "fromProperty": "out-anchorId",
+      "toId": "th_out",
+      "toProperty": "anchorId"
+    },
+    {
+      "fromId": "th_fn",
+      "fromProperty": "out-done",
+      "toId": "th_out",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "th_fn",
+      "fromProperty": "out-failed",
+      "toId": "th_out",
+      "toProperty": "failed"
+    }
+  ]
+}

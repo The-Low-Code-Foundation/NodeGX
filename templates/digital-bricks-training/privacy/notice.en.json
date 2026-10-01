@@ -1,6 +1,6 @@
 {
   "_owner": "THE TEMPLATE'S PRIVACY NOTICE (TASK-L185). The one owner of its words AND its version. tools/build-privacy.mjs writes the `privacy` namespace into Data/Strings and the version into every cloud function that compares it; tools/check-privacy.mjs fails if any copy disagrees, if the deletion plan misses a collection, or if the text claims something the template does not do. It is NOT the product's notice: that one describes model calls, uploads, a connector and Google sign-in, none of which this template has. Change the words here, bump `version` when anything that matters changes, and run build-privacy.",
-  "version": "2026-10-01",
+  "version": "2026-10-02",
   "contactEmail": "richard@digitalbricks.io",
   "privacy": {
     "pageTitle": "Your data",
@@ -35,14 +35,18 @@
         "body": "If a lesson has been written for your project, it is stored as yours alone. It is about your work, so it is personal data in the same way your project is."
       },
       {
+        "heading": "Messages with your coach",
+        "body": "You can ask your coach about anything on your programme, and they can reply. We keep every message either of you writes, what on your programme it was about, when it was written, and whether the other person has opened it yet. Nothing you write to your coach is sent to an AI model. Your messages are in your download, and they are deleted with your account."
+      },
+      {
         "id": "nothingElse",
         "heading": "What is not here",
-        "body": "No messages, notes about you, reviews or scores can be written in this version, nothing you do is sent to an AI model, and you cannot attach files. When any of that changes, this notice changes first and asks you again."
+        "body": "No notes about you, reviews or scores can be written in this version, nothing you do is sent to an AI model, and you cannot attach files. When any of that changes, this notice changes first and asks you again."
       },
       {
         "id": "seen",
         "heading": "Who can see it",
-        "body": "You can see all of it, and download it whenever you like. Your coach can see your project, your path and how far along it you are, and the answers you save. Nobody else using the course can see any of it. The person who runs the service can reach the database to keep it working, and does not read it for anything else."
+        "body": "You can see all of it, and download it whenever you like. Your coach can see your project, your path and how far along it you are, the answers you save, and the messages you write to them. Nobody else using the course can see any of it. The person who runs the service can reach the database to keep it working, and does not read it for anything else."
       },
       {
         "id": "why",

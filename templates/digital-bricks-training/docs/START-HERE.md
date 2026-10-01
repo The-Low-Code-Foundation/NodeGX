@@ -651,8 +651,8 @@ PostgreSQL runs. Two things the move found, both worth knowing:
 
 ## What is not here yet
 
-Every write but the two above — the coach's composers, the learner's question on a card, answers
-to a brief, the confidence check — each a later write on the pattern `capture` set. The engine: a lesson
+Every write but those above — the coach's composers, answers to a brief, the confidence check —
+each a later write on the pattern `capture` set. The engine: a lesson
 nobody has written says *not written yet*, and that is every step Sam has not reached yet. Every coach
 composer, the assistant, the confusion control, onboarding — and a **second locale**: see "Every
 string has one owner" above for exactly which strings the table owns today and which are still
@@ -797,6 +797,37 @@ real one by address, and on that learner's page chooses their path by hand.
 nothing, path before steps, finished stays finished, a coach refused, a second add writing
 nothing), each demonstrated failing by name. **The demo carries none of the coach's writes.**
 
-**Found, not fixed: "Ask your coach about this" does nothing.** The learner's open cards offer it
-(L131), and the template has no function that writes a message, so the control only logs. A real
-learner will press it. Building conversations or hiding the control is its own decision.
+**"Ask your coach about this" used to do nothing**; TASK-L186 below is what it does now.
+
+## Asking your coach, and the coach's reply (TASK-L186)
+
+A learner presses *Ask your coach about this* on an open card and a thread opens under it; their
+coach opens the same thread from that learner's programme and replies. Sprint 54 in the product repo
+(`dev-docs/sprints/sprint-54-the-coach-answers/`) holds the decisions: two-way threads, a coach
+answers and never starts one, and coach notes stay read-only.
+
+- **`shared/Thread` is the one owner of a thread's rules**, ported from the product's
+  `conversations/service.ts`: the anchor vocabulary (the product's `NOTE_ANCHOR_KINDS`), a message
+  refused — never trimmed — over 4,000 characters, the subject as the first line cut at 80, and who
+  marks what read. **Opening marks the OTHER party's turns read and still says which were new;
+  your own turns are never marked; sending marks nothing.** `readAt` never leaves the node.
+- **Four functions, each one request to that owner.** `openThread` and `sendMessage`
+  (`authenticated`) take the learner from `Caller learner` — the session — and name only the card.
+  `openThreadAsCoach` and `replyAsCoach` (`role:staff`) name a THREAD and never a learner: the
+  thread says whose it is. `reader` is typed in each function's own graph. A send under an
+  out-of-date notice is refused with `notice-not-accepted`; every other refusal is a reason, never a
+  sentence, so "not yours" and "not there" look the same.
+- **`Course/Timeline row`** places the kit's `ConversationPanel` under the row, `mounted` only
+  once Ask (a learner) or Reply (a coach, on an open message card) is pressed, and calls the
+  functions itself — the `Section row` precedent. Forty rows carry forty closed doors and no panels.
+- **What is not refreshed**: after a reply, the coach's programme does not grow a new message row
+  until the page is reloaded; the thread itself shows it at once.
+
+`tools/check-thread.mjs` runs `shared/Thread`'s own script over the seed — read-marking both ways,
+eight refusals writing nothing, the subject, one vocabulary across the node, the kit and the product
+— and carries a CONTROL: with the learner scope cut out of the lookup, another learner must read
+Sam's thread, or the check could not see the leak it guards. Three further mutations were driven
+and each failed by name.
+
+**The demo answers in the browser**: the two opens read the made-up messages, and a sent turn stays
+in that page only.

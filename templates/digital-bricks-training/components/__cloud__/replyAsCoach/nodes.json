@@ -1,0 +1,110 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2ffaf7aa-751f-56ed-996a-fa988cc26062",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Staff (security: role:staff)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "conversationId,body",
+        "allowNoAuth": false,
+        "ptype-conversationId": "string",
+        "preq-conversationId": true,
+        "ptype-body": "string",
+        "preq-body": true
+      }
+    },
+    {
+      "id": "ask",
+      "type": "JavaScriptFunction",
+      "label": "Who is asking, and about what",
+      "x": 560,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * BUILD THE ONE REQUEST replyAsCoach HANDS shared/Thread (TASK-L186).\n *\n * A coach names a THREAD, never a learner: the thread says whose it is. The role is checked by nodegx.security.json (role:staff) before this graph runs, and `reader: 'coach'` is typed here, never derived from the caller's roles (the product's L116).\n */\nif (Inputs.conversationId !== undefined && Inputs.body !== undefined && Inputs.noticeCurrent !== undefined && Inputs.userId !== undefined) {\n  Outputs.request = {\n    op: 'send',\n    reader: 'coach',\n    conversationId: Inputs.conversationId,\n    body: Inputs.body,\n    noticeCurrent: Inputs.noticeCurrent,\n    authorUserId: Inputs.userId\n  };\n}\n",
+        "runOnChange-in-conversationId": true,
+        "runOnChange-in-body": true,
+        "runOnChange-in-noticeCurrent": true,
+        "runOnChange-in-userId": true
+      },
+      "ports": [
+        {
+          "name": "in-conversationId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "conversationId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-body",
+          "plug": "input",
+          "type": "*",
+          "displayName": "body",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-noticeCurrent",
+          "plug": "input",
+          "type": "*",
+          "displayName": "noticeCurrent",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-request",
+          "plug": "output",
+          "type": "*",
+          "displayName": "request",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "thread",
+      "type": "/#__cloud__/shared/Thread",
+      "label": "The thread's rules",
+      "x": 820,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "turns",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "params": "turns"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "Refused: the reason, never a sentence",
+      "x": 1080,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "refused"
+      }
+    },
+    {
+      "id": "notice",
+      "type": "/#__cloud__/shared/Notice",
+      "label": "Have they accepted the current notice?",
+      "x": 300,
+      "y": 220,
+      "parameters": {}
+    }
+  ]
+}

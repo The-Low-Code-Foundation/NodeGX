@@ -84,7 +84,7 @@ const fill = (x) =>
   : x;
 check(JSON.stringify(half.privacy) === JSON.stringify(Object.assign({ version }, fill(notice.privacy))),
   'version: the privacy half of Data/Strings is not what build-privacy.mjs writes from the notice — somebody edited the generated copy, or forgot to regenerate');
-for (const fn of ['capture', 'finishStep', 'acceptPrivacy']) {
+for (const fn of ['capture', 'finishStep', 'acceptPrivacy', 'sendMessage', 'replyAsCoach']) {
   check(json(`components/__cloud__/${fn}/nodes.json`).nodes.some((n) => n.type === '/#__cloud__/shared/Notice'), `version: ${fn} does not read shared/Notice`);
 }
 

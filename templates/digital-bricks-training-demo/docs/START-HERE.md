@@ -24,6 +24,9 @@ template and regenerate, and the demo follows (TASK-L180).
   goes to the course, because each answers the way a write that worked answers — but there is no
   backend, so a reload shows the programme as it was. In the template both are real
   (TASK-L177, TASK-L178).
+- **Asking your coach works, and keeps nothing.** *Ask your coach about this* opens the thread
+  about that card from the made-up messages, and a question or a coach's reply appears in it — but
+  only in this page: a reload shows the thread as it was. In the template it is real (TASK-L186).
 - **Hash URLs** (`#/course`), so a reload works on a static host with no fallback.
 
 To run it with a real backend, magic-link sign-in and the coach's gate, start from the

@@ -2894,3 +2894,103 @@
 .dossier-submission-text {
   color: var(--ink-soft);
 }
+
+/* ── THE THREAD UNDER A CARD (TASK-L186, sprint 54) ──────────────────────────
+   Lifted from the product's globals.css `.conversation*` (L118/L131), with two
+   additions the product's dock did not need: the panel sits UNDER a timeline
+   row, so it carries the row's left inset, and Send and Close share a line.
+   The coach's turns wear `--warm-tint` exactly as the product's do — a human's
+   words, which is one of the two uses this sheet's header reserves warm for
+   (the carried note above is the other). The learner's own turns sit on the
+   raised paper. Naming who wrote it is the label's job, not the colour's.
+   One plain "New" mark, no dot, no count, no red. */
+
+.dbt-conversation {
+  display: block;
+  width: 100%;
+  padding: 4px 0 12px 32px;
+  box-sizing: border-box;
+}
+
+.conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.conversation-intro,
+.conversation-note {
+  font-family: var(--font-ui);
+  font-size: var(--text-xs);
+  line-height: 1.55;
+  color: var(--ink-soft);
+  margin: 0;
+}
+
+.conversation-turns {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.conversation-turn {
+  border-radius: var(--radius-sm);
+  padding: 8px 11px;
+  background: var(--warm-tint);
+  border: var(--edge-thin);
+}
+
+.conversation-turn.is-learner {
+  background: var(--paper-raised);
+}
+
+.conversation-turn-who {
+  font-family: var(--font-ui);
+  font-size: 0.6875rem;
+  letter-spacing: 0.06em;
+  color: var(--ink-mute);
+  margin: 0 0 4px;
+}
+
+.conversation-new { font-weight: 600; color: var(--ink-soft); }
+
+.conversation-turn-body {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+
+.conversation-turn-body p { margin: 0 0 0.5em; }
+.conversation-turn-body p:last-child { margin-bottom: 0; }
+
+.conversation-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 9px 12px;
+  border: var(--edge-thin);
+  border-radius: var(--radius-sm);
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: var(--font-prose);
+  resize: vertical;
+}
+
+.conversation-input:hover { background: var(--paper-raised); }
+
+.conversation-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.conversation-actions .path-ask { margin: 0; }
+
+@media (max-width: 600px) {
+  .dbt-conversation { padding-left: 0; }
+}

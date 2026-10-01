@@ -86,8 +86,8 @@
     "Course/Timeline row": {
       "path": "Course/Timeline row",
       "type": "visual",
-      "nodeCount": 6,
-      "connectionCount": 15,
+      "nodeCount": 19,
+      "connectionCount": 66,
       "modified": "2026-09-20T12:51:55.909Z",
       "created": "2026-09-20T12:49:24.850Z"
     },
@@ -302,7 +302,7 @@
   },
   "stats": {
     "totalComponents": 37,
-    "totalNodes": 434,
-    "totalConnections": 659
+    "totalNodes": 447,
+    "totalConnections": 710
   }
 }

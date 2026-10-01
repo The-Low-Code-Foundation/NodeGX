@@ -1,0 +1,136 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "726623a6-638f-5ee7-b674-c9e60494d367",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "req",
+      "type": "noodl.cloud.request",
+      "label": "Signed in (security: authenticated)",
+      "x": 40,
+      "y": 40,
+      "parameters": {
+        "params": "anchorKind,anchorId,body",
+        "allowNoAuth": false,
+        "ptype-anchorKind": "string",
+        "preq-anchorKind": true,
+        "ptype-anchorId": "string",
+        "preq-anchorId": true,
+        "ptype-body": "string",
+        "preq-body": true
+      }
+    },
+    {
+      "id": "ask",
+      "type": "JavaScriptFunction",
+      "label": "Who is asking, and about what",
+      "x": 560,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * BUILD THE ONE REQUEST sendMessage HANDS shared/Thread (TASK-L186).\n *\n * The learner comes from Caller learner, which reads the SESSION. No parameter names a person, so this can only ever reach the caller's own threads.\n */\nif (Inputs.anchorKind !== undefined && Inputs.anchorId !== undefined && Inputs.body !== undefined && Inputs.learnerId !== undefined && Inputs.noticeCurrent !== undefined && Inputs.userId !== undefined) {\n  Outputs.request = {\n    op: 'send',\n    reader: 'learner',\n    anchorKind: Inputs.anchorKind,\n    anchorId: Inputs.anchorId,\n    body: Inputs.body,\n    learnerId: Inputs.learnerId,\n    noticeCurrent: Inputs.noticeCurrent,\n    authorUserId: Inputs.userId\n  };\n}\n",
+        "runOnChange-in-anchorKind": true,
+        "runOnChange-in-anchorId": true,
+        "runOnChange-in-body": true,
+        "runOnChange-in-learnerId": true,
+        "runOnChange-in-noticeCurrent": true,
+        "runOnChange-in-userId": true
+      },
+      "ports": [
+        {
+          "name": "in-anchorKind",
+          "plug": "input",
+          "type": "*",
+          "displayName": "anchorKind",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-anchorId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "anchorId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-body",
+          "plug": "input",
+          "type": "*",
+          "displayName": "body",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-learnerId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-noticeCurrent",
+          "plug": "input",
+          "type": "*",
+          "displayName": "noticeCurrent",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-userId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "userId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-request",
+          "plug": "output",
+          "type": "*",
+          "displayName": "request",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "thread",
+      "type": "/#__cloud__/shared/Thread",
+      "label": "The thread's rules",
+      "x": 820,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "res",
+      "type": "noodl.cloud.response",
+      "label": "turns",
+      "x": 1080,
+      "y": 40,
+      "parameters": {
+        "params": "turns"
+      }
+    },
+    {
+      "id": "deny",
+      "type": "noodl.cloud.response",
+      "label": "Refused: the reason, never a sentence",
+      "x": 1080,
+      "y": 220,
+      "parameters": {
+        "status": "failure",
+        "errorMessage": "refused"
+      }
+    },
+    {
+      "id": "who",
+      "type": "/#__cloud__/shared/Caller learner",
+      "label": "Their learner — from the session, never an argument",
+      "x": 300,
+      "y": 40,
+      "parameters": {}
+    },
+    {
+      "id": "notice",
+      "type": "/#__cloud__/shared/Notice",
+      "label": "Have they accepted the current notice?",
+      "x": 300,
+      "y": 220,
+      "parameters": {}
+    }
+  ]
+}
