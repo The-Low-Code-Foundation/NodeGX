@@ -91,6 +91,10 @@ app, for good"* — one line, ships alone), **C11**, **C12**, **C15**, **C16**, 
 
 ## Before you start
 
+- **Every new row also gets a file in the common bug ledger** (`dev-docs/bugs/`, rules in its README; `node
+  scripts/bugs.js` lists them). P107's 32 open rows are there as `P107-<row>`, all `needs-ruling`. When a row is
+  ruled and fixed, set its ledger file to `status: fixed` + `commit:` in the fix's commit.
+
 - Shared checkout: pathspec commits, never `git add -A`, never `git stash`, one heavy job at a time (the runtime
   node-spec suite ~100 s; each extra seed ~75 s). `uptime` first.
 - **Throwaway probes go in `packages/noodl-runtime/test/node-spec/zz-*.test.ts` and are deleted in the same
