@@ -222,7 +222,8 @@ withDeployedSite({ dir: DIR }, async (page) => {
           const same = got.items.length === want.length && want.every((s, i) => got.items[i].pic === s.icon && got.items[i].price === `🐚 ${s.price}` && got.items[i].name === s.name[lang] && got.items[i].line === s.line[lang]);
           check(`TAB ${tag} build: sells the ${want.length} blueprints (picture, price, name, line) and says "${w(lang, 'iw7bBuildHow')}"; inside the page`, same && got.later === w(lang, 'iw7bBuildHow') && got.tabs === 5 && inPage, got);
         } else if (t === 'animals') {
-          const later = w(lang, t === 'build' ? 'iw6hLaterBuild' : 'iw6hLaterAnimals');
+          // P108 IW-007 (lane A): Animals, shut until a refuge on her land is finished, says build the refuge first (iw7aShut).
+          const later = w(lang, 'iw7aShut');
           check(`TAB ${tag} ${t}: says "${later}" and sells nothing yet; inside the page`, got.later === later && got.items.length === 0 && got.tabs === 5 && inPage, got);
         } else {
           const want = SHOP.filter((s) => s.tab === t && (t !== 'robots' || ['pip', 'cobble'].includes(s.robot)) && (t !== 'upgrades' || s.kind === 'brain' || s.id === 'can+' || s.id === 'basket+'));

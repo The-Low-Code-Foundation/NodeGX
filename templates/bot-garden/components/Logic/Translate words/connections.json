@@ -2309,6 +2309,48 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7aBought_rabbit",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7aBought_rabbit"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7aBought_sheep",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7aBought_sheep"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7aK_patch",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7aK_patch"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7aK_tree",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7aK_tree"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7aNoRefuge",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7aNoRefuge"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7aPenFull",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7aPenFull"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-iw7aShut",
+      "toId": "translatewordsOut",
+      "toProperty": "iw7aShut"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-iw7bBuildHow",
       "toId": "translatewordsOut",
       "toProperty": "iw7bBuildHow"

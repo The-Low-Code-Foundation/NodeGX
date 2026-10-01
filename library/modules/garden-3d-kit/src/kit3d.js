@@ -260,6 +260,12 @@
       need = wholeOf(t.max);
       have = wholeOf(t.left) || 0;
       icon = 'stone';
+    } else if (t.kind === 'patch') {
+      // P108 IW-007 (lane A): the carrot patch, like a rock — the carrots left of its max (a source: never "done").
+      if (!wholeOf(t.max)) return null;
+      need = wholeOf(t.max);
+      have = wholeOf(t.left) || 0;
+      icon = 'carrot';
     } else return null;
     if (need > 0 && have > need) have = need;
     return {
@@ -1267,6 +1273,126 @@
     return g;
   };
 
+  // ── P108 IW-007 (lane A): her animals and the carrot patch — the 2D kit's look in the round ─────────────────────────
+  // An animal is drawn BY her bowl (a bowl with `animal` and `name`): fed (count > 0) she stands, happy, and hops when a
+  // carrot lands in her bowl; hungry (0) she sits by her bowl and waits — never sad, never gone (R2). Her name is a pill
+  // in the overlay; the bowl's chip counts carrots. The patch shows its carrots by what is left (four places).
+  PALETTE.carrot = 0xff8a3d;
+  PALETTE.leaf = 0x48af70;
+  PALETTE.fur = 0xd9c3aa;
+  PALETTE.furLight = 0xe6d3be;
+  PALETTE.earPink = 0xf5b3c4;
+  PALETTE.wool = 0xffffff;
+  PALETTE.sheepFace = 0x4a4458;
+  PALETTE.petBowl = 0x7cc6f0;
+  METER_ICONS.carrot = 1;
+  /** Her bowl's count (else its food) — the engine's rule, as meterOf reads a container. */
+  function petCount(t) {
+    var n = wholeOf(t && t.count);
+    return n !== null ? n : wholeOf(t && t.food) || 0;
+  }
+  /** Her mood by her bowl: 'happy' when it has a carrot in it, else 'waiting' (never anything sadder). The 2D kit's. */
+  function petMood(t) {
+    var m = meterOf(t);
+    return (m ? m.have : petCount(t)) > 0 ? 'happy' : 'waiting';
+  }
+  JOB_LOOK.petMood = petMood;
+  /** The rabbit (fur, long ears, a white tail) or the sheep (wool, a dark face, legs), standing happy or sitting to wait. */
+  function petGroup(THREE, mat, kind, mood, out) {
+    var a = new THREE.Group();
+    a.name = 'animal';
+    var add = function (m, name) {
+      if (name) m.name = name;
+      a.add(m);
+      out.meshCount += 1;
+      return m;
+    };
+    var up = mood === 'happy';
+    if (kind === 'sheep') {
+      var wy = up ? 0.3 : 0.17;
+      [[-0.1, 0], [0.04, 0.05], [0.04, -0.06], [-0.02, 0]].forEach(function (w, i) {
+        var puff = add(mesh(THREE, G(THREE, out, 'IcosahedronGeometry', 1, 1), mat(PALETTE.wool), w[0], wy + (i === 3 ? 0.08 : 0), w[1]), 'wool');
+        puff.scale.set(0.12, 0.11, 0.12);
+      });
+      if (up) {
+        add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.2, 0.16), mat(PALETTE.sheepFace), -0.08, 0.1, 0), 'legs');
+        add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.05, 0.2, 0.16), mat(PALETTE.sheepFace), 0.08, 0.1, 0), 'legs');
+      }
+      var face = add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.08, 8, 6), mat(PALETTE.sheepFace), 0.17, up ? 0.36 : 0.13, 0), 'head');
+      face.scale.set(1.15, 1, 0.9);
+    } else {
+      var body = add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.12, 8, 6), mat(PALETTE.fur), 0, up ? 0.17 : 0.11, 0), 'body');
+      body.scale.set(1.25, up ? 0.95 : 0.75, 0.95);
+      add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.05, 6, 4), mat(PALETTE.wool), -0.16, up ? 0.2 : 0.13, 0), 'tail');
+      add(mesh(THREE, G(THREE, out, 'SphereGeometry', 0.085, 8, 6), mat(PALETTE.furLight), 0.14, up ? 0.3 : 0.17, 0), 'head');
+      [-0.035, 0.035].forEach(function (z) {
+        var ear = add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.035, 0.17, 0.05), mat(PALETTE.fur), up ? 0.12 : 0.06, up ? 0.44 : 0.22, z), 'ear');
+        // Up: ears high; waiting: laid back along her back (never drooping forward — she is not sad, she waits).
+        ear.rotation.z = up ? -0.12 : 1.25;
+      });
+    }
+    a.userData.animal = kind;
+    a.userData.mood = mood;
+    return a;
+  }
+  var plainBowl = THING_BUILDERS.bowl;
+  THING_BUILDERS.bowl = function (THREE, mat, t, out) {
+    if (!t || !t.animal) return plainBowl(THREE, mat, t, out);
+    var g = new THREE.Group();
+    var kind = t.animal === 'sheep' ? 'sheep' : 'rabbit';
+    var mood = petMood(t);
+    // Her bowl at the tile's front-right, carrots heaped in it when it has any.
+    var bowl = mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.13, 0.09, 0.08, 8), mat(PALETTE.petBowl), 0.22, 0.04, 0.2);
+    bowl.name = 'bowl';
+    g.add(bowl);
+    out.meshCount += 1;
+    if (mood === 'happy') {
+      var heap = mesh(THREE, G(THREE, out, 'ConeGeometry', 0.1, 0.08, 6), mat(PALETTE.carrot), 0.22, 0.11, 0.2);
+      heap.name = 'carrots';
+      g.add(heap);
+      out.meshCount += 1;
+    }
+    var pet = petGroup(THREE, mat, kind, mood, out);
+    // She stands by it, turned to face it (her face is +x; the bowl is to her front-right).
+    pet.position.set(0, 0, 0);
+    var holder = new THREE.Group();
+    holder.position.set(-0.14, 0, -0.06);
+    holder.rotation.y = -0.6;
+    // Half as big again as her first build (the s5 kit drive, looked at: a 0.3-tall rabbit beside a 0.9-tall robot was
+    // hard to find on a plot); she still stands inside her tile.
+    holder.scale.set(1.5, 1.5, 1.5);
+    holder.add(pet);
+    g.add(holder);
+    g.userData.animal = kind;
+    g.userData.mood = mood;
+    g.userData.fed = petCount(t);
+    g.userData.petName = t.name === undefined || t.name === null ? '' : String(t.name);
+    return g;
+  };
+  THING_BUILDERS.patch = function (THREE, mat, t, out) {
+    var g = new THREE.Group();
+    var left = wholeOf(t.left);
+    if (left === null) left = 4;
+    g.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.86, 0.08, 0.86), mat(PALETTE.dirt), 0, 0.04, 0));
+    out.meshCount += 1;
+    var spots = [[-0.2, -0.2], [0.2, -0.2], [-0.2, 0.2], [0.2, 0.2]];
+    for (var i = 0; i < spots.length; i++) {
+      if (i < left) {
+        // A carrot: its orange shoulder out of the soil, its leaves up.
+        g.add(mesh(THREE, G(THREE, out, 'CylinderGeometry', 0.09, 0.06, 0.08, 6), mat(PALETTE.carrot), spots[i][0], 0.12, spots[i][1]));
+        g.add(mesh(THREE, G(THREE, out, 'ConeGeometry', 0.09, 0.22, 4), mat(PALETTE.leaf), spots[i][0], 0.27, spots[i][1]));
+        out.meshCount += 2;
+      } else if (!left) {
+        // Used up: a sprout where each carrot will grow back.
+        g.add(mesh(THREE, G(THREE, out, 'ConeGeometry', 0.03, 0.08, 4), mat(PALETTE.leaf), spots[i][0], 0.12, spots[i][1]));
+        out.meshCount += 1;
+      }
+    }
+    g.userData.left = left;
+    g.userData.carrots = Math.min(4, left);
+    return g;
+  };
+
   /**
    * The load a robot shows on its back: the LAST entry of `carry` (brief §4). stone, letter, egg and food are drawn as
    * themselves (as the 2D kit draws them, lane A's IG-002); anything else is the generic parcel.
@@ -1274,6 +1400,7 @@
   var LOADS = ['stone', 'letter', 'egg', 'food', 'ball'];
   // P108 IW-007 (lane B): a plank from her land's tree is carried as itself.
   LOADS.push('plank');
+  LOADS.push('carrot'); // P108 IW-007 (lane A): a carrot from the patch rides as itself.
   function loadOf(r) {
     var carry = Array.isArray(r.carry) ? r.carry : [];
     if (!carry.length) return null;
@@ -1421,6 +1548,12 @@
         // P108 IW-007 (lane B): a plank across its back.
         back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.42, 0.06, 0.12), mat(PALETTE.wood), 0, 0, 0));
         out.meshCount += 1;
+      } else if (load === 'carrot') {
+        // P108 IW-007 (lane A): a carrot from the patch — orange, pointing down, its leaves up.
+        var root = mesh(THREE, G(THREE, out, 'ConeGeometry', 0.07, 0.22, 6), mat(PALETTE.carrot), 0, -0.02, 0);
+        root.rotation.x = Math.PI;
+        back.add(root, mesh(THREE, G(THREE, out, 'ConeGeometry', 0.06, 0.12, 4), mat(PALETTE.leaf), 0, 0.14, 0));
+        out.meshCount += 2;
       } else if (load === 'letter') {
         back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.28, 0.2, 0.03), mat(PALETTE.letter), 0, 0, 0));
         back.add(mesh(THREE, G(THREE, out, 'BoxGeometry', 0.2, 0.08, 0.02), mat(PALETTE.letterInk), 0, 0.04, 0.02));
@@ -1478,6 +1611,9 @@
       g.userData.lift = METER_LIFT[t.kind] || 0.62;
       // P108 IW-003 (lane S): a bench's chip floats over its back and Sami, not at a path square's height.
       if (t.kind === 'site' && t.build === 'bench') g.userData.lift = 1.02;
+      // P108 IW-007 (lane A): an animal's bowl chip floats over her head; the patch's over its carrots.
+      if (t.kind === 'bowl' && t.animal) g.userData.lift = 0.72;
+      if (t.kind === 'patch') g.userData.lift = 0.42;
       g.userData.kind = t.kind;
       g.userData.x = x;
       g.userData.y = y;
@@ -1746,6 +1882,8 @@
   var HOP_MS = 1400;
   var TULIP_MS = 500;
   var POP_MS = 300;
+  /** P108 IW-007 (lane A): a fed animal's hop (two small bounces). */
+  var PET_HOP_MS = 700;
   var CAMERA_MS = 400;
   /** P108 IW-002: how far a thing under the pointer rises while Picking (world units). */
   var PICK_LIFT = 0.14;
@@ -1868,7 +2006,7 @@
     var destroyed = false;
     var width = 1;
     var height = 1;
-    var anims = { robots: [], camera: null, hop: 0, tulips: {}, pops: {}, puffs: {} };
+    var anims = { robots: [], camera: null, hop: 0, tulips: {}, pops: {}, puffs: {}, hops: {} }; // puffs: P108 IW-007 (lane B); hops: lane A
     var overlayEls = { names: [], labels: [], bubble: null, says: [], meters: [], rings: [] };
     var stepMs = 380;
     var bubble = null;
@@ -2063,6 +2201,15 @@
         o.overlay.appendChild(e);
         overlayEls.labels.push({ el: e, g: g, plate: true });
       });
+      // P108 IW-007 (lane A): an animal's name, a pill under her (a label's, placed as a label is).
+      eng.built.things.forEach(function (g) {
+        if (g.userData.kind !== 'bowl' || !g.userData.petName) return;
+        var e = el('gd3-label gd3-pet', { 'data-pet-name': g.userData.petName, 'data-animal': g.userData.animal, 'data-mood': g.userData.mood, 'data-x': g.userData.x, 'data-y': g.userData.y });
+        if (!e) return;
+        e.textContent = String(g.userData.petName);
+        o.overlay.appendChild(e);
+        overlayEls.labels.push({ el: e, g: g, pet: true });
+      });
       if (bubble) {
         var b = el('gd3-bubble' + (bubble.style === 'olive' ? ' gd3-olive' : ''), { 'data-bubble': bubble.robot });
         if (b) {
@@ -2237,6 +2384,11 @@
           });
           if (there && !was2 && !first) { anims.pops[key] = t0; anims.puffs[key] = t0; }
         }
+        // P108 IW-007 (lane A): an animal whose bowl just got a carrot hops (her bowl's count rose since the last world).
+        else if (g.userData.kind === 'bowl' && g.userData.animal && !first) {
+          var before = previous && previous.things.filter(function (t) { return t.kind === 'bowl' && Number(t.x) === g.userData.x && Number(t.y) === g.userData.y; })[0];
+          if (before && petCount(before) < g.userData.fed) anims.hops[key] = t0;
+        }
       });
     };
     var setWorld = function (world) {
@@ -2391,6 +2543,13 @@
           g.rotation.z = 0.31 * back;
           if (k5 >= 1) delete anims.tulips[key];
         }
+        // P108 IW-007 (lane A): her hop — up and down twice over PET_HOP_MS, the animal alone (her bowl stays put).
+        if (anims.hops[key] !== undefined) {
+          var k7 = Math.min(1, (t - anims.hops[key]) / PET_HOP_MS);
+          var pet = g.getObjectByName ? g.getObjectByName('animal') : null;
+          if (pet) pet.position.y = reduced || k7 >= 1 ? 0 : 0.12 * Math.abs(Math.sin(k7 * Math.PI * 2));
+          if (k7 >= 1) delete anims.hops[key];
+        }
         if (anims.pops[key] !== undefined) {
           var k6 = Math.min(1, (t - anims.pops[key]) / POP_MS);
           var s = 0.2 + 0.8 * easeOut(k6);
@@ -2479,6 +2638,7 @@
       for (k in anims.tulips) return true;
       for (k in anims.pops) return true;
       for (k in anims.puffs) return true;
+      for (k in anims.hops) return true;
       for (var i = 0; i < anims.robots.length; i++) {
         var a = anims.robots[i];
         if (a && (a.from || a.yawStart || a.bumpStart)) return true;
@@ -2783,7 +2943,11 @@
     '.gd3-world[data-wide="1"] .gd3-meter[data-fill="1"]{--f:10%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="2"]{--f:20%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="3"]{--f:30%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="4"]{--f:40%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="5"]{--f:50%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="6"]{--f:60%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="7"]{--f:70%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="8"]{--f:80%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="9"]{--f:90%}.gd3-world[data-wide="1"] .gd3-meter[data-fill="10"]{--f:100%}\n' +
     '.gd3-world[data-wide="1"] .gd3-meter.gd3-full:not(.gd3-watch):not(.gd3-meter-bot){--c:' + METER_FULL + ';--f:100%}\n' +
     '.gd3-mi-ball{background:#E04E4E;border-radius:50%;width:8px;height:8px;box-shadow:inset 0 -2px 0 rgba(255,255,255,.6)}.gd3-m-ball .gd3-pip.gd3-on{background:#E04E4E}\n' +
-    '.gd3-world.gd3-picking{border-color:#8F6BFF;box-shadow:0 0 0 3px #EEE8FF}.gd3-picking .gd3-canvas{cursor:crosshair}';
+    '.gd3-world.gd3-picking{border-color:#8F6BFF;box-shadow:0 0 0 3px #EEE8FF}.gd3-picking .gd3-canvas{cursor:crosshair}' +
+    // P108 IW-007 (lane A): an animal's name pill (garden-kit's .gd-pet-name), the carrot icon on a meter.
+    '\n.gd3-pet{background:#FFF7E8;color:#2E2A3D;border:1.5px solid #C79A63;box-shadow:none;padding:0 7px}.gd3-world[data-wide="1"] .gd3-pet{font-size:9px;padding:0 4px;border-width:1px}\n' +
+    '.gd3-mi-carrot{background:#FF8A3D;border-radius:50% 50% 50% 50%/30% 30% 70% 70%;width:7px;height:10px;box-shadow:inset 0 2px 0 #48AF70}.gd3-m-carrot .gd3-pip.gd3-on{background:#FF8A3D}\n' +
+    '.gd3-world[data-wide="1"] .gd3-meter.gd3-m-carrot{--c:#E06A1E}.gd3-meter.gd3-watch .gd3-mi-carrot{width:9px;height:13px}';
 
   /** @type {import('./types/node-kit').ReactNodeDefinition} */
   var Garden3D = {

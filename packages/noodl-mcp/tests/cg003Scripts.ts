@@ -248,6 +248,9 @@ for (var i = 0; i < list.length; i++) {
   if (!t) continue;
   if (t.kind === 'tulip') { total++; if (t.watered) watered++; things.push(withJob({ kind: 'tulip', x: t.x, y: t.y, watered: !!t.watered, colour: t.color === 'yellow' ? 'yellow' : 'red' }, t)); }
   else if (t.kind === 'puddle' || t.kind === 'letter' || SPRITE_THINGS[t.kind]) things.push(withJob({ kind: t.kind, x: t.x, y: t.y }, t));
+  // P108 IW-007 (lane A): an animal's bowl reaches the kits with her (animal, name), drawn by it; the carrot patch by its left.
+  else if (t.kind === 'bowl' && t.animal) things.push(withJob({ kind: 'bowl', x: t.x, y: t.y, animal: String(t.animal), name: String(t.name || ''), full: (Number(t.count) || 0) > 0 }, t));
+  else if (t.kind === 'patch') things.push(withJob({ kind: 'patch', x: t.x, y: t.y, left: Math.max(0, Math.floor(Number(t.left)) || 0) }, t));
   else if (t.kind === 'bowl') { var bw = withJob({ kind: 'bowl', x: t.x, y: t.y, full: (Number(t.food) || 0) > 0 }, t); if (bw.capacity !== undefined && bw.count === undefined) bw.count = Number(t.food) || 0; things.push(bw); }
   else if (t.kind === 'label') things.push({ kind: 'label', x: t.x, y: t.y, text: String(t.text || '') });
   // IG-002: a rock drawn at its size by what is left; a sign and a note carry their text (the kit does not draw it).

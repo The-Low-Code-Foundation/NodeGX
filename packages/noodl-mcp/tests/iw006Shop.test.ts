@@ -66,8 +66,10 @@ describe('IW-006 AC3 — the shop: what it shows', () => {
       // P108 IW-007 (lane B): the Build tab is open — every blueprint, and one line: buy one, then tap your land to place it.
       const b = rows(m, SHOP_IDS.tab + 'build', lang);
       expect([ids(b.items), b.showItems, b.showLater, b.later]).toEqual([SHOP.filter((i) => i.kind === 'blueprint').map((i) => i.id), true, true, word('iw7bBuildHow', lang)]);
+      // P108 IW-007 (lane A): Animals, shut until a refuge on her land is finished, says build the refuge first (iw7aShut);
+      // it opens with the refuge (iw007Animals.test.ts).
       const e = rows(m, SHOP_IDS.tab + 'animals', lang);
-      expect([e.items, e.showItems, e.showLater, e.later]).toEqual([[], false, true, word('iw6hLaterAnimals', lang)]);
+      expect([e.items, e.showItems, e.showLater, e.later]).toEqual([[], false, true, word('iw7aShut', lang)]);
     }
     // Known-firing: Robots, Upgrades and Helpers sell something, and say nothing about later.
     for (const t of ['robots', 'upgrades', 'helpers']) expect([t, rows(m, t).showItems, rows(m, t).showLater]).toEqual([t, true, false]);

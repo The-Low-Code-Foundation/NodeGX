@@ -786,6 +786,46 @@ withDeployedSite({ dir: DIR, gpu: true, chromeArgs: ['--use-angle=swiftshader', 
     check('IW-007 lane B (3D): the ghost — the spa green on its spot, the refuge red over the rock', JSON.stringify(ghosts3) === JSON.stringify([{ ok: true, bp: 'spa' }, { ok: false, bp: 'refuge' }]), ghosts3);
   }
 
+  // ══ P108 IW-007 (lane A): her animals in 3D by their bowls, fed and hungry, from worlds the ENGINE wrote; the patch; a carrot ══
+  {
+    await page.setViewport({ width: 1024, height: 800 });
+    await setVar('watch', '');
+    await setVar('picking', false);
+    await setVar('bubble', '');
+    const petAfter = (animal, n) =>
+      engineRun(ENG, { map: ['GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG'], things: [{ kind: 'bowl', id: 'a1', item: 'carrot', capacity: animal === 'rabbit' ? 3 : 4, count: 0, food: 0, animal, name: animal === 'rabbit' ? 'Flopsy' : 'Bramble', x: 3, y: 2 }, { kind: 'patch', id: 'patch', x: 1, y: 4, left: 3, max: 4 }], robots: [{ id: 'pip', x: 3, y: 3, d: 0, carry: Array(n).fill('carrot'), basket: 4, name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' }] }, Array.from({ length: n }, (_, i) => ({ id: i + 1, t: 'put' })));
+    const PET3 = `(() => { const eng = ${ROOT}.gd3; const g = eng.built.things.find((x) => x.userData.kind === 'bowl'); const p = eng.built.things.find((x) => x.userData.kind === 'patch'); const names = []; if (g) g.traverse((o) => { if (o.name) names.push(o.name); }); const pill = document.querySelector('.gd3-pet'); const chip = [...document.querySelectorAll('.gd3-meter')].find((c) => c.getAttribute('data-kind') === 'bowl');
+      return { mood: g ? g.userData.mood : null, animal: g ? g.userData.animal : null, parts: names.filter((n) => n !== 'wool' && n !== 'ear').sort().join(' '), pill: pill ? [pill.innerText, pill.getAttribute('data-mood')] : null, chip: chip ? chip.getAttribute('data-meter') + (chip.classList.contains('gd3-full') ? ':full' : '') : null, carrotIcon: chip ? !!chip.querySelector('.gd3-mi-carrot') : false, patch: p ? p.userData.carrots : null }; })()`;
+    const pets3 = [];
+    for (const [animal, n] of [['rabbit', 0], ['rabbit', 3], ['sheep', 0], ['sheep', 4]]) {
+      const w = petAfter(animal, n);
+      await setJson('map', { rows: w.map });
+      await setJson('things', w.things);
+      await setJson('robots', w.robots);
+      await setJson('focus', { x: 0, y: 0, w: 8, h: 6 });
+      await setVar('camera', 'plot');
+      await wait(900);
+      pets3.push({ animal, n, ...(await evaluate(PET3)) });
+      await shot(`iw7a-3d-${animal}-${n}`);
+    }
+    readings.iw7a = { pets: pets3 };
+    check('IW-007 lane A (3D): by her bowl, from worlds the engine wrote — the rabbit at 0 sitting, waiting (0/3), at 3 standing happy with carrots in her bowl (3/3 green); the sheep at 0 lying, at 4 on his legs (4/4); her name a pill in the overlay with her mood; the chip in carrots; the patch’s three carrots',
+      JSON.stringify(pets3.map((p) => [p.animal, p.mood, p.parts, p.pill, p.chip])) === JSON.stringify([
+        ['rabbit', 'waiting', 'animal body bowl head tail', ['Flopsy', 'waiting'], '0/3'],
+        ['rabbit', 'happy', 'animal body bowl carrots head tail', ['Flopsy', 'happy'], '3/3:full'],
+        ['sheep', 'waiting', 'animal bowl head', ['Bramble', 'waiting'], '0/4'],
+        ['sheep', 'happy', 'animal bowl carrots head legs legs', ['Bramble', 'happy'], '4/4:full']
+      ]) && pets3.every((p) => p.carrotIcon && p.patch === 3), pets3);
+    const picked = engineRun(ENG, { map: ['GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG'], things: [{ kind: 'patch', id: 'patch', x: 2, y: 4, left: 3, max: 4 }], robots: [{ id: 'pip', x: 1, y: 4, d: 1, carry: [], basket: 4, name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' }] }, [{ id: 1, t: 'pick' }]);
+    await setJson('things', picked.things);
+    await setJson('robots', picked.robots);
+    await wait(900);
+    const carried = await evaluate(`(() => { const eng = ${ROOT}.gd3; const r = eng.built.robots[0]; const load = r && r.children.find((c) => c.name === 'load'); const p = eng.built.things.find((x) => x.userData.kind === 'patch'); return { load: load ? load.userData.load : null, patch: p ? p.userData.carrots : null }; })()`);
+    readings.iw7a.carried = carried;
+    await shot('iw7a-3d-patch-picked');
+    check('IW-007 lane A (3D): the patch picked by the engine — two carrots left, the carrot on Cobble’s back', carried.load === 'carrot' && carried.patch === 2, carried);
+  }
+
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
   return { dir: DIR, results, readings, consoleErrors: page.consoleErrors.slice(), networkErrors: page.networkErrors.slice() };
 })

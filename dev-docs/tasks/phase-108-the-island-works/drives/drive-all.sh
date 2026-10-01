@@ -39,6 +39,8 @@ ALL=(look earn shop crew crew-perf modes iw001 iw004 iw004-3d island island-3d r
 ALL+=(owed)
 # P108 s5 lane B (IW-007 building): her land — the Build tab, the ghost, the spa built by two robots, 2D and 3D.
 ALL+=(build build-3d)
+# P108 IW-007 (lane A): her animals — the Animals tab, a rabbit bought, fed, worn, fed again (2D, 3D) and AC4's frame gate.
+ALL+=(animals animals-3d animals-perf)
 (( $# )) && ALL=("$@")
 for n in $ALL; do
   waitload
@@ -77,6 +79,10 @@ for n in $ALL; do
     # P108 s5 lane B (IW-007 building).
     build) node scripts/devtools/drive-iw007-build.js $D $J --shots $P/build-shots --json $P/build.json ;;
     build-3d) node scripts/devtools/drive-iw007-build.js $D $J --mode 3d --shots $P/build-3d-shots --json $P/build-3d.json ;;
+    # P108 IW-007 (lane A).
+    animals) node scripts/devtools/drive-iw007-animals.js $D $J --shots $P/animals --json $P/animals.json ;;
+    animals-3d) node scripts/devtools/drive-iw007-animals.js $D $J --mode 3d --shots $P/animals-3d --json $P/animals-3d.json ;;
+    animals-perf) node scripts/devtools/drive-iw007-animals.js $D $J --perf --shots $P/animals-perf --json $P/animals-perf.json ;;
     *) echo "unknown drive $n"; (exit 2) ;;
   esac > $P/$n.log 2>&1
   rc=$?

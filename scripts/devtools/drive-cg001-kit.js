@@ -775,6 +775,42 @@ withDeployedSite({ dir: DIR }, async (page) => {
       !!ghosts[0] && !!ghosts[1] && ghosts[0].ghost === 'ok' && ghosts[1].ghost === 'no' && /\(63, 166, 107/.test(ghosts[0].bg) && /\(224, 78, 78/.test(ghosts[1].bg) && ghosts[0].w === 2 && ghosts[0].h === 1 && ghosts[1].w === 2 && ghosts[1].h === 2 && ghosts.every((g) => g.x === 0 && g.y === 0 && g.through === 'none'), ghosts);
   }
 
+  // ══ P108 IW-007 (lane A): her animals by their bowls, fed and hungry, from worlds the ENGINE wrote; the patch; a carrot carried ══
+  {
+    await page.setViewport({ width: 1024, height: 800, mobile: false });
+    await setVar('watch', '');
+    await setVar('picking', false);
+    await setVar('bubble', '');
+    /** Her bowl at (3, 2) as the land writes it (animal, name, carrots), Cobble below it putting n carrots in; the patch at (1, 4). */
+    const petAfter = (animal, n) =>
+      engineRun(ENG, { map: ['GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG'], things: [{ kind: 'bowl', id: 'a1', item: 'carrot', capacity: animal === 'rabbit' ? 3 : 4, count: 0, food: 0, animal, name: animal === 'rabbit' ? 'Flopsy' : 'Bramble', x: 3, y: 2 }, { kind: 'patch', id: 'patch', x: 1, y: 4, left: 3, max: 4 }], robots: [{ id: 'pip', x: 3, y: 3, d: 0, carry: Array(n).fill('carrot'), basket: 4, name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' }] }, Array.from({ length: n }, (_, i) => ({ id: i + 1, t: 'put' })));
+    const PET_READ = `(() => { const c = document.querySelector('.gd-cell[data-x="3"][data-y="2"]'); const a = c && c.querySelector('[data-animal]'); const m = c && c.querySelector('.gd-meter'); const n = c && c.querySelector('.gd-pet-name'); const b = c && c.querySelector('.gd-pet-bowl');
+      return { animal: a ? a.getAttribute('data-animal') : null, mood: a ? a.getAttribute('data-mood') : null, hop: a ? getComputedStyle(a).animationName : null, h: a ? Math.round(a.getBoundingClientRect().height) : 0, name: n ? n.innerText.trim() : null, meter: m ? m.getAttribute('data-meter') + (m.classList.contains('gd-full') ? ':full' : '') : null, icon: m ? !!m.querySelector('.gd-mi-carrot') : false, bowl: b ? b.getAttribute('data-sprite') : null }; })()`;
+    const pets = [];
+    for (const [animal, n] of [['rabbit', 0], ['rabbit', 2], ['rabbit', 3], ['sheep', 0], ['sheep', 4]]) {
+      const w = petAfter(animal, n);
+      await setJson('map', { rows: w.map });
+      await setJson('things', w.things);
+      await setJson('robots', w.robots);
+      await wait(500);
+      pets.push({ animal, n, count: w.things.find((t) => t.id === 'a1').count, ...(await evaluate(PET_READ)) });
+      await shot(`iw7a-2d-${animal}-${n}`);
+    }
+    readings.iw7a = { pets };
+    check('IW-007 lane A (2D): by her bowl, from worlds the engine wrote — the rabbit at 0 sits waiting (empty bowl, 0/3), at 2 and 3 stands happy and hops (carrots in it, 2/3, 3/3 green); the sheep the same at 0 and 4; her name a pill; the meter in carrots; never gone',
+      JSON.stringify(pets.map((p) => [p.animal, p.count, p.mood, p.bowl, p.meter, p.name])) === JSON.stringify([['rabbit', 0, 'waiting', 'bowl', '0/3', 'Flopsy'], ['rabbit', 2, 'happy', 'bowlCarrots', '2/3', 'Flopsy'], ['rabbit', 3, 'happy', 'bowlCarrots', '3/3:full', 'Flopsy'], ['sheep', 0, 'waiting', 'bowl', '0/4', 'Bramble'], ['sheep', 4, 'happy', 'bowlCarrots', '4/4:full', 'Bramble']]) &&
+        pets.every((p) => p.icon && p.h > 10 && (p.mood === 'happy' ? p.hop === 'gd-hop' : p.hop === 'none')), pets);
+    // The patch, picked by the engine: the carrot on Cobble's back, the patch one fewer.
+    const picked = engineRun(ENG, { map: ['GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG', 'GGGGGGGG'], things: [{ kind: 'patch', id: 'patch', x: 2, y: 4, left: 3, max: 4 }], robots: [{ id: 'pip', x: 1, y: 4, d: 1, carry: [], basket: 4, name: 'Cobble', colour: '#7A8CA3', accessory: 'hod' }] }, [{ id: 1, t: 'pick' }]);
+    await setJson('things', picked.things);
+    await setJson('robots', picked.robots);
+    await wait(500);
+    const patch = await evaluate(`(() => { const c = document.querySelector('.gd-cell[data-x="2"][data-y="4"]'); const p = c && c.querySelector('[data-patch]'); const m = c && c.querySelector('.gd-meter'); const l = document.querySelector('.gd-bot .gd-load'); return { patch: p ? p.getAttribute('data-patch') : null, meter: m ? m.getAttribute('data-meter') : null, load: l ? l.getAttribute('data-load') : null }; })()`);
+    readings.iw7a.patch = patch;
+    await shot('iw7a-2d-patch-picked');
+    check('IW-007 lane A (2D): the carrot patch picked by the engine — two carrots left (2/4), the carrot on Cobble’s back', patch.patch === '2' && patch.meter === '2/4' && patch.load === 'carrot', patch);
+  }
+
   check('0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));
   return { dir: DIR, results, readings, consoleErrors: page.consoleErrors.slice(), networkErrors: page.networkErrors.slice() };
 })
