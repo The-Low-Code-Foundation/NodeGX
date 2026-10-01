@@ -11,8 +11,20 @@
 
 import { PlayError, type Handle } from '../adapter';
 import { checkClaims, isGraphTarget, parseEndpoint, projectClaims, projectGraphTrace, type GraphScenario, type GraphTarget } from '../graph';
+import { specFor } from '../nodes';
 import type { TraceEvent } from '../trace';
+import { World } from '../world';
 import { compareTraces, differenceWithThrow, formatDifference, hasObservation, type Difference } from './compare';
+
+/**
+ * NSP-012: a graph whose nodes read the world (a registry, a clock) is played in ONE world built
+ * from the scenario's script — the same world for every node, which is what makes two nodes
+ * naming one id reach one record. A graph of pure nodes with no script gets none, as before.
+ */
+function worldFor(sc: GraphScenario): World | undefined {
+  const needs = Object.values(sc.nodes).some((n) => (specFor(n.type)?.needs?.length ?? 0) > 0);
+  return sc.world !== undefined || needs ? new World(sc.world ?? {}) : undefined;
+}
 
 /**
  * Plays the scenario from a fresh graph and returns the graph trace. Every node is disposed
@@ -38,6 +50,12 @@ export async function playGraph<H extends Handle>(target: GraphTarget<H>, sc: Gr
     return handles[id];
   };
 
+  const world = worldFor(sc);
+  let restore: (() => void) | undefined;
+  if (world) {
+    if (!target.install) throw new Error(`${target.name} has no install(): it cannot play a graph that needs a world`);
+    restore = target.install(world);
+  }
   try {
     handles = target.mountGraph(sc.nodes, sc.wires ?? []);
     for (const id of ids) drain(id);
@@ -64,6 +82,7 @@ export async function playGraph<H extends Handle>(target: GraphTarget<H>, sc: Gr
     if (e instanceof PlayError) throw e;
     throw new PlayError(`${target.name} threw: ${e instanceof Error ? e.message : String(e)}`, out, e);
   } finally {
+    if (restore) restore();
     if (handles) for (const id of ids) target.dispose(handles[id]);
   }
 }

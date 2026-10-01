@@ -28,6 +28,7 @@
  */
 
 import type { Coercion } from './coerce';
+import type { RecordChange, RegistryScript, RegistryView } from './registry';
 
 // ------------------------------------------------------------------------------------------------
 // port types — the catalog's `portTypeNames` (node-catalog.json) minus `signal`, which is its own
@@ -89,7 +90,13 @@ export type ReducerOutcome = Outcome | 'deferred' | 'pending';
 // ------------------------------------------------------------------------------------------------
 // the world, as a spec sees it (NSP-007; world.ts is the world itself)
 
-/** What a reducer may READ of the world. Pure in the run: the same seed and the same steps read the same values. */
+/**
+ * What a reducer may READ of the world — and, through `registry`, WRITE (NSP-012). Pure in the
+ * run: the same seed, the same script and the same steps read the same values. The registry is
+ * the one seam a reducer mutates directly rather than through its patch, because the data
+ * nodes' behaviour IS the order of their reads and writes against it (registry.ts): a reducer
+ * is pure in (state, inputs, registry-before) → (patch, registry-after).
+ */
 export interface WorldView {
   /** The clock, in milliseconds; moves only on an `advance` step. */
   now(): number;
@@ -98,7 +105,34 @@ export interface WorldView {
   bytes(n: number): Uint8Array;
   /** A version-4 UUID from the seeded source — what `crypto.randomUUID` hands a node on a target. */
   uuid(): string;
+  /** The shared records and arrays (registry.ts). Reads create (`Model.get` is create-on-read); writes notify watchers. */
+  registry: RegistryView;
+  /**
+   * Subscribes THIS instance to a record's or an array's `change` (the runtime's `model.on('change')`
+   * / `collection.on('change')`): the spec's `world.change` handler is called for each. Idempotent
+   * per target; `unwatch` is the `off`. Imperative, not a patch field, because a node subscribes
+   * and then writes in one setter (an Array binding, then copying) and the write must reach it.
+   */
+  watch(target: WatchTarget): void;
+  unwatch(target: WatchTarget): void;
+  /**
+   * Records an output's CURRENT value as sent, now — the runtime's `flagOutputDirty` (node.ts
+   * :832-835), which snapshots at the call. `Patch.send` reads at the reducer's end, which is the
+   * same thing unless the reducer WRITES THE REGISTRY after flagging: an Array node binds (sends
+   * `Items`) and then copies into the array; the wire keeps the pre-copy snapshot until the node
+   * flags `Items` again (collectionnode2.ts :273, then :325). A spec that writes after flagging
+   * sends here, at the flag, handing the STATE the output reads at that moment — the reducer's
+   * working copy, since the runtime's getter reads the node's live internals mid-setter; absent,
+   * the instance's state before the patch. A declared or a derived output name.
+   */
+  send(port: string, state?: Readonly<Record<string, unknown>>): void;
 }
+
+/** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
+export type WatchTarget = { model: unknown } | { collection: unknown };
+
+/** What a watched entry notifies (registry.ts): a record names the key that moved; an array only says it changed. */
+export type ChangeEvent = ({ kind: 'model'; id: unknown } & RecordChange) | { kind: 'collection'; id: unknown };
 
 /** A request a reducer asks the world to make. `id` is the spec's own name for it (an `abort` and the response name it); it is not on the wire. */
 export interface SpecRequest {
@@ -151,6 +185,13 @@ export interface ValueInputDecl extends PortMeta {
    * a URL. Without it the pool is unchanged, so a spec that declares none generates what it did.
    */
   examples?: readonly unknown[];
+  /**
+   * The port cannot be wired (the catalog's `allowEditOnly`, NSP-012): a value reaches it only
+   * from the property panel, so the generator draws from `examples` — and, for an `enum`, its
+   * declared values — and never from the cross-type pool a wire could deliver. A script port
+   * handed `{}` by the generator was noise, not a finding.
+   */
+  editOnly?: boolean;
 }
 
 export interface SignalInputDecl extends PortMeta {
@@ -164,8 +205,13 @@ export type InputsDecl = Record<string, InputDecl>;
 
 export interface ValueOutputDecl<S> extends PortMeta {
   type: ValueType;
-  /** The output as a function of state. Called at settle; `undefined` is never sent (C3). */
-  from: (state: Readonly<S>) => unknown;
+  /**
+   * The output as a function of state — and of the world (NSP-012: an Array node's `items` IS the
+   * registry's array; its state holds only the name). Read after every step that sends it and at
+   * the first settle; `undefined` is never sent (C3). A reducer that reads the world here must
+   * not write it.
+   */
+  from: (state: Readonly<S>, world: WorldView) => unknown;
 }
 
 export interface SignalOutputDecl extends PortMeta {
@@ -207,8 +253,14 @@ export type Inputs<I> = { readonly [K in ValueKeys<I>]: ValueOf<I[K]> };
 export interface Patch<S, O> {
   /** State keys to replace. Only declared keys (rule 2). */
   set?: Partial<S>;
-  /** Signal outputs to pulse, in order. Only declared signal outputs (rule 1). */
-  emit?: ReadonlyArray<SignalKeys<O>>;
+  /**
+   * Signal outputs to pulse, in order. Only declared signal outputs (rule 1) — or an outcome port
+   * the spec lists in `outcomes`, pulsed OUTSIDE any invocation (NSP-012: Array Filter pulses
+   * `failure` for a malformed pattern arriving on a value path, :451, where nobody invoked it and
+   * no outcome is owed): recorded as a plain `signal` event, the way the runtime target records a
+   * hand-rolled pulse on an outcome port.
+   */
+  emit?: ReadonlyArray<SignalKeys<O> | Outcome>;
   /**
    * Which value outputs this write SENDS — the runtime's `flagOutputDirty` calls in the setter.
    * Absent means all of them (a node that flags on every write, or whose outputs are never
@@ -219,6 +271,19 @@ export interface Patch<S, O> {
    * branch's shape for the mutants (a `send` difference is unobservable except in that case).
    */
   send?: ReadonlyArray<ValueOutputKeys<O>>;
+  // ⚠️ A spec whose outputs read the REGISTRY (NSP-012) names `send` in EVERY patch (an empty
+  // list for none): "absent means all" would read a shared entry another write moved, which the
+  // runtime does not send until the node flags it — an Array node's `items` after an insert.
+  /**
+   * The same two for DERIVED outputs (`DerivedPorts.outputs`, NSP-012): an Object node pulses
+   * `changed-<property>` and sends `prop-<property>` for ports its `properties` parameter names.
+   * Checked at run time against the instance's derived outputs (the type system cannot name them).
+   * `emitDerived` pulses queue BEFORE `emit`'s — the one order the format fixes, and the order the
+   * Object node has (`changed-<p>` then `changed`, modelnode2.ts :111-115). When a patch names
+   * EITHER `send` or `sendDerived`, only the outputs named in the two are read; absent both, all.
+   */
+  emitDerived?: readonly string[];
+  sendDerived?: readonly string[];
   /**
    * Effects on the world (NSP-007), applied after `set` in this order. None is observable on the
    * wire by itself; each shows through what the world later hands back.
@@ -300,6 +365,15 @@ export interface DerivedPorts<S, O> {
    * mentioned, as `collectPorts` (nodedefinition.ts) does.
    */
   inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
+  /**
+   * The OUTPUT ports these params derive (NSP-012): the Object node's `prop-<p>` value and
+   * `changed-<p>` signal per property named. A target registers them at mount the way a graph
+   * with every port wired would (the runtime registers a derived output only when a wire asks
+   * for it, `registerOutputIfNeeded`; a lone node on the runtime target gets them all), and the
+   * interpreter observes them like declared ones; a reducer reaches them through `sendDerived` /
+   * `emitDerived`. A derived output's `from` is read like a declared one's.
+   */
+  outputs?: (params: Readonly<Record<string, unknown>>) => Record<string, OutputDecl<S>>;
   on: (state: Readonly<S>, port: string, value: unknown, derived: Readonly<Record<string, unknown>>, world: WorldView) => Patch<S, O>;
   /**
    * A port the target registers ON FIRST WRITE, whatever the params — the runtime's
@@ -343,6 +417,18 @@ export type AfterInputs<S, I, O> = (state: Readonly<S>, inputs: Inputs<I>, world
 export interface WorldHandlers<S, I, O> {
   timer?: (state: Readonly<S>, inputs: Inputs<I>, tag: string, world: WorldView) => AfterInputsPatch<S, I, O>;
   response?: (state: Readonly<S>, inputs: Inputs<I>, response: WorldResponse, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-012 — a watched record or array changed (`WorldView.watch`) — written by ANOTHER node.
+   * A node's own writes are never handed to its handler: its reaction to them is written beside
+   * the write, in the reducer that writes (registry.ts, the notification rule). Called right after
+   * the reducer whose write caused it returns, in notification order, and again for
+   * what the handler's own writes cause. A handler that only RECORDS the change for the frame end
+   * (`set: { scheduled: true }`) is what the runtime's `scheduleAfterInputsHaveUpdated` idiom
+   * reads as: the interpreter runs `afterInputs` again after a delivery that followed it, up to
+   * the scheduler's ten passes (nodecontext.ts `updateDirtyNodes`), so the frame end that the
+   * runtime's second pass is lands in the same settle.
+   */
+  change?: (state: Readonly<S>, inputs: Inputs<I>, event: ChangeEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -361,6 +447,8 @@ export interface WorldPool {
   responses?: readonly import('./world').Answer[];
   delays?: readonly number[];
   advances?: readonly number[];
+  /** NSP-012: the registries a `registry` spec's sequences start from (one is drawn per sequence; the defaults include an empty one). */
+  registries?: readonly RegistryScript[];
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -378,9 +466,13 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   /**
    * The part of the initial state that comes FROM THE WORLD (NSP-007): UUID draws its first id at
    * creation (uuid.ts `initialize`), so its spec draws one here. Merged over `state` at mount,
-   * before the params are applied. A spec without one has a static initial state.
+   * before the params are applied. A spec without one has a static initial state. NSP-012 adds
+   * two things: a node that subscribes at creation does it here (Variable binds the globals
+   * record in `initialize`, so its `init` reaches the registry and `watch`es it); and the mount
+   * PARAMS are handed over, for the one thing the runtime reads from the graph's parameters
+   * rather than from an input (`this.model.parameters.properties`, modelcrudbase.ts :461).
    */
-  init?: (world: WorldView) => Partial<S>;
+  init?: (world: WorldView, params: Readonly<Record<string, unknown>>) => Partial<S>;
   inputs: I;
   outputs: O;
   /**
@@ -390,21 +482,23 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
    */
   outcomes?: readonly Outcome[];
   /** What the editor's hover/inspect shows for an instance — the runtime's `getInspectInfo`. */
-  inspect?: (state: Readonly<S>) => string;
+  inspect?: (state: Readonly<S>, world: WorldView) => string;
   /**
    * What of the world this node's behaviour depends on (T2/T3). The runner builds a scripted
    * world for a spec that declares any (NSP-007) and refuses to play it on a target that has no
    * seam for one (`TargetAdapter.install`) — running a clock-dependent node against the real
    * clock is flaky, and flaky grades nothing (NSP-003 §4). `backend` is still refused: its seam
-   * arrives with NSP-014.
+   * arrives with NSP-014. `registry` (NSP-012): the node reads or writes the shared records and
+   * arrays — a target must start each play from the script's registry and nothing else, or a
+   * record a previous play named is still there.
    */
   needs?: readonly WorldNeed[];
   /** What the generator draws for the world of this node's sequences (`WorldPool`). */
   worldPool?: WorldPool;
 }
 
-/** The parts of the world NSP-007 scripts. */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'backend';
+/** The parts of the world NSP-007 scripts, and the registry NSP-012 adds. */
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'backend';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
@@ -462,16 +556,17 @@ export interface AnyNodeSpec {
   version: number;
   source: string;
   state: Readonly<Record<string, unknown>>;
-  init?: (world: WorldView) => Record<string, unknown>;
+  init?: (world: WorldView, params: Readonly<Record<string, unknown>>) => Record<string, unknown>;
   inputs: InputsDecl;
   outputs: Record<string, ErasedValueOutput | SignalOutputDecl>;
   outcomes?: readonly Outcome[];
-  inspect?: (state: never) => string;
+  inspect?: (state: never, world: WorldView) => string;
   needs?: readonly WorldNeed[];
   worldPool?: WorldPool;
   on: Record<string, ErasedReducer | undefined>;
   derived?: {
     inputs: (params: Readonly<Record<string, unknown>>) => Record<string, ValueInputDecl>;
+    outputs?: (params: Readonly<Record<string, unknown>>) => Record<string, ErasedValueOutput | SignalOutputDecl>;
     on: (state: never, port: string, value: unknown, derived: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     discover?: (port: string) => ValueInputDecl | undefined;
     candidates?: readonly string[];
@@ -480,11 +575,12 @@ export interface AnyNodeSpec {
   world?: {
     timer?: (state: never, inputs: never, tag: string, world: WorldView) => unknown;
     response?: (state: never, inputs: never, response: WorldResponse, world: WorldView) => unknown;
+    change?: (state: never, inputs: never, event: ChangeEvent, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {
   type: ValueType;
-  from: (state: never) => unknown;
+  from: (state: never, world: WorldView) => unknown;
 }
 export type ErasedReducer = (...args: never[]) => unknown;
 

@@ -1,0 +1,285 @@
+[
+  {
+    "name": "A plain array filtered by a = 2: one record, Filtered, First Item Id and Count; Items is a new array (replaced)",
+    "because": "filtercollectionnode.ts :483-536, :44-68",
+    "params": {
+      "filterFilter": "a",
+      "filterFilterValue-a": 2,
+      "items": [
+        {
+          "a": 1
+        },
+        {
+          "a": 2
+        },
+        {
+          "a": 3
+        }
+      ]
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "A Filter pulse with no array: failure no-items; a setting arriving before any array stays silent",
+    "because": ":466-480",
+    "params": {},
+    "steps": [
+      {
+        "set": "filterFilter",
+        "value": "a"
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A pattern that will not compile: filter-failed with the thrown message; the press owes its outcome; the same message is not raised twice",
+    "because": ":491-514, :420-452",
+    "params": {
+      "items": [
+        {
+          "a": "x"
+        }
+      ],
+      "filterFilter": "a",
+      "filterFilterOp-a": "regex",
+      "filterFilterValue-a": "["
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Sort descending with a limit of 2; Enabled false then passes everything through",
+    "because": ":370-393, :485, :516-520",
+    "params": {
+      "items": [
+        {
+          "a": 1
+        },
+        {
+          "a": 3
+        },
+        {
+          "a": 2
+        }
+      ],
+      "filterSort": "a",
+      "filterSort-a": "descending",
+      "filterEnableLimit": true,
+      "filterLimit": 2
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Refresh re-runs and reports done; a value-path failure with no press pulses Failure as a plain signal",
+    "because": ":240-248, :449-451",
+    "params": {
+      "items": [
+        {
+          "a": 1
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "refresh"
+      },
+      "settle",
+      {
+        "set": "filterFilter",
+        "value": "a"
+      },
+      {
+        "set": "filterFilterOp-a",
+        "value": "regex"
+      },
+      {
+        "set": "filterFilterValue-a",
+        "value": "("
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A regex, case-insensitive by default",
+    "because": ":58-64",
+    "params": {
+      "items": [
+        {
+          "name": "Ada"
+        },
+        {
+          "name": "ada"
+        },
+        {
+          "name": "Lin"
+        }
+      ],
+      "filterFilter": "name",
+      "filterFilterOp-name": "regex",
+      "filterFilterValue-name": "^a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "filterFilterOption-case-name",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enabled unticked: Enabled moving re-runs nothing (a stuck run flag would)",
+    "because": ":223 shouldRunOnValueChanged('enabled') — the box governs the re-run",
+    "params": {
+      "items": [
+        {
+          "a": 1
+        },
+        {
+          "a": 2
+        }
+      ],
+      "filterFilter": "a",
+      "filterFilterValue-a": 1,
+      "runOnChange-enabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Items unticked: a new array arriving binds but re-runs nothing until Filter is pressed",
+    "because": ":210 shouldRunOnValueChange('items')",
+    "params": {
+      "items": [
+        {
+          "a": 1
+        }
+      ],
+      "runOnChange-items": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "a": 2
+          },
+          {
+            "a": 3
+          }
+        ]
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A repeated failure is silent; with Enabled's box unticked an Enabled change then re-runs nothing (a stuck run flag would pass everything through)",
+    "because": ":434-435 the dedup; :223 the box governs the re-run",
+    "params": {
+      "items": [
+        {
+          "a": "x"
+        }
+      ],
+      "filterFilter": "a",
+      "filterFilterOp-a": "regex",
+      "filterFilterValue-a": "(",
+      "runOnChange-enabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "filterSort",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Filter settings unticked: a setting arriving re-runs nothing until Filter is pressed",
+    "because": ":560 shouldRunOnValueChanged('filterSettings')",
+    "params": {
+      "items": [
+        {
+          "a": 1
+        },
+        {
+          "a": 2
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "runOnChange-filterSettings",
+        "value": false
+      },
+      {
+        "set": "filterFilter",
+        "value": "a"
+      },
+      {
+        "set": "filterFilterValue-a",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A number on Items: the runtime's setter throws on `collection.on` (row C10); the spec binds it and a run finds no rows to read",
+    "because": ":343 `collection && collection.on(…)` on a value with no `on`",
+    "row": "NSP-012 §6 C10",
+    "params": {},
+    "steps": [
+      {
+        "set": "items",
+        "value": 5
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ]
+  }
+]

@@ -14,6 +14,8 @@
  * | `Infinity` / `-Infinity`             | `{ "$num": "Infinity" }` / `{ "$num": "-Infinity" }` |
  * | string, boolean, `null`              | itself                                           |
  * | `Date`                               | `{ "$date": "<ISO 8601>" }`, invalid → `{ "$date": null }` |
+ * | a registry ARRAY (NSP-012): an array whose `getId()` is a string | `{ "$array": "<name>", "items": [element-wise] }` — the name is on the wire because identity is what a Repeater or a second Array node shares; a mutation in place keeps it, a replacement changes it (NSP-012 AC6) |
+ * | a registry RECORD: has `toJSON`        | the row below — the runtime's `toJSON` is the data plus `id` (model.ts :406-408), so a record travels as its data with its id |
  * | array                                | element-wise; an `undefined` element → `null` (JSON's rule) |
  * | plain object                         | keys sorted; an `undefined` value drops its key (JSON's rule) |
  * | unit object `{ value, unit }` (C10)  | kept WHOLE — it is a plain object, never reduced to its number |
@@ -90,10 +92,19 @@ function walk(value: unknown, path: string, seen: object[]): Canonical | undefin
   seen.push(obj);
   try {
     if (Array.isArray(obj)) {
-      return obj.map((item, i) => {
+      const items = obj.map((item, i) => {
         const c = walk(item, `${path}[${i}]`, seen);
         return c === undefined ? null : c;
       });
+      // NSP-012: a registry array carries its name. Duck-typed, never by class: the runtime's
+      // arrays answer `getId()` through a prototype patch (collection.ts :467-473) and a plain
+      // array in that process answers `undefined`; the interpreter's answer the same way.
+      const named = obj as unknown as { getId?: unknown };
+      if (typeof named.getId === 'function') {
+        const id = (named.getId as () => unknown)();
+        if (typeof id === 'string') return { $array: id, items };
+      }
+      return items;
     }
     const withToJson = obj as { toJSON?: unknown };
     if (typeof withToJson.toJSON === 'function') {

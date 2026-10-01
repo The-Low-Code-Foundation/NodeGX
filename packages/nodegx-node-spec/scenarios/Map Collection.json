@@ -1,0 +1,104 @@
+[
+  {
+    "name": "The default script maps nothing: one empty record per row, Changed",
+    "because": "mapcollectionnode.ts :102, :339-353",
+    "params": {
+      "items": [
+        {
+          "name": "Ada"
+        },
+        {
+          "name": "Lin"
+        }
+      ]
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "A script copying a property and computing another",
+    "because": ":345-348",
+    "params": {
+      "items": [
+        {
+          "name": "Ada",
+          "n": 1
+        }
+      ],
+      "mapScript": "map({ name: 'name', twice: function (o) { return o.n * 2; } })"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "A script that will not compile: Failure once on the value path, then script-failed on Refresh",
+    "because": ":208-218, :327-335, :255-279",
+    "params": {
+      "items": [
+        {
+          "a": 1
+        }
+      ],
+      "mapScript": "map("
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "refresh"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A script that throws: map-failed with its message",
+    "because": ":354-362",
+    "params": {
+      "items": [
+        {
+          "a": 1
+        }
+      ],
+      "mapScript": "throw new Error('boom')"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "Refresh with no array: no-items",
+    "because": ":292-305",
+    "params": {},
+    "steps": [
+      {
+        "signal": "refresh"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "null on Items throws inside the run: map-failed",
+    "because": ":339 inside the try",
+    "params": {
+      "items": null,
+      "mapScript": "map({ name: 'name' })"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "A number on Items: the runtime's setter throws on `collection.on` (row C10); the spec binds it and the run fails inside the try",
+    "because": ":233 `collection && collection.on(…)`; :339 `.map` on a number throws inside the try",
+    "row": "NSP-012 §6 C10",
+    "params": {},
+    "steps": [
+      {
+        "set": "items",
+        "value": 5
+      },
+      "settle"
+    ]
+  }
+]

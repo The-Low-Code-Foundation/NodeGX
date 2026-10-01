@@ -1,0 +1,95 @@
+[
+  {
+    "name": "Do with no Object Id: failure no-object-id — checked before the array",
+    "because": "collectionnode-insert.ts :66-69",
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "An Object Id but no array: failure no-array",
+    "because": ":71-74",
+    "params": {
+      "modifyId": "m1"
+    },
+    "steps": [
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Insert into a named array: done; the same object again: unchanged (the ERG-001 reference case)",
+    "because": ":92-95 — add is a silent no-op on a member (collection.ts :663)",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1"
+          ]
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc",
+      "modifyId": "m2"
+    },
+    "steps": [
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "An id nothing has loaded is minted empty and inserted (create-on-read)",
+    "because": ":92 Model.get mints on read",
+    "params": {
+      "collectionId": "abc",
+      "modifyId": "zz"
+    },
+    "steps": [
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Error keeps the last failure's sentence through a later success",
+    "because": "collection-failure.ts :212-224 clear only the editor's warning",
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      {
+        "signal": "add"
+      },
+      "settle",
+      {
+        "set": "modifyId",
+        "value": "m1"
+      },
+      {
+        "signal": "add"
+      },
+      "settle"
+    ]
+  }
+]

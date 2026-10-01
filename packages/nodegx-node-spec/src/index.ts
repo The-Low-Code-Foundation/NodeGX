@@ -6,6 +6,7 @@ export * from './adapter';
 export * from './adapters/interpreter';
 export * from './trace';
 export * from './world';
+export * from './registry';
 export * from './graph';
 export * from './interpreter';
 export * from './nodes';

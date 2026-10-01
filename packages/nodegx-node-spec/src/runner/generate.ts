@@ -27,6 +27,7 @@
 import type { Step } from '../adapter';
 import type { AnyNodeSpec, InputDecl } from '../spec';
 import { isSignalInput } from '../spec';
+import type { RegistryScript } from '../registry';
 import type { Answer, WorldScript } from '../world';
 import { mulberry32, sequenceSeed, type Rng } from './random';
 import type { Reach } from './reach';
@@ -54,7 +55,13 @@ export const DEFAULT_WORLD_POOL = Object.freeze({
     { never: true }
   ] as readonly Answer[]),
   delays: Object.freeze([0, 0, 1, 10, 100, 1000]),
-  advances: Object.freeze([0, 1, 10, 99, 100, 1000, 30000])
+  advances: Object.freeze([0, 1, 10, 99, 100, 1000, 30000]),
+  // NSP-012: an empty registry, and one with two records and two arrays a sequence can name
+  registries: Object.freeze([
+    {},
+    { models: { m1: { a: 1, b: 'x' }, m2: {} }, collections: { abc: ['m1'], empty: [] } },
+    { models: { m1: { a: 1 }, m2: { a: 2 }, m3: { a: 3 } }, collections: { abc: ['m1', 'm2'], def: ['m2', 'm3'] } }
+  ] as readonly RegistryScript[])
 });
 
 export interface GenerateOptions {
@@ -90,6 +97,10 @@ const POOLS: Readonly<Record<string, readonly unknown[]>> = Object.freeze({
 export function poolFor(decl: InputDecl): readonly unknown[] {
   if (isSignalInput(decl)) return [];
   const own = decl.examples ?? [];
+  if (decl.editOnly) {
+    // NSP-012: a panel-only port — what the panel can produce, and nothing a wire could
+    return decl.type === 'enum' ? [...(decl.enums ?? []), ...own] : [...own];
+  }
   if (decl.type === 'enum') {
     const declared = decl.enums ?? [];
     return [...declared, 'not-a-declared-value', '', null, undefined, ...own];
@@ -110,7 +121,8 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   const reach = options.reach;
   const inReachParams = (name: string) => !reach || reach.params.includes(name);
   const inReachInputs = (name: string) => !reach || reach.inputs.includes(name);
-  const valuePorts = Object.entries(spec.inputs).filter(([, d]) => !isSignalInput(d));
+  // a port with an empty pool (an edit-only port with no examples, NSP-012) is never driven
+  const valuePorts = Object.entries(spec.inputs).filter(([, d]) => !isSignalInput(d) && poolFor(d).length > 0);
   const signalPorts = Object.entries(spec.inputs).filter(([name, d]) => isSignalInput(d) && inReachInputs(name));
 
   const params: Record<string, unknown> = {};
@@ -125,11 +137,11 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   const drivable: Array<[string, InputDecl]> = [...valuePorts];
   if (spec.derived) {
     const derived = spec.derived.inputs(params);
-    for (const [name, decl] of Object.entries(derived)) if (!(name in spec.inputs)) drivable.push([name, decl]);
+    for (const [name, decl] of Object.entries(derived)) if (!(name in spec.inputs) && poolFor(decl).length > 0) drivable.push([name, decl]);
     for (const name of spec.derived.candidates ?? []) {
       if (name in derived || name in spec.inputs) continue;
       const decl = spec.derived.discover?.(name);
-      if (decl) drivable.push([name, decl]);
+      if (decl && poolFor(decl).length > 0) drivable.push([name, decl]);
     }
     for (const [name, decl] of drivable.slice(valuePorts.length)) {
       if (inReachParams(name) && rng.chance(paramChance)) params[name] = rng.pick(poolFor(decl));
@@ -153,6 +165,10 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
     const answer = rng.pick(pool.responses ?? DEFAULT_WORLD_POOL.responses);
     const after = rng.pick(pool.delays ?? DEFAULT_WORLD_POOL.delays);
     world.network = [after > 0 ? { answer, after } : { answer }];
+  }
+  if (needs.includes('registry')) {
+    const registry = rng.pick(pool.registries ?? DEFAULT_WORLD_POOL.registries);
+    if (Object.keys(registry).length > 0) world.registry = registry;
   }
   return { seed, params, steps, world };
 }

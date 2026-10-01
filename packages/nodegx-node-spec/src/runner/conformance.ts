@@ -68,6 +68,25 @@ export interface ConformanceOptions {
    * this reach grades.
    */
   reach?: Reach;
+  /**
+   * NSP-012: mutants the node's OWN ports cannot tell from the original — a dropped set whose
+   * only key is a "run scheduled" flag on a branch whose re-run is silent, a value a node stores
+   * and writes somewhere only another node reads. Declared by the spec's keeper with the reason
+   * and, where another suite grades it, which one; a survivor a row matches is COUNTED under
+   * the row (`mutants.equivalent`), never listed as a survivor and never hidden. Mutation
+   * testing's "equivalent mutant", kept as narrow as the row — a wider row eats the next hole.
+   */
+  equivalent?: EquivalentMutant[];
+}
+
+export interface EquivalentMutant {
+  reducer: string;
+  kind?: MutationKind;
+  /** A substring of the branch's shape key (every mutant of the reducer when absent). */
+  branch?: string;
+  /** For `swap-branch`: a substring of the sibling's shape key. */
+  swappedWith?: string;
+  why: string;
 }
 
 export interface KnownRow {
@@ -127,7 +146,7 @@ export interface Report {
   refused?: string;
   scenarios: ScenarioResult[];
   generated: { seed: number; requested: number; ran: number; divergences: Divergence[]; known: KnownCount[] };
-  mutants?: { total: number; killed: number; survivors: MutantResult[]; unreached: Branch[]; results: MutantResult[] };
+  mutants?: { total: number; killed: number; survivors: MutantResult[]; unreached: Branch[]; results: MutantResult[]; equivalent: Array<{ why: string; count: number }> };
   /** The reach this run was graded inside (NSP-005); absent for a full-surface target. */
   reach?: Reach;
   /** Reducers the reach never calls (their port is outside it) — not `unreached`, not graded here. */
@@ -309,12 +328,26 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
     }
     const declared = new Set<string>();
     for (const b of discovered.branches.values()) declared.add(b.reducer);
+    const equivalentRows = options.equivalent ?? [];
+    const equivalent = equivalentRows.map((e) => ({ why: e.why, count: 0 }));
+    const isEquivalent = (r: MutantResult) =>
+      equivalentRows.findIndex(
+        (e) => e.reducer === r.reducer && (e.kind === undefined || e.kind === r.kind) && (e.branch === undefined || r.branch.includes(e.branch)) && (e.swappedWith === undefined || (r.swappedWith ?? '').includes(e.swappedWith))
+      );
+    const survivors: MutantResult[] = [];
+    for (const r of results) {
+      if (r.killed) continue;
+      const e = isEquivalent(r);
+      if (e >= 0) equivalent[e].count++;
+      else survivors.push(r);
+    }
     report.mutants = {
       total: results.length,
       killed: results.filter((r) => r.killed).length,
-      survivors: results.filter((r) => !r.killed),
+      survivors,
       unreached: [], // filled below from the reducers the suite never called
-      results
+      results,
+      equivalent
     };
     for (const name of Object.keys(spec.on)) {
       if (typeof spec.on[name] === 'function' && !declared.has(name)) {
@@ -377,6 +410,7 @@ export function formatReport(report: Report): string {
     lines.push(`  mutants: ${report.mutants.killed} / ${report.mutants.total} killed`);
     for (const s of report.mutants.survivors) lines.push(`    SURVIVED${report.reach ? ' (not graded by this reach)' : ''} ${s.reducer} ${s.kind} on branch ${s.branch}${s.swappedWith ? ' ↔ ' + s.swappedWith : ''}`);
     for (const u of report.mutants.unreached) lines.push(`    UNREACHED ${u.reducer}: ${u.shape}`);
+    for (const e of report.mutants.equivalent) if (e.count > 0) lines.push(`    equivalent ×${e.count}: ${e.why}`);
   }
   return lines.join('\n');
 }

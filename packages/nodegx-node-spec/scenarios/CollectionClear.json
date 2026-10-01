@@ -1,0 +1,123 @@
+[
+  {
+    "name": "Do with no array bound: failure no-array, the reason on Error",
+    "because": "collectionnode-clear.ts :51-54 → collection-failure.ts :149-157",
+    "params": {},
+    "steps": [
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A seeded array is emptied in place: done; emptying it again: unchanged",
+    "because": ":60-62 — wasEmpty read before set([])",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Two Do pulses in one frame: done then unchanged, in press order",
+    "because": ":42 a token per press, :44 each press's callback in order",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      {
+        "signal": "clear"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "null on Array Id unbinds: the next Do fails",
+    "because": "collection-failure.ts :95-98",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      {
+        "set": "collectionId",
+        "value": null
+      },
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
+  }
+]

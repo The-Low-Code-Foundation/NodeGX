@@ -1,0 +1,145 @@
+[
+  {
+    "name": "Name binds: Name sent and Fetched; a Value is stored at the frame end and the record notifies: Changed, Value",
+    "because": "variablenode2.ts :174-180, :249, :62-68",
+    "params": {
+      "name": "x"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "No Name: a value is refused — Error, Failure (a plain signal, no outcome)",
+    "because": ":241-247, :208-213",
+    "params": {},
+    "steps": [
+      {
+        "set": "value",
+        "value": 5
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Fetch: Fetched and done at once",
+    "because": ":187-194",
+    "params": {
+      "name": "x"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Name unticked: only Name is sent, no Fetched",
+    "because": ":176-179",
+    "params": {
+      "runOnChange-name": false,
+      "name": "x"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "Variable changes unticked: a store notifies nothing",
+    "because": ":64 shouldRunOnValueChange('variable')",
+    "params": {
+      "name": "x",
+      "runOnChange-variable": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "The same value stored twice notifies once",
+    "because": "model.ts :379-383 — notify only when the value differs",
+    "params": {
+      "name": "x"
+    },
+    "steps": [
+      {
+        "set": "value",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A seeded variable is read at bind",
+    "because": ":151-161 the getter reads the shared record",
+    "world": {
+      "registry": {
+        "models": {
+          "--ndl--global-variables": {
+            "x": 42
+          }
+        }
+      }
+    },
+    "params": {
+      "name": "x"
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "A numeric Name keys the record as a plain object does, and the notification matches it",
+    "because": ":64 `args.name === internal.name`, model.ts :379 `data[name]`",
+    "params": {
+      "name": 7
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "seven"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "After a store of the same value again (silent), clearing the Name re-stores nothing: no Failure (a stuck store flag would refuse a write nobody asked for)",
+    "because": ":201-204 only Value schedules a store; :241-247 the refusal is the store's",
+    "params": {
+      "name": "x",
+      "value": 1
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "name",
+        "value": ""
+      },
+      "settle",
+      "settle"
+    ]
+  }
+]

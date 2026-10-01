@@ -69,8 +69,11 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
 
     test(`${typeName}: dynamic ports — the spec has \`derived\` exactly when the catalog says the node has them (NSP-004, R6)`, () => {
       const node = byName.get(typeName)!;
-      expect(spec.derived !== undefined).toBe(node.dynamicPorts !== null);
-      if (!node.dynamicPorts) return;
+      // `declared-port-groups` alone is visibility (which declared ports a parameter reveals — Static
+      // Array's CSV / JSON); no port is derived, so no `derived` is owed (NSP-012)
+      const derivesPorts = node.dynamicPorts !== null && node.dynamicPorts.mechanisms.some((m) => m !== 'declared-port-groups');
+      expect(spec.derived !== undefined).toBe(derivesPorts);
+      if (!node.dynamicPorts || !derivesPorts) return;
       // numbered-inputs: `ports({})` draws the first numbered port with the catalog's prefix
       for (const n of node.dynamicPorts.numberedInputs ?? []) {
         const first = spec.derived!.inputs({})[`${n.nameBase} 0`];
@@ -78,10 +81,23 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
         expect(first.displayName).toBe(`${n.displayPrefix} 0`);
         expect(first.type).toBe(n.type.name);
       }
-      // runtime-discovered from a parameter: the catalog names the seeding parameter; a placeholder in it draws a port
+      // runtime-discovered from a parameter: the catalog names the seeding parameter. Two encodings
+      // exist: a placeholder in text draws a port of that name (String Format); a comma-separated
+      // list draws ports by the catalog's own patterns (`prop-<property>`, NSP-012's Object family)
       if (node.parameterEncoding?.known && node.parameterEncoding.seededBy) {
+        const patterns = (node.parameterEncoding as { patterns?: Array<{ pattern: string; plug: string }> }).patterns ?? [];
         for (const seed of node.parameterEncoding.seededBy) {
-          expect(Object.keys(spec.derived!.inputs({ [seed]: 'x {probe}' }))).toContain('probe');
+          if (patterns.length === 0 || 'probe' in spec.derived!.inputs({ [seed]: 'x {probe}' })) {
+            expect(Object.keys(spec.derived!.inputs({ [seed]: 'x {probe}' }))).toContain('probe');
+            continue;
+          }
+          const inputs = Object.keys(spec.derived!.inputs({ [seed]: 'probe' }));
+          const outputs = Object.keys(spec.derived!.outputs?.({ [seed]: 'probe' }) ?? {});
+          for (const p of patterns) {
+            const name = p.pattern.replace(/<[^>]+>/, 'probe');
+            if (p.plug === 'input' || p.plug === 'input/output') expect(inputs).toContain(name);
+            if (p.plug === 'output' || p.plug === 'input/output') expect(outputs).toContain(name);
+          }
         }
       }
     });
@@ -97,8 +113,11 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
       }));
       const outcomeNames = spec.outcomes ? [...spec.outcomes, 'completed'] : [];
       const catalogOutputs = node.outputs.map(shape).sort((a, b) => a.name.localeCompare(b.name));
-      const catalogOutcome = catalogOutputs.filter((p) => (OUTCOME_PORTS as readonly string[]).includes(p.name)).map((p) => p.name);
-      const catalogRest = catalogOutputs.filter((p) => !(OUTCOME_PORTS as readonly string[]).includes(p.name)).map(({ default: _d, ...r }) => r);
+      // an outcome-named port the spec DECLARES is a plain signal of the node's own (Variable's and
+      // Static Array's `failure`, pulsed by a value setter outside any invocation — NSP-012), not an outcome
+      const isOutcomePort = (name: string) => (OUTCOME_PORTS as readonly string[]).includes(name) && !(name in spec.outputs);
+      const catalogOutcome = catalogOutputs.filter((p) => isOutcomePort(p.name)).map((p) => p.name);
+      const catalogRest = catalogOutputs.filter((p) => !isOutcomePort(p.name)).map(({ default: _d, ...r }) => r);
       expect(catalogOutcome.sort()).toEqual([...outcomeNames].sort());
       expect(declared.sort((a, b) => a.name.localeCompare(b.name))).toEqual(catalogRest);
     });

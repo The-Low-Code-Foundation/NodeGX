@@ -18,7 +18,7 @@
 import Ajv from 'ajv';
 
 import type { Handle, TargetAdapter, TraceEvent } from '../src';
-import { checkClaims, CLAUSES, framesOf, hasObservation, interpreterAdapter, loadGraphScenarios, playGraph, runGraphScenarios, TRACE_SCHEMA, validateTrace, type GraphScenario, type GraphTarget } from '../src';
+import { checkClaims, CLAUSES, framesOf, hasObservation, interpreterAdapter, loadGraphScenarios, playGraph, runGraphScenarios, TAGS, TRACE_SCHEMA, validateTrace, type GraphScenario, type GraphTarget } from '../src';
 
 const scenarios = loadGraphScenarios();
 const ajv = new Ajv({ allErrors: true, strict: true });
@@ -36,7 +36,7 @@ describe('AC1 — every clause has a scenario', () => {
   test('every tag is a clause, every name is unique', () => {
     const names = new Set<string>();
     for (const s of scenarios) {
-      for (const c of s.clauses) expect(CLAUSES).toContain(c);
+      for (const c of s.clauses) expect(TAGS).toContain(c);
       expect(names.has(s.name)).toBe(false);
       names.add(s.name);
     }

@@ -1,0 +1,94 @@
+[
+  {
+    "name": "Do with no Object Id: failure no-object-id",
+    "because": "collectionnode-remove.ts :68-71",
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      {
+        "signal": "remove"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "An id no record was ever loaded under: failure unknown-object-id, the id in the sentence",
+    "because": ":83-87 — Model.exists answers both tiers; nothing is minted",
+    "params": {
+      "collectionId": "abc",
+      "modifyId": "zz"
+    },
+    "steps": [
+      {
+        "signal": "remove"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "A seeded member: done; a loaded record that is not a member: unchanged",
+    "because": ":100-103 — the third path ERG-001 §0 found",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {},
+          "m2": {}
+        },
+        "collections": {
+          "abc": [
+            "m1"
+          ]
+        }
+      }
+    },
+    "params": {
+      "collectionId": "abc"
+    },
+    "steps": [
+      {
+        "set": "modifyId",
+        "value": "m1"
+      },
+      {
+        "signal": "remove"
+      },
+      "settle",
+      {
+        "set": "modifyId",
+        "value": "m2"
+      },
+      {
+        "signal": "remove"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "An Object Id but no array: failure no-array",
+    "because": ":73-76",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1"
+          ]
+        }
+      }
+    },
+    "params": {
+      "modifyId": "m1"
+    },
+    "steps": [
+      {
+        "signal": "remove"
+      },
+      "settle"
+    ]
+  }
+]

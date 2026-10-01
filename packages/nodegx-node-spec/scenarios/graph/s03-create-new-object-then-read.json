@@ -1,0 +1,307 @@
+[
+  {
+    "name": "Create New Object writes the held properties onto a fresh record; an Object node handed its Id over a wire reads them in the same frame",
+    "clauses": [
+      "S1"
+    ],
+    "because": "newmodelnode.ts :57-68, modelcrudbase.ts :454-525 — the write the lone node's ports never show (equivalent-mutants.ts); modelnode2.ts :404-423 the property outputs on bind",
+    "nodes": {
+      "n": {
+        "type": "NewModel",
+        "params": {
+          "properties": "a,b",
+          "prop-a": 1,
+          "prop-b": "x"
+        }
+      },
+      "o": {
+        "type": "Model2",
+        "params": {
+          "properties": "a,b"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "n.id",
+        "to": "o.modelId"
+      }
+    ],
+    "steps": [
+      {
+        "node": "n",
+        "signal": "new"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "o",
+        "port": "prop-a",
+        "value": 1
+      },
+      {
+        "at": 1,
+        "subject": "o",
+        "port": "prop-b",
+        "value": "x"
+      },
+      {
+        "at": 1,
+        "subject": "o",
+        "signal": "fetched",
+        "count": 1
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "a,b",
+        "subject": "n"
+      },
+      {
+        "t": "set",
+        "port": "prop-a",
+        "value": 1,
+        "subject": "n"
+      },
+      {
+        "t": "set",
+        "port": "prop-b",
+        "value": "x",
+        "subject": "n"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "a,b",
+        "subject": "o"
+      },
+      {
+        "t": "in",
+        "port": "new",
+        "subject": "n"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "15iCnKz2Hk",
+        "subject": "n"
+      },
+      {
+        "t": "outcome",
+        "port": "new",
+        "value": "done",
+        "subject": "n"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "15iCnKz2Hk",
+        "subject": "o"
+      },
+      {
+        "t": "value",
+        "port": "object",
+        "value": {
+          "a": 1,
+          "b": "x",
+          "id": "15iCnKz2Hk"
+        },
+        "subject": "o"
+      },
+      {
+        "t": "value",
+        "port": "prop-a",
+        "value": 1,
+        "subject": "o"
+      },
+      {
+        "t": "value",
+        "port": "prop-b",
+        "value": "x",
+        "subject": "o"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "o"
+      }
+    ]
+  },
+  {
+    "name": "an Object-typed property handed a string names a record, read back whole; an Array-typed one handed a literal is read as one",
+    "clauses": [
+      "S1"
+    ],
+    "because": "modelcrudbase.ts :483-518 — the editor connection the array branch calls always exists (noodl-runtime.ts :419-420), measured here on a runtime with no editor",
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1
+          }
+        }
+      }
+    },
+    "nodes": {
+      "n": {
+        "type": "NewModel",
+        "params": {
+          "properties": "o,l",
+          "type-o": "object",
+          "prop-o": "m1",
+          "type-l": "array",
+          "prop-l": "[1,2]"
+        }
+      },
+      "r": {
+        "type": "Model2",
+        "params": {
+          "properties": "o,l"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "n.id",
+        "to": "r.modelId"
+      }
+    ],
+    "steps": [
+      {
+        "node": "n",
+        "signal": "new"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "r",
+        "port": "prop-o",
+        "value": {
+          "a": 1,
+          "id": "m1"
+        }
+      },
+      {
+        "at": 1,
+        "subject": "r",
+        "port": "prop-l",
+        "value": [
+          1,
+          2
+        ]
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "o,l",
+        "subject": "n"
+      },
+      {
+        "t": "set",
+        "port": "type-o",
+        "value": "object",
+        "subject": "n"
+      },
+      {
+        "t": "set",
+        "port": "prop-o",
+        "value": "m1",
+        "subject": "n"
+      },
+      {
+        "t": "set",
+        "port": "type-l",
+        "value": "array",
+        "subject": "n"
+      },
+      {
+        "t": "set",
+        "port": "prop-l",
+        "value": "[1,2]",
+        "subject": "n"
+      },
+      {
+        "t": "set",
+        "port": "properties",
+        "value": "o,l",
+        "subject": "r"
+      },
+      {
+        "t": "in",
+        "port": "new",
+        "subject": "n"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "15iCnKz2Hk",
+        "subject": "n"
+      },
+      {
+        "t": "outcome",
+        "port": "new",
+        "value": "done",
+        "subject": "n"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "15iCnKz2Hk",
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "object",
+        "value": {
+          "id": "15iCnKz2Hk",
+          "l": [
+            1,
+            2
+          ],
+          "o": {
+            "a": 1,
+            "id": "m1"
+          }
+        },
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "prop-l",
+        "value": [
+          1,
+          2
+        ],
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "prop-o",
+        "value": {
+          "a": 1,
+          "id": "m1"
+        },
+        "subject": "r"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "r"
+      }
+    ]
+  }
+]

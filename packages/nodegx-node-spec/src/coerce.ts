@@ -31,7 +31,9 @@ export type Coercion =
   | 'typed-string'
   | 'typed-boolean'
   | 'typed-color'
-  | 'not-false';
+  | 'not-false'
+  | 'array-literal'
+  | 'object-literal';
 
 export interface CoercionRule {
   /** The runtime line(s) the rule was read from. */
@@ -90,8 +92,31 @@ export const COERCIONS: Readonly<Record<Coercion, CoercionRule>> = Object.freeze
     // `undefined`, `0` and `""` all leave the box ticked, unlike `js-boolean`.
     source: 'noodl-runtime/src/run-on-value-change.ts `setRunOnValueChange(this, inputName, value !== false)` in runOnChangeInput',
     apply: (v) => v !== false
+  },
+  'array-literal': {
+    // NSP-012: a DECLARED `array` port (not one registered at run time) is written as a literal in
+    // the panel, so a STRING arriving is evaluated as JavaScript; one that will not evaluate becomes
+    // `[]` (and a console line). Anything that is not a string arrives as sent. `eval` indirect, so
+    // the text sees no local names — node.ts's direct `eval` would resolve `value` or `name` to its
+    // own locals, which no pool and no author writes.
+    source: 'noodl-runtime/src/node.ts setInputValue `(inputTypeName === "array" || "object") && typeof value === "string"` → eval(literal), catch → []',
+    apply: (v) => (typeof v === 'string' ? evaluateLiteral(v, []) : v)
+  },
+  'object-literal': {
+    // The object half of the same typecast: the literal is parenthesised so `{a:1}` reads as an
+    // object and not a block; a failure becomes `{}`.
+    source: 'noodl-runtime/src/node.ts setInputValue — `inputTypeName === "object" ? "(" + value + ")" : value`, catch → {}',
+    apply: (v) => (typeof v === 'string' ? evaluateLiteral('(' + v + ')', {}) : v)
   }
 });
+
+function evaluateLiteral(text: string, fallback: unknown): unknown {
+  try {
+    return (0, eval)(text);
+  } catch {
+    return fallback;
+  }
+}
 
 export function coerce(kind: Coercion | undefined, value: unknown, fallback: unknown): unknown {
   return COERCIONS[kind ?? 'none'].apply(value, fallback);
