@@ -4,8 +4,9 @@
  * export, which is a named one here (`EaseCurves`).
  *
  * THE RULE (:1-6): a curve maps `t` in [0, 1] onto `start`..`end` with the endpoints baked in;
- * `easeIn` / `easeOut` / `easeInOut` are the cubic ones (:86-88). A name not in the set looks up
- * `undefined` — the object is indexed by whatever string a project's enum port carries (:28-33).
+ * `easeIn` / `easeOut` / `easeInOut` are the cubic ones (:86-88). The object is indexed by whatever
+ * string a project's enum port carries (:28-33), so a name not in the set looks up `undefined` here;
+ * what a node does about that is its spec's (Animate To Value v2: Ease Out).
  */
 
 /**

@@ -231,3 +231,33 @@ format's signal IS the edge. Hashes refreshed for `spec.ts` and `world.ts`; all 
 Round 4, named: Hash (digest — a hand-written SHA-256 or a world `digest` member), the date nodes (the zone — and
 jest's `process.env` copy, a trap a stranger would meet), the registry nodes, and a graph target.
 
+
+### 5.8 Round 3b — s16, 2026-10-01: a CHANGE handed to a stranger (Animate To Value v2)
+
+C19 was ruled "fix it", so Animate To Value's spec went to **v2** (an Easing Curve that is not one of the set's own
+names moves along Ease Out; v1 left the value where it was) and its scenario file and `ease-curves.ts` (both guarded)
+changed. Round 3's target implemented v1 faithfully and went red, as round 2's did for Boolean To String v2 (round
+2b, s12). The same recipe: a lab copy with no `.git`, a FRESH agent handed only the format, the five specs, their
+scenarios and the target it inherits — told that ONE spec moved, not which. Brief:
+[NSP-006-BRIEF-3B.md](NSP-006-BRIEF-3B.md); its report is the "Round 3b" section of `stranger-3/REPORT.md`.
+
+| | reading |
+|---|---|
+| found the change by | `grep version` over the five specs (one says 2), then the version note — "the note alone was enough" |
+| change | one method (`Glide.frameEnd`): `shapeNamed(name) \|\| shapeNamed('easeOut')`, two `if (shape)` guards gone |
+| before / after, narrowed | `1 failed, 1 skipped, 8 passed` exit 1 → `1 skipped, 9 passed` exit 0 |
+| full, then deep (`NSP_DEEP=10000`, the one node) | `17 skipped, 41 passed, 58 total` exit 0; v2 CONFORMS, 16/16, 10000/10000, 25/25 mutants |
+| cost | 2 min 12 s (19:58:29–20:00:41); 86 k tokens; 18 tool calls |
+| in primary, three rounds, after the scenario fix below | `17 skipped, 41 passed, 58 total`, hash gate green |
+
+**Checked, not trusted:** its 18 tool calls, read from the transcript — every one inside the lab, every read a file
+on the list; no interpreter, adapter, runner body, registry, other round's target, parent or git.
+
+**What it caught — the round's value.** (1) One of the two v2 scenarios I wrote ("an empty Easing Curve …") graded
+NOTHING: it set Target Value 10 as the node's first number, which is adopted outright, so no run and no curve; it
+passed on the v1 target. Fixed after the round (a 0 first) and checked as a control: on the v1 target BOTH v2
+scenarios now fail, on v2 both pass. (2) `ease-curves.ts`' header still said an unknown name "looks up `undefined`"
+as if that were the node's rule — rewritten. (3) No mutant encodes v1 (the count stayed 25), so mutation grades
+nothing about a version change. (4) The format has no home for a change note and a target cannot say which version
+it implements — an out-of-date target reads as trace differences. (3) and (4) are NSP-010's ("a change is a
+version"), named there.

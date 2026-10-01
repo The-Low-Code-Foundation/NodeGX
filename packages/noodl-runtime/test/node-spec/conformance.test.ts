@@ -146,15 +146,6 @@ const unknownUnitThrows = (d: Divergence) => {
 };
 
 /**
- * NSP-013 §6 C19 — Animate To Value looks its Easing Curve up by name (animate-to-value.ts :226); a
- * name the set does not have — `''`, `null`, `undefined` or unknown text — stores `undefined`, and the
- * run's first curve call throws inside the scheduler's timer pass, which nothing catches
- * (nodecontext.ts :500-503). Narrow: the throw's own message; no other node in the registry has
- * `this.ease`.
- */
-const easeIsNotAFunction = (d: Divergence) => d.difference.threw !== undefined && /this\.ease is not a function/.test(d.difference.threw);
-
-/**
  * NSP-013 §6 C21 — States builds each animated value's bezier from its transition's `curve` inside
  * the frame-end callback (states.ts :811); bezier-easing 1.1.1 THROWS for anything but four finite
  * numbers with both x in [0, 1] (`{}`, `true`, text, `{ dur, delay }` with no `curve`). The scheduler
@@ -178,7 +169,6 @@ const C6_ANY_PORT: KnownRow = { row: 'NSP-011 §6 C6 (any port — node.ts) — 
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   States: [{ row: 'NSP-013 §6 C21 — a transition whose curve bezier-easing refuses throws in the frame-end callback: the move is abandoned half-done, the rest of the queue dropped, no outcome reported', matches: refusedCurveWritten }],
-  'net.noodl.animatetovalue': [{ row: 'NSP-013 §6 C19 — an Easing Curve the set does not have (`\'\'`, null, unknown text) throws in the scheduler\'s timer pass, and every timer in the app stops', matches: easeIsNotAFunction }],
   'net.noodl.DateAdd': [{ row: 'NSP-013 §6 C16 — an unknown Unit throws in Date Add\'s setter', matches: unknownUnitThrows }],
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],

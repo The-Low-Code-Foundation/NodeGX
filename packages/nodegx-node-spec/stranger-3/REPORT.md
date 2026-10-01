@@ -215,3 +215,134 @@ unsubscribes it on dispose.
 The nodes are imperative state machines with mutable fields; they are not reducers returning patches.
 `settle()` makes two passes: first `frameEnd()` on every slot, then for each slot it records the
 values that changed (sorted by name, compared by `wireKey`), then the signals, then the outcomes.
+
+## Round 3b (NSP-013 s16)
+
+I inherited this target and did not write it. One spec had gone up a version. I found the change
+and brought the target up to it, using only the spec files and the suite.
+
+### 1. What changed, as read from the spec
+
+**Animate To Value (`net.noodl.animatetovalue`), version 1 → 2.** In v2, an Easing Curve that is not
+one of the curve set's own names moves along **Ease Out**, the port's default. That covers any wired
+text such as `'bounce'`, a curve an old project names that is no longer listed, `''`, `null` and
+`undefined`. In v1 such a run did not move the value at all: there was no `Current Value` update, but
+it still finished and fired `At Target Value` on time. Everything else about the node is unchanged.
+
+How I found it, in order:
+1. `grep version` across the five specs. Four say `version: 1` and `animate-to-value.ts` says
+   `version: 2`. That took one command and found the spec at once.
+2. The version note, a comment directly above `version: 2` (lines 77–79), says in two sentences what
+   v2 does and what v1 did. The header (lines 30–32) says the same and cites the row (NSP-013 §6 C19,
+   ruled "fix it"). `curveOf()` (lines 69–73) is the code: own-property lookup, else
+   `EaseCurves.easeOut`.
+3. The scenario file has two v2 scenarios at its end, named "(v2 …)".
+4. The failing run confirmed it. Only the `'bounce'` scenario failed, and every generated divergence
+   (5 of 200) involved `easingCurve` `''`, `null` or `'bounce'`. Each time, the reference sent a
+   `currentValue` where mine went straight to `atTargetValue`.
+
+The version note alone was enough to make the change. I did not need to diff the reducers against the
+code.
+
+### 2. What I changed
+
+One function in `stranger-3/nodes.js`, `Glide.frameEnd()`:
+- `const shape = shapeNamed(this.curveName) || shapeNamed('easeOut');` (it was `shapeNamed(...)`,
+  which returns `null` for a name the set lacks).
+- I removed the two `if (shape)` / `&& shape` guards that made a run with no curve leave the value
+  where it was. The run now always writes `Current Value`, both at the delay-0 join (t = 0) and on
+  each running frame.
+
+`curves.js` is unchanged. Its `shapeNamed` still answers "is this one of the set's own names". The
+v2 fallback is the node's rule, so it lives in the node. The name is still looked up every frame, as
+the spec's `curveOf(s.ease)` is.
+
+### 3. Readings
+
+| Run | `Tests:` line | Exit |
+|---|---|---|
+| Before, narrowed (`NSP_ONLY=net.noodl.animatetovalue`) | `Tests: 1 failed, 1 skipped, 8 passed, 10 total` | 1 |
+| Before, full | `Tests: 1 failed, 17 skipped, 40 passed, 58 total` | 1 |
+| After, narrowed | `Tests: 1 skipped, 9 passed, 10 total` | 0 |
+| After, full | `Tests: 17 skipped, 41 passed, 58 total` | 0 |
+| Deep, narrowed, `-t deep` | `Tests: 9 skipped, 1 passed, 10 total` | 0 |
+
+Before, the runner reported `net.noodl.animatetovalue v2 on stranger-3: DOES NOT CONFORM (66 ms,
+seed 20727)`, with scenarios 15 / 16 passed (the `'bounce'` one failed), 5 generated divergences and
+mutants 25 / 25 killed.
+
+Deep run (`NSP_DEEP=10000`):
+```
+net.noodl.animatetovalue v2 on stranger-3: CONFORMS (1481 ms, seed 20727)
+  scenarios: 16 / 16 passed
+  generated: 10000 / 10000 ran, 0 divergence(s)
+  mutants: 25 / 25 killed
+```
+There were 5 jest runs in all: 2 before the change, 2 after it, and the deep run. One code change
+took the target to green.
+
+### 4. Where the spec alone was thin
+
+1. **The second v2 scenario does not test what it says.** "an empty Easing Curve … half-way through
+   the run the value is Ease Out's, not Linear's" sets `easingCurve: ''` and then `targetValue: 10`
+   as the **first** number. By this spec's own rule (lines 11–12), the first number is adopted
+   outright, so no run ever starts and no curve is ever called. The `because` promises "at t = 0.5
+   the value is 8.75". That is the right number for Ease Out from 0 to 10, but the trace never
+   reaches it. **This scenario passed on the unchanged v1 target** (before: 15 / 16, and only
+   `'bounce'` failed). A `targetValue: 0` and a settle before the 10 would make it grade `''` and
+   `null`. As written, only the generator covered `''` and `null`, and it did catch them (3 of the 5
+   divergences).
+2. **No mutant encodes v1.** The mutant count stayed at 25 across the version bump. No mutant of the
+   v2 spec behaves the way v1 did (an unknown curve does not move the value). The v1 behaviour was
+   killed here by the scenario and the generator, but the mutation gate does not record this change.
+3. **Two accounts of "v1" disagree.** The version note says v1 "did not move the value at all … though
+   it still finished and fired At Target Value on time". The `'bounce'` scenario's name says "was row
+   C19 — the run's first curve call threw and stopped every timer". The first is the v1 spec and the
+   second is the runtime's defect. Nothing says which one "v1" means. I went by the version note,
+   because that is what the target had implemented. Round 3 item 11 raised the same split.
+4. **`ease-curves.ts`'s header is now stale for this node.** It still says "A name not in the set
+   looks up `undefined`". That is true of the curve object, but a reader who starts from the imported
+   module gets the v1 picture. Only `animate-to-value.ts` says the node now falls back.
+5. **A target cannot declare a version.** `adapter.ts` does not mention versions. `spec.ts` says only
+   "Bumped when behaviour changes". The runner grades whatever target it has against v2, so a stale
+   target shows up as behavioural divergences, not as "this target implements v1, the spec is v2".
+   Here that was harmless because the divergence pointed straight at the curve. On a subtler change,
+   the inheritor gets a failing trace and has to grep for the version.
+6. **Where a change note lives is a convention, not part of the format.** The note was a comment
+   beside `version:` in the spec, and scenario names carried "(v2 …)". Both worked. But the format
+   has no field for the note (such as a `changes: { 2: '…' }`), and no way to tag the scenarios that
+   belong to a version, so `grep` was the method.
+7. **Small guesses the suite cannot see.** First, whether the fallback is looked up per frame or
+   frozen when the curve is written. I follow the spec and look it up per frame. Changing the curve
+   mid-run therefore switches shape mid-run, and the generator agreed at 10000. Second, whether
+   "Ease Out" means the alias `easeOut` (which is `easeOutCubic`) or follows the port's `default` if
+   that ever changes. The spec hard-codes `EaseCurves.easeOut`, and so did I. Neither guess was
+   corrected.
+
+### 5. Files opened, in order
+
+All paths are relative to `packages/nodegx-node-spec/`.
+1. `stranger-3/REPORT.md`, read in full. I also listed `stranger-3/` and took line counts of its `.js`
+   files.
+2. `src/nodes/delay.ts`, `src/nodes/repeat.ts`, `src/nodes/animate-to-value.ts`, `src/nodes/uuid.ts`,
+   `src/nodes/screen-resolution.ts`. I opened these only through `grep -i version`, which shows
+   matching lines and not whole files.
+3. `src/nodes/animate-to-value.ts`, read in full.
+4. `stranger-3/nodes.js`, `stranger-3/curves.js`, `stranger-3/target.js`, through a grep for
+   curve/ease/class/version. I then read `stranger-3/curves.js` in full and `stranger-3/nodes.js`
+   lines 155–260 (the `Glide` class).
+5. `src/nodes/ease-curves.ts`: a grep, then lines 1–50.
+6. `scenarios/net.noodl.animatetovalue.json`: names and `because` for all 16 scenarios, then the last
+   two in full.
+7. `src/adapter.ts`, `src/spec.ts`, `scenarios/README.md`, through `grep -i version` only.
+
+I did not open `tests/stranger.test.ts` or the hashes helper this round, only ran the test file. I
+did not open the other scenario files, `src/world.ts`, `src/coerce.ts`, `src/canonical.ts`,
+`src/trace.ts`, the schema, `src/index.ts`, `src/runner/index.ts`, `src/nodes/index.ts`, `target.js`
+beyond the grep, or `canon.js`. I opened nothing outside the lab, wrote no log files and used no
+`git`.
+
+### 6. Time
+
+- Start: Thu Oct 1 19:58:29 CEST 2026
+- End: Thu Oct  1 20:00:41 CEST 2026 (about 2 minutes 12 seconds)

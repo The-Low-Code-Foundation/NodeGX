@@ -223,7 +223,14 @@ const AnimateToValue: NodeDefinitionOptions = {
       group: 'Parameters',
       description: 'Shape of the movement between where the value is and Target Value',
       set: function (this: AnimateToValueInstance, value: string) {
-        this._internal._animation.ease = EaseCurves[value];
+        // P107-C19: a name the set does not have (empty, null, a disconnected wire, any other
+        // text) used to store `undefined`, and the run's first curve call threw inside the
+        // scheduler's timer pass — every frame, stopping every timer in the app. It moves
+        // along Ease Out instead, the port's default. Own keys only: `EaseCurves` is a plain
+        // object, so `toString` and friends are not curves.
+        this._internal._animation.ease = Object.prototype.hasOwnProperty.call(EaseCurves, value)
+          ? EaseCurves[value]
+          : EaseCurves.easeOut;
       }
     }
   },

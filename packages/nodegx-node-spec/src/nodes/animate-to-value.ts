@@ -27,11 +27,9 @@
  * once (:185-194) — which is `startValue`, so the value only moves on a LATER frame. The world's
  * clock is the frame time; a frame is a settle.
  *
- * ⚠️ A name `EaseCurves` does not have (a wire carries any text; an old project a curve no longer
- * listed) is stored as `undefined` (:226), and the run's first curve call THROWS inside the
- * scheduler's timer pass, which nothing catches (nodecontext.ts :500-503) — NSP-013 §6 row C19. The
- * spec writes a run with no curve as a run that does not move the value (the runtime has no
- * behaviour a wire can carry there); the runtime conformance test attributes the throw to the row.
+ * An Easing Curve that is not one of `EaseCurves`' own names (a wire carries any text; an old
+ * project a curve no longer listed; `''`, `null`, `undefined`) moves along Ease Out, the port's
+ * default (v2 — NSP-013 §6 row C19, ruled "fix it" 2026-10-01).
  */
 
 import { defineNode } from '../spec';
@@ -57,7 +55,7 @@ type State = {
   endValue: Num;
   duration: unknown;
   delay: unknown;
-  /** The NAME the curve was looked up by — `EaseCurves[name]` at use, which is what was stored at :226. */
+  /** The NAME the curve was looked up by — `curveOf(name)` at use. */
   ease: unknown;
   jumpValue: unknown;
   /** A frame-end callback from `jumpTo` is pending (:70-75; two in one frame act as one). */
@@ -68,15 +66,18 @@ type State = {
   tStart: unknown;
 }
 
-/** `EaseCurves[name]` — `undefined` for a name the set does not have (an own key only: the set is a plain object literal). */
-function curveOf(name: unknown): ((a: number, b: number, t: number) => number) | undefined {
+/** `EaseCurves[name]` for one of its own names (the set is a plain object literal, so `toString` is not a curve); Ease Out for anything else (v2). */
+function curveOf(name: unknown): (a: number, b: number, t: number) => number {
   const key = String(name);
-  return Object.prototype.hasOwnProperty.call(EaseCurves, key) ? EaseCurves[key] : undefined;
+  return Object.prototype.hasOwnProperty.call(EaseCurves, key) ? EaseCurves[key] : EaseCurves.easeOut;
 }
 
 export const AnimateToValue = defineNode({
   type: 'net.noodl.animatetovalue',
-  version: 1,
+  // v2 (NSP-013 s16, row C19 ruled "fix it"): an Easing Curve that is not one of the set's own names moves
+  // along Ease Out. In v1 such a run did not move the value at all — no Current Value — though it still
+  // finished and fired At Target Value on time.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/animate-to-value.ts; packages/noodl-runtime/src/timerscheduler.ts; packages/noodl-viewer-react/src/easecurves.ts',
   needs: ['clock'],
   worldPool: { advances: [0, 1, 16, 100, 150, 299, 300, 301, 1000] },
@@ -180,10 +181,8 @@ export const AnimateToValue = defineNode({
       if (tRunning && now >= (tStart as number)) {
         const t = d > 0 ? (now - (tStart as number)) / (d * 1) : 1.0; // :139-143
         const localT = t >= 1.0 ? 1.0 : t * 1 - Math.floor(t * 1); // :147-150
-        if (curve) {
-          currentNumber = curve(startValue, s.endValue, localT); // :108 (row C19: no curve → the runtime throws here)
-          send.push('currentValue'); // :109
-        }
+        currentNumber = curve(startValue, s.endValue, localT); // :108
+        send.push('currentValue'); // :109
         if (!(t < 1.0)) {
           tRunning = false; // :168-169
           emit.push('atTargetValue'); // :111-113
@@ -195,7 +194,7 @@ export const AnimateToValue = defineNode({
         tStart = (now as any) + (s.delay as any); // eslint-disable-line @typescript-eslint/no-explicit-any
         tRunning = true;
         tQueued = false;
-        if (s.delay === 0 && curve) {
+        if (s.delay === 0) {
           currentNumber = curve(startValue, s.endValue, 0); // :191-193 — onRunning(0)
           send.push('currentValue');
         }

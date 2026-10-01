@@ -223,7 +223,8 @@ class Glide {
   }
   frameEnd() {
     const now = this.link.clock();
-    const shape = shapeNamed(this.curveName);
+    // v2 (NSP-013 row C19): a name the set does not own moves along Ease Out, the port's default.
+    const shape = shapeNamed(this.curveName) || shapeNamed('easeOut');
     const d = this.span;
     if (this.jumpAsked && this.to !== this.current) {
       this.from = this.current;
@@ -233,10 +234,8 @@ class Glide {
     if (this.tLive && now >= this.tFrom) {
       const t = d > 0 ? (now - this.tFrom) / (d * 1) : 1.0;
       const local = t >= 1.0 ? 1.0 : t * 1 - Math.floor(t * 1);
-      if (shape) {
-        this.current = shape(this.from, this.to, local);
-        this.link.sent('currentValue');
-      }
+      this.current = shape(this.from, this.to, local);
+      this.link.sent('currentValue');
       if (!(t < 1.0)) {
         this.tLive = false;
         this.link.pulse('atTargetValue');
@@ -246,7 +245,7 @@ class Glide {
       this.tFrom = now + this.delay;
       this.tLive = true;
       this.tWaiting = false;
-      if (this.delay === 0 && shape) {
+      if (this.delay === 0) {
         this.current = shape(this.from, this.to, 0);
         this.link.sent('currentValue');
       }
