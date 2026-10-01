@@ -1,0 +1,153 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "835ed4a7-a5eb-5368-b29f-ee7d58cc6dc3",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mm_in",
+      "type": "Component Inputs",
+      "label": "What to tell, and to whom",
+      "x": 40,
+      "y": 40,
+      "parameters": {},
+      "ports": [
+        {
+          "name": "request",
+          "plug": "output",
+          "type": "object"
+        }
+      ]
+    },
+    {
+      "id": "mm_start",
+      "type": "JavaScriptFunction",
+      "label": "Begin: the staff list first",
+      "x": 300,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/* TASK-L188. Nothing is read until a request arrives; then, in order, the staff\n   list (for a learner with no coach recorded), the site, the key, and the mail. */\nif (Inputs.request !== undefined && Inputs.request !== null) Outputs.go();\n",
+        "runOnChange-in-request": true
+      },
+      "ports": [
+        {
+          "name": "in-request",
+          "plug": "input",
+          "type": "*",
+          "displayName": "request",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        }
+      ]
+    },
+    {
+      "id": "mm_staff",
+      "type": "noodl.cloud.listusersinrole",
+      "label": "Everyone on the staff list — used only when no coach is recorded",
+      "x": 540,
+      "y": 40,
+      "parameters": {
+        "role": "staff"
+      }
+    },
+    {
+      "id": "mm_site",
+      "type": "noodl.cloud.secret",
+      "label": "SITE_ORIGIN — the configured site, never the request's headers",
+      "x": 780,
+      "y": 40,
+      "parameters": {
+        "name": "SITE_ORIGIN"
+      }
+    },
+    {
+      "id": "mm_key",
+      "type": "noodl.cloud.secret",
+      "label": "UNSUBSCRIBE_KEY — signs each recipient's one-click link",
+      "x": 1020,
+      "y": 40,
+      "parameters": {
+        "name": "UNSUBSCRIBE_KEY"
+      }
+    },
+    {
+      "id": "mm_fn",
+      "type": "JavaScriptFunction",
+      "label": "Who, may we, the words, the send",
+      "x": 1260,
+      "y": 40,
+      "parameters": {
+        "functionScript": "/*\n * TELL THE OTHER PERSON A MESSAGE ARRIVED (TASK-L188). THE ONE OWNER OF MESSAGE\n * MAIL: who it goes to, whether they may be emailed, the signed link that stops\n * it, the words, and the send. Nothing else in the template sends mail; the\n * backend sends sign-in links itself and they never pass through here.\n *\n * WHO. A learner's question goes to the coach recorded on their profile\n * (`coachEmail`, written by addLearner). With nobody recorded it goes to EVERY\n * staff account, and that mail says so — never to a guess from history (the\n * product's L132). A coach's reply goes to the learner it belongs to.\n *\n * MAY WE (the product's canEmail, L54), per recipient: an account that has asked\n * not to be emailed (`emailOptOutAt`) or has no address gets nothing. This is the\n * ONE gate; tools/check-opt-out.mjs runs this script and fails if an opted-out\n * recipient is ever handed to the mailer.\n *\n * WHAT IT CARRIES (sprint 54 §2.4): the ONE turn that triggered it and a link —\n * never the thread. The subject never quotes the message: a subject is the\n * most-previewed and most-forwarded part of a mail and shows on a lock screen.\n * The learner is named by the name on their account, else their address, and\n * NEVER by the coach's private label (L84).\n *\n * THE LINKS are built on SITE_ORIGIN, the deployment's configured address, and\n * never on the request's headers: a learner's request must not be able to aim\n * the link in their coach's mail anywhere (requestOrigin.ts). Each mail carries\n * its recipient's own one-click unsubscribe link, signed with UNSUBSCRIBE_KEY\n * over 'dbt-unsubscribe:v1:' + account — the string `unsubscribe` verifies.\n *\n * A MAIL NEVER FAILS A WRITE. This runs after the turn is saved and always\n * answers `done`; a refusal or a dead relay is logged with ids and a count —\n * never an address and never a body (the product's L132).\n *\n * THE SEND is the backend's mailer (`_noodl_send_email`, the seam the Send Email\n * node itself calls), from this script rather than through that node, because\n * a node sends one mail per Do and the staff fallback is one mail PER recipient,\n * each with its own gate and its own unsubscribe link — a loop a graph cannot\n * draw. Recorded as a NodeGX core row in sprint 54's index.\n */\nif (Inputs.request !== undefined && Inputs.request !== null) {\n  (async () => {\n    const r = Inputs.request || {};\n    const tag = '[dbt:Message mail] ' + String(r.to || '-') + ' learner=' + String(r.learnerId || '-');\n    let sent = 0, skipped = 0, failed = 0;\n    try {\n      const q = (c, where, limit) => Noodl.Records.query(c, where, { limit: limit || 100, plain: true });\n      const one = async (c, where) => (await q(c, where, 2))[0] || null;\n      const origin = String(Inputs.origin || '').replace(/\\/+$/, '');\n      const key = String(Inputs.key || '');\n      if (!/^https?:\\/\\/[^/]+$/.test(origin) || !key) {\n        console.error(tag + ' not sent: SITE_ORIGIN or UNSUBSCRIBE_KEY is not provisioned (tools/setup-mail.mjs)');\n        Outputs.sent = 0;\n        Outputs.done();\n        return;\n      }\n      const send = typeof globalThis._noodl_send_email === 'function' ? globalThis._noodl_send_email : null;\n      if (!send) throw new Error('no mailer in this process');\n\n      const hex = (buf) => Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');\n      const hmacKey = await crypto.subtle.importKey('raw', new TextEncoder().encode(key), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);\n      const unsubscribeFor = async (userId) =>\n        origin + '/unsubscribe?u=' + encodeURIComponent(userId) + '&s=' + hex(await crypto.subtle.sign('HMAC', hmacKey, new TextEncoder().encode('dbt-unsubscribe:v1:' + userId)));\n\n      const learnerId = String(r.learnerId || '');\n      const profile = learnerId ? await one('LearnerProfile', { learnerId: { equalTo: learnerId } }) : null;\n      if (!profile) throw new Error('no learner profile');\n      const learnerUser = profile.userId ? await one('_User', { objectId: { equalTo: profile.userId } }) : null;\n      const first = learnerUser && learnerUser.firstName ? String(learnerUser.firstName).trim() : '';\n      const last = learnerUser && learnerUser.lastName ? String(learnerUser.lastName).trim() : '';\n      const learnerName = (first + ' ' + last).trim() || (learnerUser && learnerUser.email) || 'One of your learners';\n\n      // WHAT IT IS ABOUT, in words: the card's own title where there is one.\n      const kind = String(r.anchorKind || '');\n      const ref = String(r.anchorId || '').slice(kind.length + 1);\n      let about = { lesson: 'a lesson', session: 'a session', evaluation: 'a review', assignment: 'a brief', submission: 'something they sent in', message: 'a message', signal: 'a moment on their course' }[kind] || 'their course';\n      try {\n        if (kind === 'lesson') { const c = await one('Concept', { conceptId: { equalTo: ref } }); if (c && c.title) about = 'the lesson “' + c.title + '”'; }\n        if (kind === 'session') { const s = await one('CoachingSession', { sessionId: { equalTo: ref } }); if (s && s.title) about = 'the session “' + s.title + '”'; }\n        if (kind === 'assignment') { const a = await one('Assignment', { assignmentId: { equalTo: ref } }); if (a && a.title) about = 'the brief “' + a.title + '”'; }\n      } catch (e) { /* the noun is enough */ }\n\n      // WHO.\n      let recipients = [];\n      let unassigned = false;\n      if (r.to === 'coach') {\n        const coachEmail = String(profile.coachEmail || '').trim().toLowerCase();\n        const coach = coachEmail ? await one('_User', { username: { equalTo: coachEmail } }) : null;\n        if (coach) recipients = [coach];\n        else {\n          unassigned = true;\n          const ids = Array.isArray(Inputs.staffIds) ? Inputs.staffIds : [];\n          for (const id of ids) { const u = await one('_User', { objectId: { equalTo: String(id) } }); if (u) recipients.push(u); }\n        }\n      } else if (r.to === 'learner') {\n        if (learnerUser) recipients = [learnerUser];\n      } else {\n        throw new Error('to must be coach or learner');\n      }\n\n      const body = String(r.body || '');\n      for (const u of recipients) {\n        // THE GATE.\n        const address = typeof u.email === 'string' && /@/.test(u.email) ? u.email : '';\n        if (!address || u.emailOptOutAt) { skipped++; continue; }\n        const unsubscribe = await unsubscribeFor(u.objectId);\n        let subject, text;\n        if (r.to === 'coach') {\n          const link = origin + '/learner?learner=' + encodeURIComponent(learnerId);\n          subject = learnerName + ' asked you a question';\n          text = [\n            learnerName + ' asked you a question about ' + about + ':',\n            '',\n            body,\n            '',\n            'Open their programme to reply: ' + link,\n            unassigned ? '\\nNobody is set as this learner’s coach, so this went to everyone on the staff list.' : '',\n            '',\n            '—',\n            'Replies to this email are not read. Answer on the course, and they will see it there.',\n            'Stop emails about messages: ' + unsubscribe,\n            'Your sign-in links are not affected.'\n          ].join('\\n');\n        } else {\n          const link = origin + '/course?comment=' + encodeURIComponent(String(r.anchorId || ''));\n          subject = 'Your coach replied';\n          text = [\n            'Your coach replied about ' + about + ':',\n            '',\n            body,\n            '',\n            'See it on your course: ' + link,\n            '',\n            '—',\n            'Replies to this email are not read. Answer on the course, and your coach will see it there.',\n            'Stop emails about messages: ' + unsubscribe,\n            'Your sign-in links are not affected.'\n          ].join('\\n');\n        }\n        const res = await send({ to: address, subject, text });\n        if (res && res.success) sent++;\n        else { failed++; console.error(tag + ' a send failed: recipient=' + u.objectId + ' ' + String((res && res.error) || '').slice(0, 160).replace(/[^\\s]+@[^\\s]+/g, '<address>')); }\n      }\n      console.log(tag + ' sent=' + sent + ' skipped=' + skipped + ' failed=' + failed + (unassigned ? ' (no coach recorded: staff list)' : ''));\n    } catch (e) {\n      console.error(tag + ' not sent: ' + String((e && e.message) || e));\n    }\n    Outputs.sent = sent;\n    Outputs.done();\n  })();\n}\n",
+        "runOnChange-in-request": false,
+        "runOnChange-in-staffIds": false,
+        "runOnChange-in-origin": false,
+        "runOnChange-in-key": false
+      },
+      "ports": [
+        {
+          "name": "in-request",
+          "plug": "input",
+          "type": "*",
+          "displayName": "request",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-staffIds",
+          "plug": "input",
+          "type": "*",
+          "displayName": "staffIds",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-origin",
+          "plug": "input",
+          "type": "*",
+          "displayName": "origin",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-key",
+          "plug": "input",
+          "type": "*",
+          "displayName": "key",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-sent",
+          "plug": "output",
+          "type": "*",
+          "displayName": "sent",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mm_out",
+      "type": "Component Outputs",
+      "label": "Always done — a mail never fails a write",
+      "x": 1520,
+      "y": 40,
+      "parameters": {},
+      "ports": [
+        {
+          "name": "sent",
+          "plug": "input",
+          "type": "*"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ]
+    }
+  ]
+}

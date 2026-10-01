@@ -30,3 +30,11 @@ Richard took four on 2026-10-01. The full record is the sprint index
   spell the limit, the subject and the read-marking four times.
 - **The notice bumped to `2026-10-02`.** `2026-10-01` said *"No messages … can be written in this
   version"*, and it is deployed, so it could not take new text.
+- **One owner of message mail (`shared/Message mail`), and it is a script.** L187 first built a
+  gate node and a link node for graph-drawn Send Email nodes; L188 found the staff fallback needs one
+  mail per recipient, each gated and each with its own link — a loop. The script calls the mailer
+  seam the Send Email node uses, and the two helpers were deleted rather than left with no caller.
+- **Every link is built on `SITE_ORIGIN`**, a configured secret. NodeGX's own `requestOrigin`
+  node says a link a third party clicks must not come from request headers.
+- **The deep link compares, never renders.** `/course?comment=` is matched against each row's own id;
+  anything that matches nothing changes nothing.

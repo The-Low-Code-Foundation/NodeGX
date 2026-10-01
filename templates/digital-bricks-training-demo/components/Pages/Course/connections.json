@@ -446,6 +446,12 @@
       "fromProperty": "Translation",
       "toId": "cs_nopath",
       "toProperty": "text"
+    },
+    {
+      "fromId": "cs_comment",
+      "fromProperty": "pm-comment",
+      "toId": "cs_focus_var",
+      "toProperty": "value"
     }
   ]
 }

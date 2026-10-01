@@ -62,9 +62,9 @@
     "Pages/Course": {
       "path": "Pages/Course",
       "type": "page",
-      "nodeCount": 52,
-      "connectionCount": 69,
-      "modified": "2026-09-23T13:44:39.931Z",
+      "nodeCount": 58,
+      "connectionCount": 75,
+      "modified": "2026-10-01T22:00:00.000Z",
       "created": "2026-09-19T21:11:24.317Z"
     },
     "Pages/Palette": {
@@ -86,9 +86,9 @@
     "Course/Timeline row": {
       "path": "Course/Timeline row",
       "type": "visual",
-      "nodeCount": 19,
-      "connectionCount": 66,
-      "modified": "2026-10-01T18:00:00.000Z",
+      "nodeCount": 21,
+      "connectionCount": 74,
+      "modified": "2026-10-01T22:00:00.000Z",
       "created": "2026-09-20T12:49:24.850Z"
     },
     "Logic/Standing": {
@@ -302,7 +302,7 @@
   },
   "stats": {
     "totalComponents": 37,
-    "totalNodes": 447,
-    "totalConnections": 710
+    "totalNodes": 455,
+    "totalConnections": 724
   }
 }

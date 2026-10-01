@@ -434,6 +434,54 @@
       "fromProperty": "out-rejected",
       "toId": "tr_panel",
       "toProperty": "rejected"
+    },
+    {
+      "fromId": "tr_focus_var",
+      "fromProperty": "value",
+      "toId": "tr_focus",
+      "toProperty": "in-focus"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "entry",
+      "toId": "tr_focus",
+      "toProperty": "in-entry"
+    },
+    {
+      "fromId": "tr_in",
+      "fromProperty": "audience",
+      "toId": "tr_focus",
+      "toProperty": "in-audience"
+    },
+    {
+      "fromId": "tr_focus",
+      "fromProperty": "out-focused",
+      "toId": "tr_row",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "tr_focus",
+      "fromProperty": "out-focused",
+      "toId": "tr_panel",
+      "toProperty": "scrollTo"
+    },
+    {
+      "fromId": "tr_focus",
+      "fromProperty": "out-anchorKind",
+      "toId": "tr_ask",
+      "toProperty": "in-anchorKind"
+    },
+    {
+      "fromId": "tr_focus",
+      "fromProperty": "out-anchorId",
+      "toId": "tr_ask",
+      "toProperty": "in-anchorId"
+    },
+    {
+      "fromId": "tr_focus",
+      "fromProperty": "out-go",
+      "toId": "tr_ask",
+      "toProperty": "run"
     }
   ]
 }

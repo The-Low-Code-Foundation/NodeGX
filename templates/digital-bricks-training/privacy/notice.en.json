@@ -36,7 +36,7 @@
       },
       {
         "heading": "Messages with your coach",
-        "body": "You can ask your coach about anything on your programme, and they can reply. We keep every message either of you writes, what on your programme it was about, when it was written, and whether the other person has opened it yet. Nothing you write to your coach is sent to an AI model. Your messages are in your download, and they are deleted with your account."
+        "body": "You can ask your coach about anything on your programme, and they can reply. We keep every message either of you writes, what on your programme it was about, when it was written, and whether the other person has opened it yet. Nothing you write to your coach is sent to an AI model. When you send a message we email your coach to say it is there, and when they reply we email you — unless you turn those emails off, which you can do from any of them or from your settings page. Your messages are in your download, and they are deleted with your account."
       },
       {
         "id": "nothingElse",
@@ -56,7 +56,7 @@
       {
         "id": "where",
         "heading": "Where it lives",
-        "body": "On one server we rent from Hetzner, in Falkenstein, Germany. One other company is involved: Brevo, an email service based in France, sends your sign-in links, so it sees your email address and the link. Nothing else leaves the server. The pages load nothing from anyone else's site."
+        "body": "On one server we rent from Hetzner, in Falkenstein, Germany. One other company is involved: Brevo, an email service based in France, sends our emails, so it sees your email address and what each email says. That is your sign-in links, and an email when there is a new message for you: when your coach replies, it carries their reply; when you ask your coach something, the email to them carries your question. It never carries the rest of the conversation. Nothing else leaves the server. The pages load nothing from anyone else's site."
       },
       {
         "id": "backups",

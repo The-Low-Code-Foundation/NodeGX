@@ -131,6 +131,65 @@
       "x": 300,
       "y": 220,
       "parameters": {}
+    },
+    {
+      "id": "mailreq",
+      "type": "JavaScriptFunction",
+      "label": "The turn that was written, to tell the coach",
+      "x": 1080,
+      "y": 400,
+      "parameters": {
+        "functionScript": "/*\n * WRITE, THEN MAIL, THEN ANSWER (TASK-L188 §2). Runs on the thread's `done`, so\n * the turn is saved before anyone is told; shared/Message mail always answers\n * done, so a refused or failed mail never fails this write.\n * The ONE turn that triggered it — never the thread (sprint 54 §2.4).\n */\nconst turn = Inputs.turn || {};\nOutputs.request = {\n  to: 'coach',\n  learnerId: String(Inputs.learnerId || ''),\n  body: String(turn.body || ''),\n  anchorKind: String(Inputs.anchorKind || ''),\n  anchorId: String(Inputs.anchorId || '')\n};\n",
+        "runOnChange-in-turn": false,
+        "runOnChange-in-learnerId": false,
+        "runOnChange-in-anchorKind": false,
+        "runOnChange-in-anchorId": false
+      },
+      "ports": [
+        {
+          "name": "in-turn",
+          "plug": "input",
+          "type": "*",
+          "displayName": "turn",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-learnerId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "learnerId",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-anchorKind",
+          "plug": "input",
+          "type": "*",
+          "displayName": "anchorKind",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-anchorId",
+          "plug": "input",
+          "type": "*",
+          "displayName": "anchorId",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-request",
+          "plug": "output",
+          "type": "*",
+          "displayName": "request",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "mail",
+      "type": "/#__cloud__/shared/Message mail",
+      "label": "Tell the coach",
+      "x": 1340,
+      "y": 400,
+      "parameters": {}
     }
   ]
 }

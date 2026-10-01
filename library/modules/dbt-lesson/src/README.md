@@ -51,8 +51,8 @@ product's design-token names as aliases of NodeGX's and the lesson CSS lifted fr
 | node | ports in | ports out |
 |---|---|---|
 | `Section` | `copy` (object), `section` (object), `facts`, `done`, `current`, `assetBase` | every lesson output below, forwarded |
-| `TimelineRow` | `entry` (object), `kindLabel`, `title`, `when`, `collapsed`, `notes[]`, `comments`, `audience`, `copy`, `assetBase` | Toggled, Opened, Ask requested, Anchor kind, Anchor id, Reply requested, Conversation id |
-| `ConversationPanel` | `turns[]`, `status`, `audience`, `sending`, `rejected`, `sent`, `copy` | Send requested, Body, Close requested |
+| `TimelineRow` | `entry` (object), `kindLabel`, `title`, `when`, `collapsed`, `notes[]`, `comments`, `focus`, `audience`, `copy`, `assetBase` | Toggled, Opened, Ask requested, Anchor kind, Anchor id, Reply requested, Conversation id |
+| `ConversationPanel` | `turns[]`, `status`, `audience`, `sending`, `rejected`, `sent`, `scrollTo`, `copy` | Send requested, Body, Close requested |
 | `PaceTracker` | `view` (object), `par` (array), `headline`, `legendActual`, `legendPar` | — |
 | `RatingGauge` | `gauge` (object) | — |
 | `DossierSegment` | `label`, `ariaLabel`, `hasFacts`, `fillPct`, `caption` | Opened |
@@ -149,6 +149,9 @@ turn and hands back `turns`, and this node renders them and emits what the reade
   *They wrote* / *You wrote* for a coach (the coach overlay in Data/Strings). A coach's turns wear
   `--warm-tint`, as in the product: a human's words.
 - **It promises nothing it cannot keep**: no response time, no "we'll get back to you".
+- **A link can ask for it (TASK-L188).** `TimelineRow.focus` opens the row (it never folds one), and
+  `ConversationPanel.scrollTo` brings the panel into view ONCE its thread is ready — not on mount,
+  because a loading panel is about to grow and the grown thread would land below the fold.
 
 ## `PaceTracker` and `RatingGauge` — two panels that must be able to not exist
 

@@ -2251,6 +2251,17 @@
     function setOpen(next) {
       set({ key: key, open: next });
     }
+    /*
+     * A LINK CAN OPEN THIS ROW (TASK-L188 §5): `/course?comment=<this entry>` from
+     * a reply mail. `Focus` only ever OPENS — it never folds a row the reader
+     * opened — and it runs before any early return, because a hook must.
+     */
+    R.useEffect(
+      function () {
+        if (p.focus && !open) setOpen(true);
+      },
+      [p.focus, key]
+    );
 
     if (!entry || typeof entry !== 'object') return null;
 
@@ -2492,6 +2503,7 @@
       collapsed: port('boolean', 'Starts folded', { default: false, description: 'Derived from the programme by the graph, never stored. What the reader does after is this node’s own state.' }),
       notes: obj('Notes', { description: 'The coach’s notes anchored to this entry. Its LENGTH is the count on the folded line — never a separate number.' }),
       comments: num('Comments', { default: 0, description: 'How many comments this entry’s thread holds. Words and a number on the folded line, never a badge.' }),
+      focus: port('boolean', 'Focus', { default: false, description: 'True when a link points at this entry (a reply mail’s /course?comment=…). Opens the row; never folds one (TASK-L188).' }),
       audience: text('Audience', {
         default: 'learner',
         description:
@@ -3261,6 +3273,26 @@
     getReactComponent: function () {
       return function ConversationPanelNode(props) {
         var el = useRoot(props);
+        /*
+         * BROUGHT INTO VIEW ONCE THE THREAD IS THERE (TASK-L188 §5), and only when a
+         * link asked for it. After `ready`, not on mount: scrolling a loading panel
+         * centres a box that is about to grow, and the grown thread lands below the
+         * fold (the product's L142, measured: 31 pixels below it). A thread taller
+         * than the window starts at its top.
+         */
+        var scrolled = R.useRef(false);
+        R.useEffect(
+          function () {
+            if (!props.scrollTo || str(props.status) !== 'ready' || scrolled.current || !el.current) return;
+            scrolled.current = true;
+            var node = el.current;
+            requestAnimationFrame(function () {
+              var tall = node.getBoundingClientRect().height > window.innerHeight * 0.9;
+              node.scrollIntoView({ block: tall ? 'start' : 'center' });
+            });
+          },
+          [props.scrollTo, props.status]
+        );
         return h('div', { ref: el, className: 'dbt-conversation', style: props.style }, h(ConversationPanelView, props));
       };
     },
@@ -3271,6 +3303,7 @@
       sending: port('boolean', 'Sending', { default: false, description: 'True while the graph is writing a turn. The box and the button wait.' }),
       rejected: text('Rejected', { description: 'Why the last send was refused: "too_long", "stale", "error", or empty.' }),
       sent: text('Sent', { description: 'A token the graph makes new after every successful write. The box clears when it changes.' }),
+      scrollTo: port('boolean', 'Scroll to', { default: false, description: 'True when a link asked for this thread. The panel scrolls itself into view once, when its thread is ready (TASK-L188).' }),
       copy: COPY_PORT
     },
     outputProps: {

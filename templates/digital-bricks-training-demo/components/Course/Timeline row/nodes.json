@@ -754,6 +754,78 @@
       "metadata": {
         "comment": "ONLY ON ITS RUN SIGNAL: every input has Run On Value Change off (NDA-017 §2; L165 found that a wired Run does not make inputs passive)."
       }
+    },
+    {
+      "id": "tr_focus_var",
+      "type": "Variable",
+      "label": "focusAnchor — set by /course from ?comment=",
+      "x": 840,
+      "y": 1300,
+      "parameters": {
+        "name": "focusAnchor"
+      }
+    },
+    {
+      "id": "tr_focus",
+      "type": "JavaScriptFunction",
+      "label": "A link pointed at THIS card: open it, and its thread",
+      "x": 1100,
+      "y": 1300,
+      "parameters": {
+        "functionScript": "/*\n * THE DEEP LINK, ON THE ROW IT NAMES (TASK-L188 §5). A reply mail links to\n * /course?comment=<entry id>; /course puts that in `focusAnchor` and every row\n * asks \"is it me?\". Only the row whose OWN id matches, on a learner's page, and\n * only for a kind a thread can be about, opens — and then it asks for the thread\n * exactly as the Ask control does. Anything else, including a hostile value,\n * matches nothing and changes nothing: it is compared, never rendered.\n */\nconst KINDS = ['lesson', 'session', 'evaluation', 'assignment', 'submission', 'message', 'signal'];\nconst focus = typeof Inputs.focus === 'string' ? Inputs.focus : '';\nconst e = Inputs.entry && typeof Inputs.entry === 'object' ? Inputs.entry : null;\nconst mine = !!(focus && e && e.id === focus && KINDS.indexOf(e.kind) !== -1 && Inputs.audience === 'learner');\nOutputs.focused = mine;\nif (mine) {\n  Outputs.anchorKind = e.kind;\n  Outputs.anchorId = e.id;\n  Outputs.go();\n}\n",
+        "runOnChange-in-focus": true,
+        "runOnChange-in-entry": true,
+        "runOnChange-in-audience": true
+      },
+      "ports": [
+        {
+          "name": "in-focus",
+          "plug": "input",
+          "type": "*",
+          "displayName": "focus",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-entry",
+          "plug": "input",
+          "type": "*",
+          "displayName": "entry",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-audience",
+          "plug": "input",
+          "type": "*",
+          "displayName": "audience",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "out-focused",
+          "plug": "output",
+          "type": "*",
+          "displayName": "focused",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-anchorKind",
+          "plug": "output",
+          "type": "*",
+          "displayName": "anchorKind",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-anchorId",
+          "plug": "output",
+          "type": "*",
+          "displayName": "anchorId",
+          "group": "Outputs"
+        }
+      ]
     }
   ],
   "visualRoots": [

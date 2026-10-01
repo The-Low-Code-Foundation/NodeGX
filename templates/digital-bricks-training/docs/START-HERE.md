@@ -831,3 +831,49 @@ and each failed by name.
 
 **The demo answers in the browser**: the two opens read the made-up messages, and a sent turn stays
 in that page only.
+
+## Telling the other person, and stopping it (TASK-L187, TASK-L188)
+
+When a learner asks, their coach is emailed the question and a link to that learner's programme;
+when a coach replies, the learner is emailed the reply and a link that opens that card's thread.
+Either can stop these emails, and sign-in links are never affected.
+
+- **`shared/Message mail` is the one owner of message mail**: who it goes to, whether they may be
+  emailed, the words, each recipient's own unsubscribe link, and the send. `sendMessage` and
+  `replyAsCoach` call it AFTER the turn is saved and answer AFTER it — and it always answers, so a
+  refused or failed mail never fails a write (driven against a dead relay: 200, the turn saved, the
+  log carrying ids and a count and no address or body).
+- **Who.** A question goes to the coach recorded on the learner's profile (`coachEmail`, which
+  `addLearner` now writes as the adding coach's address, on a NEW profile only). With nobody
+  recorded it goes to every staff account (`List Users In Role`), and that mail says so. Nothing is
+  back-filled from a guess. A reply goes to the learner.
+- **May we.** Per recipient: an account that opted out (`emailOptOutAt`) or has no address gets
+  nothing.
+- **What it carries.** The ONE turn that triggered it, what it is about (the card's title), and a
+  link — never the thread. The subject never quotes the message. The learner is named by the name on
+  their account, else their address, never by the coach's private label.
+- **Links are built on `SITE_ORIGIN`**, a configured function secret, never the request's headers:
+  a learner's request must not be able to aim the link in their coach's mail anywhere. The reply's
+  link is `/course?comment=<card>`: `/course` puts it in the `focusAnchor` variable, and the row whose
+  own entry it names opens, opens its thread and brings it into view once it is loaded. An unknown,
+  malformed or hostile value renders the plain page (driven, `#root` byte-identical).
+- **Stopping it.** A switch on `/settings` (`emailPreference`, `setEmailPreference` — the only thing
+  that turns mail back on), and a one-click link in every mail: `/unsubscribe?u=<account>&s=<HMAC>`,
+  signed with `UNSUBSCRIBE_KEY` over `dbt-unsubscribe:v1:<account>`, never stored and never
+  expiring. `/unsubscribe` needs no sign-in, sits outside the notice gate, and stops the mail on a
+  PRESS — a mail scanner's GET changes nothing. `unsubscribe` is `public` and answers one body for
+  every outcome, so it cannot be used to test which accounts exist.
+- **`tools/setup-mail.mjs`** provisions both secrets through NodeGX's admin route, mints the key ONCE
+  (replacing it would break every link already sent; `--rotate` does it on purpose), and
+  `check-production` fails without them.
+- **Why a script sends, not a Send Email node.** A node sends one mail per Do, and the staff fallback
+  is one mail PER recipient, each with its own gate and its own unsubscribe link — a loop a graph
+  cannot draw. The script uses `_noodl_send_email`, the seam the node itself calls. The node also has
+  no headers port, so the RFC 8058 `List-Unsubscribe` header cannot be set; the link is in the body.
+  Both are NodeGX core rows.
+
+`tools/check-opt-out.mjs` runs `shared/Message mail`'s own script against a fake mailer — the recorded
+coach alone, every staff account when nobody is, the learner, nobody opted out or without an address,
+the turn and never an earlier one, no label, each recipient's own signed link, no address or body in
+a log — and runs `unsubscribe`'s verifier and the switch's script. Eight mutations were driven and
+each failed by name.

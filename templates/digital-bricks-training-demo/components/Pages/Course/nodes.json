@@ -996,6 +996,29 @@
         "Key": "noPath",
         "Namespace": "course"
       }
+    },
+    {
+      "id": "cs_comment",
+      "type": "PageInputs",
+      "label": "?comment= — a reply mail's link to one card's thread",
+      "x": 1700,
+      "y": 40,
+      "parameters": {
+        "queryParams": "comment"
+      },
+      "metadata": {
+        "comment": "TASK-L188 §5. Read once into the focusAnchor variable; each Course/Timeline row compares it with its own entry. An unknown, malformed or hostile value matches nothing and is never rendered, so the page is the plain /course."
+      }
+    },
+    {
+      "id": "cs_focus_var",
+      "type": "Variable",
+      "label": "focusAnchor — which card a link pointed at",
+      "x": 1960,
+      "y": 40,
+      "parameters": {
+        "name": "focusAnchor"
+      }
     }
   ],
   "visualRoots": [
