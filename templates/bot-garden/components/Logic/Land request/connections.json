@@ -1,0 +1,31 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c79d1202-6d25-5c57-8acd-43c04d85b4df",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "landrequestIn",
+      "fromProperty": "land",
+      "toId": "landrequestFn",
+      "toProperty": "in-land"
+    },
+    {
+      "fromId": "landrequestIn",
+      "fromProperty": "requests",
+      "toId": "landrequestFn",
+      "toProperty": "in-requests"
+    },
+    {
+      "fromId": "landrequestFn",
+      "fromProperty": "out-requests",
+      "toId": "landrequestOut",
+      "toProperty": "requests"
+    },
+    {
+      "fromId": "landrequestFn",
+      "fromProperty": "success",
+      "toId": "landrequestOut",
+      "toProperty": "ran"
+    }
+  ]
+}

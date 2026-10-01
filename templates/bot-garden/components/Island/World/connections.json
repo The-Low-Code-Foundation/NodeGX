@@ -40,6 +40,12 @@
       "toProperty": "pins"
     },
     {
+      "fromId": "iwIn",
+      "fromProperty": "land",
+      "toId": "iwWorld",
+      "toProperty": "land"
+    },
+    {
       "fromId": "iwWorld",
       "fromProperty": "state",
       "toId": "iwSetBuilt",

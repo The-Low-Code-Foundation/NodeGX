@@ -333,6 +333,10 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   // ── P108 IW-003 look (lane L): Olive's read on the envelopes reads the envelope (the drawer's block, the pad's key, its card) ──
   iwlReadEnvelope: s('read the envelope', 'lire l’enveloppe'),
   iwlCdReadEnvelope: s('Olive reads the name on the envelope {b} holds. Then “go to” what Olive read takes {b} to that door.', 'Olive lit le nom sur l’enveloppe que tient {b}. Ensuite, « aller à » ce qu’Olive a lu emmène {b} à cette porte.'),
+  // ── P108 IW-007 (lane B): building — her land, the Build tab, placing a blueprint ──
+  iw7bLandTitle: s('Your land', 'Ton terrain'),
+  iw7bLandBlurb: s('Build', 'Construire'),
+  iw7bLandLine: s('Your own land: a tree for planks, a rock for stones, a carrot patch. Teach {b} to carry them to what you build here.', 'Ton terrain à toi : un arbre pour les planches, un rocher pour les pierres, un carré de carottes. Apprends à {b} à les porter jusqu’à ce que tu construis ici.'),
   // ── P108 IW-007 (lane A): the animals — the Animals tab shut until the refuge is finished, the purchase card's refusals,
   // the line after Buy (her name, by her bowl), and the two land sources in the drawer's "go to nearest" (blocks.js's copy) ──
   iw7aShut: s('Build the refuge first: your animals will live there.', 'Construis d’abord le refuge : tes animaux y vivront.'),

@@ -1025,7 +1025,9 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     it('🔴 the Workshop: Job robot reads her robots and the request, and gives the Workshop its robot (name, look, row, key, palette robot, step time); the win pins THAT robot', () => {
       const ws = C.pageWorkshop;
       expect(String(nodeIn(ws, 'wsJob').type)).toBe('/Logic/Job robot');
-      expect([into(ws, 'wsJob', 'robots'), into(ws, 'wsJob', 'requestId'), into(ws, 'wsJob', 'requests')]).toEqual([['wsFam.robots'], ['wsReqVar.value'], ['wsRequests.requests']]);
+      // P108 IW-007 (lane B): the Workshop's requests are the catalogue's with her land as one more (Land request).
+      expect([into(ws, 'wsJob', 'robots'), into(ws, 'wsJob', 'requestId'), into(ws, 'wsJob', 'requests')]).toEqual([['wsFam.robots'], ['wsReqVar.value'], ['wsLandReqs.requests']]);
+      expect([into(ws, 'wsLandReqs', 'requests'), into(ws, 'wsLandReqs', 'land')]).toEqual([['wsRequests.requests'], ['wsFam.land']]);
       for (const f of ['botName', 'color', 'eye', 'hat', 'robot', 'robotKey', 'paletteRobot', 'stepMs']) expect({ f, from: into(ws, 'wsPlay', f) }).toEqual({ f, from: [`wsJob.${f}`] });
       expect(into(ws, 'wsComplete', 'robotId')).toEqual(['wsJob.robotId']);
       expect([into(ws, 'wsGift', 'lent'), into(ws, 'wsGift', 'upgraded'), into(ws, 'wsPlay', 'giftText')]).toEqual([['wsComplete.lent'], ['wsComplete.upgraded'], ['wsGift.text']]);

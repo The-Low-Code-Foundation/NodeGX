@@ -133,6 +133,13 @@
       "type": "/Data/Requests",
       "label": "The requests",
       "x": 410,
+      "y": 2200
+    },
+    {
+      "id": "wsLandReqs",
+      "type": "/Logic/Land request",
+      "label": "The requests and her land",
+      "x": 410,
       "y": 760
     },
     {
@@ -164,7 +171,7 @@
         "name": "gardenProgram"
       },
       "x": 410,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "wsJob",
@@ -211,7 +218,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "wsGuard",

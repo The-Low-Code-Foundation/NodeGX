@@ -56,6 +56,8 @@ import { IW006_SHOP_SCRIPTS } from './iw006Shop';
 // P108 IW-006 (lane E): earning — the win's pay (over the island engine) and the island's live jobs and shells kept.
 import { ISLAND_KEEP_SCRIPT, winPayScript } from './iw006Earn';
 import { IWL_REQUEST_HELPERS } from './cg002Scripts';
+// P108 IW-007 (lane B): building — the Workshop on her land.
+import { IW007_BUILD_SCRIPTS } from './iw007Building';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -516,6 +518,8 @@ Outputs.plots = active ? JSON.parse(JSON.stringify(active.island.plots)) : {};
 Outputs.robots = active ? robotRowsOf(active) : [];
 // P108 IW-001 F8: the block cards she has seen, hers (a sibling's are her own).
 Outputs.cardsSeen = active && active.cardsSeen ? active.cardsSeen.slice() : [];
+// P108 IW-007 (lane B): her land (what stands on it), or null when nothing does.
+Outputs.land = active && active.island.land ? JSON.parse(JSON.stringify(active.island.land)) : null;
 var rows = [];
 for (var j = 0; j < model.profiles.length; j++) {
   var p = model.profiles[j];
@@ -1524,5 +1528,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   ...IW006_SHOP_SCRIPTS,
   // P108 IW-006 (lane E): earning.
   { component: 'Logic/Win pay', script: WIN_PAY_SCRIPT, seam: 'the shells a win in the Workshop earns, and the plot as a done job' },
-  { component: 'Logic/Island keep', script: ISLAND_KEEP_SCRIPT, seam: 'the island\u2019s live jobs and what its laps earned, written into her save at the moments that matter' }
+  { component: 'Logic/Island keep', script: ISLAND_KEEP_SCRIPT, seam: 'the island\u2019s live jobs and what its laps earned, written into her save at the moments that matter' },
+  // P108 IW-007 (lane B): building.
+  ...IW007_BUILD_SCRIPTS
 ];

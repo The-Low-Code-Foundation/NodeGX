@@ -35,6 +35,8 @@
  */
 import { JOB_BONUS, SHELLS_RUN_CAP } from './cg002Content';
 import { SAVE_HELPERS } from './cg002Scripts';
+// P108 IW-007 (lane B): the land's write (landKeep: a building never un-builds).
+import { LAND_KEEP } from './iw007Building';
 
 export { JOB_BONUS, SHELLS_RUN_CAP };
 
@@ -154,7 +156,9 @@ var id = String(Inputs.requestId || '');
 var req = null;
 for (var i = 0; i < reqs.length; i++) if (reqs[i] && reqs[i].id === id) req = reqs[i];
 var pay = { shells: 0, steps: 0, bonus: 0 }, jobLive = null;
-if (req && req.job && id !== 'free') {
+// P108 IW-007 (lane B): a win on her land pays nothing here and never starts the land done — it pins the robot; the
+// building rises on the island, a drop at a time (a land lap pays its steps there, D2, no bonus).
+if (req && req.job && id !== 'free' && id !== 'land') {
   var laid = islLaidOf(req);
   if (laid) {
     // Her plot as her island has it: its live job when the island kept one; else the island's start when never won;
@@ -190,7 +194,7 @@ Outputs.has = pay.shells > 0;
  * Inputs: `state` (the tick's), `model` (the store's), `robots` (Read family's rows, for the names), `words`, `lang`.
  */
 export const ISLAND_KEEP_SCRIPT = `${SAVE_HELPERS}
-${EARN_WORDS}
+${EARN_WORDS}${LAND_KEEP}
 var s = Inputs.state && typeof Inputs.state === 'object' && Array.isArray(Inputs.state.plots) ? Inputs.state : null;
 var marked = [];
 if (s && s.live) for (var i = 0; i < s.plots.length; i++) { var pl = s.plots[i], cur = s.live[pl.id]; if (pl && pl.job && cur && cur.moment) marked.push(pl); }
@@ -208,6 +212,8 @@ if (marked.length) {
     var old = sv.live || null;
     var lv = liveOf({ things: iw6CanBack(c.things, c.robot, plot.start ? plot.start.things : []), age: c.age, seed: c.seed, spent: c.spent, helper: 'helper' in c ? c.helper : old ? old.helper : '' });
     if (lv) sv.live = lv;
+    // P108 IW-007 (lane B): her land's buildings written back from the plot — a part's have only rises (AC3).
+    if (plot.id === LAND_ID && p.island.land) landKeep(p.island.land, c.things);
     due = true;
     var got = c.paid && typeof c.paid === 'object' ? earnShells(p, c.paid.shells) : 0;
     if (got > 0) {
