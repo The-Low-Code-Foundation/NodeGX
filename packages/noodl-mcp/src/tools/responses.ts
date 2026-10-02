@@ -509,6 +509,11 @@ export interface UpdateComponentResponse
   revision: string;
   /** Present for the `operations` form; absent for `set`. */
   applied?: string[];
+  /**
+   * P109 ISL-019 — present when the write changed nothing but its own timestamp, so nothing was
+   * written: the files on disk (and git) are exactly as they were.
+   */
+  unchanged?: true;
 }
 
 /**

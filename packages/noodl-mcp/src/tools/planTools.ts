@@ -858,13 +858,16 @@ export function registerPlanTools(
             connections: args.connections,
             visualRoots: args.visual_roots,
             description: args.description,
-            isVisualType: projectVisualPredicate(store)
+            isVisualType: projectVisualPredicate(store),
+            componentId: store.componentIdFor(legacyName),
+            now: store.now()
           });
         } else {
           candidate = assembleSetFiles(
             baseline!,
             { nodes: reconciled.nodes, connections: args.connections, visualRoots: args.visual_roots },
-            projectVisualPredicate(store)
+            projectVisualPredicate(store),
+            { now: store.now(), componentId: store.componentIdFor(legacyName) }
           );
         }
 

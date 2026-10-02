@@ -43,6 +43,7 @@ import { registerKitTools } from './tools/kitTools';
 import { registerLibraryTools } from './tools/libraryTools';
 import { registerLessonTools } from './tools/lessonTools';
 import { ToolDisclosure, recordTools, registerFindTools } from './tools/disclosure';
+import type { ReproducibleOutput } from './project/writeClock';
 
 /**
  * The version this server reports in its MCP handshake.
@@ -82,6 +83,13 @@ export interface ServerOptions {
    * surface exactly.
    */
   deferTools?: boolean;
+  /**
+   * P109 ISL-019 — reproducible output, chosen by whoever starts the server (a template
+   * generator, CI): component ids from this namespace and every stamp the epoch. Absent, ids are
+   * still derived (from the project's own id) and stamps are the wall clock. Never a tool
+   * parameter: the model does not choose it.
+   */
+  reproducible?: ReproducibleOutput;
 }
 
 export interface CreatedServer {
@@ -111,7 +119,7 @@ export function createServer(options: ServerOptions): CreatedServer {
     );
   }
 
-  const binding = new ProjectBinding(options.projectDir); // throws early on non-v2 targets
+  const binding = new ProjectBinding(options.projectDir, { reproducible: options.reproducible }); // throws early on non-v2 targets
   const deferTools = options.deferTools !== false;
   const store = binding.peek();
 

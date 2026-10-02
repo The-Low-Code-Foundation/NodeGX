@@ -46,7 +46,6 @@
  * @module noodl-mcp/tools/libraryTools
  */
 
-import * as crypto from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -336,7 +335,7 @@ export function registerLibraryTools(
         variants?: Array<{ name: string; typename: string; [key: string]: unknown }>;
       };
 
-      const now = new Date().toISOString();
+      const now = store.now();
 
       // ── P100 UPG-003 §6: the entry's text styles arrive as typography tokens ──
       // The conversion the editor's install runs (`import-engine/apply.ts`), against THIS project's
@@ -362,7 +361,10 @@ export function registerLibraryTools(
         }
         // Many seeded entries have id-less components; v2 files carry the id
         // into componentId, so an absent one is minted rather than propagated.
-        const withId: LegacyComponent = component.id ? component : { ...component, id: crypto.randomUUID() };
+        // P109 ISL-019 — minted the way every other component's id is, so a reinstall gives it the same one.
+        const withId: LegacyComponent = component.id
+          ? component
+          : { ...component, id: store.componentIdFor(component.name) };
         const files = buildComponentV2Files(withId, now) as ComponentFiles;
         store.writeComponent(key, files, { expectNew: true });
         componentsInstalled.push(component.name);

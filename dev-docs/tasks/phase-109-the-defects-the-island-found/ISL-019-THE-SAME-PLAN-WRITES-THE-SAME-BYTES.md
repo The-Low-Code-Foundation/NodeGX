@@ -1,6 +1,6 @@
 # ISL-019 — The same plan writes the same bytes
 
-**Status: 🔒→✅ ruled s4 (2026-10-02): "Keep the same id" — a component rebuilt in place keeps its id, for every session (README §8); not built. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F26](AUDIT-2026-10-01.md) · the merge
+**Status: 🟢 built s5 (2026-10-02) on "Keep the same id" — AC1–AC5 and AC8 met; ⬜ AC6 (Claude Code over the door), ⬜ AC7 (the garden drops its pins: blocked on a peer's live garden edits, and on two byte traps, §8 s5). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F26](AUDIT-2026-10-01.md) · the merge
 recipe of P105, P106 and P108, which depends on byte-identical regeneration · **Side:** product (MCP door, `noodl-mcp`)
 
 Run the same plan through the door twice and the two projects differ in every `component.json`, in `_registry.json` and in
@@ -111,4 +111,51 @@ Constraints:
 
 ## 8. Record
 
-None yet.
+### Session 5 — 2026-10-02: built on "Keep the same id"
+
+**The rule, as built.** One source of time and component ids, hung on the store
+([`writeClock.ts`](../../../packages/noodl-mcp/src/project/writeClock.ts), `ProjectStore.clock` / `.now()` /
+`.componentIdFor()`):
+
+- **A component's id is always derived**: `stableComponentId(namespace, legacyName)`, the pins' formula moved into `src`
+  (`templatePins.ts` now re-exports it, so the two cannot disagree). The namespace is the project's own `id` (its name,
+  then its folder, when it has none). `create_component`, a plan's create, `backfillIds` (both update doors and
+  `assembleSetFiles`), the prefab install's id-less components and `create_project`'s skeleton (`/App`, `/Pages/Home`
+  from the new project's id) all take it. A component deleted and recreated at the same path gets its old id back:
+  the cost the ruling accepted, asserted.
+- **Timestamps stay on the wall clock** unless the server was started reproducible: `createServer({ reproducible:
+  { namespace, epoch } })` or `--reproducible <namespace>@<epoch>` (also `=`). Then every stamp the door writes is the
+  epoch: `component.json`'s `created`/`modified`, the registry's rows and `lastUpdated`, `nodegx.project.json`'s
+  `modified` (settings, cloud binding), the router's `modified` on a page registration, the prefab install's
+  `importedAt`/styles `modified`, a kit's provenance `createdAt`. No tool schema changed: 0 resident tokens.
+- **An update that changes nothing writes nothing** (`ProjectStore.writeComponent`): if the three files equal what is on
+  disk, `modified`/`modifiedBy` aside and key order ignored, no file is written, the registry included, and
+  `update_component` answers `unchanged: true`. Not in §6's list, but AC6's sentence ("rebuild one component exactly as
+  it is → no change to its `component.json`") cannot hold on the wall clock without it, since the rebuild stamps
+  `modified`. The editor's own guard draws the same line: `hashComponent` leaves out `modified` and `$schema`
+  (`ComponentSaver.ts:107-114`).
+
+**Census of what still mints on its own (AC1's "second source"):** node ids for a node sent with no id
+(`author.ts:139`, `:389`; `nodeIds.ts:131` is the unreachable fallback). The ruling is about component ids, and every
+generator sends node ids. Also `create_project`'s skeleton stamps and the project's own `id` (it runs before any store
+exists), and the plan id (returned, never written). Every other `new Date()`/`randomUUID()` in `src/` is outside the
+project write path (backend records, timing, `docsTools` reading mtimes).
+
+| AC | reading |
+|---|---|
+| AC1 | The diff instrument is [`isl019SameBytes.test.ts`](../../../packages/noodl-mcp/tests/isl019SameBytes.test.ts): one plan (a section, a page the door registers in the router, an update) on two fixture copies, diffed per JSON leaf. Its known-firing control: on the wall clock it reports `Sections/Badge/component.json → modified` and `App/component.json → modified`; node ids are equal. **RED at HEAD shown by mutant, not by checking HEAD out:** put HEAD's `randomUUID()` back into `componentIdFor` and the two ordinary-session cases and AC2 go red. |
+| AC2 | ✅ Reproducible: the two trees are byte-identical (`[]`). The id is `stableComponentId('isl019', '/Sections/Badge')`, all stamps the epoch, the router's included. Ordinary session: only `created`/`modified`/`lastUpdated` leaves differ, never an id. |
+| AC3 | ✅ **Reverted arm run:** `pageRegistration.ts`'s first stamping site put back on `new Date()` → AC2 red naming exactly `components/App/component.json → modified`, nothing else. Restored from a `cp`. |
+| AC4 | ✅ Update in reproducible mode keeps `id` and `created`, sets `modified` to the epoch; delete + recreate gives the same id (asserted in the ordinary session, the same function in both). |
+| AC5 | ✅ **By reading, no new spec:** FLD-009's three-hash decide hashes `hashComponent`, which drops `modified` before hashing, so the guard never read the field a stable stamp holds still. Its spec's "changes when node content changes" covers the content side. A new case there needs the editor's Electron runner (`tests/` is jasmine under `test:ci`), and was not run. |
+| AC6 | ⬜ Not run. Needs `dist/noodl-mcp.cjs` rebuilt from this commit. |
+| AC7 | ⬜ **Not attempted, three reasons measured.** (1) A peer has the garden's content open: `cg002Content.ts`/`cg003Content.ts` modified at 22:49 and 22:56, and `cg003Template.test.ts` is 9 red against them. Its AC2 diff lists six `nodes.json` and both kits' `index.js`, **no `component.json`, `_registry.json` or project file**, so this change moved none of the pinned bytes. (2) ⚠️ The door's `writeJsonAtomic` writes no trailing newline; the pins write `\n`. Dropping the pins changes every file by one byte unless the door adopts the newline (which then changes every project an agent writes). (3) `pinComponentFiles` pins every component under `components/`, including any the generator's skeleton wrote raw. Those need the door, or a stamp of their own. |
+| AC8 | ✅ Listed. `pinComponentFiles`/`pinRegistry` callers and their namespaces: `cg003` (cg003Template.ts:195), `tpl003`, `tpl005`, `tpl006`, `tpl007`, `tpl008` + `tpl008-demo`, `tpl010` + `tpl010-demo`. `pinProjectModified` private copies in cg003, tpl007, tpl008, tpl010. `tpl001Template.ts` keeps its own copy of the formula under `tpl001` (line 328). All still call the pins, so none are deleted. |
+
+**Gates (2026-10-02, over `6bac3db02` + this change):** the spec 12/12 (three mutants: AC3's, random ids,
+no-op check off — each red, each restored). Forty write-path specs (`grep` for stamps/ids/`update_component`/
+`install_prefab`/`create_project`, the generators excluded), `--maxWorkers=2`: 37 suites pass, **5 failed in 3
+suites = s4's HEAD-reds** (`cmp004Parts` ×2 and `cmp004RoundTrip` ×2: a text style and an `icon.png`;
+`nodeIdAllocation`: *"Text has no output named text"*, printed). `isl025Census` green. The full `noodl-mcp`
+suite was not run: a peer's `node-spec` suite held the machine.
+

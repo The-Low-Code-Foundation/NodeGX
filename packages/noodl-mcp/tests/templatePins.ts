@@ -33,16 +33,16 @@
  *
  * @module noodl-mcp/tests/templatePins
  */
-import { createHash } from 'crypto';
 import * as fs from 'fs';
 import * as path from 'path';
 
-/** A stable UUID-shaped id for a component, derived from its path and the template's namespace alone. */
-export function stableComponentId(namespace: string, componentPath: string): string {
-  const h = createHash('sha1').update(`${namespace}:${componentPath}`).digest('hex');
-  // UUIDv5 layout: version nibble 5, variant nibble 8.
-  return `${h.slice(0, 8)}-${h.slice(8, 12)}-5${h.slice(13, 16)}-8${h.slice(17, 20)}-${h.slice(20, 32)}`;
-}
+/**
+ * A stable UUID-shaped id for a component, derived from its path and the template's namespace alone.
+ * P109 ISL-019 — the door's own formula now (`src/project/writeClock.ts`), re-exported so the pins and
+ * a reproducible server can never disagree on it.
+ */
+export { stableComponentId } from '../src/project/writeClock';
+import { stableComponentId } from '../src/project/writeClock';
 
 function pinComponentDirectory(dir: string, namespace: string, epoch: string): void {
   const componentFile = path.join(dir, 'component.json');

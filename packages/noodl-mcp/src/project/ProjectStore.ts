@@ -27,6 +27,7 @@ import { buildComponentRefs, isComponentRef, normalizeV2Component, refToPath } f
 import { ToolError } from '../errors';
 import type { ComponentFiles } from '../graph';
 import { toPathForm } from '../paths';
+import { WriteClock, type ReproducibleOutput } from './writeClock';
 
 const COMPONENT_FILES = ['component.json', 'nodes.json', 'connections.json'] as const;
 
@@ -92,6 +93,31 @@ function writeJsonAtomic(file: string, data: unknown): void {
   fs.renameSync(tmp, file);
 }
 
+/** JSON with every object's keys sorted, so two documents that differ only in key order compare equal. */
+function canonicalJson(value: unknown): string {
+  return JSON.stringify(value, (_key, v: unknown) =>
+    v && typeof v === 'object' && !Array.isArray(v)
+      ? Object.fromEntries(Object.entries(v as Record<string, unknown>).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0)))
+      : v
+  );
+}
+
+/**
+ * P109 ISL-019 — whether a write would change anything but the stamp of who wrote it when.
+ * `modified` and `modifiedBy` are left out of the comparison because every write sets them;
+ * everything else, `created` and the id included, must be equal.
+ */
+export function sameComponentContent(a: ComponentFiles, b: ComponentFiles): boolean {
+  const unstamped = (f: ComponentFiles) => {
+    const { modified: _m, modifiedBy: _b, ...component } = f.component as ComponentV2File & {
+      modified?: string;
+      modifiedBy?: string;
+    };
+    return [component, f.nodes, f.connections];
+  };
+  return canonicalJson(unstamped(a)) === canonicalJson(unstamped(b));
+}
+
 export function computeRevision(files: ComponentFiles): string {
   return crypto
     .createHash('sha1')
@@ -102,6 +128,8 @@ export function computeRevision(files: ComponentFiles): string {
 
 export class ProjectStore {
   readonly projectDir: string;
+  /** P109 ISL-019 — the one source of time and component ids for every write below and in the tools. */
+  readonly clock: WriteClock;
   private snapshots = new Map<string, Snapshot>();
 
   /**
@@ -112,8 +140,9 @@ export class ProjectStore {
    * spawn time. The editor cannot import this module (`@noodl/mcp` is not one of its
    * dependencies), so if you change the wording here, change it there too.
    */
-  constructor(projectDir: string) {
+  constructor(projectDir: string, options: { reproducible?: ReproducibleOutput } = {}) {
     this.projectDir = path.resolve(projectDir);
+    this.clock = new WriteClock(options.reproducible);
     if (!fs.existsSync(this.projectDir) || !fs.statSync(this.projectDir).isDirectory()) {
       throw new ToolError('not-found', `Project directory does not exist: ${this.projectDir}`);
     }
@@ -141,6 +170,22 @@ export class ProjectStore {
 
   private get projectFilePath(): string {
     return path.join(this.projectDir, 'nodegx.project.json');
+  }
+
+  /** P109 ISL-019 — the stamp for a `created`/`modified` written now (the epoch when reproducible). */
+  now(): string {
+    return this.clock.now();
+  }
+
+  /**
+   * P109 ISL-019 "Keep the same id" — the id a component at `legacyName` has in this project, derived
+   * from the project's own `id` (its name, then its folder, when it has none) and the path. A
+   * component rebuilt or recreated in the same place keeps it.
+   */
+  componentIdFor(legacyName: string): string {
+    const project = this.readProjectFile() as (ProjectV2File & { id?: string }) | undefined;
+    const namespace = project?.id || project?.name || path.basename(this.projectDir);
+    return this.clock.componentId(namespace, legacyName);
   }
 
   /**
@@ -190,7 +235,7 @@ export class ProjectStore {
   writeProjectSettings(settings: Record<string, unknown>): string[] {
     const { project, settings: current, written } = this.projectSettingsAfterWrite(settings);
     if (written.length === 0) return [];
-    writeJsonAtomic(this.projectFilePath, { ...project, settings: current, modified: new Date().toISOString() });
+    writeJsonAtomic(this.projectFilePath, { ...project, settings: current, modified: this.now() });
     return written;
   }
 
@@ -261,7 +306,7 @@ export class ProjectStore {
     }
     const project = readJson<ProjectV2File & { metadata?: Record<string, unknown> }>(p);
     const metadata = { ...(project.metadata ?? {}), cloudservices: { ...current, ...binding } };
-    writeJsonAtomic(p, { ...project, metadata, modified: new Date().toISOString() });
+    writeJsonAtomic(p, { ...project, metadata, modified: this.now() });
   }
 
   readRoutes(): RoutesV2File | undefined {
@@ -331,6 +376,17 @@ export class ProjectStore {
       ? readJson<ConnectionsV2File>(connectionsPath)
       : ({ componentId: component.id, connections: [] } as ConnectionsV2File);
     return { component, nodes, connections };
+  }
+
+  /** The three files as they are on disk, or `undefined` when any is missing (a write must create it). */
+  private readFilesIfPresent(dir: string): ComponentFiles | undefined {
+    const read = (f: string) => {
+      const abs = path.join(dir, f);
+      return fs.existsSync(abs) ? readJson<unknown>(abs) : undefined;
+    };
+    const [component, nodes, connections] = COMPONENT_FILES.map(read);
+    if (component === undefined || nodes === undefined || connections === undefined) return undefined;
+    return { component, nodes, connections } as ComponentFiles;
   }
 
   private takeSnapshot(key: string, dir: string, files: ComponentFiles): string {
@@ -478,12 +534,18 @@ export class ProjectStore {
     }
   }
 
-  /** Write a component (create or update) and maintain the registry. Assumes validation already passed. */
+  /**
+   * Write a component (create or update) and maintain the registry. Assumes validation already passed.
+   *
+   * P109 ISL-019 — an update whose content equals what is on disk (everything but `modified` and
+   * `modifiedBy`) writes nothing, the registry included, and says so with `unchanged`. A component
+   * an agent rebuilds exactly as it was then leaves git clean, on the wall clock as well as off it.
+   */
   writeComponent(
     key: string,
     files: ComponentFiles,
     options: { expectNew?: boolean; ifRevision?: string } = {}
-  ): { revision: string; dir: string } {
+  ): { revision: string; dir: string; unchanged?: true } {
     const registry = this.readRegistry();
     const existing = registry.components[key];
 
@@ -499,6 +561,10 @@ export class ProjectStore {
 
     if (existing) {
       this.assertNoDrift(key, dir, options.ifRevision);
+      const onDisk = this.readFilesIfPresent(dir);
+      if (onDisk && sameComponentContent(onDisk, files)) {
+        return { revision: this.takeSnapshot(key, dir, onDisk), dir, unchanged: true };
+      }
     } else if (COMPONENT_FILES.some((f) => fs.existsSync(path.join(dir, f)))) {
       throw new ToolError(
         'conflict',
@@ -512,7 +578,7 @@ export class ProjectStore {
     writeJsonAtomic(path.join(dir, 'connections.json'), files.connections);
 
     // Registry maintenance.
-    const now = new Date().toISOString();
+    const now = this.now();
     const entry: RegistryComponentEntry = {
       path: entryPath,
       type: files.component.type,
@@ -552,7 +618,7 @@ export class ProjectStore {
 
     const registry = this.readRegistry();
     delete registry.components[key];
-    this.updateRegistry(registry, new Date().toISOString());
+    this.updateRegistry(registry, this.now());
     this.snapshots.delete(key);
     return { removed };
   }

@@ -43,6 +43,7 @@
 
 import { ToolError } from '../errors';
 import { ProjectStore } from './ProjectStore';
+import type { ReproducibleOutput } from './writeClock';
 
 /**
  * The one refusal, for every tool that needs a project on a server that has
@@ -76,8 +77,11 @@ export class ProjectBinding {
    * path still fails at startup with today's message rather than at the first
    * tool call — the bound path's behaviour is unchanged in every respect.
    */
-  constructor(projectDir?: string) {
-    this.store = projectDir === undefined ? null : new ProjectStore(projectDir);
+  constructor(
+    projectDir?: string,
+    private readonly storeOptions: { reproducible?: ReproducibleOutput } = {}
+  ) {
+    this.store = projectDir === undefined ? null : new ProjectStore(projectDir, storeOptions);
   }
 
   /** Whether a project is bound. For the surface policy and the startup line. */
@@ -113,7 +117,7 @@ export class ProjectBinding {
     // ⚠️ Constructed here rather than by the caller, so a directory the store
     // will not accept throws *before* anything is marked bound. A half-bound
     // server is the one state this class exists to make unrepresentable.
-    this.store = new ProjectStore(projectDir);
+    this.store = new ProjectStore(projectDir, this.storeOptions);
     return true;
   }
 

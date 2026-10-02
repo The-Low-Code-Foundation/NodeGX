@@ -70,6 +70,7 @@ import { projectInstructions } from '../instructions';
 import { installProjectOverlay } from '../kitOverlay';
 import { writeAgentConfig } from '../project/agentConfig';
 import type { ProjectBinding } from '../project/ProjectBinding';
+import { stableComponentId } from '../project/writeClock';
 import type { ToolDisclosure } from './disclosure';
 import { guarded, jsonResult } from './util';
 
@@ -157,8 +158,11 @@ export function writeProjectSkeleton(projectDir: string, name: string): Skeleton
   const routerId = newId();
   const pageId = newId();
   const textId = newId();
-  const appComponentId = newId();
-  const homeComponentId = newId();
+  // P109 ISL-019 "Keep the same id" — the skeleton's two components take the id the door would
+  // give them (`ProjectStore.componentIdFor`), so a Home deleted and recreated gets this one back.
+  const projectId = newId();
+  const appComponentId = stableComponentId(projectId, '/App');
+  const homeComponentId = stableComponentId(projectId, '/Pages/Home');
   const files: string[] = [];
 
   const put = (rel: string, data: unknown) => {
@@ -171,7 +175,7 @@ export function writeProjectSkeleton(projectDir: string, name: string): Skeleton
   const project: ProjectV2File & { rootNodeId?: string } = {
     $schema: SCHEMA_IDS.PROJECT,
     name,
-    id: newId(),
+    id: projectId,
     // P109 ISL-018: format 5 — authored under the run-on-value-change box, so the editor never
     // migrates this project's Functions on open (an absent `runOnChange-*` key is a ticked box).
     version: RUN_ON_VALUE_CHANGE_FORMAT_VERSION,

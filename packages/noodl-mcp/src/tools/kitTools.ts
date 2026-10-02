@@ -111,7 +111,7 @@ export function registerKitTools(server: McpServer, binding: ProjectBinding): vo
        * successful scaffold into a reported failure.
        */
       const recorded = await recordKitProvenance(store.projectDir, [
-        { module: result.kit.dirName, origin: 'local', createdAt: new Date().toISOString() }
+        { module: result.kit.dirName, origin: 'local', createdAt: store.now() }
       ]);
       if (!recorded.ok) {
         console.error(`[create_node_kit] could not record provenance for "${result.kit.dirName}": ${recorded.message}`);

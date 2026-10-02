@@ -231,9 +231,12 @@ export function assembleCreateFiles(args: {
    * catalog alone, which answers `false` for a component instance; pass
    * `projectVisualPredicate(store)` to resolve those too. */
   isVisualType?: VisualTypePredicate;
+  /** P109 ISL-019 — `store.componentIdFor(legacyName)`: a component made in the same place keeps its id. */
+  componentId: string;
+  /** P109 ISL-019 — `store.now()`, the one clock (the epoch on a reproducible server). */
+  now: string;
 }): ComponentFiles {
-  const now = new Date().toISOString();
-  const componentId = crypto.randomUUID();
+  const { now, componentId } = args;
   const component: ComponentV2File = {
     $schema: 'https://opennoodl.dev/schemas/component-v2.json',
     id: componentId,
@@ -284,7 +287,9 @@ export function assembleCreateFiles(args: {
 export function assembleSetFiles(
   baseline: ComponentFiles,
   set: { nodes: NodeV2[]; connections?: ConnectionV2[]; visualRoots?: string[] },
-  isVisualType: VisualTypePredicate = catalogVisualPredicate
+  isVisualType: VisualTypePredicate,
+  /** P109 ISL-019 — `store.now()` and `store.componentIdFor(legacyName)`: the one clock, the derived id. */
+  stamp: { now: string; componentId: string }
 ): ComponentFiles {
   const candidate: ComponentFiles = JSON.parse(JSON.stringify(baseline));
   // FIX-014 — the gap-fill-and-collide-only pass, with the ruling's second
@@ -312,9 +317,9 @@ export function assembleSetFiles(
       set.connections
     );
   }
-  candidate.component.modified = new Date().toISOString();
+  candidate.component.modified = stamp.now;
   candidate.component.modifiedBy = 'noodl-mcp';
-  backfillIds(candidate);
+  backfillIds(candidate, stamp.componentId);
   return candidate;
 }
 
@@ -393,8 +398,10 @@ function normalizeOperations(operations: OperationInput[]): UpdateOperation[] {
  * components are editable (Gate G1 finding) — the caller's payload is never
  * at fault here.
  */
-function backfillIds(files: ComponentFiles): void {
-  if (!files.component.id) files.component.id = crypto.randomUUID();
+function backfillIds(files: ComponentFiles, derivedId: string): void {
+  // P109 ISL-019 — the derived id (`store.componentIdFor`), not a random one: a backfilled
+  // component keeps the id it was given the first time, every time.
+  if (!files.component.id) files.component.id = derivedId;
   if (!files.nodes.componentId) files.nodes.componentId = files.component.id;
   if (!files.connections.componentId) files.connections.componentId = files.component.id;
 }
@@ -545,7 +552,9 @@ export function registerAuthorTools(
           connections: args.connections,
           visualRoots: args.visual_roots,
           description: args.description,
-          isVisualType: projectVisualPredicate(store)
+          isVisualType: projectVisualPredicate(store),
+          componentId: store.componentIdFor(legacyName),
+          now: store.now()
         });
 
         // AAQ-011/F12: before validating, move any id this project already uses
@@ -651,7 +660,8 @@ export function registerAuthorTools(
           candidate = assembleSetFiles(
             baseline,
             { nodes: reconciled.nodes, connections: args.set.connections, visualRoots: args.set.visual_roots },
-            projectVisualPredicate(store)
+            projectVisualPredicate(store),
+            { now: store.now(), componentId: store.componentIdFor(stored.legacyName) }
           );
         } else {
           const result = applyOperations(baseline, normalizeOperations(args.operations!));
@@ -692,9 +702,9 @@ export function registerAuthorTools(
             lockedIds: positionsUnchangedFrom(candidate.nodes.nodes, baseline.nodes.nodes ?? [])
           });
         }
-        candidate.component.modified = new Date().toISOString();
+        candidate.component.modified = store.now();
         candidate.component.modifiedBy = 'noodl-mcp';
-        backfillIds(candidate);
+        backfillIds(candidate, store.componentIdFor(stored.legacyName));
 
         // AAQ-011/F12. `baseline` is passed so ids the component *already* had
         // are never touched — a pre-existing collision is not this write's doing,
@@ -708,7 +718,7 @@ export function registerAuthorTools(
         });
         if (!validation.ok) rejectWith(validation, `update_component "${stored.key}"`, examples);
 
-        const { revision } = store.writeComponent(stored.key, candidate, { ifRevision: args.if_revision });
+        const { revision, unchanged } = store.writeComponent(stored.key, candidate, { ifRevision: args.if_revision });
         ledger.invalidate();
         // Updates register too, exactly as the editor's apply does: a page that
         // exists but was never listed is the state this task is about, and
@@ -719,6 +729,7 @@ export function registerAuthorTools(
         const payload: UpdateComponentResponse = {
           updated: stored.key,
           revision,
+          ...(unchanged ? { unchanged } : {}),
           ...(applied ? { applied } : {}),
           ...registrationSummary(registration),
           ...remapPayload(remapped),

@@ -170,7 +170,7 @@ export function applyRegistration(store: ProjectStore, registration: PageRegistr
   if (!node) return undefined;
 
   node.parameters = { ...(node.parameters ?? {}), pages: registration.pages };
-  files.component.modified = new Date().toISOString();
+  files.component.modified = store.now();
   files.component.modifiedBy = 'noodl-mcp';
   store.writeComponent(stored.key, files);
   return registration;
@@ -258,7 +258,7 @@ export function unregisterPages(store: ProjectStore, legacyName: string): PageUn
     const written: { routes: string[]; startPage?: string } = { routes: pages?.routes ?? [] };
     if (pages?.startPage !== undefined) written.startPage = pages.startPage;
     node.parameters = { ...(node.parameters ?? {}), pages: written };
-    stored.files.component.modified = new Date().toISOString();
+    stored.files.component.modified = store.now();
     stored.files.component.modifiedBy = 'noodl-mcp';
     store.writeComponent(stored.key, stored.files);
     done.push({ router: router.component, nodeId: router.nodeId, removed: matching, startPageCleared });
