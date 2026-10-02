@@ -30,8 +30,7 @@ ISL-014 (b) built; ISL-022 AC1 measured; ISL-011 AC3 complete (canvas + port wri
 2. **ISL-025 W13 on its ruling ("Remove the force")** — `library/modules/garden-kit/src/kit.js:1932-1944`; four copies
    (F19: src, built `index.js`, the library module, the template's `noodl_modules`); re-read CG-001's gate row and the
    page drive's THE LOOK clause; a person's CSS Style `display` must stick.
-3. **ISL-018's open case** — the door writing into a project still at format 4 (README board; ISL-018 §8 s3). And if
-   session 3's `test:ci` was not read, read it (floor 8 by name; fresh `test-results.json`).
+3. **ISL-018's open case** — the door writing into a project still at format 4 (README board; ISL-018 §8 s3).
 4. **`npm run build` in `packages/noodl-mcp`** when `git status packages/noodl-mcp/src` shows no peer's work (s3 found
    `src/cloud/bundleEntry.js` modified, a peer's) — it now also ships `create_project` at format 5. Then **ISL-014 AC6**
    (`get_project_info` → `kits.readerBuilt`, the kit node placed, the page deployed with it drawing, screenshot looked at).

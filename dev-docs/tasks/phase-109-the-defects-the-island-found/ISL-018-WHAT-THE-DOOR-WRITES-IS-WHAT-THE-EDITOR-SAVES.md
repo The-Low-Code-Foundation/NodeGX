@@ -1,6 +1,6 @@
 # ISL-018 — What the door writes is what the editor saves
 
-**Status: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. Owed: the door writing into a project still at 4 (below), and `test:ci`'s reading. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
+**Status: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. `test:ci` 2,998 / 0 failures at `9a2972ec2`. Owed: the door writing into a project still at 4 (below). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
 [DEF-038](../phase-80-the-defects-the-templates-found/DEF-038-THE-OTHER-GENERATOR-DISAGREES.md) (✅ built 2026-09-03, in
 the generators only) · **Side:** product (MCP door, `noodl-mcp`; the load-time migration in `@nodegx/project-contract`)
 
@@ -150,6 +150,9 @@ re-asked with the editor's own one-time upgrade chain → **"Yes, version step 4
 **Readings:** `tests-unit/isl-018` 4 / 4 (known-firing: format 4 and no version still migrate; format 5 is left as
 written; **sabotage** — the gate forced open — reddens the format-5 row); `hls003` 8 / 8 with a new row (format 4 settles
 2, format 5 settles 0); `create_project` 8 / 8; the DEF-007 seam 10 / 10; contract and export `tsc` 0.
+
+**`test:ci` (the Electron suite, where specs load projects through `fromJSON` and so meet the new upgrader):** 2,998
+specs, **0 failures**, seed 86576, `gitHead` `9a2972ec2`, `test-results.json` written 21:39:47 (fresh) — under the floor of 8.
 
 **Drive (dev editor, throwaway profile, the probe reset to format 4, key absent, no `Run` wire):** the open saved
 `version: "5"`; `Run` wired through the graph model, autosaved, key absent; reopened (after the cap was raised) → **the
