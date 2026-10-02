@@ -13,10 +13,11 @@
  * `npm install` producing both worked directly against.
  */
 import { copyFileSync, readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
 import path from 'node:path';
 
 import esbuild from 'esbuild';
+
+import { buildKitExtract } from './build-kit-extract.mjs';
 
 /**
  * The release this bundle is shipping inside, stamped into the server's MCP handshake.
@@ -120,14 +121,8 @@ await esbuild.build({
  * from `scripts/` is fine *here*: this runs at build time in the checkout, and
  * esbuild inlines what it reaches.
  */
-const require = createRequire(import.meta.url);
-const { extractorBuildOptions } = require('../../scripts/node-catalog/lib/bundle.js');
-
-await esbuild.build({
-  ...extractorBuildOptions(
-    path.resolve('src/kitExtract/entry.js'),
-    path.resolve('dist/kit-extract.cjs')
-  ),
-  target: 'node18',
-  logLevel: 'info'
-});
+//
+// P109 ISL-014: the build itself lives in `build-kit-extract.mjs`, which a server running from a
+// checkout also spawns when the reader is missing or older than one of its inputs; it writes the
+// input list (`dist/kit-extract.inputs.json`) that decides "older".
+await buildKitExtract(path.resolve('dist/kit-extract.cjs'));

@@ -11,3 +11,6 @@ evidence: dev-docs/tasks/phase-109-the-defects-the-island-found/AUDIT-2026-10-01
 
 With `dist/kit-extract.cjs` unbuilt, the door refuses every kit node as "ensure the module is installed". This is D83;
 the ledger file for the defect is P78-D83, which ISL-014 fixes.
+
+**2026-10-02 (P109 s3):** on Richard's ruling ("Build it automatically") a checkout now builds its own reader when
+it is missing or older than any file it was built from (`build-kit-extract.mjs`, `kitExtractStaleness`); ISL-014 §8 s3.

@@ -118,7 +118,8 @@ export function kitsReport(): ProjectKitsReport | undefined {
       : {}),
     ...(registeredNothing.length > 0 ? { registeredNothing } : {}),
     ...(overlay.warnings.length > 0 ? { warnings: overlay.warnings } : {}),
-    ...(overlay.unavailable ? { unavailable: overlay.unavailable.reason } : {})
+    ...(overlay.unavailable ? { unavailable: overlay.unavailable.reason } : {}),
+    ...(overlay.readerBuilt ? { readerBuilt: overlay.readerBuilt } : {})
   };
 }
 

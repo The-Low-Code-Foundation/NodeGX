@@ -1,6 +1,6 @@
 # ISL-014 — A missing kit reader is named as one
 
-**Status: 🟡 fix landed 2026-10-01 (session 1, `aab96a056`, route (a)) — AC1–AC4 green; AC5 waits on the 🔒 ruling (a)/(b); AC6 owed.** Scoped 2026-10-01 at `27d891bf3`. Takes ownership of register **D83** (owner was
+**Status: 🟡 s1 (`aab96a056`): the refusal names the reader, AC1–AC4 green. s3 (2026-10-02): ruled (b) "Build it automatically" and built — a checkout builds its own reader when it is missing or older than any file it was built from; AC5 green, measured in a fresh worktree. AC6 owed (needs `noodl-mcp/dist` rebuilt).** Scoped 2026-10-01 at `27d891bf3`. Takes ownership of register **D83** (owner was
 `NONE`). **Source:** [the island audit](AUDIT-2026-10-01.md) row **F18** · [P78 D83](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md)
 (TPL-011 on `ubuntu-latest`, 2026-09-26) · met again by P106 [IG-001](../phase-106-the-island-grows/IG-001-THE-FIXES.md)
 deviation 8 and every garden worktree lane · **Side:** product (MCP door: kit overlay and write refusals; dev tooling)
@@ -71,6 +71,7 @@ One question about a fresh checkout does need Richard, and it does not block the
    - **(c) Commit the bundle.** 3.7 MB of generated code, rebuilt by every change to the runtime's node library. Every
      lane merge would conflict on it (the pain of audit F19), and a forgotten rebuild ships a stale reader silently.
    - **Recommendation: (a) now, then (b)** with a staleness check, so worktrees stop sharing one bundle. Not (c).
+   - ✅ **Ruled 2026-10-02 (session 3) — Richard: "Build it automatically", i.e. (b) now** (README §8 has the question as asked).
 
 Design constraints, whatever the ruling:
 - The message is added **where the overlay is known**: either the MCP door rewrites an `unknown-node-type`
@@ -165,3 +166,44 @@ peer's uncommitted hunk of the register (since 09-27). The ledger `dev-docs/bugs
 🔒 **Ruling to ask (§5):** *"When the kit reader is missing from a checkout, should the door only say so and name the
 command (done), or also build it on demand the first time, so a fresh worktree never shares the primary's bundle?"*
 Recommended: say so now, build on demand next; never commit the 3.7 MB bundle.
+
+### Session 3 — 2026-10-02, P109 s3: ruling (b), built
+
+**Ruling:** asked in plain words (README §8) → **"Build it automatically"**, against the recommendation to wait. The
+question said building "takes a minute or so, once"; **measured, it takes ~150–200 ms**, so the ruling stands on a
+cheaper cost than the one asked about.
+
+**What changed:**
+
+| file | change |
+|---|---|
+| `packages/noodl-mcp/build-kit-extract.mjs` (new) | the reader's build, shared by `build.mjs` and the server: `node build-kit-extract.mjs [outfile]`. Builds with esbuild's metafile and writes **`kit-extract.inputs.json`** beside the reader (the files it was built from, relative to the package); both written to a temporary name and renamed, the list first |
+| `packages/noodl-mcp/build.mjs` | calls `buildKitExtract` instead of its own esbuild call, so `npm run build` writes the list too |
+| `src/kitExtract/extract.ts` | `checkoutRoot()` (the builder and `src/kitExtract/entry.js` beside `__dirname`'s package: never true in a packaged install), `kitExtractStaleness(bundle, root)` (missing; no list; a listed file gone; a listed file newer than the reader), `ensureCheckoutReader(root, bundle?)` (spawns the builder with `ELECTRON_RUN_AS_NODE=1`, never throws). `extractProjectOverlay` runs it before resolving the reader, **never under `NODEGX_KIT_EXTRACT`** (an explicit reader is the caller's, and AC1's missing arm is that variable). A failed build is named in `unavailable` and `readerBuilt` |
+| `src/tools/read.ts`, `responses.ts` | `get_project_info`'s `kits.readerBuilt`: the one sentence, when this bind built the reader or failed to |
+| `scripts/devtools/make-worktree.sh` | `noodl-mcp/dist` is no longer linked whole: a real `dist/` with every primary file linked **except** `kit-extract.cjs` and its list |
+
+**🔴 The staleness rule is the reader's own input list, not `entry.js`** (§5 said "older than its inputs"; AC5 said
+"older than `entry.js`"). Measured: the reader bundles **476** inputs (475 on disk; one is the `type-stub:` plugin
+namespace), the runtime's node library included, and a fresh build **differed from the primary's 09-27 reader** while
+`entry.js` was last written 09-16 — so "newer than `entry.js`" would have called that reader current. The newest
+input at the time was this session's `states.ts`. Stat-ing all of them: ~1 ms.
+
+**Readings:**
+
+| AC | reading |
+|---|---|
+| AC5 spec | `tests/isl014ReaderBuild.test.ts`, all into a scratch directory (never the shared `dist/`): missing → built, sentence *"…because it was missing (N ms)"*, the list has `src/kitExtract/entry.js`, `../noodl-runtime/…`, `../noodl-viewer-react/…`, >400 entries, no namespace, no temp file left; the built reader runs from `/tmp` and answers JSON (`Demo Kit`); current → `{}` and the mtime unchanged; **SABOTAGE** (the reader aged to before `entry.js`, which is what touching `entry.js` does, without touching a file every server reads) → rebuilt, the sentence names the input; no list / a listed file gone → out of date by name; a builder that exits 1 → *"…and building it failed: esbuild is not installed here"*, nothing written. **6 / 6** |
+| AC5 in a worktree | `make-worktree.sh isl014-ac5-probe` (the patched script; s3's five files copied in, since the worktree forks HEAD): `dist/` holds four links and no reader. A no-override `extractProjectOverlay(kit-app)` from the worktree's `src/`: first bind *"The kit reader was built … because it was missing (191 ms)"*, `Demo Kit`, 2 nodes; **a real `kit-extract.cjs` inside the worktree**; second bind built nothing; **the primary's reader kept its 13:55:16 mtime**. Worktree and branch removed |
+| on the primary | the first no-override bind in the neighbour run rebuilt the primary's 09-27 reader (no list beside it → out of date) at 13:55:16 with its list — the ruled behaviour, by atomic rename |
+| neighbours | `isl014KitRefusal`, `kitOverlay`, `cn009`, `cn010`, `gam-014`, `gam-018`, `capability`, `ig007Garden3d`: **119 / 119**. `tsc --noEmit` on `noodl-mcp`: 0 errors |
+
+**Not measured, by construction:** the old directory link made a worktree's build write the primary's reader (a
+symlinked `dist/`); the new script removes the link, and the worktree arm above is the reading that it now lands inside.
+
+**Not done:**
+- **`npm run build` in `packages/noodl-mcp` was not run.** A peer has an uncommitted `src/cloud/bundleEntry.js`, and
+  a full build would ship it in `cloud-bundle.cjs`. The installed servers therefore still run the 09-27 bundle, with
+  neither s1's refusal nor s3's build. Run it when `git status packages/noodl-mcp/src` is clean of peers' work.
+- **AC6** (an agent from a missing-reader state places a kit node and the page deploys with it drawing) needs that
+  rebuilt server. Under (b) the sentence changes: the agent should never see a refusal, only `kits.readerBuilt`.

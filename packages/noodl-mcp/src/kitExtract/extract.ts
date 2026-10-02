@@ -103,6 +103,11 @@ export interface ProjectKitOverlay {
   unavailable?: { reason: string; probed?: string[] };
   /** Wall-clock of the child process, when one ran. */
   extractionMs?: number;
+  /**
+   * P109 ISL-014 — set when this bind built the reader first (a checkout whose reader was missing or
+   * older than one of its inputs), or tried to and could not: one sentence, for `get_project_info`.
+   */
+  readerBuilt?: string;
 }
 
 /**
@@ -152,6 +157,78 @@ export function resolveKitExtractEntry(): { entry: string | null; probed: string
   return { entry: null, probed };
 }
 
+/** Written by `build-kit-extract.mjs` beside the reader: the files it was built from. */
+const KIT_EXTRACT_INPUTS = 'kit-extract.inputs.json';
+const KIT_EXTRACT_BUILDER = 'build-kit-extract.mjs';
+
+/**
+ * P109 ISL-014 (b) — the `noodl-mcp` checkout this module runs from, or null in a packaged install.
+ *
+ * Richard's ruling, 2026-10-02: when the reader is missing the server builds it itself rather than
+ * only naming the command. A packaged install ships `dist/` and nothing else, so it never builds; a
+ * checkout has the entry and the builder beside it, from `dist/` (the bundled server) and from
+ * `src/kitExtract/` (ts-jest, `npx tsx`) alike.
+ */
+function checkoutRoot(): string | null {
+  for (const root of [path.resolve(__dirname, '..'), path.resolve(__dirname, '..', '..')]) {
+    if (fs.existsSync(path.join(root, KIT_EXTRACT_BUILDER)) && fs.existsSync(path.join(root, 'src', 'kitExtract', 'entry.js'))) {
+      return root;
+    }
+  }
+  return null;
+}
+
+/**
+ * Why the reader at `bundle` must be (re)built, or null when it is current. Current means: it exists,
+ * its input list exists, and no file on that list changed after it was built. A list naming a file that
+ * is gone is out of date too (a module moved). ~475 `stat`s, about 1 ms.
+ */
+export function kitExtractStaleness(bundle: string, packageRoot: string): string | null {
+  if (!fs.existsSync(bundle)) return 'it was missing';
+  const listFile = path.join(path.dirname(bundle), KIT_EXTRACT_INPUTS);
+  let inputs: string[];
+  try {
+    inputs = (JSON.parse(fs.readFileSync(listFile, 'utf8')) as { inputs: string[] }).inputs;
+  } catch {
+    return `it had no ${KIT_EXTRACT_INPUTS} beside it to say what it was built from`;
+  }
+  const builtAt = fs.statSync(bundle).mtimeMs;
+  for (const input of inputs) {
+    const file = path.resolve(packageRoot, input);
+    if (!fs.existsSync(file)) return `${input} was gone`;
+    if (fs.statSync(file).mtimeMs > builtAt) return `${input} changed after it was built`;
+  }
+  return null;
+}
+
+/**
+ * Build the checkout's reader when it is missing or out of date. Synchronous, like the read that
+ * follows it: a child process runs the builder (~150 ms measured, 2026-10-02). Never throws. `bundle`
+ * is the checkout's own reader; a spec passes a scratch path so it never writes the shared `dist/`.
+ */
+export function ensureCheckoutReader(
+  root: string,
+  bundle = path.join(root, 'dist', 'kit-extract.cjs')
+): { sentence?: string; failed?: string } {
+  const stale = kitExtractStaleness(bundle, root);
+  if (!stale) return {};
+  const startedAt = Date.now();
+  const result = spawnSync(process.execPath, [path.join(root, KIT_EXTRACT_BUILDER), bundle], {
+    cwd: root,
+    encoding: 'utf8',
+    timeout: EXTRACT_TIMEOUT_MS * 4,
+    stdio: ['ignore', 'pipe', 'pipe'],
+    // The installed servers run under Electron's binary; this makes it a plain Node for the child.
+    env: { ...process.env, ELECTRON_RUN_AS_NODE: '1' }
+  });
+  const ms = Date.now() - startedAt;
+  if (result.error || result.status !== 0) {
+    const detail = result.error ? result.error.message : (result.stderr || '').trim().split('\n').slice(-4).join('\n');
+    return { failed: `The kit reader needed building (${stale}) and building it failed: ${detail || `exit ${result.status}`}` };
+  }
+  return { sentence: `The kit reader was built before reading this project's kits, because ${stale} (${ms} ms).` };
+}
+
 interface ExtractPayload extends NodeLibraryPayload {
   kits?: KitSummary[];
   moduleRuntimes?: Record<string, string[]>;
@@ -178,6 +255,13 @@ export function extractProjectOverlay(projectDir: string): ProjectKitOverlay {
     return { ...base, skipped: 'no-modules-directory' };
   }
 
+  // ISL-014 (b): a checkout builds its own reader. Never under NODEGX_KIT_EXTRACT — an explicit
+  // reader is the caller's to keep, and pointing it at nothing is how the missing case is tested.
+  const root = process.env.NODEGX_KIT_EXTRACT ? null : checkoutRoot();
+  const ensured: { sentence?: string; failed?: string } = root ? ensureCheckoutReader(root) : {};
+  const readerBuilt = ensured.sentence ?? ensured.failed;
+  const note = readerBuilt ? { readerBuilt } : {};
+
   const { entry, probed, overrideMissing } = resolveKitExtractEntry();
   if (overrideMissing) {
     return {
@@ -191,11 +275,14 @@ export function extractProjectOverlay(projectDir: string): ProjectKitOverlay {
   if (!entry) {
     return {
       ...base,
+      ...note,
       unavailable: {
-        reason:
-          'The kit extractor bundle is not present in this installation, so this project\'s own node types ' +
-          'could not be read. Run `npm run build` in packages/noodl-mcp, or set NODEGX_KIT_EXTRACT to a ' +
-          'built kit-extract.cjs.',
+        reason: ensured.failed
+          ? `${ensured.failed}. So this project's own node types could not be read. Run \`npm run build\` in ` +
+            'packages/noodl-mcp, or set NODEGX_KIT_EXTRACT to a built kit-extract.cjs.'
+          : "The kit extractor bundle is not present in this installation, so this project's own node types " +
+            'could not be read. Run `npm run build` in packages/noodl-mcp, or set NODEGX_KIT_EXTRACT to a ' +
+            'built kit-extract.cjs.',
         probed
       }
     };
@@ -211,12 +298,13 @@ export function extractProjectOverlay(projectDir: string): ProjectKitOverlay {
   const extractionMs = Date.now() - startedAt;
 
   if (result.error) {
-    return { ...base, extractionMs, unavailable: { reason: `Kit extraction failed to start: ${result.error.message}` } };
+    return { ...base, ...note, extractionMs, unavailable: { reason: `Kit extraction failed to start: ${result.error.message}` } };
   }
   if (result.status !== 0) {
     const detail = (result.stderr || '').trim().split('\n').slice(-4).join('\n');
     return {
       ...base,
+      ...note,
       extractionMs,
       unavailable: {
         reason:
@@ -233,6 +321,7 @@ export function extractProjectOverlay(projectDir: string): ProjectKitOverlay {
   } catch (err) {
     return {
       ...base,
+      ...note,
       extractionMs,
       unavailable: { reason: `Kit extraction produced output that is not JSON: ${(err as Error).message}` }
     };
@@ -248,6 +337,7 @@ export function extractProjectOverlay(projectDir: string): ProjectKitOverlay {
   }) as { nodes: OverlayCatalogNode[]; collisions: OverlayCollision[] };
 
   return {
+    ...note,
     projectDir,
     nodes: overlay.nodes,
     collisions: overlay.collisions,

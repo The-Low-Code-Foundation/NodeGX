@@ -200,6 +200,11 @@ export interface ProjectKitsReport {
   warnings?: string[];
   /** 🔴 Set when extraction could not run. Not the same as "there are none". */
   unavailable?: string;
+  /**
+   * P109 ISL-014 — this bind built the kit reader first (a checkout whose reader was missing or out of
+   * date), or tried to and could not. The file it wrote is the checkout's `dist/kit-extract.cjs`.
+   */
+  readerBuilt?: string;
 }
 
 export interface ListComponentsResponse {

@@ -109,7 +109,7 @@ the work:
 | [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display — **🟡 s2: (1a) the four author surfaces say `defaultCss` is inline, gated; (2a) the export applies it; AC1 read on a page and in jsdom; canvas arm and AC6 owed** | F15 | kit bridge, docs, export | — |
 | [ISL-012](ISL-012-A-KIT-CAN-SHIP-A-MODERN-LIBRARY.md) | A kit can ship a modern library | F16 | kit loader, extractor | ✓ |
 | [ISL-013](ISL-013-TWO-KITS-SHARE-CODE-WITHOUT-A-COPY.md) | Two kits share code without a copy | F17 | kit system | ✓ |
-| [ISL-014](ISL-014-A-MISSING-KIT-READER-IS-NAMED-AS-ONE.md) | A missing kit reader is named as one — **🟡 s1: the refusal names it (route a); s3: ruled (b) "build it automatically" — to build; AC6 owed** | F18, **D83** | MCP door | ✓ ruled |
+| [ISL-014](ISL-014-A-MISSING-KIT-READER-IS-NAMED-AS-ONE.md) | A missing kit reader is named as one — **🟡 s1: the refusal names it; s3: ruled (b) "Build it automatically" and built — a checkout builds its own reader, stale by its input list; AC5 green in a worktree; AC6 owed (server rebuild first)** | F18, **D83** | MCP door | ✓ ruled |
 | [ISL-015](ISL-015-A-KIT-AUTHOR-READS-THE-TRAPS-BEFORE-MEETING-THEM.md) | A kit author reads the traps before meeting them | F20, F14 | docs, gate | — |
 | **Track D** | | | | |
 | [ISL-016](ISL-016-THE-DOOR-WRITES-THE-PROJECT-SETTINGS-AND-THE-HOME-PAGE.md) | The door writes the project settings and the home page | F23 | MCP | ✓ |
