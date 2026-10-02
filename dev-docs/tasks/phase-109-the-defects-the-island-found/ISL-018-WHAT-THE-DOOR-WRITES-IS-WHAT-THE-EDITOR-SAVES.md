@@ -1,6 +1,6 @@
 # ISL-018 — What the door writes is what the editor saves
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
+**Status: 🟡 s3 (2026-10-02): AC2 measured — the editor's own save leaves the key absent, and the next open rewrites it to `false`; §5's 🔒 ruling is now needed. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
 [DEF-038](../phase-80-the-defects-the-templates-found/DEF-038-THE-OTHER-GENERATOR-DISAGREES.md) (✅ built 2026-09-03, in
 the generators only) · **Side:** product (MCP door, `noodl-mcp`; the load-time migration in `@nodegx/project-contract`)
 
@@ -108,4 +108,28 @@ Constraints:
 
 ## 8. Record
 
-None yet.
+### Session 3 — 2026-10-02, P109 s3: AC2, the editor's own save
+
+`npm run dev:debug` on a throwaway profile (`NOODL_USER_DATA_DIR` in the scratchpad; nothing written to Richard's), a
+scratch copy of `isl002-first-state/` with a Button added and **every `runOnChange-…` key removed**, so `readFlag` (a
+Function whose `flag` input is fed by the States node) starts as an editor-made Function would. Opened from its launcher
+card.
+
+| step | `readFlag`'s saved parameters (`nodes.json`) |
+|---|---|
+| before the editor opened it | `functionScript` only |
+| after the open (the editor rewrote the file at 15:14; it added `runOnChange-in-flag` to `ports`, a port list, not a value) | `functionScript` only |
+| **wire Button `onClick` → `readFlag.run`** through the graph model the canvas drag ends in (`window.__nodeGraphEditor` → `/Pages/Home` graph → `addConnection(…, { undo: true })`); the editor autosaved at 15:15:07, the wire on disk | **`functionScript` only — the key is ABSENT** |
+| **reopen** (`cdp reload` → the launcher → the card) — the file rewritten at 15:15:45 | **`runOnChange-in-flag: false`** (and `false` in the live model) |
+
+**So the editor is the second writer F25 bites, and the bite is the editor's own:** a Function a person wires `Run` on
+today runs on every change of its fed input (the box defaults to ticked) until the project is reopened, and after that
+it runs on `Run` only — with nothing on screen saying the box was unticked. The migration cannot tell this graph from a
+pre-§2 one because the editor saves nothing that would say so.
+
+⚠️ The wire was made through the model call, not a mouse drag; no code in `noodl-editor/src/editor/src` writes a
+`runOnChange-` value on a new connection (`grep`, this session), so a drag would save the same.
+
+**§5 now applies its 🔒 branch:** (a) settle at write time in the door and in the editor's save, or (b) one project-level
+marker the migration reads. Recommended (b). Asked in plain words with session 3's other measured rulings.
+
