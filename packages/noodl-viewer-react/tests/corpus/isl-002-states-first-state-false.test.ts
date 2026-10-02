@@ -11,18 +11,14 @@
  * where a boolean becomes `_b === undefined ? false : !!_b` and a string is assigned as it is —
  * so the same `false` is right when the node comes BACK to its first state.
  *
- * 🔴 **This file is a MEASUREMENT, not a fix.** The fix needs Richard's ruling (ISL-002 §5: typed
- * value / skip unset / document only; and whether the export's `statesLib.ts` changes in the same
- * commit). The two rows the source predicts red are declared `test.failing`, so this suite stays
- * green until the ruling lands — at which point they must be flipped to plain `test`s, and jest
- * will say so (a `test.failing` that passes fails).
+ * Measured RED at `b5c1b6453` (session 1): both arrived as the number `0`, in both transition
+ * settings. Ruled 2026-10-02 (ISL-002 §5): the first state sends the typed value, and the export's
+ * `statesLib.ts` changes in the same commit. Both moves now read one helper, `typedStateValue`.
  *
  * The recorder is wired, not read off the node: the person's defect is what arrives on the wire.
  */
 
 /* eslint-env jest */
-
-import '../../../noodl-runtime/test/corpus/expected-failure';
 
 import type { NodeInstance, NodeModule } from '@noodl/types';
 
@@ -121,26 +117,17 @@ describe.each([
     expect(last(graph, 'word')).toEqual({ port: 'word', value: 'no', type: 'string' });
   });
 
-  // 🔴 Expected RED at HEAD (ISL-002 AC1). Flip to `test` when the ruling's fix lands.
-  test.failing('AC1: a boolean false in the first state arrives as false', async () => {
+  // ISL-002 AC1 — RED before the fix (both read `0`, `number`).
+  test('AC1: a boolean false in the first state arrives as false', async () => {
     const graph = await statesGraph(extra);
     await graph.settle(3);
     expect(last(graph, 'flag')).toEqual({ port: 'flag', value: false, type: 'boolean' });
   });
 
-  test.failing('AC1: an empty string in the first state arrives as the empty string', async () => {
+  test('AC1: an empty string in the first state arrives as the empty string', async () => {
     const graph = await statesGraph(extra);
     await graph.settle(3);
     expect(last(graph, 'label')).toEqual({ port: 'label', value: '', type: 'string' });
-  });
-
-  test('what actually arrives at HEAD: the number 0, for both (recorded for §8)', async () => {
-    const graph = await statesGraph(extra);
-    await graph.settle(3);
-    // Pinned so the reading is in the suite's own words; this row goes red the moment the fix
-    // lands, beside the two above, and is deleted then.
-    expect(last(graph, 'flag')).toEqual({ port: 'flag', value: 0, type: 'number' });
-    expect(last(graph, 'label')).toEqual({ port: 'label', value: 0, type: 'number' });
   });
 
   test('cause isolation: coming BACK to the first state through goToState gives false and the empty string', async () => {

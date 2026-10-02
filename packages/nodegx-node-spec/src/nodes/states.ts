@@ -273,6 +273,13 @@ function schedule(w: State, state: unknown, port?: string): 'unchanged' | 'defer
   return port ? 'deferred' : undefined;
 }
 
+/** `typedStateValue` — a true/false or a text as every move publishes it, the first entry too (ISL-002) */
+function typedStateValue(type: unknown, value: unknown): { value: unknown } | undefined {
+  if (type === 'boolean') return { value: value === undefined ? false : !!value };
+  if (type === 'string' || type === 'textStyle') return { value };
+  return undefined;
+}
+
 /** :580-616 `jumpToState` — the first move */
 function jumpToState(w: State, state: unknown, out: Out): void {
   if (!w.states) return;
@@ -281,7 +288,8 @@ function jumpToState(w: State, state: unknown, out: Out): void {
   stop(w);
   const prefix = 'value-' + state + '-';
   for (const v of w.values ?? []) {
-    w.current[v] = w.params[prefix + v] || 0; // :592 — `|| 0` whatever the type
+    const typed = typedStateValue(w.types['type-' + v], w.params[prefix + v]);
+    w.current[v] = typed ? typed.value : w.params[prefix + v] || 0; // `|| 0` for numbers and colours only (ISL-002)
     flag(w, v, out);
   }
   w.state = state;
@@ -317,13 +325,9 @@ function goToState(w: State, state: unknown, settleImmediately: boolean, port: s
   const curves: Record<string, Curve> = {};
   for (const v of w.values ?? []) {
     w.startValues[v] = w.current[v]; // :777
-    const type = w.types['type-' + v];
-    if (type === 'boolean') {
-      const b = w.params['value-' + state + '-' + v];
-      w.current[v] = b === undefined ? false : !!b; // :782-783
-      flag(w, v, out);
-    } else if (type === 'string' || type === 'textStyle') {
-      w.current[v] = w.params['value-' + state + '-' + v]; // :787
+    const typed = typedStateValue(w.types['type-' + v], w.params['value-' + state + '-' + v]);
+    if (typed) {
+      w.current[v] = typed.value;
       flag(w, v, out);
     } else {
       const ownPort = 'transition-' + state + '-' + v;

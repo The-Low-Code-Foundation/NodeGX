@@ -107,6 +107,18 @@ function curveAccepted(points: unknown): boolean {
   if (!points.every((p) => typeof p === 'number' && isFinite(p))) return false;
   return points[0] >= 0 && points[0] <= 1 && points[2] >= 0 && points[2] <= 1;
 }
+/**
+ * ISL-002 (P109 F02) — the value a state names for a true/false or a text, as a move into that
+ * state publishes it. Both the first entry (`jumpToState`) and every later move (`goToState`) read
+ * it here, so they cannot drift again: the first entry used to read `|| 0` whatever the type, and a
+ * first state's `false` and `''` both left as the number 0. Returns `undefined` for the types
+ * that keep their own rule (numbers and colours: `|| 0` on the first entry, a transition after).
+ */
+function typedStateValue(type: unknown, value: unknown): { value: unknown } | undefined {
+  if (type === 'boolean') return { value: value === undefined ? false : !!value };
+  if (type === 'string' || type === 'textStyle') return { value };
+  return undefined;
+}
 const previousStates: Record<string, string[] | undefined> = {},
   previousValues: Record<string, string[] | undefined> = {};
 
@@ -630,7 +642,8 @@ const StatesNode: NodeDefinitionOptions = {
       for (const i in internal.values) {
         const v = internal.values[i];
 
-        internal.currentValues[v] = internal.stateParameters[prefix + v] || 0;
+        const typed = typedStateValue(internal.stateParameterTypes['type-' + v], internal.stateParameters[prefix + v]);
+        internal.currentValues[v] = typed ? typed.value : internal.stateParameters[prefix + v] || 0;
 
         this.flagOutputDirty(v);
       }
@@ -817,15 +830,13 @@ const StatesNode: NodeDefinitionOptions = {
 
           internal.startValues[v] = internal.currentValues[v];
 
-          const parameterType = internal.stateParameterTypes['type-' + v];
-          if (parameterType === 'boolean') {
-            // These types don't transition, just set them
-            const _b = internal.stateParameters['value-' + state + '-' + v];
-            internal.currentValues[v] = _b === undefined ? false : !!_b;
-            this.flagOutputDirty(v);
-          } else if (parameterType === 'string' || parameterType === 'textStyle') {
-            // These types don't transition, just set them
-            internal.currentValues[v] = internal.stateParameters['value-' + state + '-' + v];
+          const typed = typedStateValue(
+            internal.stateParameterTypes['type-' + v],
+            internal.stateParameters['value-' + state + '-' + v]
+          );
+          if (typed) {
+            // True/false and texts don't transition, just set them
+            internal.currentValues[v] = typed.value;
             this.flagOutputDirty(v);
           } else {
             // Figure out transition curve

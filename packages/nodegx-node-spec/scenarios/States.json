@@ -54,10 +54,16 @@
     "steps": ["settle", { "signal": "to-B" }, "settle", { "signal": "to-A" }, "settle", { "advance": 400 }, "settle"]
   },
   {
-    "name": "the first state's text that the state does not name, and its false, are published as 0 — the first move reads `|| 0` whatever the type",
-    "because": "states.ts :592 (jumpToState) — the later moves read the type (:779-788); NSP-013 §6 D19 (the runtime and the spec agree, R3 (a))",
+    "name": "the first state publishes a false as false and leaves a text it does not name unset, as every later move does (ISL-002; was D19: both left as 0)",
+    "because": "states.ts typedStateValue, read by jumpToState and goToState alike; ruled 2026-10-02 (P109 ISL-002 §5): the first state sends the typed value",
     "params": { "states": "A,B", "values": "label,on", "type-label": "string", "type-on": "boolean", "value-A-on": false, "value-B-label": "hello", "value-B-on": true },
     "steps": ["settle", { "signal": "to-B" }, "settle", { "signal": "to-A" }, "settle"]
+  },
+  {
+    "name": "the first state's empty text arrives as the empty text, and a true/false it names as 1 arrives as true (ISL-002)",
+    "because": "states.ts typedStateValue: a text is published as the state names it, a true/false is `!!value`",
+    "params": { "states": "A,B", "values": "label,on", "type-label": "string", "type-on": "boolean", "value-A-label": "", "value-A-on": 1, "value-B-label": "x", "value-B-on": false },
+    "steps": ["settle", { "signal": "to-B" }, "settle"]
   },
   {
     "name": "a colour transitions per channel, floored, as #rrggbbaa, and lands on the value its state names (a token's own fallback is read; the document has none)",

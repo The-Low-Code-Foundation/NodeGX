@@ -188,6 +188,14 @@
  * three corpus projects with a popup slot (`charts`, `cheer`, `kits`) move exactly four entries each
  * — `src/pages/Home.tsx`, the new `src/lib/popupDialog.ts`, and `EXPORT-REPORT.md` / `@report`,
  * whose file count went 34 → 35. **12** lines, no other project, no other file.
+ *
+ * ✅ **Four lines patched by hand for P109, 2026-10-02 — not regenerated, because a peer's uncommitted
+ * export work (the READMEs, `utility-desk`'s `crypto.ts`, two new fixtures) was red in the same run and
+ * a regenerate would have folded it in.** Each line is attributed by a control that reproduces the old
+ * hash exactly: `glow-desk/src/lib/states.ts` (ISL-002, the first state's typed value: the emitted
+ * prefix + HEAD's `statesLibSource()` gives the old hash) and `src/kits/runtime.tsx` in `charts`,
+ * `kit-signals`, `kits` (ISL-011, `4638de4b1`, which did not move this golden: the emitted file minus its
+ * five `defaultCss` lines gives the old hash).
  */
 import * as fs from 'fs';
 import * as path from 'path';
