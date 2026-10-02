@@ -148,6 +148,14 @@ The test is simple: if you can imagine wanting to change it from the graph, it w
 belongs on a port. If it is what makes the node a box at all — `display: flex`, `flexDirection` — it
 is structure, and it belongs in `defaultCss`.
 
+:::caution `defaultCss` is an inline style
+`defaultCss` and `inputCss` reach your root as `props.style`, an **inline style**. Inline beats any
+rule in your kit's own stylesheet, so set a property in one place, never in both: a `display: grid`
+in your `.world` class loses, silently, to a `display: block` in `defaultCss`, and every cell of the
+grid draws at zero size. The same object is applied in the editor canvas, on a deployed page and in
+an exported app, so what you put there is what draws everywhere.
+:::
+
 Here is the same idea as code. This node does **not** decide when something counts as over budget:
 
 ```js title="the threshold is not in here"

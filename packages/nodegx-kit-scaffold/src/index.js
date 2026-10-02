@@ -541,6 +541,8 @@ function indexJs(kit) {
     // Structure, not decisions. These are what make the node a box at all, so
     // they are not ports. The test: if you can imagine wanting to change one
     // from the graph, it was a decision — move it into inputCss.
+    // They reach the component as \`props.style\`, an inline style: it beats any
+    // rule in the kit's stylesheet, so set a property here or in a class rule, never both.
     defaultCss: { display: 'flex', flexDirection: 'column', borderStyle: 'solid' },
 
     // Values handed to the React component above, for the elements it draws
@@ -716,6 +718,12 @@ ${ports}
 \`inputProps\` hands a value to the React component for the elements it draws
 itself. Inner text colour has to be an \`inputProp\` — there is no other route
 to it.
+
+**\`defaultCss\` is an inline style.** It and \`inputCss\` reach the component as
+\`props.style\`, which beats any rule in the kit's stylesheet. Set a property in
+one place, never both: a \`display: grid\` in a class rule loses, silently, to a
+\`display: block\` in \`defaultCss\`. The same object applies in the editor
+canvas, on a deployed page and in an exported app.
 
 ## Adding a node
 

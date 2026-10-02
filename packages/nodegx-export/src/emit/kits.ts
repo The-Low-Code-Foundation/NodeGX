@@ -573,6 +573,11 @@ export function KitNode({ type, params, signals, values, children }: KitNodeProp
   const componentProps: Record<string, any> = { ...node.props, ...params };
   // An \`inputs\` signal's count is for the edge effect above, not a prop the component was ever handed.
   for (const name of pulsePorts) delete componentProps[name];
+  // P109 ISL-011 (P84 P40's \`defaultCss\` half): the viewer's bridge starts every instance's style from the
+  // definition's \`defaultCss\` and hands it to the component as \`props.style\`, an inline style. The same
+  // object, applied once here, so a kit root that spreads \`props.style\` lays out the same on a deployed page
+  // and in an exported app. (\`inputCss\` ports are still not read by this export — P40's other half.)
+  componentProps.style = { ...(definition.defaultCss ?? {}), ...(componentProps.style ?? {}) };
   if (children !== undefined) componentProps.children = children;
   return React.createElement(node.reactComponent, componentProps);
 }

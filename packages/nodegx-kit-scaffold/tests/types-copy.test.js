@@ -152,8 +152,11 @@ describe('GAM-015 — the kits this repository ships carry the published types',
     path.join('templates', 'pixel-game', 'noodl_modules', 'keyboard-shortcuts', KIT_TYPES_RELPATH)
   ].filter((rel) => fs.existsSync(path.join(repo, rel)));
 
-  test('there are copies to grade (known-firing: the four library kits and pixel-game)', () => {
-    expect(copies.length).toBe(5);
+  test('there are copies to grade (known-firing: every library kit with a project copy, and pixel-game)', () => {
+    // P109 s2: named, not counted — the literal 5 was outgrown twice (garden-kit in P105, garden-3d-kit in P106) and
+    // read red for two weeks while saying nothing about which kit it had not expected.
+    const kits = copies.map((rel) => (rel.startsWith('templates') ? rel.split(path.sep).slice(0, 2).join('/') : rel.split(path.sep)[2]));
+    expect(kits).toEqual(['example-node-kit', 'game-kit', 'garden-3d-kit', 'garden-kit', 'keyboard-shortcuts', 'nodegx-charts', 'templates/pixel-game']);
   });
 
   test.each(copies)('%s is current', (rel) => {

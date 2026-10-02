@@ -784,7 +784,12 @@ export interface ReactNodeDefinition {
   /** See {@link ReactNodeFrame}. */
   frame?: ReactNodeFrame;
 
-  /** Styles applied to every instance before any input is set. */
+  /**
+   * Styles applied to every instance before any input is set. They reach your component as
+   * `props.style`, an inline style that beats any rule in the kit's own stylesheet — set a
+   * property here or in a class rule, never in both. Applied the same way in the editor canvas,
+   * on a deployed page and in an exported app.
+   */
   defaultCss?: Record<string, any>;
 
   /** Ports written as ordinary runtime inputs, with their own `set`. */
