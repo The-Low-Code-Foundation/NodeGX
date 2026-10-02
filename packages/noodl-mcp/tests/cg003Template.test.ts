@@ -498,14 +498,18 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(params(states)).toMatchObject({ states: '2d,3d', useTransitions: false });
       expect(conns.some((c) => c.fromId === 'iwGarden3d' && c.fromProperty === 'onTooSlow' && c.toId === 'iwRendSlow')).toBe(true);
       expect(conns.some((c) => c.fromId === 'iwGarden3d' && c.fromProperty === 'onSupported' && c.toId === 'iwRendOk')).toBe(true);
-      // The tick: a Timer of two Step Ms, the state held in ONE Variable by name (only one island on screen), looped.
-      const timer = world.find((n) => n.id === 'iwTimer')!;
-      expect(params(timer).duration).toBe(760);
+      // The tick: a Repeat beat of two Step Ms (P109 ISL-025 W1 — the product's own beat, not a Timer restarted by its
+      // own tick), the state held in ONE Variable by name (only one island on screen).
+      const beat = world.find((n) => n.id === 'iwBeat')!;
+      expect([beat.type, params(beat).interval]).toEqual(['Repeat', 760]);
+      expect(world.filter((n) => n.type === 'Timer').map((n) => n.id)).not.toContain('iwTimer');
       // P108 IW-007 (lane B): and the ghost of a blueprint while she places it — held by name for the same reason (one island on screen).
       // P108 IW-007 (s6): and the robot she chose on her land's card (the Workshop's Job robot reads it by name).
       expect(world.filter((n) => n.type === 'Variable2').map((n) => params(n).name)).toEqual(['gardenIsland', 'gardenGhost', 'gardenLandBot']);
-      expect(into('iwTick')).toEqual(['iwTimer.timerFinished>go', 'iwVar.value>state', 'iwWorld.state>built']);
-      expect(into('iwTimer')).toEqual(['iwSetBuilt.done>start', 'iwSetTick.done>start']);
+      expect(into('iwTick')).toEqual(['iwBeat.tick>go', 'iwVar.value>state', 'iwWorld.state>built']);
+      // Started once the build is held; a rebuild's Start while it beats is Unchanged (no second beat); the tick's write
+      // restarts nothing — the beat brings the next tick on its own.
+      expect(into('iwBeat')).toEqual(['iwSetBuilt.done>start']);
       // A tap on either renderer asks Plot at, then the card; the page's pick opens the same card.
       expect(into('iwAt')).toEqual(['iwGarden.onTileTapped>go', 'iwGarden.onTileX>x', 'iwGarden.onTileY>y', 'iwGarden3d.onTileTapped>go', 'iwGarden3d.onTileX>x', 'iwGarden3d.onTileY>y', 'iwWorld.cards>cards']);
       expect(into('iwChoose').filter((w) => />(go|requestId)$/.test(w))).toEqual(['iwAgain.timerFinished>go', 'iwAt.ran>go', 'iwAt.requestId>requestId', 'iwIn.pick>go', 'iwIn.pickId>requestId']);
@@ -680,10 +684,11 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(rinto('rnLoop', 'eval')).toEqual(['rnCap.onfalse>eval']);
       expect(rfrom('rnIn', 'answered')).toEqual(['rnAns.eval']);
       expect(rinto('rnAns', 'condition')).toEqual(['rnMode.live>condition']);
-      expect(rfrom('rnAns', 'ontrue')).toEqual(['rnTimer.start']);
+      expect(rfrom('rnAns', 'ontrue')).toEqual(['rnBeat.start']);
       // Parked is a state of the Runner's own: set by the park, cleared by the answer's tick, by Stop and by Play.
       expect(rnode('rnWait').type).toBe('States');
-      expect([rfrom('rnPark', 'ontrue'), rfrom('rnPark', 'onfalse')]).toEqual([['rnOut.parked', 'rnWait.to-parked'], ['rnCapTest.go', 'rnWait.to-free']]);
+      // P109 ISL-025 W1: the park STOPS the beat (the Timer chain merely did not restart it), so Olive is asked once.
+      expect([rfrom('rnPark', 'ontrue'), rfrom('rnPark', 'onfalse')]).toEqual([['rnBeat.stop', 'rnOut.parked', 'rnWait.to-parked'], ['rnCapTest.go', 'rnWait.to-free']]);
       expect(rfrom('rnIn', 'stop')).toContain('rnWait.to-free');
       expect(rfrom('rnIn', 'play')).toContain('rnWait.to-free');
       expect(rinto('rnOut', 'waiting')).toEqual(['rnWait.parked>waiting']);
@@ -691,6 +696,18 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(rfrom('rnIn', 'step')).toEqual(['rnParked.eval']);
       expect(rinto('rnParked', 'condition')).toEqual(['rnWait.parked>condition']);
       expect([rfrom('rnParked', 'onfalse'), rfrom('rnParked', 'ontrue')]).toEqual([['rnLive.eval'], []]);
+    });
+
+    it('🔴 P109 ISL-025 W1: the beat between ticks is the product’s Repeat — started by Play, an answer and a step; stopped by done, the park, the cap, a step while paused, and Stop; Interval from Step Ms', () => {
+      const beat = rnode('rnBeat');
+      expect([beat.type, params(beat).interval]).toEqual(['Repeat', TICK_MS]);
+      expect(rc().filter((c) => c.toId === 'rnTimer' || c.fromId === 'rnTimer')).toEqual([]);
+      expect(rinto('rnBeat', 'interval')).toEqual(['rnIn.stepMs>interval']);
+      expect(rinto('rnBeat', 'start')).toEqual(['rnAns.ontrue>start', 'rnLive.ontrue>start', 'rnSetRunNew.done>start']);
+      expect(rinto('rnBeat', 'stop')).toEqual(['rnCap.ontrue>stop', 'rnEnd.ontrue>stop', 'rnIn.stop>stop', 'rnLoop.onfalse>stop', 'rnPark.ontrue>stop']);
+      expect(rfrom('rnBeat', 'tick')).toEqual(['rnStep.go']);
+      // Nothing restarts the beat from the loop test: playing, it goes on by itself (a Start while running is Unchanged).
+      expect(rfrom('rnLoop', 'ontrue')).toEqual([]);
     });
 
     it('🔴 D2: Stop resets the run (an empty fresh run in gardenRun), and the Workshop re-chooses the hint once the reset has landed', () => {
@@ -1207,8 +1224,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(params(stop).backgroundColor).toBe('var(--ink)');
       expect([pinto('plStopRun', 'mounted'), pinto('plPlay', 'mounted'), pinto('plStopRun', 'label')]).toEqual([['plRunner.running>mounted'], ['plRunner.idle>mounted'], ['plT.iw1Stop>label']]);
       expect(pfrom('plStopRun', 'onClick')).toEqual(['plRunner.stop']);
-      // The Runner's Stop: the timer, the mode, the parked ask (IW-001 §5 trap), the run emptied, the cap cleared.
-      expect(rfrom('rnIn', 'stop')).toEqual(['rnCapped.to-free', 'rnMode.to-idle', 'rnReset.go', 'rnTimer.stop', 'rnWait.to-free']);
+      // The Runner's Stop: the beat, the mode, the parked ask (IW-001 §5 trap), the run emptied, the cap cleared.
+      expect(rfrom('rnIn', 'stop')).toEqual(['rnBeat.stop', 'rnCapped.to-free', 'rnMode.to-idle', 'rnReset.go', 'rnWait.to-free']);
       expect(GARDEN_CSS).toContain('.bg-i-stop::before');
       expect([PAGE_WORDS.iw1Stop.en, PAGE_WORDS.iw1Stop.fr]).toEqual(['Stop', 'Arrêter']);
     });
@@ -1218,7 +1235,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(rinto('rnCapTest')).toEqual(['rnPark.onfalse>go', 'rnStep.tick>tick']);
       expect(rinto('rnCap')).toEqual(['rnCapTest.over>condition', 'rnCapTest.ran>eval']);
       expect(rfrom('rnCap', 'onfalse')).toEqual(['rnLoop.eval']);
-      expect(rfrom('rnCap', 'ontrue')).toEqual(['rnCapped.to-capped', 'rnMode.to-idle', 'rnOut.cap', 'rnTimer.stop']);
+      expect(rfrom('rnCap', 'ontrue')).toEqual(['rnBeat.stop', 'rnCapped.to-capped', 'rnMode.to-idle', 'rnOut.cap']);
       // Kept: nothing on the cap's arm empties the run (Stop's rnReset is not on it).
       expect(rfrom('rnCap', 'ontrue')).not.toContain('rnReset.go');
       expect(rinto('rnCapped')).toEqual(['rnCap.ontrue>to-capped', 'rnIn.play>to-free', 'rnIn.stop>to-free', 'rnLive.onfalse>to-free']);

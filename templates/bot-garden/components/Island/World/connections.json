@@ -66,12 +66,12 @@
     {
       "fromId": "iwSetBuilt",
       "fromProperty": "done",
-      "toId": "iwTimer",
+      "toId": "iwBeat",
       "toProperty": "start"
     },
     {
-      "fromId": "iwTimer",
-      "fromProperty": "timerFinished",
+      "fromId": "iwBeat",
+      "fromProperty": "tick",
       "toId": "iwTick",
       "toProperty": "go"
     },
@@ -98,12 +98,6 @@
       "fromProperty": "ran",
       "toId": "iwSetTick",
       "toProperty": "do"
-    },
-    {
-      "fromId": "iwSetTick",
-      "fromProperty": "done",
-      "toId": "iwTimer",
-      "toProperty": "start"
     },
     {
       "fromId": "iwWorld",

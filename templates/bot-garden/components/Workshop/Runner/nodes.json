@@ -245,11 +245,11 @@
       "y": 2320
     },
     {
-      "id": "rnTimer",
-      "type": "Timer",
-      "label": "The wait between ticks",
+      "id": "rnBeat",
+      "type": "Repeat",
+      "label": "The beat between ticks",
       "parameters": {
-        "duration": 420
+        "interval": 420
       },
       "x": 40,
       "y": 2440

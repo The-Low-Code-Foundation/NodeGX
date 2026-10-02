@@ -780,11 +780,11 @@
       "y": 4720
     },
     {
-      "id": "iwTimer",
-      "type": "Timer",
-      "label": "The wait between island ticks",
+      "id": "iwBeat",
+      "type": "Repeat",
+      "label": "The beat between island ticks",
       "parameters": {
-        "duration": 760
+        "interval": 760
       },
       "x": 590,
       "y": 4840

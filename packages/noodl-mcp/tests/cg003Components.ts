@@ -68,6 +68,8 @@ const CONDITION_NODE = 'Condition';
 const COUNTER_NODE = 'Counter';
 const NAVIGATE_NODE = 'RouterNavigate';
 const TIMER_NODE = 'Timer';
+/** P109 ISL-025 W1: the product's own beat (P88 GAM-013, `Repeat`): Start, Stop, Interval → Tick. Both loops run on it. */
+const REPEAT_NODE = 'Repeat';
 const TEXT_INPUT_NODE = 'net.noodl.controls.textinput';
 const BUTTON_NODE = 'net.noodl.controls.button';
 const GLOBAL_STORE_NODE = 'net.noodl.GlobalStore';
@@ -666,9 +668,14 @@ const PAD: CgComponent = {
 
 /**
  * The tick loop. Play: a fresh run from the program and the world reset to its start, then one engine step per tick
- * (Step → Apply delta), a Timer between ticks, until the run says done. One step: the next tick of a live run, or a
+ * (Step → Apply delta) on a `Repeat` beat, until the run says done. One step: the next tick of a live run, or a
  * fresh run's first tick. The run and the world live in two Variables (`gardenRun`, `gardenWorld`) — the world one is
  * the same one the Teach pad and Start over write, so there is one world on the page.
+ *
+ * P109 ISL-025 W1: the beat is the product's `Repeat` node (P88 GAM-013), not a Timer restarted after every tick. The
+ * beat starts on Play (a Start while it runs is Unchanged, so Play during a run does not stack a second beat), and it
+ * is STOPPED wherever the Timer chain simply chose not to restart: the run done, parked on Olive, the cap, a step taken
+ * while paused (Still playing? → no), and Stop. Answered and a step start it again; a tick fires one Interval later.
  */
 const RUNNER: CgComponent = {
   path: 'Workshop/Runner',
@@ -701,7 +708,7 @@ const RUNNER: CgComponent = {
     // first hint cannot read the last request's run through gardenRun.
     logic('rnReset', L('New run'), 'The run, emptied', { program: '[]', robotId: 'me' }),
     setVariable('rnSetRunReset', 'gardenRun', 'Hold the emptied run'),
-    logic('rnTimer', TIMER_NODE, 'The wait between ticks', { duration: TICK_MS }),
+    logic('rnBeat', REPEAT_NODE, 'The beat between ticks', { interval: TICK_MS }),
     // P108 IW-001 F2: the run cap, counted here in the Runner (the engine's MAX_TICKS applied to a played run too): after
     // each tick that is not done and not parked, Run cap reads the run's tick; at the cap the run stops, and is KEPT.
     logic('rnCapTest', L('Run cap'), 'Round and round too long?'),
@@ -720,7 +727,7 @@ const RUNNER: CgComponent = {
     wire('rnIn', 'program', 'rnNew', 'program'),
     wire('rnIn', 'lang', 'rnNew', 'lang'),
     wire('rnIn', 'start', 'rnSetWorldStart', 'value'),
-    wire('rnIn', 'stepMs', 'rnTimer', 'duration'),
+    wire('rnIn', 'stepMs', 'rnBeat', 'interval'),
     // Play: always fresh.
     wire('rnIn', 'play', 'rnMode', 'to-playing'),
     wire('rnIn', 'play', 'rnWait', 'to-free'),
@@ -728,10 +735,10 @@ const RUNNER: CgComponent = {
     wire('rnIn', 'play', 'rnNew', 'go'),
     wire('rnNew', 'run', 'rnSetRunNew', 'value'),
     wire('rnNew', 'ran', 'rnSetRunNew', 'do'),
-    wire('rnSetRunNew', 'done', 'rnTimer', 'start'),
+    wire('rnSetRunNew', 'done', 'rnBeat', 'start'),
     wire('rnSetRunNew', 'done', 'rnOut', 'started'),
     // One tick: Step reads the run and the world, Apply writes the world.
-    wire('rnTimer', 'timerFinished', 'rnStep', 'go'),
+    wire('rnBeat', 'tick', 'rnStep', 'go'),
     wire('rnRunVar', 'value', 'rnStep', 'run'),
     wire('rnWorldVar', 'value', 'rnStep', 'world'),
     wire('rnIn', 'answer', 'rnStep', 'answer'),
@@ -748,6 +755,8 @@ const RUNNER: CgComponent = {
     wire('rnSetWorldApply', 'done', 'rnOut', 'ticked'),
     wire('rnEnd', 'ontrue', 'rnMode', 'to-idle'),
     wire('rnEnd', 'ontrue', 'rnOut', 'finished'),
+    // W1: the run is done — the beat stops (the Timer chain just did not restart it here).
+    wire('rnEnd', 'ontrue', 'rnBeat', 'stop'),
     wire('rnMode', 'playing', 'rnLoop', 'condition'),
     // Parked on Olive (CG-005): no next tick until an answer arrives, so the question is asked once, not once a tick.
     // The parked state is the Runner's own (D1): set here, cleared by the tick that consumes the answer, by Stop, by Play.
@@ -755,6 +764,8 @@ const RUNNER: CgComponent = {
     wire('rnEnd', 'onfalse', 'rnPark', 'eval'),
     wire('rnPark', 'ontrue', 'rnOut', 'parked'),
     wire('rnPark', 'ontrue', 'rnWait', 'to-parked'),
+    // W1: parked — no tick until Answered starts the beat again.
+    wire('rnPark', 'ontrue', 'rnBeat', 'stop'),
     wire('rnPark', 'onfalse', 'rnWait', 'to-free'),
     // P108 IW-001 F2: not parked → the cap first, then the next tick when playing.
     wire('rnPark', 'onfalse', 'rnCapTest', 'go'),
@@ -762,7 +773,7 @@ const RUNNER: CgComponent = {
     wire('rnCapTest', 'over', 'rnCap', 'condition'),
     wire('rnCapTest', 'ran', 'rnCap', 'eval'),
     wire('rnCap', 'onfalse', 'rnLoop', 'eval'),
-    wire('rnCap', 'ontrue', 'rnTimer', 'stop'),
+    wire('rnCap', 'ontrue', 'rnBeat', 'stop'),
     wire('rnCap', 'ontrue', 'rnMode', 'to-idle'),
     wire('rnCap', 'ontrue', 'rnCapped', 'to-capped'),
     wire('rnCap', 'ontrue', 'rnOut', 'cap'),
@@ -774,8 +785,9 @@ const RUNNER: CgComponent = {
     // (the engine only advances past the ask) and the loop test says no more.
     wire('rnMode', 'live', 'rnAns', 'condition'),
     wire('rnIn', 'answered', 'rnAns', 'eval'),
-    wire('rnAns', 'ontrue', 'rnTimer', 'start'),
-    wire('rnLoop', 'ontrue', 'rnTimer', 'start'),
+    wire('rnAns', 'ontrue', 'rnBeat', 'start'),
+    // W1: playing, the beat goes on by itself; not playing (a step taken while paused), it stops after this tick.
+    wire('rnLoop', 'onfalse', 'rnBeat', 'stop'),
     // One step: nothing while parked (the tag stays on, Olive is not asked twice); else the next tick of a live run, or
     // a fresh run's first. The mode moves only after the test.
     wire('rnWait', 'parked', 'rnParked', 'condition'),
@@ -783,12 +795,12 @@ const RUNNER: CgComponent = {
     wire('rnParked', 'onfalse', 'rnLive', 'eval'),
     wire('rnMode', 'live', 'rnLive', 'condition'),
     wire('rnLive', 'ontrue', 'rnMode', 'to-paused'),
-    wire('rnLive', 'ontrue', 'rnTimer', 'start'),
+    wire('rnLive', 'ontrue', 'rnBeat', 'start'),
     wire('rnLive', 'onfalse', 'rnMode', 'to-paused'),
     wire('rnLive', 'onfalse', 'rnSetWorldStart', 'do'),
     wire('rnLive', 'onfalse', 'rnNew', 'go'),
-    // Stop: the timer, the mode, the parked state — and the run itself (D2), then Reset says so.
-    wire('rnIn', 'stop', 'rnTimer', 'stop'),
+    // Stop: the beat, the mode, the parked state — and the run itself (D2), then Reset says so.
+    wire('rnIn', 'stop', 'rnBeat', 'stop'),
     wire('rnIn', 'stop', 'rnMode', 'to-idle'),
     wire('rnIn', 'stop', 'rnWait', 'to-free'),
     wire('rnIn', 'stop', 'rnReset', 'go'),
@@ -1744,7 +1756,9 @@ const ISLE_WORLD: CgComponent = {
     variable('iwVar', 'gardenIsland', 'The island, running'),
     setVariable('iwSetBuilt', 'gardenIsland', 'The island, as built'),
     setVariable('iwSetTick', 'gardenIsland', 'The island after a tick'),
-    logic('iwTimer', TIMER_NODE, 'The wait between island ticks', { duration: STEP_MS * 2 }),
+    // P109 ISL-025 W1: the island's beat is a `Repeat` (two Step Ms), started once the build is held; a rebuild's Start
+    // while it runs is Unchanged, so two builds never stack two beats, and the tick no longer restarts a Timer.
+    logic('iwBeat', REPEAT_NODE, 'The beat between island ticks', { interval: STEP_MS * 2 }),
     logic('iwDraw', L('Draw world'), 'The island in the kit’s words', { stepMs: STEP_MS }),
     // ── Taps, the card, home, find ──
     logic('iwAt', L('Plot at'), 'Which plot was tapped'),
@@ -1811,15 +1825,14 @@ const ISLE_WORLD: CgComponent = {
     // P108 IW-003 (lane M, IW-002 AC3): the island held (quiet) — the page opened again goes on from it on the same build.
     wire('iwVar', 'value', 'iwWorld', 'kept'),
     wire('iwWorld', 'ran', 'iwSetBuilt', 'do'),
-    wire('iwSetBuilt', 'done', 'iwTimer', 'start'),
-    // The tick: one step of every pinned run, the state held again, the next wait.
-    wire('iwTimer', 'timerFinished', 'iwTick', 'go'),
+    wire('iwSetBuilt', 'done', 'iwBeat', 'start'),
+    // The tick: one step of every pinned run, the state held again; the beat brings the next on its own.
+    wire('iwBeat', 'tick', 'iwTick', 'go'),
     wire('iwVar', 'value', 'iwTick', 'state'),
     // The latest build too: a held state from an older build (a tick's write landing after a rebuild's) is dropped for it.
     wire('iwWorld', 'state', 'iwTick', 'built'),
     wire('iwTick', 'state', 'iwSetTick', 'value'),
     wire('iwTick', 'ran', 'iwSetTick', 'do'),
-    wire('iwSetTick', 'done', 'iwTimer', 'start'),
     // Drawn: as built, then after every tick.
     // P108 IW-007 (lane B): through With ghost — the ghost of a blueprint on her land drawn over it while she places it.
     wire('iwWorld', 'world', 'iwWithGhost', 'world'),

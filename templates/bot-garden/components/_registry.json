@@ -807,7 +807,7 @@
       "path": "Workshop/Runner",
       "type": "visual",
       "nodeCount": 26,
-      "connectionCount": 85,
+      "connectionCount": 87,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -855,7 +855,7 @@
       "path": "Island/World",
       "type": "visual",
       "nodeCount": 86,
-      "connectionCount": 206,
+      "connectionCount": 205,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1071,6 +1071,6 @@
   "stats": {
     "totalComponents": 133,
     "totalNodes": 1112,
-    "totalConnections": 3543
+    "totalConnections": 3544
   }
 }

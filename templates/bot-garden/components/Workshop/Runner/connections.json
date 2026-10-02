@@ -24,8 +24,8 @@
     {
       "fromId": "rnIn",
       "fromProperty": "stepMs",
-      "toId": "rnTimer",
-      "toProperty": "duration"
+      "toId": "rnBeat",
+      "toProperty": "interval"
     },
     {
       "fromId": "rnIn",
@@ -66,7 +66,7 @@
     {
       "fromId": "rnSetRunNew",
       "fromProperty": "done",
-      "toId": "rnTimer",
+      "toId": "rnBeat",
       "toProperty": "start"
     },
     {
@@ -76,8 +76,8 @@
       "toProperty": "started"
     },
     {
-      "fromId": "rnTimer",
-      "fromProperty": "timerFinished",
+      "fromId": "rnBeat",
+      "fromProperty": "tick",
       "toId": "rnStep",
       "toProperty": "go"
     },
@@ -172,6 +172,12 @@
       "toProperty": "finished"
     },
     {
+      "fromId": "rnEnd",
+      "fromProperty": "ontrue",
+      "toId": "rnBeat",
+      "toProperty": "stop"
+    },
+    {
       "fromId": "rnMode",
       "fromProperty": "playing",
       "toId": "rnLoop",
@@ -200,6 +206,12 @@
       "fromProperty": "ontrue",
       "toId": "rnWait",
       "toProperty": "to-parked"
+    },
+    {
+      "fromId": "rnPark",
+      "fromProperty": "ontrue",
+      "toId": "rnBeat",
+      "toProperty": "stop"
     },
     {
       "fromId": "rnPark",
@@ -240,7 +252,7 @@
     {
       "fromId": "rnCap",
       "fromProperty": "ontrue",
-      "toId": "rnTimer",
+      "toId": "rnBeat",
       "toProperty": "stop"
     },
     {
@@ -300,14 +312,14 @@
     {
       "fromId": "rnAns",
       "fromProperty": "ontrue",
-      "toId": "rnTimer",
+      "toId": "rnBeat",
       "toProperty": "start"
     },
     {
       "fromId": "rnLoop",
-      "fromProperty": "ontrue",
-      "toId": "rnTimer",
-      "toProperty": "start"
+      "fromProperty": "onfalse",
+      "toId": "rnBeat",
+      "toProperty": "stop"
     },
     {
       "fromId": "rnWait",
@@ -342,7 +354,7 @@
     {
       "fromId": "rnLive",
       "fromProperty": "ontrue",
-      "toId": "rnTimer",
+      "toId": "rnBeat",
       "toProperty": "start"
     },
     {
@@ -366,7 +378,7 @@
     {
       "fromId": "rnIn",
       "fromProperty": "stop",
-      "toId": "rnTimer",
+      "toId": "rnBeat",
       "toProperty": "stop"
     },
     {
