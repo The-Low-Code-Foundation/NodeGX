@@ -2,7 +2,7 @@
 id: P108-S8-PICKER
 title: On a phone, a slot's picker opened near the screen's foot runs past it (its long options cannot be tapped)
 status: fixed
-commit: (the s8 commit after 3bb2e084e)
+commit: 4914f6e86
 severity: medium
 area: library garden-kit / Blocks' slot picker (blocks.js openPicker)
 found: P108 s8, 2026-10-03 (drive-cg003-pages.js, IG-006 390-fr: "if Olive read the yellow tulip")

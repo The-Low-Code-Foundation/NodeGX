@@ -2,7 +2,7 @@
 id: P108-S8-EDGECHIP
 title: A meter chip over a thing in the plot's first or last column is cut off by the world's edge
 status: fixed
-commit: (the s8 commit after 3bb2e084e)
+commit: 4914f6e86
 severity: low
 area: library garden-kit (meterEl) and garden-3d-kit (positionOverlay) / meter chips
 found: P108 s8, 2026-10-03 (drive-p108s8-feedback.js shots s8-2d-land-wrong-part, s8-3d-land-chips)
