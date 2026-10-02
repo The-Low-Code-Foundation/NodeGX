@@ -65,14 +65,13 @@
  */
 
 import type { Filter } from '../../../nodegx-backend-contract/src/translators';
-import { isVisualQueryFormat, savedFilterToNeutral, toParseWhere, visualQueryToNeutral, type SavedFilterGroup, type VisualQueryNode } from '../../../nodegx-backend-contract/src/translators';
 import type { InputDecl, OutputDecl } from '../spec';
 import { defineNode } from '../spec';
 import type { RecordRef } from '../registry';
 import type { BackendScript } from '../world';
 import { valueDidChange } from './condition';
 import { NO_BACKEND_MESSAGE } from './record-base';
-import { compareObjects, matchesQuery } from './record-match';
+import { compareObjects, lowerToParse, matchesQuery, toNeutral } from './record-match';
 
 type QueryRecordsState = {
   /** `_internal.name` — the Class (:563-570) */
@@ -164,26 +163,6 @@ function discover(port: string): InputDecl | undefined {
   // NOT IN SLICE A (header): the realtime subscription and the Javascript filter
   if (port === 'realtime' || port === 'storageFilterType' || port === 'storageJSONFilter' || port.startsWith('storageFilterValue-')) return undefined;
   return GENERIC_SETTING(port); // :1205-1207 userInputSetter
-}
-
-/** queryutils.ts :278-293 convertVisualFilterToNeutral — both saved shapes; an unresolved connected rule drops. */
-function toNeutral(query: unknown, parameters: Readonly<Record<string, unknown>>): Filter | undefined {
-  const neutral = isVisualQueryFormat(query as VisualQueryNode)
-    ? visualQueryToNeutral(query as VisualQueryNode, { ...parameters })
-    : savedFilterToNeutral(query as SavedFilterGroup, (portName) => parameters[portName.startsWith('qp-') ? portName.slice('qp-'.length) : portName], { dropUnresolvedConnected: true });
-  return neutral === null ? undefined : neutral;
-}
-
-/**
- * queryutils.ts :295-306 convertVisualFilter — the same filter lowered to Parse for the local matcher; it may THROW (a
- * refusal). The backend type is the legacy store's, which answers `nodegx` unconditionally (:157-169); a play's
- * project has no class schema cached (`schemaFor` → undefined), so `pointsTo` is refused. A document with no key is
- * no filter (:306).
- */
-function lowerToParse(neutral: Filter | undefined): Readonly<Record<string, unknown>> | undefined {
-  if (neutral === undefined) return undefined;
-  const where = toParseWhere(neutral, { backend: 'nodegx', schema: undefined }) as Record<string, unknown>;
-  return Object.keys(where).length === 0 ? undefined : where;
 }
 
 /**
@@ -362,7 +341,7 @@ export const QueryRecords = defineNode({
       let where: Readonly<Record<string, unknown>> | undefined;
       if (s.visualFilter !== undefined) {
         try {
-          neutral = toNeutral(s.visualFilter, s.queryParameters);
+          neutral = toNeutral(s.visualFilter, s.queryParameters, 'qp-');
           where = lowerToParse(neutral);
         } catch (e) {
           const f = failed((e as Error).message || 'The filter could not be applied.'); // :982, :853-856

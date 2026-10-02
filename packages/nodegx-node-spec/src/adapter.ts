@@ -72,6 +72,13 @@
  *                        callback at once), then lets what the move delivered land too — so the
  *                        next step sees the node AFTER the answer, as a person acting seconds later
  *                        would. Only a settle records what the landing did.
+ *   registryArray(name)  OPTIONAL, NSP-014 s25 — the target's own registry array named `name`, from the
+ *                        installed world's registry (world.ts REGISTRY; seeded from its script). A
+ *                        scenario's value — a mount param or a `set` step's value — that is EXACTLY
+ *                        `{ "$array": "<name>" }` (that one key) is handed to the node as that array,
+ *                        not as the object: how a single-node play hands a node the records ANOTHER
+ *                        node's output would carry (a Filter Records' Items). `play` resolves it; a
+ *                        target without this hook cannot play such a scenario, and says so.
  *
  * Why values sort by port NAME and not by the spec's declaration order (which NSP-001 §5 first
  * wrote): a stranger's target (NSP-006) must produce a comparable trace from the spec and the
@@ -99,6 +106,15 @@ export interface TargetAdapter<H extends Handle = Handle> {
   /** NSP-007 — see the contract above. */
   install?(world: World): () => void;
   advance?(h: H, ms: number): Promise<void>;
+  /** NSP-014 s25 — see the contract above. */
+  registryArray?(name: string): unknown;
+}
+
+/** NSP-014 s25 — a scenario value naming a registry array: an object whose ONLY key is `$array`, a string. */
+export function isArrayRef(value: unknown): value is { $array: string } {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const keys = Object.keys(value);
+  return keys.length === 1 && keys[0] === '$array' && typeof (value as { $array: unknown }).$array === 'string';
 }
 
 /** One scripted step of a scenario — the JSON shape NSP-003 reads from disk. `advance` (NSP-007) moves the world's clock by `ms`. */
@@ -136,15 +152,21 @@ export async function play<H extends Handle>(
 ): Promise<TraceEvent[]> {
   let h: H | undefined;
   const restore = world && adapter.install ? adapter.install(world) : undefined;
+  // NSP-014 s25 — `{ "$array": name }` is that registry array, the target's own (registryArray above)
+  const resolve = (value: unknown): unknown => {
+    if (!isArrayRef(value)) return value;
+    if (!adapter.registryArray) throw new Error(`${adapter.name} has no registryArray(): it cannot play a scenario that hands a node a registry array`);
+    return adapter.registryArray(value.$array);
+  };
   try {
-    h = adapter.mount(type, params);
+    h = adapter.mount(type, Object.fromEntries(Object.entries(params).map(([k, v]) => [k, resolve(v)])));
     for (const step of steps) {
       if (step === 'settle') await adapter.settle();
       else if ('signal' in step) adapter.signal(h, step.signal);
       else if ('advance' in step) {
         if (!adapter.advance) throw new Error(`${adapter.name} has no advance(): it cannot play a scenario that moves the clock`);
         await adapter.advance(h, step.advance);
-      } else adapter.set(h, step.set, step.value);
+      } else adapter.set(h, step.set, resolve(step.value));
     }
     return adapter.trace(h);
   } catch (e) {

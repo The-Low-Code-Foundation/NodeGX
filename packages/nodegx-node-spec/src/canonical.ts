@@ -92,7 +92,10 @@ function walk(value: unknown, path: string, seen: object[]): Canonical | undefin
   seen.push(obj);
   try {
     if (Array.isArray(obj)) {
-      const items = obj.map((item, i) => {
+      // `Array.from`, not `obj.map`: `map` builds its result through `Symbol.species`, so an array of a subclass (the
+      // runtime's `CollectionImpl`, collection.ts :739) canonicalised as that subclass — and a recorded trace, read back
+      // from JSON, holds plain arrays (NSP-014 s25: graph s09 red in a full run, green alone). The form is plain, always.
+      const items = Array.from(obj, (item, i) => {
         const c = walk(item, `${path}[${i}]`, seen);
         return c === undefined ? null : c;
       });

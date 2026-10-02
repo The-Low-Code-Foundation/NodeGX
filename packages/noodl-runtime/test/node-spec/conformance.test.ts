@@ -114,7 +114,9 @@ const coalescedPress = (port: string) => (d: Divergence) => {
  */
 const nonArrayOnItems = (d: Divergence) => {
   if (d.difference.threw === undefined || !/\.on is not a function/.test(d.difference.threw)) return false;
-  const bad = d.reference.findIndex((e) => isSet(e, 'items', (v, present) => present && v !== null && typeof v !== 'string' && !Array.isArray(v) && typeof v === 'object' ? true : present && (typeof v === 'number' || typeof v === 'boolean')));
+  // s25: a registry array's canonical form (`{ "$array": name, items }`, a `$array` step) is an array, not a plain object
+  const isRegistryArray = (v: unknown) => typeof (v as { $array?: unknown }).$array === 'string';
+  const bad = d.reference.findIndex((e) => isSet(e, 'items', (v, present) => present && v !== null && typeof v !== 'string' && !Array.isArray(v) && typeof v === 'object' && !isRegistryArray(v) ? true : present && (typeof v === 'number' || typeof v === 'boolean')));
   return bad >= 0 && d.difference.index <= bad + 1;
 };
 
@@ -188,7 +190,40 @@ const notifyOnCleared = (d: Divergence) => {
   return press >= 0 && before.slice(press).some((e) => isSet(e, 'idSource', (v) => v === 'foreach') || isSet(e, 'modelId', (v, present) => !present || v === null || v === ''));
 };
 
+/**
+ * NSP-014 §6.14 C43 — Filter Records sorts OUTSIDE its filter's `try` (filterdbmodelsnode.ts :491): a Sorting over two
+ * or more rows that are not records throws `a.get is not a function` out of the scheduled run, the press's token already
+ * drained — nothing on Error, no Failure, no outcome. The spec reports it as the filter's failure. Narrow: the first
+ * differing reference event is that failure — its Error value carrying the comparator's own message, or (the message
+ * already on Error) its failure outcome or plain Failure pulse with that message the last one on Error.
+ */
+const SORT_CANNOT_COMPARE = /^The filter could not be applied: [ab]\.get is not a function$/;
+const sortCannotCompare = (d: Divergence) => {
+  const ref = d.difference.reference;
+  if (!ref) return false;
+  const errorText = (e: TraceEvent) => (e.t === 'value' && e.port === 'error' ? String((e as { value?: unknown }).value) : undefined);
+  if (errorText(ref) !== undefined) return SORT_CANNOT_COMPARE.test(errorText(ref)!);
+  const failing = (ref.t === 'outcome' && ref.value === 'failure' && ref.error === 'filter-records/filter-failed') || (ref.t === 'signal' && ref.port === 'failure');
+  if (!failing) return false;
+  const last = d.reference.slice(0, d.difference.index).reverse().find((e) => errorText(e) !== undefined);
+  return last !== undefined && SORT_CANNOT_COMPARE.test(errorText(last)!);
+};
+
+/**
+ * NSP-014 §6.14 C44 — Filter Records' store listener tests `collection === undefined` (filterdbmodelsnode.ts :157) and
+ * then calls `collection.contains` (:164): with null on Items it throws inside the store's `save` event — measured s25 in
+ * a graph: the WRITER's Error output carries the message and a Query Records listening after it never hears the save.
+ * The spec reads a null array as holding nothing. Narrow: the runtime threw that message, with null set on Items before it.
+ */
+const nullContains = (d: Divergence) => /Cannot read properties of null \(reading 'contains'\)/.test(d.difference.threw ?? '') && d.reference.slice(0, d.difference.index + 1).some((e) => isSet(e, 'items', (v, present) => present && v === null));
+
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
+  // s25 — Array Filter's twin: the same `bindCollection` (filterdbmodelsnode.ts :316-320), and a sort outside the `try`
+  FilterDBModels: [
+    { row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems },
+    { row: 'NSP-014 §6.14 C43 — a Sorting over rows that are not records throws out of the run: no Error, no Failure, the press never answered', matches: sortCannotCompare },
+    { row: "NSP-014 §6.14 C44 — null on Items throws `null.contains` inside the store's save event: the writer's Error carries it, later listeners never hear the save", matches: nullContains }
+  ],
   // s23 — C11's twin on the Record node: `registerOutputIfNeeded` handles `prop-` only (dbmodelnode2.ts :478-480)
   DbModel2: [{ row: 'NSP-014 §6.8 C37 — the Record\'s `<field> Changed` never fires: nothing registers the output', matches: deadPropertyChanged }],
   DeleteDbModelProperties: [{ row: "NSP-014 §6.5 C36 — Delete Record's success reads the binding live; cleared while the delete is out, it throws: Failure, not Done", matches: notifyOnCleared }],

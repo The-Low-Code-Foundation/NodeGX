@@ -1,0 +1,2225 @@
+[
+  {
+    "name": "records filtered by title = a: two of three, in a new array; Filtered fires, nothing is requested",
+    "because": "filterdbmodelsnode.ts :454-510 — matchesQuery over the array's records; Collection.create; no backend call (\"one subscription, no requests\", :42)",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "sorted by n descending, then Use limit with Skip 1 and Limit 1: one record, the second by n",
+    "because": "filterdbmodelsnode.ts :484-497 — the sort, then Skip, then Limit",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "visualSorting": [
+        {
+          "property": "n",
+          "order": "descending"
+        }
+      ],
+      "filterEnableLimit": true,
+      "filterSkip": 1,
+      "filterLimit": 1
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "Use limit with Limit 0 means 10 and Skip '1' slices as text does",
+    "because": "filterdbmodelsnode.ts :369-380 — `filterLimit || 10`, `filterSkip || 0`, read raw",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "filterEnableLimit": true,
+      "filterLimit": 0,
+      "filterSkip": "1"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "Enabled off passes every record through: unfiltered, unsorted, unlimited; turning it on re-runs with the filter",
+    "because": "filterdbmodelsnode.ts :457-498 — the filter, sort, skip and limit sit under `if (enabled)`; :214-219 a CHANGED Enabled re-runs",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "enabled": false,
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "visualSorting": [
+        {
+          "property": "n",
+          "order": "descending"
+        }
+      ],
+      "filterEnableLimit": true,
+      "filterLimit": 1
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "Filter with nothing on Items fails every press with no-items; the second failure is not announced again but its press is answered",
+    "because": "filterdbmodelsnode.ts :440-452, :402-427 — silent unless a press asked; the dedup is about the announcement, rule 1 is per invocation",
+    "params": {},
+    "steps": [
+      {
+        "signal": "filter"
+      },
+      {
+        "signal": "filter"
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "with nothing on Items and no press, a setting arriving runs nothing visible",
+    "because": "filterdbmodelsnode.ts :440-452 — silent unless a press asked (the boot case)",
+    "params": {
+      "enabled": false,
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "filterEnableLimit",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "a plain-object row cannot be matched: the run fails with the matcher's own message, Failure pulses once, Error keeps it",
+    "because": "filterdbmodelsnode.ts :459-481 — matchesQuery reads `model.get` (queryutils.ts :402); the throw is caught and reported",
+    "params": {
+      "items": [
+        {
+          "title": "a"
+        },
+        {
+          "title": "b"
+        }
+      ],
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "title": "a"
+          }
+        ]
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "a failure, then a run that works, re-arms the announcement: the same failure pulses Failure again",
+    "because": "filterdbmodelsnode.ts :500-501 — `lastReportedError = undefined` after a run that got there",
+    "params": {
+      "items": [
+        {
+          "title": "a"
+        }
+      ],
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": {
+          "$array": "rows"
+        }
+      },
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "title": "b"
+          }
+        ]
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "a filter the lowering refuses (pointsTo with no class schema) fails the press with the refusal's message",
+    "because": "filterdbmodelsnode.ts :459-481 — convertVisualFilter throws inside the try (queryutils.ts :295-306)",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "owner",
+            "operator": "pointsTo",
+            "valueSource": "static",
+            "value": "u1"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "a filter parameter: an unresolved one does not narrow; arriving re-runs; the same value again does not; its own box unticked does not",
+    "because": "filterdbmodelsnode.ts :526-534 — DEF-046 per parameter, keyed by the port; queryutils.ts :278-293 dropUnresolvedConnected",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "n",
+            "operator": "greaterThan",
+            "valueSource": "connected",
+            "valuePortName": "fp-min"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "fp-min",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "fp-min",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "runOnChange-fp-min",
+        "value": false
+      },
+      {
+        "set": "fp-min",
+        "value": 2
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "the visual filter and sort re-run on every write, changed or not; a Limit setting only when it changed",
+    "because": "filterdbmodelsnode.ts :516-525 vs :581-587 — the two editors schedule unconditionally, userInputSetter compares",
+    "params": {
+      "items": {
+        "$array": "rows"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "set": "visualSorting",
+        "value": [
+          {
+            "property": "n",
+            "order": "descending"
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "filterEnableLimit",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "filterEnableLimit",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "filterLimit",
+        "value": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "Filter settings unticked: neither the visual filter nor a setting re-runs it; Filter does, and applies both",
+    "because": "filterdbmodelsnode.ts :519, :524, :586 — one box for the panel editors and the catch-all",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "runOnChange-filterSettings": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      {
+        "set": "filterEnableLimit",
+        "value": true
+      },
+      {
+        "set": "filterLimit",
+        "value": 1
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "Items unticked: a new array is bound but not filtered until Filter",
+    "because": "filterdbmodelsnode.ts :203-206 — bindCollection always, scheduleFilter only under the box",
+    "params": {
+      "runOnChange-items": false,
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": {
+          "$array": "rows"
+        }
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "the Class and the Backend arriving run nothing",
+    "because": "filterdbmodelsnode.ts :513-515, :547-553 — stored / the subscription moves; no scheduleFilter",
+    "params": {
+      "items": {
+        "$array": "rows"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "backendId",
+        "value": "_active_"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "a Sorting over two rows that are not records: the spec fails the press as the filter's failure; the runtime throws out of the run and never answers it (row C43)",
+    "because": "filterdbmodelsnode.ts :486-491 — `filtered.sort(compareObjects…)` sits OUTSIDE the try (:461-481); the token was drained at :436-437",
+    "params": {
+      "items": [
+        {
+          "n": 1
+        },
+        {
+          "n": 2
+        }
+      ],
+      "visualSorting": [
+        {
+          "property": "n",
+          "order": "descending"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ],
+    "row": "NSP-014 §6.14 C43",
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {}
+    }
+  },
+  {
+    "name": "C42 — with no Backend written the node is on the legacy store: a save that moves a member out of the filter is NOT heard (the next Filter shows it)",
+    "because": "filterdbmodelsnode.ts :172 bindStoreEvents(CloudStore.instance); world.ts BACKEND — the legacy store hears no world write; row C42 (the picker is hidden with one backend)",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Backend written: a save that moves a member out of the filter re-runs it — one record left",
+    "because": "filterdbmodelsnode.ts :153-166, :547-553 — bound to the active backend's store; `contains(Model.get(id))`",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "_active_"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a filter parameter's box written with no Class held writes no Class: a save is still not heard",
+    "because": "filterdbmodelsnode.ts :570 registerRunOnValueChangeInput, :158 — a box records its answer and nothing else",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "_active_"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "runOnChange-fp-min",
+        "value": false
+      },
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a filter parameter's box written with no Backend held moves no subscription: a save is still not heard",
+    "because": "filterdbmodelsnode.ts :570 registerRunOnValueChangeInput, :172 — a box records its answer and nothing else",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "runOnChange-fp-min",
+        "value": false
+      },
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Backend written: a save that moves a member INTO the filter re-runs it; a save that re-sorts re-runs it",
+    "because": "filterdbmodelsnode.ts :153-166 — the run re-reads the records as they are now",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "_active_",
+      "visualSorting": [
+        {
+          "property": "n",
+          "order": "ascending"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r2",
+            "data": {
+              "title": "a"
+            }
+          },
+          {
+            "at": 15,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r3",
+            "data": {
+              "n": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "only a SAVE of a record the array holds is heard: a create, a delete and a save of a record it does not hold are not; then a member's save is",
+    "because": "filterdbmodelsnode.ts :328 — `store.on('save', …)` alone; :164 `contains(Model.get(objectId))`",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "_active_"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 2,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 3,
+            "type": "delete",
+            "collection": "Lesson",
+            "objectId": "r3"
+          },
+          {
+            "at": 4,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r9",
+            "data": {
+              "title": "a"
+            }
+          },
+          {
+            "at": 15,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a save of another class is not heard, even of a record the array holds; a save of the Class is",
+    "because": "filterdbmodelsnode.ts :158 — `args.collection !== collectionName`",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "_active_"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Note",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          },
+          {
+            "at": 15,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r3",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "with no Class written a save is not heard; writing the Class runs nothing, and the next save is heard",
+    "because": "filterdbmodelsnode.ts :158, :513-515",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "_active_"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          },
+          {
+            "at": 15,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r3",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "with no visual filter a save is not heard; with one, the next save is",
+    "because": "filterdbmodelsnode.ts :156 — `visualFilter === undefined` returns",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "backendId": "_active_"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          },
+          {
+            "at": 15,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r3",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Record changes unticked: a save is not heard; ticked again, the next one is",
+    "because": "filterdbmodelsnode.ts :154 — shouldRunOnValueChange('records')",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "_active_",
+      "runOnChange-records": false
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "set": "runOnChange-records",
+        "value": true
+      },
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          },
+          {
+            "at": 15,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r3",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "two backends: Backend main hears main's saves, not other's; moved to other, it hears other's",
+    "because": "filterdbmodelsnode.ts :547-553 — CloudStore.forBackend(scope, id): one store per backend",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "main"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            },
+            "backend": "other"
+          },
+          {
+            "at": 7,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r3",
+            "data": {
+              "title": "z"
+            }
+          },
+          {
+            "at": 15,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "a"
+            },
+            "backend": "other"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Backend the project does not have puts the node back on the legacy store: nothing heard; the active one again, and it hears",
+    "because": "filterdbmodelsnode.ts :551 — `forBackend(…) || CloudStore.instance`",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "nope"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "_active_"
+      },
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          },
+          {
+            "at": 15,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r3",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a plain array on Items holds no record: a save of a record by that id is not heard",
+    "because": "filterdbmodelsnode.ts :164 — `contains(Model.get(id))` on the plain array",
+    "params": {
+      "items": [
+        {
+          "title": "a"
+        }
+      ],
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": []
+      },
+      "backendId": "_active_"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "set": "items",
+        "value": {
+          "$array": "rows"
+        }
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          },
+          {
+            "at": 15,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r3",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a press and a save in one frame: one run, the press answered Done",
+    "because": "filterdbmodelsnode.ts :429-430 — `collectionChangedScheduled`: one run per frame",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "_active_"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "null on Items with a filter, a Class and a Backend: the spec hears nothing (a null array holds no record); the runtime throws `null.contains` inside the store's event (row C44)",
+    "because": "filterdbmodelsnode.ts :157 — `collection === undefined` is the test; null passes it, and `null.contains` (:164) is what the runtime reaches",
+    "params": {
+      "items": null,
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "_active_"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "row": "NSP-014 §6.14 C44",
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          }
+        ]
+      }
+    }
+  }
+]

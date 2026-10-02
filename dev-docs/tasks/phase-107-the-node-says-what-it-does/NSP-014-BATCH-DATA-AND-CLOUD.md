@@ -406,3 +406,85 @@ of the clock (2 ms … 65 s) and `Lesson` weighted: still 2 of 400 at 200 — bu
 | `node scripts/node-spec/census.js --check` | fresh — 147, 33 excluded, all tiered |
 | runtime: the WHOLE `conformance.test.ts -t "NSP-004 / NSP-011 — every"` | **NOT RUN** — load 12–24 overruns its 600 s hook (s21's lesson). Why it is safe to defer: the target change acts only in a world with `events` (Query Records' pool alone), and the mutants.ts change only wraps a `store` handler (Query Records' alone) |
 | export, `test:main` | NOT RUN — no export code touched |
+
+### 6.13 s25 (2026-10-02) — Filter Records; a step that hands a node a registry array; s24's NOT RUN closed
+
+**s24's NOT RUN, closed first (load 1.9, no peer suite):** the WHOLE runtime conformance suite — exit 0, 75 passed,
+70 deep runs skipped, 415 s; **71 specs CONFORM**, every survivor a named equivalent mutant, no hook timeout. (The one
+"DOES NOT CONFORM" line is AC1's planted off-by-one in a copy of Counter, as it should be.)
+
+**Filter Records (`FilterDBModels`, T1) CONFORMS on the runtime** — 28 / 30 scenarios (the other two are the known rows
+C43, C44), 200 / 200 on seeds **20728, 20729, 20730** with 0 unexplained divergences (14–18 → C10, 4–8 → C43 per seed),
+**157 / 157 mutants on each seed**; on the interpreter (batch-records) on seeds 13 and 20728. Spec `src/nodes/filter-records.ts`:
+Array Filter's twin over RECORDS — the same six trigger paths and the same failure rule (twins to the end, as the runtime
+file says), the visual filter lowered and matched by the shared `record-match.ts` (Query Records' two lowerings moved
+there, prefix as a parameter: `qp-` / `fp-`). It makes no request at all, so AC6 reads "no scenario records a `backend`
+event — beside one where a save made elsewhere re-runs it" (batch-records.test.ts).
+
+**The handoff's question — `events` or `change`?** Both. It listens for the store's `save` (not `create`, not `delete`)
+on ONE store, and for the bound array's own `change`. So the world's `events` serve it as built in s24 (`world.store`
+handler), and `world.change` is Array Filter's, unchanged — but no single-node play can change the array; graph s09
+grades that path with a real Query Records.
+
+**A step that hands a node a registry array (adapter.ts, additive):** a scenario value — a mount param or a `set`
+step's value — that is EXACTLY `{ "$array": "<name>" }` is handed to the node as the world registry's array of that name.
+`play` resolves it through a new optional `registryArray(name)` on the target (interpreter: the installed world's
+registry; runtime: `Collection.get(name)`, seeded from the same script); a target without it refuses the scenario by
+name. Without it a single-node play could hand Filter Records only plain JSON — rows a matcher cannot read
+(`model.get is not a function`) — and the store path, its reason for existing, would be graded by graph claims alone.
+Stranger hashes refreshed (the diff named `src/adapter.ts` and `src/canonical.ts`, below), the three rounds green.
+
+**Measured before the spec was written (probes, deleted):** (1) the store path depends on the Backend input — the same
+graph with it unwritten does not re-filter, with it written (`_active_` or `main`) does: **row C42**; (2) plain-object
+rows fail with V8's own sentence, which names the variable — so the shared matcher's parameter is now `model`, as the
+runtime's (and its `objectId` branch reads the id whatever `match` already holds, as `&=` does); (3) `null` on Items +
+a save of the Class: the runtime throws INSIDE the store's event — in a graph the WRITER's Error carries it and a Query
+Records listening after it misses the save (control: Items unset — no Error, the Query Records drops the record):
+**row C44**.
+
+**Graph s09 (`s09-the-filter-follows.json`, recorded on the runtime, claims written first):** Query Records → Filter
+Records with real writers — (a) Backend written: an Update Record moving a member out of the filter leaves the result
+(2 → 1); (b) **C42** as a row (Backend unwritten: the claim `count 1` fails, the trace shows Filter Records silent in the
+save's frame); (c) a real Create Record joins the Query Records' rows and the array's `change` re-runs the filter (2 → 3)
+with no Backend written — the path C42 leaves open; (d) **C44** as a row (the writer's Error carries the throw, the
+Query Records is silent). Both rows checked to fail for exactly their defect, not some other one.
+
+**Two target / runner holes the new scenarios exposed:**
+- **T13 — a process-wide object made inside a play draws from the world's stream.** Graph s09 was green alone and red
+  in the full run: the first play of a process minted one id shifted by one draw. A call-site diff of the world's
+  `Random.next` (raw call sites — reading `Error.stack` under jest runs source-map's quick-sort, which itself draws:
+  T8, and the first probe drew 72,028 times through its own stacks) found `SessionStore`'s constructor (`tabId`,
+  SessionStore.ts :131), made once per process on the first `currentUserId()` — an access-rule check. The runtime
+  target now makes the legacy session store in `installUser`, before the world is installed, in every play.
+- **The canonical form of an array was its class's.** `canonicalise` built `items` with `obj.map`, which keeps a
+  subclass through `Symbol.species` — the runtime's `CollectionImpl` (collection.ts :739) canonicalised as that class,
+  and a trace read back from JSON never is. Now `Array.from` — plain always.
+- And C10's known-row predicate read a registry array's canonical form (`{ "$array", items }`) as a plain object and
+  missed 3 C10 divergences on seeds 20729 / 20730 — it now recognises the form.
+
+**Reach, measured (an interpreter tally; deleted):** of 400 generated sequences (seeds 20728, 20729) the store handler
+is REACHED in 166 and re-runs the node in **0**; the array's own `change` re-runs it in 0 (no single-node play can cause
+one). As in s24: the 200-gate for the store path is the 14 hand scenarios; the deep run grades it at random.
+
+### 6.14 Rows (s25)
+
+| row | node | what the trace shows | proposed |
+|---|---|---|---|
+| **C42** | Filter Records | it binds the LEGACY store at creation (:172) and only a written Backend moves it (:547-553); the editor hides that picker with one backend, so a project with its backend under `backendServices` never re-filters on a save made elsewhere. Measured in a graph with a control (Backend written: re-filters). Scenario + graph s09 row. Ledger `p107-c42-…` | resolve the active backend's store when Backend is unset |
+| **C43** | Filter Records | the sort runs OUTSIDE the filter's `try` (:486-491): a Sorting over two or more non-record rows throws `a.get is not a function` out of the run — no Error, no Failure, the press never answered (token drained at :436-437). Known row; 4–8 / 200 per seed. Ledger `p107-c43-…` | move the sort inside the `try` |
+| **C44** | Filter Records | `collection === undefined` (:157) lets `null` through to `null.contains` (:164) inside the store's event — fired from the WRITER's success: the writer's Error carries it and a later listener misses the save. Measured in a graph with a control. Known row; graph s09 row. Ledger `p107-c44-…` | `if (!collection) return` |
+| C10 (s9) | + Filter Records | the same `bindCollection` (:319): a number, boolean or plain object on Items throws in the setter. The ledger row now names three nodes | as C10 |
+
+### 6.15 Gate readings (s25, 2026-10-02; load 1.4–5.5 — a peer's webpack for a minute, no peer suite)
+
+| gate | reading |
+|---|---|
+| runtime: the WHOLE `conformance.test.ts`, BEFORE the s25 changes (s24's NOT RUN) | **exit 0, 75 passed, 70 skipped, 415 s — 71 specs CONFORM**; every survivor a named equivalent; no hook timeout |
+| runtime: the WHOLE `conformance.test.ts`, AFTER them | **exit 0, 76 passed, 71 skipped, 350 s — 72 specs CONFORM** (+ Filter Records); the survivor set identical to the run before |
+| runtime: `NSP_ONLY=FilterDBModels` at 200 | **CONFORMS** 28 / 30 (+ C43, C44 known), 200 / 200, 157 / 157 — on seeds **20728, 20729, 20730** |
+| runtime deep, `NSP_DEEP=10000`, Filter Records | **CONFORMS** (147 s): 0 divergences; 723 → C10, 259 → C43, **1 → C44** (the generator found it once), 157 / 157 |
+| `nodegx-node-spec`: `npx jest` | **18 suites, 717 passed, 17 skipped, exit 0** (s24: 707) — the stranger hash gate green after the refresh, which named exactly `src/adapter.ts` and `src/canonical.ts`; the three rounds re-graded in the same run |
+| runtime: `runtime-target.test.ts` + `graph.test.ts` | **2 suites, 96 passed** (s24: 92; +4 = s09) — in a FULL run, after T13 (alone it was green before the fix too) |
+| `tsc --noEmit` node-spec, runtime (`tsconfig.json`) | exit 0 · exit 0 |
+| `node scripts/node-spec/census.js` | unchanged — 147, all tiered (Filter Records was tiered T1 at s1) |
+| export, `test:main` | NOT RUN — no export code touched |

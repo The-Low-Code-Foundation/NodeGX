@@ -1,0 +1,1555 @@
+[
+  {
+    "name": "a Filter Records with its Backend written hears another node's save: a member saved out of the filter leaves its result",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "NSP-014 s25. filterdbmodelsnode.ts :153-166 cloudStoreEvents, bound by bindStoreEvents (:172 the legacy store; :547-553 the Backend's); Update Record writes the property before the save (setdbmodelpropertiesnode.ts :184-188) and the adapter tells the store's listeners after its success (RestDataAdapter.ts :1216-1219); the Query Records' rows are not touched (no filter there), so this is the store event and nothing else",
+    "nodes": {
+      "q": {
+        "type": "DbCollection2",
+        "params": {
+          "collectionName": "Lesson"
+        }
+      },
+      "f": {
+        "type": "FilterDBModels",
+        "params": {
+          "collectionName": "Lesson",
+          "visualFilter": {
+            "type": "and",
+            "conditions": [
+              {
+                "field": "title",
+                "operator": "equalTo",
+                "valueSource": "static",
+                "value": "a"
+              }
+            ]
+          },
+          "backendId": "_active_"
+        }
+      },
+      "u": {
+        "type": "SetDbModelProperties",
+        "params": {
+          "collectionName": "Lesson",
+          "modelId": "r1",
+          "prop-title": "z"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "q.items",
+        "to": "f.items"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "u",
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "f",
+        "port": "count",
+        "value": 2
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "f",
+        "port": "count",
+        "value": 1
+      },
+      {
+        "at": 2,
+        "subject": "f",
+        "signal": "modified",
+        "count": 1
+      }
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "query"
+            },
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "a",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "create"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "r4",
+                "title": "a",
+                "n": 0
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "save"
+            },
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "q"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "visualFilter",
+        "value": {
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "value": "a",
+              "valueSource": "static"
+            }
+          ],
+          "type": "and"
+        },
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "backendId",
+        "value": "_active_",
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r1",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "prop-title",
+        "value": "z",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedEvent",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecord",
+        "value": null,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecordId",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecords",
+        "value": [],
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 3,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r1",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "isEmpty",
+        "value": false,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "15iCnKz2Hk",
+          "items": [
+            {
+              "id": "r1",
+              "n": 1,
+              "title": "a"
+            },
+            {
+              "id": "r2",
+              "n": 2,
+              "title": "b"
+            },
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "realtimeError",
+        "value": null,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "realtimeStatus",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "subscribed",
+        "value": false,
+        "subject": "q"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "q"
+      },
+      {
+        "t": "backend",
+        "op": "query",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "count": false
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 2,
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r1",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "Qr3xpUEPJ3",
+          "items": [
+            {
+              "id": "r1",
+              "n": 1,
+              "title": "a"
+            },
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "modified",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r1",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 1,
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r3",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "MxMwFQsNrQ",
+          "items": [
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "modified",
+        "subject": "f"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "u"
+      },
+      {
+        "t": "backend",
+        "op": "save",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "data": {
+            "title": "z"
+          },
+          "objectId": "r1"
+        },
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  },
+  {
+    "name": "C42 — a Filter Records whose Backend was never written (the picker is hidden with one backend) never hears the save: its result keeps the record that left the filter",
+    "clauses": [
+      "N"
+    ],
+    "because": "NSP-014 s25. filterdbmodelsnode.ts :153-166 cloudStoreEvents, bound by bindStoreEvents (:172 the legacy store; :547-553 the Backend's); with no Backend written the node stays on the legacy store, and a project with backendServices writes through another store (cloudstore.js forBackend :509-536). The claim is the sentence on Filter Records' Record changes box; the runtime does not bear it out — row C42",
+    "row": "NSP-014 §6.14 C42",
+    "nodes": {
+      "q": {
+        "type": "DbCollection2",
+        "params": {
+          "collectionName": "Lesson"
+        }
+      },
+      "f": {
+        "type": "FilterDBModels",
+        "params": {
+          "collectionName": "Lesson",
+          "visualFilter": {
+            "type": "and",
+            "conditions": [
+              {
+                "field": "title",
+                "operator": "equalTo",
+                "valueSource": "static",
+                "value": "a"
+              }
+            ]
+          }
+        }
+      },
+      "u": {
+        "type": "SetDbModelProperties",
+        "params": {
+          "collectionName": "Lesson",
+          "modelId": "r1",
+          "prop-title": "z"
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "q.items",
+        "to": "f.items"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "u",
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "f",
+        "port": "count",
+        "value": 2
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "f",
+        "port": "count",
+        "value": 1
+      }
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "query"
+            },
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "a",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "create"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "r4",
+                "title": "a",
+                "n": 0
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "save"
+            },
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "q"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "visualFilter",
+        "value": {
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "value": "a",
+              "valueSource": "static"
+            }
+          ],
+          "type": "and"
+        },
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r1",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "prop-title",
+        "value": "z",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedEvent",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecord",
+        "value": null,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecordId",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecords",
+        "value": [],
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 3,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r1",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "isEmpty",
+        "value": false,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "15iCnKz2Hk",
+          "items": [
+            {
+              "id": "r1",
+              "n": 1,
+              "title": "a"
+            },
+            {
+              "id": "r2",
+              "n": 2,
+              "title": "b"
+            },
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "realtimeError",
+        "value": null,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "realtimeStatus",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "subscribed",
+        "value": false,
+        "subject": "q"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "q"
+      },
+      {
+        "t": "backend",
+        "op": "query",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "count": false
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 2,
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r1",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "Qr3xpUEPJ3",
+          "items": [
+            {
+              "id": "r1",
+              "n": 1,
+              "title": "a"
+            },
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "modified",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r1",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "u"
+      },
+      {
+        "t": "backend",
+        "op": "save",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "data": {
+            "title": "z"
+          },
+          "objectId": "r1"
+        },
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  },
+  {
+    "name": "a Filter Records follows the array it is given: a record another node creates joins the Query Records' rows, and the filter re-runs over them — with no Backend written",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "NSP-014 s25. filterdbmodelsnode.ts :153-166 cloudStoreEvents, bound by bindStoreEvents (:172 the legacy store; :547-553 the Backend's); the Query Records adds the created record to its own array (dbcollectionnode2.ts :321-329, s24) and the array's `change` re-runs the Filter Records (:147-151, bindCollection :316-320) — the path C42 does not close",
+    "nodes": {
+      "q": {
+        "type": "DbCollection2",
+        "params": {
+          "collectionName": "Lesson"
+        }
+      },
+      "f": {
+        "type": "FilterDBModels",
+        "params": {
+          "collectionName": "Lesson",
+          "visualFilter": {
+            "type": "and",
+            "conditions": [
+              {
+                "field": "title",
+                "operator": "equalTo",
+                "valueSource": "static",
+                "value": "a"
+              }
+            ]
+          }
+        }
+      },
+      "c": {
+        "type": "NewDbModelProperties",
+        "params": {
+          "collectionName": "Lesson",
+          "prop-title": "a",
+          "prop-n": 0
+        }
+      }
+    },
+    "wires": [
+      {
+        "from": "q.items",
+        "to": "f.items"
+      }
+    ],
+    "steps": [
+      "settle",
+      {
+        "node": "c",
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "f",
+        "port": "count",
+        "value": 2
+      },
+      {
+        "at": 2,
+        "subject": "c",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "q",
+        "port": "count",
+        "value": 4
+      },
+      {
+        "at": 2,
+        "subject": "f",
+        "port": "count",
+        "value": 3
+      }
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "query"
+            },
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "a",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "create"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "r4",
+                "title": "a",
+                "n": 0
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "save"
+            },
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "q"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "visualFilter",
+        "value": {
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "value": "a",
+              "valueSource": "static"
+            }
+          ],
+          "type": "and"
+        },
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "c"
+      },
+      {
+        "t": "set",
+        "port": "prop-title",
+        "value": "a",
+        "subject": "c"
+      },
+      {
+        "t": "set",
+        "port": "prop-n",
+        "value": 0,
+        "subject": "c"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedEvent",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecord",
+        "value": null,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecordId",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecords",
+        "value": [],
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 3,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r1",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "isEmpty",
+        "value": false,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "15iCnKz2Hk",
+          "items": [
+            {
+              "id": "r1",
+              "n": 1,
+              "title": "a"
+            },
+            {
+              "id": "r2",
+              "n": 2,
+              "title": "b"
+            },
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "realtimeError",
+        "value": null,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "realtimeStatus",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "subscribed",
+        "value": false,
+        "subject": "q"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "q"
+      },
+      {
+        "t": "backend",
+        "op": "query",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "count": false
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 2,
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r1",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "Qr3xpUEPJ3",
+          "items": [
+            {
+              "id": "r1",
+              "n": 1,
+              "title": "a"
+            },
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "modified",
+        "subject": "f"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "c"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 4,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "15iCnKz2Hk",
+          "items": [
+            {
+              "id": "r1",
+              "n": 1,
+              "title": "a"
+            },
+            {
+              "id": "r2",
+              "n": 2,
+              "title": "b"
+            },
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            },
+            {
+              "id": "r4",
+              "n": 0,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 3,
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "MxMwFQsNrQ",
+          "items": [
+            {
+              "id": "r1",
+              "n": 1,
+              "title": "a"
+            },
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            },
+            {
+              "id": "r4",
+              "n": 0,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "modified",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r4",
+        "subject": "c"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "c"
+      },
+      {
+        "t": "backend",
+        "op": "create",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "data": {
+            "n": 0,
+            "title": "a"
+          }
+        },
+        "subject": "c"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  },
+  {
+    "name": "C44 — a Filter Records holding null on Items breaks another node's save: the writer's Error carries its throw and a Query Records listening after it never hears the save",
+    "clauses": [
+      "S2",
+      "N"
+    ],
+    "because": "NSP-014 s25. filterdbmodelsnode.ts :153-166 cloudStoreEvents, bound by bindStoreEvents (:172 the legacy store; :547-553 the Backend's); the listener tests `collection === undefined` (:157) and then calls `null.contains` (:164) inside the adapter's event, which runs in the WRITER's success (RestDataAdapter.ts :1216-1219): the throw lands on Update Record's Error and the emitter stops before the Query Records. The claims are what a node holding no records should cause — nothing; the runtime does not bear them out — row C44. Control: the first scenario of this file (no Error on the writer)",
+    "row": "NSP-014 §6.14 C44",
+    "nodes": {
+      "f": {
+        "type": "FilterDBModels",
+        "params": {
+          "items": null,
+          "collectionName": "Lesson",
+          "visualFilter": {
+            "type": "and",
+            "conditions": [
+              {
+                "field": "title",
+                "operator": "equalTo",
+                "valueSource": "static",
+                "value": "a"
+              }
+            ]
+          },
+          "backendId": "_active_"
+        }
+      },
+      "q": {
+        "type": "DbCollection2",
+        "params": {
+          "collectionName": "Lesson",
+          "visualFilter": {
+            "type": "and",
+            "conditions": [
+              {
+                "field": "title",
+                "operator": "equalTo",
+                "valueSource": "static",
+                "value": "a"
+              }
+            ]
+          }
+        }
+      },
+      "u": {
+        "type": "SetDbModelProperties",
+        "params": {
+          "collectionName": "Lesson",
+          "modelId": "r1",
+          "prop-title": "z"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "u",
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "q",
+        "port": "count",
+        "value": 3
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "error",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "q",
+        "port": "count",
+        "value": 2
+      }
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "query"
+            },
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "a",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "create"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "r4",
+                "title": "a",
+                "n": 0
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "save"
+            },
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "items",
+        "value": null,
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "visualFilter",
+        "value": {
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "value": "a",
+              "valueSource": "static"
+            }
+          ],
+          "type": "and"
+        },
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "backendId",
+        "value": "_active_",
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "q"
+      },
+      {
+        "t": "set",
+        "port": "visualFilter",
+        "value": {
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "value": "a",
+              "valueSource": "static"
+            }
+          ],
+          "type": "and"
+        },
+        "subject": "q"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r1",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "prop-title",
+        "value": "z",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 0,
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "changedEvent",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecord",
+        "value": null,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecordId",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecords",
+        "value": [],
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 3,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r1",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "isEmpty",
+        "value": false,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "15iCnKz2Hk",
+          "items": [
+            {
+              "id": "r1",
+              "n": 1,
+              "title": "a"
+            },
+            {
+              "id": "r2",
+              "n": 2,
+              "title": "b"
+            },
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "realtimeError",
+        "value": null,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "realtimeStatus",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "subscribed",
+        "value": false,
+        "subject": "q"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "q"
+      },
+      {
+        "t": "backend",
+        "op": "query",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "count": false,
+          "where": {
+            "title": {
+              "equalTo": "a"
+            }
+          }
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r1",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "Cannot read properties of null (reading 'contains')",
+        "subject": "u"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "u"
+      },
+      {
+        "t": "backend",
+        "op": "save",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "data": {
+            "title": "z"
+          },
+          "objectId": "r1"
+        },
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  }
+]

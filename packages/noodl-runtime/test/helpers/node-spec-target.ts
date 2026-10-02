@@ -345,6 +345,11 @@ const BACKEND_OPS: Readonly<Record<string, (o: BackendOptions, ok: unknown, emit
  * `localStorage`; the store reads "whatever `localStorage` is now"). A play with no user installs nothing. Returns the undo.
  */
 function installUser(w: World): () => void {
+  // NSP-014 s25 (T13) — the session store is made ONCE per process, on its first read, and its constructor draws
+  // `Math.random` (SessionStore.ts :131, the tab id). Made inside a play (an access rule's `currentUserId()`), it took a
+  // draw from the WORLD's stream: the first play of a process minted other ids than every later one (graph s09 red in a
+  // full run, green alone; the draw found by call-site diff). Made here, before `installWorld`, in every play.
+  parseSessionStore(CloudStore.instance._handle().publicToken);
   const user = w.backend.user;
   if (user === undefined) return () => {};
   const g = globalThis as { localStorage?: unknown };
@@ -1232,6 +1237,12 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         stateHistoryManager.setClock(null);
         world = undefined;
       };
+    },
+
+    // NSP-014 s25 (adapter.ts) — the runtime's own named array, seeded from the world's registry at `install`
+    registryArray(name) {
+      if (!world) throw new Error('runtime: a registry array names the play’s world, and none is installed');
+      return Collection.get(name);
     },
 
     async advance(h, ms) {

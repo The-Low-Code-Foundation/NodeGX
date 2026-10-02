@@ -69,6 +69,11 @@ export function interpreterAdapter(options: InterpreterAdapterOptions = {}): Tar
     },
     async advance(h, ms) {
       advance(h.inst, ms);
+    },
+    // NSP-014 s25 — the installed world's registry array (adapter.ts)
+    registryArray(name) {
+      if (!current) throw new Error('interpreter: a registry array names the play’s world, and none is installed');
+      return current.registry.collection(name);
     }
   };
 }

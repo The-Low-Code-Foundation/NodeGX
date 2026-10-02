@@ -11,6 +11,8 @@
  *          the Error text — checked here by counting, per spec, the distinct Error values its scenarios record.
  *   AC6    the call is asserted (the `backend` event, with its args), and a scenario proves NO call is made when
  *          the node's inputs are not ready — beside a scenario that makes one (the known-firing control).
+ *          (s25) Filter Records makes no call at all ("one subscription, no requests"): no scenario of it records a
+ *          `backend` event — beside one where a save made elsewhere re-runs it (the store is reached; the control).
  */
 
 import type { TraceEvent } from '../src';
@@ -18,8 +20,11 @@ import { EQUIVALENT_MUTANTS, interpreterAdapter, loadScenarios, play, runConform
 
 const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRelation', 'NewDbModelProperties', 'SetDbModelProperties', 'DbModel2', 'DbCollection2'];
 
+/** s25 — Filter Records: no backend call, so graded here but not in the AC6 call table below */
+const CONFORMING = [...BATCH, 'FilterDBModels'];
+
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {
-  for (const type of BATCH) {
+  for (const type of CONFORMING) {
     for (const seed of [13, 20728]) {
       test(`${type} (seed ${seed})`, async () => {
         const spec = specs[type];
@@ -90,5 +95,28 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
     const op: Record<string, string> = { DeleteDbModelProperties: 'delete', AddDbModelRelation: 'addRelation', RemoveDbModelRelation: 'removeRelation', NewDbModelProperties: 'create', SetDbModelProperties: 'save', DbModel2: 'fetch', DbCollection2: 'query' };
     expect(ev.op).toBe(op[type]);
     expect(typeof ev.args.collection).toBe('string');
+  });
+
+  // s25 — Filter Records
+  test('FilterDBModels: every failure sentence is on Error beside a failure, and no scenario calls a backend — beside a save made elsewhere that re-runs it', async () => {
+    const all = await traces('FilterDBModels');
+    const errors = new Set<string>();
+    for (const { trace } of all) {
+      const failed = trace.some(isFailure);
+      for (const e of trace) if (failed && e.t === 'value' && e.port === 'error') errors.add(String((e as { value: unknown }).value));
+    }
+    expect([...errors]).toContain('Nothing to filter — no records are connected to the Items input');
+    expect([...errors]).toContain('The filter could not be applied: model.get is not a function');
+    expect([...errors].filter((e) => e.startsWith('The filter could not be applied: ') && !e.includes('.get is not a function')).length).toBeGreaterThan(0); // the refused pointsTo
+    expect(all.filter((x) => x.trace.some((e) => e.t === 'backend')).map((x) => x.name)).toEqual([]);
+    // the control: the store reached — a run (Filtered) in the frame after an advance that delivered a save
+    const frameAfter = (trace: TraceEvent[], i: number) => {
+      const start = trace.findIndex((x, k) => k > i && x.t === 'settle');
+      if (start < 0) return [];
+      const end = trace.findIndex((x, k) => k > start && x.t === 'settle');
+      return trace.slice(start + 1, end < 0 ? undefined : end);
+    };
+    const reRunByASave = all.filter(({ trace }) => trace.some((e, i) => e.t === 'advance' && frameAfter(trace, i).some((x) => x.t === 'signal' && x.port === 'modified')));
+    expect(reRunByASave.length).toBeGreaterThan(0);
   });
 });
