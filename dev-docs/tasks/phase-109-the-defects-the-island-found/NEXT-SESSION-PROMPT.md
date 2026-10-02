@@ -4,7 +4,8 @@
 **Session 1 (2026-10-01):** ISL-001's fix (`3df5adb82`), ISL-014's fix (`aab96a056`), ISL-002's AC1 measured (`b5c1b6453`).
 **Session 2 (2026-10-02, on `cline-dev` from `68b1549f5`): ISL-025's slice 0 landed (W1 both loops on `Repeat`, W2 every
 garden drive on `nodegx deploy`), ISL-011 built on its recommended route (1a + 2a).** 0 of 25 closed; the same three
-rulings still open (README §8). Commits: see `git log --since=2026-10-02 --author=Richard -- dev-docs/tasks/phase-109*`.
+rulings still open (README §8). Commits: `4b8ece0b1` (W2), `d194f6f5f` (W1 + the census spec + the regenerated
+template), `4638de4b1` (ISL-011 + the GAM-015 copies), `c0f5f1486` (records and this handoff).
 
 ## Read first
 
