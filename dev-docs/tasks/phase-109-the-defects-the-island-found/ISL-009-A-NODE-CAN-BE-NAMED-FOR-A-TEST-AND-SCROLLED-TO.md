@@ -1,6 +1,6 @@
 # ISL-009 — A node can be named for a test and scrolled to
 
-**Status:** 🟢 s5 (2026-10-02): **ruling 2 built** ("Signal on every node") — `Scroll Into View` + `Scroll Align` on all 27 visual node types, Page included; driven on a deployed page at 1024 and 390 with its control (§8 s5). ⬜ Ruling 1 (the `data-*` attribute surface) was never asked: round 2. ⬜ The export half, ⬜ AC7 (the island uses it), ⬜ `kitAgreement`'s editor recording. Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟢 s5 (2026-10-02): **ruling 2 built** ("Signal on every node") — `Scroll Into View` + `Scroll Align` on all 27 visual node types, Page included; driven on a deployed page at 1024 and 390 with its control (§8 s5). ✅ Ruling 1 asked in round 2 and ruled **"A data-* list"** (§5 1(b): name/value rows, `data-*` only, wirable, server-rendered) — not built. ⬜ The export half, ⬜ AC7 (the island uses it), ⬜ `kitAgreement`'s editor recording. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F12](AUDIT-2026-10-01.md) · [P105 CG-003 line 114](../phase-105-the-coding-garden/CG-003-THE-PAGES.md) ("there is no `[data-owl-row]` attribute — a node cannot write one") · [CG-005 §8 hook 2](../phase-105-the-coding-garden/CG-005-OLIVE-IN-THE-GAME.md) line 166 · the island's `Logic/Find robots` page glue
 **Side:** product (shared visual-node ports in `noodl-viewer-react`, the export, the door's vocabulary)
 
@@ -154,7 +154,7 @@ Ruling 3 (restarting a CSS animation) stays out, as recommended.
   editor (its `_recording.how` says how): next session.
 - `noodl-preview/dist/nodegx-deploy.cjs` (gitignored) was **five weeks stale** (Sep 17): `nodegx deploy` refused the
   project with *"Group has no input named scrollIntoView"* until `node build.mjs` was run. The deploy bundle
-  (`noodl-editor/src/external/deploy/noodl.deploy.js`, gitignored) was rebuilt from this change at 23:22.
+  (`noodl-editor/src/external/deploy/noodl.deploy.js`, gitignored) was rebuilt from this change at 23:26 (the build the drive graded).
 
 **Gates (2026-10-02):** editor `test:main` before the fixes: 567 suites, 8,821 passed, 7 failed — 5 of them this change
 (CHR-007, FB-017 ×2, GAM-019 ×2), all green after (the 19 affected suites 346/346); `exp-013/exportBadge` (a peer's
@@ -162,3 +162,5 @@ ledger) and `hlt-021/viewerPort` (green when re-run) are not this change. `noodl
 `noodl-mcp`, 50 catalog-reading specs: `nodeDocBudget` and `kitAgreement` this change (the first fixed, the second
 above); `cmp001`, `cmp004Parts`, `cn004`, `fld013` on s4's HEAD-red list; `fld011` the reaper under load.
 
+**Ruling 1, the same evening: "A data-* list"** (README §8 round 2). Build it next: AC2's drive then selects the card by
+`[data-testid=…]`, and AC3's and AC5's attribute halves become runnable.

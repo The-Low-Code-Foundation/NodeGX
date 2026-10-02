@@ -1,6 +1,6 @@
 # ISL-005 — Two Functions share one piece of code
 
-**Status:** 🔬 s4 (2026-10-02): not ruled — Richard asked for research first (components and native nodes before scripts; README §8, §8 s4 below). Scoped 2026-10-01 at `27d891bf3`
+**Status:** ✅ ruled s5 (2026-10-02): **"Native nodes first"** — the island is rebuilt toward native nodes and logic components as its own template task, the four blocking product gaps are fixed first, and the shared script file is decided afterwards for what is left (README §8 round 2; [census](ISL-005-CENSUS-2026-10-02.md)). §5 is not built now. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F08](AUDIT-2026-10-01.md) (R-c as well) · first planned in [P105 CG-002 line 136](../phase-105-the-coding-garden/CG-002-THE-ENGINE.md) ("`ENGINE` is inlined into five scripts … Owner: NONE") · grown by every P106 and P108 lane since
 **Side:** product (runtime `Function` node, the editor's project files, the MCP door, `@nodegx/export`)
 
@@ -147,3 +147,48 @@ and one answer out, not a library called partway through a script.
    product finding, filed.
 4. Then re-ask ISL-005 with the numbers: how much shared code is left that only a script can hold.
 
+### Session 5 — 2026-10-02: the census (no product code)
+
+Done by a read-only research agent at `6bac3db02`; the full report, with its 88-row table, the boundary tables and every
+finding's file:line, is [ISL-005-CENSUS-2026-10-02.md](ISL-005-CENSUS-2026-10-02.md). Re-checked here: **88** Functions
+and **20** engine copies (my own parse of the working tree; the working tree reads 3,266,886 bytes against HEAD's
+3,218,764 because a peer has the garden's content open).
+
+**§2 is stale.** Since scoping: 83 → **88** Functions, 2.45 → **3.22 MB**, 17 → **20** engine copies (`Land card`,
+`Land ghost`, `Land request`), and `ENGINE` is 95 KB with **108** helpers, not 75.8 KB and 91. There are **20** shared
+blocks, not six. **93.1 %** of the script bytes are pasted shared code; each Function's own logic totals 223 KB.
+
+**The answer to Richard's question, by Function (verdicts judged row by row; bytes measured):**
+
+| verdict | Functions | own logic | shared code they paste |
+|---|---|---|---|
+| (a) native nodes today (22 with Expression one-liners, 1 with none) | 23 | 31 KB | 11 KB |
+| (a) native, blocked by a missing node (translation table, "in list" filter) | 3 | 34 KB | 1 KB |
+| **(b) his logic component: one value in, one answer out** | **33** | 51 KB | **1.88 MB** |
+| (c) genuinely script, needs no shared code | 14 | 41 KB | 71 KB |
+| (c) genuinely script, calls shared code mid-logic | 15 | 65 KB | 1.03 MB |
+
+- **14 of the 20 engine users fit a component** (1–5 calls each, never in a loop; Choose hint makes 11, all on the same
+  3 inputs). **6 do not**: Island world (41 calls, in loops), Win pay (18), Record step (13, in a loop), Use helper,
+  Land card, Shop card. An engine component would cut 20 copies to **7** (an estimate).
+- Native nodes plus components, as Richard described them, would take the pasted 3.0 MB to about **1.24 MB (−59 %)**
+  with **no new feature**. What only a shared script file could still hold is **about 1.0 MB across 15 Functions**.
+- **The template uses no Expression, String Format, Array Filter, Object, Switch, HTTP Request or Run Tasks node at
+  all** (0 of 1,101 nodes), though the catalog tells agents to prefer Expression.
+
+**Findings (to be filed one per bug in `dev-docs/bugs/` next session; not filed yet):** product gaps — no translation /
+word-table node (28 Functions paste the word helper; ISL-007's add-on is the ruled route), String Format fills a
+repeated placeholder once, Array Filter has no "in list" / nested / computed field, no node edits a nested JSON value,
+list rows are app-wide by id (so scripts invent prefixed ids), no list-join or base64 node; teaching gaps — Expression,
+Object, HTTP Request, Run Tasks and "Array Filter → first → Object" as a row lookup all exist and went unused; the
+Function's `run` port doc contradicts the code (`javascriptfunction.json:8` vs `simplejavascript.ts:617-627`); a
+leftover ISL-002 workaround at `cg003Scripts.ts:392`. **The strongest single cause** (census finding 17): the
+generator grades a Function by running its text in Node (`runScript`), and nothing as cheap grades a native graph, so a
+script was always the easiest thing to test.
+
+**Next:** ask Richard in plain words (README §8 round 2), with these numbers: build the shared script file for the ~15
+that need it, or make them extra operations of one engine component, or leave them — and whether the island should
+be rebuilt toward native nodes and components first (which would be a template task, not ISL-005).
+
+**Ruled the same evening: "Native nodes first"** (README §8, round 2). ISL-006 and ISL-020, which waited on this, can now be
+scoped against it: both shrink if the island's 59 non-script Functions become nodes and components.

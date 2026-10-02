@@ -1,82 +1,71 @@
-# Next session — P109 session 5
+# Next session — P109 session 6
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 4 (2026-10-02, on `cline-dev` from `835a965f9`):** ISL-022 built on "Yes, both" (`db086d75f`); ISL-025 W13 on
-"Remove the force" → **ISL-011 ✅ closed** (`ce3e36d54`); `noodl-mcp` dist rebuilt → **ISL-014 ✅ closed** by Claude Code
-over the real door (`ddc2248f5`); round 1 of the Track B/D questions asked (3 ruled, ISL-005 turned into research);
-this handoff's commit. **4 of 25 closed** (ISL-001, 002, 011, 014).
+**Session 5 (2026-10-02, on `cline-dev` from `6bac3db02`):** ISL-019 built (`1f23b05dd`); ISL-009's ruling 2 built and
+driven (`6a9d00cee`); ISL-005's research done and **ruled "Native nodes first"**; ISL-009's ruling 1 asked and **ruled
+"A data-* list"**; five bugs filed; this handoff's commit. **4 of 25 closed** (none closed this session: ISL-019 and
+ISL-009 each have open ACs).
 
 ## Read first
 
-1. README §8 (the rulings with their questions as asked, s4's round 1 at the end), §10 (status).
-2. ISL-005 §8 s4 — **Richard's direction, and the research it orders.** Read his words in README §8 before anything.
-3. ISL-022 §8 s4 (the rule, the census, the pins, AC6's run), ISL-014 §8 s4 (AC6 end to end).
+1. README §8 — the two round-2 rulings at the end, as asked.
+2. ISL-019 §8 s5 (as built; AC7's three measured blockers), ISL-009 §8 s5 (as built; what the two new ports moved
+   elsewhere), ISL-005 §8 s5 and [the census](ISL-005-CENSUS-2026-10-02.md).
 
 ## Do, in this order
 
-1. **ISL-005's research (no product code).** Richard: *"using components and native NodeGX nodes where possible is
-   validating the concept rather than just defaulting to scripts all the time."* Census the island's 83 Functions
-   (2.45 MB): per Function, one line of what it does and (a) native nodes today / (b) a component around a one-job
-   Function / (c) genuinely script — naming the native node, or the missing one. For the 17 `ENGINE` users, propose
-   component boundaries and count the helper calls that cross each. File every missing node or port as a finding.
-   Then re-ask ISL-005 with the numbers. ISL-006 and ISL-020 wait on it. Memory: `use-the-existing-mechanism` (both
-   episodes).
-2. **Build the round-1 rulings:** ISL-019 "Keep the same id" (first: ISL-016/017 and P111 SEE-002 depend on it);
-   ISL-009 "Signal on every node" (Scroll into view, page included); ISL-007 "Adopt the add-on" (fix the
-   i18next add-on's gaps, teach it to agents; String Format's `{name}` was the other syntax on the table).
-3. **Ask round 2, in plain words, with each mechanism checked:** ISL-016 (settings overwrite; the editor already has
-   "Make home", `projectmodel.ts:324-330`, whose first-root rule differs from the task's refuse rule), ISL-017 (a font
-   as a library entry; `font-awesome-*` modules are precedent), ISL-021 (one step-list call; take the verbs from
-   `scripts/devtools/drive-page.js`), ISL-008 (defaults weakest — 🔴 variants also write inline, and a bridge-wide change
-   reverses ISL-011's 1a), ISL-010 (backend; `openai-compatible` is already reserved in `modelrequest.ts:67`). The s4
-   research agent's drafts are summarised in this session's transcript only; re-derive, don't trust.
-4. **ISL-022 follow-ups:** the cross-component blind spot (a wrapping row that is a component's ROOT, placed in a row
-   elsewhere — needs the placement, the way arm B reads item components through `views`); AC6 again with a request that
-   produces the shape. ISL-025 W21's real fix: `maxWidth: pct(100)` on `brTabs` in `cg003Components.ts`, the
-   `.bg-tabs` CSS rule deleted from `cg007Look.ts`, `npm run template:garden`, the garden pin → `[]`, drive at 390.
-5. **The two filed bugs** (`node scripts/bugs.js`): `P109-S4-UNROUTEDPAGE` (medium — a page written into a router-less
-   project is silent; a warning on the page write) and `P109-S4-ROWWRAP` (nightbook's three tool rows; planning's
-   `abRight` is CSS-rescued and pinned in `tpl010Template.test.ts` with its exit beside it).
+1. **ISL-009 ruling 1: build the `data-*` list** (§5 1(b): name/value rows on every visual node, `data-*` names only,
+   values wirable, written in server render). Put it in ACC-006's accessibility group if that mixin exists by then (read
+   P41 first). The door refuses a non-`data-*` name with the rule (AC5, sabotage arm: allow `onclick` → red). Then
+   AC2's drive selects by `[data-testid]` only (`scripts/devtools/drive-isl009-scroll-into-view.js` + the
+   `isl009-scroll-into-view/` project), AC3 reads the attribute in server-rendered HTML. 🔴 A new shared port moves
+   CHR-007's snapshot, FB-017's tier list, AWP-005's ratchet, GAM-019's alternatives and **`kitAgreement`'s recording**:
+   see ISL-009 §8 s5 for how each was handled. 🔴 Rebuild the two gitignored bundles before any deploy:
+   `noodl-viewer-react`: `npx webpack --config webpack-configs/webpack.deploy.dev.js` (**watch mode — it never exits;
+   stop it by its own PID once it prints "compiled"**), and `noodl-preview`: `node build.mjs`.
+2. **Re-record `kitAgreement`'s editor fixture** (bug `P109-S5-KITRECORDING`, red since `6a9d00cee`): an editor launch
+   with a copy of `noodl-mcp/tests/fixtures/kit-app`, per the recording's own `_recording.how`. One heavy job: do it once,
+   after step 1, so the recording carries the `data-*` port as well.
+3. **ISL-007 "Adopt the add-on"** (ruled s4, not started): fix the i18next add-on's gaps and teach it to agents. It is
+   also the first of the four product gaps "Native nodes first" names.
+4. **"Native nodes first" (ISL-005's ruling):** scope the island rebuild as **its own template task** (P108/P78, not
+   P109), and the product gaps as P109 work: String Format's repeated placeholder (`P109-S5-STRINGFORMAT`), Array
+   Filter's "in list" (`P109-S5-ARRAYFILTERIN`), rows shared app-wide by id (ISL-003 owns it, read it first). Re-scope
+   ISL-006 and ISL-020 against the ruling (both waited on ISL-005).
+5. **ISL-019's remainder:** AC6 (Claude Code over the door rebuilding a component: needs `noodl-mcp` dist rebuilt from
+   `1f23b05dd`+), AC7 (the garden drops its pins) only when no peer has `cg002Content.ts`/`cg003Content.ts` open, and
+   decide the trailing-newline byte first (ISL-019 §8 s5, AC7 row).
+6. **Round 3 questions, each mechanism checked first:** ISL-016, ISL-017, ISL-021, ISL-008, ISL-010 (s4's handoff list
+   and pointers still apply: `projectmodel.ts:324-330` "Make home", `font-awesome-*` modules, `drive-page.js` verbs,
+   `modelrequest.ts:67`). And ISL-018's open case (below).
+7. ISL-022 follow-ups and the s4 bugs (`P109-S4-UNROUTEDPAGE`, `P109-S4-ROWWRAP`), unchanged from s4's list.
 
 ## Decisions for Richard (not yours)
 
-- **ISL-018's open case:** the door writing into a format-4 project no current editor has opened. Options: leave it
-  recorded (narrow: the editor's Connect path opens — and upgrades — a project first); the door does the editor's
-  one-time 4→5 step on its first write (stamps 5: the 0.3.0 app then refuses the project); or the door marks the nodes
-  it writes (the "settle at write time" option he called nuts in s3). Not asked yet.
-- **ISL-005**, after the research. **Rounds 2–3** above.
-- Not asked, recorded: `garden-3d-kit/src/kit3d.js:3170` forces `display: block` as the grid kit did; arm B fires on
-  a wrapped row of 100 %-wide items (nightbook `hsRoot`), which the ruling's "a percentage" sentence covers.
+- **ISL-018's open case**, still not asked: the door writing into a format-4 project no current editor has opened.
+- **Round 3** above.
 
-## Readings taken in session 4 (2026-10-02)
+## Readings taken in session 5 (2026-10-02)
 
-- `noodl-mcp` whole suite with ISL-022 in (over `835a965f9`): 164 suites, 3,534 passed, **23 failed in 15 suites**;
-  every failure re-run under HEAD's rule — 15 stay red without the change (`cn004`, `nodeIdAllocation`,
-  `d54ThemePresetIdentity`, `cmp004Parts` ×2, `cmp004RoundTrip` ×2, `cmp001` corpus 39-for-33, `fld013`,
-  `provision` ×2, tpl007's byte gate, `def038` ×6), `iw008Crew` p95 timing under load; the rest were this task's
-  pins and are green. Moved gates after: 698 passed, 8 failed = exactly those HEAD-reds.
-- Editor `test:main`: **567 suites, 8,827 passed, 1 failed** (`exp-013/exportBadge`: a peer's in-flight
-  `coverage-ledger.json`).
-- Garden gates over the regenerated template (`ce3e36d54`): `cg001`, `cg003` (byte gate), `isl025`, `isl022`, `ig007`
-  **291 / 291**. CG-001 page drive **50 / 50**, THE LOOK passing.
-- 🔴 `def038SettledTemplates` is red on six **format-4** templates holding unsettled `runOnChange-*` (nightbook,
-  planning, planning-demo are untracked peer templates; rocket-school peer-dirty; digital-bricks-training(-demo)
-  committed by another workstream). s3's format step did not cause it (the planner is unchanged; it only stopped
-  re-running at 5). Not P109's to regenerate.
+- ISL-019: `isl019SameBytes` 12/12, three mutants killed. Forty write-path `noodl-mcp` specs: 5 failures in 3 suites =
+  s4's HEAD-reds (`cmp004Parts` ×2, `cmp004RoundTrip` ×2, `nodeIdAllocation`, reasons printed). `cg003Template` 9 red
+  against a **peer's open garden content**; its byte diff lists no `component.json`/registry/project file.
+- ISL-009: deployed drive 4/4 at 1024×768 and 390×844, control 4/4 unmoved; viewer-react 127 suites / 1,671 green; the
+  editor's affected suites 19 / 346 green; `catalog:check`, `catalog:merge:check`, `catalog:groups:check` green.
+- Editor `test:main` with ISL-009 before its fixes: 567 suites, 7 failed (5 this change, fixed; `exp-013/exportBadge`
+  a peer's ledger; `hlt-021/viewerPort` green on re-run). **Not re-run in full after the fixes.**
+- `noodl-mcp` 50 catalog-reading specs after ISL-009: red = `kitAgreement` (this change, bug filed), `cmp001`,
+  `cmp004Parts`, `cn004`, `fld013` (s4 HEAD-reds), `fld011` (reaper under load). **The full `noodl-mcp` suite was not
+  run this session.**
 
-## Facts measured in session 4 that are not in a task file
+## Facts measured in session 5 that are not in a task file
 
-- 🔴 **`packages/noodl-mcp/dist` was rebuilt at 22:19 from `ce3e36d54`** and includes P78 D84's uncommitted
-  `src/cloud/bundleEntry.js` (that register calls it fixed). Peer sessions run `dist/noodl-mcp.cjs` through Electron and
-  get this build at their next launch. P78's register row D83 can now read ✅ (ISL-014 closed) — that file has a peer's
-  open edits, so it was not touched.
-- **Driving Claude Code over the door works from here:** `claude -p "…" --mcp-config <file> --strict-mcp-config
-  --allowedTools "mcp__nodegx" --max-turns N --model sonnet --output-format stream-json --verbose`, the server as
-  `node packages/noodl-mcp/dist/noodl-mcp.cjs <project> --allow-writes`. ≈ $0.7 for a small page, ≈ $2.2 at a 40-turn cap.
-- **A worktree's `noodl-mcp` server resolves to the primary**: its `dist/` holds symlinks, and Node resolves a symlinked
-  main module to its real path. Replace the links with real copies (`cp -L`) to make a server that lives in the worktree.
-- **`render_report` cannot screenshot in a worktree** (no built viewer); an agent there says so and stops.
-- **The template-rows probe:** a scratch copy whose router's start page is a page placing one component, with a
-  `cssClassName` stamped on the nodes to read (`scripts/devtools/drive-isl022-template-rows.js`), reads a component's
-  rows at 390 without driving the app to the screen that shows them.
+- **`withInnerComponent` waits for `innerReactComponentRef`, which only a class component sets.** A function component
+  (Page, and anything reporting its root through `setDOMElement`) never flushes the queue: an action queued that way
+  waits for ever, silently. Every current caller (Group, Video, Drag, Text Input) is a class, so nothing is broken today;
+  a new shared action must wait on the element instead (ISL-009 does).
+- **`noodl-preview/dist/nodegx-deploy.cjs` was 5 weeks stale** and refused a valid project (`P109-S5-STALEDEPLOYCLI`).
+- Both deploy-side bundles are now built from `6a9d00cee`'s source: `noodl.deploy.js` 23:26, `nodegx-deploy.cjs` 23:23.
+- A research agent did the ISL-005 census in ~18 minutes, read-only; the method (esbuild the generator in memory, strip
+  each shared block, judge row by row) is in the census header and can be re-run.
 - Local `cline-dev` is far ahead of `origin`; pushing is Richard's call.

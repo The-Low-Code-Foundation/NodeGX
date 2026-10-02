@@ -3,7 +3,7 @@
 **Scoped:** 2026-10-01, at HEAD `27d891bf3`, from [the island audit](AUDIT-2026-10-01.md). The audit read P105, P106 and
 P108 (Olive's Island, [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md)): their task files, 225 commits, 57
 session and lane transcripts, the generator, both kits, the desktop shell and the shipped template.
-**Status: 🟡 OPEN — session 4 (2026-10-02): 4 of 25 closed (ISL-001, ISL-002, ISL-011, ISL-014); ISL-022 built (AC6 open); ISL-018 built (one case open); ISL-025 W1–W3, W13, W21 removed; round 1 of Tracks B/D ruled (ISL-007, ISL-009, ISL-019), ISL-005 turned into research on Richard's direction (§8).** **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+**Status: 🟡 OPEN — session 5 (2026-10-02): 4 of 25 closed (ISL-001, ISL-002, ISL-011, ISL-014); ISL-019 built (AC6, AC7 open); ISL-009's scroll signal built and driven (ruling 1, the data-* list, ruled and not built); ISL-005 researched and ruled "Native nodes first"; ISL-022 built (AC6 open); ISL-018 built (one case open); ISL-025 W1–W3, W13, W21 removed (§8).** **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
 > "Phase 108 has been a beast. I forgot to tell the model to record learnings about NodeGX during the push. I'm sure
 > there must be a tonne of stuff we can fix and improve in NodeGX and the way the MCP works. Can you do an audit and start
@@ -99,7 +99,7 @@ the work:
 | [ISL-003](ISL-003-TWO-LISTS-WITH-THE-SAME-ROW-IDS-KEEP-THEIR-OWN-ROWS.md) | Two lists that reuse row ids keep their own rows | F03 | runtime | ✓ |
 | [ISL-004](ISL-004-A-COMPONENT-KEEPS-ITS-OWN-STATE.md) | A page you come back to can be as you left it (instances already have their own store; leaving a page destroys it) | F04, F05 | runtime | ✓ |
 | **Track B** | | | | |
-| [ISL-005](ISL-005-TWO-FUNCTIONS-SHARE-ONE-PIECE-OF-CODE.md) | Two Functions share one piece of code | F08 | runtime | ✓ |
+| [ISL-005](ISL-005-TWO-FUNCTIONS-SHARE-ONE-PIECE-OF-CODE.md) | Two Functions share one piece of code — **🔬 s5: census done ([report](ISL-005-CENSUS-2026-10-02.md)): of 88 Functions, 26 could be native nodes, 33 fit a logic component, 29 are genuine script (15 need shared code mid-logic); re-ask with the numbers** | F08 | runtime | ✓ |
 | [ISL-006](ISL-006-A-FUNCTION-SAYS-WHAT-ITS-PORTS-ARE.md) | A Function says what its ports are | F09 | runtime | ✓ |
 | [ISL-007](ISL-007-AN-APP-SPEAKS-TWO-LANGUAGES-WITHOUT-A-SCRIPT.md) | An app speaks two languages without a script | F10 | node library | ✓ |
 | [ISL-008](ISL-008-A-STYLESHEET-CAN-PLACE-A-GROUP.md) | A stylesheet can place a Group | F11 | runtime styling | ✓ |
@@ -250,6 +250,21 @@ feature has its own copy with the same bug. Should both be fixed in one commit?"
   But I recognise that with the robot game you deffo needs scripts quite a bit, because of the complexity and three.js."*
   → ISL-005 §8 s4 scopes the research. ISL-020 (one line of a big script) and ISL-006 (a Function's ports) wait on it.
 
+**Session 5 (2026-10-02), round 2 — two questions, both ruled on the recommendation:**
+
+- **ISL-005 — ✅ Ruled: "Native nodes first."** Asked with the census's numbers ([report](ISL-005-CENSUS-2026-10-02.md)):
+  *"…26 could be ordinary NodeGX nodes today… 33 fit your idea exactly: a logic component… 29 are real code… only 15
+  of those need shared code partway through a script. Doing the first two groups would cut the copied code from 3.0 MB
+  to about 1.2 MB with no new feature. What should happen next?"* Options: native nodes first (recommended) / build the
+  shared script file / one engine component only. → The island is rebuilt toward native nodes and logic components as
+  **its own template task**, the four product gaps that blocked it are fixed (translation via ISL-007's add-on, String
+  Format's repeated placeholder, an "in list" filter, rows shared app-wide by id), and the shared script file is decided
+  afterwards for what is left. ISL-005 itself does not build its §5 now.
+- **ISL-009 ruling 1 — ✅ Ruled: "A data-* list."** Asked as *"…tests and AI agents find things on screen by their CSS
+  class names, because a node cannot carry a name just for tests… Should every visual node be able to carry data-*
+  attributes (e.g. data-testid="plot-card") that no stylesheet needs?"* Options: a data-* list (recommended) / one Test
+  ID field / not now. → §5 ruling 1 (b): name/value rows, `data-*` names only, values wirable, in the server-rendered HTML.
+
 Each task's §5 has the full question, the options and the trade-offs. Ask in plain words, one decision
 per question, and only when the task is next to build. This table is the index, with the recommendation in brackets.
 
@@ -307,7 +322,7 @@ job each.
 | track | built | of |
 |---|---|---|
 | A | **2** (ISL-001 ✅ s3, ISL-002 ✅ s3) | 4 |
-| B | 0 | 6 |
+| B | 0 (ISL-009 🟢 scroll half built s5; ISL-005 ruled "Native nodes first" s5) | 6 |
 | C | **2** (ISL-011 ✅ s4, ISL-014 ✅ s4) | 5 |
-| D | 0 (ISL-022 🟢 built, AC6 run once — inconclusive; ISL-018 🟡 built, one case open) | 7 |
+| D | 0 (ISL-022 🟢 built, AC6 run once — inconclusive; ISL-018 🟡 built, one case open; ISL-019 🟢 built s5, AC6/AC7 open) | 7 |
 | E | 0 (ISL-025 🟡 W1–W3, W13, W21 removed) | 3 |
