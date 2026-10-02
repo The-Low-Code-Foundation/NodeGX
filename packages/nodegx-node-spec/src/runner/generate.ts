@@ -28,7 +28,7 @@ import type { Step } from '../adapter';
 import type { AnyNodeSpec, InputDecl } from '../spec';
 import { isSignalInput } from '../spec';
 import type { RegistryScript } from '../registry';
-import type { Answer, PopupScript, RouterScript, StackScript, ViewportScript, WorldScript } from '../world';
+import type { Answer, BackendScript, PopupScript, RouterScript, StackScript, ViewportScript, WorldScript } from '../world';
 import { mulberry32, sequenceSeed, type Rng } from './random';
 import type { Reach } from './reach';
 
@@ -80,7 +80,9 @@ export const DEFAULT_WORLD_POOL = Object.freeze({
   // NSP-015 s19: no Router registered (every navigate queued, no page built)
   routers: Object.freeze([{}] as ReadonlyArray<RouterScript>),
   // NSP-015 s20: a host and no popup components (every show fails to build), nothing the person does
-  popups: Object.freeze([{}] as ReadonlyArray<PopupScript>)
+  popups: Object.freeze([{}] as ReadonlyArray<PopupScript>),
+  // NSP-014 s21: one backend, `main`, that answers every call at once with nothing
+  backends: Object.freeze([{ answers: [{ answer: { ok: null } }] }] as ReadonlyArray<BackendScript>)
 });
 
 export interface GenerateOptions {
@@ -235,6 +237,8 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
     const popup = rng.pick(pool.popups ?? DEFAULT_WORLD_POOL.popups);
     if (Object.keys(popup).length > 0) world.popup = popup;
   }
+  // NSP-014 s21 — BACKEND: one of the pool's (the default pool: `main`, answering everything at once)
+  if (needs.includes('backend')) world.backend = rng.pick(pool.backends ?? DEFAULT_WORLD_POOL.backends);
   return { seed, params, steps, world };
 }
 

@@ -15,7 +15,7 @@
  *   And the world's own rules: the timer delay rule, the wire forms, the delivery order.
  */
 
-import { Clock, DEFAULT_WORLD_POOL, generateSequence, installWorld, interpreterAdapter, normaliseRequest, play, run, runConformance, specs, timerDelay, toDelivery, validateTrace, World, worldFetch, defineNode, type AnyNodeSpec, type TraceEvent } from '../src';
+import { backendEvent, Clock, DEFAULT_WORLD_POOL, generateSequence, installWorld, interpreterAdapter, normaliseRequest, play, run, runConformance, specs, timerDelay, toDelivery, validateTrace, World, worldFetch, defineNode, type AnyNodeSpec, type TraceEvent } from '../src';
 import { Delay, HttpRequest, Uuid } from '../src/nodes';
 
 const WORLD_NODES = ['Timer', 'net.noodl.UUID', 'net.noodl.HTTP'];
@@ -277,5 +277,62 @@ describe('the world\'s own rules', () => {
     // afterwards a mount gets a fresh default world again (seed 1)
     const later = await play(a, 'net.noodl.UUID', {}, ['settle']);
     expect(later).toEqual(run(Uuid as unknown as AnyNodeSpec, {}, ['settle']));
+  });
+});
+
+describe('BACKEND (NSP-014 s21, R9) — the backends a record node asks, at the operation, never the wire', () => {
+  test('which backend: falsy and `_active_` are the active (first) one; an id the project has is that one; anything else is none', () => {
+    const w = new World({ backend: { backends: ['main', 'other'] } });
+    expect([undefined, null, '', 0, false, '_active_'].map((v) => w.backend.resolve(v))).toEqual(Array(6).fill('main'));
+    expect(w.backend.resolve('other')).toBe('other');
+    expect([[], 'nope', 'Main', {}, 1].map((v) => w.backend.resolve(v))).toEqual(Array(5).fill(undefined));
+    // no script: one backend, `main`
+    expect(new World().backend.ids).toEqual(['main']);
+    expect(() => new World({ backend: { backends: [] } })).toThrow(/at least one backend/);
+  });
+
+  test('a call: recorded as handed (callbacks left out, canonical); first match answers; `null` is no message; `after` waits on the clock; `never` never lands', () => {
+    const w = new World({
+      backend: {
+        backends: ['main', 'other'],
+        answers: [
+          { match: { backend: 'other' }, answer: { error: null } },
+          { match: { op: 'delete', collection: 'Late' }, answer: { ok: null }, after: 50 },
+          { match: { collection: 'Silent' }, answer: { never: true } },
+          { match: { op: 'delete' }, answer: { ok: { id: 'x' } } }
+        ]
+      }
+    });
+    const got: unknown[] = [];
+    const seen: unknown[] = [];
+    w.backend.onCall((c) => seen.push(c.op + ' ' + c.backend));
+    const call = (backend: string, collection: string) => w.backend.issue({ op: 'delete', backend, args: { collection, objectId: 'r1', success: () => undefined } }, (d) => got.push([collection, d]));
+    call('main', 'Lesson');
+    call('other', 'Lesson');
+    call('main', 'Late');
+    call('main', 'Silent');
+    expect(got).toEqual([
+      ['Lesson', { ok: { id: 'x' } }],
+      ['Lesson', { error: undefined }]
+    ]);
+    w.clock.advance(49);
+    expect(got).toHaveLength(2);
+    w.clock.advance(1);
+    expect(got[2]).toEqual(['Late', { ok: null }]);
+    w.clock.advance(100000);
+    expect(got).toHaveLength(3);
+    expect(seen).toEqual(['delete main', 'delete other', 'delete main', 'delete main']);
+    expect(w.violations).toEqual([]);
+    expect(backendEvent({ op: 'delete', backend: 'main', args: { collection: 'Lesson', objectId: 'r1', success: () => undefined, error: () => undefined } })).toEqual({ t: 'backend', op: 'delete', backend: 'main', args: { collection: 'Lesson', objectId: 'r1' } });
+    expect(validateTrace([{ t: 'backend', op: 'delete', backend: 'main', args: { collection: 'Lesson', objectId: 'r1' } }])).toMatchObject({ ok: true });
+    expect(validateTrace([{ t: 'backend', op: 'delete', backend: 'main', args: [] }])).toMatchObject({ ok: false });
+  });
+
+  test('a call no rule answers is a VIOLATION, answered with an error so the play goes on', () => {
+    const w = new World({ backend: { answers: [{ match: { op: 'query' }, answer: { ok: [] } }] } });
+    const got: unknown[] = [];
+    w.backend.issue({ op: 'delete', backend: 'main', args: { collection: 'Lesson' } }, (d) => got.push(d));
+    expect(got).toEqual([{ error: 'the world has no answer for delete Lesson on main' }]);
+    expect(w.violations).toEqual(["delete Lesson on main: no rule in the world's script answers it"]);
   });
 });

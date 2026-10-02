@@ -62,7 +62,8 @@
  *     frame issued the request).
  * A handler's patch is applied like any reducer's; its `outcomes` settle `pending` invocations
  * (oldest first per port). Outcomes are recorded in the order they were REPORTED (trace.ts).
- * A `request` effect is recorded as a `request` event in the frame it was issued in.
+ * A `request` effect is recorded as a `request` event in the frame it was issued in; a `backend` effect
+ * (NSP-014 s21) as a `backend` event beside it, its answer delivered to `spec.world.backend` like a response.
  *
  * THE REGISTRY (NSP-012, registry.ts). Reducers reach it through `world.registry` and WRITE to it
  * directly; a write notifies every OTHER instance watching the entry (`world.watch`) synchronously
@@ -85,13 +86,13 @@ import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
 import { isRegistryEntry } from './registry';
-import type { AnyNodeSpec, ChangeEvent, Outcome, InputDecl, ReducerOutcome, SignalOutputDecl, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
+import type { AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, ReducerOutcome, SignalOutputDecl, SpecBackendCall, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
-import { installTimeZone, locationEvent, openReturnsWindow, pushTarget, World, type Delivery, type LocationCall, type PopupCall, type PopupEvent } from './world';
+import { backendEvent, installTimeZone, locationEvent, openReturnsWindow, pushTarget, World, type Delivery, type LocationCall, type PopupCall, type PopupEvent } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
-type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'resize' } | { kind: 'page'; params: Readonly<Record<string, unknown>> } | { kind: 'popup'; event: PopupEvent };
+type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'backend'; answer: BackendAnswerEvent } | { kind: 'resize' } | { kind: 'page'; params: Readonly<Record<string, unknown>> } | { kind: 'popup'; event: PopupEvent };
 
 interface OutcomeSlot {
   port: string;
@@ -237,7 +238,8 @@ function viewOf(inst: Instance): WorldView {
     backAnswer: (ahead) => world.stack.backAnswer(ahead ?? 0),
     routeAnswer: (router, target, openInNewTab) => world.router.answer(router, target, openInNewTab),
     popupAnswer: (target) => world.popup.answer(target),
-    popupsInside: () => world.popup.inside
+    popupsInside: () => world.popup.inside,
+    backendFor: (backendId) => world.backend.resolve(backendId)
   };
 }
 
@@ -449,6 +451,7 @@ interface PatchLike {
   back?: ReadonlyArray<{ action: unknown; results: unknown }>;
   route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
   popup?: PopupCall;
+  backend?: SpecBackendCall;
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -569,6 +572,15 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     const worldId = inst.requests.get(id);
     if (worldId !== undefined) world.network.abort(worldId);
   }
+  // BACKEND (world.ts, NSP-014 s21): the call recorded as handed, in the request group; the answer lands in the inbox
+  if (patch.backend) {
+    if (!spec.world?.backend) throw new SpecError(`${spec.type}.${port}: called a backend but the spec has no world.backend handler`);
+    const c = patch.backend;
+    if (typeof c.id !== 'string') throw new SpecError(`${spec.type}.${port}: a backend call needs an id`);
+    const call = { op: c.op, backend: c.backend, args: c.args };
+    world.backend.issue(call, (d) => inst.inbox.push({ kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent }));
+    inst.pending.requests.push(backendEvent(call));
+  }
   // LOCATION (world.ts): only with a window — a spec reads `viewport()` first, as a node checks `typeof window`
   if ((patch.open || patch.push || patch.dispatch !== undefined) && !world.location) {
     throw new SpecError(`${spec.type}.${port}: used the location in a play with no window`);
@@ -655,6 +667,10 @@ function handleInbound(inst: Instance, item: Inbound): void {
     name = 'world.popup';
     if (!spec.world?.popup) throw new SpecError(`${spec.type}: the person did something to a popup and the spec has no world.popup handler`);
     patch = asWriter(inst, () => spec.world!.popup!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'backend') {
+    name = 'world.backend';
+    if (!spec.world?.backend) throw new SpecError(`${spec.type}: a backend answered and the spec has no world.backend handler`);
+    patch = asWriter(inst, () => spec.world!.backend!(inst.state as never, inst.inputs as never, item.answer, view));
   } else if (item.kind === 'page') {
     name = 'world.page';
     if (!spec.world?.page) throw new SpecError(`${spec.type}: a Router handed its page params and the spec has no world.page handler`);

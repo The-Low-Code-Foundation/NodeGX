@@ -3,8 +3,8 @@
  * like BRG-003's — jest wraps it, the ledger (NSP-009) reads it, and it never declares a test.
  *
  * What it does, in order:
- *   0. refuses a spec whose declared `needs` the runner cannot supply on THIS target: `backend`
- *      has no seam yet (NSP-014), and a target without `install` cannot take a world (NSP-007) —
+ *   0. refuses a spec whose declared `needs` the runner cannot supply on THIS target: a target
+ *      without `install` cannot take a world (NSP-007; `backend` has had its seam since NSP-014 s21) —
  *      running such a node flaky would grade nothing (NSP-003 §4). A spec with `needs` is
  *      otherwise played with ONE WORLD PER PLAY, built from the scenario's or the sequence's
  *      script, the same script for the reference and for the target; a play in which the node
@@ -216,11 +216,6 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   if (reach) report.reach = reach;
 
   // 0. the world this target cannot be handed
-  if (spec.needs && spec.needs.includes('backend')) {
-    report.refused = `${spec.type} needs a backend; the world has no backend seam until NSP-014`;
-    report.timeMs = Date.now() - started;
-    return report;
-  }
   if (spec.needs && spec.needs.length > 0 && !target.install) {
     report.refused = `${spec.type} needs ${spec.needs.join(', ')} and ${target.name} has no install(): it cannot be pointed at a scripted world`;
     report.timeMs = Date.now() - started;

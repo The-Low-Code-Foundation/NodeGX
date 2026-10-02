@@ -184,7 +184,9 @@ wires a string sees the number; whether that is a row is a taste question, not a
 
 **Not built, named:** the BACKEND seam (records, users, files, cloud functions — §2's fourth part):
 the runner still refuses `needs: ['backend']`; NSP-014 builds it on the request seam at the HTTP
-level. **Derived OUTPUTS** are not a shape the format has (HTTP's response mapping `out-<name>`,
+level. **→ Built by NSP-014 s21 (2026-10-02), and NOT at the HTTP level: R9 (Richard, "the request, not
+the wire") put the seam at the backend contract's OPERATION — world.ts BACKEND, NSP-014 §6.1. §2's "requests are recorded at
+the HTTP level" still holds for the network seam; a record node's trace carries `backend` events instead.** **Derived OUTPUTS** are not a shape the format has (HTTP's response mapping `out-<name>`,
 Query Records' fields) — NSP-014 needs them first. `conditional` (FED-004) waits for a validator
 store on the world. A `drop-after` / `drop-abort` mutant (a dropped timeout timer shows only in a
 sequence that waits past it with an answer that never comes) — the runner's next hole.

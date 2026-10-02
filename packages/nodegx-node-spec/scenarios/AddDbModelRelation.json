@@ -1,0 +1,827 @@
+[
+  {
+    "name": "nothing set: the press joins the batch; at the frame end, No class specified",
+    "because": "dbmodelnode-addrelation.ts :113-123 (no check at the press), :54-55",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "a blank Class passes (the check is `=== undefined`): the next check fails — No relation property specified",
+    "because": "dbmodelnode-addrelation.ts :54-57",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": ""
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "Class and Relation, no Target Record Id",
+    "because": "dbmodelnode-addrelation.ts :58-59",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "Class, Relation, Target, no Id",
+    "because": "dbmodelnode-addrelation.ts :60-61",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "a Target Record never loaded from a backend has no class: the sentence names it",
+    "because": "dbmodelnode-addrelation.ts :62-89, :106-111",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "r2"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "a null Target passes the undefined check and names the record `null`",
+    "because": "dbmodelnode-addrelation.ts :58, :86",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": null
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "all set, the Target loaded: ONE addRelation with its class; Done when it answers",
+    "because": "dbmodelnode-addrelation.ts :146-164; world.ts BACKEND",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "the answer comes later: Done in the advance that lands it",
+    "because": "dbmodelnode-addrelation.ts :158-164",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 99
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            },
+            "after": 100
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "the backend refuses: Error is its message, then Failure",
+    "because": "dbmodelnode-addrelation.ts :166-168",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Relation not found"
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "refused with no message: Error is `Failed to add relation.`",
+    "because": "dbmodelnode-addrelation.ts :167",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": null
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "a Backend the project lacks: the not-configured sentence; no call",
+    "because": "dbmodelcrudbase.ts :283-301",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "a Backend the project has: the call goes there",
+    "because": "dbmodelcrudbase.ts :288",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ],
+        "backends": [
+          "main",
+          "other"
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "two presses in one frame: ONE call, Done for each",
+    "because": "dbmodelnode-addrelation.ts :113-122",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "a failure before the call settles every press of the batch",
+    "because": "dbmodelnode-addrelation.ts :126-130",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "Id Source From repeater, outside one: the record is unbound — the no-record sentence",
+    "because": "dbmodelcrudbase.ts :520, :579-583; dbmodelnode-addrelation.ts :60-61",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "Error is kept after a later success",
+    "because": "dbmodelcrudbase.ts :166",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Article"
+            },
+            "answer": {
+              "error": "Forbidden"
+            }
+          },
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "From repeater unbinds at ITS frame end; an Id written in a later frame still binds, and the call goes out",
+    "because": "dbmodelcrudbase.ts :520, :579-583 (the re-bind is one frame's job), :548-553 (an Id write binds whatever the Id Source)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  },
+  {
+    "name": "Repeater Component written under From repeater re-binds: an Id written before it is unbound at the frame end",
+    "because": "dbmodelcrudbase.ts :532-538 — the setter re-resolves in `foreach` mode only (a hand kill: seed 13's sequences killed this mutant, seed 20728's did not)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Article"
+      },
+      {
+        "set": "relationProperty",
+        "value": "tags"
+      },
+      {
+        "set": "targetId",
+        "value": "t1"
+      },
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "repeaterComponent",
+        "value": "Row"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "classes": {
+          "t1": "Tag"
+        }
+      }
+    }
+  }
+]

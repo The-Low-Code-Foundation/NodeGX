@@ -110,6 +110,15 @@
  *     (`globalStoreManager`, `stateHistoryManager`, `actionRegistry`) are reset at `install` like
  *     the registry tables, and the history manager's clock becomes the world's — one play, one
  *     store, one history, one allow-list.
+ *   - **the backends** (NSP-014 s21, world.ts BACKEND, R9): the record nodes' REAL `CloudStore` and the REAL
+ *     resolution (`CloudStore.forBackend` → resolveBackend.pure.ts) — the project's `backendServices` are the
+ *     script's ids, converged (`version: 2`, the first active), each typed `directus` so it resolves to the REST
+ *     adapter and takes the NEUTRAL filter, and no `cloudservices` endpoint (the legacy store is not a world the
+ *     seam plays). Only the WIRE is stood in: `RestDataAdapter`'s operation methods (`BACKEND_OPS`) become the
+ *     world's — the call recorded as handed (`handle.id`, the options without callbacks), the scripted answer
+ *     delivered a microtask after its moment (an adapter's callbacks run from a promise), and after a success
+ *     the contract's event emitted as the adapter emits it (RestDataAdapter.ts :1216-1219). The per-backend
+ *     stores are dropped at `install` (`CloudStore.invalidateBackends`): they are process-wide.
  */
 
 import { AsyncLocalStorage } from 'async_hooks';
@@ -117,9 +126,9 @@ import { AsyncLocalStorage } from 'async_hooks';
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
-import type { ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
+import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
-import { canonicalise, installWorld, locationEvent, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
+import { backendEvent, canonicalise, installWorld, locationEvent, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -264,6 +273,72 @@ const GROUP_STAND_IN = NodeDefinition.defineNode({
   }
 } as never);
 
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { RestDataAdapter } = require('../../src/api/backends/RestDataAdapter') as { RestDataAdapter: { prototype: Record<string, unknown> } };
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const CloudStore = require('../../src/api/cloudstore') as { invalidateBackends(scope?: unknown): void };
+
+/** What a backend operation's options carry back (`@noodl/backend-contract` `Callbacks`). */
+interface BackendOptions extends Record<string, unknown> {
+  success: (...args: unknown[]) => void;
+  error: (message?: string) => void;
+}
+
+/**
+ * The operations the world plays (world.ts BACKEND), each with what the REST adapter does on success: the
+ * success callback, then the contract's event (RestDataAdapter.ts). Grows with NSP-014's batch, one operation
+ * at a time, each read from the adapter before it is added.
+ */
+const BACKEND_OPS: Readonly<Record<string, (o: BackendOptions, ok: unknown, emit: (e: Record<string, unknown>) => void) => void>> = {
+  // RestDataAdapter.ts :1202-1222 — `success()` with nothing, then `delete { objectId, collection }`
+  delete: (o, _ok, emit) => {
+    o.success();
+    emit({ type: 'delete', objectId: o.objectId, collection: o.collection });
+  },
+  // RestDataAdapter.ts :1584-1597 `relationChanged` — `success(record)`, then `save { objectId, object, collection }`
+  addRelation: (o, ok, emit) => {
+    o.success(ok);
+    emit({ type: 'save', objectId: o.objectId, object: ok, collection: o.collection });
+  },
+  removeRelation: (o, ok, emit) => {
+    o.success(ok);
+    emit({ type: 'save', objectId: o.objectId, object: ok, collection: o.collection });
+  }
+};
+
+/**
+ * BACKEND (world.ts, NSP-014 s21, R9) for one play: the project's backends are the script's (converged
+ * `backendServices`, the first active, each `directus` so it resolves to the REST adapter; no `cloudservices`
+ * endpoint), the per-backend stores dropped, and the REST adapter's operations the world's. Returns the undo.
+ */
+function installBackend(w: World, graphModel: { getMetaData(k: string): unknown; setMetaData(k: string, v: unknown): void }, record: (c: BackendCall) => void): () => void {
+  w.backend.onCall(record);
+  const savedMeta = { cloudservices: graphModel.getMetaData('cloudservices'), backendServices: graphModel.getMetaData('backendServices') };
+  graphModel.setMetaData('cloudservices', undefined);
+  graphModel.setMetaData('backendServices', {
+    version: 2,
+    activeBackendId: w.backend.ids[0],
+    backends: w.backend.ids.map((id) => ({ id, name: id, type: 'directus', url: `https://${id}.backend.example` }))
+  });
+  CloudStore.invalidateBackends();
+  const proto = RestDataAdapter.prototype;
+  const saved: Record<string, unknown> = {};
+  for (const [op, onSuccess] of Object.entries(BACKEND_OPS)) {
+    saved[op] = proto[op];
+    proto[op] = function (this: { emitAdapterEvent(e: Record<string, unknown>): void }, handle: { id: string }, options: BackendOptions) {
+      w.backend.issue({ op, backend: handle.id, args: options }, (d) => {
+        void Promise.resolve().then(() => ('ok' in d ? onSuccess(options, d.ok, (e) => this.emitAdapterEvent(e)) : options.error(d.error)));
+      });
+    };
+  }
+  return () => {
+    for (const [op, fn] of Object.entries(saved)) proto[op] = fn;
+    CloudStore.invalidateBackends();
+    graphModel.setMetaData('cloudservices', savedMeta.cloudservices);
+    graphModel.setMetaData('backendServices', savedMeta.backendServices);
+  };
+}
+
 /** What a stack's `back` returns to a Pop Component Stack (navigation-stack.tsx `StackBackResult`) for the world's answer. */
 function backResult(a: StackAnswer): unknown {
   if (a === 'done') return { ok: true };
@@ -292,6 +367,8 @@ function resetRegistry(world: World): void {
     const c = Collection.get(name);
     for (const id of members) c.add(Model.get(id));
   }
+  // NSP-014 s21 — the class a record was loaded with (cloudstore.js `_fromJSON`)
+  for (const [id, cls] of Object.entries(script.classes ?? {})) (Model.get(id) as unknown as { _class: string })._class = cls;
 }
 
 /**
@@ -611,6 +688,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const event: TraceEvent = { t: 'request', method: canonicalise(record.method), url: record.url, headers: { ...record.headers } };
     if (record.body !== undefined) event.body = canonicalise(record.body);
     s.frame.requests.push(event);
+  }
+
+  /** A BACKEND call the world saw (world.ts, NSP-014 s21), in the request group, attributed as a request is. */
+  function recordBackend(call: BackendCall): void {
+    const s = updating.getStore() ?? (states.size === 1 ? [...states.values()][0] : undefined);
+    if (!s) throw new Error(`runtime: a backend call (${call.op}) was made outside any node's update, and more than one node is mounted — it cannot be attributed`);
+    s.frame.requests.push(backendEvent(call));
   }
 
   /** A LOCATION call the world saw (an open, a push, a dispatch), as the trace records it, attributed as a request is. */
@@ -1043,6 +1127,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       const restoreRouters = installRouters(w, recordStack);
       // POPUP (world.ts, NSP-015 s20) — the REAL `showPopup`, its host, container, frame and root scope stood in
       const restorePopups = installPopups(w);
+      // BACKEND (world.ts, NSP-014 s21) — the REAL CloudStore and resolution; only the REST adapter's wire is the world's
+      const restoreBackend = installBackend(w, (rt as unknown as { graphModel: { getMetaData(k: string): unknown; setMetaData(k: string, v: unknown): void } }).graphModel, recordBackend);
       const installed = installWorld(w);
       // the three process-wide managers behind the store, history and action nodes (NSP-012 T4): one play, one of each
       globalStoreManager.reset({ clearState: true });
@@ -1068,6 +1154,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         restoreStacks();
         restoreRouters();
         restorePopups();
+        restoreBackend();
         installed.restore();
         stateHistoryManager.setClock(null);
         world = undefined;

@@ -205,6 +205,35 @@
  *           (:1215, :1247), so the popup that opened it is never on its walk — `popupParent` is written (:1258)
  *           and read by nothing.
  *
+ *   BACKEND. (NSP-014 s21; R9, ruled 2026-10-02: "the request, not the wire") The app's backends, as the record
+ *           nodes ask them. A record node hands a backend an OPERATION in the backend contract's own words
+ *           (`@noodl/backend-contract` `IDataAdapter`: `delete({ collection, objectId })`, `query({ collection, where,
+ *           sort, limit, … })`, …) and an adapter turns it into ONE backend's HTTP (NodeGX's own server over its legacy
+ *           `/classes/<Name>` wire; Directus, PocketBase, Supabase, PostgREST over REST). R9 put the seam at the
+ *           operation, so one spec holds for every backend; the HTTP is the adapter's, graded by the contract's own
+ *           conformance suite (`nodegx-backend-contract/conformance/`), never here. The world plays the backends as
+ *           NETWORK plays a server:
+ *             WHICH BACKEND — the script's `backends`, ids in the project's order, the FIRST the active one (absent:
+ *               `['main']`; never none). A node's Backend input resolves as the runtime resolves it
+ *               (resolveBackend.pure.ts `resolveBackendTarget`, :232-249): falsy or `_active_` is the active one; an
+ *               id the project has (`===`) is that one; anything else is NO backend — `backendFor` answers `undefined`,
+ *               and the node says so and makes no call. Every backend in a play takes the NEUTRAL filter (R9) — the
+ *               project with no backend configured at all (the legacy store, `CloudStore.forScope`) is not a world
+ *               this seam plays.
+ *             A CALL — recorded AS HANDED, a `backend` trace event in the frame it is made, in the request group
+ *               (after the outcomes): `{ op, backend, args }`, `backend` the id it went to, `args` the options the node
+ *               handed with its callbacks left out, canonical at the call.
+ *             THE ANSWER — the first of the script's `answers` whose `match` fits (`op`, `collection` — `args.collection`
+ *               — and `backend`, each equal; absent fits all): `{ ok }` — it succeeded, `ok` what the success callback
+ *               is handed (a record, rows; nothing for a delete); `{ error }` — it failed with that message (`null`: the
+ *               adapter gave none); `{ never }` — no answer comes. `after` > 0 delays it on the clock; absent or 0, it
+ *               lands at once — the settle whose frame made the call sees it, as a network answer lands. A call no
+ *               rule answers is a VIOLATION: answered `{ error }` so the play goes on, and the runner fails the run.
+ *               An answer lands as a promise resolution does (a microtask after its moment).
+ *           After a write succeeds the adapter tells the store's listeners (the contract's event surface — `delete`
+ *           `{ objectId, collection }`, …), AFTER the success callback (RestDataAdapter.ts :1216-1219): what a Query
+ *           Records watching the store hears. No single-node trace reads it; a graph will.
+ *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
  *   `now()` = `world.clock.now()` · `random()` / `bytes(n)` / `uuid()` = `world.random.next()` /
@@ -217,10 +246,8 @@
  *   play's world is thrown away after the play, so nothing graded today depends on it, but a target
  *   that keeps a world across plays would hear a disposed node. The clock is ONE per world:
  *   `advance(h, ms)` moves it for every instance and records the `advance` event on `h`'s trace
- *   only (a graph's trace is assembled per node, runner/graph.ts).
- *
- * Backend (records, users, files, cloud functions) is the fifth seam NSP-007 names; it arrives
- * with NSP-014, reusing the request seam at the HTTP level (README §8, NSP-007 §2).
+ *   only (a graph's trace is assembled per node, runner/graph.ts). (s21) `backendFor(id)` =
+ *   `world.backend.resolve(id)` · a `backend` effect = `world.backend.issue(call, deliver)`.
  */
 
 import * as nodeCrypto from 'crypto';
@@ -256,7 +283,38 @@ export interface WorldScript {
   router?: RouterScript;
   /** NSP-015 s20: the popups (POPUP above). Absent: a host, no components (every show fails to build), nothing the person does, a Close Popup inside no popup. */
   popup?: PopupScript;
+  /** NSP-014 s21: the backends (BACKEND above). Absent: one, `main`, that no rule answers — every call a violation. */
+  backend?: BackendScript;
 }
+
+/** BACKEND above: the project's backends (the first the active one) and how they answer. */
+export interface BackendScript {
+  /** The backend ids the project has, in order; the first is the active one. Absent: `['main']`. Never empty. */
+  backends?: readonly string[];
+  /** How the backends answer, first match wins. */
+  answers?: readonly BackendRule[];
+}
+
+/** BACKEND above: one answer rule — first match wins; absent `match` fits every call. */
+export interface BackendRule {
+  match?: { op?: string; collection?: string; backend?: string };
+  answer: BackendAnswer;
+  /** Milliseconds on the clock before the answer lands; absent or 0 lands at once. */
+  after?: number;
+}
+
+/** What a backend answers an operation (BACKEND above). */
+export type BackendAnswer = { ok: unknown } | { error: string | null } | { never: true };
+
+/** One backend call, as handed (BACKEND above). */
+export interface BackendCall {
+  op: string;
+  backend: string;
+  args: Readonly<Record<string, unknown>>;
+}
+
+/** What lands for a call: what the success callback is handed, or the failure's message (`undefined`: none). */
+export type BackendDelivery = { ok: unknown } | { error: string | undefined };
 
 /** POPUP above: the host, the components a Target can build, what the person does, where a Close Popup sits. */
 export interface PopupScript {
@@ -603,6 +661,73 @@ export function toDelivery(answer: Answer): Delivery {
     }
   }
   return { status: answer.status, statusText: answer.statusText ?? '', headers, body };
+}
+
+// ------------------------------------------------------------------------------------------------
+// the backends (BACKEND above)
+
+/** A `backend` trace event for a call (BACKEND above): `args` canonical, its callbacks left out. */
+export function backendEvent(c: BackendCall): TraceEvent {
+  const args: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(c.args)) if (typeof v !== 'function') args[k] = v;
+  return { t: 'backend', op: c.op, backend: c.backend, args: canonicalise(args) } as TraceEvent;
+}
+
+export class WorldBackend {
+  /** The project's backend ids, the first the active one. */
+  readonly ids: readonly string[];
+  /** Every call made, in order. */
+  readonly calls: BackendCall[] = [];
+  /** Calls no rule answered: the runner fails a run that has any. */
+  readonly violations: string[] = [];
+  private listeners: Array<(c: BackendCall) => void> = [];
+
+  constructor(
+    private readonly clock: Clock,
+    readonly script: BackendScript
+  ) {
+    const ids = script.backends ?? ['main'];
+    if (ids.length === 0) throw new Error('world: a backend script names at least one backend — the project with none is the legacy store, not a world this seam plays');
+    this.ids = ids;
+  }
+
+  /** Called with every call as it is made — how a target attributes it to the node that made it. */
+  onCall(listener: (c: BackendCall) => void): void {
+    this.listeners.push(listener);
+  }
+
+  /** The backend a node's Backend input names (resolveBackend.pure.ts :232-249): falsy or `_active_` is the active one; an id the project has is that one; anything else is none. */
+  resolve(backendId: unknown): string | undefined {
+    if (!backendId || backendId === '_active_') return this.ids[0];
+    return this.ids.find((id) => id === backendId);
+  }
+
+  /** Makes a call: records it, finds its rule, schedules the landing. `deliver` is called at the answer's moment (a target hops a microtask from there). */
+  issue(call: BackendCall, deliver: (d: BackendDelivery) => void): void {
+    const recorded: BackendCall = { op: call.op, backend: call.backend, args: call.args };
+    this.calls.push(recorded);
+    for (const l of this.listeners) l(recorded);
+    const collection = (call.args as { collection?: unknown }).collection;
+    const rule = (this.script.answers ?? []).find((r) => {
+      const m = r.match;
+      if (!m) return true;
+      if (m.op !== undefined && m.op !== call.op) return false;
+      if (m.collection !== undefined && m.collection !== collection) return false;
+      if (m.backend !== undefined && m.backend !== call.backend) return false;
+      return true;
+    });
+    if (!rule) {
+      const what = `${call.op} ${String(collection)} on ${call.backend}`;
+      this.violations.push(`${what}: no rule in the world's script answers it`);
+      deliver({ error: `the world has no answer for ${what}` });
+      return;
+    }
+    const a = rule.answer;
+    if ('never' in a) return;
+    const d: BackendDelivery = 'ok' in a ? { ok: a.ok } : { error: a.error === null ? undefined : a.error };
+    if (rule.after !== undefined && rule.after > 0) this.clock.schedule(rule.after, () => deliver(d));
+    else deliver(d);
+  }
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -1000,6 +1125,8 @@ export class World {
   readonly router: WorldRouter;
   /** The popups (POPUP above) — always: a play with no script has a host and no components. */
   readonly popup: WorldPopup;
+  /** The backends (BACKEND above) — always: a play with no script has one, `main`, that answers nothing. */
+  readonly backend: WorldBackend;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -1013,11 +1140,12 @@ export class World {
     this.stack = new WorldStack(script.stack ?? {});
     this.router = new WorldRouter(script.router ?? {});
     this.popup = new WorldPopup(script.popup ?? {});
+    this.backend = new WorldBackend(this.clock, script.backend ?? {});
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */
   get violations(): string[] {
-    return [...this.network.violations];
+    return [...this.network.violations, ...this.backend.violations];
   }
 }
 

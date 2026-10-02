@@ -67,6 +67,12 @@ import type { Random } from './world';
 export interface RegistryScript {
   models?: Record<string, Record<string, unknown>>;
   collections?: Record<string, readonly string[]>;
+  /**
+   * NSP-014 s21: the class a record was LOADED with — what `CloudStore._fromJSON` stamps on a record a Query Records or
+   * Record node read from a backend (`model._class = collectionName`, cloudstore.js :407-424). A record made by name has
+   * none. Seeded after `models`, on the record of that id (made if absent).
+   */
+  classes?: Record<string, string>;
 }
 
 /** The change a record notifies: one key. */
@@ -408,6 +414,7 @@ export class Registry implements RegistryView {
       const c = this.collection(name);
       for (const id of members) c.add(this.model(id));
     }
+    for (const [id, cls] of Object.entries(script?.classes ?? {})) (this.model(id) as unknown as { _class: string })._class = cls;
   }
 
   /** model.ts :297-311 — `_randomString(10)` over the world's `Math.random`. */

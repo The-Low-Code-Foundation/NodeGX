@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "$id": "https://nodegx.io/schemas/node-spec/trace/v1.json",
   "title": "NodeGX node trace, format version 1",
-  "description": "What a node did, in one form whichever implementation did it (phase 107, NSP-002). An ordered stream of stimulus events (set, in, settle, advance) and observation events (value, signal, outcome, request, open). Between two settles the observation events are grouped canonically: `value` events sorted by port name, then `signal` events in emission order, then `outcome` events in the order they were reported (NSP-007: an outcome the world settles — an answer landing, a timeout — is reported when it lands, which may be frames after its invocation), then `request` events in the order they were issued, then the LOCATION group — `open`, `history`, `dispatch`, `stack`, `route` and `popup` events — in the order they were made (NSP-015); a `value` is recorded only when it changed since the last settle. Every event MAY carry a `subject` (what it happened to): omitted in a one-node trace, a node id in a graph trace, and left open for app-level subjects such as `app:click`. `completed` is never recorded: every `outcome` event implies it. A `failure` outcome carries the implementation's error CODE in `error`, never its message. Values are in the canonical form src/canonical.ts defines (tagged `$num` / `$date` objects for what JSON cannot say, keys sorted). The world (NSP-007, src/world.ts): `advance` says the scripted clock moved by `ms`; `request` says the node handed the world a request — `method` as handed, `url` as handed, `headers` with lower-cased names, `body` the text that travelled or `{ \"$form\": [[name, value], …] }` for form data, absent when there was none. NSP-015: `open` says the node asked the browser to open a URL (`window.open(url, target, features)`), each canonical, as handed; s17 `history` and `dispatch` the push and the event it dispatched; s18 `stack` a request handed to a Component Stack (src/world.ts STACK); s19 `route` a navigate handed to the Routers (src/world.ts ROUTE); s20 `popup` a popup shown or closed (src/world.ts POPUP).",
+  "description": "What a node did, in one form whichever implementation did it (phase 107, NSP-002). An ordered stream of stimulus events (set, in, settle, advance) and observation events (value, signal, outcome, request, open). Between two settles the observation events are grouped canonically: `value` events sorted by port name, then `signal` events in emission order, then `outcome` events in the order they were reported (NSP-007: an outcome the world settles — an answer landing, a timeout — is reported when it lands, which may be frames after its invocation), then `request` and `backend` events, one group, in the order they were issued, then the LOCATION group — `open`, `history`, `dispatch`, `stack`, `route` and `popup` events — in the order they were made (NSP-015); a `value` is recorded only when it changed since the last settle. Every event MAY carry a `subject` (what it happened to): omitted in a one-node trace, a node id in a graph trace, and left open for app-level subjects such as `app:click`. `completed` is never recorded: every `outcome` event implies it. A `failure` outcome carries the implementation's error CODE in `error`, never its message. Values are in the canonical form src/canonical.ts defines (tagged `$num` / `$date` objects for what JSON cannot say, keys sorted). The world (NSP-007, src/world.ts): `advance` says the scripted clock moved by `ms`; `request` says the node handed the world a request — `method` as handed, `url` as handed, `headers` with lower-cased names, `body` the text that travelled or `{ \"$form\": [[name, value], …] }` for form data, absent when there was none. NSP-015: `open` says the node asked the browser to open a URL (`window.open(url, target, features)`), each canonical, as handed; s17 `history` and `dispatch` the push and the event it dispatched; s18 `stack` a request handed to a Component Stack (src/world.ts STACK); s19 `route` a navigate handed to the Routers (src/world.ts ROUTE); s20 `popup` a popup shown or closed (src/world.ts POPUP). NSP-014 s21: `backend` says the node handed a backend an operation in the backend contract's words (src/world.ts BACKEND) — `op`, `backend` the id it went to, `args` as handed, callbacks left out.",
   "type": "array",
   "items": { "$ref": "#/definitions/event" },
   "definitions": {
@@ -179,6 +179,18 @@
             "subject": { "$ref": "#/definitions/subject" }
           },
           "required": ["t", "op"],
+          "additionalProperties": false
+        },
+        {
+          "description": "observation (NSP-014 s21): the node handed a backend an operation (src/world.ts BACKEND; R9, the request not the wire) — `op` the backend contract's method (`delete`, `query`, …), `backend` the id of the backend it went to, `args` the options as handed with callbacks left out, canonical at the call. In the request group.",
+          "properties": {
+            "t": { "const": "backend" },
+            "op": { "type": "string", "minLength": 1 },
+            "backend": { "type": "string", "minLength": 1 },
+            "args": { "allOf": [{ "type": "object" }, { "$ref": "#/definitions/canonical" }] },
+            "subject": { "$ref": "#/definitions/subject" }
+          },
+          "required": ["t", "op", "backend", "args"],
           "additionalProperties": false
         }
       ]

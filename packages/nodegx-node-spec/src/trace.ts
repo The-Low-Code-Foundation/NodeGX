@@ -4,7 +4,8 @@
  * Inputs and outputs in one ordered stream; `settle` marks where the target drains its frame.
  * Between two settles the events are grouped canonically: `value` events SORTED BY PORT NAME
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
- * events in the order they were REPORTED, then `request` events in the order they were issued, then
+ * events in the order they were REPORTED, then `request` events and (s21) `backend` events, one group, in the order they
+ * were issued, then
  * the LOCATION events — `open`, `history`, `dispatch`, (s18) `stack`, (s19) `route` and (s20) `popup`, one group — in the order they were made
  * (NSP-015).
  * "Changed" is canonical inequality with the last value RECORDED for
@@ -27,7 +28,8 @@
  * history entry (`history.pushState(state, title, url)`: `op: 'push'`, `url` canonical); `dispatch`
  * — it dispatched an event on the window (`window.dispatchEvent(event)`: `event` is its type). s18 adds `stack` — it handed a
  * Component Stack a push, a replace or a pop (world.ts STACK); s19 `route` — it handed the Routers a navigate
- * (world.ts ROUTE). The world's answers are not events: they are scripted (world.ts), so what they were is
+ * (world.ts ROUTE). NSP-014 s21 adds `backend` — it handed a backend an operation in the backend contract's words
+ * (world.ts BACKEND, R9): `op`, `backend` the id it went to, `args` canonical, callbacks left out. The world's answers are not events: they are scripted (world.ts), so what they were is
  * known from the scenario, and what the node did with them is on the wire.
  * That grouping is a rule of the FORMAT, so that a runtime which
  * pulses a signal synchronously inside a setter and delivers the value at frame end (the
@@ -85,7 +87,13 @@ export type TraceEvent =
    * absent when not handed) or a `close` (the close handler a Close Popup resolved, called with `(action, results)`: `popup`
    * the name of the popup it closes, absent when unnamed; `action` absent when none; `results` canonical at the call).
    */
-  | (Base & { t: 'popup'; op: 'show' | 'close'; target?: unknown; params?: unknown; stackPolicy?: unknown; closeOnEscape?: unknown; modal?: unknown; accessibleName?: unknown; popup?: unknown; action?: unknown; results?: unknown });
+  | (Base & { t: 'popup'; op: 'show' | 'close'; target?: unknown; params?: unknown; stackPolicy?: unknown; closeOnEscape?: unknown; modal?: unknown; accessibleName?: unknown; popup?: unknown; action?: unknown; results?: unknown })
+  /**
+   * observation (NSP-014 s21): the node handed a backend an operation (world.ts BACKEND, R9) — `op` the contract's
+   * method name (`delete`, `query`, …), `backend` the id it went to, `args` the options as handed, callbacks left out,
+   * canonical at the call. In the request group.
+   */
+  | (Base & { t: 'backend'; op: string; backend: string; args: unknown });
 
 /** Trace-format version — must match the `/v1.json` in the schema's `$id` (tests/schema.test.ts). */
 export const TRACE_FORMAT_VERSION = 1;

@@ -1,106 +1,107 @@
 # P107 — next session
 
-**Written 2026-10-02 (end of s20).** Read the [README](README.md) §2–§7. NSP-015 is 14 of 14; its s20 record is
-[NSP-015 §6.1f](NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md), and the POPUP paragraph is in the header of
-[world.ts](../../../packages/nodegx-node-spec/src/world.ts).
+**Written 2026-10-02 (end of s21).** Read the [README](README.md) §2–§7. s21's record is [NSP-014 §6](NSP-014-BATCH-DATA-AND-CLOUD.md);
+the BACKEND rule is in the header of [world.ts](../../../packages/nodegx-node-spec/src/world.ts) (before "A TARGET'S VIEW").
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
-| NSP-000 the census | ✅ s1 | `3bd71e837` |
-| NSP-001 the spec + interpreter | ✅ s1 … s20; **s20: a patch's `popup` effect; `WorldView.popupAnswer`, `popupsInside`; the world handler `popup`; `WorldNeed` `popup`** | s1 … s20 |
-| NSP-002 traces + adapter + runtime target | ✅; **s20: the `popup` event in the LOCATION group; the runtime target keeps the REAL `NodeContext.showPopup` and stands in the host, the container `Group`, `requestAnimationFrame`, a fresh root scope per play, the project's components; T10, T11, T12 fixed (NSP-015 §6.1f)** | s2 … s20 |
-| NSP-003 the runner | ✅; **s20: a `popup` spec's sequences draw a popup world from the pool; the mutant runner wraps `world.popup`** | s2 … s20 |
+| NSP-000 the census | ✅ s1; **s21: the batch `NSP-022` added, 17 rows moved, regenerated** | `3bd71e837`, s21 |
+| NSP-001 the spec + interpreter | ✅ s1 … s21; **s21: a patch's `backend` effect, `world.backend` handler, `WorldView.backendFor`** | s1 … s21 |
+| NSP-002 traces + adapter + runtime target | ✅; **s21: the `backend` event (request group); the runtime target's `installBackend` — the REAL `CloudStore` + resolution, the project's `backendServices` = the script's ids, only `RestDataAdapter`'s operation methods stood in (`BACKEND_OPS`: delete, addRelation, removeRelation); the registry seeds `classes`** | s2 … s21 |
+| NSP-003 the runner | ✅; **s21: the `backend` refusal gone; a backend world drawn per sequence; mutants `world.backend`, `drop-backend` (shape key only when present — earlier shapes byte-identical)** | s2 … s21 |
 | NSP-004 the pilot five | ✅ s3 | `ef6f3b6e1` |
 | NSP-005 the export adapter | ✅ (s13); plays the latch nodes only | s13, s15 |
-| NSP-006 the stranger | ✅ rounds 1, 2, 3, 3b; s20 changed guarded format files additively — hashes refreshed (the diff named exactly schema JSON, spec.ts, trace.ts, world.ts), the three rounds green | `fec895706`, s20 |
-| NSP-007 the world | ✅; **s20: POPUP, the tenth seam**; AC1's export half ✗ | s13, s16 … s20 |
-| NSP-008 the graph | ✅ (s15 boundary + definitions); **s20: t12, the popup round trip (5 scenarios, 2 rows)** | s15, s20 |
+| NSP-006 the stranger | ✅ rounds 1, 2, 3, 3b; s21 changed guarded format files additively — hashes refreshed (the diff named exactly schema JSON, spec.ts, trace.ts, world.ts), the three rounds green | `fec895706`, s21 |
+| NSP-007 the world | ✅; **s21: BACKEND, the eleventh seam (not at the HTTP level — R9)**; AC1's export half ✗ | s13, s16 … s21 |
+| NSP-008 the graph | ✅ (s15, s20) — 60 / 60, re-read s21 | s15, s20 |
 | NSP-010 a change is a version | rows only (two holes, §4) | — |
 | NSP-011 / NSP-012 | as s15 | s15 |
 | NSP-013 the time batch | 🟡 24 / 24 conform. Left: AC2, the deep run for s11–s14 | s16 |
-| **NSP-015 navigation + components** | **🟡 14 of 14 conform** — s20: Show Popup, Close Popup. **Left: AC2 (export, P18)**; AC6 is the Router's (NSP-016) | s15 … s20 |
-| NSP-020 ports without a viewer | rows only; **s20: §6 lists the navigation family — own-params (Pop, Page Inputs, Close Popup) vs project (Push, Navigate, Show Popup)** | s20 |
-| NSP-009, NSP-014, NSP-016 … NSP-019, NSP-021 | — | — |
+| **NSP-014 records, users, files, HTTP** | **🟡 4 of 24 — s21: split (17 cloud-only → NSP-022), R9, BACKEND, Delete Record, Add / Remove Record Relation; row C33** | s8, s21 |
+| NSP-015 navigation + components | 🟡 14 of 14 conform. Left: AC2 (export, P18) | s15 … s20 |
+| NSP-020 ports without a viewer | rows only | s20 |
+| **NSP-022 the cloud-only nodes** | **📋 opened s21** (needs a second runtime target, `noodl-viewer-cloud`) | s21 |
+| NSP-009, NSP-016 … NSP-019, NSP-021 | — | — |
 
-**83 of 147 conform on the runtime (56.5%)** (T1 45/46 · T2 10/11 · T3 1/39 · **T4 27/27**; 0 exempt). Counted s20 from the
-63 specs × tiers.json (T1 45 · T2 9 · T3 1 · T4 8) + On App Error + the 19 graph-graded T4 nodes. **Graph 60 / 60 on the
-runtime**; known graph rows 7 (G1, C11–C14, C31, C32).
+**86 of 147 conform on the runtime (58.5%)** (T1 45/46 · T2 10/11 · **T3 4/39** · T4 27/27; 0 exempt). Counted s21 from the
+66 specs × tiers.json (T1 45 · T2 9 · T3 4 · T4 8) + On App Error + the 19 graph-graded T4 nodes. Graph 60 / 60.
 
 ## Commits this session (on `cline-dev`)
 
-One commit, s20: the POPUP seam, Show Popup, Close Popup, t12, rows C30–C32, a Navigate scenario, the docs, this handoff.
+One commit, s21: R9, the BACKEND seam, Delete Record, Add / Remove Record Relation, the NSP-014 / NSP-022 split, row C33 (+
+its ledger file), the docs, this handoff.
 
-## Gate readings (2026-10-02, s20, on the tree of the s20 commit; HEAD before it `68b1549f5`)
+## Gate readings (2026-10-02, s21, on the tree of the s21 commit; HEAD before it `8a98742cf`)
 
 | gate | reading |
 |---|---|
-| `packages/nodegx-node-spec`: `npx jest` (whole package) | **17 suites, 649 passed, 17 skipped, exit 0** (s19: 633) — the stranger rounds green on the refreshed hashes |
-| `packages/noodl-runtime`: `npx jest test/node-spec` | **3 suites, 154 passed, 63 skipped, exit 0** (s19: 147), seed 20728 |
-| `NSP_ONLY="NavigationShowPopup,NavigationClosePopup" … conformance.test.ts` (200) | **both CONFORM** — Show Popup 22 / 22, 200 / 200, 142 / 142 mutants; Close Popup 12 / 12, 200 / 200, 242 / 244 (2 declared equivalent) |
-| deep: `NSP_DEEP=10000` same two, `-t deep` — on the FINAL target (re-run after T12) | **both CONFORM, 10,000 / 10,000** — Show Popup 223 / 223 (known C6 50), Close Popup 242 / 244 (C6 48); 250 s at load ~2–3. The first deep run (before T12) read the same |
-| `NSP_SEED=20727` / `20728`, Navigate | at s19's seed 74 / 74 on this tree; at 20728 one survivor (an answer-only frame never followed by a settle) → a hand scenario added → 74 / 74, 23 / 23 |
-| `NSP_RECORD=1 … graph.test.ts -t popup…` | t12: 5 / 5 — 3 claims borne out, 2 rows known (C31, C32), recorded after the T12 fix |
-| `tsc --noEmit` on node-spec, runtime (runtime includes `test/`) | exit 0 · exit 0 |
-| `packages/noodl-runtime`: whole `npx jest` | NOT RUN (s16: 181 suites); s20 touched only `test/helpers/node-spec-target.ts` there |
-| `packages/nodegx-export` node-spec tests | NOT RUN (s17: 12 passed); s20 changed no export code |
+| `packages/nodegx-node-spec`: `npx jest` (whole package) | **18 suites, 673 passed, 17 skipped, exit 0** (s20: 17 suites, 649) — + `tests/batch-records.test.ts` (12), BACKEND in `world.test.ts` (3), the runner's backend test rewritten |
+| runtime: `NSP_ONLY="DeleteDbModelProperties,AddDbModelRelation,RemoveDbModelRelation" … conformance.test.ts` | **all three CONFORM**, seed 20728 — Delete 20 / 20, 200 / 200, 34 / 34; Add / Remove 18 / 18, 200 / 200, 36 / 36. Interpreter: every mutant killed on seeds 13, 20728–20731 |
+| runtime: `npx jest test/node-spec/runtime-target.test.ts test/node-spec/graph.test.ts` | **2 suites, 86 passed, exit 0** |
+| runtime: whole `npx jest test/node-spec`, FIRST try (load 12–17) | **not a clean reading** — 1,011 s vs the 600 s `beforeAll` budget, 65 tests failed on the hook timeout. Its log: 62 of 64 specs CONFORM; Stream Buffer + Text Accumulator never reported → re-read alone: both CONFORM. See below for the retry |
+| runtime: `npx jest test/node-spec/conformance.test.ts -t "NSP-004 / NSP-011 — every"`, SECOND try (load ~3–5) | **1 suite, 67 passed, 70 skipped, exit 0, 448 s — all 66 specs CONFORM at seed 20728, the known rows still fire.** The clean reading |
+| `tsc --noEmit` node-spec, runtime (`tsconfig.json`, includes `test/`) | exit 0 · exit 0 |
+| `node scripts/node-spec/census.js --check` | fresh — 147, 33 excluded, all tiered |
+| `packages/nodegx-export` node-spec tests, whole runtime `npx jest`, `test:main` | NOT RUN — s21 touched no export code; in the runtime only `test/helpers/node-spec-target.ts` |
 
-## What s20 settled (and where the handoff was wrong)
+## What s21 settled (and where the handoff was wrong)
 
-1. **The recommendation held: `showPopup` stays REAL.** Unlike STACK / ROUTE, the thing called is runtime code, so the slot
-   policy is GRADED; the world plays only the host, the project's components and the person (a close through the popup's
-   Close Popup, Escape). Ten probe questions answered before a spec line was written; every hand claim held on the first
-   run (Show Popup 22 / 22, Close Popup 12 / 12).
-2. **Three rows, all measured:** **C30** — a popup whose build fails keeps its slot (next Replace It reports Dismissed on
-   the failed node; Escape under it is dead); **C31** — a Close Popup can never close the outer popup by name (every popup
-   is built in the root scope; `popupParent` is read by nothing; the probe at its `close()` saw candidates `["Inner"]`);
-   **C32** — two Show Popups in one frame: the first reports Dismissed AND Done for a popup never opened. Ledger files
-   filed; plain-words questions in README §7.
-3. **Three holes in the runtime TARGET (not the app):** T10 no bundle map (a missing component's message was the
-   harness's TypeError); T11 a pulse on a port the node lacks was recorded; T12 popup calls attributed through the
-   opener's async context and a sole-subject fallback — now by the subject whose `update()` is on the stack.
-4. **A seed-dependent kill is not a kill.** Navigate's 74 / 74 at s19 depended on seed 20727's sequences; seed 20728 left
-   one. Hand scenarios must reach every frame-end branch AND settle after it.
-5. **The handoff was wrong in one place:** it said README §7 had C29's plain words. It did not; written at s20.
-6. Read in passing (not rows): a Target naming a node TYPE builds that node as a popup; a Show Popup inside a popup with
-   the default Replace It dismisses its own popup — as its description says (nesting needs Show On Top).
+1. **R9, ruled: the request, not the wire.** Measured first: one record node reaches NodeGX's own backend (a
+   Parse-SHAPED `/classes/<Name>` wire, `XMLHttpRequest`) or four REST backends (`fetch`, one URL shape each). Recording the
+   HTTP would have bound every record spec to one wire. My first wording said "Parse" and Richard corrected it — the server
+   is NodeGX's own (`packages/nodegx-backend`); the wire is merely Parse-shaped. **Say "NodeGX's own backend (its legacy
+   `/classes` wire)", never "Parse", to Richard.**
+2. **The handoff's "reuse the request seam at the HTTP level" (NSP-007 §5, world.ts' old footer) was overruled by R9** —
+   the seam is the backend contract's operation. The record node still computes a `/classes`-shaped `where` for the legacy
+   wire (`dbcollectionnode2.ts:882`); that translation is outside every record spec's reach — Query Records' spec must say so.
+3. **The design that worked:** keep the runtime's own `CloudStore` and backend resolution REAL (they are runtime code —
+   POPUP's rule), stand in only `RestDataAdapter`'s operation methods (`BACKEND_OPS`, one per operation, each READ from the
+   adapter: what it hands `success`, which event it emits after). The project's backends are `backendServices` v2, each
+   typed `directus` → the REST adapter → the neutral filter.
+4. **A seed-dependent kill, the second time (s20 then s21):** the relation pair's `repeaterComponent` mutant died at seed
+   13, lived at 20728. Rule now in the batch test: grade a new spec's mutants on TWO seeds; any mutant that lives on one gets
+   a hand scenario.
+5. **The full runtime suite cannot finish inside its 600 s `beforeAll` under a loaded box** (1,011 s at load 12–17). A
+   timed-out hook fails EVERY test after it with "Exceeded timeout … for a hook" — 65 reds that say nothing about the gates;
+   read the per-spec CONFORMS lines and re-read the ones that never reported. Consider splitting the beforeAll per spec.
+6. **Generated reach is thin for multi-precondition nodes:** a Record press reaches the backend only with a Class, an Id and
+   a resolvable Backend — 17–24 of 200 sequences. The Backend port is edit-only (the panel's values only) and in group
+   General for this family — the first draft had both wrong.
+7. **Row C33** (no backend configured: a browser sends `DELETE undefined/classes/…` to the app's own host and reports its
+   404; Node never answers) — filed in the ledger, outside R9's world.
 
-## What s21 does
+## What s22 does
 
-- **Pick the next batch — recommended: NSP-014 (records, users, files, HTTP, cloud), first half (the frontend data
-  nodes).** T3 is 1 / 39, the largest gap left; NSP-007 names backend as the fifth seam that "arrives with NSP-014,
-  reusing the request seam". Design the BACKEND seam first from what the nodes call (as POPUP was: what is runtime code
-  and is graded, what is outside and is played). NSP-014's own status line says it will likely split (frontend /
-  cloud-only) — split it first, from the census.
-  The alternative: **NSP-009 the ratchet** (the number in PR CI), small and protective; good to land before the number
-  moves again.
-- **Cheap, alongside, on a QUIET box only** (`uptime` first; one heavy job): the clock-driven specs' deep runs under T9
-  (Delay, Repeat, HTTP Request, Animate To Value, States, Screen Resolution, Navigate To Path — their 10,000 readings
-  predate one-timer stepping); Pop Component Stack's deep run (933 mutants); s11–s14's specs at `NSP_DEEP=10000`.
-  ALSO: re-run the 200-gate on two more seeds (`NSP_SEED=20729`, `20730`) to find other seed-dependent survivors like
-  Navigate's — each one a hand scenario.
-- **AC2 (export)** for the boundary, the location family and the popups: route to P18 when its harness emits more than
-  a latch.
+- **Continue NSP-014 — Create Record and Update Record next** (`NewDbModelProperties`, `SetDbModelProperties`): the same
+  base (`src/nodes/record-base.ts`) plus `addInputProperties` (the `prop-*` ports from the Class's schema — a project's
+  schema is world data the seam does not have yet: decide where it lives, probably `BackendScript.collections`) and
+  `addAccessControl` (the ACL, which reads the CURRENT USER — measure where the user comes from before speccing). Add each
+  operation to `BACKEND_OPS` from `RestDataAdapter.create` / `.save` (read what they hand `success` and emit). Probe first
+  (`zz-` file), as s21 did for Delete Record: ten questions on the runtime before a spec line.
+- Then **Record** (`DbModel2` — fetch) and **Query Records** (`DbCollection2`, 1,513 lines; the neutral filter; state the
+  legacy `where` translation is out of reach). Filter Records (T1, over the store) can come with Query Records.
+- **Cheap, alongside, on a QUIET box only** (`uptime` first): the deep runs s20 listed (clock-driven specs under T9, Pop
+  Component Stack, s11–s14 at `NSP_DEEP=10000`); the three record specs at 10,000; the 200-gate on seeds 20729 / 20730.
+- **NSP-009 the ratchet** is still the small protective alternative.
 
-**Human decisions outstanding:** rows to ask, in plain words (README §7 has them written): **C27 + C29 together** (one
-ruling: "hand a copy"), then **C30** (the popup an author meets first), **C26**, **C24**, C31, C32, C28, C25, D20, D21;
-then C22, D19, C11, C12, C15, C16, C20, C7, D14, D16 (`node scripts/bugs.js --from P107`); R7; R8; R4's confirmation; G1.
+**Human decisions outstanding:** rows to ask, in plain words (README §7 has them written): **C27 + C29 together** (one ruling:
+"hand a copy"), then **C30**, **C26**, **C24**, C31, C32, C28, C25, D20, D21; then C22, D19, C11, C12, C15, C16, C20, C7, D14,
+D16; **new: C33** (`node scripts/bugs.js --from P107`); R7; R8; R4's confirmation; G1.
 
 ## Before you start
 
-- Shared checkout: pathspec commits through a temporary index (`GIT_INDEX_FILE=…; git read-tree HEAD; git add
-  <mine>; commit-tree; update-ref <branch> NEW OLD`), then `git reset -q -- <mine>`. Never `git add -A`, never
-  `git stash`; one heavy job at a time — `uptime` before any deep run. The `/next` state file belongs to P108's
-  workstream — do not overwrite it for P107.
-- Throwaway probes go in `packages/noodl-runtime/test/node-spec/zz-*.test.ts`, deleted in the same command. **The play
-  sinks `console.*`** — print from a probe with `process.stdout.write`. A viewer node's real method can be watched by
-  patching `require(<file>).default.node.methods.<name>` BEFORE the target registers it (C31 was measured that way).
-- **A play's ids come from the world's random stream** (`guid()` → `Math.random`): anything that outlives a play (a
-  scope, a table) meets the same ids next play — make it fresh per play (s20's root scope).
-- A spec behaviour change is a version (plain-words note above `version:`; guarded ⇒ hashes + re-hand the round). An
-  ADDITIVE format change needs the hashes (`node -e "require('./tests/stranger-suite-hashes.helper.js').write()"`, check
-  the diff names only what you touched) and the three rounds green, not a new agent.
-- A viewer node outside `std-library/` registers through `VIEWER_NAVIGATION_NODES` in the runtime target.
-- A scenario's `row` means KNOWN TO FAIL on the runtime; a row the spec FOLLOWS (C30) carries no `row` mark.
-- A scenario whose reference trace has no observation event is refused (an absence needs a firing signal beside it).
+- Shared checkout: pathspec commits through a temporary index (`GIT_INDEX_FILE=…; git read-tree HEAD; git add <mine>;
+  commit-tree; update-ref <branch> NEW OLD`), then `git reset -q -- <mine>`. Never `git add -A`, never `git stash`; one heavy
+  job at a time — `uptime` before any deep run. The `/next` state file belongs to P108's workstream — do not overwrite it.
+- Throwaway probes go in `packages/noodl-runtime/test/node-spec/zz-*.test.ts`, deleted in the same command. The play sinks
+  `console.*` — print with `process.stdout.write`. To probe the backend before the seam knows an operation, patch
+  `RestDataAdapter.prototype.<op>` around one play and set `backendServices` on `NoodlRuntime.instance.graphModel`
+  (s21's probe did exactly that).
+- `tiers.json` is hand-kept and line-per-node: edit it TEXTUALLY (a `json.dump` rewrite reformatted all 785 lines, s21),
+  then `node scripts/node-spec/census.js`.
+- A spec behaviour change is a version; an ADDITIVE format change needs the hashes
+  (`node -e "require('./tests/stranger-suite-hashes.helper.js').write()"`, check the diff names only what you touched) and
+  the three rounds green.
+- A scenario's `row` means KNOWN TO FAIL on the runtime. A scenario whose reference trace has no observation event is refused.

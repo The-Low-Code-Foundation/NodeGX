@@ -32,7 +32,8 @@ import {
   formatDifference,
   mulberry32,
   sequenceSeed,
-  SCENARIOS_DIR
+  SCENARIOS_DIR,
+  specs
 } from '../src';
 import type { AnyNodeSpec, Scenario, Step } from '../src';
 
@@ -248,11 +249,21 @@ describe('the world a target cannot be handed (NSP-007)', () => {
     expect(formatReport(report)).toContain('refused:');
   });
 
-  test('a spec needing a backend is refused on every target until NSP-014', async () => {
-    const Clocked = clocked(['backend']);
-    const report = await runConformance(Clocked, interpreterAdapter({ resolve: () => Clocked }), { sequences: 5 });
-    expect(report.refused).toMatch(/needs a backend; the world has no backend seam until NSP-014/);
-    expect(report.conforms).toBe(false);
+  test('a spec needing a backend is played since NSP-014 s21 (world.ts BACKEND); a call no rule answers is a violation (AC5)', async () => {
+    const spec = specs['DeleteDbModelProperties'];
+    const steps: Step[] = [{ set: 'collectionName', value: 'Lesson' }, { set: 'modelId', value: 'r1' }, { signal: 'store' }, 'settle'];
+    const answered = await runConformance(spec, interpreterAdapter({ resolve: () => spec }), {
+      sequences: 5,
+      seed: 3,
+      scenarios: [{ name: 'answered', params: {}, steps, world: { backend: { answers: [{ answer: { ok: null } }] } } }]
+    });
+    expect(answered.refused).toBeUndefined();
+    expect(answered.generated.ran).toBe(5);
+    expect(answered.scenarios).toEqual([{ name: 'answered', status: 'passed' }]);
+    // the same play with no rule: the reference itself touched what the script did not answer — a scenario error
+    await expect(runConformance(spec, interpreterAdapter({ resolve: () => spec }), { sequences: 0, scenarios: [{ name: 'unanswered', params: {}, steps }] })).rejects.toThrow(
+      /delete Lesson on main: no rule in the world's script answers it/
+    );
   });
 
   test('a spec declaring `needs` on a target WITH install() is played, on a world per play', async () => {

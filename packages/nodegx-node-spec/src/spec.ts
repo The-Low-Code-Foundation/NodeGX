@@ -188,6 +188,11 @@ export interface WorldView {
   popupAnswer(target: unknown): import('./world').PopupAnswer;
   /** NSP-015 s20 — the popups this node sits inside, nearest first, by component name (world.ts POPUP `inside`); empty when none. */
   popupsInside(): readonly string[];
+  /**
+   * NSP-014 s21 — the backend a node's Backend input names (world.ts BACKEND): the id the call would go to, or
+   * `undefined` when the project has no such backend (falsy and `_active_` are the active one).
+   */
+  backendFor(backendId: unknown): string | undefined;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -204,6 +209,21 @@ export interface SpecRequest {
   headers?: Record<string, unknown>;
   body?: unknown;
 }
+
+/**
+ * NSP-014 s21 — an operation a reducer hands a backend (world.ts BACKEND, R9): `op` the backend contract's method
+ * (`delete`, `query`, …), `backend` the id it goes to (`WorldView.backendFor`), `args` the options as the node hands
+ * them. `id` is the spec's own name for the call (the answer names it); it is not on the wire.
+ */
+export interface SpecBackendCall {
+  id: string;
+  op: string;
+  backend: string;
+  args: Readonly<Record<string, unknown>>;
+}
+
+/** NSP-014 s21 — a backend's answer to a `SpecBackendCall`, delivered to `WorldHandlers.backend`: what the success callback is handed, or the failure's message (`undefined`: none). */
+export type BackendAnswerEvent = { id: string } & ({ ok: unknown } | { error: string | undefined });
 
 /** The world's answer to a `SpecRequest`, delivered to `WorldHandlers.response`. */
 export type WorldResponse = { id: string } & (
@@ -390,6 +410,8 @@ export interface Patch<S, O> {
    *             handler a Close Popup resolved, called with `(action, results)`), world.ts POPUP: a `popup`
    *             event, as handed. What a show does is `WorldView.popupAnswer`; what the person does to an open
    *             popup later arrives through `world.popup`. No window needed.
+   *   `backend` NSP-014 s21 — an operation handed to a backend (world.ts BACKEND, R9): a `backend` event in the
+   *             request group, as handed; the answer arrives at `WorldHandlers.backend` with the call's `id`.
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
@@ -402,6 +424,7 @@ export interface Patch<S, O> {
   back?: ReadonlyArray<{ action: unknown; results: unknown }>;
   route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
   popup?: import('./world').PopupCall;
+  backend?: SpecBackendCall;
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -563,6 +586,8 @@ export interface WorldHandlers<S, I, O> {
    * handed any; what it does with the popups it opened is the spec's (the context's slot policy).
    */
   popup?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').PopupEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /** NSP-014 s21 — a backend answered a call this node made (`backend` effect), at the answer's moment (world.ts BACKEND). */
+  backend?: (state: Readonly<S>, inputs: Inputs<I>, answer: BackendAnswerEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -597,6 +622,8 @@ export interface WorldPool {
   routers?: ReadonlyArray<import('./world').RouterScript>;
   /** NSP-015 s20: the popup worlds a `popup` spec's sequences play with (one is drawn per sequence; the default is a host and no popup components). */
   popups?: ReadonlyArray<import('./world').PopupScript>;
+  /** NSP-014 s21: the backend worlds a `backend` spec's sequences play with (one is drawn per sequence; the default answers every call `{ ok: null }` at once). */
+  backends?: ReadonlyArray<import('./world').BackendScript>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -659,7 +686,8 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * adds `project` — the node reads a project setting (world.ts PROJECT). s18 adds `stack` — the node
  * hands a Component Stack a request (world.ts STACK). s19 adds `router` — the node hands the Routers a
  * navigate, or sits in a Router's page (world.ts ROUTE). s20 adds `popup` — the node shows a popup, or sits
- * inside one (world.ts POPUP).
+ * inside one (world.ts POPUP). NSP-014 s21 makes `backend` real — the node hands a backend an operation (world.ts
+ * BACKEND, R9).
  */
 export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend';
 
@@ -743,6 +771,7 @@ export interface AnyNodeSpec {
     resize?: (state: never, inputs: never, world: WorldView) => unknown;
     page?: (state: never, inputs: never, params: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     popup?: (state: never, inputs: never, event: import('./world').PopupEvent, world: WorldView) => unknown;
+    backend?: (state: never, inputs: never, answer: BackendAnswerEvent, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

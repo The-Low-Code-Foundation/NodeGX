@@ -49,6 +49,8 @@ import { RouterNavigate } from './router-navigate';
 import { PageInputs } from './page-inputs';
 import { ShowPopup } from './show-popup';
 import { ClosePopup } from './close-popup';
+import { DeleteRecord } from './delete-record';
+import { AddRecordRelation, RemoveRecordRelation } from './record-relation';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
 import { JSONStreamParser } from './json-stream-parser';
@@ -132,6 +134,10 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [PageInputs.type]: PageInputs,
   [ShowPopup.type]: ShowPopup,
   [ClosePopup.type]: ClosePopup,
+  // NSP-014 — records, users, files, HTTP (s21: the world's BACKEND seam)
+  [DeleteRecord.type]: DeleteRecord,
+  [AddRecordRelation.type]: AddRecordRelation,
+  [RemoveRecordRelation.type]: RemoveRecordRelation,
   [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
@@ -190,6 +196,9 @@ export {
   PageInputs,
   ShowPopup,
   ClosePopup,
+  DeleteRecord,
+  AddRecordRelation,
+  RemoveRecordRelation,
   States,
   RandomBytes,
   Repeat,

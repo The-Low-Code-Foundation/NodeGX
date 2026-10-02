@@ -18,20 +18,21 @@
  *   - `swap-branch`    the reducer returns a SIBLING branch's last recorded patch instead — the
  *                      "condition inverted" defect (the Counter limit guard reading `>` for `>=`)
  *   - `drop-request`   the branch's request is never issued (NSP-007: the "forgot to fetch" defect)
+ *   - `drop-backend`   the branch's backend call is never made (NSP-014 s21: the same defect, one seam over)
  * A mutation that would leave the patch unchanged (drop-emit on a branch with no emit) is not
  * generated: it could only survive, and would say nothing.
  *
  * The world handlers (NSP-007, `spec.world.timer` / `spec.world.response`; NSP-012's
  * `spec.world.change`) are reducers like any
- * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page` and (s20) `world.popup`; whether a branch issues a request is part
- * of its shape. A branch's `after` / `cancel` / `abort` effects are NOT in the shape and have no
+ * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`; whether a branch issues a request
+ * — or calls a backend — is part of its shape. A branch's `after` / `cancel` / `abort` effects are NOT in the shape and have no
  * mutant of their own yet (a dropped timeout timer shows only in a sequence that waits past it
  * with an answer that never comes) — named in NSP-007 §5 as the runner's next hole.
  */
 
 import type { AnyNodeSpec, ErasedReducer } from '../spec';
 
-export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request';
+export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend';
 
 export interface Branch {
   reducer: string;
@@ -65,6 +66,8 @@ export interface PatchLike {
   outcomes?: ReadonlyArray<{ port: string; outcome: string; error?: string }>;
   /** NSP-007: a request the branch issues. */
   request?: unknown;
+  /** NSP-014 s21: a backend call the branch makes. */
+  backend?: unknown;
 }
 
 export function shapeOf(patch: unknown): string {
@@ -78,7 +81,9 @@ export function shapeOf(patch: unknown): string {
     // the resolved outcomes are part of the shape — WHICH outcomes, not how many: "Set → done" and
     // "Set → unchanged" are two branches; four Sets all unchanged is the same branch as one
     outcomes: p.outcomes ? [...new Set(p.outcomes.map((o) => `${o.port}:${o.outcome}`))].sort() : [],
-    request: p.request !== undefined
+    request: p.request !== undefined,
+    // NSP-014 s21 — present only when the branch calls a backend, so every earlier spec's shapes are the strings they were
+    ...(p.backend !== undefined ? { backend: true } : {})
   });
 }
 
@@ -94,6 +99,7 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.resize) names.push('world.resize');
   if (spec.world?.page) names.push('world.page');
   if (spec.world?.popup) names.push('world.popup');
+  if (spec.world?.backend) names.push('world.backend');
   return names;
 }
 
@@ -121,6 +127,7 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     if (spec.world.resize) w.resize = wrap('world.resize', spec.world.resize as unknown as ErasedReducer) as unknown as typeof spec.world.resize;
     if (spec.world.page) w.page = wrap('world.page', spec.world.page as unknown as ErasedReducer) as unknown as typeof spec.world.page;
     if (spec.world.popup) w.popup = wrap('world.popup', spec.world.popup as unknown as ErasedReducer) as unknown as typeof spec.world.popup;
+    if (spec.world.backend) w.backend = wrap('world.backend', spec.world.backend as unknown as ErasedReducer) as unknown as typeof spec.world.backend;
     out.world = w;
   }
   return out;
@@ -189,6 +196,10 @@ function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike):
       const { request: _r, ...rest } = patch;
       return rest;
     }
+    case 'drop-backend': {
+      const { backend: _b, ...rest } = patch;
+      return rest;
+    }
     default:
       return patch;
   }
@@ -211,6 +222,7 @@ export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mut
     // a `deferred` outcome has nothing to flip (its resolution is afterInputs' branch, mutated there)
     if ((ex.outcome !== undefined && ex.outcome !== 'deferred' && ex.outcome !== 'pending') || (ex.outcomes && ex.outcomes.length > 0)) kinds.push(['flip-outcome', undefined]);
     if (ex.request !== undefined) kinds.push(['drop-request', undefined]);
+    if (ex.backend !== undefined) kinds.push(['drop-backend', undefined]);
     for (const sibling of byReducer.get(b.reducer) ?? []) {
       if (sibling.shape !== b.shape) kinds.push(['swap-branch', sibling]);
     }

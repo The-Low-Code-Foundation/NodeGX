@@ -80,16 +80,17 @@ const TIER_NAMES = {
   T5: 'visual',
   T6: 'escape hatch'
 };
-const BATCHES = ['NSP-004', 'NSP-011', 'NSP-012', 'NSP-013', 'NSP-014', 'NSP-015', 'NSP-016', 'NSP-017'];
+const BATCHES = ['NSP-004', 'NSP-011', 'NSP-012', 'NSP-013', 'NSP-014', 'NSP-015', 'NSP-016', 'NSP-017', 'NSP-022'];
 const BATCH_NAMES = {
   'NSP-004': 'the pilot five',
   'NSP-011': 'logic, math, strings, variables, converters',
   'NSP-012': 'arrays, objects, variables, stores, events',
   'NSP-013': 'dates, time, randomness, parsers, animation',
-  'NSP-014': 'records, users, files, HTTP, streams, cloud-only',
+  'NSP-014': 'records, users, files, HTTP, streams (the browser half; s21 split)',
   'NSP-015': 'navigation, popups, component utilities',
   'NSP-016': 'visual nodes',
-  'NSP-017': 'the escape hatches'
+  'NSP-017': 'the escape hatches',
+  'NSP-022': 'the cloud-only nodes (split from NSP-014, s21)'
 };
 
 // ---------------------------------------------------------------------------------------------

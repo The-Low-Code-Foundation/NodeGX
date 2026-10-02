@@ -17,10 +17,11 @@
     "NSP-011": 13,
     "NSP-012": 26,
     "NSP-013": 24,
-    "NSP-014": 41,
+    "NSP-014": 24,
     "NSP-015": 14,
     "NSP-016": 19,
-    "NSP-017": 5
+    "NSP-017": 5,
+    "NSP-022": 17
   },
   "totals": {
     "usesOutcome": 91,
@@ -117,9 +118,9 @@
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
-        "nodegx-export": 1,
+        "nodegx-export": 2,
         "noodl-mcp": 1,
-        "total": 3
+        "total": 4
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -641,13 +642,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 0,
+        "noodl-runtime": 1,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
-        "noodl-mcp": 1,
-        "total": 2
+        "noodl-mcp": 3,
+        "total": 5
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -689,13 +690,13 @@
       ],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 0,
+        "noodl-runtime": 1,
         "noodl-viewer-react": 1,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 0,
-        "total": 2
+        "total": 3
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -907,13 +908,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 4,
+        "noodl-runtime": 5,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
-        "nodegx-export": 6,
+        "nodegx-export": 7,
         "noodl-mcp": 7,
-        "total": 17
+        "total": 19
       },
       "testsTyped": {
         "noodl-runtime": 3,
@@ -954,13 +955,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 4,
+        "noodl-runtime": 5,
         "noodl-viewer-react": 1,
         "noodl-viewer-cloud": 1,
         "nodegx-core": 0,
-        "nodegx-export": 3,
+        "nodegx-export": 4,
         "noodl-mcp": 2,
-        "total": 11
+        "total": 13
       },
       "testsTyped": {
         "noodl-runtime": 3,
@@ -1434,13 +1435,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 1,
+        "noodl-runtime": 2,
         "noodl-viewer-react": 4,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 1,
-        "total": 7
+        "total": 8
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -1549,25 +1550,25 @@
       "exportStatus": "translated",
       "tests": {
         "noodl-runtime": 6,
-        "noodl-viewer-react": 8,
+        "noodl-viewer-react": 9,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 11,
         "noodl-mcp": 23,
-        "total": 48
+        "total": 49
       },
       "testsTyped": {
         "noodl-runtime": 0,
-        "noodl-viewer-react": 7,
+        "noodl-viewer-react": 8,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 7,
         "noodl-mcp": 6,
-        "total": 20
+        "total": 21
       },
       "dynamicPorts": true,
       "dynamicPortMechanisms": 2,
-      "placesWritten": 45,
+      "placesWritten": 46,
       "warnings": []
     },
     {
@@ -1641,8 +1642,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 12,
-        "noodl-mcp": 58,
-        "total": 91
+        "noodl-mcp": 60,
+        "total": 93
       },
       "testsTyped": {
         "noodl-runtime": 1,
@@ -1818,8 +1819,8 @@
         "noodl-viewer-cloud": 1,
         "nodegx-core": 0,
         "nodegx-export": 1,
-        "noodl-mcp": 21,
-        "total": 35
+        "noodl-mcp": 22,
+        "total": 36
       },
       "testsTyped": {
         "noodl-runtime": 10,
@@ -1905,13 +1906,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 1,
+        "noodl-runtime": 2,
         "noodl-viewer-react": 3,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 2,
         "noodl-mcp": 0,
-        "total": 6
+        "total": 7
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -2526,13 +2527,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 1,
+        "noodl-runtime": 2,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 0,
-        "total": 2
+        "total": 3
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -2926,13 +2927,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 2,
+        "noodl-runtime": 3,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 7,
         "noodl-mcp": 0,
-        "total": 9
+        "total": 10
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -3019,13 +3020,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 1,
+        "noodl-runtime": 2,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 2,
         "noodl-mcp": 0,
-        "total": 3
+        "total": 4
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -3687,13 +3688,13 @@
       ],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 3,
+        "noodl-runtime": 4,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 0,
-        "total": 4
+        "total": 5
       },
       "testsTyped": {
         "noodl-runtime": 1,
@@ -4096,13 +4097,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 3,
+        "noodl-runtime": 4,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 0,
         "noodl-mcp": 0,
-        "total": 3
+        "total": 4
       },
       "testsTyped": {
         "noodl-runtime": 3,
@@ -4393,7 +4394,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/addusertorole.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/addusertorole.ts"
@@ -4435,7 +4436,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "note": "category Cloud Services but availableIn is cloud ONLY — the 17th cloud-only node",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/data/aggregatenode.js",
       "runtimeFiles": [
@@ -4478,7 +4479,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/createuser.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/createuser.ts"
@@ -4520,7 +4521,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/deleteuser.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/deleteuser.ts"
@@ -4562,7 +4563,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/getuserroles.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/getuserroles.ts"
@@ -4604,7 +4605,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "note": "deterministic given the secret — T1 shape on the cloud target",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/hmac.ts",
       "runtimeFiles": [
@@ -4647,7 +4648,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "note": "deterministic given key and clock",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/jwtsign.ts",
       "runtimeFiles": [
@@ -4690,7 +4691,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "note": "needs the clock for expiry",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/jwtverify.ts",
       "runtimeFiles": [
@@ -4733,7 +4734,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/listusersinrole.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/listusersinrole.ts"
@@ -4775,7 +4776,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/modelrequest.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/modelrequest.ts"
@@ -4817,7 +4818,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/removeuserfromrole.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/removeuserfromrole.ts"
@@ -4859,7 +4860,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "note": "the inbound request — a protocol's first event",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/request.ts",
       "runtimeFiles": [
@@ -4902,7 +4903,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "note": "the outbound response — a protocol's last event",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/response.ts",
       "runtimeFiles": [
@@ -4945,7 +4946,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/secret.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/secret.ts"
@@ -4987,7 +4988,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/sendemail.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/sendemail.ts"
@@ -5029,7 +5030,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/updateuser.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/updateuser.ts"
@@ -5071,7 +5072,7 @@
       "providedBy": "noodl-viewer-cloud",
       "isVisual": false,
       "tier": "T3",
-      "batch": "NSP-014",
+      "batch": "NSP-022",
       "runtimeFile": "packages/noodl-viewer-cloud/src/nodes/cloud/verifysessiontoken.ts",
       "runtimeFiles": [
         "packages/noodl-viewer-cloud/src/nodes/cloud/verifysessiontoken.ts"
@@ -5700,8 +5701,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 2,
-        "noodl-mcp": 1,
-        "total": 4
+        "noodl-mcp": 3,
+        "total": 6
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -6150,25 +6151,25 @@
       "exportStatus": "translated",
       "tests": {
         "noodl-runtime": 1,
-        "noodl-viewer-react": 6,
+        "noodl-viewer-react": 8,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 3,
         "noodl-mcp": 13,
-        "total": 23
+        "total": 25
       },
       "testsTyped": {
         "noodl-runtime": 1,
-        "noodl-viewer-react": 4,
+        "noodl-viewer-react": 6,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 0,
         "noodl-mcp": 2,
-        "total": 7
+        "total": 9
       },
       "dynamicPorts": true,
       "dynamicPortMechanisms": 1,
-      "placesWritten": 19,
+      "placesWritten": 21,
       "warnings": []
     },
     {
@@ -6295,13 +6296,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 0,
+        "noodl-runtime": 1,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
-        "nodegx-export": 3,
+        "nodegx-export": 4,
         "noodl-mcp": 0,
-        "total": 3
+        "total": 5
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -6348,13 +6349,13 @@
       ],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 0,
+        "noodl-runtime": 1,
         "noodl-viewer-react": 0,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 1,
         "noodl-mcp": 0,
-        "total": 1
+        "total": 2
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -6498,9 +6499,9 @@
         "noodl-viewer-react": 1,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
-        "nodegx-export": 3,
+        "nodegx-export": 4,
         "noodl-mcp": 2,
-        "total": 9
+        "total": 10
       },
       "testsTyped": {
         "noodl-runtime": 1,
@@ -6545,8 +6546,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 22,
-        "noodl-mcp": 58,
-        "total": 91
+        "noodl-mcp": 59,
+        "total": 92
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -6748,13 +6749,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 2,
+        "noodl-runtime": 4,
         "noodl-viewer-react": 2,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 4,
         "noodl-mcp": 0,
-        "total": 8
+        "total": 10
       },
       "testsTyped": {
         "noodl-runtime": 1,

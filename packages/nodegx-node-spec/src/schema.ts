@@ -26,7 +26,7 @@ const traceSchema = require('../schema/trace.schema.json') as Record<string, unk
 /** The JSON schema, as data — for a target that wants to embed it. */
 export const TRACE_SCHEMA = traceSchema;
 
-export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup'] as const;
+export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup', 'backend'] as const;
 export const OUTCOME_VALUES = ['done', 'unchanged', 'failure'] as const;
 
 /** Fields each kind requires and allows, beyond `t` and the always-optional `subject`. */
@@ -50,7 +50,9 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   // s19 — the Routers (world.ts ROUTE): router?, target?, params, openInNewTab
   route: { required: ['params', 'openInNewTab'], optional: ['router', 'target'] },
   // s20 — the popups (world.ts POPUP): a show carries target?, params, stackPolicy, closeOnEscape, modal, accessibleName?; a close popup?, action?, results
-  popup: { required: ['op'], optional: ['target', 'params', 'stackPolicy', 'closeOnEscape', 'modal', 'accessibleName', 'popup', 'action', 'results'] }
+  popup: { required: ['op'], optional: ['target', 'params', 'stackPolicy', 'closeOnEscape', 'modal', 'accessibleName', 'popup', 'action', 'results'] },
+  // NSP-014 s21 — the backends (world.ts BACKEND): op, backend, args — in the request group
+  backend: { required: ['op', 'backend', 'args'], optional: [] }
 });
 
 export type Validation = { ok: true; events: TraceEvent[] } | { ok: false; path: string; message: string };
@@ -125,6 +127,12 @@ export function validateTrace(input: unknown): Validation {
         const nc = findNonCanonical(e[f], `${at}.${f}`);
         if (nc) return bad(nc, `${f} is not in canonical form`);
       }
+    } else if (t === 'backend') {
+      if (typeof e.op !== 'string' || e.op.length === 0) return bad(`${at}.op`, 'op is the contract method the node called');
+      if (typeof e.backend !== 'string' || e.backend.length === 0) return bad(`${at}.backend`, 'backend is the id of the backend the call went to');
+      if (e.args === null || typeof e.args !== 'object' || Array.isArray(e.args)) return bad(`${at}.args`, 'args is the options object as handed');
+      const nc = findNonCanonical(e.args, `${at}.args`);
+      if (nc) return bad(nc, 'args is not in canonical form');
     } else if ('value' in e) {
       if (t === 'value' && e.value === undefined) return bad(`${at}.value`, 'a value event never carries undefined (C3)');
       if (e.value !== undefined) {

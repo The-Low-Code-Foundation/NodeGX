@@ -1,0 +1,726 @@
+[
+  {
+    "name": "no Class: the press fails at once — No class name specified; no call",
+    "because": "dbmodelcrudbase.ts :244-254 (the pre-flight, at the press)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Class, no Id: Missing Record Id at the frame end; no call",
+    "because": "deletedbmodelpropertiesnode.ts :47-50",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Class and Id: ONE delete to the active backend; Done when it answers at once",
+    "because": "deletedbmodelpropertiesnode.ts :66-72; world.ts BACKEND",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the answer comes later: no outcome until the advance that lands it, then Done",
+    "because": "deletedbmodelpropertiesnode.ts :69-72 — the outcome is the answer's",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 99
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            },
+            "after": 100
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the backend refuses: Error is its message, then Failure",
+    "because": "deletedbmodelpropertiesnode.ts :73-75; dbmodelcrudbase.ts :324-335",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Forbidden"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "refused with no message: Error is `Failed to delete.`",
+    "because": "deletedbmodelpropertiesnode.ts :74 `err || 'Failed to delete.'`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "refused with an empty message: Error is `Failed to delete.`",
+    "because": "deletedbmodelpropertiesnode.ts :74",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": ""
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Backend the project lacks: the not-configured sentence names it; no call",
+    "because": "dbmodelcrudbase.ts :283-301",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Backend the project has: the delete goes there",
+    "because": "dbmodelcrudbase.ts :288; resolveBackend.pure.ts :232-249",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "`_active_` and a blank Backend are the active one",
+    "because": "resolveBackend.pure.ts :238",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "_active_"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": ""
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "two presses in one frame: ONE delete, and Done for each press",
+    "because": "deletedbmodelpropertiesnode.ts :42-45; dbmodelcrudbase.ts :196-237 (scheduleOnce coalesces, the batch keeps every token)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a press while one is still out: a second delete; neither answered, nothing reported",
+    "because": "measured s21 (probe P8): the batch is taken before the call goes out (:45)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "two deletes out, answered in order: each settles its own presses",
+    "because": "deletedbmodelpropertiesnode.ts :44-45 — each frame's batch is its own",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            },
+            "after": 10
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Error is kept after a later success",
+    "because": "dbmodelcrudbase.ts :166 — nothing clears it",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Lesson"
+            },
+            "answer": {
+              "error": "Forbidden"
+            }
+          },
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Class cleared after the press and before the frame end goes out with the delete",
+    "because": "measured s21 (probe P11): the Class is checked only at the press (:41)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "set": "collectionName",
+        "value": ""
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a blank Id unbinds: Missing Record Id, and Id shows the blank",
+    "because": "dbmodelcrudbase.ts :621-625",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Id Source From repeater, outside one: Missing Record Id while Id shows the input",
+    "because": "dbmodelcrudbase.ts :520, :579-583; measured s21 (probe P13)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a record handed to Id is its id",
+    "because": "dbmodelcrudbase.ts :550",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "m1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Repeater Component written under From repeater re-binds: an Id written before it is unbound at the frame end",
+    "because": "dbmodelcrudbase.ts :532-538 — the setter re-resolves in `foreach` mode only",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "repeaterComponent",
+        "value": "Row"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Repeater Component under Specify explicitly re-binds nothing: the Id holds",
+    "because": "dbmodelcrudbase.ts :537",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "repeaterComponent",
+        "value": "Row"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  }
+]
