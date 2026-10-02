@@ -3,7 +3,7 @@
 **Scoped:** 2026-10-01, at HEAD `27d891bf3`, from [the island audit](AUDIT-2026-10-01.md). The audit read P105, P106 and
 P108 (Olive's Island, [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md)): their task files, 225 commits, 57
 session and lane transcripts, the generator, both kits, the desktop shell and the shipped template.
-**Status: 🟡 OPEN — session 2 (2026-10-02): ISL-025's slice 0 landed (W1 both loops on `Repeat`, W2 every garden drive on `nodegx deploy`; the census spec), ISL-011 built on its recommended route (docs + types + scaffold say `defaultCss` is inline; the export applies it); session 1: ISL-001's fix (`3df5adb82`) and ISL-014's (`aab96a056`), ISL-002's AC1 measured. 0 of 25 closed.** Three rulings still open (ISL-001 §5, ISL-014 §5, ISL-002 §5, below). **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+**Status: 🟡 OPEN — session 2 (2026-10-02): ISL-025's W1, W2 and W3 landed (both loops on `Repeat`; every garden drive on `nodegx deploy`; the island's four list waits gone on ruling 1; the census spec), ISL-011 built on its recommended route (docs + types + scaffold say `defaultCss` is inline; the export applies it); session 1: ISL-001's fix (`3df5adb82`) and ISL-014's (`aab96a056`), ISL-002's AC1 measured. 0 of 25 closed.** Ruling 1 given ("Sure"); rulings 2 and 3 re-asked in plainer words (ISL-014 §5, ISL-002 §5, below). **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
 > "Phase 108 has been a beast. I forgot to tell the model to record learnings about NodeGX during the push. I'm sure
 > there must be a tonne of stuff we can fix and improve in NodeGX and the way the MCP works. Can you do an audit and start
@@ -122,7 +122,7 @@ the work:
 | **Track E** | | | | |
 | [ISL-023](ISL-023-THE-GENERATOR-GATES-CATCH-A-TYPE-ERROR-AND-A-STRAY-BACKTICK.md) | The generator's gates catch a type error and a stray backtick | F32, F33 | tooling | — |
 | [ISL-024](ISL-024-A-TEMPLATE-LIVES-IN-ITS-OWN-FOLDER.md) | A template lives in its own folder | F34 | repo | ✓ |
-| [ISL-025](ISL-025-THE-ISLAND-DROPS-THE-WORKAROUNDS.md) | The island drops the workarounds (closing task) — **🟡 s2: slice 0 (W1, W2) landed; the census spec pins 22 rows** | every WA | template | per row |
+| [ISL-025](ISL-025-THE-ISLAND-DROPS-THE-WORKAROUNDS.md) | The island drops the workarounds (closing task) — **🟡 s2: W1, W2 and W3 (ruling 1) landed and driven; the census spec pins 22 rows** | every WA | template | per row |
 
 🔒 = the task asks Richard something before it builds. "after AC1" = the ruling waits on a measurement.
 
@@ -173,6 +173,23 @@ This rule is also saved as a feedback memory for the model, because a README is 
 ## 8. 🔒 Rulings
 
 **Asked after session 1 (2026-10-01):** ISL-001 §5 — *"The Repeater no longer needs the 120 ms wait in front of a list it is given twice. Should Olive's Island drop its three waits (pad, crew, My robots)?"* Recommended: yes, as ISL-025 W3.
+**✅ Ruled 2026-10-02 — Richard: "Sure."** Built as ISL-025 W3 in session 2 (all four copies of the wait: the pad, the crew, My robots, and her land's blueprints — the fourth was added by IW-007 after the question was written; same defect, same fix).
+
+**ISL-014 §5, re-asked in plainer words (2026-10-02, the first wording got "Huh?"):** A *kit* is a pack of custom nodes a
+project carries in its `noodl_modules` folder. For the MCP server to know a kit's node types it needs a small helper
+program that is built from source (`npm run build` in `packages/noodl-mcp`). In a fresh checkout or a worktree nobody
+has built it, so until session 1 the server blamed *the kit* ("ensure the module is installed"); now it says *"the helper
+that reads kits is missing — run this command"*. **The question: is telling the person the command enough, or should the
+server build the helper by itself the first time it finds it missing?** Recommended: telling is enough for now; build it
+by itself later; never commit the 3.7 MB helper to git.
+
+**ISL-002 §5, re-asked in plainer words (2026-10-02, the first wording got "Huh?"):** A *States* node has named states
+(say `off` and `on`) and, for each state, the values its outputs should send (for an output `visible`: `off → false`,
+`on → true`; for a text output: `off → ""`, `on → "Hello"`). When the page loads, the node starts in its first state and
+sends those values. **The bug: for the first state only, it sends the number `0` instead of `false`, and `0` instead of
+the empty text.** Every later state change sends the right value. **Question A: should the first state send `false` and
+`""`, like every later state does?** Recommended yes. **Question B: the "export to a React app" feature has its own copy
+of the States logic with the same bug — fix it in the same commit?** Recommended yes.
 
 **Asked after session 1 (2026-10-01):** ISL-014 §5 — *"When the kit reader is missing from a checkout, should the door only say so and name the command (done), or also build it on demand the first time, so a fresh worktree never shares the primary's bundle?"* Recommended: say so now (done), build on demand next; never commit the bundle.
 

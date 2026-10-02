@@ -1,6 +1,6 @@
 # ISL-025 — The island drops the workarounds
 
-**Status: 🟡 slice 0 landed, session 2 (2026-10-02): W1 (both loops on `Repeat`) and W2 (every garden drive on `nodegx deploy`, gated on its exit code); AC1's census spec in place (22 rows, 2 removed, 20 present); W3–W22 wait on their ISL tasks and rulings.** **Source:** [AUDIT](AUDIT-2026-10-01.md), every "WA" cell;
+**Status: 🟡 session 2 (2026-10-02): W1 (both loops on `Repeat`), W2 (every garden drive on `nodegx deploy`, gated on its exit code) and W3 (the four settle waits, on ruling 1) landed; AC1's census spec in place (22 rows, 3 removed, 19 present); W4–W22 wait on their ISL tasks and rulings.** **Source:** [AUDIT](AUDIT-2026-10-01.md), every "WA" cell;
 modelled on P88's closing ruling **R28** (`phase-88-the-defects-the-games-found/README.md:116`) and its per-task clauses
 (e.g. `GAM-008…:257-263`, `GAM-015…:148-153`) · **Side:** template (`templates/bot-garden/` and its generator). This is the
 **closing task**: it removes nothing until the ISL task behind each row has landed. The two exceptions are **slice 0**
@@ -186,4 +186,49 @@ is the regenerated artefact itself (committed with this row).
 
 **Owed from slice 0:** nothing. **Next rows:** W3 on ruling 1 (ISL-001 §5); W13 after ISL-011's AC6 is asked; every other
 row on its ISL task.
+
+### Session 2, later — W3 on ruling 1 (2026-10-02)
+
+**The ruling, quoted.** Asked: *"The Repeater no longer needs the 120 ms wait in front of a list it is given twice. Should
+Olive's Island drop its three waits (pad, crew, My robots)?"* — Richard: **"Sure."**
+
+**What went.** `PAD_SETTLE_MS`, the `Logic/Latch` component (`LATCH_SCRIPT`, its `LOGIC_SPECS` row, its Go-port entry) and
+the four Timer + Latch pairs: the pad (`pdSettle`/`pdHold`), the crew (`iwCrewSettle`/`iwCrewHold`), My robots
+(`rbSettle`/`rbHold`) and **her land's blueprints (`iwLandSettle`/`iwLandHold`) — a fourth copy IW-007 added after §2 was
+written, the same workaround for the same defect, taken under the same ruling and said so here.** Each list now goes
+straight to its For Each (`pdKeys.keys → pdEach.items`, `iwCrewFn.rows → iwCrewEach.items`, `iwLandCard.chips →
+iwLandEach.items`, `rbCards.cards → rbFleetEach.items`). The 🔴 comments that explained the wait went with it; one
+comment per site says what was there and why it is gone (§5's rule: a comment beside code that no longer exists is a lie).
+
+**Cost.** The regeneration: `Logic/Latch` deleted (3 files), Pad, My robot and Island/World nodes and connections,
+`_registry.json` (132 components, was 133). The spec: five pins rewritten (the pad's wires and node types, My robots'
+items wire) — 149/149. The census: W3 → `removed` (pattern widened to the Latch and the constant), 25/25.
+
+**The proof (ISL-001 AC6 and this row's clause):** the drive below — the pad's keys on the pages drive (D10: one key per
+allowed step; mamie-note's read), My robots (`drive-ig005-robots.js`: a card per robot), the crew (`drive-iw008-crew.js`)
+and her land (`drive-iw007-build.js`), on the regenerated template.
+
+**The drive, twice — and the first one graded the old Repeater.** `drive-all.sh crew robots build` on the regenerated
+template read pages 331/331, robots 60/60, build 26/26, **crew 36/39: My robots drew 14 cards for 9** (`Pip … Écho, Pebble,
+Nimbus, Pocket 2, Sprout, Bubbles` — five doubled), at 1368, 1024 and 390. That is D85's own reading. Cause: `nodegx deploy`
+copies `packages/noodl-editor/src/external/deploy/noodl.deploy.js` verbatim, a gitignored build output **dated 09-24**,
+a week before ISL-001's fix: `grep -c 'ISL-001 (P78 D85)'` → 0 in it. §5's constraint ("a row is removed only after its
+fix is in HEAD **and in the build the drive runs**") was the one this row broke first.
+
+**Rebuilt** only the deploy bundle from HEAD (`noodl-viewer-react` and `noodl-runtime` clean in the working tree):
+`npx webpack --config webpack-configs/webpack.deploy.dev.js --no-watch` (12 s; the same development mode as before, so
+the drives' `--allow-development-engine` is unchanged; the editor's `viewer/` and `ssr/` bundles untouched). The fix's
+comment now counts 1. **Re-driven on it** (`drive-all.sh crew robots build island`):
+
+| drive | Sept-24 bundle (no ISL-001) | rebuilt bundle (ISL-001) |
+|---|---|---|
+| pages (the pad: D10, one key per allowed step) | 331/331 | **331/331** |
+| crew — My robots, "a card per robot … each once" | **36/39, 14 cards for 9** | **39/39** |
+| robots (`drive-ig005-robots.js`) | 60/60 | **60/60** |
+| build (her land's blueprints) | 26/26 | **26/26** |
+| island | — | **69/69** |
+
+The left column is the control the row needed: the waits removed, the old runtime → the defect is back; the fixed
+runtime → it is gone. W3 is closed. 🔴 Every other session that deploys now ships HEAD's runtime instead of 09-24's
+(the bundle is shared and gitignored); the handoff says so.
 

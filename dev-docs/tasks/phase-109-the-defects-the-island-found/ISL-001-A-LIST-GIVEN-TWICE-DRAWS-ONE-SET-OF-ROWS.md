@@ -184,3 +184,13 @@ The bug ledger `dev-docs/bugs/p78-d85-…md` is the committed record (`status: f
 
 🔒 **Ruling to ask (§5):** *"The Repeater no longer needs the 120 ms wait in front of a list it is given twice. Should
 Olive's Island drop its three waits (pad, crew, My robots)?"* Recommended: yes, as ISL-025 W3, driven once.
+
+**AC6, built (2026-10-02, ruling 1 — Richard: "Sure"):** the island's waits are gone (ISL-025 W3: the pad, the crew, My
+robots, and her land's blueprints — four copies, not three). Each list goes straight to its For Each. The drive readings
+are in ISL-025 §8 (the pages drive's pad clauses, `drive-ig005-robots.js`, `drive-iw008-crew.js`, `drive-iw007-build.js`).
+AC5 and AC7 are still owed (the 20 loads and the 8× Teach-pad drive, after a `noodl-viewer-react` rebuild).
+**The browser reading AC6 asked for, with its control (2026-10-02):** the island with its waits gone, on the deployed
+page — **the Sept-24 deploy bundle (no fix): My robots 14 cards for 9; the bundle rebuilt from HEAD (the fix): 9, crew
+drive 39/39** at 1368, 1024 and 390, and the pad, robots, build and island drives green. Details in ISL-025 §8. The deploy
+bundle in `src/external/deploy` is now HEAD's, so AC5 (20 loads) and AC7 (8× Teach pad) can run without a rebuild.
+
