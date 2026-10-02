@@ -522,24 +522,6 @@
     {
       "fromId": "iwCrewFn",
       "fromProperty": "rows",
-      "toId": "iwCrewHold",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "iwCrewFn",
-      "fromProperty": "ran",
-      "toId": "iwCrewSettle",
-      "toProperty": "restart"
-    },
-    {
-      "fromId": "iwCrewSettle",
-      "fromProperty": "timerFinished",
-      "toId": "iwCrewHold",
-      "toProperty": "go"
-    },
-    {
-      "fromId": "iwCrewHold",
-      "fromProperty": "value",
       "toId": "iwCrewEach",
       "toProperty": "items"
     },
@@ -996,24 +978,6 @@
     {
       "fromId": "iwLandCard",
       "fromProperty": "chips",
-      "toId": "iwLandHold",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "iwLandCard",
-      "fromProperty": "ran",
-      "toId": "iwLandSettle",
-      "toProperty": "restart"
-    },
-    {
-      "fromId": "iwLandSettle",
-      "fromProperty": "timerFinished",
-      "toId": "iwLandHold",
-      "toProperty": "go"
-    },
-    {
-      "fromId": "iwLandHold",
-      "fromProperty": "value",
       "toId": "iwLandEach",
       "toProperty": "items"
     },

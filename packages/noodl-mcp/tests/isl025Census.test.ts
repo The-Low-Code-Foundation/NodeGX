@@ -57,10 +57,10 @@ export const WORKAROUNDS: Row[] = [
   },
   {
     w: 'W3',
-    what: 'a 120 ms Timer plus a Logic/Latch in front of every list given twice',
-    files: [t('cg003Components.ts')],
-    pattern: /TIMER_NODE, '[^']*once (it|they) stops? changing', \{ duration: PAD_SETTLE_MS \}/,
-    state: 'present'
+    what: 'a 120 ms Timer plus a Logic/Latch in front of every list given twice (pad, crew, My robots, her land)',
+    files: [t('cg003Components.ts'), t('cg003Scripts.ts')],
+    pattern: /TIMER_NODE, '[^']*once (it|they) stops? changing', \{ duration: PAD_SETTLE_MS \}|L\('Latch'\)|PAD_SETTLE_MS|LATCH_SCRIPT/,
+    state: 'removed'
   },
   {
     w: 'W4',

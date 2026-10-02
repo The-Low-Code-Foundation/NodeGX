@@ -43,8 +43,6 @@ export const STORAGE_KEY = 'bot-garden';
 /** The glide the kit animates (the mockup's .38s) and the tick the runner waits between steps (the mockup's 420 ms). */
 export const STEP_MS = 380;
 export const TICK_MS = 420;
-/** P108 IW-001 F7: how long the pad's keys must stay unchanged before the pad draws them (see Workshop/Pad). */
-export const PAD_SETTLE_MS = 120;
 /** What a person sees the game called (ruling 7). The slugs (the template, the storage key, the kits) stay bot-garden. */
 export const GAME_NAME = 'Olive’s Island';
 
@@ -332,7 +330,6 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   // P108 IW-001 (lane A).
   'Logic/Run cap': 'go',
   'Logic/Pad answer': 'go',
-  'Logic/Latch': 'go',
   // P108 IW-004 (lane B).
   'Logic/Pick thing': 'go',
   // P108 IW-008 (lane C): the crew.
@@ -638,13 +635,10 @@ const PAD: CgComponent = {
     group('pdBox', 'The pad', undefined, { sizeMode: 'contentSize', cssClassName: 'bg-pad', mounted: false }, ['pdEach']),
     // IG-001 D10: the keys follow the request (the pad was fixed to fwd left water right, so the stones' put came only from the palette).
     logic('pdKeys', L('Pad keys'), 'One key per allowed step'),
-    // P108 IW-001 F7: the keys reach the For Each once they have SETTLED. As a request opens they are answered two or
-    // three times (its allowed list, then the drawer's palette, then the job robot's); a list that changed while the
-    // For Each was still rebuilding for its mount left both sets on the page (the page drive: ten keys on the tulips,
-    // each under its twin; mamie-note's read twice, so no press landed). Latch holds the last list until PAD_SETTLE_MS
-    // of quiet.
-    logic('pdSettle', TIMER_NODE, 'The keys, once they stop changing', { duration: PAD_SETTLE_MS }),
-    logic('pdHold', L('Latch'), 'The settled keys'),
+    // P109 ISL-025 W3 (ruling 1, 2026-10-02): the keys go straight to the For Each. As a request opens they are answered
+    // two or three times (its allowed list, the drawer's palette, the job robot's); a list that changed while the For
+    // Each was still rebuilding once left both sets on the page (P78 D85: ten keys for five). ISL-001 fixed the Repeater
+    // (`3df5adb82`), so the 120 ms Timer + Latch that held the last list until it settled is gone.
     { ...logic('pdEach', FOR_EACH_NODE, 'One key per row', { template: C.padKey, templateType: 'explicit' }), parent: 'pdBox' },
     outputs('pdOut', [['op', 'string'], ['pressed', 'signal']])
   ],
@@ -657,10 +651,7 @@ const PAD: CgComponent = {
     wire('pdIn', 'lang', 'pdKeys', 'lang'),
     // P108 IW-003 (lane M): the world the request opened on — its kinds are the go keys.
     wire('pdIn', 'world', 'pdKeys', 'world'),
-    wire('pdKeys', 'keys', 'pdHold', 'value'),
-    wire('pdKeys', 'ran', 'pdSettle', 'restart'),
-    wire('pdSettle', 'timerFinished', 'pdHold', 'go'),
-    wire('pdHold', 'value', 'pdEach', 'items'),
+    wire('pdKeys', 'keys', 'pdEach', 'items'),
     wire('pdEach', 'itemOutput-op', 'pdOut', 'op'),
     wire('pdEach', 'itemOutputSignal-pressed', 'pdOut', 'pressed')
   ]
@@ -1744,8 +1735,6 @@ const ISLE_WORLD: CgComponent = {
     logic('iwCrewFn', L('Crew chips'), 'The crew for this job'),
     // The chips reach the For Each once they have SETTLED (IW-001 F7's latch): a list answered twice while the For Each
     // rebuilt left both sets on the page.
-    logic('iwCrewSettle', TIMER_NODE, 'The crew, once it stops changing', { duration: PAD_SETTLE_MS }),
-    logic('iwCrewHold', L('Latch'), 'The settled crew'),
     logic('iwAssign', L('Assign robot'), 'A robot sent here, or home'),
     gate('iwAssignOk', 'Did the robot go?'),
     withStates('iwCardState', 'The card shown or not', ['hidden', 'shown'], { shown: { type: 'boolean', by: { hidden: false, shown: true } } }),
@@ -1800,8 +1789,6 @@ const ISLE_WORLD: CgComponent = {
     place('iwGhostPut', BUTTON_NODE, 'Put it here', 'iwGhostBtns', { ...btn('primary', '', { cssClassName: 'bg-ghost-put' }), label: 'Put it here', mounted: false }),
     place('iwGhostNo', BUTTON_NODE, 'Not now', 'iwGhostBtns', { ...btn('quiet', '', { cssClassName: 'bg-ghost-no' }), label: 'Not now' }),
     logic('iwLandCard', L('Land card'), 'Her land’s card'),
-    logic('iwLandSettle', TIMER_NODE, 'The blueprints, once they stop changing', { duration: PAD_SETTLE_MS }),
-    logic('iwLandHold', L('Latch'), 'The settled blueprints'),
     variable('iwGhostVar', 'gardenGhost', 'The ghost of a blueprint on her land'),
     setVariable('iwSetGhost', 'gardenGhost', 'The ghost, out, moved or gone'),
     logic('iwGhostStart', L('Land ghost'), 'A blueprint’s ghost out', { mode: 'start' }),
@@ -1888,10 +1875,8 @@ const ISLE_WORLD: CgComponent = {
     wire('iwWorld', 'cards', 'iwCrewFn', 'cards'),
     ...(['requests', 'plots', 'robots', 'words', 'lang'] as const).map((f) => wire('iwIn', f, 'iwCrewFn', f)),
     wire('iwCrewFn', 'show', 'iwCrew', 'mounted'),
-    wire('iwCrewFn', 'rows', 'iwCrewHold', 'value'),
-    wire('iwCrewFn', 'ran', 'iwCrewSettle', 'restart'),
-    wire('iwCrewSettle', 'timerFinished', 'iwCrewHold', 'go'),
-    wire('iwCrewHold', 'value', 'iwCrewEach', 'items'),
+    // P109 ISL-025 W3: straight to the For Each (the settle Timer + Latch went with ISL-001's Repeater fix).
+    wire('iwCrewFn', 'rows', 'iwCrewEach', 'items'),
     wire('iwCrewFn', 'label', 'iwCrewL', 'text'),
     wire('iwCrewFn', 'hereText', 'iwCrewHere', 'text'),
     wire('iwCrewFn', 'line', 'iwCrewTap', 'text'),
@@ -1969,10 +1954,8 @@ const ISLE_WORLD: CgComponent = {
     wire('iwLandCard', 'chipsLabel', 'iwLandL', 'text'),
     wire('iwLandCard', 'showChips', 'iwLandL', 'mounted'),
     wire('iwLandCard', 'showChips', 'iwLandRow', 'mounted'),
-    wire('iwLandCard', 'chips', 'iwLandHold', 'value'),
-    wire('iwLandCard', 'ran', 'iwLandSettle', 'restart'),
-    wire('iwLandSettle', 'timerFinished', 'iwLandHold', 'go'),
-    wire('iwLandHold', 'value', 'iwLandEach', 'items'),
+    // P109 ISL-025 W3: straight to the For Each (the fourth copy of the pad's wait, added by IW-007; same fix).
+    wire('iwLandCard', 'chips', 'iwLandEach', 'items'),
     wire('iwLandCard', 'ghostLine', 'iwGhostLine', 'text'),
     wire('iwLandCard', 'ghostShow', 'iwGhostLine', 'mounted'),
     wire('iwLandCard', 'ghostShow', 'iwGhostBtns', 'mounted'),
@@ -2944,8 +2927,6 @@ const PAGE_ROBOT: CgComponent = (() => {
       // The cards reach the For Each once they have SETTLED (IW-001 F7's latch): Robot cards answers once per input as the
       // page mounts, and a list that changed while the For Each rebuilt left a copy's card twice (this lane's drive: 14 cards
       // for 9, every copy twice — a kind's card, id the kind, was never doubled).
-      logic('rbSettle', TIMER_NODE, 'The cards, once they stop changing', { duration: PAD_SETTLE_MS }),
-      logic('rbHold', L('Latch'), 'The settled cards'),
       gate('rbCopyOk', 'Was it copied?'),
       // P108 IW-006 owed (lane O): a robot sent to a job from its card (written only when it went).
       logic('rbSend', L('Send robot'), 'A robot sent to a job she has won'),
@@ -2965,10 +2946,8 @@ const PAGE_ROBOT: CgComponent = (() => {
       wire('rbWords', 'words', 'rbCards', 'words'),
       wire('rbRequests', 'requests', 'rbCards', 'requests'),
       // P108 IW-008 (lane C): through the settle latch (above).
-      wire('rbCards', 'cards', 'rbHold', 'value'),
-      wire('rbCards', 'ran', 'rbSettle', 'restart'),
-      wire('rbSettle', 'timerFinished', 'rbHold', 'go'),
-      wire('rbHold', 'value', 'rbFleetEach', 'items'),
+      // P109 ISL-025 W3: straight to the For Each (My robots drew 14 cards for 9 before ISL-001's fix; the wait is gone).
+      wire('rbCards', 'cards', 'rbFleetEach', 'items'),
       // P108 IW-008 (lane C): a card's copy chip: its robot's program onto the chip's robot; the line on the card it is said on.
       wire('rbStore', 'model', 'rbCopy', 'model'),
       wire('rbFam', 'profileId', 'rbCopy', 'profileId'),

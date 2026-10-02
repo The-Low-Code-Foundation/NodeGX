@@ -1344,11 +1344,6 @@ Outputs.id = Inputs.live === true && g !== null && g !== undefined && g !== '' ?
 
 // ── P108 IW-001 (lane A): the Workshop fixes ─────
 
-/** `Logic/Latch` (the pad's): Value in is held; Go hands it on as it stands (a Timer's end, after the value settled). */
-export const LATCH_SCRIPT = `
-Outputs.value = Inputs.value;
-`;
-
 /**
  * `Logic/Pad answer` (F7): Olive's answer to the pad's read key, spoken over the robot as the block speaks it in a run —
  * the engine's own step on the parked run the key made (Record step's Pending), with her answer. Go-driven, after Ask
@@ -1552,7 +1547,6 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   // P108 IW-001 (lane A).
   { component: 'Logic/Run cap', script: RUN_CAP_SCRIPT, seam: 'a played run at the engine\u2019s tick cap stops by itself' },
   { component: 'Logic/Pad answer', script: PAD_ANSWER_SCRIPT, seam: 'Olive\u2019s answer to the pad\u2019s read key, spoken over the robot' },
-  { component: 'Logic/Latch', script: LATCH_SCRIPT, seam: 'a value held until Go, then handed on as it stood' },
   // P108 IW-004 (lane B).
   { component: 'Logic/Pick thing', script: PICK_THING_SCRIPT, seam: 'the thing on a tapped tile, for the chip that is picking' },
   { component: 'Logic/Var monitor', script: VAR_MONITOR_SCRIPT, seam: 'what the robot remembers, as one line under the world' },

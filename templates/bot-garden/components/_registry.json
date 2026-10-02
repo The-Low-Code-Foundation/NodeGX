@@ -579,14 +579,6 @@
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
-    "Logic/Latch": {
-      "path": "Logic/Latch",
-      "type": "visual",
-      "nodeCount": 3,
-      "connectionCount": 4,
-      "modified": "2026-09-27T00:00:00.000Z",
-      "created": "2026-09-27T00:00:00.000Z"
-    },
     "Logic/Pick thing": {
       "path": "Logic/Pick thing",
       "type": "visual",
@@ -798,8 +790,8 @@
     "Workshop/Pad": {
       "path": "Workshop/Pad",
       "type": "visual",
-      "nodeCount": 7,
-      "connectionCount": 12,
+      "nodeCount": 5,
+      "connectionCount": 9,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -854,8 +846,8 @@
     "Island/World": {
       "path": "Island/World",
       "type": "visual",
-      "nodeCount": 86,
-      "connectionCount": 205,
+      "nodeCount": 82,
+      "connectionCount": 199,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1030,8 +1022,8 @@
     "Pages/My robot": {
       "path": "Pages/My robot",
       "type": "page",
-      "nodeCount": 29,
-      "connectionCount": 102,
+      "nodeCount": 27,
+      "connectionCount": 99,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1069,8 +1061,8 @@
     }
   },
   "stats": {
-    "totalComponents": 133,
-    "totalNodes": 1112,
-    "totalConnections": 3544
+    "totalComponents": 132,
+    "totalNodes": 1101,
+    "totalConnections": 3528
   }
 }

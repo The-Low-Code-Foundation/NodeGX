@@ -30,7 +30,6 @@ import { APPLY_DELTA_SCRIPT, COMPLETE_REQUEST_SCRIPT, FIND_REPEAT_SCRIPT, FOLD_S
 import { BLOCK_CARDS, IG006_WORDS, IG006_WORD_KEYS, PAGE_WORDS, PAGE_WORD_KEYS } from './cg003Content';
 import { OLIVE_SCRIPTS, OLIVE_WORDS, OLIVE_WORD_KEYS } from './cg005Olive';
 import { C, CG003_COMPONENTS, GAME_NAME, LOGIC_COMPONENTS, LOGIC_SPECS, PAGES, REQUIRED_MODULES, STORAGE_KEY, TICK_MS } from './cg003Components';
-import { PAD_SETTLE_MS } from './cg003Components';
 import {
   ALL_WORDS_JSON,
   PAD_KEYS_SCRIPT,
@@ -824,9 +823,11 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect([pad.some((n) => n.type === '/Logic/Pad keys'), pad.some((n) => n.type === 'Static Data')]).toEqual([true, false]);
       // P108 IW-001 F7: through the latch, once the keys have settled (a For Each fed a changing list while it rebuilt kept both).
       const padWires = connectionsOf(built, C.pad).map((c) => `${c.fromId}.${c.fromProperty}>${c.toId}.${c.toProperty}`);
-      expect(padWires).toEqual(expect.arrayContaining(['pdKeys.keys>pdHold.value', 'pdKeys.ran>pdSettle.restart', 'pdSettle.timerFinished>pdHold.go', 'pdHold.value>pdEach.items']));
-      expect(padWires.filter((c) => c.endsWith('>pdEach.items'))).toEqual(['pdHold.value>pdEach.items']);
-      expect([nodesOf(built, C.pad).find((n) => n.id === 'pdSettle')!.type, params(nodesOf(built, C.pad).find((n) => n.id === 'pdSettle')!).duration, nodesOf(built, C.pad).find((n) => n.id === 'pdHold')!.type]).toEqual(['Timer', PAD_SETTLE_MS, '/Logic/Latch']);
+      // P109 ISL-025 W3 (ruling 1): the keys go straight to the For Each — no settle Timer, no Latch (ISL-001 fixed D85).
+      expect(padWires).toEqual(expect.arrayContaining(['pdKeys.keys>pdEach.items']));
+      expect(padWires.filter((w) => /pdSettle|pdHold/.test(w))).toEqual([]);
+      expect(padWires.filter((c) => c.endsWith('>pdEach.items'))).toEqual(['pdKeys.keys>pdEach.items']);
+      expect(nodesOf(built, C.pad).filter((n) => n.type === 'Timer' || n.type === '/Logic/Latch')).toEqual([]);
       for (const icon of ['pick', 'put', 'fill']) expect(GARDEN_CSS).toContain(`.bg-i-${icon}::before`);
       expect(GARDEN_CSS).toMatch(/\.bg-key-mid \{ grid-column: 2; grid-row: 2; \}/);
       expect(GARDEN_CSS).toMatch(/\.bg-key-r3a \{ grid-column: 1; grid-row: 3; \}/);
@@ -1069,9 +1070,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const rb = C.pageRobot;
       expect(String(nodeIn(rb, 'rbFleetEach').type)).toBe('For Each');
       expect(params(nodeIn(rb, 'rbFleetEach')).template).toBe(C.robotCard);
-      // P108 IW-008 (lane C): through the settle latch (a crew's copies were doubled by a list that changed mid-rebuild).
-      expect(into(rb, 'rbFleetEach', 'items')).toEqual(['rbHold.value']);
-      expect([into(rb, 'rbHold', 'value'), into(rb, 'rbHold', 'go'), into(rb, 'rbSettle', 'restart')]).toEqual([['rbCards.cards'], ['rbSettle.timerFinished'], ['rbCards.ran']]);
+      // P109 ISL-025 W3: the cards go straight to the For Each (the settle Timer + Latch went with ISL-001's fix).
+      expect(into(rb, 'rbFleetEach', 'items')).toEqual(['rbCards.cards']);
       for (const [u, value, signal, field] of [['rbSetName', 'name', 'named', 'name'], ['rbSetColour', 'colour', 'coloured', 'color'], ['rbSetHat', 'hat', 'hatted', 'hat']]) {
         expect({ u, field: params(nodeIn(rb, u)).field, id: into(rb, u, 'robotId'), value: into(rb, u, 'value'), go: into(rb, u, 'go') }).toEqual({ u, field, id: ['rbFleetEach.itemOutput-robotId'], value: [`rbFleetEach.itemOutput-${value}`], go: [`rbFleetEach.itemOutputSignal-${signal}`] });
       }

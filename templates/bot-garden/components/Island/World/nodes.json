@@ -677,28 +677,11 @@
       "y": 2200
     },
     {
-      "id": "iwCrewSettle",
-      "type": "Timer",
-      "label": "The crew, once it stops changing",
-      "parameters": {
-        "duration": 120
-      },
-      "x": 590,
-      "y": 4000
-    },
-    {
-      "id": "iwCrewHold",
-      "type": "/Logic/Latch",
-      "label": "The settled crew",
-      "x": 590,
-      "y": 2320
-    },
-    {
       "id": "iwAssign",
       "type": "/Logic/Assign robot",
       "label": "A robot sent here, or home",
       "x": 590,
-      "y": 2440
+      "y": 2320
     },
     {
       "id": "iwAssignOk",
@@ -708,7 +691,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 4120
+      "y": 4000
     },
     {
       "id": "iwCardState",
@@ -733,7 +716,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 4240
+      "y": 4120
     },
     {
       "id": "iwWorld",
@@ -747,7 +730,7 @@
       "type": "/Logic/Island tick",
       "label": "One tick of the island",
       "x": 590,
-      "y": 4360
+      "y": 4240
     },
     {
       "id": "iwVar",
@@ -757,7 +740,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 4480
+      "y": 4360
     },
     {
       "id": "iwSetBuilt",
@@ -767,7 +750,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 4600
+      "y": 4480
     },
     {
       "id": "iwSetTick",
@@ -777,7 +760,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 4720
+      "y": 4600
     },
     {
       "id": "iwBeat",
@@ -787,7 +770,7 @@
         "interval": 760
       },
       "x": 590,
-      "y": 4840
+      "y": 4720
     },
     {
       "id": "iwDraw",
@@ -828,7 +811,7 @@
         "duration": 400
       },
       "x": 590,
-      "y": 4960
+      "y": 4840
     },
     {
       "id": "iwRevealWait",
@@ -838,7 +821,7 @@
         "duration": 80
       },
       "x": 590,
-      "y": 5080
+      "y": 4960
     },
     {
       "id": "iwReveal",
@@ -848,7 +831,7 @@
         "what": "card"
       },
       "x": 590,
-      "y": 5200
+      "y": 5080
     },
     {
       "id": "iwFindFn",
@@ -915,21 +898,21 @@
         "keys": "renderer"
       },
       "x": 590,
-      "y": 5320
+      "y": 5200
     },
     {
       "id": "iwRendRead",
       "type": "/Logic/Renderer",
       "label": "Draw in 3D here?",
       "x": 590,
-      "y": 5440
+      "y": 5320
     },
     {
       "id": "iwRendIs3d",
       "type": "Condition",
       "label": "In 3D?",
       "x": 590,
-      "y": 5560
+      "y": 5440
     },
     {
       "id": "iwRendOk",
@@ -946,7 +929,7 @@
         "event": "unsupported"
       },
       "x": 590,
-      "y": 5680
+      "y": 5560
     },
     {
       "id": "iwRendSlow",
@@ -968,7 +951,7 @@
         "merge": false
       },
       "x": 590,
-      "y": 5800
+      "y": 5680
     },
     {
       "id": "iwKeep",
@@ -985,7 +968,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 5920
+      "y": 5800
     },
     {
       "id": "iwPay",
@@ -1030,7 +1013,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 6040
+      "y": 5920
     },
     {
       "id": "iwPayWait",
@@ -1040,7 +1023,7 @@
         "duration": 4000
       },
       "x": 590,
-      "y": 6160
+      "y": 6040
     },
     {
       "id": "iwLand",
@@ -1277,23 +1260,6 @@
       "y": 2560
     },
     {
-      "id": "iwLandSettle",
-      "type": "Timer",
-      "label": "The blueprints, once they stop changing",
-      "parameters": {
-        "duration": 120
-      },
-      "x": 590,
-      "y": 6280
-    },
-    {
-      "id": "iwLandHold",
-      "type": "/Logic/Latch",
-      "label": "The settled blueprints",
-      "x": 590,
-      "y": 3040
-    },
-    {
       "id": "iwGhostVar",
       "type": "Variable2",
       "label": "The ghost of a blueprint on her land",
@@ -1301,7 +1267,7 @@
         "name": "gardenGhost"
       },
       "x": 590,
-      "y": 6400
+      "y": 6160
     },
     {
       "id": "iwSetGhost",
@@ -1311,7 +1277,7 @@
         "name": "gardenGhost"
       },
       "x": 590,
-      "y": 6520
+      "y": 6280
     },
     {
       "id": "iwGhostStart",
@@ -1321,7 +1287,7 @@
         "mode": "start"
       },
       "x": 590,
-      "y": 3160
+      "y": 3040
     },
     {
       "id": "iwGhostMove",
@@ -1361,14 +1327,14 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 6640
+      "y": 6400
     },
     {
       "id": "iwWithGhost",
       "type": "/Logic/With ghost",
       "label": "The island with the ghost on it",
       "x": 590,
-      "y": 6760
+      "y": 6520
     },
     {
       "id": "iwLandBotVar",
@@ -1378,7 +1344,7 @@
         "name": "gardenLandBot"
       },
       "x": 590,
-      "y": 6880
+      "y": 6640
     },
     {
       "id": "iwSetLandBot",
@@ -1388,7 +1354,7 @@
         "name": "gardenLandBot"
       },
       "x": 590,
-      "y": 7000
+      "y": 6760
     },
     {
       "id": "iwChoseIs",
@@ -1398,7 +1364,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 7120
+      "y": 6880
     },
     {
       "id": "iwOut",

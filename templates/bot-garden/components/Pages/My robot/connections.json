@@ -192,24 +192,6 @@
     {
       "fromId": "rbCards",
       "fromProperty": "cards",
-      "toId": "rbHold",
-      "toProperty": "value"
-    },
-    {
-      "fromId": "rbCards",
-      "fromProperty": "ran",
-      "toId": "rbSettle",
-      "toProperty": "restart"
-    },
-    {
-      "fromId": "rbSettle",
-      "fromProperty": "timerFinished",
-      "toId": "rbHold",
-      "toProperty": "go"
-    },
-    {
-      "fromId": "rbHold",
-      "fromProperty": "value",
       "toId": "rbFleetEach",
       "toProperty": "items"
     },
