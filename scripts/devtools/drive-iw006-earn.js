@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * P108 IW-006 (session 4, lane E) — shells earned by jobs, driven the way a child meets them on the DEPLOYED template
- * (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx-deploy.cjs`).
+ * (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx deploy`).
  *
  * What is graded is what a child sees — the win card's "+N 🐚" line under the thanks, the island's "+N 🐚" chip after the
  * meter fills — and the save the page writes (localStorage, the store's own model) beside it. The numbers are never

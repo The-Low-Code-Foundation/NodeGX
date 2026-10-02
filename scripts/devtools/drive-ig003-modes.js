@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * P106 IG-003 (session 3, lane B) — Drive · Teach · Play and the islander's Predict challenge, driven on the DEPLOYED
- * template (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx-deploy.cjs`).
+ * template (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx deploy`).
  *
  * Every press is a CDP mouse event at an element's centre after `elementFromPoint` says it is what a finger would hit.
  * A stub Olive answers `/__garden/*` inside Chrome (as the page drive's). Words, hints and requests are read from the

@@ -15,10 +15,12 @@ npm run template:garden > $OUT/generate.log 2>&1; echo $? > $OUT/generate.exit
 git -C $REPO status --short templates/bot-garden | head -5 > $OUT/drift.txt
 # 1. A COPY of the template (opening a project writes into it).
 node scripts/devtools/drive-cg003-pages.js assemble $PROJ > $OUT/assemble.log 2>&1; echo $? > $OUT/assemble.exit
-# 2. Deploy. It exits 0 even when it refuses: compare index.html's mtime with the marker.
-touch $OUT/.before-deploy
-node packages/noodl-preview/dist/nodegx-deploy.cjs $PROJ $DEPLOY --allow-development-engine > $OUT/deploy.log 2>&1; echo $? > $OUT/deploy.exit
-[[ $DEPLOY/index.html -nt $OUT/.before-deploy ]] || { echo "deploy wrote no fresh index.html: $OUT/deploy.log"; exit 1; }
+# 2. Deploy with the PRODUCT command and gate on its exit code (P109 ISL-025 W2). The internal bundle it spawns exits 0
+#    by its own contract, which is why this step once compared index.html's mtime with a marker; `nodegx deploy` maps
+#    the refusal to a code (11 a development engine without the flag, 2 not a project, 3 the target) and writes nothing.
+rm -rf $DEPLOY
+node node_modules/.bin/nodegx deploy $PROJ $DEPLOY --allow-development-engine > $OUT/deploy.log 2>&1; echo $? > $OUT/deploy.exit
+[[ $(cat $OUT/deploy.exit) == 0 ]] || { echo "deploy refused (exit $(cat $OUT/deploy.exit)): $OUT/deploy.log"; exit 1; }
 # 3. The drive (stub Olive inside Chrome), with the mockup's own screens for CG-007 AC1.
 node scripts/devtools/drive-cg003-pages.js $DEPLOY --project $PROJ --shots $SHOTS --json $OUT/drive.json --mockup > $OUT/drive.log 2>&1; echo $? > $OUT/drive.exit
 echo "generate $(cat $OUT/generate.exit) · assemble $(cat $OUT/assemble.exit) · deploy $(cat $OUT/deploy.exit) · drive $(cat $OUT/drive.exit)"

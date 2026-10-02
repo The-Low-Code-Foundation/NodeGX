@@ -2,7 +2,7 @@
 /**
  * P108 IW-004 (session 2, lane B) — real blocks: the Workshop's program on Blockly (garden-kit.Blocks), driven the way a
  * child does it on the DEPLOYED template (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` +
- * `nodegx-deploy.cjs`).
+ * `nodegx deploy`).
  *
  * Every press is a CDP mouse (or, on the phone, touch) event at an element's centre after `elementFromPoint` says it is
  * what a finger would hit; a drag is a press, a walk of small moves, a lift. The program is read from the page's own

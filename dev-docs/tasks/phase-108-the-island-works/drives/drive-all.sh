@@ -22,19 +22,24 @@ waitload
 TS_NODE_COMPILER_OPTIONS='{"module":"CommonJS"}' npx ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-garden-template.ts > $P/generate.log 2>&1; echo $? > $P/generate.exit
 git -C $R status --short templates/bot-garden | head -5 > $P/drift.txt
 node scripts/devtools/drive-cg003-pages.js assemble $P/project > $P/assemble.log 2>&1; echo $? > $P/assemble.exit
-touch $P/.before-deploy
-node packages/noodl-preview/dist/nodegx-deploy.cjs $P/project $D --allow-development-engine > $P/deploy.log 2>&1; echo $? > $P/deploy.exit
-[[ $D/index.html -nt $P/.before-deploy ]] && echo fresh > $P/deploy.fresh || echo STALE > $P/deploy.fresh
+# P109 ISL-025 W2: the PRODUCT command, gated on its exit code. (The internal bundle it spawns exits 0 by its own
+# contract — the JSON is its report — which is why this runner once compared index.html's mtime with a marker.) A
+# refusal is non-zero and nothing is written: 11 a development engine without the flag, 2 not a project, 3 the target.
+node node_modules/.bin/nodegx deploy $P/project $D --allow-development-engine > $P/deploy.log 2>&1; echo $? > $P/deploy.exit
+if [[ $(cat $P/deploy.exit) != 0 ]]; then
+  echo "pages generate $(cat $P/generate.exit) drift [$(cat $P/drift.txt | tr '\n' ' ')] assemble $(cat $P/assemble.exit) deploy REFUSED exit $(cat $P/deploy.exit) — nothing driven ($P/deploy.log)" >> $X/summary.txt
+  echo DONE >> $X/summary.txt; exit 1
+fi
 node scripts/devtools/drive-cg003-pages.js $D $J --shots $P/shots --json $P/drive.json --mockup > $P/drive.log 2>&1; echo $? > $P/drive.exit
-echo "pages generate $(cat $P/generate.exit) drift [$(cat $P/drift.txt | tr '\n' ' ')] assemble $(cat $P/assemble.exit) deploy $(cat $P/deploy.exit) $(cat $P/deploy.fresh) drive $(cat $P/drive.exit) | $(tail -1 $P/drive.log)" >> $X/summary.txt
+echo "pages generate $(cat $P/generate.exit) drift [$(cat $P/drift.txt | tr '\n' ' ')] assemble $(cat $P/assemble.exit) deploy $(cat $P/deploy.exit) drive $(cat $P/drive.exit) | $(tail -1 $P/drive.log)" >> $X/summary.txt
 # the kit fixtures
 for k in kit2d kit3d; do
   mkdir -p $X/$k
   [[ $k == kit2d ]] && node scripts/devtools/drive-cg001-kit.js assemble $X/$k/project > $X/$k/assemble.log 2>&1
   [[ $k == kit3d ]] && node scripts/devtools/drive-ig007-3d.js assemble $X/$k/project > $X/$k/assemble.log 2>&1
-  touch $X/$k/.before
-  node packages/noodl-preview/dist/nodegx-deploy.cjs $X/$k/project $X/$k/deploy --allow-development-engine > $X/$k/deploy.log 2>&1
-  [[ $X/$k/deploy/index.html -nt $X/$k/.before ]] && echo "$k deploy fresh" >> $X/summary.txt || echo "$k deploy STALE" >> $X/summary.txt
+  # P109 ISL-025 W2: the product command; its exit code is the gate, read again before the kit's drive runs.
+  node node_modules/.bin/nodegx deploy $X/$k/project $X/$k/deploy --allow-development-engine > $X/$k/deploy.log 2>&1; echo $? > $X/$k/deploy.exit
+  [[ $(cat $X/$k/deploy.exit) == 0 ]] && echo "$k deploy exit 0" >> $X/summary.txt || echo "$k deploy REFUSED exit $(cat $X/$k/deploy.exit) — its drive will be skipped" >> $X/summary.txt
 done
 ALL=(look earn shop crew crew-perf modes iw001 iw004 iw004-3d island island-3d robots robots-3d ws3d wsnogl olive mamie-ws mamie-isl mamie-isl3d mamie-look3d stones stones-3d post post-3d biscuit kit2d kit3d)
 # P108 s5 lane O (iw006-owed): the owed items' drive.
@@ -78,8 +83,8 @@ for n in $ALL; do
     post) node scripts/devtools/drive-iw003-post.js $D $J --shots $P/post --json $P/post.json ;;
     post-3d) node scripts/devtools/drive-iw003-post.js $D $J --mode 3d --shots $P/post-3d --json $P/post-3d.json ;;
     biscuit) node scripts/devtools/drive-iw003-biscuit.js $D $J --shots $P/biscuit --json $P/biscuit.json ;;
-    kit2d) node scripts/devtools/drive-cg001-kit.js $X/kit2d/deploy --shots $X/kit2d/shots --json $X/kit2d/kit2d.json ;;
-    kit3d) node scripts/devtools/drive-ig007-3d.js $X/kit3d/deploy --shots $X/kit3d/shots --json $X/kit3d/kit3d.json ;;
+    kit2d) [[ $(cat $X/kit2d/deploy.exit) == 0 ]] || { echo "kit2d deploy refused: not driven"; (exit 3); } && node scripts/devtools/drive-cg001-kit.js $X/kit2d/deploy --shots $X/kit2d/shots --json $X/kit2d/kit2d.json ;;
+    kit3d) [[ $(cat $X/kit3d/deploy.exit) == 0 ]] || { echo "kit3d deploy refused: not driven"; (exit 3); } && node scripts/devtools/drive-ig007-3d.js $X/kit3d/deploy --shots $X/kit3d/shots --json $X/kit3d/kit3d.json ;;
     # P108 s5 lane O (iw006-owed).
     owed) node scripts/devtools/drive-iw006-owed.js $D $J --shots $P/owed-shots --json $P/owed.json ;;
     # P108 s5 lane B (IW-007 building).

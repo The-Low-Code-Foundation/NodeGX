@@ -3,7 +3,7 @@
  * CG-003 / CG-007 — drive Olive's Island's six pages (template slug bot-garden) in a headless Chrome, on the DEPLOYED template.
  *
  * The project is `templates/bot-garden/` exactly as `npm run template:garden` writes it, copied (opening a project
- * writes into it — drive a COPY), deployed with `nodegx-deploy.cjs`, served by `drive-deployed.js`. Every press is a
+ * writes into it — drive a COPY), deployed with `nodegx deploy`, served by `drive-deployed.js`. Every press is a
  * real CDP mouse event at the element's centre, after `elementFromPoint` says the element is what a finger would hit
  * (RECT ≠ VISIBLE). Words are read from the project's own `Data/Words`, so a word lane B changes is still found.
  *
@@ -13,10 +13,11 @@
  *
  * Usage:
  *   node scripts/devtools/drive-cg003-pages.js assemble <project-dir>
- *   node packages/noodl-preview/dist/nodegx-deploy.cjs <project-dir> <deploy-dir> --allow-development-engine
+ *   node node_modules/.bin/nodegx deploy <project-dir> <deploy-dir> --allow-development-engine
  *   node scripts/devtools/drive-cg003-pages.js <deploy-dir> --project <project-dir> [--shots <dir>] [--json <file>] [--mockup]
  *
- * 🔴 The deploy exits 0 EVEN WHEN IT REFUSES TO WRITE: check <deploy-dir>/index.html's mtime before believing a drive.
+ * 🔴 Gate on the deploy's EXIT CODE (P109 ISL-025 W2): 0 wrote the site; 11 refused a development engine (the flag above);
+ *    2 not a project; 3 the target. The internal bundle `nodegx deploy` spawns exits 0 by its own contract — never call it directly.
  *
  * Clauses — CG-003: AC3 (the whole path, EN then FR, 1368×912 then 390×844), AC4, AC5, AC6, AC7, AC8, AC9, AC10;
  * CG-007: AC1 (the six screens at 1368×912, and with --mockup the mockup's own screens beside them), AC3 (fonts

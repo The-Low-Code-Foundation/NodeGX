@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * P108 IW-003 (session 3, lane P) — the post missions as jobs, driven the way a child does it on the DEPLOYED template
- * (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx-deploy.cjs`).
+ * (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx deploy`).
  *
  * Every program is built from the drawer (a tap on a drawer block adds it; a chip is picked by a tap on the world), then
  * played. What is graded is what a child sees: the door's plate and its letter chip (0/1 → 1/1, green), the letter gone

@@ -2,7 +2,7 @@
 /**
  * IG-007 (P106 s2) — drive Olive's Island's Workshop with the renderer in place, on the DEPLOYED template.
  *
- * The deploy is the page drive's (`drive-cg003-pages.js assemble` + `nodegx-deploy.cjs`): the template exactly as
+ * The deploy is the page drive's (`drive-cg003-pages.js assemble` + `nodegx deploy`): the template exactly as
  * `npm run template:garden` writes it, garden-3d-kit in its `noodl_modules/`. A stub Olive answers `/__garden/*` inside
  * Chrome, as in the page drive. Every press is a CDP mouse event at an element `elementFromPoint` says is on top.
  *

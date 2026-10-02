@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * P108 IW-006 owed (session 5, lane O `iw006-owed`) — what session 4 owed, driven the way a child meets it on the DEPLOYED
- * template (the deploy `drive-all.sh` makes: `drive-cg003-pages.js assemble` + `nodegx-deploy.cjs`).
+ * template (the deploy `drive-all.sh` makes: `drive-cg003-pages.js assemble` + `nodegx deploy`).
  *
  * The family is made the game's way: a new player on the page; the wins she did not play here recorded by the deployed
  * project's own `Logic/Complete request` (path-postbox, tulip-door — Pip's; the post box lends Cobble), a copy bought by

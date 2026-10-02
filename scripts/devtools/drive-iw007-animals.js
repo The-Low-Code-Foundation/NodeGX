@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * P108 IW-007 (session 5, lane A) — her animals on the DEPLOYED template (the page drive's deploy: `drive-cg003-pages.js
- * assemble` + `nodegx-deploy.cjs`, as `drives/drive-all.sh` makes it).
+ * assemble` + `nodegx deploy`, as `drives/drive-all.sh` makes it).
  *
  * Usage:
  *   node scripts/devtools/drive-iw007-animals.js <deploy-dir> --project <assembled-project> [--shots <dir>] [--json <file>] [--mode 2d|3d] [--perf]

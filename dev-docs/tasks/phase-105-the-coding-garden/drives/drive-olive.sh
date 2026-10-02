@@ -25,7 +25,7 @@ case "$step" in
     ( cd $REPO && node scripts/devtools/drive-cg005-olive.js route --json $OUT/route.json ) > $OUT/route.log 2>&1; echo $? > $OUT/route.exit
     ;;
   pages)
-    [[ -f "$DEPLOY/index.html" ]] || { echo "DEPLOY=<deploy dir with index.html> required (drive-pages.sh with OUT=<dir> makes <dir>/deploy; check index.html's mtime: the deploy exits 0 when it refuses)"; exit 2; }
+    [[ -f "$DEPLOY/index.html" ]] || { echo "DEPLOY=<deploy dir with index.html> required (drive-pages.sh with OUT=<dir> makes <dir>/deploy; drive-pages.sh stops on a refused deploy: nodegx deploy exits non-zero)"; exit 2; }
     ( cd $REPO && node scripts/devtools/drive-cg005-olive.js pages "$DEPLOY" --shots $OUT/shots --json $OUT/pages.json ) > $OUT/pages.log 2>&1; echo $? > $OUT/pages.exit
     ;;
   contract)

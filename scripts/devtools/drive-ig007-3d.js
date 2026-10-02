@@ -9,10 +9,11 @@
  *
  * Usage:
  *   node scripts/devtools/drive-ig007-3d.js assemble <project-dir>
- *   node packages/noodl-preview/dist/nodegx-deploy.cjs <project-dir> <deploy-dir> --allow-development-engine
+ *   node node_modules/.bin/nodegx deploy <project-dir> <deploy-dir> --allow-development-engine
  *   node scripts/devtools/drive-ig007-3d.js <deploy-dir> [--shots <dir>] [--json <file>]
  *
- * 🔴 The deploy exits 0 EVEN WHEN IT REFUSES TO WRITE (it prints {"ok":false}); check <deploy-dir>/index.html's mtime.
+ * 🔴 Gate on the deploy's EXIT CODE (P109 ISL-025 W2): 0 wrote the site; 11 refused a development engine (the flag above);
+ *    2 not a project; 3 the target. The internal bundle `nodegx deploy` spawns exits 0 by its own contract — never call it directly.
  * 🔴 Chrome runs with `--use-angle=swiftshader`: the frame times are a software renderer's on this Mac's CPU and say
  *    nothing about the tablet (IG-007 AC3 is Richard's, on the tablet). Supported, Ready, the pixels, the glide and
  *    the tap are what this drive grades.

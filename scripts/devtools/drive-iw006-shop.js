@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * P108 IW-006 (session 4, lane H) — the shop on the Island page, driven on the DEPLOYED template (the deploy
- * `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx-deploy.cjs`).
+ * `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx deploy`).
  *
  * A child's way: the shop's button, its tabs, an item, the purchase card, Buy / Use it / Not now — every one a tap on
  * what she sees (a tap lands only where `elementFromPoint` finds the thing). What is bought is read off the page and off

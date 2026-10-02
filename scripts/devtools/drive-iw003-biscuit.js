@@ -2,7 +2,7 @@
 /**
  * P108 IW-003 (session 3, lane B) — Biscuit's three missions as jobs, the Workshop's look at 1024 × 768, and "teach
  * again", driven on the DEPLOYED template (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` +
- * `nodegx-deploy.cjs`).
+ * `nodegx deploy`).
  *
  * A child's way: the program is built by TAPS on the drawer (Blockly: a tap adds a block at the end, or into the
  * container she selected — its word tapped; a slot opens the node's picker), then Play; the win card, the meters and the

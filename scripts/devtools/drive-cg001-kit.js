@@ -9,10 +9,11 @@
  *
  * Usage:
  *   node scripts/devtools/drive-cg001-kit.js assemble <project-dir>
- *   node packages/noodl-preview/dist/nodegx-deploy.cjs <project-dir> <deploy-dir> --allow-development-engine
+ *   node node_modules/.bin/nodegx deploy <project-dir> <deploy-dir> --allow-development-engine
  *   node scripts/devtools/drive-cg001-kit.js <deploy-dir> [--shots <dir>] [--json <file>]
  *
- * 🔴 The deploy exits 0 EVEN WHEN IT REFUSES TO WRITE (it prints {"ok":false}); check <deploy-dir>/index.html's mtime.
+ * 🔴 Gate on the deploy's EXIT CODE (P109 ISL-025 W2): 0 wrote the site; 11 refused a development engine (the flag above);
+ *    2 not a project; 3 the target. The internal bundle `nodegx deploy` spawns exits 0 by its own contract — never call it directly.
  *
  * Clauses (each beside its known-firing half — the marker Text and the Avatar prove the page and game-kit drew):
  *   AC1  both kits on the page under Group roots, beside a game-kit Avatar

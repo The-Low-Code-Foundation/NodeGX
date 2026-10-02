@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * P108 IW-001 (session 1, lane A) — the Workshop fixes, driven on the DEPLOYED template (the deploy `drive-pages.sh`
- * makes: `drive-cg003-pages.js assemble` + `nodegx-deploy.cjs`).
+ * makes: `drive-cg003-pages.js assemble` + `nodegx deploy`).
  *
  * Every press is a CDP mouse event at an element's centre after `elementFromPoint` says it is what a finger would hit.
  * A stub Olive answers `/__garden/*` inside Chrome (as the page drive's), scripted per rung and able to hold one rung's

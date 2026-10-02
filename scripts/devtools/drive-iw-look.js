@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * P108 IW-003 (session 4, lane L) — the seven look items session 3 left open (IW-003 §7 "Open after the merge"), driven
- * on the DEPLOYED template (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx-deploy.cjs`).
+ * on the DEPLOYED template (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx deploy`).
  * Every clause reads what a child sees on the page (the Blockly workspace's own boxes, the drawer's own blocks, the
  * owl's line, the pad's and the world's rectangles, the island's islanders), never only the engine's state.
  *

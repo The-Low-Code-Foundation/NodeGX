@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * P108 IW-003 (session 3, lane M, Mamie Rose) — Mamie's five missions as jobs, driven the way a child plays them on the
- * DEPLOYED template (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx-deploy.cjs`), and the
+ * DEPLOYED template (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx deploy`), and the
  * island's job clauses this lane owns.
  *
  * Every press is a CDP mouse event at an element's centre after `elementFromPoint` says it is what a finger would hit.

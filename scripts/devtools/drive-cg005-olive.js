@@ -175,7 +175,7 @@ async function pagesPart() {
   const { withDeployedSite } = require('./drive-deployed.js');
   const DIR = process.argv[3];
   if (!DIR || !fs.existsSync(path.join(DIR, 'index.html'))) {
-    console.error('pages: <deploy-dir> must be a deploy folder (templates/bot-garden through nodegx-deploy.cjs)');
+    console.error('pages: <deploy-dir> must be a deploy folder (templates/bot-garden through nodegx deploy)');
     process.exit(2);
   }
   if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });

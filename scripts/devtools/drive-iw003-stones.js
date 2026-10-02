@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * P108 IW-003 (session 3, lane S) — Sami's stones on the job model, driven the way a child plays them on the DEPLOYED
- * template (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx-deploy.cjs`).
+ * template (the deploy `drive-pages.sh` makes: `drive-cg003-pages.js assemble` + `nodegx deploy`).
  *
  * Every program is BUILT in the Workshop's drawer with real taps (a tap on a drawer block adds it to the selected
  * container; a tap on a container's word selects it; a slot is set from its picker; a chip is picked by a tap on the
