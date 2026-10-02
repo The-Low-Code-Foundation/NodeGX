@@ -1,0 +1,702 @@
+[
+  {
+    "name": "the round trip: a popup's Close Popup hands its Results back to the Show Popup that opened it — Done, then Close Results and Closed",
+    "clauses": [
+      "N"
+    ],
+    "because": "showpopup.ts `Done`: \"Fires once the popup has been opened\"; `Closed`: \"Fires when the popup was closed without a close action, after Close Results are up to date\"; closepopup.ts `results`: \"Names of values to hand back to the Show Popup node that opened this popup\"; `close`: \"Closes the popup and hands back any Results\". The popup is a DEFINITION built by name in the root scope (nodecontext.ts :1245); its params arrive as its component inputs (:1253-1255) — `go` reaches Close Popup's Close over a wire (a value `true` is a rising edge), `name` its result. WHEN each lands is the runtime's timing (the build is awaited, the close leaves at the next frame's start) — the frames the claims name were read from the recording; WHAT is answered is the sentences'",
+    "definitions": {
+      "Dialog": {
+        "inputs": {
+          "name": "value",
+          "go": "value"
+        },
+        "outputs": {},
+        "nodes": {
+          "ci": {
+            "type": "Component Inputs"
+          },
+          "cp": {
+            "type": "NavigationClosePopup",
+            "params": {
+              "results": "name"
+            }
+          }
+        },
+        "wires": [
+          {
+            "from": "ci.name",
+            "to": "cp.result-name"
+          },
+          {
+            "from": "ci.go",
+            "to": "cp.close"
+          }
+        ]
+      }
+    },
+    "nodes": {
+      "show": {
+        "type": "NavigationShowPopup",
+        "params": {
+          "target": "Dialog",
+          "popupParam-name": "A",
+          "popupParam-go": true
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "show",
+        "signal": "show"
+      },
+      "settle",
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "show",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "show",
+        "port": "closeResult-name",
+        "value": "A"
+      },
+      {
+        "at": 3,
+        "subject": "show",
+        "signal": "Closed",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "show",
+        "signal": "Dismissed",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "target",
+        "value": "Dialog",
+        "subject": "show"
+      },
+      {
+        "t": "set",
+        "port": "popupParam-name",
+        "value": "A",
+        "subject": "show"
+      },
+      {
+        "t": "set",
+        "port": "popupParam-go",
+        "value": true,
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "show",
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "show",
+        "value": "done",
+        "subject": "show"
+      },
+      {
+        "t": "popup",
+        "op": "show",
+        "params": {
+          "go": true,
+          "name": "A"
+        },
+        "stackPolicy": "replace",
+        "closeOnEscape": true,
+        "modal": true,
+        "target": "Dialog",
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "closeResult-name",
+        "value": "A",
+        "subject": "show"
+      },
+      {
+        "t": "signal",
+        "port": "Closed",
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  },
+  {
+    "name": "one modal slot across nodes: a second Show Popup (Replace It) dismisses the first node's open popup — Dismissed on the first, Done on the second",
+    "clauses": [
+      "N"
+    ],
+    "because": "showpopup.ts `stackPolicy`: \"Replace It closes the popup already showing\"; `Dismissed`: \"Fires when another popup replaced this one before the user closed it\"; nodecontext.ts :1197-1210 — one modal slot, claimed synchronously",
+    "definitions": {
+      "Stay": {
+        "inputs": {},
+        "outputs": {},
+        "nodes": {
+          "ci": {
+            "type": "Component Inputs"
+          }
+        },
+        "wires": []
+      }
+    },
+    "nodes": {
+      "a": {
+        "type": "NavigationShowPopup",
+        "params": {
+          "target": "Stay"
+        }
+      },
+      "b": {
+        "type": "NavigationShowPopup",
+        "params": {
+          "target": "Stay"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "show"
+      },
+      "settle",
+      {
+        "node": "b",
+        "signal": "show"
+      },
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "a",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "a",
+        "signal": "Dismissed",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "b",
+        "signal": "Dismissed",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "target",
+        "value": "Stay",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "target",
+        "value": "Stay",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "show",
+        "subject": "a"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "show",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "popup",
+        "op": "show",
+        "params": {},
+        "stackPolicy": "replace",
+        "closeOnEscape": true,
+        "modal": true,
+        "target": "Stay",
+        "subject": "a"
+      },
+      {
+        "t": "in",
+        "port": "show",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "Dismissed",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "show",
+        "value": "done",
+        "subject": "b"
+      },
+      {
+        "t": "popup",
+        "op": "show",
+        "params": {},
+        "stackPolicy": "replace",
+        "closeOnEscape": true,
+        "modal": true,
+        "target": "Stay",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  },
+  {
+    "name": "two Show Popups pressed in one frame: the first is replaced while it is still being built — Dismissed, and by its own Done sentence no Done, since it never opened",
+    "clauses": [
+      "N"
+    ],
+    "row": "C32",
+    "because": "showpopup.ts `Done`: \"Fires once the popup has been opened. Closed and Dismissed are later events about the same popup, not this signal\"; `Dismissed`: \"Fires when another popup replaced this one before the user closed it\". nodecontext.ts :1247-1253 — a popup dismissed while its build is awaited is deleted and never shown, and `showPopup` RETURNS (resolves) — showpopup.ts :288-290 reports Done on that",
+    "definitions": {
+      "Stay": {
+        "inputs": {},
+        "outputs": {},
+        "nodes": {
+          "ci": {
+            "type": "Component Inputs"
+          }
+        },
+        "wires": []
+      }
+    },
+    "nodes": {
+      "a": {
+        "type": "NavigationShowPopup",
+        "params": {
+          "target": "Stay"
+        }
+      },
+      "b": {
+        "type": "NavigationShowPopup",
+        "params": {
+          "target": "Stay"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "a",
+        "signal": "show"
+      },
+      {
+        "node": "b",
+        "signal": "show"
+      },
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "a",
+        "signal": "Dismissed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "a",
+        "outcome": "done",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "b",
+        "outcome": "done",
+        "count": 1
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "target",
+        "value": "Stay",
+        "subject": "a"
+      },
+      {
+        "t": "set",
+        "port": "target",
+        "value": "Stay",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "show",
+        "subject": "a"
+      },
+      {
+        "t": "in",
+        "port": "show",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "Dismissed",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "show",
+        "value": "done",
+        "subject": "a"
+      },
+      {
+        "t": "popup",
+        "op": "show",
+        "params": {},
+        "stackPolicy": "replace",
+        "closeOnEscape": true,
+        "modal": true,
+        "target": "Stay",
+        "subject": "a"
+      },
+      {
+        "t": "outcome",
+        "port": "show",
+        "value": "done",
+        "subject": "b"
+      },
+      {
+        "t": "popup",
+        "op": "show",
+        "params": {},
+        "stackPolicy": "replace",
+        "closeOnEscape": true,
+        "modal": true,
+        "target": "Stay",
+        "subject": "b"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  },
+  {
+    "name": "nested popups: a Close Popup in the inner popup naming the OUTER one closes the outer — its opener hears Closed",
+    "clauses": [
+      "N"
+    ],
+    "row": "C31",
+    "because": "closepopup.ts `targetComponent` (Popup): \"Which popup to close when popups are nested; leave blank to close the nearest enclosing one\"; its docblock :89-90: \"popups nest — a popup opened from inside a popup gives a Close Popup node two honest answers, and only the author knows which was meant\". The inner Show Popup is Show On Top, so opening Inner does not dismiss Outer (nodecontext.ts :1240). Read: every popup is built in the ROOT scope (:1215, :1245), so Outer is never on Inner's component walk; `popupParent` (:1258) is read by nothing",
+    "definitions": {
+      "Outer": {
+        "inputs": {
+          "go": "value"
+        },
+        "outputs": {},
+        "nodes": {
+          "ci": {
+            "type": "Component Inputs"
+          },
+          "sp": {
+            "type": "NavigationShowPopup",
+            "params": {
+              "target": "Inner",
+              "stackPolicy": "stack",
+              "popupParam-go": true
+            }
+          }
+        },
+        "wires": [
+          {
+            "from": "ci.go",
+            "to": "sp.show"
+          }
+        ]
+      },
+      "Inner": {
+        "inputs": {
+          "go": "value"
+        },
+        "outputs": {},
+        "nodes": {
+          "ci": {
+            "type": "Component Inputs"
+          },
+          "cp": {
+            "type": "NavigationClosePopup",
+            "params": {
+              "targetComponent": "Outer"
+            }
+          }
+        },
+        "wires": [
+          {
+            "from": "ci.go",
+            "to": "cp.close"
+          }
+        ]
+      }
+    },
+    "nodes": {
+      "show": {
+        "type": "NavigationShowPopup",
+        "params": {
+          "target": "Outer",
+          "popupParam-go": true
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "show",
+        "signal": "show"
+      },
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "show",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 4,
+        "subject": "show",
+        "signal": "Closed",
+        "count": 1
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "target",
+        "value": "Outer",
+        "subject": "show"
+      },
+      {
+        "t": "set",
+        "port": "popupParam-go",
+        "value": true,
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "show",
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "show",
+        "value": "done",
+        "subject": "show"
+      },
+      {
+        "t": "popup",
+        "op": "show",
+        "params": {
+          "go": true
+        },
+        "stackPolicy": "replace",
+        "closeOnEscape": true,
+        "modal": true,
+        "target": "Outer",
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  },
+  {
+    "name": "the control for the nested close: a Close Popup in the outer popup itself, naming it, closes it — its opener hears Closed",
+    "clauses": [
+      "N"
+    ],
+    "because": "closepopup.ts :202-204 — the node's own component is tested first; :216-229 a named popup on the walk is closed. The firing arm beside the row above: the named close works whenever the popup is on the walk",
+    "definitions": {
+      "Outer": {
+        "inputs": {
+          "go": "value"
+        },
+        "outputs": {},
+        "nodes": {
+          "ci": {
+            "type": "Component Inputs"
+          },
+          "cp": {
+            "type": "NavigationClosePopup",
+            "params": {
+              "targetComponent": "Outer"
+            }
+          }
+        },
+        "wires": [
+          {
+            "from": "ci.go",
+            "to": "cp.close"
+          }
+        ]
+      }
+    },
+    "nodes": {
+      "show": {
+        "type": "NavigationShowPopup",
+        "params": {
+          "target": "Outer",
+          "popupParam-go": true
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "show",
+        "signal": "show"
+      },
+      "settle",
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "show",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "show",
+        "signal": "Closed",
+        "count": 1
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "target",
+        "value": "Outer",
+        "subject": "show"
+      },
+      {
+        "t": "set",
+        "port": "popupParam-go",
+        "value": true,
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "show",
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "show",
+        "value": "done",
+        "subject": "show"
+      },
+      {
+        "t": "popup",
+        "op": "show",
+        "params": {
+          "go": true
+        },
+        "stackPolicy": "replace",
+        "closeOnEscape": true,
+        "modal": true,
+        "target": "Outer",
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "Closed",
+        "subject": "show"
+      },
+      {
+        "t": "settle"
+      }
+    ]
+  }
+]

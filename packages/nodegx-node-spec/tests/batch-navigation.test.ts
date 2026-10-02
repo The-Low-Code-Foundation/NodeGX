@@ -15,13 +15,15 @@
  *          is recorded and heard by its listeners, a page's `location` reads the href live, and
  *          the project's settings are the script's. s18 STACK: a blank or null name is Main, a name nobody
  *          registered is queued, answers are first-match, a call is canonical at the call, a pop is told the
- *          n-th scripted answer.
+ *          n-th scripted answer. s20 POPUP: a show's answer is the host's and the project's (no host, a
+ *          falsy Target, a component the project lacks, one it has), the person's events map to what a
+ *          spec is handed, a call is canonical at the call.
  */
 
 import type { AnyNodeSpec } from '../src';
 import { DEFAULT_WORLD_POOL, EQUIVALENT_MUTANTS, generateSequence, installWorld, interpreterAdapter, runConformance, specs, World } from '../src';
 
-const BATCH = ['net.noodl.externallink', 'PageStackNavigateToPath', 'PageStackNavigate', 'PageStackNavigateBack', 'RouterNavigate', 'PageInputs'];
+const BATCH = ['net.noodl.externallink', 'PageStackNavigateToPath', 'PageStackNavigate', 'PageStackNavigateBack', 'RouterNavigate', 'PageInputs', 'NavigationShowPopup', 'NavigationClosePopup'];
 
 describe('NSP-015 — every batch spec with a reducer conforms on the interpreter: scenarios, 200 sequences, every mutant killed or declared', () => {
   for (const type of BATCH) {
@@ -202,5 +204,45 @@ describe('STACK — the Component Stacks a navigation node hands its requests to
     expect(none.inPushedPage).toBe(false);
     expect(none.backAnswer()).toBeUndefined();
     expect(() => none.back(undefined, {})).toThrow(/not in a pushed page/);
+  });
+});
+
+describe('POPUP — what lies outside the runtime\'s popup stack (world.ts, NSP-015 s20)', () => {
+  test('a show\'s answer: no host opens nothing; a falsy Target has no name; a component the project lacks is not found; one it has opens', () => {
+    expect(new World({ popup: { host: false, components: ['Popup'] } }).popup.answer('Popup')).toBe('nohost');
+    const popup = new World({ popup: { components: ['Popup'] } }).popup;
+    expect(popup.answer('Popup')).toBe('opened');
+    expect(popup.answer('')).toEqual({ error: 'Component instance must have a name' });
+    expect(popup.answer(0)).toEqual({ error: 'Component instance must have a name' });
+    expect(popup.answer('Nope')).toEqual({ error: "Can't find component model for Nope" });
+    expect(new World({}).popup.answer('Popup')).toEqual({ error: "Can't find component model for Popup" });
+  });
+
+  test('the person\'s events are handed as the spec reads them; a close carries a copy of its results; `inside` is the script\'s', () => {
+    const results = { name: 'A' };
+    const popup = new World({ popup: { events: [{ at: 1, close: { action: 'closeAction-Save', results }, popup: 0 }, { at: 2, escape: true }, { at: 3, close: {} }], inside: ['Inner', 'Popup'] } }).popup;
+    expect(popup.events).toEqual([
+      { at: 1, event: { kind: 'close', popup: 0, action: 'closeAction-Save', results: { name: 'A' } } },
+      { at: 2, event: { kind: 'escape' } },
+      { at: 3, event: { kind: 'close', popup: undefined, action: undefined, results: {} } }
+    ]);
+    expect((popup.events[0].event as { results: unknown }).results).not.toBe(results);
+    expect(popup.inside).toEqual(['Inner', 'Popup']);
+    expect(new World({}).popup.inside).toEqual([]);
+  });
+
+  test('a call is recorded as handed and canonical AT THE CALL; what was not handed is absent', () => {
+    const popup = new World({}).popup;
+    const seen: unknown[] = [];
+    popup.onCall((e) => seen.push(e));
+    const params: Record<string, unknown> = { id: 1 };
+    popup.record({ op: 'show', target: 'Popup', params, stackPolicy: 'replace', closeOnEscape: true, modal: false, accessibleName: undefined });
+    params.id = 2;
+    popup.record({ op: 'close', popup: undefined, action: undefined, results: params });
+    expect(seen).toEqual([
+      { t: 'popup', op: 'show', target: 'Popup', params: { id: 1 }, stackPolicy: 'replace', closeOnEscape: true, modal: false },
+      { t: 'popup', op: 'close', results: { id: 2 } }
+    ]);
+    expect(popup.calls).toEqual(seen);
   });
 });

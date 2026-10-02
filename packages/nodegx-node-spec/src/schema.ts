@@ -26,7 +26,7 @@ const traceSchema = require('../schema/trace.schema.json') as Record<string, unk
 /** The JSON schema, as data — for a target that wants to embed it. */
 export const TRACE_SCHEMA = traceSchema;
 
-export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route'] as const;
+export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup'] as const;
 export const OUTCOME_VALUES = ['done', 'unchanged', 'failure'] as const;
 
 /** Fields each kind requires and allows, beyond `t` and the always-optional `subject`. */
@@ -48,7 +48,9 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   // s18 — the Component Stacks (world.ts STACK): a push / replace carries stack?, target?, params, transition; a back action?, results
   stack: { required: ['op'], optional: ['stack', 'target', 'params', 'transition', 'action', 'results'] },
   // s19 — the Routers (world.ts ROUTE): router?, target?, params, openInNewTab
-  route: { required: ['params', 'openInNewTab'], optional: ['router', 'target'] }
+  route: { required: ['params', 'openInNewTab'], optional: ['router', 'target'] },
+  // s20 — the popups (world.ts POPUP): a show carries target?, params, stackPolicy, closeOnEscape, modal, accessibleName?; a close popup?, action?, results
+  popup: { required: ['op'], optional: ['target', 'params', 'stackPolicy', 'closeOnEscape', 'modal', 'accessibleName', 'popup', 'action', 'results'] }
 });
 
 export type Validation = { ok: true; events: TraceEvent[] } | { ok: false; path: string; message: string };
@@ -112,6 +114,13 @@ export function validateTrace(input: unknown): Validation {
       }
     } else if (t === 'route') {
       for (const f of ['router', 'target', 'params', 'openInNewTab'] as const) {
+        if (!(f in e)) continue;
+        const nc = findNonCanonical(e[f], `${at}.${f}`);
+        if (nc) return bad(nc, `${f} is not in canonical form`);
+      }
+    } else if (t === 'popup') {
+      if (e.op !== 'show' && e.op !== 'close') return bad(`${at}.op`, 'op is show or close');
+      for (const f of ['target', 'params', 'stackPolicy', 'closeOnEscape', 'modal', 'accessibleName', 'popup', 'action', 'results'] as const) {
         if (!(f in e)) continue;
         const nc = findNonCanonical(e[f], `${at}.${f}`);
         if (nc) return bad(nc, `${f} is not in canonical form`);

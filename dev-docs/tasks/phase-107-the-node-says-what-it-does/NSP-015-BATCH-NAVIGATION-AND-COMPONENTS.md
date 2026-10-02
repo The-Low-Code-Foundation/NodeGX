@@ -1,7 +1,7 @@
 # NSP-015 — Batch: navigation, popups, component utilities
 
 **Opened 2026-09-29.** **Depends on NSP-008** (graph scenarios) and R4 = continue.
-**Status: 🟡 12 of 14 (+ NSP-012's Run Tasks) — s15 (2026-10-01): the component boundary, the Component Object family, component DEFINITIONS; s16: the world's LOCATION (`open`), External Link; s17: LOCATION's `history` and `dispatch`, the world's PROJECT, Navigate To Path (rows C24, C25, D20, D21); s18: the world's STACK, Push Component To Stack, Pop Component Stack (rows C26, C27, C28); s19: the world's ROUTE, Navigate, Page Inputs (row C29). Left: 2 — Show / Close Popup (the POPUP seam, named in §6.1e); AC2; AC6 is the Router's (§6.1e).**
+**Status: 🟡 14 of 14 (+ NSP-012's Run Tasks) — AC2 left — s15 (2026-10-01): the component boundary, the Component Object family, component DEFINITIONS; s16: the world's LOCATION (`open`), External Link; s17: LOCATION's `history` and `dispatch`, the world's PROJECT, Navigate To Path (rows C24, C25, D20, D21); s18: the world's STACK, Push Component To Stack, Pop Component Stack (rows C26, C27, C28); s19: the world's ROUTE, Navigate, Page Inputs (row C29); s20: the world's POPUP, Show Popup, Close Popup, the popup round trip as a graph (rows C30, C31, C32). Left: AC2 (the export, P18); AC6 is the Router's (§6.1e).**
 
 ## 1. The person sentence
 
@@ -340,6 +340,93 @@ publishes (`_popupCloseHandler`, closepopup.ts :192-240) — Pop Component Stack
 can play `NodeContext.showPopup` as STACK plays a stack; the stacking policy and the overlay are the context's / a visual
 node's. Show Popup also hands its LIVE `popupParams` — check whether `showPopup` keeps it before calling it a row.
 
+### 6.1f s20 (2026-10-02) — the world's POPUP, Show Popup and Close Popup (14 of 14)
+
+**The decision s19 named, made from what the two nodes call.** Show Popup calls `this.context.showPopup(target,
+params, args)` (showpopup.ts :249-276) — RUNTIME code, not a visual node: `NodeContext.showPopup` (nodecontext.ts
+:1212-1330) owns the popup stack and its policy (one modal slot unless Show On Top, claimed synchronously; Escape
+cancels the top MODAL popup only; a close leaves at the next frame's start). So, unlike STACK and ROUTE, the thing
+called is graded, and the world plays only what lies outside the runtime: the app's popup HOST (`setPopupCallbacks`),
+the PROJECT's components (what a Target builds), and the PERSON (a close through the popup's own Close Popup, an
+Escape). Close Popup walks its component's ancestors for a published `_popupCloseHandler` (closepopup.ts :206-247) —
+so for a lone Close Popup the world says which popups it sits inside.
+
+**POPUP, the tenth seam** (world.ts header — the rule every target reads): a `popup` trace event in the LOCATION
+group, a `show` `{ target, params, stackPolicy, closeOnEscape, modal, accessibleName? }` recorded at the call, and a
+`close` `{ popup?, action?, results }` recorded at the close handler the Close Popup resolved; the script's `popup` is
+`{ components, host, events, inside }` (`events`: `{ at, close: { action, results }, popup? }` — the `popup`-th popup
+the play opened, absent the last — or `{ at, escape: true }`). A spec reads `WorldView.popupAnswer(target)` (`nohost` ·
+`opened` · `{ error }` with the runtime's own message) and `popupsInside()`; the person's events arrive through the
+world handler `popup`. **On the runtime target `showPopup` is the REAL one**; the target stands in the host (no-op
+callbacks, or none), the container `Group` (`GROUP_STAND_IN`, keeps its child so deleting it deletes the popup),
+`requestAnimationFrame` (the next frame's start), a FRESH root scope per play (a popup's id is a `guid()` — the world's
+random stream — so a scope that outlived a play refused the next play's first popup as a duplicate id; found by the
+first probe), an empty component model per scripted name; the person's events are world timers calling the n-th
+built popup's published handler or `cancelTopPopup()`. A lone Close Popup's component gets a parent chain of stand-in
+popups; its `resolvePopup` is wrapped so the handler it resolved is recorded as called.
+
+**Format** (guarded: `src/trace.ts`, `schema/trace.schema.json`, `src/spec.ts`, `src/world.ts` — hashes refreshed,
+the diff named exactly those four, the three stranger rounds green in the full run): the `popup` event; `WorldNeed`
+`popup`; a patch's `popup` effect; `WorldView.popupAnswer`, `popupsInside`; the world handler `popup`;
+`WorldPool.popups`; `popupEvent`, `WorldPopup`, `PopupScript`, `PopupScriptEvent`, `PopupEvent`, `PopupAnswer`,
+`PopupCall`. The mutant runner wraps `world.popup`.
+
+**Harness facts found on the way (the TARGET, not the app):**
+- **T10** — headless, a component the context lacks threw `Cannot read properties of undefined (reading 'get')`:
+  the graph model had no `componentToBundleMap` (`importEditorData` sets it, graphmodel.ts :158-161). The app says
+  `Can't find component model for <name>` — Show Popup's Error carries it. The target now has a project with no
+  bundles, as it has one with no variants.
+- **T11** — the signal intercept recorded a pulse on a port the node does not have; the runtime sends nothing there
+  (node.ts `sendSignalOnOutput` returns at once). Show Popup's close action can name such a port. Fixed: recorded
+  only when the node has the output.
+- **T12** — attribution: a popup is built inside its opener's promise chain, so the async context named the opener
+  for every call the popup's OWN nodes made (a Show Popup inside a popup), and so did the sole-subject fallback in a
+  graph of one subject. Popup calls are attributed to the subject whose `update()` is on the stack and dropped
+  otherwise (found on the nested-popups scenario's first recording).
+
+**The probe first** (the real `showPopup`, a throwaway test, ten questions; each answer then written into the spec and
+a hand scenario): Done lands in the settle that showed (the build is microtasks); a close leaves at the next frame's
+start, with its results and then Closed or its action; a second Escape in the frame is spent on the popup leaving;
+Close On Escape off spends nothing; a non-modal popup is skipped; no host is Done for anything — a missing component
+included; an empty Target fails to build (`Component instance must have a name`), a null one is no-target; a close of
+a dismissed popup does nothing; **a failed build keeps its slot (C30)**.
+
+**Show Popup** — [show-popup.ts](../../../packages/nodegx-node-spec/src/nodes/show-popup.ts), 22 hand scenarios, claims
+from the source and the probe. **CONFORMS on its first run**: 22 / 22, 200 / 200, 142 / 142 mutants (the first run left
+one survivor — an Escape reported in the same frame as a new show, never followed by a settle — killed by a scenario
+written for it). **Deep (10,000, seed 20728): CONFORMS, 10,000 / 10,000, 223 / 223 mutants** (known C6 50). The spec keeps
+the context's stack for the popups the node opened (its slots, leaving at the next frame's start). Its
+`closeResult-` / `closeAction-` outputs come from the PROJECT (the Close Popups inside the target): the spec grades a
+project whose popup declares Results `name,ok` and Close Actions `Save,Cancel` — NSP-020's case.
+
+**Close Popup** — [close-popup.ts](../../../packages/nodegx-node-spec/src/nodes/close-popup.ts), 12 hand scenarios.
+**CONFORMS on its first run**: 12 / 12, 200 / 200, 242 / 244 mutants with 2 declared equivalent (Results and Close
+Actions are stored and never read — Pop Component Stack's pair). **Deep (10,000): CONFORMS, 10,000 / 10,000** (known C6
+48). Its ports derive from its own params — drawable without a viewer.
+
+**The round trip, as a graph** ([t12](../../../packages/nodegx-node-spec/scenarios/graph/t12-popups.json); popups are
+DEFINITIONS built by name in the root scope; their params arrive as component inputs — a `go` value wired to Close
+Popup's Close is a rising edge), claims from the sentences before recording:
+
+| scenario | grades | result |
+|---|---|---|
+| Show Popup → Dialog; its Close Popup hands `name` back | Done (frame 2), Close Results + Closed (frame 3) — the census's round trip | ✅ every claim |
+| two Show Popups, the second a frame later (Replace It) | one modal slot ACROSS nodes: `a` Dismissed, `b` Done | ✅ |
+| two Show Popups pressed in ONE frame | Done's sentence ("once the popup has been opened") | ❌ **row C32**: `a` reports Dismissed AND Done |
+| a Close Popup in a popup opened from a popup, naming the OUTER one | the Popup input's sentence ("when popups are nested") | ❌ **row C31**: candidates `["Inner"]`, target-not-found (probe at its `close()`) |
+| the control: the same Close Popup in the outer popup itself | the named close works on the walk | ✅ Closed |
+
+**Read in passing:** a Target that names a NODE TYPE builds that node as a popup (`createNode` asks the register
+first, nodescope.ts :303); no scenario uses one. A Show Popup inside a popup with the default Replace It dismisses the
+popup it sits in — as its description says ("Replace It closes the popup already showing"); nesting needs Show On Top.
+
+**Also this session:** Navigate's 200-run showed a mutant survivor on today's seed only (20728; all 74 killed at s19's
+20727, measured on the same tree) — an answer-only frame never followed by a settle. A hand scenario now settles after
+one (23 scenarios, 74 / 74 on both seeds).
+
+**Not graded:** the export (AC1's export half, P18); the `_setCloseCallback` hand-down (the nearest popup's own handler,
+which the walk finds anyway).
+
 ### 6.2 Rows
 
 | row | what | where | proposed |
@@ -352,4 +439,7 @@ node's. Show Popup also hands its LIVE `popupParams` — check whether `showPopu
 | **C27** — needs a ruling | One Push Component To Stack pushing (or replacing) the SAME page with NEW `pm-` values reports Unchanged from the second press on and the old page stays: the node hands its live `pageParams`, the stack keeps it on the entry, and `_isAlreadyShowing` compares the object with itself | navigate.ts :181, :210; navigation-stack.tsx :430-457, :878, :1000 | hand a copy (`{ ...pageParams }`). [Ledger](../../bugs/p107-c27-a-second-push-of-the-same-page-with-new-parameters-reports-unchanged.md) |
 | **C28** — needs a ruling | A Mode that is neither `push` nor `replace` (`'Push'`, `''`, `null` over a wire) hands nothing and answers no press | navigate.ts :177, :203 (no else) | Failure `push-component-stack/unknown-mode`. [Ledger](../../bugs/p107-c28-push-component-to-stack-never-answers-a-mode-that-is-not-push-or-replace.md) |
 | **C29** — needs a ruling | One Navigate pushing the SAME page with NEW `pm-` values reports Unchanged from the second press on and the Router keeps the old page: the node hands its live `pageParams`, the Router keeps it as `currentParams`, and `_navigateInCurrentWindow` compares the object with itself. C27's twin | router-navigate.ts :132, :149-151; router.tsx :888-895, :917 | hand a copy (`{ ...pageParams }`) — same ruling as C27. [Ledger](../../bugs/p107-c29-a-second-navigate-to-the-same-page-with-new-parameters-reports-unchanged.md) |
+| **C30** — needs a ruling | A popup whose component fails to build keeps its slot on the popup stack: the next Show Popup (Replace It) tells the FAILED node Dismissed for a popup that never opened; with Show On Top a failed popup on top takes Escape and the open popup beneath cannot be cancelled | nodecontext.ts :1243-1245 (no catch), :1183-1195 | give the slot back on a rejected build, rethrow so Failure stands. [Ledger](../../bugs/p107-c30-a-popup-that-failed-to-open-keeps-its-slot.md) |
+| **C31** — needs a ruling | A Close Popup in a popup opened from inside a popup can never close the OUTER one by name (Popup input: "when popups are nested"): every popup is built in the root scope, so the outer is never on the walk; `popupParent` is written and read by nothing | nodecontext.ts :1215, :1245, :1258; closepopup.ts :89-101, :206-229 | (a) walk from a popup to its opener (`popupParent`); or (b) re-word the input — it only ever matches the enclosing popup. [Ledger](../../bugs/p107-c31-close-popup-cannot-close-the-popup-that-opened-its-popup.md) |
+| **C32** — needs a ruling | Two Show Popups pressed in one frame: the first, replaced while still being built, reports Dismissed AND Done — Done says "once the popup has been opened" | nodecontext.ts :1247-1253 (returns, resolves); showpopup.ts :288-290 | (a) no Done for an early return (Dismissed answers it); (b) Failure `show-popup/replaced-before-open`; (c) re-word Done. [Ledger](../../bugs/p107-c32-show-popup-reports-done-for-a-popup-replaced-before-it-opened.md) |
 | **C23** ✅ ruled "fix it" 2026-10-01 (s16), fixed — the deferred callback re-walks unconditionally (`onComponentStateNodesChanged`); the scenario lost its `row` mark and was re-recorded | A Parent Component Object (blank Parent Component) whose parent's Component Object is created AFTER the child instance binds the **grandparent's** record for good — reads 8 when the grandparent is written, nothing when the parent is. The Set Parent … beside it resolves at Do and writes the PARENT's (measured: 5 into Page, `near` never sees it). Control: the same tree with the parent's object first binds the parent. Reachable: nodes are created in `Object.values(componentModel.nodes)` order and a child instance's graph is built when it is created ("place the Row, then add the Component Object"). | parentcomponentobject.ts `initialize` walks at creation; the deferred re-walk in `nodeScopeDidInitialize` runs only `if (!modelId)`; the `componentStateNodesChanged` re-walk is editor-only and edit-time | re-resolve unconditionally in the deferred callback and rebind when the id differs. [Ledger](../../bugs/p107-c23-parent-component-object-binds-the-grandparent-when-the-parent-s-object-is-created-later.md) |

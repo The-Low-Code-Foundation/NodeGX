@@ -740,5 +740,39 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "an answer is reported once: the frame after the one that reported Done reports nothing more",
+    "because": "router-navigate.ts :134-143 — the frame-end callback reports the answer and is spent; found s20 as a mutant survivor on one day's seed (20728) only — no hand scenario settled after an answer-only frame",
+    "world": {
+      "router": {
+        "names": [
+          "Main"
+        ]
+      }
+    },
+    "params": {
+      "target": "/Home"
+    },
+    "steps": [
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "navigate"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle"
+    ]
   }
 ]

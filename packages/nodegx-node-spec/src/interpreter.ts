@@ -88,10 +88,10 @@ import { isRegistryEntry } from './registry';
 import type { AnyNodeSpec, ChangeEvent, Outcome, InputDecl, ReducerOutcome, SignalOutputDecl, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
-import { installTimeZone, locationEvent, openReturnsWindow, pushTarget, World, type Delivery, type LocationCall } from './world';
+import { installTimeZone, locationEvent, openReturnsWindow, pushTarget, World, type Delivery, type LocationCall, type PopupCall, type PopupEvent } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
-type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'resize' } | { kind: 'page'; params: Readonly<Record<string, unknown>> };
+type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'resize' } | { kind: 'page'; params: Readonly<Record<string, unknown>> } | { kind: 'popup'; event: PopupEvent };
 
 interface OutcomeSlot {
   port: string;
@@ -235,7 +235,9 @@ function viewOf(inst: Instance): WorldView {
     projectSettings: () => world.projectSettings,
     stackAnswer: (op, stack, target) => world.stack.answer(op, stack, target),
     backAnswer: (ahead) => world.stack.backAnswer(ahead ?? 0),
-    routeAnswer: (router, target, openInNewTab) => world.router.answer(router, target, openInNewTab)
+    routeAnswer: (router, target, openInNewTab) => world.router.answer(router, target, openInNewTab),
+    popupAnswer: (target) => world.popup.answer(target),
+    popupsInside: () => world.popup.inside
   };
 }
 
@@ -303,6 +305,14 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
       const item: Inbound = { kind: 'page', params: deepFreeze({ ...p.params }) };
       if (p.at > 0) world.clock.schedule(p.at, () => handleInbound(inst, item));
       else inst.inbox.push(item);
+    }
+  }
+  // POPUP (world.ts, NSP-015 s20): what the person does to the popups, each at its time on the clock — handed
+  // to a spec that opens popups (its `world.popup` handler); a Close Popup is closed BY one, never handed any
+  if (spec.needs?.includes('popup') && spec.world?.popup) {
+    for (const e of world.popup.events) {
+      const item: Inbound = { kind: 'popup', event: deepFreeze({ ...e.event }) as PopupEvent };
+      world.clock.schedule(e.at, () => handleInbound(inst, item));
     }
   }
   return inst;
@@ -438,6 +448,7 @@ interface PatchLike {
   stack?: { op: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown };
   back?: ReadonlyArray<{ action: unknown; results: unknown }>;
   route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
+  popup?: PopupCall;
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -606,6 +617,12 @@ function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
     world.router.record(patch.route);
     inst.pending.location.push(world.router.calls[world.router.calls.length - 1]);
   }
+  // POPUP (world.ts, NSP-015 s20): a show or a close recorded as handed — a `popup` event in the same group
+  if (patch.popup) {
+    if (patch.popup.op !== 'show' && patch.popup.op !== 'close') throw new SpecError(`${spec.type}.${port}: a popup effect's op is show or close, not ${String((patch.popup as { op?: unknown }).op)}`);
+    world.popup.record(patch.popup);
+    inst.pending.location.push(world.popup.calls[world.popup.calls.length - 1]);
+  }
 }
 
 /**
@@ -634,6 +651,10 @@ function handleInbound(inst: Instance, item: Inbound): void {
     name = 'world.resize';
     if (!spec.world?.resize) throw new SpecError(`${spec.type}: the viewport was resized and the spec listens with no world.resize handler`);
     patch = asWriter(inst, () => spec.world!.resize!(inst.state as never, inst.inputs as never, view));
+  } else if (item.kind === 'popup') {
+    name = 'world.popup';
+    if (!spec.world?.popup) throw new SpecError(`${spec.type}: the person did something to a popup and the spec has no world.popup handler`);
+    patch = asWriter(inst, () => spec.world!.popup!(inst.state as never, inst.inputs as never, item.event, view));
   } else if (item.kind === 'page') {
     name = 'world.page';
     if (!spec.world?.page) throw new SpecError(`${spec.type}: a Router handed its page params and the spec has no world.page handler`);

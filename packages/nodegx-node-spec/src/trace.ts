@@ -5,7 +5,7 @@
  * Between two settles the events are grouped canonically: `value` events SORTED BY PORT NAME
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
  * events in the order they were REPORTED, then `request` events in the order they were issued, then
- * the LOCATION events — `open`, `history`, `dispatch`, (s18) `stack` and (s19) `route`, one group — in the order they were made
+ * the LOCATION events — `open`, `history`, `dispatch`, (s18) `stack`, (s19) `route` and (s20) `popup`, one group — in the order they were made
  * (NSP-015).
  * "Changed" is canonical inequality with the last value RECORDED for
  * the port (nothing before the first settle, so the first settle records every defined output),
@@ -78,7 +78,14 @@ export type TraceEvent =
    * observation (NSP-015 s19): the node handed the Routers a navigate (world.ts ROUTE) — `RouterHandler.navigate(router, args)`:
    * `router` / `target` as handed, absent when not; `params` and `openInNewTab` canonical at the call.
    */
-  | (Base & { t: 'route'; router?: unknown; target?: unknown; params: unknown; openInNewTab: unknown });
+  | (Base & { t: 'route'; router?: unknown; target?: unknown; params: unknown; openInNewTab: unknown })
+  /**
+   * observation (NSP-015 s20): the popups (world.ts POPUP) — a `show` (`context.showPopup(target, params, args)`, Show Popup:
+   * `target` as handed, `params` canonical at the call, `stackPolicy` / `closeOnEscape` / `modal` as handed, `accessibleName`
+   * absent when not handed) or a `close` (the close handler a Close Popup resolved, called with `(action, results)`: `popup`
+   * the name of the popup it closes, absent when unnamed; `action` absent when none; `results` canonical at the call).
+   */
+  | (Base & { t: 'popup'; op: 'show' | 'close'; target?: unknown; params?: unknown; stackPolicy?: unknown; closeOnEscape?: unknown; modal?: unknown; accessibleName?: unknown; popup?: unknown; action?: unknown; results?: unknown });
 
 /** Trace-format version — must match the `/v1.json` in the schema's `$id` (tests/schema.test.ts). */
 export const TRACE_FORMAT_VERSION = 1;

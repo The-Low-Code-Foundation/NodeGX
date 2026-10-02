@@ -1,0 +1,272 @@
+[
+  {
+    "name": "inside no popup: Failure no-popup-in-scope, Error set",
+    "because": "closepopup.ts :238-244, :280-288",
+    "steps": [
+      "settle",
+      {
+        "signal": "close"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "inside a popup: its handler is called with no action and the Results values; Done",
+    "because": "closepopup.ts :246, :291-292",
+    "world": {
+      "popup": {
+        "inside": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "results": "name,ok",
+      "result-name": "A"
+    },
+    "steps": [
+      {
+        "signal": "close"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a close action hands its port's name; the outcome is on that port",
+    "because": "closepopup.ts :294-298, :309-314",
+    "world": {
+      "popup": {
+        "inside": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "closeActions": "Save,Cancel"
+    },
+    "steps": [
+      {
+        "signal": "closeAction-Save"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the action is taken by its close: the next plain Close hands none",
+    "because": "closepopup.ts :267-268",
+    "world": {
+      "popup": {
+        "inside": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "closeActions": "Save"
+    },
+    "steps": [
+      {
+        "signal": "closeAction-Save"
+      },
+      "settle",
+      {
+        "signal": "close"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Close and two actions in one frame: ONE close, with the LAST action pressed; every press Done",
+    "because": "closepopup.ts :171-188, :294-298",
+    "world": {
+      "popup": {
+        "inside": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "closeActions": "Save,Cancel"
+    },
+    "steps": [
+      {
+        "signal": "closeAction-Save"
+      },
+      {
+        "signal": "close"
+      },
+      {
+        "signal": "closeAction-Cancel"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Popup unset closes the NEAREST of two",
+    "because": "closepopup.ts :246",
+    "world": {
+      "popup": {
+        "inside": [
+          "Inner",
+          "Popup"
+        ]
+      }
+    },
+    "steps": [
+      {
+        "signal": "close"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Popup named: that one, even when it is not the nearest",
+    "because": "closepopup.ts :216-229",
+    "world": {
+      "popup": {
+        "inside": [
+          "Popup",
+          "Outer"
+        ]
+      }
+    },
+    "params": {
+      "targetComponent": "Outer"
+    },
+    "steps": [
+      {
+        "signal": "close"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Popup named and not inside it: Failure target-not-found — never the nearest — the message names where it is",
+    "because": "closepopup.ts :216-228",
+    "world": {
+      "popup": {
+        "inside": [
+          "Popup",
+          "Outer"
+        ]
+      }
+    },
+    "params": {
+      "targetComponent": "Nope"
+    },
+    "steps": [
+      {
+        "signal": "close"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Popup named, inside none: the message has no `it is inside`",
+    "because": "closepopup.ts :226",
+    "params": {
+      "targetComponent": "Nope"
+    },
+    "steps": [
+      {
+        "signal": "close"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an empty Popup is unset",
+    "because": "closepopup.ts :98 `value || undefined`",
+    "world": {
+      "popup": {
+        "inside": [
+          "Inner",
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "targetComponent": "Popup"
+    },
+    "steps": [
+      {
+        "signal": "close"
+      },
+      "settle",
+      {
+        "set": "targetComponent",
+        "value": ""
+      },
+      {
+        "signal": "close"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Results values are the node's own, as they are at each close",
+    "because": "closepopup.ts :157-159, :291",
+    "world": {
+      "popup": {
+        "inside": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "results": "name"
+    },
+    "steps": [
+      {
+        "set": "result-name",
+        "value": "A"
+      },
+      {
+        "signal": "close"
+      },
+      "settle",
+      {
+        "set": "result-name",
+        "value": null
+      },
+      {
+        "set": "result-ok",
+        "value": {
+          "a": 1
+        }
+      },
+      {
+        "signal": "close"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a failure keeps Error; a later success does not clear it",
+    "because": "closepopup.ts :281-282 — nothing clears lastError",
+    "world": {
+      "popup": {
+        "inside": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "targetComponent": "Nope"
+    },
+    "steps": [
+      {
+        "signal": "close"
+      },
+      "settle",
+      {
+        "set": "targetComponent",
+        "value": "Popup"
+      },
+      {
+        "signal": "close"
+      },
+      "settle"
+    ]
+  }
+]

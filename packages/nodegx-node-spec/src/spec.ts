@@ -180,6 +180,14 @@ export interface WorldView {
    * `undefined` when no router answers to the name — queued, never answered in the play.
    */
   routeAnswer(router: unknown, target: unknown, openInNewTab: unknown): import('./world').StackAnswer | undefined;
+  /**
+   * NSP-015 s20 — what `context.showPopup` does with a popup handed for `target` (world.ts POPUP): `nohost` (the
+   * app has no popup host — it returns at once, opening nothing), `opened`, or the `error` its promise rejects with
+   * (the component cannot be built). Read when the node shows; the `popup` effect records the call.
+   */
+  popupAnswer(target: unknown): import('./world').PopupAnswer;
+  /** NSP-015 s20 — the popups this node sits inside, nearest first, by component name (world.ts POPUP `inside`); empty when none. */
+  popupsInside(): readonly string[];
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -378,6 +386,10 @@ export interface Patch<S, O> {
    *   `route`   NSP-015 s19 — a navigate handed to the Routers (`RouterHandler.navigate`, world.ts
    *             ROUTE): a `route` event, as handed. The handler hands it on 1 ms later — a spec asks
    *             the clock for that with `after` and reads `WorldView.routeAnswer` when it fires.
+   *   `popup`   NSP-015 s20 — a popup shown (`context.showPopup(target, params, args)`) or closed (the close
+   *             handler a Close Popup resolved, called with `(action, results)`), world.ts POPUP: a `popup`
+   *             event, as handed. What a show does is `WorldView.popupAnswer`; what the person does to an open
+   *             popup later arrives through `world.popup`. No window needed.
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
@@ -389,6 +401,7 @@ export interface Patch<S, O> {
   stack?: { op: 'push' | 'replace'; stack: unknown; target: unknown; params: unknown; transition: unknown };
   back?: ReadonlyArray<{ action: unknown; results: unknown }>;
   route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
+  popup?: import('./world').PopupCall;
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -543,6 +556,13 @@ export interface WorldHandlers<S, I, O> {
    * later ones at their time on the clock. Only a spec that needs `router` is handed any.
    */
   page?: (state: Readonly<S>, inputs: Inputs<I>, params: Readonly<Record<string, unknown>>, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-015 s20 — the person did something to the popups (world.ts POPUP `events`), at its time on the clock: a Close
+   * Popup inside the `popup`-th popup opened in the play (`undefined`: the last one opened) called its close handler
+   * with `action` and `results`, or the person pressed Escape. Only a spec that needs `popup` and has this handler is
+   * handed any; what it does with the popups it opened is the spec's (the context's slot policy).
+   */
+  popup?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').PopupEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -575,6 +595,8 @@ export interface WorldPool {
   stacks?: ReadonlyArray<import('./world').StackScript>;
   /** NSP-015 s19: the Routers a `router` spec's sequences play with (one is drawn per sequence; the default is none registered alone). */
   routers?: ReadonlyArray<import('./world').RouterScript>;
+  /** NSP-015 s20: the popup worlds a `popup` spec's sequences play with (one is drawn per sequence; the default is a host and no popup components). */
+  popups?: ReadonlyArray<import('./world').PopupScript>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -636,9 +658,10 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * LOCATION); the play has a window or none, as for `viewport`, and an activation or none. s17
  * adds `project` — the node reads a project setting (world.ts PROJECT). s18 adds `stack` — the node
  * hands a Component Stack a request (world.ts STACK). s19 adds `router` — the node hands the Routers a
- * navigate, or sits in a Router's page (world.ts ROUTE).
+ * navigate, or sits in a Router's page (world.ts ROUTE). s20 adds `popup` — the node shows a popup, or sits
+ * inside one (world.ts POPUP).
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'backend';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
@@ -719,6 +742,7 @@ export interface AnyNodeSpec {
     change?: (state: never, inputs: never, event: ChangeEvent, world: WorldView) => unknown;
     resize?: (state: never, inputs: never, world: WorldView) => unknown;
     page?: (state: never, inputs: never, params: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
+    popup?: (state: never, inputs: never, event: import('./world').PopupEvent, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

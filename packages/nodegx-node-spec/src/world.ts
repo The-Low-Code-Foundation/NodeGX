@@ -163,6 +163,47 @@
  *               the node sits in no Router's page (a Component Stack hands a page its params as the
  *               page component's own inputs, navigation-stack.tsx :974-977, never to a Page Inputs).
  *               Not a trace event — the world's hand-off, as a timer's firing is not.
+ *   POPUP.  (NSP-015 s20) The popups Show Popup opens and Close Popup closes. Unlike STACK and ROUTE the
+ *           thing the node calls is not a visual node but RUNTIME code — `NodeContext.showPopup` (nodecontext.ts
+ *           :1212-1330) owns the popup stack and its policy — so the policy is part of what is graded, and the
+ *           world plays only what lies outside the runtime: the app's popup HOST (the viewer's
+ *           `setPopupCallbacks`), the PROJECT's components (what a Target can build), and the PERSON (a close
+ *           through the popup's own Close Popup, an Escape). Each call recorded AS HANDED, a `popup` trace
+ *           event in the LOCATION group (trace.ts), in the order made:
+ *             a show (`context.showPopup(target, params, args)`, Show Popup) — `{ op: 'show', target, params,
+ *               stackPolicy, closeOnEscape, modal, accessibleName }`, each canonical AT THE CALL, `accessibleName`
+ *               absent when not handed. What the call does (nodecontext.ts :1212-1330, read and measured s20):
+ *               with no host (`host: false`) it returns at once and opens nothing — the promise resolves.
+ *               Otherwise, SYNCHRONOUSLY: with `stackPolicy` `replace` (anything but `stack`) every popup on the
+ *               stack is dismissed, in stack order, each told `Dismissed` (its `onDismissPopup`) — a popup whose
+ *               build FAILED included (below); then the new popup takes a slot on top. Then the component is
+ *               built (`nodeScope.createNode(target)` on the root scope): a name the project has (`components`)
+ *               opens — the promise resolves; any other is refused with the runtime's message — `Component
+ *               instance must have a name` for a falsy Target, `Can't find component model for <target>`
+ *               otherwise — and the promise REJECTS, and its slot is never given back: it stays on the stack,
+ *               not cancellable, `modal` / `closeOnEscape` as handed. Both land in the settle whose frame showed.
+ *               (A Target that names a NODE TYPE builds that node as a popup — `createNode` asks the register
+ *               first; no scenario uses one.)
+ *             a close (the close handler a Close Popup resolved, closepopup.ts :206-247, called with `(action,
+ *               results)`) — `{ op: 'close', popup, action, results }`, `popup` the name of the popup the handler
+ *               belongs to (absent when unnamed), `action` absent when none, `results` canonical at the call.
+ *           WHAT THE PERSON DOES — the script's `events`, each a world timer at `at`: `close` — a Close Popup
+ *           inside the `popup`-th popup the play OPENED (0-based, counting every show that built its component;
+ *           absent: the last one opened) calls its close handler with `action` and `results`; `escape` — the
+ *           person presses Escape (the host's key listener calls `context.cancelTopPopup()`, :1183-1195: the
+ *           TOP popup whose `modal` is on, and only it — nothing when it has `closeOnEscape` off or its build
+ *           failed). A close or an Escape takes the popup off the screen at the START OF THE NEXT FRAME (`leave`
+ *           → `scheduleNextFrame`, :1284-1300): only then does it leave the stack and is its opener told —
+ *           `Closed` / the action (with its results) or `Cancelled`; until then it is still on the stack, and a
+ *           second close or Escape aimed at it does nothing more (the first wins). A close of a popup no longer
+ *           open does nothing.
+ *           WHERE A CLOSE POPUP SITS — the script's `inside`: the popups (component instances that published a
+ *           close handler) on the node's component walk, nearest first, by component name; absent, none. The
+ *           handler the world hands each only records the call. The callback `showPopup` also hands the Close
+ *           Popups at a popup's top level (`_setCloseCallback`) is not scripted: it is the nearest popup's own
+ *           handler, which the walk finds anyway. A popup opened from INSIDE a popup is built in the ROOT scope
+ *           (:1215, :1247), so the popup that opened it is never on its walk — `popupParent` is written (:1258)
+ *           and read by nothing.
  *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
@@ -213,7 +254,37 @@ export interface WorldScript {
   stack?: StackScript;
   /** NSP-015 s19: the Routers (ROUTE above). Absent: none — every navigate is queued, and no Page Inputs sits in a Router's page. */
   router?: RouterScript;
+  /** NSP-015 s20: the popups (POPUP above). Absent: a host, no components (every show fails to build), nothing the person does, a Close Popup inside no popup. */
+  popup?: PopupScript;
 }
+
+/** POPUP above: the host, the components a Target can build, what the person does, where a Close Popup sits. */
+export interface PopupScript {
+  /** The components the project has that a Show Popup can open; absent: none. */
+  components?: readonly string[];
+  /** `false`: the app has no popup host (`showPopup` returns at once, opening nothing). Absent or `true`: a host. */
+  host?: boolean;
+  /** What the person does, each at `at` ms on the clock (a world timer: never before 1). */
+  events?: readonly PopupScriptEvent[];
+  /** Close Popup: the popups the node sits inside, nearest first, by component name. Absent: none. */
+  inside?: readonly string[];
+}
+
+/** One thing the person does (POPUP above): a close through the popup's own Close Popup, or Escape. */
+export type PopupScriptEvent =
+  | { at: number; close: { action?: string; results?: Record<string, unknown> }; popup?: number }
+  | { at: number; escape: true };
+
+/** What a spec's `world.popup` handler is handed (spec.ts) — POPUP's `events`, at their time. `popup` absent: the last opened. */
+export type PopupEvent = { kind: 'close'; popup?: number; action?: string; results: Readonly<Record<string, unknown>> } | { kind: 'escape' };
+
+/** What `showPopup` does with a show (POPUP above): no host, the component built, or the message its promise rejects with. */
+export type PopupAnswer = 'nohost' | 'opened' | { error: string };
+
+/** One popup call (POPUP above), as handed. */
+export type PopupCall =
+  | { op: 'show'; target: unknown; params: unknown; stackPolicy: unknown; closeOnEscape: unknown; modal: unknown; accessibleName: unknown }
+  | { op: 'close'; popup: unknown; action: unknown; results: unknown };
 
 /** What a Component Stack tells a request (STACK above). */
 export type StackAnswer = 'done' | 'unchanged' | { failure: { code: string; message: string } };
@@ -786,6 +857,67 @@ export class WorldRouter {
   }
 }
 
+/** The trace event a popup call is recorded as (POPUP above; trace.ts) — canonical NOW, since a node hands its live objects. */
+export function popupEvent(c: PopupCall): TraceEvent {
+  if (c.op === 'close') {
+    const e: TraceEvent = { t: 'popup', op: 'close', results: canonicalise(c.results) ?? null };
+    if (c.popup !== undefined) e.popup = canonicalise(c.popup);
+    if (c.action !== undefined) e.action = canonicalise(c.action);
+    return e;
+  }
+  const e: TraceEvent = { t: 'popup', op: 'show', params: canonicalise(c.params) ?? null, stackPolicy: canonicalise(c.stackPolicy) ?? null, closeOnEscape: canonicalise(c.closeOnEscape) ?? null, modal: canonicalise(c.modal) ?? null };
+  if (c.target !== undefined) e.target = canonicalise(c.target);
+  if (c.accessibleName !== undefined) e.accessibleName = canonicalise(c.accessibleName);
+  return e;
+}
+
+/** The popups of a play (POPUP above): the host, what a show builds, what the person does, every call made. */
+export class WorldPopup {
+  /** Every call, as its trace event, in the order made. */
+  readonly calls: TraceEvent[] = [];
+  private listeners: Array<(e: TraceEvent) => void> = [];
+
+  constructor(readonly script: PopupScript) {}
+
+  /** Called with every call's event as it is made — how a target attributes it to the node that made it. */
+  onCall(listener: (e: TraceEvent) => void): void {
+    this.listeners.push(listener);
+  }
+
+  /** Records a call as handed. */
+  record(c: PopupCall): void {
+    const e = popupEvent(c);
+    this.calls.push(e);
+    for (const l of this.listeners) l(e);
+  }
+
+  /** Whether the app has a popup host. */
+  get host(): boolean {
+    return this.script.host !== false;
+  }
+
+  /** What `showPopup` does with this target (nodecontext.ts :1213, nodescope.ts :293-313, :615-623). */
+  answer(target: unknown): PopupAnswer {
+    if (!this.host) return 'nohost';
+    if (!target) return { error: 'Component instance must have a name' };
+    if ((this.script.components ?? []).includes(String(target))) return 'opened';
+    return { error: "Can't find component model for " + String(target) };
+  }
+
+  /** What the person does, in script order, `at` read as a delay (world.ts CLOCK). */
+  get events(): ReadonlyArray<{ at: number; event: PopupEvent }> {
+    return (this.script.events ?? []).map((e) => ({
+      at: Number(e.at),
+      event: 'escape' in e ? { kind: 'escape' as const } : { kind: 'close' as const, popup: e.popup, action: e.close.action, results: { ...(e.close.results ?? {}) } }
+    }));
+  }
+
+  /** The popups a Close Popup sits inside, nearest first. */
+  get inside(): readonly string[] {
+    return this.script.inside ?? [];
+  }
+}
+
 /** The location of a play with a window (LOCATION above): its href, every call made, and the user activation. */
 export class WorldLocation {
   /** Every `window.open`, in order. */
@@ -866,6 +998,8 @@ export class World {
   readonly stack: WorldStack;
   /** The Routers (ROUTE above) — always: a play with none registered queues every navigate. */
   readonly router: WorldRouter;
+  /** The popups (POPUP above) — always: a play with no script has a host and no components. */
+  readonly popup: WorldPopup;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -878,6 +1012,7 @@ export class World {
     this.projectSettings = { ...(script.projectSettings ?? {}) };
     this.stack = new WorldStack(script.stack ?? {});
     this.router = new WorldRouter(script.router ?? {});
+    this.popup = new WorldPopup(script.popup ?? {});
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */

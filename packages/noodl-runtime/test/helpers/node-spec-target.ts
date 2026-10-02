@@ -236,6 +236,34 @@ function installRouters(w: World, record: (e: TraceEvent) => void): () => void {
   };
 }
 
+/**
+ * POPUP (world.ts, NSP-015 s20) — the stand-in for the viewer's popup container (`createPrimitiveNode('Group')`,
+ * nodecontext.ts :1261): it takes the three inputs `showPopup` sets and keeps the popup it is handed (the rAF
+ * attach, :1327-1331) as its child, so deleting it deletes the popup, as the real Group's teardown does. It
+ * draws nothing; nothing a popup's opener observes reads it.
+ */
+const GROUP_STAND_IN = NodeDefinition.defineNode({
+  name: 'Group',
+  category: 'node-spec',
+  initialize(this: { _internal: { children: unknown[] } }) {
+    this._internal.children = [];
+  },
+  inputs: { flexDirection: { type: 'string', set: () => undefined }, cssClassName: { type: 'string', set: () => undefined }, position: { type: 'string', set: () => undefined } },
+  methods: {
+    addChild(this: { _internal: { children: Array<{ parent?: unknown }> } }, child: { parent?: unknown }) {
+      this._internal.children.push(child);
+      child.parent = this;
+    },
+    removeChild(this: { _internal: { children: Array<{ parent?: unknown }> } }, child: { parent?: unknown }) {
+      this._internal.children = this._internal.children.filter((c) => c !== child);
+      child.parent = undefined;
+    },
+    getChildren(this: { _internal: { children: unknown[] } }) {
+      return this._internal.children.slice();
+    }
+  }
+} as never);
+
 /** What a stack's `back` returns to a Pop Component Stack (navigation-stack.tsx `StackBackResult`) for the world's answer. */
 function backResult(a: StackAnswer): unknown {
   if (a === 'done') return { ok: true };
@@ -277,8 +305,8 @@ function resetRegistry(world: World): void {
  */
 export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink'] as const;
 
-/** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (Navigate To Path). */
-export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs'] as const;
+/** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (s17 Navigate To Path … s20 Show / Close Popup). */
+export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -393,11 +421,19 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   // for every node (nodescope.ts `setNodeParameters` → `variants.getVariant` → `this.variants.find`);
   // the headless runtime loads no project, so the list was undefined and every instance a node
   // makes by name (Run Tasks' template) threw there. This is a project with no variants.
-  const graphModel = (context as unknown as { graphModel: { variants?: unknown[] } }).graphModel;
+  const graphModel = (context as unknown as { graphModel: { variants?: unknown[]; componentToBundleMap?: Map<string, string>; componentIndex?: Record<string, unknown> } }).graphModel;
   if (graphModel && !graphModel.variants) graphModel.variants = [];
+  // NSP-015 s20 — likewise its bundles: `importEditorData` sets the component index and the map from a component to
+  // the bundle holding it (graphmodel.ts :158-161); with neither, a component the context does not have threw
+  // `Cannot read properties of undefined (reading 'get')` where the app says `Can't find component model for <name>`
+  // (nodecontext.ts :620-623) — Show Popup's Error carries that message. This is a project with no bundles.
+  if (graphModel && !graphModel.componentToBundleMap) graphModel.componentToBundleMap = new Map();
+  if (graphModel && !graphModel.componentIndex) graphModel.componentIndex = {};
   const states = new Map<string, State>();
   const byNodeId = new Map<string, State>();
   let next = 0;
+  /** NSP-015 s20 — the subject whose `update()` is on the stack right now (synchronously); `undefined` between updates. */
+  let inUpdate: State | undefined;
   /** The node whose `update()` is running (or whose update started the promise chain that is running) — where a request the world sees is attributed. */
   const updating = new AsyncLocalStorage<State>();
 
@@ -486,7 +522,15 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // inside its update, through a promise chain (`conditionalHeaders(url).then(fetch)`): the
     // async context set here follows that chain, where a plain variable would not.
     const originalUpdate = node.update.bind(node);
-    node.update = () => updating.run(s, originalUpdate);
+    node.update = () => {
+      const outer = inUpdate;
+      inUpdate = s;
+      try {
+        return updating.run(s, originalUpdate);
+      } finally {
+        inUpdate = outer;
+      }
+    };
     const originalSendValue = node.sendValue.bind(node);
     node.sendValue = (name: string, value: unknown) => {
       if (s.signalOutputs?.has(name)) {
@@ -496,6 +540,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     };
     const originalSignal = node.sendSignalOnOutput.bind(node);
     node.sendSignalOnOutput = (name: string) => {
+      // NSP-015 s20 — a port the node does not have sends nothing (node.ts `sendSignalOnOutput` returns at once): Show
+      // Popup's close action names a port the popup's Close Popup declared, and one the opener lacks was recorded here
+      if (!node.hasOutput(name)) return originalSignal(name);
       if (!(s.inOutcome > 0 && (OUTCOME_PORTS as readonly string[]).includes(name))) s.frame.signals.push(name);
       originalSignal(name);
     };
@@ -580,6 +627,128 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     s.frame.location.push(event);
   }
 
+  /**
+   * A POPUP call the world saw (a show, a close; world.ts, NSP-015 s20), in the LOCATION group — attributed to the
+   * subject whose `update()` is running RIGHT NOW (both calls are made synchronously from a frame-end callback), and
+   * DROPPED when none is: a Show Popup inside a popup a graph built is not a subject. Not by the async context a request
+   * uses — a popup is built inside its opener's promise chain, and the async context then named the opener for every
+   * call the popup's own nodes made (found s20 on the nested-popups scenario).
+   */
+  function recordPopup(event: TraceEvent): void {
+    // no sole-subject fallback: a graph of ONE subject whose popup holds a Show Popup is exactly where it misattributed
+    if (inUpdate) inUpdate.frame.location.push(event);
+  }
+
+  /** POPUP (world.ts) for the play: the popups `showPopup` built in the root scope, in the order built — what the person's close addresses. */
+  let popups: RuntimeNode[] = [];
+  /** Inside a `showPopup` call: its `createNode` builds a popup (the call reaches it synchronously, before its first `await`). */
+  let showing = 0;
+
+  /**
+   * POPUP (world.ts, NSP-015 s20) — `scope` is the ROOT component's scope, where `showPopup` builds every popup and
+   * its container (nodecontext.ts :1215): made the context's root component, its `createNode` watched for the
+   * popups a show builds. A lone play gets a fresh one (`installPopups`); a graph with components gets the tree's.
+   */
+  function popupRoot(scope: InstanceType<typeof NodeScope>, owner: Owner): void {
+    (context as unknown as { rootComponent: unknown }).rootComponent = owner;
+    const create = scope.createNode.bind(scope);
+    scope.createNode = (async (...args: Parameters<typeof create>) => {
+      const popup = showing > 0;
+      const node = await create(...args);
+      if (popup) popups.push(node as unknown as RuntimeNode);
+      return node;
+    }) as typeof scope.createNode;
+  }
+
+  /**
+   * POPUP (world.ts, NSP-015 s20) for one play. `NodeContext.showPopup` stays the RUNTIME's — its stack, its slot
+   * policy, its next-frame `leave` are what is graded — and only what lies outside the runtime is stood in: the
+   * app's popup host (`setPopupCallbacks`; none when the script says `host: false`), the container `Group`
+   * (GROUP_STAND_IN), `requestAnimationFrame` (the next frame's start, as a browser runs it before the next paint),
+   * a fresh root scope (a popup's id is a `guid()` — the world's random stream — so a scope that outlived a play
+   * refused the next play's first popup as a duplicate), and the project's components (an empty model per name). A
+   * show is recorded at the call, as handed; the person's events are world timers calling the n-th popup's
+   * published close handler or the host's Escape (`cancelTopPopup`). Returns the undo.
+   */
+  function installPopups(w: World): () => void {
+    const ctx = context as unknown as {
+      rootComponent: unknown;
+      popupStack: unknown[];
+      showPopup: (target: unknown, params: unknown, args?: Record<string, unknown>) => unknown;
+      cancelTopPopup(): boolean;
+      setPopupCallbacks(cb: { onShow?: unknown; onClose?: unknown }): void;
+      componentModels: Record<string, unknown>;
+    };
+    w.popup.onCall(recordPopup);
+    const savedRoot = ctx.rootComponent;
+    const savedGroup = context.nodeRegister.peek('Group');
+    context.nodeRegister.register(GROUP_STAND_IN);
+    const g = globalThis as unknown as { requestAnimationFrame?: unknown };
+    const savedRaf = g.requestAnimationFrame;
+    g.requestAnimationFrame = (cb: (t: number) => void) => {
+      context.scheduleNextFrame(() => cb(w.clock.now()));
+      return 0;
+    };
+    const rootOwner: Owner = { name: 'node-spec/root', getInstanceId: () => 'node-spec/root', getRoots: () => [] as never[] };
+    popupRoot(scopeFor(rootOwner, []), rootOwner);
+    popups = [];
+    ctx.popupStack = [];
+    ctx.setPopupCallbacks(w.popup.host ? { onShow: () => undefined, onClose: () => undefined } : { onShow: undefined, onClose: undefined });
+    const models: string[] = [];
+    for (const name of w.popup.script.components ?? []) {
+      if (Object.prototype.hasOwnProperty.call(ctx.componentModels, name)) continue;
+      ctx.componentModels[name] = new ComponentModel(name);
+      models.push(name);
+    }
+    const realShow = ctx.showPopup;
+    ctx.showPopup = function (this: unknown, target, params, args) {
+      w.popup.record({ op: 'show', target, params, stackPolicy: args?.stackPolicy, closeOnEscape: args?.closeOnEscape, modal: args?.modal, accessibleName: args?.accessibleName });
+      showing++;
+      try {
+        return realShow.call(this, target, params, args);
+      } finally {
+        showing--;
+      }
+    };
+    for (const { at, event } of w.popup.events) {
+      w.clock.schedule(at, () => {
+        if (event.kind === 'escape') {
+          ctx.cancelTopPopup();
+          return;
+        }
+        const popup = popups[event.popup ?? popups.length - 1] as unknown as { _popupCloseHandler?: (action: unknown, results: unknown) => void } | undefined;
+        popup?._popupCloseHandler?.(event.action, { ...event.results });
+      });
+    }
+    return () => {
+      delete (ctx as { showPopup?: unknown }).showPopup;
+      for (const name of models) delete ctx.componentModels[name];
+      ctx.setPopupCallbacks({ onShow: undefined, onClose: undefined });
+      ctx.popupStack = [];
+      popups = [];
+      if (savedRaf === undefined) delete g.requestAnimationFrame;
+      else g.requestAnimationFrame = savedRaf;
+      context.nodeRegister.restore('Group', savedGroup);
+      ctx.rootComponent = savedRoot;
+    };
+  }
+
+  /**
+   * POPUP (world.ts, NSP-015 s20) — a lone Close Popup sits inside the script's popups (`inside`, nearest first): its
+   * component's parent is the first, each popup's parent the next — the walk `componentAncestors` makes
+   * (componentwalk.ts :47-75, the non-visual hop). Each popup has a published close handler; the one the node
+   * resolves is recorded by the node's own `resolvePopup` (below), so the handler itself does nothing.
+   */
+  function insidePopups(owner: { parentNodeScope?: unknown }, names: readonly string[]): void {
+    let parent: { componentOwner: unknown } | undefined;
+    for (let i = names.length - 1; i >= 0; i--) {
+      const popup: Record<string, unknown> = { name: names[i], getInstanceId: () => `node-spec/popup/${i}`, getRoots: () => [] as never[], parentNodeScope: parent, _popupCloseHandler: () => undefined };
+      popup.nodeScope = { componentOwner: popup };
+      parent = { componentOwner: popup };
+    }
+    owner.parentNodeScope = parent;
+  }
+
   /** A line a node wrote through its scope's log sink lands on that node's handle; the entry names the node (runcontext.ts). */
   const logSink = (fallback: LogLine[]) => (entry: { level: string; message: string; data?: unknown; nodeId?: string }) => {
     const line: LogLine = entry.data === undefined ? { level: entry.level, message: entry.message } : { level: entry.level, message: entry.message, data: entry.data };
@@ -611,6 +780,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const id = graphId ?? `${type}#${next++}`;
     const logs: LogLine[] = [];
     const nodeScope = scope ?? loneScope(id, logs);
+    // POPUP (world.ts, NSP-015 s20) — a lone Close Popup inside the script's popups
+    if (!scope && type === 'NavigationClosePopup' && world && world.popup.inside.length > 0) insidePopups(nodeScope.componentOwner as { parentNodeScope?: unknown }, world.popup.inside);
     const node = context.nodeRegister.createNode(type, id, nodeScope as never) as unknown as RuntimeNode;
     if (!node.nodeScope) node.nodeScope = nodeScope as never;
     // a node in a component's scope is one of the scope's nodes — what `getNodesWithType` reads
@@ -630,6 +801,24 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const spec = specFor(type);
     if (spec?.derived?.outputs) {
       for (const name of Object.keys(spec.derived.outputs(params))) (node as unknown as NodeInstance).registerOutputIfNeeded(name);
+    }
+    // POPUP (world.ts, NSP-015 s20) — a Close Popup's call to the handler it resolved, recorded AS HANDED, before the call
+    if (type === 'NavigationClosePopup') {
+      type Resolution = { popup?: { name?: unknown }; close?: (action: unknown, results: unknown) => void };
+      const n = node as unknown as { resolvePopup(): Resolution };
+      const resolve = n.resolvePopup.bind(node);
+      n.resolvePopup = () => {
+        const r = resolve();
+        const close = r.close;
+        if (close && world) {
+          const w = world;
+          r.close = (action, results) => {
+            w.popup.record({ op: 'close', popup: r.popup?.name, action, results });
+            close(action, results);
+          };
+        }
+        return r;
+      };
     }
     const h = adopt(node, id, type, context.nodeRegister.getNodeMetadata(type), params, logs);
     // ROUTE (world.ts, NSP-015 s19) — a Page Inputs in a page a Router built: the Router hands it the page's
@@ -726,7 +915,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       return instance;
     };
     for (const cid of Object.keys(components)) build(cid);
-    return { root, instances };
+    return { root, rootOwner, instances };
   }
 
   /** The component models the previous play's definitions registered — removed when the next graph mounts. */
@@ -852,6 +1041,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       const restoreStacks = installStacks(w, recordStack);
       // ROUTE (world.ts, NSP-015 s19) — likewise the REAL RouterHandler, fresh, with a stand-in router per scripted name
       const restoreRouters = installRouters(w, recordStack);
+      // POPUP (world.ts, NSP-015 s20) — the REAL `showPopup`, its host, container, frame and root scope stood in
+      const restorePopups = installPopups(w);
       const installed = installWorld(w);
       // the three process-wide managers behind the store, history and action nodes (NSP-012 T4): one play, one of each
       globalStoreManager.reset({ clearState: true });
@@ -876,6 +1067,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         consoleMethods.forEach((m, i) => (console[m] = hostConsole[i]));
         restoreStacks();
         restoreRouters();
+        restorePopups();
         installed.restore();
         stateHistoryManager.setClock(null);
         world = undefined;
@@ -939,6 +1131,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // does one with definitions, which a node instantiates in its own scope (a real `NodeScope`)
       const hasDefinitions = !!definitions && Object.keys(definitions).length > 0;
       const tree = (components && Object.keys(components).length) || hasDefinitions ? componentTree(components ?? {}, orphanLogs) : undefined;
+      // POPUP (world.ts, NSP-015 s20) — the tree's root is the app's root component: a popup is built in its scope
+      if (tree) popupRoot(tree.root, tree.rootOwner);
       for (const id of Object.keys(nodes)) {
         const decl = nodes[id];
         const scope = tree ? (decl.in !== undefined ? (tree.instances[decl.in].nodeScope as unknown as InstanceType<typeof NodeScope>) : tree.root) : undefined;

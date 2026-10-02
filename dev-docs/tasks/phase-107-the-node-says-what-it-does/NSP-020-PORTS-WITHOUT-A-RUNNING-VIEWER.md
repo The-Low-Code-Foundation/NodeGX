@@ -70,3 +70,14 @@ families on one node — `input <n>` drawn as *Input n* in group *Inputs*, `outp
 mentioned plus one spare, or `<base> 0` alone) and the catalog-parity gate checks `<base> 0`'s prefix and type. With And
 and String Format: **5 of the 68 dynamic-port nodes** have `ports(params)`; 63 rows open. `tests/batch.test.ts` pins the
 three.
+
+**Rows read by NSP-015 (s17–s20, 2026-10-01/02) — the navigation family splits in two.** Derivable from the node's OWN
+params: **Pop Component Stack** (`result-<n>` / `backAction-<n>` from Results / Back Actions), **Page Inputs**
+(`pm-<n>` outputs from Path / Query Parameters, split on `,`, untrimmed — s19) and **Close Popup** (`result-<n>` /
+`closeAction-<n>` from Results / Close Actions — s20); each spec's `derived` draws them. From the PROJECT, not the
+node: **Push Component To Stack** (`target`, `pm-` — the Component Stack named Stack, its pages, the target's
+inputs), **Navigate** (`router`, `target`, `pm-` — the project's Routers and their pages) and **Show Popup**
+(`popupParam-<n>` from the Target component's inputs; `closeResult-<n>` / `closeAction-<n>` from the Close Popups
+inside it, closeResult types from its outputs — showpopup.ts setup :341-416). These need the project model, which
+the editor has without a viewer; a `ports(params, project)` shape, not `ports(params)`. Show Popup's spec grades a
+fixed project (a popup with Results `name,ok`, Close Actions `Save,Cancel`).

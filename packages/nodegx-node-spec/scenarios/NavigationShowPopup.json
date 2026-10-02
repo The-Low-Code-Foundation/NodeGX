@@ -1,0 +1,733 @@
+[
+  {
+    "name": "no Target: every press is Failure no-target with Error set, and nothing is handed",
+    "because": "showpopup.ts :226-232",
+    "steps": [
+      "settle",
+      {
+        "signal": "show"
+      },
+      {
+        "signal": "show"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Target the project has: the popup is handed at the frame's end and Done lands in the same settle",
+    "because": "showpopup.ts :214-217, :249-290; nodecontext.ts :1245 — the build is microtasks, inside the settle",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "show"
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "two presses in one frame: ONE popup handed, both presses Done",
+    "because": "showpopup.ts :202-219 — the guard drops the second show, its token is kept",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      {
+        "signal": "show"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "no popup host: the show is handed and Done — for a component that does not even exist",
+    "because": "nodecontext.ts :1213 returns at once; showpopup.ts :288-290",
+    "world": {
+      "popup": {
+        "host": false
+      }
+    },
+    "params": {
+      "target": "Nope"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Target the project does not have: Failure target-failed, Error carries the runtime's message",
+    "because": "nodecontext.ts :620-623 `Can't find component model for`; showpopup.ts :291-297",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "target": "Nope"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an empty Target is handed (not == undefined) and fails to build: `Component instance must have a name`; a null one is no-target",
+    "because": "showpopup.ts :226; nodecontext.ts :615-618",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "target": ""
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": null
+      },
+      {
+        "signal": "show"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Replace It: a second show dismisses the popup this node already has open — Dismissed, then Done",
+    "because": "nodecontext.ts :1240-1242, :1220-1236",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "signal": "show"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C30 — a failed build keeps its slot: the next show (Replace It) tells THIS node Dismissed for a popup that never opened",
+    "because": "nodecontext.ts :1243-1245 — no catch around the await; :1240-1242 dismisses it",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "target": "Nope"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "Popup"
+      },
+      {
+        "signal": "show"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C30 — a failed build on top (Show On Top) takes Escape: the popup beneath cannot be cancelled",
+    "because": "nodecontext.ts :1183-1195 — the top modal slot has no cancel",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "escape": true
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup",
+      "stackPolicy": "stack"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "Nope"
+      },
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "the control for C30's Escape: with no failed build on top, the same Escape cancels the popup — Cancelled at the next frame",
+    "because": "nodecontext.ts :1183-1195, :1284-1300, :1306-1308",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "escape": true
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup",
+      "stackPolicy": "stack"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Escape twice in one millisecond: one Cancelled — the second is spent on the popup already leaving",
+    "because": "nodecontext.ts :1179-1182 comment, :1289 `hasNodeWithId` guard",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "escape": true
+          },
+          {
+            "at": 1,
+            "escape": true
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a close with results: nothing before the next frame; then Close Results move and Closed fires",
+    "because": "nodecontext.ts :1287 scheduleNextFrame; showpopup.ts :266-274",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 5,
+            "close": {
+              "results": {
+                "name": "A",
+                "ok": true,
+                "extra": 1
+              }
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "a close action: its signal instead of Closed, after its results",
+    "because": "showpopup.ts :273-274",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "close": {
+              "action": "closeAction-Save",
+              "results": {
+                "ok": false
+              }
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a close action this node has no port for sends nothing at all — not even Closed",
+    "because": "showpopup.ts :273-274; node.ts sendSignalOnOutput returns for a port the node lacks",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "close": {
+              "action": "closeAction-Nope",
+              "results": {
+                "name": "B"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an empty action is no action: Closed",
+    "because": "showpopup.ts :273 `!action`",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "close": {
+              "action": "",
+              "results": {
+                "name": null
+              }
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two closes of one popup in a millisecond: the first wins",
+    "because": "nodecontext.ts :1289 — the second leave finds the container gone",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "close": {
+              "action": "closeAction-Save",
+              "results": {
+                "name": "first"
+              }
+            }
+          },
+          {
+            "at": 1,
+            "close": {
+              "results": {
+                "name": "second"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Show On Top: the first popup closed by its own Close Popup while the second stays; Escape then cancels the second",
+    "because": "nodecontext.ts :1240 (no dismissal), :1284-1300, :1183-1195",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup",
+          "Other"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "close": {
+              "results": {
+                "ok": 1
+              }
+            },
+            "popup": 0
+          },
+          {
+            "at": 3,
+            "escape": true
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup",
+      "stackPolicy": "stack"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "Other"
+      },
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a close of a popup already dismissed does nothing",
+    "because": "nodecontext.ts :1289 — its container was deleted at the dismissal (:1231-1234)",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "close": {
+              "results": {
+                "name": "late"
+              }
+            },
+            "popup": 0
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Close On Escape off: Escape does nothing",
+    "because": "nodecontext.ts :1189",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "escape": true
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup",
+      "closeOnEscape": false
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a popup with Modal off is skipped by Escape: the modal one beneath it is cancelled",
+    "because": "nodecontext.ts :1185-1188",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup",
+          "Other"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "escape": true
+          },
+          {
+            "at": 2,
+            "close": {
+              "results": {
+                "name": "toast"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup",
+      "stackPolicy": "stack"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "set": "target",
+        "value": "Other"
+      },
+      {
+        "set": "modal",
+        "value": false
+      },
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "what is handed: the popupParam values by name, the policy, the flags and the Accessible Name, as stored",
+    "because": "showpopup.ts :196-198, :249-254; :78-79, :93-94, :109-110, :118-119",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup",
+      "popupParam-title": "Hi",
+      "popupParam-id": 2,
+      "stackPolicy": "other",
+      "closeOnEscape": 0,
+      "modal": null,
+      "accessibleName": "Pick"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "set": "accessibleName",
+        "value": 5
+      },
+      {
+        "set": "closeOnEscape",
+        "value": false
+      },
+      {
+        "signal": "show"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an Escape reported in the same frame as a new show: Cancelled, the new popup Done — and the next Escape reaches the new one",
+    "because": "nodecontext.ts :1284-1300 at the frame's start, then the frame's show",
+    "world": {
+      "popup": {
+        "components": [
+          "Popup"
+        ],
+        "events": [
+          {
+            "at": 1,
+            "escape": true
+          },
+          {
+            "at": 3,
+            "escape": true
+          }
+        ]
+      }
+    },
+    "params": {
+      "target": "Popup",
+      "stackPolicy": "stack"
+    },
+    "steps": [
+      {
+        "signal": "show"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "signal": "show"
+      },
+      "settle",
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      "settle"
+    ]
+  }
+]
