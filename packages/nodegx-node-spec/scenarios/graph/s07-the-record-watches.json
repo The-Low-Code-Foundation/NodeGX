@@ -645,5 +645,226 @@
         "subject": "r"
       }
     ]
+  },
+  {
+    "name": "Query Records' First Record Id wired into a Record: the Record binds the very record the query's answer wrote — its fields, Fetched — in the frame the answer lands",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "NSP-014 s23. dbcollectionnode2.ts :888-904 (rows → registry records under their objectId, First Record Id re-sent) → a wire → dbmodelnode2.ts :247-275 binds by name: one id, one record (S1). The use First Record Id's description names",
+    "nodes": {
+      "q": {
+        "type": "DbCollection2",
+        "params": {
+          "collectionName": "Lesson"
+        }
+      },
+      "r": {
+        "type": "DbModel2",
+        "params": {}
+      }
+    },
+    "wires": [
+      {
+        "from": "q.firstItemId",
+        "to": "r.modelId"
+      }
+    ],
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "q",
+        "signal": "fetched",
+        "count": 1
+      },
+      {
+        "at": 1,
+        "subject": "q",
+        "port": "firstItemId",
+        "value": "r1"
+      },
+      {
+        "at": 1,
+        "subject": "r",
+        "port": "prop-title",
+        "value": "a"
+      },
+      {
+        "at": 1,
+        "subject": "r",
+        "signal": "fetched",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "r",
+        "signal": "fetched",
+        "count": 0
+      }
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "query"
+            },
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "q"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "changedEvent",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecord",
+        "value": null,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecordId",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "changedRecords",
+        "value": [],
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 2,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r1",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "isEmpty",
+        "value": false,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "15iCnKz2Hk",
+          "items": [
+            {
+              "id": "r1",
+              "n": 1,
+              "title": "a"
+            },
+            {
+              "id": "r2",
+              "n": 2,
+              "title": "b"
+            }
+          ]
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "realtimeError",
+        "value": null,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "realtimeStatus",
+        "value": "",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "subscribed",
+        "value": false,
+        "subject": "q"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "q"
+      },
+      {
+        "t": "backend",
+        "op": "query",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "count": false
+        },
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r1",
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 1,
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "prop-title",
+        "value": "a",
+        "subject": "r"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "r"
+      },
+      {
+        "t": "settle"
+      }
+    ]
   }
 ]

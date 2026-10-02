@@ -322,6 +322,12 @@ const BACKEND_OPS: Readonly<Record<string, (o: BackendOptions, ok: unknown, emit
   fetch: (o, ok, emit) => {
     o.success(ok);
     emit({ type: 'fetch', objectId: o.objectId, object: ok, collection: o.collection });
+  },
+  // s23 — RestDataAdapter.ts :601-636 — `success(records, total)` and NO event; the world's `ok` carries the two as
+  // `{ results, count }` (the contract's success takes two arguments; a script answers with one value)
+  query: (o, ok) => {
+    const a = (ok ?? {}) as { results?: unknown; count?: unknown };
+    o.success(a.results, a.count);
   }
 };
 

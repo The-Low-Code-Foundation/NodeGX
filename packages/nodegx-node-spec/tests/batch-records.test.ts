@@ -16,7 +16,7 @@
 import type { TraceEvent } from '../src';
 import { EQUIVALENT_MUTANTS, interpreterAdapter, loadScenarios, play, runConformance, specs, World } from '../src';
 
-const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRelation', 'NewDbModelProperties', 'SetDbModelProperties', 'DbModel2'];
+const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRelation', 'NewDbModelProperties', 'SetDbModelProperties', 'DbModel2', 'DbCollection2'];
 
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {
   for (const type of BATCH) {
@@ -35,6 +35,9 @@ describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 2
     }
   }
 });
+
+/** A failure as the node reports it: the outcome contract's, or — on Query Records, which predates ERG-001 — its plain `Failure` pulse. */
+const isFailure = (e: TraceEvent) => (e.t === 'outcome' && e.value === 'failure') || (e.t === 'signal' && e.port === 'failure');
 
 describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made only when the inputs are ready, beside one that is', () => {
   const traces = async (type: string): Promise<Array<{ name: string; trace: TraceEvent[] }>> => {
@@ -63,12 +66,13 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
       ]
     ],
     // s23 — the read
-    ['DbModel2', ['Missing Id.', 'Forbidden', 'Failed to fetch.']]
+    ['DbModel2', ['Missing Id.', 'Forbidden', 'Failed to fetch.']],
+    ['DbCollection2', ['Unknown class', 'Failed to fetch.']]
   ])('%s: every failure sentence is on Error beside a Failure outcome in some scenario, and so is the not-configured backend', async (type, sentences) => {
     const all = await traces(type);
     const errors = new Set<string>();
     for (const { trace } of all) {
-      const failed = trace.some((e) => e.t === 'outcome' && e.value === 'failure');
+      const failed = trace.some(isFailure);
       for (const e of trace) if (failed && e.t === 'value' && e.port === 'error') errors.add(String((e as { value: unknown }).value));
     }
     for (const s of sentences) expect([...errors]).toContain(s);
@@ -78,12 +82,12 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
   test.each(BATCH)('%s: a scenario that calls the backend (the control) and one that does not (inputs not ready) — both observed', async (type) => {
     const all = await traces(type);
     const calls = all.filter((x) => x.trace.some((e) => e.t === 'backend'));
-    const none = all.filter((x) => !x.trace.some((e) => e.t === 'backend') && x.trace.some((e) => e.t === 'outcome' && e.value === 'failure'));
+    const none = all.filter((x) => !x.trace.some((e) => e.t === 'backend') && x.trace.some(isFailure));
     expect(calls.length).toBeGreaterThan(0);
     expect(none.length).toBeGreaterThan(0);
     // the call carries the contract's words: the op and the Class as `collection`
     const ev = calls[0].trace.find((e) => e.t === 'backend') as TraceEvent & { op: string; args: Record<string, unknown> };
-    const op: Record<string, string> = { DeleteDbModelProperties: 'delete', AddDbModelRelation: 'addRelation', RemoveDbModelRelation: 'removeRelation', NewDbModelProperties: 'create', SetDbModelProperties: 'save', DbModel2: 'fetch' };
+    const op: Record<string, string> = { DeleteDbModelProperties: 'delete', AddDbModelRelation: 'addRelation', RemoveDbModelRelation: 'removeRelation', NewDbModelProperties: 'create', SetDbModelProperties: 'save', DbModel2: 'fetch', DbCollection2: 'query' };
     expect(ev.op).toBe(op[type]);
     expect(typeof ev.args.collection).toBe('string');
   });

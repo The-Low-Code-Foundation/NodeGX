@@ -54,6 +54,7 @@ import { AddRecordRelation, RemoveRecordRelation } from './record-relation';
 import { CreateRecord } from './create-record';
 import { UpdateRecord } from './update-record';
 import { RecordNode } from './record';
+import { QueryRecords } from './query-records';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
 import { JSONStreamParser } from './json-stream-parser';
@@ -144,6 +145,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [CreateRecord.type]: CreateRecord, // s22
   [UpdateRecord.type]: UpdateRecord,
   [RecordNode.type]: RecordNode, // s23
+  [QueryRecords.type]: QueryRecords,
   [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
@@ -208,6 +210,7 @@ export {
   CreateRecord,
   UpdateRecord,
   RecordNode,
+  QueryRecords,
   States,
   RandomBytes,
   Repeat,

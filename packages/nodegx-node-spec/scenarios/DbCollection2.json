@@ -1,0 +1,1061 @@
+[
+  {
+    "name": "the Class written: ONE query at the frame end; the rows become Items, Success",
+    "because": "dbcollectionnode2.ts — the Class setter schedules; the frame's one query; the success publishes",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "nothing written: no query, ever; Items undefined, Is Empty true, Count 0",
+    "because": "no setter ran, nothing scheduled",
+    "params": {},
+    "steps": [
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Do with nothing written queries anyway — collection undefined",
+    "because": "storageFetch → scheduleFetch, no guard; the editor's warning only",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Class, Search, a filter and its parameter in one frame: one query carrying all of them",
+    "because": "scheduleFetch coalesces; the neutral filter on the wire",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "search",
+        "value": "ada"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      {
+        "set": "qp-min",
+        "value": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the same Class again does not re-query (DEF-046); Do does",
+    "because": "setCollectionName compares; storageFetch does not",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the visual filter written again with the same value re-queries — no comparison on the panel's two editors",
+    "because": "setVisualFilter / setVisualSorting ask only the Query settings box",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Use limit with no Limit or Skip: limit 10, skip 0; Limit 2 then narrows",
+    "because": "getStorageLimit / getStorageSkip — `|| 10`, `|| 0`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "storageEnableLimit",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "storageLimit",
+        "value": 2
+      },
+      {
+        "set": "storageSkip",
+        "value": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Limit without Use limit is not sent",
+    "because": "getStorageLimit returns nothing unless Use limit is on",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "storageLimit",
+        "value": 2
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Fetch total count: the call asks for it, and the answer's total is re-sent on Total Count",
+    "because": "getStorageFetchTotalCount; the success stores the count and flags storageTotalCount",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "storageEnableCount",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ],
+                "count": 7
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a connected rule whose parameter has supplied nothing does not narrow the query",
+    "because": "savedFilterToNeutral { dropUnresolvedConnected: true } — the optional filter port",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a filter the Parse lowering refuses (pointsTo, no schema): Error is the refusal, Failure, no call",
+    "because": "getStorageFilter's catch → `failed`; fetch() setError and returns",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "owner",
+              "operator": "pointsTo",
+              "valueSource": "static",
+              "value": "u1"
+            }
+          ]
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Backend the project does not have: the not-configured sentence, Failure, no call; Items stays unset",
+    "because": "fetch() — forBackend answers nothing",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the first failure publishes the empty array; a later one keeps the rows already shown",
+    "because": "REL-011b AC2 — only the first failure publishes `_c`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Other"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Note"
+            },
+            "answer": {
+              "error": "Unknown class"
+            }
+          },
+          {
+            "match": {
+              "collection": "Other"
+            },
+            "answer": {
+              "error": "Forbidden"
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "refused with no message: Error is `Failed to fetch.`",
+    "because": "`err || 'Failed to fetch.'`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": null
+            },
+            "after": 10
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Class box unticked: the Class is stored and nothing runs; Do queries with it",
+    "because": "shouldRunOnValueChanged('collectionName', …) — the box; Do is not governed",
+    "params": {
+      "runOnChange-collectionName": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Query settings box unticked: a Limit change does not re-query; Do does",
+    "because": "userInputSetter asks the Query settings box",
+    "params": {
+      "runOnChange-querySettings": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "storageEnableLimit",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Do while a query is out is a second query; each answer publishes its own array",
+    "because": "fetchScheduled is cleared before fetch() runs; each success closes over its own `_c`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            },
+            "after": 10
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the visual sort: one '-'-prefixed name per rule, in order",
+    "because": "queryutils.ts convertVisualSorting",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualSort",
+        "value": [
+          {
+            "property": "n",
+            "order": "descending"
+          },
+          {
+            "property": "title",
+            "order": "ascending"
+          }
+        ]
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the retired QueryEditor shape reads the same as the builder's: a rule on a parameter",
+    "because": "convertVisualFilterToNeutral — isVisualQueryFormat → visualQueryToNeutral",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "combinator": "and",
+          "rules": [
+            {
+              "property": "title",
+              "operator": "equal to",
+              "input": "min"
+            }
+          ]
+        }
+      },
+      {
+        "set": "qp-min",
+        "value": "a"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "an empty Search sends none; an empty filter group narrows nothing",
+    "because": "`this._internal.search || undefined`; savedFilterToNeutral of no conditions is null",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "search",
+        "value": ""
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": []
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "an empty answer: Items is an empty array, Is Empty true, First Record Id unset, Success",
+    "because": "the success publishes whatever came back",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": []
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Backend picker names the second backend: the query goes there",
+    "because": "forBackend(modelScope, backendId)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "backend": "other"
+            },
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r3",
+                    "title": "c"
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "backends": [
+          "main",
+          "other"
+        ]
+      }
+    }
+  },
+  {
+    "name": "a filter parameter's own box unticked: its change does not re-query",
+    "because": "setQueryParameter asks `qp-<name>`'s own box",
+    "params": {
+      "runOnChange-qp-min": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "n",
+              "operator": "greaterThan",
+              "valueSource": "connected",
+              "valuePortName": "qp-min"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "set": "qp-min",
+        "value": 5
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+]

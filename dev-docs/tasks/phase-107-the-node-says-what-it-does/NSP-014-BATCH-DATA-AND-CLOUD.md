@@ -1,7 +1,7 @@
 # NSP-014 — Batch: records, users, files, HTTP, streams, and the cloud-only nodes
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world's network and backend) and R4 = continue.
-**Status: 🟡 s23 (2026-10-02): Record (`DbModel2`) conforms on the runtime, first run and at 10,000; `fetch` joined the BACKEND seam; rows C37, D22. 7 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
+**Status: 🟡 s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
 
 ## 1. The person sentence
 
@@ -272,21 +272,68 @@ on `r1` hears every key that moved (Changed ×2, `n` re-sent, no Fetched), `r2` 
 **Runtime target:** `fetch` joined `BACKEND_OPS` (RestDataAdapter.ts :972-1015: `success(record)` then the contract's
 `fetch` event).
 
+### 6.7b s23 — Query Records (`DbCollection2`), slice A: the query
+
+**CONFORMS on the runtime on its first run** — 23 / 23 scenarios, 200 / 200 (seed 20728), 255 / 255 mutants; the
+interpreter's every mutant killed on seeds 13 and 20728 (two were sharpened: a later failure with the SAME message
+could not show a dropped Error, and Do's reducer now sets its flag on one branch). Spec `src/nodes/query-records.ts`.
+Two runtime traces printed and read beside the spec before trusting the green (the neutral `where` on the call; the
+first failure publishing `[]`, the later one keeping the rows).
+
+**What the node is, from the code (1,513 lines):** NO declared input — every port registers on first write. Three
+per-port Run On Value Change boxes (Class, Search, each `qp-<name>`) compare old and new (DEF-046); everything else —
+Backend, the visual filter and sort, Use limit / Limit / Skip, Fetch total count, any other name — shares the ONE
+`Query settings` box, and the visual filter and sort re-query on EVERY write (no comparison); Do always. One query per
+frame. **No outcome contract** — `Success` is the `fetched` signal, Do has no tokens.
+
+**The filter is the CONTRACT's:** the visual filter (two saved shapes — the builder's and the retired QueryEditor's)
+becomes the neutral filter through `@noodl/backend-contract/translators`, which the spec IMPORTS (a pure workspace
+module — "types and data only", shared with the editor; as Parse XML imports fast-xml-parser). The call carries the
+neutral filter (R9). The same filter is ALSO lowered to Parse for the local matcher, and that lowering is what refuses
+(`pointsTo` with no class schema — a play's project has none) → Error + Failure, no call. A connected rule whose
+parameter has supplied nothing drops (the optional filter port).
+
+**Slice A's edges, named in the spec's header:** realtime (no REALTIME seam), the Javascript filter (NSP-017's escape
+hatch — but measured, rows C38 / C39), and WATCHING the store (another node's create / save / delete patches `Items` in
+place through the local Parse matcher — the next slice, a graph through the world's contract events: a world change).
+
+**Runtime target:** `query` joined `BACKEND_OPS` (RestDataAdapter.ts :601-636: `success(records, total)`, no event); the
+world's `ok` carries the two as `{ results, count }`.
+
+**The Javascript filter, probed (six arms on the runtime target, world answering every query; probe deleted):** control
+(Class only) → query, rows, Success. Javascript with NO script stored → nothing at all: no call, no Success, no Failure,
+no Error — **C38** (`filterCode.replace` on undefined is caught and logged, `getStorageFilter` returns `undefined`, and
+`fetch()` throws reading `f.where` in the frame-end callback, which the scheduler only logs). A syntax error → the same
+silence. The default script written → a normal query (`where: {}`, `sort: []`). A filtering script → its `where` on the
+call. A script that throws BEFORE `where(…)` → the query goes out with NO `where` — every row, Success — **C39**, the
+widening FLD-008 closed for the error callback, arriving by a throw. Unmeasured for C38: whether the editor stores its
+default script as a parameter when an author switches to Javascript (a port default is not a parameter, A-D1).
+
+**A lead dropped, not filed:** reading Query Records' per-port boxes suggested a saved `runOnChange-search` would land in
+the catch-all setter (the node scope applies every `runOnChange-…` parameter FIRST, before its port exists). It does
+not: `nodedefinition.ts` wraps every dynamic family's `registerInputIfNeeded` so a `runOnChange-…` name always registers
+the real box (:512-528) — measured by reading, the guard names this exact case.
+
 ### 6.8 Rows (s23)
 
 | row | node | what the trace shows | proposed |
 |---|---|---|---|
 | **C37** | Record | `<field> Changed` never fires: offered by the editor (:560), never registered (:473-481 handles `prop-` only), the pulse at :142 guarded by `hasOutput`. Control beside it: `Changed` fires for the same write. 86 / 10,000 generated sequences meet it. Ledger `p107-c37-…` | register `changed-` beside `prop-`; rule WITH C11 |
+| **C38** | Query Records | Filter = Javascript with no script stored, or a syntax error: no query, no Success, no Failure, no Error — ever (a TypeError at `f.where`, :874, in the frame-end callback, logged only). Probe with a control arm. Ledger `p107-c38-…` | a missing or unparseable script fails the filter, as the visual filter's refusal does |
+| **C39** | Query Records | a filter script that throws before `where(…)` sends the query with NO filter — every row, as a Success (:1079-1089; FLD-008 guarded only the error callback). Probe with a control arm. Ledger `p107-c39-…` | a throw in the script fails the filter |
 | **D22** | Record | the Fetch's guard (:411) checks `undefined` and `''` but not `null`, which binding treats as empty (:313): a cleared Id wire fetches record `null` and reports the backend's sentence instead of `Missing Id.`. A conforming scenario shows it. Ledger `p107-d22-…` | use `emptyId` at :411 |
 
 ### 6.9 Gate readings (s23, 2026-10-02)
 
 | gate | reading |
 |---|---|
-| `nodegx-node-spec`: `npx jest` | **18 suites, 697 passed, 17 skipped, exit 0** (s22: 687) — the stranger hash gate green (no guarded file moved) |
-| runtime: `NSP_ONLY=<the six record specs> … conformance.test.ts` | **all six CONFORM**, seed 20728 — Delete 20 / 21 (+C36), Add / Remove 18 / 18, Create 23 / 23, Update 30 / 30, Record 24 / 25 (+C37); each 200 / 200; mutants 34, 36, 36, 40, 78 all killed, Record 145 / 147 + 2 equivalent |
-| runtime deep, `NSP_DEEP=10000 NSP_ONLY=DbModel2` (load ~4–7, a VM; no peer suite) | **CONFORMS**, 129 s: 0 divergences, 86 attributed to C37, 204 / 206 mutants |
-| runtime: `runtime-target.test.ts` + `graph.test.ts` | **2 suites, 89 passed, exit 0** (s22: 86; +3 = s07) |
+| `nodegx-node-spec`: `npx jest` | **18 suites, 705 passed, 17 skipped, exit 0** (s22: 687) — the stranger hash gate green (no guarded file moved) |
+| runtime: the WHOLE `conformance.test.ts -t "NSP-004 / NSP-011 — every"` | **71 passed, 74 skipped, exit 0, 336 s — all 70 specs CONFORM at seed 20728** (load ~2–3) |
+| runtime: `NSP_ONLY=<the five earlier record specs> + DbModel2` at 200, on the changed target | **all six CONFORM**, seed 20728 — Delete 20 / 21 (+C36), Add / Remove 18 / 18, Create 23 / 23, Update 30 / 30, Record 24 / 25 (+C37); each 200 / 200; mutants 34, 36, 36, 40, 78 all killed, Record 145 / 147 + 2 equivalent |
+| runtime: `NSP_ONLY=DbCollection2` at 200 | **CONFORMS** 23 / 23, 200 / 200, 255 / 255 |
+| runtime deep, `NSP_DEEP=10000`, one spec at a time (load ~2–7, a VM; no peer suite) | **Record CONFORMS** (129 s): 0 divergences, 86 → C37, 204 / 206; **Query Records CONFORMS** (89 s): 0 divergences, 23 → C6 (any port), 255 / 255 |
+| interpreter, `tests/batch-records.test.ts` | every record spec × seeds 13, 20728 — all mutants killed or declared; AC5 sentences; AC6 call / no-call |
+| runtime: `runtime-target.test.ts` + `graph.test.ts` | **2 suites, 90 passed, exit 0** (s22: 86; +4 = s07) — the four s07 claims written before recording; three held first time, the fourth is C37's (known) |
 | `tsc --noEmit` node-spec, runtime (`tsconfig.json`) | exit 0 · exit 0 |
 | `node scripts/node-spec/census.js --check` | fresh — 147, 33 excluded, all tiered |
-| the whole runtime conformance suite, `test:main`, export | NOT RUN — s23 touched the runtime only in `test/helpers/node-spec-target.ts` (`fetch`, the answer copy — the six record specs re-read on it) and `test/node-spec/conformance.test.ts` (one known row) |
+| export, `test:main` | NOT RUN — s23 touched the runtime only in `test/helpers/node-spec-target.ts` (`fetch`, `query`, the answer copy) and `test/node-spec/conformance.test.ts` (one known row) |
