@@ -1,6 +1,6 @@
 # ISL-002 — A `false` from a States node's first state reaches its wire as `false`
 
-**Status: 🟡 s3 (2026-10-02): ruled ("Fix both, one commit") and fixed in `06e65ab47` — runtime, export and P107's spec; AC1–AC4 green with their sabotage arms. AC5 driven on a deployed page with its control; AC6 is written (README §6). Every AC met — ✅ ready to close.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F02 ·
+**Status: 🟡 s3 (2026-10-02): ruled ("Fix both, one commit") and fixed in `06e65ab47` — runtime, export and P107's spec; AC1–AC4 green with their sabotage arms. AC5 driven on a deployed page with its control; AC6 is written (README §6). Every AC met — ✅ **CLOSED 2026-10-02.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F02 ·
 [P106 IG-003](../phase-106-the-island-grows/IG-003-DRIVE-TEACH-PLAY.md) §7, deviation 4 (line 169-172) · the template's
 note at `packages/noodl-mcp/tests/cg003Components.ts:1072-1074` · **Side:** product (runtime, the `States` node; the
 exported States library too)
