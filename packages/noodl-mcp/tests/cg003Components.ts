@@ -936,8 +936,10 @@ const PLAY: CgComponent = {
     text('plSub', 'How it works', 'plHead', '', { ...T_MUTED, maxWidth: px(640), cssClassName: 'bg-ws-sub' }),
     group('plWs', 'World and steps', 'plRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-ws' }, ['plLeft', 'plSplit', 'plRight']),
     // P108 s8 (Richard, 2026-10-02: "make the middle divider possible to drag and resize"): the steps column's width is
-    // --bg-steps-w on the grid (cg007Look), set by a drag or the arrow keys and kept on this computer.
-    place('plSplit', KIT_DIVIDER, 'The divider between the world and the steps', 'plWs', { variable: '--bg-steps-w', hostClass: 'bg-ws', storeKey: 'bot-garden-steps-w', min: 360, max: 1000, minOther: 420, label: 'Drag to make the steps wider or narrower' }),
+    // --bg-steps-w on the grid (cg007Look), set by a drag or the arrow keys and kept on this computer. Min 420: the
+    // column's own floor at 1024 — narrower, Blocks' workspace drops under 380 px and its drawer goes to the foot, off the
+    // screen (seen on the s8 drive's shot at 375).
+    place('plSplit', KIT_DIVIDER, 'The divider between the world and the steps', 'plWs', { variable: '--bg-steps-w', hostClass: 'bg-ws', storeKey: 'bot-garden-steps-w', min: 420, max: 1000, minOther: 420, label: 'Drag to make the steps wider or narrower' }),
     group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plTeachLine', 'plStage', 'plVars', 'plModeLine', 'plControls', 'plOwl', 'plJob']),
     group('plTask', 'The task', 'plLeft', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), flexWrap: 'nowrap' }), ['plFace', 'plTaskText', 'plMarks']),
     group('plFace', 'The islander', 'plTask', { sizeMode: 'explicit', width: px(56), height: px(56) }),

@@ -1,7 +1,8 @@
 ---
 id: P108-S8-CAN
 title: "Water my three tulips" (and three more watering missions) hand Pip the can — there is no can to pick up
-status: open
+status: fixed
+commit: 3bb2e084e
 severity: medium
 area: template bot-garden / missions (cg002Content.ts REQUESTS)
 found: P108 s8, 2026-10-02 (Richard played it)

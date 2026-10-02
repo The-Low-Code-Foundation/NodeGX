@@ -2360,7 +2360,16 @@
           return;
         }
         var s = screenOf([l.g.position.x, l.g.position.y + l.g.userData.lift, l.g.position.z]);
-        place(l.el, s.sx, s.sy);
+        // P108 s8: a chip over a thing on the plot's edge (her land's tree and rock) is kept inside the world, not cut by
+        // its edge (the chip is centred on its point; its width read once per text, never every frame).
+        var sx = s.sx;
+        if (eng.world.map.w <= 16 && width > 0) {
+          var txt = l.el.textContent;
+          if (l.el.__gdText !== txt || !l.el.__gdW) { l.el.__gdText = txt; l.el.__gdW = l.el.offsetWidth || 0; }
+          var half = (l.el.__gdW || 0) / 2 + 4;
+          if (half * 2 < width) sx = Math.max(half, Math.min(width - half, sx));
+        }
+        place(l.el, sx, s.sy);
         // P108 IW-003 (lane B): on the island the compact bar is at most 80 % of its tile as the camera sees it (12 px at
         // most), so two neighbours' bars never touch however far the camera stands.
         if (eng.world.map.w > 16 && l.el.className.indexOf('gd3-watch') === -1) {

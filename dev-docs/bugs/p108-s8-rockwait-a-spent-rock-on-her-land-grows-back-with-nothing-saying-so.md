@@ -1,7 +1,8 @@
 ---
 id: P108-S8-ROCKWAIT
 title: After the first building her land's rock is empty, and nothing says it is growing back
-status: open
+status: fixed
+commit: 3bb2e084e
 severity: medium
 area: template bot-garden / her land's sources (LAND_SOURCES; both kits' source drawing)
 found: P108 s8, 2026-10-02 (Richard: "there's not enough rock")

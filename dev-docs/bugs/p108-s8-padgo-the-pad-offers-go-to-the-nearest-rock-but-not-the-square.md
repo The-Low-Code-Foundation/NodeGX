@@ -1,7 +1,8 @@
 ---
 id: P108-S8-PADGO
 title: Teaching by driving, a child can go to the nearest rock but not back to the nearest square — the trip back cannot be taught
-status: open
+status: fixed
+commit: 3bb2e084e
 severity: high
 area: template bot-garden / the Workshop pad (PAD_GO, cg003Content.ts; PAD_KEYS script, cg003Scripts.ts)
 found: P108 s8, 2026-10-02 (Richard played path-stones)

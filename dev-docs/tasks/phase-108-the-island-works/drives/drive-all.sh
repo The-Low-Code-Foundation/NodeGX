@@ -52,6 +52,8 @@ ALL+=(animals animals-3d animals-perf)
 ALL+=(touch)
 # P108 s7: the touch path on Garden 3D.
 ALL+=(touch-3d)
+# P108 s8: Richard's play (drive-p108s8-feedback.js).
+ALL+=(s8 s8-3d)
 (( $# )) && ALL=("$@")
 for n in $ALL; do
   waitload
@@ -93,6 +95,9 @@ for n in $ALL; do
     touch) node scripts/devtools/drive-iw007-touch.js $D $J --shots $P/touch-shots --json $P/touch.json ;;
     # P108 s7: the same taps on Garden 3D (swiftshader).
     touch-3d) node scripts/devtools/drive-iw007-touch.js $D $J --mode 3d --shots $P/touch-3d-shots --json $P/touch-3d.json ;;
+    # P108 s8: what Richard found playing — the can, the walk, the divider, no Workshop tab, the refuge's lines.
+    s8) node scripts/devtools/drive-p108s8-feedback.js $D $J --shots $P/s8-shots --json $P/s8.json ;;
+    s8-3d) node scripts/devtools/drive-p108s8-feedback.js $D $J --mode 3d --shots $P/s8-3d-shots --json $P/s8-3d.json ;;
     build-3d) node scripts/devtools/drive-iw007-build.js $D $J --mode 3d --shots $P/build-3d-shots --json $P/build-3d.json ;;
     # P108 IW-007 (lane A).
     animals) node scripts/devtools/drive-iw007-animals.js $D $J --shots $P/animals --json $P/animals.json ;;

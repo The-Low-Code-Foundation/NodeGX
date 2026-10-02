@@ -346,7 +346,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       await openQuest(lang, 'tulips-three');
       const m0 = await meters();
       const b0 = await evaluate(BOT);
-      check(`M2 ${tag}: the tulips wear 0/3 each (three drinks, and the can holds three), Pip's can is empty`, m0.filter((m) => m.kind === 'tulip' && m.meter === '0/3').length === 3 && b0 && b0.can === '0', { m0, b0 });
+      // P108 s8: the can lies on the grass between Pip and the pond (empty, 0/3); his hands are empty.
+      check(`M2 ${tag}: the tulips wear 0/3 each (three drinks, and the can holds three), the empty can lies on the grass at 1,1, Pip's hands empty`, m0.filter((m) => m.kind === 'tulip' && m.meter === '0/3').length === 3 && m0.some((m) => m.kind === 'can' && m.at === '1,1' && m.meter === '0/3') && b0 && (b0.can === null || b0.can === undefined), { m0, b0 });
       await shot('m2-1368-en-01-start');
       await evaluate(`(() => { const j = document.querySelector('.bg-job'); if (j) j.scrollIntoView({ block: 'center' }); })()`);
       await wait(400);
@@ -508,6 +509,8 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       await freshFamily(lang);
       const r = REQ('rows-trick');
       await openQuest(lang, 'rows-trick');
+      // P108 s8: the can lies at the pond's edge in front of Pip: picked first.
+      await palTap('pick');
       await palTap('trick');
       const trickId = await lastOf('trick');
       await pick(`document.querySelector('.bg-blocks-box .gd-prog [data-rep="${trickId}"] .gd-slot[data-slot="name"]')`, 'row', 'the trick’s name');
@@ -552,6 +555,9 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       const targets = (w0.job && w0.job.targets) || [];
       const rowColours = [...new Set(targets.map((id) => (w0.things.find((t) => t.id === id) || {}).color))];
       check(`M5 ${tag}: today's note says the ${day} ones and the job is that row (targets ${targets.join(' ')}: ${rowColours.join('')})`, rowColours.length === 1 && rowColours[0] === day, { note, targets, rowColours });
+      // P108 s8: Pip faces the can on the path: pick it up, turn to the well.
+      await palTap('pick');
+      await palTap('left');
       await palTap('olive:read');
       await palTap('fill');
       await palTap('if:else');

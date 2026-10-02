@@ -401,9 +401,9 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     readings.benchWords = await evaluate(`((b) => { const c = b && b.getInputTargetBlock('THING'); const tx = (r) => (r ? r.textContent.replace(/\u00a0/g, ' ').trim() : ''); return { chip: tx(c && c.getSvgRoot()), state: tx(b && b.getField('STATE').getSvgRoot()) }; })(${condOf(u1)})`);
     return program();
   };
-  /** right, fill, left, repeat 4 { forward, left, is it a…? (a flower, 3 times), if Olive says yes { water }, right } */
+  /** (P108 s8: pick the can on the path first) right, fill, left, repeat 4 { forward, left, is it a…? (a flower, 3 times), if Olive says yes { water }, right } */
   const buildFlower = async (lang) => {
-    for (const op of ['right', 'fill', 'left']) await palTap(op);
+    for (const op of ['pick', 'right', 'fill', 'left']) await palTap(op);
     await palTap('repeat');
     const r = await newest('repeat');
     await slot(blockOf(r), 'N', '4', 'the four');

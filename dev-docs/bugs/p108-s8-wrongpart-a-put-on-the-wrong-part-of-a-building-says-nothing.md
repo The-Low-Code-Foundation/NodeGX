@@ -1,7 +1,8 @@
 ---
 id: P108-S8-WRONGPART
 title: Putting stones on a building's plank part (or planks on its stone part) does nothing and says nothing
-status: open
+status: fixed
+commit: 3bb2e084e
 severity: high
 area: template bot-garden / the engine's put (cg002Scripts.ts exec, op put)
 found: P108 s8, 2026-10-02 (Richard: "I can't seem to put it down on the refuge build site")

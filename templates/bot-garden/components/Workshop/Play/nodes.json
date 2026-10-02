@@ -263,7 +263,7 @@
         "variable": "--bg-steps-w",
         "hostClass": "bg-ws",
         "storeKey": "bot-garden-steps-w",
-        "min": 360,
+        "min": 420,
         "max": 1000,
         "minOther": 420,
         "label": "Drag to make the steps wider or narrower"

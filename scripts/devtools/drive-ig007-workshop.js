@@ -79,6 +79,9 @@ const FIRST_REPEAT = TULIPS.referenceProgram.find((b) => b.t === 'repeat');
  */
 const FOLDED = TULIPS.referenceProgram.length + (FIRST_REPEAT ? layOut(FIRST_REPEAT.body).length : 0);
 const START = TULIPS.robotStart;
+// P108 s8: the can lies on the grass (Pip starts with none: null); its size is the can lying there.
+const START_CAN = START.can === undefined ? null : START.can;
+const CAN_MAX = (TULIPS.things.find((t) => t.kind === 'can') || {}).max || START.canMax;
 const TULIP_COUNT = TULIPS.things.filter((t) => t.kind === 'tulip').length;
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -244,7 +247,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     await wait(800);
     await shot('ac1-3d-01-start');
     const start = await agree('start');
-    check(`AC1: the 3D node draws the engine’s start — Pip on ${START.x},${START.y} facing d ${START.d}, the can at ${START.can} of ${START.canMax}, ${TULIP_COUNT} dry tulips (the request's own start)`, start.ok && start.last.engine.x === START.x && start.last.engine.y === START.y && start.last.engine.d === START.d && start.last.engine.can === START.can && start.last.drawn.tulips === TULIP_COUNT && start.last.engine.wet === 0, start.last);
+    check(`AC1: the 3D node draws the engine’s start — Pip on ${START.x},${START.y} facing d ${START.d}, the can ${START_CAN === null ? 'not in hand' : `at ${START_CAN} of ${CAN_MAX}`}, ${TULIP_COUNT} dry tulips (the request's own start)`, start.ok && start.last.engine.x === START.x && start.last.engine.y === START.y && start.last.engine.d === START.d && start.last.engine.can === START_CAN && start.last.drawn.tulips === TULIP_COUNT && start.last.engine.wet === 0, start.last);
 
     // Drive with the pad: Teach, then the reference program laid out press by press; after every press the engine
     // and the 3D node agree (tile, facing, wet tulips, the can's level).
@@ -270,7 +273,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const bad = steps.filter((x) => !x.ok);
     check(`AC1: all ${PRESSES.length} presses of the reference program — after EVERY press the 3D node draws what the engine holds (tile, facing, wet tulips, can level)`, bad.length === 0 && steps.length === PRESSES.length, bad.slice(0, 3));
     const fill = steps.find((x) => x.op === 'fill');
-    check('AC1: fill — the engine’s can goes to canMax and the 3D can’s level shows it', !!fill && fill.ok && fill.after.can === START.canMax && fill.drawn.can === START.canMax, fill);
+    check('AC1: fill — the engine’s can goes to canMax and the 3D can’s level shows it', !!fill && fill.ok && fill.after.can === CAN_MAX && fill.drawn.can === CAN_MAX, fill);
     const fwd = steps.find((x) => x.op === 'fwd' && (x.after.x !== x.before.x || x.after.y !== x.before.y));
     check('AC1: a forward — the engine moves Pip one tile and the 3D node glides him there (mid-way it was gliding)', !!fwd && fwd.ok && Math.abs(fwd.after.x - fwd.before.x) + Math.abs(fwd.after.y - fwd.before.y) === 1 && midGlide && midGlide.drawn && midGlide.drawn.gliding === true, { fwd, midGlide });
     const turn = steps.find((x) => x.op === 'left' || x.op === 'right');

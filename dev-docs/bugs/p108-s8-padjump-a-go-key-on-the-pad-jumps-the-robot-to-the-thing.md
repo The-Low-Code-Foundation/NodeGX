@@ -1,7 +1,8 @@
 ---
 id: P108-S8-PADJUMP
 title: A "go to the nearest" press on the pad jumps the robot to the thing instead of walking there
-status: open
+status: fixed
+commit: 3bb2e084e
 severity: medium
 area: template bot-garden / Record step (RECORD_STEP_SCRIPT, cg003Scripts.ts)
 found: P108 s8, 2026-10-02 (Richard drove path-stones)

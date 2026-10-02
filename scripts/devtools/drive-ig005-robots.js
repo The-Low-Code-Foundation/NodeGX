@@ -422,6 +422,9 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
           await wait(1000);
           await control('rec');
           await until(`!!document.querySelector('.bg-pad .bg-key-fill')`, Boolean, 4000);
+          // P108 s8: the can lies on the grass between Pip and the pond (his bigger can, can+): pick it up, step to the pond.
+          await key('pick');
+          await key('fwd');
           await key('fill');
           const full = await until(gauge, (g) => !!g && g.can > 0, 2500);
           for (const op of ['left', 'left', 'fwd']) await key(op);

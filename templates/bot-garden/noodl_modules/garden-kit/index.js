@@ -1667,6 +1667,21 @@ var gardenKitBlocks = (function () {
       el.style.left = Math.round(left) + 'px';
       el.style.top = Math.round(top) + 'px';
       root.appendChild(el);
+      // P108 s8: the estimate counts three options a row; long ones (French, at 390) wrap one a row and the picker ran past
+      // the screen's foot (the page drive's 390-fr "if yellow", option at y 850 of 844). Measured now: over the slot when it
+      // does not fit under it, and never taller than the window (it scrolls inside itself then).
+      var real = el.getBoundingClientRect ? el.getBoundingClientRect().height : 0;
+      if (real > 0) {
+        if (real > vh - 8) {
+          el.style.maxHeight = vh - 8 + 'px';
+          el.style.overflowY = 'auto';
+          real = vh - 8;
+        }
+        var under = fr ? fr.bottom + 6 : 12;
+        var at = under + real <= vh ? under : Math.max(4, (fr ? fr.top : vh) - 6 - real);
+        if (at + real > vh) at = Math.max(4, vh - 4 - real);
+        el.style.top = Math.round(at) + 'px';
+      }
       pickerEl = el;
       pickerEl.__field = field;
       var fr0 = field.getSvgRoot && field.getSvgRoot();
@@ -3983,12 +3998,12 @@ var gardenKitBlocks = (function () {
     return String(m && m.need > 0 ? Math.max(0, Math.min(10, Math.round((10 * m.have) / m.need))) : 0);
   }
   /** P108 IW-002: a meter chip (the mockup's): its icon, a pip per unit up to METER_PIPS_MAX, and the numbers. */
-  function meterEl(m, key, watched, top) {
+  function meterEl(m, key, watched, top, edge) {
     var pips = [];
     for (var i = 0; i < m.pips; i++) pips.push(h('i', { key: i, className: 'gd-pip' + (i < m.have ? ' gd-on' : '') }));
     return h(
       'span',
-      { key: key, className: 'gd-meter gd-m-' + m.icon + (m.full ? ' gd-full' : '') + (m.grows ? ' gd-grows' : '') + (watched ? ' gd-watch' : '') + (top ? ' gd-meter-top' : ''), 'data-meter': m.text, 'data-kind': m.kind, 'data-full': m.full ? 'true' : undefined, 'data-grows': m.grows ? 'true' : undefined, 'data-watch': watched ? 'true' : undefined, 'data-fill': fillOf(m) },
+      { key: key, className: 'gd-meter gd-m-' + m.icon + (m.full ? ' gd-full' : '') + (m.grows ? ' gd-grows' : '') + (watched ? ' gd-watch' : '') + (top ? ' gd-meter-top' : '') + (edge ? ' gd-meter-' + edge : ''), 'data-meter': m.text, 'data-kind': m.kind, 'data-full': m.full ? 'true' : undefined, 'data-grows': m.grows ? 'true' : undefined, 'data-watch': watched ? 'true' : undefined, 'data-fill': fillOf(m) },
       h('i', { key: 'ic', className: 'gd-mi gd-mi-' + m.icon }),
       m.pips ? h('span', { key: 'p', className: 'gd-pips' }, pips) : null,
       h('span', { key: 't', className: 'gd-mt' }, m.text),
@@ -4267,6 +4282,8 @@ var gardenKitBlocks = (function () {
     '.gd-meter.gd-watch{outline:3px solid #8F6BFF;outline-offset:1px;font-size:15px;gap:5px;padding:2px 11px;z-index:3;transform:translate(-50%,-85%)}\n' +
     '.gd-meter.gd-watch .gd-pip{width:9px;height:14px;border-radius:4px}.gd-meter.gd-watch .gd-mi{width:11px;height:11px}.gd-meter.gd-watch .gd-mi-egg{width:10px;height:13px}.gd-meter.gd-watch .gd-mi-stone,.gd-meter.gd-watch .gd-mi-food,.gd-meter.gd-watch .gd-mi-letter{width:14px;height:10px}\n' +
     '.gd-meter.gd-meter-top{transform:translate(-50%,6%)}.gd-meter.gd-watch.gd-meter-top{transform:translate(-50%,4%)}\n' +
+    '.gd-world:not([data-wide="1"]) .gd-meter.gd-meter-start{left:1px;transform:translate(0,-70%)}.gd-world:not([data-wide="1"]) .gd-meter.gd-meter-end{left:auto;right:1px;transform:translate(0,-70%)}\n' +
+    '.gd-world:not([data-wide="1"]) .gd-meter.gd-watch.gd-meter-start,.gd-world:not([data-wide="1"]) .gd-meter.gd-watch.gd-meter-end{transform:translate(0,-85%)}.gd-world:not([data-wide="1"]) .gd-meter.gd-meter-top.gd-meter-start,.gd-world:not([data-wide="1"]) .gd-meter.gd-meter-top.gd-meter-end{transform:translate(0,6%)}\n' +
     '.gd-ring{position:absolute;inset:-4%;box-sizing:border-box;border:3px solid #8F6BFF;border-radius:50%;box-shadow:0 0 0 2px rgba(255,255,255,.9),inset 0 0 0 2px rgba(255,255,255,.9);z-index:2;pointer-events:none}\n' +
     '.gd-bot>.gd-ring{inset:-6%}\n' +
     '.gd-bot.gd-watch>.gd-can{outline:3px solid #8F6BFF;outline-offset:1px;transform:translateY(-50%) scale(1.4)}\n' +
@@ -4881,8 +4898,10 @@ var gardenKitBlocks = (function () {
           here.forEach(function (t, i) {
             var m = meterOf(t);
             var seen = watchedThings.indexOf(t) !== -1;
-            // The world clips at its edge (overflow hidden): on the top row the chip sits just inside its tile.
-            if (m) marks.push(meterEl(m, 'meter-' + i, seen, c.y === 0));
+            // The world clips at its edge (overflow hidden): on the top row the chip sits just inside its tile; P108 s8: in
+            // the first and last column it grows inward from the tile's side (her land's tree and rock stand on the edge:
+            // their chips were cut to "6," and "0").
+            if (m) marks.push(meterEl(m, 'meter-' + i, seen, c.y === 0, c.x === 0 ? 'start' : c.x === grid.w - 1 ? 'end' : ''));
             if (seen) marks.push(h('span', { key: 'ring-' + i, className: 'gd-ring', 'data-ring': t.kind }));
             if (t.kind === 'tulip') tulip = t;
             else if (t.kind === 'puddle') extras.push(h('div', { key: 'puddle-' + i, className: 'gd-puddle', 'data-puddle': 'true' }));

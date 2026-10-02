@@ -1,7 +1,8 @@
 ---
 id: P108-S8-LANDLEFT
 title: The Workshop on her land shows the rock and tree full even when they are empty on the island
-status: open
+status: fixed
+commit: 3bb2e084e
 severity: medium
 area: template bot-garden / landThings (iw007Land.ts)
 found: P108 s8, 2026-10-02

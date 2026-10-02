@@ -1664,6 +1664,21 @@ var gardenKitBlocks = (function () {
       el.style.left = Math.round(left) + 'px';
       el.style.top = Math.round(top) + 'px';
       root.appendChild(el);
+      // P108 s8: the estimate counts three options a row; long ones (French, at 390) wrap one a row and the picker ran past
+      // the screen's foot (the page drive's 390-fr "if yellow", option at y 850 of 844). Measured now: over the slot when it
+      // does not fit under it, and never taller than the window (it scrolls inside itself then).
+      var real = el.getBoundingClientRect ? el.getBoundingClientRect().height : 0;
+      if (real > 0) {
+        if (real > vh - 8) {
+          el.style.maxHeight = vh - 8 + 'px';
+          el.style.overflowY = 'auto';
+          real = vh - 8;
+        }
+        var under = fr ? fr.bottom + 6 : 12;
+        var at = under + real <= vh ? under : Math.max(4, (fr ? fr.top : vh) - 6 - real);
+        if (at + real > vh) at = Math.max(4, vh - 4 - real);
+        el.style.top = Math.round(at) + 'px';
+      }
       pickerEl = el;
       pickerEl.__field = field;
       var fr0 = field.getSvgRoot && field.getSvgRoot();

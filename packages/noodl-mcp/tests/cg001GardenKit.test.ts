@@ -973,7 +973,8 @@ describe('CG-001 — garden-kit, the built artefact', () => {
     it('🔴 Watch rings each chip’s thing and draws its meter large — by id, by kind on its tile, a held can on its robot, else the tile; junk and empty ring nothing', () => {
       const w = { map: ['GGGG', 'GGGG'], things: [{ kind: 'tulip', id: 'tu', x: 0, y: 0, need: 3, have: 1 }, { kind: 'basket', x: 2, y: 0, count: 2, capacity: 4 }, { kind: 'egg', x: 3, y: 0 }], robots: [{ x: 1, y: 1, d: 1, holds: 'can', can: 1, canMax: 3 }] };
       const html = draw(w, { watch: JSON.stringify([{ id: 'tu', kind: 'tulip', x: 9, y: 9 }, { kind: 'basket', x: 2, y: 0 }, { kind: 'can', x: 5, y: 5 }, { kind: 'ahead', x: 3, y: 1 }]) });
-      expect(cellOf(html, 0, 0)).toMatch(/class="gd-meter gd-m-water gd-watch gd-meter-top" data-meter="1\/3"[^>]*data-watch="true"/);
+      // P108 s8: a chip in the first column grows inward (gd-meter-start), so the world's edge never cuts it.
+      expect(cellOf(html, 0, 0)).toMatch(/class="gd-meter gd-m-water gd-watch gd-meter-top gd-meter-start" data-meter="1\/3"[^>]*data-watch="true"/);
       expect(cellOf(html, 0, 0)).toContain('class="gd-ring" data-ring="tulip"');
       expect(cellOf(html, 2, 0)).toMatch(/gd-meter gd-m-egg gd-watch gd-meter-top" data-meter="2\/4"/);
       expect(cellOf(html, 3, 1)).toContain('class="gd-ring gd-ring-tile" data-ring="tile"');
@@ -1036,11 +1037,11 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       const before = cellOf(draw(w0), 7, 3);
       expect(before).toMatch(/data-sprite="door"/);
       expect(before).toMatch(/class="gd-plate" data-owner="Sami">Sami</);
-      expect(before).toMatch(/class="gd-meter gd-m-letter" data-meter="0\/1" data-kind="door"/);
+      expect(before).toMatch(/class="gd-meter gd-m-letter gd-meter-end" data-meter="0\/1" data-kind="door"/); // P108 s8: the last column
       const r = REQUESTS.find((q: any) => q.id === 'path-postbox');
       const after = cellOf(draw(play(w0, r.referenceProgram)), 7, 3);
       expect(after).toMatch(/data-sprite="doorMail"/);
-      expect(after).toMatch(/class="gd-meter gd-m-letter gd-full" data-meter="1\/1" data-kind="door" data-full="true"/);
+      expect(after).toMatch(/class="gd-meter gd-m-letter gd-full gd-meter-end" data-meter="1\/1" data-kind="door" data-full="true"/);
       // The post box gave its letter: it no longer peeks from the slot.
       expect(cellOf(draw(w0), 2, 2)).toMatch(/gd-letter-in/);
       expect(cellOf(draw(play(w0, r.referenceProgram)), 2, 2)).not.toMatch(/gd-letter-in/);

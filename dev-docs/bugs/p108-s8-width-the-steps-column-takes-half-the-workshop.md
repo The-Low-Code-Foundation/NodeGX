@@ -1,7 +1,8 @@
 ---
 id: P108-S8-WIDTH
 title: The Workshop's steps column takes half the screen and the world stays small beside it
-status: open
+status: fixed
+commit: 3bb2e084e
 severity: medium
 area: template bot-garden / the Workshop's layout (cg007Look.ts .bg-ws, .bg-stage)
 found: P108 s8, 2026-10-02 (Richard's screenshot, a 1420 px window)

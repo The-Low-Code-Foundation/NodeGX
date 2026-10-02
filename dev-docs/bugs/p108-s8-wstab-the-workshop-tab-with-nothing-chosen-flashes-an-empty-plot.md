@@ -1,7 +1,8 @@
 ---
 id: P108-S8-WSTAB
 title: The Workshop tab with no mission chosen shows an empty plot, then jumps back to the island
-status: open
+status: fixed
+commit: 3bb2e084e
 severity: medium
 area: template bot-garden / the top bar (TABS, cg003Components.ts) and Pages/Workshop's guard
 found: P108 s8, 2026-10-02 (Richard)
