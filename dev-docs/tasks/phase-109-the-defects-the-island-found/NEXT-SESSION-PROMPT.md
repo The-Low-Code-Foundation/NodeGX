@@ -2,15 +2,15 @@
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
 **Sessions 1–2:** ISL-001's fix (`3df5adb82`), ISL-014's refusal (`aab96a056`), ISL-025 W1–W3, ISL-011 (1a + 2a).
-**Session 3 (2026-10-02, on `cline-dev` from `4b448e016`): rulings 2 and 3 given; ISL-002 ✅ CLOSED (the phase's first);
-ISL-014 (b) built; ISL-001 AC5 and ISL-022 AC1 measured; two gates of this phase's own put right.** Commits:
+**Session 3 (2026-10-02, on `cline-dev` from `4b448e016`): rulings 2 and 3 given; ISL-002 and ISL-001 ✅ CLOSED (2 of 25);
+ISL-014 (b) built; ISL-022 AC1 measured; ISL-001's AC7: 8 modes runs, no lost press; two gates of this phase's own put right.** Commits:
 `06e65ab47` (ISL-002 fix, three copies), `13b57fc4e` (rulings + records), `83a31805b` (ISL-014 b), `e234bd15f`
 (HLS-001 golden learns ISL-011's fixture), `45177be3a` (ISL-002 AC5), `906a1fe3c` (ISL-001 AC5), `1fd49429c` and
 `5ddc39420` (ISL-022 AC1), plus this handoff's commit.
 
 ## Read first
 
-1. README §4 (board), §8 (rulings 1–3 given, each with its question), §10 (status: 1 of 25 closed).
+1. README §4 (board), §8 (rulings 1–3 given, each with its question), §10 (status: 2 of 25 closed).
 2. ISL-014 §8 s3 (the build-on-demand and its staleness rule), ISL-001 §8 s3 (why a minimal page cannot show D85),
    ISL-022 §8 s3 (both halves of AC1), ISL-002 §8 s3 (the census; closed).
 
@@ -22,19 +22,14 @@ ISL-014 (b) built; ISL-001 AC5 and ISL-022 AC1 measured; two gates of this phase
 
 ## Build, in this order
 
-1. **ISL-001 AC7** — if session 3's background run did not finish, its runner is
-   `scratchpad/ac7/run.sh` (copied into ISL-001 §8 if it did): the island assembled and deployed once, then
-   `drive-ig003-modes.js` 8× on today's island (fix + W3), counting lost Teach presses (F06: 2 of 8 at IG-005).
-   🔴 **Before, as AC7 words it, is not re-runnable as it was:** the waits are gone (W3), so a pre-fix runtime now draws
-   doubled cards as well. Compare the 8 runs with IG-005 §7.7's recorded 2 of 8 and say which reading that is.
-2. **`npm run build` in `packages/noodl-mcp`** when `git status packages/noodl-mcp/src` shows no peer's work (s3 found
+1. **`npm run build` in `packages/noodl-mcp`** when `git status packages/noodl-mcp/src` shows no peer's work (s3 found
    `src/cloud/bundleEntry.js` modified, a peer's). Then **ISL-014 AC6**: under (b) the agent should never see the
    refusal — `get_project_info` → `kits.readerBuilt` on a checkout with no reader, the kit node placed, the page
    deployed with it drawing, the screenshot looked at.
-3. **ISL-011's two owed arms** (the editor canvas via `run-editor` on a copy of `nodegx-export/tests/fixtures/isl011-kit-grid`;
+2. **ISL-011's two owed arms** (the editor canvas via `run-editor` on a copy of `nodegx-export/tests/fixtures/isl011-kit-grid`;
    the port-write-after-mount drive).
-4. **ISL-018 AC2** (the editor) — a measurement that decides its ruling.
-5. **Then ask, in plain words, all at once:** ISL-022 §5 (should the wrapped-row warning still fire on items with a pixel
+3. **ISL-018 AC2** (the editor) — a measurement that decides its ruling.
+4. **Then ask, in plain words, all at once:** ISL-022 §5 (should the wrapped-row warning still fire on items with a pixel
    width — it reverses GAM-022 — and fire on a `contentSize` wrapped row like `brTabs`?) with the Track B and D
    rulings (README §9). Rewrite each with no internal word: say what the person saw (the island's page zoomed out on a
    phone; taps landing off), the choices, the cost.

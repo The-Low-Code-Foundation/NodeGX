@@ -24,3 +24,7 @@ D85's fix). One heavy job.
 
 **Proposed:** none until measured. ISL-001 owns the measurement and a sentence saying whether this went with D85; if
 it did not, file the cause as its own bug.
+
+**2026-10-02 (P109 s3, ISL-001 AC7):** not reproduced — `drive-ig003-modes.js` 8× on the island with ISL-001's fix and
+ISL-025 W3: 8 / 8 runs 90 / 90, every press / block clause green, 0 console errors. Consistent with F06 having been D85
+(a pad list doubled mid-build), not shown by it; the cause is still unmeasured. Status left as it was.

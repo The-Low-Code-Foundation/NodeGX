@@ -1,6 +1,6 @@
 # ISL-001 — A list given twice while it is still building draws one set of rows
 
-**Status: 🟡 fix landed 2026-10-01 (session 1, `3df5adb82`) — AC1–AC4, AC6 (s2) and AC8 green; s3: AC5 driven (80/80 loads read the latest list; the minimal page's control cannot see the defect — the island's My robots reading, 14 for 9 before the fix, is the browser control). AC7 owed.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F01 (and F06 as a
+**Status: ✅ CLOSED 2026-10-02 (session 3).** Fix `3df5adb82` (s1); AC1–AC4, AC8 (s1), AC6 (s2), AC5 and AC7 (s3). AC5's control is blind on a minimal page and says so, as the clause allows; the island's 14-for-9 is the browser control. Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F01 (and F06 as a
 "measure alongside" note) · [P78 D85](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) (table line 64, section
 line 3277; owner `NONE` until now — **this task takes D85**) · met three times: TPL-011 s5 (09-27), P108 IW-001 §6 and
 IW-008 §5 · **Side:** product (runtime, the `For Each` / Repeater node)
@@ -224,4 +224,17 @@ real wait the island's cards hit is **not measured here**.
 (no fix) was **14 cards for 9**, and 9 after the rebuild (above). The fix's side of AC5 is met — **80 / 80 loads read
 exactly the latest list**, at both times, on both pages.
 
-**AC7 (IG-005's Teach-pad drive 8× before and after) is still owed.**
+**AC7 — F06 measured alongside.** The island assembled once (`drive-cg003-pages.js assemble`, exit 0), deployed with
+`nodegx deploy` (exit 0) over the 14:01 bundle (this fix + ISL-002), then `drive-ig003-modes.js` — the drive where F06's
+"2 blocks for 3 presses" was seen — **8 times in a row** (14:29–15:02, each run waiting for no peer jest):
+
+| runs | clauses | the 40 press / block clauses (Drive and Teach presses, block counts, the pad) | console / network errors |
+|---|---|---|---|
+| 8 / 8 exit 0 | **90 / 90 each** | **40 / 40 each — no lost press in 8 runs** | 0 / 0 each |
+
+**The sentence AC7 owes:** F06 (a Teach press lost in 2 of 8 runs at IG-005, 2026-09-29) **did not appear in 8 runs on
+today's island**, which has both this fix and W3 (no 120 ms wait in front of the pad's list). That fits F06 having been
+this defect — a pad list given twice while building, its key rows doubled, a press landing on a stale row — but it is
+**not shown**: 0 of 8 against 2 of 8 is weak evidence by count alone, and the "before" arm cannot be re-run as worded
+(without W3's waits a pre-fix runtime also doubles the cards, so it grades a different page). F06's own row says so.
+Runner: the session-3 scratch `ac7/run.sh`; its loop is drive-all.sh's `modes` line, eight times.
