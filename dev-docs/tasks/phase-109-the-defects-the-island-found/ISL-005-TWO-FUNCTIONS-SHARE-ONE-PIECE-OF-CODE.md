@@ -1,6 +1,6 @@
 # ISL-005 — Two Functions share one piece of code
 
-**Status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
+**Status:** 🔬 s4 (2026-10-02): not ruled — Richard asked for research first (components and native nodes before scripts; README §8, §8 s4 below). Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F08](AUDIT-2026-10-01.md) (R-c as well) · first planned in [P105 CG-002 line 136](../phase-105-the-coding-garden/CG-002-THE-ENGINE.md) ("`ENGINE` is inlined into five scripts … Owner: NONE") · grown by every P106 and P108 lane since
 **Side:** product (runtime `Function` node, the editor's project files, the MCP door, `@nodegx/export`)
 
@@ -120,4 +120,30 @@ Constraints, after the rulings:
 
 ## 8. Session log
 
-None yet.
+### Session 4 — 2026-10-02: the question asked, and research ordered instead of a ruling
+
+Richard's answers are quoted in README §8. In short: before building any shared-code feature, find out how much of
+what the island does in Function scripts could be **components and native NodeGX nodes**, because *"Claude Code just
+ends up creating a bunch of function nodes and custom UI components instead of using NodeGX nodes"* is the community's
+criticism of the whole concept, and the island is evidence for it.
+
+**What s4 established (read, not yet researched):** the 17 copies are not 17 identical boxes. They are 17 different
+`Logic/*` Functions (Step, New run, Apply delta, Sense, Goal met, Predict end, Choose hint, Island tick, Island world,
+Use helper, Pad answer, Record step, Teach again, Teach start, Win pay, Shop card, Job card), each pasting `ENGINE`
+(`cg002Scripts.ts:239-1342`, 91 helper functions) in front of its own script and calling those helpers mid-script,
+often in loops. A component instance is reached only through its ports, so it fits a shared job that is one value in
+and one answer out, not a library called partway through a script.
+
+**The research the next session owes (no product code):**
+1. A census of the island's 83 Functions (2.45 MB): for each, what it does in one line, and whether that job is
+   (a) expressible today with native nodes (Expression, Condition, States, Array/Object nodes, Repeat, For Each,
+   Variables, Component Object…), (b) expressible as a component wrapping a smaller Function with one job in and one
+   answer out, or (c) genuinely script (the interpreter, three.js, a loop over the grid). Name the native node that
+   would replace it, or the missing one that stops it.
+2. For the 17 engine users: could the engine's work be cut at a few component boundaries ("run one step", "sense
+   the tile ahead", "is the goal met") so the scripts call wires instead of helpers? Count how many helper calls cross
+   each proposed boundary.
+3. What a person or agent hits when they try (a) or (b): missing nodes, missing ports, awkward patterns — each one a
+   product finding, filed.
+4. Then re-ask ISL-005 with the numbers: how much shared code is left that only a script can hold.
+

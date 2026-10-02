@@ -3,7 +3,7 @@
 **Scoped:** 2026-10-01, at HEAD `27d891bf3`, from [the island audit](AUDIT-2026-10-01.md). The audit read P105, P106 and
 P108 (Olive's Island, [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md)): their task files, 225 commits, 57
 session and lane transcripts, the generator, both kits, the desktop shell and the shipped template.
-**Status: 🟡 OPEN — session 2 (2026-10-02): ISL-025's W1, W2 and W3 landed (both loops on `Repeat`; every garden drive on `nodegx deploy`; the island's four list waits gone on ruling 1; the census spec), ISL-011 built on its recommended route (docs + types + scaffold say `defaultCss` is inline; the export applies it); session 1: ISL-001's fix (`3df5adb82`) and ISL-014's (`aab96a056`), ISL-002's AC1 measured. 0 of 25 closed.** Ruling 1 given ("Sure"); rulings 2 and 3 re-asked in plainer words (ISL-014 §5, ISL-002 §5, below). **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+**Status: 🟡 OPEN — session 4 (2026-10-02): 4 of 25 closed (ISL-001, ISL-002, ISL-011, ISL-014); ISL-022 built (AC6 open); ISL-018 built (one case open); ISL-025 W1–W3, W13, W21 removed; round 1 of Tracks B/D ruled (ISL-007, ISL-009, ISL-019), ISL-005 turned into research on Richard's direction (§8).** **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
 > "Phase 108 has been a beast. I forgot to tell the model to record learnings about NodeGX during the push. I'm sure
 > there must be a tonne of stuff we can fix and improve in NodeGX and the way the MCP works. Can you do an audit and start
@@ -222,6 +222,33 @@ feature has its own copy with the same bug. Should both be fixed in one commit?"
 - **ISL-011 AC6 / ISL-025 W13 — ✅ Ruled: "Remove the force."** Asked as *"…the kit forces 'display: grid' every time it
   draws. So if someone types 'display: flex' into that node's CSS Style box… it's undone on the next redraw… the force
   isn't needed for the grid any more. Remove it?"*
+
+**Session 4 (2026-10-02), round 1 of the Track B/D questions** — each checked first for an existing mechanism:
+
+- **ISL-007 — ✅ Ruled: "Adopt the add-on"** (against the recommendation, which was phase 47's built-in slice).
+  Asked as *"Olive's Island speaks French and English and built its own word-swapping script, because NodeGX has no
+  standard way. Two answers exist already: the i18next translation add-on (works, nightbook uses 22 of its nodes, but
+  needs a JSON file and {{name}} blanks), and a planned built-in translation feature (phase 47) that was never
+  started. Which should bilingual apps use?"*
+- **ISL-019 — ✅ Ruled: "Keep the same id"** (recommended). Asked as *"Every component has a hidden id. When an agent
+  rebuilds a component today it gets a brand-new id, so git shows the whole file changed even when nothing did. Should
+  a component rebuilt in the same place keep its id? (The catch: a component deleted and recreated under the same name
+  gets its old id back.)"* Ruling 1 (how reproducible output is asked for) is taken as the engineering default: a
+  startup switch for the generators' timestamps.
+- **ISL-009 — ✅ Ruled: "Signal on every node"** (recommended). Asked as *"…Groups have a 'Scroll To Element' action,
+  but it's hidden unless the Group uses an older scrolling mode… Should every visual node get its own 'Scroll into
+  view' signal that works anywhere, including on the page itself?"*
+- **ISL-005 — 🔬 Not ruled: research first, on Richard's direction.** Asked where shared code should live (project
+  script file recommended), Richard answered: *"in theory that would be a good case for a component node no?? You create
+  a logic component, stick your robot engine code inside it with the component inputs and outputs, and then place that
+  component with the function node inside it in 17 different places."* Told that the engine is ~90 helpers that 17
+  different Functions call mid-script, and re-asked, he answered: *"I think this is an important point to research
+  further, because one of the criticisms from the NodeGX community at the moment is 'So in reality Claude Code just ends
+  up creating a bunch of function nodes and custom UI components instead of using NodeGX nodes? Thus proving that low
+  code tools aren't good enough to build production apps'. I feel like we're taking the easy way out… using components
+  and native NodeGX nodes where possible is validating the concept rather than just defaulting to scripts all the time.
+  But I recognise that with the robot game you deffo needs scripts quite a bit, because of the complexity and three.js."*
+  → ISL-005 §8 s4 scopes the research. ISL-020 (one line of a big script) and ISL-006 (a Function's ports) wait on it.
 
 Each task's §5 has the full question, the options and the trade-offs. Ask in plain words, one decision
 per question, and only when the task is next to build. This table is the index, with the recommendation in brackets.

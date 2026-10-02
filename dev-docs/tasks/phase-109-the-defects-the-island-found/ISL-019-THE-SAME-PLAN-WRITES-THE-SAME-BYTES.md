@@ -1,6 +1,6 @@
 # ISL-019 — The same plan writes the same bytes
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F26](AUDIT-2026-10-01.md) · the merge
+**Status: 🔒→✅ ruled s4 (2026-10-02): "Keep the same id" — a component rebuilt in place keeps its id, for every session (README §8); not built. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F26](AUDIT-2026-10-01.md) · the merge
 recipe of P105, P106 and P108, which depends on byte-identical regeneration · **Side:** product (MCP door, `noodl-mcp`)
 
 Run the same plan through the door twice and the two projects differ in every `component.json`, in `_registry.json` and in

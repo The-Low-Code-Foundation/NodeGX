@@ -1,6 +1,6 @@
 # ISL-007 — An app speaks two languages without a script
 
-**Status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
+**Status:** 🔒→✅ ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). Not built. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F10](AUDIT-2026-10-01.md) · the island's 693-row word table and `Logic/Translate words` · the same need met by [TPL-007](../phase-78-the-templates/TPL-007-THE-MATHS-AND-TYPING-GAME.md) §2.6 (Static Data route) and [TPL-011](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md) (i18next route)
 **Side:** product (a translation primitive, or the shipped i18next module) — and a scope ruling against [P47](../phase-47-internationalisation/README.md)
 

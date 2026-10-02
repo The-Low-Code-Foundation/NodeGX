@@ -1,6 +1,6 @@
 # ISL-009 — A node can be named for a test and scrolled to
 
-**Status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
+**Status:** 🔒→✅ ruled s4 (2026-10-02): **"Signal on every node"** — a Scroll into view signal on every visual node, page included (README §8). Not built. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F12](AUDIT-2026-10-01.md) · [P105 CG-003 line 114](../phase-105-the-coding-garden/CG-003-THE-PAGES.md) ("there is no `[data-owl-row]` attribute — a node cannot write one") · [CG-005 §8 hook 2](../phase-105-the-coding-garden/CG-005-OLIVE-IN-THE-GAME.md) line 166 · the island's `Logic/Find robots` page glue
 **Side:** product (shared visual-node ports in `noodl-viewer-react`, the export, the door's vocabulary)
 
