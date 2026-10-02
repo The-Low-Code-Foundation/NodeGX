@@ -16,7 +16,7 @@
 import type { TraceEvent } from '../src';
 import { EQUIVALENT_MUTANTS, interpreterAdapter, loadScenarios, play, runConformance, specs, World } from '../src';
 
-const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRelation'];
+const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRelation', 'NewDbModelProperties', 'SetDbModelProperties'];
 
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {
   for (const type of BATCH) {
@@ -47,7 +47,21 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
   test.each([
     ['DeleteDbModelProperties', ['No class name specified', 'Missing Record Id', 'Forbidden', 'Failed to delete.']],
     ['AddDbModelRelation', ['No class specified', 'No relation property specified', 'No target record Id (the record to add a relation to) specified', 'No record Id specified (the record that should get the relation)', 'Relation not found', 'Failed to add relation.']],
-    ['RemoveDbModelRelation', ['No class specified', 'No relation property specified', 'No target record Id (the record to remove a relation from) specified', 'No record Id specified (the record that should lose the relation)', 'Relation not found', 'Failed to remove relation.']]
+    ['RemoveDbModelRelation', ['No class specified', 'No relation property specified', 'No target record Id (the record to remove a relation from) specified', 'No record Id specified (the record that should lose the relation)', 'Relation not found', 'Failed to remove relation.']],
+    // s22
+    ['NewDbModelProperties', ['No class name specified', 'Duplicate value', 'Failed to insert.']],
+    [
+      'SetDbModelProperties',
+      [
+        'No class name specified',
+        'Missing Record Id',
+        'Forbidden',
+        'Failed to save.',
+        'Someone else changed this record after it was read, so this update was not applied. Fetch the record again, then retry.',
+        'Only If Unchanged names "nothere", which this record has not been read with. Fetch the record first.',
+        'Only If Unchanged names "tags", which holds an object or list. Name a plain value such as a version number.'
+      ]
+    ]
   ])('%s: every failure sentence is on Error beside a Failure outcome in some scenario, and so is the not-configured backend', async (type, sentences) => {
     const all = await traces(type);
     const errors = new Set<string>();
@@ -67,7 +81,8 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
     expect(none.length).toBeGreaterThan(0);
     // the call carries the contract's words: the op and the Class as `collection`
     const ev = calls[0].trace.find((e) => e.t === 'backend') as TraceEvent & { op: string; args: Record<string, unknown> };
-    expect(ev.op).toBe(type === 'DeleteDbModelProperties' ? 'delete' : type === 'AddDbModelRelation' ? 'addRelation' : 'removeRelation');
+    const op: Record<string, string> = { DeleteDbModelProperties: 'delete', AddDbModelRelation: 'addRelation', RemoveDbModelRelation: 'removeRelation', NewDbModelProperties: 'create', SetDbModelProperties: 'save' };
+    expect(ev.op).toBe(op[type]);
     expect(typeof ev.args.collection).toBe('string');
   });
 });

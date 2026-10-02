@@ -51,6 +51,8 @@ import { ShowPopup } from './show-popup';
 import { ClosePopup } from './close-popup';
 import { DeleteRecord } from './delete-record';
 import { AddRecordRelation, RemoveRecordRelation } from './record-relation';
+import { CreateRecord } from './create-record';
+import { UpdateRecord } from './update-record';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
 import { JSONStreamParser } from './json-stream-parser';
@@ -138,6 +140,8 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [DeleteRecord.type]: DeleteRecord,
   [AddRecordRelation.type]: AddRecordRelation,
   [RemoveRecordRelation.type]: RemoveRecordRelation,
+  [CreateRecord.type]: CreateRecord, // s22
+  [UpdateRecord.type]: UpdateRecord,
   [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
@@ -199,6 +203,8 @@ export {
   DeleteRecord,
   AddRecordRelation,
   RemoveRecordRelation,
+  CreateRecord,
+  UpdateRecord,
   States,
   RandomBytes,
   Repeat,

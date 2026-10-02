@@ -1,0 +1,926 @@
+[
+  {
+    "name": "no Class: the press fails at once — No class name specified; no call",
+    "because": "newdbmodelpropertiesnode.ts :123-124; dbmodelcrudbase.ts :244-254",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Class: ONE create to the active backend carrying the property ports; Id is the id the backend gave; Done",
+    "because": "newdbmodelpropertiesnode.ts :132-159; world.ts BACKEND",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "prop-title",
+        "value": "a"
+      },
+      {
+        "set": "prop-version",
+        "value": 1
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1",
+                "title": "a",
+                "createdAt": "T"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the answer comes later: no outcome and no Id until the advance that lands it",
+    "because": "newdbmodelpropertiesnode.ts :150-159 — the outcome is the answer's",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 99
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            },
+            "after": 100
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the backend refuses: Error is its message, then Failure; Id stays empty",
+    "because": "newdbmodelpropertiesnode.ts :160-162; dbmodelcrudbase.ts :324-335",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Duplicate value"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "refused with no message: Error is `Failed to insert.`",
+    "because": "newdbmodelpropertiesnode.ts :161",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": null
+            },
+            "after": 10
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "refused with an empty message: Error is `Failed to insert.`",
+    "because": "newdbmodelpropertiesnode.ts :161",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": ""
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Backend the project lacks: the not-configured sentence names it; no call",
+    "because": "newdbmodelpropertiesnode.ts :140-141; dbmodelcrudbase.ts :283-301",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Backend the project has: the create goes there",
+    "because": "dbmodelcrudbase.ts :283-301; resolveBackend.pure.ts :232-249",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "o1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "two presses in one frame: ONE create, and Done for each press",
+    "because": "newdbmodelpropertiesnode.ts :125-130 (scheduleOnce, the batch)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a press while one is still out: a second create; neither answered, nothing reported",
+    "because": "newdbmodelpropertiesnode.ts :127-130 — the batch is taken before the call",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "two creates out, answered in order: each settles its own presses, and Id follows the last answer",
+    "because": "newdbmodelpropertiesnode.ts :150-159",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Lesson"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            },
+            "after": 5
+          },
+          {
+            "match": {
+              "collection": "Note"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "n2"
+              }
+            },
+            "after": 10
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Error is kept after a later success",
+    "because": "dbmodelcrudbase.ts :166",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Lesson"
+            },
+            "answer": {
+              "error": "Forbidden"
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n2"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Class cleared after the press and before the frame end goes out with the create",
+    "because": "dbmodelcrudbase.ts :244-254 — checked at the press only",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "set": "collectionName",
+        "value": ""
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Source Object Id: the data is that record's data with the property ports written over it",
+    "because": "newdbmodelpropertiesnode.ts :132-136",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "sourceObjectId",
+        "value": "m1"
+      },
+      {
+        "set": "prop-title",
+        "value": "new"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "m1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Source Object Id naming no record: an empty one is made, and the data is the ports alone",
+    "because": "newdbmodelpropertiesnode.ts :134 — Model.get is create-on-read",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "sourceObjectId",
+        "value": "nobody"
+      },
+      {
+        "set": "prop-title",
+        "value": "a"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a blank Source Object Id seeds nothing",
+    "because": "newdbmodelpropertiesnode.ts :134 — a falsy id",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "sourceObjectId",
+        "value": ""
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "m1": {
+            "title": "old"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "the created record is in the registry: a second create seeded from it carries what the backend handed back, its ACL left out",
+    "because": "cloudstore.js _fromJSON :407-422",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "prop-a",
+        "value": 1
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "sourceObjectId",
+        "value": "n1"
+      },
+      {
+        "set": "prop-a",
+        "value": 2
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Lesson"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "n1",
+                "a": 9,
+                "b": "kept",
+                "ACL": {
+                  "u1": {
+                    "read": true
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Upsert On is trimmed; a blank one is absent from the call",
+    "because": "newdbmodelpropertiesnode.ts :106-108, :149",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "upsertOn",
+        "value": " slug "
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "upsertOn",
+        "value": "  "
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "an access rule no port has written: nobody signed in — no ACL",
+    "because": "dbmodelcrudbase.ts :970-974, :1020",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "Owner"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "an access rule no port has written: the signed-in user may read and write",
+    "because": "dbmodelcrudbase.ts :964, :970-974; world.ts BACKEND USER",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "Owner"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ],
+        "user": "u1"
+      }
+    }
+  },
+  {
+    "name": "access rules: Everyone with Read off, a Role, a User Id with Write off; a rule id the list lacks is ignored",
+    "because": "dbmodelcrudbase.ts :994-1017",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "Everyone"
+        },
+        {
+          "id": "a2",
+          "label": "Admins"
+        },
+        {
+          "id": "a3",
+          "label": "Owner"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "acl-a1-target",
+        "value": "everyone"
+      },
+      {
+        "set": "acl-a1-read",
+        "value": false
+      },
+      {
+        "set": "acl-a2-target",
+        "value": "role"
+      },
+      {
+        "set": "acl-a2-role",
+        "value": "admin"
+      },
+      {
+        "set": "acl-a3-userid",
+        "value": "u9"
+      },
+      {
+        "set": "acl-a3-write",
+        "value": false
+      },
+      {
+        "set": "acl-zz-target",
+        "value": "everyone"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ],
+        "user": "u1"
+      }
+    }
+  },
+  {
+    "name": "access rules: a User rule with no User Id and nobody signed in adds nothing; a Role rule with no Role names `role:undefined` (row C35)",
+    "because": "dbmodelcrudbase.ts :999-1015 (NDA-012 guards the user branch, not the role branch)",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "Owner"
+        },
+        {
+          "id": "a2",
+          "label": "Admins"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "acl-a1-read",
+        "value": false
+      },
+      {
+        "set": "acl-a2-target",
+        "value": "role"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "access rules: a later rule's key overwrites an earlier one's",
+    "because": "dbmodelcrudbase.ts :966-1017 — one object, in the list's order",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "A"
+        },
+        {
+          "id": "a2",
+          "label": "B"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "acl-a1-target",
+        "value": "everyone"
+      },
+      {
+        "set": "acl-a2-target",
+        "value": "everyone"
+      },
+      {
+        "set": "acl-a2-write",
+        "value": false
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+]

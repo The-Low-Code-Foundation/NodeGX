@@ -1,7 +1,7 @@
 # NSP-014 — Batch: records, users, files, HTTP, streams, and the cloud-only nodes
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world's network and backend) and R4 = continue.
-**Status: 🟡 s21 (2026-10-02): split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire); Delete Record, Add Record Relation and Remove Record Relation conform on the runtime; row C33 filed. 4 of 24 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21).**
+**Status: 🟡 s22 (2026-10-02): Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22).** s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
 
 ## 1. The person sentence
 
@@ -151,5 +151,88 @@ operation (a diff of the two names nothing else). What they do that Delete Recor
 | runtime: `NSP_ONLY=<the three> … conformance.test.ts` | Delete Record 20 / 20, 200 / 200, 34 / 34; Add / Remove Record Relation 18 / 18, 200 / 200, 36 / 36 — all CONFORM, seed 20728 |
 | runtime: whole `npx jest test/node-spec` under load 12–17 | **not a clean reading** — 1,011 s against the 600 s `beforeAll` budget: 65 tests failed on `Exceeded timeout … for a hook`. Its log: 62 of its 64 specs CONFORM at seed 20728; Stream Buffer and Text Accumulator never reported → re-read alone: both CONFORM. Graph and runtime-target suites passed |
 | runtime: the same suite, retried at load ~3–5 | **67 passed, exit 0, 448 s — all 66 specs CONFORM at seed 20728** (the clean reading) |
+| `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
+
+### 6.4 s22 (2026-10-02) — Create Record, Update Record; the deep run's C36
+
+**Both CONFORM on the runtime on their first run, and at 10,000:** Create Record (`NewDbModelProperties`) 23 / 23
+scenarios, 200 / 200 sequences (seed 20728), 40 / 40 mutants; Update Record (`SetDbModelProperties`) 30 / 30, 200 / 200,
+78 / 78 — every mutant killed on SIX seeds (13, 1, 20728–20731; s21's rule asked for two). Fourteen probe questions
+answered on the runtime BEFORE a spec line (two `zz-` probes, deleted). Shared pieces in `src/nodes/record-write.ts`
+(the twin of `addInputProperties` + `addAccessControl`).
+
+**The handoff's open question — "a project's schema is world data the seam does not have yet" — measured, and the
+answer is no:** the runtime registers ANY `prop-<field>` on its first write and stores it raw (dbmodelcrudbase.ts
+:711-725); the Class's schema only decides which ports the EDITOR offers. So the spec `discover`s any `prop-` port,
+and the schema stays out of the world. (The success's schema-typed conversions — Date, Pointer, File, a list of
+objects — are named as not graded; the world's answers carry plain values.)
+
+**What the two nodes do that Delete Record does not, from the code and the probes:**
+- **Create:** no Id input at all (`addModelId` with outputs only, :173-175). The data is `Object.assign({}, <the Source
+  Object Id's record's data — create-on-read, so a name nobody loaded is an empty record>, <the property ports>)`. A
+  success becomes a registry record under the answer's `objectId` (anonymous when none), its class the Class AS IT IS
+  WHEN THE ANSWER LANDS (:154 reads it live), every key but `objectId` and `ACL` written; `Id` is its id. Upsert On is
+  trimmed; blank is absent from the call. `Failed to insert.`
+- **Update:** TWO NODES IN ONE by `Store to` at each press. Cloud: the Class pre-flight at the press, then at the frame
+  end Missing Record Id → the Only If Unchanged names read off the record BEFORE the write (a name it does not hold, or
+  a list/object, fails with its own sentence and writes nothing) → the property ports written onto the record → the
+  backend resolved → `save({ collection, objectId, data: <the ports, or the whole record under All>, acl, ifMatch })`.
+  Success writes every key handed back onto the record; a failure whose `detail.reason` is `precondition-failed` puts
+  back what the write replaced and says "Someone else changed this record…"; any other failure is the message or
+  `Failed to save.`. Local: NO pre-flight (the token is minted before the guard), one write per frame, Done per press,
+  no call. Anything but unset / `cloud` is local.
+- **The ACL** (both): built at the call from `Access Control Rules` and the `acl-<id>-<field>` ports (stored by
+  splitting the port name on `-`); a rule no port wrote is the signed-in user; Target unset is `user`; a later rule's
+  key overwrites an earlier one's.
+
+**Two world changes, both additive (guarded files: the hashes refreshed — the diff named exactly `src/spec.ts` and
+`src/world.ts`; the three stranger rounds green):**
+- a backend failure may carry the contract's **`detail`** (`error(message, detail)`, `@noodl/backend-contract`
+  data.ts :214-215) — `{ error, detail }` in the script, `answer.detail` in a spec's handler;
+- **USER** — the script's `backend.user`, `WorldView.backendUser()`: the signed-in user's id as the access rules read it.
+  Measured: the rules ask the LEGACY store (`CloudStore.instance.currentUserId()` → `ParseWireAdapter` → the session
+  under `Parse/<cloudservices appId>/currentUser`), not the backend the record goes to. The runtime target writes the
+  user through the REAL `SessionStore` into a storage the play owns (`installUser`).
+- Runtime target: `create` and `save` joined `BACKEND_OPS` (each read from RestDataAdapter.ts :1028-1135: `success(record)`
+  then the contract's event); a failure's `detail` is handed on; and a throw inside a success callback now goes to
+  `error` with its message, as the REST adapter's promise chain does (RestDataAdapter.ts :515-531) — before s22 the
+  stand-in let it escape as an unhandled rejection, which the real adapter never does.
+
+**The deep run (10,000, seed 20728) over all five record specs:** Create, Update, Add / Remove Record Relation conform;
+**Delete Record diverged 19 times — row C36**, a real defect s21's 200 sequences and 20 scenarios did not reach: the
+success reads the record binding LIVE (`internal.model.notify('delete')`, :70), so an Id cleared while the delete is out
+throws, and a REST backend reports Failure with V8's TypeError text for a delete that happened (an Id moved to another
+record tells THAT one it was deleted). The spec keeps its reading (Done — the call's own record, as Update Record and the
+relation nodes capture it); the runtime's reading is a known row with a narrow predicate (the TypeError text on Error,
+or — when a later failure in the same frame overwrote the text before the settle — Done against Failure after a press
+and then a binding-clearing write; the first predicate caught 18 of 19, the 19th was exactly that overwrite) and a hand
+scenario marked `row`. Re-run: **all 19 attributed to C36, 0 divergences, 34 / 34 mutants.**
+
+**A lead, NOT measured to a row (named so it is not rediscovered at full price):** because the access rules read the
+LEGACY store's user, a project whose backend is a `backendServices` v2 NodeGX entry with its own `auth.publicToken` and
+no `cloudservices` would sign users in under `Parse/<that token>/currentUser` while the rules read
+`Parse/undefined/currentUser` — every "current user" rule naming nobody, the record written with no ACL. Unmeasured:
+whether such a project exists (does the editor still write `cloudservices` beside a v2 NodeGX backend?) and where Log In
+writes its session for one. Measure before filing.
+
+### 6.5 Rows (s22)
+
+| row | node | what the trace shows | proposed |
+|---|---|---|---|
+| **C34** | Update Record | the property ports are written onto the record BEFORE the backend is resolved and the save sent (:184-192), and only a refused precondition puts them back — a backend not configured (nothing sent), a 4xx, a network error all leave the record showing values the backend does not hold; a later Only If Unchanged sends them as its precondition. Two conforming scenarios show it. Ledger `p107-c34-…` | put back what the write replaced on every failure. Ships alone, after a ruling |
+| **C35** | Create / Update Record (`_getACL`) | a rule with Target Role and no Role written → the ACL key `role:undefined` (:1015) — NDA-012 guarded the User branch's `acl['undefined']`, not this one; the record is then locked to a role called "undefined". A conforming scenario shows it. Ledger `p107-c35-…` | skip the rule when the Role is empty, as the User branch does |
+| **C36** | Delete Record | found by the deep run (19 / 10,000): the success reads the binding live and throws when it was cleared while the delete was out — Failure (REST) or never answered (the legacy wire) for a delete that happened; a binding moved to another record tells that record it was deleted. A known row + a `row` scenario. Ledger `p107-c36-…` | capture the record at the call, as Update Record does; the known row goes with the fix |
+
+### 6.6 Gate readings (s22, 2026-10-02)
+
+| gate | reading |
+|---|---|
+| `nodegx-node-spec`: `npx jest` | **18 suites, 687 passed, 17 skipped, exit 0** (s21: 673) |
+| runtime: the whole conformance suite | 69 passed, exit 0, 336 s — all 68 specs CONFORM at seed 20728 |
+| `nodegx-node-spec`: `tests/batch-records.test.ts` | 20 passed — five record specs × two seeds, AC5 sentences, AC6 call / no-call |
+| interpreter mutants, four more seeds (1, 20729–20731) | Create 40 / 40, Update 78 / 78, Delete 34 / 34 on each |
+| runtime: `NSP_ONLY=<the five record specs> … conformance.test.ts` | all five CONFORM at seed 20728 — Delete 20 / 21 (+1 known, C36), 200 / 200; Add / Remove 18 / 18, 200 / 200; Create 23 / 23, 200 / 200; Update 30 / 30, 200 / 200 |
+| runtime deep, `NSP_DEEP=10000`, seed 20728 | Add / Remove Record Relation CONFORM (0 divergences); Delete CONFORMS with 19 attributed to C36, 34 / 34; Create CONFORMS 40 / 40 and Update 92 / 92 (re-read after the last spec change; 11 and 1 sequences attributed to the old known row C6 — a unit object on a `prop-` port) |
+| runtime: `runtime-target.test.ts` + `graph.test.ts` | 2 suites, 86 passed |
 | `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
 

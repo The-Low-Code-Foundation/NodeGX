@@ -239,7 +239,8 @@ function viewOf(inst: Instance): WorldView {
     routeAnswer: (router, target, openInNewTab) => world.router.answer(router, target, openInNewTab),
     popupAnswer: (target) => world.popup.answer(target),
     popupsInside: () => world.popup.inside,
-    backendFor: (backendId) => world.backend.resolve(backendId)
+    backendFor: (backendId) => world.backend.resolve(backendId),
+    backendUser: () => world.backend.user
   };
 }
 

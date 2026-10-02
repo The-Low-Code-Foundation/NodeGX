@@ -722,5 +722,46 @@
         ]
       }
     }
+  },
+  {
+    "name": "the binding cleared while the delete is out: Done for the record the call named (row C36 — the runtime's success reads the binding live and throws)",
+    "because": "deletedbmodelpropertiesnode.ts :66-72; row C36",
+    "row": "NSP-014 §6.5 C36",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": null
+            },
+            "after": 10
+          }
+        ]
+      }
+    }
   }
 ]

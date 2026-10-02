@@ -1,0 +1,1527 @@
+[
+  {
+    "name": "no Class: the press fails at once — No class name specified; no call",
+    "because": "setdbmodelpropertiesnode.ts :146-147; dbmodelcrudbase.ts :244-254",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Class, no Id: Missing Record Id at the frame end; no call",
+    "because": "setdbmodelpropertiesnode.ts :153-156",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Class and Id: ONE save to the active backend carrying the property ports only; Done",
+    "because": "setdbmodelpropertiesnode.ts :184-206; world.ts BACKEND",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "prop-title",
+        "value": "y"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "updatedAt": "T"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Properties to store = All: the save carries the whole record, the ports written onto it first",
+    "because": "setdbmodelpropertiesnode.ts :184-188, :197",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "storeProperties",
+        "value": "all"
+      },
+      {
+        "set": "prop-title",
+        "value": "y"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "the answer comes later: no outcome until the advance that lands it",
+    "because": "setdbmodelpropertiesnode.ts :200-206",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 99
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            },
+            "after": 100
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "the backend refuses: Error is its message, then Failure",
+    "because": "setdbmodelpropertiesnode.ts :218; dbmodelcrudbase.ts :324-335",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Forbidden"
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "refused with no message, and with an empty one: Error is `Failed to save.`",
+    "because": "setdbmodelpropertiesnode.ts :218",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Lesson"
+            },
+            "answer": {
+              "error": null
+            },
+            "after": 10
+          },
+          {
+            "answer": {
+              "error": ""
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a Backend the project lacks: the not-configured sentence names it; no call — and the property ports stay written on the record (row C34)",
+    "because": "setdbmodelpropertiesnode.ts :184-192 — the write comes before the backend is resolved",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      {
+        "set": "prop-title",
+        "value": "z"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "_active_"
+      },
+      {
+        "set": "onlyIfUnchanged",
+        "value": "title"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a Backend the project has: the save goes there",
+    "because": "dbmodelcrudbase.ts :283-301",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "two presses in one frame: ONE save, and Done for each press",
+    "because": "setdbmodelpropertiesnode.ts :148-151 (scheduleOnce, the batch)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a press while one is still out: a second save; neither answered, nothing reported",
+    "because": "setdbmodelpropertiesnode.ts :150-151 — the batch is taken before the call",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "the success writes what the backend hands back onto the record: a later Only If Unchanged reads it",
+    "because": "setdbmodelpropertiesnode.ts :200-204, :163-181",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "onlyIfUnchanged",
+        "value": "title, version"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "title": "from the backend",
+                "version": 4
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Only If Unchanged: the precondition is what the record held BEFORE the write",
+    "because": "setdbmodelpropertiesnode.ts :160-181",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "onlyIfUnchanged",
+        "value": " version , title "
+      },
+      {
+        "set": "prop-title",
+        "value": "y"
+      },
+      {
+        "set": "prop-version",
+        "value": 4
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a refused precondition: the sentence, Failure, and the record put back — the next precondition reads the old values",
+    "because": "setdbmodelpropertiesnode.ts :208-216",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "onlyIfUnchanged",
+        "value": "version, title"
+      },
+      {
+        "set": "prop-title",
+        "value": "y"
+      },
+      {
+        "set": "prop-version",
+        "value": 4
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "conflict",
+              "detail": {
+                "reason": "precondition-failed"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Only If Unchanged naming a property the record does not hold: its sentence, and nothing written",
+    "because": "setdbmodelpropertiesnode.ts :164-178",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "onlyIfUnchanged",
+        "value": "nothere"
+      },
+      {
+        "set": "prop-title",
+        "value": "y"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "onlyIfUnchanged",
+        "value": "title"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Only If Unchanged naming a list: its sentence; no call",
+    "because": "setdbmodelpropertiesnode.ts :168-176",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "onlyIfUnchanged",
+        "value": "tags"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a precondition refusal on a save that set no precondition: the sentence still, nothing to put back",
+    "because": "setdbmodelpropertiesnode.ts :184, :208-216",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "prop-title",
+        "value": "y"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "onlyIfUnchanged",
+        "value": "title"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "conflict",
+              "detail": {
+                "reason": "precondition-failed"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "the backend refuses: the property ports stay written on the record (row C34)",
+    "because": "setdbmodelpropertiesnode.ts :184-188, :218 — only a refused precondition puts anything back",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "prop-title",
+        "value": "y"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "onlyIfUnchanged",
+        "value": "title"
+      },
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Lesson"
+            },
+            "answer": {
+              "error": "Forbidden"
+            }
+          },
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Local only: no Class needed; no Id is Missing Record Id for each press",
+    "because": "setdbmodelpropertiesnode.ts :223-244 — no pre-flight; minted before the guard",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "storeType",
+        "value": "local"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Local only: ONE write for two presses, Done for each, no call; a later save reads the write",
+    "because": "setdbmodelpropertiesnode.ts :223-250",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "storeType",
+        "value": "local"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "prop-title",
+        "value": "loc"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "storeType",
+        "value": "cloud"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "onlyIfUnchanged",
+        "value": "title"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Store to flipped between presses in one frame: a local write and a save, in press order",
+    "because": "setdbmodelpropertiesnode.ts :64-67 — two batches",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "storeType",
+        "value": "local"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "set": "storeType",
+        "value": "cloud"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Error is kept after a later success",
+    "because": "dbmodelcrudbase.ts :166",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Lesson"
+            },
+            "answer": {
+              "error": "Forbidden"
+            }
+          },
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a Class cleared after the press and before the frame end goes out with the save",
+    "because": "dbmodelcrudbase.ts :244-254 — checked at the press only",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "set": "collectionName",
+        "value": ""
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a blank Id unbinds: Missing Record Id, and Id shows the blank",
+    "because": "dbmodelcrudbase.ts :622-625",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Id Source From repeater, outside one: Missing Record Id while Id shows the input",
+    "because": "dbmodelcrudbase.ts :517-521, :579-583",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Repeater Component written under From repeater re-binds: an Id written before it is unbound at the frame end",
+    "because": "dbmodelcrudbase.ts :532-538",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "repeaterComponent",
+        "value": "Row"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "under From repeater, an Id written in a LATER frame still binds the record and the save goes out",
+    "because": "dbmodelcrudbase.ts :548-553 — the re-bind is one frame's job",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Repeater Component under Specify explicitly re-binds nothing: the Id holds",
+    "because": "dbmodelcrudbase.ts :532-538",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "repeaterComponent",
+        "value": "Row"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "access rules written on the save: Everyone with Read off, then a Role — the ACL the save carries",
+    "because": "dbmodelcrudbase.ts :994-1017; setdbmodelpropertiesnode.ts :198",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "Owner"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "acl-a1-target",
+        "value": "everyone"
+      },
+      {
+        "set": "acl-a1-read",
+        "value": false
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "acl-a1-target",
+        "value": "role"
+      },
+      {
+        "set": "acl-a1-role",
+        "value": "admin"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "an access rule no port has written: the save carries the signed-in user",
+    "because": "dbmodelcrudbase.ts :964, :970-974; world.ts BACKEND USER",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "Owner"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ],
+        "user": "u1"
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  }
+]

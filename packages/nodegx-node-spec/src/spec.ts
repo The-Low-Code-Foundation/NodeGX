@@ -193,6 +193,8 @@ export interface WorldView {
    * `undefined` when the project has no such backend (falsy and `_active_` are the active one).
    */
   backendFor(backendId: unknown): string | undefined;
+  /** NSP-014 s22 — the id of the user signed in, as the Record family's access rules read it (world.ts BACKEND, USER); `undefined`: nobody. */
+  backendUser(): string | undefined;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -222,8 +224,8 @@ export interface SpecBackendCall {
   args: Readonly<Record<string, unknown>>;
 }
 
-/** NSP-014 s21 — a backend's answer to a `SpecBackendCall`, delivered to `WorldHandlers.backend`: what the success callback is handed, or the failure's message (`undefined`: none). */
-export type BackendAnswerEvent = { id: string } & ({ ok: unknown } | { error: string | undefined });
+/** NSP-014 s21 — a backend's answer to a `SpecBackendCall`, delivered to `WorldHandlers.backend`: what the success callback is handed, or the failure's message (`undefined`: none) and (s22) the backend's `detail` when it gave one. */
+export type BackendAnswerEvent = { id: string } & ({ ok: unknown } | { error: string | undefined; detail?: Record<string, unknown> });
 
 /** The world's answer to a `SpecRequest`, delivered to `WorldHandlers.response`. */
 export type WorldResponse = { id: string } & (

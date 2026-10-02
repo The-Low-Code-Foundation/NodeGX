@@ -170,7 +170,26 @@ const nonTextPath = (d: Divergence) => {
 };
 const refusedPush = (d: Divergence) => navigateToPathAnswer('The browser refused to navigate to this path', 'navigate-to-path/refused')(d.difference.reference);
 
+/**
+ * NSP-014 §6.5 C36 — Delete Record's success reads the record binding LIVE (deletedbmodelpropertiesnode.ts :70,
+ * `internal.model.notify('delete')`): a binding cleared while the delete is out throws there, and the REST adapter hands
+ * the throw to `error` (RestDataAdapter.ts :531) — Error is V8's TypeError text, every press Failure, the record deleted.
+ * Narrow: the runtime's trace carries that text on Error at or before the first difference — or, when a later failure in
+ * the same frame overwrote the text before the settle recorded it, the difference is the spec's Done against the family's
+ * Failure, after a press and then a write that clears the binding (Id Source → From repeater, an empty Id).
+ */
+const notifyOnCleared = (d: Divergence) => {
+  if (d.actual.slice(0, d.difference.index + 1).some((e) => e.t === 'value' && e.port === 'error' && /\(reading 'notify'\)/.test(String((e as { value: unknown }).value)))) return true;
+  const ref = d.difference.reference;
+  const act = d.difference.actual;
+  if (!ref || !act || ref.t !== 'outcome' || ref.value !== 'done' || act.t !== 'outcome' || act.value !== 'failure' || act.error !== 'record/storage-op-failed') return false;
+  const before = d.reference.slice(0, d.difference.index);
+  const press = before.findIndex((e) => e.t === 'in' && e.port === 'store');
+  return press >= 0 && before.slice(press).some((e) => isSet(e, 'idSource', (v) => v === 'foreach') || isSet(e, 'modelId', (v, present) => !present || v === null || v === ''));
+};
+
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
+  DeleteDbModelProperties: [{ row: "NSP-014 §6.5 C36 — Delete Record's success reads the binding live; cleared while the delete is out, it throws: Failure, not Done", matches: notifyOnCleared }],
   PageStackNavigateToPath: [
     { row: 'NSP-015 §6.2 C24 — a Path that is not text throws at `.match` in the frame-end callback; the presses are never answered', matches: nonTextPath },
     { row: 'NSP-015 §6.2 C25 — a push the browser refuses (another origin) throws in the frame-end callback; no popstate, the presses are never answered', matches: refusedPush }

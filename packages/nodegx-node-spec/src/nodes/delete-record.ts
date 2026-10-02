@@ -21,6 +21,11 @@
  *     reads it. A graph with a Record or Query Records watching the record will.
  *   - the scope: `nodeScope.ModelScope`, capital M (:52-63, PLAT-003 §27.3) — Delete Record resolves its store
  *     against NO scope where its siblings use the component's. A play has one scope, so it is invisible here.
+ *   - row C36 (NSP-014 §6.5, found by the s22 deep run): the success reads the binding LIVE (`internal.model.notify`,
+ *     :70) — a binding CLEARED while the delete is out (Id Source → From repeater outside one, a blank Id) throws
+ *     there, and the REST adapter hands the throw to `error` (RestDataAdapter.ts :531): Error is V8's TypeError text and
+ *     every press Failure, though the backend deleted the record; a binding MOVED to another record tells THAT record
+ *     it was deleted. This spec states the call's own record: Done. The runtime's reading is a known row.
  *   - a project with NO backend configured: `forBackend` falls back to the legacy store (`CloudStore.forScope`)
  *     with no endpoint — a browser sends `DELETE undefined/classes/<Class>/<id>` to the app's own host and reports
  *     what it answers; on Node the press is never answered (row C33, NSP-014 §6.2). Not a world the BACKEND seam

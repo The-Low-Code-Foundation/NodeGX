@@ -88,7 +88,14 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
         const patterns = (node.parameterEncoding as { patterns?: Array<{ pattern: string; plug: string }> }).patterns ?? [];
         // every seed at once: a pattern may name two (States' `value-<state>-<value>`, NSP-013 s14) —
         // for a one-seed node this is the same single parameter it always was
-        const probe = Object.fromEntries(node.parameterEncoding.seededBy.map((seed) => [seed, 'probe']));
+        // a LIST parameter (`proplist` — the Record writes' Access Control Rules, NSP-014 s22) is probed with one row
+        // whose id is the probe, as the editor stores it; every other seed with the text
+        const isList = (seed: string) => node.inputs.some((i) => i.name === seed && typeof i.type === 'object' && i.type.name === 'proplist');
+        const probe = Object.fromEntries(node.parameterEncoding.seededBy.map((seed) => [seed, isList(seed) ? [{ id: 'probe', label: 'probe' }] : 'probe']));
+        // a pattern whose variable names no seed parameter is seeded by the PROJECT (`seededByProjectMetadata` — a class
+        // schema's `prop-<property>`, the Class picker): no parameter draws it, so the spec must accept it on first write
+        const fromParameter = (p: { variables?: Record<string, string> }) =>
+          !!p.variables && Object.values(p.variables).some((v) => node.parameterEncoding!.seededBy!.some((seed) => v.includes('`' + seed + '`')));
         for (const seed of node.parameterEncoding.seededBy) {
           if (patterns.length === 0 || 'probe' in spec.derived!.inputs({ [seed]: 'x {probe}' })) {
             expect(Object.keys(spec.derived!.inputs({ [seed]: 'x {probe}' }))).toContain('probe');
@@ -98,6 +105,10 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
           const outputs = Object.keys(spec.derived!.outputs?.(probe) ?? {});
           for (const p of patterns) {
             const name = p.pattern.replace(/<[^>]+>/g, 'probe');
+            if ((node.parameterEncoding as { seededByProjectMetadata?: string[] }).seededByProjectMetadata && !fromParameter(p as { variables?: Record<string, string> })) {
+              if (p.plug === 'input') expect(spec.derived!.discover?.(name)).toBeDefined();
+              continue;
+            }
             if (p.plug === 'input' || p.plug === 'input/output') expect(inputs).toContain(name);
             if (p.plug === 'output' || p.plug === 'input/output') expect(outputs).toContain(name);
           }

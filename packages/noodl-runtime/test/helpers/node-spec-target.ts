@@ -118,7 +118,9 @@
  *     world's — the call recorded as handed (`handle.id`, the options without callbacks), the scripted answer
  *     delivered a microtask after its moment (an adapter's callbacks run from a promise), and after a success
  *     the contract's event emitted as the adapter emits it (RestDataAdapter.ts :1216-1219). The per-backend
- *     stores are dropped at `install` (`CloudStore.invalidateBackends`): they are process-wide.
+ *     stores are dropped at `install` (`CloudStore.invalidateBackends`): they are process-wide. (s22) A failure's
+ *     `detail` is handed on as the contract's second argument; the signed-in user (USER) is written into the legacy
+ *     store's session, where the access rules read it (`installUser`).
  */
 
 import { AsyncLocalStorage } from 'async_hooks';
@@ -276,12 +278,14 @@ const GROUP_STAND_IN = NodeDefinition.defineNode({
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { RestDataAdapter } = require('../../src/api/backends/RestDataAdapter') as { RestDataAdapter: { prototype: Record<string, unknown> } };
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const CloudStore = require('../../src/api/cloudstore') as { invalidateBackends(scope?: unknown): void };
+const CloudStore = require('../../src/api/cloudstore') as { invalidateBackends(scope?: unknown): void; instance: { _handle(): { publicToken?: string } } };
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { parseSessionStore } = require('../../src/api/backends/SessionStore') as { parseSessionStore(appId: string | undefined): { write(session: Record<string, unknown>): void } };
 
 /** What a backend operation's options carry back (`@noodl/backend-contract` `Callbacks`). */
 interface BackendOptions extends Record<string, unknown> {
   success: (...args: unknown[]) => void;
-  error: (message?: string) => void;
+  error: (message?: string, detail?: Record<string, unknown>) => void;
 }
 
 /**
@@ -303,8 +307,38 @@ const BACKEND_OPS: Readonly<Record<string, (o: BackendOptions, ok: unknown, emit
   removeRelation: (o, ok, emit) => {
     o.success(ok);
     emit({ type: 'save', objectId: o.objectId, object: ok, collection: o.collection });
+  },
+  // s22 — RestDataAdapter.ts :1028-1084 — `success(record)`, then `create { objectId: record.objectId, object, collection }`
+  create: (o, ok, emit) => {
+    o.success(ok);
+    emit({ type: 'create', objectId: (ok as { objectId?: unknown } | null)?.objectId, object: ok, collection: o.collection });
+  },
+  // s22 — RestDataAdapter.ts :1086-1135 — `success(record)`, then `save { objectId: <the one handed>, object, collection }`
+  save: (o, ok, emit) => {
+    o.success(ok);
+    emit({ type: 'save', objectId: o.objectId, object: ok, collection: o.collection });
   }
 };
+
+/**
+ * USER (world.ts BACKEND, s22): the signed-in user, where the Record family's access rules read it — the LEGACY store's
+ * session (`_getCurrentUser` → `CloudStore.instance.currentUserId()` → `ParseWireAdapter.currentUserId` → the session
+ * store under that store's app id). Written through the REAL `SessionStore` into a storage the play owns (Node has no
+ * `localStorage`; the store reads "whatever `localStorage` is now"). A play with no user installs nothing. Returns the undo.
+ */
+function installUser(w: World): () => void {
+  const user = w.backend.user;
+  if (user === undefined) return () => {};
+  const g = globalThis as { localStorage?: unknown };
+  const had = 'localStorage' in g;
+  const saved = g.localStorage;
+  g.localStorage = {};
+  parseSessionStore(CloudStore.instance._handle().publicToken).write({ objectId: user, sessionToken: 'world' });
+  return () => {
+    if (had) g.localStorage = saved;
+    else delete g.localStorage;
+  };
+}
 
 /**
  * BACKEND (world.ts, NSP-014 s21, R9) for one play: the project's backends are the script's (converged
@@ -327,11 +361,22 @@ function installBackend(w: World, graphModel: { getMetaData(k: string): unknown;
     saved[op] = proto[op];
     proto[op] = function (this: { emitAdapterEvent(e: Record<string, unknown>): void }, handle: { id: string }, options: BackendOptions) {
       w.backend.issue({ op, backend: handle.id, args: options }, (d) => {
-        void Promise.resolve().then(() => ('ok' in d ? onSuccess(options, d.ok, (e) => this.emitAdapterEvent(e)) : options.error(d.error)));
+        void Promise.resolve().then(() => {
+          if (!('ok' in d)) return d.detail === undefined ? options.error(d.error) : options.error(d.error, d.detail);
+          // RestDataAdapter.ts :515-531 — the success runs inside the request's promise chain, whose `.catch` hands a
+          // throw to `fail` → the operation's `error` with the throw's message (s22: Delete Record's success can throw, row C36)
+          try {
+            onSuccess(options, d.ok, (e) => this.emitAdapterEvent(e));
+          } catch (e) {
+            options.error(e instanceof Error ? e.message : String(e));
+          }
+        });
       });
     };
   }
+  const restoreUser = installUser(w);
   return () => {
+    restoreUser();
     for (const [op, fn] of Object.entries(saved)) proto[op] = fn;
     CloudStore.invalidateBackends();
     graphModel.setMetaData('cloudservices', savedMeta.cloudservices);

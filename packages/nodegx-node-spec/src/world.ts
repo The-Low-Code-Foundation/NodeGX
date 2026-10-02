@@ -226,10 +226,17 @@
  *             THE ANSWER — the first of the script's `answers` whose `match` fits (`op`, `collection` — `args.collection`
  *               — and `backend`, each equal; absent fits all): `{ ok }` — it succeeded, `ok` what the success callback
  *               is handed (a record, rows; nothing for a delete); `{ error }` — it failed with that message (`null`: the
- *               adapter gave none); `{ never }` — no answer comes. `after` > 0 delays it on the clock; absent or 0, it
+ *               adapter gave none), and `detail` the backend's error body when it gave one (the contract's `save` hands
+ *               `error(message, detail)` — `detail.reason === 'precondition-failed'` is a refused Only If Unchanged, s22);
+ *               `{ never }` — no answer comes. `after` > 0 delays it on the clock; absent or 0, it
  *               lands at once — the settle whose frame made the call sees it, as a network answer lands. A call no
  *               rule answers is a VIOLATION: answered `{ error }` so the play goes on, and the runner fails the run.
  *               An answer lands as a promise resolution does (a microtask after its moment).
+ *             USER (s22) — the script's `user`: the id of the user signed in, as the Record family's access rules read
+ *               it (`_getCurrentUser`, dbmodelcrudbase.ts :775-792 → `CloudStore.instance.currentUserId()`); absent,
+ *               nobody. NOT the resolved backend's session: the rules ask the LEGACY store (the `cloudservices` app id's
+ *               session, `Parse/<appId>/currentUser`), whichever backend the record goes to — a target plays the user
+ *               where that store reads it.
  *           After a write succeeds the adapter tells the store's listeners (the contract's event surface — `delete`
  *           `{ objectId, collection }`, …), AFTER the success callback (RestDataAdapter.ts :1216-1219): what a Query
  *           Records watching the store hears. No single-node trace reads it; a graph will.
@@ -247,7 +254,8 @@
  *   that keeps a world across plays would hear a disposed node. The clock is ONE per world:
  *   `advance(h, ms)` moves it for every instance and records the `advance` event on `h`'s trace
  *   only (a graph's trace is assembled per node, runner/graph.ts). (s21) `backendFor(id)` =
- *   `world.backend.resolve(id)` · a `backend` effect = `world.backend.issue(call, deliver)`.
+ *   `world.backend.resolve(id)` · a `backend` effect = `world.backend.issue(call, deliver)` · (s22) `backendUser()` =
+ *   `world.backend.user`.
  */
 
 import * as nodeCrypto from 'crypto';
@@ -293,6 +301,8 @@ export interface BackendScript {
   backends?: readonly string[];
   /** How the backends answer, first match wins. */
   answers?: readonly BackendRule[];
+  /** s22: the id of the user signed in, as the Record family's access rules read it (USER, BACKEND above). Absent: nobody. */
+  user?: string;
 }
 
 /** BACKEND above: one answer rule — first match wins; absent `match` fits every call. */
@@ -304,7 +314,7 @@ export interface BackendRule {
 }
 
 /** What a backend answers an operation (BACKEND above). */
-export type BackendAnswer = { ok: unknown } | { error: string | null } | { never: true };
+export type BackendAnswer = { ok: unknown } | { error: string | null; detail?: Record<string, unknown> } | { never: true };
 
 /** One backend call, as handed (BACKEND above). */
 export interface BackendCall {
@@ -313,8 +323,8 @@ export interface BackendCall {
   args: Readonly<Record<string, unknown>>;
 }
 
-/** What lands for a call: what the success callback is handed, or the failure's message (`undefined`: none). */
-export type BackendDelivery = { ok: unknown } | { error: string | undefined };
+/** What lands for a call: what the success callback is handed, or the failure's message (`undefined`: none) and its `detail` when the backend gave one. */
+export type BackendDelivery = { ok: unknown } | { error: string | undefined; detail?: Record<string, unknown> };
 
 /** POPUP above: the host, the components a Target can build, what the person does, where a Close Popup sits. */
 export interface PopupScript {
@@ -691,6 +701,11 @@ export class WorldBackend {
     this.ids = ids;
   }
 
+  /** USER (s22): the id of the user signed in, as the Record family's access rules read it; `undefined`: nobody. */
+  get user(): string | undefined {
+    return this.script.user;
+  }
+
   /** Called with every call as it is made — how a target attributes it to the node that made it. */
   onCall(listener: (c: BackendCall) => void): void {
     this.listeners.push(listener);
@@ -724,7 +739,7 @@ export class WorldBackend {
     }
     const a = rule.answer;
     if ('never' in a) return;
-    const d: BackendDelivery = 'ok' in a ? { ok: a.ok } : { error: a.error === null ? undefined : a.error };
+    const d: BackendDelivery = 'ok' in a ? { ok: a.ok } : a.detail === undefined ? { error: a.error === null ? undefined : a.error } : { error: a.error === null ? undefined : a.error, detail: a.detail };
     if (rule.after !== undefined && rule.after > 0) this.clock.schedule(rule.after, () => deliver(d));
     else deliver(d);
   }
