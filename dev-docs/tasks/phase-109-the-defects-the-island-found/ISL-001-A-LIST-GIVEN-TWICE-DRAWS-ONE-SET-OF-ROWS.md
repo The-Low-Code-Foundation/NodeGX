@@ -1,6 +1,6 @@
 # ISL-001 — A list given twice while it is still building draws one set of rows
 
-**Status: 🟡 fix landed 2026-10-01 (session 1, from `22303a534`) — AC1–AC4 and AC8 green; AC5–AC7 owed (each a heavy drive, and the island's rows wait on a P108 merge point).** Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F01 (and F06 as a
+**Status: 🟡 fix landed 2026-10-01 (session 1, `3df5adb82`) — AC1–AC4, AC6 (s2) and AC8 green; s3: AC5 driven (80/80 loads read the latest list; the minimal page's control cannot see the defect — the island's My robots reading, 14 for 9 before the fix, is the browser control). AC7 owed.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F01 (and F06 as a
 "measure alongside" note) · [P78 D85](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) (table line 64, section
 line 3277; owner `NONE` until now — **this task takes D85**) · met three times: TPL-011 s5 (09-27), P108 IW-001 §6 and
 IW-008 §5 · **Side:** product (runtime, the `For Each` / Repeater node)
@@ -194,3 +194,34 @@ page — **the Sept-24 deploy bundle (no fix): My robots 14 cards for 9; the bun
 drive 39/39** at 1368, 1024 and 390, and the pad, robots, build and island drives green. Details in ISL-025 §8. The deploy
 bundle in `src/external/deploy` is now HEAD's, so AC5 (20 loads) and AC7 (8× Teach pad) can run without a rebuild.
 
+### Session 3 — 2026-10-02, P109 s3: AC5 driven — the fix reads right on every load, and a minimal page cannot show the defect
+
+The deploy bundle was rebuilt from HEAD at 14:01 (for ISL-002; it carries this fix). Two pages in this folder, both
+**hand-written, not authored through the door**, both `validate:project` clean, each deployed with `nodegx deploy`
+(exit 0) and driven by `scripts/devtools/drive-isl001-list-twice.js`: a Function seeds a Variable with list `a` at load
+and replaces it with list `b` after a random 0–30 ms; the Variable feeds a For Each of `/Row`. Each load is a fresh
+navigation (`/?load=N`); rows counted at +500 ms and +2 s from the moment the seed ran. The control is a copy of the
+deployed folder whose bundle's rebuild op is put back to the block body that dropped the promise (one of `3df5adb82`'s
+two sabotage arms, printed by the deploy build as `function () { _this.refresh(); }`).
+
+| page | arm | loads | delays drawn | wrong loads | a row from list `a` at +500 ms |
+|---|---|---|---|---|---|
+| `isl001-list-twice` (5 rows, as AC5 words it) | the fix | 20 | 0–27 ms, 16 distinct | **0** | 0 |
+| same | **control** | 20 | 2–27 ms | **0** | 0 |
+| `isl001-list-twice-async` (60 rows, "Create asynchronously" on) | the fix | 20 | 1–30 ms | **0** | 0 |
+| same | **control** | 20 | 0–29 ms | **0** | 0 |
+
+**So, as AC5 allows: this drive cannot see the defect, and says so.** Why, from the source: with the old op the rebuild
+carries on in **microtasks** (`addItem` → `createNode` awaits nothing real once the component is loaded), and a 0–30 ms
+timer is a macrotask, so it always lands after the rebuild has finished. The spec reproduces it because it sets the
+second list inside the same update (`scheduleAfterUpdate`, `isl-001-…test.ts:126-133`). A browser opens that gap only
+when the rebuild **waits on something real**; the one real wait on that path is `fetchComponentBundle` (a row component
+in a bundle not fetched yet, `nodecontext.ts:586-640`). Tried once and dropped: a second page placing `Row` does not
+split it out — the deploy kept `/Row` in the first page's bundle (`b1: /Pages/Home, /Row`; `b2: /Pages/Other`). Which
+real wait the island's cards hit is **not measured here**.
+
+**The browser control for this defect therefore stays the island's:** s2's My robots reading on the Sept-24 bundle
+(no fix) was **14 cards for 9**, and 9 after the rebuild (above). The fix's side of AC5 is met — **80 / 80 loads read
+exactly the latest list**, at both times, on both pages.
+
+**AC7 (IG-005's Teach-pad drive 8× before and after) is still owed.**

@@ -94,7 +94,7 @@ the work:
 | task | sentence | from | side | 🔒 |
 |---|---|---|---|---|
 | **Track A** | | | | |
-| [ISL-001](ISL-001-A-LIST-GIVEN-TWICE-DRAWS-ONE-SET-OF-ROWS.md) | A list given twice while it is building draws one set of rows — **🟡 s1: fix landed; AC5–AC7 owed** | F01, F06, **D85** | runtime | §5 after AC2 |
+| [ISL-001](ISL-001-A-LIST-GIVEN-TWICE-DRAWS-ONE-SET-OF-ROWS.md) | A list given twice while it is building draws one set of rows — **🟡 s1: fix landed; s2: AC6 (the island's waits gone, 14→9 on the page); s3: AC5 driven (80/80, the minimal page's control blind — said so); AC7 owed** | F01, F06, **D85** | runtime | §5 after AC2 |
 | [ISL-002](ISL-002-A-FALSE-FROM-A-STATES-NODE-REACHES-ITS-WIRE.md) | A `false` from a States node's first state reaches its wire (it leaves as `0`: `states.ts:633`, and the exporter too) — **✅ s3: ruled and fixed (`06e65ab47`) in the runtime, the export and P107's spec; AC1–AC5 met (AC5 on a deployed page, `boolean:false` / `string:""` vs the control's `0`), AC6 written** | F02 | runtime, export | ✓ ruled |
 | [ISL-003](ISL-003-TWO-LISTS-WITH-THE-SAME-ROW-IDS-KEEP-THEIR-OWN-ROWS.md) | Two lists that reuse row ids keep their own rows | F03 | runtime | ✓ |
 | [ISL-004](ISL-004-A-COMPONENT-KEEPS-ITS-OWN-STATE.md) | A page you come back to can be as you left it (instances already have their own store; leaving a page destroys it) | F04, F05 | runtime | ✓ |

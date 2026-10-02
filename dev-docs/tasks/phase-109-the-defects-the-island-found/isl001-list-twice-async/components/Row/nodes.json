@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_row",
+  "version": 1,
+  "nodes": [
+    { "id": "rowRoot", "type": "Group", "label": "One row", "children": ["rowText"] },
+    { "id": "rowText", "type": "Text", "label": "the row's label", "parent": "rowRoot", "parameters": { "text": "?", "cssClassName": "isl001-row" } },
+    { "id": "rowIn", "type": "Component Inputs", "label": "What the list gives", "ports": [{ "name": "label", "plug": "output", "type": "string" }] }
+  ],
+  "visualRoots": ["rowRoot"]
+}
