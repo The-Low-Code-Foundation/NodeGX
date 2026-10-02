@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "ISL-002 First State",
+  "id": "isl002-first-state-0001",
+  "version": "4",
+  "nodegxVersion": "1.1.0",
+  "settings": { "htmlTitle": "ISL-002 First State", "navigationPathType": "path" },
+  "structure": { "componentsDir": "components", "assetsDir": "assets" }
+}

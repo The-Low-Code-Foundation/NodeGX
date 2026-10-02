@@ -1,6 +1,6 @@
 # ISL-002 — A `false` from a States node's first state reaches its wire as `false`
 
-**Status: 🟡 s3 (2026-10-02): ruled ("Fix both, one commit") and fixed in `06e65ab47` — runtime, export and P107's spec; AC1–AC4 green with their sabotage arms. Owed: AC5 (a deployed page, needs the deploy bundle rebuilt), AC6 is written (README §6).** Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F02 ·
+**Status: 🟡 s3 (2026-10-02): ruled ("Fix both, one commit") and fixed in `06e65ab47` — runtime, export and P107's spec; AC1–AC4 green with their sabotage arms. AC5 driven on a deployed page with its control; AC6 is written (README §6). Every AC met — ✅ ready to close.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F02 ·
 [P106 IG-003](../phase-106-the-island-grows/IG-003-DRIVE-TEACH-PLAY.md) §7, deviation 4 (line 169-172) · the template's
 note at `packages/noodl-mcp/tests/cg003Components.ts:1072-1074` · **Side:** product (runtime, the `States` node; the
 exported States library too)
@@ -166,5 +166,22 @@ reproduces the old hash exactly — this fix (`glow-desk/src/lib/states.ts`) and
 in three projects), which had left it red. Four hashes patched by hand; not regenerated, because a peer's in-flight
 export work is red in the same run. Filed `P109-S3-ISL011GOLDEN`.
 
-**Not done:** AC5 (the person sentence on a deployed page) — `nodegx deploy` copies the gitignored deploy bundle, which
-must be rebuilt from this commit first. AC6 written into README §6 for P108.
+**AC5, on a deployed page (later in session 3).** The deploy bundle (`noodl-editor/src/external/deploy/noodl.deploy.js`,
+gitignored) was rebuilt from HEAD (`webpack.deploy.dev.js`, 27 s, `typedStateValue` ×3 in it; the runtime sources had no
+peer edits). The project is `isl002-first-state/` in this folder — **hand-written, not authored through the door**, and
+validated by `npm run validate:project` (0 errors, 11 nodes): a States node `off,on` never moved, `flag` (off → `false`) and
+`label` (off → `''`) each into a Function that writes `typeof:value` into a Text, and `label` straight into a Text whose own
+text is `LABEL-DEFAULT`. `nodegx deploy … --allow-development-engine` → exit 0. Driven in headless Chromium by
+`scripts/devtools/drive-isl002-first-state.js`:
+
+| arm | `flag` | `label` | the wired Text | console errors |
+|---|---|---|---|---|
+| as deployed (the fix) | **`boolean:false`** | **`string:""`** | empty (its default replaced by `''`) | 0 |
+| **control**: the same folder copied, its bundle's first jump put back to `\|\| 0` | `number:0` | `number:0` | **shows `0`** | 0 |
+
+Both screenshots looked at: the control's page carries a stray **0** under the two readings; the fixed page carries
+nothing there. That `0` is the person's defect as §3 predicted it ("an empty text in the first state shows `0`") — seen
+for the first time, not only predicted. AC6 written into README §6 for P108.
+
+🔴 **The deploy bundle now carries this fix and every other HEAD change as of 14:01 on 10-02.** A peer drive whose reading
+moves after that may be seeing this rebuild (the same note as s2's 11:17 rebuild).

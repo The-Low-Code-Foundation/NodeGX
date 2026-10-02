@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "nodes": [
+    { "id": "page", "type": "Page", "label": "Home", "children": ["layout"], "parameters": { "title": "Home" } },
+    { "id": "layout", "type": "Group", "label": "Layout", "parent": "page", "children": ["marker", "flagShown", "labelShown", "labelText"] },
+    { "id": "marker", "type": "Text", "label": "Marker", "parent": "layout", "parameters": { "text": "isl002 page drew" } },
+    { "id": "flagShown", "type": "Text", "label": "flag as it arrived", "parent": "layout", "parameters": { "text": "flag: nothing arrived" } },
+    { "id": "labelShown", "type": "Text", "label": "label as it arrived", "parent": "layout", "parameters": { "text": "label: nothing arrived" } },
+    { "id": "labelText", "type": "Text", "label": "label, wired straight in (what a person sees)", "parent": "layout", "parameters": { "text": "LABEL-DEFAULT" } },
+    {
+      "id": "mode",
+      "type": "States",
+      "label": "starts off: flag false, label empty",
+      "parameters": {
+        "states": "off,on",
+        "values": "flag,label",
+        "type-flag": "boolean",
+        "type-label": "string",
+        "value-off-flag": false,
+        "value-on-flag": true,
+        "value-off-label": "",
+        "value-on-label": "x"
+      }
+    },
+    {
+      "id": "readFlag",
+      "type": "JavaScriptFunction",
+      "label": "write down what flag is",
+      "parameters": { "runOnChange-in-flag": true, "functionScript": "Outputs.shown = 'flag: ' + typeof Inputs.flag + ':' + String(Inputs.flag);" },
+      "ports": [
+        { "name": "in-flag", "displayName": "flag", "plug": "input", "type": "*", "group": "Inputs" },
+        { "name": "out-shown", "displayName": "shown", "plug": "output", "type": "*", "group": "Outputs" }
+      ]
+    },
+    {
+      "id": "readLabel",
+      "type": "JavaScriptFunction",
+      "label": "write down what label is",
+      "parameters": { "runOnChange-in-label": true, "functionScript": "Outputs.shown = 'label: ' + typeof Inputs.label + ':' + JSON.stringify(Inputs.label);" },
+      "ports": [
+        { "name": "in-label", "displayName": "label", "plug": "input", "type": "*", "group": "Inputs" },
+        { "name": "out-shown", "displayName": "shown", "plug": "output", "type": "*", "group": "Outputs" }
+      ]
+    }
+  ],
+  "visualRoots": ["page"]
+}
