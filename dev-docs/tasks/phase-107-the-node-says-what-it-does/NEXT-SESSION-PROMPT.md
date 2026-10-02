@@ -72,6 +72,14 @@ CONFORM); package jest 18 suites, 760 passed, exit 0; both `tsc` exit 0.
     `initialize` calls its own handler with what it read (:86-88).
   - runtime target: FIX T16 first (hook `beginOutcome` / `reportOutcome` / `sendSignalOnOutput` so a report made inside
     `initialize` lands in the first frame); stand in `RestAuthAdapter.prototype.consumeAuthReturn` with the world's return.
+  - **The format gap s28 found last (why slice B was not started):** `applyReturn` OPENS an outcome no input invoked
+    (`beginOutcome` inside a session handler — signinwith.ts :191-201 calls it "the one place in the phase where something
+    other than a port opens an invocation"). Today: the schema says an outcome's `port` IS the invoked input; the
+    interpreter's `resolveOpen` throws on an outcome with no pending slot; the runtime target writes a placeholder `'?'`
+    (`token.port ?? s.currentInput ?? '?'`, seen in the s28 probe). Decide the port for "no input" (proposed `''` with a
+    schema sentence — String Format's `''` port has no outcomes, so no clash), add a patch field for an outcome opened and
+    settled at once (e.g. `opens`), teach `runner/mutants.ts` the new field (s24: an unknown field is DROPPED silently),
+    and make the target write the same port. spec.ts + the schema + world.ts are guarded — hashes + three rounds, one commit.
   - Sign In With → v2: init reads the return; the `world.auth` handler runs `applyReturn`. C50 is the RUNTIME's behaviour
     (R3 a) — the spec follows it; a scenario named for C50 shows two Failures; the row stays for Richard.
   - The s28 probe is in the session scratchpad only (deleted from the tree): three stub arms copied from the adapter's branches.
