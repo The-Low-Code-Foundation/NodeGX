@@ -228,7 +228,8 @@
  *               is handed (a record, rows; nothing for a delete); `{ error }` — it failed with that message (`null`: the
  *               adapter gave none), and `detail` the backend's error body when it gave one (the contract's `save` hands
  *               `error(message, detail)` — `detail.reason === 'precondition-failed'` is a refused Only If Unchanged, s22);
- *               `{ never }` — no answer comes. `after` > 0 delays it on the clock; absent or 0, it
+ *               `{ never }` — no answer comes. (s28) `times`: the rule answers the first `times` calls it fits, then fits
+ *               none — a refusal, then a retry the next rule answers. `after` > 0 delays it on the clock; absent or 0, it
  *               lands at once — the settle whose frame made the call sees it, as a network answer lands. A call no
  *               rule answers is a VIOLATION: answered `{ error }` so the play goes on, and the runner fails the run.
  *               An answer lands as a promise resolution does (a microtask after its moment).
@@ -262,7 +263,9 @@
  *             THE REFUSAL BEFORE THE WIRE — a `fetchCurrentUser` to a backend holding no session, a `setUserProperties` to
  *               one holding none or none with an `objectId`: `Nobody is signed in.`, answered at once, inside the call
  *               (`refused`); recorded, never a violation, no rule read. (s27) A `logOut` to a backend holding no session is
- *               no request either: it SUCCEEDS at once, inside the call (`inCall`) — and lands as below.
+ *               no request either: it SUCCEEDS at once, inside the call (`inCall`) — and lands as below. (s28) A
+ *               `signInWithProvider` with no provider (falsy — `!options.provider`): `Sign In With: no provider was set.`,
+ *               refused inside the call (RestAuthAdapter.ts :1377-1380; ParseAuthAdapter.ts :616-619 — the same sentence).
  *             A LANDING — an answer lands as a BACKEND answer does, and then the ADAPTER's steps run in this order
  *               (`landAuth`; `AuthStep`), each after the world's sessions moved for it:
  *                 `fetchCurrentUser` ok — the session becomes the one held AT THE CALL with the answer's fields over it;
@@ -280,6 +283,14 @@
  *                   (:1087-1142): one operation here, one landing. Failed: the error only, the session untouched.
  *                 (s27) `logOut` — WHATEVER the answer (`ok` or an error: the adapter's `finish` on both, :1064-1083): the
  *                   session cleared WITH `sessionChanged`; the caller's success; `loggedOut`. Only `never` stops it.
+ *                 (s28) `requestMagicLink` — the session untouched either way: ok, the caller's success (ParseAuthAdapter.ts
+ *                   :636-643 — the link is emailed; nothing signs in on THIS page); failed, the error.
+ *                 (s28) `signInWithProvider` — ok is the HANDOVER ACCEPTED: the adapter sends the browser to the provider
+ *                   (`window.location.href`, RestAuthAdapter.ts :1436; ParseAuthAdapter.ts :624) and nothing comes back
+ *                   to the caller — the contract's one call with no success (`SignInWithProviderOptions`, auth.ts
+ *                   :116-128). No step lands. Failed (the REST adapter's discovery found no such provider, or failed —
+ *                   :1400-1438), the error. Where the browser went is the adapter's (its discovery request, the parked
+ *                   flow, the URL it builds): R9's seam, not played — the operation as handed is the record.
  *             THE SERVICE — the app's one user service (userservice.ts), made by the first node that reaches it
  *               (`startService`; the User node at its mount, a Set User Properties at its frame end). When it is made with
  *               a session on the active backend it reads it (`current`, :143-144: the session handed to the record store,
@@ -300,7 +311,9 @@
  *                   and a `lost` failure announces `sessionLost` twice (the adapter's, then the service's — row C46).
  *           Not played: the token lifecycle (refresh timers, cross-tab storage events — RestAuthAdapter's controller), the
  *           Parse wire's adapter, the service's `current` model (read by no node specced here), the provider return leg;
- *           (s27) the capability gate (`begin` — every backend here offers password sign-in and sign-up) and each wire's
+ *           (s27) the capability gate (`begin` — every backend here offers password sign-in and sign-up; s28: and magic links —
+ *           only the `nodegx` type does, RestAuthAdapter.ts :1562-1570 refuses every REST one in the call, so a world that plays
+ *           a REST backend's refusal scripts it as an answer) and each wire's
  *           own steps inside a sign-in (Directus writes the tokens, then `/users/me` merged — two `sessionChanged`;
  *           PocketBase one; a sign-up's create-then-sign-in is two requests): the contract's operation is the seam (R9).
  *
@@ -421,6 +434,8 @@ export interface BackendRule {
   answer: BackendAnswer;
   /** Milliseconds on the clock before the answer lands; absent or 0 lands at once. */
   after?: number;
+  /** s28: the rule answers the first `times` calls it fits, then fits none (a refusal, then a retry that succeeds); absent: every one. */
+  times?: number;
 }
 
 /** What a backend answers an operation (BACKEND above). */
@@ -803,12 +818,15 @@ function deliveryOf(a: Exclude<BackendAnswer, { never: true }>): BackendDelivery
 }
 
 /** AUTH below: the operations the world plays as auth — the contract's (`IAuthAdapter`) and the one beside it (`setUserProperties`, userservice.ts :422). */
-export const AUTH_OPS: readonly string[] = Object.freeze(['fetchCurrentUser', 'setUserProperties', 'logIn', 'signUp', 'logOut']);
+export const AUTH_OPS: readonly string[] = Object.freeze(['fetchCurrentUser', 'setUserProperties', 'logIn', 'signUp', 'logOut', 'requestMagicLink', 'signInWithProvider']);
 
 export const isAuthOp = (op: string): boolean => AUTH_OPS.includes(op);
 
 /** RestAuthAdapter.ts :1153 / :1603 (and ParseAuthAdapter.ts :682 — the one sentence for the condition). */
 export const NOBODY_SIGNED_IN = 'Nobody is signed in.';
+
+/** RestAuthAdapter.ts :1378 / ParseAuthAdapter.ts :617 — a provider sign-in handed no provider (s28). */
+export const NO_PROVIDER_SET = 'Sign In With: no provider was set.';
 
 /** What a session announces (AUTH below) — the contract's `AuthEventType` (`@noodl/backend-contract` auth.ts :189-206). */
 export type AuthEventType = 'sessionChanged' | 'loggedIn' | 'loggedOut' | 'sessionGained' | 'sessionLost';
@@ -961,9 +979,11 @@ export class WorldBackend {
    * A refusal (RestAuthAdapter.ts :1150-1155 `fetchCurrentUser`, :1601-1605 `setUserProperties`): with no session (no
    * `objectId`, for a write) on the backend it was handed to, `Nobody is signed in.` (s27) A `logOut` to a backend holding no
    * session is no request at all — the adapter finishes it at once (:1070-1073, `!session`): a SUCCESS, in the call. Either
-   * is still a call (recorded, never a violation) answered AT ONCE, inside the call — no rule is read.
+   * is still a call (recorded, never a violation) answered AT ONCE, inside the call — no rule is read. (s28) A
+   * `signInWithProvider` handed no provider (`!args.provider`) is refused so, by both adapters in the same words.
    */
-  authBeforeWire(op: string, backend: string): BackendDelivery | undefined {
+  authBeforeWire(op: string, backend: string, args?: Readonly<Record<string, unknown>>): BackendDelivery | undefined {
+    if (op === 'signInWithProvider' && !args?.provider) return { error: NO_PROVIDER_SET, refused: true };
     const s = this.sessions.get(backend);
     if (op === 'fetchCurrentUser' && s === undefined) return { error: NOBODY_SIGNED_IN, refused: true };
     if (op === 'setUserProperties' && (s === undefined || !s.objectId)) return { error: NOBODY_SIGNED_IN, refused: true };
@@ -1029,6 +1049,11 @@ export class WorldBackend {
       event('loggedIn');
       return;
     }
+    if (op === 'requestMagicLink') {
+      perform({ do: 'success' }); // s28 — ParseAuthAdapter.ts :640: the session untouched
+      return;
+    }
+    if (op === 'signInWithProvider') return; // s28 — the handover accepted: the browser leaves, nothing comes back
     throw new Error(`world: ${op} is not an auth operation the world plays`);
   }
 
@@ -1061,7 +1086,7 @@ export class WorldBackend {
     this.calls.push(recorded);
     for (const l of this.listeners) l(recorded);
     // AUTH (s26, s27) — answered before the wire: at once, inside the call, no rule read
-    const before = this.authBeforeWire(call.op, call.backend);
+    const before = this.authBeforeWire(call.op, call.backend, call.args as Readonly<Record<string, unknown>>);
     if (before !== undefined) {
       deliver(before);
       return;
@@ -1081,10 +1106,14 @@ export class WorldBackend {
     else deliver(d);
   }
 
-  /** The first of the script's `answers` whose `match` fits the call (BACKEND above). */
+  /** How many calls each rule has answered (s28 `times`). */
+  private readonly answered = new Map<BackendRule, number>();
+
+  /** The first of the script's `answers` whose `match` fits the call and whose `times` is not spent (BACKEND above); counts it. */
   private ruleFor(call: BackendCall): BackendRule | undefined {
     const collection = (call.args as { collection?: unknown }).collection;
-    return (this.script.answers ?? []).find((r) => {
+    const rule = (this.script.answers ?? []).find((r) => {
+      if (r.times !== undefined && (this.answered.get(r) ?? 0) >= r.times) return false;
       const m = r.match;
       if (!m) return true;
       if (m.op !== undefined && m.op !== call.op) return false;
@@ -1092,6 +1121,8 @@ export class WorldBackend {
       if (m.backend !== undefined && m.backend !== call.backend) return false;
       return true;
     });
+    if (rule) this.answered.set(rule, (this.answered.get(rule) ?? 0) + 1);
+    return rule;
   }
 }
 

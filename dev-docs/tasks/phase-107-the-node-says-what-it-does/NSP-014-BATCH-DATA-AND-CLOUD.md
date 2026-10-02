@@ -645,3 +645,84 @@ C47 and D23 now have graph evidence too (s10).
 | `node scripts/node-spec/census.js` | 147, all tiered; `placesWritten` counts moved only |
 | `node scripts/bugs.js check` | 152 files, every header valid |
 | export, `test:main` | NOT RUN — no export code touched |
+
+### 6.22 s28 (2026-10-02) — Request Magic Link, Sign In With (the launcher); the return leg probed
+
+**Built.** `src/nodes/user-handovers.ts` — the two user nodes whose sign-in finishes somewhere else (an inbox, a
+provider), so neither moves the session on the page that pressed Do. Log In's shape (a token per press, one call per
+frame, the batch taken before the call goes out, Failure with the node's code, Error as given). Request Magic Link 10
+scenarios, Sign In With 12. Both **conform on the runtime on the first run, on two seeds, and at 10,000**; mutants 15 / 16
+(+1 declared equivalent — D25) and 12 / 12 on the runtime, every mutant killed or declared on the interpreter on seeds 13
+and 20728. **98 of 147.**
+
+**Read what each CALLS first (s18).** Request Magic Link: `UserService.instance.requestMagicLink({ email, redirect,
+success, error })` and nothing else. Sign In With: `UserService.instance` in `initialize` (the service made at MOUNT, with
+its start-up check — like the User node), a subscription to `oauthReturn` and a read of the service's `oauthReturn`
+state; at the frame end Signing In true, then `signInWithProvider({ provider, redirect, error })` — no `success`
+(the contract's one call without one, auth.ts :116-128).
+
+**The world (world.ts AUTH).** `requestMagicLink` and `signInWithProvider` joined `AUTH_OPS`:
+- `requestMagicLink` — the session untouched either way: ok → the caller's success; failed → the error. Only the
+  `nodegx` backend type offers magic links (`auth.magicLink` is `supported` there, `unsupported` on Directus /
+  PocketBase / Parse — RestAuthAdapter.ts :1562-1570 refuses every REST one in the call, through `begin`). That is the
+  capability gate, which the world does not play (s27); a world plays a REST backend's refusal as an answer.
+- `signInWithProvider` — ok is the HANDOVER ACCEPTED: the adapter navigates the browser away and NOTHING lands (no step;
+  the press is never settled — the node's own docblock :227-241). Failed → the error. A falsy provider is refused BEFORE
+  the wire, inside the call, by both adapters in the same words (`Sign In With: no provider was set.`, RestAuthAdapter.ts
+  :1377-1380, ParseAuthAdapter.ts :616-619) → `authBeforeWire` (now takes the call's args).
+- Where the browser goes on a handover (the REST adapter's discovery request, its parked flow, the provider URL) is the
+  adapter's — R9's seam, not played. No LOCATION event: the node hands the operation, the adapter makes the navigation.
+- **`times` on a backend rule** (additive): a rule answers the first `times` calls it fits, then fits none — so a
+  scenario can script a refusal and then a retry that succeeds (D25's scenario needs it).
+
+**Runtime-target hole T15:** the viewer's user nodes reach `UserService.instance` (the module singleton), and s27
+forwarded its METHODS to the play's service — not its GETTERS. Sign In With reads `UserService.instance.oauthReturn`, a
+getter, which read the app singleton's adapters. Now getters are forwarded too. No other spec read a getter (the whole
+suite unmoved).
+
+**The return leg — not played, but probed (row C50).** The receiver half (`applyReturn`, a sign-in coming back on a
+later page load through the service's `_consumeAuthReturn` at its construction) needs a world that plays the return —
+slice B. Reading it for the seam found a lead, measured before filing: on a PROVIDER ERROR (the person pressed Cancel,
+or the provider refused; on REST also a `state` mismatch) the adapter sets the final state at once AND defers the
+`oauthReturn` event by `setTimeout(0)`; Sign In With's `initialize` both READS the state and SUBSCRIBES, so it reports
+twice. The probe (the real node and service; only `consumeAuthReturn` stood in by the adapter's own branches, verbatim):
+- a wire — Sign In With's Failure → a Counter's Increase: **0 → 1 → 2** on a provider error; the control (the exchange
+  refused — no early state) → 1;
+- the error bus — an On App Error mounted before the Sign In With fires **twice**, mounted after it once; controls:
+  exchange refused once in either order, exchange succeeded and no return none.
+The node's comment ("idempotent per page load because UserService only ever consumes one return") is wrong: every call
+mints a fresh token.
+
+**Runtime-target hole T16 (found, not fixed — slice B's):** the target installs its `beginOutcome` / `reportOutcome` /
+signal hooks AFTER a node is made, so an outcome a node reports inside `initialize` is not on its single-node trace —
+while in the app it DOES reach the wire (the late wire catches up, graph c01: the probe's Counter counted it). No spec
+before Sign In With's return leg reports at mount; slice B must fix it first (hook the definition before the mount).
+
+**Also measured:** Request Magic Link clears Error on a Done with `undefined`, which is never sent (C3) — the wire keeps
+the last failure (row D25). The clear is unobservable on every port, so the mutant that drops it is declared
+equivalent (`equivalent-mutants.ts`), pointing at D25 — a structural reason (no dedup in `node.ts` `sendValue`), not a
+seed's luck.
+
+### 6.23 Rows (s28)
+
+| row | node | what the trace shows | proposed |
+|---|---|---|---|
+| **C50** | Sign In With (return leg) | a sign-in cancelled or refused at the provider fires Failure TWICE on the returning page (Counter 0 → 1 → 2) and raises twice on the error bus (On App Error ×2 when mounted first); control (exchange refused) once. `initialize` reads the final state AND hears the deferred event (:76-89; RestAuthAdapter.ts :1497-1513, ParseAuthAdapter.ts :765-770). Probe, four arms × two mount orders + a wire arm. Ledger `p107-c50-…` | report a terminal return once per page load (remember the state already reported) |
+| **D25** | Request Magic Link | after a Failure, a Done clears Error with `undefined` — never sent (C3): the wire keeps the last failure. Measured on the runtime (the Done frame sends only the outcome). Sign In With's return leg clears the same way (:217-220, read). Ledger `p107-d25-…` | send `''` when clearing a text output (one decision with C47) |
+
+### 6.24 Gate readings (s28, 2026-10-02; load 2.6–5 — this session's jest and one peer jest worker for a minute)
+
+| gate | reading |
+|---|---|
+| interpreter: `batch-records.test.ts`, the two on seeds 13 and 20728 | 4 / 4 green — scenarios, 200 sequences, every mutant killed or declared (RML 1 declared: D25), none unreached |
+| runtime: `NSP_ONLY=` the two, at 200, seeds 20728 and 13 | **both CONFORM, first run, both seeds**: Request Magic Link 10 / 10, 200 / 200, 15 / 16 (+1 equivalent) · Sign In With 12 / 12, 200 / 200, 12 / 12 |
+| runtime deep, `NSP_DEEP=10000`, the two | **both CONFORM**: 10,000 / 10,000, 0 divergences (87 s, 81 s); mutants as at 200 |
+| runtime traces printed (probe, deleted) | SIW no provider → refused in the call: Error + Failure, Signing In true-and-back inside one frame records no value change; SIW handover → Signing In true, the call, no outcome; RML Failure then Done → nothing on Error (D25); interpreter traces identical |
+| return-leg probe (deleted) | C50 as above |
+| runtime: the WHOLE `test/node-spec/` (conformance + graph + runtime-target), after T15 | **3 suites, 185 passed, 78 skipped, exit 0, 387 s**: **78 specs CONFORM** + Counter's AC5; the one DOES NOT CONFORM is AC1's planted off-by-one, as designed. Graph 76 / 76 unmoved |
+| `nodegx-node-spec`: `npx jest` | **18 suites, 760 passed, 17 skipped, exit 0** (s27: 750) — the hash refresh named exactly `src/world.ts`; the three stranger rounds green |
+| `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
+| count, from `specs` × tiers.json | 78 specs (T1 46 · T2 9 · T3 15 · T4 8) + On App Error + 19 graph-graded T4 = **98** |
+| `node scripts/node-spec/census.js` | 147, all tiered; `placesWritten` counts moved only (Text / Group, not this session's) — a first run counted this session's probe files and was re-run after they were deleted |
+| `node scripts/bugs.js check` | 154 files, every header valid |
+| export, `test:main` | NOT RUN — no export code touched |

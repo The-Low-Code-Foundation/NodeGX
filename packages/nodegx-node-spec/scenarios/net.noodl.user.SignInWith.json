@@ -1,0 +1,375 @@
+[
+  {
+    "name": "Mount with nobody signed in: the service is made, no call, Signing In false",
+    "because": "signinwith.ts :81-95 — `UserService.instance` reached at initialize; `_internal.signingIn = false`",
+    "params": {},
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "Mount with somebody signed in: the service's start-up check is made (no node's) — nothing on this node",
+    "because": "signinwith.ts :85 — the first reach makes the service (world.ts AUTH, THE START-UP CHECK)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Do with a provider: Signing In, one call — the handover; the browser leaves, no outcome",
+    "because": "signinwith.ts :248-259 — Signing In first, then `signInWithProvider`; :229-241 the press never settles",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "provider",
+        "value": "google"
+      },
+      {
+        "set": "redirect",
+        "value": "/welcome"
+      },
+      {
+        "signal": "signIn"
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signInWithProvider"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Do with no provider: refused inside the call — Signing In and back in one frame, Error, Failure",
+    "because": "signinwith.ts :257 → :187-196; RestAuthAdapter.ts :1377-1380 (world.ts AUTH, before the wire)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "signIn"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "An empty provider is no provider: refused inside the call",
+    "because": "signinwith.ts :257; RestAuthAdapter.ts :1377 `!options.provider`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "provider",
+        "value": ""
+      },
+      {
+        "signal": "signIn"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "Two Dos in one frame with no provider: one call, two Failures",
+    "because": "signinwith.ts :243-247 — a token per press, minted before the guard",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "signIn"
+      },
+      {
+        "signal": "signIn"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "The backend does not offer the provider: Signing In, then at the answer Error, Signing In false, Failure",
+    "because": "signinwith.ts :257 → :187-196; RestAuthAdapter.ts :1403-1412 (the discovery's refusal)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "provider",
+        "value": "github"
+      },
+      {
+        "signal": "signIn"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signInWithProvider"
+            },
+            "answer": {
+              "error": "\"github\" is not one of the sign-in providers main offers (google)."
+            },
+            "after": 5
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A refusal with no message: Signing In false, Failure, and nothing on Error — the node has no fallback sentence",
+    "because": "signinwith.ts :187-196 — Error as given; undefined is never sent (C3)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "provider",
+        "value": "google"
+      },
+      {
+        "signal": "signIn"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signInWithProvider"
+            },
+            "answer": {
+              "error": null
+            },
+            "after": 1
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Do after a refusal is a second call with the values at its own frame end — and the handover this time",
+    "because": "signinwith.ts :252-253 — the batch taken before the call goes out",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "provider",
+        "value": "github"
+      },
+      {
+        "signal": "signIn"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "set": "provider",
+        "value": "google"
+      },
+      {
+        "signal": "signIn"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signInWithProvider"
+            },
+            "answer": {
+              "error": "\"github\" is not one of the sign-in providers main offers (google)."
+            },
+            "after": 5,
+            "times": 1
+          },
+          {
+            "match": {
+              "op": "signInWithProvider"
+            },
+            "answer": {
+              "ok": null
+            },
+            "after": 5
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A value written after the press in the same frame goes out: the call reads the frame end",
+    "because": "signinwith.ts :254-258",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "signIn"
+      },
+      {
+        "set": "provider",
+        "value": "google"
+      },
+      {
+        "set": "redirect",
+        "value": ""
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signInWithProvider"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Do while a handover is out: a second call, Signing In sent true again",
+    "because": "signinwith.ts :248-250 — flagged on every batch",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "provider",
+        "value": "google"
+      },
+      {
+        "signal": "signIn"
+      },
+      "settle",
+      {
+        "signal": "signIn"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signInWithProvider"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A call that never comes back: Signing In stays true — no outcome",
+    "because": "signinwith.ts :248-259",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "provider",
+        "value": "google"
+      },
+      {
+        "signal": "signIn"
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signInWithProvider"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  }
+]

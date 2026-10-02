@@ -423,9 +423,19 @@ function installAuth(w: World): () => void {
   const appService = appUserService();
   const serviceProto = UserServiceClass.prototype as Record<string, unknown>;
   const savedMethods: Record<string, unknown> = {};
+  const savedGetters: Record<string, PropertyDescriptor> = {};
   for (const name of Object.getOwnPropertyNames(serviceProto)) {
     const desc = Object.getOwnPropertyDescriptor(serviceProto, name);
-    if (name === 'constructor' || !desc || typeof desc.value !== 'function') continue;
+    if (name === 'constructor' || !desc) continue;
+    // s28 (T15) — a getter too: Sign In With reads `UserService.instance.oauthReturn` (signinwith.ts :92), which read the
+    // app singleton's adapters, never the play's
+    if (desc.get) {
+      const get = desc.get;
+      savedGetters[name] = desc;
+      Object.defineProperty(serviceProto, name, { ...desc, get(this: unknown) { return get.call(this === appService ? forScope() : this); } });
+      continue;
+    }
+    if (typeof desc.value !== 'function') continue;
     const method = desc.value as (...a: unknown[]) => unknown;
     savedMethods[name] = method;
     serviceProto[name] = function (this: unknown, ...a: unknown[]) {
@@ -464,6 +474,7 @@ function installAuth(w: World): () => void {
   return () => {
     for (const [op, fn] of Object.entries(saved)) proto[op] = fn;
     for (const [name, fn] of Object.entries(savedMethods)) serviceProto[name] = fn;
+    for (const [name, desc] of Object.entries(savedGetters)) Object.defineProperty(serviceProto, name, desc);
     services.UserService = savedService;
   };
 }
@@ -578,7 +589,7 @@ function resetRegistry(world: World): void {
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout', 'user/requestmagiclink', 'user/signinwith'] as const;
 
 /** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (s17 Navigate To Path … s20 Show / Close Popup). */
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;

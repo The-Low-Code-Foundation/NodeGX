@@ -59,6 +59,7 @@ import { FilterRecords } from './filter-records';
 import { UserNode } from './user';
 import { SetUserProperties } from './set-user-properties';
 import { LogIn, LogOut, SignUp } from './user-actions';
+import { RequestMagicLink, SignInWith } from './user-handovers';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
 import { JSONStreamParser } from './json-stream-parser';
@@ -156,6 +157,8 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [LogIn.type]: LogIn, // s27
   [SignUp.type]: SignUp,
   [LogOut.type]: LogOut,
+  [RequestMagicLink.type]: RequestMagicLink, // s28
+  [SignInWith.type]: SignInWith,
   [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
@@ -227,6 +230,8 @@ export {
   LogIn,
   SignUp,
   LogOut,
+  RequestMagicLink,
+  SignInWith,
   States,
   RandomBytes,
   Repeat,

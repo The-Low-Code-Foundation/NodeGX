@@ -122,4 +122,10 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
         "the frame end's outcomes and pops stand without its `set`; only the NEXT settle shows the presses it failed to take (they pop again). A sequence ending at that settle cannot show it, and the branch keys are combinations of press ports and answers, so which branches end a sequence moves with the seed — States' frame end exactly. Every hand scenario with two presses in a frame settles again after it, and a frame end reached there is killed"
     }
   ],
+  // NSP-014 s28 — Request Magic Link clears Error on a Done (requestmagiclink.ts :158-159) with `undefined`, which a node
+  // never SENDS (node.ts :820-822, CONTRACT C3), and the runtime does not dedup a repeated send: a later failure sends its
+  // message whether or not the clear happened. Row D25 is exactly this — the clear never reaches the wire.
+  'net.noodl.user.RequestMagicLink': [
+    { reducer: 'world.backend', kind: 'drop-set', branch: '"set":["error"],"emit":[],"outcome":null,"outcomes":["send:done"]', why: 'the clear is `undefined`, never sent (C3; row D25), and no later send depends on it' }
+  ],
 });

@@ -47,8 +47,8 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 
 | # | node | tier | batch | places | plan.ts lines | emit libs | tests typed | tests loose |
 |---:|---|---|---|---:|---:|---|---:|---:|
-| 1 | **Text** | T5 | NSP-016 | 58 | 1 | sseLib.ts | 55 | 92 |
-| 2 | **Group** | T5 | NSP-016 | 57 | 0 | — | 56 | 93 |
+| 1 | **Text** | T5 | NSP-016 | 59 | 1 | sseLib.ts | 56 | 93 |
+| 2 | **Group** | T5 | NSP-016 | 58 | 0 | — | 57 | 94 |
 | 3 | **Set Variable** | T1 | NSP-012 | 49 | 12 | — | 36 | 43 |
 | 4 | **Repeater** (`For Each`) | T5 | NSP-016 | 46 | 24 | — | 21 | 48 |
 | 5 | **Component Inputs** | T4 | NSP-015 | 34 | 10 | — | 23 | 47 |
@@ -206,7 +206,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Component Children** | `Component Children` | T5 | browser | `noodl-runtime/src/nodelibraryexport.ts` |  |  | 4 |  | translated | 1 / 5 | providedBy noodl-editor in the catalog |
 | **Drag** | `Drag` | T5 | browser | `noodl-viewer-react/src/nodes/visual/drag.ts` |  |  | 10 | dragLib | translated | 2 / 9 |  |
 | **Repeater** | `For Each` | T5 | browser | `noodl-viewer-react/src/nodes/std-library/data/foreach.tsx` | ✓ | ✓ | 24 |  | translated | 21 / 48 |  |
-| **Group** | `Group` | T5 | browser | `noodl-viewer-react/src/nodes/visual/group.ts` | ✓ | ✓ | 0 |  | translated | 56 / 93 |  |
+| **Group** | `Group` | T5 | browser | `noodl-viewer-react/src/nodes/visual/group.ts` | ✓ | ✓ | 0 |  | translated | 57 / 94 |  |
 | **Image** | `Image` | T5 | browser | `noodl-viewer-react/src/nodes/visual/image.ts` |  | ✓ | 0 |  | translated | 2 / 11 |  |
 | **Button** | `net.noodl.controls.button` | T5 | browser | `noodl-viewer-react/src/nodes/controls/button.ts` |  | ✓ | 0 |  | translated | 24 / 39 |  |
 | **Checkbox** | `net.noodl.controls.checkbox` | T5 | browser | `noodl-viewer-react/src/nodes/controls/checkbox.ts` | ✓ | ✓ | 1 |  | translated | 2 / 9 |  |
@@ -219,7 +219,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Component Stack** | `Page Stack` | T5 | browser | `noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx` | ✓ | ✓ | 4 |  | translated | 1 / 5 |  |
 | **Radio Button Group** | `Radio Button Group` | T5 | browser | `noodl-viewer-react/src/nodes/controls/radiobuttongroup.ts` |  | ✓ | 0 |  | translated | 0 / 5 |  |
 | **Page Router** | `Router` | T5 | browser | `noodl-viewer-react/src/nodes/navigation/router.tsx` | ✓ | ✓ | 5 |  | translated | 2 / 20 |  |
-| **Text** | `Text` | T5 | browser | `noodl-viewer-react/src/nodes/visual/text.ts` |  | ✓ | 1 | sseLib | translated | 55 / 92 |  |
+| **Text** | `Text` | T5 | browser | `noodl-viewer-react/src/nodes/visual/text.ts` |  | ✓ | 1 | sseLib | translated | 56 / 93 |  |
 | **Video** | `Video` | T5 | browser | `noodl-viewer-react/src/nodes/visual/video.ts` |  | ✓ | 0 |  | translated | 0 / 8 |  |
 
 ### NSP-017 — the escape hatches (5)

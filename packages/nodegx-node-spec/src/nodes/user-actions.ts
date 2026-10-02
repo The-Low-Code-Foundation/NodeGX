@@ -65,13 +65,13 @@ type ActionState = {
 const INITIAL: ActionState = { username: undefined, password: undefined, email: undefined, properties: {}, error: undefined, scheduled: false, presses: 0, calls: {}, nextCall: 1 };
 
 /** The account a world signs in: the user's fields flat, as the adapter flattens a sign-in's answer (world.ts AUTH). */
-const ANN = { objectId: 'u1', email: 'ann@example.com', username: 'ann', nick: 'Ann', n: 1 };
+export const ANN = { objectId: 'u1', email: 'ann@example.com', username: 'ann', nick: 'Ann', n: 1 };
 const BEA = { objectId: 'u2', email: 'bea@example.com', username: 'bea', nick: 'Bea', n: 2 };
 /** The service's start-up check, never answered — the pools that hold a session at the start script it so it is not a violation. */
-const NO_CHECK = { match: { op: 'fetchCurrentUser' }, answer: { never: true as const } };
+export const NO_CHECK = { match: { op: 'fetchCurrentUser' }, answer: { never: true as const } };
 
 /** The backends a sequence plays with, for one operation: it succeeds at once and late, is refused with and without a message, is never answered — with nobody signed in and with somebody. */
-function pool(op: string, ok: unknown): ReadonlyArray<BackendScript> {
+export function pool(op: string, ok: unknown): ReadonlyArray<BackendScript> {
   return [
     { answers: [{ match: { op }, answer: { ok } }] },
     { answers: [{ match: { op }, answer: { ok }, after: 20 }] },
@@ -83,10 +83,10 @@ function pool(op: string, ok: unknown): ReadonlyArray<BackendScript> {
   ];
 }
 
-const stringInput = (displayName: string, description: string, examples: unknown[]): ValueInputDecl => ({ type: 'string', coerce: 'none', displayName, group: 'General', description, examples });
+export const stringInput = (displayName: string, description: string, examples: unknown[]): ValueInputDecl => ({ type: 'string', coerce: 'none', displayName, group: 'General', description, examples });
 
-const failures = <P extends string>(port: P, code: string, n: number) => Array.from({ length: n }, () => ({ port, outcome: 'failure' as const, error: code }));
-const dones = <P extends string>(port: P, n: number) => Array.from({ length: n }, () => ({ port, outcome: 'done' as const }));
+export const failures = <P extends string>(port: P, code: string, n: number) => Array.from({ length: n }, () => ({ port, outcome: 'failure' as const, error: code }));
+export const dones = <P extends string>(port: P, n: number) => Array.from({ length: n }, () => ({ port, outcome: 'done' as const }));
 
 /** :78-80 → :126-133 — a token per press, minted before the guard; one call per frame */
 const press = (s: ActionState) => ({ set: s.scheduled ? { presses: s.presses + 1 } : { presses: s.presses + 1, scheduled: true }, send: [] as never[], outcome: 'pending' as const });

@@ -1,0 +1,372 @@
+[
+  {
+    "name": "Do with the held values: one call, then Done",
+    "because": "requestmagiclink.ts :151-169 — the frame's batch, one call to the active backend with Email and Redirect",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "email",
+        "value": "ann@example.com"
+      },
+      {
+        "set": "redirect",
+        "value": "/welcome"
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Two Dos in one frame: one call, two Dones",
+    "because": "requestmagiclink.ts :143-149 — a token per press, minted before the guard",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "email",
+        "value": "ann@example.com"
+      },
+      {
+        "signal": "send"
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A refusal: Error is the message as given, Failure",
+    "because": "requestmagiclink.ts :171 → :127-135",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "email",
+        "value": "ann@example.com"
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "error": "main has no magic-link login."
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A refusal with no message: Failure, and nothing on Error — the node has no fallback sentence",
+    "because": "requestmagiclink.ts :127-135 — Error as given; undefined is never sent (C3)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "error": null
+            },
+            "after": 1
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A late answer: the presses wait, then Done at the answer",
+    "because": "requestmagiclink.ts :160-169",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "email",
+        "value": "ann@example.com"
+      },
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "ok": null
+            },
+            "after": 20
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Do while a call is out is a second call, with the values as they are at its own frame end",
+    "because": "requestmagiclink.ts :155-158 — the batch taken before the call goes out",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "email",
+        "value": "a@example.com"
+      },
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "set": "email",
+        "value": "b@example.com"
+      },
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "ok": null
+            },
+            "after": 20
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Done after a Failure clears Error inside the node, and the wire keeps the failure — the clear is undefined, never sent",
+    "because": "requestmagiclink.ts :166-167 — `_internal.error = undefined` then flagged (C3; row D25)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "error": "Too many requests."
+            },
+            "after": 5,
+            "times": 1
+          },
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "ok": null
+            },
+            "after": 10
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A value written after the press in the same frame goes out: the call reads the frame end",
+    "because": "requestmagiclink.ts :160-163",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      {
+        "set": "email",
+        "value": "late@example.com"
+      },
+      {
+        "set": "redirect",
+        "value": ""
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Somebody already signed in: the service's start-up check is made (no node's), the call goes out, Done — the session untouched",
+    "because": "world.ts AUTH (s28) — a magic link signs nobody in on this page",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "email",
+        "value": "bea@example.com"
+      },
+      {
+        "signal": "send"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A call that never comes back: the presses wait — no outcome",
+    "because": "requestmagiclink.ts :160-172",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "send"
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "requestMagicLink"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  }
+]
