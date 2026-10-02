@@ -1,6 +1,6 @@
 # ISL-025 — The island drops the workarounds
 
-**Status: ⬜ not started — scoped 2026-10-01 at 27d891bf3.** **Source:** [AUDIT](AUDIT-2026-10-01.md), every "WA" cell;
+**Status: 🟡 slice 0 landed, session 2 (2026-10-02): W1 (both loops on `Repeat`) and W2 (every garden drive on `nodegx deploy`, gated on its exit code); AC1's census spec in place (22 rows, 2 removed, 20 present); W3–W22 wait on their ISL tasks and rulings.** **Source:** [AUDIT](AUDIT-2026-10-01.md), every "WA" cell;
 modelled on P88's closing ruling **R28** (`phase-88-the-defects-the-games-found/README.md:116`) and its per-task clauses
 (e.g. `GAM-008…:257-263`, `GAM-015…:148-153`) · **Side:** template (`templates/bot-garden/` and its generator). This is the
 **closing task**: it removes nothing until the ISL task behind each row has landed. The two exceptions are **slice 0**
@@ -123,4 +123,67 @@ Constraints:
 
 ## 8. Record
 
-None yet.
+### Session 2 — 2026-10-02, P109 s2, on `cline-dev` from `68b1549f5`
+
+**The merge point.** P108 s7 committed `c051ca68d` (23:34 on 10-01) and its handoff says the build of P108 is done; the
+three lane files (`cg003Components.ts`, `cg003Template.test.ts`, `drives/drive-all.sh`) were clean in the working tree,
+nothing under the repo had moved in the hour before, and the load was 1.4. §4's rule held: no P108 lane open.
+
+**AC1, the census, RED at HEAD.** `packages/noodl-mcp/tests/isl025Census.test.ts`: one row per W1–W22 (a pattern at the
+location §2 names, and the state recorded for it), two known-firing controls (`name: 'Repeat'` in `repeat.ts`,
+`engine: 11` in `exitCodes.ts`) and a file-exists sweep so a moved path never reads as a removal. Written for slice 0's
+end state and run at HEAD first: **W1 and W2 red (still present), W3–W22 green (present), both controls green** — 2/25
+red. After slice 0: 25/25. Two of §2's readings moved since scoping: W10 counts **199** `!important` (197 at `27d891bf3`),
+and W5's row-id prefixes are `padkey-`/`jobline-` (`cg003Scripts.ts:357`, `:1484`), not at `:330`.
+
+**W2 — the drives deploy with `nodegx deploy` and gate on its exit code.** `drive-all.sh` (P108) and `drive-pages.sh`
+(P105): the bundle call, the `.before-deploy` marker and the `-nt` mtime test are gone; the page deploy's non-zero exit
+writes `deploy REFUSED exit N — nothing driven` to the summary and the runner exits 1 before any drive; each kit fixture's
+deploy exit is recorded and its drive is skipped on a refusal. `drive-pages.sh` `rm -rf`s its deploy folder first (a
+non-empty target is its own refusal). The three usage headers (`drive-cg003-pages.js`, `drive-cg001-kit.js`,
+`drive-ig007-3d.js`) name the command and the codes; the 15 descriptive mentions and `drive-cg005-olive.js`'s message and
+`drive-olive.sh`'s hint now say `nodegx deploy`. `grep -c "\-nt .*before"` → 0 and 0. **AC3's sabotage arms, run on an
+assembled copy of the template:** without `--allow-development-engine` → **exit 11**, "Nothing was written to …" (the
+target folder exists and is empty); an empty folder as the project → **exit 2**, "is not a NodeGX project". The good
+deploy's exit 0 is read by the drive run below.
+
+**W1 — both loops on `Repeat`.** `cg003Components.ts`: `REPEAT_NODE = 'Repeat'`; the Runner's `rnTimer` (Timer, `duration`)
+is `rnBeat` (Repeat, `interval` ← Step Ms, `TICK_MS` default); the island's `iwTimer` is `iwBeat` (`interval: STEP_MS * 2`).
+The wiring difference, written at each wire: the Timer chain *restarted* after every tick and merely did not restart
+where the run stopped; a beat runs by itself, so it is **stopped** at each of those places — `rnEnd.ontrue` (done),
+`rnPark.ontrue` (parked on Olive), `rnCap.ontrue` (the cap), `rnLoop.onfalse` (a step taken while paused), `rnIn.stop`;
+started by Play (`rnSetRunNew.done`), an answer (`rnAns.ontrue`) and a step (`rnLive.ontrue`). `rnLoop.ontrue → start`
+is gone (a Start while running is Unchanged; the beat already goes on). The island: `iwSetBuilt.done → start` only;
+`iwSetTick.done → start` is gone (a rebuild's Start while beating is Unchanged, so two builds never stack two beats). The
+Runner has 87 wires (85), the island 205 (206). `ISLAND_TICK_SCRIPT` and `STEP_SCRIPT` are untouched, so the per-tick
+world is the engine's and the same (the engine gate ran green, 259/259, in the regeneration).
+
+**AC2.** `cg003Template.test.ts`: the nine Timer pins rewritten (iwBeat's type, interval 760, its one start; rnAns →
+`rnBeat.start`; rnPark's `rnBeat.stop`; Stop's and the cap's `rnBeat.stop`) plus one new pin for the beat itself (type,
+interval from Step Ms, its three starts, its five stops, Tick → Step, nothing from `rnLoop.ontrue`). 149/149 after the
+regeneration (148 + the byte gate, which was the one red before `templates/bot-garden` was regenerated: 5 files —
+Island/World and Workshop/Runner nodes and connections, `_registry.json`). **Sabotage arm** (`rnIn.stop → rnBeat.stop`
+removed, `cp` snapshot restored `cmp`-identical): **2 red** — the new W1 pin and F1's Stop clause — by name.
+**The on-screen proof** (Play, Stop, Step; the island's robots stepping) is the drive below.
+
+**Not done here, by design:** a separate per-tick world recording "both ways" — the tick's script is byte-identical and
+the gate that grades it is the engine gate; what W1 changes is *when* a tick fires, which the drive's clauses time.
+
+**The drive, on the regenerated template (one heavy job, the box otherwise quiet, 09:50–10:25):** `R=<repo> X=<scratch>
+zsh drive-all.sh island` — the generator (engine gate 259/259), a COPY assembled, **deployed with `nodegx deploy` (exit 0,
+read by the new gate)**, then the page drive with `--mockup` and the island drive:
+
+| step | reading |
+|---|---|
+| pages deploy | exit 0 (the W2 good-deploy arm) |
+| `drive-cg003-pages.js --mockup` | **331/331 clauses passed** — Play to the win, Stop on the bar (F1), One step (D1, D5), the parked ask and its answer, the cap (F2), the hint one step after an edit (D8) all on the `Repeat` beat |
+| kit2d, kit3d fixture deploys | exit 0, exit 0 |
+| `drive-ig004-island.js --perf` | **69/69 passed** — her robot on the tulips' plot "stepping (two reads 2.3 s apart differ)", three robots at work under CPU ×4 for 20 s (AC6), 0 console/network errors |
+
+So W1's clause holds on screen: Play runs a program to its end, Stop halts it, Step takes one tick, a parked run asks
+once, the cap stops it; the island's robots step on the beat and a rebuild stacks nothing. The drift line in the summary
+is the regenerated artefact itself (committed with this row).
+
+**Owed from slice 0:** nothing. **Next rows:** W3 on ruling 1 (ISL-001 §5); W13 after ISL-011's AC6 is asked; every other
+row on its ISL task.
+

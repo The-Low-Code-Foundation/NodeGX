@@ -1,7 +1,8 @@
 ---
 id: P109-F15
 title: A kit node's `defaultCss` lands as inline style that beats the kit's own stylesheet, the docs send `display` there without saying so, and the export drops it
-status: scheduled
+status: fixed
+commit: 4638de4b1
 phase: P109
 task: ISL-011
 severity: medium
@@ -27,3 +28,10 @@ which takes the CSS Style input away from the person using the node.
 
 **Proposed:** keep `defaultCss` inline and document it (docs page, types, scaffold), and take P40's export half.
 🔒 ISL-011 recommends this route. Small (docs) + medium (export).
+
+**Fixed (P109 s2, 2026-10-02, ruling 1a + 2a):** the docs page, the types comment, the scaffold's example node and its
+generated README all say `defaultCss` is an inline style that beats the kit's stylesheet (gate
+`nodegx-node-kit-types/tests/isl011-default-css-is-inline.test.js`); the export's kit shim applies `defaultCss` as the
+page does (`nodegx-export/src/emit/kits.ts`, spec `isl-011-default-css-reaches-an-exported-kit.test.ts`). The inline
+behaviour itself is kept on purpose (the runtime path is shared with every built-in node); the garden kit's force stays
+until ISL-025 W13 is ruled. Measured on a deployed page: `display: block` computed with `defaultCss`, `grid` without.

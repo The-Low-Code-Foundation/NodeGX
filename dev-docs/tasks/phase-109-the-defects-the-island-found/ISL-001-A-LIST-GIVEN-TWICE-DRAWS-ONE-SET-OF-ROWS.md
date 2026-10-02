@@ -177,6 +177,9 @@ The bug ledger `dev-docs/bugs/p78-d85-…md` is the committed record (`status: f
   rebuild `noodl-viewer-react` before the drive or it grades the old Repeater.
 - **AC6** (the island without its 120 ms waits): needs the §5 ruling, and edits `cg003Components.ts`, which P108 s7 had
   dirty all session — a P108 merge point, with ISL-025 W3.
+  **s2 (2026-10-02):** the merge point came (P108 s7 committed `c051ca68d`; ISL-025's slice 0 landed in `cg003Components.ts`
+  this session), so AC6 now waits on ruling 1 alone — W3's three waits are still in (`pdSettle`, `iwCrewSettle`, `rbSettle`;
+  the census spec `isl025Census.test.ts` pins W3 as present).
 - **AC7** (the IG-005 Teach-pad drive 8× before and after): heavy; same box constraint.
 
 🔒 **Ruling to ask (§5):** *"The Repeater no longer needs the 120 ms wait in front of a list it is given twice. Should

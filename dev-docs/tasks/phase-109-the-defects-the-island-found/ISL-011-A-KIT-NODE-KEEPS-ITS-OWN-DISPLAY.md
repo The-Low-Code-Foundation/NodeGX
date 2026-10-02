@@ -1,6 +1,6 @@
 # ISL-011 — A kit node keeps the display its author gave it
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: 🟡 built on the recommended route (1a + 2a), session 2 (2026-10-02) — AC1 measured both ways, AC2 gated, AC3's page and export arms read, AC5 censused (0 conflicts); owed: AC3's canvas arm and its port-write-after-mount drive, AC6 (ISL-025 W13's ruling).** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F15** · found by P105 [CG-001](../phase-105-the-coding-garden/CG-001-THE-KIT.md) §7.1 item 1, the first page drive,
 2026-09-27 · **Side:** product (React bridge, node-kit types and docs, scaffold; the export's half is P84 **P40**)
 
@@ -117,4 +117,71 @@ Constraints, after the rulings:
 
 ## 8. Record
 
-None yet.
+### Session 2 — 2026-10-02, P109 s2, on `cline-dev` from `68b1549f5`
+
+**AC1, measured before any change, both ways.** The minimal kit is `packages/nodegx-export/tests/fixtures/isl011-kit-grid`
+(`isl011.World`: root class `.isl011-k{display:grid;grid-template-columns:repeat(4,1fr)}`, `defaultCss: { display: 'block' }`,
+`style: props.style` on the root, four cells; `isl011.WorldBare` the same component with no `defaultCss` — the
+known-firing control on the same page). Deployed with `nodegx deploy … --allow-development-engine` (exit 0) and driven in
+headless Chromium by `scripts/devtools/drive-isl011-kit-display.js`:
+
+| node | computed `display` | `grid-template-columns` | inline `style.display` | cells | rows |
+|---|---|---|---|---|---|
+| `World` (defaultCss block) | **`block`** | `repeat(4, 1fr)` (declared, inert) | `block` | 4 | **4** (stacked, 320 px wide each) |
+| `WorldBare` (control) | **`grid`** | `77px 77px 77px 77px` | `` | 4 | **1** (side by side) |
+
+0 console errors; the kit registered both nodes. So the page does what §2 predicted: the inline `defaultCss` beats the
+class rule, and nothing says so. **Export arm, at HEAD:** the emitted kit runtime handed the component no `style` at all
+(`emit/kits.ts` `componentProps = { ...node.props, ...params }`), so `World` read `inline: ''`, `computed: grid` — the
+opposite of the page, as P40 predicted.
+
+**Ruling 1a, built.** The sentence is on all four surfaces an author reads: `docs-site/docs/custom-nodes.md` (a
+`:::caution` block after "it belongs in `defaultCss`"), `nodegx-node-kit-types/src/index.d.ts` (the `defaultCss` field's
+comment), the scaffold's example node comment and its generated README (`nodegx-kit-scaffold/src/index.js`). **AC2's
+gate:** `nodegx-node-kit-types/tests/isl011-default-css-is-inline.test.js` — 6/6; it reads each surface by name and its
+known-firing control is that each still names `defaultCss`. The optional kit check is **not built**: AC5 found no second
+conflict (below). `docsamples.test.js` is unchanged (the new block is prose, no counted fragment).
+
+**Ruling 2a, built.** `emit/kits.ts`: `componentProps.style = { ...definition.defaultCss, ...componentProps.style }` —
+the page's order (the definition's defaults first, then what was set). Spec
+`nodegx-export/tests/isl-011-default-css-reaches-an-exported-kit.test.ts` (GAM-017's jsdom harness over the fixture): the
+emitted page typechecks; `WorldBare` → `inline '' / computed grid` (control); `World` → `inline block / computed block`;
+a graph `style: { display: 'grid' }` on `World` still wins (`grid`). 4/4. `inputCss` is still not read by the export —
+P40's other half, named in the P84 register row (annotated: `defaultCss` half → ISL-011).
+
+**AC3:** the deployed page and the exported app now read the same `block` for the same kit (above). **Owed:** the editor
+canvas arm (the same bridge as the page, so predicted `block`, not measured), and the port-write-after-mount drive
+(§7's second trap).
+
+**AC5, the census** (every `reactNodes` `defaultCss` under `library/modules`, read against the kit's own stylesheet):
+
+| kit | `defaultCss` | root class | stylesheet sets `display` on that class? |
+|---|---|---|---|
+| game-kit | 4 (`inline-block` Avatar, `block`, `inline-flex`, `flex` Pad) | — | no class rule sets `display` anywhere in the kit; the Pad writes `flex` inline itself (consistent) |
+| garden-kit `kit.js:786` BlockList | `block` | `gd-blocks gd-band…` | no (`.gd-prog`/`.gd-palette` are inner elements) |
+| garden-kit `kit.js:2311` Garden | `grid` | `gd-world` | yes, `grid` — **consistent since the s1 workaround set both to grid**; the force at `:2283` stays (W13) |
+| garden-kit `blocks.js:2666` Blocks | `block` | `gd-blocks gd-bk gd-band` | `.gd-bk{display:block}` — consistent |
+| nightbook-kit `:1292`, `:1526` | `block`, `block` | `nb-item…`, none | no |
+| garden-3d-kit `:3192` Garden3D | `block` | `gd3-world` | no (`.gd3-canvas` etc. are inner) |
+
+11 entries, 5 kits, **0 conflicts at HEAD** (example-node-kit, keyboard-shortcuts, nodegx-charts declare none). The one
+conflict this task came from was already papered over in the garden kit; under (1a) nothing's look changes.
+
+**A pre-existing red met on the way:** editing the types made GAM-015's copy gate (`nodegx-kit-scaffold/tests/types-copy.test.js`)
+the thing to re-run, and it read **8 failed at HEAD** before the edit (control: `typesCopyStatus` over `git show HEAD:…game-kit/types/node-kit.d.ts`
+→ `current: false`): the seven shipped copies were stale since 09-17 and the known-firing count said 5 for 7 kits. Refreshed
+(stamp kept, body = the published types), `templates/bot-garden`'s three module copies regenerated with them, the count
+gate now names the kits; 76/76. Filed `dev-docs/bugs/p109-s2-gam015-…md`. nightbook's, rocket-school's and
+digital-bricks-training's own copies are left to their templates (GAM-015 leaves rocket out on purpose).
+
+**AC4 (the shim removed, export reading changes by name):** see the end of this record.
+
+**Ledger:** P109-F15 → `fixed` (this session's commit); P84 P40's owner cell annotated.
+
+**AC4, run after the drive** (`componentProps.style = …` removed from `emit/kits.ts`, `cp` snapshot restored
+`cmp`-identical): **1 red by name** — *"ruling 2a: defaultCss reaches the root as an inline style in the exported app"* —
+with the control, the page check and the graph-style row still green; 4/4 again after the restore.
+
+**Owed, with why:** AC3's canvas arm (needs `run-editor`, a heavy job the drive set held the box for), the
+port-write-after-mount drive (the same), AC6 (ISL-025 W13's ruling, asked when W13 is next).
+

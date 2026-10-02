@@ -3,7 +3,7 @@
 **Scoped:** 2026-10-01, at HEAD `27d891bf3`, from [the island audit](AUDIT-2026-10-01.md). The audit read P105, P106 and
 P108 (Olive's Island, [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md)): their task files, 225 commits, 57
 session and lane transcripts, the generator, both kits, the desktop shell and the shipped template.
-**Status: 🟡 OPEN — session 1 (2026-10-01): ISL-001's fix landed (`3df5adb82`; AC1–AC4, AC8; AC5–AC7 owed as drives) and ISL-014's (`aab96a056`; AC1–AC4; AC5 on a ruling, AC6 owed), 0 of 25 closed; ISL-002's AC1 measured (`0`/`0`), its ruling asked.** Three rulings asked (ISL-001 §5, ISL-014 §5, ISL-002 §5, below). **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+**Status: 🟡 OPEN — session 2 (2026-10-02): ISL-025's slice 0 landed (W1 both loops on `Repeat`, W2 every garden drive on `nodegx deploy`; the census spec), ISL-011 built on its recommended route (docs + types + scaffold say `defaultCss` is inline; the export applies it); session 1: ISL-001's fix (`3df5adb82`) and ISL-014's (`aab96a056`), ISL-002's AC1 measured. 0 of 25 closed.** Three rulings still open (ISL-001 §5, ISL-014 §5, ISL-002 §5, below). **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
 > "Phase 108 has been a beast. I forgot to tell the model to record learnings about NodeGX during the push. I'm sure
 > there must be a tonne of stuff we can fix and improve in NodeGX and the way the MCP works. Can you do an audit and start
@@ -106,7 +106,7 @@ the work:
 | [ISL-009](ISL-009-A-NODE-CAN-BE-NAMED-FOR-A-TEST-AND-SCROLLED-TO.md) | A node can be named for a test and scrolled to | F12 | node library | ✓ |
 | [ISL-010](ISL-010-A-RUNNING-APP-CAN-ASK-A-LOCAL-MODEL.md) | A running app can ask a local model | F13 | cloud nodes | ✓ |
 | **Track C** | | | | |
-| [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display (`defaultCss` lands inline, undocumented; the export ignores it) | F15 | kit bridge, docs, export | — |
+| [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display — **🟡 s2: (1a) the four author surfaces say `defaultCss` is inline, gated; (2a) the export applies it; AC1 read on a page and in jsdom; canvas arm and AC6 owed** | F15 | kit bridge, docs, export | — |
 | [ISL-012](ISL-012-A-KIT-CAN-SHIP-A-MODERN-LIBRARY.md) | A kit can ship a modern library | F16 | kit loader, extractor | ✓ |
 | [ISL-013](ISL-013-TWO-KITS-SHARE-CODE-WITHOUT-A-COPY.md) | Two kits share code without a copy | F17 | kit system | ✓ |
 | [ISL-014](ISL-014-A-MISSING-KIT-READER-IS-NAMED-AS-ONE.md) | A missing kit reader is named as one — **🟡 s1: the refusal names it (route a); build-on-demand on a ruling, AC6 owed** | F18, **D83** | MCP door | §5 for AC5 |
@@ -122,7 +122,7 @@ the work:
 | **Track E** | | | | |
 | [ISL-023](ISL-023-THE-GENERATOR-GATES-CATCH-A-TYPE-ERROR-AND-A-STRAY-BACKTICK.md) | The generator's gates catch a type error and a stray backtick | F32, F33 | tooling | — |
 | [ISL-024](ISL-024-A-TEMPLATE-LIVES-IN-ITS-OWN-FOLDER.md) | A template lives in its own folder | F34 | repo | ✓ |
-| [ISL-025](ISL-025-THE-ISLAND-DROPS-THE-WORKAROUNDS.md) | The island drops the workarounds (closing task) | every WA | template | per row |
+| [ISL-025](ISL-025-THE-ISLAND-DROPS-THE-WORKAROUNDS.md) | The island drops the workarounds (closing task) — **🟡 s2: slice 0 (W1, W2) landed; the census spec pins 22 rows** | every WA | template | per row |
 
 🔒 = the task asks Richard something before it builds. "after AC1" = the ruling waits on a measurement.
 
@@ -232,8 +232,8 @@ job each.
 
 | track | built | of |
 |---|---|---|
-| A | 0 (ISL-001 🟡 fix landed) | 4 |
+| A | 0 (ISL-001 🟡 fix landed; ISL-002 🟡 measured) | 4 |
 | B | 0 | 6 |
-| C | 0 (ISL-014 🟡 fix landed) | 5 |
+| C | 0 (ISL-014 🟡 fix landed; ISL-011 🟡 built, two arms owed) | 5 |
 | D | 0 | 7 |
-| E | 0 | 3 |
+| E | 0 (ISL-025 🟡 slice 0 landed) | 3 |
