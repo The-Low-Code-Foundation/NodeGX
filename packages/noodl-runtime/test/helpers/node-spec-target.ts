@@ -317,6 +317,11 @@ const BACKEND_OPS: Readonly<Record<string, (o: BackendOptions, ok: unknown, emit
   save: (o, ok, emit) => {
     o.success(ok);
     emit({ type: 'save', objectId: o.objectId, object: ok, collection: o.collection });
+  },
+  // s23 — RestDataAdapter.ts :972-1015 — `success(record)`, then `fetch { objectId: <the one asked for>, object, collection }`
+  fetch: (o, ok, emit) => {
+    o.success(ok);
+    emit({ type: 'fetch', objectId: o.objectId, object: ok, collection: o.collection });
   }
 };
 
@@ -365,8 +370,10 @@ function installBackend(w: World, graphModel: { getMetaData(k: string): unknown;
           if (!('ok' in d)) return d.detail === undefined ? options.error(d.error) : options.error(d.error, d.detail);
           // RestDataAdapter.ts :515-531 — the success runs inside the request's promise chain, whose `.catch` hands a
           // throw to `fail` → the operation's `error` with the throw's message (s22: Delete Record's success can throw, row C36)
+          // s23: a COPY — an adapter parses a fresh body per response, and a node may mutate what it is handed (Record's
+          // success deletes `objectId` from it, dbmodelnode2.ts :444): the script's object must answer the next call whole
           try {
-            onSuccess(options, d.ok, (e) => this.emitAdapterEvent(e));
+            onSuccess(options, d.ok === undefined ? undefined : JSON.parse(JSON.stringify(d.ok)), (e) => this.emitAdapterEvent(e));
           } catch (e) {
             options.error(e instanceof Error ? e.message : String(e));
           }

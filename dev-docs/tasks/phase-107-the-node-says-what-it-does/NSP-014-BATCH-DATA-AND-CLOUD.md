@@ -1,7 +1,7 @@
 # NSP-014 — Batch: records, users, files, HTTP, streams, and the cloud-only nodes
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world's network and backend) and R4 = continue.
-**Status: 🟡 s22 (2026-10-02): Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22).** s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
+**Status: 🟡 s23 (2026-10-02): Record (`DbModel2`) conforms on the runtime, first run and at 10,000; `fetch` joined the BACKEND seam; rows C37, D22. 7 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
 
 ## 1. The person sentence
 
@@ -236,3 +236,57 @@ writes its session for one. Measure before filing.
 | runtime: `runtime-target.test.ts` + `graph.test.ts` | 2 suites, 86 passed |
 | `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
 
+### 6.7 s23 (2026-10-02) — Record (`DbModel2`), the read
+
+**Record CONFORMS on the runtime on its first run, and at 10,000:** 24 / 25 scenarios + the one `row` scenario (C37),
+200 / 200 sequences (seed 20728), 145 / 147 mutants (2 declared equivalent, `equivalent-mutants.ts`); deep 10,000: 0
+divergences, 86 sequences attributed to C37, 204 / 206. Interpreter: every mutant killed or declared on seeds 13 and
+20728. Spec `src/nodes/record.ts` — its own file, the Object node's backend twin (object.ts), sharing with the write family
+only the Class / Backend ports and the failure code (record-base.ts).
+
+**What the code says, read before the spec (no `zz-` probe this time — the six questions below were each settled by a
+scenario that conforms on the runtime):**
+- **A bind reads nothing.** `Id` binds the record of that name (create-on-read), sends `Id` and the fields the record
+  already holds, and pulses Fetched (:320-343) — the port's description already says so (P77 D25). Fetch is the read.
+- **Fetch has no Class pre-flight** (the write family's `checkWarningsBeforeCloudOp` is not this node's): no Class goes
+  out as `collection: undefined`. Its own guard is `Missing Id.` for `undefined` / `''` only — **row D22**: a `null` Id
+  (what binding treats as empty) is fetched as record `null`.
+- **The answer is written under ITS `objectId`** (`_fromJSON`): an answer naming another record moves the node there,
+  quietly (no Changed for either); an answer for the record the node is ALREADY bound to is heard by the node's own
+  listener — Changed per key that moved, BEFORE Fetched and Done.
+- **`delete response.objectId`** (:444) mutates the body the success is handed: the runtime target now hands every
+  success a COPY of the world's answer (a real adapter parses a fresh body per response) — otherwise the script's object
+  answers a second Fetch with no `objectId` (an anonymous record). The five earlier record specs re-read green on it.
+- **The property outputs exist when a graph wires them** (`registerOutputIfNeeded`, `prop-` only) — the Class's
+  fields; a play declares `title` and `n`. **Row C37**: the `<field> Changed` beside each is offered by the editor
+  (`includeChangedSignals`) and never registered — C11's twin. The `prop-` INPUTS are accepted and inert
+  (`scheduleStore` is dead).
+- **Id overrides From repeater**: the `Id` setter binds in either mode; From repeater's bind only happens at a frame end
+  after Id Source / Repeater Component is written.
+
+**Graph (AC6's watching half):** `scenarios/graph/s07-the-record-watches.json` — (1) Update Record writes `other` onto
+`r1`: a Record on `r1` pulses Changed, a Record on `r2` nothing; (2) a Record's Fetch writes its answer: a SECOND Record
+on `r1` hears every key that moved (Changed ×2, `n` re-sent, no Fetched), `r2` nothing; (3) `title` moved under a Record
+= the C37 claim, known. Claims written from the clause before recording; (1) and (2) held on the runtime first time.
+
+**Runtime target:** `fetch` joined `BACKEND_OPS` (RestDataAdapter.ts :972-1015: `success(record)` then the contract's
+`fetch` event).
+
+### 6.8 Rows (s23)
+
+| row | node | what the trace shows | proposed |
+|---|---|---|---|
+| **C37** | Record | `<field> Changed` never fires: offered by the editor (:560), never registered (:473-481 handles `prop-` only), the pulse at :142 guarded by `hasOutput`. Control beside it: `Changed` fires for the same write. 86 / 10,000 generated sequences meet it. Ledger `p107-c37-…` | register `changed-` beside `prop-`; rule WITH C11 |
+| **D22** | Record | the Fetch's guard (:411) checks `undefined` and `''` but not `null`, which binding treats as empty (:313): a cleared Id wire fetches record `null` and reports the backend's sentence instead of `Missing Id.`. A conforming scenario shows it. Ledger `p107-d22-…` | use `emptyId` at :411 |
+
+### 6.9 Gate readings (s23, 2026-10-02)
+
+| gate | reading |
+|---|---|
+| `nodegx-node-spec`: `npx jest` | **18 suites, 697 passed, 17 skipped, exit 0** (s22: 687) — the stranger hash gate green (no guarded file moved) |
+| runtime: `NSP_ONLY=<the six record specs> … conformance.test.ts` | **all six CONFORM**, seed 20728 — Delete 20 / 21 (+C36), Add / Remove 18 / 18, Create 23 / 23, Update 30 / 30, Record 24 / 25 (+C37); each 200 / 200; mutants 34, 36, 36, 40, 78 all killed, Record 145 / 147 + 2 equivalent |
+| runtime deep, `NSP_DEEP=10000 NSP_ONLY=DbModel2` (load ~4–7, a VM; no peer suite) | **CONFORMS**, 129 s: 0 divergences, 86 attributed to C37, 204 / 206 mutants |
+| runtime: `runtime-target.test.ts` + `graph.test.ts` | **2 suites, 89 passed, exit 0** (s22: 86; +3 = s07) |
+| `tsc --noEmit` node-spec, runtime (`tsconfig.json`) | exit 0 · exit 0 |
+| `node scripts/node-spec/census.js --check` | fresh — 147, 33 excluded, all tiered |
+| the whole runtime conformance suite, `test:main`, export | NOT RUN — s23 touched the runtime only in `test/helpers/node-spec-target.ts` (`fetch`, the answer copy — the six record specs re-read on it) and `test/node-spec/conformance.test.ts` (one known row) |

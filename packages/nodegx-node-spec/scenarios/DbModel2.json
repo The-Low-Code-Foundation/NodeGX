@@ -1,0 +1,1108 @@
+[
+  {
+    "name": "Id binds the record of that name: Id, the property outputs it holds, Fetched — and no call",
+    "because": "dbmodelnode2.ts :271 → :310-343 — a bind has read nothing",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "an empty Id binds nothing: Id re-sent, no Fetched",
+    "because": ":310-314",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": null
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "the same Id twice binds once (DEF-046); a record handed in is its id",
+    "because": ":253, :268-273",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Id checkbox unticked: Id is stored and re-sent, nothing binds",
+    "because": ":271-274; run-on-value-change.ts",
+    "params": {
+      "runOnChange-modelId": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Fetch with no Id: Missing Id. on Error, then Failure; no call",
+    "because": ":411-414",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Fetch with Id and Class: ONE fetch to the active backend; the answer is written, the property outputs re-sent, Fetched, Done",
+    "because": ":428-452; world.ts BACKEND. Record properties unticked, so the write is not announced (the watching is its own scenario)",
+    "params": {
+      "runOnChange-record": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "from the backend",
+                "n": 2
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "two presses in one frame: one call, two Done",
+    "because": ":402-409 — scheduleOnce, a token per press",
+    "params": {
+      "runOnChange-record": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "t"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "the answer comes later: no outcome until the advance that lands it",
+    "because": ":451-452 — the outcome is the answer's",
+    "params": {
+      "runOnChange-record": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "advance": 99
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "late"
+              }
+            },
+            "after": 100
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a Fetch while one is out is a second call; each answer settles its own press",
+    "because": ":406-409 — the batch is taken into a local before the call",
+    "params": {
+      "runOnChange-record": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "x"
+              }
+            },
+            "after": 10
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "the backend refuses: Error is its message, then Failure",
+    "because": ":454-456; :375-387",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Forbidden"
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "refused with no message: Error is `Failed to fetch.`",
+    "because": ":455",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": null
+            },
+            "after": 10
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a Backend the project does not have: the not-configured sentence, Failure, no call",
+    "because": ":419-425",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Backend names the second backend: the call goes there",
+    "because": ":419; resolveBackend.pure.ts",
+    "params": {
+      "runOnChange-record": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "backend": "other"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "from other"
+              }
+            }
+          }
+        ],
+        "backends": [
+          "main",
+          "other"
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "no Class: the Fetch still goes out, with collection undefined — this node has no pre-flight",
+    "because": ":428-430 — the write family's Class check (dbmodelcrudbase.ts :244-254) is not this node's",
+    "params": {
+      "runOnChange-record": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "t"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a null Id binds nothing but a Fetch asks the backend for it (D22)",
+    "because": ":313 treats null as empty; :411 checks only undefined and ''",
+    "params": {
+      "runOnChange-record": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": null
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "No record with id null in Lesson."
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "the answer names another record: the node moves to it — no Changed for the old one, Fetched, Done",
+    "because": ":432-441 — _fromJSON keys by the ANSWER's objectId — then the same Id again re-sends Id, which reads the record bound NOW (r2)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r2",
+                "title": "two",
+                "n": 7
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "bound and watching: a fetched key that differs pulses Changed before Fetched; one that does not is quiet",
+    "because": ":136-145 hears _fromJSON's set; `other` is no property output of this node, so Changed alone",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "old",
+                "n": 1,
+                "other": "x"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a plain object on Id writes its fields into the record the node is bound to, heard as Changed",
+    "because": ":262-263 Model.create; :136-145",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": {
+          "id": "r1",
+          "other": "local"
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a plain object with no id is an anonymous record: the node binds it",
+    "because": ":262-263 — Model.create mints a guid",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": {
+          "other": "anon"
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Error is kept after a later Fetch succeeds",
+    "because": ":376 — nothing clears it",
+    "params": {
+      "runOnChange-record": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "collection": "Note"
+            },
+            "answer": {
+              "error": "Forbidden"
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "t"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Id Source From repeater, outside any Repeater: binds nothing at the frame end; Id shows the raw input",
+    "because": ":223-226 → :292-296; foreachitem.ts",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a property INPUT is held and read by nothing",
+    "because": ":514-516, :527-531 — scheduleStore is dead (:460-471)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "prop-title",
+        "value": "typed"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "Repeater Component written while From repeater: the frame end unbinds again — a later write to the old record is not heard",
+    "because": ":240-245 → :292-296; :136-145 (the listener left with the binding)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "repeaterComponent",
+        "value": "Row"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": {
+          "id": "r1",
+          "other": "z"
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "From repeater, then an Id: the Id binds after all (the setter binds in either mode), and a write to that record is heard",
+    "because": ":223-226 bind at the frame end, then :271 — setModelID does not ask Id Source; :136-145",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "idSource",
+        "value": "foreach"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": {
+          "id": "r1",
+          "other": "z"
+        }
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "C37: a fetched field that differs on the bound record pulses its <field> Changed — never registered on the runtime",
+    "because": "NSP-014 §6.8 C37 — registerOutputIfNeeded handles prop- only (:478-480), as C11 on the Object node",
+    "row": "NSP-014 §6.8 C37",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "title": "new"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
+  }
+]

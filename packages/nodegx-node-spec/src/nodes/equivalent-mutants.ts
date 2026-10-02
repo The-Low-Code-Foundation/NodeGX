@@ -25,6 +25,12 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG }
   ],
+  // NSP-014 s23 — the frame end's two quiet branches: no job, and a bind of a node already bound to nothing. Each sibling's
+  // example writes what the state already holds (`jobs: []` on an empty list; `bound: undefined` on an unbound node).
+  DbModel2: [
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["jobs"],"emit":[]', why: 'the sibling writes `jobs: []` on a frame end whose job list is already empty' },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["jobs"],"emit":[]', swappedWith: '"set":["bound","jobs"],"emit":[]', why: 'the sibling (an unbind) writes `bound: undefined` on a node already bound to nothing — the branch is that same unbind' }
+  ],
   Model2: [
     {
       reducer: 'afterInputs',

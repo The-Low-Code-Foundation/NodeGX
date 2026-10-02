@@ -16,7 +16,7 @@
 import type { TraceEvent } from '../src';
 import { EQUIVALENT_MUTANTS, interpreterAdapter, loadScenarios, play, runConformance, specs, World } from '../src';
 
-const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRelation', 'NewDbModelProperties', 'SetDbModelProperties'];
+const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRelation', 'NewDbModelProperties', 'SetDbModelProperties', 'DbModel2'];
 
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {
   for (const type of BATCH) {
@@ -61,7 +61,9 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
         'Only If Unchanged names "nothere", which this record has not been read with. Fetch the record first.',
         'Only If Unchanged names "tags", which holds an object or list. Name a plain value such as a version number.'
       ]
-    ]
+    ],
+    // s23 — the read
+    ['DbModel2', ['Missing Id.', 'Forbidden', 'Failed to fetch.']]
   ])('%s: every failure sentence is on Error beside a Failure outcome in some scenario, and so is the not-configured backend', async (type, sentences) => {
     const all = await traces(type);
     const errors = new Set<string>();
@@ -81,7 +83,7 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
     expect(none.length).toBeGreaterThan(0);
     // the call carries the contract's words: the op and the Class as `collection`
     const ev = calls[0].trace.find((e) => e.t === 'backend') as TraceEvent & { op: string; args: Record<string, unknown> };
-    const op: Record<string, string> = { DeleteDbModelProperties: 'delete', AddDbModelRelation: 'addRelation', RemoveDbModelRelation: 'removeRelation', NewDbModelProperties: 'create', SetDbModelProperties: 'save' };
+    const op: Record<string, string> = { DeleteDbModelProperties: 'delete', AddDbModelRelation: 'addRelation', RemoveDbModelRelation: 'removeRelation', NewDbModelProperties: 'create', SetDbModelProperties: 'save', DbModel2: 'fetch' };
     expect(ev.op).toBe(op[type]);
     expect(typeof ev.args.collection).toBe('string');
   });

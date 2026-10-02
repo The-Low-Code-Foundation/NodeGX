@@ -1,0 +1,649 @@
+[
+  {
+    "name": "Update Record writes onto the record a Record node watches: Changed; a Record on another id hears nothing",
+    "clauses": [
+      "S1",
+      "S2",
+      "N"
+    ],
+    "because": "NSP-014 s23. setdbmodelpropertiesnode.ts :184-188 writes the property ports onto the record before the save; dbmodelnode2.ts :136-145 the Record's listener. `other` is no property output a Record here has, so Changed alone (C37 stays out of this one)",
+    "nodes": {
+      "u": {
+        "type": "SetDbModelProperties",
+        "params": {
+          "collectionName": "Lesson",
+          "modelId": "r1",
+          "prop-other": "z"
+        }
+      },
+      "r": {
+        "type": "DbModel2",
+        "params": {
+          "modelId": "r1"
+        }
+      },
+      "q": {
+        "type": "DbModel2",
+        "params": {
+          "modelId": "r2"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "u",
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "r",
+        "signal": "fetched",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "r",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "r",
+        "port": "prop-title",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "q",
+        "signal": "changed",
+        "count": 0
+      }
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          },
+          "r2": {
+            "title": "two"
+          }
+        }
+      },
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "save"
+            },
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r1",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "prop-other",
+        "value": "z",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r1",
+        "subject": "r"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r2",
+        "subject": "q"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r1",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r1",
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 1,
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "prop-title",
+        "value": "old",
+        "subject": "r"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r2",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "prop-title",
+        "value": "two",
+        "subject": "q"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "q"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "u"
+      },
+      {
+        "t": "backend",
+        "op": "save",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "data": {
+            "other": "z"
+          },
+          "objectId": "r1"
+        },
+        "subject": "u"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "r"
+      }
+    ]
+  },
+  {
+    "name": "a Record's Fetch writes the answer onto the record: a second Record bound to it hears every key that moved, re-sends its property output, and does not pulse Fetched; a Record on another id hears nothing",
+    "clauses": [
+      "S1",
+      "S2",
+      "N"
+    ],
+    "because": "NSP-014 s23. dbmodelnode2.ts :432 → cloudstore.js _fromJSON :407-422 (`set` per key, model.ts notifies when !==); :136-145 the watcher's listener — Fetched is the fetching node's alone (:451)",
+    "nodes": {
+      "f": {
+        "type": "DbModel2",
+        "params": {
+          "collectionName": "Lesson",
+          "modelId": "r1"
+        }
+      },
+      "w": {
+        "type": "DbModel2",
+        "params": {
+          "modelId": "r1"
+        }
+      },
+      "q": {
+        "type": "DbModel2",
+        "params": {
+          "modelId": "r2"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "f",
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "w",
+        "signal": "fetched",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "f",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "f",
+        "signal": "fetched",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "w",
+        "signal": "changed",
+        "count": 2
+      },
+      {
+        "at": 2,
+        "subject": "w",
+        "port": "prop-n",
+        "value": 5
+      },
+      {
+        "at": 2,
+        "subject": "w",
+        "signal": "fetched",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "q",
+        "signal": "changed",
+        "count": 0
+      }
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          },
+          "r2": {
+            "title": "two"
+          }
+        }
+      },
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "fetch"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "other": "x",
+                "n": 5,
+                "title": "old"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r1",
+        "subject": "f"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r1",
+        "subject": "w"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r2",
+        "subject": "q"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r1",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 1,
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "prop-title",
+        "value": "old",
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r1",
+        "subject": "w"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 1,
+        "subject": "w"
+      },
+      {
+        "t": "value",
+        "port": "prop-title",
+        "value": "old",
+        "subject": "w"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "w"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r2",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "prop-title",
+        "value": "two",
+        "subject": "q"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "q"
+      },
+      {
+        "t": "in",
+        "port": "fetch",
+        "subject": "f"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 5,
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "f"
+      },
+      {
+        "t": "outcome",
+        "port": "fetch",
+        "value": "done",
+        "subject": "f"
+      },
+      {
+        "t": "backend",
+        "op": "fetch",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "objectId": "r1"
+        },
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 5,
+        "subject": "w"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "w"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "w"
+      }
+    ]
+  },
+  {
+    "name": "a field a Record wires moves under it: its <field> Changed pulses (row C37: never registered on the runtime — the claim on changed-title is the finding)",
+    "clauses": [
+      "N"
+    ],
+    "because": "NSP-014 §6.8 C37 — dbmodelnode2.ts :142 is guarded by `hasOutput('changed-' + name)`, and :473-481 registers `prop-` only; the editor offers the port (:560). C11's twin (Object node)",
+    "row": "NSP-014 §6.8 C37",
+    "nodes": {
+      "u": {
+        "type": "SetDbModelProperties",
+        "params": {
+          "collectionName": "Lesson",
+          "modelId": "r1",
+          "prop-title": "new"
+        }
+      },
+      "r": {
+        "type": "DbModel2",
+        "params": {
+          "modelId": "r1"
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "u",
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "r",
+        "port": "prop-title",
+        "value": "new"
+      },
+      {
+        "at": 2,
+        "subject": "r",
+        "signal": "changed",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "r",
+        "signal": "changed-title",
+        "count": 1
+      }
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          },
+          "r2": {
+            "title": "two"
+          }
+        }
+      },
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "save"
+            },
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r1",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "prop-title",
+        "value": "new",
+        "subject": "u"
+      },
+      {
+        "t": "set",
+        "port": "modelId",
+        "value": "r1",
+        "subject": "r"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r1",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "r1",
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 1,
+        "subject": "r"
+      },
+      {
+        "t": "value",
+        "port": "prop-title",
+        "value": "old",
+        "subject": "r"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "r"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "u"
+      },
+      {
+        "t": "backend",
+        "op": "save",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "data": {
+            "title": "new"
+          },
+          "objectId": "r1"
+        },
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-title",
+        "value": "new",
+        "subject": "r"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "r"
+      }
+    ]
+  }
+]
