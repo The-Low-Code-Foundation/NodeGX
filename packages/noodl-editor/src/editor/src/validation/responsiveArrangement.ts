@@ -182,23 +182,70 @@ function isVisualType(type: string, catalog: CatalogIndex): boolean {
 }
 
 /**
- * GAM-022 (P78 D50) — how wide the item a `For Each` draws is, read off its template's visual root.
+ * The phone every message in this module names: arm A's "stay side by side at 390px", and ISL-022's
+ * threshold for an item given a pixel width.
+ */
+export const PHONE_WIDTH_PX = 390;
+
+/** A dimension read as a pixel length, or `undefined` when it is not one (a %, a token, vw, unparseable). */
+function pixelLength(value: unknown): number | undefined {
+  if (typeof value === 'object' && value !== null) {
+    const v = value as { value?: unknown; unit?: unknown };
+    return v.unit === 'px' && typeof v.value === 'number' ? v.value : undefined;
+  }
+  if (typeof value === 'string') {
+    const m = /^\s*([\d.]+)\s*px\s*$/.exec(value);
+    return m ? Number(m[1]) : undefined;
+  }
+  return undefined; // a bare number is a percentage: dimension ports default to '%'
+}
+
+/** Whether a dimension is a percentage: a bare number (the ports' default unit), `{unit: '%'}` or `"32%"`. */
+function isPercentage(value: unknown): boolean {
+  if (typeof value === 'number') return true;
+  if (typeof value === 'object' && value !== null) return (value as { unit?: unknown }).unit === '%';
+  return typeof value === 'string' && /^\s*[\d.]+\s*%\s*$/.test(value);
+}
+
+/**
+ * ISL-022 — the width a phone gives the row's items: {@link PHONE_WIDTH_PX} less the row's own
+ * horizontal padding. A padding that is not a pixel length (a token) counts as nothing, which makes
+ * the box wider and the rule quieter: it may only be wrong in the quiet direction.
+ */
+function phoneContentBox(row: ArrangementNode): number {
+  const padding = ['paddingLeft', 'paddingRight'].reduce(
+    (sum, port) => sum + (pixelLength(row.parameters?.[port]) ?? 0),
+    0
+  );
+  return PHONE_WIDTH_PX - padding;
+}
+
+/**
+ * GAM-022 (P78 D50) + ISL-022 — what the item a `For Each` draws does on a phone, read off its
+ * template's visual root.
  *
- * Arm B's message is *"each item keeps the width it was given"*, which is true of a card given
- * 340px or 32% and false of a pill sized by its label: TPL-006's tag sidebar and Rocket School's
- * choice row wrap correctly on a phone, and were told to become 300px columns. The container is not
- * the discriminator (both of those are full-width), the item is.
+ * Arm B's message is *"each item keeps the width it was given and the grid is frozen at the
+ * proportions authored for a desktop"*. GAM-022 made it false of a pill sized by its label: TPL-006's
+ * tag sidebar and Rocket School's choice row wrap correctly on a phone, and were told to become
+ * 300px columns. ISL-022 (Richard's ruling, 2026-10-02: "Yes, both") made it false of a small item
+ * given a pixel width too: the island's 44px colour swatches, Rocket School's 132px tiles and 150px
+ * cards all wrap on a phone, and following the advice gives each a 260-320px column. So:
  *
- * `unknown` abstains, as everywhere in this module: a wired or unresolved template, a Component
- * Children root, a component-instance root, or not exactly one visual root. Read on 2026-09-15, all
- * three calibration grids resolve to one Group with a width, so abstaining silences none of them.
+ *  - `content` — sized by its contents (GAM-022): silent;
+ *  - `fixed-fits` — a pixel width no wider than the phone's content box: it wraps, silent;
+ *  - `frozen` — a **percentage** (the desktop proportion the message is about), or a pixel width
+ *    wider than a phone, which overflows it: fires;
+ *  - `unknown` — abstains, as everywhere in this module: a wired or unresolved template, a Component
+ *    Children root, a component-instance root, not exactly one visual root, or a width that is
+ *    neither a percentage nor pixels (a token, `vw`).
  */
 function repeatedItemWidth(
   repeater: ArrangementNode,
+  row: ArrangementNode,
   views: readonly ItemComponentView[],
   connectedInputs: ReadonlySet<string> | undefined,
   catalog: CatalogIndex
-): 'content' | 'sized' | 'unknown' {
+): 'content' | 'fixed-fits' | 'frozen' | 'unknown' {
   if (connectedInputs?.has(`${repeater.id}::template`)) return 'unknown';
   const template = repeater.parameters?.['template'];
   if (typeof template !== 'string' || template === '') return 'unknown';
@@ -213,9 +260,16 @@ function repeatedItemWidth(
   if (visualRoots.length !== 1 || isComponentRef(visualRoots[0].type)) return 'unknown';
 
   const [root] = visualRoots;
+  const defaults = catalog.inputDefaults(root.type);
   // Unset reads as the catalog default: a Group is `explicit`, a Button is `contentSize`.
-  const sizeMode = root.parameters?.['sizeMode'] ?? catalog.inputDefaults(root.type)['sizeMode'];
-  return CONTENT_WIDTH_MODES.has(String(sizeMode)) ? 'content' : 'sized';
+  const sizeMode = root.parameters?.['sizeMode'] ?? defaults['sizeMode'];
+  if (CONTENT_WIDTH_MODES.has(String(sizeMode))) return 'content';
+  // Unset reads as the port default, `100%`.
+  const width = root.parameters?.['width'] ?? defaults['width'];
+  if (isPercentage(width)) return 'frozen';
+  const px = pixelLength(width);
+  if (px === undefined) return 'unknown';
+  return px > phoneContentBox(row) ? 'frozen' : 'fixed-fits';
 }
 
 /** Total nodes in a subtree, counting the root. Cycle-safe: a corrupt graph is not a crash. */
@@ -308,8 +362,9 @@ export function checkResponsiveArrangement(
       gutter !== undefined &&
       gutter !== null &&
       gutter !== '' &&
-      // GAM-022 — only a grid of items given a width. No views: the item cannot be read, judge the row.
-      (!views || repeatedItemWidth(repeaterChild, views, connectedInputs, catalog) === 'sized')
+      // GAM-022 + ISL-022 — only a grid of items frozen at a desktop proportion or wider than a phone.
+      // No views: the item cannot be read, judge the row.
+      (!views || repeatedItemWidth(repeaterChild, node, views, connectedInputs, catalog) === 'frozen')
     ) {
       diagnostics.push({
         code: DiagnosticCode.UncollapsibleMultiColumn,
@@ -329,6 +384,20 @@ export function checkResponsiveArrangement(
     // A cluster is as wide as its contents; a band owns the page's width. This
     // is the exclusion that took the authored false-positive rate to zero.
     if (CONTENT_WIDTH_MODES.has(String(parameters['sizeMode']))) continue;
+
+    // ISL-022 — a WRAPPED row whose every track is sized to its own contents is a row of clusters,
+    // and it wraps as clusters: the island's top bar went to two lines at 390px (CG-003 §7.2). The
+    // container exclusion above cannot see it, because such a bar is full-width. A wired sizeMode is
+    // not known to be content-sized, so that row is judged.
+    if (
+      wraps &&
+      visualChildren.every(
+        (c) =>
+          !connectedInputs?.has(`${c.id}::sizeMode`) &&
+          CONTENT_WIDTH_MODES.has(String(c.parameters?.['sizeMode'] ?? catalog.inputDefaults(c.type)['sizeMode']))
+      )
+    )
+      continue;
 
     const trackSizes = visualChildren.map((c) => subtreeSize(c.id, byId, new Set()));
     if (trackSizes.some((size) => size < MIN_TRACK_NODES)) continue;

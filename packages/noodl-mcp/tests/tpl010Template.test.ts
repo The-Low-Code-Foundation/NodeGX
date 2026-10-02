@@ -137,7 +137,15 @@ describe('§1 the artefact is the build', () => {
    */
   it('the door refused nothing, and the only warning it raised is the one the bars are built on', () => {
     const codes = [...new Set(built.diagnostics.filter((d) => d.severity !== 'info').map((d) => d.code))].sort();
-    expect(codes).toEqual(['wired-dimension-becomes-grow']);
+    expect(codes).toEqual(['row-cannot-wrap', 'wired-dimension-becomes-grow']);
+    // P109 ISL-022 (2026-10-02): `row-cannot-wrap` on `Week/App bar#abRight` is TRUE of the graph — a content-sized
+    // row set to wrap, inside the bar's row, never wraps — and only the stylesheet's `.planner-shrink-wrap
+    // { max-width: 100% }` rescues it (rendered: 3 lines at 390). The graph's own exit is `maxWidth: pct(100)` on
+    // `abRight` and the class rule deleted; then this pin drops the code. Filed P109-S4-ROWWRAP.
+    // The builder keeps the step's label, not the node: `Week/App bar` is abRight's component, and `apply` is
+    // apply_plan's re-validation of the same node.
+    const rowWrap = built.diagnostics.filter((d) => d.code === 'row-cannot-wrap').map((d) => String(d.component).replace(/^\//, ''));
+    expect([...new Set(rowWrap)].sort()).toEqual(['Week/App bar', 'apply']);
   });
 
   it('templates/planner is byte-identical to a fresh build — the same files, the same bytes', () => {

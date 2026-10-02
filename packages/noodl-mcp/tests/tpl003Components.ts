@@ -667,7 +667,19 @@ const HEADER: Tpl003Component = {
       'hdNav',
       'The nav',
       'hdShell',
-      { sizeMode: 'contentSize', flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', columnGap: 'var(--space-6)', rowGap: 'var(--space-2)', as: 'nav' },
+      // P109 ISL-022: `maxWidth` 100%, or the wrap never happens — a content-sized row inside the shell's row is as wide
+      // as all its links on one line (`row-cannot-wrap`; measured on `isl022-wrapped-row/`, 566px on one line at 390).
+      // It still sits at its links' width beside the wordmark; it wraps only once it meets the edge.
+      {
+        sizeMode: 'contentSize',
+        maxWidth: pct(100),
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        alignItems: 'center',
+        columnGap: 'var(--space-6)',
+        rowGap: 'var(--space-2)',
+        as: 'nav'
+      },
       ['hdLink1', 'hdLink2', 'hdLink3']
     ),
     ...[1, 2, 3].map((n) =>

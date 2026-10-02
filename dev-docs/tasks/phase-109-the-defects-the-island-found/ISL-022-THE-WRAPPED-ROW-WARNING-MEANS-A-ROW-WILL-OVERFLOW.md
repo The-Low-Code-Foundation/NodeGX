@@ -1,6 +1,6 @@
 # ISL-022 — The wrapped-row warning means a row will overflow
 
-**Status: 🟡 s3 (2026-10-02): AC1 measured both halves — the door fires on `brBar`, `rcColourRow`, `opColourRow` and not on `brTabs`; and a `contentSize` wrapped row in a row parent **never wraps** on a phone (566 px on one line at 390; zoomed out to 566 with `bodyScroll`, clipped without). AC2 (the rule change) is next, after a ruling (§5). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F29](AUDIT-2026-10-01.md) · P78
+**Status: 🟢 s4 (2026-10-02): built on the ruling ("Yes, both") — AC2, AC3, AC4, AC5, AC7 met (§8 s4); arm B silent on items a phone holds, arm A silent on a wrapped row of clusters, and a new code `row-cannot-wrap` names `brTabs`. Census 22 → 14 + 7 new, every one read; landing-pages fixed at its source. ⬜ AC6 (Claude Code over the real door) owed. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F29](AUDIT-2026-10-01.md) · P78
 [D50](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) (✅ for pills, by GAM-022) · CG-003 AC1 and §7.2 ·
 **Side:** product (validator, `uncollapsible-multi-column` and the layout-inert family)
 
@@ -145,3 +145,115 @@ silently; with it, mobile Chrome zooms the whole page out to the row's width —
 on `brTabs` (the validator half above).
 
 AC2 changes the rule (it reverses GAM-022's choice for items with a pixel width), so it waits on §5's ruling.
+
+### Session 4 — 2026-10-02, P109 s4: AC2–AC5 and AC7, on the ruling ("Yes, both")
+
+**The rule** (`responsiveArrangement.ts`, `layoutInertCombination.ts`, `diagnostics.ts`, `diagnosticExamples.ts`):
+
+- **Arm B** reads the item's width, not only its sizing: `frozen` (a percentage — the unset default is `100%` — or a pixel
+  width wider than `PHONE_WIDTH_PX` 390 less the row's own px padding) fires; `fixed-fits` (a pixel width a phone holds)
+  is silent; a token or `vw` width abstains. A token padding counts as 0, the quiet direction.
+- **Arm A**: a WRAPPED row whose every visual track is content-sized (its own `sizeMode`, or the catalog default) is a row
+  of clusters and is silent. A wired track `sizeMode` is not known to be content-sized. (An instance track was going to
+  be excluded too; it is a one-node track, which arm A's floor already skips, so the guard and its arm were dead — cut.)
+- **New code `row-cannot-wrap`** (layout-inert family): a row Group, `flexWrap` wrap, own `sizeMode`
+  `contentSize`/`contentWidth`, whose parent lays out as a row (`parentAxis`: a row Group or a Button). Abstains on: no
+  parent in this graph (a component root), a column parent, out of flow (`absolute`/`fixed`), any wired
+  `flexDirection`/`flexWrap`/`sizeMode`/`position`/`maxWidth` or wired parent `flexDirection`, an authored `maxWidth`,
+  sizing `styleCss` (`max-width`/`width`/`flex…`), and fewer than `MIN_WRAPPING_ITEMS` (= arm A's `MIN_TRACKS`, 3)
+  visual children unless one is a `For Each`. 🔴 A `cssClassName` is NOT an abstention (see the census).
+  Suggestion `maxWidth: 100%`; cites `layout-wrap-a-row-of-content-width-items`. No MCP schema change.
+
+**Two first versions this session corrected, each by a measurement:**
+
+1. 🔴 **The first `row-cannot-wrap` fired 16 times**, not once: on `brTabs` and on every pair in the bar (`brBrand` logo +
+   name, `brWho`, both two-segment switches), and on pairs elsewhere. Rendered on a probe page (a scratch copy whose start
+   page places the component, a `cssClassName` stamped on each flagged node): the pairs are **38–118 px** wide at 390.
+   True that their wrap is inert, false that they overflow. Hence the floor of three, arm A's own "a pair is a pair".
+2. 🔴 **Two of the rows it named DID wrap on the probe page** — planning `abRight` (3 lines) and todo-list `hdNav`
+   (2 lines) — which looked like a contradiction of s3's render. It is not: each carries hand-written CSS
+   (`.planner-shrink-wrap { max-width: 100% }`; inline `styleCss: "max-width: 100%;"`). With the garden's
+   `.bg-tabs { width: 100% !important }` that is **three templates that met this exact shape and patched it in CSS**.
+   It also gave a better exit than §5's: the fixture grew two rows, measured at 390 × 844 (mobile, `bodyScroll` off):
+
+| row | shape | width | lines |
+|---|---|---|---|
+| `rowA` | brTabs' shape (control, unchanged) | 566 | **1** |
+| `rowB` | contentHeight + 100 % | 390 | 2 |
+| `rowC` | `rowA` + the Group's own **`maxWidth` 100 %** | 390 | **2** |
+| `rowD` | `rowA` in a **column** parent | 390 | **2** |
+
+   `rowC` stays as narrow as its items until it meets the edge, which is what a cluster at the end of a
+   `space-between` header needs (contentHeight + 100 % would stretch it across the bar). `rowD` measures AC3(ii)'s claim,
+   which §5 had only argued. Drive: `scripts/devtools/drive-isl022-template-rows.js` (any class list; the s3 drive still
+   reads rows A and B).
+
+**AC2 ✅** — `tests-unit/validation/isl-022-the-wrapped-row-warning.test.ts` (28 arms) and the door's
+`isl022WrappedRow.test.ts` (flipped from AC1's readings): `brBar`, `rcColourRow`, `opColourRow` silent; `brTabs` named by
+`row-cannot-wrap` on `sizeMode`; the 32 % grid, the default-100 % item and a 600 px item fire beside every silence.
+
+**AC3 ✅** — reverted arms, each over the spec: (i) the per-track read off (`false && wraps`) → **1 red / 28**, exactly
+"the garden's bar … is silent"; (ii) the row-parent condition off → **1 red / 28**, exactly the column-parent arm. Both
+files restored and `cmp`-identical.
+
+**AC4 ✅ — census through the door** (`validate_project` on a copy of each of the 12 V2 templates and the 4 calibration
+projects; the 46 legacy prefabs are refused by the MCP server as GAM-022 found, and arm B's structural scan there found 0
+gapped rows). `uncollapsible-multi-column` **22 → 14**; `row-cannot-wrap` **0 → 7**.
+
+| removed (`uncollapsible-multi-column`) | why |
+|---|---|
+| bot-garden `Garden/Top bar#brBar` | arm A, five content-sized clusters, wraps (CG-003 §7.2: two rows at 390) |
+| bot-garden `Robot/Card#rcColourRow`, `Robot/Options#opColourRow` | arm B, 44 px swatches |
+| rocket-school `Hangar/Shelf#hsGrid` | arm B, 132 px tiles — GAM-022's calibration true positive, **reversed by the ruling** |
+| rocket-school `Pages/Profiles#pfList` | arm B, 150 px cards — the same |
+| Puppy test 3 `Pages/Landing#grid` | arm B, 340 px card (DSG-004's calibration grid) — **reversed by the ruling**: one per line on a phone |
+| nightbook `Keep/Section#ksGrid`, `Pages/Tonight#tnMineGrid` | arm B, 168 px things |
+
+Still firing, every one a percentage or a band: ecommerce-example ×5 and its probe ×2 (32 % cards and four arm A bands),
+phase55-replay-sonnet ×3 (31 %), nightbook `Help/Lines#hsRoot` (items at 100 % — see the question below), `Pages/Book#bkGrid`
+(13 %), `Pages/Me#meDesk` and `Pages/Setup#suS3Cards` (arm A).
+
+| new (`row-cannot-wrap`) | rescued? | rendered at 390 |
+|---|---|---|
+| bot-garden `Garden/Top bar#brTabs` | CSS class `.bg-tabs` (`!important`) | 362 px (the CSS) — the graph alone: CG-003's 506 px page |
+| planning, planning-demo `Week/App bar#abRight` | CSS class `.planner-shrink-wrap` | 3 lines (the CSS) |
+| landing-pages `Site/Header#hdNav` (3 links) | none | 185 px, fits today; a 4th–5th link overflows — **fixed in the template** (below) |
+| nightbook `Pages/Tonight#tnFonts` (6), `#tnEffects` (5), `#tnColours` (8) | none | not rendered (mounted only when a text is picked, behind the unlock) |
+
+Filed: `dev-docs/bugs/p109-s4-rowwrap-…` (the unrescued rows).
+
+**❓ Not ruled, recorded:** arm B still fires on a wrapped row of **100 %-wide** items (nightbook `hsRoot`): each item is
+a full line, so nothing is frozen at a desktop proportion. The ruling's sentence says "a percentage" fires, so it does.
+
+**AC5 ✅ — the pins moved in the same change, and each is red against HEAD's rule** (HEAD's four validation files
+copied in, the suites run, mine copied back, `cmp`-identical):
+
+| gate | before | after | under HEAD's rule |
+|---|---|---|---|
+| `cg003Template.test.ts` AC1 (garden) | `['uncollapsible-multi-column']` on Top bar, Card, Options, apply | `['row-cannot-wrap']` on `Garden/Top bar`, `apply` | red (HEAD gives the old list) |
+| `tpl007Template.test.ts` (Rocket School) | `['uncollapsible-multi-column']` on Shelf, Profiles, apply | `[]` (title no longer says "except …") | **red** |
+| `tpl010Template.test.ts` §1 (planning) | `['wired-dimension-becomes-grow']` | `+ 'row-cannot-wrap'`, on `Week/App bar` and `apply` (CSS-rescued; the exit is written beside the pin) | **red** |
+| `tpl003Template.test.ts` (landing-pages) | `[]` | `[]` — **the template was fixed instead**: `maxWidth: pct(100)` on `hdNav` in `tpl003Components.ts`, `npm run template:landing` (+4 lines in `Site/Header/nodes.json` and the embedded `landing-pages.content.json`). Rendered before/after: 185 px, 1 line, same position at 390 and at 1280 | n/a (the gate is about the template) |
+| `isl022WrappedRow.test.ts` | AC1's readings | AC2's | **3 red** |
+| `isl025Census.test.ts` W21 | `present` | **`removed`** (the noise pin is gone) | — |
+| `tpl006Template.test.ts`, `sb006PublicSite.test.ts` | unchanged | unchanged, green | — |
+
+GAM-022's own spec moved three arms (300 px, Puppy's 340 px, the 150 px content-sized container → 600 px items; its
+abstention arms → 600 px, since a 300 px item is now silent for its width and would grade nothing): 16 / 16.
+
+**AC7 ✅** — the garden's generator is untouched and `CG-003 AC2`'s byte gate passed in the same run (0 files differ):
+the rule changed, the artefact did not. The pin names exactly `row-cannot-wrap` on `Garden/Top bar` (+ `apply`).
+
+**Gates, with this change in (2026-10-02, over `835a965f9`):** the whole `noodl-mcp` suite, 164 suites: 3,534 passed,
+23 failed in 15 suites. Each failure re-run under HEAD's rule: **15 stay red without this change** — `cn004` (1),
+`nodeIdAllocation` (1), `d54ThemePresetIdentity` (1), `cmp004Parts` (2), `cmp004RoundTrip` (2), `cmp001InterfaceDoctrine`
+(1, a corpus count 39 for 33), `fld013ExportReach` (1), `provision` (2, a real backend), tpl007's byte gate (the
+`node-kit.d.ts` copies in a peer-dirty rocket-school), and `def038SettledTemplates` (6: format-4 templates holding
+unsettled `runOnChange-*` — nightbook, planning, planning-demo are untracked peer templates, rocket-school is peer-dirty,
+digital-bricks-training(-demo) committed 32 h earlier; s3's format step only stopped the migration re-running at format
+5, and every template is at 4) — plus `iw008Crew`'s p95 tick timing (6.5 ms for 5, load). **The rest were this task's,
+and are green after:** the 4 pins above, tpl003 (regenerated), and the moved suites re-run: 698 passed, 8 failed, the 8
+being exactly the HEAD-red `def038` ×6, tpl007's byte gate, and the tpl010 `apply` label (pinned, then 1 / 1).
+
+**⬜ AC6 (the person's door over the real protocol) is owed.** It needs `dist/noodl-mcp.cjs` rebuilt with this rule and a
+Claude Code run under a project-local `--mcp-config`.

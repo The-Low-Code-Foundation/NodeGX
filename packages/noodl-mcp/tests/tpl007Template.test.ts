@@ -111,21 +111,16 @@ describe('TPL-007 — Rocket School, the artefact', () => {
     expect([...pages.routes!].sort()).toEqual([...PAGES].sort());
   });
 
-  it('raised no warning the door did not refuse over, except the one it raises about its own plan', () => {
+  it('raised no warning the door did not refuse over', () => {
     const warnings = built.diagnostics.filter((d) => d.severity === 'warning');
     const codes = new Set(warnings.map((d) => d.code));
     // P88 GAM-021: `page-cannot-scroll` is gone — the plan door now judges the `bodyScroll` the plan's
     // own `scroll: "page"` leaves, and the artefact HAS it (asserted below).
-    expect([...codes].sort()).toEqual(['uncollapsible-multi-column']);
-    // P88 GAM-022: Arm B reads the item a `For Each` draws. The content-sized pills of `Game/Choice row` and
-    // `Game/Question box` are no longer told to become columns; the two grids of tiles given a width
-    // (132px hangar tiles, 150px profile cards) still are. Pinned by component, because the code set alone
-    // cannot tell a fixed rule from a broken one. `apply` is the builder's label for `apply_plan`'s
-    // re-validation, which raises the same two again.
-    const multiColumn = new Set(
-      warnings.filter((d) => d.code === 'uncollapsible-multi-column').map((d) => String(d.component).replace(/^\//, ''))
-    );
-    expect([...multiColumn].sort()).toEqual(['Hangar/Shelf', 'Pages/Profiles', 'apply']);
+    // P88 GAM-022 silenced the content-sized pills of `Game/Choice row` and `Game/Question box`; P109 ISL-022 (Richard's
+    // ruling 2026-10-02, "Yes, both") silenced the last two, `Hangar/Shelf` (132px tiles) and `Pages/Profiles` (150px
+    // cards): a wrapped row of items a phone can hold wraps, and was being told to become 260-320px columns. The
+    // known-firing arms beside this absence (32%, 600px) are in `isl-022-the-wrapped-row-warning.test.ts`.
+    expect([...codes].sort()).toEqual([]);
     const project = JSON.parse(fs.readFileSync(path.join(built.projectDir, 'nodegx.project.json'), 'utf8')) as { settings: { bodyScroll?: boolean } };
     expect(project.settings.bodyScroll).toBe(true);
   });

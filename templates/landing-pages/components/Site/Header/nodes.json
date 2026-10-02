@@ -157,6 +157,10 @@
       ],
       "parameters": {
         "sizeMode": "contentSize",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        },
         "flexDirection": "row",
         "flexWrap": "wrap",
         "alignItems": "center",

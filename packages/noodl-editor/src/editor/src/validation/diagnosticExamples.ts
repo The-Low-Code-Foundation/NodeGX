@@ -174,6 +174,15 @@ export const DIAGNOSTIC_EXAMPLES: readonly ExampleCitation[] = [
       'a grid of unknown length as a Columns node in autoFit with a 280px minWidth, with the For Each inside ' +
       'it — no breakpoints to maintain and no wrapped Group to freeze'
   },
+  // P109 ISL-022 — the wrapping row done right: the container at contentHeight and 100%, so its width
+  // comes from its parent, and the ITEMS at Content Size. The same recipe its message points at.
+  {
+    code: DiagnosticCode.RowCannotWrap,
+    examples: ['layout-wrap-a-row-of-content-width-items'],
+    why:
+      'a wrapping row whose container is sizeMode "contentHeight" at width 100% and whose items are Content Size, ' +
+      'so the row has an edge to wrap at and the items flow onto the next line'
+  },
   // DSG-004 §2.2 — the doctrine's own worked box: sizeMode "explicit", a width,
   // a height and objectFit "cover", which is the four-parameter set an inert
   // dimension is one quarter of.

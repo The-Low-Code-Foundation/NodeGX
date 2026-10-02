@@ -22,7 +22,9 @@
       "children": [
         "marker",
         "outerA",
-        "outerB"
+        "outerB",
+        "outerC",
+        "outerD"
       ],
       "parameters": {
         "rowGap": "var(--space-4)"
@@ -309,6 +311,275 @@
         },
         "backgroundColor": "var(--primary)",
         "cssClassName": "b-item"
+      }
+    },
+    {
+      "id": "outerC",
+      "type": "Group",
+      "parent": "layout",
+      "children": [
+        "rowC"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "outerC"
+      }
+    },
+    {
+      "id": "rowC",
+      "type": "Group",
+      "parent": "outerC",
+      "children": [
+        "c_0",
+        "c_1",
+        "c_2",
+        "c_3",
+        "c_4"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "rowC",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1)",
+        "rowGap": "var(--space-1)",
+        "maxWidth": {
+          "value": 100,
+          "unit": "%"
+        }
+      }
+    },
+    {
+      "id": "c_0",
+      "type": "Group",
+      "parent": "rowC",
+      "children": [],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "c-item"
+      }
+    },
+    {
+      "id": "c_1",
+      "type": "Group",
+      "parent": "rowC",
+      "children": [],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "c-item"
+      }
+    },
+    {
+      "id": "c_2",
+      "type": "Group",
+      "parent": "rowC",
+      "children": [],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "c-item"
+      }
+    },
+    {
+      "id": "c_3",
+      "type": "Group",
+      "parent": "rowC",
+      "children": [],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "c-item"
+      }
+    },
+    {
+      "id": "c_4",
+      "type": "Group",
+      "parent": "rowC",
+      "children": [],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "c-item"
+      }
+    },
+    {
+      "id": "outerD",
+      "type": "Group",
+      "parent": "layout",
+      "children": [
+        "rowD"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "outerD"
+      }
+    },
+    {
+      "id": "rowD",
+      "type": "Group",
+      "parent": "outerD",
+      "children": [
+        "d_0",
+        "d_1",
+        "d_2",
+        "d_3",
+        "d_4"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "rowD",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1)",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "d_0",
+      "type": "Group",
+      "parent": "rowD",
+      "children": [],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "d-item"
+      }
+    },
+    {
+      "id": "d_1",
+      "type": "Group",
+      "parent": "rowD",
+      "children": [],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "d-item"
+      }
+    },
+    {
+      "id": "d_2",
+      "type": "Group",
+      "parent": "rowD",
+      "children": [],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "d-item"
+      }
+    },
+    {
+      "id": "d_3",
+      "type": "Group",
+      "parent": "rowD",
+      "children": [],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "d-item"
+      }
+    },
+    {
+      "id": "d_4",
+      "type": "Group",
+      "parent": "rowD",
+      "children": [],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "d-item"
       }
     }
   ],

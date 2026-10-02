@@ -267,14 +267,15 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     expect(PAGES.map((p) => p.replace('/Pages/', ''))).toEqual(['Profiles', 'Island', 'Workshop', 'My robot', 'Skills', 'Grown-ups']);
   });
 
-  it('AC1: no warning the door did not refuse over but D50’s, pinned by component', () => {
+  it('AC1: no warning the door did not refuse over but the tab row that cannot wrap, pinned by component', () => {
     const warnings = built.diagnostics.filter((d) => d.severity === 'warning' || d.severity === 'error');
-    expect([...new Set(warnings.map((d) => d.code))].sort()).toEqual(['uncollapsible-multi-column']);
-    // D50 (filed): a wrapped row of fixed-size items is told to become a Columns node. The bar wraps on purpose; the
-    // swatches, chips and profile cards are a wrapped row of fixed-size items. `apply` is apply_plan's re-validation.
-    // s3: Profiles no longer warns — its row is the cards' repeater and the new-player card, not a wrap of fixed items.
-    // P106 IG-005: Robot/Card's colour and hat rows are the same wrapped rows of swatches and chips as Robot/Options'.
-    expect([...new Set(warnings.map((d) => String(d.component).replace(/^\//, '')))].sort()).toEqual(['Garden/Top bar', 'Robot/Card', 'Robot/Options', 'apply']);
+    // P109 ISL-022 (Richard's ruling 2026-10-02, "Yes, both"): D50's four false alarms are gone — the bar wraps as
+    // clusters, and the swatches, chips and cards are fixed-size items a phone holds. What is left is TRUE of the graph:
+    // `Garden/Top bar#brTabs` is a content-sized row set to wrap inside the bar's row, so it never wraps (CG-003 §7.2: a
+    // 506 px page at 390). Only `.bg-tabs { width: 100% !important }` in the stylesheet hides it. Dropping that CSS for
+    // `maxWidth` 100% on brTabs is ISL-025's row, and then this list is empty. `apply` is apply_plan's re-validation.
+    expect([...new Set(warnings.map((d) => d.code))].sort()).toEqual(['row-cannot-wrap']);
+    expect([...new Set(warnings.map((d) => String(d.component).replace(/^\//, '')))].sort()).toEqual(['Garden/Top bar', 'apply']);
     const project = JSON.parse(fs.readFileSync(path.join(built.projectDir, 'nodegx.project.json'), 'utf8')) as { settings: { bodyScroll?: boolean } };
     expect(project.settings.bodyScroll).toBe(true);
   });

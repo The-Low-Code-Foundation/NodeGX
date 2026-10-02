@@ -186,7 +186,8 @@ export const WORKAROUNDS: Row[] = [
     what: 'the uncollapsible-multi-column warnings pinned as expected noise',
     files: [t('cg003Template.test.ts')],
     pattern: /toEqual\(\['uncollapsible-multi-column'\]\)/,
-    state: 'present'
+    // P109 ISL-022 (s4): the false alarms are gone; the pin now names `row-cannot-wrap` on brTabs, a true finding.
+    state: 'removed'
   },
   {
     w: 'W22',

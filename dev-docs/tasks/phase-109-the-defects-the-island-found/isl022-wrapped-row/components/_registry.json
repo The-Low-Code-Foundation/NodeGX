@@ -12,13 +12,13 @@
     "Pages/Home": {
       "path": "Pages/Home",
       "type": "page",
-      "nodeCount": 17,
+      "nodeCount": 31,
       "connectionCount": 0
     }
   },
   "stats": {
     "totalComponents": 2,
-    "totalNodes": 19,
+    "totalNodes": 33,
     "totalConnections": 0
   }
 }

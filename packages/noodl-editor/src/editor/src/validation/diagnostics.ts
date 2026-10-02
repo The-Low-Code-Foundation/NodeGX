@@ -773,6 +773,18 @@ export enum DiagnosticCode {
   TextCannotWrap = 'text-cannot-wrap',
 
   /**
+   * P109 ISL-022 (AUDIT F29) — a wrapping row `Group` sized to its own content (`contentSize` /
+   * `contentWidth`) inside a row parent. `layout.ts` gives such a node no width and every node
+   * `flexShrink: 0`, so in a row parent it is as wide as all its children on one line and its
+   * `flexWrap` never takes effect. Measured (`isl022-wrapped-row/`, 2026-10-02): five 110px items
+   * stay one 566px line at 390px; without `bodyScroll` the row is clipped, with it mobile Chrome
+   * zooms the whole page out to 566px (Olive's Island's top tabs, 506px, CG-003 §7.2).
+   *
+   * In a COLUMN parent the same Group can wrap, and is not reported. A **warning**, advisory.
+   */
+  RowCannotWrap = 'row-cannot-wrap',
+
+  /**
    * DEF-020 (P78 D32) — a row `Group` whose `justifyContent` distributes free
    * space, with two or more children that grow: the free space never exists,
    * the children split the row evenly, and the parameter is silently inert.

@@ -108,12 +108,15 @@ describe('GAM-022 — Arm B judges the item a wrapped row draws, not the row', (
     });
   });
 
-  describe('firing: the items were given a width', () => {
-    it('AC2 — the same pill row whose item is explicit at 300px', () => {
+  // P109 ISL-022 (Richard, 2026-10-02: "Yes, both") narrowed "given a width" to a width that freezes a desktop
+  // proportion (a percentage) or is wider than a phone. GAM-022's 300px arm and calibration 1 (Puppy's 340px card) now
+  // wrap silently, and are pinned that way in `isl-022-the-wrapped-row-warning.test.ts`; the firing arms here moved to 600px.
+  describe('firing: the items were given a width a phone cannot hold, or a percentage', () => {
+    it('AC2 — the same pill row whose item is explicit at 600px', () => {
       const views = itemView('/Card', {
         id: 'c',
         type: 'Group',
-        parameters: { sizeMode: 'explicit', width: { value: 300, unit: 'px' } }
+        parameters: { sizeMode: 'explicit', width: { value: 600, unit: 'px' } }
       });
       const found = grid('/Card', { views });
       expect(found.map((d) => d.code)).toEqual([DiagnosticCode.UncollapsibleMultiColumn]);
@@ -121,13 +124,13 @@ describe('GAM-022 — Arm B judges the item a wrapped row draws, not the row', (
       expect(found[0].location.port).toBe('flexWrap');
     });
 
-    it('calibration 1 — Puppy test 3 /Components/PuppyCard: contentHeight at 340px', () => {
+    it('calibration 1 — Puppy test 3 /Components/PuppyCard: contentHeight at 340px — ISL-022: silent, one card per line on a phone', () => {
       const views = itemView(
         '/Components/PuppyCard',
         { id: 'pc', type: 'Group', parameters: { sizeMode: 'contentHeight', width: { value: 340, unit: 'px' } } },
         inputs('pcIn')
       );
-      expect(grid('/Components/PuppyCard', { views }).map((d) => d.code)).toEqual([DiagnosticCode.UncollapsibleMultiColumn]);
+      expect(grid('/Components/PuppyCard', { views })).toEqual([]);
     });
 
     it('calibration 2 — ecommerce-example /Components/ProductCard: sizeMode unset (explicit), 32%', () => {
@@ -156,11 +159,12 @@ describe('GAM-022 — Arm B judges the item a wrapped row draws, not the row', (
     });
 
     it('AC4 — a content-sized CONTAINER of sized items still fires (Arm A\'s exclusion was not ported)', () => {
-      // Rocket School /Pages/Profiles#pfList: contentSize row, 150px profile cards.
+      // Rocket School /Pages/Profiles#pfList's container (contentSize), with an item a phone cannot hold. Its own 150px
+      // cards wrap on a phone and are silent since ISL-022.
       const views = itemView('/Game/Profile card', {
         id: 'pf',
         type: 'Group',
-        parameters: { sizeMode: 'contentHeight', width: { value: 150, unit: 'px' } }
+        parameters: { sizeMode: 'contentHeight', width: { value: 600, unit: 'px' } }
       });
       const container = { flexDirection: 'row', flexWrap: 'wrap', sizeMode: 'contentSize', columnGap: 'var(--space-4)' };
       expect(grid('/Game/Profile card', { views }, container).map((d) => d.code)).toEqual([
@@ -174,7 +178,9 @@ describe('GAM-022 — Arm B judges the item a wrapped row draws, not the row', (
   });
 
   describe('unknowable item roots abstain (none of the three calibration grids is one)', () => {
-    const sized = { sizeMode: 'explicit', width: { value: 300, unit: 'px' } };
+    // 600px, not 300px: since ISL-022 a 300px item is silent for its width, and an abstention arm built on it would pass
+    // whether or not the abstention exists.
+    const sized = { sizeMode: 'explicit', width: { value: 600, unit: 'px' } };
 
     it('a template no view names', () => {
       expect(grid('/Nowhere', { views: itemView('/Card', { id: 'c', type: 'Group', parameters: sized }) })).toEqual([]);

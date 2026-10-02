@@ -42,6 +42,13 @@
  *    combination strictly, but it lives here because a Columns child is D28's, and one module
  *    decides the cardinality: D28 speaks, this does not.
  *
+ *  - **`row-cannot-wrap`** (P109 ISL-022, AUDIT F29): a wrapping row `Group` at `contentSize`/
+ *    `contentWidth` inside a row parent. `layout.ts` gives a content-sized node no width and every
+ *    node `flexShrink: 0`, so the row is as wide as its children on one line and the wrap never
+ *    happens. Measured at 390px (`isl022-wrapped-row/`): one 566px line, clipped, or with
+ *    `bodyScroll` the whole page zoomed out. The island's top tabs did exactly that, and
+ *    `uncollapsible-multi-column` named the bar around them instead (CG-003 §7.2).
+ *
  *  - **`justify-content-distributes-nothing`** (D32): every visual node's `width` defaults to
  *    `100%` (`node-shared-port-definitions.ts`), and `layout.ts` turns a percentage width inside
  *    a `row` parent into `flexGrow`. So growing is what a child of a row does unless something
@@ -86,7 +93,8 @@ import { DiagnosticCode, type Diagnostic } from './diagnostics';
 import { isComponentRef } from './model';
 import type { ParameterizedNode } from './parameterValues';
 import { resolveAgainstDefaults } from './portConditions';
-import { COLUMNS_TYPE } from './responsiveArrangement';
+import { REPEATER_TYPE } from './repeaterTemplate';
+import { COLUMNS_TYPE, MIN_TRACKS } from './responsiveArrangement';
 
 /** The one general-purpose container whose `flexDirection` makes a row. */
 const GROUP_TYPE = 'Group';
@@ -106,6 +114,9 @@ export const SENTENCE_MIN_CHARS = 26;
 
 /** `textOverflow` values with which the author asked for one line on purpose (DEF-031). */
 const ONE_LINE_ON_PURPOSE = new Set(['ellipsis', 'clip']);
+
+/** ISL-022 — the fewest items a wrapping row must hold to be reported: arm A's "a pair is a pair" floor. */
+export const MIN_WRAPPING_ITEMS = MIN_TRACKS;
 
 /** `justifyContent` values that exist to distribute free space along the main axis. */
 const DISTRIBUTING = new Set(['space-between', 'space-around', 'space-evenly']);
@@ -277,6 +288,93 @@ function checkTextCannotWrap(
         plug: 'input' as const
       },
       suggestion: 'sizeMode: "contentHeight"'
+    }
+  ];
+}
+
+/**
+ * ISL-022's exit, both halves measured at 390px (`isl022-wrapped-row/`, rows C and A): `maxWidth` 100% keeps the row
+ * as narrow as its children until it meets the edge and then wraps (2 lines, against the control's one 566px line),
+ * which is what a cluster at the end of a `space-between` header needs; `contentHeight` at 100% makes it the full row.
+ */
+const ISL022_EXIT =
+  'Give it maxWidth 100% so it stays as wide as its children until it reaches the edge and then wraps, or sizeMode ' +
+  '"contentHeight" with width 100% so it takes the whole row.';
+
+/** Inline CSS that sets a width or a flex sizing rescues the row in a way this rule cannot weigh (todo-list's header). */
+const CSS_SIZING = /(^|[;{\s])(max-width|width|flex|flex-shrink|flex-basis)\s*:/i;
+
+/**
+ * ISL-022 — a wrapping row Group sized to its own content, inside a row parent: the wrap is inert.
+ *
+ * Reported on the Group, because the repair is its own `sizeMode`. The abstentions:
+ *
+ *  - the parent does not lay out as a row (see {@link parentAxis}): in a column a content-sized Group
+ *    is no wider than the column, and its wrap works — the recipe library's three wrapped button
+ *    rows (`ui-cta-band#actions`, `ui-landing-page#hero_actions`, `#cta_actions`) are exactly that;
+ *  - the Group has no parent in this graph — a component's root, whose parent is whoever places it;
+ *  - any of `flexDirection`, `flexWrap`, `sizeMode` on it, or `flexDirection` on the parent, is wired;
+ *  - it is out of flow (`position` absolute or fixed): no longer a flex item, it is not held at one line;
+ *  - it has fewer than {@link MIN_WRAPPING_ITEMS} visual children and no `For Each`: a pair (a logo and a name, two
+ *    segment buttons) is a pair, the same floor `uncollapsible-multi-column`'s arm A uses. The 2026-10-02 census
+ *    fired on six such pairs across the templates, measured 38-118px wide at 390;
+ *  - it carries an authored or wired `maxWidth`, or inline `styleCss` that sets a width or a flex size: the author
+ *    bounded it (`maxWidth` 100% is the measured exit, and todo-list's header does the same in `styleCss`).
+ *
+ * 🔴 A `cssClassName` is NOT an abstention, though a class can rescue the row from the project's stylesheet (the
+ * garden's `.bg-tabs`, planning's `.planner-shrink-wrap`): a stylesheet is not in this graph, and three templates
+ * meeting the same defect and each patching it in CSS is the reason the code exists.
+ */
+function checkRowCannotWrap(
+  node: LayoutNode,
+  byId: Map<string, LayoutNode>,
+  parentOf: Map<string, LayoutNode>,
+  component: string,
+  catalog: CatalogIndex,
+  connected: ReadonlySet<string> | undefined
+): Diagnostic[] {
+  if (node.type !== GROUP_TYPE) return [];
+  const parent = parentOf.get(node.id);
+  if (!parent) return [];
+  if (['flexDirection', 'flexWrap', 'sizeMode', 'position'].some((port) => connected?.has(`${node.id}::${port}`))) return [];
+  if (connected?.has(`${parent.id}::flexDirection`)) return [];
+  const resolved = resolveAgainstDefaults(node.parameters ?? {}, catalog.inputDefaults(node.type));
+  if (resolved['flexDirection'] !== 'row') return [];
+  if (resolved['flexWrap'] !== 'wrap' && resolved['flexWrap'] !== 'wrap-reverse') return [];
+  const sizeMode = resolved['sizeMode'];
+  if (typeof sizeMode !== 'string' || !CONTENT_WIDTH_MODES.has(sizeMode)) return [];
+  const position = resolved['position'];
+  if (position === 'absolute' || position === 'fixed') return [];
+  if (parentAxis(parent, catalog) !== 'row') return [];
+  if (connected?.has(`${node.id}::maxWidth`)) return [];
+  const maxWidth = resolved['maxWidth'];
+  if (maxWidth !== undefined && maxWidth !== null && maxWidth !== '') return [];
+  const styleCss = node.parameters?.['styleCss'];
+  if (typeof styleCss === 'string' && CSS_SIZING.test(styleCss)) return [];
+  const children = (node.children ?? []).map((id) => byId.get(id)).filter((c): c is LayoutNode => !!c);
+  const wrapsARepeater = children.some((c) => c.type === REPEATER_TYPE);
+  const items = children.filter((c) => isComponentRef(c.type) || !!catalog.getNode(c.type)?.isVisual);
+  if (!wrapsARepeater && items.length < MIN_WRAPPING_ITEMS) return [];
+
+  return [
+    {
+      code: DiagnosticCode.RowCannotWrap,
+      severity: 'warning',
+      message:
+        `This Group is set to wrap, but it is sized to its own content (sizeMode "${sizeMode}") and sits in a row ` +
+        `(${parent.label ? `"${parent.label}", ` : ''}Layout: Horizontal). A content-sized Group in a row is as wide ` +
+        'as all its children side by side, so the wrap never happens: once they add up to more than a phone, the row ' +
+        'runs past the screen and the browser either cuts it off or zooms the whole page out to fit it, which makes ' +
+        `everything small and every tap land off target. ${ISL022_EXIT}`,
+      location: {
+        component,
+        nodeId: node.id,
+        nodeType: node.type,
+        ...(node.label ? { nodeLabel: node.label } : {}),
+        port: 'sizeMode',
+        plug: 'input' as const
+      },
+      suggestion: 'maxWidth: 100%'
     }
   ];
 }
@@ -517,6 +615,9 @@ export function checkLayoutInertCombination(
   for (const node of nodes) {
     // ── GAM-020: a sentence in a content-sized Text ─────────────────────────
     diagnostics.push(...checkTextCannotWrap(node, parentOf, component, catalog, connectedInputs));
+
+    // ── ISL-022: a content-sized wrapping row inside a row ──────────────────
+    diagnostics.push(...checkRowCannotWrap(node, byId, parentOf, component, catalog, connectedInputs));
 
     // ── FLD-004: a number wired into the child's main-axis dimension ────────
     diagnostics.push(...checkWiredMainAxisDimensions(node, byId, component, catalog, connectedInputs));

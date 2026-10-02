@@ -118,7 +118,7 @@ the work:
 | [ISL-019](ISL-019-THE-SAME-PLAN-WRITES-THE-SAME-BYTES.md) | The same plan writes the same bytes | F26 | MCP | ✓ |
 | [ISL-020](ISL-020-AN-AGENT-CHANGES-ONE-LINE-OF-A-BIG-SCRIPT.md) | An agent changes one line of a big script | F27 | MCP | ✓ |
 | [ISL-021](ISL-021-AN-AGENT-CAN-PRESS-AND-TYPE-ON-A-RENDERED-PAGE.md) | An agent can press and type on a rendered page | F28 | MCP, render | ✓ |
-| [ISL-022](ISL-022-THE-WRAPPED-ROW-WARNING-MEANS-A-ROW-WILL-OVERFLOW.md) | The wrapped-row warning means a row will overflow — **🟡 s3: AC1 measured: the warning misses `brTabs`; a `contentSize` wrapped row never wraps (566 px at 390; the page zooms out under `bodyScroll`); AC2 waits on §5** | F29 | validator | ✓ |
+| [ISL-022](ISL-022-THE-WRAPPED-ROW-WARNING-MEANS-A-ROW-WILL-OVERFLOW.md) | The wrapped-row warning means a row will overflow — **🟢 s4: built on "Yes, both": the three false alarms silent, `row-cannot-wrap` names `brTabs`; census 22 → 14 + 7 new; four pins moved, landing-pages fixed at source. ⬜ AC6 (Claude Code over the door)** | F29 | validator | ✓ |
 | **Track E** | | | | |
 | [ISL-023](ISL-023-THE-GENERATOR-GATES-CATCH-A-TYPE-ERROR-AND-A-STRAY-BACKTICK.md) | The generator's gates catch a type error and a stray backtick | F32, F33 | tooling | — |
 | [ISL-024](ISL-024-A-TEMPLATE-LIVES-IN-ITS-OWN-FOLDER.md) | A template lives in its own folder | F34 | repo | ✓ |
@@ -282,5 +282,5 @@ job each.
 | A | **2** (ISL-001 ✅ s3, ISL-002 ✅ s3) | 4 |
 | B | 0 | 6 |
 | C | 0 (ISL-014 🟡 (a) + (b) built, AC6 owed; ISL-011 🟡 built, two arms owed) | 5 |
-| D | 0 (ISL-022 🟡 AC1 measured, AC2 on a ruling) | 7 |
+| D | 0 (ISL-022 🟢 built, AC6 owed) | 7 |
 | E | 0 (ISL-025 🟡 slice 0 landed) | 3 |
