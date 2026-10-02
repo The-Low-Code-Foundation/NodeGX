@@ -1,7 +1,7 @@
 # NSP-014 — Batch: records, users, files, HTTP, streams, and the cloud-only nodes
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world's network and backend) and R4 = continue.
-**Status: 🟡 s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
+**Status: 🟡 s26 (2026-10-02): User and Set User Properties conform on the runtime — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24.** s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
 
 ## 1. The person sentence
 
@@ -487,4 +487,89 @@ one). As in s24: the 200-gate for the store path is the 14 hand scenarios; the d
 | runtime: `runtime-target.test.ts` + `graph.test.ts` | **2 suites, 96 passed** (s24: 92; +4 = s09) — in a FULL run, after T13 (alone it was green before the fix too) |
 | `tsc --noEmit` node-spec, runtime (`tsconfig.json`) | exit 0 · exit 0 |
 | `node scripts/node-spec/census.js` | unchanged — 147, all tiered (Filter Records was tiered T1 at s1) |
+| export, `test:main` | NOT RUN — no export code touched |
+
+### 6.16 s26 (2026-10-02) — AUTH, the twelfth seam; User and Set User Properties
+
+**The seam first, measured before written.** A probe ran the User node on the REAL viewer `UserService` and the REAL REST
+auth adapter with only the HTTP scripted (the world's NETWORK), eleven situations (the page-load check answered 200 / 503 /
+401; a Fetch with nobody, with 503 / 401 / a network error; a Backend another backend, gone, switched; Run On Value Change
+off; Set User Properties with nobody, ok, a gone Backend, 403). What it settled:
+- **Under R9 the trace carries the auth OPERATION** — `fetchCurrentUser`, `setUserProperties` (`@noodl/backend-contract`
+  `IAuthAdapter` and the one beside it) — as a `backend` event, answered by BACKEND's rules. No new trace event; the
+  schema is unchanged.
+- **What a user node SHOWS is the session its backend holds**, read through the service: `currentFor` hands it to the
+  record store (`_fromJSON(user, '_User')`) on EVERY read, so a read is a registry write a bound node hears. The world
+  therefore holds the SESSIONS (`backend.sessions`, per backend id), and an auth answer's landing is a list of STEPS the
+  REST adapter takes in a fixed order (`landAuth`: the session written or cleared, `sessionChanged`, `sessionGained` /
+  `sessionLost`, the caller's callback) — performed by the interpreter on its world and by the runtime target through the
+  adapter's own session store and event surface. Both adapters agree on the contract-level order (read, not assumed:
+  RestAuthAdapter.ts :978-1186, ParseAuthAdapter.ts :387-521, :656-713); the world plays the REST one, as BACKEND does.
+- **The service is part of the world** (THE SERVICE): made by the first node that reaches `forScope` — the User at its
+  mount, a Set User Properties at its frame end; it reads a stored session when made; its BRIDGE writes the active
+  backend's session into the record store at every `sessionChanged`; and it makes a **start-up check** when made with a
+  session — the service's call, on no node's trace, landing never before 1 ms. When that check FAILS, the service clears
+  the Parse-wire store and announces `sessionLost` (userservice.ts :147-158) — the source of rows C45 and C46.
+- **The refusal before the wire** — `Nobody is signed in.` with no session — is the REST adapter's (and the Parse
+  adapter's, ERG-001 made them one sentence): answered at once, inside the call; recorded, never a violation.
+- Not played, named in world.ts: the token lifecycle (refresh timers, cross-tab), the Parse-wire auth adapter, the
+  service's `current` model (no node specced reads it), the provider return leg.
+
+**The runtime target (`installAuth`):** a FRESH real `UserService` per play behind `Services.UserService.forScope`
+(the module's own process-wide assignment undone at load — found by `runtime-target.test.ts`, whose "User cannot mount
+without a world" ratchet went green by accident when the module was first loaded); the REST auth adapter's two
+operations stood in (`AUTH_OPS`): the call recorded as handed, the landing's steps through the adapter's real store and
+`emitAuthEvent`; the constructor's own `fetchCurrentUser` routed to `startService` (unattributed). The args are read AT
+THE CALL (the adapter builds its body there; the node's held properties are one live object). Sessions are written into
+the play's storage under the REST adapter's key by `installUser`.
+
+**User (`net.noodl.user.User`) CONFORMS on the runtime: 25 / 26 scenarios (the 26th is row C48, known), 200 / 200
+(seed 20728; 24 generated divergences attributed to C48), 91 / 91 mutants** — on seeds 20728 and 20729 (82 / 82 on 13).
+One mutant was first DECLARED equivalent (the Backend reducer's quiet branch swapped with its sibling: "a repeat write of
+the Backend the node holds") — and the 10,000 deep run killed it: a switch to ANOTHER account in between makes the
+sibling's last example an older Backend. The declaration is gone; a three-backend hand scenario kills it at 200. First runtime play: 18 of 20 hand scenarios identical; the two that were not were both C48.
+Spec `src/nodes/user.ts` — Record's twin for the signed-in account: the four session events, the Backend picker (an id
+the project lacks: nobody, and a Fetch fails with the service's sentence, no call), Run On Value Change (`User
+properties`), Roles (a real list only), the three session signals and the property outputs as derived outputs.
+**Set User Properties CONFORMS: 12 / 12, 200 / 200, 25 / 25 mutants** — first run identical on all twelve. Both green
+on the interpreter on seeds 13 and 20728 (batch-records.test.ts), with AC5 (every failure sentence on Error beside a
+Failure) and AC6 (a not-configured Backend makes no call, beside scenarios that make one).
+
+**Two interpreter holes the User's mutants found:**
+- **A write made elsewhere reached the registry only when some node listened to the store** (s24 subscribed in
+  `listenToStore`). A User watching its record never heard a save made elsewhere on the interpreter — the runtime always
+  writes it. The world is now subscribed once per world at its first mount (`hearWritesMadeElsewhere`): the write lands
+  whoever listens, the store's listeners hear the event as before, then every instance hears what changed on records it
+  watches. Found by two `world.auth` mutants that only such a write could kill.
+- **AC5's own gate caught a scenario of mine that graded nothing** ("a Fetch that fails with no message" answered at
+  +4 ms and never advanced the clock) — a green that would have said the fallback sentence was graded.
+
+**Reach:** the generated sequences draw one of nine backend worlds (sessions or none, the check failing two ways, two
+backends with two accounts, roles); the session-loss paths, the backend switch onto the same account and the writes made
+elsewhere are the hand scenarios' — each mutant they alone kill is named above.
+
+### 6.17 Rows (s26)
+
+| row | node | what the trace shows | proposed |
+|---|---|---|---|
+| **C45** | the user service (every User node) | a page-load check that fails (503, network) clears the PARSE-WIRE store, not the REST backend's: Session Lost fires and the user stays signed in (Authenticated true, the session still stored); the legacy session (USER) goes too. Measured on the real service + adapter. Ledger `p107-c45-…` | clear the active adapter's store, and only when the backend rejected the session — the adapter already announces that |
+| **C46** | the user service | a session rejected at page load: Session Lost **twice** (the adapter's, then the service's). Ledger `p107-c46-…` | one announcement — ask with C45 |
+| **C47** | User | an ended session sends nothing for Id / Email / Username / the properties (`undefined` is never sent, CONTRACT C3; the properties are not even flagged): every wire keeps the person who left. Ledger `p107-c47-…` | send an explicit empty value — needs "what is empty" ruled |
+| **C48** | User | `<field> Changed` is offered by the editor and never registered (C11 / C37's twin). Known row. Ledger `p107-c48-…` | register `changed-` beside `prop-` — ask with C11 + C37 |
+| **C49** | User (via the service) | Roles is a fresh array on every session read, so a Fetch that changes nothing pulses Changed three times (bridge, `sessionGained`, success). Ledger `p107-c49-…` | write a list only when its content differs — the R7 family |
+| **D23** | Set User Properties | Username is dropped by the REST adapter (measured: the body carried Email and the properties, not `zed`); the node says Done. Ledger `p107-d23-…` | say so on the port, or refuse with a sentence on a REST backend |
+
+### 6.18 Gate readings (s26, 2026-10-02; load 3–14 — a busy box, no peer suite)
+
+| gate | reading |
+|---|---|
+| runtime: `NSP_ONLY=net.noodl.user.User` at 200 | **CONFORMS** 25 / 26 (C48 known), 200 / 200, **91 / 91** on seeds 20728, 20729 (82 / 82 on 13) |
+| runtime: `NSP_ONLY=net.noodl.user.SetUserProperties` at 200 | **CONFORMS** 12 / 12, 200 / 200, **25 / 25** on seeds 20728, 20729 |
+| runtime deep, `NSP_DEEP=10000`, both | **both CONFORM**: 10,000 / 10,000, 0 divergences; User 1,150 → C48, 91 / 91 (it killed the mutant declared equivalent — §6.16); SUP 25 / 25 |
+| runtime: the WHOLE `conformance.test.ts` under load 8–14 | **not a clean reading** — 957 s against the 600 s `beforeAll`: hook-timeout reds that grade nothing. Its log: **71 specs CONFORM** (User and SUP among them), the three last in registry order never reported → re-read alone: Pattern Extractor, Text Accumulator, Stream Buffer CONFORM. Every one of the 73 specs read CONFORMS |
+| runtime: `runtime-target.test.ts` + `graph.test.ts` | **96 passed** (after the `userservice` module's global assignment was undone — the first full run read "User mounts without a world") |
+| `nodegx-node-spec`: `npx jest` | **18 suites, 729 passed, 17 skipped, exit 0** (s25: 717) — the hash gate green after the refresh, which named exactly `src/spec.ts` and `src/world.ts`; the three stranger rounds green |
+| `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
+| `node scripts/node-spec/census.js` | 147, all tiered; two `placesWritten` counts moved (the new specs name the nodes) |
+| `node scripts/bugs.js check` | my six files valid; 3 problems, all P109's (a peer's file names) |
 | export, `test:main` | NOT RUN — no export code touched |

@@ -91,10 +91,19 @@ import { isRegistryEntry } from './registry';
 import type { AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, ReducerOutcome, SignalOutputDecl, SpecBackendCall, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
-import { backendEvent, installTimeZone, locationEvent, openReturnsWindow, pushTarget, World, writeStoreEvent, type Delivery, type LocationCall, type PopupCall, type PopupEvent, type StoreEvent } from './world';
+import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PopupCall, type PopupEvent, type StoreEvent } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
-type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'backend'; answer: BackendAnswerEvent } | { kind: 'resize' } | { kind: 'page'; params: Readonly<Record<string, unknown>> } | { kind: 'popup'; event: PopupEvent } | { kind: 'store'; event: StoreEvent };
+type Inbound =
+  | { kind: 'timer'; tag: string }
+  | { kind: 'response'; response: WorldResponse }
+  // s26: an AUTH call's answer carries the call and the session at the call — its landing runs the adapter's steps (world.ts AUTH)
+  | { kind: 'backend'; answer: BackendAnswerEvent; auth?: { op: string; backend: string; args: Readonly<Record<string, unknown>>; atCall: Readonly<Record<string, unknown>> | undefined; delivery: BackendDelivery } }
+  | { kind: 'resize' }
+  | { kind: 'page'; params: Readonly<Record<string, unknown>> }
+  | { kind: 'popup'; event: PopupEvent }
+  | { kind: 'store'; event: StoreEvent }
+  | { kind: 'auth'; event: AuthNotice };
 
 interface OutcomeSlot {
   port: string;
@@ -242,8 +251,77 @@ function viewOf(inst: Instance): WorldView {
     popupAnswer: (target) => world.popup.answer(target),
     popupsInside: () => world.popup.inside,
     backendFor: (backendId) => world.backend.resolve(backendId),
-    backendUser: () => world.backend.user
+    backendUser: () => world.backend.user,
+    session: (backend) => world.backend.session(backend),
+    userService: () => startUserService(world)
   };
+}
+
+/**
+ * NSP-014 s26 — the world's user service as the interpreter plays it (world.ts AUTH, THE SERVICE): every instance of a
+ * world (for the bridge's record write — its watchers hear it at once, in mount order) and the instances that listen to
+ * the session events (a spec that needs `backend` and has `world.auth`), in mount order.
+ */
+const worldInstances = new WeakMap<World, { all: Instance[]; auth: Instance[] }>();
+function instancesOf(world: World): { all: Instance[]; auth: Instance[] } {
+  let entry = worldInstances.get(world);
+  if (!entry) {
+    worldInstances.set(world, (entry = { all: [], auth: [] }));
+    hearWritesMadeElsewhere(world, entry.all);
+  }
+  return entry;
+}
+
+/** One step of an auth landing, as the interpreter performs it (world.ts AUTH): the world's sessions already moved; `callback` is the caller's success / error. */
+function performAuth(world: World, step: AuthStep, callback: (step: AuthStep) => void): void {
+  if (step.do === 'success' || step.do === 'error') return callback(step);
+  if (step.do !== 'event') return; // a write / clear moved the world's sessions already; USER is the world's (`clear-legacy`)
+  const { all, auth } = instancesOf(world);
+  if (step.type === 'sessionChanged') {
+    // THE BRIDGE — the active backend's session handed to the record store; no instance is the writer: every watcher hears it
+    const session = world.backend.session(world.backend.ids[0]);
+    if (session === undefined) return;
+    const previous = currentWriter;
+    currentWriter = undefined;
+    try {
+      writeStoreEvent(world.registry, userRecordEvent(session));
+    } finally {
+      currentWriter = previous;
+    }
+    for (const i of [...all]) deliverChanges(i);
+    return;
+  }
+  for (const i of [...auth]) handleInbound(i, { kind: 'auth', event: { type: step.type, backend: step.backend } });
+}
+
+/**
+ * NSP-014 s26 — THE START-UP CHECK (world.ts AUTH): made by the first reach of the service; its answer lands on the clock
+ * (a world timer, never before 1 ms). At the landing, as at a store event, every instance's inbox is delivered first (what
+ * already landed runs before the next timer fires), then the adapter's steps, and — when it failed — the service's.
+ */
+function startUserService(world: World): void {
+  if (world.backend.serviceStarted) return;
+  const backend = world.backend.ids[0];
+  const atCall = world.backend.session(backend);
+  // userservice.ts :143-144 — a stored session is read into `current` when the service is made: the record store's write
+  if (atCall !== undefined) {
+    const previous = currentWriter;
+    currentWriter = undefined;
+    try {
+      writeStoreEvent(world.registry, userRecordEvent(atCall));
+    } finally {
+      currentWriter = previous;
+    }
+    for (const i of [...instancesOf(world).all]) deliverChanges(i);
+  }
+  world.backend.startService((d: BackendDelivery) => {
+    for (const i of [...instancesOf(world).all]) deliver(i);
+    world.backend.landAuth('fetchCurrentUser', backend, {}, atCall, d, (step) =>
+      performAuth(world, step, (s) => {
+        if (s.do === 'error') world.backend.serviceCheckFailed((t) => performAuth(world, t, () => undefined));
+      })
+    );
+  });
 }
 
 /**
@@ -255,25 +333,32 @@ function viewOf(inst: Instance): WorldView {
 const storeListeners = new WeakMap<World, Instance[]>();
 function listenToStore(inst: Instance): void {
   let list = storeListeners.get(inst.world);
-  if (!list) {
-    const instances: Instance[] = [];
-    list = instances;
-    storeListeners.set(inst.world, instances);
-    const world = inst.world;
-    world.backend.onStoreEvent((event) => {
-      // an event loop runs what already landed (the answers in the inbox) before the next timer fires (world.ts CLOCK)
-      for (const i of [...instances]) deliver(i);
-      const previous = currentWriter;
-      currentWriter = undefined;
-      try {
-        writeStoreEvent(world.registry, event);
-      } finally {
-        currentWriter = previous;
-      }
-      for (const i of [...instances]) handleInbound(i, { kind: 'store', event });
-    });
-  }
+  if (!list) storeListeners.set(inst.world, (list = []));
   list.push(inst);
+}
+
+/**
+ * s26 — the world's writes made elsewhere reach the REGISTRY whoever listens to the store (s24 subscribed only once a
+ * store listener was mounted, so a User node watching its record never heard a save made elsewhere — found by the User's
+ * mutants, which a write from elsewhere was the only way to kill): subscribed ONCE per world, at its first mount. At the
+ * firing every instance's inbox is delivered first (CLOCK: what already landed runs before the next timer), the write
+ * lands in the registry (no instance is the writer), the store's listeners are handed the event in mount order, and then
+ * every instance hears what the write changed on the records it watches.
+ */
+function hearWritesMadeElsewhere(world: World, all: Instance[]): void {
+  world.backend.onStoreEvent((event) => {
+    const listeners = storeListeners.get(world) ?? [];
+    for (const i of [...all]) deliver(i);
+    const previous = currentWriter;
+    currentWriter = undefined;
+    try {
+      writeStoreEvent(world.registry, event);
+    } finally {
+      currentWriter = previous;
+    }
+    for (const i of [...listeners]) handleInbound(i, { kind: 'store', event });
+    for (const i of [...all]) deliverChanges(i);
+  });
 }
 
 export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World()): Instance {
@@ -317,6 +402,10 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
   (inst as { view: WorldView }).view = viewOf(inst);
   // s24: a node that watches the store hears the writes made elsewhere (spec.ts `WorldHandlers.store`)
   if (spec.world?.store && spec.needs?.includes('backend')) listenToStore(inst);
+  // s26: every instance is in its world's list (the bridge's record write); a listener of the session events in the other
+  const mine = instancesOf(world);
+  mine.all.push(inst);
+  if (spec.world?.auth && spec.needs?.includes('backend')) mine.auth.push(inst);
   // the part of the initial state the world supplies (spec.ts `init`) — drawn at mount, before the params
   if (spec.init) {
     const initial = asWriter(inst, () => spec.init!(inst.view, frozenParams));
@@ -613,7 +702,9 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     const c = patch.backend;
     if (typeof c.id !== 'string') throw new SpecError(`${spec.type}.${port}: a backend call needs an id`);
     const call = { op: c.op, backend: c.backend, args: c.args };
-    world.backend.issue(call, (d) => inst.inbox.push({ kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent }));
+    // s26: an AUTH call keeps the session its backend held at the call — the REST adapter merges an answer over that
+    const auth = isAuthOp(c.op) ? { op: c.op, backend: c.backend, args: c.args, atCall: world.backend.session(c.backend) } : undefined;
+    world.backend.issue(call, (d) => inst.inbox.push(auth ? { kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent, auth: { ...auth, delivery: d } } : { kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent }));
     inst.pending.requests.push(backendEvent(call));
   }
   // LOCATION (world.ts): only with a window — a spec reads `viewport()` first, as a node checks `typeof window`
@@ -702,6 +793,17 @@ function handleInbound(inst: Instance, item: Inbound): void {
     name = 'world.popup';
     if (!spec.world?.popup) throw new SpecError(`${spec.type}: the person did something to a popup and the spec has no world.popup handler`);
     patch = asWriter(inst, () => spec.world!.popup!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'backend' && item.auth) {
+    // s26 — an AUTH answer: the adapter's steps in their order (world.ts AUTH), the caller's own answer among them
+    const a = item.auth;
+    inst.world.backend.landAuth(a.op, a.backend, a.args, a.atCall, a.delivery, (step) =>
+      performAuth(inst.world, step, () => handleInbound(inst, { kind: 'backend', answer: item.answer }))
+    );
+    return;
+  } else if (item.kind === 'auth') {
+    name = 'world.auth';
+    if (!spec.world?.auth) throw new SpecError(`${spec.type}: a session event reached it and the spec has no world.auth handler`);
+    patch = asWriter(inst, () => spec.world!.auth!(inst.state as never, inst.inputs as never, item.event, view));
   } else if (item.kind === 'backend') {
     name = 'world.backend';
     if (!spec.world?.backend) throw new SpecError(`${spec.type}: a backend answered and the spec has no world.backend handler`);

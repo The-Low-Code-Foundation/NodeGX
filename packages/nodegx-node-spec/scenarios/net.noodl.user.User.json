@@ -1,0 +1,1093 @@
+[
+  {
+    "name": "Nobody signed in: Authenticated is false and nothing else is sent — and the service makes no check",
+    "because": "user.ts :116 → userservice.ts :141-160 (no stored session, no check); :280-288",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "Signed in when the page loads: the session's user, read at mount",
+    "because": "user.ts :116, :353-379 → userservice.ts currentFor :489-510",
+    "params": {},
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "The start-up check agrees with the session: nothing moves when it lands",
+    "because": "world.ts AUTH (THE START-UP CHECK) — the adapter's write, sessionChanged (the bridge's write: no key differs), sessionGained (a re-read)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1",
+                "nick": "Ann"
+              }
+            },
+            "after": 5
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "C48 — the start-up check brings a moved field: its <field> Changed, Changed, and the property output — the runtime never pulses <field> Changed",
+    "because": "world.ts AUTH — the bridge writes the active backend's session into the record store; the node is bound to it (:103-112). user.ts :447-463 registers prop- and the three session signals, never changed- (C37's twin)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1",
+                "nick": "Annie"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "row": "NSP-014 §6.17 C48"
+  },
+  {
+    "name": "The start-up check brings a moved field no output is wired to: Changed",
+    "because": "world.ts AUTH — the bridge's write; user.ts :111 pulses Changed for any key",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1",
+                "bio": "moved"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "C45 — the backend is down when the page loads (503): Session Lost fires and the user stays signed in",
+    "because": "userservice.ts :147-158 — the service clears the Parse-wire store, not this backend's; the session survives, Authenticated stays true (NSP-014 §6.17 row C45)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "error": "HTTP 503: {}"
+            },
+            "after": 2
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "C46 + C47 — the backend rejects the session when the page loads (401): Session Lost TWICE, Authenticated false, and Id / Email / Username / the properties keep the user who left",
+    "because": "RestAuthAdapter.ts :1177-1186 then userservice.ts :147-158 (two sessionLost); user.ts :375 — nothing is sent for an ended session, and undefined is never sent (CONTRACT C3)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "error": "Token expired.",
+              "lost": true
+            },
+            "after": 3
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Fetch with nobody signed in: the call is made and refused at once — Nobody is signed in., Failure",
+    "because": "user.ts :409-424 → RestAuthAdapter.ts :1150-1155 (world.ts AUTH, the refusal before the wire)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "Two Fetches in one frame: one call, the record re-read (two keys moved: Changed twice), Fetched once, two Dones",
+    "because": "user.ts :396-426 — scheduleOnce, one token per press; :414-420",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1",
+                "bio": "moved",
+                "city": "Lund"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Fetch that changes nothing: Fetched and Done, no Changed",
+    "because": "user.ts :414-420; the bridge's write differs in no key",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1",
+                "nick": "Ann"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Fetch the backend fails (503): Error, Failure — still signed in",
+    "because": "user.ts :421-423; RestAuthAdapter.ts :1177-1188 (no lost: the session stays)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "error": "HTTP 503: {}"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Fetch that fails with no message: Failed to fetch.",
+    "because": "user.ts :422",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "error": null
+            },
+            "after": 4
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "C47 — a Fetch whose session the backend rejects: Authenticated false, Session Lost once, Error, Failure — Id / Email / Username / the properties keep the user who left",
+    "because": "RestAuthAdapter.ts :1177-1186 (clear, sessionLost, then the error); user.ts :145-148, :375",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "error": "Token expired.",
+              "lost": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Fetch while an earlier one is out is a second call; each settles its own press",
+    "because": "user.ts :404-407 — the batch taken into a local before the call",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1",
+                "bio": "late"
+              }
+            },
+            "after": 10
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "User properties unticked: a Fetch that moves nick re-sends it and pulses no Changed",
+    "because": "user.ts :105 — the watcher returns; :376-378 the re-read still sends every property",
+    "params": {
+      "runOnChange-user": false
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1",
+                "nick": "Annie"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Backend names another backend: that backend's account, and a Fetch goes there",
+    "because": "user.ts :436-446, :388-395 → userservice.ts :199-215 (two backends, two sessions)",
+    "params": {
+      "backendId": "other"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          },
+          "other": {
+            "objectId": "u9",
+            "email": "otto@example.com",
+            "nick": "Otto"
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser",
+              "backend": "other"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u9",
+                "bio": "Otto's"
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Backend names one the project does not have: nobody — and a Fetch fails with the sentence, no call",
+    "because": "userservice.ts :199-203, :228-231, :270-277",
+    "params": {
+      "backendId": "gone"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Backend switched while running: the other account at once, and back",
+    "because": "user.ts :441-444 — the setter re-reads",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      "settle",
+      {
+        "set": "backendId"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          },
+          "other": {
+            "objectId": "u9",
+            "email": "otto@example.com",
+            "nick": "Otto"
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Error is kept after a later Fetch succeeds",
+    "because": "user.ts :337-345 — nothing clears it",
+    "params": {
+      "backendId": "gone"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "_active_"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1",
+                "bio": "moved"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Roles: a real list — and a fresh one on every read, so a Fetch that returns the same roles still pulses Changed",
+    "because": "user.ts :246-261; the store is JSON parsed on every read (SessionStore.ts), and the record store's !== calls a new array changed",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1,
+            "roles": [
+              "editor"
+            ]
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1",
+                "roles": [
+                  "editor"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A session holding roles that are not a list: Roles is not set",
+    "because": "user.ts :256-259 — only a real list passes",
+    "params": {},
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1,
+            "roles": "editor"
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "C45 — after a 503 at load the node still shows the user AND still hears a write made elsewhere",
+    "because": "userservice.ts :147-158 then user.ts :145-148 — the re-read binds the same record (bound unchanged, still watched); :103-112",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 2
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1,
+            "bio": "main"
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "error": "HTTP 503: {}"
+            },
+            "after": 2
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "_User",
+            "objectId": "u1",
+            "data": {
+              "bio": "written elsewhere"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A lost session, then the same account on another backend: bound afresh, and a write made elsewhere is heard",
+    "because": "user.ts :145-148 (unbound, unwatched), :441-444 then :356-364 (bound and watched again)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1,
+            "bio": "main"
+          },
+          "other": {
+            "objectId": "u1",
+            "bio": "other"
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser",
+              "backend": "main"
+            },
+            "answer": {
+              "error": "Token expired.",
+              "lost": true
+            }
+          },
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "_User",
+            "objectId": "u1",
+            "data": {
+              "bio": "written elsewhere"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "The same account on two backends, User properties unticked: switching writes the other session's fields and pulses no Changed",
+    "because": "user.ts :441-444 → currentFor writes the bound record; :105 the watcher returns",
+    "params": {
+      "runOnChange-user": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1,
+            "bio": "main"
+          },
+          "other": {
+            "objectId": "u1",
+            "bio": "other"
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "The same account on two backends, ticked: switching writes the other session's fields — Changed (the node hears its own write)",
+    "because": "user.ts :441-444 → currentFor writes the bound record, and the node's own listener hears it (:103-112)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1,
+            "bio": "main"
+          },
+          "other": {
+            "objectId": "u1",
+            "bio": "other"
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Backend re-written while the record it reads is re-read: the Fetch goes to the Backend held NOW (three backends, two accounts)",
+    "because": "user.ts :441-444 — the setter stores the value as it arrives; :409-411 the Fetch reads it at the frame end. A switch to another account in between makes the last same-account switch an OLDER value",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "spare"
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "_active_"
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "_active_"
+      },
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other",
+          "spare"
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u2",
+            "roles": [
+              "a"
+            ]
+          },
+          "other": {
+            "objectId": "u1",
+            "roles": [
+              "b"
+            ]
+          },
+          "spare": {
+            "objectId": "u1",
+            "roles": [
+              "b"
+            ]
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  }
+]

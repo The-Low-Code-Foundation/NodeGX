@@ -1,76 +1,76 @@
 # P107 — next session
 
-**Written 2026-10-02 (end of s25).** Read the [README](README.md) §2–§7. s25's record is [NSP-014 §6.13–§6.15](NSP-014-BATCH-DATA-AND-CLOUD.md);
-the new step value (`{ "$array": name }`) is in the contract at the top of [adapter.ts](../../../packages/nodegx-node-spec/src/adapter.ts).
+**Written 2026-10-02 (end of s26).** Read the [README](README.md) §2–§7. s26's record is [NSP-014 §6.16–§6.18](NSP-014-BATCH-DATA-AND-CLOUD.md);
+the world's twelfth seam, AUTH, is the header of [world.ts](../../../packages/nodegx-node-spec/src/world.ts) (after BACKEND).
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 the census | ✅ s1; s21 the `NSP-022` batch | `3bd71e837`, s21 |
-| NSP-001 the spec + interpreter | ✅ s1 … s24; **s25: the interpreter answers `registryArray(name)`** | s1 … s25 |
-| NSP-002 traces + adapter + runtime target | ✅; **s25: a scenario value `{ "$array": name }` is that registry array (`play` resolves it, `registryArray` on both targets); `canonicalise` builds a plain array always; T13 (the session store made before the world) fixed** | s2 … s25 |
-| NSP-003 the runner | ✅; s24 `wrapReducers` | s2 … s24 |
+| NSP-001 the spec + interpreter | ✅ s1 … s25; **s26: `WorldView.session` / `userService`, `world.auth`; a write made elsewhere reaches the registry whoever listens** | s1 … s26 |
+| NSP-002 traces + adapter + runtime target | ✅; **s26: `installAuth` — a fresh real `UserService` per play, the REST auth adapter's two operations stood in** | s2 … s26 |
+| NSP-003 the runner | ✅; s24 `wrapReducers`; **s26 `world.auth` in it** | s2 … s26 |
 | NSP-004 the pilot five | ✅ s3 | `ef6f3b6e1` |
 | NSP-005 the export adapter | ✅ (s13); plays the latch nodes only | s13, s15 |
-| NSP-006 the stranger | ✅ rounds 1, 2, 3, 3b — s25 refreshed the hashes (exactly adapter.ts, canonical.ts), the three rounds green | `fec895706`, s21, s22, s24, s25 |
-| NSP-007 the world | ✅; BACKEND (s21) + `detail` + USER (s22) + `events` (s24); AC1's export half ✗ | s13, s16 … s24 |
-| NSP-008 the graph | ✅ — **70 / 70** (s25: +4 in `s09-the-filter-follows.json`, two of them rows) | s15, s20, s23 … s25 |
+| NSP-006 the stranger | ✅ rounds 1, 2, 3, 3b — s26 refreshed the hashes (exactly spec.ts, world.ts), the three rounds green | `fec895706`, s21 … s26 |
+| NSP-007 the world | ✅; BACKEND (s21) + `detail` + USER (s22) + `events` (s24) + **AUTH (s26)**; AC1's export half ✗ | s13, s16 … s26 |
+| NSP-008 the graph | ✅ — 70 / 70 | s15, s20, s23 … s25 |
 | NSP-010 a change is a version | rows only (two holes, §4) | — |
 | NSP-011 / NSP-012 | as s15 | s15 |
 | NSP-013 the time batch | 🟡 24 / 24 conform. Left: AC2, the deep run for s11–s14 | s16 |
-| **NSP-014 records, users, files, HTTP** | **🟡 9 of 24 — s25: Filter Records (T1 now 46 / 46); rows C42, C43, C44** | s8, s21 … s25 |
+| **NSP-014 records, users, files, HTTP** | **🟡 11 of 24 — s26: User, Set User Properties; rows C45–C49, D23** | s8, s21 … s26 |
 | NSP-015 navigation + components | 🟡 14 of 14 conform. Left: AC2 (export, P18) | s15 … s20 |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 opened s21 (needs a second runtime target, `noodl-viewer-cloud`) | s21 |
 | NSP-009, NSP-016 … NSP-019, NSP-021 | — | — |
 
-**91 of 147 conform on the runtime (61.9%)** (T1 **46/46** · T2 10/11 · T3 8/39 · T4 27/27; 0 exempt). Graph 70 / 70.
+**93 of 147 conform on the runtime (63.3%)** (T1 46/46 · T2 10/11 · T3 10/39 · T4 27/27; 0 exempt). Graph 70 / 70.
 
 ## Commits this session (on `cline-dev`)
 
-- the s25 commit — Filter Records (spec, 30 scenarios, graph s09), the `$array` step value, the canonical fix, T13, the
-  known rows C10 / C43 / C44, ledger C42–C44 (+ C10 names Filter Records), NSP-014 §6.13–§6.15, README, this handoff.
+- the s26 commit — the AUTH seam (world.ts, spec.ts, interpreter.ts, mutants.ts, the runtime target), User and Set
+  User Properties (specs, 25 + 12 scenarios), the store-write hole, the batch-records and conformance gates, ledger
+  C45–C49 + D23, NSP-014 §6.16–§6.18, README, census, this handoff.
 
 ## Gate readings
 
-NSP-014 §6.15. In short: the WHOLE runtime conformance suite twice (s24's NOT RUN closed at the start; again after the
-changes): exit 0, 72 specs CONFORM, the survivor set identical; Filter Records CONFORMS at 200 on seeds 20728 / 20729 /
-20730 (157 / 157 mutants each) and at 10,000 (§6.15); package jest 18 suites / 717 passed; runtime-target + graph 96
-passed; both `tsc` exit 0; census fresh.
+NSP-014 §6.18. In short: User and Set User Properties CONFORM at 200 (two seeds) and at 10,000; every one of the 73 specs
+reads CONFORMS (the whole suite overran its `beforeAll` under load — the three unreported re-read alone); package jest
+729 passed; both `tsc` exit 0. **A mutant declared equivalent was killed at 10,000** — declarations are hypotheses; the deep
+run grades them.
 
-## What s25 settled (and where the handoff was wrong)
+## What s26 settled (and where the handoff was right)
 
-1. **"`events` or `change`?" — both.** Filter Records listens for the store's `save` on ONE store and for its bound
-   array's `change`. The world's `events` serve the first as built; the second is graph-only (s09).
-2. **It is deaf to saves unless its Backend was written — row C42**, and the picker is hidden with one backend. Measured
-   with a control pair that differs in that one parameter. The spec states it as the runtime does.
-3. **A single-node play could not hand a node records.** Plain JSON rows fail the matcher (`model.get is not a function`);
-   `{ "$array": name }` is now a step value every target resolves against the world's registry.
-4. **Two holes the new scenarios exposed:** T13 (a process-wide `SessionStore` made inside the first play drew from the
-   world's stream: green alone, red in a full run) and `canonicalise` keeping an Array subclass through `.map`. Both fixed.
-   **A probe that reads `new Error().stack` under jest draws from the world's stream itself** (source-map's quick-sort,
-   T8) — diff draws with raw call sites (`Error.prepareStackTrace = (_e, cs) => cs`).
-5. **Reach, measured again:** 0 of 400 generated sequences re-run Filter Records on a save. The 14 hand scenarios are the
-   store path's 200-gate.
+1. **The seam is the operation (R9) plus the SESSION.** The handoff said "find the AUTH contract first" — right: it is
+   `IAuthAdapter` (+ `setUserProperties` beside it), and a call is an ordinary `backend` event. What it did not say: a
+   user node SHOWS the session, read through the viewer's `UserService`, and every read is a registry write. So the
+   world holds sessions, a landing is the REST adapter's ordered steps, and the SERVICE is part of the world (its bridge,
+   its read when made, its start-up check). Probe first, with the REAL service and adapter and only HTTP scripted.
+2. **The service's start-up check is where the defects are** — C45 (a 503 says Session Lost while signed in: it clears
+   the Parse-wire store on a REST project) and C46 (Session Lost twice). C47 (sign-out leaves Email / Username / Id on the
+   wires) is CONTRACT C3 meeting `setUserModel(undefined)`.
+3. **Loading `userservice.ts` assigns `Services.UserService` process-wide** — the runtime target undoes it at load; the
+   service exists only inside a play.
+4. **A world write must not depend on who listens** — the interpreter wrote a write made elsewhere only when a store
+   listener existed. Fixed; found by mutants only that write could kill.
 
-## What s26 does
+## What s27 does
 
-- **The user nodes** — the next by reach (task file §2): **User** (`net.noodl.user.User`, runtime
-  `std-library/user/user.ts`, 569 lines) and **Set User Properties** (runtime), then **Log In / Sign Up / Log Out /
-  Request Magic Link / Sign In With** (viewer, `noodl-viewer-react/src/nodes/std-library/user/`). Read `user.ts` whole
-  first and decide the seam: R9's rule ("the request, not the wire") says the trace carries the AUTH contract's operation
-  as the node hands it — find that contract (`@noodl/backend-contract`, the auth adapter) before writing a world. The
-  world already has `backend.user` (s22, the signed-in user as the access rules read it); a Log In CHANGES it — a session
-  seam, probably USER grown, measured against what `SessionStore` does (T13's store).
-- Then the files (Cloud File, Upload File, Sign File URL, Open File Picker), then WebSocket / SSE / Subscribe To Changes.
+- **Log In, Sign Up, Log Out** (viewer, `noodl-viewer-react/src/nodes/std-library/user/`) — `logIn` / `signUp` / `logOut`
+  join `AUTH_OPS` (world.ts `landAuth`: logIn ok → write the answer, `sessionChanged`, success, `loggedIn`; logOut →
+  REST: cleared WHATEVER the backend says, then success, `loggedOut`; signUp → REST signs in after, read
+  RestAuthAdapter.ts :1087-1142 first). Then the graph the user family needs: `s10` — a Log In / Set User Properties
+  writing, a User watching (Logged In, the bridge, D23 on the wire, C47 after a Log Out). Record it in a FULL graph run.
+- Then **Request Magic Link, Sign In With** (a navigation away — the LOCATION seam), then the files, then WebSocket / SSE /
+  Subscribe To Changes.
 - **Cheap, alongside, on a QUIET box only:** the deep runs s20 listed (clock-driven specs under T9, Pop Component Stack,
   s11–s14 at `NSP_DEEP=10000`).
 
 **Human decisions outstanding:** rows to ask, in plain words (README §7 has them written): **C27 + C29 together** (one ruling:
 "hand a copy"), then **C30**, **C26**, **C24**, C31, C32, C28, C25, D20, D21; then C22, D19 (second half), C11 **with C37**,
 C12, C15, C16, C20, C7, D14, D16; the Record family: C34, C36, C35, C33, D22; Query Records: C38, C39, C40 + C41 together;
-**Filter Records: C42 (the one an author meets), C44, C43** (`node scripts/bugs.js --from P107`); R7; R8; R4's
+**Filter Records: C42 (the one an author meets), C44, C43**; **the user nodes: C47 (the one an author meets), C45 + C46 together, C48 (with C11 + C37), C49 (with R7), D23** (`node scripts/bugs.js --from P107`); R7; R8; R4's
 confirmation; G1.
 
 ## Before you start

@@ -56,6 +56,8 @@ import { UpdateRecord } from './update-record';
 import { RecordNode } from './record';
 import { QueryRecords } from './query-records';
 import { FilterRecords } from './filter-records';
+import { UserNode } from './user';
+import { SetUserProperties } from './set-user-properties';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
 import { JSONStreamParser } from './json-stream-parser';
@@ -148,6 +150,8 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [RecordNode.type]: RecordNode, // s23
   [QueryRecords.type]: QueryRecords,
   [FilterRecords.type]: FilterRecords, // s25
+  [UserNode.type]: UserNode, // s26 (the world's AUTH seam)
+  [SetUserProperties.type]: SetUserProperties,
   [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
@@ -214,6 +218,8 @@ export {
   RecordNode,
   QueryRecords,
   FilterRecords,
+  UserNode,
+  SetUserProperties,
   States,
   RandomBytes,
   Repeat,

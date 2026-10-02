@@ -195,6 +195,14 @@ export interface WorldView {
   backendFor(backendId: unknown): string | undefined;
   /** NSP-014 s22 — the id of the user signed in, as the Record family's access rules read it (world.ts BACKEND, USER); `undefined`: nobody. */
   backendUser(): string | undefined;
+  /** NSP-014 s26 — what `backend`'s session store holds now (world.ts AUTH): the signed-in user's fields, flat; `undefined`: nobody is signed in there. */
+  session(backend: string): Readonly<Record<string, unknown>> | undefined;
+  /**
+   * NSP-014 s26 — reaches the app's user service (world.ts AUTH, THE SERVICE): the first reach in a play MAKES it, and with
+   * it the start-up check when the active backend holds a session. Idempotent. A node calls it where its runtime code first
+   * reaches `UserService.forScope`.
+   */
+  userService(): void;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -597,6 +605,12 @@ export interface WorldHandlers<S, I, O> {
    * whether the node watches that backend's store is the spec's (a store a node never bound tells it nothing).
    */
   store?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').StoreEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-014 s26 — a session event reached the user service's listeners (world.ts AUTH): `loggedIn`, `loggedOut`,
+   * `sessionGained` or `sessionLost`, at the step of the landing that raised it. Every instance of a spec that needs
+   * `backend` and has this handler hears every one, in mount order, whichever backend raised it.
+   */
+  auth?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').AuthNotice, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -782,6 +796,7 @@ export interface AnyNodeSpec {
     popup?: (state: never, inputs: never, event: import('./world').PopupEvent, world: WorldView) => unknown;
     backend?: (state: never, inputs: never, answer: BackendAnswerEvent, world: WorldView) => unknown;
     store?: (state: never, inputs: never, event: import('./world').StoreEvent, world: WorldView) => unknown;
+    auth?: (state: never, inputs: never, event: import('./world').AuthNotice, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

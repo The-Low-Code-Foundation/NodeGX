@@ -252,6 +252,48 @@
  *               `advance` that reaches it, in the order they listened. A listener that is not bound to that backend's
  *               store is the node's business: the world tells every listener, the node keeps the backend it watches.
  *
+ *   AUTH.   (NSP-014 s26; R9 again — "the request, not the wire") Who is signed in, per backend, and the auth operations a
+ *           user node hands its backend: the contract's (`@noodl/backend-contract` `IAuthAdapter`) and the one beside it,
+ *           `setUserProperties` (AUTH_OPS). An auth call is a BACKEND call — recorded as handed (`{ op, backend, args }`, a
+ *           `backend` trace event), answered by the same rules — and every backend here is a REST one (BACKEND), so the
+ *           adapter whose contract-level behaviour the world plays is the REST adapter's (RestAuthAdapter.ts):
+ *             THE SESSIONS — the script's `sessions`: what each backend's session store holds at the start, the user's
+ *               fields flat (`objectId` among them, tokens never); absent, nobody. `session(backend)` reads it NOW.
+ *             THE REFUSAL BEFORE THE WIRE — a `fetchCurrentUser` to a backend holding no session, a `setUserProperties` to
+ *               one holding none or none with an `objectId`: `Nobody is signed in.`, answered at once, inside the call
+ *               (`refused`); recorded, never a violation, no rule read.
+ *             A LANDING — an answer lands as a BACKEND answer does, and then the ADAPTER's steps run in this order
+ *               (`landAuth`; `AuthStep`), each after the world's sessions moved for it:
+ *                 `fetchCurrentUser` ok — the session becomes the one held AT THE CALL with the answer's fields over it;
+ *                   `sessionChanged`; `sessionGained`; then the caller's success (:1170-1176).
+ *                 `fetchCurrentUser` failed with `lost` (the backend rejected the session: 401 / 403) — the session is
+ *                   cleared with NO `sessionChanged`; `sessionLost`; then the caller's error (:1177-1186). Without `lost`
+ *                   (a 5xx, the network) the session stays and only the error lands.
+ *                 `setUserProperties` ok — the session becomes the one held at the call, the answer's fields over it, and
+ *                   what the call wrote over those (`writtenUserFields`: every property, `email` when defined, `username`
+ *                   NEVER, the server-owned fields dropped); `sessionChanged`; the caller's success (:1634-1637). Failed:
+ *                   the error only (`lost` means nothing to a write).
+ *             THE SERVICE — the app's one user service (userservice.ts), made by the first node that reaches it
+ *               (`startService`; the User node at its mount, a Set User Properties at its frame end). When it is made with
+ *               a session on the active backend it reads it (`current`, :143-144: the session handed to the record store,
+ *               as THE BRIDGE below hands it). And it does two things a target that plays it must do too:
+ *                 THE BRIDGE — at every `sessionChanged` it re-reads the ACTIVE backend's session and, when there is one,
+ *                   hands it to the record store (`userRecordEvent`: tokens dropped, `_fromJSON(user, '_User')` — the
+ *                   registry record of its `objectId`, every key but `objectId` / `ACL` written, its watchers notified).
+ *                   The node-facing events (`loggedIn`, `loggedOut`, `sessionGained`, `sessionLost`) reach EVERY listening
+ *                   node, whichever backend raised them (user.ts :136-139: "the signals are still global"), in mount order.
+ *                 THE START-UP CHECK — made when the service is made, if the active backend holds a session: a
+ *                   `fetchCurrentUser` with nothing in its args, the SERVICE's call (no node's — on no trace), answered by
+ *                   the script's first rule for it, landing at its `after` but NEVER BEFORE 1 ms (a page's first frame is
+ *                   drawn before any answer to its load). Its landing is the adapter's steps, and then — when it FAILED,
+ *                   for any reason — the service's own (`serviceCheckFailed`, userservice.ts :147-158): the LEGACY session
+ *                   cleared (USER goes: the service clears the Parse-wire store under the active handle's app id, and a
+ *                   REST handle has none — the legacy store's own key), then `sessionLost`. The backend's own session is
+ *                   NOT cleared by the service (row C45: a 503 at load says Session Lost while the user stays signed in),
+ *                   and a `lost` failure announces `sessionLost` twice (the adapter's, then the service's — row C46).
+ *           Not played: the token lifecycle (refresh timers, cross-tab storage events — RestAuthAdapter's controller), the
+ *           Parse wire's adapter, the service's `current` model (read by no node specced here), the provider return leg.
+ *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
  *   `now()` = `world.clock.now()` · `random()` / `bytes(n)` / `uuid()` = `world.random.next()` /
@@ -317,6 +359,11 @@ export interface BackendScript {
   user?: string;
   /** s24: writes made elsewhere in the app, each heard by the store's listeners at its time (BACKEND above). Absent: none. */
   events?: readonly StoreEventScript[];
+  /**
+   * s26: the session each backend holds when the play starts (AUTH below), by backend id — the signed-in user's fields,
+   * flat, `objectId` among them (the contract's `AuthSession` without its tokens). Absent: nobody is signed in anywhere.
+   */
+  sessions?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
 }
 
 /** BACKEND above (s24): one write made elsewhere in the app — a world timer at `at`. */
@@ -367,7 +414,7 @@ export interface BackendRule {
 }
 
 /** What a backend answers an operation (BACKEND above). */
-export type BackendAnswer = { ok: unknown } | { error: string | null; detail?: Record<string, unknown> } | { never: true };
+export type BackendAnswer = { ok: unknown } | { error: string | null; detail?: Record<string, unknown>; lost?: true } | { never: true };
 
 /** One backend call, as handed (BACKEND above). */
 export interface BackendCall {
@@ -377,7 +424,7 @@ export interface BackendCall {
 }
 
 /** What lands for a call: what the success callback is handed, or the failure's message (`undefined`: none) and its `detail` when the backend gave one. */
-export type BackendDelivery = { ok: unknown } | { error: string | undefined; detail?: Record<string, unknown> };
+export type BackendDelivery = { ok: unknown } | { error: string | undefined; detail?: Record<string, unknown>; lost?: true; refused?: true };
 
 /** POPUP above: the host, the components a Target can build, what the person does, where a Close Popup sits. */
 export interface PopupScript {
@@ -736,6 +783,70 @@ export function backendEvent(c: BackendCall): TraceEvent {
   return { t: 'backend', op: c.op, backend: c.backend, args: canonicalise(args) } as TraceEvent;
 }
 
+/** What lands for an answer rule that answers (BACKEND above). */
+function deliveryOf(a: Exclude<BackendAnswer, { never: true }>): BackendDelivery {
+  if ('ok' in a) return { ok: a.ok };
+  const d: BackendDelivery = { error: a.error === null ? undefined : a.error };
+  if (a.detail !== undefined) d.detail = a.detail;
+  if (a.lost) d.lost = true;
+  return d;
+}
+
+/** AUTH below: the operations the world plays as auth — the contract's (`IAuthAdapter`) and the one beside it (`setUserProperties`, userservice.ts :422). */
+export const AUTH_OPS: readonly string[] = Object.freeze(['fetchCurrentUser', 'setUserProperties']);
+
+export const isAuthOp = (op: string): boolean => AUTH_OPS.includes(op);
+
+/** RestAuthAdapter.ts :1153 / :1603 (and ParseAuthAdapter.ts :682 — the one sentence for the condition). */
+export const NOBODY_SIGNED_IN = 'Nobody is signed in.';
+
+/** What a session announces (AUTH below) — the contract's `AuthEventType` (`@noodl/backend-contract` auth.ts :189-206). */
+export type AuthEventType = 'sessionChanged' | 'loggedIn' | 'loggedOut' | 'sessionGained' | 'sessionLost';
+
+/** One step of an auth answer's landing (AUTH below), in order; the target performs each as it comes. */
+export type AuthStep =
+  | { do: 'write'; backend: string; session: Record<string, unknown> }
+  | { do: 'clear'; backend: string }
+  | { do: 'clear-legacy' }
+  | { do: 'event'; type: AuthEventType; backend: string }
+  | { do: 'success' }
+  | { do: 'error'; message: string | undefined };
+
+/** What a node-facing session event hands a listening node (AUTH below; spec.ts `WorldHandlers.auth`). */
+export interface AuthNotice {
+  type: Exclude<AuthEventType, 'sessionChanged'>;
+  backend: string;
+}
+
+/** The fields the REST adapter never sends back (RestAuthAdapter.ts :243-261 `REST_USER_READONLY_FIELDS`, copied) — server-owned. */
+export const REST_USER_READONLY_FIELDS: readonly string[] = Object.freeze([
+  'objectId', 'id', 'emailVerified', 'verified', 'createdAt', 'updatedAt', 'created', 'updated', 'collectionId',
+  'collectionName', 'expand', 'password', 'passwordConfirm', 'tokenKey', 'sessionToken', 'refreshToken', 'expiresAt'
+]);
+
+/**
+ * AUTH below: what a `setUserProperties` writes into the session on success, from the call's args (RestAuthAdapter.ts
+ * :1607-1617): every property, then `email` when it is not `undefined` — `username` NEVER (the REST adapter drops it) — and
+ * then the server-owned fields removed.
+ */
+export function writtenUserFields(args: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  const content: Record<string, unknown> = { ...((args.properties as Record<string, unknown> | undefined) ?? {}) };
+  if (args.email !== undefined) content.email = args.email;
+  for (const field of REST_USER_READONLY_FIELDS) delete content[field];
+  return content;
+}
+
+/**
+ * AUTH below: a session as the user service hands it to the record store (userservice.ts :502-509 `currentFor`): a copy,
+ * the token and bookkeeping keys removed, then `_fromJSON(user, '_User')` — the registry record of its `objectId`, class
+ * `_User`, every key but `objectId` and `ACL` written in key order (`writeStoreEvent`).
+ */
+export function userRecordEvent(session: Readonly<Record<string, unknown>>): StoreEvent {
+  const user: Record<string, unknown> = { ...session };
+  for (const key of ['sessionToken', 'refreshToken', 'expiresAt', 'ACL', 'className', '__type']) delete user[key];
+  return { backend: '', type: 'save', objectId: String(user.objectId), object: user, collection: '_User' };
+}
+
 export class WorldBackend {
   /** The project's backend ids, the first the active one. */
   readonly ids: readonly string[];
@@ -745,6 +856,12 @@ export class WorldBackend {
   readonly violations: string[] = [];
   private listeners: Array<(c: BackendCall) => void> = [];
   private storeListeners: Array<(e: StoreEvent) => void> = [];
+  /** AUTH (s26): what each backend's session store holds now, by backend id; absent: nobody signed in there. */
+  private readonly sessions = new Map<string, Readonly<Record<string, unknown>>>();
+  /** USER (s22), as state since s26: a failed start-up check clears it (AUTH below). */
+  private legacyUser: string | undefined;
+  /** AUTH (s26): whether the app's user service exists yet — it makes the start-up check once, when it is made. */
+  private serviceMade = false;
 
   constructor(
     private readonly clock: Clock,
@@ -753,6 +870,11 @@ export class WorldBackend {
     const ids = script.backends ?? ['main'];
     if (ids.length === 0) throw new Error('world: a backend script names at least one backend — the project with none is the legacy store, not a world this seam plays');
     this.ids = ids;
+    this.legacyUser = script.user;
+    for (const [backend, session] of Object.entries(script.sessions ?? {})) {
+      if (!ids.includes(backend)) throw new Error(`world: a session names backend ${JSON.stringify(backend)}, which the project does not have`);
+      this.sessions.set(backend, { ...session });
+    }
     // s24 — writes made elsewhere: world timers, scheduled before any node's
     for (const e of script.events ?? []) {
       const backend = e.backend ?? ids[0];
@@ -777,9 +899,118 @@ export class WorldBackend {
     };
   }
 
-  /** USER (s22): the id of the user signed in, as the Record family's access rules read it; `undefined`: nobody. */
+  /** USER (s22): the id of the user signed in, as the Record family's access rules read it; `undefined`: nobody (or, s26, a failed start-up check cleared it — AUTH). */
   get user(): string | undefined {
-    return this.script.user;
+    return this.legacyUser;
+  }
+
+  /**
+   * AUTH (s26): what `backend`'s session store holds now — the signed-in user's fields, flat — or `undefined`: nobody signed
+   * in there. A FRESH copy every read, as the store is JSON text parsed on every read (SessionStore.ts :177-185): an array in
+   * it is a new array each time, and the record store's `!==` then calls it changed.
+   */
+  session(backend: string): Record<string, unknown> | undefined {
+    const s = this.sessions.get(backend);
+    return s === undefined ? undefined : (JSON.parse(JSON.stringify(s)) as Record<string, unknown>);
+  }
+
+  /**
+   * AUTH (s26): the app's user service is made — by the first node that reaches it. Once per play: when the ACTIVE backend
+   * holds a session, the service checks it — a `fetchCurrentUser` call to the active backend with nothing in its args, made
+   * by the SERVICE (recorded in `calls`; no listener hears it, so it is no node's), answered by the script's first rule for
+   * it, landing on the clock at its `after` but never before 1 ms (THE START-UP CHECK, AUTH above). `deliver` gets the
+   * answer at its moment; what lands is the target's to perform — the adapter's half (`landAuth`) and, where the target
+   * plays the service itself, the service's (`serviceCheckFailed`). Returns whether a check was made.
+   */
+  startService(deliver: (d: BackendDelivery) => void): boolean {
+    if (this.serviceMade) return false;
+    this.serviceMade = true;
+    const backend = this.ids[0];
+    if (!this.sessions.has(backend)) return false;
+    const call: BackendCall = { op: 'fetchCurrentUser', backend, args: {} };
+    this.calls.push(call);
+    const rule = this.ruleFor(call);
+    if (!rule) {
+      this.violations.push(`the user service's start-up check (fetchCurrentUser on ${backend}): no rule in the world's script answers it`);
+      this.clock.schedule(1, () => deliver({ error: `the world has no answer for fetchCurrentUser on ${backend}` }));
+      return true;
+    }
+    if ('never' in rule.answer) return true;
+    const d = deliveryOf(rule.answer);
+    this.clock.schedule(Math.max(1, rule.after ?? 0), () => deliver(d));
+    return true;
+  }
+
+  /** AUTH (s26): whether the user service has been made in this play. */
+  get serviceStarted(): boolean {
+    return this.serviceMade;
+  }
+
+  /**
+   * AUTH (s26): the auth operation's refusal BEFORE the wire, or `undefined` — the REST adapter's own pre-flight
+   * (RestAuthAdapter.ts :1150-1155 `fetchCurrentUser`, :1601-1605 `setUserProperties`): with no session (no `objectId`,
+   * for a write) on the backend it was handed to, `Nobody is signed in.` A refused call is still a call (recorded, never
+   * a violation) and it is answered AT ONCE, inside the call — no rule is read.
+   */
+  authRefusal(op: string, backend: string): string | undefined {
+    const s = this.sessions.get(backend);
+    if (op === 'fetchCurrentUser' && s === undefined) return NOBODY_SIGNED_IN;
+    if (op === 'setUserProperties' && (s === undefined || !s.objectId)) return NOBODY_SIGNED_IN;
+    return undefined;
+  }
+
+  /**
+   * AUTH (s26): an auth call's answer landing — the adapter's half, the steps in their order (AUTH above), each handed to
+   * `perform` right after the world's own sessions moved for it. `atCall` is the session the backend held when the call was
+   * made (`session(backend)` then): the REST adapter merges an answer over THAT (RestAuthAdapter.ts :1170-1172, :1636).
+   */
+  landAuth(op: string, backend: string, args: Readonly<Record<string, unknown>>, atCall: Readonly<Record<string, unknown>> | undefined, d: BackendDelivery, perform: (step: AuthStep) => void): void {
+    const write = (session: Record<string, unknown>) => {
+      this.sessions.set(backend, session);
+      perform({ do: 'write', backend, session: { ...session } });
+    };
+    const clear = () => {
+      this.sessions.delete(backend);
+      perform({ do: 'clear', backend });
+    };
+    const event = (type: AuthEventType) => perform({ do: 'event', type, backend });
+    if (!('ok' in d)) {
+      // a rejected session (the contract's `sessionLost`: 401 / 403 on REST, 209 on the Parse wire) — storage cleared
+      // WITHOUT `sessionChanged`, then `sessionLost` (RestAuthAdapter.ts :1177-1186); only a read of the session does this
+      if (op === 'fetchCurrentUser' && d.lost && !d.refused) {
+        clear();
+        event('sessionLost');
+      }
+      perform({ do: 'error', message: d.error });
+      return;
+    }
+    const answer = d.ok !== null && typeof d.ok === 'object' ? (d.ok as Record<string, unknown>) : {};
+    if (op === 'fetchCurrentUser') {
+      write({ ...(atCall ?? {}), ...answer }); // :1170-1174 — then `sessionChanged`
+      event('sessionChanged');
+      event('sessionGained'); // :1175
+      perform({ do: 'success' }); // :1176
+      return;
+    }
+    if (op === 'setUserProperties') {
+      write({ ...(atCall ?? {}), ...answer, ...writtenUserFields(args) }); // :1634-1637
+      event('sessionChanged');
+      perform({ do: 'success' });
+      return;
+    }
+    throw new Error(`world: ${op} is not an auth operation the world plays`);
+  }
+
+  /**
+   * AUTH (s26): the SERVICE's half of a start-up check that failed — what userservice.ts :147-158 does, for a target that
+   * plays the service itself (the runtime runs the real one): the LEGACY session cleared (the service clears the Parse-wire
+   * store under the active handle's app id — a REST backend's handle has none, which is the legacy store's own key: USER
+   * goes), and `sessionLost` announced. The backend's own session is NOT touched: it survives (row C45).
+   */
+  serviceCheckFailed(perform: (step: AuthStep) => void): void {
+    this.legacyUser = undefined;
+    perform({ do: 'clear-legacy' });
+    perform({ do: 'event', type: 'sessionLost', backend: this.ids[0] });
   }
 
   /** Called with every call as it is made — how a target attributes it to the node that made it. */
@@ -798,15 +1029,14 @@ export class WorldBackend {
     const recorded: BackendCall = { op: call.op, backend: call.backend, args: call.args };
     this.calls.push(recorded);
     for (const l of this.listeners) l(recorded);
+    // AUTH (s26) — the adapter's refusal before the wire: answered at once, inside the call, no rule read
+    const refusal = this.authRefusal(call.op, call.backend);
+    if (refusal !== undefined) {
+      deliver({ error: refusal, refused: true });
+      return;
+    }
     const collection = (call.args as { collection?: unknown }).collection;
-    const rule = (this.script.answers ?? []).find((r) => {
-      const m = r.match;
-      if (!m) return true;
-      if (m.op !== undefined && m.op !== call.op) return false;
-      if (m.collection !== undefined && m.collection !== collection) return false;
-      if (m.backend !== undefined && m.backend !== call.backend) return false;
-      return true;
-    });
+    const rule = this.ruleFor(call);
     if (!rule) {
       const what = `${call.op} ${String(collection)} on ${call.backend}`;
       this.violations.push(`${what}: no rule in the world's script answers it`);
@@ -815,9 +1045,22 @@ export class WorldBackend {
     }
     const a = rule.answer;
     if ('never' in a) return;
-    const d: BackendDelivery = 'ok' in a ? { ok: a.ok } : a.detail === undefined ? { error: a.error === null ? undefined : a.error } : { error: a.error === null ? undefined : a.error, detail: a.detail };
+    const d = deliveryOf(a);
     if (rule.after !== undefined && rule.after > 0) this.clock.schedule(rule.after, () => deliver(d));
     else deliver(d);
+  }
+
+  /** The first of the script's `answers` whose `match` fits the call (BACKEND above). */
+  private ruleFor(call: BackendCall): BackendRule | undefined {
+    const collection = (call.args as { collection?: unknown }).collection;
+    return (this.script.answers ?? []).find((r) => {
+      const m = r.match;
+      if (!m) return true;
+      if (m.op !== undefined && m.op !== call.op) return false;
+      if (m.collection !== undefined && m.collection !== collection) return false;
+      if (m.backend !== undefined && m.backend !== call.backend) return false;
+      return true;
+    });
   }
 }
 

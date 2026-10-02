@@ -21,7 +21,9 @@ import { EQUIVALENT_MUTANTS, interpreterAdapter, loadScenarios, play, runConform
 const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRelation', 'NewDbModelProperties', 'SetDbModelProperties', 'DbModel2', 'DbCollection2'];
 
 /** s25 — Filter Records: no backend call, so graded here but not in the AC6 call table below */
-const CONFORMING = [...BATCH, 'FilterDBModels'];
+/** s26 — the user nodes (world.ts AUTH): calls without a `collection`, so their AC5 / AC6 tests are their own, below */
+const USERS = ['net.noodl.user.User', 'net.noodl.user.SetUserProperties'];
+const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS];
 
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {
   for (const type of CONFORMING) {
@@ -95,6 +97,26 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
     const op: Record<string, string> = { DeleteDbModelProperties: 'delete', AddDbModelRelation: 'addRelation', RemoveDbModelRelation: 'removeRelation', NewDbModelProperties: 'create', SetDbModelProperties: 'save', DbModel2: 'fetch', DbCollection2: 'query' };
     expect(ev.op).toBe(op[type]);
     expect(typeof ev.args.collection).toBe('string');
+  });
+
+  // s26 — the user nodes: the AUTH operation is the call (no collection); every failure sentence is on Error beside a
+  // Failure; the not-configured Backend makes no call — beside a scenario that makes one (the control)
+  test.each([
+    ['net.noodl.user.User', 'fetchCurrentUser', ['Nobody is signed in.', 'HTTP 503: {}', 'Token expired.', 'Failed to fetch.', 'The backend this node is set to ("gone") is not configured in this project.']],
+    ['net.noodl.user.SetUserProperties', 'setUserProperties', ['Nobody is signed in.', 'Forbidden', 'The backend this node is set to ("gone") is not configured in this project.']]
+  ])('%s: every failure sentence on Error beside a Failure; the call is %s — and a scenario makes none', async (type, op, sentences) => {
+    const all = await traces(type);
+    const errors = new Set<string>();
+    for (const { trace } of all) {
+      const failed = trace.some(isFailure);
+      for (const e of trace) if (failed && e.t === 'value' && e.port === 'error') errors.add(String((e as { value: unknown }).value));
+    }
+    for (const sentence of sentences) expect([...errors]).toContain(sentence);
+    const calls = all.filter((x) => x.trace.some((e) => e.t === 'backend'));
+    const none = all.filter((x) => !x.trace.some((e) => e.t === 'backend') && x.trace.some(isFailure));
+    expect(calls.length).toBeGreaterThan(0);
+    expect(none.map((x) => x.name).some((n) => n.includes('does not have'))).toBe(true);
+    for (const { trace } of calls) for (const e of trace) if (e.t === 'backend') expect((e as TraceEvent & { op: string }).op).toBe(op);
   });
 
   // s25 — Filter Records

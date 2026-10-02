@@ -24,7 +24,7 @@
  *
  * The world handlers (NSP-007, `spec.world.timer` / `spec.world.response`; NSP-012's
  * `spec.world.change`) are reducers like any
- * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`, (s24) `world.store`; whether a branch issues a request
+ * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`, (s24) `world.store`, (s26) `world.auth`; whether a branch issues a request
  * — or calls a backend — is part of its shape. A branch's `after` / `cancel` / `abort` effects are NOT in the shape and have no
  * mutant of their own yet (a dropped timeout timer shows only in a sequence that waits past it
  * with an answer that never comes) — named in NSP-007 §5 as the runner's next hole.
@@ -101,6 +101,7 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.popup) names.push('world.popup');
   if (spec.world?.backend) names.push('world.backend');
   if (spec.world?.store) names.push('world.store');
+  if (spec.world?.auth) names.push('world.auth');
   return names;
 }
 
@@ -132,6 +133,8 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     // NSP-014 s24 — a handler left off this copy is not only unmutated: the copy no longer HEARS the store, so the reference
     // play and every mutant ran with the writes made elsewhere silently dropped (s24 found it by three survivors on the box)
     if (spec.world.store) w.store = wrap('world.store', spec.world.store as unknown as ErasedReducer) as unknown as typeof spec.world.store;
+    // NSP-014 s26 — the same rule for the session events (world.ts AUTH): a copy without it never hears a login
+    if (spec.world.auth) w.auth = wrap('world.auth', spec.world.auth as unknown as ErasedReducer) as unknown as typeof spec.world.auth;
     out.world = w;
   }
   return out;

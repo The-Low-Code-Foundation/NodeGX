@@ -132,7 +132,7 @@ import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, R
 import type { RuntimeNode } from '../../src/internal';
 import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
-import { backendEvent, canonicalise, installWorld, locationEvent, OUTCOME_PORTS } from '../../../nodegx-node-spec/src';
+import { AUTH_OPS, backendEvent, canonicalise, installWorld, locationEvent, OUTCOME_PORTS, type BackendDelivery } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -351,15 +351,103 @@ function installUser(w: World): () => void {
   // full run, green alone; the draw found by call-site diff). Made here, before `installWorld`, in every play.
   parseSessionStore(CloudStore.instance._handle().publicToken);
   const user = w.backend.user;
-  if (user === undefined) return () => {};
+  // s26 — AUTH's sessions live in the same storage, each backend's under the REST adapter's own key (`restSessionKey`)
+  const sessions = w.backend.ids.map((id) => [id, w.backend.session(id)] as const).filter(([, session]) => session !== undefined);
+  if (user === undefined && sessions.length === 0) return () => {};
   const g = globalThis as { localStorage?: unknown };
   const had = 'localStorage' in g;
   const saved = g.localStorage;
-  g.localStorage = {};
-  parseSessionStore(CloudStore.instance._handle().publicToken).write({ objectId: user, sessionToken: 'world' });
+  const storage: Record<string, string> = {};
+  g.localStorage = storage;
+  for (const [id, session] of sessions) storage['NodeGX/' + id + '/session'] = JSON.stringify({ ...session, sessionToken: 'world' });
+  if (user !== undefined) parseSessionStore(CloudStore.instance._handle().publicToken).write({ objectId: user, sessionToken: 'world' });
   return () => {
     if (had) g.localStorage = saved;
     else delete g.localStorage;
+  };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { RestAuthAdapter } = require('../../src/api/backends/RestAuthAdapter') as { RestAuthAdapter: { prototype: Record<string, unknown> } };
+/**
+ * The viewer's user service CLASS. Loading its module assigns `NoodlRuntime.Services.UserService` process-wide
+ * (userservice.ts :538), as the viewer does at boot — undone at once: the service exists only inside a play's AUTH install
+ * (a fresh one per play), never as a process-wide singleton a play without a world would make and keep.
+ */
+const UserServiceClass = ((): new () => unknown => {
+  const services = (NoodlRuntime as unknown as { Services: Record<string, unknown> }).Services;
+  const before = services.UserService;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const cls = require('../../../noodl-viewer-react/src/nodes/std-library/user/userservice').default as new () => unknown;
+  services.UserService = before;
+  return cls;
+})();
+
+/** The REST auth adapter's halves the AUTH stand-in performs a landing through (RestAuthAdapter.ts — its store, its events). */
+interface AuthAdapterLike {
+  sessionStore(handle: unknown): { write(session: Record<string, unknown>): void; clear(): void };
+  emitAuthEvent(event: string, payload?: unknown): void;
+}
+
+/**
+ * AUTH (world.ts, NSP-014 s26) for one play: the viewer's REAL user service — a FRESH one, made by the first node that
+ * reaches `Services.UserService.forScope` (its constructor's start-up check and its bridge run as in the app) — and the
+ * REAL REST auth adapter it makes, whose auth operations (`AUTH_OPS`) are the world's: the call recorded as handed and
+ * answered by the script (a refusal inside the call; an answer a microtask after its moment, as a `fetch` resolves), and
+ * the landing's steps (`landAuth`) performed through the adapter's own session store and event surface, in the world's
+ * order. The constructor's own `fetchCurrentUser` is the SERVICE's start-up check (`startService`): recorded, attributed
+ * to no node. The sessions themselves are written into storage by `installUser`. Returns the undo.
+ */
+function installAuth(w: World): () => void {
+  const services = (NoodlRuntime as unknown as { Services: Record<string, unknown> }).Services;
+  const savedService = services.UserService;
+  let service: unknown;
+  let constructing = false;
+  services.UserService = {
+    forScope: () => {
+      if (service === undefined) {
+        constructing = true;
+        try {
+          service = new UserServiceClass();
+        } finally {
+          constructing = false;
+        }
+      }
+      return service;
+    }
+  };
+  const proto = RestAuthAdapter.prototype;
+  const saved: Record<string, unknown> = {};
+  for (const op of AUTH_OPS) {
+    saved[op] = proto[op];
+    proto[op] = function (this: AuthAdapterLike, handle: { id: string }, options: BackendOptions) {
+      const backend = handle.id;
+      const atCall = w.backend.session(backend);
+      // what the adapter builds its request from is read AT THE CALL (RestAuthAdapter.ts :1607-1617) — the node's held
+      // properties are one live object it keeps writing into
+      const argsAtCall: Record<string, unknown> = Object.fromEntries(Object.entries(options).filter(([, v]) => typeof v !== 'function'));
+      if (argsAtCall.properties && typeof argsAtCall.properties === 'object') argsAtCall.properties = { ...(argsAtCall.properties as Record<string, unknown>) };
+      const land = (d: BackendDelivery) =>
+        w.backend.landAuth(op, backend, argsAtCall, atCall, d, (step) => {
+          if (step.do === 'write') this.sessionStore(handle).write({ ...step.session, sessionToken: 'world' });
+          else if (step.do === 'clear') this.sessionStore(handle).clear();
+          else if (step.do === 'event') this.emitAuthEvent(step.type);
+          else if (step.do === 'success') options.success('ok' in d && d.ok !== undefined ? JSON.parse(JSON.stringify(d.ok)) : undefined);
+          else if (step.do === 'error') options.error(step.message);
+        });
+      if (constructing && op === 'fetchCurrentUser') {
+        w.backend.startService((d) => void Promise.resolve().then(() => land(d)));
+        return;
+      }
+      w.backend.issue({ op, backend, args: options }, (d) => {
+        if ('refused' in d && d.refused) land(d); // the adapter's refusal before the wire — inside the call
+        else void Promise.resolve().then(() => land(d));
+      });
+    };
+  }
+  return () => {
+    for (const [op, fn] of Object.entries(saved)) proto[op] = fn;
+    services.UserService = savedService;
   };
 }
 
@@ -407,8 +495,10 @@ function installBackend(w: World, graphModel: { getMetaData(k: string): unknown;
     CloudStore.forBackend(undefined, backend)!._adapter.emitAdapterEvent(event);
   });
   const restoreUser = installUser(w);
+  const restoreAuth = installAuth(w);
   return () => {
     offStore();
+    restoreAuth();
     restoreUser();
     for (const [op, fn] of Object.entries(saved)) proto[op] = fn;
     CloudStore.invalidateBackends();

@@ -1,0 +1,622 @@
+[
+  {
+    "name": "Do with nobody signed in: the call is made and refused at once — Nobody is signed in. on Error, both presses Failure",
+    "because": "setuserproperties.ts :167-202 → RestAuthAdapter.ts :1601-1605 (world.ts AUTH, the refusal before the wire)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "prop-nick",
+        "value": "Z"
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "Do writes the held values: one call with Email, Username and the properties, then Done",
+    "because": "setuserproperties.ts :187-195",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "prop-nick",
+        "value": "Annie"
+      },
+      {
+        "set": "email",
+        "value": "annie@example.com"
+      },
+      {
+        "set": "username",
+        "value": "annie"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Two Dos in one frame: one write, two Dones",
+    "because": "setuserproperties.ts :170-177 — a token per press, one write per frame",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "prop-n",
+        "value": 2
+      },
+      {
+        "signal": "store"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A write the backend refuses: Error, Failure",
+    "because": "setuserproperties.ts :197-200",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "error": "Forbidden"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A refusal with no message: Failure, and nothing on Error — the node has no fallback sentence",
+    "because": "setuserproperties.ts :198-199 → :151-153 — setError(undefined); undefined is never sent (CONTRACT C3)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "error": null
+            },
+            "after": 1
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Backend names one the project does not have: the sentence, Failure, no call",
+    "because": "userservice.ts :228-231, :430-431",
+    "params": {
+      "backendId": "gone"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Backend names another backend: the write goes there",
+    "because": "setuserproperties.ts :215-220, :189",
+    "params": {
+      "backendId": "other"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "prop-nick",
+        "value": "O"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          },
+          "other": {
+            "objectId": "u9",
+            "nick": "Otto"
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties",
+              "backend": "other"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u9"
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "error": "Not here"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Do while a write is out is a second write, with the values as they are at its own frame end",
+    "because": "setuserproperties.ts :182-185 — the batch taken into a local; :187-192 the held values read at the frame end",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "prop-nick",
+        "value": "A"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "prop-nick",
+        "value": "B"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1"
+              }
+            },
+            "after": 20
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "The held properties accumulate: a property written once goes out in every later write, and one written undefined is still held",
+    "because": "setuserproperties.ts :204-206 — one object for the node's life, nothing removed",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "prop-nick",
+        "value": "A"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "prop-n",
+        "value": 2
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "prop-nick"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A value written after the press in the same frame goes out: the write reads the frame end",
+    "because": "setuserproperties.ts :179-192",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "store"
+      },
+      {
+        "set": "prop-nick",
+        "value": "late"
+      },
+      {
+        "set": "email",
+        "value": ""
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Error is kept after a later write succeeds",
+    "because": "setuserproperties.ts :151-159 — nothing clears it",
+    "params": {
+      "backendId": "gone"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "_active_"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A write that never comes back: the presses wait — no outcome",
+    "because": "setuserproperties.ts :193-200 — nothing else settles them",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  }
+]
