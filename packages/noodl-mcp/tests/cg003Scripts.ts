@@ -168,7 +168,10 @@ if (req) {
     if (Number(bot.basket) > 0) robot.basket = Math.max(Math.floor(Number(bot.basket)), Number(rs.basket) > 0 ? Math.floor(Number(rs.basket)) : 0);
     robot.look = { name: String(bot.name || ''), colour: String(bot.color || ''), eyes: String(bot.eye || 'round'), hat: String(bot.hat || 'none'), accessory: String(bot.accessory || '') };
   }
-  Outputs.world = { map: (req.map || []).slice(), things: JSON.parse(JSON.stringify(req.things || [])), robots: [robot], events: [], schedule: JSON.parse(JSON.stringify(req.schedule || [])) };
+  var startThings = JSON.parse(JSON.stringify(req.things || []));
+  // P108 s8: the can lies on the grass now — a robot's bigger can (Mamie's can+) is the one lying there.
+  for (var sc = 0; sc < startThings.length; sc++) if (startThings[sc] && startThings[sc].kind === 'can' && robot.canMax > (Number(startThings[sc].max) || 0)) startThings[sc].max = robot.canMax;
+  Outputs.world = { map: (req.map || []).slice(), things: startThings, robots: [robot], events: [], schedule: JSON.parse(JSON.stringify(req.schedule || [])) };
   Outputs.request = JSON.parse(JSON.stringify(req));
   Outputs.goal = JSON.parse(JSON.stringify(req.goal || []));
   Outputs.allowed = (req.palette || []).slice();
@@ -297,6 +300,8 @@ for (var r = 0; r < rl.length; r++) {
   var lk = rl[r].look && typeof rl[r].look === 'object' ? rl[r].look : {};
   robots.push({ x: rl[r].x, y: rl[r].y, d: rl[r].d, colour: String(lk.colour || Inputs.color || '#FF7A59'), eyes: String(lk.eyes || Inputs.eye || 'round'), hat: String(lk.hat || Inputs.hat || 'none'), name: nameOf(lk.name || Inputs.botName), bump: bump, can: rl[r].can === undefined || rl[r].can === null ? null : rl[r].can, canMax: Number(rl[r].canMax) > 0 ? Number(rl[r].canMax) : ${CAN_MAX}, carry: Array.isArray(rl[r].carry) ? rl[r].carry.slice() : [], accessory: lk.accessory !== undefined ? String(lk.accessory) : Inputs.accessory !== undefined && Inputs.accessory !== null ? String(Inputs.accessory) : 'can' });
   if (rl[r].holds === 'can') robots[robots.length - 1].holds = 'can';
+  // P108 s8: a pad press's walk (Record step's via), for the kits to draw a tile at a time.
+  if (Array.isArray(rl[r].via) && rl[r].via.length > 1) robots[robots.length - 1].via = rl[r].via.slice();
 }
 var lang = langOf(Inputs.lang);
 var w = wordMap(Inputs.words, lang, nameOf(Inputs.botName));
@@ -340,7 +345,7 @@ var pal = Array.isArray(Inputs.palette) ? Inputs.palette : [];
 var drawer = [];
 for (var p = 0; p < pal.length; p++) if (pal[p] && pal[p].id) drawer.push(String(pal[p].id));
 var allowed = drawer.length ? drawer : Array.isArray(Inputs.allowed) ? Inputs.allowed : [];
-var slots = ['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c', 'bg-key-r4a', 'bg-key-r4b', 'bg-key-r4c'], used = 0;
+var slots = ['bg-key-mid', 'bg-key-r3a', 'bg-key-r3b', 'bg-key-r3c', 'bg-key-r4a', 'bg-key-r4b', 'bg-key-r4c', 'bg-key-r5a', 'bg-key-r5b', 'bg-key-r5c'], used = 0;
 var keys = [];
 for (var i = 0; i < PAD.length; i++) {
   var op = PAD[i][0];
@@ -362,11 +367,13 @@ var GO = ${JSON.stringify({ nearest: PAD_GO.nearest, to: PAD_GO.to })};
 var onPlot = Inputs.world && Array.isArray(Inputs.world.things) ? Inputs.world.things : [];
 function lying(k) { for (var q = 0; q < onPlot.length; q++) if (onPlot[q] && onPlot[q].kind === k) return true; return false; }
 var goRows = [];
-if (allowed.indexOf('go_nearest') !== -1) for (var gn = 0; gn < GO.nearest.length; gn++) if (lying(GO.nearest[gn])) goRows.push(['go_nearest', GO.nearest[gn]]);
+// P108 s8: a kind that go to has a key for here is not also a nearest key (one key per place).
+var hasTo = allowed.indexOf('go_to') !== -1;
+if (allowed.indexOf('go_nearest') !== -1) for (var gn = 0; gn < GO.nearest.length; gn++) if (lying(GO.nearest[gn]) && !(hasTo && GO.to.indexOf(GO.nearest[gn]) !== -1)) goRows.push(['go_nearest', GO.nearest[gn]]);
 if (allowed.indexOf('go_to') !== -1) for (var gt = 0; gt < GO.to.length; gt++) if (lying(GO.to[gt])) goRows.push(['go_to', GO.to[gt]]);
 for (var gi = 0; gi < goRows.length; gi++) {
   var gslug = (goRows[gi][0] === 'go_to' ? 'go-to-' : 'go-nearest-') + goRows[gi][1];
-  keys.push({ id: 'padkey-' + gslug, op: goRows[gi][0] + ':' + goRows[gi][1], cls: 'bg-key bg-key-' + gslug + ' ' + slots[Math.min(used++, slots.length - 1)] + ' bg-key-go bg-key-go-' + goRows[gi][1] + ' bg-i-go bg-press', label: (W[goRows[gi][0] === 'go_to' ? 'bGoTo' : 'bGoNearest'] || goRows[gi][0]) + ' ' + (W['iw4K_' + goRows[gi][1]] || goRows[gi][1]) });
+  keys.push({ id: 'padkey-' + gslug, op: goRows[gi][0] + ':' + goRows[gi][1], cls: 'bg-key bg-key-' + gslug + ' ' + slots[Math.min(used++, slots.length - 1)] + ' bg-key-go bg-key-go-' + goRows[gi][1] + ' bg-i-go bg-press', label: (W[goRows[gi][0] === 'go_to' ? 'bGoTo' : 'bGoNearest'] || goRows[gi][0]) + ' ' + (W['iw4K_' + goRows[gi][1]] || W['iw7aK_' + goRows[gi][1]] || goRows[gi][1]) });
 }
 Outputs.keys = keys;
 Outputs.count = keys.length;
@@ -408,11 +415,15 @@ if (ok) {
   var st = step(newRun([clone(blk)], w.robots[0].id, Inputs.lang), w, null);
   // P108 IW-003 (lane M): a go key walks the whole way in one press (every tick of the block, the engine's own step and
   // apply, as Play walks it); what it last said is the press's line (a none: sayNone:<kind>).
+  // P108 s8 (Richard: "the robot jumps to the rock"): every tile it steps onto is kept, in order, as the robot row's
+  // via, so the kits draw the walk a tile at a time (the world itself still changes once, as before).
+  var via = [];
   if (goKey) {
     var gsay = '', gn2 = 0;
     for (;;) {
       if (st.delta.sayKey) gsay = st.delta.none && st.delta.sayKey === 'sayNone' ? 'sayNone:' + st.delta.none.kind : st.delta.sayKey;
       w = apply(w, st.delta);
+      if (st.delta.move && w.robots[0]) via.push([w.robots[0].x, w.robots[0].y]);
       if (st.done || ++gn2 > 400) break;
       st = step(st.run, w, null);
     }
@@ -424,6 +435,8 @@ if (ok) {
   else w = apply(w, st.delta);
   sayKey = st.delta.sayKey || '';
   bumped = !!st.delta.bump;
+  // The walk is this press's only: any other press clears it (a kit ignores a via that does not join where it drew the robot).
+  if (w.robots[0]) { if (via.length > 1) w.robots[0].via = via; else delete w.robots[0].via; }
 }
 // F7: a say key's line over the robot (a new bubble each press); nothing to say leaves the port alone.
 if (sayKey) {
@@ -743,7 +756,6 @@ var page = String(Inputs.page || '');
 var band = Number(Inputs.band) === 1 ? 1 : 2;
 var lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';
 Outputs.islandOn = page === 'island';
-Outputs.workshopOn = page === 'workshop';
 Outputs.robotOn = page === 'robot';
 Outputs.skillsOn = page === 'skills';
 Outputs.grownOn = page === 'grown';

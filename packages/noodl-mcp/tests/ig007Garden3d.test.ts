@@ -1164,7 +1164,8 @@ describe('IG-007 — garden-3d-kit, the built artefact', () => {
       expect(overlay.unavailable).toBeUndefined();
       expect(overlay.failures).toEqual([]);
       // P108 IW-004: garden-kit now also carries Blocks (the program on Blockly).
-      expect(overlay.nodes.map((n) => n.typeName).sort()).toEqual(['garden-3d-kit.Garden3D', 'garden-kit.BlockList', 'garden-kit.Blocks', 'garden-kit.Garden']);
+      // P108 s8: + Divider (the Workshop's middle divider).
+      expect(overlay.nodes.map((n) => n.typeName).sort()).toEqual(['garden-3d-kit.Garden3D', 'garden-kit.BlockList', 'garden-kit.Blocks', 'garden-kit.Divider', 'garden-kit.Garden']);
       const g3 = overlay.nodes.find((n) => n.typeName === 'garden-3d-kit.Garden3D')!;
       expect(g3.inNodePicker).toBe(true);
       // The bridge adds its own inputs to every React node (cssClassName, mounted, styleCss, variant); the kit's are all there.
@@ -1670,5 +1671,101 @@ describe('P108 IW-007 lane B — garden-3d-kit builds her land: the spa and the 
     expect(load).toBe('plank');
     const ghost = (ok: boolean) => scene([{ kind: 'ghost', bp: 'refuge', x: 1, y: 1, w: 2, pen: 2, ok }]).things[0];
     expect([ghost(true).userData.ok, ghost(false).userData.ok, names(ghost(true))]).toEqual([true, false, 'ghost']);
+  });
+});
+
+// ── P108 s8 (Richard, 2026-10-02: "it's a bit sad that the robot jumps to the rock"): a pad press's walk (the robot row's
+// via, Record step) is drawn a tile at a time — one Step Ms a tile, facing each step — and a via that does not join where
+// the robot was drawn is ignored (an ordinary glide). Both kits read the same rule (walkTiles).
+describe('P108 s8 — the 3D world draws a walk a tile at a time', () => {
+  let kit3: KitModule;
+  let kit2: KitModule;
+  beforeAll(() => {
+    const both = loadKits(BUILT_2D);
+    kit3 = both.kit;
+    kit2 = both.modules[0];
+  });
+  const node3 = () => kit3.reactNodes.find((n) => n.name === 'garden-3d-kit.Garden3D')!;
+  const MAP = { rows: ['GGGGG', 'GWWGG', 'GGGGG'] };
+  const VIA = [[0, 1], [0, 2], [1, 2], [2, 2], [3, 2]];
+  function make() {
+    const { THREE } = threeStub();
+    const dom = fakeDom();
+    const frames: Array<() => void> = [];
+    const clock = { t: 0 };
+    const eng = node3().engine.create({ THREE, root: dom.root, canvas: dom.canvas, overlay: dom.overlay, doc: dom.doc, now: () => clock.t, raf: (f: () => void) => (frames.push(f), frames.length), caf: () => {} });
+    eng.setStepMs(100);
+    const W = node3().world;
+    const set = (r: Record<string, unknown>) => eng.setWorld({ map: W.parseMap(MAP), things: [], robots: W.parseRobots([r]) });
+    const until = (t: number) => {
+      while (clock.t < t && frames.length) {
+        clock.t += 10;
+        frames.shift()!();
+      }
+      clock.t = Math.max(clock.t, t);
+    };
+    const pos = () => ({ x: eng.built.robots[0].position.x, z: eng.built.robots[0].position.z, yaw: eng.built.robots[0].rotation.y });
+    return { eng, set, until, pos };
+  }
+  /** Where a robot standing still on (x, y) is drawn. */
+  const at = (x: number, y: number) => {
+    const m = make();
+    m.set({ x, y, d: 1 });
+    m.until(50);
+    return m.pos();
+  };
+
+  it('🔴 with a via the robot passes each tile in turn (one Step Ms each) and faces the step; without one it glides straight there in one Step Ms', () => {
+    const walk = make();
+    walk.set({ x: 0, y: 0, d: 2 });
+    walk.until(50);
+    walk.set({ x: 3, y: 2, d: 1, via: VIA });
+    // After about two steps the robot is at the walk's second tile (0, 2), round the pond's corner — never over the pond.
+    walk.until(50 + 205);
+    const mid = walk.pos();
+    const t02 = at(0, 2);
+    expect([Math.abs(mid.x - t02.x) < 0.05, Math.abs(mid.z - t02.z) < 0.05]).toEqual([true, true]);
+    // Then on, and at the end where the world says, facing d 1.
+    walk.until(50 + 1000);
+    const end = walk.pos();
+    const t32 = at(3, 2);
+    expect([Math.abs(end.x - t32.x) < 1e-6, Math.abs(end.z - t32.z) < 1e-6, Math.abs(end.yaw - (-Math.PI / 2)) < 1e-6]).toEqual([true, true, true]);
+    // The control: the same move with no via is one glide — already at (3, 2) after one Step Ms.
+    const jump = make();
+    jump.set({ x: 0, y: 0, d: 2 });
+    jump.until(50);
+    jump.set({ x: 3, y: 2, d: 1 });
+    jump.until(50 + 205);
+    expect(Math.abs(jump.pos().x - t32.x) < 1e-6).toBe(true);
+  });
+
+  it('🔴 a via that does not start one step from where the robot was drawn is ignored (a stale one rides on the row): a plain glide', () => {
+    const stale = make();
+    stale.set({ x: 4, y: 0, d: 2 });
+    stale.until(50);
+    stale.set({ x: 3, y: 2, d: 1, via: VIA });
+    stale.until(50 + 205);
+    expect(Math.abs(stale.pos().x - at(3, 2).x) < 1e-6).toBe(true);
+  });
+
+  it('the rule is the same in both kits (walkTiles, stepFacing), and both parse via the same way', () => {
+    const w3 = node3().world;
+    const w2 = kit2.reactNodes.find((n) => n.name === 'garden-kit.Garden')!.world;
+    const cases: Array<[number[], Record<string, unknown>]> = [
+      [[0, 0], { x: 3, y: 2, via: VIA }],
+      [[4, 0], { x: 3, y: 2, via: VIA }],
+      [[0, 0], { x: 0, y: 2, via: [[0, 1], [0, 2]] }],
+      [[0, 0], { x: 1, y: 2, via: [[0, 1], [1, 2]] }],
+      [[0, 0], { x: 0, y: 1, via: [[0, 1]] }],
+      [[0, 0], { x: 0, y: 1 }]
+    ];
+    for (const [prev, r] of cases) {
+      const p3 = w3.parseRobots([r])[0];
+      const p2 = w2.parseRobots([r])[0];
+      expect(p3.via).toEqual(p2.via);
+      expect(w3.walkTiles(prev, p3)).toEqual(w2.walkTiles(prev, p2));
+    }
+    expect(w2.walkTiles([0, 0], w2.parseRobots([{ x: 3, y: 2, via: VIA }])[0])).toEqual(VIA);
+    expect([w2.stepFacing([1, 1], [1, 0]), w2.stepFacing([1, 1], [2, 1]), w2.stepFacing([1, 1], [1, 2]), w2.stepFacing([1, 1], [0, 1])]).toEqual([0, 1, 2, 3]);
   });
 });

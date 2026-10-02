@@ -95,24 +95,6 @@
     },
     {
       "fromId": "brT",
-      "fromProperty": "navWorkshop",
-      "toId": "brTab_workshop",
-      "toProperty": "label"
-    },
-    {
-      "fromId": "brLit",
-      "fromProperty": "workshopOn",
-      "toId": "brTab_workshop",
-      "toProperty": "selected"
-    },
-    {
-      "fromId": "brTab_workshop",
-      "fromProperty": "clicked",
-      "toId": "brGo_workshop",
-      "toProperty": "navigate"
-    },
-    {
-      "fromId": "brT",
       "fromProperty": "navRobot",
       "toId": "brTab_robot",
       "toProperty": "label"

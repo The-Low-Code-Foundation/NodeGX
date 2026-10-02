@@ -253,9 +253,9 @@ describe('CG-006 — the requests', () => {
     it('row 2 "the fold offered": the band 10–12 recording of the tulips offers repeat 3; band 7–9 is never offered one', () => {
       const r = byId('tulips-three');
       const recording = unrolled(r.referenceProgram);
-      // IG-002: the fetch-and-return dance; IW-003 (lane M): eleven blocks a pass (fill, turn round, walk, three pours,
-      // step down, walk back).
-      expect(recording).toHaveLength(33);
+      // IG-002: the fetch-and-return dance; IW-003 (lane M): eleven blocks a pass (P108 s8: a step to the pond, fill, turn
+      // round, walk, three pours, step down, turn back), after the pick of the can off the grass.
+      expect(recording).toHaveLength(34);
       const b2 = runScript(FIND_REPEAT, { program: recording, band: 2 });
       expect({ found: b2.found, offer: b2.offer, count: b2.count, len: b2.len }).toEqual({ found: true, offer: true, count: 3, len: 11 });
       expect(runScript(FIND_REPEAT, { program: recording, band: 1 }).offer).toBe(false);

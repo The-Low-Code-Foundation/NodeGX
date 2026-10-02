@@ -72,7 +72,10 @@ function islStart(req, robotId, bot) {
     if (Number(bot.basket) > 0) robot.basket = Math.max(Math.floor(Number(bot.basket)), Number(rs.basket) > 0 ? Math.floor(Number(rs.basket)) : 0);
     robot.look = islLook(bot);
   }
-  return { things: islClone(req.things || []), robot: robot, spent: [] };
+  var things = islClone(req.things || []);
+  // P108 s8: the can lies on the grass now — a robot's bigger can (Mamie's can+) is the one lying there (Start world's rule).
+  for (var c = 0; c < things.length; c++) if (things[c] && things[c].kind === 'can' && robot.canMax > (Number(things[c].max) || 0)) things[c].max = robot.canMax;
+  return { things: things, robot: robot, spent: [] };
 }
 /** IG-005: a robot row's look as Draw world reads it: its name, colour, eyes, hat and the accessory of its job. */
 function islLook(bot) { return { name: String(bot.name || ''), colour: String(bot.color || ''), eyes: String(bot.eye || 'round'), hat: String(bot.hat || 'none'), accessory: String(bot.accessory || '') }; }

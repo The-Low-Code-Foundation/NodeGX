@@ -207,16 +207,17 @@ async function runAsync(script: string, inputs: Record<string, unknown>, fetchIm
  * P108 IW-003 (lane M): three pours a tulip (the can's three is one tulip's worth), so the pass is eleven presses and
  * the program takes two folds: the passes ×3, then the pours ×3 inside the pass.
  */
-const TULIP_DANCE = ['fill', 'left', 'left', 'fwd', 'water', 'water', 'water', 'right', 'fwd', 'right', 'fwd'];
+// P108 s8: the can lies on the grass (picked first), and each pass starts a step from the pond.
+const TULIP_DANCE = ['fwd', 'fill', 'left', 'left', 'fwd', 'water', 'water', 'water', 'right', 'fwd', 'right'];
 function playTulips(scripts: { record?: string; win?: string } = {}) {
   const start = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three', nonce: 0 });
   let world = start.world;
   let program: unknown = '[]';
-  const taught = TULIP_DANCE;
+  const taught = ['pick', ...TULIP_DANCE, ...TULIP_DANCE, ...TULIP_DANCE];
   const after4: number[] = [];
   const cans: number[] = [];
-  for (let k = 0; k < taught.length * 3; k++) {
-    const rec = run(scripts.record ?? RECORD_STEP_SCRIPT, { op: taught[k % taught.length], program, world, selected: '', lang: 'en', bumps: 0 });
+  for (let k = 0; k < taught.length; k++) {
+    const rec = run(scripts.record ?? RECORD_STEP_SCRIPT, { op: taught[k], program, world, selected: '', lang: 'en', bumps: 0 });
     program = rec.program;
     world = rec.world;
     cans.push(world.robots[0].can);
@@ -401,7 +402,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     it('🔴 AC8: a page changes only through the router — no script writes the location or the hash', () => {
       for (const spec of LOGIC_SPECS) expect({ c: spec.path, hash: /location|history\.|\.hash\b/.test(spec.script) }).toEqual({ c: spec.path, hash: false });
       const navs = componentsOf(built).flatMap((c) => nodesOf(built, c.name).filter((n) => n.type === 'RouterNavigate'));
-      expect(navs.length).toBeGreaterThan(8);
+      // P108 s8: eight since the Workshop tab (and its navigate) went — the known-firing count, not a budget.
+      expect(navs.length).toBeGreaterThanOrEqual(8);
       for (const n of navs) expect(PAGES as readonly string[]).toContain(String(params(n).target));
     });
 
@@ -746,7 +748,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
         const count = (l: Array<{ body?: unknown[] }>): number => l.reduce((n, b) => n + 1 + (Array.isArray(b.body) ? count(b.body as Array<{ body?: unknown[] }>) : 0), 0);
         return count(REQ_ROWS.find((r) => r.id === id)!.referenceProgram as Array<{ body?: unknown[] }>);
       };
-      expect([refOf('path-stones'), refOf('tulips-three')]).toEqual([7, 11]);
+      expect([refOf('path-stones'), refOf('tulips-three')]).toEqual([7, 12]);
       expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones' }).referenceCount).toBe(refOf('path-stones'));
       expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' }).referenceCount).toBe(refOf('tulips-three'));
       expect(run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' }).referenceCount).toBe(0);
@@ -801,7 +803,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const keys = (id: string) => run(PAD_KEYS_SCRIPT, { allowed: run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: id }).allowed }).keys as Array<{ op: string; cls: string; label: string }>;
       // IG-002: the stones mine first (pick), the tulips fill at the pond; free play has every step, fill included.
       expect(keys('path-stones').map((k) => k.op)).toEqual(['fwd', 'left', 'right', 'pick', 'put']);
-      expect(keys('tulips-three').map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'fill']);
+      expect(keys('tulips-three').map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'fill', 'pick']);
       // P108 IW-001 F7: say is a key where it is allowed (the drawer-driven pad has its own clause below).
       expect(keys('letter-say').map((k) => k.op)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'say']);
       expect(keys('free').map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'fill', 'pick', 'put', 'say']);
@@ -1281,10 +1283,11 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const padOf = (id: string, robot: string) => run(PAD_KEYS_SCRIPT, { palette: drawer(id, robot), allowed: [], words: WORD_ROWS, lang: 'en' }).keys as Array<{ op: string; cls: string; label: string }>;
       expect(padOf('letter-say', 'pocket').map((k) => k.op)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'say']);
       const note = padOf('mamie-note', 'pip');
-      // P108 IW-003 (lane M): Mamie's note has the can now — fill is a key, and read takes the next place.
-      expect(note.map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'fill', 'olive:read']);
+      // P108 IW-003 (lane M): Mamie's note has the can now — fill is a key, and read takes the next place. P108 s8: the
+      // can lies on the path, so pick is a key too, and read moves one place on.
+      expect(note.map((k) => k.op)).toEqual(['fwd', 'left', 'water', 'right', 'fill', 'pick', 'olive:read']);
       // A class a selector can name (no colon), a place on the pad, its icon, and its word.
-      expect(note.find((k) => k.op === 'olive:read')).toEqual({ id: 'padkey-olive-read', op: 'olive:read', cls: 'bg-key bg-key-olive-read bg-key-r3b bg-i-read bg-press', label: WORDS_BY_KEY.rungRead.en });
+      expect(note.find((k) => k.op === 'olive:read')).toEqual({ id: 'padkey-olive-read', op: 'olive:read', cls: 'bg-key bg-key-olive-read bg-key-r3c bg-i-read bg-press', label: WORDS_BY_KEY.rungRead.en });
       expect(padOf('letter-say', 'pocket').find((k) => k.op === 'say')!.cls).toBe('bg-key bg-key-say bg-key-r3b bg-i-say bg-press');
       // Every action of every request's drawer is a key (the drawer's action blocks and Olive's read).
       for (const r of REQ_ROWS) {
@@ -1379,12 +1382,13 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     }
   });
 
-  it('Start world: the tulip request starts facing its pond with an empty can (IG-002); free play is the mockup’s garden, no can; an unknown id is not found', () => {
+  it('Start world: the tulip request starts facing its pond, the empty can on the grass between them (IG-002, P108 s8); free play is the mockup’s garden, no can; an unknown id is not found', () => {
     const t = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three', nonce: 1 });
     expect(t.found).toBe(true);
-    expect(t.world.robots).toEqual([{ id: 'me', x: 1, y: 1, d: 3, carry: [], can: 0, canMax: 3 }]);
+    expect(t.world.robots).toEqual([{ id: 'me', x: 2, y: 1, d: 3, carry: [], can: null, canMax: 3 }]);
+    expect(t.world.things.filter((x: { kind: string }) => x.kind === 'can')).toEqual([{ kind: 'can', id: 'can', x: 1, y: 1, level: 0, max: 3 }]);
     expect(t.world.things.filter((x: { kind: string }) => x.kind === 'tulip')).toHaveLength(3);
-    expect(t.allowed).toEqual(['fwd', 'left', 'right', 'water', 'fill', 'repeat']);
+    expect(t.allowed).toEqual(['fwd', 'left', 'right', 'pick', 'water', 'fill', 'repeat']);
     const free = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'free' });
     expect(free.isFree).toBe(true);
     expect(free.world.robots).toEqual([{ id: 'me', x: 0, y: 3, d: 1, carry: [], can: null, canMax: 3 }]);
@@ -1416,10 +1420,14 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     expect(run(RECORD_STEP_SCRIPT, { op: 'fwd', program: '[]', world: wall, lang: 'en', bumps: 2 }).bumps).toBe(3);
     expect(run(RECORD_STEP_SCRIPT, { op: 'jump', program: '[]', world: t.world, lang: 'en' }).recorded).toBe(false);
     // IG-002: fill and pick are pad presses too — the can fills at the pond; a stone comes out of the rock.
+    // P108 s8: the can is on the grass — a fill before picking it up is "no can"; picked, a step, then the pond fills it.
     const tul = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three' });
-    const filled = run(RECORD_STEP_SCRIPT, { op: 'fill', program: '[]', world: tul.world, selected: '', lang: 'en', bumps: 0 });
-    expect([filled.recorded, filled.sayKey, filled.world.robots[0].can, JSON.parse(filled.program)]).toEqual([true, 'sayFill', 3, [{ id: 1, t: 'fill' }]]);
-    const dry = run(RECORD_STEP_SCRIPT, { op: 'water', program: '[]', world: tul.world, selected: '', lang: 'en', bumps: 0 });
+    expect(run(RECORD_STEP_SCRIPT, { op: 'fill', program: '[]', world: tul.world, selected: '', lang: 'en', bumps: 0 }).sayKey).toBe('sayNoCan');
+    const held = run(RECORD_STEP_SCRIPT, { op: 'pick', program: '[]', world: tul.world, selected: '', lang: 'en', bumps: 0 });
+    const atPond = run(RECORD_STEP_SCRIPT, { op: 'fwd', program: held.program, world: held.world, selected: '', lang: 'en', bumps: 0 });
+    const filled = run(RECORD_STEP_SCRIPT, { op: 'fill', program: atPond.program, world: atPond.world, selected: '', lang: 'en', bumps: 0 });
+    expect([filled.recorded, filled.sayKey, filled.world.robots[0].can, JSON.parse(filled.program)]).toEqual([true, 'sayFill', 3, [{ id: 1, t: 'pick' }, { id: 2, t: 'fwd' }, { id: 3, t: 'fill' }]]);
+    const dry = run(RECORD_STEP_SCRIPT, { op: 'water', program: '[]', world: atPond.world, selected: '', lang: 'en', bumps: 0 });
     expect([dry.sayKey, dry.world.robots[0].can, dry.bumps]).toEqual(['sayDry', 0, 0]);
     // P108 IW-003 (lane S): on seed 1 the first rock is at 2,1 — turn, step up, pick: a stone, the rock keeps seven.
     const st = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', seed: 1 });
@@ -1674,24 +1682,24 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
   it('🔴 AC3 in plain JS: teach the tulips’ fetch-and-return dance ×3 (4 blocks after 4), fold, play to the end, the goal met, the hat owned, the trick blooming', () => {
     const r = playTulips();
     expect(r.after4).toBe(4);
-    expect(r.read.blocks).toBe(TULIP_DANCE.length * 3);
+    expect(r.read.blocks).toBe(1 + TULIP_DANCE.length * 3);
     expect(r.taughtWorld.things.filter((x: { watered?: boolean }) => x.watered)).toHaveLength(3);
     // IG-002: the can, press by press — filled to 3 at the pond, one spent per water, filled again on the next pass.
-    // IW-003 (lane M): three pours empty it on one tulip.
-    expect(r.cans.slice(0, 11)).toEqual([3, 3, 3, 3, 2, 1, 0, 0, 0, 0, 0]);
-    expect(r.cans[11]).toBe(3);
+    // IW-003 (lane M): three pours empty it on one tulip. P108 s8: picked up empty off the grass first.
+    expect(r.cans.slice(0, 12)).toEqual([0, 0, 3, 3, 3, 3, 2, 1, 0, 0, 0, 0]);
+    expect(r.cans[13]).toBe(3);
+    expect(r.taughtWorld.things.filter((x: { kind: string }) => x.kind === 'can')).toEqual([]);
     expect([r.find.offer, r.find.len, r.find.count]).toEqual([true, TULIP_DANCE.length, 3]);
-    expect(r.fold.program).toHaveLength(1);
-    expect(r.fold.program[0].t).toBe('repeat');
-    expect(r.fold.program[0].body).toHaveLength(TULIP_DANCE.length);
-    expect([r.find2.offer, r.find2.containerId, r.find2.i, r.find2.len, r.find2.count]).toEqual([true, r.fold.repeatId, 4, 1, 3]);
-    expect(r.fold2.blocks).toBe(11);
+    expect(r.fold.program.map((b: { t: string }) => b.t)).toEqual(['pick', 'repeat']);
+    expect(r.fold.program[1].body).toHaveLength(TULIP_DANCE.length);
+    expect([r.find2.offer, r.find2.containerId, r.find2.i, r.find2.len, r.find2.count]).toEqual([true, r.fold.repeatId, 5, 1, 3]);
+    expect(r.fold2.blocks).toBe(12);
     expect(r.last.done).toBe(true);
     expect(r.goal.met).toBe(true);
     expect(r.playedWorld.robots[0].can).toBe(0);
     expect(r.summary.bloom).toEqual([1, 2]);
-    // The reference is eleven blocks (over MANY_BLOCKS): the win says Neat, not "it could be shorter" (IG-002).
-    expect(r.summary.line).toBe('11 blocks. Neat!');
+    // The reference is twelve blocks (over MANY_BLOCKS): the win says Neat, not "it could be shorter" (IG-002).
+    expect(r.summary.line).toBe('12 blocks. Neat!');
     expect(r.summary.learnText).toBe('Pip learned: repeat');
     expect(r.done.island.done).toEqual(['tulips-three']);
     expect(r.done.profiles[0].hats).toEqual(['sun']);
@@ -2027,7 +2035,8 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       expect(run(m, { model: fam, profileId: fam.island.activeId, field: 'hat', value: 'crown' }).changed).toBe(true);
     });
     it('Start world shares the request’s own things with the world (no copy) → killed', () => {
-      const m = mutate(START_WORLD_SCRIPT, 'things: JSON.parse(JSON.stringify(req.things || []))', 'things: req.things');
+      // P108 s8: the copy is made once, before the can is sized to the robot's (startThings).
+      const m = mutate(START_WORLD_SCRIPT, 'var startThings = JSON.parse(JSON.stringify(req.things || []));', 'var startThings = req.things || [];');
       const reqs = JSON.parse(JSON.stringify(REQ_ROWS));
       const t = run(m, { requests: reqs, requestId: 'tulips-three' });
       t.world.things[0].watered = true;
@@ -2103,7 +2112,10 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
       const pip = rows.find((r: any) => r.kind === 'pip');
       const cobble = rows.find((r: any) => r.kind === 'cobble');
       const tul = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three', robot: pip, robotKey: 'k' });
-      expect([tul.needs, tul.world.robots[0].can, tul.world.robots[0].canMax, tul.world.robots[0].look.accessory]).toEqual(['pip', 0, 6, 'can']);
+      // P108 s8: the can lies on the grass — with can+ it is the bigger can lying there (picked up, Pip holds six).
+      expect([tul.needs, tul.world.robots[0].canMax, tul.world.things.find((x: any) => x.kind === 'can').max, tul.world.robots[0].look.accessory]).toEqual(['pip', 6, 6, 'can']);
+      const pickedBig = run(RECORD_STEP_SCRIPT, { op: 'pick', program: '[]', world: tul.world, selected: '', lang: 'en', bumps: 0 }).world.robots[0];
+      expect([pickedBig.holds, pickedBig.can, pickedBig.canMax]).toEqual(['can', 0, 6]);
       const st = run(START_WORLD_SCRIPT, { requests: REQ_ROWS, requestId: 'path-stones', robot: cobble, robotKey: 'k' });
       expect([st.needs, st.world.robots[0].basket, st.world.robots[0].look]).toEqual(['cobble', 8, { name: 'Cobble', colour: '#7A8CA3', eyes: 'round', hat: 'none', accessory: 'hod' }]);
       const drawn = run(DRAW_WORLD_SCRIPT, { world: st.world, words: WORD_ROWS, lang: 'en', botName: 'Pip', color: '#FF7A59' }).robots[0];
@@ -2372,7 +2384,7 @@ describe('P108 IW-003 (lane M) — the pad walks to things; a robot that finds n
     return run(PALETTE_SCRIPT, { band: 2, allowed: st.allowed, rungs: st.rungs, robot, needs: st.needs, lang: 'en', words: WORD_ROWS }).palette;
   };
   const padOf = (id: string, robot: string, world?: unknown) => run(PAD_KEYS_SCRIPT, { palette: drawer(id, robot), allowed: [], words: WORD_ROWS, lang: 'en', world: world ?? start(id).world }).keys as Array<{ id: string; op: string; cls: string; label: string }>;
-  const place = (cls: string) => cls.split(' ').find((c) => /^bg-key-(fwd|left|right|mid|r[34][abc])$/.test(c));
+  const place = (cls: string) => cls.split(' ').find((c) => /^bg-key-(fwd|left|right|mid|r[345][abc])$/.test(c)); // P108 s8: + a fifth row
 
   it('🔴 the eggs’ pad has a key to the nearest egg and one to the basket (IW-001 F7: the drawer has both walks); each records its block and walks the whole way', () => {
     const keys = padOf('eggs-count', 'pocket');

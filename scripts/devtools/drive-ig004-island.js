@@ -294,7 +294,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
 
       if (tag === '1368-en') {
         // AC7: the save code round-trips through the Grown-ups box, the pinned plot with it.
-        await tab(4);
+        await tab(3);
         await until('location.pathname', (p) => p === '/grown-ups');
         await wait(1000);
         const code = await evaluate(`(() => { const e = document.querySelector('.bg-code'); return e ? e.innerText.trim() : ''; })()`);

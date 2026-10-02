@@ -168,11 +168,10 @@
     {
       "id": "brTabs",
       "type": "Group",
-      "label": "The five screens",
+      "label": "The four screens",
       "parent": "brBar",
       "children": [
         "brTab_island",
-        "brTab_workshop",
         "brTab_robot",
         "brTab_skills",
         "brTab_grown"
@@ -198,20 +197,12 @@
       "y": 640
     },
     {
-      "id": "brTab_workshop",
-      "type": "/Garden/Tab",
-      "label": "Tab: workshop",
-      "parent": "brTabs",
-      "x": 160,
-      "y": 760
-    },
-    {
       "id": "brTab_robot",
       "type": "/Garden/Tab",
       "label": "Tab: robot",
       "parent": "brTabs",
       "x": 160,
-      "y": 880
+      "y": 760
     },
     {
       "id": "brTab_skills",
@@ -219,7 +210,7 @@
       "label": "Tab: skills",
       "parent": "brTabs",
       "x": 160,
-      "y": 1000
+      "y": 880
     },
     {
       "id": "brTab_grown",
@@ -227,7 +218,7 @@
       "label": "Tab: grown",
       "parent": "brTabs",
       "x": 160,
-      "y": 1120
+      "y": 1000
     },
     {
       "id": "brBandSeg",
@@ -269,7 +260,7 @@
         "cssClassName": "bg-seg"
       },
       "x": 100,
-      "y": 1240
+      "y": 1120
     },
     {
       "id": "brBand1",
@@ -280,7 +271,7 @@
         "label": "7–9"
       },
       "x": 160,
-      "y": 1360
+      "y": 1240
     },
     {
       "id": "brBand2",
@@ -291,7 +282,7 @@
         "label": "10–12"
       },
       "x": 160,
-      "y": 1480
+      "y": 1360
     },
     {
       "id": "brLangSeg",
@@ -333,7 +324,7 @@
         "cssClassName": "bg-seg"
       },
       "x": 100,
-      "y": 1600
+      "y": 1480
     },
     {
       "id": "brEn",
@@ -344,7 +335,7 @@
         "label": "EN"
       },
       "x": 160,
-      "y": 1720
+      "y": 1600
     },
     {
       "id": "brFr",
@@ -355,7 +346,7 @@
         "label": "FR"
       },
       "x": 160,
-      "y": 1840
+      "y": 1720
     },
     {
       "id": "brWho",
@@ -377,7 +368,7 @@
         "mounted": false
       },
       "x": 100,
-      "y": 1960
+      "y": 1840
     },
     {
       "id": "brFace",
@@ -391,7 +382,7 @@
         "background": "var(--sun)"
       },
       "x": 160,
-      "y": 2080
+      "y": 1960
     },
     {
       "id": "brWhoName",
@@ -409,7 +400,7 @@
         "color": "var(--ink)"
       },
       "x": 160,
-      "y": 2200
+      "y": 2080
     },
     {
       "id": "brT",
@@ -434,7 +425,7 @@
         "value": "en"
       },
       "x": 410,
-      "y": 1720
+      "y": 1600
     },
     {
       "id": "brSetFr",
@@ -445,7 +436,7 @@
         "value": "fr"
       },
       "x": 410,
-      "y": 1960
+      "y": 1840
     },
     {
       "id": "brSetB1",
@@ -456,7 +447,7 @@
         "value": 1
       },
       "x": 410,
-      "y": 1360
+      "y": 1240
     },
     {
       "id": "brSetB2",
@@ -467,7 +458,7 @@
         "value": 2
       },
       "x": 410,
-      "y": 1480
+      "y": 1360
     },
     {
       "id": "brChanged",
@@ -477,7 +468,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2200
+      "y": 2080
     },
     {
       "id": "brGo_island",
@@ -491,17 +482,6 @@
       "y": 760
     },
     {
-      "id": "brGo_workshop",
-      "type": "RouterNavigate",
-      "label": "To workshop",
-      "parameters": {
-        "router": "Main",
-        "target": "/Pages/Workshop"
-      },
-      "x": 410,
-      "y": 880
-    },
-    {
       "id": "brGo_robot",
       "type": "RouterNavigate",
       "label": "To robot",
@@ -510,7 +490,7 @@
         "target": "/Pages/My robot"
       },
       "x": 410,
-      "y": 1000
+      "y": 880
     },
     {
       "id": "brGo_skills",
@@ -521,7 +501,7 @@
         "target": "/Pages/Skills"
       },
       "x": 410,
-      "y": 1120
+      "y": 1000
     },
     {
       "id": "brGo_grown",
@@ -532,7 +512,7 @@
         "target": "/Pages/Grown-ups"
       },
       "x": 410,
-      "y": 1240
+      "y": 1120
     },
     {
       "id": "brGoProfiles",
@@ -543,7 +523,7 @@
         "target": "/Pages/Profiles"
       },
       "x": 410,
-      "y": 2080
+      "y": 1960
     },
     {
       "id": "brOut",
@@ -572,7 +552,7 @@
         }
       ],
       "x": 410,
-      "y": 1840
+      "y": 1720
     }
   ],
   "visualRoots": [

@@ -68,6 +68,8 @@ import { ENVELOPE_NOTES } from './cg005Olive';
 import { HEN_CAPACITY, JOB_ITEMS, JOB_KINDS, SITE_STAGES, WALL_TILE, WEAR } from './cg002Content';
 // P108 IW-007 (s5 base): the sources a pick mines, the blueprints' stages, the land's save shape.
 import { ANIMALS_JSON, BLUEPRINTS, BLUEPRINTS_JSON, LAND_ID, PLOT_H, PLOT_W, SOURCE_ITEMS } from './cg002Content';
+// P108 s8: her land's sources' most (a save's land.left is bounded by it).
+import { LAND_SOURCES } from './cg002Content';
 // P108 IW-006 / IW-008 (session-4 base): the economy's names.
 import { BRAIN_SIZE, BRAIN_SIZES, CREW_CAP, SHOP_JSON } from './cg002Content';
 
@@ -262,6 +264,10 @@ var PICKABLE = { letter: 1, egg: 1, stone: 1, food: 1, ball: 1, plank: 1, carrot
 // P108 IW-007 (s5 base): a source a pick mines (one of its item per pick, its left shrinking; one with a max regrows) and
 // each blueprint's number of stages (a building's parts share one stage, bstage, by the share of ALL its materials in).
 var SOURCE_ITEMS = ${JSON.stringify(SOURCE_ITEMS)};
+/** P108 s8: the items a place can want that the robot names when it is handed another (sayWants<Item>). */
+var WANTS_SAID = { stone: 1, plank: 1, egg: 1, food: 1, ball: 1, carrot: 1 };
+/** P108 s8: the sources that grow back and say so when picked empty (sayGrows<Kind>). */
+var GROWS_SAID = { rock: 1, tree: 1, patch: 1 };
 var BUILD_STAGES = ${JSON.stringify(Object.fromEntries(BLUEPRINTS.map((b) => [b.id, b.stages])))};
 var UNTIL_GUARD = ${UNTIL_GUARD};
 var MAX_TRICK_DEPTH = ${MAX_TRICK_DEPTH};
@@ -1128,7 +1134,8 @@ function exec(w, run, s, delta) {
     if (!it && rock && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: SOURCE_ITEMS[rock.kind], x: f.x, y: f.y, rock: true }; if (rock.kind !== 'rock') delta.pick.source = rock.kind; delta.sayKey = 'sayPick'; return; }
     if (!it && !rock && box && r.carry.length < basketOf(r)) { delta.pick = { id: r.id, kind: itemOf(box), x: f.x, y: f.y, box: true, from: String(box.id || '') }; delta.meter = meterDelta(box, f.x, f.y, meterOf(box).have - 1); mailPick(box, delta); delta.sayKey = 'sayPick'; return; }
     // A pick where a rock was used up: a bump with nothing carried (the rockGone hint names why).
-    if (!it && !rock && (spentAt(w, f.x, f.y) || rock0)) { run.rockGone++; run.bumps++; delta.bump = { id: r.id, x: f.x, y: f.y }; delta.rockGone = { x: f.x, y: f.y }; delta.sayKey = 'sayBump'; return; }
+    // P108 s8 (ruled: "keep the wait, but show it"): a source that grows back says so (sayGrows<Kind>), not a plain bump.
+    if (!it && !rock && (spentAt(w, f.x, f.y) || rock0)) { run.rockGone++; run.bumps++; delta.bump = { id: r.id, x: f.x, y: f.y }; delta.rockGone = { x: f.x, y: f.y }; delta.sayKey = rock0 && GROWS_SAID[rock0.kind] ? 'sayGrows' + rock0.kind.charAt(0).toUpperCase() + rock0.kind.slice(1) : 'sayBump'; return; }
     delta.nothing = true; return;
   }
   if (s.op === 'put') {
@@ -1139,7 +1146,8 @@ function exec(w, run, s, delta) {
     var top = r.carry.length ? String(r.carry[r.carry.length - 1]) : '', into = null, ahead = thingsAt(w, f.x, f.y);
     for (var ai = 0; ai < ahead.length && !into; ai++) if (ahead[ai].kind === 'site' || ahead[ai].kind === 'basket' || ahead[ai].kind === 'store') into = ahead[ai];
     if (into && top) {
-      if (top !== itemOf(into)) { delta.nothing = true; return; }
+      // P108 s8: the wrong item for this place stays carried, and the robot says what the place wants (it said nothing).
+      if (top !== itemOf(into)) { var want = String(itemOf(into) || ''); delta.nothing = true; delta.wrong = { id: r.id, x: f.x, y: f.y, wants: want, has: top }; delta.sayKey = WANTS_SAID[want] ? 'sayWants' + want.charAt(0).toUpperCase() + want.slice(1) : 'sayWrongItem'; return; }
       var im = meterOf(into);
       if (im.have >= im.need) { delta.full = { id: String(into.id || ''), x: f.x, y: f.y }; delta.sayKey = 'sayFull'; return; }
       delta.stow = { id: r.id, kind: top, x: f.x, y: f.y, into: String(into.id || ''), target: into.kind };
@@ -1155,7 +1163,8 @@ function exec(w, run, s, delta) {
     if (bowl.length && kind === itemOf(bowl[0]) && isFull(bowl[0])) { delta.full = { id: String(bowl[0].id || ''), x: f.x, y: f.y }; delta.sayKey = 'sayFull'; return; }
     if (bowl.length && kind === itemOf(bowl[0]) && Number(bowl[0].capacity) > 0) delta.meter = meterDelta(bowl[0], f.x, f.y, meterOf(bowl[0]).have + 1);
     // P108 IW-007 (s5 base): a bowl takes its own item (food, or an animal's carrots), nothing else.
-    if (bowl.length) { if (kind === itemOf(bowl[0])) { delta.feed = { id: r.id, x: f.x, y: f.y }; delta.sayKey = 'sayPut'; return; } delta.nothing = true; return; }
+    // P108 s8: anything else stays carried, and the robot says what the bowl wants.
+    if (bowl.length) { if (kind === itemOf(bowl[0])) { delta.feed = { id: r.id, x: f.x, y: f.y }; delta.sayKey = 'sayPut'; return; } var bw = String(itemOf(bowl[0]) || ''); delta.nothing = true; delta.wrong = { id: r.id, x: f.x, y: f.y, wants: bw, has: kind }; delta.sayKey = WANTS_SAID[bw] ? 'sayWants' + bw.charAt(0).toUpperCase() + bw.slice(1) : 'sayWrongItem'; return; }
     if (tileAt(w, f.x, f.y) !== '' && !blocked(w, f.x, f.y)) { delta.put = { id: r.id, kind: kind, x: f.x, y: f.y }; delta.sayKey = 'sayPut'; return; }
     delta.nothing = true; return;
   }
@@ -1843,6 +1852,8 @@ var SHOP = ${SHOP_JSON};
 var BLUEPRINTS = ${BLUEPRINTS_JSON};
 var ANIMALS = ${ANIMALS_JSON};
 var LAND_W = ${PLOT_W}, LAND_H = ${PLOT_H};
+/** P108 s8: her land's sources by id, the most each holds (land.left, as the island last wrote it, is bounded by it). */
+var LAND_LEFT_MAX = ${JSON.stringify(Object.fromEntries(LAND_SOURCES.map((t) => [String(t.id), Number(t.max)])))};
 function newId(prefix) { return prefix + Date.now().toString(36) + Math.floor(Math.random() * 46656).toString(36); }
 function tricksOf(raw) {
   var out = {};
@@ -2080,6 +2091,13 @@ function landOf(raw) {
     if (!home || !(slot >= 0 && slot < blueprintSpec(home.bp).pen) || slots[home.id + ':' + slot]) continue;
     ids[aid] = 1; slots[home.id + ':' + slot] = 1;
     out.animals.push({ id: aid, kind: as.id, name: typeof a.name === 'string' ? a.name.trim().slice(0, ROBOT_NAME_MAX) : '', at: home.id, slot: slot, fed: Math.max(0, Math.min(as.capacity, Math.floor(Number(a.fed)) || 0)) });
+  }
+  // P108 s8 (Richard, 2026-10-02: the Workshop shows the island's real amount): what each source has left, as the island
+  // last wrote it (landKeep). Optional: a land without it (every save before s8) has its sources as first laid.
+  if (r.left && typeof r.left === 'object' && !Array.isArray(r.left)) {
+    var left = {}, anyLeft = false;
+    for (var sid in LAND_LEFT_MAX) if (isFinite(Number(r.left[sid])) && r.left[sid] !== null && r.left[sid] !== '') { left[sid] = Math.max(0, Math.min(LAND_LEFT_MAX[sid], Math.floor(Number(r.left[sid])))); anyLeft = true; }
+    if (anyLeft) out.left = left;
   }
   return out;
 }

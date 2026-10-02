@@ -779,7 +779,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       // held as the page closed (a tick already in flight may land as it closes) is read twice while it is closed: it must
       // not move; opened again, the island goes on from it (never from a fresh build: age 1, the tulip dry).
       const before = await held();
-      await tab(2);
+      await tab(1);
       await until('location.pathname', (p) => p === '/robot');
       const away = (WEAR.tulip + 10) * ISLAND_TICK_MS;
       await wait(3000);

@@ -273,18 +273,24 @@ ${owlColourRule}
    clamp(440px, 50vw, 780px), from 1200 px up; 43vw under it. Measured: at 1024 × 768 a half-page column made the pad wrap
    under the world and pushed Play below the fold; at 1368 a 43vw column (588 px) clipped Olive's widest blocks in French
    (say thank you … and its deed) off the workspace's right edge. */
-.bg-ws { display: grid !important; grid-template-columns: minmax(0, 1fr) clamp(420px, 43vw, 780px); gap: 16px; align-items: start; }
-@media (min-width: 1200px) { .bg-ws { grid-template-columns: minmax(0, 1fr) clamp(440px, 50vw, 780px); } }
-@media (max-width: 980px) { .bg-ws { grid-template-columns: minmax(0, 1fr); } }
-.bg-stage { position: relative !important; width: 100%; max-width: 640px; margin: 0 auto; }
+/* P108 s8 (Richard, 2026-10-02: "the width of the blockly bit is too wide … make the middle divider possible to drag"): a
+   divider between the columns (garden-kit.Divider) sets --bg-steps-w; until it is dragged the steps take 44vw from
+   1200 px up (50vw before s8; 44vw is the narrowest measured to keep Olive's widest French blocks whole at 1368, 588 px)
+   and the world takes the rest, no longer capped at 640 px but by the window's height (its 4:3 plot under the head and
+   above Play). */
+.bg-ws { --bg-world-max: min(1100px, calc((100vh - 230px) * 4 / 3)); display: grid !important; grid-template-columns: minmax(0, 1fr) 16px var(--bg-steps-w, clamp(420px, 43vw, 780px)); gap: 16px 0; align-items: start; }
+@media (min-width: 1200px) { .bg-ws { grid-template-columns: minmax(0, 1fr) 16px var(--bg-steps-w, clamp(440px, 44vw, 780px)); } }
+@media (max-width: 980px) { .bg-ws { grid-template-columns: minmax(0, 1fr); } .bg-ws > .gd-divider { display: none !important; } }
+.bg-stage { position: relative !important; width: 100%; max-width: var(--bg-world-max, 640px); margin: 0 auto; }
+.bg-stage .gd-world, .bg-stage .gd3-world { max-width: var(--bg-world-max, 640px) !important; }
 /* P106 s4 (b): with the pad on (Drive, Teach) the stage is the world and the pad side by side, so no key hides a tile (s3:
    the pad sat on the plot's lower-right tiles — a rock, a tree, the path's end). The world keeps 640 px where it fits and
    gives way down to 300 (1024 × 768: 352 px, the pad and the bar still on the first screen; at a 400 basis the pad
    wrapped under the world and off it); only then does the pad wrap under it. A phone keeps the pad over the corner (the
    media rule under the pad's): there is no room beside, and under the world it would push Play off the first screen
    (CG-003 AC4). */
-.bg-stage:has(> .bg-pad) { max-width: 836px; display: flex !important; flex-direction: row !important; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 16px; }
-.bg-stage:has(> .bg-pad) > :not(.bg-pad):not(.bg-rec) { flex: 1 1 300px; max-width: 640px; min-width: 0; }
+.bg-stage:has(> .bg-pad) { max-width: calc(var(--bg-world-max, 640px) + 196px); display: flex !important; flex-direction: row !important; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 16px; }
+.bg-stage:has(> .bg-pad) > :not(.bg-pad):not(.bg-rec) { flex: 1 1 300px; max-width: var(--bg-world-max, 640px); min-width: 0; }
 .bg-stage .gd-world { border: 4px solid var(--world-edge); border-radius: 16px; }
 .bg-rec { position: absolute !important; left: 10px !important; top: 10px !important; z-index: 6; box-shadow: var(--shadow-soft); pointer-events: none; }
 .bg-rec::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--coral); margin-right: 8px; animation: bg-blink 1s infinite; }
@@ -333,6 +339,10 @@ ${owlColourRule}
 .bg-key-r4a { grid-column: 1; grid-row: 4; }
 .bg-key-r4b { grid-column: 2; grid-row: 4; }
 .bg-key-r4c { grid-column: 3; grid-row: 4; }
+/* P108 s8: a fifth row (her land's go keys: the rock, the tree, the patch, beside the actions). */
+.bg-key-r5a { grid-column: 1; grid-row: 5; }
+.bg-key-r5b { grid-column: 2; grid-row: 5; }
+.bg-key-r5c { grid-column: 3; grid-row: 5; }
 .bg-key-olive-read { color: var(--violet-ink); background-color: var(--violet-2) !important; }
 .bg-key-water { color: var(--pond-2); background-color: var(--water-key) !important; }
 .bg-key-right { grid-column: 3; grid-row: 2; }

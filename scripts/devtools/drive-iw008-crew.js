@@ -335,7 +335,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
 
     if (tag === '1368-en') {
       // AC1: the save code round-trips the crew through the Grown-ups box.
-      await tab(4);
+      await tab(3);
       await until('location.pathname', (x) => x === '/grown-ups');
       await wait(1000);
       const code = await evaluate(`(() => { const e = document.querySelector('.bg-code'); return e ? e.innerText.trim() : ''; })()`);
@@ -383,7 +383,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     }
 
     // AC2: copy a program on My robots.
-    await tab(2);
+    await tab(1);
     await until('location.pathname', (x) => x === '/my-robot' || x.includes('robot'));
     await wait(1400);
     const CARDS = `[...document.querySelectorAll('.bg-robot-card')].filter((c) => c.offsetParent !== null).map((c) => { const t = (s) => { const e = c.querySelector(s); return e && e.offsetParent !== null ? e.innerText.trim() : null; }; const inp = c.querySelector('input'); return { name: inp && inp.offsetParent !== null ? inp.value : t('h3'), brain: t('.bg-robot-brain'), where: t('.bg-robot-where'), copy: [...c.querySelectorAll('.bg-robot-copy .bg-chip')].filter((e) => e.offsetParent !== null).map((e) => e.innerText.trim()), said: t('.bg-robot-said'), locked: c.className.includes('bg-robot-locked') }; })`;
@@ -422,7 +422,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     await page.setViewport(VIEWPORTS[vpName]);
     await page.navigate('/island');
     await wait(900);
-    await tab(2);
+    await tab(1);
     await wait(1400);
     const layout = await evaluate(`(() => { const cards = [...document.querySelectorAll('.bg-robot-card')].filter((c) => c.offsetParent !== null); const vw = document.documentElement.clientWidth; return { names: cards.map((c) => { const i = c.querySelector('input'); return i && i.offsetParent !== null ? i.value : (c.querySelector('h3') || {}).innerText; }), n: cards.length, owned: cards.filter((c) => !c.className.includes('bg-robot-locked')).length, brains: cards.filter((c) => { const b = c.querySelector('.bg-robot-brain'); return b && b.offsetParent !== null && b.innerText.trim().length > 0; }).length, sideways: document.scrollingElement.scrollWidth > vw + 1, outside: cards.filter((c) => { const r = c.getBoundingClientRect(); return r.left < -1 || r.right > vw + 1; }).length, vw }; })()`);
     readings[`layout-${vpName}`] = layout;

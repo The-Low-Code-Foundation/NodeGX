@@ -165,7 +165,7 @@ const FIXTURES: Record<string, Program> = {
 describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', () => {
   it('the kit registers garden-kit.Blocks beside Block List and Garden; it draws an empty box on the server and throws nothing without Blockly', () => {
     const names = kit.reactNodes.map((n: any) => n.name).sort();
-    expect(names).toEqual(['garden-kit.BlockList', 'garden-kit.Blocks', 'garden-kit.Garden']);
+    expect(names).toEqual(['garden-kit.BlockList', 'garden-kit.Blocks', 'garden-kit.Divider', 'garden-kit.Garden']); // P108 s8: + Divider
     const node = blocksNode();
     expect(node.ssr).toEqual({ compat: 'safe' });
     expect(typeof node.translate.toBlockly).toBe('function');

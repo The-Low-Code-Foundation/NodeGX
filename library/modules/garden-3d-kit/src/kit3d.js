@@ -169,6 +169,12 @@
         // P108 IW-002 (lane D): a robot that holds the can (the engine's `holds: 'can'`) carries it whatever it wears; the
         // field is there only when it holds it, so a robot row without it parses exactly as before.
         if (r.holds === 'can') o.holds = 'can';
+        // P108 s8: a pad press's walk — every tile the robot stepped onto, in order, the last its x, y (Record step's via).
+        // Drawn a tile at a time; a via that does not join where the robot was drawn is ignored (walkTiles).
+        if (Array.isArray(r.via) && r.via.length > 1) {
+          var via = r.via.map(function (t) { return Array.isArray(t) ? [Number(t[0]), Number(t[1])] : [NaN, NaN]; });
+          if (via.every(function (t) { return isFinite(t[0]) && isFinite(t[1]); })) o.via = via;
+        }
         return o;
       });
   }
@@ -266,9 +272,15 @@
       need = wholeOf(t.max);
       have = wholeOf(t.left) || 0;
       icon = 'carrot';
+    } else if (t.kind === 'tree') {
+      // P108 s8: her land's tree, like a rock — the planks left of its max (it had no chip: the planks left went unseen).
+      if (!wholeOf(t.max)) return null;
+      need = wholeOf(t.max);
+      have = wholeOf(t.left) || 0;
+      icon = 'plank';
     } else return null;
     if (need > 0 && have > need) have = need;
-    return {
+    var meter = {
       kind: t.kind,
       icon: METER_ICONS[icon] ? icon : 'dot',
       have: have,
@@ -277,6 +289,10 @@
       text: need > 0 ? have + '/' + need : String(have),
       full: (row.role === 'target' || row.role === 'container') && need > 0 && have >= need
     };
+    // P108 s8 (ruled: "keep the wait, but show it"): a source under its max grows back (on the island's tick) — its chip
+    // says so. Only when it does, so every other meter reads as before.
+    if ((t.kind === 'rock' || t.kind === 'tree' || t.kind === 'patch') && need > 0 && have < need) meter.grows = true;
+    return meter;
   }
   /** A path site's look: its `stage` when the engine wrote one, else the engine's own rule by have/need (0 · under half · under full · full). */
   function siteStage(t) {
@@ -341,6 +357,28 @@
    * a robot standing right above another, it is the upper one whose pill goes over. No width (no name) takes no room. A COPY of
    * garden-kit's (pinned by ig007Garden3d): here the pills are placed in screen px every frame.
    */
+  /**
+   * P108 s8: the tiles of a robot's walk, from the tile it was last drawn on (prev, [x, y]) — its via when the via starts
+   * one step from prev, goes one step at a time and ends where the robot is; else null (a stale via, or none). The same
+   * rule as garden-kit's walkTiles.
+   */
+  function walkTiles(prev, r) {
+    var v = r && r.via;
+    if (!prev || !Array.isArray(v) || v.length < 2) return null;
+    var last = v[v.length - 1];
+    if (last[0] !== r.x || last[1] !== r.y) return null;
+    var a = prev;
+    for (var i = 0; i < v.length; i++) {
+      if (Math.abs(v[i][0] - a[0]) + Math.abs(v[i][1] - a[1]) !== 1) return null;
+      a = v[i];
+    }
+    return v;
+  }
+  /** The way a robot faces stepping from tile a to tile b (0 up, 1 right, 2 down, 3 left). */
+  function stepFacing(a, b) {
+    return b[1] < a[1] ? 0 : b[0] > a[0] ? 1 : b[1] > a[1] ? 2 : 3;
+  }
+
   function pillSides(items) {
     var placed = [], out = [];
     function meets(a) {
@@ -373,7 +411,7 @@
     return out;
   }
 
-  var LOCAL_WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, rose: rose, pillSides: pillSides, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, job: JOB_LOOK, source: 'local' };
+  var LOCAL_WORLD = { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, rose: rose, pillSides: pillSides, walkTiles: walkTiles, stepFacing: stepFacing, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, job: JOB_LOOK, source: 'local' };
 
   /**
    * garden-kit’s `Garden.world` if that kit is on the page. Modules land in `window.__noodl_modules` in load order and
@@ -2147,6 +2185,13 @@
         e.appendChild(pips);
       }
       e.appendChild(part('span', 'gd3-mt', m.text));
+      // P108 s8: a source growing back wears a sprout after its numbers (garden-kit's gd-grow).
+      if (m.grows) {
+        e.setAttribute('data-grows', 'true');
+        var sprout = part('span', 'gd3-grow', '\uD83C\uDF31');
+        sprout.setAttribute('aria-label', 'growing back');
+        e.appendChild(sprout);
+      }
       return e;
     };
     var rebuildOverlay = function () {
@@ -2499,6 +2544,7 @@
               a.bump = oa.bump;
               a.bumpStart = oa.bumpStart;
               a.seenBump = oa.seenBump;
+              a.path = oa.path;
             }
           }
           return a;
@@ -2521,6 +2567,18 @@
         if (!g || !a) return;
         var p = tileCentre(world.map, r.x, r.y);
         var goal = { x: p.x + g.userData.offset[0], z: p.z + g.userData.offset[1], yaw: (-r.d * Math.PI) / 2, tileY: tileHeight(kindAt(world.map, r.x, r.y) || 'grass') };
+        // P108 s8: a walk (the robot's via) glides a tile at a time, facing each step; the last step turns to r.d.
+        var was = previous && previous.robots ? previous.robots[i] : null;
+        var tiles = !reduced && was && (was.x !== r.x || was.y !== r.y) ? walkTiles([was.x, was.y], r) : null;
+        if (tiles) {
+          var steps = tiles.map(function (t, k) {
+            var q = tileCentre(world.map, t[0], t[1]);
+            var yaw = k === tiles.length - 1 ? goal.yaw : (-stepFacing(k ? tiles[k - 1] : [was.x, was.y], t) * Math.PI) / 2;
+            return { x: q.x + g.userData.offset[0], z: q.z + g.userData.offset[1], yaw: yaw, tileY: tileHeight(kindAt(world.map, t[0], t[1]) || 'grass') };
+          });
+          goal = steps[0];
+          a.path = steps.slice(1);
+        } else if (was && (was.x !== r.x || was.y !== r.y)) a.path = null;
         if (Math.abs(goal.x - a.goal.x) > 1e-6 || Math.abs(goal.z - a.goal.z) > 1e-6) {
           a.from = { x: g.position.x, z: g.position.z, y: g.position.y };
           a.start = now();
@@ -2577,6 +2635,18 @@
           z = a.from.z + (a.goal.z - a.from.z) * e2;
           y = a.from.y + (a.goal.tileY - a.from.y) * e2;
           if (k2 >= 1) a.from = null;
+          // P108 s8: the walk's next tile (a.path), from the tile just reached, turning to face the step.
+          if (k2 >= 1 && a.path && a.path.length) {
+            var next = a.path.shift();
+            a.from = { x: a.goal.x, z: a.goal.z, y: a.goal.tileY };
+            a.start = t;
+            a.ms = stepMs;
+            if (Math.abs(shortestYaw(a.goal.yaw, next.yaw)) > 1e-6) {
+              a.yawFrom = a.goal.yaw;
+              a.yawStart = t;
+            }
+            a.goal = next;
+          }
         }
         var yaw = a.goal.yaw;
         if (a.yawStart && !reduced) {

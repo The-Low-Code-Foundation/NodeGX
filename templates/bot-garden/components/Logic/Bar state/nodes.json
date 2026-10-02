@@ -32,7 +32,7 @@
       "type": "JavaScriptFunction",
       "label": "Bar state",
       "parameters": {
-        "functionScript": "\nvar page = String(Inputs.page || '');\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nOutputs.islandOn = page === 'island';\nOutputs.workshopOn = page === 'workshop';\nOutputs.robotOn = page === 'robot';\nOutputs.skillsOn = page === 'skills';\nOutputs.grownOn = page === 'grown';\nOutputs.band1On = band === 1;\nOutputs.band2On = band === 2;\nOutputs.enOn = lang === 'en';\nOutputs.frOn = lang === 'fr';\n"
+        "functionScript": "\nvar page = String(Inputs.page || '');\nvar band = Number(Inputs.band) === 1 ? 1 : 2;\nvar lang = String(Inputs.lang) === 'fr' ? 'fr' : 'en';\nOutputs.islandOn = page === 'island';\nOutputs.robotOn = page === 'robot';\nOutputs.skillsOn = page === 'skills';\nOutputs.grownOn = page === 'grown';\nOutputs.band1On = band === 1;\nOutputs.band2On = band === 2;\nOutputs.enOn = lang === 'en';\nOutputs.frOn = lang === 'fr';\n"
       },
       "x": 40,
       "y": 160,
@@ -61,13 +61,6 @@
         {
           "name": "out-islandOn",
           "displayName": "islandOn",
-          "plug": "output",
-          "type": "*",
-          "group": "Outputs"
-        },
-        {
-          "name": "out-workshopOn",
-          "displayName": "workshopOn",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
@@ -165,11 +158,6 @@
         },
         {
           "name": "skillsOn",
-          "plug": "input",
-          "type": "*"
-        },
-        {
-          "name": "workshopOn",
           "plug": "input",
           "type": "*"
         },

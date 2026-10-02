@@ -259,11 +259,12 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
   },
   {
     // IG-002 (P106 s2, ruling R3): fetch and return. The pond is the left edge (x 0, rows 1–4), the three tulips stand in
-    // the bed at x 3, and the robot starts at (1,1) facing the pond with an EMPTY can of three in its hand. P108 IW-003
+    // the bed at x 3, and the robot starts at (2,1) facing the pond, the EMPTY can of three on the grass between them (P108 s8: picked first;
+    // until s8 it started at (1,1) with the can in its hand). P108 IW-003
     // (lane M): each tulip wants THREE drinks (a meter, 0/3), so the can's three is one tulip's worth: each pass fills
-    // the can, turns round, walks to a tulip, pours all three (a repeat of its own), steps down a row and walks back to
-    // the pond. The recorded dance is eleven presses a pass; the fold finds the pass ×3 and the pours ×3, in either
-    // order (the fold compares a repeat by its shape). All three full is the finish line: Pip walks home to (1,1).
+    // the can, turns round, walks to a tulip, pours all three (a repeat of its own), steps down a row and turns back to
+    // the pond, a tile from it. The recorded dance is eleven presses a pass; the fold finds the pass ×3 and the pours ×3, in either
+    // order (the fold compares a repeat by its shape). All three full is the finish line: Pip walks home to (2,1).
     // The tulips stay first in `things` (the engine gate's watered-world helper).
     id: 'tulips-three',
     islander: 'mamie',
@@ -274,16 +275,20 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
     things: [
       { kind: 'tulip', id: 't1', x: 3, y: 1, watered: false, have: 0, need: 3 },
       { kind: 'tulip', id: 't2', x: 3, y: 2, watered: false, have: 0, need: 3 },
-      { kind: 'tulip', id: 't3', x: 3, y: 3, watered: false, have: 0, need: 3 }
+      { kind: 'tulip', id: 't3', x: 3, y: 3, watered: false, have: 0, need: 3 },
+      // P108 s8 (Richard, 2026-10-02: "no can to pick up"; ruled: every watering mission): the can on the grass between Pip
+      // and the pond. Pip starts a tile further from the pond, so each pass starts with a step to it (the pass is still
+      // eleven presses, and the program 12 blocks: a robot's brain, BRAIN_SIZE).
+      { kind: 'can', id: 'can', x: 1, y: 1, level: 0, max: 3 }
     ],
-    robotStart: { x: 1, y: 1, d: 3, can: 0, canMax: 3 },
+    robotStart: { x: 2, y: 1, d: 3 },
     goal: { name: 'job_done' },
-    palette: ['fwd', 'left', 'right', 'water', 'fill', 'repeat'],
+    palette: ['fwd', 'left', 'right', 'pick', 'water', 'fill', 'repeat'],
     challenge: 'predict',
     reward: { kind: 'hat', id: 'sun', from: 'mamie' },
     copyKeys: { title: 'rqTulipsTitle', blurb: 'rqTulipsBlurb', line: 'rqTulipsLine', reward: 'hatSun', gift: 'giftSun' },
-    referenceProgram: [blk('repeat', { n: 3, body: [...b1('fill', 'left', 'left', 'fwd'), blk('repeat', { n: 3, body: b1('water') }), ...b1('right', 'fwd', 'right', 'fwd')] })],
-    job: { targets: ['t1', 't2', 't3'], home: { x: 1, y: 1, d: 3 } }
+    referenceProgram: [blk('pick'), blk('repeat', { n: 3, body: [...b1('fwd', 'fill', 'left', 'left', 'fwd'), blk('repeat', { n: 3, body: b1('water') }), ...b1('right', 'fwd', 'right')] })],
+    job: { targets: ['t1', 't2', 't3'], home: { x: 2, y: 1, d: 3 } }
   },
   {
     // CG-006 §2 row 2b, rewritten by IG-002 (R3), then by P108 IW-003 (lane S) as a JOB: four squares of dirt at (3..6, 3)
@@ -478,7 +483,7 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
   },
   {
     // P108 IW-003 (lane M): the named trick with a can. Two ponds on the path (0,3) and (5,3); Pip starts facing the
-    // left one with an empty can of three. The trick "row" fills the can, turns round and waters the three tulips on
+    // left one; the empty can of three lies at its edge (P108 s8: picked first). The trick "row" fills the can, turns round and waters the three tulips on
     // one side of the path, one drink each, ending at the other pond — so the same trick, used again from there, waters
     // the other row. Both rows full is the finish line (Pip is already home, facing the pond he started at).
     id: 'rows-trick',
@@ -493,14 +498,18 @@ export const REQUESTS: ReadonlyArray<GardenRequest> = [
       { kind: 'tulip', id: 'a3', x: 4, y: 2, watered: false, have: 0, need: 1 },
       { kind: 'tulip', id: 'b1', x: 3, y: 4, watered: false, have: 0, need: 1 },
       { kind: 'tulip', id: 'b2', x: 2, y: 4, watered: false, have: 0, need: 1 },
-      { kind: 'tulip', id: 'b3', x: 1, y: 4, watered: false, have: 0, need: 1 }
+      { kind: 'tulip', id: 'b3', x: 1, y: 4, watered: false, have: 0, need: 1 },
+      // P108 s8 (ruled 2026-10-02): the can at the edge of the left pond, in front of Pip — picked, then filled from the same
+      // tile (anywhere else costs a turn, and the program is already a robot's whole brain: 12 blocks, BRAIN_SIZE).
+      { kind: 'can', id: 'can', x: 0, y: 3, level: 0, max: 3 }
     ],
-    robotStart: { x: 1, y: 3, d: 3, can: 0, canMax: 3 },
+    robotStart: { x: 1, y: 3, d: 3 },
     goal: [{ name: 'job_done' }, { name: 'uses', args: ['do', 2] }],
-    palette: ['fwd', 'left', 'right', 'water', 'fill', 'repeat', 'trick', 'do'],
+    palette: ['fwd', 'left', 'right', 'pick', 'water', 'fill', 'repeat', 'trick', 'do'],
     reward: { kind: 'item', id: 'gnome', from: 'mamie' },
     copyKeys: { title: 'rqRowsTitle', blurb: 'rqRowsBlurb', line: 'rqRowsLine', reward: 'itemGnome', gift: 'giftGnome' },
     referenceProgram: [
+      blk('pick'),
       // Turned round by two lefts, not two rights: "right, right, forward, left, water, right …" holds "right, forward,
       // left, water" three times from its second block, and the fold nudge would offer that rotation (lane F's rule).
       blk('trick', { slots: { name: 'row' }, body: [blk('fill'), blk('left'), blk('left'), blk('repeat', { n: 3, body: b1('fwd', 'left', 'water', 'right') })] }),
@@ -778,7 +787,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   rqTulipsBlurb: s('Repeat', 'Répéter'),
   // P108 IW-003 (lane M): the three drinks said in English; the French keeps its line (at 390 × 844 its task card has three
   // pixels to spare before the owl leaves the screen — the page drive's AC4 — and the job card says "3 tulipes × 3 gorgées").
-  rqTulipsLine: s('"Three drinks a tulip. Fill the can at the pond, and come back!"', '« Mes tulipes ont soif. Remplis l’arrosoir à la mare, et reviens ! »'),
+  rqTulipsLine: s('"Three drinks a tulip. The can is on the grass: fill it at the pond, and come back!"', '« Mes tulipes ont soif. L’arrosoir est dans l’herbe : remplis-le à la mare, et reviens ! »'),
   rqBowlTitle: s('Feed me, but only if my bowl is empty', 'Nourris-moi, mais seulement si ma gamelle est vide'),
   rqBowlBlurb: s('If', 'Si'),
   rqBowlLine: s('"I eat from my three bowls all day. Take food from the sack and fill only the empty ones, {b}!"', '« Je mange dans mes trois gamelles toute la journée. Prends à manger dans le sac et remplis seulement les vides, {b} ! »'),
@@ -965,6 +974,19 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   sayFull: s('It’s full!', 'C’est plein !'),
   sayNoCan: s('I need the can.', 'Il me faut l’arrosoir.'),
   sayHome: s('Home! All done.', 'À la maison ! Tout est fait.'),
+  // ── P108 s8 (Richard: "I can't seem to put it down on the refuge build site"): a put where the place wants another item
+  // (stones on a building's plank part) said nothing. It says what this place wants (sayWants<Item>), else sayWrongItem.
+  sayWantsStone: s('This part wants stones.', 'Ici, il faut des pierres.'),
+  sayWantsPlank: s('This part wants planks.', 'Ici, il faut des planches.'),
+  sayWantsEgg: s('Only eggs go in here.', 'Ici, seulement des œufs.'),
+  sayWantsFood: s('Only food goes in here.', 'Ici, seulement de la nourriture.'),
+  sayWantsBall: s('Only the ball goes in here.', 'Ici, seulement la balle.'),
+  sayWantsCarrot: s('Only carrots go in here.', 'Ici, seulement des carottes.'),
+  sayWrongItem: s('That doesn’t go here.', 'Ça ne va pas ici.'),
+  // P108 s8 (ruled: keep the wait, but show it): a pick at a source that is empty and grows back.
+  sayGrowsRock: s('The rock is empty. It grows back, a stone at a time.', 'Le rocher est vide. Il repousse, une pierre à la fois.'),
+  sayGrowsTree: s('No wood left. The tree grows back, a plank at a time.', 'Plus de bois. L’arbre repousse, une planche à la fois.'),
+  sayGrowsPatch: s('No carrots left. They grow back, one at a time.', 'Plus de carottes. Elles repoussent, une à la fois.'),
   // ── P108 IW-005 (lane J): go to nearest / go to found nothing to reach (the none event) ──
   sayNone: s('There’s none left to find.', 'Il n’y en a plus à trouver.'),
   // ── P108 IW-003 (lane P): the post — the envelopes' card, and what a robot says at a door ──
@@ -1024,21 +1046,25 @@ function IG006_REQUESTS(): GardenRequest[] {
         at('tulip', 1, 4, { id: 'r3', watered: false, color: 'red', have: 0, need: 1 }),
         at('tulip', 5, 2, { id: 'y1', watered: false, color: 'yellow', have: 0, need: 1 }),
         at('tulip', 6, 2, { id: 'y2', watered: false, color: 'yellow', have: 0, need: 1 }),
-        at('tulip', 7, 2, { id: 'y3', watered: false, color: 'yellow', have: 0, need: 1 })
+        at('tulip', 7, 2, { id: 'y3', watered: false, color: 'yellow', have: 0, need: 1 }),
+        // P108 s8 (ruled 2026-10-02): the can on the path beside Pip (picked before he walks it).
+        at('can', 5, 3, { id: 'can', level: 0, max: 3 })
       ],
-      robotStart: { x: 4, y: 3, d: 0, can: 0, canMax: 3 },
+      robotStart: { x: 4, y: 3, d: 1 },
       goal: goal([{ name: 'job_done' }, { name: 'uses', args: ['olive:read', 1] }, { name: 'uses', args: ['if', 1] }]),
-      palette: ['fwd', 'left', 'right', 'water', 'fill', 'repeat', 'if'],
+      palette: ['fwd', 'left', 'right', 'pick', 'water', 'fill', 'repeat', 'if'],
       rungs: ['read'],
       reward: { kind: 'sticker', id: 'note', from: 'mamie' },
       copyKeys: { title: 'rqNoteTitle', blurb: 'rqNoteBlurb', line: 'rqNoteLine', reward: 'stickerNote', gift: 'giftNote' },
       referenceProgram: [
+        blk('pick'),
+        blk('left'),
         olive('read'),
         blk('fill'),
         blk('if', { slots: { sensor: 'olive_read:red_tulip' }, body: b1('left'), ...({ else: b1('right') } as unknown as Partial<Block>) }),
         blk('repeat', { n: 3, body: b1('fwd', 'left', 'water', 'right') })
       ],
-      job: { targets: ['r1', 'r2', 'r3'], home: { x: 4, y: 3, d: 0 } },
+      job: { targets: ['r1', 'r2', 'r3'], home: { x: 4, y: 3, d: 1 } },
       seeded: {
         // The two notes, three times over and index-aligned with their rows: a day is still one in two of each, and the
         // gate's seeds 1, 2, 3 (whose first draws all fall in 0.62..0.74) lay both — yellow on 1, red on 2 and 3.
@@ -1068,17 +1094,20 @@ function IG006_REQUESTS(): GardenRequest[] {
         at('tulip', 1, 2, { id: 't1', watered: false, color: 'red', have: 0, need: 1 }),
         at('rock', 2, 2, { left: 4, max: 4 }),
         at('tulip', 3, 2, { id: 't2', watered: false, color: 'red', have: 0, need: 1 }),
-        at('rock', 4, 2, { left: 4, max: 4 })
+        at('rock', 4, 2, { left: 4, max: 4 }),
+        // P108 s8 (ruled 2026-10-02): the can on the path ahead of Echo.
+        at('can', 1, 3, { id: 'can', level: 0, max: 3 })
       ],
-      robotStart: { x: 0, y: 3, d: 1, can: 0, canMax: 3 },
+      robotStart: { x: 0, y: 3, d: 1 },
       goal: goal([{ name: 'job_done' }, { name: 'no_puddle' }, { name: 'uses', args: ['olive:is-it-a', 1] }, { name: 'senses', args: ['olive_says:yes', 1] }]),
-      palette: ['fwd', 'left', 'right', 'water', 'fill', 'repeat', 'if'],
+      palette: ['fwd', 'left', 'right', 'pick', 'water', 'fill', 'repeat', 'if'],
       needs: 'echo',
       rungs: ['is-it-a'],
       reward: { kind: 'sticker', id: 'flower', from: 'sami' },
       copyKeys: { title: 'rqFlowerTitle', blurb: 'rqFlowerBlurb', line: 'rqFlowerLine', reward: 'stickerFlower', gift: 'giftFlower' },
       job: { targets: ['t1', 't2'], home: { x: 0, y: 3, d: 1 } },
       referenceProgram: [
+        blk('pick'),
         blk('right'),
         blk('fill'),
         blk('left'),

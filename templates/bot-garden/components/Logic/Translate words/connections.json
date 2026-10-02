@@ -4049,6 +4049,24 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-sayGrowsPatch",
+      "toId": "translatewordsOut",
+      "toProperty": "sayGrowsPatch"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayGrowsRock",
+      "toId": "translatewordsOut",
+      "toProperty": "sayGrowsRock"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayGrowsTree",
+      "toId": "translatewordsOut",
+      "toProperty": "sayGrowsTree"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-sayHome",
       "toId": "translatewordsOut",
       "toProperty": "sayHome"
@@ -4082,6 +4100,48 @@
       "fromProperty": "out-saySplash",
       "toId": "translatewordsOut",
       "toProperty": "saySplash"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayWantsBall",
+      "toId": "translatewordsOut",
+      "toProperty": "sayWantsBall"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayWantsCarrot",
+      "toId": "translatewordsOut",
+      "toProperty": "sayWantsCarrot"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayWantsEgg",
+      "toId": "translatewordsOut",
+      "toProperty": "sayWantsEgg"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayWantsFood",
+      "toId": "translatewordsOut",
+      "toProperty": "sayWantsFood"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayWantsPlank",
+      "toId": "translatewordsOut",
+      "toProperty": "sayWantsPlank"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayWantsStone",
+      "toId": "translatewordsOut",
+      "toProperty": "sayWantsStone"
+    },
+    {
+      "fromId": "translatewordsFn",
+      "fromProperty": "out-sayWrongItem",
+      "toId": "translatewordsOut",
+      "toProperty": "sayWrongItem"
     },
     {
       "fromId": "translatewordsFn",

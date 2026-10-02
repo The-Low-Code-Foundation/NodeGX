@@ -14,7 +14,7 @@
  * | `landRequest(land)` | the land as a request the island and the Workshop read like any other: id LAND_ID, plot LAND_PLOT, map LAND_MAP, its things and job, goal job_done, no reference program |
  * | `landLegal(land, bp, x, y)` | '' when the blueprint may go there (the ghost is green), else why: 'unknown' · 'built' (that blueprint stands already) · 'edge' · 'ground' (not grass) · 'taken' (a thing, home, or another building or its pen) · 'reach' (a robot could not reach a part or a pen place from home, or a source or another building would be cut off) |
  * | `landPlace(land, bp, x, y, id)` | the ghost placed: '{ ok, error, id }' — error is landLegal's; the building starts with nothing delivered |
- * | `landKeep(land, things)` | the island's things written back onto the land: a part's have only ever rises (a building never un-builds, AC3); an animal's fed follows her bowl; true when anything changed |
+ * | `landKeep(land, things)` | the island's things written back onto the land: a part's have only ever rises (a building never un-builds, AC3); an animal's fed follows her bowl; (P108 s8) a source's left follows the island's (`land.left`, which `landThings` lays); true when anything changed |
  *
  * Every script that uses these includes ENGINE (worldOf, blocked, the stage) and SAVE_HELPERS (landOf, blueprintSpec,
  * animalSpec, buildingDone) first: `${ENGINE}${SAVE_HELPERS}${LAND_HELPERS}` (LAND_SCRIPT below is exactly that).
@@ -47,6 +47,8 @@ function landPen(b) {
 }
 function landThings(raw) {
   var land = landOf(raw), out = JSON.parse(JSON.stringify(LAND_SOURCES));
+  // P108 s8: each source as the island last left it (land.left, landKeep), so the Workshop shows the real amount.
+  if (land.left) for (var sl = 0; sl < out.length; sl++) if (land.left[out[sl].id] !== undefined) out[sl].left = land.left[out[sl].id];
   for (var i = 0; i < land.buildings.length; i++) {
     var b = land.buildings[i], parts = landParts(b);
     for (var k = 0; k < parts.length; k++) out.push({ kind: 'site', id: b.id + '-' + parts[k].item, of: b.id, build: b.bp, keep: true, item: parts[k].item, need: parts[k].need, have: Number(b.have[parts[k].item]) || 0, x: parts[k].x, y: parts[k].y });
@@ -172,6 +174,12 @@ function landKeep(raw, things) {
       if (as[a].id !== String(t.id)) continue;
       var f = Math.max(0, Math.floor(Number(t.count)) || 0);
       if (f !== Number(as[a].fed)) { as[a].fed = f; changed = true; }
+    }
+    // P108 s8: a source's left follows the island's (mined down, grown back), for the Workshop's land (landThings).
+    if (isSet(t.id) && String(t.id) === t.kind && LAND_LEFT_MAX[t.kind] !== undefined && t.left !== undefined && raw) {
+      var lv = Math.max(0, Math.floor(Number(t.left)) || 0);
+      if (!raw.left || typeof raw.left !== 'object') raw.left = {};
+      if (raw.left[String(t.id)] !== lv) { raw.left[String(t.id)] = lv; changed = true; }
     }
   }
   return changed;

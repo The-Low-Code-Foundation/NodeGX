@@ -412,7 +412,7 @@ describe('IW-008 AC5 — My robots with a crew; the plot card’s crew row', () 
     expect(new Set(allIds).size).toBe(allIds.length);
     const byId = (id: string) => cs.find((c: any) => c.id === id);
     const tulipsTitle = w('en', req('tulips-three').copyKeys.title);
-    expect(byId('pip').brainText).toBe(fill(w('en', 'iw8cBrainText'), { n: BRAIN_SIZE, knows: fill(w('en', 'iw8cKnows'), { k: 11 }) }));
+    expect(byId('pip').brainText).toBe(fill(w('en', 'iw8cBrainText'), { n: BRAIN_SIZE, knows: fill(w('en', 'iw8cKnows'), { k: 12 }) })); // the tulips' program (P108 s8: 12 with the can's pick)
     expect(byId(ids[2]).brainText).toBe(fill(w('en', 'iw8cBrainText'), { n: BRAIN_SIZE, knows: w('en', 'iw8cKnowsNone') }));
     expect(byId(ids[1]).whereText).toBe(fill(w('en', 'iw8cHelpsOn'), { plot: tulipsTitle }));
     expect([byId('pip').hasCopy, byId('pip').copyChips.length, byId(ids[2]).hasCopy, byId(ids[2]).copyChips.length]).toEqual([true, 4, false, 0]);

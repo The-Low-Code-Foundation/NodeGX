@@ -167,7 +167,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 756,
+      "connectionCount": 766,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -375,7 +375,7 @@
       "path": "Logic/Bar state",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 13,
+      "connectionCount": 12,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -766,8 +766,8 @@
     "Garden/Top bar": {
       "path": "Garden/Top bar",
       "type": "visual",
-      "nodeCount": 34,
-      "connectionCount": 59,
+      "nodeCount": 32,
+      "connectionCount": 56,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -830,7 +830,7 @@
     "Workshop/Play": {
       "path": "Workshop/Play",
       "type": "visual",
-      "nodeCount": 162,
+      "nodeCount": 163,
       "connectionCount": 450,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
@@ -1062,7 +1062,7 @@
   },
   "stats": {
     "totalComponents": 132,
-    "totalNodes": 1101,
-    "totalConnections": 3528
+    "totalNodes": 1100,
+    "totalConnections": 3534
   }
 }

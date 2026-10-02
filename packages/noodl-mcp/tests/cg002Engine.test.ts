@@ -488,7 +488,8 @@ describe('CG-002 — the engine', () => {
       const recording = unrolled(r.referenceProgram);
       const found = runScript(FIND_REPEAT_SCRIPT, { program: recording, band: 2 });
       const folded = runScript(FOLD_SCRIPT, { program: recording, i: found.i, len: found.len, count: found.count, containerId: found.containerId });
-      expect(folded.program).toHaveLength(1);
+      // P108 s8: the can lies on the grass, so the program is the pick, then the passes folded into one repeat.
+      expect(folded.program.map((b: any) => b.t)).toEqual(['pick', 'repeat']);
       const a = runToEnd(recording, worldOfRequest(r));
       const b = runToEnd(folded.program, worldOfRequest(r));
       expect(JSON.stringify(a.world)).toBe(JSON.stringify(b.world));
@@ -1182,13 +1183,14 @@ describe('CG-002 — the engine', () => {
   });
 
   describe('AC7 — predictEnd returns the tile the robot ends on', () => {
-    // P108 IW-003 (lane M): the tulips are a job — the dance ends at (1,4), then Pip walks home to (1,1), facing the pond.
-    it('the tulip request (IG-002: fetch and return; IW-003: a job) ends at home 1,1 facing the pond; a tap there hits, a tap beside it misses', () => {
+    // P108 IW-003 (lane M): the tulips are a job — the dance ends at (2,4), then Pip walks home to (2,1), facing the pond
+    // (P108 s8: a tile from it, the can between them at the start).
+    it('the tulip request (IG-002: fetch and return; IW-003: a job) ends at home 2,1 facing the pond; a tap there hits, a tap beside it misses', () => {
       const r = REQUESTS.find((x) => x.id === 'tulips-three')!;
       const p = runScript(PREDICT_END_SCRIPT, { program: r.referenceProgram, world: worldOfRequest(r), robotId: 'pip' });
-      expect({ x: p.x, y: p.y, d: p.d, known: p.known, asked: p.asked, hit: p.hit }).toEqual({ x: 1, y: 1, d: 3, known: true, asked: false, hit: false });
-      expect(runScript(PREDICT_END_SCRIPT, { program: r.referenceProgram, world: worldOfRequest(r), robotId: 'pip', tapX: 1, tapY: 1 })).toMatchObject({ asked: true, hit: true });
-      expect(runScript(PREDICT_END_SCRIPT, { program: r.referenceProgram, world: worldOfRequest(r), robotId: 'pip', tapX: 1, tapY: 4 })).toMatchObject({ asked: true, hit: false });
+      expect({ x: p.x, y: p.y, d: p.d, known: p.known, asked: p.asked, hit: p.hit }).toEqual({ x: 2, y: 1, d: 3, known: true, asked: false, hit: false });
+      expect(runScript(PREDICT_END_SCRIPT, { program: r.referenceProgram, world: worldOfRequest(r), robotId: 'pip', tapX: 2, tapY: 1 })).toMatchObject({ asked: true, hit: true });
+      expect(runScript(PREDICT_END_SCRIPT, { program: r.referenceProgram, world: worldOfRequest(r), robotId: 'pip', tapX: 2, tapY: 4 })).toMatchObject({ asked: true, hit: false });
       // The prediction is what the run does: the same end as a full run.
       const end = runToEnd(r.referenceProgram, worldOfRequest(r));
       expect(end.world.robots[0]).toMatchObject({ x: p.x, y: p.y, d: p.d });
@@ -1353,8 +1355,8 @@ describe('CG-002 — the engine', () => {
       // The hint names it: dry, not "not quite yet".
       const chosen = runScript(CHOOSE_HINT_SCRIPT, { world: end.world, program, run: end.run, goalMet: false });
       expect(chosen.key).toBe('hintDry');
-      // On the tulips request itself: forgetting the pond leaves the tulip dry.
-      const forgot = runToEnd(parse('L L F W'), worldOfRequest(TULIPS()));
+      // On the tulips request itself: forgetting the pond leaves the tulip dry (P108 s8: the can picked off the grass first).
+      const forgot = runToEnd(parse('P L L W'), worldOfRequest(TULIPS()));
       expect([forgot.run.dries, forgot.world.things[0].watered]).toEqual([1, false]);
     });
 
@@ -1423,27 +1425,28 @@ describe('CG-002 — the engine', () => {
     // passes ×3, then the pours ×3 inside the pass.
     it('🔴 AC2: the recorded tulips dance folds to repeat 3 with the eleven-block pass, then the pours to repeat 3 inside it, in both bands (offered at 10–12 only, as every fold)', () => {
       const r = TULIPS();
-      const dance = 'K L L F W W W R F R F';
-      const recording = parse([dance, dance, dance].join(' '));
-      expect(recording).toHaveLength(33);
+      // P108 s8: the can is picked off the grass first, and each pass starts a tile from the pond (a step to it).
+      const dance = 'F K L L F W W W R F R';
+      const recording = parse(['P', dance, dance, dance].join(' '));
+      expect(recording).toHaveLength(34);
       expect(shape(recording)).toEqual(shape(unrolled(r.referenceProgram)));
       for (const band of [1, 2]) {
         const found = runScript(FIND_REPEAT_SCRIPT, { program: recording, band, allowed: [...r.palette] });
-        expect({ band, found: found.found, i: found.i, len: found.len, count: found.count, cover: found.cover, offer: found.offer }).toEqual({ band, found: true, i: 0, len: 11, count: 3, cover: 33, offer: band === 2 });
+        expect({ band, found: found.found, i: found.i, len: found.len, count: found.count, cover: found.cover, offer: found.offer }).toEqual({ band, found: true, i: 1, len: 11, count: 3, cover: 33, offer: band === 2 });
       }
       const found = runScript(FIND_REPEAT_SCRIPT, { program: recording, band: 2, allowed: [...r.palette] });
       const once = runScript(FOLD_SCRIPT, { program: recording, i: found.i, len: found.len, count: found.count, containerId: found.containerId });
-      expect(once.program).toHaveLength(1);
+      expect(once.program.map((b: any) => b.t)).toEqual(['pick', 'repeat']);
       const inner = runScript(FIND_REPEAT_SCRIPT, { program: once.program, band: 2, allowed: [...r.palette] });
-      expect({ offer: inner.offer, container: inner.containerId === once.repeatId, i: inner.i, len: inner.len, count: inner.count }).toEqual({ offer: true, container: true, i: 4, len: 1, count: 3 });
+      expect({ offer: inner.offer, container: inner.containerId === once.repeatId, i: inner.i, len: inner.len, count: inner.count }).toEqual({ offer: true, container: true, i: 5, len: 1, count: 3 });
       const folded = runScript(FOLD_SCRIPT, { program: once.program, i: inner.i, len: inner.len, count: inner.count, containerId: inner.containerId });
       expect(shape(folded.program)).toEqual(shape(r.referenceProgram));
       const end = runToEnd(folded.program, worldOfRequest(r));
       expect(runScript(GOAL_SCRIPT, { world: end.world, run: end.run, program: folded.program, goal: r.goal }).met).toBe(true);
       // The task file's written dance (fill fwd fwd water left left fwd fwd right right) cannot run: after fill the pond
       // is ahead, so its first forward is a bump. The measurement behind the geometry above (task file §7, deviation 1).
-      const written = runToEnd(parse('r3[K F F W L L F F R R]'), worldOfRequest(r));
-      expect(written.deltas.find((d) => d.op === 'fwd')).toMatchObject({ bump: { x: 0, y: 1 } });
+      const written = runToEnd(parse('P F r3[K F F W L L F F R R]'), worldOfRequest(r));
+      expect(written.deltas.find((d) => d.op === 'fwd' && d.bump)).toMatchObject({ bump: { x: 0, y: 1 } });
     });
 
     it('🔴 AC3: tulips and path-stones win with their reference program in EN and FR, both bands, and say hintPerfect at 10–12', () => {
@@ -1462,7 +1465,7 @@ describe('CG-002 — the engine', () => {
           }
         }
       }
-      // The tulips' reference is eleven blocks, over MANY_BLOCKS: Perfect outranks "done with many" when it IS the reference.
+      // The tulips' reference is twelve blocks (eleven before P108 s8's pick), over MANY_BLOCKS: Perfect outranks "done with many" when it IS the reference.
       expect(refCount(TULIPS())).toBeGreaterThan(MANY_BLOCKS);
       // The consequence in the world: three tulips watered, three drinks each (IW-003: the can's three is one tulip's
       // worth, so it comes home empty); four stones laid, the rock gone.
@@ -1474,7 +1477,8 @@ describe('CG-002 — the engine', () => {
       expect([st.world.things.filter((x: any) => x.kind === 'site').map((x: any) => [x.have, x.stage]), st.world.things.filter((x: any) => x.kind === 'rock').map((x: any) => x.left), st.world.things.filter((x: any) => x.kind === 'stone').length, st.world.robots[0].carry, [st.world.robots[0].x, st.world.robots[0].y]]).toEqual([[[4, 'path'], [4, 'path'], [4, 'path'], [4, 'path']], [0, 0], 0, [], [2, 3]]);
       // Path-stones starts with an EMPTY hod, four squares of dirt and two rocks of eight.
       expect([STONES().robotStart.carry ?? [], STONES().things.map((x) => [x.kind, x.have ?? x.left])]).toEqual([[], [['site', 0], ['site', 0], ['site', 0], ['site', 0], ['rock', 8], ['rock', 8]]]);
-      expect([TULIPS().robotStart.can, TULIPS().robotStart.canMax]).toEqual([0, 3]);
+      // P108 s8: the tulips' can is EMPTY and lies on the grass (Richard: "no can to pick up"); Pip's hands start empty.
+      expect([TULIPS().robotStart.can, TULIPS().things.filter((x) => x.kind === 'can').map((x: any) => [x.x, x.y, x.level, x.max])]).toEqual([undefined, [[1, 1, 0, 3]]]);
     });
 
     it('the palette carries fill where a request allows it, labelled in both bands; the other requests keep their R tiles as decoration', () => {
@@ -1483,10 +1487,13 @@ describe('CG-002 — the engine', () => {
       expect(pal(2, TULIPS().palette)).toContain('fill');
       // P108 IW-003 (lane S): + go to nearest (the rocks lie somewhere new each day).
       expect(pal(2, STONES().palette)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'repeat', 'go_nearest']);
-      // rock-flower (IG-006) places rocks as the things Olive is asked about; its palette has no pick, so none is mined.
+      // rock-flower (IG-006) places rocks as the things Olive is asked about. P108 s8: its palette has pick now (the can
+      // lies on the path); a rock mined there wins nothing — the goal is the flowers watered, no puddle, Olive asked.
       // P108 IW-003 (lane S): Sami's bench is built from rocks too.
       const ROCKS_ON_PURPOSE = ['path-stones', 'rock-flower', 'sami-bench'];
-      expect(REQUESTS.find((r) => r.id === 'rock-flower')?.palette).not.toContain('pick');
+      const flower = REQUESTS.find((r) => r.id === 'rock-flower')!;
+      expect(flower.referenceProgram[0].t).toBe('pick');
+      expect(flower.goal).not.toContainEqual(expect.objectContaining({ name: 'uses', args: ['pick', expect.anything()] }));
       for (const r of REQUESTS) if (!ROCKS_ON_PURPOSE.includes(r.id)) expect({ id: r.id, rocks: r.things.filter((x) => x.kind === 'rock').length }).toEqual({ id: r.id, rocks: 0 });
     });
   });
@@ -1529,20 +1536,23 @@ describe('CG-002 — the engine', () => {
 
     // P108 IW-003 (lane M): the pass is eleven presses with three pours in it — the pours (the reference's own inner repeat)
     // are offered from the third pour on, and nothing else until the second pass is whole.
-    it('🔴 the tulips dance: from the first pass to the second only its pours ×3 are offered (never the pass’s tail), the eleven-block pass at the second, ×3 at the third', () => {
+    it('🔴 the tulips dance: from the first pass to the second only its pours ×3 are offered (never the pass’s tail), the eleven-block pass ×3 at the third', () => {
       const r = REQUESTS.find((x) => x.id === 'tulips-three')!;
       const recording = unrolled(r.referenceProgram);
-      const body = recording.length / 3;
+      // P108 s8: the pick first (the can on the grass), then three passes of eleven.
+      expect(recording[0].t).toBe('pick');
+      const body = (recording.length - 1) / 3;
       expect(body).toBe(11);
       const at = (p: number) => runScript(FIND_REPEAT_SCRIPT, { program: recording.slice(0, p), band: 2, allowed: [...r.palette] });
-      // The first dance ends in right, forward, right, forward: a run seen twice that does not start the list is held back.
-      for (let p = 1; p < body * 2; p++) {
+      // The first dance ends in right, forward, right: a run seen twice that does not start the list is held back.
+      for (let p = 1; p < 1 + body * 2; p++) {
         const f = at(p);
-        expect({ press: p, offer: f.offer, i: f.i, len: f.len, count: f.count }).toEqual(p < 7 ? { press: p, offer: false, i: -1, len: 0, count: 0 } : { press: p, offer: true, i: 4, len: 1, count: 3 });
+        expect({ press: p, offer: f.offer, i: f.i, len: f.len, count: f.count }).toEqual(p < 9 ? { press: p, offer: false, i: -1, len: 0, count: 0 } : { press: p, offer: true, i: 6, len: 1, count: 3 });
         expect({ press: p, hint: runScript(CHOOSE_HINT_SCRIPT, { program: recording.slice(0, p), allowed: [...r.palette] }).key }).not.toEqual({ press: p, hint: 'hintPattern' });
       }
-      expect([at(body * 2).offer, at(body * 2).i, at(body * 2).len, at(body * 2).count]).toEqual([true, 0, body, 2]);
-      expect([at(body * 3).offer, at(body * 3).i, at(body * 3).len, at(body * 3).count]).toEqual([true, 0, body, 3]);
+      // Two whole passes no longer start the list (the pick does), so the rule below holds them back: still the pours.
+      expect([at(1 + body * 2).offer, at(1 + body * 2).i, at(1 + body * 2).len, at(1 + body * 2).count]).toEqual([true, 6, 1, 3]);
+      expect([at(1 + body * 3).offer, at(1 + body * 3).i, at(1 + body * 3).len, at(1 + body * 3).count]).toEqual([true, 1, body, 3]);
       // A run seen twice FROM the start is still the child's own loop, and a third time anywhere is too.
       expect(runScript(FIND_REPEAT_SCRIPT, { program: parse('K L R F R F'), band: 2 }).offer).toBe(false);
       expect(runScript(FIND_REPEAT_SCRIPT, { program: parse('K L R F R F R F'), band: 2 })).toMatchObject({ offer: true, i: 2, len: 2, count: 3 });
@@ -1583,8 +1593,8 @@ describe('CG-002 — the engine', () => {
       // Why not Mamie's note: a program that goes one step further when Olive read the red tulip ends on another tile
       // with her real answer than with the fallback the prediction takes.
       const note = REQUESTS.find((r) => r.id === 'mamie-note')!;
-      // (P108 IW-003, lane M: Pip starts facing the well now, so the step is taken after a turn onto the path.)
-      const readThenGo: Block[] = [{ id: 1, t: 'olive:read' as BlockType }, { id: 4, t: 'left' }, { id: 2, t: 'if', slots: { sensor: 'olive_read:red_tulip' }, body: [{ id: 3, t: 'fwd' }] }];
+      // (P108 s8: Pip starts facing the can on the path, so the step is taken once the can is picked up.)
+      const readThenGo: Block[] = [{ id: 1, t: 'olive:read' as BlockType }, { id: 4, t: 'pick' }, { id: 2, t: 'if', slots: { sensor: 'olive_read:red_tulip' }, body: [{ id: 3, t: 'fwd' }] }];
       const guess = runScript(PREDICT_END_SCRIPT, { program: readThenGo, world: worldOfRequest(note), robotId: 'pip' });
       const seen = runToEnd(readThenGo, worldOfRequest(note), 'pip', 'en', [{ ok: true, value: 'red tulip' }]);
       expect(guess.x).not.toBe(seen.world.robots[0].x);
@@ -1602,14 +1612,14 @@ describe('CG-002 — the engine', () => {
     const rows = (model: any) => helper<any[]>(SAVE_HELPERS, 'robotRowsOf', model.profiles[0]);
 
     it('🔴 AC1: band 7–9 × tulips × Pip is fwd left right water fill; × path-stones × Cobble is fwd left right pick put; Cobble on the tulips is refused', () => {
-      expect(pal(1, req('tulips-three'), spec('pip')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill']);
+      expect(pal(1, req('tulips-three'), spec('pip')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill', 'pick']);
       // P108 IW-003 (lane S): + go to nearest (band 7–9 walks to a thing, D9).
       expect(pal(1, req('path-stones'), spec('cobble')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'pick', 'put', 'go_nearest']);
       const refused = pal(1, req('tulips-three'), spec('cobble'));
       expect([refused.refused, refused.count, refused.palette]).toEqual([true, 0, []]);
       // Known-firing beside the refusal: the same robot on its own job is not refused; a kind name works as a robot too.
       expect(pal(1, req('path-stones'), 'cobble').refused).toBe(false);
-      expect(pal(2, req('tulips-three'), spec('pip')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill', 'repeat']);
+      expect(pal(2, req('tulips-three'), spec('pip')).palette.map((p: any) => p.id)).toEqual(['fwd', 'left', 'right', 'water', 'fill', 'pick', 'repeat']);
       // The robot narrows the request. P108 IW-003 (s3 base, D9): every robot has hands now, so Pip on the stones' list
       // keeps pick and put; the narrowing is shown by Olive's blocks below (and water/fill/say, each a robot's own).
       // P108 IW-003 (lane S): + go to nearest (every robot walks to a thing, D9).
@@ -3160,10 +3170,11 @@ describe('P108 IW-003 (lane M) — the job follows the day; two repeats of one s
 
   it('🔴 the fold: the tulips dance with its pours already folded (a repeat in each pass) still folds the passes ×3 — to the reference', () => {
     const r = REQUESTS.find((x) => x.id === 'tulips-three')!;
-    const pass = (n: number) => [...parse('K L L F').map((b, i) => ({ ...b, id: n + i })), { id: n + 4, t: 'repeat' as BlockType, n: 3, body: [{ id: n + 5, t: 'water' as BlockType }] }, ...parse('R F R F').map((b, i) => ({ ...b, id: n + 6 + i }))];
-    const program = [...pass(1), ...pass(20), ...pass(40)];
+    // P108 s8: the pick first (the can on the grass), each pass a step to the pond first.
+    const pass = (n: number) => [...parse('F K L L F').map((b, i) => ({ ...b, id: n + i })), { id: n + 5, t: 'repeat' as BlockType, n: 3, body: [{ id: n + 6, t: 'water' as BlockType }] }, ...parse('R F R').map((b, i) => ({ ...b, id: n + 7 + i }))];
+    const program = [{ id: 90, t: 'pick' as BlockType }, ...pass(1), ...pass(20), ...pass(40)];
     const found = runScript(FIND_REPEAT_SCRIPT, { program, band: 2, allowed: [...r.palette] });
-    expect([found.offer, found.i, found.len, found.count]).toEqual([true, 0, 9, 3]);
+    expect([found.offer, found.i, found.len, found.count]).toEqual([true, 1, 9, 3]);
     const folded = runScript(FOLD_SCRIPT, { program, i: found.i, len: found.len, count: found.count, containerId: found.containerId });
     expect(shape(folded.program)).toEqual(shape(r.referenceProgram));
     // A repeat of another count, or another body, is another block.

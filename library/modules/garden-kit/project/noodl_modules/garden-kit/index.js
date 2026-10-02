@@ -3625,6 +3625,12 @@ var gardenKitBlocks = (function () {
         // P108 IW-002 (lane D): a robot that holds the can (the engine's `holds: 'can'`) carries it whatever it wears; the
         // field is there only when it holds it, so a robot row without it parses exactly as before.
         if (r.holds === 'can') o.holds = 'can';
+        // P108 s8: a pad press's walk — every tile the robot stepped onto, in order, the last its x, y (Record step's via).
+        // Drawn a tile at a time; a via that does not join where the robot was drawn is ignored (walkTiles).
+        if (Array.isArray(r.via) && r.via.length > 1) {
+          var via = r.via.map(function (t) { return Array.isArray(t) ? [Number(t[0]), Number(t[1])] : [NaN, NaN]; });
+          if (via.every(function (t) { return isFinite(t[0]) && isFinite(t[1]); })) o.via = via;
+        }
         return o;
       });
   }
@@ -3982,10 +3988,12 @@ var gardenKitBlocks = (function () {
     for (var i = 0; i < m.pips; i++) pips.push(h('i', { key: i, className: 'gd-pip' + (i < m.have ? ' gd-on' : '') }));
     return h(
       'span',
-      { key: key, className: 'gd-meter gd-m-' + m.icon + (m.full ? ' gd-full' : '') + (watched ? ' gd-watch' : '') + (top ? ' gd-meter-top' : ''), 'data-meter': m.text, 'data-kind': m.kind, 'data-full': m.full ? 'true' : undefined, 'data-watch': watched ? 'true' : undefined, 'data-fill': fillOf(m) },
+      { key: key, className: 'gd-meter gd-m-' + m.icon + (m.full ? ' gd-full' : '') + (m.grows ? ' gd-grows' : '') + (watched ? ' gd-watch' : '') + (top ? ' gd-meter-top' : ''), 'data-meter': m.text, 'data-kind': m.kind, 'data-full': m.full ? 'true' : undefined, 'data-grows': m.grows ? 'true' : undefined, 'data-watch': watched ? 'true' : undefined, 'data-fill': fillOf(m) },
       h('i', { key: 'ic', className: 'gd-mi gd-mi-' + m.icon }),
       m.pips ? h('span', { key: 'p', className: 'gd-pips' }, pips) : null,
-      h('span', { key: 't', className: 'gd-mt' }, m.text)
+      h('span', { key: 't', className: 'gd-mt' }, m.text),
+      // P108 s8: a source growing back wears a sprout after its numbers.
+      m.grows ? h('span', { key: 'g', className: 'gd-grow', title: 'growing back', 'aria-label': 'growing back' }, '\uD83C\uDF31') : null
     );
   }
   /** IG-004: the islander a thing's `who` names, as its sprite. */
@@ -4094,9 +4102,15 @@ var gardenKitBlocks = (function () {
       need = wholeOf(t.max);
       have = wholeOf(t.left) || 0;
       icon = 'carrot';
+    } else if (t.kind === 'tree') {
+      // P108 s8: her land's tree, like a rock — the planks left of its max (it had no chip: the planks left went unseen).
+      if (!wholeOf(t.max)) return null;
+      need = wholeOf(t.max);
+      have = wholeOf(t.left) || 0;
+      icon = 'plank';
     } else return null;
     if (need > 0 && have > need) have = need;
-    return {
+    var meter = {
       kind: t.kind,
       icon: METER_ICONS[icon] ? icon : 'dot',
       have: have,
@@ -4105,6 +4119,10 @@ var gardenKitBlocks = (function () {
       text: need > 0 ? have + '/' + need : String(have),
       full: (row.role === 'target' || row.role === 'container') && need > 0 && have >= need
     };
+    // P108 s8 (ruled: "keep the wait, but show it"): a source under its max grows back (on the island's tick) — its chip
+    // says so. Only when it does, so every other meter reads as before.
+    if ((t.kind === 'rock' || t.kind === 'tree' || t.kind === 'patch') && need > 0 && have < need) meter.grows = true;
+    return meter;
   }
   /** A path site's look: its `stage` when the engine wrote one, else the engine's own rule by have/need (0 · under half · under full · full). */
   function siteStage(t) {
@@ -4580,6 +4598,27 @@ var gardenKitBlocks = (function () {
    * is on the island; two robots never overlap). Sharing robots are drawn smaller, one up-left, one down-right,
    * far enough apart that their boxes do not touch.
    */
+  /**
+   * P108 s8: the tiles of a robot's walk, from the tile it was last drawn on (prev, [x, y]) — its via when the via starts
+   * one step from prev, goes one step at a time and ends where the robot is; else null (a stale via, or none).
+   */
+  function walkTiles(prev, r) {
+    var v = r && r.via;
+    if (!prev || !Array.isArray(v) || v.length < 2) return null;
+    var last = v[v.length - 1];
+    if (last[0] !== r.x || last[1] !== r.y) return null;
+    var a = prev;
+    for (var i = 0; i < v.length; i++) {
+      if (Math.abs(v[i][0] - a[0]) + Math.abs(v[i][1] - a[1]) !== 1) return null;
+      a = v[i];
+    }
+    return v;
+  }
+  /** The way a robot faces stepping from tile a to tile b (0 up, 1 right, 2 down, 3 left). */
+  function stepFacing(a, b) {
+    return b[1] < a[1] ? 0 : b[0] > a[0] ? 1 : b[1] > a[1] ? 2 : 3;
+  }
+
   function robotPlaces(robots, w, h) {
     var byTile = {};
     robots.forEach(function (r, i) {
@@ -4662,7 +4701,7 @@ var gardenKitBlocks = (function () {
     noodlNodeAsProp: true,
 
     /** The pure parts, for the kit gate. */
-    world: { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, pillSides: pillSides, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf, job: JOB_LOOK },
+    world: { parseMap: parseMap, parseThings: parseThings, parseRobots: parseRobots, robotPlaces: robotPlaces, pillSides: pillSides, walkTiles: walkTiles, stepFacing: stepFacing, rose: rose, DEFAULT_LEGEND: DEFAULT_LEGEND, KINDS: KINDS, rockSize: rockSize, loadOf: loadOf, job: JOB_LOOK },
     sprite: { minPx: ROBOT_MIN_PX, svgPct: ROBOT_SVG_PCT, face: { x: FACE_X, y: FACE_Y, w: FACE_W, h: FACE_H }, faceFraction: FACE_FRACTION, robotSvg: robotSvg, sprites: SPRITES },
     css: WORLD_CSS,
 
@@ -4693,6 +4732,40 @@ var gardenKitBlocks = (function () {
             if (rose(bumps.current.seen[i], r.bump)) bumps.current.n[i]++;
             bumps.current.seen[i] = r.bump;
           }
+        });
+
+        // P108 s8: a walk (a robot's via) is drawn a tile at a time, one Step Ms each: where each robot was last drawn, and
+        // the walk under way (its tiles, the one drawn now). The world is already at the end: data-x / data-y say so.
+        var walkRef = React.useRef({ at: [], walks: [] });
+        var walkTickState = React.useState(0);
+        var stillMotion = typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        robots.forEach(function (r, i) {
+          var W = walkRef.current, prev = W.at[i], key = r.x + ',' + r.y;
+          if (prev && (prev[0] !== r.x || prev[1] !== r.y)) {
+            var tiles = stillMotion ? null : walkTiles(prev, r);
+            W.walks[i] = tiles ? { tiles: tiles, k: 0, from: prev, to: key } : null;
+          } else if (W.walks[i] && W.walks[i].to !== key) W.walks[i] = null;
+          W.at[i] = [r.x, r.y];
+        });
+        React.useEffect(function () {
+          var W = walkRef.current, going = W.walks.some(function (k) { return k && k.k < k.tiles.length - 1; });
+          if (!going) return undefined;
+          var t = setTimeout(function () {
+            W.walks.forEach(function (k) { if (k && k.k < k.tiles.length - 1) k.k++; });
+            walkTickState[1](function (n) { return n + 1; });
+          }, stepMs);
+          return function () { clearTimeout(t); };
+        });
+        var drawn = robots.map(function (r, i) {
+          var k = walkRef.current.walks[i];
+          if (!k || k.k >= k.tiles.length - 1) return r;
+          var at = k.tiles[k.k], before = k.k ? k.tiles[k.k - 1] : k.from;
+          var o = {};
+          for (var f in r) o[f] = r[f];
+          o.x = at[0];
+          o.y = at[1];
+          o.d = stepFacing(before, at);
+          return o;
         });
 
         // P108 s7: after each draw, a name pill that would cover another robot's goes over its robot (pillSides). Read from
@@ -4879,12 +4952,12 @@ var gardenKitBlocks = (function () {
           );
         });
 
-        var places = robotPlaces(robots, grid.w, grid.h);
+        var places = robotPlaces(drawn, grid.w, grid.h);
         var sizeW = grid.w ? 'max(' + (100 / grid.w).toFixed(4) + '%, ' + ROBOT_MIN_PX + 'px)' : ROBOT_MIN_PX + 'px';
         var sizeH = grid.h ? 'max(' + (100 / grid.h).toFixed(4) + '%, ' + ROBOT_MIN_PX + 'px)' : ROBOT_MIN_PX + 'px';
         var robotEls = robots.map(function (r, i) {
           var p = places[i];
-          var rot = 'rotate(' + r.d * 90 + 'deg)';
+          var rot = 'rotate(' + drawn[i].d * 90 + 'deg)';
           var bumpN = bumps.current.n[i] || 0;
           // IG-002: the can's level upright at the robot's left (canMax drops, can of them full; none when it has no can),
           // and the load it carries (the last thing carried) upright at its right. Drawn on the literal back (turning with
@@ -5038,13 +5111,168 @@ var gardenKitBlocks = (function () {
     }
   };
 
+  // ── P108 s8 (Richard, 2026-10-02: "make the middle divider possible to drag and resize so you can make the blockly bit
+  //    bigger or smaller and the 3D bit grows and shrinks"): a divider between two columns of a grid ──
+  var DIVIDER_CSS =
+    '.gd-divider{position:relative;align-self:stretch;width:100%;min-height:48px;cursor:col-resize;touch-action:none;display:flex;align-items:flex-start;justify-content:center;outline:none;-webkit-tap-highlight-color:transparent}\n' +
+    '.gd-divider::before{content:"";position:absolute;top:0;bottom:0;left:50%;width:2px;margin-left:-1px;border-radius:2px;background:transparent;transition:background .15s}\n' +
+    '.gd-divider:hover::before,.gd-divider:focus-visible::before,.gd-divider[data-dragging="true"]::before{background:#C9B98F}\n' +
+    '.gd-divider-grip{position:sticky;top:45vh;margin-top:120px;width:10px;height:56px;border-radius:6px;background:#E6DCC6;box-shadow:inset 0 0 0 2px #fff;display:grid;place-items:center}\n' +
+    '.gd-divider-grip::after{content:"";width:2px;height:24px;border-left:2px dotted #8E8B9A}\n' +
+    '.gd-divider:hover .gd-divider-grip,.gd-divider:focus-visible .gd-divider-grip,.gd-divider[data-dragging="true"] .gd-divider-grip{background:#C9B98F}\n' +
+    '.gd-divider:focus-visible .gd-divider-grip{outline:3px solid #8F6BFF;outline-offset:2px}\n';
+  /** A width kept on this computer (localStorage; a private window or a blocked store keeps none). */
+  function dividerRead(key) {
+    try {
+      var v = key && typeof localStorage !== 'undefined' ? Number(localStorage.getItem(key)) : NaN;
+      return isFinite(v) && v > 0 ? v : null;
+    } catch (e) {
+      return null;
+    }
+  }
+  function dividerWrite(key, v) {
+    try {
+      if (!key || typeof localStorage === 'undefined') return;
+      if (v === null) localStorage.removeItem(key);
+      else localStorage.setItem(key, String(Math.round(v)));
+    } catch (e) {
+      /* nothing kept: the width lasts until the page goes */
+    }
+  }
+  /** The width the column after the divider may have: between Min and Max, leaving Min Other for the column before it. */
+  function dividerClamp(w, hostWidth, min, max, minOther) {
+    var hi = Math.min(max, Math.max(min, hostWidth - minOther));
+    return Math.max(min, Math.min(hi, w));
+  }
+
+  /** @type {import('./types/node-kit').ReactNodeDefinition} */
+  var Divider = {
+    name: 'garden-kit.Divider',
+    displayNodeName: 'Divider',
+    docs:
+      'A divider between two columns of a grid that a person drags (a finger, a pen or a mouse) or moves with the arrow ' +
+      'keys: it sets a CSS variable (Variable, a width in px) on its host — the element with Host Class around it, else its ' +
+      'parent — for the column AFTER it (the grid uses var(Variable, its default)). The width is kept on this computer ' +
+      '(Store Key); a double-click gives the default back. Width is the width set, 0 for the default.',
+    ssr: { compat: 'safe' },
+    noodlNodeAsProp: true,
+    clamp: dividerClamp,
+    css: DIVIDER_CSS,
+
+    getReactComponent: function () {
+      return function DividerComponent(props) {
+        var root = React.useRef(null);
+        var dragging = React.useState(false);
+        var variable = typeof props.variable === 'string' && /^--[a-z0-9-]+$/i.test(props.variable) ? props.variable : '--gd-split';
+        var min = Number(props.min) > 0 ? Number(props.min) : 320;
+        var max = Number(props.max) > 0 ? Number(props.max) : 900;
+        var minOther = Number(props.minOther) >= 0 ? Number(props.minOther) : 360;
+        var hostOf = function () {
+          var el = root.current;
+          if (!el) return null;
+          var cls = typeof props.hostClass === 'string' ? props.hostClass.trim() : '';
+          return (cls && el.closest ? el.closest('.' + cls) : null) || el.parentElement;
+        };
+        var set = function (w, keep) {
+          var host = hostOf();
+          if (!host) return;
+          if (w === null) host.style.removeProperty(variable);
+          else host.style.setProperty(variable, Math.round(w) + 'px');
+          if (keep) dividerWrite(props.storeKey, w);
+          if (typeof props.onWidth === 'function') props.onWidth(w === null ? 0 : Math.round(w));
+          if (keep && typeof props.onResized === 'function') props.onResized();
+        };
+        React.useEffect(function () {
+          props.noodlNode && props.noodlNode.setDOMElement(root.current);
+        }, []);
+        // The kept width, put back on the host (bounded by today's window).
+        React.useEffect(function () {
+          var host = hostOf(), w = dividerRead(props.storeKey);
+          if (host && w !== null) set(dividerClamp(w, host.getBoundingClientRect().width, min, max, minOther), false);
+        }, [props.storeKey, variable]);
+        var widthNow = function () {
+          var host = hostOf(), el = root.current;
+          if (!host || !el) return min;
+          return host.getBoundingClientRect().right - el.getBoundingClientRect().right;
+        };
+        var onPointerDown = function (e) {
+          var host = hostOf(), el = root.current;
+          if (!host || !el || (e.button !== undefined && e.button !== 0)) return;
+          e.preventDefault();
+          if (el.setPointerCapture && e.pointerId !== undefined) el.setPointerCapture(e.pointerId);
+          var start = e.clientX, from = widthNow(), last = from;
+          dragging[1](true);
+          var move = function (ev) {
+            last = dividerClamp(from - (ev.clientX - start), host.getBoundingClientRect().width, min, max, minOther);
+            set(last, false);
+          };
+          var up = function () {
+            el.removeEventListener('pointermove', move);
+            el.removeEventListener('pointerup', up);
+            el.removeEventListener('pointercancel', up);
+            dragging[1](false);
+            set(last, true);
+          };
+          el.addEventListener('pointermove', move);
+          el.addEventListener('pointerup', up);
+          el.addEventListener('pointercancel', up);
+        };
+        var onKeyDown = function (e) {
+          var host = hostOf();
+          if (!host || (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight')) return;
+          e.preventDefault();
+          // Left widens the column after the divider (the divider moves left), right narrows it.
+          set(dividerClamp(widthNow() + (e.key === 'ArrowLeft' ? 32 : -32), host.getBoundingClientRect().width, min, max, minOther), true);
+        };
+        var onDoubleClick = function () {
+          dividerWrite(props.storeKey, null);
+          set(null, false);
+          if (typeof props.onResized === 'function') props.onResized();
+        };
+        return h(
+          'div',
+          {
+            ref: root,
+            className: 'gd-divider',
+            role: 'separator',
+            'aria-orientation': 'vertical',
+            'aria-label': props.label || 'Drag to resize',
+            tabIndex: 0,
+            'data-dragging': dragging[0] ? 'true' : undefined,
+            onPointerDown: onPointerDown,
+            onKeyDown: onKeyDown,
+            onDoubleClick: onDoubleClick,
+            style: props.style
+          },
+          h('style', { key: 'css' }, DIVIDER_CSS),
+          h('span', { key: 'grip', className: 'gd-divider-grip', 'aria-hidden': 'true' })
+        );
+      };
+    },
+
+    inputProps: {
+      variable: { type: 'string', displayName: 'Variable', group: 'Divider', default: '--gd-split', description: 'The CSS variable set on the host, a width in px for the column after the divider (the grid reads var(Variable, a default)).' },
+      hostClass: { type: 'string', displayName: 'Host Class', group: 'Divider', default: '', description: 'The class of the element the variable is set on (the grid). Empty: the divider’s parent.' },
+      storeKey: { type: 'string', displayName: 'Store Key', group: 'Divider', default: '', description: 'Where the width is kept on this computer. Empty: nothing is kept.' },
+      min: { type: 'number', displayName: 'Min', group: 'Divider', default: 320, description: 'The narrowest the column after the divider may be, in px.' },
+      max: { type: 'number', displayName: 'Max', group: 'Divider', default: 900, description: 'The widest the column after the divider may be, in px.' },
+      minOther: { type: 'number', displayName: 'Min Other', group: 'Divider', default: 360, description: 'What the divider always leaves the column before it, in px.' },
+      label: { type: 'string', displayName: 'Label', group: 'Divider', default: 'Drag to resize', description: 'What a screen reader calls the divider.' }
+    },
+
+    outputProps: {
+      onWidth: { type: 'number', displayName: 'Width', group: 'Divider', description: 'The width set, in px (0: the default).' },
+      onResized: { type: 'signal', displayName: 'Resized', group: 'Divider', description: 'A drag or a key ended, or a double-click gave the default back.' }
+    }
+  };
+
   // P108 IW-004: Blocks (src/blocks.js, above this file in index.js) — the program editor on Blockly — beside these two.
   var blocksNode = typeof gardenKitBlocks !== 'undefined' && gardenKitBlocks ? gardenKitBlocks.node : null;
 
   /** @type {import('./types/node-kit').NodeKitModule} */
   var kit = {
     nodes: [],
-    reactNodes: h ? [BlockList, Garden].concat(blocksNode ? [blocksNode] : []) : []
+    reactNodes: h ? [BlockList, Garden, Divider].concat(blocksNode ? [blocksNode] : []) : []
   };
 
   Noodl.defineModule(kit);

@@ -284,7 +284,8 @@ describe('IW-007 (lane A) — garden-kit draws her by her bowl: happy fed, waiti
     const node = garden();
     const patch = (left: number) => cellOf(draw(node, { map: ['GGG'], things: [{ kind: 'patch', id: 'patch', x: 1, y: 0, left, max: 4 }], robots: [] }), 1, 0);
     expect([4, 3, 1, 0].map((n) => [(patch(n).match(/data-patch="(\d)"/) || [])[1], (patch(n).match(/class="gd-meter([^"]*)" data-meter="([^"]+)"/) || []).slice(1).join('|')])).toEqual([
-      ['4', ' gd-m-carrot gd-meter-top|4/4'], ['3', ' gd-m-carrot gd-meter-top|3/4'], ['1', ' gd-m-carrot gd-meter-top|1/4'], ['0', ' gd-m-carrot gd-meter-top|0/4']
+      // P108 s8: under its max the patch grows back, and its chip says so (gd-grows); full, it does not.
+      ['4', ' gd-m-carrot gd-meter-top|4/4'], ['3', ' gd-m-carrot gd-grows gd-meter-top|3/4'], ['1', ' gd-m-carrot gd-grows gd-meter-top|1/4'], ['0', ' gd-m-carrot gd-grows gd-meter-top|0/4']
     ]);
     expect(patch(0)).toMatch(/gd-patch gd-used/);
     // The engine picks one: the patch shrinks and the carrot is the robot's load.

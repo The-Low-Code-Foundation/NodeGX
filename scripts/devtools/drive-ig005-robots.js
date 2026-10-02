@@ -318,7 +318,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
       check(`IG-005 AC2 ${tag}: the save has ${lentName} in island.robots, the catalogue’s name in her language, not named by the child`, !!row && row.kind === LENT.id && row.name === lentName && row.color === LENT.colour, saved && saved.island.robots);
 
       // My robots: a card per robot; the lent one named, lent by its islander, wearing its accessory; the others locked.
-      await tab(2);
+      await tab(1);
       await until('location.pathname', (p) => p === '/robot');
       await wait(1200);
       const cards = await evaluate(`[...document.querySelectorAll('.bg-robot-card')].filter((c) => c.offsetParent !== null).map((c) => { const t = (s) => { const e = c.querySelector(s); return e && e.offsetParent !== null ? e.innerText.trim() : null; }; const inp = c.querySelector('input'); return { cls: c.className, name: inp && inp.offsetParent !== null ? inp.value : t('.bg-robot-card h3'), tag: t('.bg-robot-tag'), wears: t('.bg-robot-wears'), where: t('.bg-robot-where'), blocks: [...c.querySelectorAll('.bg-ability')].map((a) => a.innerText.trim()), drawn: (c.querySelector('.gd-bot') || { getAttribute: () => null }).getAttribute('data-accessory'), locked: c.className.includes('bg-robot-locked') }; })`);
@@ -363,7 +363,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
 
       if (tag === '1368-en') {
         // The lent robot renamed on his card is the name on the island.
-        await tab(2);
+        await tab(1);
         await until('location.pathname', (p) => p === '/robot');
         await wait(1000);
         await typeInto(`document.querySelector('.bg-robot-${LENT.id} input')`, 'Rocky');

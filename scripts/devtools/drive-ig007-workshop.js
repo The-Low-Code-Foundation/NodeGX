@@ -403,7 +403,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     readings.nextOpen = { before: m1, after: m2, worlds: wl2 };
     check('AC4: the next Workshop open is the 2D Garden from the start — the 3D node is never mounted', m2.gd3 === m1.gd3 && m2.gd > m1.gd && wl2.gd === 1 && wl2.gd3 === 0, readings.nextOpen);
     // The Grown-ups page says why, and its switch brings 3D back.
-    await tab(4);
+    await tab(3);
     await until('location.pathname', (p) => p === '/grown-ups');
     await wait(800);
     const line = await evaluate(`(() => { const e = document.querySelector('.bg-renderer-line'); return e ? e.innerText : null; })()`);
@@ -449,7 +449,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const m2 = await mounts();
     readings.nextOpen = { before: m1, after: m2, worlds: await worlds() };
     check('AC4: the next Workshop open is instant — the 3D node is never mounted again, the 2D Garden is', m2.gd3 === m1.gd3 && m2.gd > m1.gd && readings.nextOpen.worlds.gd === 1, readings.nextOpen);
-    await tab(4);
+    await tab(3);
     await until('location.pathname', (p) => p === '/grown-ups');
     await wait(800);
     const g = await evaluate(`(() => { const e = document.querySelector('.bg-renderer-line'); const on = [...document.querySelectorAll('.bg-renderer-switch .bg-seg-btn')].map((b) => ({ text: b.innerText, bg: getComputedStyle(b).backgroundColor })); return { line: e ? e.innerText : null, on }; })()`);

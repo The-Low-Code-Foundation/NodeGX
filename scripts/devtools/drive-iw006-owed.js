@@ -283,7 +283,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const cardNamed = (name) => `[...document.querySelectorAll('.bg-robot-card')].find((c) => c.offsetParent !== null && ((c.querySelector('input') || {}).value === ${JSON.stringify(name)}))`;
   const sendChip = (name, title) => `[...(${cardNamed(name)}).querySelectorAll('.bg-robot-send .bg-chip')].find((e) => e.offsetParent !== null && e.innerText.trim() === ${JSON.stringify(title)})`;
   const openRobots = async () => {
-    await tab(2);
+    await tab(1);
     await until('location.pathname', (p) => p === '/robot');
     await until(`document.querySelectorAll('.bg-robot-card').length`, (n) => n >= 4, 8000);
     await wait(900);

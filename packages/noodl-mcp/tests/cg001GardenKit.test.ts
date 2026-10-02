@@ -177,9 +177,9 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(built.startsWith('/* garden-kit')).toBe(true);
     });
 
-    it('registers exactly garden-kit.BlockList and garden-kit.Garden (and, P108 IW-004, garden-kit.Blocks), each documented, in a context with no window and no document', () => {
+    it('registers exactly garden-kit.BlockList and garden-kit.Garden (and, P108 IW-004, garden-kit.Blocks; P108 s8, garden-kit.Divider), each documented, in a context with no window and no document', () => {
       const names = [...kit.nodes, ...kit.reactNodes].map((n) => n.name).sort();
-      expect(names).toEqual(['garden-kit.BlockList', 'garden-kit.Blocks', 'garden-kit.Garden']);
+      expect(names).toEqual(['garden-kit.BlockList', 'garden-kit.Blocks', 'garden-kit.Divider', 'garden-kit.Garden']);
       for (const n of kit.reactNodes) {
         expect(typeof n.docs).toBe('string');
         expect(n.docs.length).toBeGreaterThan(40);

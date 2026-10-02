@@ -620,7 +620,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
         check(`AC3 ${tag}: the tulip request is done on the island`, !!done && done.includes(w(lang, 'done')), done);
       }
       // My robot: the hat, owned, worn.
-      await tab(2);
+      await tab(1);
       await until('location.pathname', (p) => p === '/robot');
       await wait(700);
       const hat = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-chip')].find((e) => e.innerText.includes(${JSON.stringify(w(lang, 'hatSun'))})); return c ? { text: c.innerText, opacity: getComputedStyle(c).opacity } : null; })()`);
@@ -628,7 +628,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
       if (hat) await tap(byText('.bg-chip', w(lang, 'hatSun')), 'wear the hat');
       await shot(`ac3-${tag}-07-robot`);
       // Skills: Repeat blooms.
-      await tab(3);
+      await tab(2);
       await until('location.pathname', (p) => p === '/skills');
       await wait(700);
       const bloom = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-notion')].find((e) => e.innerText.includes(${JSON.stringify(w(lang, 'n2p'))})); return c ? c.className : null; })()`);
@@ -923,7 +923,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
         STUB.plan.answers['no-letter-e'] = lang === 'fr' ? 'La tulipe est une belle fleur rouge.' : 'The tulip is a lovely red flower.';
         STUB.plan.answers['tall-tales'] = lang === 'fr' ? 'Sydney !' : 'Sydney!';
         STUB.plan.answers.translate = 'Les tulipes sont vif.';
-        await tab(3);
+        await tab(2);
         await until('location.pathname', (p) => p === '/skills');
         await wait(900);
         const cards = await evaluate(`[...document.querySelectorAll('.bg-lesson')].filter((e) => e.offsetParent !== null).length`);
@@ -1094,7 +1094,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await wait(900);
   await contrastClause('Island');
   // S3-RENAME: the robot renamed on My robot is the name on its pin and in the Workshop's line.
-  await tab(2);
+  await tab(1);
   await until('location.pathname', (p) => p === '/robot');
   await wait(700);
   await typeInto(first('.bg-panel input'), 'Rosie', 'the robot’s name (My robot)');
@@ -1116,14 +1116,14 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await shot('look-workshop-1368');
   await contrastClause('Workshop');
   // Rename back, so the screens after read as before.
-  await tab(2);
+  await tab(1);
   await until('location.pathname', (p) => p === '/robot');
   await wait(600);
   await typeInto(first('.bg-panel input'), 'Pip', 'the robot’s name back to Pip');
   await wait(400);
 
   // Grown-ups: the stub Olive is awake; Try Olive answers.
-  await tab(4);
+  await tab(3);
   await until('location.pathname', (p) => p === '/grown-ups');
   await wait(1200);
   const gu = await text();
@@ -1176,7 +1176,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   const pastedPin = await evaluate(`[...document.querySelectorAll('.bg-isle .gd-bot .gd-name')].map((n) => n.innerText)`);
   check('S4-PASTE: … and the island shows it (the robot on the island is Remy)', pastedPin.includes('Remy'), pastedPin);
   // The shown code back, so the screens after read as before.
-  await tab(4);
+  await tab(3);
   await until('location.pathname', (p) => p === '/grown-ups');
   await wait(900);
   await typeInto(pasteBox, shown, 'the paste box (the code shown at first)');

@@ -80,6 +80,8 @@ export const KIT_BLOCKS = 'garden-kit.BlockList';
 export const KIT_BLOCKLY = 'garden-kit.Blocks';
 /** IG-007 (P106 s2): the 3D world on the Workshop, under the 2D Garden's exact wires, behind the `renderer` States node. */
 export const KIT_GARDEN_3D = 'garden-3d-kit.Garden3D';
+/** P108 s8: the Workshop's middle divider — dragged, it sizes the steps column and the world takes the rest. */
+export const KIT_DIVIDER = 'garden-kit.Divider';
 const KIT_AVATAR = 'game-kit.Avatar';
 const KIT_KEEP = 'game-kit.KeepStorage';
 
@@ -523,29 +525,31 @@ const SEG: CgComponent = {
   ]
 };
 
+// P108 s8 (Richard, 2026-10-02: "I think the workshop tab maybe shouldn't even be a tab"): no Workshop tab. It opened the
+// last request, or — none chosen — an empty plot that CG-003 AC8's reload guard sent back to the island. The Workshop is
+// reached from a request, a plot or her land, as it always was.
 const TABS: ReadonlyArray<{ id: string; word: string; target: string; on: string }> = [
   { id: 'island', word: 'navIsland', target: C.pageIsland, on: 'islandOn' },
-  { id: 'workshop', word: 'navWorkshop', target: C.pageWorkshop, on: 'workshopOn' },
   { id: 'robot', word: 'navRobot', target: C.pageRobot, on: 'robotOn' },
   { id: 'skills', word: 'navSkills', target: C.pageSkills, on: 'skillsOn' },
   { id: 'grown', word: 'navGrown', target: C.pageGrown, on: 'grownOn' }
 ];
 
 /**
- * The bar on every screen (the mockup's .top): the brand, the five screens, the band and the language (per profile, so
+ * The bar on every screen (the mockup's .top): the brand, the four screens (P108 s8: the Workshop is not one), the band and the language (per profile, so
  * a switch writes the family), and who is playing (a tap goes back to Profiles). Page changes are the router's (AC8).
  * Picked En / Picked Fr also fire, so the Profiles screen can set the language before anyone is chosen (`gardenLang`, written there only: one bar is drawn per page, and a Variable in the bar would be one value for every copy).
  */
 const BAR: CgComponent = {
   path: 'Garden/Top bar',
-  description: 'The top bar: brand, the five screens, band 7–9 / 10–12, EN / FR, and who is playing. Page is which tab is lit. A band or language tap writes the family through Model and Write. Show Tabs false and Show Band false for the Profiles screen.',
+  description: 'The top bar: brand, the four screens, band 7–9 / 10–12, EN / FR, and who is playing. Page is which tab is lit. A band or language tap writes the family through Model and Write. Show Tabs false and Show Band false for the Profiles screen.',
   nodes: [
     inputs('brIn', [['page', 'string'], ['band', 'number'], ['lang', 'string'], ['name', 'string'], ['face', 'string'], ['words', 'array'], ['botName', 'string'], ['model', 'object'], ['profileId', 'string'], ['showTabs', 'boolean'], ['showBand', 'boolean'], ['hasProfile', 'boolean']]),
     group('brBar', 'The bar', undefined, { ...row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), rowGap: sp(10) }), backgroundColor: 'var(--card)', borderRadius: 'var(--radius-bar)', ...pad(10, 14), cssClassName: 'bg-top' }, ['brBrand', 'brTabs', 'brBandSeg', 'brLangSeg', 'brWho']),
     group('brBrand', 'The brand', 'brBar', row({ columnGap: sp(10) }), ['brMark', 'brName']),
     group('brMark', 'The tulip', 'brBrand', { sizeMode: 'explicit', width: px(38), height: px(38), cssClassName: 'bg-brand-mark bg-sp-tulip' }),
     text('brName', 'The game’s name', 'brBrand', GAME_NAME, { sizeMode: 'contentSize', ...DISPLAY, fontSize: px(24), fontWeight: '700', color: 'var(--ink)', cssClassName: 'bg-brand' }),
-    group('brTabs', 'The five screens', 'brBar', { ...row({ columnGap: sp(4), rowGap: sp(4) }), cssClassName: 'bg-tabs' }, TABS.map((t) => `brTab_${t.id}`)),
+    group('brTabs', 'The four screens', 'brBar', { ...row({ columnGap: sp(4), rowGap: sp(4) }), cssClassName: 'bg-tabs' }, TABS.map((t) => `brTab_${t.id}`)),
     ...TABS.map((t) => place(`brTab_${t.id}`, C.tab, `Tab: ${t.id}`, 'brTabs')),
     group('brBandSeg', 'Age band', 'brBar', { ...row({ columnGap: sp(0) }), backgroundColor: 'var(--paper-2)', borderRadius: px(999), ...pad(3), cssClassName: 'bg-seg' }, ['brBand1', 'brBand2']),
     place('brBand1', C.seg, '7–9', 'brBandSeg', { label: '7–9' }),
@@ -930,7 +934,10 @@ const PLAY: CgComponent = {
     text('plEyebrow', 'Whose request', 'plHead', '', T_EYEBROW),
     text('plTitle', 'The request', 'plHead', '', { ...T_H1, cssClassName: 'bg-ws-title' }),
     text('plSub', 'How it works', 'plHead', '', { ...T_MUTED, maxWidth: px(640), cssClassName: 'bg-ws-sub' }),
-    group('plWs', 'World and steps', 'plRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-ws' }, ['plLeft', 'plRight']),
+    group('plWs', 'World and steps', 'plRoot', { width: pct(100), sizeMode: 'contentHeight', cssClassName: 'bg-ws' }, ['plLeft', 'plSplit', 'plRight']),
+    // P108 s8 (Richard, 2026-10-02: "make the middle divider possible to drag and resize"): the steps column's width is
+    // --bg-steps-w on the grid (cg007Look), set by a drag or the arrow keys and kept on this computer.
+    place('plSplit', KIT_DIVIDER, 'The divider between the world and the steps', 'plWs', { variable: '--bg-steps-w', hostClass: 'bg-ws', storeKey: 'bot-garden-steps-w', min: 360, max: 1000, minOther: 420, label: 'Drag to make the steps wider or narrower' }),
     group('plLeft', 'The world side', 'plWs', { ...column({ rowGap: sp(12) }), ...PANEL }, ['plTask', 'plTeachLine', 'plStage', 'plVars', 'plModeLine', 'plControls', 'plOwl', 'plJob']),
     group('plTask', 'The task', 'plLeft', row({ width: pct(100), sizeMode: 'contentHeight', columnGap: sp(14), flexWrap: 'nowrap' }), ['plFace', 'plTaskText', 'plMarks']),
     group('plFace', 'The islander', 'plTask', { sizeMode: 'explicit', width: px(56), height: px(56) }),

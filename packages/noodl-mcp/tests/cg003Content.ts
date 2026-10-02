@@ -32,7 +32,7 @@ export const REQUEST_SUBS: Readonly<Record<string, { key: string; words: Bi }>> 
   'rows-trick': { key: 'subRowsTrick', words: s('Two rows, the same job. Teach {b} the job once, as a trick with a name, then use it twice.', 'Deux rangées, le même travail. Apprends le travail une fois à {b}, comme une astuce avec un nom, puis utilise-la deux fois.') },
   // P106 IG-006 (lane C): Olive's three requests.
   'mamie-note': { key: 'subMamieNote', words: s('A program cannot read Mamie’s note, but Olive can. Ask her, then let “if Olive read…” choose the row.', 'Un programme ne sait pas lire le mot de Mamie, Olive si. Demande-lui, puis laisse « si Olive a lu… » choisir la rangée.') },
-  'rock-flower': { key: 'subRockFlower', words: s('Fill the can at the pond first. Olive is right most of the time, not every time. Ask three times, and the count decides.', 'Remplis d’abord l’arrosoir à la mare. Olive a raison presque tout le temps, pas à chaque fois. Demande trois fois, et le compte décide.') },
+  'rock-flower': { key: 'subRockFlower', words: s('Pick up the can and fill it at the pond first. Olive is right most of the time, not every time. Ask three times, and the count decides.', 'Prends l’arrosoir et remplis-le d’abord à la mare. Olive a raison presque tout le temps, pas à chaque fois. Demande trois fois, et le compte décide.') },
   'sami-thanks': { key: 'subSamiThanks', words: s('The letter is {b}’s job; the kind words are Olive’s. Put her thank-you at the end.', 'La lettre, c’est le travail de {b} ; les mots gentils, ceux d’Olive. Mets son merci à la fin.') },
   // P108 IW-003 (lane P): the envelopes.
   envelopes: { key: 'iw3pSubEnvelopes', words: s('A program cannot read a name, but Olive can. {b} picks up a letter, Olive reads it, then “go to” what she read.', 'Un programme ne sait pas lire un nom, Olive si. {b} prend une lettre, Olive la lit, puis « aller à » ce qu’elle a lu.') },
@@ -248,7 +248,7 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw3mDoorWr: s('the tulip gets thirsty again', 'la tulipe a de nouveau soif'),
   iw3mDoorSum: s('{n}/{t} drinks', '{n}/{t} gorgées'),
   iw3mTulipsSrc: s('⛲ the pond, which never runs dry', '⛲ la mare, qui ne tarit jamais'),
-  iw3mTulipsCar: s('🪣 the can in {b}’s hand, holds 3', '🪣 l’arrosoir de {b}, 3 gorgées'),
+  iw3mTulipsCar: s('🪣 the can on the grass, holds 3', '🪣 l’arrosoir dans l’herbe, 3 gorgées'),
   iw3mTulipsTgt: s('🌷 3 tulips × 3 drinks', '🌷 3 tulipes × 3 gorgées'),
   iw3mTulipsFin: s('every tulip full → {b} walks home', 'toutes les tulipes pleines → {b} rentre'),
   iw3mTulipsWr: s('a tulip gets thirsty again', 'une tulipe a de nouveau soif'),
@@ -260,13 +260,13 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   iw3mEggsWr: s('Mamie takes an egg for breakfast; the hen lays again', 'Mamie prend un œuf pour le petit-déjeuner ; la poule pond à nouveau'),
   iw3mEggsSum: s('{n}/{t} eggs in the basket', '{n}/{t} œufs dans le panier'),
   iw3mRowsSrc: s('⛲ two ponds, one at each end of the path', '⛲ deux mares, une à chaque bout du chemin'),
-  iw3mRowsCar: s('🪣 the can in {b}’s hand, holds 3', '🪣 l’arrosoir de {b}, 3 gorgées'),
+  iw3mRowsCar: s('🪣 the can by the pond, holds 3', '🪣 l’arrosoir au bord de la mare, 3 gorgées'),
   iw3mRowsTgt: s('🌷 2 rows × 3 little tulips, one drink each', '🌷 2 rangées × 3 petites tulipes, une gorgée chacune'),
   iw3mRowsFin: s('both rows watered → {b} is home', 'les deux rangées arrosées → {b} est rentré'),
   iw3mRowsWr: s('a tulip gets thirsty again', 'une tulipe a de nouveau soif'),
   iw3mRowsSum: s('{n}/{t} tulips watered', '{n}/{t} tulipes arrosées'),
   iw3mNoteSrc: s('⛲ the well, which never runs dry', '⛲ le puits, qui ne tarit jamais'),
-  iw3mNoteCar: s('🪣 the can in {b}’s hand, holds 3', '🪣 l’arrosoir de {b}, 3 gorgées'),
+  iw3mNoteCar: s('🪣 the can on the grass, holds 3', '🪣 l’arrosoir dans l’herbe, 3 gorgées'),
   iw3mNoteTgt: s('🌷 the row Mamie’s note asks for: 3 tulips, one drink each', '🌷 la rangée que demande le mot de Mamie : 3 tulipes, une gorgée chacune'),
   iw3mNoteFin: s('that row watered → {b} walks home', 'cette rangée arrosée → {b} rentre'),
   iw3mNoteWr: s('a tulip gets thirsty again', 'une tulipe a de nouveau soif'),
@@ -453,11 +453,14 @@ export const PAD_KEYS: ReadonlyArray<{ op: string; place: string; icon: string; 
  * pad has one key per kind lying on the plot when the request opens — a thing to fetch (`nearest`: go to the nearest egg)
  * or a place to take it (`to`: go to the basket; the key records a chip of the first one on the plot). Kinds nobody
  * fetches or visits (a tulip is watered where it stands) are not keys, so free play's pad is as it was.
+ * P108 s8 (Richard: "the fixed list of movements won't apply to just any rock"): `nearest` has the places to take things
+ * too (a square, a bowl, a basket) and her land's sources (a tree, a carrot patch), so the walk BACK can be taught by
+ * driving, as the drawer's block always could; where `go to` already has a key for that kind, the nearest one is left out.
  */
 export const PAD_GO: { nearest: ReadonlyArray<string>; to: ReadonlyArray<string>; emoji: Readonly<Record<string, string>> } = {
-  nearest: ['egg', 'letter', 'stone', 'food', 'ball', 'rock', 'can'],
+  nearest: ['egg', 'letter', 'stone', 'food', 'ball', 'rock', 'can', 'tree', 'patch', 'site', 'bowl', 'basket'],
   to: ['basket', 'bowl', 'store', 'door', 'site', 'postbox'],
-  emoji: { egg: '🥚', letter: '✉️', stone: '🪨', food: '🍖', ball: '⚽', rock: '⛰️', can: '🪣', basket: '🧺', bowl: '🥣', store: '📦', door: '🚪', site: '🟫', postbox: '📮' }
+  emoji: { egg: '🥚', letter: '✉️', stone: '🪨', food: '🍖', ball: '⚽', rock: '⛰️', can: '🪣', tree: '🌳', patch: '🥕', basket: '🧺', bowl: '🥣', store: '📦', door: '🚪', site: '🟫', postbox: '📮' }
 };
 
 /**
