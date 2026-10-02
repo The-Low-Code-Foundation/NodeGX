@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "later",
+      "fromProperty": "out-op",
+      "toId": "world",
+      "toProperty": "opacity"
+    },
+    {
+      "fromId": "later",
+      "fromProperty": "out-op",
+      "toId": "bare",
+      "toProperty": "opacity"
+    }
+  ]
+}

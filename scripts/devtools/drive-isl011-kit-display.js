@@ -14,7 +14,10 @@
  *   bare          — the same for the control (must read grid, four columns side by side)
  * Plus console errors and the kit's registration (`window.__noodl_modules`).
  *
- * Usage: drive-isl011-kit-display.js <deploy-dir> [--json out.json]
+ * AC3's port-write arm (P109 s3): `--settle <ms>` reads after that long, and the readings carry `opacity` and
+ * `wrote` — for `isl011-port-write` in the phase folder, whose Function sets both nodes' opacity 300 ms after load.
+ *
+ * Usage: drive-isl011-kit-display.js <deploy-dir> [--settle ms] [--shot out.png] [--json out.json]
  * Exits 0 after printing its readings; 1 when the drive could not run; 2 on a usage error.
  */
 const fs = require('fs');
@@ -23,6 +26,10 @@ const { withDeployedSite } = require('./drive-deployed.js');
 const DIR = process.argv[2];
 const jsonFlag = process.argv.indexOf('--json');
 const JSON_OUT = jsonFlag === -1 ? null : process.argv[jsonFlag + 1];
+const settleFlag = process.argv.indexOf('--settle');
+const SETTLE_MS = settleFlag === -1 ? 500 : Number(process.argv[settleFlag + 1]);
+const shotFlag = process.argv.indexOf('--shot');
+const SHOT = shotFlag === -1 ? null : process.argv[shotFlag + 1];
 if (!DIR || DIR.startsWith('--')) {
   console.error('usage: drive-isl011-kit-display.js <deploy-dir> [--json out.json]');
   process.exit(2);
@@ -43,25 +50,28 @@ const READ = `(() => {
       computedDisplay: cs.display,
       gridTemplateColumns: cs.gridTemplateColumns,
       inlineDisplay: el.style.display,
+      opacity: cs.opacity,
+      inlineOpacity: el.style.opacity,
       cells: cells.length,
       rows,
       cellBoxes: cells
     };
   };
-  const out = { marker: document.body.innerText.includes('isl011 page drew'), roots: roots.length };
+  const out = { marker: document.body.innerText.includes('isl011 page drew'), roots: roots.length, wrote: !!window.__isl011Wrote };
   for (const el of roots) out[el.getAttribute('data-isl011')] = one(el);
   out.modules = (window.__noodl_modules || []).map((m) => ({ name: m && m.name, reactNodes: ((m && m.reactNodes) || []).map((n) => n && n.name) }));
   return out;
 })()`;
 
-withDeployedSite({ dir: DIR }, async ({ evaluate, consoleErrors }) => {
+withDeployedSite({ dir: DIR }, async ({ evaluate, consoleErrors, screenshot }) => {
   let read = await evaluate(READ);
   for (let i = 0; i < 20 && !(read.marker && read.roots === 2); i++) {
     await wait(250);
     read = await evaluate(READ);
   }
-  await wait(500);
+  await wait(SETTLE_MS);
   read = await evaluate(READ);
+  if (SHOT) await screenshot(SHOT);
   return { dir: DIR, ...read, consoleErrors: consoleErrors.slice(0, 10) };
 })
   .then((result) => {

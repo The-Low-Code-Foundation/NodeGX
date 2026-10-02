@@ -1,6 +1,6 @@
 # ISL-011 — A kit node keeps the display its author gave it
 
-**Status: 🟡 built on the recommended route (1a + 2a), session 2 (2026-10-02) — AC1 measured both ways, AC2 gated, AC3's page and export arms read, AC5 censused (0 conflicts); owed: AC3's canvas arm and its port-write-after-mount drive, AC6 (ISL-025 W13's ruling).** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: 🟡 built on the recommended route (1a + 2a), session 2 (2026-10-02) — AC1 measured both ways, AC2 gated, AC3's page and export arms read, AC5 censused (0 conflicts); s3: AC3's port-write-after-mount arm driven (the grid survives); owed: AC3's canvas arm, AC6 (ISL-025 W13's ruling).** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F15** · found by P105 [CG-001](../phase-105-the-coding-garden/CG-001-THE-KIT.md) §7.1 item 1, the first page drive,
 2026-09-27 · **Side:** product (React bridge, node-kit types and docs, scaffold; the export's half is P84 **P40**)
 
@@ -185,3 +185,20 @@ with the control, the page check and the graph-style row still green; 4/4 again 
 **Owed, with why:** AC3's canvas arm (needs `run-editor`, a heavy job the drive set held the box for), the
 port-write-after-mount drive (the same), AC6 (ISL-025 W13's ruling, asked when W13 is next).
 
+### Session 3 — 2026-10-02, P109 s3: AC3's port write after mount
+
+`isl011-port-write/` in this folder: a copy of `nodegx-export/tests/fixtures/isl011-kit-grid` (the export corpus
+fixture stays as it is — HLS-001 pins it) whose kit nodes also declare an `opacity` style input (`inputCss`), and a
+Function that writes `0.5` to both 300 ms after load. `validate:project` 0 errors (the kit's new port read). Deployed with
+`nodegx deploy` (exit 0) over the 14:01 bundle and read 1.5 s after load by `drive-isl011-kit-display.js --settle 1500`
+(the drive grew `--settle`, `--shot`, and `opacity` / `wrote` in its readings):
+
+| node | the write landed | computed `display` | inline `display` | cells' rows |
+|---|---|---|---|---|
+| `WorldBare` — the kit written as the updated docs say (no `display` in `defaultCss`) | `opacity 0.5`, inline | **`grid`** | — | **1** (four columns) |
+| `World` — `defaultCss: { display: 'block' }` | `opacity 0.5`, inline | `block` | `block` | 4 (stacked, as documented) |
+
+**The grid survives a style write after mount** (`setStyle`'s direct DOM patch writes only the property it was given).
+Screenshot looked at: both faded, the docs-way node four across, the other stacked. 0 console errors.
+
+**Still owed:** AC3's editor-canvas reading (`run-editor`, a heavy job), AC6 (ISL-025 W13's ruling).
