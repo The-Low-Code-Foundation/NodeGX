@@ -106,7 +106,7 @@ the work:
 | [ISL-009](ISL-009-A-NODE-CAN-BE-NAMED-FOR-A-TEST-AND-SCROLLED-TO.md) | A node can be named for a test and scrolled to | F12 | node library | ✓ |
 | [ISL-010](ISL-010-A-RUNNING-APP-CAN-ASK-A-LOCAL-MODEL.md) | A running app can ask a local model | F13 | cloud nodes | ✓ |
 | **Track C** | | | | |
-| [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display — **🟡 s2: (1a) the four author surfaces say `defaultCss` is inline, gated; (2a) the export applies it; AC1 read on a page and in jsdom; canvas arm and AC6 owed** | F15 | kit bridge, docs, export | — |
+| [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display — **🟡 s2: (1a) docs + gate, (2a) the export applies it; s3: AC3 complete (page, port write after mount, editor canvas); AC6 waits on ISL-025 W13's ruling** | F15 | kit bridge, docs, export | — |
 | [ISL-012](ISL-012-A-KIT-CAN-SHIP-A-MODERN-LIBRARY.md) | A kit can ship a modern library | F16 | kit loader, extractor | ✓ |
 | [ISL-013](ISL-013-TWO-KITS-SHARE-CODE-WITHOUT-A-COPY.md) | Two kits share code without a copy | F17 | kit system | ✓ |
 | [ISL-014](ISL-014-A-MISSING-KIT-READER-IS-NAMED-AS-ONE.md) | A missing kit reader is named as one — **🟡 s1: the refusal names it; s3: ruled (b) "Build it automatically" and built — a checkout builds its own reader, stale by its input list; AC5 green in a worktree; AC6 owed (server rebuild first)** | F18, **D83** | MCP door | ✓ ruled |

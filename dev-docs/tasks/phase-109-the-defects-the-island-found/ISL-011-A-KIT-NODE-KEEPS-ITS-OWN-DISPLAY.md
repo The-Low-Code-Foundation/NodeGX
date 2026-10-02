@@ -1,6 +1,6 @@
 # ISL-011 — A kit node keeps the display its author gave it
 
-**Status: 🟡 built on the recommended route (1a + 2a), session 2 (2026-10-02) — AC1 measured both ways, AC2 gated, AC3's page and export arms read, AC5 censused (0 conflicts); s3: AC3's port-write-after-mount arm driven (the grid survives); owed: AC3's canvas arm, AC6 (ISL-025 W13's ruling).** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: 🟡 built on the recommended route (1a + 2a), session 2 (2026-10-02) — AC1 measured both ways, AC2 gated, AC3's page and export arms read, AC5 censused (0 conflicts); s3: AC3 complete — the port write after mount (the grid survives) and the editor canvas (the same reading as the page); only AC6 (ISL-025 W13's ruling) is owed.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F15** · found by P105 [CG-001](../phase-105-the-coding-garden/CG-001-THE-KIT.md) §7.1 item 1, the first page drive,
 2026-09-27 · **Side:** product (React bridge, node-kit types and docs, scaffold; the export's half is P84 **P40**)
 
@@ -201,4 +201,17 @@ Function that writes `0.5` to both 300 ms after load. `validate:project` 0 error
 **The grid survives a style write after mount** (`setStyle`'s direct DOM patch writes only the property it was given).
 Screenshot looked at: both faded, the docs-way node four across, the other stacked. 0 console errors.
 
-**Still owed:** AC3's editor-canvas reading (`run-editor`, a heavy job), AC6 (ISL-025 W13's ruling).
+**AC3's editor-canvas arm (later in s3).** `npm run dev:debug` with `NOODL_USER_DATA_DIR` at a throwaway profile in
+the scratchpad (seeded with `firstRunLegal.json` and a one-entry `recently_opened_project.json` — nothing written to
+Richard's profile), a scratch copy of `nodegx-export/tests/fixtures/isl011-kit-grid` with `rootNodeId: app_group`, opened
+from its launcher card. Read in the canvas webview (`cdp eval --target=viewer`):
+
+| node | computed `display` | inline | `grid-template-columns` | cells' rows |
+|---|---|---|---|---|
+| `World` (`defaultCss` block) | `block` | `block` | (declared, inert) | 4 |
+| `WorldBare` (the docs' way) | **`grid`** | — | `77px 77px 77px 77px` | **1** |
+
+**The canvas reads as the deployed page does** — the shared bridge, now measured rather than predicted. Editor screenshot
+looked at: the stacked block above the four-column grid. Stack stopped with `dev:stop` (26 processes).
+
+**Owed:** AC6 only (ISL-025 W13's ruling: does the garden's `kit.js` workaround stay).

@@ -3,7 +3,7 @@
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
 **Sessions 1–2:** ISL-001's fix (`3df5adb82`), ISL-014's refusal (`aab96a056`), ISL-025 W1–W3, ISL-011 (1a + 2a).
 **Session 3 (2026-10-02, on `cline-dev` from `4b448e016`): rulings 2 and 3 given; ISL-002 and ISL-001 ✅ CLOSED (2 of 25);
-ISL-014 (b) built; ISL-022 AC1 measured; ISL-001's AC7: 8 modes runs, no lost press; two gates of this phase's own put right.** Commits:
+ISL-014 (b) built; ISL-022 AC1 measured; ISL-011 AC3 complete (canvas + port write); ISL-001's AC7: 8 modes runs, no lost press; two gates of this phase's own put right.** Commits:
 `06e65ab47` (ISL-002 fix, three copies), `13b57fc4e` (rulings + records), `83a31805b` (ISL-014 b), `e234bd15f`
 (HLS-001 golden learns ISL-011's fixture), `45177be3a` (ISL-002 AC5), `906a1fe3c` (ISL-001 AC5), `1fd49429c` and
 `5ddc39420` (ISL-022 AC1), plus this handoff's commit.
@@ -26,11 +26,9 @@ ISL-014 (b) built; ISL-022 AC1 measured; ISL-001's AC7: 8 modes runs, no lost pr
    `src/cloud/bundleEntry.js` modified, a peer's). Then **ISL-014 AC6**: under (b) the agent should never see the
    refusal — `get_project_info` → `kits.readerBuilt` on a checkout with no reader, the kit node placed, the page
    deployed with it drawing, the screenshot looked at.
-2. **ISL-011's two owed arms** (the editor canvas via `run-editor` on a copy of `nodegx-export/tests/fixtures/isl011-kit-grid`;
-   the port-write-after-mount drive).
-3. **ISL-018 AC2** (the editor) — a measurement that decides its ruling.
-4. **Then ask, in plain words, all at once:** ISL-022 §5 (should the wrapped-row warning still fire on items with a pixel
-   width — it reverses GAM-022 — and fire on a `contentSize` wrapped row like `brTabs`?) with the Track B and D
+2. **ISL-018 AC2** (the editor) — a measurement that decides its ruling.
+3. **Then ask, in plain words, all at once:** ISL-022 §5 (should the wrapped-row warning still fire on items with a pixel
+   width — it reverses GAM-022 — and fire on a `contentSize` wrapped row like `brTabs`?) with ISL-025 W13 (keep the garden's `kit.js` display workaround? — ISL-011 AC6) and the Track B and D
    rulings (README §9). Rewrite each with no internal word: say what the person saw (the island's page zoomed out on a
    phone; taps landing off), the choices, the cost.
 
