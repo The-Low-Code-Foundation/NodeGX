@@ -1,0 +1,318 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "layout"
+      ],
+      "parameters": {
+        "title": "Home"
+      }
+    },
+    {
+      "id": "layout",
+      "type": "Group",
+      "label": "Layout",
+      "parent": "page",
+      "children": [
+        "marker",
+        "outerA",
+        "outerB"
+      ],
+      "parameters": {
+        "rowGap": "var(--space-4)"
+      }
+    },
+    {
+      "id": "marker",
+      "type": "Text",
+      "label": "Marker",
+      "parent": "layout",
+      "parameters": {
+        "text": "isl022 page drew"
+      }
+    },
+    {
+      "id": "outerA",
+      "type": "Group",
+      "label": "a row parent (brTabs' shape: contentSize, wraps)",
+      "parent": "layout",
+      "children": [
+        "rowA"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "outerA"
+      }
+    },
+    {
+      "id": "rowA",
+      "type": "Group",
+      "label": "brTabs' shape: contentSize, wraps",
+      "parent": "outerA",
+      "children": [
+        "a_0",
+        "a_1",
+        "a_2",
+        "a_3",
+        "a_4"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "cssClassName": "rowA",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1)",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "a_0",
+      "type": "Group",
+      "label": "item 0",
+      "parent": "rowA",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "a-item"
+      }
+    },
+    {
+      "id": "a_1",
+      "type": "Group",
+      "label": "item 1",
+      "parent": "rowA",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "a-item"
+      }
+    },
+    {
+      "id": "a_2",
+      "type": "Group",
+      "label": "item 2",
+      "parent": "rowA",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "a-item"
+      }
+    },
+    {
+      "id": "a_3",
+      "type": "Group",
+      "label": "item 3",
+      "parent": "rowA",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "a-item"
+      }
+    },
+    {
+      "id": "a_4",
+      "type": "Group",
+      "label": "item 4",
+      "parent": "rowA",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "a-item"
+      }
+    },
+    {
+      "id": "outerB",
+      "type": "Group",
+      "label": "a row parent (control: given the page's width, wraps)",
+      "parent": "layout",
+      "children": [
+        "rowB"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "outerB"
+      }
+    },
+    {
+      "id": "rowB",
+      "type": "Group",
+      "label": "control: given the page's width, wraps",
+      "parent": "outerB",
+      "children": [
+        "b_0",
+        "b_1",
+        "b_2",
+        "b_3",
+        "b_4"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "cssClassName": "rowB",
+        "flexDirection": "row",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-1)",
+        "rowGap": "var(--space-1)"
+      }
+    },
+    {
+      "id": "b_0",
+      "type": "Group",
+      "label": "item 0",
+      "parent": "rowB",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "b-item"
+      }
+    },
+    {
+      "id": "b_1",
+      "type": "Group",
+      "label": "item 1",
+      "parent": "rowB",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "b-item"
+      }
+    },
+    {
+      "id": "b_2",
+      "type": "Group",
+      "label": "item 2",
+      "parent": "rowB",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "b-item"
+      }
+    },
+    {
+      "id": "b_3",
+      "type": "Group",
+      "label": "item 3",
+      "parent": "rowB",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "b-item"
+      }
+    },
+    {
+      "id": "b_4",
+      "type": "Group",
+      "label": "item 4",
+      "parent": "rowB",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 110,
+          "unit": "px"
+        },
+        "height": {
+          "value": 40,
+          "unit": "px"
+        },
+        "backgroundColor": "var(--primary)",
+        "cssClassName": "b-item"
+      }
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

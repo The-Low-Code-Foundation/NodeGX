@@ -1,6 +1,6 @@
 # ISL-022 — The wrapped-row warning means a row will overflow
 
-**Status: 🟡 s3 (2026-10-02): AC1's validator half measured (the door fires on `brBar`, `rcColourRow`, `opColourRow`, nothing on `brTabs` — §2's derivation confirmed); the render half below. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F29](AUDIT-2026-10-01.md) · P78
+**Status: 🟡 s3 (2026-10-02): AC1 measured both halves — the door fires on `brBar`, `rcColourRow`, `opColourRow` and not on `brTabs`; and a `contentSize` wrapped row in a row parent **never wraps** on a phone (566 px on one line at 390; zoomed out to 566 with `bodyScroll`, clipped without). AC2 (the rule change) is next, after a ruling (§5). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F29](AUDIT-2026-10-01.md) · P78
 [D50](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) (✅ for pills, by GAM-022) · CG-003 AC1 and §7.2 ·
 **Side:** product (validator, `uncollapsible-multi-column` and the layout-inert family)
 
@@ -124,3 +124,24 @@ is read in the same run as the known-firing `brBar` beside it.
 🔴 **Met on the way:** the editor's `npm run validate:project` reports **0 warnings** over the same template (1,101 nodes,
 5,284 endpoints) — its rule set does not run the responsive-arrangement rules the door runs. Not a defect of this task;
 a reader who validates a template with the CLI does not see what the door's gate pins.
+
+### Session 3 — AC1, the render half
+
+`isl022-wrapped-row/` in this folder (hand-written, `validate:project` 0 errors after it caught my `"4px"` gaps —
+a string value with a unit is dropped silently; the gaps are `var(--space-1)` as on the island): `rowA` is `brTabs`'
+shape (`contentSize`, `flexWrap: wrap`, five 110 px items, gap `--space-1`, inside a full-width wrapping row parent);
+`rowB` beside it is the control, the same row given the page's width (`contentHeight`, 100 %). Deployed with
+`nodegx deploy` (exit 0), rendered at **390 × 844, mobile** by `scripts/devtools/drive-isl022-wrapped-row.js`:
+
+| project setting | `innerWidth` | `scrollWidth` | `rowA` (brTabs' shape) | `rowB` (control) |
+|---|---|---|---|---|
+| as written (no `bodyScroll`) | 390 | 390 | **566 px, 1 line**, computed `flexShrink: 0` — 4th item cut at the edge, 5th not on screen (screenshot) | 390 px, **2 lines** |
+| `bodyScroll: true` (as the island has it; scratch copy) | **566** | **566** | 566 px, 1 line | 390 px, 2 lines |
+
+**§2's inference is confirmed:** a `contentSize` Group is as wide as its unwrapped content, so its `flexWrap` never takes
+effect inside a row parent. **And what it does to a person depends on `bodyScroll`:** without it the row is clipped
+silently; with it, mobile Chrome zooms the whole page out to the row's width — the island's 506 px page and its
+0.77×-off taps (CG-003 §7.2), reproduced here as 566. The warning that would have caught it is the one that is silent
+on `brTabs` (the validator half above).
+
+AC2 changes the rule (it reverses GAM-022's choice for items with a pixel width), so it waits on §5's ruling.

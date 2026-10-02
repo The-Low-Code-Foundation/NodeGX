@@ -118,7 +118,7 @@ the work:
 | [ISL-019](ISL-019-THE-SAME-PLAN-WRITES-THE-SAME-BYTES.md) | The same plan writes the same bytes | F26 | MCP | ✓ |
 | [ISL-020](ISL-020-AN-AGENT-CHANGES-ONE-LINE-OF-A-BIG-SCRIPT.md) | An agent changes one line of a big script | F27 | MCP | ✓ |
 | [ISL-021](ISL-021-AN-AGENT-CAN-PRESS-AND-TYPE-ON-A-RENDERED-PAGE.md) | An agent can press and type on a rendered page | F28 | MCP, render | ✓ |
-| [ISL-022](ISL-022-THE-WRAPPED-ROW-WARNING-MEANS-A-ROW-WILL-OVERFLOW.md) | The wrapped-row warning means a row will overflow | F29 | validator | ✓ |
+| [ISL-022](ISL-022-THE-WRAPPED-ROW-WARNING-MEANS-A-ROW-WILL-OVERFLOW.md) | The wrapped-row warning means a row will overflow — **🟡 s3: AC1 measured: the warning misses `brTabs`; a `contentSize` wrapped row never wraps (566 px at 390; the page zooms out under `bodyScroll`); AC2 waits on §5** | F29 | validator | ✓ |
 | **Track E** | | | | |
 | [ISL-023](ISL-023-THE-GENERATOR-GATES-CATCH-A-TYPE-ERROR-AND-A-STRAY-BACKTICK.md) | The generator's gates catch a type error and a stray backtick | F32, F33 | tooling | — |
 | [ISL-024](ISL-024-A-TEMPLATE-LIVES-IN-ITS-OWN-FOLDER.md) | A template lives in its own folder | F34 | repo | ✓ |
