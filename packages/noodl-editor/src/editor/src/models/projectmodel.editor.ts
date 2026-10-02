@@ -9,8 +9,12 @@ import { describeUpgradeReport, UpgradeFile, upgradeOnLoad } from '@noodl-models
 import { filesystem } from '@noodl/platform';
 import { projectStructureService } from '../services/ProjectStructure';
 import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
+import { RUN_ON_VALUE_CHANGE_FORMAT_VERSION } from '@noodl-models/ProjectPatches/runOnValueChangeMigration';
 
-const supportedProjectVersion = 4;
+// P109 ISL-018: the newest project format this editor opens. 5 = the run-on-value-change migration ran (a one-time
+// step, `ProjectModel.Upgraders[4]`). It moves with that constant: a project an older editor cannot read is refused
+// below rather than opened and mis-read, and an editor that writes 5 must open what it wrote.
+const supportedProjectVersion = Number(RUN_ON_VALUE_CHANGE_FORMAT_VERSION);
 
 export function projectFromDirectory(projectdir: string, callback: (project?: ProjectModel) => void, args?: TSFixme) {
   bugtracker.debug('ProjectModel.fromDirectory');

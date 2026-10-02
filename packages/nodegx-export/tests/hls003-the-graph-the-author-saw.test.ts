@@ -234,6 +234,18 @@ describe('HLS-003 — the export reads the graph the author saw', () => {
       ]);
     });
 
+    it('P109 ISL-018: a project at format 5 is read as written — the editor runs the migration once, as step 4 → 5', () => {
+      // Richard's ruling, 2026-10-02. The same `absent` arm, its `nodegx.project.json` stamped at the two versions.
+      const at = (version: string) => {
+        const dir = armOf('absent');
+        const file = path.join(dir, 'nodegx.project.json');
+        fs.writeFileSync(file, JSON.stringify({ ...JSON.parse(fs.readFileSync(file, 'utf8')), version }, null, 2));
+        return irOf(dir).project.settledRunOnValueChange.length;
+      };
+      expect(at('4')).toBe(2); // known-firing: the format the corpus is at still settles
+      expect(at('5')).toBe(0);
+    });
+
     it('the export says where it did not read the files literally', () => {
       const absent = appOf(armOf('absent'));
       const report = absent.files[REPORT_PATH];

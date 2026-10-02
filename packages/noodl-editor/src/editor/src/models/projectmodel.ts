@@ -108,6 +108,13 @@ export class ProjectModel extends Model {
     3: function (project) {
       // Upgrade event senders to use string lists instead of PortEditor
       project.version = '4';
+    },
+    4: function (project) {
+      // P109 ISL-018 (ruled 2026-10-02): the run-on-value-change migration has run. It ran in
+      // `applyPatches`, before `fromJSON`, because it needs the whole document; this step records
+      // that it did, so the next open — and every reader that checks the version — skips it.
+      // From format 5 an absent `runOnChange-*` key is a ticked box, never a pre-§2 author.
+      project.version = '5';
     }
   };
 

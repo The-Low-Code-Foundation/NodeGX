@@ -438,6 +438,30 @@ export function planRunOnValueChangeMigration(project: MigrationProjectLike): Ru
 }
 
 /**
+ * P109 ISL-018 — the project format version that ends the guessing. Richard's ruling, 2026-10-02:
+ * the migration is a ONE-TIME format step, 4 → 5, in the editor's own upgrade chain
+ * (`ProjectModel.Upgraders`), not a pass that re-runs on every open.
+ *
+ * Measured before the ruling: a Function a person wired `Run` on in the editor was saved with no
+ * `runOnChange-*` key, and the next open rewrote it to `false` — the migration's only evidence of
+ * a pre-§2 author is an absent key, and the editor's own post-§2 save leaves the key absent. A
+ * project at this version was authored (or already upgraded) under §2, so an absent key there is
+ * a ticked box and nothing is guessed.
+ */
+export const RUN_ON_VALUE_CHANGE_FORMAT_VERSION = '5';
+
+/**
+ * Whether a project at `version` predates {@link RUN_ON_VALUE_CHANGE_FORMAT_VERSION} and so
+ * still needs the migration. A missing or unreadable version predates it — the conservative
+ * reading, which is every project's behaviour before the ruling.
+ */
+export function projectPredatesRunOnValueChange(version: unknown): boolean {
+  if (version === undefined || version === null || version === '') return true;
+  const n = Number(version);
+  return !Number.isFinite(n) || n < Number(RUN_ON_VALUE_CHANGE_FORMAT_VERSION);
+}
+
+/**
  * Apply the plan to the project in place, and return it.
  *
  * The parameter bag is **rebuilt with the `runOnChange-*` keys first**. See §3 of the module
@@ -460,7 +484,8 @@ export function applyRunOnValueChangeMigration(
  * contract: wiring the control signal used to silence the value setters, and §2 reversed that
  * underneath an author who could not be asked. Its evidence that such an author exists is
  * **absence of the key, and nothing else** — the module header says so, and there is no
- * project-version guard anywhere in the pass because the format has nowhere to carry one.
+ * project-version guard in the pass itself — the guard is the caller's, by format version, since P109 ISL-018
+ * ({@link RUN_ON_VALUE_CHANGE_FORMAT_VERSION}).
  *
  * 🔴 **That makes it wrong on a graph minted after §2.** A generated template has no pre-§2
  * author to preserve; it was authored, generated and driven against the *post*-§2 reading, where

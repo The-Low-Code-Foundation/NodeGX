@@ -22,6 +22,7 @@ import { DEFAULT_TOKENS } from '@nodegx/project-contract/tokens';
 // package for exactly this reason: one copy, both readers. See `settleComponent`.
 import {
   applyRunOnValueChangeMigration,
+  projectPredatesRunOnValueChange,
   type MigrationComponentLike,
   type MigrationConnectionLike,
   type MigrationNodeLike,
@@ -93,13 +94,16 @@ export function parseProject(projectDir: string, catalog: Catalog): ExportIR {
   // HLS-003. Filled by `settleComponent` as each component is read; carried into the IR so the
   // report can say what the file did not, rather than the export quietly reading a better graph.
   const settled: RunOnChangeWrite[] = [];
+  // P109 ISL-018: the editor runs the migration once, as format step 4 → 5; a project at 5 was
+  // authored (or upgraded) under §2, and the editor does not settle it on open — so neither does this.
+  const settles = projectPredatesRunOnValueChange(projectFile.version);
 
   // STY-004. Read before the components, because every node that wears a Look resolves against it.
   const styles = parseStyles(projectDir, projectFile);
 
   const components = findComponentDirs(componentsDir)
     .filter((dir) => !path.relative(componentsDir, dir).split(path.sep).includes('__cloud__'))
-    .map((dir) => parseComponent(dir, index, settled, styles))
+    .map((dir) => parseComponent(dir, index, settles ? settled : null, styles))
     // D1: components sort by path, codepoint order.
     .sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 
@@ -309,7 +313,8 @@ function settleComponent(
 function parseComponent(
   dir: string,
   catalog: CatalogIndex,
-  settled: RunOnChangeWrite[],
+  /** Null for a project at format 5 or later, which the editor does not settle either (ISL-018). */
+  settled: RunOnChangeWrite[] | null,
   styles: StylesIR | undefined
 ): ComponentIR {
   const meta = readJson(path.join(dir, 'component.json'));
@@ -321,7 +326,7 @@ function parseComponent(
 
   // 🔴 Before anything reads a parameter. `parseNode` copies the bag into the IR, so a settle
   // after this line would be invisible to every consumer of it.
-  settled.push(
+  settled?.push(
     ...settleComponent(String(meta.path ?? meta.name ?? ''), rawNodes, connectionsFile.connections ?? [])
   );
 

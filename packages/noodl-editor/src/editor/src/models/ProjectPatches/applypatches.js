@@ -19,7 +19,8 @@
 const { Patches } = require('./projectpatchgenerators');
 const {
   applyRunOnValueChangeMigration,
-  describeRunOnValueChangeMigration
+  describeRunOnValueChangeMigration,
+  projectPredatesRunOnValueChange
 } = require('./runOnValueChangeMigration');
 
 function _applyPatch(node, p) {
@@ -85,12 +86,18 @@ module.exports = {
      * merely harmless: the migration is deterministic and idempotent, so all three sides are
      * normalised the same way and it can only remove conflicts, never manufacture one. A side
      * that had already been migrated is left exactly as it is.
+     *
+     * 🔴 P109 ISL-018 (Richard's ruling, 2026-10-02): **only for a project that predates format 5.**
+     * The editor's own save leaves the key absent when a person wires `Run`, so re-running this on
+     * every open rewrote post-§2 work to `false` (measured: ISL-018 §8). It is now a one-time step:
+     * `ProjectModel.Upgraders[4]` bumps the project to `'5'` after this ran, the first save writes
+     * that, and a project at 5 — or one `create_project` made — is never guessed about again.
      */
+    if (!projectPredatesRunOnValueChange(projectJSON.version)) return undefined;
     const plan = applyRunOnValueChangeMigration(projectJSON);
     if (plan.writes.length > 0) {
-      // The project format has nowhere to record that this ran (§2 left "once and stamp" open
-      // for exactly that reason), so the log line IS the audit trail. Deliberately `info`: it
-      // reports a silent rewrite of the user's graph and should be findable after the fact.
+      // The log line is the audit trail of the one run: `info`, because it reports a rewrite of
+      // the user's graph and should be findable after the fact.
       console.info(describeRunOnValueChangeMigration(plan));
     }
     return plan;

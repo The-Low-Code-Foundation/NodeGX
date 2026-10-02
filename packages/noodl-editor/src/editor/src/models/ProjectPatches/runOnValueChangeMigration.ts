@@ -22,7 +22,9 @@ export {
   planRunOnValueChangeMigration,
   applyRunOnValueChangeMigration,
   pinRunOnValueChangeDefaults,
-  describeRunOnValueChangeMigration
+  describeRunOnValueChangeMigration,
+  RUN_ON_VALUE_CHANGE_FORMAT_VERSION,
+  projectPredatesRunOnValueChange
 } from '@nodegx/project-contract/run-on-value-change-migration';
 
 export type {

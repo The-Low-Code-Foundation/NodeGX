@@ -39,6 +39,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { RUN_ON_VALUE_CHANGE_FORMAT_VERSION } from '@nodegx/project-contract/run-on-value-change-migration';
 import { z } from 'zod';
 
 import type { AuthoringPlan } from '../../../noodl-editor/src/editor/src/models/AiAssistant/authoring/plan';
@@ -171,7 +172,9 @@ export function writeProjectSkeleton(projectDir: string, name: string): Skeleton
     $schema: SCHEMA_IDS.PROJECT,
     name,
     id: newId(),
-    version: '4',
+    // P109 ISL-018: format 5 — authored under the run-on-value-change box, so the editor never
+    // migrates this project's Functions on open (an absent `runOnChange-*` key is a ticked box).
+    version: RUN_ON_VALUE_CHANGE_FORMAT_VERSION,
     nodegxVersion: PKG_VERSION,
     runtimeVersion: 'react19',
     created: now,
