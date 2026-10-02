@@ -1057,5 +1057,931 @@
         ]
       }
     }
+  },
+  {
+    "name": "a write made elsewhere that matches the filter joins Items at the end (no sort); one that does not match, and one to another class, are not heard",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) — create: Model.get(object.objectId), matchesQuery against the query made, `add` with no sort; :256 another class",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 6,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r8",
+            "data": {
+              "title": "b",
+              "n": 8
+            }
+          },
+          {
+            "at": 7,
+            "type": "create",
+            "collection": "Note",
+            "objectId": "r5",
+            "data": {
+              "title": "a",
+              "n": 4
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "under a sort a created record joins at its sorted place: before the first member that sorts after it",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :291-296 — compareObjects(sort, member, new) > 0 is where it goes",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualSort",
+        "value": [
+          {
+            "property": "n",
+            "order": "ascending"
+          }
+        ]
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "c",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r2",
+            "data": {
+              "title": "b",
+              "n": 2
+            }
+          },
+          {
+            "at": 6,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r9",
+            "data": {
+              "title": "z",
+              "n": 9
+            }
+          },
+          {
+            "at": 7,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r0",
+            "data": {
+              "title": "y",
+              "n": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Limit under a DESCENDING sort: the record past the limit is dropped from the end — the new one when it sorts last",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :301-311 — a leading '-' on the first sort key drops the LAST",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualSort",
+        "value": [
+          {
+            "property": "n",
+            "order": "descending"
+          }
+        ]
+      },
+      {
+        "set": "storageEnableLimit",
+        "value": true
+      },
+      {
+        "set": "storageLimit",
+        "value": 2
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r3",
+                    "title": "c",
+                    "n": 3
+                  },
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 3,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r2",
+            "data": {
+              "title": "b",
+              "n": 2
+            }
+          },
+          {
+            "at": 8,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r0",
+            "data": {
+              "title": "y",
+              "n": 0
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Limit under an ASCENDING sort drops the FIRST record: a new record that sorts first is dropped again at once, one that sorts last pushes the first out (row C40)",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :301-311 — no leading '-': `remove(get(0))`; the backend would answer the two smallest",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualSort",
+        "value": [
+          {
+            "property": "n",
+            "order": "ascending"
+          }
+        ]
+      },
+      {
+        "set": "storageEnableLimit",
+        "value": true
+      },
+      {
+        "set": "storageLimit",
+        "value": 2
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "c",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 3,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r0",
+            "data": {
+              "title": "y",
+              "n": 0
+            }
+          },
+          {
+            "at": 8,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r9",
+            "data": {
+              "title": "z",
+              "n": 9
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Limit with NO sort: the new record goes at the end and the first is dropped (row C40)",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :297-311 — `add`, then `remove(get(0))`",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "storageEnableLimit",
+        "value": true
+      },
+      {
+        "set": "storageLimit",
+        "value": 2
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "d",
+              "n": 4
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a member saved out of the filter leaves Items; a record saved into it joins",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :330-349 — save: Model.get(objectId), re-matched; the registry holds the write first",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "a",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 3,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z",
+              "n": 1
+            }
+          },
+          {
+            "at": 8,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r2",
+            "data": {
+              "title": "a",
+              "n": 2
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a member whose sort key moved keeps its place: a save that still matches changes nothing in Items",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :345 — only `matches && !contains` adds; nothing re-sorts",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "visualSort",
+        "value": [
+          {
+            "property": "n",
+            "order": "ascending"
+          }
+        ]
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r3",
+                    "title": "c",
+                    "n": 3
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "a",
+              "n": 9
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a delete removes a member; a delete of a record not shown changes nothing",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :350-362",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 3,
+            "type": "delete",
+            "collection": "Lesson",
+            "objectId": "r1"
+          },
+          {
+            "at": 8,
+            "type": "delete",
+            "collection": "Lesson",
+            "objectId": "r9"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "with a Search term a write re-queries instead: one query at the next frame",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :266-269 (BAK-008) — scheduleFetch",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "search",
+        "value": "ada"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 6,
+            "type": "delete",
+            "collection": "Lesson",
+            "objectId": "r1"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Record changes box unticked: a write made elsewhere is not heard",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :253 — shouldRunOnValueChange('records')",
+    "params": {},
+    "steps": [
+      {
+        "set": "runOnChange-records",
+        "value": false
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 6,
+            "type": "delete",
+            "collection": "Lesson",
+            "objectId": "r1"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "before the first answer a write is not heard — nothing is held yet; once the rows landed, the next one joins",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :255 — `collection === undefined`",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            },
+            "after": 10
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 15,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r7",
+            "data": {
+              "title": "a",
+              "n": 7
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a write to another backend's store is not heard: the node listens to the store of the backend it queried",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :600-616, :850 — bindStoreEvents(cloudstore)",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "backends": [
+          "main",
+          "other"
+        ],
+        "events": [
+          {
+            "at": 5,
+            "backend": "other",
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 6,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r7",
+            "data": {
+              "title": "a",
+              "n": 7
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "the Class as it is NOW is matched: a Class changed with its box unticked hears the new class's writes into the old rows",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :256 — `args.collection !== _internal.name`, read live",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "runOnChange-collectionName",
+        "value": false
+      },
+      {
+        "set": "collectionName",
+        "value": "Note"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  }
+                ]
+              }
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          },
+          {
+            "at": 6,
+            "type": "create",
+            "collection": "Note",
+            "objectId": "r5",
+            "data": {
+              "title": "n",
+              "n": 5
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "after the first failure a write joins the empty array it published",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :941 then :321-329 — the failure published an array; the query made is matched",
+    "params": {},
+    "steps": [
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "error": "Forbidden"
+            }
+          }
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "create",
+            "collection": "Lesson",
+            "objectId": "r4",
+            "data": {
+              "title": "a",
+              "n": 0
+            }
+          }
+        ]
+      }
+    }
   }
 ]

@@ -337,3 +337,72 @@ the real box (:512-528) — measured by reading, the guard names this exact case
 | `tsc --noEmit` node-spec, runtime (`tsconfig.json`) | exit 0 · exit 0 |
 | `node scripts/node-spec/census.js --check` | fresh — 147, 33 excluded, all tiered |
 | export, `test:main` | NOT RUN — s23 touched the runtime only in `test/helpers/node-spec-target.ts` (`fetch`, `query`, the answer copy) and `test/node-spec/conformance.test.ts` (one known row) |
+
+### 6.10 s24 (2026-10-02) — Query Records slice B: watching the store
+
+**CONFORMS on the runtime on its first run with the world change** — 37 / 37 scenarios (23 + 14 new), 200 / 200 (seed
+20728), 297 / 297 mutants. Spec `src/nodes/query-records.ts` (state `bound`, `query`, `recordsBox`; a `world.store`
+handler), the matcher `src/nodes/record-match.ts` (queryutils.ts `matchesQuery` / `matchesOperator` / `compareObjects`
+stated as they are — loose `$eq`, a permissive unknown operator, `$relatedTo` never matching, no short-circuit so a
+throwing child throws whatever the others did; Filter Records will share it).
+
+**The world change — WRITES MADE ELSEWHERE (world.ts BACKEND, guarded, additive):** the backend script's `events`, each
+`{ at, backend?, type, collection, objectId, data? }` a world timer. At its time the writer's half first (`_fromJSON`:
+the record takes the class, then each key of `data` — one registry write each, watchers notified), then the adapter's
+half: every store listener hears the contract event with the backend it came from. The handoff asked for the world to
+route ANOTHER NODE's event; reading the runner said otherwise — the interpreter is not a graph target (no `mountGraph`),
+so a single-node play needs the write to come FROM THE WORLD, as a resize does. The real writers are graded beside it
+in graph s08 (below). Spec format: `WorldHandlers.store` (spec.ts, guarded). Interpreter: one subscription per world
+(`listenToStore`); at a firing every listening instance's inbox is DELIVERED FIRST — the first draft did not, and a
+scenario caught it: an answer due at 10 and a write at 15 in one `advance(20)` reached the node in the wrong order,
+because the clock's `advance` fires every timer in one sweep (world.ts CLOCK: "what each timer delivers lands BEFORE the
+next one fires"). Runtime target: the write through the REAL `CloudStore._fromJSON`, the event through the REAL store of
+its backend (`forBackend(…)._adapter.emitAdapterEvent`) — so the node's own subscription is what hears it.
+
+**What the node does, from the code (:251-363, :600-616, :850):** in the spec's header. The points a reader would not
+guess: it listens to ONE store — the legacy store from creation, then the store of the backend each query resolved,
+rebound at :850 BEFORE the filter is built (a refused filter still moves it). Heard only with the `Record changes` box
+ticked, an array held (an answer or the FIRST FAILURE — whose empty array then fills from writes), and the write's class
+equal to the Class AS IT IS NOW. A Search term re-queries (BAK-008). Otherwise matched against the query MADE last, even
+while its answer is still out. Two behaviours a backend would not give — **C40** (Limit drops the FIRST record unless the
+first sort key descends) and **C41** (a member whose sort field moved keeps its place).
+
+**Graph s08 (`s08-the-query-watches.json`, recorded on the runtime, claims written first):** a REAL Create Record, Update
+Record and Delete Record writing into a Query Records' rows (`title = a`, sorted by `n`): `[r1 r2 r3]` → create r4 (n 0)
+→ `[r4 r1 r2 r3]` → update r1's title to `z` → `[r4 r2 r3]` → delete r2 → `[r4 r3]`; and a Search-term Query Records
+re-querying on a real create. All nine claims of the first held on the first recording; the second's were wrong about
+WHEN — the re-query is made in the drain after the create's answer and its rows land the frame after — corrected from
+the trace, re-recorded.
+
+**A hole in the mutant machinery, found by three survivors:** `wrapReducers` (runner/mutants.ts) copies a spec's world
+handlers one by one and did not know `store` — so the reference play AND every mutant ran with the store handler GONE:
+the writes made elsewhere were silently dropped from the whole mutant phase, and the only visible sign was three
+survivors on the `Record changes` box. Fixed (`world.store` wrapped and named). Every future world handler must be added
+there too — its comment says so.
+
+**Reach, measured (an interpreter probe; deleted):** a generated sequence acts on a write only when several independent
+draws line up (Class `Lesson` out of examples + the whole string pool, a query made and answered BEFORE the advance, the
+box ticked, no Search). With seven hand-placed writes: 0 of 200 on seeds 20728 and 20729. With a write at every doubling
+of the clock (2 ms … 65 s) and `Lesson` weighted: still 2 of 400 at 200 — but **70 of 10,000** (100 creates, 31 saves,
+66 deletes patched, 23 re-queries). So slice B's 200-gate is the 14 hand scenarios; its random grade is the deep run.
+
+### 6.11 Rows (s24)
+
+| row | node | what the trace shows | proposed |
+|---|---|---|---|
+| **C40** | Query Records | over Limit after a write made elsewhere, the FIRST record is dropped unless the first sort key descends (:301-311): ascending `[n1 n3]` + `n0` → `[n1 n3]` (the new one dropped at once), + `n9` → `[n3 n9]`; no sort `[r1 r2]` + r4 → `[r2 r4]`. Control: descending right both ways. Two scenarios, both on the runtime. Ledger `p107-c40-…` | drop the LAST under any sort; with none, re-query |
+| **C41** | Query Records | a `save` of a member that still matches leaves it where it was, whatever moved (:330-349): ascending by `n`, r1 saved with `n 9` → Items unchanged, nothing re-sent. Ledger `p107-c41-…` | re-place it at its sorted position; rule with C40 |
+
+### 6.12 Gate readings (s24, 2026-10-02; load 8–24 — a busy browser, no peer suite)
+
+| gate | reading |
+|---|---|
+| `nodegx-node-spec`: `npx jest` | **18 suites, 707 passed, 17 skipped, exit 0** (s23: 705) — the stranger hash gate green after the refresh, which named exactly `src/spec.ts` and `src/world.ts`; the three rounds re-graded in the same run |
+| runtime: `NSP_ONLY=DbCollection2` at 200 | **CONFORMS** 37 / 37, 200 / 200, 297 / 297 — on seeds **20728, 20729, 20730** |
+| runtime deep, `NSP_DEEP=10000`, Query Records | **CONFORMS** (154 s): 0 divergences, 23 → C6 (any port, as s23), 297 / 297 — the run in which 70 sequences act on a write |
+| runtime: the six other record specs at 200 on the changed target | **all CONFORM** (Delete, Add / Remove Relation, Create, Update, Record) |
+| runtime: `runtime-target.test.ts` + `graph.test.ts` | **2 suites, 92 passed** (s23: 90; +2 = s08) |
+| `tsc --noEmit` node-spec, runtime (`tsconfig.json`) | exit 0 · exit 0 |
+| `node scripts/node-spec/census.js --check` | fresh — 147, 33 excluded, all tiered |
+| runtime: the WHOLE `conformance.test.ts -t "NSP-004 / NSP-011 — every"` | **NOT RUN** — load 12–24 overruns its 600 s hook (s21's lesson). Why it is safe to defer: the target change acts only in a world with `events` (Query Records' pool alone), and the mutants.ts change only wraps a `store` handler (Query Records' alone) |
+| export, `test:main` | NOT RUN — no export code touched |

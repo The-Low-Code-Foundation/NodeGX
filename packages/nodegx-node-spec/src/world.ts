@@ -239,7 +239,18 @@
  *               where that store reads it.
  *           After a write succeeds the adapter tells the store's listeners (the contract's event surface — `delete`
  *           `{ objectId, collection }`, …), AFTER the success callback (RestDataAdapter.ts :1216-1219): what a Query
- *           Records watching the store hears. No single-node trace reads it; a graph will.
+ *           Records watching the store hears. A graph's writers cause it (s24: graph s08).
+ *             WRITES MADE ELSEWHERE (s24) — the script's `events`: what the store's listeners hear when ANOTHER node in
+ *               the app wrote, without that node in the play. Each `{ at, backend, type, collection, objectId, data }`
+ *               is a world TIMER at `at` (CLOCK's rule: never before 1), `backend` absent the active one. When it fires,
+ *               the writer's half first, as the writer's success does it (cloudstore.js `_fromJSON` :407-422): for a
+ *               `create` or a `save` the registry record `objectId` takes the class `collection` and then each key of
+ *               `data` (`objectId` and `ACL` skipped), one write each, in the key order, its watchers notified; a
+ *               `delete` writes nothing. Then the adapter's half: every store listener hears the contract's event
+ *               (`storeEventOf`) — `create` / `save` `{ type, objectId, object: { objectId, …data }, collection }`,
+ *               `delete` `{ type, objectId, collection }` — with the backend it came from, synchronously, inside the
+ *               `advance` that reaches it, in the order they listened. A listener that is not bound to that backend's
+ *               store is the node's business: the world tells every listener, the node keeps the backend it watches.
  *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
@@ -255,7 +266,8 @@
  *   `advance(h, ms)` moves it for every instance and records the `advance` event on `h`'s trace
  *   only (a graph's trace is assembled per node, runner/graph.ts). (s21) `backendFor(id)` =
  *   `world.backend.resolve(id)` · a `backend` effect = `world.backend.issue(call, deliver)` · (s22) `backendUser()` =
- *   `world.backend.user`.
+ *   `world.backend.user` · (s24) a spec's `world.store` handler is fed from `world.backend.onStoreEvent` after
+ *   `writeStoreEvent(world.registry, e)`.
  */
 
 import * as nodeCrypto from 'crypto';
@@ -303,6 +315,47 @@ export interface BackendScript {
   answers?: readonly BackendRule[];
   /** s22: the id of the user signed in, as the Record family's access rules read it (USER, BACKEND above). Absent: nobody. */
   user?: string;
+  /** s24: writes made elsewhere in the app, each heard by the store's listeners at its time (BACKEND above). Absent: none. */
+  events?: readonly StoreEventScript[];
+}
+
+/** BACKEND above (s24): one write made elsewhere in the app — a world timer at `at`. */
+export interface StoreEventScript {
+  at: number;
+  /** The backend it was written to; absent, the active one. */
+  backend?: string;
+  type: 'create' | 'save' | 'delete';
+  collection: string;
+  objectId: string;
+  /** What the record holds after it (`create` / `save`); a `delete` carries none. */
+  data?: Readonly<Record<string, unknown>>;
+}
+
+/** What a store listener hears (BACKEND above, s24): the contract's event (`@noodl/backend-contract` `AdapterEvent`) and the backend it came from. */
+export interface StoreEvent {
+  backend: string;
+  type: 'create' | 'save' | 'delete';
+  objectId: string;
+  /** `create` / `save`: the record as the adapter hands it, `objectId` first. */
+  object?: Readonly<Record<string, unknown>>;
+  collection: string;
+}
+
+/** The contract event a scripted write is heard as (BACKEND above, s24). */
+export function storeEventOf(e: StoreEventScript, backend: string): StoreEvent {
+  if (e.type === 'delete') return { backend, type: 'delete', objectId: e.objectId, collection: e.collection };
+  return { backend, type: e.type, objectId: e.objectId, object: { objectId: e.objectId, ...(e.data ?? {}) }, collection: e.collection };
+}
+
+/** The writer's half of a scripted write (BACKEND above, s24) on a registry: `_fromJSON` — the class, then each key of `data` but `objectId` / `ACL`. */
+export function writeStoreEvent(registry: { model(id?: unknown): { set(name: string, value: unknown): void; [key: string]: unknown } }, e: StoreEvent): void {
+  if (e.type === 'delete') return;
+  const m = registry.model(e.objectId);
+  m._class = e.collection;
+  for (const key in e.object) {
+    if (key === 'objectId' || key === 'ACL') continue;
+    m.set(key, e.object[key]);
+  }
 }
 
 /** BACKEND above: one answer rule — first match wins; absent `match` fits every call. */
@@ -691,6 +744,7 @@ export class WorldBackend {
   /** Calls no rule answered: the runner fails a run that has any. */
   readonly violations: string[] = [];
   private listeners: Array<(c: BackendCall) => void> = [];
+  private storeListeners: Array<(e: StoreEvent) => void> = [];
 
   constructor(
     private readonly clock: Clock,
@@ -699,6 +753,28 @@ export class WorldBackend {
     const ids = script.backends ?? ['main'];
     if (ids.length === 0) throw new Error('world: a backend script names at least one backend — the project with none is the legacy store, not a world this seam plays');
     this.ids = ids;
+    // s24 — writes made elsewhere: world timers, scheduled before any node's
+    for (const e of script.events ?? []) {
+      const backend = e.backend ?? ids[0];
+      if (!ids.includes(backend)) throw new Error(`world: a store event names backend ${JSON.stringify(backend)}, which the project does not have`);
+      clock.schedule(e.at, () => {
+        const event = storeEventOf(e, backend);
+        for (const l of [...this.storeListeners]) l(event);
+      });
+    }
+  }
+
+  /**
+   * s24 — called at each scripted write made elsewhere (BACKEND above), in the order subscribed. A target subscribes
+   * ONCE per play and does both halves itself: the registry write (`writeStoreEvent`, on whatever holds its records),
+   * then the event to its nodes' store listeners. Returns the unsubscribe.
+   */
+  onStoreEvent(listener: (e: StoreEvent) => void): () => void {
+    this.storeListeners.push(listener);
+    return () => {
+      const i = this.storeListeners.indexOf(listener);
+      if (i >= 0) this.storeListeners.splice(i, 1);
+    };
   }
 
   /** USER (s22): the id of the user signed in, as the Record family's access rules read it; `undefined`: nobody. */

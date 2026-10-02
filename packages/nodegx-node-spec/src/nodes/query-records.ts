@@ -2,6 +2,7 @@
  * Query Records (`DbCollection2`) — read from `packages/noodl-runtime/src/nodes/std-library/data/dbcollectionnode2.ts`
  * on 2026-10-02 (NSP-014 s23), with `api/queryutils.ts` and the backend contract's filter translators
  * (`@noodl/backend-contract/translators`) beside it. SLICE A: the query a node makes and what it does with the answer.
+ * SLICE B (s24): watching the store — another node's write on the bound backend patches the rows in place.
  *
  * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
  *
@@ -35,16 +36,30 @@
  * NO OUTCOME CONTRACT: `Success` is `fetched` and `Failure` a plain signal — Do has no tokens; this node predates
  * ERG-001 (the Record node's twin has them).
  *
- * NOT IN SLICE A, named (each a later slice or a seam not built):
+ * WATCHING THE STORE (slice B, s24; :251-363, :600-616). The node listens to ONE store: the legacy store from creation
+ * (:372, which no world write reaches), then the store of the backend each query resolved (:850 — before the filter
+ * is built, so a refused filter still moves it; the not-configured backend does not). A write ANOTHER node made on
+ * that backend (world.ts BACKEND `events`; graph s08 with the real writers) is heard when the `Record changes` box is
+ * ticked, an array is held (an answer or the first failure landed), and the write's class is the Class AS IT IS NOW.
+ * With a Search term the node re-queries at the next frame end (BAK-008) and patches nothing. Otherwise the record is
+ * read from the registry (which already holds the write) and matched against the query MADE last — its Parse `where`,
+ * sort and limit (:873-879), even while that query's answer is still out — by the LOCAL matcher (record-match.ts):
+ *   - `create`: a match joins — under a sort before the first member that sorts after it, with none at the end; then,
+ *     over Limit, one is dropped: the LAST under a descending first sort key, otherwise the FIRST (row C40);
+ *   - `save`: a member that no longer matches leaves; a non-member that now matches joins as a create does; a member
+ *     that still matches keeps its place, whatever moved (row C41);
+ *   - `delete`: the member goes.
+ * A change re-sends Items, Count, First Record Id and Is Empty; a create or save that changed nothing re-sends nothing,
+ * and a delete re-sends the four even when nothing was removed (unchanged values: no trace shows it). The node's own array watcher (:237-249) re-sends three of them
+ * at the frame end — the same values, so no trace shows it.
+ *
+ * NOT SPECCED, named (each a later slice or a seam not built):
  *   - REALTIME (`Subscribe To Changes`, :650-805): a subscription per transport — a REALTIME seam the world does not
  *     have. `realtime` is not accepted by this spec (the generator never writes it); the outputs keep their unsubscribed
  *     values.
  *   - THE JAVASCRIPT FILTER (`Filter` = Javascript, :996-1089): the author's script, run with `where` / `filter` /
  *     `sort` / `Inputs` / `$vars` — NSP-017's escape hatch. `storageFilterType`, `storageJSONFilter` and
  *     `storageFilterValue-…` are not accepted here.
- *   - WATCHING THE STORE (`cloudStoreEvents`, :251-358): another node's create / save / delete on the bound backend
- *     patches `Items` in place through the LOCAL Parse matcher and sort — a graph scenario through the world's
- *     contract events (a world change: guarded files).
  *   - the success's schema conversions (as Record's); a relation filter's class read off the record store; the
  *     editor's warnings (no editor in a play); `raiseRuntimeError` on the error bus (not a port).
  */
@@ -53,9 +68,11 @@ import type { Filter } from '../../../nodegx-backend-contract/src/translators';
 import { isVisualQueryFormat, savedFilterToNeutral, toParseWhere, visualQueryToNeutral, type SavedFilterGroup, type VisualQueryNode } from '../../../nodegx-backend-contract/src/translators';
 import type { InputDecl, OutputDecl } from '../spec';
 import { defineNode } from '../spec';
+import type { RecordRef } from '../registry';
 import type { BackendScript } from '../world';
 import { valueDidChange } from './condition';
 import { NO_BACKEND_MESSAGE } from './record-base';
+import { compareObjects, matchesQuery } from './record-match';
 
 type QueryRecordsState = {
   /** `_internal.name` — the Class (:563-570) */
@@ -81,6 +98,12 @@ type QueryRecordsState = {
   /** every query made, by the spec's call id: the array minted for its answer (:852) */
   calls: Readonly<Record<string, string>>;
   nextCall: number;
+  /** s24 — `_internal.boundStore`: the backend whose store the node listens to (:600-616, rebound at a query :850); `undefined`: the legacy store it bound in `initialize` (:372), which no world write reaches */
+  bound: string | undefined;
+  /** s24 — `_internal.currentQuery` (:873-879): the Parse `where`, sort and limit of the last query MADE — what a write made elsewhere is matched against */
+  query: { where: Readonly<Record<string, unknown>> | undefined; sort: readonly string[] | undefined; limit: number | undefined } | undefined;
+  /** s24 — the `Record changes` box (`runOnChange-records`, :233), read by the store listener (:253) */
+  recordsBox: boolean;
 };
 
 /** :1205-1207 → :1215-1222 — any other name is a stored setting, re-querying when it changed under the Query settings box. */
@@ -131,7 +154,7 @@ const ticked = (derived: Readonly<Record<string, unknown>>, governed: string) =>
 /** :1227-1456 updatePorts — `Do`, `Class`, `Backend`, `Search`, the visual filter and sort, by first write. */
 function discover(port: string): InputDecl | undefined {
   if (port === 'storageFetch') return { type: 'signal', displayName: 'Do', group: 'Actions', description: 'Runs the query again now' };
-  if (port === 'collectionName') return { type: 'string', coerce: 'none', displayName: 'Class', group: 'General', description: 'The class to query', examples: ['Lesson', 'Lesson', 'Note', '', undefined] };
+  if (port === 'collectionName') return { type: 'string', coerce: 'none', displayName: 'Class', group: 'General', description: 'The class to query', examples: ['Lesson', 'Lesson', 'Lesson', 'Lesson', 'Lesson', 'Note', '', undefined] };
   if (port === 'backendId') return { type: 'string', coerce: 'none', editOnly: true, displayName: 'Backend', group: 'General', description: 'Which backend to query', examples: ['_active_', 'main', 'other', 'nope'] };
   if (port === 'search') return { type: 'string', coerce: 'none', displayName: 'Search', group: 'Search', description: 'Full-text search term; empty for none', examples: ['ada', 'ada', '', undefined] };
   if (port === 'visualFilter') return { type: 'object', coerce: 'none', editOnly: true, displayName: 'Filter', group: 'Filter', description: 'The visual filter', examples: FILTERS };
@@ -154,21 +177,45 @@ function toNeutral(query: unknown, parameters: Readonly<Record<string, unknown>>
 /**
  * queryutils.ts :295-306 convertVisualFilter — the same filter lowered to Parse for the local matcher; it may THROW (a
  * refusal). The backend type is the legacy store's, which answers `nodegx` unconditionally (:157-169); a play's
- * project has no class schema cached (`schemaFor` → undefined), so `pointsTo` is refused.
+ * project has no class schema cached (`schemaFor` → undefined), so `pointsTo` is refused. A document with no key is
+ * no filter (:306).
  */
-function lowerToParse(neutral: Filter | undefined): void {
-  if (neutral === undefined) return;
-  toParseWhere(neutral, { backend: 'nodegx', schema: undefined });
+function lowerToParse(neutral: Filter | undefined): Readonly<Record<string, unknown>> | undefined {
+  if (neutral === undefined) return undefined;
+  const where = toParseWhere(neutral, { backend: 'nodegx', schema: undefined }) as Record<string, unknown>;
+  return Object.keys(where).length === 0 ? undefined : where;
 }
 
-/** The backends a sequence plays with: rows at once (weighted), rows with a total count, an empty answer, late, refused with and without a message, silent, two backends. */
+/**
+ * s24 — writes made elsewhere (world.ts BACKEND `events`): one at every doubling of the clock from 2 ms to 65 s, so an
+ * advance made after the first query reaches some whatever its size — a record created that matches `title = a`, one
+ * that does not, a member saved out of the filter and back, a member deleted, a non-member deleted, a write to another
+ * class. Measured s24: with the seven hand-placed writes of the first draft, 1 sequence in 400 (two seeds) acted on one.
+ */
+const WRITE_CYCLE: ReadonlyArray<Omit<NonNullable<BackendScript['events']>[number], 'at'>> = [
+  { type: 'create', collection: 'Lesson', objectId: 'r4', data: { title: 'a', n: 0 } },
+  { type: 'save', collection: 'Lesson', objectId: 'r1', data: { title: 'z', n: 9 } },
+  { type: 'create', collection: 'Note', objectId: 'r5', data: { title: 'a', n: 4 } },
+  { type: 'delete', collection: 'Lesson', objectId: 'r2' },
+  { type: 'create', collection: 'Lesson', objectId: 'r6', data: { title: 'b', n: 5 } },
+  { type: 'save', collection: 'Lesson', objectId: 'r6', data: { title: 'a', n: 1 } },
+  { type: 'delete', collection: 'Lesson', objectId: 'r9' },
+  { type: 'save', collection: 'Lesson', objectId: 'r1', data: { title: 'a', n: 1 } }
+];
+const WRITES: NonNullable<BackendScript['events']> = Array.from({ length: 16 }, (_, k) => ({ at: 2 ** (k + 1), ...WRITE_CYCLE[k % WRITE_CYCLE.length] }));
+
+/** The backends a sequence plays with: rows at once (weighted), rows with a total count, an empty answer, late, refused with and without a message, silent, two backends — and (s24) the same worlds with writes made elsewhere. */
 const BACKENDS: ReadonlyArray<BackendScript> = [
   { answers: [{ answer: { ok: { results: [{ objectId: 'r1', title: 'a', n: 1 }, { objectId: 'r2', title: 'b', n: 2 }] } } }] },
-  { answers: [{ answer: { ok: { results: [{ objectId: 'r1', title: 'a', n: 1 }, { objectId: 'r2', title: 'b', n: 2 }] } } }] },
-  { answers: [{ answer: { ok: { results: [{ objectId: 'r2', title: 'b', n: 2 }], count: 7 } } }] },
+  { answers: [{ answer: { ok: { results: [{ objectId: 'r1', title: 'a', n: 1 }, { objectId: 'r2', title: 'b', n: 2 }] } } }], events: WRITES },
+  { answers: [{ answer: { ok: { results: [{ objectId: 'r1', title: 'a', n: 1 }, { objectId: 'r2', title: 'b', n: 2 }, { objectId: 'r3', title: 'c', n: 3 }] } } }], events: WRITES },
+  { answers: [{ answer: { ok: { results: [{ objectId: 'r2', title: 'b', n: 2 }], count: 7 } } }], events: WRITES },
   { answers: [{ answer: { ok: { results: [] } } }] },
+  { answers: [{ answer: { ok: { results: [] } } }], events: [{ at: 1, type: 'create', collection: 'Lesson', objectId: 'r7', data: { title: 'a', n: 2 } }, { at: 10, type: 'create', collection: 'Lesson', objectId: 'r8', data: { title: 'b', n: 8 } }, ...WRITES] },
   { backends: ['main', 'other'], answers: [{ answer: { ok: { results: [{ objectId: 'r3', title: 'c' }] } }, after: 1 }] },
+  { backends: ['main', 'other'], answers: [{ answer: { ok: { results: [{ objectId: 'r1', title: 'a', n: 1 }] } }, after: 1 }], events: [{ at: 5, backend: 'other', type: 'create', collection: 'Lesson', objectId: 'r4', data: { title: 'a', n: 0 } }, ...WRITES.slice(1)] },
   { answers: [{ answer: { error: 'Forbidden' } }] },
+  { answers: [{ answer: { error: 'Forbidden' } }], events: WRITES },
   { answers: [{ answer: { error: null }, after: 10 }] },
   { answers: [{ answer: { never: true } }] },
   { backends: ['main', 'other'], answers: [{ match: { backend: 'other' }, answer: { error: 'Unknown class' } }, { match: { collection: 'Lesson' }, answer: { ok: { results: [{ objectId: 'r1', title: 'a' }] } }, after: 1 }, { answer: { error: '' } }] }
@@ -193,7 +240,10 @@ export const QueryRecords = defineNode({
     error: undefined,
     fetchScheduled: false,
     calls: {},
-    nextCall: 1
+    nextCall: 1,
+    bound: undefined,
+    query: undefined,
+    recordsBox: true
   } as QueryRecordsState,
 
   inputs: {},
@@ -279,9 +329,10 @@ export const QueryRecords = defineNode({
         storageTotalCount: { type: 'number', displayName: 'Total Count', group: 'Total Count', description: 'How many records match, ignoring Limit', from: (s) => s.settings.storageTotalCount } as OutputDecl<QueryRecordsState>
       }),
       discover,
-      candidates: ['storageFetch', 'collectionName', 'backendId', 'search', 'visualFilter', 'visualSort', 'qp-min', 'storageEnableLimit', 'storageLimit', 'storageSkip', 'storageEnableCount', 'runOnChange-collectionName', 'runOnChange-search', 'runOnChange-qp-min', 'runOnChange-querySettings'],
+      candidates: ['storageFetch', 'collectionName', 'backendId', 'search', 'visualFilter', 'visualSort', 'qp-min', 'storageEnableLimit', 'storageLimit', 'storageSkip', 'storageEnableCount', 'runOnChange-collectionName', 'runOnChange-search', 'runOnChange-qp-min', 'runOnChange-querySettings', 'runOnChange-records'],
       on: (s, port, v, derived) => {
         const schedule = (go: boolean) => (go && !s.fetchScheduled ? { fetchScheduled: true } : {});
+        if (port === 'runOnChange-records') return { set: { recordsBox: v !== false }, send: [] }; // s24 — read by the store listener
         if (port.startsWith('runOnChange-')) return { send: [] }; // the box only records its answer
         if (port === 'collectionName') return { set: { name: v, ...schedule(valueDidChange(s.name, v) && ticked(derived, 'collectionName')) }, send: [] }; // :563-570
         if (port === 'search') return { set: { search: v, ...schedule(valueDidChange(s.search, v) && ticked(derived, 'search')) }, send: [] }; // :1131-1138
@@ -304,15 +355,18 @@ export const QueryRecords = defineNode({
       const failed = (error: string) => ({ set: { fetchScheduled: false, error }, send: ['error' as const], emit: ['failure' as const] });
       const backend = w.backendFor(s.backendId); // :843-849
       if (backend === undefined) return failed(NO_BACKEND_MESSAGE(s.backendId));
+      // :850 — the store's listeners move to this backend's store now, before the filter is built
       const c = w.registry.collection(); // :852 — the answer's array, minted (a guid draw) before the filter is built
       // :947-995 — the simple filter (the only one in slice A)
       let neutral: Filter | undefined;
+      let where: Readonly<Record<string, unknown>> | undefined;
       if (s.visualFilter !== undefined) {
         try {
           neutral = toNeutral(s.visualFilter, s.queryParameters);
-          lowerToParse(neutral);
+          where = lowerToParse(neutral);
         } catch (e) {
-          return failed((e as Error).message || 'The filter could not be applied.'); // :982, :853-856
+          const f = failed((e as Error).message || 'The filter could not be applied.'); // :982, :853-856
+          return { ...f, set: { ...f.set, bound: backend } };
         }
       }
       const sort = s.visualSorting !== undefined ? (s.visualSorting as Array<{ property: string; order?: string }>).map((x) => (x.order === 'descending' ? '-' : '') + x.property) : undefined; // queryutils.ts :440-444
@@ -323,7 +377,8 @@ export const QueryRecords = defineNode({
       const search = s.search || undefined; // :865
       const id = 'query:' + s.nextCall;
       return {
-        set: { fetchScheduled: false, calls: { ...s.calls, [id]: c.getId() }, nextCall: s.nextCall + 1 },
+        // :873-879 — the query MADE is what a later write is matched against, whether or not its answer has landed
+        set: { fetchScheduled: false, calls: { ...s.calls, [id]: c.getId() }, nextCall: s.nextCall + 1, bound: backend, query: { where, sort, limit } },
         send: [],
         // :880-889
         backend: { id, op: 'query', backend, args: { collection: s.name, where: neutral, sort, limit, skip, count, search } }
@@ -354,6 +409,51 @@ export const QueryRecords = defineNode({
         }
         const settings = count !== undefined ? { settings: { ...s.settings, storageTotalCount: count } } : {};
         return { set: { ...publish, ...settings }, send: [...all], sendDerived: count !== undefined ? ['storageTotalCount'] : [], emit: ['fetched'] };
+      },
+      // s24 — :251-363 `cloudStoreEvents`: a write made elsewhere, heard on the store this node is bound to
+      store: (s, _i, e, w) => {
+        if (!s.recordsBox) return { send: [] }; // :253
+        if (s.bound !== e.backend) return { send: [] }; // :600-616 — a store it never bound tells it nothing
+        if (s.collection === undefined) return { send: [] }; // :255
+        if (e.collection !== s.name) return { send: [] }; // :256 — the Class as it is NOW, not as queried
+        if (s.search) return { set: s.fetchScheduled ? {} : { fetchScheduled: true }, send: [] }; // :266-269 — a search re-queries
+        const c = w.registry.collection(s.collection);
+        const q = s.query!; // an array is held only once a query was made
+        const all = ['items', 'count', 'firstItemId', 'isEmpty'] as const;
+        // :271-319 — at its sorted place (before the first member that sorts after it), or at the end with no sort; then Limit
+        const add = (m: RecordRef) => {
+          const sort = q.sort;
+          const hasSort = sort !== undefined && sort.length > 0; // :285-286 — an empty sort is no sort
+          if (hasSort) {
+            let i = 0;
+            for (i = 0; i < c.size(); i++) if (compareObjects(sort, c.get(i)!, m) > 0) break;
+            c.addAtIndex(m, i);
+          } else c.add(m);
+          // :301-311 — over Limit, one is dropped: the LAST under a descending first sort key, otherwise the FIRST
+          const size = c.size();
+          if (q.limit !== undefined && size > q.limit) {
+            const descending = hasSort && sort[0].charAt(0) === '-';
+            c.remove(c.get(descending ? size - 1 : 0)!);
+          }
+          return { send: all };
+        };
+        if (e.type === 'create') {
+          const m = w.registry.model(e.object?.objectId); // :322 — the id the record carries
+          return matchesQuery(m, q.where) ? add(m) : { send: [] };
+        }
+        const m = w.registry.model(e.objectId);
+        if (e.type === 'save') {
+          // :330-349 — out of the filter: removed; into it: added; a member that still matches keeps its place
+          const matches = matchesQuery(m, q.where);
+          if (!matches && c.contains(m)) {
+            c.remove(m);
+            return { send: all };
+          }
+          return matches && !c.contains(m) ? add(m) : { send: [] };
+        }
+        // :350-362 — removed if a member; the four re-sent either way
+        c.remove(m);
+        return { send: all };
       }
     }
   }

@@ -120,7 +120,9 @@
  *     the contract's event emitted as the adapter emits it (RestDataAdapter.ts :1216-1219). The per-backend
  *     stores are dropped at `install` (`CloudStore.invalidateBackends`): they are process-wide. (s22) A failure's
  *     `detail` is handed on as the contract's second argument; the signed-in user (USER) is written into the legacy
- *     store's session, where the access rules read it (`installUser`).
+ *     store's session, where the access rules read it (`installUser`). (s24) A write made elsewhere (`events`) goes
+ *     through the REAL `_fromJSON` and then the REAL store of its backend (`emitAdapterEvent`), so a Query Records'
+ *     own subscription is what hears it.
  */
 
 import { AsyncLocalStorage } from 'async_hooks';
@@ -278,7 +280,12 @@ const GROUP_STAND_IN = NodeDefinition.defineNode({
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { RestDataAdapter } = require('../../src/api/backends/RestDataAdapter') as { RestDataAdapter: { prototype: Record<string, unknown> } };
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const CloudStore = require('../../src/api/cloudstore') as { invalidateBackends(scope?: unknown): void; instance: { _handle(): { publicToken?: string } } };
+const CloudStore = require('../../src/api/cloudstore') as {
+  invalidateBackends(scope?: unknown): void;
+  instance: { _handle(): { publicToken?: string } };
+  forBackend(modelScope: unknown, backendId: string): { _adapter: { emitAdapterEvent(e: Record<string, unknown>): void } } | undefined;
+  _fromJSON(item: Record<string, unknown>, collectionName: string, modelScope?: unknown): unknown;
+};
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const { parseSessionStore } = require('../../src/api/backends/SessionStore') as { parseSessionStore(appId: string | undefined): { write(session: Record<string, unknown>): void } };
 
@@ -387,8 +394,16 @@ function installBackend(w: World, graphModel: { getMetaData(k: string): unknown;
       });
     };
   }
+  // s24 — writes made elsewhere (world.ts BACKEND `events`): the writer's half through the REAL `_fromJSON` (what a
+  // writer's success does), then the adapter's half through that backend's REAL store — the event its listeners hear
+  const offStore = w.backend.onStoreEvent((e) => {
+    const { backend, ...event } = e;
+    if (event.object) CloudStore._fromJSON({ ...event.object }, event.collection, undefined);
+    CloudStore.forBackend(undefined, backend)!._adapter.emitAdapterEvent(event);
+  });
   const restoreUser = installUser(w);
   return () => {
+    offStore();
     restoreUser();
     for (const [op, fn] of Object.entries(saved)) proto[op] = fn;
     CloudStore.invalidateBackends();

@@ -590,6 +590,13 @@ export interface WorldHandlers<S, I, O> {
   popup?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').PopupEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
   /** NSP-014 s21 — a backend answered a call this node made (`backend` effect), at the answer's moment (world.ts BACKEND). */
   backend?: (state: Readonly<S>, inputs: Inputs<I>, answer: BackendAnswerEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-014 s24 — a write made elsewhere in the app reached the store's listeners (world.ts BACKEND, `events`): called
+   * at its time on the clock, AFTER the registry holds the write, with the contract's event and the backend it came
+   * from. Every instance of a spec that needs `backend` and has this handler hears every event, in mount order;
+   * whether the node watches that backend's store is the spec's (a store a node never bound tells it nothing).
+   */
+  store?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').StoreEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -774,6 +781,7 @@ export interface AnyNodeSpec {
     page?: (state: never, inputs: never, params: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     popup?: (state: never, inputs: never, event: import('./world').PopupEvent, world: WorldView) => unknown;
     backend?: (state: never, inputs: never, answer: BackendAnswerEvent, world: WorldView) => unknown;
+    store?: (state: never, inputs: never, event: import('./world').StoreEvent, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

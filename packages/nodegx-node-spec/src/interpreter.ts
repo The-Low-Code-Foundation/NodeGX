@@ -64,6 +64,8 @@
  * (oldest first per port). Outcomes are recorded in the order they were REPORTED (trace.ts).
  * A `request` effect is recorded as a `request` event in the frame it was issued in; a `backend` effect
  * (NSP-014 s21) as a `backend` event beside it, its answer delivered to `spec.world.backend` like a response.
+ * (s24) A write made elsewhere (world.ts BACKEND `events`) reaches `spec.world.store` of every instance that listens,
+ * at its firing — after their inboxes were delivered, once the registry holds the write (`listenToStore`).
  *
  * THE REGISTRY (NSP-012, registry.ts). Reducers reach it through `world.registry` and WRITE to it
  * directly; a write notifies every OTHER instance watching the entry (`world.watch`) synchronously
@@ -89,10 +91,10 @@ import { isRegistryEntry } from './registry';
 import type { AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, ReducerOutcome, SignalOutputDecl, SpecBackendCall, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
-import { backendEvent, installTimeZone, locationEvent, openReturnsWindow, pushTarget, World, type Delivery, type LocationCall, type PopupCall, type PopupEvent } from './world';
+import { backendEvent, installTimeZone, locationEvent, openReturnsWindow, pushTarget, World, writeStoreEvent, type Delivery, type LocationCall, type PopupCall, type PopupEvent, type StoreEvent } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
-type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'backend'; answer: BackendAnswerEvent } | { kind: 'resize' } | { kind: 'page'; params: Readonly<Record<string, unknown>> } | { kind: 'popup'; event: PopupEvent };
+type Inbound = { kind: 'timer'; tag: string } | { kind: 'response'; response: WorldResponse } | { kind: 'backend'; answer: BackendAnswerEvent } | { kind: 'resize' } | { kind: 'page'; params: Readonly<Record<string, unknown>> } | { kind: 'popup'; event: PopupEvent } | { kind: 'store'; event: StoreEvent };
 
 interface OutcomeSlot {
   port: string;
@@ -244,6 +246,36 @@ function viewOf(inst: Instance): WorldView {
   };
 }
 
+/**
+ * NSP-014 s24 — the store's listeners per world (world.ts BACKEND, `events`): the world is subscribed ONCE. At the firing
+ * every listening instance's inbox is delivered first (an answer that landed at 10 is seen by a write at 15, as on an
+ * event loop: the clock's `advance` fires its timers in one sweep), then the write lands in the registry once (no
+ * instance is the writer — every watcher hears it), then every listening instance is handed the event, in mount order.
+ */
+const storeListeners = new WeakMap<World, Instance[]>();
+function listenToStore(inst: Instance): void {
+  let list = storeListeners.get(inst.world);
+  if (!list) {
+    const instances: Instance[] = [];
+    list = instances;
+    storeListeners.set(inst.world, instances);
+    const world = inst.world;
+    world.backend.onStoreEvent((event) => {
+      // an event loop runs what already landed (the answers in the inbox) before the next timer fires (world.ts CLOCK)
+      for (const i of [...instances]) deliver(i);
+      const previous = currentWriter;
+      currentWriter = undefined;
+      try {
+        writeStoreEvent(world.registry, event);
+      } finally {
+        currentWriter = previous;
+      }
+      for (const i of [...instances]) handleInbound(i, { kind: 'store', event });
+    });
+  }
+  list.push(inst);
+}
+
 export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, world: World = new World()): Instance {
   const inputs: Record<string, unknown> = {};
   for (const [name, decl] of Object.entries(spec.inputs)) {
@@ -283,6 +315,8 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
     watches: new Map()
   };
   (inst as { view: WorldView }).view = viewOf(inst);
+  // s24: a node that watches the store hears the writes made elsewhere (spec.ts `WorldHandlers.store`)
+  if (spec.world?.store && spec.needs?.includes('backend')) listenToStore(inst);
   // the part of the initial state the world supplies (spec.ts `init`) — drawn at mount, before the params
   if (spec.init) {
     const initial = asWriter(inst, () => spec.init!(inst.view, frozenParams));
@@ -672,6 +706,9 @@ function handleInbound(inst: Instance, item: Inbound): void {
     name = 'world.backend';
     if (!spec.world?.backend) throw new SpecError(`${spec.type}: a backend answered and the spec has no world.backend handler`);
     patch = asWriter(inst, () => spec.world!.backend!(inst.state as never, inst.inputs as never, item.answer, view));
+  } else if (item.kind === 'store') {
+    name = 'world.store';
+    patch = asWriter(inst, () => spec.world!.store!(inst.state as never, inst.inputs as never, item.event, view));
   } else if (item.kind === 'page') {
     name = 'world.page';
     if (!spec.world?.page) throw new SpecError(`${spec.type}: a Router handed its page params and the spec has no world.page handler`);
