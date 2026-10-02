@@ -177,8 +177,8 @@ blocks, not six. **93.1 %** of the script bytes are pasted shared code; each Fun
   all** (0 of 1,101 nodes), though the catalog tells agents to prefer Expression.
 
 **Findings (to be filed one per bug in `dev-docs/bugs/` next session; not filed yet):** product gaps — no translation /
-word-table node (28 Functions paste the word helper; ISL-007's add-on is the ruled route), String Format fills a
-repeated placeholder once, Array Filter has no "in list" / nested / computed field, no node edits a nested JSON value,
+word-table node (28 Functions paste the word helper; ISL-007's add-on is the ruled route), ~~String Format fills a
+repeated placeholder once~~ (**wrong**: it fills every occurrence; only its comment says otherwise, P107-D2), Array Filter has no "in list" / nested / computed field, no node edits a nested JSON value,
 list rows are app-wide by id (so scripts invent prefixed ids), no list-join or base64 node; teaching gaps — Expression,
 Object, HTTP Request, Run Tasks and "Array Filter → first → Object" as a row lookup all exist and went unused; the
 Function's `run` port doc contradicts the code (`javascriptfunction.json:8` vs `simplejavascript.ts:617-627`); a

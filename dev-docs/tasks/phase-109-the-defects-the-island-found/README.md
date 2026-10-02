@@ -260,6 +260,9 @@ feature has its own copy with the same bug. Should both be fixed in one commit?"
   **its own template task**, the four product gaps that blocked it are fixed (translation via ISL-007's add-on, String
   Format's repeated placeholder, an "in list" filter, rows shared app-wide by id), and the shared script file is decided
   afterwards for what is left. ISL-005 itself does not build its §5 now.
+  ⚠️ **One premise was wrong:** String Format *does* fill a placeholder used twice (a peer measured it the same night;
+  `P109-S5-STRINGFORMAT` withdrawn as a duplicate of P107-D2, which owns the wrong comment and description). The gaps are
+  three, not four. Not re-asked: it does not change which way the choice points; say so when the island task is scoped.
 - **ISL-009 ruling 1 — ✅ Ruled: "A data-* list."** Asked as *"…tests and AI agents find things on screen by their CSS
   class names, because a node cannot carry a name just for tests… Should every visual node be able to carry data-*
   attributes (e.g. data-testid="plot-card") that no stylesheet needs?"* Options: a data-* list (recommended) / one Test

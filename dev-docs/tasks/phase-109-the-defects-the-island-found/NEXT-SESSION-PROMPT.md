@@ -8,7 +8,9 @@ ISL-009 each have open ACs).
 
 ## Read first
 
-1. README §8 — the two round-2 rulings at the end, as asked.
+1. README §8 — the two round-2 rulings at the end, as asked. 🔴 One premise in the ISL-005 question was wrong: String
+   Format DOES fill a repeated placeholder (`P109-S5-STRINGFORMAT` withdrawn, a peer measured it; P107-D2 owns the wrong
+   comment). Tell Richard the gap list is three, not four, when the island task is scoped.
 2. ISL-019 §8 s5 (as built; AC7's three measured blockers), ISL-009 §8 s5 (as built; what the two new ports moved
    elsewhere), ISL-005 §8 s5 and [the census](ISL-005-CENSUS-2026-10-02.md).
 
@@ -29,8 +31,7 @@ ISL-009 each have open ACs).
 3. **ISL-007 "Adopt the add-on"** (ruled s4, not started): fix the i18next add-on's gaps and teach it to agents. It is
    also the first of the four product gaps "Native nodes first" names.
 4. **"Native nodes first" (ISL-005's ruling):** scope the island rebuild as **its own template task** (P108/P78, not
-   P109), and the product gaps as P109 work: String Format's repeated placeholder (`P109-S5-STRINGFORMAT`), Array
-   Filter's "in list" (`P109-S5-ARRAYFILTERIN`), rows shared app-wide by id (ISL-003 owns it, read it first). Re-scope
+   P109), and the product gaps as P109 work: Array Filter's "in list" (`P109-S5-ARRAYFILTERIN`), rows shared app-wide by id (ISL-003 owns it, read it first). Re-scope
    ISL-006 and ISL-020 against the ruling (both waited on ISL-005).
 5. **ISL-019's remainder:** AC6 (Claude Code over the door rebuilding a component: needs `noodl-mcp` dist rebuilt from
    `1f23b05dd`+), AC7 (the garden drops its pins) only when no peer has `cg002Content.ts`/`cg003Content.ts` open, and
