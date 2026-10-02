@@ -3,7 +3,8 @@
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
 **Sessions 1–2:** ISL-001's fix (`3df5adb82`), ISL-014's refusal (`aab96a056`), ISL-025 W1–W3, ISL-011 (1a + 2a).
 **Session 3 (2026-10-02, on `cline-dev` from `4b448e016`): rulings 2 and 3 given; ISL-002 and ISL-001 ✅ CLOSED (2 of 25);
-ISL-014 (b) built; ISL-022 AC1 measured; ISL-011 AC3 complete (canvas + port write); ISL-001's AC7: 8 modes runs, no lost press; two gates of this phase's own put right.** Commits:
+ISL-014 (b) built; ISL-022 AC1 measured; ISL-011 AC3 complete (canvas + port write); ISL-018 measured, ruled and built
+(format step 4→5, `b2ba0320a`); three more rulings given (ISL-018, ISL-022, W13); ISL-001's AC7: 8 modes runs, no lost press; two gates of this phase's own put right.** Commits:
 `06e65ab47` (ISL-002 fix, three copies), `13b57fc4e` (rulings + records), `83a31805b` (ISL-014 b), `e234bd15f`
 (HLS-001 golden learns ISL-011's fixture), `45177be3a` (ISL-002 AC5), `906a1fe3c` (ISL-001 AC5), `1fd49429c` and
 `5ddc39420` (ISL-022 AC1), plus this handoff's commit.
@@ -22,15 +23,20 @@ ISL-014 (b) built; ISL-022 AC1 measured; ISL-011 AC3 complete (canvas + port wri
 
 ## Build, in this order
 
-1. **`npm run build` in `packages/noodl-mcp`** when `git status packages/noodl-mcp/src` shows no peer's work (s3 found
-   `src/cloud/bundleEntry.js` modified, a peer's). Then **ISL-014 AC6**: under (b) the agent should never see the
-   refusal — `get_project_info` → `kits.readerBuilt` on a checkout with no reader, the kit node placed, the page
-   deployed with it drawing, the screenshot looked at.
-2. **ISL-018 AC2** (the editor) — a measurement that decides its ruling.
-3. **Then ask, in plain words, all at once:** ISL-022 §5 (should the wrapped-row warning still fire on items with a pixel
-   width — it reverses GAM-022 — and fire on a `contentSize` wrapped row like `brTabs`?) with ISL-025 W13 (keep the garden's `kit.js` display workaround? — ISL-011 AC6) and the Track B and D
-   rulings (README §9). Rewrite each with no internal word: say what the person saw (the island's page zoomed out on a
-   phone; taps landing off), the choices, the cost.
+1. **ISL-022 on its ruling ("Yes, both")** — arm B silent on items with a pixel width narrower than a phone's content
+   box (Rocket School's 132 px / 150 px gates and the island's three pinned warnings move: re-pin them by name), and the
+   new code for a `contentSize` wrapped row in a row parent (§5 item 3) with its `diagnosticExamples.ts` entry. The
+   fixture `isl022-wrapped-row/` and `tests/isl022WrappedRow.test.ts` are AC1's readings; AC2 flips them.
+2. **ISL-025 W13 on its ruling ("Remove the force")** — `library/modules/garden-kit/src/kit.js:1932-1944`; four copies
+   (F19: src, built `index.js`, the library module, the template's `noodl_modules`); re-read CG-001's gate row and the
+   page drive's THE LOOK clause; a person's CSS Style `display` must stick.
+3. **ISL-018's open case** — the door writing into a project still at format 4 (README board; ISL-018 §8 s3). And if
+   session 3's `test:ci` was not read, read it (floor 8 by name; fresh `test-results.json`).
+4. **`npm run build` in `packages/noodl-mcp`** when `git status packages/noodl-mcp/src` shows no peer's work (s3 found
+   `src/cloud/bundleEntry.js` modified, a peer's) — it now also ships `create_project` at format 5. Then **ISL-014 AC6**
+   (`get_project_info` → `kits.readerBuilt`, the kit node placed, the page deployed with it drawing, screenshot looked at).
+5. **Then ask, in plain words, all at once:** the Track B and D rulings (README §9) — check first whether the product
+   already has a mechanism for each (memory "MECH 1st").
 
 ## Facts measured in session 3 that are not in a task file
 
@@ -48,4 +54,6 @@ ISL-014 (b) built; ISL-022 AC1 measured; ISL-011 AC3 complete (canvas + port wri
 - **ISL-002 also fixed P107 D19's first half** (NSP-013's row is marked); the round-trip half (a text a state does not
   name keeps the previous state's text) is still P107's.
 - Template follow-up for P108 (README §6): the island's `plMode.record` can go back to a boolean.
+- 🔴 **Format 5 (ISL-018):** a project the new editor saves is refused by an older editor (the installed 0.3.0 app).
+  Richard was told in the s3 summary; if he wants it otherwise, it is one commit to revert.
 - Local `cline-dev` is far ahead of `origin`; pushing is Richard's call.

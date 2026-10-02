@@ -114,7 +114,7 @@ the work:
 | **Track D** | | | | |
 | [ISL-016](ISL-016-THE-DOOR-WRITES-THE-PROJECT-SETTINGS-AND-THE-HOME-PAGE.md) | The door writes the project settings and the home page | F23 | MCP | ✓ |
 | [ISL-017](ISL-017-THE-DOOR-INSTALLS-A-KIT.md) | The door installs a kit, and a project need not carry a copy | F24, F19 | MCP, modules | ✓ |
-| [ISL-018](ISL-018-WHAT-THE-DOOR-WRITES-IS-WHAT-THE-EDITOR-SAVES.md) | What the door writes is what the editor saves — **🟡 s3: AC2 measured: the editor saves no key and the next open writes `false` (the editor's own Functions bitten); §5 ruling needed** | F25 | MCP | after AC2 |
+| [ISL-018](ISL-018-WHAT-THE-DOOR-WRITES-IS-WHAT-THE-EDITOR-SAVES.md) | What the door writes is what the editor saves — **🟡 s3: AC2 measured (the editor's own save was rewritten on reopen); ruled "format step 4→5"; built `b2ba0320a` and driven — the box survives a reopen; ⚠️ older editors refuse a format-5 project** | F25 | MCP | after AC2 |
 | [ISL-019](ISL-019-THE-SAME-PLAN-WRITES-THE-SAME-BYTES.md) | The same plan writes the same bytes | F26 | MCP | ✓ |
 | [ISL-020](ISL-020-AN-AGENT-CHANGES-ONE-LINE-OF-A-BIG-SCRIPT.md) | An agent changes one line of a big script | F27 | MCP | ✓ |
 | [ISL-021](ISL-021-AN-AGENT-CAN-PRESS-AND-TYPE-ON-A-RENDERED-PAGE.md) | An agent can press and type on a rendered page | F28 | MCP, render | ✓ |

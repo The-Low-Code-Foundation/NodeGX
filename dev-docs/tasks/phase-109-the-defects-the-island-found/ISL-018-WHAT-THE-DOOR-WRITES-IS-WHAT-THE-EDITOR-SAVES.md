@@ -1,6 +1,6 @@
 # ISL-018 — What the door writes is what the editor saves
 
-**Status: 🟡 s3 (2026-10-02): AC2 measured — the editor's own save leaves the key absent, and the next open rewrites it to `false`; §5's 🔒 ruling is now needed. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
+**Status: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. Owed: the door writing into a project still at 4 (below), and `test:ci`'s reading. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
 [DEF-038](../phase-80-the-defects-the-templates-found/DEF-038-THE-OTHER-GENERATOR-DISAGREES.md) (✅ built 2026-09-03, in
 the generators only) · **Side:** product (MCP door, `noodl-mcp`; the load-time migration in `@nodegx/project-contract`)
 
@@ -133,3 +133,33 @@ pre-§2 one because the editor saves nothing that would say so.
 **§5 now applies its 🔒 branch:** (a) settle at write time in the door and in the editor's save, or (b) one project-level
 marker the migration reads. Recommended (b). Asked in plain words with session 3's other measured rulings.
 
+### Session 3 — the ruling and the build (`b2ba0320a`)
+
+**Ruling (README §8):** asked with §5's two options → *"This sounds nuts, surely there must be a cleverer fix?"* →
+re-asked with the editor's own one-time upgrade chain → **"Yes, version step 4→5."**
+
+| file | change |
+|---|---|
+| `nodegx-project-contract/run-on-value-change-migration.ts` | `RUN_ON_VALUE_CHANGE_FORMAT_VERSION = '5'`; `projectPredatesRunOnValueChange(version)` (missing, older or unreadable → predates) |
+| `noodl-editor/…/ProjectPatches/applypatches.js` | migrates only a project that predates 5 |
+| `noodl-editor/…/models/projectmodel.ts` | `Upgraders[4]`: `version = '5'` — the open's write-back saves it |
+| `noodl-editor/…/models/projectmodel.editor.ts` | `supportedProjectVersion` follows the constant. 🔴 **Met in the drive:** at 4 the editor refused the project it had just saved (*"This project was saved with a newer version of Noodl"*) |
+| `nodegx-export/src/parse/parseProject.ts` | settles only a pre-5 project, as the editor does |
+| `noodl-mcp/src/tools/createProject.ts` | a new project is written at `'5'` |
+
+**Readings:** `tests-unit/isl-018` 4 / 4 (known-firing: format 4 and no version still migrate; format 5 is left as
+written; **sabotage** — the gate forced open — reddens the format-5 row); `hls003` 8 / 8 with a new row (format 4 settles
+2, format 5 settles 0); `create_project` 8 / 8; the DEF-007 seam 10 / 10; contract and export `tsc` 0.
+
+**Drive (dev editor, throwaway profile, the probe reset to format 4, key absent, no `Run` wire):** the open saved
+`version: "5"`; `Run` wired through the graph model, autosaved, key absent; reopened (after the cap was raised) → **the
+key is absent live and on disk, `Run` still wired, version 5**. At HEAD the same reopen wrote `false` (AC2 above).
+
+⚠️ **What the step costs, said to Richard with the summary:** once the new editor saves a project at 5, **an older
+editor — the installed 0.3.0 app included — refuses to open it** ("saved with a newer version"). That is what a format
+step is; it is reversible until the commit ships.
+
+**Still open:** the door writing into a project still at **4** that no editor has opened since (a template the
+generator writes at `'4'`, or an old project): its new nodes would be migrated once on the next open. The shipped
+templates are settled (DEF-038's gate), so their one-time step writes nothing; a hand-edited old project is the case.
+Recorded, not built.
