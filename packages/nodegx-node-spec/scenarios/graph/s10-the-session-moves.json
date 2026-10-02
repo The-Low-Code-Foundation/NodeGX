@@ -1,0 +1,1232 @@
+[
+  {
+    "name": "Log In signs somebody in: Done, and a User watching shows her and pulses Logged In",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "NSP-014 s27. login.ts :143-148 → world.ts AUTH (logIn ok: the session becomes the answer, sessionChanged, the caller's success, loggedIn); user.ts :117-121 (loggedIn: read, then Logged In), :353-379 setUserModel",
+    "nodes": {
+      "li": {
+        "type": "net.noodl.user.LogIn",
+        "params": {
+          "username": "bea",
+          "password": "secret"
+        }
+      },
+      "u": {
+        "type": "net.noodl.user.User",
+        "params": {
+          "runOnChange-user": true
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "li",
+        "signal": "login"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "u",
+        "port": "authenticated",
+        "value": false
+      },
+      {
+        "at": 2,
+        "subject": "li",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "signal": "loggedIn",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "authenticated",
+        "value": true
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "id",
+        "value": "u2"
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "email",
+        "value": "bea@example.com"
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "prop-nick",
+        "value": "Bea"
+      }
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "logIn"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea",
+                "nick": "Bea",
+                "n": 2
+              }
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "username",
+        "value": "bea",
+        "subject": "li"
+      },
+      {
+        "t": "set",
+        "port": "password",
+        "value": "secret",
+        "subject": "li"
+      },
+      {
+        "t": "set",
+        "port": "runOnChange-user",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "authenticated",
+        "value": false,
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "login",
+        "subject": "li"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "login",
+        "value": "done",
+        "subject": "li"
+      },
+      {
+        "t": "backend",
+        "op": "logIn",
+        "backend": "main",
+        "args": {
+          "password": "secret",
+          "username": "bea"
+        },
+        "subject": "li"
+      },
+      {
+        "t": "value",
+        "port": "authenticated",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "email",
+        "value": "bea@example.com",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "u2",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 2,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": "Bea",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "bea",
+        "subject": "u"
+      },
+      {
+        "t": "signal",
+        "port": "loggedIn",
+        "subject": "u"
+      }
+    ]
+  },
+  {
+    "name": "Log In while somebody else is signed in: the User moves to the new person",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "NSP-014 s27. RestAuthAdapter.ts :999 readSession(…, undefined) — the answer replaces the session; user.ts :353-363 moves the binding",
+    "nodes": {
+      "li": {
+        "type": "net.noodl.user.LogIn",
+        "params": {
+          "username": "bea",
+          "password": "secret"
+        }
+      },
+      "u": {
+        "type": "net.noodl.user.User",
+        "params": {
+          "runOnChange-user": true
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "li",
+        "signal": "login"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "u",
+        "port": "id",
+        "value": "u1"
+      },
+      {
+        "at": 2,
+        "subject": "li",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "signal": "loggedIn",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "id",
+        "value": "u2"
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "username",
+        "value": "bea"
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "prop-nick",
+        "value": "Bea"
+      }
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logIn"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea",
+                "nick": "Bea",
+                "n": 2
+              }
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "username",
+        "value": "bea",
+        "subject": "li"
+      },
+      {
+        "t": "set",
+        "port": "password",
+        "value": "secret",
+        "subject": "li"
+      },
+      {
+        "t": "set",
+        "port": "runOnChange-user",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "authenticated",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "email",
+        "value": "ann@example.com",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "u1",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 1,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": "Ann",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "ann",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "login",
+        "subject": "li"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "login",
+        "value": "done",
+        "subject": "li"
+      },
+      {
+        "t": "backend",
+        "op": "logIn",
+        "backend": "main",
+        "args": {
+          "password": "secret",
+          "username": "bea"
+        },
+        "subject": "li"
+      },
+      {
+        "t": "value",
+        "port": "email",
+        "value": "bea@example.com",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "u2",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 2,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": "Bea",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "bea",
+        "subject": "u"
+      },
+      {
+        "t": "signal",
+        "port": "loggedIn",
+        "subject": "u"
+      }
+    ]
+  },
+  {
+    "name": "A refused Log In leaves the person signed in where she was: Failure and the Error, no Logged In, nothing moves on the User",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "NSP-014 s27. RestAuthAdapter.ts :1022 fail → options.error only; login.ts :149-151",
+    "nodes": {
+      "li": {
+        "type": "net.noodl.user.LogIn",
+        "params": {
+          "username": "bea",
+          "password": "wrong"
+        }
+      },
+      "u": {
+        "type": "net.noodl.user.User",
+        "params": {
+          "runOnChange-user": true
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "li",
+        "signal": "login"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "u",
+        "port": "id",
+        "value": "u1"
+      },
+      {
+        "at": 2,
+        "subject": "li",
+        "outcome": "failure",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "li",
+        "port": "error",
+        "value": "Invalid credentials."
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "signal": "loggedIn",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "id",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "authenticated",
+        "absent": true
+      }
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logIn"
+            },
+            "answer": {
+              "error": "Invalid credentials."
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "username",
+        "value": "bea",
+        "subject": "li"
+      },
+      {
+        "t": "set",
+        "port": "password",
+        "value": "wrong",
+        "subject": "li"
+      },
+      {
+        "t": "set",
+        "port": "runOnChange-user",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "authenticated",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "email",
+        "value": "ann@example.com",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "u1",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 1,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": "Ann",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "ann",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "login",
+        "subject": "li"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "error",
+        "value": "Invalid credentials.",
+        "subject": "li"
+      },
+      {
+        "t": "outcome",
+        "port": "login",
+        "value": "failure",
+        "error": "user/log-in-failed",
+        "subject": "li"
+      },
+      {
+        "t": "backend",
+        "op": "logIn",
+        "backend": "main",
+        "args": {
+          "password": "wrong",
+          "username": "bea"
+        },
+        "subject": "li"
+      }
+    ]
+  },
+  {
+    "name": "Log Out: Done, the User pulses Logged Out and Authenticated goes false — and Id, Email and the properties keep the person who left (row C47)",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "NSP-014 s27. logout.ts :110-113 → RestAuthAdapter.ts :1064-1083 (clearSession, success, loggedOut); user.ts :140-143 (loggedOut: read, then Logged Out) → setUserModel(undefined) :353-375: undefined is never sent (CONTRACT C3) — C47's evidence beside the Authenticated that does move",
+    "nodes": {
+      "lo": {
+        "type": "net.noodl.user.LogOut",
+        "params": {}
+      },
+      "u": {
+        "type": "net.noodl.user.User",
+        "params": {
+          "runOnChange-user": true
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "lo",
+        "signal": "login"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "u",
+        "port": "id",
+        "value": "u1"
+      },
+      {
+        "at": 1,
+        "subject": "u",
+        "port": "authenticated",
+        "value": true
+      },
+      {
+        "at": 2,
+        "subject": "lo",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "signal": "loggedOut",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "authenticated",
+        "value": false
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "id",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "email",
+        "absent": true
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "prop-nick",
+        "absent": true
+      }
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logOut"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "runOnChange-user",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "authenticated",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "email",
+        "value": "ann@example.com",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "u1",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 1,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": "Ann",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "ann",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "login",
+        "subject": "lo"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "login",
+        "value": "done",
+        "subject": "lo"
+      },
+      {
+        "t": "backend",
+        "op": "logOut",
+        "backend": "main",
+        "args": {},
+        "subject": "lo"
+      },
+      {
+        "t": "value",
+        "port": "authenticated",
+        "value": false,
+        "subject": "u"
+      },
+      {
+        "t": "signal",
+        "port": "loggedOut",
+        "subject": "u"
+      }
+    ]
+  },
+  {
+    "name": "A sign-out the backend refuses still signs out: Done (never Failure), Logged Out, Authenticated false",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "NSP-014 s27. RestAuthAdapter.ts :1083 { ok: finish, fail: finish } — the local session goes whatever the backend says",
+    "nodes": {
+      "lo": {
+        "type": "net.noodl.user.LogOut",
+        "params": {}
+      },
+      "u": {
+        "type": "net.noodl.user.User",
+        "params": {
+          "runOnChange-user": true
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "lo",
+        "signal": "login"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "lo",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "lo",
+        "outcome": "failure",
+        "count": 0
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "signal": "loggedOut",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "authenticated",
+        "value": false
+      }
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logOut"
+            },
+            "answer": {
+              "error": "HTTP 503: {}"
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "runOnChange-user",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "authenticated",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "email",
+        "value": "ann@example.com",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "u1",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 1,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": "Ann",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "ann",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "login",
+        "subject": "lo"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "login",
+        "value": "done",
+        "subject": "lo"
+      },
+      {
+        "t": "backend",
+        "op": "logOut",
+        "backend": "main",
+        "args": {},
+        "subject": "lo"
+      },
+      {
+        "t": "value",
+        "port": "authenticated",
+        "value": false,
+        "subject": "u"
+      },
+      {
+        "t": "signal",
+        "port": "loggedOut",
+        "subject": "u"
+      }
+    ]
+  },
+  {
+    "name": "Sign Up, then Set User Properties: the User shows the new account, then the written property — and Username stays as it was (row D23)",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "NSP-014 s27. signup.ts :166-173 → world.ts AUTH (signUp lands as a sign-in); setuserproperties.ts → RestAuthAdapter.ts :1607-1617 (Username dropped from the write — D23), :1634-1637 the session merged, sessionChanged → the bridge's write → user.ts :103-112",
+    "nodes": {
+      "su": {
+        "type": "net.noodl.user.SignUp",
+        "params": {
+          "username": "bea",
+          "password": "secret",
+          "email": "bea@example.com"
+        }
+      },
+      "sp": {
+        "type": "net.noodl.user.SetUserProperties",
+        "params": {
+          "username": "bee",
+          "prop-nick": "B2"
+        }
+      },
+      "u": {
+        "type": "net.noodl.user.User",
+        "params": {
+          "runOnChange-user": true
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "su",
+        "signal": "signup"
+      },
+      "settle",
+      {
+        "node": "sp",
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 1,
+        "subject": "u",
+        "port": "authenticated",
+        "value": false
+      },
+      {
+        "at": 2,
+        "subject": "su",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "signal": "loggedIn",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "id",
+        "value": "u2"
+      },
+      {
+        "at": 2,
+        "subject": "u",
+        "port": "username",
+        "value": "bea"
+      },
+      {
+        "at": 3,
+        "subject": "sp",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "u",
+        "port": "prop-nick",
+        "value": "B2"
+      },
+      {
+        "at": 3,
+        "subject": "u",
+        "port": "username",
+        "absent": true
+      }
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "signUp"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea",
+                "nick": "Bea",
+                "n": 2
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "username",
+        "value": "bea",
+        "subject": "su"
+      },
+      {
+        "t": "set",
+        "port": "password",
+        "value": "secret",
+        "subject": "su"
+      },
+      {
+        "t": "set",
+        "port": "email",
+        "value": "bea@example.com",
+        "subject": "su"
+      },
+      {
+        "t": "set",
+        "port": "username",
+        "value": "bee",
+        "subject": "sp"
+      },
+      {
+        "t": "set",
+        "port": "prop-nick",
+        "value": "B2",
+        "subject": "sp"
+      },
+      {
+        "t": "set",
+        "port": "runOnChange-user",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "authenticated",
+        "value": false,
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "signup",
+        "subject": "su"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "signup",
+        "value": "done",
+        "subject": "su"
+      },
+      {
+        "t": "backend",
+        "op": "signUp",
+        "backend": "main",
+        "args": {
+          "email": "bea@example.com",
+          "password": "secret",
+          "properties": {},
+          "username": "bea"
+        },
+        "subject": "su"
+      },
+      {
+        "t": "value",
+        "port": "authenticated",
+        "value": true,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "email",
+        "value": "bea@example.com",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "u2",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": 2,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": "Bea",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "bea",
+        "subject": "u"
+      },
+      {
+        "t": "signal",
+        "port": "loggedIn",
+        "subject": "u"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "sp"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "sp"
+      },
+      {
+        "t": "backend",
+        "op": "setUserProperties",
+        "backend": "main",
+        "args": {
+          "properties": {
+            "nick": "B2"
+          },
+          "username": "bee"
+        },
+        "subject": "sp"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": "B2",
+        "subject": "u"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "u"
+      }
+    ]
+  }
+]

@@ -1,0 +1,357 @@
+[
+  {
+    "name": "Do with nobody signed in: Done inside the call — no request is made, but the call is recorded",
+    "because": "RestAuthAdapter.ts :1070-1073 — no session: finish() at once",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "login"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "Do while somebody is signed in: one call, then Done",
+    "because": "logout.ts :104-113 → RestAuthAdapter.ts :1075-1084",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "login"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logOut"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "The backend refuses the sign-out: still Done, nothing on Error — the local session goes whatever the backend says",
+    "because": "RestAuthAdapter.ts :1064-1068, :1083 — { ok: finish, fail: finish }",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "login"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logOut"
+            },
+            "answer": {
+              "error": "HTTP 503: {}"
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Two Dos in one frame: one call, two Dones",
+    "because": "logout.ts :97-108",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "login"
+      },
+      {
+        "signal": "login"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logOut"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A late answer: the presses wait, then Done at the answer",
+    "because": "logout.ts :110-113",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "login"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logOut"
+            },
+            "answer": {
+              "ok": null
+            },
+            "after": 20
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A Do while a sign-out is out is a second call — the session still held at its call — each answered Done",
+    "because": "logout.ts :106-108 — the batch taken before the call goes out",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "login"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      {
+        "signal": "login"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logOut"
+            },
+            "answer": {
+              "ok": null
+            },
+            "after": 20
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A second Do after the sign-out landed: nobody is signed in now, so Done inside the call",
+    "because": "RestAuthAdapter.ts :1070 — the session is read at the call",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "login"
+      },
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle",
+      {
+        "signal": "login"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logOut"
+            },
+            "answer": {
+              "ok": null
+            },
+            "after": 20
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "A sign-out that never comes back: the press waits — no outcome",
+    "because": "logout.ts — no timeout of its own",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "login"
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "logOut"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  }
+]

@@ -261,7 +261,8 @@
  *               fields flat (`objectId` among them, tokens never); absent, nobody. `session(backend)` reads it NOW.
  *             THE REFUSAL BEFORE THE WIRE — a `fetchCurrentUser` to a backend holding no session, a `setUserProperties` to
  *               one holding none or none with an `objectId`: `Nobody is signed in.`, answered at once, inside the call
- *               (`refused`); recorded, never a violation, no rule read.
+ *               (`refused`); recorded, never a violation, no rule read. (s27) A `logOut` to a backend holding no session is
+ *               no request either: it SUCCEEDS at once, inside the call (`inCall`) — and lands as below.
  *             A LANDING — an answer lands as a BACKEND answer does, and then the ADAPTER's steps run in this order
  *               (`landAuth`; `AuthStep`), each after the world's sessions moved for it:
  *                 `fetchCurrentUser` ok — the session becomes the one held AT THE CALL with the answer's fields over it;
@@ -273,6 +274,12 @@
  *                   what the call wrote over those (`writtenUserFields`: every property, `email` when defined, `username`
  *                   NEVER, the server-owned fields dropped); `sessionChanged`; the caller's success (:1634-1637). Failed:
  *                   the error only (`lost` means nothing to a write).
+ *                 (s27) `logIn` / `signUp` ok — the session becomes the ANSWER (whoever held it before; the answer is the
+ *                   user's fields flat, as the adapter flattens a sign-in's body); `sessionChanged`; the caller's success;
+ *                   `loggedIn` (:999-1020). A sign-up's success IS the adapter's own sign-in made after the account
+ *                   (:1087-1142): one operation here, one landing. Failed: the error only, the session untouched.
+ *                 (s27) `logOut` — WHATEVER the answer (`ok` or an error: the adapter's `finish` on both, :1064-1083): the
+ *                   session cleared WITH `sessionChanged`; the caller's success; `loggedOut`. Only `never` stops it.
  *             THE SERVICE — the app's one user service (userservice.ts), made by the first node that reaches it
  *               (`startService`; the User node at its mount, a Set User Properties at its frame end). When it is made with
  *               a session on the active backend it reads it (`current`, :143-144: the session handed to the record store,
@@ -292,7 +299,10 @@
  *                   NOT cleared by the service (row C45: a 503 at load says Session Lost while the user stays signed in),
  *                   and a `lost` failure announces `sessionLost` twice (the adapter's, then the service's — row C46).
  *           Not played: the token lifecycle (refresh timers, cross-tab storage events — RestAuthAdapter's controller), the
- *           Parse wire's adapter, the service's `current` model (read by no node specced here), the provider return leg.
+ *           Parse wire's adapter, the service's `current` model (read by no node specced here), the provider return leg;
+ *           (s27) the capability gate (`begin` — every backend here offers password sign-in and sign-up) and each wire's
+ *           own steps inside a sign-in (Directus writes the tokens, then `/users/me` merged — two `sessionChanged`;
+ *           PocketBase one; a sign-up's create-then-sign-in is two requests): the contract's operation is the seam (R9).
  *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
@@ -424,7 +434,7 @@ export interface BackendCall {
 }
 
 /** What lands for a call: what the success callback is handed, or the failure's message (`undefined`: none) and its `detail` when the backend gave one. */
-export type BackendDelivery = { ok: unknown } | { error: string | undefined; detail?: Record<string, unknown>; lost?: true; refused?: true };
+export type BackendDelivery = { ok: unknown; inCall?: true } | { error: string | undefined; detail?: Record<string, unknown>; lost?: true; refused?: true };
 
 /** POPUP above: the host, the components a Target can build, what the person does, where a Close Popup sits. */
 export interface PopupScript {
@@ -793,7 +803,7 @@ function deliveryOf(a: Exclude<BackendAnswer, { never: true }>): BackendDelivery
 }
 
 /** AUTH below: the operations the world plays as auth — the contract's (`IAuthAdapter`) and the one beside it (`setUserProperties`, userservice.ts :422). */
-export const AUTH_OPS: readonly string[] = Object.freeze(['fetchCurrentUser', 'setUserProperties']);
+export const AUTH_OPS: readonly string[] = Object.freeze(['fetchCurrentUser', 'setUserProperties', 'logIn', 'signUp', 'logOut']);
 
 export const isAuthOp = (op: string): boolean => AUTH_OPS.includes(op);
 
@@ -947,15 +957,17 @@ export class WorldBackend {
   }
 
   /**
-   * AUTH (s26): the auth operation's refusal BEFORE the wire, or `undefined` — the REST adapter's own pre-flight
-   * (RestAuthAdapter.ts :1150-1155 `fetchCurrentUser`, :1601-1605 `setUserProperties`): with no session (no `objectId`,
-   * for a write) on the backend it was handed to, `Nobody is signed in.` A refused call is still a call (recorded, never
-   * a violation) and it is answered AT ONCE, inside the call — no rule is read.
+   * AUTH (s26): what an auth operation is answered with BEFORE the wire, or `undefined` — the REST adapter's own pre-flight.
+   * A refusal (RestAuthAdapter.ts :1150-1155 `fetchCurrentUser`, :1601-1605 `setUserProperties`): with no session (no
+   * `objectId`, for a write) on the backend it was handed to, `Nobody is signed in.` (s27) A `logOut` to a backend holding no
+   * session is no request at all — the adapter finishes it at once (:1070-1073, `!session`): a SUCCESS, in the call. Either
+   * is still a call (recorded, never a violation) answered AT ONCE, inside the call — no rule is read.
    */
-  authRefusal(op: string, backend: string): string | undefined {
+  authBeforeWire(op: string, backend: string): BackendDelivery | undefined {
     const s = this.sessions.get(backend);
-    if (op === 'fetchCurrentUser' && s === undefined) return NOBODY_SIGNED_IN;
-    if (op === 'setUserProperties' && (s === undefined || !s.objectId)) return NOBODY_SIGNED_IN;
+    if (op === 'fetchCurrentUser' && s === undefined) return { error: NOBODY_SIGNED_IN, refused: true };
+    if (op === 'setUserProperties' && (s === undefined || !s.objectId)) return { error: NOBODY_SIGNED_IN, refused: true };
+    if (op === 'logOut' && s === undefined) return { ok: undefined, inCall: true };
     return undefined;
   }
 
@@ -974,6 +986,15 @@ export class WorldBackend {
       perform({ do: 'clear', backend });
     };
     const event = (type: AuthEventType) => perform({ do: 'event', type, backend });
+    if (op === 'logOut') {
+      // s27 — the local session goes WHATEVER the backend says (RestAuthAdapter.ts :1064-1068 `finish`, :1083 — on `ok` and
+      // on `fail` alike): cleared WITH `sessionChanged` (`clearSession` :645-649), the caller's success, then `loggedOut`
+      clear();
+      event('sessionChanged');
+      perform({ do: 'success' });
+      event('loggedOut');
+      return;
+    }
     if (!('ok' in d)) {
       // a rejected session (the contract's `sessionLost`: 401 / 403 on REST, 209 on the Parse wire) — storage cleared
       // WITHOUT `sessionChanged`, then `sessionLost` (RestAuthAdapter.ts :1177-1186); only a read of the session does this
@@ -996,6 +1017,16 @@ export class WorldBackend {
       write({ ...(atCall ?? {}), ...answer, ...writtenUserFields(args) }); // :1634-1637
       event('sessionChanged');
       perform({ do: 'success' });
+      return;
+    }
+    if (op === 'logIn' || op === 'signUp') {
+      // s27 — the session becomes the ANSWER, whoever was signed in before (`readSession(…, undefined)` :999, :832-841 — no
+      // `previous`); `sessionChanged`; the caller's success; then `loggedIn` (:1019-1020). A sign-up is the sign-in made after
+      // the account (:1087-1142 — the adapter's own `logIn` on the created account's credentials): the same landing.
+      write({ ...answer });
+      event('sessionChanged');
+      perform({ do: 'success' });
+      event('loggedIn');
       return;
     }
     throw new Error(`world: ${op} is not an auth operation the world plays`);
@@ -1029,10 +1060,10 @@ export class WorldBackend {
     const recorded: BackendCall = { op: call.op, backend: call.backend, args: call.args };
     this.calls.push(recorded);
     for (const l of this.listeners) l(recorded);
-    // AUTH (s26) — the adapter's refusal before the wire: answered at once, inside the call, no rule read
-    const refusal = this.authRefusal(call.op, call.backend);
-    if (refusal !== undefined) {
-      deliver({ error: refusal, refused: true });
+    // AUTH (s26, s27) — answered before the wire: at once, inside the call, no rule read
+    const before = this.authBeforeWire(call.op, call.backend);
+    if (before !== undefined) {
+      deliver(before);
       return;
     }
     const collection = (call.args as { collection?: unknown }).collection;

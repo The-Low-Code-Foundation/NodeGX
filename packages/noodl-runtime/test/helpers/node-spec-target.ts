@@ -342,7 +342,7 @@ const BACKEND_OPS: Readonly<Record<string, (o: BackendOptions, ok: unknown, emit
  * USER (world.ts BACKEND, s22): the signed-in user, where the Record family's access rules read it — the LEGACY store's
  * session (`_getCurrentUser` → `CloudStore.instance.currentUserId()` → `ParseWireAdapter.currentUserId` → the session
  * store under that store's app id). Written through the REAL `SessionStore` into a storage the play owns (Node has no
- * `localStorage`; the store reads "whatever `localStorage` is now"). A play with no user installs nothing. Returns the undo.
+ * `localStorage`; the store reads "whatever `localStorage` is now"), installed for every backend play (s27, T14). Returns the undo.
  */
 function installUser(w: World): () => void {
   // NSP-014 s25 (T13) — the session store is made ONCE per process, on its first read, and its constructor draws
@@ -353,7 +353,9 @@ function installUser(w: World): () => void {
   const user = w.backend.user;
   // s26 — AUTH's sessions live in the same storage, each backend's under the REST adapter's own key (`restSessionKey`)
   const sessions = w.backend.ids.map((id) => [id, w.backend.session(id)] as const).filter(([, session]) => session !== undefined);
-  if (user === undefined && sessions.length === 0) return () => {};
+  // s27 (T14) — a storage EVERY backend play, signed in or not: the app always has one. Installed only when the play started
+  // with a session, a Log In into an empty world wrote its session into no storage at all, and a User watching read nobody
+  // (graph s10 — Logged In pulsed, nothing else moved; the play that started signed in moved). Found by its first graph.
   const g = globalThis as { localStorage?: unknown };
   const had = 'localStorage' in g;
   const saved = g.localStorage;
@@ -403,19 +405,33 @@ function installAuth(w: World): () => void {
   const savedService = services.UserService;
   let service: unknown;
   let constructing = false;
-  services.UserService = {
-    forScope: () => {
-      if (service === undefined) {
-        constructing = true;
-        try {
-          service = new UserServiceClass();
-        } finally {
-          constructing = false;
-        }
+  const forScope = () => {
+    if (service === undefined) {
+      constructing = true;
+      try {
+        service = new UserServiceClass();
+      } finally {
+        constructing = false;
       }
-      return service;
     }
+    return service;
   };
+  services.UserService = { forScope };
+  // s27 — the viewer's own user nodes (Log In, Sign Up, Log Out …) reach `UserService.instance`, the module's singleton
+  // (userservice.ts :530-536), not `forScope` — in the app the two are ONE service (:525-528). The singleton is made once,
+  // outside any play (`appUserService`); during a play every method called on it runs on the play's service instead.
+  const appService = appUserService();
+  const serviceProto = UserServiceClass.prototype as Record<string, unknown>;
+  const savedMethods: Record<string, unknown> = {};
+  for (const name of Object.getOwnPropertyNames(serviceProto)) {
+    const desc = Object.getOwnPropertyDescriptor(serviceProto, name);
+    if (name === 'constructor' || !desc || typeof desc.value !== 'function') continue;
+    const method = desc.value as (...a: unknown[]) => unknown;
+    savedMethods[name] = method;
+    serviceProto[name] = function (this: unknown, ...a: unknown[]) {
+      return method.apply(this === appService ? forScope() : this, a);
+    };
+  }
   const proto = RestAuthAdapter.prototype;
   const saved: Record<string, unknown> = {};
   for (const op of AUTH_OPS) {
@@ -440,15 +456,28 @@ function installAuth(w: World): () => void {
         return;
       }
       w.backend.issue({ op, backend, args: options }, (d) => {
-        if ('refused' in d && d.refused) land(d); // the adapter's refusal before the wire — inside the call
+        if (('refused' in d && d.refused) || ('inCall' in d && d.inCall)) land(d); // answered before the wire — inside the call
         else void Promise.resolve().then(() => land(d));
       });
     };
   }
   return () => {
     for (const [op, fn] of Object.entries(saved)) proto[op] = fn;
+    for (const [name, fn] of Object.entries(savedMethods)) serviceProto[name] = fn;
     services.UserService = savedService;
   };
+}
+
+/**
+ * s27 — the app's singleton user service (`UserService.instance`, userservice.ts :530-536), made ONCE, the first time a
+ * play installs AUTH and BEFORE anything of the play is installed: no session in storage, no world's random stream, no
+ * backend of the world's — so its constructor's start-up check finds nobody signed in and makes no call. A play never
+ * runs anything on it (`installAuth` forwards its methods to the play's own service).
+ */
+let appServiceMade: unknown;
+function appUserService(): unknown {
+  if (appServiceMade === undefined) appServiceMade = (UserServiceClass as unknown as { instance: unknown }).instance;
+  return appServiceMade;
 }
 
 /**
@@ -457,6 +486,7 @@ function installAuth(w: World): () => void {
  * endpoint), the per-backend stores dropped, and the REST adapter's operations the world's. Returns the undo.
  */
 function installBackend(w: World, graphModel: { getMetaData(k: string): unknown; setMetaData(k: string, v: unknown): void }, record: (c: BackendCall) => void): () => void {
+  appUserService(); // s27 — before the play's metadata, storage and world (installAuth)
   w.backend.onCall(record);
   const savedMeta = { cloudservices: graphModel.getMetaData('cloudservices'), backendServices: graphModel.getMetaData('backendServices') };
   graphModel.setMetaData('cloudservices', undefined);
@@ -548,7 +578,7 @@ function resetRegistry(world: World): void {
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout'] as const;
 
 /** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (s17 Navigate To Path … s20 Show / Close Popup). */
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;

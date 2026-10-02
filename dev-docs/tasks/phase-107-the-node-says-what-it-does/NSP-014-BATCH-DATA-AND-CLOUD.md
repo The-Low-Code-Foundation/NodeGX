@@ -1,7 +1,7 @@
 # NSP-014 — Batch: records, users, files, HTTP, streams, and the cloud-only nodes
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world's network and backend) and R4 = continue.
-**Status: 🟡 s26 (2026-10-02): User and Set User Properties conform on the runtime — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24.** s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
+**Status: 🟡 s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24.** s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
 
 ## 1. The person sentence
 
@@ -572,4 +572,76 @@ elsewhere are the hand scenarios' — each mutant they alone kill is named above
 | `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
 | `node scripts/node-spec/census.js` | 147, all tiered; two `placesWritten` counts moved (the new specs name the nodes) |
 | `node scripts/bugs.js check` | my six files valid; 3 problems, all P109's (a peer's file names) |
+| export, `test:main` | NOT RUN — no export code touched |
+
+### 6.19 s27 (2026-10-02) — Log In, Sign Up, Log Out; graph s10, the session moving
+
+**Built.** `src/nodes/user-actions.ts` — three specs, one shape (a token per press, one call per frame, the batch taken before
+the call goes out, Done / Failure with the node's code, Error as given and never cleared), three operations. 10 + 11 + 8
+scenarios. All three **conform on the runtime on the first run and at 10,000**; 15 / 15, 17 / 17, 9 / 9 mutants on the
+runtime, every mutant killed on the interpreter on seeds 13 and 20728. **96 of 147.**
+
+**The world (world.ts AUTH).** `logIn`, `signUp`, `logOut` joined `AUTH_OPS`. Read from RestAuthAdapter.ts before writing:
+- `logIn` / `signUp` ok → the session becomes the ANSWER (`readSession(…, undefined)` :999 — no `previous`, so whoever was
+  signed in is replaced), `sessionChanged`, the caller's success, `loggedIn` (:1019-1020). A sign-up's success IS the
+  adapter's own sign-in after the account (:1087-1142), so at the contract level it is one operation with the sign-in's
+  landing. Failed: the error only.
+- `logOut` → cleared WITH `sessionChanged`, success, `loggedOut` — **whatever the backend answers** (`{ ok: finish, fail:
+  finish }`, :1083). With nobody signed in there is no request at all (:1070-1073) and it is Done INSIDE the call: the
+  world's `authRefusal` became `authBeforeWire`, which answers a refusal OR an in-call success (`inCall`). The interpreter's
+  caller now hears the landing's STEP, not the delivery: a refused sign-out is a success.
+- Not played, named in the header: the capability gate (`begin`; Directus's `auth.signUp` is `conditional`), and each wire's
+  own steps inside a sign-in — Directus writes the tokens first and merges `/users/me` after, so it raises `sessionChanged`
+  TWICE, the first time with a session that has no `objectId`. Unmeasured; a lead for the contract's own conformance suite.
+
+**The runtime target — two holes.**
+- **T14: a play that started with nobody signed in had no `localStorage`.** `installUser` installed a storage only when the
+  script held a session, so a Log In into an empty world wrote its session into nothing and a User watching read nobody —
+  Logged In pulsed and nothing else moved, while the same graph starting signed in moved correctly. Found by graph s10's
+  claims on the first record; now a storage every backend play. No other graph's trace moved (a full record run: every file
+  byte-identical but the escaping of two, restored).
+- **The viewer's user nodes reach `UserService.instance`, not `forScope`.** In the app they are one service (userservice.ts
+  :525-536); in the target the module singleton would have been a process-wide service made inside the first play. It is now
+  made ONCE, before anything of a play is installed (`appUserService`), and every method called on it during a play runs on
+  the play's own service.
+
+**Graph s10 — the session moves** (6 scenarios, `S1 N`, claims from each node's sentence BEFORE recording; all held on the
+record after T14): Log In into an empty world (User: Authenticated true, Id, Email, `prop-nick`, Logged In); Log In over
+another person (the User moves); a refused Log In (Failure and the Error; nothing moves on the User); **Log Out with C47's
+evidence beside it** (Logged Out and Authenticated false fire; Id, Email and `prop-nick` record nothing); a sign-out the
+backend refuses (Done, never Failure; Logged Out); **Sign Up then Set User Properties with D23's evidence** (the written
+`prop-nick` arrives; Username records nothing).
+
+**A lead measured, not a guess (row D24).** The Record family's access rules read the LEGACY store (s22). A probe graph,
+three arms on the runtime target: Log In as `u2`, then Create Record with an Owner rule → `create` with NO `acl`; control
+(legacy user `u1` scripted) → `acl: { u1: … }`; neither → none. Every REST backend ignores a per-record ACL anyway
+(`data.acl` unsupported), so access does not change — but the adapter's "ACL ignored" warning, there so the drop is never
+silent, never fires after a REST Log In. The `nodegx` backend on the Parse wire (where ACL is real) is not measured.
+
+**Observed, not a row:** on every REST backend Log Out's Failure and Error can never fire — by the adapter's design (a
+sign-out that fails remotely still signs out locally). Its description ("Fires when the sign-out was refused") holds for the
+Parse wire only.
+
+### 6.20 Rows (s27)
+
+| row | node | what the trace shows | proposed |
+|---|---|---|---|
+| **D24** | the Record family's access rules, after any REST Log In | an Owner rule hands no `acl` (the rules read the legacy store a REST Log In never writes), so `RestDataAdapter`'s "ACL ignored" warning never fires. Probe, three arms. Ledger `p107-d24-…` | read the signed-in user from the record's own backend, or warn at the rule when the backend has no `data.acl` |
+
+C47 and D23 now have graph evidence too (s10).
+
+### 6.21 Gate readings (s27, 2026-10-02; load 1.4–9.9 — this session's jest only, no peer suite)
+
+| gate | reading |
+|---|---|
+| interpreter: `batch-records.test.ts`, the three on seeds 13 and 20728 | 6 / 6 green — scenarios, 200 sequences, every mutant killed, none unreached |
+| runtime: `NSP_ONLY=` the three, at 200 (seed 20728) | **all CONFORM, first run**: Log In 10 / 10, 15 / 15 · Sign Up 11 / 11, 17 / 17 · Log Out 8 / 8, 9 / 9 |
+| runtime deep, `NSP_DEEP=10000`, the three | **all CONFORM**: 10,000 / 10,000, 0 divergences; Sign Up 61 → C6 (R7: a unit object merged into a `prop-` port); mutants as at 200 |
+| runtime traces printed (probe, deleted) | Log Out refused → Done; Log Out signed out → Done in the call, the call recorded; Log In signed in → the start-up check on the world's calls, on no node's trace |
+| runtime: `graph.test.ts` — FULL record run, then check mode | **87 / 87** both (76 scenarios; s10's claims held after T14). Record rewrote t04 / t05 escape-only (parsed equal) — restored from HEAD |
+| runtime: the WHOLE `test/node-spec/` (conformance + graph + runtime-target) | **3 suites, 183 passed, 76 skipped, exit 0, 386 s** (inside the 600 s `beforeAll`): **76 specs CONFORM** + Counter's AC5; the one DOES NOT CONFORM is AC1's planted off-by-one, as designed |
+| `nodegx-node-spec`: `npx jest` | **18 suites, 750 passed, 17 skipped, exit 0** (s26: 729) — the hash refresh named exactly `src/world.ts`; the three stranger rounds green |
+| `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
+| `node scripts/node-spec/census.js` | 147, all tiered; `placesWritten` counts moved only |
+| `node scripts/bugs.js check` | 152 files, every header valid |
 | export, `test:main` | NOT RUN — no export code touched |

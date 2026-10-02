@@ -22,7 +22,7 @@ const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRe
 
 /** s25 — Filter Records: no backend call, so graded here but not in the AC6 call table below */
 /** s26 — the user nodes (world.ts AUTH): calls without a `collection`, so their AC5 / AC6 tests are their own, below */
-const USERS = ['net.noodl.user.User', 'net.noodl.user.SetUserProperties'];
+const USERS = ['net.noodl.user.User', 'net.noodl.user.SetUserProperties', 'net.noodl.user.LogIn', 'net.noodl.user.SignUp', 'net.noodl.user.LogOut'];
 const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS];
 
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {

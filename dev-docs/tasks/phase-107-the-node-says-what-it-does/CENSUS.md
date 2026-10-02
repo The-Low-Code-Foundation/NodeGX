@@ -50,7 +50,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | 1 | **Text** | T5 | NSP-016 | 58 | 1 | sseLib.ts | 55 | 92 |
 | 2 | **Group** | T5 | NSP-016 | 57 | 0 | — | 56 | 93 |
 | 3 | **Set Variable** | T1 | NSP-012 | 49 | 12 | — | 36 | 43 |
-| 4 | **Repeater** (`For Each`) | T5 | NSP-016 | 46 | 24 | — | 21 | 49 |
+| 4 | **Repeater** (`For Each`) | T5 | NSP-016 | 46 | 24 | — | 21 | 48 |
 | 5 | **Component Inputs** | T4 | NSP-015 | 34 | 10 | — | 23 | 47 |
 | 6 | **Component Outputs** | T4 | NSP-015 | 34 | 20 | — | 13 | 25 |
 | 7 | **String** | T1 | NSP-011 | 27 | 1 | — | 25 | 36 |
@@ -166,10 +166,10 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Log In** | `net.noodl.user.LogIn` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/login.ts` | ✓ |  | 2 |  | translated | 3 / 6 |  |
 | **Log Out** | `net.noodl.user.LogOut` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/logout.ts` | ✓ |  | 2 |  | translated | 3 / 6 |  |
 | **Request Magic Link** | `net.noodl.user.RequestMagicLink` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/requestmagiclink.ts` | ✓ |  | 2 |  | translated | 2 / 3 |  |
-| **Set User Properties** | `net.noodl.user.SetUserProperties` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/user/setuserproperties.ts` | ✓ | ✓ | 3 |  | translated | 3 / 5 |  |
+| **Set User Properties** | `net.noodl.user.SetUserProperties` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/user/setuserproperties.ts` | ✓ | ✓ | 3 |  | translated | 3 / 4 |  |
 | **Sign In With** | `net.noodl.user.SignInWith` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/signinwith.ts` | ✓ |  | 0 |  | deferred | 8 / 10 |  |
 | **Sign Up** | `net.noodl.user.SignUp` | T3 | browser | `noodl-viewer-react/src/nodes/std-library/user/signup.ts` | ✓ | ✓ | 2 |  | translated | 3 / 6 |  |
-| **User** | `net.noodl.user.User` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/user/user.ts` | ✓ | ✓ | 3 |  | translated | 4 / 7 |  |
+| **User** | `net.noodl.user.User` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/user/user.ts` | ✓ | ✓ | 3 |  | translated | 3 / 5 |  |
 | **WebSocket** | `net.noodl.WebSocket` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/agent/websocket.ts` | ✓ |  | 1 | websocketLib | translated | 2 / 9 |  |
 | **Create Record** | `NewDbModelProperties` | T3 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/newdbmodelpropertiesnode.ts` | ✓ | ✓ | 0 |  | translated | 6 / 18 |  |
 | **Open File Picker** | `Open File Picker` | T2 | browser | `noodl-viewer-react/src/nodes/std-library/openfilepicker.ts` | ✓ |  | 5 |  | translated | 2 / 4 | no network — a DOM input and a user gesture; environment-fed, so T2, kept with the file family |
@@ -205,7 +205,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Shape** | `Circle` | T5 | browser | `noodl-viewer-react/src/nodes/visual/circle.ts` |  | ✓ | 0 |  | translated | 0 / 8 |  |
 | **Component Children** | `Component Children` | T5 | browser | `noodl-runtime/src/nodelibraryexport.ts` |  |  | 4 |  | translated | 1 / 5 | providedBy noodl-editor in the catalog |
 | **Drag** | `Drag` | T5 | browser | `noodl-viewer-react/src/nodes/visual/drag.ts` |  |  | 10 | dragLib | translated | 2 / 9 |  |
-| **Repeater** | `For Each` | T5 | browser | `noodl-viewer-react/src/nodes/std-library/data/foreach.tsx` | ✓ | ✓ | 24 |  | translated | 21 / 49 |  |
+| **Repeater** | `For Each` | T5 | browser | `noodl-viewer-react/src/nodes/std-library/data/foreach.tsx` | ✓ | ✓ | 24 |  | translated | 21 / 48 |  |
 | **Group** | `Group` | T5 | browser | `noodl-viewer-react/src/nodes/visual/group.ts` | ✓ | ✓ | 0 |  | translated | 56 / 93 |  |
 | **Image** | `Image` | T5 | browser | `noodl-viewer-react/src/nodes/visual/image.ts` |  | ✓ | 0 |  | translated | 2 / 11 |  |
 | **Button** | `net.noodl.controls.button` | T5 | browser | `noodl-viewer-react/src/nodes/controls/button.ts` |  | ✓ | 0 |  | translated | 24 / 39 |  |

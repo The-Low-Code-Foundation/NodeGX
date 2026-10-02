@@ -796,8 +796,11 @@ function handleInbound(inst: Instance, item: Inbound): void {
   } else if (item.kind === 'backend' && item.auth) {
     // s26 — an AUTH answer: the adapter's steps in their order (world.ts AUTH), the caller's own answer among them
     const a = item.auth;
+    // s27 — the caller hears the STEP, not the delivery: a `logOut` the backend refused still lands as a success
+    const answerOf = (step: AuthStep): BackendAnswerEvent =>
+      step.do === 'success' && !('ok' in item.answer) ? ({ id: item.answer.id, ok: undefined } as BackendAnswerEvent) : item.answer;
     inst.world.backend.landAuth(a.op, a.backend, a.args, a.atCall, a.delivery, (step) =>
-      performAuth(inst.world, step, () => handleInbound(inst, { kind: 'backend', answer: item.answer }))
+      performAuth(inst.world, step, (s) => handleInbound(inst, { kind: 'backend', answer: answerOf(s) }))
     );
     return;
   } else if (item.kind === 'auth') {
