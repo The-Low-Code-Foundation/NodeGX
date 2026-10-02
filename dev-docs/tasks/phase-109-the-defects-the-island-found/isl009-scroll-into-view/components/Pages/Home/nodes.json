@@ -1,0 +1,352 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "layout"
+      ],
+      "parameters": {
+        "title": "Home",
+        "cssClassName": "isl009-page",
+        "scrollIntoViewAlign": "start"
+      }
+    },
+    {
+      "id": "layout",
+      "type": "Group",
+      "label": "Layout",
+      "parent": "page",
+      "children": [
+        "bar",
+        "sp1",
+        "pageCard",
+        "nativeBox",
+        "iscrollBox",
+        "sp4"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight"
+      }
+    },
+    {
+      "id": "bar",
+      "type": "Group",
+      "label": "buttons",
+      "parent": "layout",
+      "children": [
+        "bPage",
+        "bNative",
+        "bIscroll",
+        "bTop"
+      ],
+      "parameters": {
+        "flexDirection": "row",
+        "sizeMode": "contentHeight"
+      }
+    },
+    {
+      "id": "bPage",
+      "type": "Group",
+      "label": "to page card",
+      "parent": "bar",
+      "children": [
+        "bPageT"
+      ],
+      "parameters": {
+        "cssClassName": "isl009-bPage",
+        "backgroundColor": "#dde",
+        "paddingLeft": {
+          "value": 8,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 8,
+          "unit": "px"
+        },
+        "sizeMode": "contentSize"
+      }
+    },
+    {
+      "id": "bPageT",
+      "type": "Text",
+      "parent": "bPage",
+      "parameters": {
+        "text": "to page card"
+      }
+    },
+    {
+      "id": "bNative",
+      "type": "Group",
+      "label": "to native card",
+      "parent": "bar",
+      "children": [
+        "bNativeT"
+      ],
+      "parameters": {
+        "cssClassName": "isl009-bNative",
+        "backgroundColor": "#dde",
+        "paddingLeft": {
+          "value": 8,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 8,
+          "unit": "px"
+        },
+        "sizeMode": "contentSize"
+      }
+    },
+    {
+      "id": "bNativeT",
+      "type": "Text",
+      "parent": "bNative",
+      "parameters": {
+        "text": "to native card"
+      }
+    },
+    {
+      "id": "bIscroll",
+      "type": "Group",
+      "label": "to iscroll card",
+      "parent": "bar",
+      "children": [
+        "bIscrollT"
+      ],
+      "parameters": {
+        "cssClassName": "isl009-bIscroll",
+        "backgroundColor": "#dde",
+        "paddingLeft": {
+          "value": 8,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 8,
+          "unit": "px"
+        },
+        "sizeMode": "contentSize"
+      }
+    },
+    {
+      "id": "bIscrollT",
+      "type": "Text",
+      "parent": "bIscroll",
+      "parameters": {
+        "text": "to iscroll card"
+      }
+    },
+    {
+      "id": "bTop",
+      "type": "Group",
+      "label": "to top",
+      "parent": "bar",
+      "children": [
+        "bTopT"
+      ],
+      "parameters": {
+        "cssClassName": "isl009-bTop",
+        "backgroundColor": "#dde",
+        "paddingLeft": {
+          "value": 8,
+          "unit": "px"
+        },
+        "paddingRight": {
+          "value": 8,
+          "unit": "px"
+        },
+        "sizeMode": "contentSize"
+      }
+    },
+    {
+      "id": "bTopT",
+      "type": "Text",
+      "parent": "bTop",
+      "parameters": {
+        "text": "to top"
+      }
+    },
+    {
+      "id": "sp1",
+      "type": "Group",
+      "label": "spacer",
+      "parent": "layout",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 2200,
+          "unit": "px"
+        },
+        "backgroundColor": "#f4f4f4"
+      }
+    },
+    {
+      "id": "pageCard",
+      "type": "Group",
+      "label": "PAGE CARD",
+      "parent": "layout",
+      "children": [
+        "pageCardT"
+      ],
+      "parameters": {
+        "cssClassName": "isl009-pageCard",
+        "sizeMode": "explicit",
+        "height": {
+          "value": 120,
+          "unit": "px"
+        },
+        "backgroundColor": "#fc9"
+      }
+    },
+    {
+      "id": "pageCardT",
+      "type": "Text",
+      "parent": "pageCard",
+      "parameters": {
+        "text": "PAGE CARD"
+      }
+    },
+    {
+      "id": "nativeBox",
+      "type": "Group",
+      "label": "native scroll box",
+      "parent": "layout",
+      "children": [
+        "sp2",
+        "nativeCard"
+      ],
+      "parameters": {
+        "cssClassName": "isl009-nativeBox",
+        "sizeMode": "explicit",
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "scrollEnabled": true,
+        "nativeScroll": true,
+        "clip": true
+      }
+    },
+    {
+      "id": "sp2",
+      "type": "Group",
+      "label": "spacer",
+      "parent": "nativeBox",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 1000,
+          "unit": "px"
+        },
+        "backgroundColor": "#f4f4f4"
+      }
+    },
+    {
+      "id": "nativeCard",
+      "type": "Group",
+      "label": "NATIVE CARD",
+      "parent": "nativeBox",
+      "children": [
+        "nativeCardT"
+      ],
+      "parameters": {
+        "cssClassName": "isl009-nativeCard",
+        "sizeMode": "explicit",
+        "height": {
+          "value": 120,
+          "unit": "px"
+        },
+        "backgroundColor": "#9cf"
+      }
+    },
+    {
+      "id": "nativeCardT",
+      "type": "Text",
+      "parent": "nativeCard",
+      "parameters": {
+        "text": "NATIVE CARD"
+      }
+    },
+    {
+      "id": "iscrollBox",
+      "type": "Group",
+      "label": "iscroll box",
+      "parent": "layout",
+      "children": [
+        "sp3",
+        "iscrollCard"
+      ],
+      "parameters": {
+        "cssClassName": "isl009-iscrollBox",
+        "sizeMode": "explicit",
+        "height": {
+          "value": 200,
+          "unit": "px"
+        },
+        "scrollEnabled": true,
+        "nativeScroll": false,
+        "clip": true
+      }
+    },
+    {
+      "id": "sp3",
+      "type": "Group",
+      "label": "spacer",
+      "parent": "iscrollBox",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 1000,
+          "unit": "px"
+        },
+        "backgroundColor": "#f4f4f4"
+      }
+    },
+    {
+      "id": "iscrollCard",
+      "type": "Group",
+      "label": "ISCROLL CARD",
+      "parent": "iscrollBox",
+      "children": [
+        "iscrollCardT"
+      ],
+      "parameters": {
+        "cssClassName": "isl009-iscrollCard",
+        "sizeMode": "explicit",
+        "height": {
+          "value": 120,
+          "unit": "px"
+        },
+        "backgroundColor": "#9f9"
+      }
+    },
+    {
+      "id": "iscrollCardT",
+      "type": "Text",
+      "parent": "iscrollCard",
+      "parameters": {
+        "text": "ISCROLL CARD"
+      }
+    },
+    {
+      "id": "sp4",
+      "type": "Group",
+      "label": "spacer",
+      "parent": "layout",
+      "parameters": {
+        "sizeMode": "explicit",
+        "height": {
+          "value": 1500,
+          "unit": "px"
+        },
+        "backgroundColor": "#f4f4f4"
+      }
+    }
+  ],
+  "visualRoots": [
+    "page"
+  ]
+}

@@ -103,7 +103,7 @@ the work:
 | [ISL-006](ISL-006-A-FUNCTION-SAYS-WHAT-ITS-PORTS-ARE.md) | A Function says what its ports are | F09 | runtime | ✓ |
 | [ISL-007](ISL-007-AN-APP-SPEAKS-TWO-LANGUAGES-WITHOUT-A-SCRIPT.md) | An app speaks two languages without a script | F10 | node library | ✓ |
 | [ISL-008](ISL-008-A-STYLESHEET-CAN-PLACE-A-GROUP.md) | A stylesheet can place a Group | F11 | runtime styling | ✓ |
-| [ISL-009](ISL-009-A-NODE-CAN-BE-NAMED-FOR-A-TEST-AND-SCROLLED-TO.md) | A node can be named for a test and scrolled to | F12 | node library | ✓ |
+| [ISL-009](ISL-009-A-NODE-CAN-BE-NAMED-FOR-A-TEST-AND-SCROLLED-TO.md) | A node can be named for a test and scrolled to — **🟢 s5: Scroll Into View on all 27 visual types, Page included; deployed drive 4/4 arms at 1024 and 390 with its control, iScroll through iScroll. ⬜ ruling 1 (data-* names) not asked; ⬜ export, AC7, `kitAgreement` re-record** | F12 | node library | ✓ ruled (2 of 3) |
 | [ISL-010](ISL-010-A-RUNNING-APP-CAN-ASK-A-LOCAL-MODEL.md) | A running app can ask a local model | F13 | cloud nodes | ✓ |
 | **Track C** | | | | |
 | [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display — **✅ s4: closed — AC6 on W13's ruling (the force removed, a person's display sticks; page drive 50/50)** | F15 | kit bridge, docs, export | — |

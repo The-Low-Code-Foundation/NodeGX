@@ -764,6 +764,67 @@ function defineSignalInputProp(input: ReactInputPropDefinition, name: string) {
   };
 }
 
+/** P109 ISL-009 — the alignments `Scroll Align` offers, as `scrollIntoView` spells them. */
+const SCROLL_ALIGNMENTS = ['nearest', 'start', 'center', 'end'] as const;
+type ScrollAlignment = (typeof SCROLL_ALIGNMENTS)[number];
+
+/**
+ * P109 ISL-009 ("Signal on every node", Richard 2026-10-02) — scroll whatever holds this node's
+ * element until the element can be seen. Returns why it did nothing, or `undefined`.
+ *
+ * Two holders, because they scroll differently:
+ * - A Group with Native Scroll off moves its content with iScroll's transform, which the
+ *   browser's `scrollIntoView` cannot see. The nearest such Group that contains the element is
+ *   asked through its own `iScroll.scrollToElement` (offset `true` centres, `0` aligns the start,
+ *   which is as close as iScroll comes to `nearest`).
+ * - Everything else — the page's own scroll, a Group scrolling the native way, nested native
+ *   scrollers — is the browser's `scrollIntoView`, which scrolls every scrolling ancestor.
+ */
+function scrollNodeIntoView(node: ReactNodeInstance, align: ScrollAlignment): string | undefined {
+  const element = node.getDOMElement();
+  if (!element || typeof element.scrollIntoView !== 'function') {
+    return 'this element has no rendered DOM element — it may not be mounted';
+  }
+  for (let parent = node.getVisualParentNode(); parent; parent = parent.getVisualParentNode()) {
+    const inner = parent.innerReactComponentRef as
+      | { iScroll?: { scrollToElement(el: Element, time: number, x: number | boolean, y: number | boolean): void }; scrollRef?: { current?: HTMLElement | null } }
+      | null
+      | undefined;
+    if (inner && inner.iScroll && inner.scrollRef?.current?.contains(element)) {
+      const offset = align === 'center' ? true : 0;
+      inner.iScroll.scrollToElement(element, 300, offset, offset);
+      // The Group may itself be below the fold: bring it into view in whatever holds it too.
+      inner.scrollRef.current.scrollIntoView({ behavior: scrollBehavior(), block: 'nearest', inline: 'nearest' });
+      return undefined;
+    }
+  }
+  element.scrollIntoView({ behavior: scrollBehavior(), block: align, inline: align });
+  return undefined;
+}
+
+/**
+ * Run a requested Scroll Into View, reporting why it did nothing through the failure channel.
+ *
+ * 🔴 It waits for the element, not for the inner component's ref. `withInnerComponent` waits for
+ * `innerReactComponentRef`, which only a class component sets: a Page (or any function component
+ * that reports its root through `setDOMElement`) never sets it, so the scroll queued for ever and
+ * said nothing. Found by the deployed drive's fourth arm.
+ */
+function runScrollIntoView(node: ReactNodeInstance): void {
+  const align: ScrollAlignment = SCROLL_ALIGNMENTS.includes(node._scrollIntoViewAlign) ? node._scrollIntoViewAlign : 'nearest';
+  const reason = scrollNodeIntoView(node, align);
+  if (reason) node.raiseRuntimeError('visual/scroll-into-view-failed', `Scroll Into View did nothing: ${reason}`);
+}
+
+/** Smooth, unless the person asked their system for reduced motion. */
+function scrollBehavior(): ScrollBehavior {
+  const reduce =
+    typeof window !== 'undefined' &&
+    typeof window.matchMedia === 'function' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return reduce ? 'auto' : 'smooth';
+}
+
 function flattenArray(target: React.ReactNode[], array: React.ReactNode[]) {
   for (const e of array) {
     if (Array.isArray(e)) {
@@ -789,6 +850,13 @@ export interface NoodlReactComponentProps {
  */
 export class NoodlReactComponent extends React.Component<NoodlReactComponentProps> {
   componentDidMount() {
+    // P109 ISL-009 — the element may have arrived through the wrapper's own ref (a host-element
+    // inner component), which does not pass through `setDOMElement`'s pending check first.
+    const node = this.props.noodlNode;
+    if (node._pendingScrollIntoView && node.getDOMElement()) {
+      node._pendingScrollIntoView = false;
+      runScrollIntoView(node);
+    }
     // During SSR (server) and SSR hydration (client pre-settle), triggerDidMount()
     // already sent this node's didMount before React committed; sending it again on
     // commit would double-fire user graphs. The flag is cleared on unmount below so
@@ -1163,6 +1231,48 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         description: 'Raw CSS declarations applied to this element, overriding the styling ports above',
         set(value) {
           this.updateAdvancedStyle({ content: value });
+        }
+      },
+      /*
+       * P109 ISL-009 — "Signal on every node" (Richard, 2026-10-02). Group's own Scroll To Element
+       * shows only when Native Scroll is off, and nothing could scroll the page; the island's
+       * Functions reached into `document` instead. Every visual node now scrolls itself into view,
+       * in whatever holds it. Held until the element exists, like Group's actions; during server
+       * render there is nothing to scroll and nothing is said.
+       */
+      scrollIntoView: {
+        index: 100020,
+        displayName: 'Scroll Into View',
+        group: 'Scroll Into View',
+        type: 'signal',
+        description: 'Scrolls the page, or the scrolling Group holding this element, until the element can be seen',
+        valueChangedToTrue() {
+          if (typeof document === 'undefined') return;
+          const node = this as unknown as ReactNodeInstance;
+          node.scheduleAfterInputsHaveUpdated(() => {
+            // Held until the element exists; presses before then coalesce into one scroll.
+            if (node.getDOMElement()) runScrollIntoView(node);
+            else node._pendingScrollIntoView = true;
+          });
+        }
+      },
+      scrollIntoViewAlign: {
+        index: 100021,
+        displayName: 'Scroll Align',
+        group: 'Scroll Into View',
+        type: {
+          name: 'enum',
+          enums: [
+            { label: 'Nearest edge', value: 'nearest' },
+            { label: 'Start', value: 'start' },
+            { label: 'Center', value: 'center' },
+            { label: 'End', value: 'end' }
+          ]
+        },
+        default: 'nearest',
+        description: 'Where Scroll Into View leaves the element: Nearest edge moves only as far as needed',
+        set(value) {
+          (this as unknown as ReactNodeInstance)._scrollIntoViewAlign = value;
         }
       }
     },
@@ -1680,6 +1790,11 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         this._domElement = element || undefined;
         if (this.boundingBoxObserver) {
           this.boundingBoxObserver.setTarget((element as HTMLElement) || null);
+        }
+        // P109 ISL-009 — a Scroll Into View that arrived before the element did.
+        if (element && this._pendingScrollIntoView) {
+          this._pendingScrollIntoView = false;
+          runScrollIntoView(this);
         }
       },
       /**

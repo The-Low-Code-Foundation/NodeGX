@@ -1750,6 +1750,50 @@
           "index": 11
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "sizeMode",
           "displayName": "Size Mode",
           "group": "Dimensions",
@@ -2880,6 +2924,50 @@
           "index": 11
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "styleCss",
           "displayName": "CSS Style",
           "group": "Advanced HTML",
@@ -3887,6 +3975,50 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "shape",
@@ -8427,6 +8559,50 @@
           "description": "Divides pointer movement before it becomes element movement, so 2 makes the element move half as far as the pointer"
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "snapToPositionX.do",
           "displayName": "Do",
           "editorName": "Do|Snap To Position X",
@@ -9893,6 +10069,50 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "sizeMode",
@@ -11635,6 +11855,50 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "sizeMode",
@@ -13795,6 +14059,50 @@
           "index": 54
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "scrollSnapEnabled",
           "displayName": "Snap",
           "group": "Scroll",
@@ -14760,7 +15068,8 @@
           "onClick": "Signal; fires on click/tap of the group surface. Any Group can act as a button.",
           "didMount": "Signal; fires when the group enters the render tree — a common 'component is ready' trigger.",
           "this": "Reference to the visual object itself, consumed by nodes that need a target reference (e.g. Animation targets).",
-          "onScrollPositionChanged": "Number level with the current scroll offset while scrolling is enabled."
+          "onScrollPositionChanged": "Number level with the current scroll offset while scrolling is enabled.",
+          "scrollIntoView": "Signal on every visual node: scrolls the page, or the scrolling Group holding this element, until it can be seen, Native Scroll on or off. Use it rather than a Function calling element.scrollIntoView."
         },
         "runtimeBehavior": "Group's port list is largely static, but several port groups are conditional on parameter values (declared-port-groups): scroll-related ports appear when scrolling is enabled, advanced-dimension ports depend on the size mode, and visual-state variants add ports per state. An authoring tool should treat the catalog's input list as the superset and expect the editor to expose subsets based on the node's current parameters.",
         "examples": [
@@ -16111,6 +16420,50 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "sizeMode",
@@ -18423,6 +18776,50 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "sizeMode",
@@ -22000,6 +22397,50 @@
           "index": 11
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "sizeMode",
           "displayName": "Size Mode",
           "group": "Dimensions",
@@ -22894,6 +23335,50 @@
           "index": 80001
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "sitemapChangefreq",
           "displayName": "Change Freq",
           "group": "Experimental Sitemap",
@@ -23218,7 +23703,8 @@
           "done": "Signal; the page has announced that it is ready to render.",
           "completed": "Signal; fires after Done. No Failure or Unchanged — announcing the event cannot fail and every pulse announces.",
           "title": "String value; the page title, shown as the document title when the page is active. Defaults to the component name.",
-          "urlPath": "String value; the URL pattern that routes to this page, e.g. \"product/{productId}\" — placeholders become path parameters readable via PageInputs. Defaults to the title, lowercased and hyphenated."
+          "urlPath": "String value; the URL pattern that routes to this page, e.g. \"product/{productId}\" — placeholders become path parameters readable via PageInputs. Defaults to the title, lowercased and hyphenated.",
+          "scrollIntoView": "Set Scroll Align to Start to bring the page's top back into view; on Nearest edge a page taller than the window does not move."
         },
         "runtimeBehavior": "Runtime-determined inputs (runtime-discovered): an editor connection re-sends `title` and `urlPath` per instance so the property panel can offer defaults derived from the component name. Both are ordinary declared inputs and are settable as parameters with no editor attached: the exporter reads them off the node into the router index, so a headlessly authored page carries its own title and URL. Nothing else on this node is runtime-determined.",
         "examples": [
@@ -23339,6 +23825,50 @@
           },
           "isSignal": true,
           "description": "Empties the stack and rebuilds the start component"
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "styleCss",
@@ -25070,6 +25600,50 @@
           "index": 11
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "styleCss",
           "displayName": "CSS Style",
           "group": "Advanced HTML",
@@ -26008,6 +26582,50 @@
           "index": 11
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "sizeMode",
           "displayName": "Size Mode",
           "group": "Dimensions",
@@ -26865,6 +27483,50 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "step",
@@ -27902,6 +28564,50 @@
           },
           "isSignal": true,
           "description": "Re-reads the URL and rebuilds the current page from scratch"
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "styleCss",
@@ -32028,6 +32734,50 @@
           "index": 11
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "sizeMode",
           "displayName": "Size Mode",
           "group": "Dimensions",
@@ -33635,6 +34385,50 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "set",
@@ -36494,6 +37288,50 @@
           },
           "isSignal": true,
           "description": "Seeks to the beginning and plays, then fires Done"
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "sizeMode",
@@ -46941,6 +47779,50 @@
           "index": 11
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "sizeMode",
           "displayName": "Size Mode",
           "group": "Dimensions",
@@ -49120,6 +50002,50 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "styleCss",
@@ -51499,6 +52425,50 @@
           "index": 11
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "showChevron",
           "displayName": "Show Chevron",
           "group": "Style",
@@ -53703,6 +54673,50 @@
           "index": 11
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "styleCss",
           "displayName": "CSS Style",
           "group": "Advanced HTML",
@@ -54832,6 +55846,50 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "step",
@@ -58505,6 +59563,50 @@
           "description": "Whether a new value on Value re-runs this node. On by default; untick to make this input passive so only the control signal runs it"
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "set",
           "displayName": "Set",
           "group": "Actions",
@@ -61051,6 +62153,50 @@
           "description": "Rows makes every item in a row as tall as the tallest; Masonry lets each column pack independently"
         },
         {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
+        },
+        {
           "name": "sizing",
           "displayName": "Column Sizing",
           "group": "Layout Settings",
@@ -61779,6 +62925,50 @@
           "default": "relative",
           "description": "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space",
           "index": 11
+        },
+        {
+          "name": "scrollIntoView",
+          "displayName": "Scroll Into View",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "signal",
+            "allowConnectionsOnly": true
+          },
+          "isSignal": true,
+          "description": "Scrolls the page, or the scrolling Group holding this element, until the element can be seen",
+          "index": 100020
+        },
+        {
+          "name": "scrollIntoViewAlign",
+          "displayName": "Scroll Align",
+          "group": "Scroll Into View",
+          "plug": "input",
+          "type": {
+            "name": "enum",
+            "enums": [
+              {
+                "label": "Nearest edge",
+                "value": "nearest"
+              },
+              {
+                "label": "Start",
+                "value": "start"
+              },
+              {
+                "label": "Center",
+                "value": "center"
+              },
+              {
+                "label": "End",
+                "value": "end"
+              }
+            ]
+          },
+          "isSignal": false,
+          "default": "nearest",
+          "description": "Where Scroll Into View leaves the element: Nearest edge moves only as far as needed",
+          "index": 100021
         },
         {
           "name": "styleCss",

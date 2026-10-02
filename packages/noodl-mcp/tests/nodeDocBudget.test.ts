@@ -127,9 +127,22 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
   const cost = async (types: string[], detail: 'summary' | 'full') =>
     tokens(await callRawText(session, 'get_node_type', { type_names: types, detail }));
 
-  it('keeps the 8-type storefront basket under 8,000 tokens at summary detail', async () => {
+  /**
+   * 🔴 **Ratchet moved 8,000 → 8,200 by P109/ISL-009 (2026-10-02).** Every visual node gained
+   * `Scroll Into View` and `Scroll Align` (Richard's ruling, "Signal on every node"). A summary
+   * line carries no description, so nothing could be trimmed: it is the two port lines on the
+   * basket's seven visual types. Measured with this spec's harness, the enriched catalog at `HEAD`
+   * `1f23b05dd` swapped in against the working tree: **7,919 → 8,115** (+196). Headroom kept near
+   * what `HEAD` had (81): **85**.
+   *
+   * The full-detail ceiling below was not moved: `Group` 15,840 → **16,141** after the two
+   * descriptions and Group's enrichment line were cut to fit (`Text` 10,142 → 10,386, `Page`
+   * 3,940 → 4,223, `textinput` 14,520 → 14,765). ⚠️ That leaves 59 tokens, and `HEAD`'s `Group`
+   * had already grown 279 past P99's recorded 15,561 — not attributed here.
+   */
+  it('keeps the 8-type storefront basket under 8,200 tokens at summary detail', async () => {
     // Was 30,815 at full detail — more than all 89 tool schemas combined.
-    expect(await cost(STOREFRONT_TYPES, 'summary')).toBeLessThan(8_000);
+    expect(await cost(STOREFRONT_TYPES, 'summary')).toBeLessThan(8_200);
   });
 
   it('keeps any single summary response under 3,000 tokens', async () => {

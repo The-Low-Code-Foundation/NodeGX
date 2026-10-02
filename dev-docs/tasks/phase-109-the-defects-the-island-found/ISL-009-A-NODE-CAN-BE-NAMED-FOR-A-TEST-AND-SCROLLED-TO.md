@@ -1,6 +1,6 @@
 # ISL-009 — A node can be named for a test and scrolled to
 
-**Status:** 🔒→✅ ruled s4 (2026-10-02): **"Signal on every node"** — a Scroll into view signal on every visual node, page included (README §8). Not built. Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟢 s5 (2026-10-02): **ruling 2 built** ("Signal on every node") — `Scroll Into View` + `Scroll Align` on all 27 visual node types, Page included; driven on a deployed page at 1024 and 390 with its control (§8 s5). ⬜ Ruling 1 (the `data-*` attribute surface) was never asked: round 2. ⬜ The export half, ⬜ AC7 (the island uses it), ⬜ `kitAgreement`'s editor recording. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F12](AUDIT-2026-10-01.md) · [P105 CG-003 line 114](../phase-105-the-coding-garden/CG-003-THE-PAGES.md) ("there is no `[data-owl-row]` attribute — a node cannot write one") · [CG-005 §8 hook 2](../phase-105-the-coding-garden/CG-005-OLIVE-IN-THE-GAME.md) line 166 · the island's `Logic/Find robots` page glue
 **Side:** product (shared visual-node ports in `noodl-viewer-react`, the export, the door's vocabulary)
 
@@ -100,4 +100,65 @@ the kit's own elements are out of reach. Say so, do not fake it.
 
 ## 8. Session log
 
-None yet.
+### Session 5 — 2026-10-02: ruling 2 built and driven
+
+**What was asked and ruled.** Only §5 ruling 2 ("Should every visual node get its own 'Scroll into view' signal that
+works anywhere, including on the page itself?" → *"Signal on every node"*). Ruling 1 (the attribute surface:
+`data-testid` / a `data-*` list / free attributes) was **not** in the question, so it is not built and goes to round 2.
+Ruling 3 (restarting a CSS animation) stays out, as recommended.
+
+**As built** (`react-component-node.ts`, the shared inputs beside `cssClassName`, so every node made by
+`createNodeFromReactComponent` has them — 27 catalog types including Page, Router and the controls):
+- `scrollIntoView` (signal, group `Scroll Into View`) and `scrollIntoViewAlign` (enum Nearest edge / Start / Center / End,
+  default Nearest edge).
+- In a Group with Native Scroll off, the nearest such ancestor whose scroller contains the element is asked through its
+  own `iScroll.scrollToElement` (Center centres; the rest align the start), and the Group itself is then brought into view
+  with the browser's `scrollIntoView` (`nearest`), because it may be below the fold. Everywhere else: the browser's
+  `scrollIntoView`, which moves every scrolling ancestor. `behavior: 'smooth'` unless `prefers-reduced-motion`.
+- **Held until the element exists, not until the inner component's ref.** 🔴 The first build used `withInnerComponent`
+  (Group's pattern). The deployed drive's fourth arm (the Page) did nothing and said nothing: `innerReactComponentRef` is
+  set only by class components, and a Page — like every function component that reports its root through
+  `setDOMElement` — never sets it, so the scroll queued for ever. Now: run at once if `getDOMElement()` answers, else one
+  pending flag (presses coalesce), run from `setDOMElement` when the element arrives, with the wrapper's `componentDidMount`
+  as the fallback.
+- No `document` (server render): returns before anything, holds nothing, says nothing.
+- A scroll that cannot run raises `visual/scroll-into-view-failed` on the failure channel. No outcome ports: the outcome
+  contract needs them declared, and Done/Failure on 27 node types was not asked for.
+
+**AC readings**
+
+| AC | reading |
+|---|---|
+| AC1 | Not written as a spec. The catalog at HEAD had no `scrollIntoView` on any type (`catalog:check` regenerated: 27 types gained it, the same 27 that carry `cssClassName`). |
+| AC2 | ✅ **On a deployed page, graded by `elementFromPoint`.** Project `isl009-scroll-into-view/` (this folder, hand-written, `validate:project` 0 errors, 8 endpoints) deployed with `nodegx deploy … --allow-development-engine` → exit 0; [`drive-isl009-scroll-into-view.js`](../../../scripts/devtools/drive-isl009-scroll-into-view.js) presses each button with a real mouse event (reachability checked first). **1024×768:** page card seen false → true (scrollY 0 → 1570); **390×844:** the same four arms all false → true. Console errors 0. **Control** (a copy whose bundle's call is replaced by `undefined`): every arm false → false, nothing moves (exit 0 in `--control` mode). Screenshot looked at (390, iScroll arm: the card at the window's foot). ⚠️ The card is selected by `cssClassName`, not `data-testid`: ruling 1 is not built. |
+| AC3 | Half: the scroll half is a spec (no `document` → silent, nothing pending, no error). The attribute half waits on ruling 1. |
+| AC4 | ✅ Native Group: seen false → true, the box's `scrollTop` 0 → 920. **iScroll Group: seen false → true through iScroll** — the scroller's transform `matrix3d(…, 0, -920, …)`, the box's own `scrollTop` stays 0, so it was not `element.scrollIntoView`. |
+| AC5 | Held until mount: specced (two presses before the element → one scroll when it arrives, with `innerReactComponentRef` left unset). The `data-*` refusal waits on ruling 1. |
+| AC6 | Catalog, enriched catalog (Group and Page enrichment lines), port groups, CHR-007 snapshot (+54 rows, exactly the two ports on 27 types: signal → no row class, enum → `EnumType`), FB-017's panel tier (`Scroll Into View` filed as plumbing beside `Scroll To Element`; Group 21 → 22 headings, basic unmoved at 10). ⬜ **Export:** not done — a peer has `nodegx-export` open (`plan.ts`, `component.ts`, `coverage-ledger.json` uncommitted). `hls001-catalog-cardinality` green. |
+| AC7 | ⬜ Not started (the island's `FIND_ROBOTS_SCRIPT` card branch). |
+
+**Specs:** [`tests/isl-009/`](../../../packages/noodl-viewer-react/tests/isl-009/) 5/5 — mutants: pending run removed from
+`setDOMElement` → red; the `document` guard removed → red; both restored from a `cp`.
+
+**What the new ports moved elsewhere, each attributed:**
+- **GAM-019's "did you mean"** (`nonexistentPort.ts`): a Text Input's `startValue` was **24th of the 24** alternatives at
+  HEAD; the two ports pushed it to 26th and D66's refusal stopped naming it (2 rows red in `gam-019/builtinPortDoor`).
+  Fixed by rule, not by a bumped cap: ports whose heading the panel folds into Advanced CSS join the styling tier
+  (`tierForGroup`, one list for both), and a value wire leads with value ports, as GAM-019's ruling has the suggestion do.
+- **AWP-005's response ratchet** (`nodeDocBudget`): basket summary 7,919 → 8,115, ratchet moved 8,000 → 8,200 with the
+  table in the spec. Full detail: `Group` 15,840 → 16,141 after the descriptions and Group's enrichment line were cut —
+  under 16,200, not moved, 59 tokens left.
+- 🔴 **`kitAgreement` is red (3 rows), and is not fixed:** its editor side is a **recording** of the running editor's
+  node library (`noodl-editor/tests-unit/cn-003/fixtures/kit-app.editor-nodelibrary.json`, 2026-08-17), and kit nodes
+  now carry the two shared ports on the MCP route only. Hand-editing a recording would forge it. Re-record with the
+  editor (its `_recording.how` says how): next session.
+- `noodl-preview/dist/nodegx-deploy.cjs` (gitignored) was **five weeks stale** (Sep 17): `nodegx deploy` refused the
+  project with *"Group has no input named scrollIntoView"* until `node build.mjs` was run. The deploy bundle
+  (`noodl-editor/src/external/deploy/noodl.deploy.js`, gitignored) was rebuilt from this change at 23:22.
+
+**Gates (2026-10-02):** editor `test:main` before the fixes: 567 suites, 8,821 passed, 7 failed — 5 of them this change
+(CHR-007, FB-017 ×2, GAM-019 ×2), all green after (the 19 affected suites 346/346); `exp-013/exportBadge` (a peer's
+ledger) and `hlt-021/viewerPort` (green when re-run) are not this change. `noodl-viewer-react` 127 suites / 1,671 green.
+`noodl-mcp`, 50 catalog-reading specs: `nodeDocBudget` and `kitAgreement` this change (the first fixed, the second
+above); `cmp001`, `cmp004Parts`, `cn004`, `fld013` on s4's HEAD-red list; `fld011` the reaper under load.
+

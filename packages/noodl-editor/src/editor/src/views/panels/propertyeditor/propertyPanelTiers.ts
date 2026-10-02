@@ -112,6 +112,9 @@ export const ADVANCED_CSS_GROUPS: Readonly<Record<string, string>> = {
   Scroll: 'plumbing: scroll behaviour on a container that already scrolls',
   'Scroll To Element': 'plumbing: an imperative scroll action and its parameters',
   'Scroll To Index': 'plumbing: an imperative scroll action and its parameters',
+  // P109 ISL-009. The same kind of thing as `Scroll To Element`, on every visual node: a wire's
+  // target, reached deliberately, and the basic tier of 27 node types is not the place for it.
+  'Scroll Into View': 'plumbing: an imperative scroll action and its parameters',
   'Snap To Position X': 'plumbing: an imperative move action and its parameters',
   'Snap To Position Y': 'plumbing: an imperative move action and its parameters',
   Breakpoints: 'plumbing: responsive overrides, set once per layout rather than daily',

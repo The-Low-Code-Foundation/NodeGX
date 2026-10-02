@@ -27,6 +27,7 @@
  * @module noodl-editor/validation/rules/nonexistentPort
  */
 
+import { tierForGroup } from '../../views/panels/propertyeditor/propertyPanelTiers';
 import { CatalogIndex, Plug, PortKind, portKindOfTypeName } from '../CatalogIndex';
 import { Diagnostic, DiagnosticCode } from '../diagnostics';
 import { NormConnection, NormNode, isComponentRef } from '../model';
@@ -35,7 +36,7 @@ import { Rule, RuleContext } from './types';
 
 const MAX_ALTERNATIVES = 24;
 
-function availableAlternatives(catalog: CatalogIndex, type: string, plug: Plug): string[] {
+function availableAlternatives(catalog: CatalogIndex, type: string, plug: Plug, kind?: PortKind): string[] {
   // For inputs, lead with signal inputs — "how do I trigger this" is the most
   // common near-miss — then the ports that carry a value or a behaviour, then
   // the styling ports a visual state can vary, capped so the message stays readable.
@@ -44,9 +45,25 @@ function availableAlternatives(catalog: CatalogIndex, type: string, plug: Plug):
   // Input's `startValue` 88th of its 105 inputs, behind every `border*`, so the
   // refusal of D66's `text` listed 24 styling ports and never the one the author
   // meant. `suggestPort` cannot rescue it: "text" is nowhere near "startValue".
+  //
+  // P109 ISL-009 — two more rules, found when every visual node gained a `Scroll Into View`
+  // signal and its `Scroll Align`: a Text Input's `startValue` was 24th of the 24 shown, and
+  // those two ports pushed it to 26th, so the refusal of D66's `text` stopped naming it.
+  // - Shared plumbing joins the last tier: a port whose heading the property panel folds into
+  //   Advanced CSS (`CSS Class`, `Scroll Into View`, `Pointer Events`…) is never the near-miss
+  //   for what a node is about. One list decides both (`tierForGroup`), so they cannot drift.
+  // - The first two tiers follow the wire, as GAM-019's ruling has the suggestion do: a value
+  //   wire leads with the ports that take a value. A signal wire, or one of no known kind,
+  //   keeps signals first.
   const all = catalog.portNames(type, plug);
   const signals = new Set(plug === 'input' ? catalog.signalInputNames(type) : []);
-  const tier = (name: string) => (signals.has(name) ? 0 : catalog.getPort(type, plug, name)?.allowVisualStates ? 2 : 1);
+  const valuesFirst = kind === 'value';
+  const tier = (name: string) => {
+    const port = catalog.getPort(type, plug, name);
+    if (port?.allowVisualStates || (port?.group && tierForGroup(port.group) === 'advanced')) return 2;
+    if (signals.has(name)) return valuesFirst ? 1 : 0;
+    return valuesFirst ? 0 : 1;
+  };
   const ordered = [...all].sort((a, b) => tier(a) - tier(b) || (a < b ? -1 : 1));
   return ordered.slice(0, MAX_ALTERNATIVES);
 }
@@ -147,8 +164,9 @@ export const nonexistentPort: Rule = {
           }
 
           // Fully static node — a missing port here is a real error.
-          const suggestion = catalog.suggestPort(node.type, plug, port, otherEndKind(catalog, nodeById, conn, plug));
-          const alternatives = availableAlternatives(catalog, node.type, plug);
+          const wireKind = otherEndKind(catalog, nodeById, conn, plug);
+          const suggestion = catalog.suggestPort(node.type, plug, port, wireKind);
+          const alternatives = availableAlternatives(catalog, node.type, plug, wireKind);
           out.push({
             code: DiagnosticCode.NonexistentPort,
             severity: 'error',

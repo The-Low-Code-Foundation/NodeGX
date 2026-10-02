@@ -229,8 +229,11 @@ describe('the ruling, swept over the real node catalog', () => {
     //
     // 19 → 21 and 9 → 11 is HLT-017's `Drag Source` and `Drop Zone`, filed the same way and for
     // the same reason; basic is unmoved at 10 again.
-    expect(groups.length).toBe(21);
-    expect(advanced.length).toBe(11);
+    //
+    // 21 → 22 and 11 → 12 is P109 ISL-009's `Scroll Into View` (a signal on every visual node),
+    // filed beside `Scroll To Element`; basic is unmoved at 10.
+    expect(groups.length).toBe(22);
+    expect(advanced.length).toBe(12);
     expect(basic.length).toBe(10);
     expect(namesOf(basic)[0]).toBe('General');
   });
