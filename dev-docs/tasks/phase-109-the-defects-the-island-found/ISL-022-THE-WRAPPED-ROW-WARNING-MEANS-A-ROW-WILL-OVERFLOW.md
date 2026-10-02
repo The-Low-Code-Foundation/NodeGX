@@ -1,6 +1,6 @@
 # ISL-022 — The wrapped-row warning means a row will overflow
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F29](AUDIT-2026-10-01.md) · P78
+**Status: 🟡 s3 (2026-10-02): AC1's validator half measured (the door fires on `brBar`, `rcColourRow`, `opColourRow`, nothing on `brTabs` — §2's derivation confirmed); the render half below. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F29](AUDIT-2026-10-01.md) · P78
 [D50](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) (✅ for pills, by GAM-022) · CG-003 AC1 and §7.2 ·
 **Side:** product (validator, `uncollapsible-multi-column` and the layout-inert family)
 
@@ -107,4 +107,20 @@ Constraints:
 
 ## 8. Record
 
-None yet.
+### Session 3 — 2026-10-02, P109 s3: AC1, the validator half
+
+`packages/noodl-mcp/tests/isl022WrappedRow.test.ts` binds the door read-only to a copy of the shipped
+`templates/bot-garden` and runs `validate_component` over the three components (3 / 3 green, pinning today's reading):
+
+| component | `uncollapsible-multi-column` fires on | arm |
+|---|---|---|
+| `Garden/Top bar` | **`brBar`** only — **nothing on `brTabs`** (the row that overflowed the phone) | A (five content-sized tracks) |
+| `Robot/Card` | **`rcColourRow`** | B (a wrapped Repeater of 44 px swatches) |
+| `Robot/Options` | **`opColourRow`** | B |
+
+§2 derived these from the rule's source without running it; they are now measured, by node id. The absence on `brTabs`
+is read in the same run as the known-firing `brBar` beside it.
+
+🔴 **Met on the way:** the editor's `npm run validate:project` reports **0 warnings** over the same template (1,101 nodes,
+5,284 endpoints) — its rule set does not run the responsive-arrangement rules the door runs. Not a defect of this task;
+a reader who validates a template with the CLI does not see what the door's gate pins.
