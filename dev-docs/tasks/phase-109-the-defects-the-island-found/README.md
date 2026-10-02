@@ -207,6 +207,22 @@ feature has its own copy with the same bug. Should both be fixed in one commit?"
 
 **Asked after session 1 (2026-10-01):** ISL-014 §5 — *"When the kit reader is missing from a checkout, should the door only say so and name the command (done), or also build it on demand the first time, so a fresh worktree never shares the primary's bundle?"* Recommended: say so now (done), build on demand next; never commit the bundle.
 
+**Asked in session 3 (2026-10-02), after their measurements, in plain words:**
+
+- **ISL-018 §5 — ✅ Ruled: a format step, 4→5.** First asked as *"…wire something into a Function's Run port in the
+  editor and save, and nothing records the box. Reopen the project and an old-project upgrade unticks it… Which fix?"*
+  with (b) a project marker (recommended) / (a) always save the box → Richard: **"This sounds nuts, surely there must be
+  a cleverer fix?"** Re-asked with the editor's own one-time upgrade chain (`ProjectModel.Upgraders`, 0→1→…→4): *"Make
+  the old-project box fix the next step, 4→5. A project at 4 gets it once, is saved as 5, and is never touched again.
+  Every project the editor or the MCP creates starts at 5… Caveat: …this stops it from happening again, it doesn't undo
+  past ones."* → **"Yes, version step 4→5."** Neither option of §5 as written: no new field, no write-time settling.
+- **ISL-022 §5 — ✅ Ruled: "Yes, both."** Asked as *"…Should the warning stop firing on small fixed-size items (only %
+  widths, or items wider than a phone) and gain a new warning for the tab-row shape? This undoes GAM-022's choice to keep
+  it firing on Rocket School's 132 px tiles and 150 px cards."* → §5 ruling 1 (b) plus the new code of §5 item 3.
+- **ISL-011 AC6 / ISL-025 W13 — ✅ Ruled: "Remove the force."** Asked as *"…the kit forces 'display: grid' every time it
+  draws. So if someone types 'display: flex' into that node's CSS Style box… it's undone on the next redraw… the force
+  isn't needed for the grid any more. Remove it?"*
+
 Each task's §5 has the full question, the options and the trade-offs. Ask in plain words, one decision
 per question, and only when the task is next to build. This table is the index, with the recommendation in brackets.
 
