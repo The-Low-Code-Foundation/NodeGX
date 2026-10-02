@@ -66,6 +66,9 @@
  * (NSP-014 s21) as a `backend` event beside it, its answer delivered to `spec.world.backend` like a response.
  * (s24) A write made elsewhere (world.ts BACKEND `events`) reaches `spec.world.store` of every instance that listens,
  * at its firing — after their inboxes were delivered, once the registry holds the write (`listenToStore`).
+ * (s29) `spec.world.mount` runs once at mount, after `init` and before the params — the rest of the node's `initialize` —
+ * and `spec.world.authReturn` at each `oauthReturn` the world's user service announces (world.ts AUTH, THE RETURN LEG). A
+ * world handler's `opens` opens and reports invocations no input invoked, at once, recorded with the port `''`.
  *
  * THE REGISTRY (NSP-012, registry.ts). Reducers reach it through `world.registry` and WRITE to it
  * directly; a write notifies every OTHER instance watching the entry (`world.watch`) synchronously
@@ -91,7 +94,7 @@ import { isRegistryEntry } from './registry';
 import type { AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, ReducerOutcome, SignalOutputDecl, SpecBackendCall, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
-import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PopupCall, type PopupEvent, type StoreEvent } from './world';
+import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PopupCall, type PopupEvent, type StoreEvent } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
 type Inbound =
@@ -103,7 +106,10 @@ type Inbound =
   | { kind: 'page'; params: Readonly<Record<string, unknown>> }
   | { kind: 'popup'; event: PopupEvent }
   | { kind: 'store'; event: StoreEvent }
-  | { kind: 'auth'; event: AuthNotice };
+  | { kind: 'auth'; event: AuthNotice }
+  // s29: the service's `oauthReturn` event (world.ts AUTH, THE RETURN LEG); the end of the node's initialize (spec.ts `WorldHandlers.mount`)
+  | { kind: 'authReturn'; state: AuthReturnState }
+  | { kind: 'mount' };
 
 interface OutcomeSlot {
   port: string;
@@ -253,7 +259,8 @@ function viewOf(inst: Instance): WorldView {
     backendFor: (backendId) => world.backend.resolve(backendId),
     backendUser: () => world.backend.user,
     session: (backend) => world.backend.session(backend),
-    userService: () => startUserService(world)
+    userService: () => startUserService(world),
+    authReturn: () => world.backend.authReturn
   };
 }
 
@@ -275,6 +282,14 @@ function instancesOf(world: World): { all: Instance[]; auth: Instance[] } {
 /** One step of an auth landing, as the interpreter performs it (world.ts AUTH): the world's sessions already moved; `callback` is the caller's success / error. */
 function performAuth(world: World, step: AuthStep, callback: (step: AuthStep) => void): void {
   if (step.do === 'success' || step.do === 'error') return callback(step);
+  if (step.do === 'return') {
+    // s29 — the state is the world's already; an announcement reaches the instances that subscribed to it, in mount order
+    if (!step.announce) return;
+    for (const i of [...instancesOf(world).all]) {
+      if (i.spec.world?.authReturn && i.spec.needs?.includes('backend')) handleInbound(i, { kind: 'authReturn', state: { ...step.state } });
+    }
+    return;
+  }
   if (step.do !== 'event') return; // a write / clear moved the world's sessions already; USER is the world's (`clear-legacy`)
   const { all, auth } = instancesOf(world);
   if (step.type === 'sessionChanged') {
@@ -314,14 +329,22 @@ function startUserService(world: World): void {
     }
     for (const i of [...instancesOf(world).all]) deliverChanges(i);
   }
-  world.backend.startService((d: BackendDelivery) => {
-    for (const i of [...instancesOf(world).all]) deliver(i);
-    world.backend.landAuth('fetchCurrentUser', backend, {}, atCall, d, (step) =>
-      performAuth(world, step, (s) => {
-        if (s.do === 'error') world.backend.serviceCheckFailed((t) => performAuth(world, t, () => undefined));
-      })
-    );
-  });
+  world.backend.startService(
+    (d: BackendDelivery) => {
+      for (const i of [...instancesOf(world).all]) deliver(i);
+      world.backend.landAuth('fetchCurrentUser', backend, {}, atCall, d, (step) =>
+        performAuth(world, step, (s) => {
+          if (s.do === 'error') world.backend.serviceCheckFailed((t) => performAuth(world, t, () => undefined));
+        })
+      );
+    },
+    // s29 — THE RETURN LEG: its steps as a landing's (no caller); at each later moment what already landed runs first
+    (step) => performAuth(world, step, () => undefined),
+    (_moment, steps) => {
+      for (const i of [...instancesOf(world).all]) deliver(i);
+      steps();
+    }
+  );
 }
 
 /**
@@ -423,6 +446,8 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
     }
   }
   deliverChanges(inst);
+  // s29 — the end of the node's initialize (spec.ts `WorldHandlers.mount`): after `init`, before the params
+  if (spec.world?.mount) handleInbound(inst, { kind: 'mount' });
   for (const name of Object.keys(params)) set(inst, name, params[name]);
   // ROUTE (world.ts, NSP-015 s19): the params the Router hands the page this node sits in — at the build
   // (now: they land with the first settle's deliveries), then each later one at its time on the clock
@@ -576,6 +601,7 @@ interface PatchLike {
   route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
   popup?: PopupCall;
   backend?: SpecBackendCall;
+  opens?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -585,6 +611,8 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
     throw new SpecError(`${spec.type}.${port}: reducer returned ${String(patchUnknown)}, not a patch`);
   }
   const patch = patchUnknown as PatchLike;
+  // s29 — only a world handler opens an invocation no input invoked (spec.ts `AfterInputsPatch.opens`)
+  if (patch.opens !== undefined && !port.startsWith('<world.')) throw new SpecError(`${spec.type}.${port}: opened an invocation — only a world handler may (a reducer's outcome is its input's)`);
   if (patch.set) {
     for (const key of Object.keys(patch.set)) {
       if (!(key in spec.state)) throw new SpecError(`${spec.type}.${port}: set names undeclared state key "${key}"`);
@@ -803,6 +831,12 @@ function handleInbound(inst: Instance, item: Inbound): void {
       performAuth(inst.world, step, (s) => handleInbound(inst, { kind: 'backend', answer: answerOf(s) }))
     );
     return;
+  } else if (item.kind === 'authReturn') {
+    name = 'world.authReturn';
+    patch = asWriter(inst, () => spec.world!.authReturn!(inst.state as never, inst.inputs as never, item.state, view));
+  } else if (item.kind === 'mount') {
+    name = 'world.mount';
+    patch = asWriter(inst, () => spec.world!.mount!(inst.state as never, inst.inputs as never, view));
   } else if (item.kind === 'auth') {
     name = 'world.auth';
     if (!spec.world?.auth) throw new SpecError(`${spec.type}: a session event reached it and the spec has no world.auth handler`);
@@ -826,8 +860,24 @@ function handleInbound(inst: Instance, item: Inbound): void {
   }
   const sends = apply(inst, `<${name}>`, patch, false);
   resolveOpen(inst, name, (patch as { outcomes?: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }> }).outcomes ?? [], ['pending']);
+  opened(inst, name, (patch as PatchLike).opens);
   observe(inst, sends);
   deliverChanges(inst);
+}
+
+/** s29 — invocations no input opened (spec.ts `AfterInputsPatch.opens`): each opened and reported at once, port `''`. */
+function opened(inst: Instance, by: string, opens: PatchLike['opens']): void {
+  for (const o of opens ?? []) {
+    if (o.outcome !== 'done' && o.outcome !== 'unchanged' && o.outcome !== 'failure') {
+      throw new SpecError(`${inst.spec.type}.<${by}>: opened an invocation reported as ${String(o.outcome)}, not an outcome`);
+    }
+    if (!inst.spec.outcomes || !(inst.spec.outcomes as readonly string[]).includes(o.outcome)) {
+      throw new SpecError(`${inst.spec.type}.<${by}>: opened an invocation reported as ${o.outcome}, which the spec's outcomes do not list`);
+    }
+    const slot: OutcomeSlot = o.error === undefined ? { port: '', outcome: o.outcome } : { port: '', outcome: o.outcome, error: o.error };
+    slot.reportedAt = inst.reports++;
+    inst.pending.outcomes.push(slot);
+  }
 }
 
 /**
@@ -845,6 +895,7 @@ function deliverChanges(inst: Instance): number {
     const patch = asWriter(inst, () => spec.world!.change!(inst.state as never, inst.inputs as never, event, view));
     const sends = apply(inst, '<world.change>', patch, false);
     resolveOpen(inst, 'world.change', (patch as { outcomes?: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }> }).outcomes ?? [], ['pending']);
+    opened(inst, 'world.change', (patch as PatchLike).opens);
     observe(inst, sends);
   }
   return delivered;

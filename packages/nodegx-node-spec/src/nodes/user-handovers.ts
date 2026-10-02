@@ -25,13 +25,21 @@
  *     :170-180), every press Failure with the node's code. No Unchanged (:106).
  *
  * MOUNT: Sign In With reaches the service in `initialize` (:79 — `UserService.instance`: the first reach in a play makes
- * it, and its start-up check) and listens for a return leg (:85-88); Signing In starts false (:77, not sent). Request
- * Magic Link reaches nothing at mount.
+ * it, and with it either the start-up check or, on a page load carrying a sign-in, THE RETURN LEG — world.ts AUTH),
+ * subscribes to its `oauthReturn` event (:85) and READS its `oauthReturn` state (:86-88); Signing In starts false (:77,
+ * not sent). Request Magic Link reaches nothing at mount.
+ *
+ * THE RECEIVER (v2, s29) — `applyReturn` (:202-226), reached two ways: at mount, when the state it read is in progress or
+ * settled (:86-88), and at every `oauthReturn` event (:85). In progress: Signing In true, nothing reported (:203-207 — a
+ * state, not an outcome). Settled: Signing In false, then an invocation NO INPUT opened (`beginOutcome` :211 — the Do that
+ * started it was pressed on a page that is gone; spec.ts `opens`, trace port `''`) reported — succeeded: Notice the
+ * state's (`undefined` when it has none: never sent, C3), Error cleared (`undefined`, never sent — D25's shape), Done;
+ * failed: `setError` (:225 → :170-180) with the state's error or `Sign-in could not be completed.` — Error, Signing In
+ * false, Failure with the node's code. A provider's error is final when the node is made AND announced a tick later
+ * (world.ts AUTH), so the node reports it TWICE — at mount and at the event (row C50: the runtime's behaviour, R3 (a); the
+ * comment at :80-84 says "idempotent per page load", which every call minting a fresh token makes untrue).
  *
  * NOT GRADED HERE, named:
- *   - Sign In With's RECEIVER half — a sign-in coming back on a later page load (`applyReturn` :202-226, the service's
- *     `_consumeAuthReturn` at its construction, userservice.ts :138): no world plays a return leg yet (world.ts AUTH "Not
- *     played"), so `oauthReturn` never fires and Notice is never written. Slice B.
  *   - where the browser goes on a handover (the adapter's discovery request, its parked flow, the provider URL), and the
  *     adapters' own `redirect` default (the page's URL without auth parameters) — R9's seam (world.ts AUTH);
  *   - the capability gate (`begin`): only the `nodegx` backend type offers magic links (RestAuthAdapter.ts :1562-1570
@@ -41,7 +49,22 @@
 
 import type { BackendAnswerEvent, WorldView } from '../spec';
 import { defineNode } from '../spec';
-import { dones, failures, pool, stringInput } from './user-actions';
+import type { AuthReturnState, BackendScript } from '../world';
+import { SIGN_IN_NOT_COMPLETED } from '../world';
+import { ANN, dones, failures, pool, stringInput } from './user-actions';
+
+/**
+ * v2 (s29) — page loads that are a sign-in coming back (world.ts AUTH, THE RETURN LEG), for the generator: a provider's
+ * error; an exchange that lands — at once, later, with a notice — or fails, with and without a message; one that never lands.
+ */
+const RETURNS: ReadonlyArray<BackendScript> = [
+  { return: { error: 'access_denied' }, answers: [{ match: { op: 'signInWithProvider' }, answer: { ok: null } }] },
+  { return: { exchange: { ok: ANN, outcome: 'signed-in' } }, answers: [{ match: { op: 'signInWithProvider' }, answer: { ok: null } }] },
+  { return: { exchange: { ok: ANN, outcome: 'linked-credentials-revoked', notice: 'Your password was removed.' }, after: 20 }, answers: [{ match: { op: 'signInWithProvider' }, answer: { ok: null }, after: 5 }] },
+  { return: { exchange: { error: 'The sign-in code has expired.' }, after: 5 }, answers: [{ match: { op: 'signInWithProvider' }, answer: { error: 'Invalid credentials.' } }] },
+  { return: { exchange: { error: null }, after: 1 }, answers: [{ match: { op: 'signInWithProvider' }, answer: { error: null }, after: 1 }] },
+  { return: { exchange: { never: true } }, answers: [{ match: { op: 'signInWithProvider' }, answer: { error: 'HTTP 503: {}' } }] }
+];
 
 /** requestmagiclink.ts :23, signinwith.ts :22 */
 export const REQUEST_MAGIC_LINK_ERROR_CODE = 'user/request-magic-link-failed';
@@ -121,21 +144,31 @@ type SignInWithState = Batch & {
   error: string | undefined;
   /** `_internal.signingIn` (:77) */
   signingIn: boolean;
+  /** `_internal.notice` (:217) — v2 */
+  notice: string | undefined;
 };
+
+/** :203-226 — a return applied: a state in progress sets Signing In; a settled one reports on an invocation no input opened (v2) */
+function applyReturn(s: SignInWithState, r: AuthReturnState) {
+  if (r.inProgress) return { set: { signingIn: true }, send: ['signingIn' as const] }; // :203-207
+  if (r.succeeded) {
+    // :208-223 — Signing In false, Notice, Error cleared (never sent: C3), then Done, last
+    return { set: { signingIn: false, notice: r.notice, error: undefined }, send: ['signingIn' as const, 'notice' as const, 'error' as const], opens: [{ outcome: 'done' as const }] };
+  }
+  // :225 → :170-180 — Error, Signing In false, then Failure with the node's code
+  return { set: { signingIn: false, error: r.error || SIGN_IN_NOT_COMPLETED }, send: ['signingIn' as const, 'error' as const], opens: [{ outcome: 'failure' as const, error: SIGN_IN_WITH_ERROR_CODE }] };
+}
 
 export const SignInWith = defineNode({
   type: 'net.noodl.user.SignInWith',
-  version: 1,
+  // v2 (s29): the receiver — a return already resolved at mount (:86-88) and every `oauthReturn` (:85) applied; Notice written.
+  // v1 played the launcher only; no v1 trace moves (no v1 world carried a return)
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/user/signinwith.ts; userservice.ts; RestAuthAdapter.ts; ParseAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
-  worldPool: { backends: pool('signInWithProvider', null) },
-  state: { provider: undefined, redirect: undefined, error: undefined, signingIn: false, scheduled: false, presses: 0, calls: {}, nextCall: 1 } as SignInWithState,
+  worldPool: { backends: [...pool('signInWithProvider', null), ...RETURNS] },
+  state: { provider: undefined, redirect: undefined, error: undefined, signingIn: false, notice: undefined, scheduled: false, presses: 0, calls: {}, nextCall: 1 } as SignInWithState,
   outcomes: ['done', 'failure'],
-  // :76-89 — the service reached (made, the first time in a play); a return leg listened for (slice B)
-  init: (w) => {
-    w.userService();
-    return {};
-  },
   inputs: {
     // :141-148
     signIn: { type: 'signal', outcome: true, displayName: 'Do', group: 'Actions', description: 'Hands over to the provider, which navigates the browser away — nothing downstream of this runs' },
@@ -153,7 +186,7 @@ export const SignInWith = defineNode({
       displayName: 'Notice',
       group: 'General',
       description: 'Something the user should be told about a sign-in that nevertheless succeeded, such as an old password having been revoked',
-      from: () => undefined
+      from: (s) => s.notice
     }
   }
 }).on(
@@ -170,6 +203,15 @@ export const SignInWith = defineNode({
       return { ...made, set: { ...made.set, signingIn: true }, send: ['signingIn' as const] };
     },
     world: {
+      // :76-89 — the service reached (made, the first time in a play — and with it a return consumed), then a return it
+      // already holds applied (:86-88: in progress, or settled)
+      mount: (s, _i, w) => {
+        w.userService();
+        const r = w.authReturn();
+        return r.inProgress || r.succeeded !== undefined ? applyReturn(s, r) : { send: [] };
+      },
+      // :85 — every `oauthReturn` the service announces
+      authReturn: (s, _i, r) => applyReturn(s, r),
       backend: (s, _i, answer: BackendAnswerEvent) => {
         // the handover lands nothing (world.ts AUTH) — only a failure reaches the node
         if ('ok' in answer) return { send: [] };

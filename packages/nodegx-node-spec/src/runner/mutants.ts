@@ -24,7 +24,7 @@
  *
  * The world handlers (NSP-007, `spec.world.timer` / `spec.world.response`; NSP-012's
  * `spec.world.change`) are reducers like any
- * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`, (s24) `world.store`, (s26) `world.auth`; whether a branch issues a request
+ * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`, (s24) `world.store`, (s26) `world.auth`, (s29) `world.authReturn` and `world.mount`; whether a branch issues a request
  * — or calls a backend — is part of its shape. A branch's `after` / `cancel` / `abort` effects are NOT in the shape and have no
  * mutant of their own yet (a dropped timeout timer shows only in a sequence that waits past it
  * with an answer that never comes) — named in NSP-007 §5 as the runner's next hole.
@@ -68,6 +68,8 @@ export interface PatchLike {
   request?: unknown;
   /** NSP-014 s21: a backend call the branch makes. */
   backend?: unknown;
+  /** NSP-014 s29: invocations no input opened, reported at once (spec.ts `AfterInputsPatch.opens`). */
+  opens?: ReadonlyArray<{ outcome: string; error?: string }>;
 }
 
 export function shapeOf(patch: unknown): string {
@@ -83,7 +85,9 @@ export function shapeOf(patch: unknown): string {
     outcomes: p.outcomes ? [...new Set(p.outcomes.map((o) => `${o.port}:${o.outcome}`))].sort() : [],
     request: p.request !== undefined,
     // NSP-014 s21 — present only when the branch calls a backend, so every earlier spec's shapes are the strings they were
-    ...(p.backend !== undefined ? { backend: true } : {})
+    ...(p.backend !== undefined ? { backend: true } : {}),
+    // s29 — likewise only when the branch opens an invocation: WHICH outcomes it reports, as `outcomes`
+    ...(p.opens !== undefined && p.opens.length > 0 ? { opens: [...new Set(p.opens.map((o) => o.outcome))].sort() } : {})
   });
 }
 
@@ -102,6 +106,8 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.backend) names.push('world.backend');
   if (spec.world?.store) names.push('world.store');
   if (spec.world?.auth) names.push('world.auth');
+  if (spec.world?.authReturn) names.push('world.authReturn');
+  if (spec.world?.mount) names.push('world.mount');
   return names;
 }
 
@@ -135,6 +141,9 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     if (spec.world.store) w.store = wrap('world.store', spec.world.store as unknown as ErasedReducer) as unknown as typeof spec.world.store;
     // NSP-014 s26 — the same rule for the session events (world.ts AUTH): a copy without it never hears a login
     if (spec.world.auth) w.auth = wrap('world.auth', spec.world.auth as unknown as ErasedReducer) as unknown as typeof spec.world.auth;
+    // s29 — and the return leg's two (a copy without them never hears a sign-in come back, and never applies one at its making)
+    if (spec.world.authReturn) w.authReturn = wrap('world.authReturn', spec.world.authReturn as unknown as ErasedReducer) as unknown as typeof spec.world.authReturn;
+    if (spec.world.mount) w.mount = wrap('world.mount', spec.world.mount as unknown as ErasedReducer) as unknown as typeof spec.world.mount;
     out.world = w;
   }
   return out;
@@ -190,6 +199,7 @@ function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike):
       const flipped: PatchLike = { ...patch };
       if (patch.outcome !== undefined && patch.outcome !== 'deferred' && patch.outcome !== 'pending') flipped.outcome = flip(patch.outcome);
       if (patch.outcomes) flipped.outcomes = patch.outcomes.map((o) => ({ ...o, outcome: flip(o.outcome) as string }));
+      if (patch.opens) flipped.opens = patch.opens.map((o) => ({ ...o, outcome: flip(o.outcome) as string }));
       return flipped;
     }
     case 'swap-branch': {
@@ -227,7 +237,7 @@ export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mut
     if ((ex.emit && ex.emit.length > 0) || (ex.emitDerived && ex.emitDerived.length > 0) || (ex.pulses && ex.pulses.length > 0)) kinds.push(['drop-emit', undefined]);
     if (ex.set && Object.keys(ex.set).length > 0) kinds.push(['drop-set', undefined]);
     // a `deferred` outcome has nothing to flip (its resolution is afterInputs' branch, mutated there)
-    if ((ex.outcome !== undefined && ex.outcome !== 'deferred' && ex.outcome !== 'pending') || (ex.outcomes && ex.outcomes.length > 0)) kinds.push(['flip-outcome', undefined]);
+    if ((ex.outcome !== undefined && ex.outcome !== 'deferred' && ex.outcome !== 'pending') || (ex.outcomes && ex.outcomes.length > 0) || (ex.opens && ex.opens.length > 0)) kinds.push(['flip-outcome', undefined]);
     if (ex.request !== undefined) kinds.push(['drop-request', undefined]);
     if (ex.backend !== undefined) kinds.push(['drop-backend', undefined]);
     for (const sibling of byReducer.get(b.reducer) ?? []) {

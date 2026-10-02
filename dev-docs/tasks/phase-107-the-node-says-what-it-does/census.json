@@ -6542,25 +6542,25 @@
       "exportStatus": "translated",
       "tests": {
         "noodl-runtime": 3,
-        "noodl-viewer-react": 8,
+        "noodl-viewer-react": 10,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 22,
         "noodl-mcp": 60,
-        "total": 93
+        "total": 95
       },
       "testsTyped": {
         "noodl-runtime": 0,
-        "noodl-viewer-react": 0,
+        "noodl-viewer-react": 2,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 15,
         "noodl-mcp": 41,
-        "total": 56
+        "total": 58
       },
       "dynamicPorts": true,
       "dynamicPortMechanisms": 1,
-      "placesWritten": 59,
+      "placesWritten": 61,
       "warnings": []
     },
     {

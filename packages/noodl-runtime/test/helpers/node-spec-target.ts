@@ -471,6 +471,25 @@ function installAuth(w: World): () => void {
       });
     };
   }
+  // s29 — THE RETURN LEG (world.ts AUTH): the service, as it is made, asks the active backend's adapter whether this page load
+  // is a sign-in coming back (userservice.ts :138, :456-463). The adapter's `consumeAuthReturn` reads the address and the
+  // parked flow — R9's seam, the world's: it answers from the script's `return`, and its steps are performed on THIS adapter
+  // (its `oauthReturn` state, its store, its events — what the real branches do, RestAuthAdapter.ts :1497-1556). A timer's
+  // step runs at its moment (the adapter's `setTimeout(0)`); the exchange's a microtask after it, as a `fetch` resolves.
+  saved.consumeAuthReturn = proto.consumeAuthReturn;
+  proto.consumeAuthReturn = function (this: AuthAdapterLike & { oauthReturn: unknown }, handle: { id: string }) {
+    if (handle.id !== w.backend.ids[0]) return false;
+    return w.backend.consumeReturn(
+      (step) => {
+        if (step.do === 'return') {
+          this.oauthReturn = { ...step.state };
+          if (step.announce) this.emitAuthEvent('oauthReturn', this.oauthReturn);
+        } else if (step.do === 'write') this.sessionStore(handle).write({ ...step.session, sessionToken: 'world' });
+        else if (step.do === 'event') this.emitAuthEvent(step.type);
+      },
+      (moment, steps) => (moment === 'answer' ? void Promise.resolve().then(steps) : steps())
+    );
+  };
   return () => {
     for (const [op, fn] of Object.entries(saved)) proto[op] = fn;
     for (const [name, fn] of Object.entries(savedMethods)) serviceProto[name] = fn;
@@ -848,7 +867,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         s.inOutcome--;
       }
       if (first && token.reported !== undefined) {
-        const port = (token as StampedToken).port ?? s.currentInput ?? '?';
+        // s29 — `''`: an invocation no input opened (trace.ts; Sign In With's return leg). It was `'?'`, which no spec could say
+        const port = (token as StampedToken).port ?? s.currentInput ?? '';
         const event: TraceEvent = { t: 'outcome', port, value: token.reported };
         if (token.reported === 'failure') {
           event.error = outcome === 'unchanged' ? OUTCOME_UNCHANGED_AS_FAILURE : (failure && failure.code) || OUTCOME_UNSPECIFIED;
@@ -1075,7 +1095,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const nodeScope = scope ?? loneScope(id, logs);
     // POPUP (world.ts, NSP-015 s20) — a lone Close Popup inside the script's popups
     if (!scope && type === 'NavigationClosePopup' && world && world.popup.inside.length > 0) insidePopups(nodeScope.componentOwner as { parentNodeScope?: unknown }, world.popup.inside);
-    const node = context.nodeRegister.createNode(type, id, nodeScope as never) as unknown as RuntimeNode;
+    const metadata = context.nodeRegister.getNodeMetadata(type);
+    const { node, made } = createHooked(type, id, nodeScope, metadata, logs);
     if (!node.nodeScope) node.nodeScope = nodeScope as never;
     // a node in a component's scope is one of the scope's nodes — what `getNodesWithType` reads
     if (scope) scope.nodes[id] = node as never;
@@ -1113,7 +1134,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         return r;
       };
     }
-    const h = adopt(node, id, type, context.nodeRegister.getNodeMetadata(type), params, logs);
+    const h = adopt(node, id, type, metadata, params, logs, made);
     // ROUTE (world.ts, NSP-015 s19) — a Page Inputs in a page a Router built: the Router hands it the page's
     // params once the page's nodes exist (router.tsx :923-927), and again on a reset onto the same page (:528-531)
     if (type === 'PageInputs' && world) {
@@ -1127,13 +1148,50 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     return h;
   }
 
-  /** Makes `node` a handle: recorded, intercepted, its `params` applied as `set` events. */
-  function adopt(node: RuntimeNode, id: string, type: string, metadata: NodeMetadata, params: Record<string, unknown>, logs: LogLine[]): RuntimeHandle {
-    const h: RuntimeHandle = { id, type, node, metadata, errors: [], logs };
-    const s: State = { h, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
-    states.set(id, s);
-    byNodeId.set(id, s);
-    intercept(s);
+  /**
+   * NSP-014 s29 (T16) — makes the node with its own outcome and signal calls hooked FROM ITS FIRST ONE, even inside its
+   * `initialize`: a node that reports at its making (Sign In With applying a sign-in that came back, signinwith.ts :86-88)
+   * reaches the wire in the app (a late wire catches up — graph c01), and before this the hooks were installed after the
+   * node was made, so the report was off its trace. For the making only, `beginOutcome` / `reportOutcome` /
+   * `sendSignalOnOutput` on `Node.prototype` hook THIS node (by id) at its first call — `intercept` as `adopt` does it,
+   * the node's error-bus entry with it — and the call goes through the hook; every other call is the original. A type
+   * whose own prototype overrides one of the three is hooked at `adopt`, as before. Returns the state made, if one was.
+   */
+  function createHooked(type: string, id: string, nodeScope: unknown, metadata: NodeMetadata, logs: LogLine[]): { node: RuntimeNode; made?: State } {
+    const proto = Node.prototype as unknown as Record<string, (...a: unknown[]) => unknown>;
+    const names = ['beginOutcome', 'reportOutcome', 'sendSignalOnOutput'] as const;
+    const saved = Object.fromEntries(names.map((m) => [m, proto[m]])) as Record<(typeof names)[number], (...a: unknown[]) => unknown>;
+    let made: State | undefined;
+    for (const m of names) {
+      proto[m] = function (this: RuntimeNode & Record<string, (...a: unknown[]) => unknown>, ...a: unknown[]) {
+        if (made === undefined && this.id === id) {
+          made = { h: { id, type, node: this, metadata, errors: [], logs }, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
+          states.set(id, made);
+          byNodeId.set(id, made);
+          intercept(made); // the node's own wrappers now — each calls this function again, which below is the original
+          return (this[m] as (...args: unknown[]) => unknown).apply(this, a);
+        }
+        return saved[m].apply(this, a);
+      };
+    }
+    try {
+      const node = context.nodeRegister.createNode(type, id, nodeScope as never) as unknown as RuntimeNode;
+      return { node, made };
+    } finally {
+      for (const m of names) proto[m] = saved[m];
+    }
+  }
+
+  /** Makes `node` a handle: recorded, intercepted, its `params` applied as `set` events. `made`: the state `createHooked` already made for it (T16). */
+  function adopt(node: RuntimeNode, id: string, type: string, metadata: NodeMetadata, params: Record<string, unknown>, logs: LogLine[], made?: State): RuntimeHandle {
+    let s = made;
+    if (!s) {
+      s = { h: { id, type, node, metadata, errors: [], logs }, trace: [], frame: newFrame(), lastSent: {}, settles: 0, currentInput: undefined, inOutcome: 0 };
+      states.set(id, s);
+      byNodeId.set(id, s);
+      intercept(s);
+    }
+    const h = s.h;
     for (const name of Object.keys(params)) target.set(h, name, params[name]);
     return h;
   }

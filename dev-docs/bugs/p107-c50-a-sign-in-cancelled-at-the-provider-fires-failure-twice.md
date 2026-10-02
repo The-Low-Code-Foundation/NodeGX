@@ -27,6 +27,12 @@ adapter's own branches, copied verbatim):
 The success path is single (the state is `inProgress` when the node mounts, so the read only sets Signing In, and the
 event brings the one Done).
 
+**Graded since s29 (2026-10-02):** the world now plays the return leg (world.ts AUTH, THE RETURN LEG) and Sign In With
+v2's spec follows the runtime (R3 (a)): the scenario *"A provider's error coming back: Failure when the node is made AND
+again at the announcement a tick later (row C50)"* records TWO `failure` outcomes on port `''` — the runtime target
+produces the same two from the real node (seeds 20728 and 13, and at 10,000). A ruled fix is a v3 of the spec: that
+scenario then shows one Failure, and the fix ships alone with it.
+
 **Plain words:** *"If someone presses Cancel on the Google sign-in screen, the Sign In With node on the page they come
 back to fires Failure twice — so an error toast shows twice, a retry counter counts two, and On App Error logs it twice.
 Fire it once?"*

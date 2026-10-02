@@ -517,6 +517,26 @@
       {
         "t": "signal",
         "port": "changed",
+        "subject": "near"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "near"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "named"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "named"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
         "subject": "named"
       },
       {
@@ -783,6 +803,16 @@
       },
       {
         "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "changed",
+        "subject": "near"
+      },
+      {
+        "t": "signal",
+        "port": "fetched",
+        "subject": "near"
       },
       {
         "t": "signal",

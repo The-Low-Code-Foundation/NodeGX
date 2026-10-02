@@ -726,3 +726,76 @@ seed's luck.
 | `node scripts/node-spec/census.js` | 147, all tiered; `placesWritten` counts moved only (Text / Group, not this session's) — a first run counted this session's probe files and was re-run after they were deleted |
 | `node scripts/bugs.js check` | 154 files, every header valid |
 | export, `test:main` | NOT RUN — no export code touched |
+
+### 6.25 s29 (2026-10-02) — Sign In With slice B: the return leg
+
+**Built.** Sign In With **v2** — the receiver half: a sign-in coming back on a later page load. 23 scenarios (+11). It
+**conforms on the runtime on the first run, on seeds 20728 and 13, and at 10,000**, mutants 27 / 27. Still 98 / 147:
+the node was counted in s28, and v2 grades the rest of it.
+
+**The world (world.ts AUTH, THE RETURN LEG).** A backend script's `return` says this page load is a sign-in coming back
+to the active backend. As the user service is made it asks the adapter FIRST (`consumeReturn`; userservice.ts :138),
+and a page load carrying a return makes NO start-up check.
+- `{ error }` (a provider's error, or REST's `state` mismatch): the state is final at once, and it is ANNOUNCED at 1 ms
+  (the adapter's `setTimeout(0)`).
+- `{ exchange, after }`: the state is `{ inProgress: true }` at once, and the exchange lands at `after`, never before
+  1 ms. If ok, the session is written, then `sessionChanged`, then the state goes to succeeded (with `outcome` /
+  `notice`) and is announced, then `loggedIn` (RestAuthAdapter.ts :1536-1547). If it fails, the state goes to failed
+  (no message means `Sign-in could not be completed.`) and is announced. `never` lands nothing.
+- `notice` is only ever set by the Parse wire's adapter (ParseAuthAdapter.ts :782); a script that carries one plays that.
+- A target is handed each later moment's steps with what the moment is (`ReturnLanding`): the adapter's `timer` runs at
+  its moment; the exchange's `answer` runs a microtask after its moment, as a `fetch` resolves.
+
+**The format (spec.ts — additive; s28 named the gap).**
+- `opens` on a world handler's patch: an invocation NO INPUT opened, opened and reported at once, recorded with the
+  port `''` (trace.ts and the schema say so). A reducer may not use it, and the interpreter refuses one that tries.
+  The mutant machinery counts it in a branch's shape and flips it.
+- `world.mount`: the end of the node's `initialize`. It runs once at mount, after `init` and before the params, and
+  what it sends and reports lands in the first settle.
+- `world.authReturn`: the service's `oauthReturn` event, heard only by a spec with this handler. The runtime's
+  subscription is to this one event; it is not one of the four session events `world.auth` hears, and the User spec
+  would have pulsed a derived port for it.
+- `WorldView.authReturn()`: the service's `oauthReturn` getter.
+- `runner/mutants.ts` wraps both new handlers. s24's lesson: a handler it does not list is dropped silently.
+
+**Runtime target.**
+- `RestAuthAdapter.prototype.consumeAuthReturn` is stood in by the world's return, performed on the real adapter: its
+  `oauthReturn` state, its store, its events.
+- **T16 fixed:** for the making only, `beginOutcome` / `reportOutcome` / `sendSignalOnOutput` on `Node.prototype` hook
+  the node being made, at its first call. So a report or a signal made inside `initialize` is on its trace, as it is
+  on a wire in the app: a scope makes its nodes and then its connections before the first update, and `connectInput`
+  replays a signal sent this update (node.ts :554-556).
+- An outcome no input opened was written with the port `'?'`; it is now `''`.
+
+**What T16 moved besides Sign In With.** The whole runtime suite (§6.27) found two graph scenarios in
+`t09-component-object.json` whose recorded `expect` lacked Parent Component Object's `changed` / `fetched` sent from its
+`initialize` (its `setModelId` at the making). Those signals reach a wire connected at build time (the replay above).
+The expectations were recorded through the hole, so they were re-recorded in a full graph run, and the diff adds
+exactly those signals (§6.27).
+
+**C50 is graded now.** The spec follows the runtime (R3 (a)). The scenario "A provider's error coming back …" records
+two `failure` outcomes on port `''`, and the runtime fires the same two from the real node. A ruled fix is v3, shipped
+alone with that scenario.
+
+### 6.26 Rows (s29)
+
+None new. **C50 is graded now.** The scenario records the two Failures the runtime fires, so the row stays open for
+Richard's ruling, and a fix is a v3 of the spec.
+
+### 6.27 Gate readings (s29, 2026-10-02/03; load 2–4.3 — this session's jest only)
+
+| gate | reading |
+|---|---|
+| interpreter: `batch-records.test.ts -t SignInWith`, seeds 13 and 20728 | 2 / 2 green: scenarios, 200 sequences, every mutant killed, none unreached |
+| runtime: `NSP_ONLY=net.noodl.user.SignInWith`, at 200, seeds 20728 and 13 | **CONFORMS on the first run, both seeds**: 23 / 23 scenarios, 200 / 200, 27 / 27 mutants |
+| runtime deep, `NSP_DEEP=10000` | **CONFORMS**: 10,000 / 10,000, 0 divergences, 91 s, 27 / 27 |
+| traces printed, interpreter and runtime (probes deleted) | C50 (two Failures on port `''`), the exchange that lands, Do after a provider's error, Do during an exchange: identical, event for event |
+| runtime: the WHOLE `test/node-spec/`, first run | 3 suites, **183 passed, 2 failed**, 372 s. Conformance: 79 CONFORMS (78 specs + Counter's AC5), and the one DOES NOT CONFORM is AC1's planted off-by-one, as designed. The two red were the `t09` graph scenarios (§6.25, what T16 moved) |
+| graph: `NSP_RECORD=1`, a FULL run, then a check run | 87 / 87. The record rewrote t04 / t05 with escape-only changes (`—`→`—`), so both were restored from HEAD. The t09 diff adds exactly six `signal` events (`near` and `named`: `changed`, `fetched`). The check run is green: **graph 76 / 76** |
+| `nodegx-node-spec`: `npx jest` (after the record) | **18 suites, 760 passed, 17 skipped, exit 0**. The hash refresh named exactly `schema/trace.schema.json`, `src/spec.ts`, `src/trace.ts` and `src/world.ts`; the three stranger rounds are green |
+| export: `tests/node-spec-*` | 2 suites, 12 passed, exit 0 |
+| `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
+| count | unchanged, **98** (Sign In With was counted in s28) |
+| `node scripts/node-spec/census.js` (after the probes were deleted) | 147, all tiered. Only `placesWritten` moved (Text — not this session's files) |
+| `node scripts/bugs.js check` | 159 files, every header valid |
+| export `test:main` | NOT RUN: no export code was touched |

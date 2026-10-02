@@ -70,7 +70,7 @@
           "additionalProperties": false
         },
         {
-          "description": "observation: an outcome-reporting input finished (ERG-001) — `port` is the INPUT that was invoked.",
+          "description": "observation: an outcome-reporting input finished (ERG-001) — `port` is the INPUT that was invoked; `''` (NSP-014 s29) when no input opened the invocation (an outcome a node reports for something that did not start on this page — Sign In With's return leg).",
           "properties": {
             "t": { "const": "outcome" },
             "port": { "$ref": "#/definitions/port" },

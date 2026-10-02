@@ -309,8 +309,17 @@
  *                   REST handle has none — the legacy store's own key), then `sessionLost`. The backend's own session is
  *                   NOT cleared by the service (row C45: a 503 at load says Session Lost while the user stays signed in),
  *                   and a `lost` failure announces `sessionLost` twice (the adapter's, then the service's — row C46).
+ *             THE RETURN LEG (s29) — the script's `return`: this page load is a sign-in coming back to the ACTIVE backend.
+ *               The service, as it is made, asks the adapter FIRST (`consumeReturn`, userservice.ts :138) and, when there is
+ *               one, makes NO start-up check. A provider `error` is final at once and ANNOUNCED at 1 ms (the adapter's
+ *               `setTimeout(0)`); an `exchange` is `{ inProgress: true }` at once and lands at its `after` (never before
+ *               1 ms): ok — the session written, `sessionChanged`, the state succeeded, announced, `loggedIn`; failed — the
+ *               state failed, announced. The state is what the service's `oauthReturn` getter hands (`authReturn`); the
+ *               announcement is its `oauthReturn` event, heard only by a node that subscribed to it (spec.ts
+ *               `WorldHandlers.authReturn`) — not one of the four node-facing session events.
  *           Not played: the token lifecycle (refresh timers, cross-tab storage events — RestAuthAdapter's controller), the
- *           Parse wire's adapter, the service's `current` model (read by no node specced here), the provider return leg;
+ *           Parse wire's adapter, the service's `current` model (read by no node specced here), where a return's address
+ *           came from and how it is stripped (the parked flow, `state`, `stripQueryParams`);
  *           (s27) the capability gate (`begin` — every backend here offers password sign-in and sign-up; s28: and magic links —
  *           only the `nodegx` type does, RestAuthAdapter.ts :1562-1570 refuses every REST one in the call, so a world that plays
  *           a REST backend's refusal scripts it as an answer) and each wire's
@@ -387,7 +396,40 @@ export interface BackendScript {
    * flat, `objectId` among them (the contract's `AuthSession` without its tokens). Absent: nobody is signed in anywhere.
    */
   sessions?: Readonly<Record<string, Readonly<Record<string, unknown>>>>;
+  /**
+   * s29: this page load is a sign-in coming back to the active backend (AUTH below, THE RETURN LEG) — what its address
+   * carried. Absent: an ordinary page load.
+   */
+  return?: AuthReturnScript;
 }
+
+/**
+ * AUTH below (s29), THE RETURN LEG: what a page load coming back from a provider carried. `error` — the provider's error
+ * (the person cancelled, the provider refused; on REST also a `state` that does not match the parked flow — its own
+ * sentence, RestAuthAdapter.ts :1505-1511): final at once. `exchange` — a code, exchanged with the backend: its answer
+ * lands at `after` (never before 1 ms — a page's first frame is drawn before any answer to its load). `ok` is the session
+ * the exchange returns (the user's fields flat, as `logIn`'s answer); `outcome` and `notice` what the state carries with
+ * it (`notice` only the Parse wire's adapter sets — ParseAuthAdapter.ts :782; the REST adapter never does); a failed
+ * exchange's `error` absent (or null) is the adapter's own `Sign-in could not be completed.`
+ */
+export type AuthReturnScript =
+  | { error: string }
+  | { exchange: { ok: Readonly<Record<string, unknown>>; outcome?: string; notice?: string } | { error: string | null } | { never: true }; after?: number };
+
+/** AUTH below (s29): the state of a sign-in coming back, as the adapter keeps it and the service's `oauthReturn` hands it (ParseAuthAdapter.ts :192-201 `OAuthReturnState`). */
+export interface AuthReturnState {
+  inProgress: boolean;
+  succeeded?: boolean;
+  error?: string;
+  outcome?: string;
+  notice?: string;
+}
+
+/** AUTH below (s29): how a target runs the steps of a later moment of a return leg — `timer`: the adapter's `setTimeout(0)` firing; `answer`: the exchange's request resolving. */
+export type ReturnLanding = (moment: 'timer' | 'answer', steps: () => void) => void;
+
+/** RestAuthAdapter.ts :1552 / ParseAuthAdapter.ts :791 — a failed exchange with no message of its own (s29). */
+export const SIGN_IN_NOT_COMPLETED = 'Sign-in could not be completed.';
 
 /** BACKEND above (s24): one write made elsewhere in the app — a world timer at `at`. */
 export interface StoreEventScript {
@@ -838,7 +880,9 @@ export type AuthStep =
   | { do: 'clear-legacy' }
   | { do: 'event'; type: AuthEventType; backend: string }
   | { do: 'success' }
-  | { do: 'error'; message: string | undefined };
+  | { do: 'error'; message: string | undefined }
+  /** s29 — THE RETURN LEG: the adapter's `oauthReturn` state becomes `state`; `announce`: then its `oauthReturn` event, carrying it. */
+  | { do: 'return'; backend: string; state: AuthReturnState; announce: boolean };
 
 /** What a node-facing session event hands a listening node (AUTH below; spec.ts `WorldHandlers.auth`). */
 export interface AuthNotice {
@@ -950,9 +994,11 @@ export class WorldBackend {
    * answer at its moment; what lands is the target's to perform — the adapter's half (`landAuth`) and, where the target
    * plays the service itself, the service's (`serviceCheckFailed`). Returns whether a check was made.
    */
-  startService(deliver: (d: BackendDelivery) => void): boolean {
+  startService(deliver: (d: BackendDelivery) => void, performReturn: (step: AuthStep) => void = () => undefined, landReturn?: ReturnLanding): boolean {
     if (this.serviceMade) return false;
     this.serviceMade = true;
+    // s29 — THE RETURN LEG first: a page load carrying a sign-in makes no start-up check (userservice.ts :138)
+    if (this.consumeReturn(performReturn, landReturn)) return false;
     const backend = this.ids[0];
     if (!this.sessions.has(backend)) return false;
     const call: BackendCall = { op: 'fetchCurrentUser', backend, args: {} };
@@ -972,6 +1018,63 @@ export class WorldBackend {
   /** AUTH (s26): whether the user service has been made in this play. */
   get serviceStarted(): boolean {
     return this.serviceMade;
+  }
+
+  /** s29: the adapter's return state (THE RETURN LEG) — `{ inProgress: false }` until a return was consumed. */
+  private returnState: AuthReturnState = { inProgress: false };
+  private returnConsumed = false;
+
+  /** s29: what the service's `oauthReturn` hands now (THE RETURN LEG, AUTH above) — a copy. */
+  get authReturn(): AuthReturnState {
+    return { ...this.returnState };
+  }
+
+  /**
+   * s29 — THE RETURN LEG (AUTH above): the user service, as it is made, asks the active backend's adapter whether this page
+   * load is a sign-in coming back (userservice.ts :138, :456-463; RestAuthAdapter.ts :1465-1560 `consumeAuthReturn`). Once
+   * per play; `false` when the script carries none. With one, its steps go to `perform` (`AuthStep`); the steps of each
+   * later moment on the clock are handed to `land` as one function, with what the moment is — the adapter's `timer`
+   * firing, or the exchange's `answer` resolving (a target runs that a microtask after its moment, as a `fetch` resolves):
+   *   `error` — at once, the state final (`{ inProgress: false, succeeded: false, error }`, not announced); at 1 ms (the
+   *     adapter's `setTimeout(0)`, CLOCK's rule) the same state announced.
+   *   `exchange` — at once, the state `{ inProgress: true }` (not announced); at `after` (never before 1 ms) the answer
+   *     lands — ok: the session becomes the answer (written, `sessionChanged` — `setSession` :639-643), the state
+   *     succeeded with the answer's `outcome` / `notice`, announced, then `loggedIn` (:1536-1547); failed: the state failed
+   *     with the error (absent: `Sign-in could not be completed.`), announced (:1549-1556). `never`: nothing lands.
+   */
+  consumeReturn(perform: (step: AuthStep) => void, land: ReturnLanding = (_moment, steps) => steps()): boolean {
+    const r = this.script.return;
+    if (r === undefined || this.returnConsumed) return false;
+    this.returnConsumed = true;
+    const backend = this.ids[0];
+    const state = (s: AuthReturnState, announce: boolean) => {
+      this.returnState = s;
+      perform({ do: 'return', backend, state: { ...s }, announce });
+    };
+    if ('error' in r) {
+      state({ inProgress: false, succeeded: false, error: r.error }, false);
+      this.clock.schedule(1, () => land('timer', () => perform({ do: 'return', backend, state: { ...this.returnState }, announce: true })));
+      return true;
+    }
+    state({ inProgress: true }, false);
+    const answer = r.exchange;
+    if ('never' in answer) return true;
+    this.clock.schedule(Math.max(1, r.after ?? 0), () => land('answer', () => {
+      if ('ok' in answer) {
+        const session = { ...answer.ok };
+        this.sessions.set(backend, session);
+        perform({ do: 'write', backend, session: { ...session } });
+        perform({ do: 'event', type: 'sessionChanged', backend });
+        const s: AuthReturnState = { inProgress: false, succeeded: true };
+        if (answer.outcome !== undefined) s.outcome = answer.outcome;
+        if (answer.notice !== undefined) s.notice = answer.notice;
+        state(s, true);
+        perform({ do: 'event', type: 'loggedIn', backend });
+        return;
+      }
+      state({ inProgress: false, succeeded: false, error: answer.error || SIGN_IN_NOT_COMPLETED }, true);
+    }));
+    return true;
   }
 
   /**

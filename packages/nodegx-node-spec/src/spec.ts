@@ -203,6 +203,13 @@ export interface WorldView {
    * reaches `UserService.forScope`.
    */
   userService(): void;
+  /**
+   * NSP-014 s29 — what the user service's `oauthReturn` getter hands now (world.ts AUTH, THE RETURN LEG): `{ inProgress:
+   * false }` on an ordinary page load; on a sign-in coming back, `inProgress` until the exchange lands, then `succeeded` and
+   * its `outcome` / `notice`, or `error`. A node calls it where its runtime code reads the getter (after `userService()` —
+   * the service consumes the return as it is made).
+   */
+  authReturn(): import('./world').AuthReturnState;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -462,6 +469,13 @@ export interface ResolvedOutcome<I> {
  */
 export interface AfterInputsPatch<S, I, O> extends Patch<S, O> {
   outcomes?: ReadonlyArray<ResolvedOutcome<I>>;
+  /**
+   * NSP-014 s29 — invocations NO INPUT opened, each opened and reported here at once, after `outcomes`: the outcome a
+   * node reports for something that did not start on this page (Sign In With's return leg — signinwith.ts :191-201 calls
+   * it "the one place … where something other than a port opens an invocation"). Recorded with the port `''` (trace.ts).
+   * Only a world handler's patch (`WorldHandlers`, `mount` among them) may open one; a reducer's outcome is its input's.
+   */
+  opens?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -611,6 +625,19 @@ export interface WorldHandlers<S, I, O> {
    * `backend` and has this handler hears every one, in mount order, whichever backend raised it.
    */
   auth?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').AuthNotice, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-014 s29 — the user service's `oauthReturn` event (world.ts AUTH, THE RETURN LEG), with the state it carries, at the
+   * step that announced it. Only an instance of a spec that needs `backend` and has this handler hears it, in mount order —
+   * the runtime's subscription is to this one event (signinwith.ts :85), not to the four session events `auth` hears.
+   */
+  authReturn?: (state: Readonly<S>, inputs: Inputs<I>, ret: import('./world').AuthReturnState, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-014 s29 — the end of the node's `initialize`: what it DOES at its making beyond the state `init` sets — called once,
+   * at mount, after `init` and before the params, its patch applied like any handler's (its sends and reports land in the
+   * first settle). Sign In With applies a return the service already holds (signinwith.ts :86-88). A node that only sets
+   * state at its making needs none.
+   */
+  mount?: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -797,6 +824,8 @@ export interface AnyNodeSpec {
     backend?: (state: never, inputs: never, answer: BackendAnswerEvent, world: WorldView) => unknown;
     store?: (state: never, inputs: never, event: import('./world').StoreEvent, world: WorldView) => unknown;
     auth?: (state: never, inputs: never, event: import('./world').AuthNotice, world: WorldView) => unknown;
+    authReturn?: (state: never, inputs: never, ret: import('./world').AuthReturnState, world: WorldView) => unknown;
+    mount?: (state: never, inputs: never, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

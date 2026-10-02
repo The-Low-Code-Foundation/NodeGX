@@ -371,5 +371,313 @@
         ]
       }
     }
+  },
+  {
+    "name": "A provider's error coming back: Failure when the node is made AND again at the announcement a tick later (row C50)",
+    "because": "signinwith.ts :86-88 reads the final state, :85 hears the deferred event — two tokens (RestAuthAdapter.ts :1497-1502; world.ts AUTH, THE RETURN LEG)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "return": {
+          "error": "access_denied"
+        },
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "A provider's error, the clock moved before the first frame: both Failures land in the first settle",
+    "because": "signinwith.ts :86-88 then :85 — the announcement at 1 ms, before any frame was drawn",
+    "params": {},
+    "steps": [
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "return": {
+          "error": "access_denied"
+        },
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "An exchange that lands: Signing In true from the making, then false and Done at the answer",
+    "because": "signinwith.ts :203-207 (in progress at mount), :208-223 (succeeded); RestAuthAdapter.ts :1515-1547",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "return": {
+          "exchange": {
+            "ok": {
+              "objectId": "u1",
+              "email": "ann@example.com",
+              "username": "ann",
+              "nick": "Ann",
+              "n": 1
+            },
+            "outcome": "signed-in"
+          },
+          "after": 10
+        },
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "An exchange scripted at once still lands a tick after the first frame",
+    "because": "world.ts AUTH — never before 1 ms: a page's first frame is drawn before any answer to its load",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "return": {
+          "exchange": {
+            "ok": {
+              "objectId": "u1",
+              "email": "ann@example.com",
+              "username": "ann",
+              "nick": "Ann",
+              "n": 1
+            }
+          }
+        },
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "An exchange that lands with a notice: Notice written, then Done",
+    "because": "signinwith.ts :214-222 — the notice the linking rule leaves (ParseAuthAdapter.ts :782)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 20
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "return": {
+          "exchange": {
+            "ok": {
+              "objectId": "u1",
+              "email": "ann@example.com",
+              "username": "ann",
+              "nick": "Ann",
+              "n": 1
+            },
+            "outcome": "linked-credentials-revoked",
+            "notice": "Your password was removed."
+          },
+          "after": 20
+        },
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "An exchange the backend refuses: Error as given, Signing In false, Failure",
+    "because": "signinwith.ts :225 → :170-180; RestAuthAdapter.ts :1549-1556",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 5
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "return": {
+          "exchange": {
+            "error": "The sign-in code has expired."
+          },
+          "after": 5
+        },
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "An exchange refused with no message: the adapter's own sentence on Error",
+    "because": "RestAuthAdapter.ts :1552 — `error.error || 'Sign-in could not be completed.'`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 3
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "return": {
+          "exchange": {
+            "error": null
+          },
+          "after": 3
+        },
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "An exchange that never lands: Signing In stays true, nothing reported",
+    "because": "signinwith.ts :198-207 — in progress is a state, not an outcome",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "return": {
+          "exchange": {
+            "never": true
+          }
+        },
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "A sign-in coming back with somebody already stored: no start-up check is made",
+    "because": "userservice.ts :138 — the return leg FIRST; a page load carrying a sign-in is not one with a stale session",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "return": {
+          "exchange": {
+            "ok": {
+              "objectId": "u1",
+              "email": "ann@example.com",
+              "username": "ann",
+              "nick": "Ann",
+              "n": 1
+            }
+          },
+          "after": 10
+        },
+        "answers": []
+      }
+    }
+  },
+  {
+    "name": "Do after a provider's error: the launcher hands over as before — Signing In true, the call, no outcome",
+    "because": "signinwith.ts :242-264 — one list for both roles; the return's tokens are already settled",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "provider",
+        "value": "google"
+      },
+      {
+        "signal": "signIn"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "return": {
+          "error": "access_denied"
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "signInWithProvider"
+            },
+            "answer": {
+              "ok": null
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Do while an exchange is in flight with no provider: the press fails, then the exchange's Done lands",
+    "because": "signinwith.ts :257 → :170-180 (refused in the call), then :208-223 at the answer — two invocations, two outcomes",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "signIn"
+      },
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "return": {
+          "exchange": {
+            "ok": {
+              "objectId": "u1",
+              "email": "ann@example.com",
+              "username": "ann",
+              "nick": "Ann",
+              "n": 1
+            }
+          },
+          "after": 10
+        },
+        "answers": []
+      }
+    }
   }
 ]

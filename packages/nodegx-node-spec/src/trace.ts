@@ -58,7 +58,7 @@ export type TraceEvent =
   | (Base & { t: 'settle' })
   | (Base & { t: 'value'; port: string; value: unknown })
   | (Base & { t: 'signal'; port: string })
-  /** `port` is the INPUT that was invoked (the signal whose reducer reported), never an output name. */
+  /** `port` is the INPUT that was invoked (the signal whose reducer reported), never an output name — `''` (s29) for an invocation no input opened (spec.ts `opens`). */
   | (Base & { t: 'outcome'; port: string; value: Outcome; error?: string })
   /** stimulus (NSP-007): the world's clock moved by `ms` milliseconds. */
   | (Base & { t: 'advance'; ms: number })
