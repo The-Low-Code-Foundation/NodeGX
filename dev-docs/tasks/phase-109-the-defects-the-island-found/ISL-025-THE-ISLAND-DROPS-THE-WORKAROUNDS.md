@@ -232,3 +232,16 @@ The left column is the control the row needed: the waits removed, the old runtim
 runtime → it is gone. W3 is closed. 🔴 Every other session that deploys now ships HEAD's runtime instead of 09-24's
 (the bundle is shared and gitignored); the handoff says so.
 
+
+### Session 4 — 2026-10-02: W13 and W21 removed
+
+- **W13 — the garden kit's forced `display: grid`.** Ruled "Remove the force" (README §8). Gone from all four copies
+  (F19); the census row now reads three file copies (src, the built kit, the template's `noodl_modules`) so a kit rebuilt
+  without the template regenerated is not read as gone. CG-001's gate row rewritten to the ruling's sentence (a person's
+  display sticks), red against the forced kit; the CG-001 page drive 50 / 50, THE LOOK passing. Full record: ISL-011 §8 s4
+  (its AC6). ⚠️ `garden-3d-kit` forces `display: block` the same way; not asked.
+- **W21 — the `uncollapsible-multi-column` noise pin.** Removed by ISL-022 (`db086d75f`): the garden's pin is now
+  `['row-cannot-wrap']` on `Garden/Top bar` (+ `apply`), a true finding that only `.bg-tabs { width: 100% !important }`
+  hides. The next row for it: `maxWidth` 100 % on `brTabs` in `cg003Components.ts` and the CSS rule deleted from
+  `cg007Look.ts` (one of W10's `!important`s), then the pin is `[]`. Measured exit: ISL-022 §8 s4, fixture row C.
+- Census: 22 rows, W1–W3, W13, W21 `removed`.

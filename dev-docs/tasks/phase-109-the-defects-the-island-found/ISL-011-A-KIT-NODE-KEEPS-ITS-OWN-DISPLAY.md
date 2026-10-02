@@ -1,6 +1,6 @@
 # ISL-011 — A kit node keeps the display its author gave it
 
-**Status: 🟡 built on the recommended route (1a + 2a), session 2 (2026-10-02) — AC1 measured both ways, AC2 gated, AC3's page and export arms read, AC5 censused (0 conflicts); s3: AC3 complete — the port write after mount (the grid survives) and the editor canvas (the same reading as the page); only AC6 (ISL-025 W13's ruling) is owed.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: ✅ CLOSED s4 (2026-10-02) — AC6 on ISL-025 W13's ruling ("Remove the force"): the garden kit's force is gone from all four copies, CG-001's gate row now reads "a person's display sticks" and is red against the forced kit, the page drive 50/50 (THE LOOK passes). Built s2 (1a + 2a); AC3 complete s3.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F15** · found by P105 [CG-001](../phase-105-the-coding-garden/CG-001-THE-KIT.md) §7.1 item 1, the first page drive,
 2026-09-27 · **Side:** product (React bridge, node-kit types and docs, scaffold; the export's half is P84 **P40**)
 
@@ -215,3 +215,26 @@ from its launcher card. Read in the canvas webview (`cdp eval --target=viewer`):
 looked at: the stacked block above the four-column grid. Stack stopped with `dev:stop` (26 processes).
 
 **Owed:** AC6 only (ISL-025 W13's ruling: does the garden's `kit.js` workaround stay).
+
+### Session 4 — 2026-10-02: AC6, on the ruling ("Remove the force") — closed
+
+Asked (s3, README §8): *"…the kit forces 'display: grid' every time it draws. So if someone types 'display: flex' into
+that node's CSS Style box… it's undone on the next redraw… the force isn't needed for the grid any more. Remove it?"*
+— Richard: **"Remove the force."**
+
+- **The change:** `library/modules/garden-kit/src/kit.js` — the `if (worldStyle.display !== 'none') worldStyle.display =
+  'grid'` line is gone; `defaultCss: { display: 'grid' }` (inline since this task's 1a) and the `.gd-world` class both
+  still say grid. All four copies (F19): src, `node build.mjs` → the built `index.js` (+4/−4, only this), the library
+  module's project, and `templates/bot-garden/noodl_modules` by `npm run template:garden` (that file only, +4/−4; the
+  generator's own line now reads `2 × warning row-cannot-wrap`, ISL-022's).
+- **CG-001's gate row, re-read and rewritten** (`cg001GardenKit.test.ts`, "the look"): it said "`display:block` in,
+  `display:grid` out", which is the force. Now: the seeded default (`grid`) draws the grid, **a person's `flex` comes out
+  `flex`**, and `none` still hides it. Against HEAD's kit (the force in) the row is **red** (`flex` came out `grid`);
+  with the change it is green.
+- **The page drive** (`drive-cg001-kit.js`, assembled from the rebuilt kit — the force grep reads 0 in the deployed
+  copy, the new comment 1; `nodegx deploy` exit 0): **50 / 50 clauses**, THE LOOK passes, 0 console errors. Screenshot
+  at 390 × 844 looked at: sized tiles, path, water, trees, beds and the house.
+- Gates: `cg001GardenKit`, `cg003Template` (byte gate over the regenerated template), `isl025Census` (W13 now reads all
+  three file copies and is `removed`), `isl022WrappedRow`, `ig007Garden3d`: **291 / 291**.
+- ⚠️ Not ruled, recorded: `garden-3d-kit/src/kit3d.js:3170` forces `display: block` the same way. The question was
+  about the grid kit only.

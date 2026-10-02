@@ -4975,9 +4975,10 @@ var gardenKitBlocks = (function () {
           }
         }
 
-        // 🔴 Session 1’s drive: the bridge seeds props.style from defaultCss, so an inline display:block arrived and beat
-        // the class’s display:grid — 48 cells of zero size, one flat green rectangle. The grid is set AFTER the merge;
-        // only the graph hiding the node (display none) is kept.
+        // Session 1’s drive met an inline display:block from the bridge beating the class’s display:grid (48 cells of
+        // zero size), and the kit forced the grid after this merge. P109 ISL-011 made `defaultCss` the node's inline
+        // default, so `display: grid` arrives here from the definition below; the force went (ISL-025 W13, Richard's
+        // ruling 2026-10-02 "Remove the force"), so a display a person types into the node's CSS Style now sticks.
         var worldStyle = Object.assign(
           {
             gridTemplateColumns: 'repeat(' + Math.max(1, grid.w) + ', minmax(0, 1fr))',
@@ -4987,7 +4988,6 @@ var gardenKitBlocks = (function () {
           },
           props.style
         );
-        if (worldStyle.display !== 'none') worldStyle.display = 'grid';
         return h(
           'div',
           {

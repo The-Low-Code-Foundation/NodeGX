@@ -128,9 +128,15 @@ export const WORKAROUNDS: Row[] = [
   {
     w: 'W13',
     what: 'the kit forces display:grid after the bridge’s merge',
-    files: ['library/modules/garden-kit/src/kit.js'],
+    // s4: every copy (F19), so a kit rebuilt without the template regenerated is not read as gone.
+    files: [
+      'library/modules/garden-kit/src/kit.js',
+      'library/modules/garden-kit/project/noodl_modules/garden-kit/index.js',
+      'templates/bot-garden/noodl_modules/garden-kit/index.js'
+    ],
     pattern: /worldStyle\.display = 'grid'/,
-    state: 'present'
+    // P109 s4, on Richard's ruling 2026-10-02 ("Remove the force"): defaultCss carries the grid since ISL-011.
+    state: 'removed'
   },
   {
     w: 'W14',

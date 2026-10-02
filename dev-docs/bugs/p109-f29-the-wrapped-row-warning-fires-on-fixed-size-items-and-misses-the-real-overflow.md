@@ -1,7 +1,8 @@
 ---
 id: P109-F29
 title: `uncollapsible-multi-column` fires on wrapped rows of fixed-size swatches and misses the child row that really overflowed a phone
-status: scheduled
+status: fixed
+commit: db086d75f
 phase: P109
 task: ISL-022
 severity: medium
@@ -26,3 +27,7 @@ which can never wrap) is invisible to it. Last changed 2026-09-16 (`593de4f57`, 
 
 **Proposed:** 🔒 ISL-022 (reverses GAM-022's choice): fire only when a row can be wider than a phone, and add the
 `contentSize` + `flexWrap` row to the layout-inert family (`validation/layoutInertCombination.ts`). Medium.
+
+**Fixed (P109 s4, 2026-10-02, `db086d75f`) on Richard's ruling "Yes, both":** arm B silent on items a phone holds, arm A
+silent on a wrapped row of clusters, and the new code `row-cannot-wrap` names `brTabs`. ISL-022 §8 s4 has the census and
+the pins. ISL-022's AC6 (Claude Code over the real door) is still owed.

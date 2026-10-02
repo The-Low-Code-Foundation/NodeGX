@@ -443,13 +443,17 @@ describe('CG-001 — garden-kit, the built artefact', () => {
       expect(Math.round((358 / 12) * sprite.faceFraction)).toBeLessThan(20);
     });
 
-    it('🔴 the look: the grid survives the bridge’s inline display:block, and each tile kind draws its own art', () => {
-      // The bridge seeds props.style from defaultCss; session 1’s drive saw display:block win over the class and 48 zero-size cells.
-      const bridged = render('garden-kit.Garden', { map: MOCKUP, style: { display: 'block', width: '100%' } });
+    it('🔴 the look: the grid arrives from defaultCss, a person’s own display sticks, and each tile kind draws its own art', () => {
+      // The bridge seeds props.style from defaultCss (inline since P109 ISL-011), so the seeded style IS the grid. Session
+      // 1's drive saw an inline display:block win over the class (48 zero-size cells) and the kit forced the grid after
+      // the merge; P109 ISL-025 W13 removed the force (Richard, 2026-10-02: "Remove the force"), so a display a person
+      // types into the node's CSS Style is no longer undone at the next render.
+      expect(node('garden-kit.Garden').defaultCss).toEqual({ display: 'grid' });
+      const bridged = render('garden-kit.Garden', { map: MOCKUP, style: { display: 'grid', width: '100%' } });
       expect(bridged).toMatch(/class="gd-world"[^>]*style="[^"]*display:grid/);
       expect(bridged).toContain('width:100%');
+      expect(render('garden-kit.Garden', { map: MOCKUP, style: { display: 'flex' } })).toMatch(/class="gd-world"[^>]*style="[^"]*display:flex/);
       expect(render('garden-kit.Garden', { map: MOCKUP, style: { display: 'none' } })).toMatch(/style="[^"]*display:none/);
-      expect(node('garden-kit.Garden').defaultCss).toEqual({ display: 'grid' });
       // Per kind: a tree, a rock and a house cell carry their sprite; grass, path and water carry none; a bed carries a tulip.
       const cell = (x: number, y: number) => {
         const at = bridged.indexOf(`data-x="${x}" data-y="${y}"`);

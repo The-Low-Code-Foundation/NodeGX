@@ -106,7 +106,7 @@ the work:
 | [ISL-009](ISL-009-A-NODE-CAN-BE-NAMED-FOR-A-TEST-AND-SCROLLED-TO.md) | A node can be named for a test and scrolled to | F12 | node library | ✓ |
 | [ISL-010](ISL-010-A-RUNNING-APP-CAN-ASK-A-LOCAL-MODEL.md) | A running app can ask a local model | F13 | cloud nodes | ✓ |
 | **Track C** | | | | |
-| [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display — **🟡 s2: (1a) docs + gate, (2a) the export applies it; s3: AC3 complete (page, port write after mount, editor canvas); AC6 waits on ISL-025 W13's ruling** | F15 | kit bridge, docs, export | — |
+| [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display — **✅ s4: closed — AC6 on W13's ruling (the force removed, a person's display sticks; page drive 50/50)** | F15 | kit bridge, docs, export | — |
 | [ISL-012](ISL-012-A-KIT-CAN-SHIP-A-MODERN-LIBRARY.md) | A kit can ship a modern library | F16 | kit loader, extractor | ✓ |
 | [ISL-013](ISL-013-TWO-KITS-SHARE-CODE-WITHOUT-A-COPY.md) | Two kits share code without a copy | F17 | kit system | ✓ |
 | [ISL-014](ISL-014-A-MISSING-KIT-READER-IS-NAMED-AS-ONE.md) | A missing kit reader is named as one — **🟡 s1: the refusal names it; s3: ruled (b) "Build it automatically" and built — a checkout builds its own reader, stale by its input list; AC5 green in a worktree; AC6 owed (server rebuild first)** | F18, **D83** | MCP door | ✓ ruled |
@@ -122,7 +122,7 @@ the work:
 | **Track E** | | | | |
 | [ISL-023](ISL-023-THE-GENERATOR-GATES-CATCH-A-TYPE-ERROR-AND-A-STRAY-BACKTICK.md) | The generator's gates catch a type error and a stray backtick | F32, F33 | tooling | — |
 | [ISL-024](ISL-024-A-TEMPLATE-LIVES-IN-ITS-OWN-FOLDER.md) | A template lives in its own folder | F34 | repo | ✓ |
-| [ISL-025](ISL-025-THE-ISLAND-DROPS-THE-WORKAROUNDS.md) | The island drops the workarounds (closing task) — **🟡 s2: W1, W2 and W3 (ruling 1) landed and driven; the census spec pins 22 rows** | every WA | template | per row |
+| [ISL-025](ISL-025-THE-ISLAND-DROPS-THE-WORKAROUNDS.md) | The island drops the workarounds (closing task) — **🟡 s2: W1, W2 and W3 (ruling 1) landed and driven; the census spec pins 22 rows; s4: W13 ("Remove the force") and W21 (ISL-022) removed** | every WA | template | per row |
 
 🔒 = the task asks Richard something before it builds. "after AC1" = the ruling waits on a measurement.
 
@@ -281,6 +281,6 @@ job each.
 |---|---|---|
 | A | **2** (ISL-001 ✅ s3, ISL-002 ✅ s3) | 4 |
 | B | 0 | 6 |
-| C | 0 (ISL-014 🟡 (a) + (b) built, AC6 owed; ISL-011 🟡 built, two arms owed) | 5 |
+| C | **1** (ISL-011 ✅ s4; ISL-014 🟡 (a) + (b) built, AC6 owed) | 5 |
 | D | 0 (ISL-022 🟢 built, AC6 owed) | 7 |
-| E | 0 (ISL-025 🟡 slice 0 landed) | 3 |
+| E | 0 (ISL-025 🟡 W1–W3, W13, W21 removed) | 3 |
