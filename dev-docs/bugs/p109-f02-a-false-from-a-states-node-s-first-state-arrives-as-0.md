@@ -1,7 +1,8 @@
 ---
 id: P109-F02
 title: A `false` (or `''`) a States node sends from its first state arrives as the number 0
-status: scheduled
+status: fixed
+commit: 06e65ab47
 phase: P109
 task: ISL-002
 severity: medium
@@ -26,3 +27,7 @@ read as "record".
 
 **Proposed:** send the typed value (`?? 0` or the port's typed default) in runtime and export together. Small. 🔒 ISL-002
 asks Richard: typed value, skip unset values, or document only.
+
+**Fixed 2026-10-02 (P109 s3, `06e65ab47`)** on Richard's ruling ("Fix both, one commit"): one helper, `typedStateValue`,
+decides a true/false or a text for the first entry and every later move, in the runtime, the export's `statesLib.ts`
+and P107's reference spec. ISL-002 §8 session 3 has the readings.

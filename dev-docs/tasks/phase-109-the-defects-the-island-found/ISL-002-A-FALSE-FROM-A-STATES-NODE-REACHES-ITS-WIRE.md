@@ -1,6 +1,6 @@
 # ISL-002 — A `false` from a States node's first state reaches its wire as `false`
 
-**Status: 🟡 AC1 measured 2026-10-01 (session 1): the first state hands out the number `0` for a boolean `false` and for `''`, in both transition settings; the ruling (§5) is now asked. No fix yet.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F02 ·
+**Status: 🟡 s3 (2026-10-02): ruled ("Fix both, one commit") and fixed in `06e65ab47` — runtime, export and P107's spec; AC1–AC4 green with their sabotage arms. Owed: AC5 (a deployed page, needs the deploy bundle rebuilt), AC6 is written (README §6).** Scoped 2026-10-01 at `27d891bf3`. **Source:** [audit](AUDIT-2026-10-01.md) F02 ·
 [P106 IG-003](../phase-106-the-island-grows/IG-003-DRIVE-TEACH-PLAY.md) §7, deviation 4 (line 169-172) · the template's
 note at `packages/noodl-mcp/tests/cg003Components.ts:1072-1074` · **Side:** product (runtime, the `States` node; the
 exported States library too)
@@ -133,4 +133,38 @@ P108 wait on the ruling too.
 that state says `false` or an empty text. Should it send exactly what the state says, typed (false, ''), as every later
 move already does? And should the exported app's States library change in the same commit?"* Recommended: yes and yes.
 
-None yet.
+### Session 3 — 2026-10-02, P109 s3: ruled, fixed in three places (`06e65ab47`)
+
+**Ruling (README §8, asked in plain words):** *"Should the first state send false / empty text like every later change
+does? … Should both be fixed in one commit?"* → **"Fix both, one commit"** — §5 ruling 1 (a) and ruling 2 (a).
+
+**The fix.** One helper, `typedStateValue(type, value)`: a true/false is `value === undefined ? false : !!value`, a text
+(and a text style) is the value as named, anything else returns `undefined` and keeps its own rule (`|| 0` on the first
+entry, a transition after). `jumpToState` and `goToState` both call it, so the two paths cannot drift again. The same
+helper, the same shape, in three files:
+
+| file | what changed |
+|---|---|
+| `noodl-viewer-react/src/nodes/std-library/states.ts` | `typedStateValue`; `jumpToState` (was `:633`) and `goToState`'s two typed branches call it |
+| `nodegx-export/src/emit/statesLib.ts` | the emitted library's `typedStateValue` (over `ValueDef.type`); `jumpToState` and `goToState` call it. The export refuses a value a state leaves unset, so only `false`/`''` reach it |
+| `nodegx-node-spec/src/nodes/states.ts` + `scenarios/States.json` | P107's reference reads the same rule; the D19 scenario renamed to the ruled reading, and one added for an empty text a state names (`''`) and a true/false named as `1` |
+
+**Readings:**
+
+| AC | reading |
+|---|---|
+| AC1 | the spec's two `test.failing` rows are plain `test`s and green in both transition settings: `flag` → `false`/`boolean`, `label` → `''`/`string` (were `0`/`number`); the "what arrives at HEAD" row deleted; known-firing `word` row green |
+| AC2 sabotage | a sibling copy of `states.ts` with `\|\| 0` back at the jump, loaded by a copy of the spec (the shared file was not touched while a peer's conformance suite ran): **4 red** (the AC1 rows × 2 settings), the `word` control and the round trip green. Copies removed |
+| AC2 others | `erg-001`, `nda-001`, `nda-004`, `fb-020`, both `gam-006`, `p107-c21`: **100 / 100**. `tsc --noEmit` on the viewer package: 0 errors |
+| AC3 | `animation-pair.test.ts` "A5 ISL-002": the runtime and the emitted library, frame by frame, every value read as `typeof:value` — equal, first frame `boolean:false`, `string:`; CONTROL: the library with `\|\| 0` back reads `number:0` twice and disagrees. Suite 67 / 67 |
+| P107 | `nodegx-node-spec` `batch-time` States (interpreter, 200 sequences, mutants): pass; runtime `conformance.test.ts` with `NSP_ONLY=States`: conforms, known rows still fire; `stranger`, `graph`, `catalog-parity` 358 / 358 |
+| AC4 census | **273 States nodes** in tracked JSON outside `dev-docs/` (templates, prefabs, modules, the editor's embedded templates and test projects) + **11** in the P86 corpus (`.md`). **69 rows** have a true/false or text whose first state is `false`, `''` or unset (the P86 corpus: 0). Every wire followed to its reader: `Mounted`/`Visible` (truthy, `react-component-node.ts:2020`), `Condition` (`!!`, `condition.ts:133`), every Function/Expression reader `=== true`/`!== true`/`!open`, garden-kit's `flag()` (`=== true`), and texts (`pixel-game`'s banner, `story-engine`'s note, the todo dialog's three labels) under a parent the same first state unmounts. **0 "was wrong"** — every shipped first-state `false` was already read loosely or strictly-as-true. The one that was wrong is the island's `record`, and the template had already moved it to strings. Known-firing row present: `Workshop/Play plMode.teaching` → `Condition(plTeachGate)` |
+| behaviour change | a text a first state leaves **unset** is no longer sent (it was `0`); a Text bound to it keeps its own value until a move names one — the same as every later move |
+
+**Met on the way:** HLS-001's corpus golden was red for two reasons of this phase's own, each attributed by a control that
+reproduces the old hash exactly — this fix (`glow-desk/src/lib/states.ts`) and ISL-011's `4638de4b1` (`src/kits/runtime.tsx`
+in three projects), which had left it red. Four hashes patched by hand; not regenerated, because a peer's in-flight
+export work is red in the same run. Filed `P109-S3-ISL011GOLDEN`.
+
+**Not done:** AC5 (the person sentence on a deployed page) — `nodegx deploy` copies the gitignored deploy bundle, which
+must be rebuilt from this commit first. AC6 written into README §6 for P108.

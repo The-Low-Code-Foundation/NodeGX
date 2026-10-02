@@ -95,7 +95,7 @@ the work:
 |---|---|---|---|---|
 | **Track A** | | | | |
 | [ISL-001](ISL-001-A-LIST-GIVEN-TWICE-DRAWS-ONE-SET-OF-ROWS.md) | A list given twice while it is building draws one set of rows — **🟡 s1: fix landed; AC5–AC7 owed** | F01, F06, **D85** | runtime | §5 after AC2 |
-| [ISL-002](ISL-002-A-FALSE-FROM-A-STATES-NODE-REACHES-ITS-WIRE.md) | A `false` from a States node's first state reaches its wire (it leaves as `0`: `states.ts:633`, and the exporter too) — **🟡 s1: AC1 measured, ruling asked** | F02 | runtime, export | ✓ asked |
+| [ISL-002](ISL-002-A-FALSE-FROM-A-STATES-NODE-REACHES-ITS-WIRE.md) | A `false` from a States node's first state reaches its wire (it leaves as `0`: `states.ts:633`, and the exporter too) — **🟡 s3: ruled and fixed (`06e65ab47`) in the runtime, the export and P107's spec; AC1–AC4 green; AC5 (a deployed page) and AC6 owed** | F02 | runtime, export | ✓ ruled |
 | [ISL-003](ISL-003-TWO-LISTS-WITH-THE-SAME-ROW-IDS-KEEP-THEIR-OWN-ROWS.md) | Two lists that reuse row ids keep their own rows | F03 | runtime | ✓ |
 | [ISL-004](ISL-004-A-COMPONENT-KEEPS-ITS-OWN-STATE.md) | A page you come back to can be as you left it (instances already have their own store; leaving a page destroys it) | F04, F05 | runtime | ✓ |
 | **Track B** | | | | |
@@ -109,7 +109,7 @@ the work:
 | [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display — **🟡 s2: (1a) the four author surfaces say `defaultCss` is inline, gated; (2a) the export applies it; AC1 read on a page and in jsdom; canvas arm and AC6 owed** | F15 | kit bridge, docs, export | — |
 | [ISL-012](ISL-012-A-KIT-CAN-SHIP-A-MODERN-LIBRARY.md) | A kit can ship a modern library | F16 | kit loader, extractor | ✓ |
 | [ISL-013](ISL-013-TWO-KITS-SHARE-CODE-WITHOUT-A-COPY.md) | Two kits share code without a copy | F17 | kit system | ✓ |
-| [ISL-014](ISL-014-A-MISSING-KIT-READER-IS-NAMED-AS-ONE.md) | A missing kit reader is named as one — **🟡 s1: the refusal names it (route a); build-on-demand on a ruling, AC6 owed** | F18, **D83** | MCP door | §5 for AC5 |
+| [ISL-014](ISL-014-A-MISSING-KIT-READER-IS-NAMED-AS-ONE.md) | A missing kit reader is named as one — **🟡 s1: the refusal names it (route a); s3: ruled (b) "build it automatically" — to build; AC6 owed** | F18, **D83** | MCP door | ✓ ruled |
 | [ISL-015](ISL-015-A-KIT-AUTHOR-READS-THE-TRAPS-BEFORE-MEETING-THEM.md) | A kit author reads the traps before meeting them | F20, F14 | docs, gate | — |
 | **Track D** | | | | |
 | [ISL-016](ISL-016-THE-DOOR-WRITES-THE-PROJECT-SETTINGS-AND-THE-HOME-PAGE.md) | The door writes the project settings and the home page | F23 | MCP | ✓ |
@@ -154,6 +154,10 @@ session:
   kind reaches the drawn world would catch the next one.
 - A Blockly `when` block shows "…" until an event is picked, and the engine reads it as `meow`.
 - The desktop shell keeps a byte-identical copy of the save packer (`copies.js`), so every save version must be mirrored.
+- **ISL-002 AC6 (2026-10-02):** since `06e65ab47` a States node's first state sends `false` as `false` (it was the number
+  `0`). Olive's Island's `plMode.record` can go back to a boolean (`false` in Drive, `true` in Teach): its reader
+  `Inputs.record !== false && String(Inputs.record) !== 'no'` (`cg003Scripts.ts:365`) then reads Drive as "do not record".
+  It is ISL-025's row for the `'yes'`/`'no'` strings; change it only with a drive that presses Drive and counts zero blocks.
 
 ## 7. The rule this phase adds: a finding gets a row the day it is met
 
@@ -182,6 +186,12 @@ has built it, so until session 1 the server blamed *the kit* ("ensure the module
 that reads kits is missing — run this command"*. **The question: is telling the person the command enough, or should the
 server build the helper by itself the first time it finds it missing?** Recommended: telling is enough for now; build it
 by itself later; never commit the 3.7 MB helper to git.
+**✅ Ruled 2026-10-02 (session 3) — Richard: "Build it automatically"** (against the recommendation). Asked as: *"…The
+server used to say "your kit is broken" when that happened. It now says "the helper is missing, run this command". Is
+saying so enough, or should the server build the helper itself the first time it finds it missing (takes a minute or
+so, once)?"* Options shown: saying so is enough (recommended) / build it automatically / commit the helper to git.
+ISL-014 §5 option (b) — the server builds the reader when it runs from a checkout and the bundle is missing; never
+committed.
 
 **ISL-002 §5, re-asked in plainer words (2026-10-02, the first wording got "Huh?"):** A *States* node has named states
 (say `off` and `on`) and, for each state, the values its outputs should send (for an output `visible`: `off → false`,
@@ -190,6 +200,10 @@ sends those values. **The bug: for the first state only, it sends the number `0`
 the empty text.** Every later state change sends the right value. **Question A: should the first state send `false` and
 `""`, like every later state does?** Recommended yes. **Question B: the "export to a React app" feature has its own copy
 of the States logic with the same bug — fix it in the same commit?** Recommended yes.
+**✅ Ruled 2026-10-02 (session 3) — Richard: "Fix both, one commit"** (the recommendation). Asked as: *"…For that first
+state only, it sends the number 0 instead of false, and 0 instead of empty text. Every later state change sends the
+right value. Should the first state send false / empty text like every later change does? The "export to a React app"
+feature has its own copy with the same bug. Should both be fixed in one commit?"* Built in session 3 (`06e65ab47`).
 
 **Asked after session 1 (2026-10-01):** ISL-014 §5 — *"When the kit reader is missing from a checkout, should the door only say so and name the command (done), or also build it on demand the first time, so a fresh worktree never shares the primary's bundle?"* Recommended: say so now (done), build on demand next; never commit the bundle.
 
