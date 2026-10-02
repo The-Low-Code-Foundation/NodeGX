@@ -1,6 +1,6 @@
 # ISL-014 — A missing kit reader is named as one
 
-**Status: 🟡 s1 (`aab96a056`): the refusal names the reader, AC1–AC4 green. s3 (2026-10-02): ruled (b) "Build it automatically" and built — a checkout builds its own reader when it is missing or older than any file it was built from; AC5 green, measured in a fresh worktree. AC6 owed (needs `noodl-mcp/dist` rebuilt).** Scoped 2026-10-01 at `27d891bf3`. Takes ownership of register **D83** (owner was
+**Status: ✅ CLOSED s4 (2026-10-02): AC6 met — Claude Code over the real door, in a checkout with no reader, was told the reader was built (304 ms), placed the kit's nodes with no refusal, and the deployed page draws the kit's Badge. s1 (`aab96a056`): the refusal names the reader, AC1–AC4. s3: ruled (b) "Build it automatically" and built; AC5 in a fresh worktree.** Scoped 2026-10-01 at `27d891bf3`. Takes ownership of register **D83** (owner was
 `NONE`). **Source:** [the island audit](AUDIT-2026-10-01.md) row **F18** · [P78 D83](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md)
 (TPL-011 on `ubuntu-latest`, 2026-09-26) · met again by P106 [IG-001](../phase-106-the-island-grows/IG-001-THE-FIXES.md)
 deviation 8 and every garden worktree lane · **Side:** product (MCP door: kit overlay and write refusals; dev tooling)
@@ -207,3 +207,36 @@ symlinked `dist/`); the new script removes the link, and the worktree arm above 
   neither s1's refusal nor s3's build. Run it when `git status packages/noodl-mcp/src` is clean of peers' work.
 - **AC6** (an agent from a missing-reader state places a kit node and the page deploys with it drawing) needs that
   rebuilt server. Under (b) the sentence changes: the agent should never see a refusal, only `kits.readerBuilt`.
+
+### Session 4 — 2026-10-02: the server rebuilt, and AC6 — the person sentence, end to end
+
+**`npm run build` in `packages/noodl-mcp`** (22:19, from `ce3e36d54`): `dist/noodl-mcp.cjs`, `cloud-bundle.cjs`, the
+catalog and a fresh `kit-extract.cjs` + `kit-extract.inputs.json`. ⚠️ `src/cloud/bundleEntry.js` still carries a peer's
+uncommitted change (P78 D84, "✅ fixed 09-26, uncommitted" in that register — logs to stderr), so the built
+`cloud-bundle.cjs` includes it. `dist/` is gitignored; peer sessions that run `dist/noodl-mcp.cjs` pick the build up at
+their next launch.
+
+**AC6 — met.** A checkout whose server is built and whose reader is missing: `make-worktree.sh isl014-ac6`, its four
+`dist/` links replaced by real copies (a symlinked main module resolves to the primary, where the reader exists), no
+`kit-extract.cjs`. Claude Code (`claude -p`, sonnet, `--strict-mcp-config`, only `mcp__nodegx`) on a scratch copy of the
+`kit-app` fixture (its `Broken` component removed), asked: *"This NodeGX app has an add-on kit installed. Make a home
+page that shows the kit's badge saying "Hello" and its meter at 60."*
+
+- Its first call, `get_project_info`, answered *"The kit reader was built before reading this project's kits, because it
+  was missing (304 ms)."* The reader appeared **inside the worktree** (22:29); **the primary's kept 22:19**.
+- It read `demo.kit.Badge` and `demo.kit.Meter` with `get_node_type`, placed both on `Pages/Home`, cleared the two
+  warnings it was given (`page-cannot-scroll`, `font-face-not-shipped`): 21 turns, ≈ $0.67, **no refusal at any step**.
+- `nodegx deploy` (exit 0), read in headless Chrome at 390 × 844 behind a Router a scratch copy gained (see below):
+  **"Hello" drawn by the kit's Badge**, 0 console errors, screenshot looked at.
+
+**Three things the run found that are not this task's defect:**
+1. 🔴 **The page it made is reachable from nowhere.** The fixture's `App` has no Router; the door wrote the page, returned
+   no `registeredPages`, and nothing — `create_component`, `apply_plan`, `validate_project` — said so. Filed
+   `P109-S4-UNROUTEDPAGE`. (The deployed site as the agent left it shows App's own Badge, "Budget 0%", which also draws.)
+2. **The Meter is in the DOM at `width: 60%` and invisible**: its track is 0 px wide (no width in a centred column) and
+   its colours are `var(--color-primary)` / `var(--color-surface)`, tokens this project does not define. The demo kit's
+   defaults, a fixture property; a kit-author trap of ISL-015's kind.
+3. `render_report` could not screenshot in the worktree (no built viewer: a gitignored build output a worktree lacks).
+   The agent said so and did not try to build it.
+
+Worktree and branch removed after the run.

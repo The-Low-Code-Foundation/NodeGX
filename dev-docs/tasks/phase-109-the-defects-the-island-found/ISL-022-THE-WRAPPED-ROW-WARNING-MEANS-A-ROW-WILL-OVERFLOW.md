@@ -1,6 +1,6 @@
 # ISL-022 — The wrapped-row warning means a row will overflow
 
-**Status: 🟢 s4 (2026-10-02): built on the ruling ("Yes, both") — AC2, AC3, AC4, AC5, AC7 met (§8 s4); arm B silent on items a phone holds, arm A silent on a wrapped row of clusters, and a new code `row-cannot-wrap` names `brTabs`. Census 22 → 14 + 7 new, every one read; landing-pages fixed at its source. ⬜ AC6 (Claude Code over the real door) owed. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F29](AUDIT-2026-10-01.md) · P78
+**Status: 🟢 s4 (2026-10-02): built on the ruling ("Yes, both") — AC2, AC3, AC4, AC5, AC7 met (§8 s4); arm B silent on items a phone holds, arm A silent on a wrapped row of clusters, and a new code `row-cannot-wrap` names `brTabs`. Census 22 → 14 + 7 new, every one read; landing-pages fixed at its source. AC6 run once and inconclusive (the agent never wrote the shape; it exposed a cross-component blind spot, §8 s4). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F29](AUDIT-2026-10-01.md) · P78
 [D50](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) (✅ for pills, by GAM-022) · CG-003 AC1 and §7.2 ·
 **Side:** product (validator, `uncollapsible-multi-column` and the layout-inert family)
 
@@ -255,5 +255,29 @@ digital-bricks-training(-demo) committed 32 h earlier; s3's format step only sto
 and are green after:** the 4 pins above, tpl003 (regenerated), and the moved suites re-run: 698 passed, 8 failed, the 8
 being exactly the HEAD-red `def038` ×6, tpl007's byte gate, and the tpl010 `apply` label (pinned, then 1 / 1).
 
-**⬜ AC6 (the person's door over the real protocol) is owed.** It needs `dist/noodl-mcp.cjs` rebuilt with this rule and a
-Claude Code run under a project-local `--mcp-config`.
+**AC6 — run once, inconclusive: the agent never wrote the shape.** `dist/noodl-mcp.cjs` rebuilt from `ce3e36d54`
+(`row-cannot-wrap` ×2 in it). Claude Code (`claude -p`, sonnet, `--strict-mcp-config`, only `mcp__nodegx`, 40 turns) on a
+scratch copy of the `demo-app` fixture, asked for *"a top bar: the app's name on the left, and on the right a group of
+five tab buttons … kept together as one cluster that wraps onto a second line when there isn't room. It must work on a
+phone."* It hit the turn cap (≈ $2.15) after building and checking:
+
+- It installed the library's `tab-bar` prefab, judged it wrong for a wrapping cluster, deleted it, and built three
+  components through a plan: `Tab Button`, **`Tab Bar` whose root is the cluster — a row at `contentSize` with NO
+  `flexWrap`**, and `Top Bar` (a wrapping row at 100 %) placing it. The wrap the person asked for was never written.
+- **The door caught the overflow through `render_report`, not the validator:** *"the viewport had to widen to 455px"*.
+  The agent's fix was to tighten padding and gaps until the five tabs fit one line (re-render: 390, 0 overflow).
+- Read by me on the deployed result (`nodegx deploy` exit 0, the cluster stamped with a class): **335 px, 1 line, at 390
+  and at 360** (`scrollWidth` = `innerWidth` both times). It fits down to ≈ 350 and would overflow a 320 px phone; it
+  never wraps.
+
+🔴 **Two findings, neither the condition AC6 was written for:**
+1. **The new code cannot see across a component boundary.** Had the agent set `flexWrap` on that cluster, it would be
+   `brTabs`' shape exactly — but as a component's ROOT, placed in another component's row, which `row-cannot-wrap`
+   abstains on by construction (the rule reads one component). The garden's `brTabs` is caught only because it sits in
+   the same component as its row parent. Closing this needs the instance's placement (arm B already reads item
+   components through `views`); recorded, not built.
+2. **"Wraps when there isn't room" was asked for and not authored**, and nothing in the door said so — the render's
+   overflow was the only signal, and the agent answered it by shrinking. A content-sized row with no wrap in a row
+   parent is arm A's territory only when its tracks are ≥ 3 nodes; five instance tracks are one node each.
+
+AC6 stays open: its sentence ("if it writes the brTabs shape, the write's diagnostics name that row") was not exercised.
