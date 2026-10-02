@@ -22,3 +22,10 @@ in the same run and is that peer's to regenerate. The patch is recorded in the s
 
 **The lesson for this phase:** an export change owes `tests/hls001-corpus-identity.test.ts`, which the per-feature spec
 does not run.
+
+**Second half, found the same session:** `4638de4b1` also added `tests/fixtures/isl011-kit-grid` to the corpus without
+adding it to the golden or moving the count literal, so "the corpus is the one the golden was taken over" (51 for 50) and
+"no project emits a file the golden does not know about" were red at HEAD too. Fixed additively: its hashes computed in a
+fresh worktree at HEAD (the primary's peer ledger edit moves every README there), the literal 50 → 51. In that worktree
+the spec reads **4 / 4**; the other 50 projects' hashes all equal the golden. The primary still reads red on a peer's
+in-flight work (`pattern-desk`, untracked; every README; `utility-desk`'s `crypto.ts`), theirs to regenerate.

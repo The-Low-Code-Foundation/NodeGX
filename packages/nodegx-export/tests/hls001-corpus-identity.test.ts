@@ -280,7 +280,13 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // that places a parser node (Parse CSV → For Each, To CSV, Parse XML, Parse Feed on one page).
     // The 49 that moved on the red run are every project's `README.md` and nothing else — the coverage
     // sentence reads 122 of 130 now — counted before the golden was regenerated.
-    expect(corpusProjects().length).toBe(50);
+    //
+    // 50 → 51 on 2026-10-02 (P109 ISL-011, `4638de4b1`): `isl011-kit-grid`, a kit whose root class says
+    // `display: grid` and whose `defaultCss` says `block` (the export now applies `defaultCss`). 🔴 Committed
+    // in session 2 WITHOUT moving this literal or the golden — red at HEAD from then. Added in session 3,
+    // hashed in a fresh worktree at HEAD (a peer's uncommitted ledger moves every README in the primary):
+    // purely additive, the other 50 projects' hashes all equal the golden there.
+    expect(corpusProjects().length).toBe(51);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 
