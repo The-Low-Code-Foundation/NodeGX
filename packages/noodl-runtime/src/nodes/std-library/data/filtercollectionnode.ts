@@ -19,7 +19,7 @@ import type {
 
 
 /** The comparison operators {@link applyFilter} understands, as authored port suffixes. */
-type FilterOperator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'regex';
+type FilterOperator = 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | 'regex' | 'in' | 'nin';
 
 /**
  * One property's test, keyed by `'$' + operator`. `$case` is not an operator — it is the
@@ -48,6 +48,9 @@ function applyFilter(item: Record<string, unknown>, filter: Filter): boolean {
     //check neq first, it's the only operation where the key can be undefined
     if (op['$neq'] !== undefined) {
       if (!(item[key] != op['$neq'])) return false;
+    } else if (op['$nin'] !== undefined) {
+      // P109 (IW-010's "is in this list" gap): like `$neq`, a row without the property is not in the list.
+      if (listOf(op['$nin']).some((v) => item[key] == v)) return false;
     } else if (item[key] === undefined) return false;
     // The key does not exist, always return false
     else if (op['$eq'] !== undefined && !(item[key] == op['$eq'])) return false;
@@ -55,6 +58,7 @@ function applyFilter(item: Record<string, unknown>, filter: Filter): boolean {
     else if (op['$lt'] !== undefined && !(item[key] < op['$lt'])) return false;
     else if (op['$gte'] !== undefined && !(item[key] >= op['$gte'])) return false;
     else if (op['$lte'] !== undefined && !(item[key] <= op['$lte'])) return false;
+    else if (op['$in'] !== undefined && !listOf(op['$in']).some((v) => item[key] == v)) return false;
     else if (op['$regex'] !== undefined) {
       // Test if string matches regex
       const a = item[key] + ''; // Convert to string
@@ -65,6 +69,21 @@ function applyFilter(item: Record<string, unknown>, filter: Filter): boolean {
   }
 
   return true;
+}
+
+/**
+ * The list an `$in` / `$nin` test compares against, from whatever the Value port holds.
+ *
+ * Wired, it is usually an Array (a `Collection`; its records count by id, so "rows whose `owner` is one of these
+ * records" works) or a plain JS array. Typed into the property panel, it is text: `"fern, moss"` is two values, each
+ * trimmed, an empty piece dropped. Any other single value is a list of one. Members compare loosely (`==`), like
+ * `$eq`, so the typed `"2"` matches the number 2.
+ */
+function listOf(value: unknown): unknown[] {
+  if (value instanceof Collection) return value.items.map((m: ModelLike) => (m instanceof Model ? m.getId() : m));
+  if (Array.isArray(value)) return value.map((m) => (m instanceof Model ? m.getId() : m));
+  if (typeof value === 'string') return value.split(',').map((v) => v.trim()).filter((v) => v !== '');
+  return [value];
 }
 
 /**
@@ -615,7 +634,9 @@ function updatePorts(
     string: [
       { value: 'eq', label: 'Equals' },
       { value: 'neq', label: 'Not Equals' },
-      { value: 'regex', label: 'Matches RegEx' }
+      { value: 'regex', label: 'Matches RegEx' },
+      { value: 'in', label: 'Is one of' },
+      { value: 'nin', label: 'Is not one of' }
     ],
     boolean: [
       { value: 'eq', label: 'Equals' },
@@ -627,7 +648,9 @@ function updatePorts(
       { value: 'lt', label: 'Less than' },
       { value: 'gt', label: 'Greater than' },
       { value: 'gte', label: 'Greater than or equal' },
-      { value: 'lte', label: 'Less than or equal' }
+      { value: 'lte', label: 'Less than or equal' },
+      { value: 'in', label: 'Is one of' },
+      { value: 'nin', label: 'Is not one of' }
     ]
   };
 
@@ -678,11 +701,13 @@ function updatePorts(
         });
       }
 
+      // `Is one of` takes a list: wire an Array (any type may arrive, so `*`) or type "a, b, c".
+      const listOp = parameters['filterFilterOp-' + f] === 'in' || parameters['filterFilterOp-' + f] === 'nin';
       ports.push({
-        type: type || 'string',
+        type: listOp ? '*' : type || 'string',
         plug: 'input',
         group: f + ' filter',
-        displayName: 'Value',
+        displayName: listOp ? 'Values' : 'Value',
         editorName: f + ' Filter Value',
         name: 'filterFilterValue-' + f
       });

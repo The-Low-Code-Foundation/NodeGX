@@ -29,7 +29,7 @@ one place: changing how a robot steps is one edit, not twenty.** Nothing a child
 | gap | owner | state 2026-10-03 |
 |---|---|---|
 | Translation with no script | ISL-007 | ✅ built s8: the i18next add-on 1.1.0 (text as typed, missing words named). The page pattern is nightbook's `UI/Say` (Component Inputs → Translation → Text), placed where a Text would be; its Function is no longer needed |
-| "Is in this list" in Array Filter | `P109-S5-ARRAYFILTERIN` | open |
+| "Is in this list" in Array Filter | `P109-S5-ARRAYFILTERIN` | ✅ built s8: `in` / `nin` ("Is one of" / "Is not one of"), a wired Array or typed "a, b"; a nested field (`owner.id`) is NOT, and needs a ruling (`P109-S8-ARRAYFILTERPATH`) |
 | Rows shared app-wide by id | ISL-003 | open (the template prefixes ids by hand) |
 | ~~String Format's repeated placeholder~~ | — | not a gap (it fills every occurrence; P107-D2 owns the wrong comment) |
 
