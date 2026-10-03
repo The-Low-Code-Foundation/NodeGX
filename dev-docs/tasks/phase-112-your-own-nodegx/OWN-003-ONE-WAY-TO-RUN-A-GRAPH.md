@@ -1,7 +1,7 @@
 # OWN-003 — One way to run a graph
 
 **Opened 2026-10-02.** **Depends on OWN-002 and on R1** (README §8).
-**Status: 📋 not started. Step 1 is a measurement and needs no ruling.**
+**Status: 🟡 step 1 measured, s1 (2026-10-03); R1 to ask with §6. Steps 2–4 wait for the ruling.**
 
 ## 1. The person sentence
 
@@ -54,4 +54,32 @@ why only 19 of the todo template's 531 nodes could run.
 
 ## 6. Built
 
-*(empty)*
+**Step 1, measured s1 (2026-10-03) on `77c8ffdf8`, headless Chrome, esbuild.**
+
+1. **`@noodl/runtime` bundles for a browser as it is**: `noodl-runtime.ts` → one IIFE, platform browser, minified:
+   **807 KB** (no errors). Of that: `src/nodes` 450 KB, `@noodl/backend-contract` 81 KB, `src/api` 65 KB,
+   `fast-xml-parser` 33 KB, `node.ts` 17 KB, `nodecontext.ts` 16 KB, `models` 15 KB, `editorconnection.ts` 10 KB.
+   For comparison the spec package's browser entry is 520 KB with 86 specs; the runtime is every node.
+2. **It constructs and registers in a page**: `new NoodlRuntime({ type: 'browser', platform: { requestUpdate,
+   getCurrentTime, objectToString } })` the way the Node headless target does
+   (`noodl-runtime/test/helpers/node-spec-target.ts:762-776`), `context.styles` stubbed as there; **80 node types
+   registered**; `context.nodeRegister.createNode('Counter', 'c1')` returns a node; all in **65 ms** from script
+   start. The 80 are the runtime's own: the viewer's (visual nodes, Router, Navigate, Page Inputs, HTTP…) are
+   registered by `noodl-viewer-react`, which the bundle does not include (`withViewerNodes` in the helper adds
+   13 of them by file).
+3. **Driving it is the open half.** The page's guessed calls (`setInputValue`, `sendSignalOnInput`, a timer, the
+   scheduler) left `currentCount` undefined: a node in the runtime is driven through a scope and a frame, which
+   the helper's `adopt()` and `settle()` do (:1176-1215 and after) in **Node only** — the helper imports
+   `async_hooks` and `buffer`, installs the spec package's world over the globals, and knows the runtime's frame
+   boundary. So the measurement says: **the engine loads and builds nodes in a page; what does not exist yet is a
+   browser-side way to set, signal and settle it**, which is exactly what a `GraphTarget` wrapper (§3.3) would be.
+   Not measured this session: which node types fail without a viewer at run time, and the frame cost on the todo
+   template's biggest logic component.
+
+**R1, with the numbers (plain words):** the real engine is 807 KB minified and does load and build nodes in a page
+in 65 ms; the spec package is 520 KB and runs 37 node types fully in a page today (CENSUS.md). The engine runs every
+non-visual type (the census's "unspecced" bucket is 1,071 Component Inputs / Outputs out of 1,229). What the engine
+lacks in a page is the thing the Node test helper has: a way to set inputs, send signals and run a frame outside the
+viewer. Recommendation unchanged (README §8 R1): **the real engine, behind the package's own `GraphTarget` interface**
+(a browser port of the helper's `adopt` / `settle`), so every home-made editor runs the reference; the spec runner
+stays the grader.
