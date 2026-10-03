@@ -83,4 +83,17 @@ Island. It keeps its islands in its own data folder (not the browser), so a sitt
 
 ## 6. Notes
 
-(empty — her words, the same day)
+**2026-10-03 — the children played on the Windows tablets** (the installer of `a9c10ff8c`, run 37104659311). Richard's
+report, his words (each built and driven in P108 s9 — the README's session 9):
+- "The framerate on the kids' tablets is low, so it auto switches to 2D. I tried to switch it back to 3D in the grown
+  ups tab, but it went back to 2D again. I'd like a manual override, because the kids don't care about low framerate."
+- "the hints are still showing the old pre-blockly style actions."
+- "you can't shift select a group of blockly nodes to delete, which is annoying."
+- "the 'fold' option that appears for repeated actions is really handy, can we not make that an option for example when
+  you shift select a group of the same node multiple times you can condense them into a repeat node?"
+- "when you get the robots to build a building, it doesn't show as built until you go back to the island and return to
+  the plot of land. And sometimes it even goes back to being unbuilt … Once built, they should be permanent and out of
+  the game modes."
+
+(The children's own words — what they bought first, whether they understood the purchase card, §2/§3's questions — are
+not written here yet: Richard's to add.)

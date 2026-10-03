@@ -54,6 +54,8 @@ ALL+=(touch)
 ALL+=(touch-3d)
 # P108 s8: Richard's play (drive-p108s8-feedback.js).
 ALL+=(s8 s8-3d)
+# P108 s9: what the tablets found (drive-p108s9.js): 2d = the hints and buildings that stay built, 3d = a grown-up's 3D held.
+ALL+=(s9 s9-3d)
 (( $# )) && ALL=("$@")
 for n in $ALL; do
   waitload
@@ -98,6 +100,9 @@ for n in $ALL; do
     # P108 s8: what Richard found playing — the can, the walk, the divider, no Workshop tab, the refuge's lines.
     s8) node scripts/devtools/drive-p108s8-feedback.js $D $J --shots $P/s8-shots --json $P/s8.json ;;
     s8-3d) node scripts/devtools/drive-p108s8-feedback.js $D $J --mode 3d --shots $P/s8-3d-shots --json $P/s8-3d.json ;;
+    # P108 s9: the hints lead with the blocks; a part built in the Workshop stays built; a grown-up's 3D survives Too Slow.
+    s9) node scripts/devtools/drive-p108s9.js $D $J --shots $P/s9-shots --json $P/s9.json ;;
+    s9-3d) node scripts/devtools/drive-p108s9.js $D $J --mode 3d --shots $P/s9-3d-shots --json $P/s9-3d.json ;;
     build-3d) node scripts/devtools/drive-iw007-build.js $D $J --mode 3d --shots $P/build-3d-shots --json $P/build-3d.json ;;
     # P108 IW-007 (lane A).
     animals) node scripts/devtools/drive-iw007-animals.js $D $J --shots $P/animals --json $P/animals.json ;;

@@ -1,14 +1,42 @@
 # Phase 108 — next session
 
-> ### ⬜ SESSION 9 = what the children found (IW-009), or Richard's next play — START HERE
+> ### ⬜ SESSION 10 = the tablets again on the s9 build, or what the children find — START HERE
 >
-> **Session 8 (2026-10-02/03) was Richard's own play, not the children's sitting.** He reported five things; all five are
-> built and driven (below). **Ask Richard first whether the children's sitting (IW-009 §4–§5) has happened** — its notes
-> are session 9's work list. The Mac app (`garden-desktop/shell/dist/mac-arm64/Olive's Island.app`) was REBUILT
-> from the s8 tree on 2026-10-03 (IW-009 §5, "Rebuilt after s8") — it carries s8's fixes.
+> **Session 9 (2026-10-03) built what the children found on the Windows TABLETS** (Richard's report: IW-009 §6). All
+> five items are built and driven (below). **The tablets' installer and the Mac app are from BEFORE s9** — ask Richard
+> whether to build a new Windows installer (`garden-desktop.yml`: a push of the tip to `p105-garden-desktop` on the PUBLIC
+> repo — ask first; run `npm ci --dry-run` over HEAD's package.json files before pushing, P108-S9-LOCKFILE) and rebuild
+> the Mac app (IW-009 §5's two steps). Then: what the children say on it.
 >
-> **Read first:** [README.md](README.md) §3 (R1–R8 ruled — **R7, R8 are session 8's**; D1–D13), §6 (the board);
-> [IW-009](IW-009-THE-KIDS-VERDICT.md).
+> **Session 9 — on `cline-dev`: `c25fb8ee5` (3D, hints, buildings) · `cc4d1ad06` (lane BLOCKS) · `51fee1145` (regen) ·
+> `710c7a05c` (pad saves too, the bar's place, the drive) · `4ee7c8ee8` (bugs):**
+> - **3D stays (P108-S9-3D):** `RENDERER_CHOICE_SCRIPT` — Too Slow never takes back `{3d, grown-up}`; only `unsupported`
+>   falls back over it. Grown-ups says so (`guRend3dKept`). Nothing chosen: Too Slow still flattens (the control).
+> - **The hints (P108-S9-HINTS):** hintStart / hintEmpty / hintPattern (the shell's table — the apps carry it),
+>   hintDriveReady, `empty`, subTulipsThree, subPathPostbox lead with the blocks; Teach second.
+> - **Several blocks (lane BLOCKS, `blocks.js`):** shift/⌘/ctrl-click toggles a block in a set (`gd-multi`); the block
+>   menu's "Select several" / « Choisir plusieurs » (long-press on a tablet) turns on a mode where each tap toggles; a bar
+>   (one row, top right of the workspace) offers "Delete N blocks", "Fold into repeat ×k" (a contiguous run that is k
+>   copies of its first p blocks, FOLD_HELPERS' sameness, smallest p, k ≤ 9, only where the drawer has a repeat) and
+>   Done; Delete/Backspace deletes the set (a stack heals); one undo, one emit. Words in `SEL_WORDS` (not the page's
+>   table — cg003Content would have to carry the five `iw4Sel*` keys first).
+> - **Buildings stay built (P108-S9-BUILT, `p108s9Land.ts`):** `Land keep here` (Pages/Workshop) writes each part the
+>   moment it is delivered — runner tick or pad press, Drive or Teach — have only rises; `Land start` (the drawn start,
+>   after Start world) and `Land lift` (runner, pad, Teach) give the Workshop every part her save holds; Island world
+>   lifts a kept island's land (`iw9LiftLand`); Read family's `landText` drops `have`, so the Workshop's own write never
+>   re-runs Start world (its Ran clears her program). Sources and bowls stay the island's.
+>
+> **Readings (session 9):** garden specs **1086 in 23 files** + `p108s9.test.ts` (in that count; an arm per rule) ·
+> generator 0 · drives on one deploy of the final tree: `drive-p108s9.js` 2d **14/14** (the same drive on the pre-s9
+> template: 5/14 — only setup clauses; the reported defect reproduced), 3d **8/8** (CPU ×8; control flattens, grown-up 3D
+> holds while gd3.tooSlow fires), `drive-iw004-blocks.js` **23/23** (S9 clauses), page drive **331/331** (`--mockup`).
+> `drive-p108s9.js` is in `drives/drive-all.sh` as `s9` and `s9-3d`.
+>
+> **Open (not blocking):** P108-S9-BKFONT (the Blocks node's `font:… inherit` shorthand, unmeasured); the selection bar
+> covers the ▶ hat while blocks are chosen (accepted: nothing needs it then); a building's parts delivered in the
+> Workshop take stones the save never loses (sources stay the island's — free stones in the Workshop).
+>
+> **Session 8 (kept for reference) — Richard's own play, five items, all built and driven:**
 >
 > **Rulings already given (do not re-ask):** R1 scored play IN; R2 wear and regrowth only while the game is open; R3 real
 > Blockly 12, customised; R4 the order is ours; R5 run cap 400 ticks; R6 the island is 55 × 22; more land: not in this
