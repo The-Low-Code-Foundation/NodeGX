@@ -11,6 +11,9 @@
  * @module noodl-mcp/kitOverlay
  */
 
+import * as fs from 'fs';
+import * as path from 'path';
+
 import { setCatalogOverlay } from './catalog';
 import { extractProjectOverlay } from './kitExtract/extract';
 import type { ProjectKitOverlay } from './kitExtract/extract';
@@ -28,6 +31,8 @@ export type { KitFailure, KitSummary, ProjectKitOverlay } from './kitExtract/ext
  * and the catalog has no business carrying it. `get_project_info` reads this.
  */
 let installed: ProjectKitOverlay | null = null;
+/** What `noodl_modules/` held when {@link installed} was extracted: see {@link kitFilesSignature}. */
+let installedFrom: string | null = null;
 
 export function currentKitOverlay(): ProjectKitOverlay | null {
   return installed;
@@ -44,9 +49,7 @@ export function currentKitOverlay(): ProjectKitOverlay | null {
  */
 export function installProjectOverlay(projectDir: string): ProjectKitOverlay {
   if (installed && installed.projectDir === projectDir) return installed;
-  installed = extractProjectOverlay(projectDir);
-  setCatalogOverlay(installed.nodes);
-  return installed;
+  return refreshProjectOverlay(projectDir);
 }
 
 /**
@@ -62,23 +65,79 @@ export function installProjectOverlay(projectDir: string): ProjectKitOverlay {
  * exactly this gap: *"generating files is not the feature; the feature is that
  * the node arrives."*
  *
- * Deliberately **not** a general staleness check. ✅ **D3** forbids an on-disk
- * cache and prefers not re-running the child for an answer we already have, and
- * a poll or an mtime sweep would run the extractor on a schedule nobody asked
- * for. A write door knows precisely when the kit set changed; that is the only
- * moment this is called.
+ * A write door knows precisely when the kit set changed, so it calls this at
+ * once. ⚠️ It is no longer the only moment (P109 ISL-015, s12): a kit written
+ * by anything else is read by {@link ensureProjectOverlayFresh}, keyed on the
+ * kit files' mtimes, which is the cache ✅ **D3** itself sanctions. This note
+ * used to read D3 as forbidding exactly that.
  *
  * ⚠️ Still one process executing project kit code, as D3 requires — this is the
  * same process, doing it again.
  */
 export function refreshProjectOverlay(projectDir: string): ProjectKitOverlay {
+  // Read BEFORE extracting: a file written during the extraction then reads as a change next time, never as
+  // one the overlay already holds.
+  installedFrom = kitFilesSignature(projectDir);
   installed = extractProjectOverlay(projectDir);
   setCatalogOverlay(installed.nodes);
   return installed;
 }
 
+/**
+ * P109 ISL-015 AC5 (s12) — re-extract when the kit files on disk are not the ones the overlay was read from.
+ *
+ * 🔴 **The write doors are not the only way a kit arrives.** The docs page's first instruction is "save it as
+ * `noodl_modules/my-kit/index.js`", and the stranger round's agent did exactly that with its own file tools. The
+ * overlay had been read at bind, so its next `get_node_type` answered "Unknown node type"; it passed
+ * `allow_unknown_types`, the door left the kit node out of `visualRoots` (it could not know it was visual), and
+ * the deployed page drew nothing while `validate_project` said 0 errors. A person editing a kit in their editor
+ * beside a running agent meets the same thing.
+ *
+ * This is D3's own sanctioned shape ("an in-memory, per-server-session cache keyed on module mtime — never a
+ * file"), which the comment above read as forbidding it. It runs on request, not on a schedule: a `readdir` and
+ * a `stat` per kit file per tool call, and the extractor only when something changed. Called by `guarded()`
+ * before every tool's handler: the catalog tools (`get_node_type`, `list_node_types`) never ask for the project,
+ * so a hook on the binding would miss exactly the call that answered "Unknown node type".
+ *
+ * ⚠️ Top-level files of each `noodl_modules/<kit>/` folder only. A kit whose `index.js` requires a file in a
+ * subfolder, edited there alone, is not seen until a top-level file changes too.
+ */
+export function ensureProjectOverlayFresh(): void {
+  // Only an overlay this session installed: the suite clears it, and a cleared server must not grow one behind a
+  // test's back. Its own directory is the project, so the caller needs no binding.
+  if (!installed) return;
+  if (kitFilesSignature(installed.projectDir) === installedFrom) return;
+  refreshProjectOverlay(installed.projectDir);
+}
+
+/** Every kit folder and the name, size and mtime of each file directly inside it, as one string. */
+function kitFilesSignature(projectDir: string): string {
+  const modules = path.join(projectDir, 'noodl_modules');
+  let kits: fs.Dirent[];
+  try {
+    kits = fs.readdirSync(modules, { withFileTypes: true });
+  } catch {
+    return '';
+  }
+  const parts: string[] = [];
+  for (const kit of kits.filter((k) => k.isDirectory()).sort((a, b) => a.name.localeCompare(b.name))) {
+    const dir = path.join(modules, kit.name);
+    parts.push(`${kit.name}/`);
+    for (const name of fs.readdirSync(dir).sort()) {
+      try {
+        const st = fs.statSync(path.join(dir, name));
+        if (st.isFile()) parts.push(`${kit.name}/${name}:${st.size}:${st.mtimeMs}`);
+      } catch {
+        // Removed between the listing and the stat: the next call reads the settled folder.
+      }
+    }
+  }
+  return parts.join('\n');
+}
+
 /** For the suite: forget the session's overlay and put the catalog back to built-ins only. */
 export function clearProjectOverlay(): void {
   installed = null;
+  installedFrom = null;
   setCatalogOverlay([]);
 }

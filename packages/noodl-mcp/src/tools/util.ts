@@ -9,6 +9,7 @@
  */
 
 import { ToolError } from '../errors';
+import { ensureProjectOverlayFresh } from '../kitOverlay';
 import type { ToolErrorPayload } from './responses';
 
 /**
@@ -46,6 +47,8 @@ export function errorResult(error: ToolError): ToolResult {
 export function guarded<A>(fn: (args: A) => ToolResult | Promise<ToolResult>): (args: A) => Promise<ToolResult> {
   return async (args: A) => {
     try {
+      // P109 ISL-015 AC5: a kit written to disk since the last call (a file tool, a person's editor) is read first.
+      ensureProjectOverlayFresh();
       return await fn(args);
     } catch (err) {
       if (err instanceof ToolError) return errorResult(err);

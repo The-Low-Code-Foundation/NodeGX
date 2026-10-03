@@ -692,6 +692,11 @@ You do not have to type any of this from scratch. In the editor, **Project Setti
 writes a complete working kit — `manifest.json`, an annotated `index.js` with one example node, a
 copy of the types, and a README — and opens `index.js` for you.
 
+An agent working through the NodeGX MCP server has the same scaffold as the `create_node_kit` tool.
+It is not listed until asked for: call `find_tools` with the group `project`. A kit written by hand
+works too, and the server reads a kit's files again whenever they change, but the scaffold's README
+carries the traps under [Wrapping a library](#wrapping-a-library) as well.
+
 The example node it writes is built to be read: it declares 15 ports across all three groups,
 defaults every colour and spacing port to a design token, and carries a `Highlighted` boolean input
 specifically to demonstrate the rule above — the node draws the highlight, the graph decides when.

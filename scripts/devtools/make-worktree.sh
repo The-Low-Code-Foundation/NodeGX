@@ -141,10 +141,16 @@ done
 # since ISL-014),
 # `nodegx-export/dist` and `nodegx-core/dist`, and the P105 desktop shell's own
 # `node_modules`. P106 session 1 linked them by hand in three lanes.
+# ⚠️ P109 s12: `packages/noodl-editor/src/external/viewer` is the viewer bundle `render_report` renders with
+# (`scripts/devtools/render-report.js` probes it beside the server). Without it every agent round run from a
+# worktree answers "The viewer bundle is missing", and two agents in a row lost their one visual check to it.
+# Its parent `src/external` is itself ignored, so the link's parent is made first.
 for artifact in packages/nodegx-backend/dist packages/noodl-runtime/dist-types \
   packages/noodl-preview/dist packages/nodegx-export/dist packages/nodegx-core/dist \
+  packages/noodl-editor/src/external/viewer \
   dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/node_modules; do
   if [ -d "$PRIMARY/$artifact" ] && [ ! -e "$WT/$artifact" ]; then
+    mkdir -p "$(dirname "$WT/$artifact")"
     ln -s "$PRIMARY/$artifact" "$WT/$artifact"
     echo "make-worktree: linked $artifact from primary (gitignored build output)"
   elif [ ! -d "$PRIMARY/$artifact" ]; then

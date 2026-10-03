@@ -684,11 +684,17 @@ export function registerAuthorTools(
           // then reported `visualRootsDerived: true` over the stale array,
           // which is the reporting field saying the thing is fine.
           //
-          // `explicit` is undefined here by construction: a batch has no
-          // `visual_roots` argument, so this door only ever derives.
+          // 🔴 P109 ISL-015 AC5 (s12): a batch has no `visual_roots` argument, but
+          // it can carry a `set_visual_roots` op, and passing `undefined` here
+          // overwrote it — answered `applied` and `unchanged`, nothing written,
+          // wherever derivation disagrees (a kit type the server does not know
+          // yet, a deliberate subset). The op's roots are explicit, as AWP-001
+          // rules for `visual_roots`; a later `remove_node` in the batch has
+          // already pruned them (`graph.ts`).
+          const setsRoots = (args.operations ?? []).some((o) => o.op === 'set_visual_roots');
           const opRoots = resolveVisualRoots(
             candidate.nodes.nodes,
-            undefined,
+            setsRoots ? candidate.nodes.visualRoots ?? [] : undefined,
             projectVisualPredicate(store)
           );
           if (opRoots.visualRoots) candidate.nodes.visualRoots = opRoots.visualRoots;
