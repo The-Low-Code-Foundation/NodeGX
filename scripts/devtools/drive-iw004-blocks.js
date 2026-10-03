@@ -18,8 +18,13 @@
  *   AC5  a 13th block on a 12-block brain is refused, with the line that says why (and the drawer greys).
  *   AC6  Teach records into the workspace — into the selected repeat.
  *   AC7  the ? on a drawer block opens its card and places nothing; no placed block carries a ?.
- *   AC9  EN / FR: the blocks' words and Blockly's own (the menu: Help + Duplicate / Aide + Dupliquer, nothing else);
- *        0 console errors, 0 network errors.
+ *   AC9  EN / FR: the blocks' words and Blockly's own (the menu: Help + Duplicate + Select several / Aide + Dupliquer +
+ *        Choisir plusieurs, nothing else); 0 console errors, 0 network errors.
+ *   S9   (P108 s9) several blocks at once, by mouse at 1368: shift-click three forwards → the bar says Delete 3 blocks /
+ *        Fold into repeat ×3 / Done and the three are marked; the bar's Fold → [repeat 3 { forward }, turn left]; a
+ *        shift-click on a block in the middle + the Delete key → it is gone and the stack heals; the block menu's Select
+ *        several (a tablet's long press opens the same menu) → a plain tap chooses another → the bar says Delete 2 blocks →
+ *        Done lets go, the program unchanged.
  * `--mode 3d` (swiftshader): AC3 on the 3D world — the chip picked by a tap on the tulip's tile of Garden 3D.
  *
  * Usage: node scripts/devtools/drive-iw004-blocks.js <deploy-dir> --project <project-dir> [--mode 2d|3d] [--shots <dir>] [--json <file>]
@@ -508,7 +513,7 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     check('AC6: Teach, with a repeat selected, records each pad press INTO it, and the workspace draws it there — [repeat 3 { forward, turn left }]', sel6 === '1' && shape(taught) === 'repeat 3 { fwd, left }' && drawnIn === 'fwd left', { sel6, taught: shape(taught), drawnIn });
     await control('drive');
 
-    // ── AC9: EN / FR — the blocks' words and Blockly's own; the menu is Help and Duplicate only ──
+    // ── AC9: EN / FR — the blocks' words and Blockly's own; the menu is Help, Duplicate and Select several only ──
     const menuOf = async (id) => {
       const p = await where(headOfId(id));
       await client.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: p.x, y: p.y, button: 'right', buttons: 2, clickCount: 1 });
@@ -528,10 +533,69 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
     const fr = await menuOf(rep6fr);
     const frWords = await evaluate(`[...document.querySelectorAll('.bg-blocks-box .gd-palette [data-pal-head]')].slice(0, 3).map((e) => e.textContent)`);
     await shot('iw004-ac9-fr');
-    check(`AC9: the menu on a placed block is exactly Help + Duplicate in English (${en.join(', ')}) and Aide + Dupliquer in French (${fr.join(', ')} — Blockly’s own word for Duplicate)`, JSON.stringify(en) === JSON.stringify(['Help', 'Duplicate']) && JSON.stringify(fr) === JSON.stringify(['Aide', 'Dupliquer']), { en, fr });
+    // P108 s9: + Select several (the touch path to choosing several blocks: a long press opens this same menu).
+    check(`AC9: the menu on a placed block is exactly Help + Duplicate + Select several in English (${en.join(', ')}) and Aide + Dupliquer + Choisir plusieurs in French (${fr.join(', ')} — Blockly’s own word for Duplicate)`, JSON.stringify(en) === JSON.stringify(['Help', 'Duplicate', 'Select several']) && JSON.stringify(fr) === JSON.stringify(['Aide', 'Dupliquer', 'Choisir plusieurs']), { en, fr });
     check(`AC9: the drawer's words follow the language (${enWords.map(nbsp).join(' / ')} → ${frWords.map(nbsp).join(' / ')})`, nbsp(enWords[0]) === w('en', 'bFwd') && nbsp(frWords[0]) === w('fr', 'bFwd') && shape(await program()) === 'repeat 3 { fwd, left }', { enWords, frWords });
     await seg('EN');
     await wait(800);
+
+    // ── S9 (P108 s9): several blocks at once — shift-click, the bar's Fold, the Delete key, the menu's Select several ──
+    // Richard (2026-10-03): "you can't shift select a group of blockly nodes to delete" and "when you shift select a group
+    // of the same node multiple times you can condense them into a repeat". The words: the page's rows when it has them,
+    // else the node's own (SEL_WORDS in blocks.js).
+    const SEL_OWN = { iw4SelSeveral: 'Select several', iw4SelDel1: 'Delete 1 block', iw4SelDelN: 'Delete {n} blocks', iw4SelFold: 'Fold into repeat ×{k}', iw4SelDone: 'Done' };
+    const selW = (key, vars = {}) => w('en', key, 'Pip', vars) || Object.keys(vars).reduce((t, k) => t.split(`{${k}}`).join(String(vars[k])), SEL_OWN[key]);
+    const BAR = `[...document.querySelectorAll('.bg-blocks-box .gd-bk-sel [data-sel-act]')].map((b) => b.getAttribute('data-sel-act') + ': ' + b.textContent.trim())`;
+    const MARKED = `[...document.querySelectorAll('.bg-blocks-box .gd-prog .gd-blk.gd-multi[data-multi="1"]')].map((b) => b.getAttribute('data-id')).sort().join(',')`;
+    /** A click with modifier keys held (CDP: 8 = shift), at the element's centre once elementFromPoint says it is hit. */
+    const modTap = async (finder, label, modifiers = 8) => {
+      const p = await where(finder);
+      if (!p.found || !p.hit) {
+        check(`shift-click ${label}`, false, p);
+        return false;
+      }
+      for (const type of ['mousePressed', 'mouseReleased']) await client.send('Input.dispatchMouseEvent', { type, x: p.x, y: p.y, button: 'left', clickCount: 1, modifiers });
+      await wait(300);
+      return true;
+    };
+    await openQuest('en', 'free');
+    for (const id of ['fwd', 'fwd', 'fwd', 'left']) await palTap(id);
+    const s9a = await program();
+    const fw = s9a.filter((b) => b.t === 'fwd').map((b) => String(b.id));
+    for (const id of fw) await modTap(headOfId(id), `forward ${id}`);
+    const bar3 = await until(BAR, (b) => b.length === 3, 2000);
+    const marked3 = await evaluate(MARKED);
+    await shot('s9-three-chosen');
+    check(`S9: shift-click on three forwards chooses them — marked on the workspace (${marked3}), the bar says ${bar3.join(' · ')}; the program unchanged`, shape(s9a) === 'fwd, fwd, fwd, left' && marked3 === fw.slice().sort().join(',') && JSON.stringify(bar3) === JSON.stringify([`delete: ${selW('iw4SelDelN', { n: 3 })}`, `fold: ${selW('iw4SelFold', { k: 3 })}`, `done: ${selW('iw4SelDone')}`]) && shape(await program()) === 'fwd, fwd, fwd, left', { s9a: shape(s9a), marked3, bar3 });
+    await tap(first('.bg-blocks-box .gd-bk-sel [data-sel-act="fold"]'), 'the bar’s Fold');
+    const s9b = await until(PROGRAM, (l) => shape(l) === 'repeat 3 { fwd }, left', 3000);
+    const rep9 = s9b.find((b) => b.t === 'repeat');
+    check(`S9: the bar’s Fold makes one repeat ×3 of the first forward (id ${fw[0]} kept; the repeat ${rep9 && rep9.id}, the next whole number) — [repeat 3 { forward }, turn left]; the bar is gone`, shape(s9b) === 'repeat 3 { fwd }, left' && !!rep9 && String(rep9.body[0].id) === fw[0] && Number(rep9.id) > Math.max(...s9a.map((b) => Number(b.id))) && (await evaluate(BAR)).length === 0, { s9b: shape(s9b), rep9 });
+    await shot('s9-folded');
+    await palTap('right');
+    const s9c = await program();
+    const left9 = String((s9c.find((b) => b.t === 'left') || {}).id);
+    await modTap(headOfId(left9), 'turn left (the middle of the stack)');
+    for (const type of ['keyDown', 'keyUp']) await client.send('Input.dispatchKeyEvent', { type, key: 'Delete', code: 'Delete', windowsVirtualKeyCode: 46 });
+    const s9d = await until(PROGRAM, (l) => shape(l) === 'repeat 3 { fwd }, right', 3000);
+    check(`S9: shift-click on turn left (the middle of [repeat 3 { forward }, turn left, turn right]) + the Delete key deletes it, and the stack heals — [repeat 3 { forward }, turn right]`, shape(s9c) === 'repeat 3 { fwd }, left, right' && shape(s9d) === 'repeat 3 { fwd }, right' && (await evaluate(BAR)).length === 0, { s9c: shape(s9c), s9d: shape(s9d) });
+    // The touch path, by mouse here: the block menu's Select several, then a plain tap chooses another, Done lets go.
+    const repId9 = String(rep9 && rep9.id);
+    const rightId = String((s9d.find((b) => b.t === 'right') || {}).id);
+    const rp = await where(headOfId(repId9));
+    await client.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: rp.x, y: rp.y, button: 'right', buttons: 2, clickCount: 1 });
+    await client.send('Input.dispatchMouseEvent', { type: 'mouseReleased', x: rp.x, y: rp.y, button: 'right', buttons: 0, clickCount: 1 });
+    await wait(500);
+    await tap(byText('.blocklyContextMenu .blocklyMenuItem', selW('iw4SelSeveral')), 'the menu’s Select several');
+    const bar1 = await until(BAR, (b) => b.length === 2, 2000);
+    await tap(headOfId(rightId), 'turn right (a plain tap, Select several on)');
+    const bar2 = await until(BAR, (b) => b.length === 2 && b[0].includes('2'), 2000);
+    const several = await evaluate(`({ mode: !!document.querySelector('.bg-blocks-box .gd-bk.gd-several'), marked: ${MARKED} })`);
+    await shot('s9-select-several');
+    await tap(first('.bg-blocks-box .gd-bk-sel [data-sel-act="done"]'), 'the bar’s Done');
+    await wait(300);
+    const after9 = await evaluate(`({ bar: ${BAR}, mode: !!document.querySelector('.bg-blocks-box .gd-bk.gd-several'), marked: ${MARKED} })`);
+    check(`S9: the menu’s “${selW('iw4SelSeveral')}” chooses the repeat (${bar1.join(' · ')}); a plain tap then chooses turn right too (${bar2.join(' · ')}); Done lets both go — the program unchanged`, JSON.stringify(bar1) === JSON.stringify([`delete: ${selW('iw4SelDel1')}`, `done: ${selW('iw4SelDone')}`]) && JSON.stringify(bar2) === JSON.stringify([`delete: ${selW('iw4SelDelN', { n: 2 })}`, `done: ${selW('iw4SelDone')}`]) && several.mode && several.marked === [repId9, rightId].sort().join(',') && after9.bar.length === 0 && !after9.mode && after9.marked === '' && shape(await program()) === 'repeat 3 { fwd }, right', { bar1, bar2, several, after9 });
   }
 
   check('AC9: 0 console errors through the whole drive', page.consoleErrors.length === 0, page.consoleErrors.slice(0, 5));

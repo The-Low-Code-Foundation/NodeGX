@@ -407,4 +407,344 @@ describe('P108 IW-004 — the block gate (garden-kit.Blocks, the translator)', (
       }
     });
   });
+
+  /**
+   * P108 s9 (Richard, 2026-10-03, after the kids played on Windows tablets): "you can't shift select a group of blockly nodes
+   * to delete" — and "when you shift select a group of the same node multiple times you can condense them into a repeat".
+   *
+   * The node's own editor (`createEditor`) on a real Blockly 12.3.1 workspace (headless: `Bk.inject` hands back a
+   * `Blockly.Workspace`), driven the way the page drives it: a press on the node's box (`pointerdown`, its modifier keys),
+   * then the events Blockly fires for a click (SELECTED, CLICK); the keys on the document; the bar's buttons; the block
+   * menu's item from Blockly's own registry (a long press on a tablet opens that menu: Blockly 12.3.1's Touch.longStart).
+   */
+  describe('🔴 [s9-select] several blocks at once — select (shift / ⌘ / ctrl-click, or “Select several” on a tablet), delete, fold into a repeat', () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const Blockly = require(BLOCKLY_FILE);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { JSDOM } = require('jsdom');
+    const dom = new JSDOM('<!DOCTYPE html><body></body>');
+    Blockly.utils.xml.injectDependencies(dom.window);
+    const doc = dom.window.document;
+    const { kit: bk, context } = loadKit({ Blockly, document: doc });
+    const node = bk.reactNodes.find((n: any) => n.name === 'garden-kit.Blocks');
+    // This kit's blocks and menu (the describe above defined its own kit's on the same Blockly; a page loads one kit). In a
+    // beforeAll, so the describe above has run its rows on its own definitions first.
+    beforeAll(() => {
+      delete Blockly.__gardenKit;
+      node.defineBlocks(Blockly);
+    });
+    const pal = (ids: string[]) => ids.map((id) => ({ id, kind: 'motion', icon: 'fwd', label: id, hasBody: id === 'repeat', hasCount: id === 'repeat', slots: [] }));
+    const PALETTE = pal(['fwd', 'left', 'right', 'water', 'repeat']);
+    const tick = () => new Promise((r) => setTimeout(r, 40));
+    const F = (id: number) => ({ id, t: 'fwd' });
+    const L = (id: number) => ({ id, t: 'left' });
+    const R = (id: number) => ({ id, t: 'right' });
+    const open: Array<() => void> = [];
+    afterEach(() => {
+      while (open.length) open.pop()!();
+    });
+
+    async function editor(program: unknown[], props: Record<string, unknown> = {}) {
+      const Bk = Object.create(Blockly);
+      Bk.inject = () => new Blockly.Workspace();
+      const root = doc.createElement('div');
+      const host = doc.createElement('div');
+      root.appendChild(host);
+      doc.body.appendChild(root);
+      const emits: string[] = [];
+      const p: Record<string, unknown> = { program: JSON.stringify(program), palette: PALETTE, language: 'en', band: 2, onProgram: (t: string) => emits.push(t), ...props };
+      const made = context.gardenKitBlocks.createEditor(Bk, root, host, { props: () => p });
+      const ed = made.api;
+      const ws = ed.workspace();
+      open.push(() => {
+        made.destroy();
+        root.remove();
+      });
+      const press = (mods: Record<string, boolean>) => root.dispatchEvent(new dom.window.MouseEvent('pointerdown', { bubbles: true, cancelable: true, ...mods }));
+      /** A click on a placed block as Blockly reports it: the press on the box, Blockly's SELECTED, then its CLICK. */
+      const click = async (id: string, mods: Record<string, boolean> = {}) => {
+        press(mods);
+        Blockly.Events.fire(new (Blockly.Events.get(Blockly.Events.SELECTED))(null, id, ws.id));
+        Blockly.Events.fire(new (Blockly.Events.get(Blockly.Events.CLICK))(ws.getBlockById(id), ws.id, 'block'));
+        await tick();
+      };
+      const clickEmpty = async () => {
+        press({});
+        Blockly.Events.fire(new (Blockly.Events.get(Blockly.Events.CLICK))(null, ws.id, 'workspace'));
+        await tick();
+      };
+      const key = async (k: string) => {
+        root.dispatchEvent(new dom.window.KeyboardEvent('keydown', { key: k, bubbles: true, cancelable: true }));
+        await tick();
+      };
+      const barEl = () => root.querySelector('[data-sel-bar]');
+      const bar = () => (barEl() ? [...barEl()!.querySelectorAll('button')].map((b: any) => `${b.getAttribute('data-sel-act')}: ${b.textContent}`) : null);
+      const pressBar = async (act: string) => {
+        const b = root.querySelector(`[data-sel-bar] [data-sel-act="${act}"]`);
+        if (!b) throw new Error(`no ${act} on the bar: ${JSON.stringify(bar())}`);
+        b.dispatchEvent(new dom.window.MouseEvent('click', { bubbles: true, cancelable: true }));
+        await tick();
+      };
+      const set = (): string[] => (typeof ed.multiIds === 'function' ? ed.multiIds() : []);
+      await tick();
+      return { ed, ws, root, emits, p, update: () => made.update(), click, clickEmpty, key, bar, pressBar, set, program: () => ed.program() as string };
+    }
+    const selectAll = async (e: Awaited<ReturnType<typeof editor>>, ids: string[]) => {
+      for (const id of ids) await e.click(id, { shiftKey: true });
+    };
+
+    it('[s9-select] shift-click toggles a block in the set (⌘- and ctrl-click too); the block selected before joins it; the ▶ hat never does; no emit', async () => {
+      const e = await editor([F(1), L(2), F(3)]);
+      await e.click('2');
+      expect([e.ed.selected, e.set()]).toEqual(['2', []]);
+      await e.click('3', { shiftKey: true });
+      expect([e.set(), e.ed.selected]).toEqual([['2', '3'], '']);
+      await e.click('1', { metaKey: true });
+      expect(e.set()).toEqual(['2', '3', '1']);
+      await e.click('3', { ctrlKey: true });
+      expect(e.set()).toEqual(['2', '1']);
+      await e.click('start', { shiftKey: true });
+      expect(e.set()).toEqual(['2', '1']);
+      expect(e.bar()).toEqual(['delete: Delete 2 blocks', 'done: Done']);
+      expect(e.emits).toEqual([]);
+    });
+
+    it('[s9-select] a plain click on a block, or on the empty workspace, clears the set — and is today’s single selection (tap-to-add still goes into the selected repeat)', async () => {
+      const e = await editor([F(1), { id: 2, t: 'repeat', n: 3, body: [] }, F(3)]);
+      await selectAll(e, ['1', '3']);
+      expect(e.set()).toEqual(['1', '3']);
+      await e.click('2');
+      expect([e.set(), e.ed.selected, e.bar()]).toEqual([[], '2', null]);
+      // Today's tap-to-add: the drawer's forward goes into the selected repeat.
+      const fly = new Blockly.Workspace();
+      try {
+        const fb = Blockly.serialization.blocks.append({ type: 'garden_forward' }, fly);
+        e.ed.tapAdd(fb);
+      } finally {
+        fly.dispose();
+      }
+      expect(JSON.parse(e.program())[1]).toEqual({ id: 2, t: 'repeat', n: 3, body: [{ id: 4, t: 'fwd' }] });
+      await selectAll(e, ['1', '3']);
+      expect(e.set()).toEqual(['2', '1', '3']);
+      await e.clickEmpty();
+      expect([e.set(), e.ed.selected, e.bar()]).toEqual([[], '', null]);
+    });
+
+    it('[s9-select] Delete deletes every block in the set — one emit; a block from the middle of a stack heals it', async () => {
+      const e = await editor([F(1), L(2), F(3)]);
+      await e.click('2', { shiftKey: true });
+      await e.key('Delete');
+      expect(e.program()).toBe(JSON.stringify([F(1), F(3)]));
+      expect(e.emits).toEqual([JSON.stringify([F(1), F(3)])]);
+      expect([e.set(), e.bar()]).toEqual([[], null]);
+    });
+
+    it('[s9-select] Backspace too; a selected container goes with its body; two apart in one go', async () => {
+      const e = await editor([F(1), { id: 2, t: 'repeat', n: 2, body: [F(3), L(4)] }, R(5)]);
+      await e.click('2', { shiftKey: true });
+      await e.key('Backspace');
+      expect(e.program()).toBe(JSON.stringify([F(1), R(5)]));
+      expect(e.emits.length).toBe(1);
+      expect(e.ws.getBlockById('3')).toBeNull();
+      const two = await editor([F(1), L(2), F(3), R(4)]);
+      await selectAll(two, ['1', '3']);
+      await two.key('Delete');
+      expect(two.program()).toBe(JSON.stringify([L(2), R(4)]));
+      expect(two.emits.length).toBe(1);
+    });
+
+    it('[s9-select] the ▶ hat is never selected or deleted; Delete with nothing selected deletes nothing (no emit)', async () => {
+      const e = await editor([F(1)]);
+      await e.click('start', { shiftKey: true });
+      expect(e.set()).toEqual([]);
+      await e.key('Delete');
+      expect([e.program(), e.emits.length, !!e.ws.getBlockById('start')]).toEqual([JSON.stringify([F(1)]), 0, true]);
+      // Known-firing beside the absence: the same key with forward selected deletes it.
+      await e.click('1', { shiftKey: true });
+      await e.key('Delete');
+      expect([e.program(), e.emits.length, !!e.ws.getBlockById('start')]).toEqual(['[]', 1, true]);
+    });
+
+    it('[s9-select] the bar: “Delete 1 block” / “Delete N blocks”, Done — and in French; its Delete deletes, its Done lets go', async () => {
+      const e = await editor([F(1), F(2), F(3), L(4)]);
+      await e.click('4', { shiftKey: true });
+      expect(e.bar()).toEqual(['delete: Delete 1 block', 'done: Done']);
+      await e.pressBar('done');
+      expect([e.set(), e.bar()]).toEqual([[], null]);
+      await selectAll(e, ['1', '2', '3']);
+      expect(e.bar()).toEqual(['delete: Delete 3 blocks', 'fold: Fold into repeat ×3', 'done: Done']);
+      await e.pressBar('delete');
+      expect([e.program(), e.emits.length, e.bar()]).toEqual([JSON.stringify([L(4)]), 1, null]);
+      const fr = await editor([F(1), F(2), F(3), L(4)], { language: 'fr' });
+      await fr.click('4', { shiftKey: true });
+      expect(fr.bar()).toEqual(['delete: Supprimer 1 bloc', 'done: Fini']);
+      await fr.click('4', { shiftKey: true });
+      await selectAll(fr, ['1', '2', '3']);
+      expect(fr.bar()).toEqual(['delete: Supprimer 3 blocs', 'fold: Plier en « répéter ×3 »', 'done: Fini']);
+      // The page's own word rows (Words) win over the node's, as for every iw4 word.
+      const own = await editor([F(1)], { words: [{ key: 'iw4SelDone', en: 'All done', fr: 'Tout fini' }] });
+      await own.click('1', { shiftKey: true });
+      expect(own.bar()).toEqual(['delete: Delete 1 block', 'done: All done']);
+    });
+
+    it('[s9-select] fold: forward forward forward → repeat 3 { forward } — the first copy keeps its id, the repeat gets the next whole number; one emit', async () => {
+      const e = await editor([F(1), F(2), F(3)]);
+      await selectAll(e, ['1', '2', '3']);
+      await e.pressBar('fold');
+      const want = JSON.stringify([{ id: 4, t: 'repeat', n: 3, body: [F(1)] }]);
+      expect(e.program()).toBe(want);
+      expect(e.emits).toEqual([want]);
+      expect([e.ws.getBlockById('2'), e.ws.getBlockById('3'), e.set(), e.bar()]).toEqual([null, null, [], null]);
+    });
+
+    it('[s9-select] fold: forward left forward left → repeat 2 { forward, left }; at the run’s place in the stack; inside a body', async () => {
+      const e = await editor([F(1), L(2), F(3), L(4)]);
+      await selectAll(e, ['1', '2', '3', '4']);
+      expect(e.bar()).toContain('fold: Fold into repeat ×2');
+      await e.pressBar('fold');
+      expect(e.program()).toBe(JSON.stringify([{ id: 5, t: 'repeat', n: 2, body: [F(1), L(2)] }]));
+      expect(e.emits.length).toBe(1);
+      const mid = await editor([L(1), F(2), F(3), R(4)]);
+      await selectAll(mid, ['3', '2']);
+      await mid.pressBar('fold');
+      expect(mid.program()).toBe(JSON.stringify([L(1), { id: 5, t: 'repeat', n: 2, body: [F(2)] }, R(4)]));
+      const inner = await editor([{ id: 1, t: 'repeat', n: 2, body: [F(2), F(3), F(4)] }, L(5)]);
+      await selectAll(inner, ['2', '3', '4']);
+      await inner.pressBar('fold');
+      expect(inner.program()).toBe(JSON.stringify([{ id: 1, t: 'repeat', n: 2, body: [{ id: 6, t: 'repeat', n: 3, body: [F(2)] }] }, L(5)]));
+    });
+
+    it('[s9-select] fold picks the SMALLEST copy (the higher count): six forwards → ×6, not 2 × 3; inside the repeat’s own count (1–9): twelve forwards → ×6 of two', async () => {
+      const six = await editor([1, 2, 3, 4, 5, 6].map(F));
+      await selectAll(six, ['1', '2', '3', '4', '5', '6']);
+      expect(six.ed.foldPlan()).toMatchObject({ k: 6, p: 1 });
+      const fl = await editor([F(1), L(2), F(3), L(4), F(5), L(6)]);
+      await selectAll(fl, ['1', '2', '3', '4', '5', '6']);
+      expect(fl.ed.foldPlan()).toMatchObject({ k: 3, p: 2 });
+      const twelve = await editor([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map(F));
+      await selectAll(twelve, ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
+      expect(twelve.ed.foldPlan()).toMatchObject({ k: 6, p: 2 });
+      await twelve.pressBar('fold');
+      expect(twelve.program()).toBe(JSON.stringify([{ id: 13, t: 'repeat', n: 6, body: [F(1), F(2)] }]));
+      // Copies are the page's fold's "same": a say with another text is not a copy.
+      const says = await editor([{ id: 1, t: 'say', slots: { text: 'a' } }, { id: 2, t: 'say', slots: { text: 'b' } }]);
+      await selectAll(says, ['1', '2']);
+      expect(says.ed.foldPlan()).toBeNull();
+    });
+
+    it('[s9-select] fold is NOT offered for forward left forward, a set with a gap, a set across two lists, one block — or where the drawer has no repeat', async () => {
+      const none = async (program: unknown[], ids: string[], props: Record<string, unknown> = {}) => {
+        const e = await editor(program, props);
+        await selectAll(e, ids);
+        const before = e.program();
+        const out = { ids: e.set(), plan: e.ed.foldPlan(), bar: e.bar(), folded: e.ed.multiFold(), same: e.program() === before, emits: e.emits.length };
+        return out;
+      };
+      expect(await none([F(1), L(2), F(3)], ['1', '2', '3'])).toEqual({ ids: ['1', '2', '3'], plan: null, bar: ['delete: Delete 3 blocks', 'done: Done'], folded: false, same: true, emits: 0 });
+      expect((await none([F(1), F(2), F(3)], ['1', '3'])).plan).toBeNull();
+      expect((await none([F(1), { id: 2, t: 'repeat', n: 2, body: [F(3)] }], ['1', '3'])).plan).toBeNull();
+      const loose = await editor([F(1)]);
+      Blockly.serialization.blocks.append({ type: 'garden_forward', id: '9', x: 400, y: 40 }, loose.ws);
+      await selectAll(loose, ['1', '9']);
+      expect([loose.set(), loose.ed.foldPlan()]).toEqual([['1', '9'], null]);
+      expect((await none([F(1)], ['1'])).plan).toBeNull();
+      expect((await none([F(1), F(2)], ['1', '2'], { palette: pal(['fwd', 'left']) })).bar).toEqual(['delete: Delete 2 blocks', 'done: Done']);
+      // Known-firing beside the absences: the same two forwards with repeat in the drawer fold.
+      expect((await none([F(1), F(2)], ['1', '2'])).plan).toMatchObject({ k: 2, p: 1 });
+    });
+
+    it('[s9-select] the brain cap blocks neither: a full brain still folds (it never grows) and still deletes', async () => {
+      const e = await editor([F(1), F(2), F(3)], { brainSize: 3 });
+      await selectAll(e, ['1', '2', '3']);
+      await e.pressBar('fold');
+      expect(e.program()).toBe(JSON.stringify([{ id: 4, t: 'repeat', n: 3, body: [F(1)] }]));
+      const two = await editor([F(1), F(2)], { brainSize: 2 });
+      await selectAll(two, ['1', '2']);
+      await two.pressBar('fold');
+      expect(two.program()).toBe(JSON.stringify([{ id: 3, t: 'repeat', n: 2, body: [F(1)] }]));
+      await two.click('3', { shiftKey: true });
+      await two.key('Delete');
+      expect(two.program()).toBe('[]');
+    });
+
+    it('[s9-select] one undo puts a fold back, and one undo puts a delete back (the events are one group)', async () => {
+      const e = await editor([F(1), F(2), L(3)]);
+      await selectAll(e, ['1', '2']);
+      await e.pressBar('fold');
+      expect(e.program()).toBe(JSON.stringify([{ id: 4, t: 'repeat', n: 2, body: [F(1)] }, L(3)]));
+      e.ws.undo(false);
+      await tick();
+      expect(e.program()).toBe(JSON.stringify([F(1), F(2), L(3)]));
+      await selectAll(e, ['1', '3']);
+      await e.key('Delete');
+      expect(e.program()).toBe(JSON.stringify([F(2)]));
+      e.ws.undo(false);
+      await tick();
+      expect(e.program()).toBe(JSON.stringify([F(1), F(2), L(3)]));
+    });
+
+    it('[s9-select] a tablet has no shift key: the block menu’s “Select several” (a long press opens it) — then each tap toggles; Done, or a tap on the empty workspace, ends it', async () => {
+      const reg = Blockly.ContextMenuRegistry.registry;
+      const e = await editor([F(1), L(2), { id: 3, t: 'repeat', n: 2, body: [] }]);
+      const b2 = e.ws.getBlockById('2');
+      const menu = (b: any) => reg.getContextMenuOptions({ block: b, focusedNode: b }, null).map((o: any) => o.text);
+      expect(menu(b2)).toEqual(['Help', 'Duplicate', 'Select several']);
+      const item = reg.getItem('gardenSelectSeveral');
+      expect(item.preconditionFn({ block: e.ws.getBlockById('start') })).toBe('hidden');
+      expect(item.preconditionFn({ block: b2 })).toBe('enabled');
+      item.callback({ block: b2 });
+      await tick();
+      expect([e.set(), e.root.classList.contains('gd-several'), e.bar()]).toEqual([['2'], true, ['delete: Delete 1 block', 'done: Done']]);
+      await e.click('1');
+      expect(e.set()).toEqual(['2', '1']);
+      await e.click('2');
+      expect(e.set()).toEqual(['1']);
+      // A tap on a slot of a block (the repeat's count) toggles it too, and opens no picker.
+      e.ws.getBlockById('3').getField('N').showEditor_();
+      await tick();
+      expect([e.set(), e.root.querySelector('.gd-picker')]).toEqual([['1', '3'], null]);
+      await e.pressBar('done');
+      expect([e.set(), e.root.classList.contains('gd-several'), e.bar()]).toEqual([[], false, null]);
+      // After Done a tap is today's tap again.
+      await e.click('2');
+      expect([e.set(), e.ed.selected]).toEqual([[], '2']);
+      // The empty workspace ends it too.
+      item.callback({ block: e.ws.getBlockById('1') });
+      await tick();
+      await e.clickEmpty();
+      expect([e.set(), e.root.classList.contains('gd-several'), e.bar()]).toEqual([[], false, null]);
+      expect(e.emits).toEqual([]);
+      // In French, in Blockly's menu (Duplicate is Blockly's own word: its French messages file is not loaded here).
+      const fr = await editor([F(1)], { language: 'fr' });
+      const frm = menu(fr.ws.getBlockById('1'));
+      expect([frm.length, frm[0], frm[2]]).toEqual([3, 'Aide', 'Choisir plusieurs']);
+    });
+
+    it('[s9-select] while a run plays (Locked) nothing can be selected or deleted, and the menu item is gone', async () => {
+      const e = await editor([F(1), F(2)]);
+      await selectAll(e, ['1', '2']);
+      e.p.locked = true;
+      // The node hands every render's props to the editor's update().
+      e.update();
+      await tick();
+      expect([e.set(), e.bar()]).toEqual([[], null]);
+      await e.click('1', { shiftKey: true });
+      await e.key('Delete');
+      expect([e.set(), e.program()]).toEqual([[], JSON.stringify([F(1), F(2)])]);
+      expect(Blockly.ContextMenuRegistry.registry.getItem('gardenSelectSeveral').preconditionFn({ block: e.ws.getBlockById('1') })).toBe('hidden');
+    });
+
+    it('[s9-select] the look: the set is marked on Blockly’s own path (the Zelos renderer’s .blocklyPath), the bar sits inside the node’s box; the words are the node’s own, EN and FR', () => {
+      expect(node.css).toMatch(/\.gd-multi>\.blocklyPath\{[^}]*stroke:/);
+      expect(node.css).toMatch(/\.gd-bk-sel\{position:absolute/);
+      const sw = node.selWords as Record<string, { en: string; fr: string }>;
+      expect(sw).toEqual({
+        iw4SelSeveral: { en: 'Select several', fr: 'Choisir plusieurs' },
+        iw4SelDel1: { en: 'Delete 1 block', fr: 'Supprimer 1 bloc' },
+        iw4SelDelN: { en: 'Delete {n} blocks', fr: 'Supprimer {n} blocs' },
+        iw4SelFold: { en: 'Fold into repeat ×{k}', fr: 'Plier en « répéter ×{k} »' },
+        iw4SelDone: { en: 'Done', fr: 'Fini' }
+      });
+    });
+  });
 });

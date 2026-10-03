@@ -273,6 +273,9 @@ var gardenKitBlocks = (function () {
 
   /** The start hat's place in the workspace (right of the drawer the flyout leaves; the node scrolls it into sight). */
   var START_AT = { x: 24, y: 24 };
+  /** The repeat block's count, as its picker offers it (P108 s9: a fold offers a count only inside it). */
+  var REPEAT_MIN = 1;
+  var REPEAT_MAX = 9;
   /** P108 IW-003 (lane B): fitProgram's margin each side (workspace units: measured, 20 left the right edge 2 px short at 1024) and its smallest scale (the zoom's minScale is 0.45). */
   var FIT_MARGIN = 36;
   var FIT_MIN = 0.5;
@@ -605,6 +608,19 @@ var gardenKitBlocks = (function () {
     iw4B_trick: { en: 'trick', fr: 'astuce' },
     iw4B_do: { en: 'do trick', fr: 'faire l’astuce' }
   };
+  /**
+   * P108 s9: several blocks at once — the block menu's item (a tablet has no shift key), the bar over the workspace. Kept
+   * beside WORDS, not in it: the page's word table must carry every key of WORDS (cg003Template's gate), and these five are
+   * not in it yet. They are iw4 keys, so a page row with the same key wins like any other (wordsOf); once the page's table
+   * carries them they move into WORDS.
+   */
+  var SEL_WORDS = {
+    iw4SelSeveral: { en: 'Select several', fr: 'Choisir plusieurs' },
+    iw4SelDel1: { en: 'Delete 1 block', fr: 'Supprimer 1 bloc' },
+    iw4SelDelN: { en: 'Delete {n} blocks', fr: 'Supprimer {n} blocs' },
+    iw4SelFold: { en: 'Fold into repeat ×{k}', fr: 'Plier en « répéter ×{k} »' },
+    iw4SelDone: { en: 'Done', fr: 'Fini' }
+  };
   // P108 IW-007 (lane A): the land's two sources, as the drawer's "go to nearest" names them — the fallback for the page's
   // iw7aK_ words (kept apart from WORDS: the page's table carries every iw4 key of WORDS, and these are lane A's).
   var IW7A_KIND_WORDS = { patch: { en: '🥕 carrot patch', fr: '🥕 carré de carottes' }, tree: { en: '🌳 tree', fr: '🌳 arbre' } };
@@ -612,6 +628,7 @@ var gardenKitBlocks = (function () {
   function wordsOf(rows, lang) {
     var out = {};
     for (var k in WORDS) out[k] = WORDS[k][lang] || WORDS[k].en;
+    for (var sk in SEL_WORDS) out[sk] = SEL_WORDS[sk][lang] || SEL_WORDS[sk].en;
     var list = readJson(rows, []);
     if (Array.isArray(list)) {
       for (var i = 0; i < list.length; i++) {
@@ -858,6 +875,8 @@ var gardenKitBlocks = (function () {
       }
       showEditor_() {
         var c = ctlOfWs(this.getSourceBlock() && this.getSourceBlock().workspace);
+        // P108 s9: while blocks are being chosen (a modifier held, or Select several on), a tap on a slot chooses its block.
+        if (c && c.multiTap && c.multiTap(this.getSourceBlock())) return;
         if (c) c.openPicker(this);
       }
     }
@@ -968,7 +987,7 @@ var gardenKitBlocks = (function () {
         }
       });
     }
-    container('garden_repeat', 'repeat', 'N', 'n', function () { return range(1, 9); });
+    container('garden_repeat', 'repeat', 'N', 'n', function () { return range(REPEAT_MIN, REPEAT_MAX); });
     container('garden_when', 'when', 'EVENT', 'event', function (ctx) { return slotOptions(ctx, ['when'], 'event', [['meow', 'meow']]); });
     container('garden_trick', 'trick', 'NAME', 'name', function (ctx) { return slotOptions(ctx, ['trick', 'do'], 'name', [['row', 'row'], ['hop', 'hop'], ['zigzag', 'zigzag']]); });
 
@@ -1242,7 +1261,7 @@ var gardenKitBlocks = (function () {
     }
     Bk.registry.register(Bk.registry.Type.FLYOUTS_HORIZONTAL_TOOLBOX, 'gardenKidFlyoutH', KidFlyoutH, true);
 
-    // ── No menu a child can break anything with (IW-004 §2): only Help and Duplicate. Every other item is unregistered;
+    // ── No menu a child can break anything with (IW-004 §2): only Help and Duplicate (and, P108 s9, Select several). Every other item is unregistered;
     // Duplicate is ours (the copy gets the next whole-number ids and stays under the brain size), in Blockly's own word.
     (function trimMenus() {
       var reg = Bk.ContextMenuRegistry && Bk.ContextMenuRegistry.registry;
@@ -1286,6 +1305,26 @@ var gardenKitBlocks = (function () {
         callback: function (scope) {
           var c = ctlOfWs(scope.block.workspace);
           if (c) c.duplicate(scope.block);
+        }
+      });
+      // P108 s9: a tablet has no shift key — "Select several" (a long press opens this menu: Blockly's Touch.longStart on
+      // any pointer that is not a mouse) turns on a mode where each tap chooses a block; the bar's Done ends it.
+      reg.register({
+        id: 'gardenSelectSeveral',
+        weight: 2,
+        scopeType: BLOCK,
+        displayText: function (scope) {
+          return w(ctxOf(scope.block), 'iw4SelSeveral');
+        },
+        preconditionFn: function (scope) {
+          var b = scope.block;
+          if (!b || b.isInFlyout || b.type === 'garden_start') return 'hidden';
+          var c = ctlOfWs(b.workspace);
+          return c && c.canChoose(b) ? 'enabled' : 'hidden';
+        },
+        callback: function (scope) {
+          var c = ctlOfWs(scope.block.workspace);
+          if (c) c.selectSeveral(scope.block);
         }
       });
     })();
@@ -1393,6 +1432,16 @@ var gardenKitBlocks = (function () {
     // The running block: Blockly's own highlight plus the ink ring over a white halo (P106 D5, ≥ 3:1 on every ground).
     '.gd-bk .gd-run>.blocklyPath{stroke:var(--gd-run,#2E2A3D)!important;stroke-width:4px!important;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff)}\n' +
     '.gd-bk .gd-sel>.blocklyPath{stroke:var(--gd-sel,#A86501);stroke-width:3px}\n' +
+    // P108 s9: the blocks chosen together — a dashed ink line on Blockly's own path (Zelos draws one .blocklyPath a block)
+    // over a white halo, so it reads on every block colour; the bar floats at the top of the node's own box.
+    '.gd-bk .gd-multi>.blocklyPath{stroke:#2E2A3D!important;stroke-width:4px!important;stroke-dasharray:9 5;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff)}\n' +
+    '.gd-bk.gd-several .gd-bk-host{box-shadow:inset 0 0 0 4px #4A2FA6}\n' +
+    '.gd-bk-sel{position:absolute;left:0;right:0;top:12px;z-index:5;display:flex;justify-content:center;pointer-events:none}\n' +
+    '.gd-bk.gd-narrow .gd-bk-sel{top:58px}\n' +
+    '.gd-bk-sel-in{pointer-events:auto;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:calc(100% - 24px);padding:8px;border-radius:14px;background:#EEE8FF;box-shadow:0 4px 14px rgba(0,0,0,.2)}\n' +
+    '.gd-bk-sel button{border:0;border-radius:999px;min-height:40px;padding:8px 14px;font-weight:800;font-size:15px;font-family:inherit;cursor:pointer;touch-action:manipulation;background:#fff;color:#4A2FA6}\n' +
+    '.gd-bk-sel button[data-sel-act="delete"]{background:#B3361C;color:#fff}\n' +
+    '.gd-bk-sel button[data-sel-act="fold"]{background:#4A2FA6;color:#fff}\n' +
     '.gd-bk .gd-slot{cursor:pointer}\n' +
     '.gd-bk-zoom{position:absolute;right:18px;bottom:18px;display:flex;flex-direction:column;gap:6px;z-index:3}\n' +
     '.gd-bk.gd-narrow .gd-bk-zoom{top:10px;bottom:auto;flex-direction:row}\n' +
@@ -1852,6 +1901,299 @@ var gardenKitBlocks = (function () {
       call('onSelected', next);
     }
 
+    // ── P108 s9: several blocks at once ──
+    // Richard (2026-10-03, after the kids played on Windows tablets): "you can't shift select a group of blockly nodes to
+    // delete" — and a group of the same block should condense into a repeat. Shift- (⌘-, ctrl-) click chooses a block; on a
+    // tablet the block menu's Select several turns on a mode in which each tap does. A plain click, or a click on the empty
+    // workspace, lets the set go — and is today's single selection, untouched. The bar over the workspace deletes the set,
+    // or folds it into one repeat when it is k copies of one run in one list (the page's fold's "same").
+    var multi = [];
+    ed.multiMode = false;
+    /** The modifier keys of the last press on the node's box (Blockly's CLICK and SELECTED events carry none). */
+    ed.mod = false;
+    function multiLive() {
+      var out = [];
+      for (var i = 0; i < multi.length; i++) {
+        var b = ed.ws ? ed.ws.getBlockById(multi[i]) : null;
+        if (b && !b.isDeadOrDying()) out.push(multi[i]);
+      }
+      multi = out;
+      return out;
+    }
+    ed.multiIds = function () {
+      return multiLive().slice();
+    };
+    /** The statement a press on this block chooses (a chip or a slot chooses its block) — never ▶, never one that cannot go. */
+    function choosable(b) {
+      var st = statementOf(b);
+      if (!st || st.type === 'garden_start' || st.isInFlyout || ed.locked || st.isShadow() || !st.isDeletable()) return null;
+      return st;
+    }
+    ed.canChoose = function (b) {
+      return !!choosable(b);
+    };
+    function toggleMulti(b) {
+      var st = choosable(b);
+      if (!st) return false;
+      multiLive();
+      // The block selected before (a plain tap) joins the set with the first one chosen beside it.
+      if (!multi.length && ed.selected && ed.selected !== st.id) {
+        var was = choosable(ed.ws.getBlockById(ed.selected));
+        if (was) multi.push(was.id);
+      }
+      var at = multi.indexOf(st.id);
+      if (at === -1) multi.push(st.id);
+      else multi.splice(at, 1);
+      if (ed.selected) noteSelected('');
+      showMulti();
+      return true;
+    }
+    function clearMulti() {
+      var had = multi.length > 0 || ed.multiMode || !!selBarEl;
+      multi = [];
+      ed.multiMode = false;
+      if (had) showMulti();
+    }
+    ed.clearMulti = clearMulti;
+    /** The block menu's Select several: the mode on, the block it was opened on chosen. */
+    ed.selectSeveral = function (b) {
+      if (ed.locked || !ed.ws) return;
+      ed.multiMode = true;
+      var st = choosable(b);
+      if (st && multiLive().indexOf(st.id) === -1) toggleMulti(st);
+      else showMulti();
+    };
+    /** A tap on a slot (KidPick) while blocks are being chosen chooses its block, and opens no picker. */
+    ed.multiTap = function (b) {
+      if (ed.locked || (!ed.multiMode && !ed.mod)) return false;
+      toggleMulti(b);
+      return true;
+    };
+
+    /** The list a statement sits in — its head (the first block of a stack, or of a container's input) — and its place. */
+    function placeOf(b) {
+      var head = b;
+      var i = 0;
+      for (;;) {
+        var pc = head.previousConnection;
+        var up = pc && pc.targetBlock();
+        if (!up || up.nextConnection !== pc.targetConnection) break;
+        head = up;
+        i++;
+      }
+      return { head: head, i: i };
+    }
+    function engineBlock(b) {
+      return engineOf(Bk.serialization.blocks.save(b, { addCoordinates: false, addNextBlocks: false }));
+    }
+    /** The page's fold's "same" (cg002Scripts FOLD_HELPERS sameBlock / shapeOf): t, n and slots; of containers, only two repeats of one shape. */
+    function shapeOfList(list) {
+      var out = [];
+      for (var i = 0; i < list.length; i++) {
+        var b = list[i];
+        if (!b) continue;
+        var s = { t: b.t };
+        if (b.n !== undefined) s.n = b.n;
+        if (b.slots) s.slots = b.slots;
+        if (b.body) s.body = shapeOfList(b.body);
+        if (Array.isArray(b['else'])) s['else'] = shapeOfList(b['else']);
+        out.push(s);
+      }
+      return out;
+    }
+    function sameCopy(a, b) {
+      if (!a || !b) return false;
+      if (a.body || b.body) return a.t === 'repeat' && b.t === 'repeat' && !!a.body && !!b.body && JSON.stringify(shapeOfList([a])) === JSON.stringify(shapeOfList([b]));
+      if (a.t !== b.t || (Number(a.n) || 0) !== (Number(b.n) || 0)) return false;
+      return JSON.stringify(a.slots || {}) === JSON.stringify(b.slots || {});
+    }
+    /**
+     * The fold the set offers: a CONTIGUOUS run of two or more blocks in ONE list that is k copies of its first p blocks —
+     * the smallest p whose k is a count the repeat block offers (on a tie the shorter sequence wins: Richard's ruling
+     * 2026-09-28 for the page's fold). Only where the drawer has a repeat (or no palette at all). Else null.
+     */
+    ed.foldPlan = function () {
+      var ids = multiLive();
+      if (ids.length < 2 || ed.locked || !ed.ws) return null;
+      if (ed.ctx.paletteList.length && !ed.ctx.palette.repeat) return null;
+      var head = null;
+      var at = [];
+      for (var i = 0; i < ids.length; i++) {
+        var b = ed.ws.getBlockById(ids[i]);
+        var pl = placeOf(b);
+        if (head && pl.head !== head) return null;
+        head = pl.head;
+        at.push({ i: pl.i, b: b });
+      }
+      at.sort(function (x, y) {
+        return x.i - y.i;
+      });
+      for (var j = 1; j < at.length; j++) if (at[j].i !== at[j - 1].i + 1) return null;
+      var run = at.map(function (x) {
+        return x.b;
+      });
+      var eng = run.map(engineBlock);
+      var n = run.length;
+      for (var p = 1; p * 2 <= n; p++) {
+        if (n % p) continue;
+        var k = n / p;
+        if (k < REPEAT_MIN || k > REPEAT_MAX) continue;
+        var ok = true;
+        for (var q = p; q < n && ok; q++) ok = sameCopy(eng[q], eng[q % p]);
+        if (ok) return { k: k, p: p, ids: run.map(function (x) { return x.id; }) };
+      }
+      return null;
+    };
+
+    /** One edit of several blocks: one event group (one undo puts it back), one emit, the set let go. */
+    function batch(fn) {
+      Bk.Events.setGroup(true);
+      ed.loading = true;
+      try {
+        fn();
+      } finally {
+        ed.loading = false;
+        Bk.Events.setGroup(false);
+      }
+      multi = [];
+      ed.multiMode = false;
+      if (ed.selected && !selectedBlock()) noteSelected('');
+      showMulti();
+      refreshFields();
+      schedule();
+      emit();
+      fitSoon();
+    }
+    /** Delete every block in the set: one from the middle of a stack heals it (the blocks under it move up), a container goes with its body. */
+    ed.multiDelete = function () {
+      var ids = multiLive();
+      if (!ids.length || ed.locked || !ed.ws) return false;
+      batch(function () {
+        for (var i = 0; i < ids.length; i++) {
+          var b = ed.ws.getBlockById(ids[i]);
+          if (b && !b.isDeadOrDying() && b.isDeletable()) b.dispose(true);
+        }
+      });
+      return true;
+    };
+    /** The fold: one repeat k at the run's place, its body the first copy (those blocks keep their ids), the other copies gone. */
+    ed.multiFold = function () {
+      var plan = ed.foldPlan();
+      if (!plan) return false;
+      var run = plan.ids.map(function (id) {
+        return ed.ws.getBlockById(id);
+      });
+      var first = run[0];
+      var last = run[run.length - 1];
+      // A block made here gets the next whole number of the program (counted before the copies go, as the page's fold does).
+      var repId = String(maxId() + 1);
+      batch(function () {
+        var upper = first.previousConnection.targetConnection;
+        var xy = upper ? null : first.getRelativeToSurfaceXY();
+        var after = last.getNextBlock();
+        if (after) after.previousConnection.disconnect();
+        if (upper) first.previousConnection.disconnect();
+        var drop = run[plan.p];
+        drop.previousConnection.disconnect();
+        drop.dispose(false);
+        var rep = ed.ws.newBlock('garden_repeat', repId);
+        rep.setFieldValue(String(plan.k), 'N');
+        if (rep.initSvg) {
+          rep.initSvg();
+          rep.render();
+        }
+        if (upper) upper.connect(rep.previousConnection);
+        else if (xy) {
+          var r0 = rep.getRelativeToSurfaceXY();
+          rep.moveBy(xy.x - r0.x, xy.y - r0.y);
+        }
+        rep.getInput('DO').connection.connect(first.previousConnection);
+        if (after) rep.nextConnection.connect(after.previousConnection);
+      });
+      return true;
+    };
+
+    // ── the set on the screen: a mark on each chosen block, the bar at the top of the node's box ──
+    var selBarEl = null;
+    function markMulti() {
+      if (!ed.ws) return;
+      var all = ed.ws.getAllBlocks(false);
+      for (var i = 0; i < all.length; i++) {
+        var r = all[i].getSvgRoot && all[i].getSvgRoot();
+        if (!r) continue;
+        var on = multi.indexOf(all[i].id) !== -1;
+        if (on || r.classList.contains('gd-multi')) {
+          r.classList.toggle('gd-multi', on);
+          r.setAttribute('data-multi', on ? '1' : '0');
+        }
+      }
+    }
+    function showMulti() {
+      var ids = multiLive();
+      markMulti();
+      if (typeof document === 'undefined') return;
+      root.classList.toggle('gd-several', !!ed.multiMode);
+      if (ed.locked || (!ids.length && !ed.multiMode)) {
+        if (selBarEl && selBarEl.parentNode) selBarEl.parentNode.removeChild(selBarEl);
+        selBarEl = null;
+        return;
+      }
+      if (!selBarEl) {
+        selBarEl = document.createElement('div');
+        selBarEl.className = 'gd-bk-sel';
+        selBarEl.setAttribute('data-sel-bar', 'true');
+        selBarEl.setAttribute('role', 'toolbar');
+        var inner = document.createElement('div');
+        inner.className = 'gd-bk-sel-in';
+        selBarEl.appendChild(inner);
+        root.appendChild(selBarEl);
+      }
+      var box = selBarEl.firstChild;
+      while (box.firstChild) box.removeChild(box.firstChild);
+      selBarEl.setAttribute('data-n', String(ids.length));
+      var add = function (act, text, run) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('data-sel-act', act);
+        b.textContent = text;
+        b.addEventListener('click', function (e) {
+          if (e && e.preventDefault) e.preventDefault();
+          run();
+        });
+        box.appendChild(b);
+        return b;
+      };
+      if (ids.length) add('delete', ids.length === 1 ? w(ed.ctx, 'iw4SelDel1') : w(ed.ctx, 'iw4SelDelN', { n: ids.length }), function () { ed.multiDelete(); });
+      var plan = ed.foldPlan();
+      if (plan) {
+        var fb = add('fold', w(ed.ctx, 'iw4SelFold', { k: plan.k }), function () { ed.multiFold(); });
+        fb.setAttribute('data-k', String(plan.k));
+        fb.setAttribute('data-p', String(plan.p));
+      }
+      add('done', w(ed.ctx, 'iw4SelDone'), function () { clearMulti(); });
+    }
+    // The press's modifier keys, read before Blockly's own handlers (capture on the node's box).
+    var onPress = function (e) {
+      ed.mod = !!(e && (e.shiftKey || e.metaKey || e.ctrlKey));
+    };
+    root.addEventListener('pointerdown', onPress, true);
+    // Delete / Backspace delete the set (before Blockly's own shortcut, which deletes only its one selected block).
+    var onKey = function (e) {
+      if (!e || (e.key !== 'Delete' && e.key !== 'Backspace')) return;
+      if (ed.locked || !multiLive().length) return;
+      var t = e.target;
+      if (t && t.nodeType === 1) {
+        var tn = String(t.tagName || '').toUpperCase();
+        if (tn === 'INPUT' || tn === 'TEXTAREA' || tn === 'SELECT' || t.isContentEditable) return;
+        if (t !== document.body && t !== document.documentElement && !root.contains(t)) return;
+      }
+      e.preventDefault();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      e.stopPropagation();
+      ed.multiDelete();
+    };
+    if (typeof document !== 'undefined') document.addEventListener('keydown', onKey, true);
+
     // ── what is shown depends on what is picked: the chip decides the states; `has` shows N or WHAT; count_is shows its N ──
     function refreshFields() {
       var all = ed.ws.getAllBlocks(false);
@@ -1935,6 +2277,9 @@ var gardenKitBlocks = (function () {
           else r.removeAttribute('data-run');
           r.classList.toggle('gd-sel', b.id === ed.selected);
           r.setAttribute('data-sel', b.id === ed.selected ? '1' : '0');
+          // P108 s9: a block in the set chosen together.
+          r.classList.toggle('gd-multi', multi.indexOf(b.id) !== -1);
+          r.setAttribute('data-multi', multi.indexOf(b.id) !== -1 ? '1' : '0');
           if (b.getInput('DO')) {
             r.classList.add('gd-rep');
             r.setAttribute('data-rep', b.id);
@@ -2100,6 +2445,8 @@ var gardenKitBlocks = (function () {
       ed.loading = false;
       ed.lastEmitted = text;
       if (ed.selected && !ed.ws.getBlockById(ed.selected)) noteSelected('');
+      // P108 s9: a program put whole (or the view built again) lets the set go.
+      clearMulti();
       refreshFields();
       highlight();
       try {
@@ -2262,6 +2609,8 @@ var gardenKitBlocks = (function () {
     // tap forward, tap forward" puts both forwards inside the repeat.
     function onEvent(e) {
       if (e.type === Bk.Events.SELECTED) {
+        // P108 s9: a press that chooses blocks (a modifier held, or Select several on) is not a selection.
+        if (ed.mod || ed.multiMode) return;
         var nb = e.newElementId ? ed.ws.getBlockById(e.newElementId) : null;
         var st = statementOf(nb);
         if (st && st.type !== 'garden_start' && st.id !== ed.selected) {
@@ -2271,11 +2620,18 @@ var gardenKitBlocks = (function () {
         return;
       }
       if (e.type === Bk.Events.CLICK && e.targetType === 'workspace') {
+        clearMulti();
         noteSelected('');
         return;
       }
       if (e.type === Bk.Events.CLICK && e.targetType === 'block' && e.blockId) {
         var b = ed.ws.getBlockById(e.blockId);
+        // P108 s9: shift / ⌘ / ctrl-click, or any tap while Select several is on, chooses the block; a plain click lets the set go.
+        if (!ed.locked && (ed.mod || ed.multiMode)) {
+          toggleMulti(b);
+          return;
+        }
+        if (multi.length) clearMulti();
         if (b && b.type === 'garden_thing' && !ed.locked) {
           ed.armPick(b);
           return;
@@ -2295,6 +2651,8 @@ var gardenKitBlocks = (function () {
       refreshFields();
       schedule();
       emit();
+      // P108 s9: a block of the set dragged away or thrown out — the set, its count and its fold follow.
+      if (multi.length || ed.multiMode) showMulti();
       // P108 IW-003 (lane B): a program grown by a tap or a drop is fitted too — shrink only (her own zoom-in stays until
       // the program no longer fits beside the drawer).
       fitSoon();
@@ -2386,6 +2744,11 @@ var gardenKitBlocks = (function () {
       closePicker();
       hideLine();
       if (typeof document !== 'undefined') document.removeEventListener('pointerdown', outside, true);
+      // P108 s9: the set's listeners and its bar.
+      if (typeof document !== 'undefined') document.removeEventListener('keydown', onKey, true);
+      root.removeEventListener('pointerdown', onPress, true);
+      if (selBarEl && selBarEl.parentNode) selBarEl.parentNode.removeChild(selBarEl);
+      selBarEl = null;
       if (ed.ws) {
         delete CTL[ed.ws.id];
         try {
@@ -2448,6 +2811,8 @@ var gardenKitBlocks = (function () {
         if (locked) {
           closePicker();
           ed.cancelPick();
+          // P108 s9: a run plays — nothing is chosen.
+          clearMulti();
         }
       }
       var run = p.runningId === undefined || p.runningId === null ? '' : String(p.runningId);
@@ -2465,6 +2830,7 @@ var gardenKitBlocks = (function () {
       root.classList.toggle('gd-narrow', foot());
       root.classList.toggle('gd-picking', !!ed.picking);
       root.classList.toggle('gd-locked', !!ed.locked);
+      root.classList.toggle('gd-several', !!ed.multiMode);
     }
 
     function destroyWs() {
@@ -2579,7 +2945,8 @@ var gardenKitBlocks = (function () {
     docs:
       'The program editor a child holds, on real Blockly 12 made for children (P108 IW-004): the Zelos look, the drawer always ' +
       'open on the left (tap a drawer block to add it, or drag it out; drag a block back to the drawer to throw it away), a ? on ' +
-      'the drawer blocks only, big pickers instead of typing, no menu but Help and Duplicate, the running block glowing. ' +
+      'the drawer blocks only, big pickers instead of typing, no menu but Help, Duplicate and Select several, the running block glowing. ' +
+      'Several blocks at once: shift- (⌘-, ctrl-) click, or Select several on a tablet, chooses them; the bar over the workspace deletes them (or the Delete key), or folds k copies of one run into one repeat. ' +
       'Program in and out is the engine program (the same JSON Block List reads and writes); Blockly JSON never leaves the node. ' +
       'A thing chip is picked on the island: a tap on a chip arms Picking, and the page sends the tapped thing through Pick.',
     ssr: { compat: 'safe' },
@@ -2592,6 +2959,8 @@ var gardenKitBlocks = (function () {
     // P108 IW-007 (s6): a chip's words (a thing picked on the world), for the gate.
     chipLabel: chipLabel,
     words: WORDS,
+    // P108 s9: the words of several blocks at once (beside WORDS until the page's table carries them).
+    selWords: SEL_WORDS,
     css: BLOCKS_CSS,
 
     getReactComponent: function () {
