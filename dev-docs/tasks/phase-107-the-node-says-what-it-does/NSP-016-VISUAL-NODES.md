@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 📋 not started. Research and a ruling before any build.**
+**Status: 🟡 s36 (2026-10-03): research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -66,4 +66,24 @@ Census notes:
 
 ## 7. Built
 
-*(empty)*
+### 7.1 s36, 2026-10-03 — the research (AC1) and the ruling (AC2)
+
+[RESEARCH-LAYOUT-SEMANTICS.md](RESEARCH-LAYOUT-SEMANTICS.md) holds it. In brief:
+- **The toolkits.** A table of what Yoga, SwiftUI, Compose and Flutter share, can express, and cannot.
+- **The census.** `node scripts/node-spec/visual-census.js` reads the catalog, the hand-kept classes in
+  [visual-params.json](visual-params.json) and the product surface: 10 shelf templates, Site Builder, and 109 examples.
+  It writes [visual-census.json](visual-census.json); `--check` fails on an input with no class. 274 inputs: 65 logic, 55
+  layout, 141 look, 13 web-only. Of 11,041 layout settings on templates, 96.6% are shared, 0.9% expressible, 2.4% not
+  shared (`flexWrap: wrap` on rows, 173). Sizes are `%` / `px` (98%), and colours and fonts are tokens (92.5%).
+- **The finding.** 9 of the 10 shelf templates carry a hand-written stylesheet (`CSS Definition`, or a Function that
+  injects a `<style>`): about 1,084 rules, 185 KB, `!important` 445 times. 17% of their visual nodes take a class from it.
+  A parameter-level spec cannot see what those sheets change.
+
+**R10 (Richard, 2026-10-03): "Logic + record each setting's portability".** The README §7 has the question as asked.
+The build:
+- (1) logic specs for all 19, the 65 behaviour inputs plus outputs and signals, through a visual-node seam in the runtime
+  target (the corpus harness already makes these nodes without React; the events a person causes need a world face);
+- (2) each layout and look input's class from `visual-params.json` written into the spec's port metadata;
+- (3) no geometry until NSP-017 has said what a `CSS Definition` sheet is.
+
+AC4 waits on (3).
