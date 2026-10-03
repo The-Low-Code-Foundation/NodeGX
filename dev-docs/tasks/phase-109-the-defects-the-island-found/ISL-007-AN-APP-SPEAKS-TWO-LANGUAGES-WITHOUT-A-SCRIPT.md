@@ -205,3 +205,12 @@ the spec's stub; a test-harness trap, not a product defect.
 Text, and a Text is there anyway, so first measure what a `T` component costs against Translate words' 16 placements);
 then AC4 (the island moves, `drive-isl007-words.js` re-run beside the AC1 table), AC6.
 
+**Later in s8 — the third clause and AC4, measured.** The cheaper page pattern already exists: nightbook's `UI/Say`
+(Component Inputs `key` + variables → Translation → Text, placed **152** times where a Text would be). Its third node, a
+Function that blanks an emptied key, was the P78-TPL011-TRANSLATION workaround and is no longer needed in 1.1.0. So a page
+pays one component instance per word, not a node pair, and no new node is designed. Not taught by the door yet: the door's
+examples come from the built-in catalog (AC6). **AC4 cannot be done apart from the island rebuild:** only **94** wires leave
+the 16 Translate words (48 Text, 18 Button label, 28 component inputs), while **69 of 88** Functions make words themselves
+(fill / fillIn / lookups over the table, placed 6 times). AC4 therefore moves to
+[IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md) AC4, the island's own rebuild.
+

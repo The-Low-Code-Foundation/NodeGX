@@ -1,6 +1,11 @@
 # ISL-006 — A Function says what its ports are
 
 **Status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
+**Re-scoped s8 (2026-10-03), against "Native nodes first" and ISL-007:** its largest consumer goes. `Translate words`
+(696 outputs) is replaced by the i18next add-on (ISL-007, built s8) and deleted in [IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md)
+AC4. What is left is the general case: a Function whose outputs come from a list (`Outputs[key] = …`) mints none, and a
+generator predicts ports with its own copy of the runtime's regex. Still a product defect; no longer the island's
+blocker. Priority below the three gaps IW-010 depends on.
 **Source:** [audit F09](AUDIT-2026-10-01.md) · `Logic/Translate words` (696 outputs) and the generator's 120-entry name→type table · related register rows [P78 D45 and D80](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) (a wire to a port the script never mentions)
 **Side:** product (runtime `Function` node and its port parser, the editor's port panel, the MCP door, catalog docs)
 

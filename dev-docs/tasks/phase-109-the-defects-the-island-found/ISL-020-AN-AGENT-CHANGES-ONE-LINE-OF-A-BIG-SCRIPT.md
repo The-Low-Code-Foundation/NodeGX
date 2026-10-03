@@ -1,6 +1,9 @@
 # ISL-020 — An agent changes one line of a big script
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F27](AUDIT-2026-10-01.md) · sized by
+**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Re-scoped s8 (2026-10-03), against "Native nodes first":** the ruled rebuild ([IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md))
+takes the engine from 20 copies to about 7 (census estimate), so the "17 times over" case shrinks but does not vanish:
+the 29 script rows stay script, and any template with a big Function meets the read-all/send-all cost. The tool is
+still worth building; its fixture should be a big Function that survives the rebuild, not the engine copies. **Source:** [AUDIT F27](AUDIT-2026-10-01.md) · sized by
 F08 (17 copies of one engine) · **Side:** product (MCP door, `noodl-mcp`)
 
 To fix one line in a Function's script through the door, an agent reads the whole component and sends the whole script
