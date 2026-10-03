@@ -16,14 +16,16 @@
  */
 
 import type { TraceEvent } from '../src';
-import { EQUIVALENT_MUTANTS, interpreterAdapter, loadScenarios, play, runConformance, specs, World } from '../src';
+import { EQUIVALENT_MUTANTS, interpreterAdapter, loadScenarios, NOT_A_FILE, play, runConformance, specs, World } from '../src';
 
 const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRelation', 'NewDbModelProperties', 'SetDbModelProperties', 'DbModel2', 'DbCollection2'];
 
 /** s25 — Filter Records: no backend call, so graded here but not in the AC6 call table below */
 /** s26 — the user nodes (world.ts AUTH): calls without a `collection`, so their AC5 / AC6 tests are their own, below */
 const USERS = ['net.noodl.user.User', 'net.noodl.user.SetUserProperties', 'net.noodl.user.LogIn', 'net.noodl.user.SignUp', 'net.noodl.user.LogOut', 'net.noodl.user.RequestMagicLink', 'net.noodl.user.SignInWith'];
-const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS];
+/** s30 — the file nodes (world.ts FILES): Cloud File calls nothing; Upload File and Sign File URL hand the contract's file operations */
+const FILES = ['Cloud File', 'Upload File', 'Sign File URL'];
+const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS, ...FILES];
 
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {
   for (const type of CONFORMING) {
@@ -116,6 +118,31 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
     const none = all.filter((x) => !x.trace.some((e) => e.t === 'backend') && x.trace.some(isFailure));
     expect(calls.length).toBeGreaterThan(0);
     expect(none.map((x) => x.name).some((n) => n.includes('does not have'))).toBe(true);
+    for (const { trace } of calls) for (const e of trace) if (e.t === 'backend') expect((e as TraceEvent & { op: string }).op).toBe(op);
+  });
+
+  // s30 — the file operations (world.ts FILES): every failure sentence on Error beside a Failure — before the call (no
+  // file, no backend), refused inside it (not a file) and answered — and the not-configured Backend makes no call
+  test.each([
+    [
+      'Upload File',
+      'uploadFile',
+      ['No file specified', NOT_A_FILE, 'HTTP 403: {"errors":[{"message":"Forbidden"}]}', 'Permission denied', 'The backend this node is set to ("nope") is not configured in this project.']
+    ],
+    ['Sign File URL', 'signFileUrl', ['No file specified', 'Permission denied', 'The backend this node is set to ("nope") is not configured in this project.']]
+  ])('%s: every failure sentence on Error beside a Failure; the call is %s — and a scenario makes none', async (type, op, sentences) => {
+    const all = await traces(type);
+    const errors = new Set<string>();
+    for (const { trace } of all) {
+      const failed = trace.some(isFailure);
+      for (const e of trace) if (failed && e.t === 'value' && e.port === 'error') errors.add(String((e as { value: unknown }).value));
+    }
+    for (const sentence of sentences) expect([...errors]).toContain(sentence);
+    const calls = all.filter((x) => x.trace.some((e) => e.t === 'backend'));
+    const none = all.filter((x) => !x.trace.some((e) => e.t === 'backend') && x.trace.some(isFailure));
+    expect(calls.length).toBeGreaterThan(0);
+    expect(none.map((x) => x.name).some((n) => n.includes('does not have'))).toBe(true);
+    expect(none.map((x) => x.name).some((n) => n.startsWith('no file'))).toBe(true);
     for (const { trace } of calls) for (const e of trace) if (e.t === 'backend') expect((e as TraceEvent & { op: string }).op).toBe(op);
   });
 

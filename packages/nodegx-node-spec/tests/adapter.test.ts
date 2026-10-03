@@ -45,4 +45,19 @@ describe('the interpreter adapter', () => {
     const t = await play(a, 'Alias', {}, ['settle']);
     expect(t).toEqual([{ t: 'settle' }, { t: 'value', port: 'currentCount', value: 0 }]);
   });
+
+  // NSP-014 s30 — a file and a stored file are made the TARGET's way, through its hooks
+  test('`{ "$cloudFile": … }` is handed as a stored file; a plain object with its keys is not one', async () => {
+    const t = await play(interpreterAdapter(), 'Cloud File', {}, ['settle', { set: 'file', value: { url: 'u0', name: 'x_y' } }, 'settle', { set: 'file', value: { $cloudFile: { name: 'k_a.png', url: 'u' } } }, 'settle']);
+    expect(t.filter((e) => e.t === 'value')).toEqual([
+      { t: 'value', port: 'name', value: 'a.png' },
+      { t: 'value', port: 'url', value: 'u' }
+    ]);
+  });
+
+  test('a target without the hook refuses a scenario that hands a file, by name', async () => {
+    const a = { ...interpreterAdapter(), file: undefined, cloudFile: undefined };
+    await expect(play(a, 'Cloud File', {}, [{ set: 'file', value: { $cloudFile: { name: 'a', url: 'u' } } }])).rejects.toThrow(/has no cloudFile\(\)/);
+    await expect(play(a, 'Cloud File', {}, [{ set: 'file', value: { $file: { name: 'a' } } }])).rejects.toThrow(/has no file\(\)/);
+  });
 });

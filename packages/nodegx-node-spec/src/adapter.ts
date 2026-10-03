@@ -79,6 +79,16 @@
  *                        not as the object: how a single-node play hands a node the records ANOTHER
  *                        node's output would carry (a Filter Records' Items). `play` resolves it; a
  *                        target without this hook cannot play such a scenario, and says so.
+ *   file(desc)           OPTIONAL, NSP-014 s30 — a file the browser hands, made the target's way (a `File`):
+ *                        a scenario value that is EXACTLY `{ "$file": { name, type?, size? } }` is handed
+ *                        to the node as a file named `name`, of MIME type `type` (absent: `''`), `size`
+ *                        zero bytes (absent: 0), `lastModified` 0 — what an Open File Picker's File output
+ *                        carries to an Upload File. Canonical as `{ "$file": … }` (canonical.ts).
+ *   cloudFile(desc)      OPTIONAL, NSP-014 s30 — a STORED file, the target's own (the runtime's `CloudFile`):
+ *                        a scenario value that is EXACTLY `{ "$cloudFile": { name, url, contentType?, size?,
+ *                        target? } }` is handed as one — what an Upload File's Cloud File output or a
+ *                        record's file property carries. A plain object with the same keys is NOT one, and
+ *                        the nodes that take a stored file drop it (`instanceof CloudFile`).
  *
  * Why values sort by port NAME and not by the spec's declaration order (which NSP-001 §5 first
  * wrote): a stranger's target (NSP-006) must produce a comparable trace from the spec and the
@@ -108,6 +118,33 @@ export interface TargetAdapter<H extends Handle = Handle> {
   advance?(h: H, ms: number): Promise<void>;
   /** NSP-014 s25 — see the contract above. */
   registryArray?(name: string): unknown;
+  /** NSP-014 s30 — see the contract above. */
+  file?(desc: FileDesc): unknown;
+  cloudFile?(desc: CloudFileDesc): unknown;
+}
+
+/** NSP-014 s30 — what `{ "$file": … }` describes: a file the browser hands. */
+export interface FileDesc {
+  name: string;
+  type?: string;
+  size?: number;
+}
+
+/** NSP-014 s30 — what `{ "$cloudFile": … }` describes: a stored file (`@noodl/backend-contract` `FileRef`, as the runtime's `CloudFile` keeps it). */
+export interface CloudFileDesc {
+  name: string;
+  url: string;
+  contentType?: string;
+  size?: number;
+  target?: Readonly<Record<string, unknown>>;
+}
+
+/** NSP-014 s30 — a scenario value tagged with `tag`: an object whose ONLY key is `tag`, an object. */
+function isTagged<T>(value: unknown, tag: string): value is Record<string, T> {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return false;
+  const keys = Object.keys(value);
+  const inner = (value as Record<string, unknown>)[tag];
+  return keys.length === 1 && keys[0] === tag && !!inner && typeof inner === 'object' && !Array.isArray(inner);
 }
 
 /** NSP-014 s25 — a scenario value naming a registry array: an object whose ONLY key is `$array`, a string. */
@@ -154,6 +191,15 @@ export async function play<H extends Handle>(
   const restore = world && adapter.install ? adapter.install(world) : undefined;
   // NSP-014 s25 — `{ "$array": name }` is that registry array, the target's own (registryArray above)
   const resolve = (value: unknown): unknown => {
+    // NSP-014 s30 — `{ "$file": … }` / `{ "$cloudFile": … }` are a file, made the target's way (file / cloudFile above)
+    if (isTagged<FileDesc>(value, '$file')) {
+      if (!adapter.file) throw new Error(`${adapter.name} has no file(): it cannot play a scenario that hands a node a file`);
+      return adapter.file(value.$file);
+    }
+    if (isTagged<CloudFileDesc>(value, '$cloudFile')) {
+      if (!adapter.cloudFile) throw new Error(`${adapter.name} has no cloudFile(): it cannot play a scenario that hands a node a stored file`);
+      return adapter.cloudFile(value.$cloudFile);
+    }
     if (!isArrayRef(value)) return value;
     if (!adapter.registryArray) throw new Error(`${adapter.name} has no registryArray(): it cannot play a scenario that hands a node a registry array`);
     return adapter.registryArray(value.$array);

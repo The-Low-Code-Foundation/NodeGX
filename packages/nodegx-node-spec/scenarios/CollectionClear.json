@@ -120,5 +120,49 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Do twice with no array bound (the second keeps the same Error), then bind and Do once: one done",
+    "because": ":44-63 — each frame's presses are settled and forgotten; s30: closes a mutant seed 20729's sequences left alive (afterInputs drop-set on the failure branch whose Error is unchanged)",
+    "params": {},
+    "steps": [
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      "settle",
+      "settle",
+      {
+        "set": "collectionId",
+        "value": "abc"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "m1": {
+            "a": 1,
+            "b": "x"
+          },
+          "m2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "abc": [
+            "m1",
+            "m2"
+          ],
+          "empty": []
+        }
+      }
+    }
   }
 ]

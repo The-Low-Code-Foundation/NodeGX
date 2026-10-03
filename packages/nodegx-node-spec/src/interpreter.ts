@@ -725,9 +725,9 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     if (worldId !== undefined) world.network.abort(worldId);
   }
   // BACKEND (world.ts, NSP-014 s21): the call recorded as handed, in the request group; the answer lands in the inbox
-  if (patch.backend) {
+  // (s30) a list is several calls, made in its order
+  for (const c of patch.backend === undefined ? [] : Array.isArray(patch.backend) ? (patch.backend as readonly SpecBackendCall[]) : [patch.backend as SpecBackendCall]) {
     if (!spec.world?.backend) throw new SpecError(`${spec.type}.${port}: called a backend but the spec has no world.backend handler`);
-    const c = patch.backend;
     if (typeof c.id !== 'string') throw new SpecError(`${spec.type}.${port}: a backend call needs an id`);
     const call = { op: c.op, backend: c.backend, args: c.args };
     // s26: an AUTH call keeps the session its backend held at the call — the REST adapter merges an answer over that

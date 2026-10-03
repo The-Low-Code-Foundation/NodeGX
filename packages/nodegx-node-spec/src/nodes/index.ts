@@ -60,6 +60,8 @@ import { UserNode } from './user';
 import { SetUserProperties } from './set-user-properties';
 import { LogIn, LogOut, SignUp } from './user-actions';
 import { RequestMagicLink, SignInWith } from './user-handovers';
+import { CloudFile } from './cloud-file';
+import { SignFileUrl, UploadFile } from './upload-file';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
 import { JSONStreamParser } from './json-stream-parser';
@@ -159,6 +161,9 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [LogOut.type]: LogOut,
   [RequestMagicLink.type]: RequestMagicLink, // s28
   [SignInWith.type]: SignInWith,
+  [CloudFile.type]: CloudFile, // s30 (the world's FILES)
+  [UploadFile.type]: UploadFile,
+  [SignFileUrl.type]: SignFileUrl,
   [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
@@ -232,6 +237,9 @@ export {
   LogOut,
   RequestMagicLink,
   SignInWith,
+  CloudFile,
+  UploadFile,
+  SignFileUrl,
   States,
   RandomBytes,
   Repeat,

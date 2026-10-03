@@ -1104,5 +1104,52 @@
         }
       }
     }
+  },
+  {
+    "name": "Id emptied while bound: the record is unbound, so a later Fetch has no Id — Missing Id., no call",
+    "because": "dbmodelnode2.ts :268-273 → setModelID :310-318 (an empty id binds nothing) → :411-414; s30: closes a mutant seed 20729's sequences left alive (modelId drop-set on the unbind branch)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "n": 1
+          }
+        }
+      }
+    }
   }
 ]

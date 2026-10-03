@@ -13,12 +13,14 @@
  * reads a calendar reads it in the script's zone, exactly as the runtime target's nodes do.
  */
 
+import { File as NodeFile } from 'buffer';
+
 import type { AnyNodeSpec } from '../spec';
 import type { Handle, TargetAdapter } from '../adapter';
 import type { TraceEvent } from '../trace';
 import { advance, mount, set, signal, settle, trace, type Instance } from '../interpreter';
 import { specFor } from '../nodes';
-import { installTimeZone, type World } from '../world';
+import { installTimeZone, StoredFile, type World } from '../world';
 
 export interface InterpreterHandle extends Handle {
   readonly inst: Instance;
@@ -74,6 +76,14 @@ export function interpreterAdapter(options: InterpreterAdapterOptions = {}): Tar
     registryArray(name) {
       if (!current) throw new Error('interpreter: a registry array names the play’s world, and none is installed');
       return current.registry.collection(name);
+    },
+    // NSP-014 s30 — a file the browser hands: Node's `File`, its bytes zeros (adapter.ts)
+    file(desc) {
+      return new NodeFile([new Uint8Array(desc.size ?? 0)], desc.name, { type: desc.type ?? '', lastModified: 0 });
+    },
+    // NSP-014 s30 — a stored file: the world's `StoredFile` (world.ts FILES)
+    cloudFile(desc) {
+      return new StoredFile(desc);
     }
   };
 }

@@ -1,0 +1,149 @@
+[
+  {
+    "name": "a stored file: all four reported, the name without its prefix",
+    "because": "cloudfilenode.ts :75-84 (taken, all four sent); :36-41 (everything up to the first underscore dropped)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "abc_my_photo.png",
+            "url": "https://files.example/abc_my_photo.png",
+            "contentType": "image/png",
+            "size": 3
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a stored file with no prefix and neither optional field: Name whole, Content Type and Size never sent",
+    "because": "cloudfilenode.ts :40 (one part: the name as it is); :55, :64 (the getters hand undefined — never sent, C3)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "plain.png",
+            "url": "https://files.example/plain.png"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a plain object with a stored file's keys is dropped; a stored file after it is taken (the control)",
+    "because": "cloudfilenode.ts :76-78 — `instanceof CloudFile` only",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "name": "abc_photo.png",
+          "url": "https://files.example/abc_photo.png"
+        }
+      },
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "abc_photo.png",
+            "url": "https://files.example/abc_photo.png"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "null after a stored file keeps the stored file",
+    "because": "cloudfilenode.ts :76-78 — any other value leaves the held file",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "abc_photo.png",
+            "url": "u1",
+            "size": 3
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "file",
+        "value": null
+      },
+      "settle",
+      {
+        "set": "file",
+        "value": "abc"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a second stored file replaces the first; a field it lacks keeps its old value on the wire",
+    "because": "cloudfilenode.ts :79-83 — all four flagged; the second has no Size, `undefined` is never sent (C3)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "a_one.png",
+            "url": "u1",
+            "contentType": "image/png",
+            "size": 3
+          }
+        }
+      },
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "_two.png",
+            "url": "u2"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a PocketBase file: its stored name's first part is dropped — Name is the random suffix (row C52)",
+    "because": "cloudfilenode.ts :38-41 — the prefix rule is Parse's, applied to every backend; PocketBase stores photo.png as photo_<random10>.png (BCN-007-FILES-PROBE-OUTPUT.txt :62)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "photo_g235k8arvj.png",
+            "url": "https://pb.example/api/files/notes/r1/photo_g235k8arvj.png",
+            "target": {
+              "kind": "record",
+              "collection": "notes",
+              "recordId": "r1",
+              "field": "attachment"
+            }
+          }
+        }
+      },
+      "settle"
+    ]
+  }
+]

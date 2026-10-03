@@ -428,7 +428,10 @@ export interface Patch<S, O> {
    *             event, as handed. What a show does is `WorldView.popupAnswer`; what the person does to an open
    *             popup later arrives through `world.popup`. No window needed.
    *   `backend` NSP-014 s21 — an operation handed to a backend (world.ts BACKEND, R9): a `backend` event in the
-   *             request group, as handed; the answer arrives at `WorldHandlers.backend` with the call's `id`.
+   *             request group, as handed; the answer arrives at `WorldHandlers.backend` with the call's `id`. (s30) A
+   *             list is several calls made in that order — a node whose every press in a frame is its own call
+   *             (Upload File): each recorded and issued before the next, so an answer one gives inside the call
+   *             (world.ts FILES' refusal) lands before the next call is made.
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
@@ -441,7 +444,7 @@ export interface Patch<S, O> {
   back?: ReadonlyArray<{ action: unknown; results: unknown }>;
   route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
   popup?: import('./world').PopupCall;
-  backend?: SpecBackendCall;
+  backend?: SpecBackendCall | readonly SpecBackendCall[];
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {

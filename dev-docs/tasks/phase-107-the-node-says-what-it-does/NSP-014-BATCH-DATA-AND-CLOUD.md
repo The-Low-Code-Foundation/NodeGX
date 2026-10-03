@@ -1,7 +1,7 @@
 # NSP-014 — Batch: records, users, files, HTTP, streams, and the cloud-only nodes
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world's network and backend) and R4 = continue.
-**Status: 🟡 s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24.** s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
+**Status: 🟡 s30 (2026-10-03): Cloud File, Upload File and Sign File URL conform on the runtime, first run, two seeds and at 10,000 — the world's BACKEND grew FILES (the contract's `uploadFile` / `signFileUrl`, a failure as one envelope, the REST adapter's not-a-file refusal); a scenario can hand a node a file (`$file`) or a stored file (`$cloudFile`); rows C51, C52, D26 (§6.28). 19 of 24. Left: Open File Picker (a FILE PICKER seam), WebSocket, Server-Sent Events, Subscribe To Changes, Cloud Function.** s29: Sign In With slice B — the return leg (§6.25). s28: Request Magic Link, Sign In With (16 of 24). s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24. s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
 
 ## 1. The person sentence
 
@@ -798,4 +798,102 @@ Richard's ruling, and a fix is a v3 of the spec.
 | count | unchanged, **98** (Sign In With was counted in s28) |
 | `node scripts/node-spec/census.js` (after the probes were deleted) | 147, all tiered. Only `placesWritten` moved (Text — not this session's files) |
 | `node scripts/bugs.js check` | 159 files, every header valid |
+| export `test:main` | NOT RUN: no export code was touched |
+
+### 6.28 s30 (2026-10-03) — the files: Cloud File, Upload File, Sign File URL; the world's FILES
+
+**Built.** Three specs (`cloud-file.ts`; `upload-file.ts` holds Upload File and Sign File URL), 6 + 19 + 11 scenarios.
+All three **conform on the runtime on the first run** (Cloud File after one scenario gained its control, below), on
+seeds 20729 and 13, and at 10,000; mutants 3 / 3, 25 / 25, 21 / 21. **101 / 147.** Open File Picker (T2) is the fourth
+file node and is NOT built: it needs a person choosing a file (a FILE PICKER seam).
+
+**Read first (s18's rule: what does each CALL?).** Cloud File calls nothing: it reads a stored file it is handed. Upload
+File and Sign File URL call the routed store (`CloudStore.forBackend`, as the Record family does since BCN-007 step 6),
+which hands the adapter the contract's own operations `uploadFile({ file, private, target })` and
+`signFileUrl({ name, target })` — the same `(handle, options)` shape as `delete` / `save`, so they joined BACKEND (R9).
+
+**The world (world.ts BACKEND, FILES).**
+- The two operations are recorded and answered by the BACKEND rules.
+- **The failure is an envelope.** The contract's file callbacks take ONE object, `FileError { error?, code?, status? }`
+  (data.ts :51-61), not `(message, detail)`. A failed answer hands `fileError(d)`: the rule's `detail` fields, with
+  `error` the message over them, and no `error` key when the rule gave none. The REST adapter hands `{ error }` alone
+  (its `fail` has no status — row C51).
+- **A refusal before the wire:** an `uploadFile` whose `file` has no `arrayBuffer` is refused inside the call with the
+  REST adapter's sentence (`NOT_A_FILE`, RestDataAdapter.ts :1738-1749).
+- No store event follows a file operation; upload PROGRESS is not played (the REST adapter never calls
+  `onUploadProgress`), so Progress Changed never fires and Uploaded Percent reads 0.
+
+**The format (additive; the hash refresh named exactly `src/adapter.ts`, `src/canonical.ts`, `src/spec.ts`,
+`src/world.ts`; the three stranger rounds green).**
+- **canonical.ts, two rows.** A file the browser hands (a `Blob` by its surface) is `{ "$file": { name?, size, type } }`
+  (no bytes, no `lastModified`). A STORED file (`getUrl`, `getName`, `getTarget` all functions — the runtime's
+  `CloudFile`) is `{ "$cloudFile": { name, url, contentType?, size?, target? } }`. The stored file is TAGGED, unlike other
+  class instances: Cloud File, Sign File URL and a record's file property take ONLY a stored file (`instanceof
+  CloudFile`) and drop a plain object with the same keys, so a trace that could not tell them apart would let a target
+  hand a plain object and pass. canonical.test.ts has a row for each.
+- **adapter.ts, two scenario values**, resolved by `play` through two OPTIONAL target hooks as `$array` is (s25):
+  `{ "$file": { name, type?, size? } }` → `file(desc)` (Node's own `File`, zero bytes, `lastModified` 0, on both targets);
+  `{ "$cloudFile": { … } }` → `cloudFile(desc)` (the runtime's `CloudFile`; the interpreter's `StoredFile`, world.ts).
+  A target without the hook refuses the scenario by name (adapter.test.ts).
+- **spec.ts:** a patch's `backend` may be a LIST — several calls in order. Upload File needs it: every press in a frame is
+  its own after-inputs callback and its own call (measured: two presses, two calls, two Dones; no coalescing).
+
+**Runtime target.** `uploadFile` / `signFileUrl` joined `BACKEND_OPS` (success hands the answer; no event). A file
+operation's failure goes through `fileError`, a refusal before the wire lands inside the call, and a throw in a success
+is `{ error: message }`, as the adapter's `fail` hands it. Upload File joined `VIEWER_NODES`; Cloud File and Sign File
+URL are the runtime's own.
+
+**What the probe measured first (on the runtime, before any spec).**
+- Upload File reports Uploaded Percent `0` at the first settle (its getter's `!total` branch); the other progress
+  outputs are `undefined`.
+- Two presses in one frame make two calls. A string on File reaches the adapter and is refused there.
+- `{ error, detail: { status: 403, code: 119 } }` shows **119** on Error Status Code: `code || status || 0` (C51).
+- A message-less envelope puts the object itself on Error (`{}` / `{ status: 500 }`) (C51).
+- Cloud File drops a plain object with a stored file's keys, and drops `null` and strings.
+- Re-signing to a public link leaves Expires At and TTL on the wire (D26).
+- Two traces per node were printed side by side (two presses; a string; a re-sign to public): identical, and not empty.
+
+**Reach (s24's rule: measure it before trusting a 200 / 200).** On 400 generated sequences (seeds 20729 and 13) Upload
+File reached a call in 96 and a Done in only **6**: 71 of the calls were a refused string. The file pool was weighted
+(six of eight examples a real file): 111 calls and **14** Dones. Sign File URL: 60 calls, 17 Dones. Cloud File took a
+stored file in 249 of 400. The hand scenarios are the 200-gate for the success paths.
+
+**Not graded, named in the specs' headers:** the Parse wire's XHR progress; the editor's Backend picker and inspector; a
+failure envelope that is `undefined` (the contract allows `error()` with nothing; `setError` would throw on
+`.hasOwnProperty` — the world always hands one); a stored file with no name (Cloud File's Name getter would throw).
+
+**The census tier.** Cloud File is T3 in `tiers.json`, but its spec needs no world at all — everything it reports, the
+stored file carries. Left as tiered (a judgement for the census's owner, not this batch's); its spec declares no `needs`.
+
+### 6.29 Rows (s30)
+
+- **C51** — Upload File and Sign File URL's **Error Status Code is never the HTTP status**: always 0 on Directus,
+  Supabase and PocketBase (the REST adapter's `fail` drops it), the Parse error CODE (119) on the NodeGX / Parse wire
+  (`code || status`), and a message-less body puts the envelope OBJECT on Error. Graded by three scenarios.
+  ([P107-C51](../../bugs/p107-c51-upload-file-and-sign-file-url-error-status-code-is-never-an-http-status.md))
+- **C52** — Cloud File's **Name is the original file name only on NodeGX**: the "drop up to the first `_`" rule is
+  Parse's, so PocketBase's `photo_g235k8arvj.png` (measured in BCN-007's probe) reads `g235k8arvj.png`, Directus's
+  reads a UUID (the FileRef's `filename` is dropped by the stored file), Supabase's the bucket path. Graded by one
+  scenario. ([P107-C52](../../bugs/p107-c52-cloud-file-name-is-not-the-original-file-name-on-three-of-four-rest-backends.md))
+- **D26** — after Sign File URL mints a link with no expiry, **Expires At and TTL keep the previous link's** on the wire
+  (C3; one decision with D25 and C47). ([P107-D26](../../bugs/p107-d26-sign-file-url-expires-at-keeps-the-previous-link-s-expiry-after-a-public-link.md))
+
+### 6.30 Gate readings (s30, 2026-10-03; load 2.8–4.8 — this session's jest only, no peer suite)
+
+| gate | reading |
+|---|---|
+| probe on the runtime FIRST (zz probe, deleted) | the measurements in §6.28 — before any spec was written |
+| runtime: `NSP_ONLY="Cloud File,Upload File,Sign File URL"`, at 200, seeds 20729 and 13 | **CONFORMS**: Upload File and Sign File URL on the first run; Cloud File after its drop scenario gained a firing control (the runner refused it — "an arm with no predicate grades nothing"). 6 / 6, 19 / 19, 11 / 11 scenarios; 200 / 200; mutants 3 / 3, 25 / 25, 21 / 21 |
+| runtime deep, `NSP_DEEP=10000` | **CONFORMS**, all three: 10,000 / 10,000, 0 divergences (40 s, 89 s, 84 s) |
+| interpreter: `batch-records.test.ts`, seeds 13 and 20728 | 6 / 6 green (the three added to `CONFORMING`); AC5 / AC6 for Upload File and Sign File URL: every failure sentence on Error beside a Failure, the call's `op`, a no-file and a not-configured scenario making no call |
+| two traces printed side by side, interpreter and runtime | two presses, a string File, a re-sign to public: identical, event for event, and not empty |
+| reach, 400 generated sequences (seeds 20729, 13) | Upload File 111 calls / 14 Dones (6 before the file pool was weighted); Sign File URL 60 / 17; Cloud File took a stored file in 249 |
+| runtime: the WHOLE `test/node-spec/`, first run | 3 suites, **186 passed, 2 failed**, 337 s. Graph and runtime-target green (the canonical change moved no recorded graph). The two red: **mutant survivors on today's rotated seed 20729**, in specs this session did not touch — CollectionClear (`afterInputs drop-set` on the failure branch whose Error is unchanged) and DbModel2 (`modelId drop-set` on the unbind branch). Control: both CONFORM at 20728 with this session's changes in place, so the rotation exposed them (s12's T4 lesson). Each closed by a hand scenario (CollectionClear: two failed Dos, then bind and Do once; DbModel2: Id emptied while bound, then Fetch) — both conform at 20729 and 20728 |
+| runtime: the WHOLE `test/node-spec/`, second run | **3 suites, 188 passed, exit 0**, 351 s; 82 conformance reports (81 specs + Counter's AC5), the one DOES NOT CONFORM is AC1's planted off-by-one, as designed. GRAPH 76 / 76 |
+| `nodegx-node-spec`: `npx jest` | **18 suites, 784 passed, 17 skipped, exit 0** (+7 canonical rows, +2 adapter tests, the batch additions). The hash refresh named exactly `src/adapter.ts`, `src/canonical.ts`, `src/spec.ts`, `src/world.ts`; the three stranger rounds green |
+| export: `tests/node-spec-*` | 2 suites, 12 passed |
+| `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
+| count | **101** (+3) |
+| `node scripts/node-spec/census.js` | run, then RESTORED from HEAD: it picked up a peer's uncommitted viewer-react work (dynamic ports 68 → 69, Button / Columns / Text test counts). No census number depends on specs |
+| `node scripts/bugs.js check` | 164 files, every header valid |
 | export `test:main` | NOT RUN: no export code was touched |

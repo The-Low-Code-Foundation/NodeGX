@@ -126,13 +126,14 @@
  */
 
 import { AsyncLocalStorage } from 'async_hooks';
+import { File as NodeFile } from 'buffer';
 
 import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, RuntimeErrorEventLike } from '@noodl/types';
 
 import type { RuntimeNode } from '../../src/internal';
 import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
-import { AUTH_OPS, backendEvent, canonicalise, installWorld, locationEvent, OUTCOME_PORTS, type BackendDelivery } from '../../../nodegx-node-spec/src';
+import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, type BackendDelivery } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -278,6 +279,8 @@ const GROUP_STAND_IN = NodeDefinition.defineNode({
 } as never);
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
+const CloudFileClass = require('../../src/api/cloudfile') as typeof import('../../src/api/cloudfile');
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { RestDataAdapter } = require('../../src/api/backends/RestDataAdapter') as { RestDataAdapter: { prototype: Record<string, unknown> } };
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 const CloudStore = require('../../src/api/cloudstore') as {
@@ -335,7 +338,10 @@ const BACKEND_OPS: Readonly<Record<string, (o: BackendOptions, ok: unknown, emit
   query: (o, ok) => {
     const a = (ok ?? {}) as { results?: unknown; count?: unknown };
     o.success(a.results, a.count);
-  }
+  },
+  // s30 — RestDataAdapter.ts :1734-1760, :1965-2040 — `success(FileRef)` / `success(SignedFileUrl)` and NO event (world.ts FILES)
+  uploadFile: (o, ok) => o.success(ok),
+  signFileUrl: (o, ok) => o.success(ok)
 };
 
 /**
@@ -531,9 +537,17 @@ function installBackend(w: World, graphModel: { getMetaData(k: string): unknown;
   for (const [op, onSuccess] of Object.entries(BACKEND_OPS)) {
     saved[op] = proto[op];
     proto[op] = function (this: { emitAdapterEvent(e: Record<string, unknown>): void }, handle: { id: string }, options: BackendOptions) {
+      // s30 — a file operation's failure is ONE envelope (world.ts FILES, `fileError`); a refusal before the wire lands
+      // inside the call (RestDataAdapter.ts :1738-1749), every other answer a microtask after its moment
+      const file = isFileOp(op);
+      const fail = (message: string) => (file ? options.error({ error: message } as never) : options.error(message));
       w.backend.issue({ op, backend: handle.id, args: options }, (d) => {
+        if (file && !('ok' in d) && d.refused) return void options.error(fileError(d) as never);
         void Promise.resolve().then(() => {
-          if (!('ok' in d)) return d.detail === undefined ? options.error(d.error) : options.error(d.error, d.detail);
+          if (!('ok' in d)) {
+            if (file) return options.error(fileError(d) as never);
+            return d.detail === undefined ? options.error(d.error) : options.error(d.error, d.detail);
+          }
           // RestDataAdapter.ts :515-531 — the success runs inside the request's promise chain, whose `.catch` hands a
           // throw to `fail` → the operation's `error` with the throw's message (s22: Delete Record's success can throw, row C36)
           // s23: a COPY — an adapter parses a fresh body per response, and a node may mutate what it is handed (Record's
@@ -541,7 +555,7 @@ function installBackend(w: World, graphModel: { getMetaData(k: string): unknown;
           try {
             onSuccess(options, d.ok === undefined ? undefined : JSON.parse(JSON.stringify(d.ok)), (e) => this.emitAdapterEvent(e));
           } catch (e) {
-            options.error(e instanceof Error ? e.message : String(e));
+            fail(e instanceof Error ? e.message : String(e));
           }
         });
       });
@@ -608,7 +622,7 @@ function resetRegistry(world: World): void {
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout', 'user/requestmagiclink', 'user/signinwith'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout', 'user/requestmagiclink', 'user/signinwith', 'uploadfile'] as const;
 
 /** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (s17 Navigate To Path … s20 Show / Close Popup). */
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
@@ -1432,6 +1446,15 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     registryArray(name) {
       if (!world) throw new Error('runtime: a registry array names the play’s world, and none is installed');
       return Collection.get(name);
+    },
+
+    // NSP-014 s30 (adapter.ts) — a file the browser hands: Node's own `File` (the class a browser's `File` is), its bytes zeros
+    file(desc) {
+      return new NodeFile([new Uint8Array(desc.size ?? 0)], desc.name, { type: desc.type ?? '', lastModified: 0 });
+    },
+    // NSP-014 s30 (adapter.ts) — a stored file: the runtime's own `CloudFile` (cloudfile.ts), what `instanceof` accepts
+    cloudFile(desc) {
+      return new CloudFileClass(desc as ConstructorParameters<typeof CloudFileClass>[0]);
     },
 
     async advance(h, ms) {

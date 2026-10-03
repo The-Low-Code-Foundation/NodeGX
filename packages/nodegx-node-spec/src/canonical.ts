@@ -20,6 +20,8 @@
  * | plain object                         | keys sorted; an `undefined` value drops its key (JSON's rule) |
  * | unit object `{ value, unit }` (C10)  | kept WHOLE — it is a plain object, never reduced to its number |
  * | object with `toJSON`                 | `toJSON()` first, then the rules above           |
+ * | a FILE the browser hands (NSP-014 s30): a `Blob` — `arrayBuffer()` a function, `size` a number, `type` a string | `{ "$file": { "name"?, "size", "type" } }` — the bytes are not on the wire, `name` only when it is a string (a `File`; a bare `Blob` has none), `lastModified` never (a clock reading) |
+ * | a STORED file (NSP-014 s30): `getUrl`, `getName` and `getTarget` all functions — the runtime's `CloudFile` | `{ "$cloudFile": { "name", "url", "contentType"?, "size"?, "target"? } }` from those getters (and `getContentType` / `getSize`), each canonical, an absent one dropped. Tagged, unlike other class instances (below): Cloud File, Sign File URL and a record's file property take ONLY a stored file (`instanceof CloudFile`) and drop a plain object with the same keys, so the difference is behaviour a trace must show |
  * | other object (class instance, Map…)  | its own enumerable keys, sorted — no class tag (see below) |
  * | `undefined` (top level)              | `undefined` — the CALLER decides: a `value` event never carries it (C3), a `set` event omits the field |
  * | function, symbol, bigint, circular   | refused: `CanonicalError` naming the path         |
@@ -91,6 +93,16 @@ function walk(value: unknown, path: string, seen: object[]): Canonical | undefin
   }
   seen.push(obj);
   try {
+    // NSP-014 s30 — the two file shapes, duck-typed (a target's own classes; never by constructor)
+    if (isStoredFile(obj)) {
+      const f = obj as unknown as StoredFileLike;
+      const fields: Record<string, unknown> = { name: f.getName(), url: f.getUrl(), contentType: f.getContentType?.(), size: f.getSize?.(), target: f.getTarget() };
+      return { $cloudFile: walk(fields, `${path}.$cloudFile`, seen) as Canonical };
+    }
+    if (isBrowserFile(obj)) {
+      const b = obj as { name?: unknown; size: number; type: string };
+      return { $file: walk(typeof b.name === 'string' ? { name: b.name, size: b.size, type: b.type } : { size: b.size, type: b.type }, `${path}.$file`, seen) as Canonical };
+    }
     if (Array.isArray(obj)) {
       // `Array.from`, not `obj.map`: `map` builds its result through `Symbol.species`, so an array of a subclass (the
       // runtime's `CollectionImpl`, collection.ts :739) canonicalised as that subclass — and a recorded trace, read back
@@ -122,6 +134,29 @@ function walk(value: unknown, path: string, seen: object[]): Canonical | undefin
   } finally {
     seen.pop();
   }
+}
+
+/** NSP-014 s30 — what a stored file answers (the runtime's `CloudFile`, cloudfile.ts :79-98). */
+export interface StoredFileLike {
+  getName(): unknown;
+  getUrl(): unknown;
+  getTarget(): unknown;
+  getContentType?(): unknown;
+  getSize?(): unknown;
+}
+
+/** NSP-014 s30 — a stored file (the `$cloudFile` row above): `getUrl`, `getName` and `getTarget` all functions. */
+export function isStoredFile(value: unknown): value is StoredFileLike {
+  if (!value || typeof value !== 'object') return false;
+  const f = value as Record<string, unknown>;
+  return typeof f.getUrl === 'function' && typeof f.getName === 'function' && typeof f.getTarget === 'function';
+}
+
+/** NSP-014 s30 — a file the browser hands (the `$file` row above): a `Blob` by its surface. */
+export function isBrowserFile(value: unknown): boolean {
+  if (!value || typeof value !== 'object') return false;
+  const b = value as Record<string, unknown>;
+  return typeof b.arrayBuffer === 'function' && typeof b.size === 'number' && typeof b.type === 'string';
 }
 
 /**

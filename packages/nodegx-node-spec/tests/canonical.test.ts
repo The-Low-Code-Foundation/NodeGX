@@ -3,7 +3,9 @@
  * unit object. Every row of the table in canonical.ts's docblock is a row here.
  */
 
-import { canonicalise, canonicalKey, findNonCanonical, CanonicalError } from '../src';
+import { Blob as NodeBlob, File as NodeFile } from 'buffer';
+
+import { canonicalise, canonicalKey, findNonCanonical, CanonicalError, StoredFile } from '../src';
 
 describe('canonicalise — the table', () => {
   const rows: Array<[string, unknown, unknown]> = [
@@ -27,7 +29,17 @@ describe('canonicalise — the table', () => {
     ['tags nest inside structures', { n: -0, d: [NaN] }, { d: [{ $num: 'NaN' }], n: { $num: '-0' } }],
     ['toJSON is honoured first', { toJSON: () => ({ q: 1, p: 2 }) }, { p: 2, q: 1 }],
     ['a class instance is its own enumerable keys, no class tag', new (class Model { b = 1; a = 2; })(), { a: 2, b: 1 }],
-    ['top-level undefined stays undefined (the caller decides)', undefined, undefined]
+    ['top-level undefined stays undefined (the caller decides)', undefined, undefined],
+    // NSP-014 s30 — the two file shapes
+    ['a File is tagged: name, size, type — no bytes, no lastModified', new NodeFile([new Uint8Array(3)], 'photo.png', { type: 'image/png', lastModified: 5 }), { $file: { name: 'photo.png', size: 3, type: 'image/png' } }],
+    ['a bare Blob is tagged without a name', new NodeBlob(['ab'], { type: 'text/plain' }), { $file: { size: 2, type: 'text/plain' } }],
+    ['a stored file is tagged from its getters, an absent field dropped', new StoredFile({ name: 'k_a.png', url: 'u', size: 0 }), { $cloudFile: { name: 'k_a.png', size: 0, url: 'u' } }],
+    [
+      'a stored file\'s target is canonical inside the tag',
+      new StoredFile({ name: 'f', url: 'u', contentType: 'image/png', target: { kind: 'record', field: 'a', collection: 'c' } }),
+      { $cloudFile: { contentType: 'image/png', name: 'f', target: { collection: 'c', field: 'a', kind: 'record' }, url: 'u' } }
+    ],
+    ['a plain object with a stored file\'s keys is a plain object', { url: 'u', name: 'f' }, { name: 'f', url: 'u' }]
   ];
   for (const [name, input, expected] of rows) {
     test(name, () => {

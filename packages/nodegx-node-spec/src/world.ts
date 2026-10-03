@@ -253,6 +253,24 @@
  *               `advance` that reaches it, in the order they listened. A listener that is not bound to that backend's
  *               store is the node's business: the world tells every listener, the node keeps the backend it watches.
  *
+ *           FILES (s30) — two more operations a node hands its backend, the contract's own (`IDataAdapter` `uploadFile`,
+ *           `signFileUrl`), recorded and answered by the same rules, with two differences the contract makes:
+ *             THE FAILURE IS AN ENVELOPE — a file operation's `error` callback takes ONE object, the contract's `FileError`
+ *               `{ error?, code?, status? }` (data.ts :51-61; RestDataAdapter.ts :1698-1711 "the three file methods take
+ *               `error({error, status})`"), never `(message, detail)`. A failed answer hands `fileError(d)`: the rule's
+ *               `detail` fields (a `status`, a `code` — what the Parse wire's error body carries) with `error` the message
+ *               over them, and NO `error` key when the rule gave none (`error: null` — an error body without one). The REST
+ *               adapter hands `{ error: message }` alone: its `fail` has the message and not the status (RestDataAdapter.ts
+ *               :1814, :1868, :1938, :2013 …), so a script that plays a REST backend scripts no `detail`.
+ *             THE REFUSAL BEFORE THE WIRE — an `uploadFile` whose `file` is not a file (no `arrayBuffer` function: a string, a
+ *               plain object, a number): `Upload File was given something that is not a file. Wire the File output of an Open
+ *               File Picker node into it.` — refused at once, inside the call (RestDataAdapter.ts :1738-1749; `NOT_A_FILE`),
+ *               recorded, never a violation, no rule read.
+ *           An upload's success hands the rule's `ok` (a `FileRef`: `{ name, url, contentType?, size?, target? }`); a sign's,
+ *           a `SignedFileUrl` (`{ url, kind, expiresAt?, ttlSeconds? }`). Neither tells the store's listeners anything (no
+ *           adapter event follows a file operation). Upload PROGRESS is not played: the REST adapter never calls
+ *           `onUploadProgress` (RestDataAdapter.ts :1725-1732 — `fetch` has no upload progress); only the Parse wire's XHR does.
+ *
  *   AUTH.   (NSP-014 s26; R9 again — "the request, not the wire") Who is signed in, per backend, and the auth operations a
  *           user node hands its backend: the contract's (`@noodl/backend-contract` `IAuthAdapter`) and the one beside it,
  *           `setUserProperties` (AUTH_OPS). An auth call is a BACKEND call — recorded as handed (`{ op, backend, args }`, a
@@ -859,6 +877,71 @@ function deliveryOf(a: Exclude<BackendAnswer, { never: true }>): BackendDelivery
   return d;
 }
 
+/** FILES (BACKEND above, s30): the contract's file operations — their failure is an envelope (`fileError`). */
+export const FILE_OPS: readonly string[] = Object.freeze(['uploadFile', 'signFileUrl']);
+
+export const isFileOp = (op: string): boolean => FILE_OPS.includes(op);
+
+/** RestDataAdapter.ts :1744-1747 — an upload handed something that is not a file, refused before the wire (s30). */
+export const NOT_A_FILE = 'Upload File was given something that is not a file. Wire the File output of an Open File Picker node into it.';
+
+/**
+ * FILES (s30): what a file operation's `error` callback is handed for a failed answer — the contract's `FileError` envelope:
+ * the answer's `detail` fields, then `error` the message over them; no `error` key when the answer carried no message.
+ */
+export function fileError(d: { error: string | undefined; detail?: Record<string, unknown> }): Record<string, unknown> {
+  const envelope: Record<string, unknown> = { ...(d.detail ?? {}) };
+  if (d.error !== undefined) envelope.error = d.error;
+  else delete envelope.error;
+  return envelope;
+}
+
+/**
+ * FILES (s30): a stored file as a target that has no class of its own for one makes it — the runtime's `CloudFile`
+ * (cloudfile.ts :57-103) by its surface: the fields of a `FileRef` it keeps (name, url, and contentType / size / target
+ * only when present) and their getters. canonical.ts tags it `$cloudFile`.
+ */
+export class StoredFile {
+  readonly name: string;
+  readonly url: string;
+  readonly contentType?: string;
+  readonly size?: number;
+  readonly target?: unknown;
+  constructor(ref: { name: string; url: string; contentType?: string; size?: number; target?: unknown }) {
+    this.name = ref.name;
+    this.url = ref.url;
+    if (ref.contentType !== undefined) this.contentType = ref.contentType;
+    if (ref.size !== undefined) this.size = ref.size;
+    if (ref.target !== undefined) this.target = ref.target;
+  }
+  getUrl(): string {
+    return this.url;
+  }
+  getName(): string {
+    return this.name;
+  }
+  getContentType(): string | undefined {
+    return this.contentType;
+  }
+  getSize(): number | undefined {
+    return this.size;
+  }
+  getTarget(): unknown {
+    return this.target;
+  }
+  toString(): string {
+    return this.url;
+  }
+}
+
+/** FILES (s30): an `uploadFile` whose `file` has no `arrayBuffer` function is refused inside the call (RestDataAdapter.ts :1738-1749). */
+function fileBeforeWire(op: string, args: Readonly<Record<string, unknown>>): BackendDelivery | undefined {
+  if (op !== 'uploadFile') return undefined;
+  const file = args.file as { arrayBuffer?: unknown } | null | undefined;
+  if (file !== null && file !== undefined && typeof file.arrayBuffer === 'function') return undefined;
+  return { error: NOT_A_FILE, refused: true };
+}
+
 /** AUTH below: the operations the world plays as auth — the contract's (`IAuthAdapter`) and the one beside it (`setUserProperties`, userservice.ts :422). */
 export const AUTH_OPS: readonly string[] = Object.freeze(['fetchCurrentUser', 'setUserProperties', 'logIn', 'signUp', 'logOut', 'requestMagicLink', 'signInWithProvider']);
 
@@ -1189,7 +1272,7 @@ export class WorldBackend {
     this.calls.push(recorded);
     for (const l of this.listeners) l(recorded);
     // AUTH (s26, s27) — answered before the wire: at once, inside the call, no rule read
-    const before = this.authBeforeWire(call.op, call.backend, call.args as Readonly<Record<string, unknown>>);
+    const before = this.authBeforeWire(call.op, call.backend, call.args as Readonly<Record<string, unknown>>) ?? fileBeforeWire(call.op, call.args);
     if (before !== undefined) {
       deliver(before);
       return;
