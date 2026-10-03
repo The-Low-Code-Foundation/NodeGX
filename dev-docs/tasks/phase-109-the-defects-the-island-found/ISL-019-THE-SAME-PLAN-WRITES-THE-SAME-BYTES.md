@@ -159,3 +159,17 @@ suites = s4's HEAD-reds** (`cmp004Parts` ×2 and `cmp004RoundTrip` ×2: a text s
 `nodeIdAllocation`: *"Text has no output named text"*, printed). `isl025Census` green. The full `noodl-mcp`
 suite was not run: a peer's `node-spec` suite held the machine.
 
+
+### Session 11 (2026-10-03) — AC7's newline byte, measured (no ruling needed)
+
+**The editor writes no trailing newline either.** `ComponentSaver.ts:248` (a component's three files, staged) and
+`:359` (`atomicWrite`, the rest) both write `JSON.stringify(content, null, 2)` and nothing after it, exactly as the
+door's `writeJsonAtomic` (`noodl-mcp/src/project/ProjectStore.ts:90`). The pins' `\n` is the outlier, so ISL-018's
+rule (what the door writes is what the editor saves) already settles s5's reason (2): the door keeps its bytes and
+the template loses its newlines. **The checked-in island today:** all **407** JSON files end in `\n` (135 each of
+`component.json`, `nodes.json`, `connections.json`, plus `_registry.json` and `nodegx.project.json`). Dropping the pins
+therefore changes 407 files by one byte each, once: AC7's "0 files differ" holds only after that one re-baseline,
+done in the same commit and named in it. An editor open-and-save of the template would make the same change today.
+
+Still blocked by s5's reason (1): `packages/noodl-mcp/tests/cg003Components.ts` is modified in the working tree right
+now (a peer's garden edit, not this session's). Reason (3) (components the skeleton writes raw) is unchanged.
