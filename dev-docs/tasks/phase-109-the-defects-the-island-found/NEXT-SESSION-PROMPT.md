@@ -1,72 +1,68 @@
-# Next session — P109 session 6
+# Next session — P109 session 7
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 5 (2026-10-02, on `cline-dev` from `6bac3db02`):** ISL-019 built (`1f23b05dd`); ISL-009's ruling 2 built and
-driven (`6a9d00cee`); ISL-005's research done and **ruled "Native nodes first"**; ISL-009's ruling 1 asked and **ruled
-"A data-* list"**; five bugs filed; this handoff's commit. **4 of 25 closed** (none closed this session: ISL-019 and
-ISL-009 each have open ACs).
+**Session 6 (2026-10-03, on `cline-dev`, commit `0951dbbe3`):** ISL-009 ruling 1 ("A data-* list") **built and
+driven**; `kitAgreement` re-recorded from the running editor (`P109-S5-KITRECORDING` fixed); the first full
+`noodl-mcp` run in P109 (three red neighbours filed). **4 of 25 closed** (none closed this session: ISL-009 still owes
+its export half and AC7).
 
 ## Read first
 
-1. README §8 — the two round-2 rulings at the end, as asked. 🔴 One premise in the ISL-005 question was wrong: String
-   Format DOES fill a repeated placeholder (`P109-S5-STRINGFORMAT` withdrawn, a peer measured it; P107-D2 owns the wrong
-   comment). Tell Richard the gap list is three, not four, when the island task is scoped.
-2. ISL-019 §8 s5 (as built; AC7's three measured blockers), ISL-009 §8 s5 (as built; what the two new ports moved
-   elsewhere), ISL-005 §8 s5 and [the census](ISL-005-CENSUS-2026-10-02.md).
+1. ISL-009 §8 s6: what was built and why each design choice (a `namedports/derived` rule, derived on read in
+   `getPorts`, a per-instance runtime claim, the kit catalog keeping it declared, the ref-arrival sync).
+2. The three bugs filed in s6: `P109-S6-DEF038` (may be ISL-018's own AC7, never recorded), `P109-S6-D54`,
+   `P109-S6-TPL007`. And `P109-S1-CN004`, whose diagnosis s6 corrected (it is the fixture's wire, not a duplicate).
 
 ## Do, in this order
 
-1. **ISL-009 ruling 1: build the `data-*` list** (§5 1(b): name/value rows on every visual node, `data-*` names only,
-   values wirable, written in server render). Put it in ACC-006's accessibility group if that mixin exists by then (read
-   P41 first). The door refuses a non-`data-*` name with the rule (AC5, sabotage arm: allow `onclick` → red). Then
-   AC2's drive selects by `[data-testid]` only (`scripts/devtools/drive-isl009-scroll-into-view.js` + the
-   `isl009-scroll-into-view/` project), AC3 reads the attribute in server-rendered HTML. 🔴 A new shared port moves
-   CHR-007's snapshot, FB-017's tier list, AWP-005's ratchet, GAM-019's alternatives and **`kitAgreement`'s recording**:
-   see ISL-009 §8 s5 for how each was handled. 🔴 Rebuild the two gitignored bundles before any deploy:
-   `noodl-viewer-react`: `npx webpack --config webpack-configs/webpack.deploy.dev.js` (**watch mode — it never exits;
-   stop it by its own PID once it prints "compiled"**), and `noodl-preview`: `node build.mjs`.
-2. **Re-record `kitAgreement`'s editor fixture** (bug `P109-S5-KITRECORDING`, red since `6a9d00cee`): an editor launch
-   with a copy of `noodl-mcp/tests/fixtures/kit-app`, per the recording's own `_recording.how`. One heavy job: do it once,
-   after step 1, so the recording carries the `data-*` port as well.
-3. **ISL-007 "Adopt the add-on"** (ruled s4, not started): fix the i18next add-on's gaps and teach it to agents. It is
-   also the first of the four product gaps "Native nodes first" names.
-4. **"Native nodes first" (ISL-005's ruling):** scope the island rebuild as **its own template task** (P108/P78, not
-   P109), and the product gaps as P109 work: Array Filter's "in list" (`P109-S5-ARRAYFILTERIN`), rows shared app-wide by id (ISL-003 owns it, read it first). Re-scope
-   ISL-006 and ISL-020 against the ruling (both waited on ISL-005).
-5. **ISL-019's remainder:** AC6 (Claude Code over the door rebuilding a component: needs `noodl-mcp` dist rebuilt from
-   `1f23b05dd`+), AC7 (the garden drops its pins) only when no peer has `cg002Content.ts`/`cg003Content.ts` open, and
-   decide the trailing-newline byte first (ISL-019 §8 s5, AC7 row).
-6. **Round 3 questions, each mechanism checked first:** ISL-016, ISL-017, ISL-021, ISL-008, ISL-010 (s4's handoff list
-   and pointers still apply: `projectmodel.ts:324-330` "Make home", `font-awesome-*` modules, `drive-page.js` verbs,
-   `modelrequest.ts:67`). And ISL-018's open case (below).
-7. ISL-022 follow-ups and the s4 bugs (`P109-S4-UNROUTEDPAGE`, `P109-S4-ROWWRAP`), unchanged from s4's list.
+1. **`P109-S6-DEF038` first, because it may be P109's own debt.** ISL-018 AC7 says `def038SettledTemplates` stays
+   green; it reads 6 red (four templates at format 4 would gain `runOnChange-*` on an editor load). Measure at
+   `b2ba0320a^` and `b2ba0320a` in a worktree (`scripts/make-worktree.sh`) before touching anything: if ISL-018
+   made it red, fix it under ISL-018; if not, hand it to its owner.
+2. **ISL-009's export half**, only if `nodegx-export/src/emit/component.ts` and `coverage-ledger.json` are no longer a
+   peer's open pile (they held uncommitted edits from **Sep 26** on 2026-10-03; read that pile's task file first).
+   Emit `data-*` in JSX from `dataAttributes` + the listed values (wired values too), and the scroll as a translated
+   action or a named deferral in the ledger. Today the export reports both as unmapped, loudly.
+3. **ISL-009 AC7** (the island uses it): `FIND_ROBOTS_SCRIPT`'s card branch → the node's Scroll Into View; the
+   CG-005 owl-row hook → a `data-` name its drive reads. The robots branch (inside a kit) stays, with the reason.
+   Record the selector-count change across the garden drives. ⚠️ Peer has garden content open: check
+   `git status` on `cg00*Content.ts` first.
+4. **ISL-007 "Adopt the add-on"** (ruled s4, not started) — also the first product gap "Native nodes first" names.
+5. **"Native nodes first":** scope the island rebuild as its own template task (P108/P78), and the product gaps as P109
+   work (Array Filter's "in list" `P109-S5-ARRAYFILTERIN`; rows shared app-wide by id, which ISL-003 owns). Re-scope ISL-006
+   and ISL-020 against the ruling. Tell Richard the gap list is three, not four (String Format was never a gap).
+6. **ISL-019's remainder:** AC6 (needs `noodl-mcp` dist rebuilt), AC7 (only when no peer has the garden content open;
+   decide the trailing-newline byte first).
+7. **Round 3 questions**, each mechanism checked first: ISL-016, ISL-017, ISL-021, ISL-008, ISL-010, plus ISL-018's
+   open case. Then the ISL-022 follow-ups and the s4 bugs.
 
 ## Decisions for Richard (not yours)
 
 - **ISL-018's open case**, still not asked: the door writing into a format-4 project no current editor has opened.
 - **Round 3** above.
+- Pushing: local `cline-dev` is far ahead of `origin`; that is Richard's call.
 
-## Readings taken in session 5 (2026-10-02)
+## Readings taken in session 6 (2026-10-03)
 
-- ISL-019: `isl019SameBytes` 12/12, three mutants killed. Forty write-path `noodl-mcp` specs: 5 failures in 3 suites =
-  s4's HEAD-reds (`cmp004Parts` ×2, `cmp004RoundTrip` ×2, `nodeIdAllocation`, reasons printed). `cg003Template` 9 red
-  against a **peer's open garden content**; its byte diff lists no `component.json`/registry/project file.
-- ISL-009: deployed drive 4/4 at 1024×768 and 390×844, control 4/4 unmoved; viewer-react 127 suites / 1,671 green; the
-  editor's affected suites 19 / 346 green; `catalog:check`, `catalog:merge:check`, `catalog:groups:check` green.
-- Editor `test:main` with ISL-009 before its fixes: 567 suites, 7 failed (5 this change, fixed; `exp-013/exportBadge`
-  a peer's ledger; `hlt-021/viewerPort` green on re-run). **Not re-run in full after the fixes.**
-- `noodl-mcp` 50 catalog-reading specs after ISL-009: red = `kitAgreement` (this change, bug filed), `cmp001`,
-  `cmp004Parts`, `cn004`, `fld013` (s4 HEAD-reds), `fld011` (reaper under load). **The full `noodl-mcp` suite was not
-  run this session.**
+- viewer-react full: **131 suites, 1,692 tests, 0 failed** (final source, after the ref-arrival fix).
+- editor `test:main`: **568 suites, 8,835 tests, 1 failed** (`exp-013/exportBadge`, a peer's ledger; red in s5 too).
+  Run before the editor-session fixes; the suites those touched were re-run green after.
+- full `noodl-mcp`: **166 suites, 3,585 tests, 20 failed in 10 suites**. None this change after its fixes.
+  `kitAgreement` 3 (since fixed, 9/9). On the HEAD-red list: `cmp004Parts` 2, `cmp004RoundTrip` 2,
+  `nodeIdAllocation` 1, `cmp001` 1, `fld013` 1, `cn004` 1. Filed: `def038` 6, `d54` 1, `tpl007` 1.
+- Catalog gates: `catalog:check`, `catalog:merge:check`, `catalog:groups:check` green.
+- Deployed drive (`nodegx deploy` exit 0, both bundles from the final source): 1024 and 390 4/4, ten names found by
+  `[data-testid]`, 0 classes, 0 console errors; control 4/4 unmoved.
 
-## Facts measured in session 5 that are not in a task file
+## Facts measured in session 6 that are not in a task file
 
-- **`withInnerComponent` waits for `innerReactComponentRef`, which only a class component sets.** A function component
-  (Page, and anything reporting its root through `setDOMElement`) never flushes the queue: an action queued that way
-  waits for ever, silently. Every current caller (Group, Video, Drag, Text Input) is a class, so nothing is broken today;
-  a new shared action must wait on the element instead (ISL-009 does).
-- **`noodl-preview/dist/nodegx-deploy.cjs` was 5 weeks stale** and refused a valid project (`P109-S5-STALEDEPLOYCLI`).
-- Both deploy-side bundles are now built from `6a9d00cee`'s source: `noodl.deploy.js` 23:26, `nodegx-deploy.cjs` 23:23.
-- A research agent did the ISL-005 census in ~18 minutes, read-only; the method (esbuild the generator in memory, strip
-  each shared block, judge row by row) is in the census header and can be re-run.
-- Local `cline-dev` is far ahead of `origin`; pushing is Richard's call.
+- **React attaches a class component's ref after its `componentDidMount`.** In the Noodl wrapper, `getRef()` is null
+  inside `NoodlReactComponent.componentDidMount`, so anything there that needs a third-party component's element finds
+  none. The wrapper's ref callback in `render()` is where it first exists (s6 moved the data-* sync and the held scroll
+  there).
+- **`nodegx deploy` does not prerender**; its page renders on the client. A "server-rendered HTML" AC is graded by
+  rendering `node.render()` with `renderToStaticMarkup`, unless someone runs `static/ssr/server-core.js`.
+- `npm run cdp -- reload --target=viewer` reloaded the **editor** back to the launcher (the preview target disappeared).
+  Reopen the project after it.
+- The `kit-app` fixture has no home component: its preview is empty until `ProjectModel.setRootComponent(/App)`
+  (reachable as `window.__nodeGraphEditor.activeComponent.owner`).
