@@ -201,6 +201,8 @@ const CSVNode: NodeDefinitionOptions = {
         const json = rowsToRecords(parseCSVRows(internal.csv));
 
         internal.collection = Collection.get();
+        // ISL-003: typed rows are this node's own list (see `collection.ts` `plainRowRecord`).
+        Collection.keepPlainRowsApart(internal.collection, this);
         internal.collection.set(json);
         this.flagOutputDirty('items');
         this.flagOutputDirty('count');
@@ -231,6 +233,7 @@ const CSVNode: NodeDefinitionOptions = {
 
         internal.lastReportedError = undefined;
         internal.collection = Collection.get();
+        Collection.keepPlainRowsApart(internal.collection, this);
         internal.collection.set(parsed as ArrayLike<Record<string, unknown>>);
         this.flagOutputDirty('items');
         this.flagOutputDirty('count');

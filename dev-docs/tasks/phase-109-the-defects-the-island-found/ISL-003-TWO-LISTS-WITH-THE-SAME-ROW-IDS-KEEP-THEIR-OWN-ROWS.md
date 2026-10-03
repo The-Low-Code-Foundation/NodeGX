@@ -216,3 +216,21 @@ red). The For Each page and catalog carry it as a "Watch out for" line (`docs/no
 to fit (15/15), not the limit moved. ⚠️ `cmp001InterfaceDoctrine.test.ts` has one red that is not this change: the
 corpus publish rate reads 39%, the doctrine says 33%, stale for 25+ catalog commits — filed `P109-S9-CMP001RATE`.
 MCP doctrine/budget specs: 126/127 (that row) + nodeDocBudget 15/15.
+
+**🔴 Met before AC5: the Repeater's opt-in did not reach Static Data.** A Static Data node converts its rows itself, into
+its own collection (`staticdata.ts`), so the Repeater fed by it only ever sees records, and three cards over three
+tables numbered `l0…l2` would still have shown one card's lines (AC5's own shape). Static Data rows are "rows you type",
+so its collection opts in too. 🔴 And it makes a **fresh collection on every parse**, so a claim held per collection
+made an edited table look like a second list holding its own ids: the list is now the **node**
+(`keepPlainRowsApart(collection, list)`; the claim is read on the collection the list holds now).
+
+| arm (spec now 10/10) | reads |
+|---|---|
+| three cards over three Static Data tables, ids `l0…l2` each | each card its own `cardN lineI`; `Model.get('l0')` → card 1's |
+| card 1's table re-parsed (JSON edited) | card 1 `['edited']`, `Model.get('l0')` → `edited`, card 2 unchanged |
+| sabotage: no opt-in in `staticdata.ts` | both arms red, 8 green |
+| sabotage: opt in without the node as the list | the re-parse arm red, alone |
+
+Neighbours: runtime `test/corpus` + collection/model/GAM-007/CSV/ISL-005 + node-spec graph **837 green** (6 skipped as
+before); viewer `tests/corpus` **878/878**; P107 conformance `NSP_ONLY="Static Data"` **CONFORMS, 200/200, 0
+divergences**. Export: a Static Data table exports as its own `const …_DATA` array, so it agrees.

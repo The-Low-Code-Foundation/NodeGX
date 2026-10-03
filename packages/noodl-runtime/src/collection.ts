@@ -64,10 +64,21 @@ interface PatchedArray extends CollectionLike {
    */
   _plainItemModels?: WeakMap<object, ModelLike>;
   /**
-   * ISL-003: this list's own records, for plain rows whose id another live list already holds.
-   * Present only on a collection opted in by {@link CollectionConstructor.keepPlainRowsApart}.
+   * ISL-003: the list this collection is the current rows of. Present only on a collection opted in
+   * by {@link CollectionConstructor.keepPlainRowsApart}.
    */
-  _plainRowScope?: ModelScopeLike;
+  _plainRows?: PlainRowList;
+}
+
+/**
+ * ISL-003 — one list of plain rows: a Repeater, or a Static Data node. It outlives any one
+ * collection, because a Static Data node makes a fresh collection every time it parses.
+ */
+interface PlainRowList {
+  /** This list's own records, for rows whose id another live list already holds. */
+  scope: ModelScopeLike;
+  /** The collection holding the list's rows now. */
+  current: WeakRef<PatchedArray>;
 }
 
 interface CollectionConstructor {
@@ -93,9 +104,10 @@ interface CollectionConstructor {
   /**
    * ISL-003 (🔒 2026-10-03, "Each list keeps its rows"): plain rows this collection converts keep
    * their own records when another live list already holds their id. The Repeater opts its private
-   * collection in; an Array node's or a query's collection is not opted in and stays app-wide.
+   * collection in, a Static Data node each collection it parses (passing itself as `list`, so one node
+   * is one list across re-parses); an Array node's or a query's collection is not opted in.
    */
-  keepPlainRowsApart(collection: CollectionLike): void;
+  keepPlainRowsApart(collection: CollectionLike, list?: object): void;
 
   /**
    * Live entry counts per tier. Diagnostic/test-facing: the DEBT-014 success criterion is
@@ -493,7 +505,8 @@ Object.defineProperty(Array.prototype, "id", {
  * ISL-003 — which opted-in list converted a plain row into an app-wide record. Weak both ways: the
  * record is app-wide and lives for ever, and must not keep a deleted Repeater's list alive.
  */
-const plainRowOwner = new WeakMap<ModelLike, WeakRef<PatchedArray>>();
+const plainRowOwner = new WeakMap<ModelLike, PlainRowList>();
+const plainRowLists = new WeakMap<object, PlainRowList>();
 
 /**
  * ISL-003. The record a plain row with an explicit id becomes, in a list opted in by
@@ -510,20 +523,25 @@ const plainRowOwner = new WeakMap<ModelLike, WeakRef<PatchedArray>>();
  *  - an id this list already keeps apart → stays apart, so a list never swaps which record an id
  *    means (the diff below keys by id and would hold both).
  *
- * "Holds" is read live (`contains`), so a list that dropped its rows no longer claims them.
+ * "Holds" is read live, on the collection the owning list holds NOW (`current`), so a list that
+ * dropped its rows, or a Static Data node that re-parsed into a new collection, claims only what
+ * it shows.
  */
 function keptApart(self: PatchedArray, id: string): boolean {
-  if (self._plainRowScope!.exists(id)) return true;
+  const list = self._plainRows!;
+  if (list.scope.exists(id)) return true;
   if (!Model.exists(id)) return false;
   const shared = Model.get(id);
-  const owner = plainRowOwner.get(shared)?.deref();
-  return owner !== undefined && owner !== self && owner.contains(shared);
+  const owner = plainRowOwner.get(shared);
+  if (owner === undefined || owner === list) return false;
+  const holding = owner.current.deref();
+  return holding !== undefined && holding.contains(shared);
 }
 
 function plainRowRecord(self: PatchedArray, plain: Record<string, unknown>): ModelLike {
-  if (keptApart(self, plain.id as string)) return self._plainRowScope!.create(plain);
+  if (keptApart(self, plain.id as string)) return self._plainRows!.scope.create(plain);
   const model = Model.create(plain);
-  plainRowOwner.set(model, new WeakRef(self));
+  plainRowOwner.set(model, self._plainRows!);
   return model;
 }
 
@@ -584,8 +602,8 @@ Object.defineProperty(Array.prototype, "set", {
       const plain = item as Record<string, unknown>;
       let model = typeof plain === 'object' && plain !== null ? plainModels.get(plain) : undefined;
       // ISL-003: the same object again, but another list has taken its app-wide record since.
-      const apart = self._plainRowScope !== undefined && typeof plain === 'object' && plain !== null && plain.id !== undefined;
-      if (apart && model !== undefined && keptApart(self, plain.id as string) && self._plainRowScope!.get(plain.id as string) !== model) {
+      const apart = self._plainRows !== undefined && typeof plain === 'object' && plain !== null && plain.id !== undefined;
+      if (apart && model !== undefined && keptApart(self, plain.id as string) && self._plainRows!.scope.get(plain.id as string) !== model) {
         model = undefined;
       }
       if (model === undefined) {
@@ -841,10 +859,16 @@ Collection.create = function (items?: ArrayLike<ModelLike | Record<string, unkno
   return proxyOf(collection);
 };
 
-Collection.keepPlainRowsApart = function (collection: CollectionLike) {
+Collection.keepPlainRowsApart = function (collection: CollectionLike, list?: object) {
   const self = rawOf(collection);
-  if (self._plainRowScope !== undefined) return;
-  Object.defineProperty(self, '_plainRowScope', { value: new Model.Scope(), enumerable: false, writable: false });
+  const key = list ?? self;
+  let rows = plainRowLists.get(key);
+  if (rows === undefined) {
+    rows = { scope: new Model.Scope(), current: new WeakRef(self) };
+    plainRowLists.set(key, rows);
+  }
+  rows.current = new WeakRef(self);
+  Object.defineProperty(self, '_plainRows', { value: rows, enumerable: false, writable: true, configurable: true });
 };
 
 Collection.get = function (name?: string): CollectionLike {

@@ -32,6 +32,7 @@ import Collection = require('@noodl/runtime/src/collection');
 import Model = require('@noodl/runtime/src/model');
 import ComponentInputs = require('@noodl/runtime/src/nodes/componentinputs');
 import ObjectNodeModule = require('@noodl/runtime/src/nodes/std-library/data/modelnode2');
+import StaticDataModule = require('@noodl/runtime/src/nodes/std-library/data/staticdata');
 
 import ForEachModule from '../../src/nodes/std-library/data/foreach';
 
@@ -121,6 +122,47 @@ async function twoListsGraph(): Promise<CorpusGraph> {
             { id: 'card-c', type: 'corpus.Container', children: [repeater('list-c')] }
           ],
           connections: []
+        },
+        {
+          name: '/Line',
+          ports: [{ name: 'text', plug: 'input', type: 'string' }],
+          nodes: [
+            { id: 'line-in', type: 'Component Inputs', ports: [{ name: 'text', plug: 'output', type: 'string' }] },
+            { id: 'line-text', type: 'corpus.LineText' },
+            { id: 'line-object', type: 'Model2', parameters: { idSource: 'foreach' } }
+          ],
+          connections: [{ sourceId: 'line-in', sourcePort: 'text', targetId: 'line-text', targetPort: 'text' }]
+        }
+      ]
+    } as never
+  });
+}
+
+/**
+ * The island's shape and AC5's: three cards, each a Repeater over ITS OWN Static Data, every table
+ * numbering its lines `l0…l2`. Static Data converts its rows itself (its own collection), so the
+ * Repeater only ever sees records — the Repeater's opt-in alone does not reach this.
+ */
+async function threeCardsGraph(suffix: string): Promise<CorpusGraph> {
+  const card = (n: number) => ({
+    id: `card-${n}`,
+    type: 'corpus.Container',
+    children: [{ id: `list-${n}`, type: 'For Each', parameters: { template: '/Line', templateType: 'explicit' } }]
+  });
+  const table = (n: number) => ({
+    id: `data-${n}`,
+    type: 'Static Data',
+    parameters: { type: 'json', json: JSON.stringify([0, 1, 2].map((i) => ({ id: `l${i}-${suffix}`, text: `card${n} line${i}` }))) }
+  });
+  return createCorpusGraph({
+    modules: [ForEachModule, ContainerModule, LineTextModule, ComponentInputs, ObjectNodeModule as unknown as NodeModule, StaticDataModule as unknown as NodeModule],
+    rootComponent: '/root',
+    data: {
+      components: [
+        {
+          name: '/root',
+          nodes: [card(1), card(2), card(3), table(1), table(2), table(3)],
+          connections: [1, 2, 3].map((n) => ({ sourceId: `data-${n}`, sourcePort: 'items', targetId: `list-${n}`, targetPort: 'items' }))
         },
         {
           name: '/Line',
@@ -239,5 +281,28 @@ describe('ISL-003: two lists whose rows reuse ids, both alive', () => {
     expect(warningsFor(graph, 'list-c').map((w) => w.key)).toContain('repeater/items-not-a-collection');
     expect(warningsFor(graph, 'list-a')).toEqual([]);
     expect(warningsFor(graph, 'list-b')).toEqual([]);
+  });
+
+  test('AC5 shape: three cards over three Static Data tables numbered l0…l2 — each card shows its own lines', async () => {
+    const graph = await threeCardsGraph(`${run}`);
+    await graph.settle(12);
+
+    for (const n of [1, 2, 3]) {
+      expect(rowTexts(graph, `list-${n}`)).toEqual([0, 1, 2].map((i) => `card${n} line${i}`));
+    }
+    // The first table keeps the app-wide records.
+    expect(Model.get(`l0-${run}`).get('text')).toBe('card1 line0');
+  });
+
+  test('a Static Data node that parses again (its JSON edited) is still one list: it keeps its records', async () => {
+    const graph = await threeCardsGraph(`${run}`);
+    await graph.settle(12);
+
+    graph.node('data-1').setInputValue('json', JSON.stringify([{ id: `l0-${run}`, text: 'edited' }]));
+    await graph.settle(12);
+
+    expect(rowTexts(graph, 'list-1')).toEqual(['edited']);
+    expect(Model.get(`l0-${run}`).get('text')).toBe('edited');
+    expect(rowTexts(graph, 'list-2')).toEqual([0, 1, 2].map((i) => `card2 line${i}`));
   });
 });
