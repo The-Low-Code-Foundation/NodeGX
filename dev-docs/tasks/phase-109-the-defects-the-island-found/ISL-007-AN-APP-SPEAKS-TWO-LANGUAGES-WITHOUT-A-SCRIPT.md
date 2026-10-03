@@ -1,6 +1,6 @@
 # ISL-007 — An app speaks two languages without a script
 
-**Status:** 🟡 ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). s7: AC1 read (288 of 334 texts switch, 0 braces, the route costs 16 placements + 342 KB); the module's source recovered from its map. **s8: BUILT — module 1.1.0 rebuilt from its recovered sources (no install, root lock untouched); AC2, AC3, AC5 ✅ (spec 5/5, imported module 1/5; deployed drive 16/16, control 5/5); AC8 recorded in P47. Open: the "words for this page" clause, AC4 (the island moves), AC6 (the door). s9: AC7's catalog half ✅ (each node says what it does to an agent; was a dead URL).** Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 **s11: AC6 ruled "Warn if app translates" (see §8 s11).** Ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). s7: AC1 read (288 of 334 texts switch, 0 braces, the route costs 16 placements + 342 KB); the module's source recovered from its map. **s8: BUILT — module 1.1.0 rebuilt from its recovered sources (no install, root lock untouched); AC2, AC3, AC5 ✅ (spec 5/5, imported module 1/5; deployed drive 16/16, control 5/5); AC8 recorded in P47. Open: the "words for this page" clause, AC4 (the island moves), AC6 (the door). s9: AC7's catalog half ✅ (each node says what it does to an agent; was a dead URL).** Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F10](AUDIT-2026-10-01.md) · the island's 693-row word table and `Logic/Translate words` · the same need met by [TPL-007](../phase-78-the-templates/TPL-007-THE-MATHS-AND-TYPING-GAME.md) §2.6 (Static Data route) and [TPL-011](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md) (i18next route)
 **Side:** product (a translation primitive, or the shipped i18next module) — and a scope ruling against [P47](../phase-47-internationalisation/README.md)
 
@@ -244,3 +244,39 @@ missing from French costs one `get_component` per component. The runtime warning
 (iii) *Warn on a typed word on an opted-in project* (INT-009's rule) is a new validator rule, and the question it needs
 is what counts as opted in and what a word is (the island has 334 visible texts and s7 read 46 that did not switch, not classified
 by kind). Put to Richard with this session's other questions.
+
+### Session 11 (2026-10-03) — AC6's question classified, asked and ruled
+
+**The 46 that did not switch (s7), classified** from s7's saved reading (`unchangedSample` is the de-duplicated set,
+not a sample: 16 distinct strings across the five pages). Every one is right to stay: the language buttons `EN` `FR`,
+the age bands `7–9` `10–12`, the player's own typed name `Ada`, characters `Sami` `Mamie Rose` `Biscuit` `Cobble`, and
+symbols `→` `+` `−` `⤢` `—`. **0 missed words among what the drive reads.**
+
+**What the drive cannot read.** A census of the GRAPH (both project formats; `text` / `label` / `placeholder` strings with
+a letter; "wired" = a connection into that node's port): the island types **43** words, **31** overridden by a wire from
+`Translate words`, **12** not: 4 language names (`EN`, `FR`, `English`, `Français`, right to stay) and **8 screen-reader
+names** on kit nodes (`Garden` / `Garden3D` / `Divider` `label` → `aria-label`: "The island", "The garden", "My robot",
+"Her robot", "The robot", "Drag to make the steps wider or narrower"). They stay English in French and no visible-text
+drive sees them. Filed [`P109-S11-ARIALABELWORDS`](../../bugs/p109-s11-arialabelwords-the-islands-screen-reader-names-stay-english-in-french.md)
+(→ IW-010, which re-does every word).
+
+**The population a warning would serve** (the same census on every project on this machine that carries the add-on):
+
+| project | Translation nodes | typed words | wired | unwired (would warn) |
+|---|---|---|---|---|
+| `templates/nightbook` | 22 (+ `UI/Say` ×152) | 0 | — | 0 |
+| `templates/digital-bricks-training` | 131 | 1 | 0 | 1 (`Section` on a dbt-lesson Section) |
+| `isl007-two-languages` (AC2's fixture) | 4 | 2 | 0 | 2 (`EN`, `FR` buttons) |
+| Tailr (`Noodl projects/30d29729…`, Richard's) | 16 | 234 | 72 | **162**: mostly real (`Password` ×7, `Cancel`, `Forgot Password?`, 23 placeholders, 18 input labels); some not words (`AA` ×9, `MMM DD, YYYY` ×6, `V1.13`, `g/m2`) |
+| hsseq ×2 (`Noodl projects/83bd13a2…`, `hsseq-test-main`) | **0** | 59 / 66 | 33 / 33 | 26 / 33 |
+| `templates/bot-garden` (no add-on) | 0 | 43 | 31 | 12 |
+
+The two hsseq copies CARRY the add-on and never place a Translation node, so "the add-on is installed" is the wrong
+opt-in. The existing mechanism for "what this project carries" is the catalog's read of `noodl_modules`; the existing
+signal for "this app translates" is a placed `Translation` node.
+
+**Ruled (Richard, 2026-10-03, in one click, as recommended): "Warn if app translates".** The validator warns on a typed
+word only in a project that places at least one `Translation` node; a word is a string with a letter; a port with a wire
+into it is skipped. Expected on the population above: Tailr 162, DBT 1, the fixture 2, hsseq 0, nightbook 0.
+AC6's other two clauses were met in s9 (one call each, through the bundle). Next: build the rule (AC6) — census-first
+gate with the table above as its expected counts, the hsseq pair as the silent arm, Tailr as the firing arm.

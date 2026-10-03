@@ -1,6 +1,6 @@
 # ISL-015 — A kit author reads the traps before meeting them
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: 🟡 ruled s11 (2026-10-03): all three as recommended (§8) — building.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F20**, with **F14**'s note · found across P105 CG-001, P106 IG-007 and P108 IW-004, 2026-09-27 → 09-30 · **Side:**
 product (kit docs page, node-kit types, kit scaffold and its README, the MCP's `create_node_kit`; a docs gate)
 
@@ -106,4 +106,22 @@ regenerated from the scaffold, never edited by hand.
 
 ## 8. Record
 
-None yet.
+### Session 11 (2026-10-03) — the table re-read, and the three rulings
+
+**§2 re-read at `a6f629a2e` before asking.** One row moved: **T8 is now written** — ISL-011 (s2, `4638de4b1`) put
+*"`defaultCss` is an inline style"* on the docs page (`custom-nodes.md:151`, a caution block), in the types and in the
+scaffold's README, with its own gate. T5 still holds: the runtime's `resolveColor` (`noodl-viewer-react/src/styles.ts:122`,
+called by `node.ts:432` for a `color` port) maps a project's NAMED colour styles, not a `var(--token)`, and is not offered
+to a kit. T1's docs page still says nothing about a kit node as a component's root; its only sizing advice is "put it in
+a Group" (`:277`), which is about Width/Height, not the old root rule. ISL-012 and ISL-013 are still ⬜ (T6, T7 wait).
+
+**Ruled (Richard, 2026-10-03, one click each, all as recommended):**
+1. **"Grow existing pages"**: a "Wrapping a library" section on `custom-nodes.md`, a short version of each trap in the
+   scaffold's README, and `create_node_kit`'s result points at it.
+2. **"Advice + exception"**: keep "default to a token"; the same paragraph says a colour handed to anything that is not
+   CSS is looked up first, with the three-line way. No runtime helper.
+3. **"Phrase check + 1 sample"**: a spec holds the trap list and the phrase each surface must carry; one runnable
+   sample, for T3 (the reload on its own echo).
+
+T6 and T7 are not written until ISL-013 and ISL-012 rule (§7's last trap: today's workaround would read as tomorrow's
+advice). The gate carries them as named pending rows, so the table cannot lose them; T7's existing SSR sentence stays.
