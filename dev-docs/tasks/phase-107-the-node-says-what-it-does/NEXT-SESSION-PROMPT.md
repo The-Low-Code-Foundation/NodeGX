@@ -1,26 +1,26 @@
 # P107 — next session
 
-**Written 2026-10-03 (s34).** Read the [README](README.md) §2–§7. s34's record is [NSP-014 §6.40–§6.42](NSP-014-BATCH-DATA-AND-CLOUD.md)
-(s33's is §6.37–§6.39). SOCKET and A STREAMED BODY are in the header of [world.ts](../../../packages/nodegx-node-spec/src/world.ts)
-(SOCKET after PICKER; A STREAMED BODY under NETWORK).
+**Written 2026-10-03 (s35).** Read the [README](README.md) §2–§7. s35's record is in two places: [NSP-012 §6.5](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md)
+(Array Filter v2, C59, the name sweep, C60, the Upload File hole) and [NSP-014 §6.43–§6.45](NSP-014-BATCH-DATA-AND-CLOUD.md)
+(Query Records slice C, `subscribeFirst`, D29). s34's is NSP-014 §6.40–§6.42.
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 the census | ✅ s1; s21 the `NSP-022` batch | `3bd71e837`, s21 |
-| NSP-001 the spec + interpreter | ✅ s1 … s33; **s34: the `socket` effect, `world.socket`, `world.stream`, `socketAnswer`, `settles` naming a `port`; T17 (`advance` steps timer by timer)** | s1 … s34 |
+| NSP-001 the spec + interpreter | ✅ s1 … s34; **s35: `subscribeFirst` (a patch's subscriptions before its backend calls)** | s1 … s35 |
 | NSP-002 traces + adapter + runtime target | ✅; **s34: the `socket` trace event; canonical `$bytes`; the target attributes each socket call to the node that made the socket** | s2 … s34 |
-| NSP-003 the runner | ✅; s24 `wrapReducers`; s29 `opens`; s31 `world.picker`, `settles`; s33 `drop-subscribe` / `drop-unsubscribe`; **s34 `drop-socket`, the `socket` need and pool** | s2 … s34 |
+| NSP-003 the runner | ✅; s24 `wrapReducers`; s29 `opens`; s31 `world.picker`, `settles`; s33 `drop-subscribe` / `drop-unsubscribe`; s34 `drop-socket`; **s35 `drop-subscribe-first`** | s2 … s35 |
 | NSP-004 the pilot five | ✅ s3 | `ef6f3b6e1` |
 | NSP-005 the export adapter | ✅ (s13); plays the latch nodes only | s13, s15 |
-| NSP-006 the stranger | ✅ rounds 1, 2, 3, 3b — s34 refreshed the hashes (5 files), the three rounds green | `fec895706`, s21 … s34 |
+| NSP-006 the stranger | ✅ rounds 1, 2, 3, 3b — s35 refreshed the hashes (`src/spec.ts` only), the three rounds green | `fec895706`, s21 … s35 |
 | NSP-007 the world | ✅; … REALTIME (s33), **SOCKET and NETWORK's STREAMED BODY (s34)**; AC1's export half ✗ | s13, s16 … s34 |
 | NSP-008 the graph | ✅ — 76 / 76 | s15, s20, s23 … s29 |
 | NSP-010 a change is a version | rows only (two holes, §4) | — |
-| NSP-011 / NSP-012 | as s15 — **Array Filter is stale: the runtime grew `in` / `nin` (P109, `2c38d43a4`), see below** | s15 |
+| NSP-011 / NSP-012 | as s15; **s35: Array Filter v2 (`in` / `nin`); seven of its scenarios had never filtered (C59); Array Map's one mapping scenario had never mapped (C60)** | s15, s35 |
 | NSP-013 the time batch | 🟡 24 / 24 conform. Left: AC2, the deep run for s11–s14 | s16 |
-| **NSP-014 records, users, files, HTTP, streams** | **🟡 24 of 24 conform — s34: WebSocket, Server-Sent Events. Left: AC2's export half (P18)** | s8, s21 … s34 |
+| **NSP-014 records, users, files, HTTP, streams** | **🟡 24 of 24 conform — s35: Query Records slice C (its realtime half). Left: AC2's export half (P18)** | s8, s21 … s35 |
 | NSP-015 navigation + components | 🟡 14 of 14 conform. Left: AC2 (export, P18) | s15 … s20 |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 opened s21 (needs a second runtime target, `noodl-viewer-cloud`) | s21 |
@@ -31,56 +31,54 @@ left of the 147: the 17 cloud-only nodes (NSP-022, T3), 19 visual nodes (NSP-016
 
 ## Commits this session (on `cline-dev`)
 
-- the s34 commit: `packages/nodegx-node-spec` (world.ts SOCKET + A STREAMED BODY; spec.ts; trace.ts; schema.ts + the JSON
-  schema; canonical.ts `$bytes`; interpreter.ts (the socket effect, the stream inbox, T17); runner/mutants.ts, generate.ts,
-  compare.ts; `nodes/websocket.ts`, `nodes/sse.ts`, the SSE half of `nodes/stream-parsers.ts`, the index, the declared
-  equivalents; `scenarios/net.noodl.WebSocket.json`, `scenarios/net.noodl.SSE.json`, scenarios/README.md; world.test.ts,
-  canonical.test.ts, batch-records.test.ts; the hashes), the runtime target (`recordSocket`), the runtime conformance test
-  (C57's known row), the three bug files (C56, C57, C58), NSP-014 §6.40–§6.42, the README and this handoff.
-- **The census is still NOT regenerated into a commit**: a peer's viewer and export work moves it (s30–s33). No census number
+- `3ae3f7288` — Array Filter v2 (spec, scenarios 11 → 16, its own records pool), row C59, NSP-012 §6.5, the README.
+- `be5223e48` — the name sweep: Array Map's records twin and pool, row C60, Upload File's second backend, NSP-012 §6.5.
+- the slice C commit — `query-records.ts` (realtime half), `DbCollection2.json` (37 → 56), spec.ts + interpreter.ts
+  `subscribeFirst`, runner/mutants.ts `drop-subscribe-first`, equivalent-mutants.ts (2 rows), the hashes, row D29, C55's
+  note, NSP-014 §6.43–§6.45, the README and this handoff.
+- **The census is still NOT regenerated into a commit**: a peer's viewer and export work moves it. No census number
   depends on specs.
 
 ## Gate readings
 
-NSP-014 §6.42. In short: WebSocket conformed on its first runtime run (0 divergences); SSE after T17 and one declared
-coercion. Both at seeds 20729, 13 and 20730 and at 10,000 / 10,000 with 0 divergences; every mutant killed or declared (12 and
-21 declared, each with its reason); six defects planted in copies of the runtime nodes all caught. Package: 18 suites, 837
-passed, exit 0. Whole runtime `test/node-spec/`: **3 suites, 193 passed, exit 0**. Export node-spec 12 passed. Both `tsc --noEmit` exit 0.
+NSP-012 §6.5 and NSP-014 §6.45. In short: Array Filter v2, Array Map and Query Records each conform at seeds 20729, 13 and
+20730 and at 10,000 / 10,000 with 0 divergences; mutants killed or declared (Query Records: 2 new declared rows); planted
+defects in copies of the runtime nodes caught (Array Filter 5 of 6, the sixth out of the format's reach; Array Map 3 of 3;
+Query Records 4 of 4). Package: 18 suites, exit 0, the three stranger rounds green. Whole runtime `test/node-spec/`:
+3 suites, 193 passed, exit 0. Both `tsc --noEmit` exit 0.
 
-## What s34 settled
+## What s35 settled
 
-1. **Two seams, both NETWORK-shaped, neither the backend's.** WebSocket reaches the browser through the `WebSocket`
-   constructor; SSE through `fetch` with a body that streams (its `auto` transport is fetch whenever fetch exists — always, in a
-   play). The connection classes are the NODES' code, so backoff, jitter, heartbeat and the duplicate window are graded on the
-   world's clock and random stream.
-2. **A host global can reach the real network.** Jest's Node 22 has a real `WebSocket`: every play now has the world's, and
-   no `EventSource` (a host's is hidden), so a node that asks for one meets the Node reading.
-3. **T17 — the interpreter's clock broke its own rule.** `advance` fired every timer and THEN delivered its inbox, so an answer
-   landing mid-advance reached its handler at the advance's end. world.ts CLOCK always said otherwise and the runtime target
-   always did otherwise (T6); no spec before SSE read the clock inside a response handler. The interpreter now steps the clock
-   timer by timer, delivering every instance's inbox after each. The whole runtime suite and the graph scenarios were re-run:
-   nothing else moved.
-4. **A swap mutant installs a sibling's WHOLE recorded patch.** With `conn` / `config` as one state key each, a swap brings
-   another play's connection; it shows only when a later step reads that connection (a Disconnect's Done vs Unchanged, the
-   next reconnect, Text recomputed). Most of s34's survivors were this; hand scenarios carry the follow-up. When a swap
-   survives, ask first whether the sibling's connection happens to EQUAL the real one but for ids (s34 met that: give the
-   scenario its own Reconnect Delay).
-5. **Pools: weight what the node can use.** WebSocket's URL pool joined the generic string pool a wire can deliver — no ws://
-   URL in it — so 41 of 400 sequences made a socket. Twelve copies of each real URL took it to 94.
+1. **A scenario's NAME is a claim, and nobody had read it against its trace.** Array Filter's "one record, Filtered, First
+   Item Id and Count" was a filter-failed on both targets from s15. The filter reads each row's `data`, and the scenario
+   handed plain objects. Seven of its eleven scenarios did the same, so equals, regex and the uncompilable pattern were
+   graded on one failure. That is also a product defect: a Function's plain array cannot be filtered (C59), nor mapped by
+   Array Map (C60). A sweep of all 1,151 scenarios (a failing trace under a name that says nothing of failing) found 17
+   candidates and three holes. It takes seconds: **re-run it whenever a batch closes** (NSP-012 §6.5 has the method).
+2. **A generated pool must hold what the node can USE.** Array Filter's and Array Map's `items` examples were plain arrays,
+   so no generated run ever filtered or mapped. Both now draw registry records from their own pool.
+3. **Two frame-end callbacks run in the order first scheduled** (`scheduleAfterInputsHaveUpdated`). Query Records' query and
+   reconnect do, and the request group shows it. The format's `subscribeFirst` says so. A spec sets it only when the patch also
+   calls a backend: with nothing to order against, its mutant cannot be killed.
+4. **A 200-sequence green does not grade a branch the 200 never reach.** Query Records' first deep run had 0 divergences and
+   still did NOT conform: three mutant survivors on branches only 10,000 sequences found (a still-connecting subscription
+   torn down beside a query). The deep run is where mutants of rare branches first exist. Read its `mutants:` line, not
+   only `generated:`.
+5. **A swap survivor is often a swap into a twin that differs only in flags already at that value.** Declare exact shapes;
+   the reverse direction usually IS killable by a follow-up step that reads the flag (an order it would flip).
 
-## What s35 does
+## What s36 does
 
-- **Array Filter v2 — the runtime grew two operators** (P109, `2c38d43a4`, a peer's note): `in` / `nin` ("Is one of" / "Is not
-  one of") on string and number filters; the Values port becomes `*` (a wired Array, records by id, or typed `"a, b"`); `nin`
-  keeps a row without the property, like `neq`. `nodegx-node-spec/src/nodes/array-filter.ts` lists the 7 old operators and its
-  generator never draws `in`, so today's gates are green and blind to it. A behaviour change is a version (NSP-010): read
-  `filtercollectionnode.ts` at HEAD, bump the spec, add scenarios, catalog parity (the port's type and description moved).
-- **Query Records' realtime half (slice C)** through the REALTIME seam s33 built: its spec refuses the `realtime` port today
-  ("NOT IN SLICE A", query-records.ts :163-164). Read dbcollectionnode2.ts :680-760. The count does not move; its grading does.
-- **Then a batch:** NSP-022 (the 17 cloud-only nodes — read `noodl-viewer-cloud` first: what a second runtime target needs)
-  or NSP-016 (the visual nodes — research first). Ask Richard which, in plain words, if the board does not settle it.
+- **A batch: NSP-022 (the 17 cloud-only nodes) or NSP-016 (the 19 visual nodes).** Both need research first. NSP-022 needs a
+  second runtime target (`noodl-viewer-cloud`: read what it is and how its nodes run before anything). NSP-016 needs a
+  viewer seam for React nodes. **Ask Richard which, in plain words**, if the board does not settle it: *"The next batch is
+  either the nodes that only run in cloud functions (17), or the visual nodes like Group, Text and Repeater (19). Which
+  first?"*
 - **Cheap, on a QUIET box only:** the deep runs s20 listed (clock-driven specs under T9, Pop Component Stack, s11–s14 at
-  `NSP_DEEP=10000`); the D24 probe on a `nodegx`-type backend.
+  `NSP_DEEP=10000`); the D24 probe on a `nodegx`-type backend; the name sweep again (it was a throwaway — a gate is better:
+  consider making it a package test that lists the candidates and fails on a NEW one).
+- **Array Filter's generated reach is low by construction**: the Op candidate is `filterFilterOp-a` while the drawn filter
+  fields vary, so 10–18 of 400 sequences pair `in` / `nin` with records (NSP-012 §6.5). The hand scenarios carry it.
 
 **Human decisions outstanding:** rows to ask, in plain words (README §7 has them written):
 - **C27 + C29 together** (one ruling: "hand a copy"), then **C30**, **C26**, **C24**, C31, C32, C28, C25, D20, D21.
@@ -93,8 +91,12 @@ passed, exit 0. Whole runtime `test/node-spec/`: **3 suites, 193 passed, exit 0*
 - The file dialog (s31): C53, D27 (rides with it).
 - Cloud Function (s32): **C54**, D28.
 - Subscribe To Changes (s33): C55.
-- **Server-Sent Events (s34): C58 (says Connected after a URL change tore the stream down — WebSocket says idle), C56 (Last
-  Error / Retry Count / Duplicates Suppressed move unsent), C57 (a non-text Event Types or Method throws).**
+- Server-Sent Events (s34): C58 (says Connected after a URL change tore the stream down — WebSocket says idle), C56 (Last
+  Error / Retry Count / Duplicates Suppressed move unsent), C57 (a non-text Event Types or Method throws).
+- **s35, worth asking FIRST — one fix, two nodes: C59 + C60** — *"A Function's list of plain objects wired into Array Filter
+  fails as soon as a filter is set, and Array Map fails any script that copies a property. Records work. Make both read a
+  plain object's own fields too?"* Then **D29** (Query Records' Realtime Status blank while connecting; C55 now covers Query
+  Records too).
 - Then R7, R8, R4's confirmation and G1.
 
 The list: `node scripts/bugs.js --from P107`.

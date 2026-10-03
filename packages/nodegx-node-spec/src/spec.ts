@@ -481,6 +481,9 @@ export interface Patch<S, O> {
    *   `subscribe` NSP-014 s33 — opens a subscription (`createRealtimeSubscription`, world.ts REALTIME): a `subscribe` `backend`
    *             event in the request group, as handed. What it tells arrives at `WorldHandlers.realtime` with the `id`, each at
    *             its moment on the clock (never inside the call: its status is `connecting` there).
+   *   `subscribeFirst` NSP-014 s35 — the `unsubscribe` / `subscribe` above are made BEFORE this patch's `backend` calls
+   *             (absent: after them). A node whose frame end runs two scheduled callbacks — a query and a reconnect, in the
+   *             order they were scheduled (Query Records) — says which ran first; the request group records them so.
    *   `socket`  NSP-014 s34 — calls on WebSockets, in the order made (world.ts SOCKET): each a `socket` event in the request group,
    *             as handed. What a socket the node made tells arrives at `WorldHandlers.socket` with its `id`, each at its moment
    *             on the clock. A `connect` the world's script refuses by throwing is still recorded — read `socketAnswer` first.
@@ -500,6 +503,7 @@ export interface Patch<S, O> {
   picker?: import('./world').PickerClick;
   unsubscribe?: readonly string[];
   subscribe?: SpecBackendCall;
+  subscribeFirst?: boolean;
   socket?: readonly SpecSocketOp[];
 }
 

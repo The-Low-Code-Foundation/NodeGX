@@ -38,3 +38,9 @@ Records does?"*
 would go to v2.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules. The spec states the runtime's reading.
+
+**Also on Query Records (s35, slice C):** its realtime half reconnects at every write of the Class, the Backend or Subscribe
+To Changes, changed or not (`dbcollectionnode2.ts` :563-571, :1177-1187, :650-653), though the query beside it re-runs only
+on a change (DEF-046). Scenario "slice C: the same Class re-written reconnects …" (`scenarios/DbCollection2.json`). The same
+guard fixes both.
+

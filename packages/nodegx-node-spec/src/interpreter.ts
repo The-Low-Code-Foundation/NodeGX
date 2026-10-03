@@ -638,6 +638,7 @@ interface PatchLike {
   settles?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
   unsubscribe?: readonly string[];
   subscribe?: SpecBackendCall;
+  subscribeFirst?: boolean;
   socket?: readonly SpecSocketOp[];
 }
 
@@ -767,36 +768,48 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     const worldId = inst.requests.get(id);
     if (worldId !== undefined) world.network.abort(worldId);
   }
-  // BACKEND (world.ts, NSP-014 s21): the call recorded as handed, in the request group; the answer lands in the inbox
-  // (s30) a list is several calls, made in its order
-  for (const c of patch.backend === undefined ? [] : Array.isArray(patch.backend) ? (patch.backend as readonly SpecBackendCall[]) : [patch.backend as SpecBackendCall]) {
-    if (!spec.world?.backend) throw new SpecError(`${spec.type}.${port}: called a backend but the spec has no world.backend handler`);
-    if (typeof c.id !== 'string') throw new SpecError(`${spec.type}.${port}: a backend call needs an id`);
-    const call = { op: c.op, backend: c.backend, args: c.args };
-    // s26: an AUTH call keeps the session its backend held at the call — the REST adapter merges an answer over that
-    const auth = isAuthOp(c.op) ? { op: c.op, backend: c.backend, args: c.args, atCall: world.backend.session(c.backend) } : undefined;
-    world.backend.issue(call, (d) => inst.inbox.push(auth ? { kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent, auth: { ...auth, delivery: d } } : { kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent }));
-    inst.pending.requests.push(backendEvent(call));
-  }
-  // REALTIME (world.ts, NSP-014 s33): the subscriptions disposed, then the one opened — each a `backend` event in the request
-  // group, as the world records it; what an open one tells runs the spec's handler at its moment on the clock
-  if (patch.unsubscribe !== undefined || patch.subscribe !== undefined) {
-    const subs = (inst.subscriptions ??= new Map());
-    const recordFrom = world.backend.calls.length;
-    for (const id of patch.unsubscribe ?? []) {
-      const sub = subs.get(id);
-      if (!sub) throw new SpecError(`${spec.type}.${port}: unsubscribed ${JSON.stringify(id)}, which is not open`);
-      subs.delete(id);
-      sub.dispose();
+  // s35 — `subscribeFirst`: the subscriptions before the backend calls (spec.ts), as a frame end that reconnected first made them
+  const backendCalls = (): void => {
+    // BACKEND (world.ts, NSP-014 s21): the call recorded as handed, in the request group; the answer lands in the inbox
+    // (s30) a list is several calls, made in its order
+    for (const c of patch.backend === undefined ? [] : Array.isArray(patch.backend) ? (patch.backend as readonly SpecBackendCall[]) : [patch.backend as SpecBackendCall]) {
+      if (!spec.world?.backend) throw new SpecError(`${spec.type}.${port}: called a backend but the spec has no world.backend handler`);
+      if (typeof c.id !== 'string') throw new SpecError(`${spec.type}.${port}: a backend call needs an id`);
+      const call = { op: c.op, backend: c.backend, args: c.args };
+      // s26: an AUTH call keeps the session its backend held at the call — the REST adapter merges an answer over that
+      const auth = isAuthOp(c.op) ? { op: c.op, backend: c.backend, args: c.args, atCall: world.backend.session(c.backend) } : undefined;
+      world.backend.issue(call, (d) => inst.inbox.push(auth ? { kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent, auth: { ...auth, delivery: d } } : { kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent }));
+      inst.pending.requests.push(backendEvent(call));
     }
-    if (patch.subscribe) {
-      const c = patch.subscribe;
-      if (!spec.world?.realtime) throw new SpecError(`${spec.type}.${port}: subscribed but the spec has no world.realtime handler`);
-      if (c.op !== 'subscribe') throw new SpecError(`${spec.type}.${port}: a subscribe effect's op is subscribe, not ${String(c.op)}`);
-      if (typeof c.id !== 'string' || subs.has(c.id)) throw new SpecError(`${spec.type}.${port}: a subscription needs an id not already open`);
-      subs.set(c.id, world.backend.subscribe({ op: 'subscribe', backend: c.backend, args: c.args }, (told) => handleInbound(inst, { kind: 'realtime', event: { id: c.id, ...told } as RealtimeEvent })));
+  };
+  const realtime = (): void => {
+    // REALTIME (world.ts, NSP-014 s33): the subscriptions disposed, then the one opened — each a `backend` event in the request
+    // group, as the world records it; what an open one tells runs the spec's handler at its moment on the clock
+    if (patch.unsubscribe !== undefined || patch.subscribe !== undefined) {
+      const subs = (inst.subscriptions ??= new Map());
+      const recordFrom = world.backend.calls.length;
+      for (const id of patch.unsubscribe ?? []) {
+        const sub = subs.get(id);
+        if (!sub) throw new SpecError(`${spec.type}.${port}: unsubscribed ${JSON.stringify(id)}, which is not open`);
+        subs.delete(id);
+        sub.dispose();
+      }
+      if (patch.subscribe) {
+        const c = patch.subscribe;
+        if (!spec.world?.realtime) throw new SpecError(`${spec.type}.${port}: subscribed but the spec has no world.realtime handler`);
+        if (c.op !== 'subscribe') throw new SpecError(`${spec.type}.${port}: a subscribe effect's op is subscribe, not ${String(c.op)}`);
+        if (typeof c.id !== 'string' || subs.has(c.id)) throw new SpecError(`${spec.type}.${port}: a subscription needs an id not already open`);
+        subs.set(c.id, world.backend.subscribe({ op: 'subscribe', backend: c.backend, args: c.args }, (told) => handleInbound(inst, { kind: 'realtime', event: { id: c.id, ...told } as RealtimeEvent })));
+      }
+      for (const call of world.backend.calls.slice(recordFrom)) inst.pending.requests.push(backendEvent(call));
     }
-    for (const call of world.backend.calls.slice(recordFrom)) inst.pending.requests.push(backendEvent(call));
+  };
+  if (patch.subscribeFirst) {
+    realtime();
+    backendCalls();
+  } else {
+    backendCalls();
+    realtime();
   }
   // SOCKET (world.ts, NSP-014 s34): calls on WebSockets in the order made — each a `socket` event in the request group, as the
   // world records it; what a socket tells runs the spec's handler at its moment on the clock

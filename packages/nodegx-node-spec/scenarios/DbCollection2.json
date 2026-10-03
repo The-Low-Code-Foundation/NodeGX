@@ -1983,5 +1983,1489 @@
         ]
       }
     }
+  },
+  {
+    "name": "slice C: Subscribe To Changes on with a Class — the query, then the subscribe `{ collection, primaryKey }` with NO filter though one is set; Realtime Status stays empty until the subscription says subscribed",
+    "because": "dbcollectionnode2.ts :563-571 (the query first, then the reconnect), :707-713 (no where; the status never read), :777-785",
+    "params": {
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 4
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 5,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: realtime written before the Class in one frame — the reconnect was scheduled first, so the subscribe is made before the query",
+    "because": ":650-663 then :563-571 — two scheduleAfterInputsHaveUpdated callbacks, run in the order scheduled",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a create told — Change Type, Changed Record, Changed Records, Changed Record Id; Record Created then Records Changed; the query runs again at the next frame end",
+    "because": ":744-775 — and :772-774 scheduleFetch under the Record changes box",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 2,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r3"
+                    ],
+                    "records": [
+                      {
+                        "id": "r3",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: Record changes unticked — a create is still told and pulsed, and nothing is queried again",
+    "because": ":772-774 shouldRunOnValueChange('records')",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true,
+      "runOnChange-records": false
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 2,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r3"
+                    ],
+                    "records": [
+                      {
+                        "id": "r3",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: init publishes the snapshot and pulses nothing, and re-queries nothing; an update pulses Record Updated; a key-only delete leaves Changed Record null and Changed Records empty with the id; resync pulses Records Changed alone",
+    "because": ":748-760 (recordsComplete is the gate; init returns early), :766-771",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "change": {
+                    "type": "init",
+                    "ids": [
+                      "r1"
+                    ],
+                    "records": [
+                      {
+                        "id": "r1",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 2,
+                  "change": {
+                    "type": "update",
+                    "ids": [
+                      "r1"
+                    ],
+                    "records": [
+                      {
+                        "id": "r1",
+                        "title": "b"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 3,
+                  "change": {
+                    "type": "delete",
+                    "ids": [
+                      "r2"
+                    ],
+                    "records": [],
+                    "recordsComplete": false
+                  }
+                },
+                {
+                  "at": 4,
+                  "change": {
+                    "type": "resync"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: an error told — Realtime Error and Realtime Failure; a later subscribed clears the error; a fatal one stops the subscription",
+    "because": ":797-802; :777-783 a subscribed clears a held error; world.ts REALTIME — a fatal error tells stopped",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "error": {
+                    "message": "The realtime connection went down before it was confirmed (errored).",
+                    "code": "CONNECT_FAILED"
+                  }
+                },
+                {
+                  "at": 2,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 3,
+                  "error": {
+                    "message": "No heartbeat",
+                    "code": "HEARTBEAT_MISSED",
+                    "kind": "fatal"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a Backend the project has not — the query fails, then the reconnect says so on Realtime Error with the id as written; Failure then Realtime Failure",
+    "because": ":1177-1187 (the query scheduled first), :843-849, :685-693",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: the same Class re-written reconnects — the old subscription disposed, Subscribed false, a new one opened — and queries nothing",
+    "because": ":563-571 — the reconnect at every write, the query only when the Class changed; :716-726",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: Subscribe To Changes off — torn down: disposed, Subscribed false and Realtime Status empty; the error held is kept",
+    "because": ":650-653, :665-668 — the teardown first; the error is not cleared by it",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                },
+                {
+                  "at": 2,
+                  "error": {
+                    "message": "Rejected",
+                    "code": "SUBSCRIPTION_REJECTED"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: the Backend switched — the query goes to other, then the subscription follows it there",
+    "because": ":1177-1187 — BCN-008: the subscription follows the picker",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: no Class — realtime on subscribes to nothing",
+    "because": ":669-670",
+    "params": {
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a subscription held, then Subscribe To Changes written again and Do in one frame — the old one disposed and a new one opened BEFORE the query",
+    "because": ":650-663 scheduled first, :1161-1168 Do second — the frame end runs them in that order",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a subscription held, then Subscribe To Changes off and Do in one frame — disposed BEFORE the query; Do then the Class written: the query before the reconnect",
+    "because": ":650-663 then :1161-1168; then Do first, :563-571 second",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: realtime on with no Class, then Do and the Class in a later frame — the reconnect asked for after the query this time, so the query is made first (a reconnect flag left set would put the subscribe first)",
+    "because": ":656-663 — the flag clears when the reconnect runs, quiet or not",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: Subscribe To Changes then a Backend the project has not, in one frame — the reconnect fails first: Realtime Failure, then Failure",
+    "because": ":650-663 scheduled before :1177-1187's query; :685-693, :843-849",
+    "params": {
+      "collectionName": "Lesson"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      {
+        "set": "backendId",
+        "value": "nope"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: Record changes unticked — create, update, a whole delete and resync each told and pulsed, the Change outputs moving each time, and nothing queried again",
+    "because": ":744-775 with shouldRunOnValueChange('records') false",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true,
+      "runOnChange-records": false
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r3"
+                    ],
+                    "records": [
+                      {
+                        "id": "r3",
+                        "title": "a"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 2,
+                  "change": {
+                    "type": "update",
+                    "ids": [
+                      "r3"
+                    ],
+                    "records": [
+                      {
+                        "id": "r3",
+                        "title": "b"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 3,
+                  "change": {
+                    "type": "delete",
+                    "ids": [
+                      "r2"
+                    ],
+                    "records": [
+                      {
+                        "id": "r2",
+                        "title": "b"
+                      }
+                    ]
+                  }
+                },
+                {
+                  "at": 4,
+                  "change": {
+                    "type": "resync"
+                  }
+                },
+                {
+                  "at": 5,
+                  "change": {
+                    "type": "create",
+                    "ids": [
+                      "r4"
+                    ],
+                    "records": [
+                      {
+                        "id": "r4"
+                      }
+                    ]
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a filter the translator refuses beside a quiet reconnect (realtime on, no Class) — Failure; then Do, a good filter and the Class: the query before the subscribe (a reconnect flag left set would put the subscribe first)",
+    "because": ":656-663 the flag clears when the reconnect runs, quiet or not; :982 the refusal",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "owner",
+              "operator": "pointsTo",
+              "valueSource": "static",
+              "value": "u1"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "title",
+              "operator": "equalTo",
+              "valueSource": "static",
+              "value": "a"
+            }
+          ]
+        }
+      },
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a subscription that never answers, the Class re-written twice — each reconnect disposes the one before (Realtime Status empty throughout); realtime off disposes the third, and on again opens a fourth",
+    "because": ":716-726 the teardown disposes what is held; :707-713 the status is never read",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: the Class, realtime and a refused filter in one frame — Error and Failure, the subscription opened anyway; realtime off then disposes it",
+    "because": ":982 the query refused; :707-713 the subscription takes no filter; :665-668",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "realtime",
+        "value": true
+      },
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "owner",
+              "operator": "pointsTo",
+              "valueSource": "static",
+              "value": "u1"
+            }
+          ]
+        }
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "stream": [
+                {
+                  "at": 1,
+                  "status": "subscribed"
+                }
+              ]
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a subscription still connecting and a second query, then Subscribe To Changes off and Do in one frame — disposed before the query, whose answer lands as Items; on again opens a new one",
+    "because": ":650-663 then :1161-1168; :716-726 (nothing told, so no status to clear)",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
+      {
+        "signal": "storageFetch"
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "slice C: a subscription still connecting (the third), then a refused filter and Subscribe To Changes off in one frame — Error and Failure, the third disposed; on again opens a fourth",
+    "because": ":982 the refusal; :716-726 the teardown with no status held",
+    "params": {
+      "collectionName": "Lesson",
+      "realtime": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      "settle",
+      {
+        "set": "visualFilter",
+        "value": {
+          "type": "and",
+          "conditions": [
+            {
+              "field": "owner",
+              "operator": "pointsTo",
+              "valueSource": "static",
+              "value": "u1"
+            }
+          ]
+        }
+      },
+      {
+        "set": "realtime",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "realtime",
+        "value": true
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "subscribe"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "results": [
+                  {
+                    "objectId": "r1",
+                    "title": "a",
+                    "n": 1
+                  },
+                  {
+                    "objectId": "r2",
+                    "title": "b",
+                    "n": 2
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
   }
 ]

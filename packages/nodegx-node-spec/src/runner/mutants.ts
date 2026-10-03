@@ -22,6 +22,7 @@
  *   - `drop-picker`    the branch's click on the file input is never made (NSP-014 s31: the dialog never opens)
  *   - `drop-subscribe` / `drop-unsubscribe`  the branch's subscription is never opened / never disposed (NSP-014 s33)
  *   - `drop-socket`    the branch's calls on its WebSockets are never made — no connect, no send, no close (NSP-014 s34)
+ *   - `drop-subscribe-first`  the branch's subscription is made AFTER its backend calls, not before (NSP-014 s35)
  * A mutation that would leave the patch unchanged (drop-emit on a branch with no emit) is not
  * generated: it could only survive, and would say nothing.
  *
@@ -35,7 +36,7 @@
 
 import type { AnyNodeSpec, ErasedReducer } from '../spec';
 
-export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend' | 'drop-picker' | 'drop-subscribe' | 'drop-unsubscribe' | 'drop-socket';
+export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend' | 'drop-picker' | 'drop-subscribe' | 'drop-unsubscribe' | 'drop-socket' | 'drop-subscribe-first';
 
 export interface Branch {
   reducer: string;
@@ -80,6 +81,8 @@ export interface PatchLike {
   /** NSP-014 s33: a subscription opened, and the ones disposed (spec.ts `Patch.subscribe` / `unsubscribe`). */
   subscribe?: unknown;
   unsubscribe?: readonly string[];
+  /** NSP-014 s35: the subscriptions made before the backend calls (spec.ts `Patch.subscribeFirst`). */
+  subscribeFirst?: boolean;
   /** NSP-014 s34: calls on WebSockets (spec.ts `Patch.socket`). */
   socket?: ReadonlyArray<{ op: string }>;
 }
@@ -106,6 +109,8 @@ export function shapeOf(patch: unknown): string {
     // s33 — likewise only when the branch opens or disposes a subscription
     ...(p.subscribe !== undefined ? { subscribe: true } : {}),
     ...(p.unsubscribe !== undefined && p.unsubscribe.length > 0 ? { unsubscribe: true } : {}),
+    // s35 — likewise only when the branch makes its subscriptions before its backend calls
+    ...(p.subscribeFirst ? { subscribeFirst: true } : {}),
     // s34 — likewise only when the branch makes calls on a WebSocket: WHICH calls, not how many
     ...(p.socket !== undefined && p.socket.length > 0 ? { socket: [...new Set(p.socket.map((o) => o.op))].sort() } : {})
   });
@@ -266,6 +271,10 @@ function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike):
       const { socket: _s, ...rest } = patch;
       return rest;
     }
+    case 'drop-subscribe-first': {
+      const { subscribeFirst: _f, ...rest } = patch;
+      return rest;
+    }
     default:
       return patch;
   }
@@ -293,6 +302,7 @@ export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mut
     if (ex.subscribe !== undefined) kinds.push(['drop-subscribe', undefined]);
     if (ex.unsubscribe !== undefined && ex.unsubscribe.length > 0) kinds.push(['drop-unsubscribe', undefined]);
     if (ex.socket !== undefined && ex.socket.length > 0) kinds.push(['drop-socket', undefined]);
+    if (ex.subscribeFirst) kinds.push(['drop-subscribe-first', undefined]);
     for (const sibling of byReducer.get(b.reducer) ?? []) {
       if (sibling.shape !== b.shape) kinds.push(['swap-branch', sibling]);
     }

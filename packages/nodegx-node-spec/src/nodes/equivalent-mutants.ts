@@ -20,6 +20,7 @@ const STUCK_FLAG = 'a stuck "scheduled" flag re-runs a silent run silently: no p
 const WS_SAME_VALUE = 'a same-value write of URL, Protocols or Auto Connect schedules a rebuild that cannot act (the frame end finds the connection matching, or no URL, or Auto Connect off)';
 const SSE_SAME_VALUE = 'a same-value write of URL or Auto Connect schedules a pass that cannot act (the connection was opened against this URL, or there is no URL, or Auto Connect is off)';
 const SSE_DEAD = 'a Connect that fails inside the call leaves a dead connection (error, no transport, no timer, 0 retries); which dead one is kept is invisible — a later Connect or pass replaces it, a Disconnect sends closed / false / 0 from either';
+const QR_CLEAR = 'a frame end with no reconnect scheduled, handed the patch of its twin that ran a quiet one: it clears two reconnect flags already clear';
 const GRAPH = (what: string, scenario: string) => `${what} is written onto the registry and no port of this node reads it back — graded by ${scenario}`;
 
 export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
@@ -30,6 +31,14 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   ],
   // NSP-014 s33 — the frame end's quiet reconfigure (Enabled off, or no Class, with no subscription held): nothing to tear
   // down and nothing to open, so re-running it every frame is silent; every input that could change it schedules anyway
+  // NSP-014 s35 — Query Records' frame end runs two callbacks; a branch where the reconnect was NOT scheduled handed the patch of
+  // its twin where it was and did nothing (a quiet reconnect: Subscribe To Changes off, or no Class, nothing held) clears two
+  // flags that are already clear. Exact shapes, both ways the pair is not: the twin handed this one's patch leaves the flag set,
+  // and that IS killed (scenario "a filter the translator refuses beside a quiet reconnect …").
+  DbCollection2: [
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '{"set":[],"emit":[],"outcome":null,"outcomes":[],"request":false}', swappedWith: '{"set":["rtFirst","rtScheduled"],"emit":[],"outcome":null,"outcomes":[],"request":false}', why: QR_CLEAR },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '{"set":["bound","error","fetchScheduled"],"emit":["failure"],"outcome":null,"outcomes":[],"request":false}', swappedWith: '{"set":["bound","error","fetchScheduled","rtFirst","rtScheduled"],"emit":["failure"],"outcome":null,"outcomes":[],"request":false}', why: QR_CLEAR }
+  ],
   SubscribeToChanges: [
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },
