@@ -2,6 +2,7 @@
 id: P78-TPL011-TRANSLATION
 title: An i18next Translation node keeps showing its last text when its key goes empty or names nothing
 status: fixed
+commit: a36d28e90
 regression: packages/noodl-runtime/test/isl-007-i18next-module.test.js
 severity: medium
 area: library / i18next Translation (i18next-translation module)

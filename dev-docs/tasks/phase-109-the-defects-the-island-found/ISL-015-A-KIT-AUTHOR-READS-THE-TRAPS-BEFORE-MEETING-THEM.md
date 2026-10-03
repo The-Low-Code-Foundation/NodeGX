@@ -1,6 +1,6 @@
 # ISL-015 — A kit author reads the traps before meeting them
 
-**Status: 🟡 ruled s11 (2026-10-03): all three as recommended (§8) — building.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: 🟡 s11 (2026-10-03): ruled (all three as recommended) and BUILT — AC1–AC4, AC6 ✅; AC5 (the stranger round) owed.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F20**, with **F14**'s note · found across P105 CG-001, P106 IG-007 and P108 IW-004, 2026-09-27 → 09-30 · **Side:**
 product (kit docs page, node-kit types, kit scaffold and its README, the MCP's `create_node_kit`; a docs gate)
 
@@ -125,3 +125,22 @@ a Group" (`:277`), which is about Width/Height, not the old root rule. ISL-012 a
 
 T6 and T7 are not written until ISL-013 and ISL-012 rule (§7's last trap: today's workaround would read as tomorrow's
 advice). The gate carries them as named pending rows, so the table cannot lose them; T7's existing SSR sentence stays.
+
+**Built in s11** — the gate first: [`isl015-kit-traps.test.js`](../../../packages/nodegx-node-kit-types/tests/isl015-kit-traps.test.js)
+(beside `docsamples.test.js`; the README read as `scaffoldKitFiles` GENERATES it, not from its template literal).
+
+| AC | reading |
+|---|---|
+| AC1 | ✅ **RED at HEAD `b49434fcb`: 13 of 20.** Present: T2 and T8 on the docs page (the known-firing control: GAM-017's and ISL-011's words), T8 in the README; T6/T7 pending rows green (no surface carries a route). Absent by name: T1, T3, T4, T5 on the docs page; T1–T5 in the README; the tool's pointer; the T3 sample (3 rows). |
+| AC2 | ✅ **Written.** Docs page: a new `## Wrapping a library` before "Where your kit runs" — three sub-sections, each opening with **What you notice** (T3 "Edits vanish when the page re-renders", with a complete sample `noodl_modules/note-kit/index.js`; T4 "The library's CSS reaches the whole page" — the page, other kits, *not* the editor, whose canvas is a document of its own; T5 "A theme colour has to be looked up…", with `colourOf`, a probe element's computed `color`, which reads any CSS colour, not only hex — the island's own `resolveColour` (`blocks.js:1462`) falls back on an `rgb()`/`hsl()` token); the token paragraph carries the exception in the same paragraph, linked (ruling 2); T1 heads "The rough edges", claiming only what GAM-014 measured (a deployed page and the editor canvas). Scaffold README: `## Traps you will meet`, six bullets (T1–T5, T8 pointing at Ports). |
+| AC3 | ✅ **21/21 green, two sabotage arms**, each on a backed-up copy restored by `cp` and `cmp`-checked: T3's rule paragraph deleted from the docs page → **1 red, "T3 on the docs page"**; T5's README bullet deleted → **1 red, "T5 in the scaffold's README"**. The table asserts its eight ids and the two pending owners. **T3 sample RUN** (the ruling's one sample): pulled off the page, loaded as the runtime loads a kit (React 19 global, `Noodl.defineModule`), rendered in jsdom: typed text survives 3 re-renders with the graph's old value and its own echo, a new graph value shows, one `textarea` throughout. Sabotage: the same sample with the guard replaced by "load whatever the graph says" (the island's first cut) shows `from the graph` after the first re-render. |
+| AC4 | ✅ `create_node_kit`'s `next` names *"Traps you will meet"* (read by the gate); `kitTools.test.ts` 10/10. The tool description is unchanged (its budget gate untouched). |
+| AC5 | ⬜ **Owed: the stranger round.** A fresh agent with only the docs page and `create_node_kit`, deployed and driven (§6). |
+| AC6 | ✅ Recorded for ISL-024: `packages/noodl-mcp/tests/cg003Components.ts:26` *"A kit React node is never a component's root (D53)"* is the stale line (ISL-024 §8). The shipped wraps stay (R28). |
+
+Neighbours: `docsamples.test.js` fragment budget 8 → 9 (`colourOf`, named in its comment; the complete count rose
+too). **Met on the way, this phase's own:** `drift.test.js` was red since s6 — ISL-009's `0951dbbe3` added
+`noDataAttributes` to the runtime's `ReactNodeDefinition` and not to the published types. Added to `index.d.ts` and
+the 10 copies that were current (6 library kits, bot-garden ×3, pixel-game; each +5 lines, nothing else); the 4 copies
+already stale before this (dbt-lesson ×2, rocket-school ×2, unpinned) left as found. Filed
+`P109-S11-NODATAATTRTYPES` (fixed). Types package 111/111, scaffold 76/76.

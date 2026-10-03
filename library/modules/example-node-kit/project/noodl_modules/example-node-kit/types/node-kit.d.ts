@@ -788,6 +788,11 @@ export interface ReactNodeDefinition {
 
   /** Passes the node itself to the React component as `props.noodlNode`. */
   noodlNodeAsProp?: boolean;
+  /**
+   * `true` for a node with no element of its own (it moves or wraps its child), so it offers no
+   * Data Attributes list: an attribute it wrote would land on the child and overwrite the child's own.
+   */
+  noDataAttributes?: boolean;
   /** Set `false` to omit the standard `mounted` input. */
   mountedInput?: boolean;
   /** See {@link ReactNodeFrame}. */

@@ -733,6 +733,31 @@ canvas, on a deployed page and in an exported app.
 3. Add it to \`kit.reactNodes\`.
 4. Reload the preview.
 
+## Traps you will meet
+
+Each of these cost a real kit at least one rebuild. The docs page *Writing your
+own nodes* has the full version, with a sample, under "Wrapping a library".
+
+- **A kit node can be a component's only visual node.** It draws on its own,
+  in the canvas and on a deployed page. Wrap it in a Group only for the
+  Group's size ports.
+- **A signal input arrives as a count.** A prop cannot hold an event, so a
+  signal in \`inputProps\` reaches your component as a number that goes up by
+  one each time it fires. Two pulses in the same frame can count as one.
+- **Edits vanish when the page re-renders.** A library that owns its own DOM
+  (an editor, a map, a block editor) must be made once, into an element React
+  never renders into, and kept in a ref. Load a value into it only when the
+  graph sends a new value, and never your own output coming back.
+- **A library's CSS reaches the whole page.** Its stylesheet, and any rule you
+  write to restyle it, applies to every element on the page your node is on.
+  Scope every rule of yours under a class on your node's root.
+- **A colour for anything that is not CSS has to be looked up.** Colour ports
+  default to a \`var(--token)\`, and that stays right. A canvas, WebGL or a
+  library's theme object cannot read \`var(--primary)\`: set the value as a
+  probe element's \`color\` and read \`getComputedStyle(probe).color\`.
+- **\`defaultCss\` is an inline style** (see Ports above): it beats any rule
+  in your stylesheet.
+
 ## Autocomplete
 
 \`types/${KIT_TYPES_FILENAME}\` is a copy of \`@nodegx/node-kit-types\` (version

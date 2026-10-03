@@ -144,3 +144,8 @@ Constraints, after the rulings:
 ## 8. Record
 
 None yet.
+
+**From ISL-015 AC6 (s11, 2026-10-03):** when the garden generator moves, retire
+`packages/noodl-mcp/tests/cg003Components.ts:26`, *"6. A kit React node is never a component's root (D53)."* GAM-014
+fixed that on 09-17, and the docs page now says a kit node can be a component's only visual node. The wraps in the
+shipped templates stay (P88 R28) unless ISL-025 re-rules them.
