@@ -1,6 +1,6 @@
 # ISL-003 — Two lists that reuse row ids keep their own rows, or the author is told they share them
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F03 ·
+**Status: 🟡 AC1 red recorded (s9, 2026-10-03); ruling 1 asked — scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F03 ·
 [P106 IG-006](../phase-106-the-island-grows/IG-006-OLIVE-READS.md) §7, deviation 10 (lines 166-167) · the template's
 prefixes at `packages/noodl-mcp/tests/cg003Scripts.ts:330` and `:1250-1252` · **Side:** product (runtime: `Model`,
 `Collection`, the For Each row; doctrine)
@@ -114,4 +114,21 @@ Design constraints:
 
 ## 8. Session log
 
-None yet.
+### Session 9 (2026-10-03, at `23bb0a073`)
+
+**AC1 ✅ RED recorded, before any change.** Spec
+[`isl-003-two-lists-same-row-ids.test.ts`](../../../packages/noodl-viewer-react/tests/corpus/isl-003-two-lists-same-row-ids.test.ts):
+three Repeaters over one row component `/Line` (Component Inputs `text` → a sink), both lists mounted at once, each
+test spelling its ids with its own suffix (the record table outlives a test).
+
+| arm | A's rows | B's rows | warnings |
+|---|---|---|---|
+| known-firing: ids `a0,a1` / `b0,b1` | `['a0','a1']` | `['b0','b1']` | — |
+| **the defect: ids `l0,l1` in both** | **`['b0','b1']`** (its own are `a0,a1`) | `['b0','b1']` | none on A or B |
+| beside it, same graph: a third Repeater handed `42` | — | — | `repeater/items-not-a-collection` ✅ |
+
+3/3 green as the HEAD reading (the RED clause is written as what HEAD does, so the fix flips it).
+🔴 A harness trap met on the way: a row component needs `ports: [{ name, plug: 'input' }]` on the **component** as
+well as the Component Inputs node, or the instance has no inputs and both arms read `undefined` (a known-firing arm
+caught it, not the defect arm).
+
