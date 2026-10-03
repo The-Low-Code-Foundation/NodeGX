@@ -1,6 +1,6 @@
 # ISL-015 — A kit author reads the traps before meeting them
 
-**Status: 🟡 s11 (2026-10-03): ruled (all three as recommended) and BUILT — AC1–AC4, AC6 ✅; AC5 (the stranger round) owed.** Scoped 2026-10-01 at `27d891bf3`. **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: ✅ CLOSED s12 (2026-10-03) — AC1–AC6 met; AC5 by a second stranger round after its first found two door defects (fixed) and a docs gap (written). Ruled s11 (all three as recommended).** Scoped 2026-10-01 at `27d891bf3`. **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F20**, with **F14**'s note · found across P105 CG-001, P106 IG-007 and P108 IW-004, 2026-09-27 → 09-30 · **Side:**
 product (kit docs page, node-kit types, kit scaffold and its README, the MCP's `create_node_kit`; a docs gate)
 
@@ -135,7 +135,7 @@ advice). The gate carries them as named pending rows, so the table cannot lose t
 | AC2 | ✅ **Written.** Docs page: a new `## Wrapping a library` before "Where your kit runs" — three sub-sections, each opening with **What you notice** (T3 "Edits vanish when the page re-renders", with a complete sample `noodl_modules/note-kit/index.js`; T4 "The library's CSS reaches the whole page" — the page, other kits, *not* the editor, whose canvas is a document of its own; T5 "A theme colour has to be looked up…", with `colourOf`, a probe element's computed `color`, which reads any CSS colour, not only hex — the island's own `resolveColour` (`blocks.js:1462`) falls back on an `rgb()`/`hsl()` token); the token paragraph carries the exception in the same paragraph, linked (ruling 2); T1 heads "The rough edges", claiming only what GAM-014 measured (a deployed page and the editor canvas). Scaffold README: `## Traps you will meet`, six bullets (T1–T5, T8 pointing at Ports). |
 | AC3 | ✅ **21/21 green, two sabotage arms**, each on a backed-up copy restored by `cp` and `cmp`-checked: T3's rule paragraph deleted from the docs page → **1 red, "T3 on the docs page"**; T5's README bullet deleted → **1 red, "T5 in the scaffold's README"**. The table asserts its eight ids and the two pending owners. **T3 sample RUN** (the ruling's one sample): pulled off the page, loaded as the runtime loads a kit (React 19 global, `Noodl.defineModule`), rendered in jsdom: typed text survives 3 re-renders with the graph's old value and its own echo, a new graph value shows, one `textarea` throughout. Sabotage: the same sample with the guard replaced by "load whatever the graph says" (the island's first cut) shows `from the graph` after the first re-render. |
 | AC4 | ✅ `create_node_kit`'s `next` names *"Traps you will meet"* (read by the gate); `kitTools.test.ts` 10/10. The tool description is unchanged (its budget gate untouched). |
-| AC5 | ⬜ **Owed: the stranger round.** A fresh agent with only the docs page and `create_node_kit`, deployed and driven (§6). |
+| AC5 | ✅ **s12, second round** (§8 s12): deployed and driven, 5/5 with two sabotage arms and a graded re-render arm. |
 | AC6 | ✅ Recorded for ISL-024: `packages/noodl-mcp/tests/cg003Components.ts:26` *"A kit React node is never a component's root (D53)"* is the stale line (ISL-024 §8). The shipped wraps stay (R28). |
 
 Neighbours: `docsamples.test.js` fragment budget 8 → 9 (`colourOf`, named in its comment; the complete count rose
@@ -144,3 +144,62 @@ too). **Met on the way, this phase's own:** `drift.test.js` was red since s6 —
 the 10 copies that were current (6 library kits, bot-garden ×3, pixel-game; each +5 lines, nothing else); the 4 copies
 already stale before this (dbt-lesson ×2, rocket-school ×2, unpinned) left as found. Filed
 `P109-S11-NODATAATTRTYPES` (fixed). Types package 111/111, scaffold 76/76.
+
+### Session 12 (2026-10-03) — AC5, the stranger round, twice
+
+**The setup.** Claude Code (`claude -p`, sonnet, `--strict-mcp-config`), its cwd a scratch copy of the `demo-app`
+fixture with `--primary` set to `#d6336c` (a colour no default carries), the stdio server from a worktree's
+`dist/noodl-mcp.cjs` (built at `e839f2424`, the primary's `bundleEntry.js` carrying a peer's edit), `--add-dir` a
+brief folder holding only `custom-nodes.md` and `pixelpad.js` — a 100-line imperative library written for the round:
+it owns its element, draws on a `<canvas>` (so a token must be looked up), ships a stylesheet with bare `button` and
+`canvas` rules (so it leaks unless scoped), and reports every stroke. Asked: *"Wrap PixelPad as a node kit in this
+app … The pad's ink is the app's primary theme colour … Keep the drawing in a Variable named Drawing … the pad saves
+into it and starts from it. Make a component called Sketch whose whole content is the pad, and place it on the Home
+page …"* No word about traps, wrappers or roots. ⚠️ `--allowedTools` pre-approves; it does not restrict: both agents
+also had Bash.
+
+The drive, [`drive-isl015-stranger-kit.js`](../../../scripts/devtools/drive-isl015-stranger-kit.js), on `nodegx deploy`
+output: presses a cell with a real pointer (reach by `elementFromPoint`), reads the canvas pixel against `var(--primary)`
+read off a probe, `forceUpdate`s the kit's own `noodlNode` three times (found by walking the fiber up from the canvas),
+sets `Noodl.Variables.Drawing` to a new drawing (known-firing: it must repaint), and compares the Go button's, the
+title's and the card's computed styles with a baseline deploy of the same project minus the Sketch instance.
+
+**Round 1 (48 turns, $2.09) — the kit was right and the page drew nothing.** It read the whole docs page, never saw
+`create_node_kit` (deferred; 20 tools advertised; it never called `find_tools`) and did what the page's first section
+says: wrote `noodl_modules/pixelpad-kit/` by hand. The server had read the kits at bind, so `get_node_type` answered
+"Unknown node type"; it passed `allow_unknown_types` and a misnamed `"visualRoots": "[\"pad\"]"` (stripped
+silently), then `set_visual_roots: ["pad"]`, answered `applied` + `unchanged`. `validate_project`: 0 errors. Deployed:
+*"1 component(s) render nothing of their own (/Sketch)"*, no canvas. `render_report` could not tell it: the worktree had
+no viewer bundle. **Its kit, graded on a copy with the root restored by a fresh server: 5/5.** T3: the docs' `seen`
+guard verbatim; T4: every library rule rescoped under its own class; T5: the probe lookup (once, at mount — the page
+says each time); T1: the pad alone as root.
+
+**What round 1 found, all fixed or filed this session:**
+
+| finding | |
+|---|---|
+| a kit written to disk mid-session reads as unknown until the server restarts | ✅ `P109-S12-KITONDISK`: `ensureProjectOverlayFresh()` in `guarded()`, keyed on the kit files' name/size/mtime — D3's own sanctioned cache, which the CN-006 comment had read as forbidden. Spec `isl015KitOnDisk.test.ts` red 2/2 at HEAD, green. |
+| `set_visual_roots` in a batch overwritten by the A20 re-derive | ✅ `P109-S12-SETROOTSOP` (`author.ts`). Spec `setVisualRootsOp.test.ts`: unknown-type root and subset red at HEAD, the A20 derive case green both sides. |
+| a misnamed argument dropped without a word | ⬜ `P109-S12-CAMELROOTS` (open: every tool's schema handling) |
+| `create_node_kit` unreachable from the page | ✅ docs: "Start from the scaffold" names the tool and `find_tools` group `project`; ⬜ `P109-S12-KITGROUPPURPOSE` (the group's purpose line, under the surface budget) |
+| `render_report` dead in every worktree | ✅ `P109-S12-WORKTREEVIEWER`: `make-worktree.sh` links `noodl-editor/src/external/viewer` |
+
+**Round 2 (29 turns, $1.21), the fixes copied into the worktree and its `dist` rebuilt, the new page in the brief.**
+`find_tools` → `project` → `create_node_kit` → read the scaffold's README → rewrote `index.js` (the overlay re-read it)
+→ `Sketch` → Home → `render_report` → validate, 0 errors. Its kit is closer to the page than round 1's: ink is a PORT
+defaulting to `var(--primary)`, re-resolved whenever it changes; the same guard; CSS scoped and re-written in tokens.
+Its own words: it recognised the Variable loop as "your output coming back", and would not have reached for the probe
+without the section. Deployed (exit 0) and driven:
+
+| arm | token pixel | edit after 3 re-renders | new graph value loads | outside unchanged | errors |
+|---|---|---|---|---|---|
+| as built | ✅ `rgb(214, 51, 108)` | ✅ | ✅ | ✅ | 0 |
+| the echo wire removed (the graph keeps its OLD value) | ✅ | ✅ | ✅ | ✅ | 0 |
+| same, the guard removed (sabotage) | ✅ | ❌ white after the first | ✅ | ✅ | 0 |
+| the library's `button {}` unscoped (sabotage) | ✅ | ✅ | ✅ | ❌ the Go button | 0 |
+
+`Sketch/nodes.json`: `visualRoots: ["pad"]`, the kit node, no Group. **AC5 ✅.**
+🔴 **The wiring the person asked for grades nothing on re-renders:** with the Variable loop the graph's value IS the
+edit, so a guardless kit passes too (round 1's copy, measured). Only the arm with the echo wire removed grades T3.
+The page's Card stretching to ~480 px is the fixture's own layout (the baseline has it).
+

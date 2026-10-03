@@ -1,6 +1,6 @@
 # ISL-019 — The same plan writes the same bytes
 
-**Status: 🟢 built s5 (2026-10-02) on "Keep the same id" — AC1–AC5 and AC8 met; ⬜ AC6 (Claude Code over the door), ⬜ AC7 (the garden drops its pins: blocked on a peer's live garden edits, and on two byte traps, §8 s5). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F26](AUDIT-2026-10-01.md) · the merge
+**Status: 🟢 built s5 (2026-10-02) on "Keep the same id" — AC1–AC5, AC7 (s12) and AC8 met; 🟡 AC6 run s12: the update route holds over the real protocol, but 2/2 agents asked to rebuild took delete + create, which stamps the component new (`P109-S12-REBUILDSTAMPS`, needs a ruling). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F26](AUDIT-2026-10-01.md) · the merge
 recipe of P105, P106 and P108, which depends on byte-identical regeneration · **Side:** product (MCP door, `noodl-mcp`)
 
 Run the same plan through the door twice and the two projects differ in every `component.json`, in `_registry.json` and in
@@ -173,3 +173,41 @@ done in the same commit and named in it. An editor open-and-save of the template
 
 Still blocked by s5's reason (1): `packages/noodl-mcp/tests/cg003Components.ts` is modified in the working tree right
 now (a peer's garden edit, not this session's). Reason (3) (components the skeleton writes raw) is unchanged.
+
+### Session 12 (2026-10-03) — AC7 met, AC6 run twice
+
+**AC7 ✅.** `cg003Components.ts` was committed by P108 s9 (`710c7a05c`, 22:21), so reason (1) cleared; reason (3)
+did not apply (the skeleton writes `nodegx.project.json` and an empty `_registry.json` only; every component goes
+through the door). `cg003Template.ts` now starts the door with `reproducible: { namespace: 'cg003', epoch:
+TEMPLATE_EPOCH }` and no longer calls `pinComponentFiles`, `pinRegistry` or its private `pinProjectModified`
+(`pinRunOnValueChangeDefaultsInDirectory` and `pinRootNode` stay: AC7 names three pins, and the settle pin is shared
+with every other template). A `wallClock` build option exists for the control arm only.
+
+| arm | reading (a temp build diffed against `templates/bot-garden`, never over it) |
+|---|---|
+| before the re-baseline | **407 files differ, every one by its trailing newline alone** (135 × each of `component.json`, `nodes.json`, `connections.json`, plus `_registry.json` and `nodegx.project.json`) — s11's count, to the file. Nothing else moved: the ids, every stamp and the project's `modified` now come from the door. |
+| re-baseline | `npm run template:garden` (type gate green; engine gate 259/259; wrote 135 components through one plan). `git diff`: 407 files, 1 line each; each checked as `HEAD:file == file + "\n"`. |
+| treatment | **0 files differ**, none added or missing. `cg003Template.test.ts` **150/150** (AC2's two-builds and checked-in comparisons included). |
+| control (`wallClock`) | **407 differ, 0 newline-only**: every `component.json` by its stamps, and `nodes.json`/`connections.json` by `componentId`, derived from the project's own namespace instead of `cg003`. The gate would be red, as it should. |
+
+**AC6 — run twice, the mechanism holds and the person sentence does not.** Claude Code (`claude -p`, sonnet,
+`--strict-mcp-config`, the stdio server from a worktree's `dist/noodl-mcp.cjs` built at `e839f2424`), asked: *"Rebuild
+the Home page component with the authoring tools so that it ends up exactly as it is now: same nodes, same
+parameters, same wiring. Do not edit the files directly."*
+
+1. **On the `demo-app` fixture (hand-written, 16 turns, $0.68):** `delete_component` then `create_component`. The door
+   refused the exact original: its `RouterNavigate` has no target, `unresolved-navigation` is one of AAQ-005's three
+   blocking warnings, forgiven on an update only because it is already on disk, and a delete + create has nothing on
+   disk to forgive. The agent set the target to `/Pages/Home` and said so. The fixture's hand id `c_home` became the
+   derived one and every file was reformatted: the wrong population for "no diff" (a file the door never wrote).
+2. **On `isl003-three-cards` (door-written, 8 turns, $0.34):** delete + create again. The id came back identical (this
+   task's derived id), but `component.json` got fresh `created`/`modified`, the agent added a `description`,
+   `nodes.json` keys followed the agent's input order, the registry rows were re-stamped, and **App's `modified` moved
+   with no change to its content** (the router entry removed by the delete and re-added by the create).
+3. **The update route, same server, by hand:** `update_component` `set` with Home's current graph, every node's keys
+   reversed → `unchanged: true`, `git status` clean. So s5's no-op guard holds over the real protocol; it is just not
+   the route an agent takes when asked to "rebuild".
+
+AC6's sentence is not met as written. Filed `P109-S12-REBUILDSTAMPS` (needs-ruling): restore the old bytes when a
+create at a path deleted this session differs in nothing, steer a rebuild to `set`, or accept the update route.
+
