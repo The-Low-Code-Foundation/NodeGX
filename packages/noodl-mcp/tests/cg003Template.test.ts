@@ -931,7 +931,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(panel.filter((n) => n.type === '/Logic/Renderer choice').map((n) => params(n).event).sort()).toEqual(['use2d', 'use3d']);
       const set = panel.find((n) => n.type === 'net.noodl.GlobalStore.Set')!;
       expect([params(set).storeName, params(set).key]).toEqual(['garden', 'renderer']);
-      for (const key of ['guRendH', 'guRend3d', 'guRend2d', 'guRend3dLine', 'guRendSlow', 'guRendNoGl', 'guRendFlat']) {
+      for (const key of ['guRendH', 'guRend3d', 'guRend2d', 'guRend3dLine', 'guRend3dKept', 'guRendSlow', 'guRendNoGl', 'guRendFlat']) {
         const word = PAGE_WORDS[key];
         expect({ key, both: !!word && !!word.en && !!word.fr && word.en !== word.fr }).toEqual({ key, both: true });
       }
@@ -947,7 +947,14 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect([read({ mode: '2d' }).use2d, read({ mode: 'junk' }).use3d, read('text').use3d]).toEqual([true, true, true]);
       const choose = (event: string, stored?: unknown) => run(RENDERER_CHOICE_SCRIPT, { event, stored });
       expect(choose('unsupported').renderer).toEqual({ mode: '2d', why: 'unsupported' });
-      expect(choose('slow', { mode: '3d', why: 'grown-up' }).renderer).toEqual({ mode: '2d', why: 'slow' });
+      // P108 s9 (Richard, the tablets): a grown-up's 3D is a manual override — Too Slow never takes it back; only a
+      // computer that cannot draw 3D at all (unsupported) still falls back. With no grown-up choice, slow still switches.
+      expect(choose('slow', { mode: '3d', why: 'grown-up' })).toMatchObject({ renderer: { mode: '3d', why: 'grown-up' }, changed: false });
+      expect(choose('slow', { mode: '3d', why: '' }).renderer).toEqual({ mode: '2d', why: 'slow' });
+      expect(choose('slow', undefined).renderer).toEqual({ mode: '2d', why: 'slow' });
+      expect(choose('unsupported', { mode: '3d', why: 'grown-up' }).renderer).toEqual({ mode: '2d', why: 'unsupported' });
+      expect(read({ mode: '3d', why: 'grown-up' }).line).toBe(PAGE_WORDS.guRend3dKept.en);
+      expect(read({ mode: '3d', why: 'grown-up' }, 'fr').line).toBe(PAGE_WORDS.guRend3dKept.fr);
       expect(choose('use3d', { mode: '2d', why: 'slow' })).toMatchObject({ renderer: { mode: '3d', why: 'grown-up' }, changed: true });
       expect(choose('use2d', { mode: '2d', why: 'grown-up' })).toMatchObject({ renderer: { mode: '2d', why: 'grown-up' }, changed: false });
       expect(choose('', undefined).renderer).toEqual({ mode: '3d', why: '' });
@@ -1024,7 +1031,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(into('plTeachGate', 'condition')).toEqual(['plMode.teaching']);
       expect(from('plTeachGate', 'ontrue')).toEqual([]);
       expect(from('plTeachGate', 'onfalse')).toEqual(['plClearMiss.do', 'plClearOutcome.do', 'plClearTeachBumps.do', 'plMode.to-teach', 'plRunner.stop', 'plTeachStart.go']);
-      expect([into('plTeachStart', 'start'), into('plTeachStart', 'program')]).toEqual([['plStart.world'], ['plRead.program']]);
+      // P108 s9: Teach starts from Land lift — Start world's world, on her land with every part her save holds.
+      expect([into('plTeachStart', 'start'), into('plTeachStart', 'program')]).toEqual([['plLandLift.world'], ['plRead.program']]);
       expect([into('plSetWorldTeach', 'value'), into('plSetWorldTeach', 'do'), params(pnode('plSetWorldTeach')).name]).toEqual([['plTeachStart.world'], ['plTeachStart.ran'], 'gardenWorld']);
       // No transition writes the program: Drive and Teach keep it (only Start over clears it).
       for (const src of ['plDrive', 'plTeachGate', 'plTeachStart']) expect(pc().filter((c) => c.fromId === src && /^plSetProg/.test(c.toId))).toEqual([]);
@@ -1600,8 +1608,8 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
         expect({ id: r.id, lang, sub: card.sub }).toEqual({ id: r.id, lang, sub: own });
       }
     }
-    // The tulips' line is the mockup's own sentence; free play keeps the island's general one.
-    expect(run(REQUEST_CARD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three', words: WORD_ROWS, lang: 'en', botName: 'Pip' }).sub).toBe('Drive Pip yourself first. Pip remembers every step as a block, and then you can tidy the steps up.');
+    // The tulips' line (the mockup's sentence until P108 s9 put the blocks first); free play keeps the island's general one.
+    expect(run(REQUEST_CARD_SCRIPT, { requests: REQ_ROWS, requestId: 'tulips-three', words: WORD_ROWS, lang: 'en', botName: 'Pip' }).sub).toBe('Build Pip’s steps from the blocks, or press Teach and drive: every move becomes a block. Then tidy the steps up.');
     expect(run(REQUEST_CARD_SCRIPT, { requests: REQ_ROWS, requestId: 'free', words: WORD_ROWS, lang: 'en', botName: 'Pip' }).sub).toBe(WORDS.isSub.en.split('{b}').join('Pip'));
   });
 
@@ -2078,7 +2086,7 @@ describe('CG-003 — the page glue, run as the Functions run it', () => {
     });
     it('Request card gives every request the general line → the item-1 row fails', () => {
       const m = mutate(REQUEST_CARD_SCRIPT, 'Outputs.sub = (req && SUBS[req.id] && w[SUBS[req.id]]) || w.isSub', 'Outputs.sub = w.isSub');
-      expect(run(m, { requests: REQ_ROWS, requestId: 'tulips-three', words: WORD_ROWS, lang: 'en', botName: 'Pip' }).sub).not.toContain('Drive Pip yourself first');
+      expect(run(m, { requests: REQ_ROWS, requestId: 'tulips-three', words: WORD_ROWS, lang: 'en', botName: 'Pip' }).sub).not.toContain('Build Pip’s steps from the blocks');
     });
     it('Draw world lights no mark → the item-3 row fails', () => {
       const m = mutate(DRAW_WORLD_SCRIPT, 'lit: d < watered', 'lit: false');
@@ -2506,6 +2514,8 @@ describe('P108 IW-003 (lane M) — the pad walks to things; a robot that finds n
     const pad = CG003_COMPONENTS.find((c) => c.path === 'Workshop/Pad')!;
     expect(pad.connections.some((c: any) => c.fromId === 'pdIn' && c.fromProperty === 'world' && c.toId === 'pdKeys' && c.toProperty === 'world')).toBe(true);
     const play = CG003_COMPONENTS.find((c) => c.connections.some((x: any) => x.toId === 'plPad' && x.toProperty === 'world'))!;
-    expect(play.connections.filter((x: any) => x.toId === 'plPad' && x.toProperty === 'world').map((x: any) => `${x.fromId}.${x.fromProperty}`)).toEqual(['plStart.world']);
+    expect(play.connections.filter((x: any) => x.toId === 'plPad' && x.toProperty === 'world').map((x: any) => `${x.fromId}.${x.fromProperty}`)).toEqual(['plLandLift.world']);
+    // P108 s9: Land lift is Start world's world (on her land, the parts her save holds lifted) — never the live one.
+    expect(play.connections.filter((x: any) => x.toId === 'plLandLift' && x.toProperty === 'world').map((x: any) => `${x.fromId}.${x.fromProperty}`)).toEqual(['plStart.world']);
   });
 });

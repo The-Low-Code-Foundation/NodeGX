@@ -32,7 +32,7 @@
       "type": "JavaScriptFunction",
       "label": "Renderer choice",
       "parameters": {
-        "functionScript": "\nvar before = Inputs.stored && typeof Inputs.stored === 'object' ? Inputs.stored : {};\nvar event = String(Inputs.event || '');\nvar next = event === 'unsupported' ? { mode: '2d', why: 'unsupported' }\n  : event === 'slow' ? { mode: '2d', why: 'slow' }\n  : event === 'use2d' ? { mode: '2d', why: 'grown-up' }\n  : event === 'use3d' ? { mode: '3d', why: 'grown-up' }\n  : { mode: before.mode === '2d' ? '2d' : '3d', why: String(before.why || '') };\nOutputs.renderer = next;\nOutputs.changed = next.mode !== (before.mode === '2d' ? '2d' : '3d') || next.why !== String(before.why || '');\n",
+        "functionScript": "\nvar before = Inputs.stored && typeof Inputs.stored === 'object' ? Inputs.stored : {};\nvar event = String(Inputs.event || '');\nvar kept3d = before.mode !== '2d' && before.why === 'grown-up';\nvar next = event === 'unsupported' ? { mode: '2d', why: 'unsupported' }\n  : event === 'slow' && !kept3d ? { mode: '2d', why: 'slow' }\n  : event === 'use2d' ? { mode: '2d', why: 'grown-up' }\n  : event === 'use3d' ? { mode: '3d', why: 'grown-up' }\n  : { mode: before.mode === '2d' ? '2d' : '3d', why: String(before.why || '') };\nOutputs.renderer = next;\nOutputs.changed = next.mode !== (before.mode === '2d' ? '2d' : '3d') || next.why !== String(before.why || '');\n",
         "runOnChange-in-event": false,
         "runOnChange-in-stored": false
       },

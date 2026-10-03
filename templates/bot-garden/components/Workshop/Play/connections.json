@@ -222,14 +222,56 @@
     {
       "fromId": "plStart",
       "fromProperty": "world",
-      "toId": "plSetWorld",
-      "toProperty": "value"
+      "toId": "plLandStart",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "requestId",
+      "toId": "plLandStart",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "land",
+      "toId": "plLandStart",
+      "toProperty": "land"
     },
     {
       "fromId": "plStart",
       "fromProperty": "ran",
+      "toId": "plLandStart",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "plLandStart",
+      "fromProperty": "world",
+      "toId": "plSetWorld",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "plLandStart",
+      "fromProperty": "ran",
       "toId": "plSetWorld",
       "toProperty": "do"
+    },
+    {
+      "fromId": "plStart",
+      "fromProperty": "world",
+      "toId": "plLandLift",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "requestId",
+      "toId": "plLandLift",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "land",
+      "toId": "plLandLift",
+      "toProperty": "land"
     },
     {
       "fromId": "plStart",
@@ -790,7 +832,7 @@
       "toProperty": "go"
     },
     {
-      "fromId": "plStart",
+      "fromId": "plLandLift",
       "fromProperty": "world",
       "toId": "plTeachStart",
       "toProperty": "start"
@@ -946,7 +988,7 @@
       "toProperty": "palette"
     },
     {
-      "fromId": "plStart",
+      "fromId": "plLandLift",
       "fromProperty": "world",
       "toId": "plPad",
       "toProperty": "world"
@@ -1132,10 +1174,22 @@
       "toProperty": "program"
     },
     {
-      "fromId": "plStart",
+      "fromId": "plLandLift",
       "fromProperty": "world",
       "toId": "plRunner",
       "toProperty": "start"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "world",
+      "toId": "plOut",
+      "toProperty": "runWorld"
+    },
+    {
+      "fromId": "plRunner",
+      "fromProperty": "ticked",
+      "toId": "plOut",
+      "toProperty": "ticked"
     },
     {
       "fromId": "plIn",

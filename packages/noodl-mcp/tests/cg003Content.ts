@@ -20,9 +20,9 @@ const s = (en: string, fr: string): Bi => ({ en, fr });
  * request with no line here falls back to the island's general sentence (`isSub`); the template gate names it.
  */
 export const REQUEST_SUBS: Readonly<Record<string, { key: string; words: Bi }>> = {
-  'path-postbox': { key: 'subPathPostbox', words: s('Drive {b} to the post box, pick up the letter, and carry it to Sami’s door. Every step you take becomes a block.', 'Conduis {b} jusqu’à la boîte aux lettres, prends la lettre, et porte-la à la porte de Sami. Chaque pas devient un bloc.') },
+  'path-postbox': { key: 'subPathPostbox', words: s('Take {b} to the post box, pick up the letter, and carry it to Sami’s door. Tap the blocks in the right order.', 'Emmène {b} jusqu’à la boîte aux lettres, prends la lettre, et porte-la à la porte de Sami. Touche les blocs dans le bon ordre.') },
   'tulip-door': { key: 'subTulipDoor', words: s('The can first: pick it up and fill it at the well, then walk {b} to the tulip and water. Steps in the right order.', 'D’abord l’arrosoir : prends-le et remplis-le au puits, puis emmène {b} jusqu’à la tulipe et arrose. Des pas dans le bon ordre.') },
-  'tulips-three': { key: 'subTulipsThree', words: s('Drive {b} yourself first. {b} remembers every step as a block, and then you can tidy the steps up.', 'Conduis {b} toi-même d’abord. {b} retient chaque pas comme un bloc, et ensuite tu peux ranger les pas.') },
+  'tulips-three': { key: 'subTulipsThree', words: s('Build {b}’s steps from the blocks, or press Teach and drive: every move becomes a block. Then tidy the steps up.', 'Construis les pas de {b} avec les blocs, ou appuie sur Apprendre et conduis : chaque geste devient un bloc. Ensuite, range les pas.') },
   'path-stones': { key: 'subPathStones', words: s('To the rock, four stones in the hod, to a square, four stones down. Four squares, the same trip: fold it into a repeat.', 'Au rocher, quatre pierres dans la hotte, à une case, quatre pierres posées. Quatre cases, le même trajet : range-le dans un « répéter ».') },
   'bowl-if': { key: 'subBowlIf', words: s('Only the empty bowl gets food. Teach {b} to look first: if the bowl is empty, then fill it.', 'Seul le bol vide reçoit à manger. Apprends à {b} à regarder d’abord : si le bol est vide, alors remplis-le.') },
   'letter-say': { key: 'subLetterSay', words: s('Fetch the letter from the post box, carry it to Sami’s door, then give {b} something kind to say there.', 'Va chercher la lettre dans la boîte aux lettres, porte-la à la porte de Sami, puis donne à {b} quelque chose de gentil à dire.') },
@@ -84,6 +84,8 @@ export const PAGE_WORDS: Readonly<Record<string, Bi>> = {
   guRend3d: s('3D island', 'Île en 3D'),
   guRend2d: s('Flat garden', 'Jardin à plat'),
   guRend3dLine: s('This computer draws the island in 3D. If it is too slow, the game switches to the flat garden by itself.', 'Cet ordinateur dessine l’île en 3D. Si c’est trop lent, le jeu passe tout seul au jardin à plat.'),
+  // P108 s9: a grown-up chose 3D — it stays, however slowly this computer draws it.
+  guRend3dKept: s('3D, as chosen here. It stays on even if this computer draws it slowly.', 'La 3D, comme choisi ici. Elle reste même si cet ordinateur la dessine lentement.'),
   guRendSlow: s('The flat garden is on: 3D was too slow on this computer.', 'Le jardin à plat est activé : la 3D était trop lente sur cet ordinateur.'),
   guRendNoGl: s('The flat garden is on: this computer cannot draw 3D.', 'Le jardin à plat est activé : cet ordinateur ne sait pas dessiner en 3D.'),
   guRendFlat: s('The flat garden is on, as chosen here.', 'Le jardin à plat est activé, comme choisi ici.'),

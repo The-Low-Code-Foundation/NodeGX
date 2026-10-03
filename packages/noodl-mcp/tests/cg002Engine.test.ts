@@ -573,7 +573,7 @@ describe('CG-002 — the engine', () => {
       expect(HINTS.hintNotYet.en).toContain(WORDS.step.en);
     });
 
-    it('🔴 P106 s4 (c): in Drive with a program not yet run the owl says Play or Teach, never "press Teach and show"; Teach and no mode keep the start line', () => {
+    it('🔴 P106 s4 (c): in Drive with a program not yet run the owl says Play or change the blocks (P108 s9), never "press Teach and show"; Teach and no mode keep the start line', () => {
       const ready = { world: world(), program: parse('F L'), run: runScript(NEW_RUN_SCRIPT, { program: parse('F L'), robotId: 'pip', lang: 'en' }).run };
       expect(runScript(CHOOSE_HINT_SCRIPT, { ...ready, mode: 'drive' }).key).toBe('hintDriveReady');
       expect(runScript(CHOOSE_HINT_SCRIPT, { ...ready, mode: 'teach' }).key).toBe('hintStart');
@@ -583,7 +583,9 @@ describe('CG-002 — the engine', () => {
       expect(runScript(CHOOSE_HINT_SCRIPT, { world: world(), program: parse('F'), run: ranRun({ bumps: 1 }), mode: 'drive' }).key).toBe('hintBump');
       for (const lang of ['en', 'fr'] as const) {
         expect(HINTS.hintDriveReady[lang]).toContain(WORDS.play[lang]);
-        expect(HINTS.hintDriveReady[lang]).toContain(IG006_WORDS.ig3Teach[lang]);
+        // P108 s9: the blocks, not Teach — Richard: "the hints are still showing the old pre-blockly style actions".
+        expect(HINTS.hintDriveReady[lang]).toContain(lang === 'en' ? 'blocks' : 'blocs');
+        expect(HINTS.hintDriveReady[lang]).not.toContain(IG006_WORDS.ig3Teach[lang]);
         expect(HINTS.hintDriveReady[lang]).not.toBe(HINTS.hintStart[lang]);
       }
     });

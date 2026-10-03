@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "9f92895e-7b4b-5c3b-8836-8b90eb9e5254",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "landliftIn",
+      "fromProperty": "land",
+      "toId": "landliftFn",
+      "toProperty": "in-land"
+    },
+    {
+      "fromId": "landliftIn",
+      "fromProperty": "requestId",
+      "toId": "landliftFn",
+      "toProperty": "in-requestId"
+    },
+    {
+      "fromId": "landliftIn",
+      "fromProperty": "world",
+      "toId": "landliftFn",
+      "toProperty": "in-world"
+    },
+    {
+      "fromId": "landliftFn",
+      "fromProperty": "out-world",
+      "toId": "landliftOut",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "landliftFn",
+      "fromProperty": "success",
+      "toId": "landliftOut",
+      "toProperty": "ran"
+    }
+  ]
+}

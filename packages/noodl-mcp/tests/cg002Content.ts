@@ -626,7 +626,8 @@ export const HINTS: Readonly<Record<string, Bi>> = {
   hintRockGone: s('Nothing left in that rock! {b} has the stones: where do they go?', 'Plus rien dans ce rocher ! {b} a les pierres : où vont-elles ?'),
   hintPredictMiss: s('You tapped one tile, {b} stopped on another. Follow the steps with your finger, one by one.', 'Tu as touché une case, {b} s’est arrêté sur une autre. Suis les pas avec ton doigt, un par un.'),
   // P106 s4: a program not run yet, while just driving — "press Teach and show" read as if the steps were not there.
-  hintDriveReady: s('{b} still knows your steps. Press Play to watch them, or Teach to change them.', '{b} connaît toujours tes pas. Appuie sur Jouer pour les regarder, ou sur Apprendre pour les changer.'),
+  // P108 s9 (Richard: "the hints are still showing the old pre-blockly style actions"): the blocks first, Teach second.
+  hintDriveReady: s('{b} still knows your steps. Press Play to watch them, or change the blocks.', '{b} connaît toujours tes pas. Appuie sur Jouer pour les regarder, ou change les blocs.'),
   oliveThinking: s('Olive is thinking…', 'Olive réfléchit…'),
   oliveResting: s('Olive is resting. Here is her written line.', 'Olive se repose. Voici sa phrase écrite.'),
   // P106 IG-006 AC7: after a run, the line names the block Olive was asked — and says she was resting when the written
@@ -749,7 +750,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   tidyFound1: s('{n} × "{s}" in a row.', '{n} × « {s} » de suite.'),
   blocks: s('{n} blocks', '{n} blocs'),
   block1: s('1 block', '1 bloc'),
-  empty: s('No steps yet. Press "Teach {b}" and drive, or tap a block.', 'Pas encore de pas. Appuie sur « Apprendre à {b} » et conduis, ou touche un bloc.'),
+  empty: s('No steps yet. Tap a block, or press "Teach {b}" and drive.', 'Pas encore de pas. Touche un bloc, ou appuie sur « Apprendre à {b} » et conduis.'),
   recording: s('{b} is learning…', '{b} apprend…'),
   sayBump: s('Boing!', 'Boing !'),
   saySplash: s('Splash!', 'Splash !'),

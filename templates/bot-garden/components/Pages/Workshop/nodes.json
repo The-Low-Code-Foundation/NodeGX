@@ -81,7 +81,7 @@
         "name": "gardenLang"
       },
       "x": 410,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "wsWords",
@@ -95,7 +95,7 @@
       "type": "/Logic/Translate words",
       "label": "In their language",
       "x": 410,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "wsResave",
@@ -105,7 +105,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "wsPlay",
@@ -133,7 +133,7 @@
       "type": "/Data/Requests",
       "label": "The requests",
       "x": 410,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "wsLandReqs",
@@ -178,7 +178,7 @@
         "name": "gardenProgram"
       },
       "x": 410,
-      "y": 2440
+      "y": 2560
     },
     {
       "id": "wsJob",
@@ -198,7 +198,7 @@
         "name": "gardenLandBot"
       },
       "x": 410,
-      "y": 2560
+      "y": 2680
     },
     {
       "id": "wsGift",
@@ -206,6 +206,23 @@
       "label": "What the win lent and gave",
       "x": 410,
       "y": 1480
+    },
+    {
+      "id": "wsLandKeep",
+      "type": "/Logic/Land keep here",
+      "label": "Her land’s parts, into her save",
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "wsLandKeepDue",
+      "type": "Condition",
+      "label": "Did a part rise?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 2800
     },
     {
       "id": "wsGuardWait",
@@ -225,7 +242,7 @@
         "field": "cardsSeen"
       },
       "x": 410,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "wsSeenChanged",
@@ -235,7 +252,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2680
+      "y": 2920
     },
     {
       "id": "wsGuard",
@@ -245,7 +262,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "wsGoIsland",
@@ -256,7 +273,7 @@
         "target": "/Pages/Island"
       },
       "x": 410,
-      "y": 1840
+      "y": 1960
     }
   ],
   "visualRoots": [

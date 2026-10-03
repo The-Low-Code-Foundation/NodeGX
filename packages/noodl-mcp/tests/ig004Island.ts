@@ -45,6 +45,7 @@ import { CREW_PICK } from './iw008Crew';
 import { EARN_ENGINE } from './iw006Earn';
 // P108 IW-007 (lane B): her land — a plot of the island, its drops written to her save, teach again judged by its team.
 import { LAND_TICK, LAND_WORLD } from './iw007Building';
+import { LAND_LIFT } from './p108s9Land';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { writtenAnswer: islWritten } = require('../../../dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/olive-written.js');
 
@@ -305,7 +306,7 @@ ${LAND_TICK}
  * request's reference program run to its end, no Olive), **open**, **locked** (a band above hers: a fence, a padlock),
  * or **free** (free play, "the garden": never pinned, its own dry tulips).
  */
-export const islandWorldScript = (o: { free: unknown; base: ReadonlyArray<string>; home: { x: number; y: number }; freePlot: { x: number; y: number }; plotW: number; plotH: number }): string => `${ISLAND_ENGINE}${LAND_WORLD}
+export const islandWorldScript = (o: { free: unknown; base: ReadonlyArray<string>; home: { x: number; y: number }; freePlot: { x: number; y: number }; plotW: number; plotH: number }): string => `${ISLAND_ENGINE}${LAND_WORLD}${LAND_LIFT}
 var FREE = ${JSON.stringify(o.free)};
 var FREE_PLOT = ${JSON.stringify(o.freePlot)};
 var BASE = ${JSON.stringify(o.base)};
@@ -456,6 +457,9 @@ var state = { v: 1, build: build, w: W, h: H, map: rows.map(function (r) { retur
 // wear's age) — never from a fresh build. Kept is the state held (quiet: it never makes the island build again).
 var kept = Inputs.kept && typeof Inputs.kept === 'object' && !Array.isArray(Inputs.kept) ? Inputs.kept : null;
 if (kept && kept.build === build && kept.live && typeof kept.live === 'object') { state.live = kept.live; state.tick = Number(kept.tick) || 0; }
+// P108 s9 (Richard: "once built, they should be permanent"): a part her save gained elsewhere (the Workshop writes each
+// one as it is delivered) is never drawn unbuilt on a kept island — the build does not move with have, so lift it here.
+if (state.live[IW9_LAND_ID] && Inputs.land) iw9LiftLand(state.live[IW9_LAND_ID].things, Inputs.land);
 // Find my robots: the rectangle around every plot with a robot at work and the robots at home.
 var fx0 = 1e9, fy0 = 1e9, fx1 = -1, fy1 = -1;
 for (var f = 0; f < plots.length; f++) if (plots[f].status === 'working') { fx0 = Math.min(fx0, plots[f].x); fy0 = Math.min(fy0, plots[f].y); fx1 = Math.max(fx1, plots[f].x + PW); fy1 = Math.max(fy1, plots[f].y + PH); }

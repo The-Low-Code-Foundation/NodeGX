@@ -354,7 +354,10 @@ const DRIVE: Readonly<Record<string, 'go'>> = {
   'Logic/Shop news': 'go',
   'Logic/Send robot': 'go',
   // P108 IW-007 (lane B): a blueprint's ghost out, moved, placed, put away.
-  'Logic/Land ghost': 'go'
+  'Logic/Land ghost': 'go',
+  // P108 s9: the Workshop's part written at each tick on her land; its drawn start, after Start world.
+  'Logic/Land keep here': 'go',
+  'Logic/Land start': 'go'
 };
 
 /**
@@ -406,7 +409,9 @@ const TYPE: Readonly<Record<string, string>> = {
   paletteRobot: 'object', robotId: 'string', accessory: 'string', has: 'boolean', giftText: 'string', hasGift: 'boolean',
   // P108 IW-001 (lane A) — the run cap; the pad's say and read.
   over: 'boolean', capped: 'boolean', asking: 'boolean', pending: 'object', bubble: 'object', said: 'string', answer: 'object',
-  cardsSeen: 'array'
+  cardsSeen: 'array',
+  // P108 s9 — a building, once built, stays built.
+  wrote: 'boolean'
 };
 const typeOf = (name: string) => TYPE[name] ?? '*';
 
@@ -934,7 +939,9 @@ const PLAY: CgComponent = {
   nodes: [
     inputs('plIn', [['requestId', 'string'], ['requests', 'array'], ['hints', 'array'], ['words', 'array'], ['lang', 'string'], ['band', 'number'], ['isOlder', 'boolean'], ['botName', 'string'], ['color', 'string'], ['eye', 'string'], ['hat', 'string'], ['stepMs', 'number'], ['robot', 'object'], ['robotKey', 'string'], ['paletteRobot', 'object'], ['giftText', 'string'], ['hasGift', 'boolean'], ['cardsSeen', 'array'], ['plots', 'object'], ['payText', 'string'], ['hasPay', 'boolean'],
       // P108 IW-006 owed (lane O): the win card's "Now in the shop" (Pages/Workshop's Shop news).
-      ['shopText', 'string'], ['hasShop', 'boolean']]),
+      ['shopText', 'string'], ['hasShop', 'boolean'],
+      // P108 s9: her save's land — the Workshop on her land starts from every part already built (Land start / Land lift).
+      ['land', 'object']]),
     // ── What the child sees ──
     group('plRoot', 'The workshop', undefined, column({ rowGap: sp(12) }), ['plHead', 'plWs', 'plWin']),
     group('plHead', 'The head', 'plRoot', column({ rowGap: sp(2) }), ['plEyebrow', 'plTitle', 'plSub']),
@@ -1061,6 +1068,10 @@ const PLAY: CgComponent = {
     logic('plNonce', COUNTER_NODE, 'Start over, counted', { startValue: 0 }),
     variable('plWorldVar', 'gardenWorld', 'The world'),
     setVariable('plSetWorld', 'gardenWorld', 'The world at its start'),
+    // P108 s9: on her land, the start with every part her save holds (a building, once built, stays built). Start world is
+    // untouched — a save write never re-runs it (it would clear her program).
+    logic('plLandStart', L('Land start'), 'Her land’s start: the parts already built'),
+    logic('plLandLift', L('Land lift'), 'The start the runner, the pad and Teach use, the parts already built'),
     setVariable('plSetWorldRec', 'gardenWorld', 'The world after a pad press'),
     variable('plProgVar', 'gardenProgram', 'The program'),
     logic('plRead', L('Read program'), 'The program as a list'),
@@ -1149,7 +1160,9 @@ const PLAY: CgComponent = {
     setVariable('plSetWon', 'gardenWon', 'Show it', { setWith: 'boolean', value: true }),
     setVariable('plClearWon', 'gardenWon', 'Hide it', { setWith: 'boolean', value: false }),
     logic('plWinSum', L('Win summary'), 'The win in words'),
-    outputs('plOut', [['won', 'signal'], ['bloom', 'array'], ['reward', 'object'], ['wonRequest', 'string'], ['island', 'signal'], ['found', 'boolean'], ['blocks', 'number'], ['running', 'boolean'], ['cardsSeen', 'array'], ['cardSeen', 'signal']])
+    outputs('plOut', [['won', 'signal'], ['bloom', 'array'], ['reward', 'object'], ['wonRequest', 'string'], ['island', 'signal'], ['found', 'boolean'], ['blocks', 'number'], ['running', 'boolean'], ['cardsSeen', 'array'], ['cardSeen', 'signal'],
+      // P108 s9: the run's world after each tick, for the page's Land keep here (her land's parts into her save at once).
+      ['runWorld', 'object'], ['ticked', 'signal']])
   ],
   connections: [
     // Words.
@@ -1193,8 +1206,17 @@ const PLAY: CgComponent = {
     wire('plIn', 'robot', 'plStart', 'robot'),
     wire('plIn', 'robotKey', 'plStart', 'robotKey'),
     wire('plReset', 'onClick', 'plNonce', 'increase'),
-    wire('plStart', 'world', 'plSetWorld', 'value'),
-    wire('plStart', 'ran', 'plSetWorld', 'do'),
+    // P108 s9: the drawn start, after Start world, lifted on her land (Land start publishes its world before Ran).
+    wire('plStart', 'world', 'plLandStart', 'world'),
+    wire('plIn', 'requestId', 'plLandStart', 'requestId'),
+    wire('plIn', 'land', 'plLandStart', 'land'),
+    wire('plStart', 'ran', 'plLandStart', 'go'),
+    wire('plLandStart', 'world', 'plSetWorld', 'value'),
+    wire('plLandStart', 'ran', 'plSetWorld', 'do'),
+    // … and the start every run, drive and Teach begins from: lifted again whenever her save's land changes.
+    wire('plStart', 'world', 'plLandLift', 'world'),
+    wire('plIn', 'requestId', 'plLandLift', 'requestId'),
+    wire('plIn', 'land', 'plLandLift', 'land'),
     wire('plStart', 'ran', 'plSetProgClear', 'do'),
     wire('plStart', 'ran', 'plClearTeachBumps', 'do'),
     wire('plStart', 'ran', 'plClearWon', 'do'),
@@ -1305,7 +1327,7 @@ const PLAY: CgComponent = {
     wire('plTeachGate', 'onfalse', 'plClearOutcome', 'do'),
     wire('plTeachGate', 'onfalse', 'plClearTeachBumps', 'do'),
     wire('plTeachGate', 'onfalse', 'plTeachStart', 'go'),
-    wire('plStart', 'world', 'plTeachStart', 'start'),
+    wire('plLandLift', 'world', 'plTeachStart', 'start'),
     wire('plRead', 'program', 'plTeachStart', 'program'),
     wire('plIn', 'lang', 'plTeachStart', 'lang'),
     wire('plTeachStart', 'world', 'plSetWorldTeach', 'value'),
@@ -1334,7 +1356,7 @@ const PLAY: CgComponent = {
     // P108 IW-001 F7: the pad's keys are the drawer's actions; say shows its line; read asks Olive and she answers.
     wire('plPalette', 'palette', 'plPad', 'palette'),
     // P108 IW-003 (lane M): the start world to the pad (its go keys: one per kind lying on the plot).
-    wire('plStart', 'world', 'plPad', 'world'),
+    wire('plLandLift', 'world', 'plPad', 'world'),
     wire('plIn', 'words', 'plRecord', 'words'),
     wire('plIn', 'botName', 'plRecord', 'botName'),
     wire('plStart', 'islander', 'plRecord', 'islander'),
@@ -1366,7 +1388,10 @@ const PLAY: CgComponent = {
     wire('plRecord', 'ran', 'plSetTeachBumps', 'do'),
     // Play, One step: the runner. Play ends teaching and any prediction.
     wire('plRead', 'program', 'plRunner', 'program'),
-    wire('plStart', 'world', 'plRunner', 'start'),
+    wire('plLandLift', 'world', 'plRunner', 'start'),
+    // P108 s9: each tick's world out to the page (values before the signal).
+    wire('plRunner', 'world', 'plOut', 'runWorld'),
+    wire('plRunner', 'ticked', 'plOut', 'ticked'),
     wire('plIn', 'lang', 'plRunner', 'lang'),
     wire('plIn', 'stepMs', 'plRunner', 'stepMs'),
     wire('plPlay', 'onClick', 'plRunner', 'play'),
@@ -2833,6 +2858,9 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       // P108 IW-007 (s6): on her land, the robot she chose on the land's card learns the job.
       variable('wsLandBotVar', 'gardenLandBot', 'The robot chosen on her land'),
       logic('wsGift', L('Gift line'), 'What the win lent and gave'),
+      // P108 s9: on her land, each part the robot delivers goes into her save at once (a building, once built, stays built).
+      logic('wsLandKeep', L('Land keep here'), 'Her land’s parts, into her save'),
+      gate('wsLandKeepDue', 'Did a part rise?'),
       logic('wsGuardWait', TIMER_NODE, 'A moment for the request to arrive', { duration: 600 }),
       // P108 IW-001 F8: Got it writes the cards seen to HER profile (per profile, saved), when it changed anything.
       logic('wsSeen', L('Update profile'), 'The cards she has seen', { field: 'cardsSeen' }),
@@ -2847,6 +2875,17 @@ const PAGE_WORKSHOP: CgComponent = (() => {
       wire('wsRequests', 'requests', 'wsLandReqs', 'requests'),
       // P108 IW-007 (s6): as text — a profile write that leaves her land as it was must not restart the Workshop.
       wire('wsFam', 'landText', 'wsLandReqs', 'land'),
+      // P108 s9: her land as it stands into the Workshop (its start lifts every part already built) …
+      wire('wsFam', 'land', 'wsPlay', 'land'),
+      // … and each tick on her land, the parts delivered into her save (the same store write as a win).
+      wire('wsStore', 'model', 'wsLandKeep', 'model'),
+      wire('wsReqVar', 'value', 'wsLandKeep', 'requestId'),
+      wire('wsPlay', 'runWorld', 'wsLandKeep', 'world'),
+      wire('wsPlay', 'ticked', 'wsLandKeep', 'go'),
+      wire('wsLandKeep', 'wrote', 'wsLandKeepDue', 'condition'),
+      wire('wsLandKeep', 'ran', 'wsLandKeepDue', 'eval'),
+      wire('wsLandKeep', 'model', 'wsStore', 'model'),
+      wire('wsLandKeepDue', 'ontrue', 'wsStore', 'write'),
       wire('wsLandReqs', 'requests', 'wsPlay', 'requests'),
       wire('wsHints', 'hints', 'wsPlay', 'hints'),
       wire('wsWords', 'words', 'wsPlay', 'words'),

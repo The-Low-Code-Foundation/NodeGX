@@ -142,6 +142,60 @@
       "toProperty": "land"
     },
     {
+      "fromId": "wsFam",
+      "fromProperty": "land",
+      "toId": "wsPlay",
+      "toProperty": "land"
+    },
+    {
+      "fromId": "wsStore",
+      "fromProperty": "model",
+      "toId": "wsLandKeep",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsReqVar",
+      "fromProperty": "value",
+      "toId": "wsLandKeep",
+      "toProperty": "requestId"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "runWorld",
+      "toId": "wsLandKeep",
+      "toProperty": "world"
+    },
+    {
+      "fromId": "wsPlay",
+      "fromProperty": "ticked",
+      "toId": "wsLandKeep",
+      "toProperty": "go"
+    },
+    {
+      "fromId": "wsLandKeep",
+      "fromProperty": "wrote",
+      "toId": "wsLandKeepDue",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "wsLandKeep",
+      "fromProperty": "ran",
+      "toId": "wsLandKeepDue",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "wsLandKeep",
+      "fromProperty": "model",
+      "toId": "wsStore",
+      "toProperty": "model"
+    },
+    {
+      "fromId": "wsLandKeepDue",
+      "fromProperty": "ontrue",
+      "toId": "wsStore",
+      "toProperty": "write"
+    },
+    {
       "fromId": "wsLandReqs",
       "fromProperty": "requests",
       "toId": "wsPlay",

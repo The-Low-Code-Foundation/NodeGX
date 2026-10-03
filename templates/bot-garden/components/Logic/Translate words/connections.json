@@ -701,6 +701,12 @@
     },
     {
       "fromId": "translatewordsFn",
+      "fromProperty": "out-guRend3dKept",
+      "toId": "translatewordsOut",
+      "toProperty": "guRend3dKept"
+    },
+    {
+      "fromId": "translatewordsFn",
       "fromProperty": "out-guRend3dLine",
       "toId": "translatewordsOut",
       "toProperty": "guRend3dLine"

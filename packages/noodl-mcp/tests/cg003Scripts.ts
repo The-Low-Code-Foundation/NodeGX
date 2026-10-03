@@ -60,6 +60,7 @@ import { IWL_REQUEST_HELPERS } from './cg002Scripts';
 import { IW6O_CARD_HELPERS, sendRobotScript, shopNewsScript } from './iw006Owed';
 // P108 IW-007 (lane B): building — the Workshop on her land.
 import { IW007_BUILD_SCRIPTS } from './iw007Building';
+import { P108S9_LAND_SCRIPTS } from './p108s9Land';
 
 /** P106 IG-005 (lane B): the islanders' name keys, for the lock line and the gifts. */
 const ISLANDER_WORDS = Object.fromEntries(Object.entries(ISLANDERS).map(([id, i]) => [id, i.nameKey]));
@@ -555,7 +556,12 @@ Outputs.land = active && active.island.land ? JSON.parse(JSON.stringify(active.i
 // P108 IW-007 (s6): her land as TEXT, for the Workshop's Land request — a text the same as before is not published again,
 // so a write that leaves her land as it was (Got it's cards seen, the win itself) does not rebuild the requests, which
 // re-ran Start world: her program cleared and the world reset under her (Land object above is new on every read).
-Outputs.landText = active && active.island.land ? JSON.stringify(active.island.land) : '';
+// P108 s9: and WITHOUT what has been delivered (each building's have) — the Workshop writes a part the moment it is
+// delivered (Land keep here), and that write must not change this text either; Land start / Land lift put every part
+// back from her save, so the Workshop on her land still starts from what is built.
+var iw9Shape = active && active.island.land ? JSON.parse(JSON.stringify(active.island.land)) : null;
+if (iw9Shape && Array.isArray(iw9Shape.buildings)) for (var iw9b = 0; iw9b < iw9Shape.buildings.length; iw9b++) if (iw9Shape.buildings[iw9b]) delete iw9Shape.buildings[iw9b].have;
+Outputs.landText = iw9Shape ? JSON.stringify(iw9Shape) : '';
 var rows = [];
 for (var j = 0; j < model.profiles.length; j++) {
   var p = model.profiles[j];
@@ -872,19 +878,22 @@ Outputs.use3d = mode === '3d';
 Outputs.use2d = mode === '2d';
 Outputs.mode = mode;
 Outputs.why = why;
-Outputs.line = mode === '3d' ? (w.guRend3dLine || '') : (w[why === 'slow' ? 'guRendSlow' : why === 'unsupported' ? 'guRendNoGl' : 'guRendFlat'] || '');
+Outputs.line = mode === '3d' ? (w[why === 'grown-up' ? 'guRend3dKept' : 'guRend3dLine'] || '') : (w[why === 'slow' ? 'guRendSlow' : why === 'unsupported' ? 'guRendNoGl' : 'guRendFlat'] || '');
 `;
 
 /**
  * IG-007 AC4 — the fallback rule's write. `event` is a parameter per placement: `unsupported` (Garden 3D said
  * Supported false), `slow` (it fired Too Slow: Frame Ms above 50 ms for 3 s of visible time), `use3d` / `use2d` (the
  * Grown-ups switch). The next `renderer` value is a fresh object; Changed says whether it differs from the stored one.
+ * P108 s9 (Richard, after the tablets): a grown-up's 3D is a manual override — Too Slow never takes it back ("the kids
+ * don't care about low framerate"); only `unsupported` (no WebGL2: nothing would draw) still falls back over it.
  */
 export const RENDERER_CHOICE_SCRIPT = `
 var before = Inputs.stored && typeof Inputs.stored === 'object' ? Inputs.stored : {};
 var event = String(Inputs.event || '');
+var kept3d = before.mode !== '2d' && before.why === 'grown-up';
 var next = event === 'unsupported' ? { mode: '2d', why: 'unsupported' }
-  : event === 'slow' ? { mode: '2d', why: 'slow' }
+  : event === 'slow' && !kept3d ? { mode: '2d', why: 'slow' }
   : event === 'use2d' ? { mode: '2d', why: 'grown-up' }
   : event === 'use3d' ? { mode: '3d', why: 'grown-up' }
   : { mode: before.mode === '2d' ? '2d' : '3d', why: String(before.why || '') };
@@ -1579,5 +1588,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Shop news', script: SHOP_NEWS_SCRIPT, seam: 'the win card\u2019s line when this first win puts an upgrade on the shop\u2019s shelf' },
   { component: 'Logic/Send robot', script: SEND_ROBOT_SCRIPT, seam: 'My robots: a robot sent to a job she has won, by the crew\u2019s assign rule, said on its card' },
   // P108 IW-007 (lane B): building.
-  ...IW007_BUILD_SCRIPTS
+  ...IW007_BUILD_SCRIPTS,
+  // P108 s9: a building, once built, stays built (the Workshop writes each part; its start and the island lift to the save).
+  ...P108S9_LAND_SCRIPTS
 ];

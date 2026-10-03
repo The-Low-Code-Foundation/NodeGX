@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "b7680a62-8950-5677-8235-d825b95bb053",
+  "name": "Land start",
+  "path": "/Logic/Land start",
+  "type": "visual",
+  "created": "2026-09-27T00:00:00.000Z",
+  "modified": "2026-09-27T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Workshop’s start on her land, every part lifted to what her save holds (after Start world). Runs on Go; answers Ran once its outputs are set."
+}
