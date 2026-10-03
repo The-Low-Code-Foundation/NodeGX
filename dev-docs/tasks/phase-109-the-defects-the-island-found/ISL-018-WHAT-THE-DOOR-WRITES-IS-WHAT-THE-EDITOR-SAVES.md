@@ -166,3 +166,16 @@ step is; it is reversible until the commit ships.
 generator writes at `'4'`, or an old project): its new nodes would be migrated once on the next open. The shipped
 templates are settled (DEF-038's gate), so their one-time step writes nothing; a hand-edited old project is the case.
 Recorded, not built.
+
+### Session 7 — 2026-10-03: AC7 measured (`4988a5948`)
+
+`def038SettledTemplates` over the **committed** population only (a clean worktree, `scripts/devtools/make-worktree.sh`,
+because the gate sweeps the working tree and three of its six reds were a peer's uncommitted `nightbook` / `planning` /
+`planning-demo`): **the same 3 red at `b2ba0320a^` and at `b2ba0320a`**. This change did not redden it. Two of the
+three were the gate's control arm deleting a key the planner never governs (`P109-S7-DEF038CONTROL`, fixed); the
+mutant arm now reddens 14/14 under a planner that never writes. The third is real and older than this phase:
+`digital-bricks-training-demo`, six unanswered Function inputs since its first commit (`P109-S6-DEF038`, handed to the
+dbt-template workstream). **AC7: this change keeps the gate where it was; the gate reads 1 red, not this task's.**
+
+🔴 That row is ISL-018's **open case** in the wild: a format-4 project nobody's editor has opened yet. Its first open
+writes `false` on the six inputs once and saves it at 5. It belongs in the question to Richard below, as an example.

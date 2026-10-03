@@ -1,7 +1,8 @@
 ---
 id: P109-S7-DEF038CONTROL
 title: DEF-038's "the check is live" arm deleted a key the planner never reads, and read three settled templates as dead checks
-status: open
+status: fixed
+commit: 4988a5948
 severity: low
 area: templates / test instrument (packages/noodl-mcp/tests/def038SettledTemplates.test.ts)
 found: P109 s7, 2026-10-03 (attributing P109-S6-DEF038)
