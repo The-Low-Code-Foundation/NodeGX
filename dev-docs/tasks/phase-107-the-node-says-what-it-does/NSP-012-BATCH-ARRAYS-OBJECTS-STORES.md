@@ -116,6 +116,7 @@ derived from a comma list (the catalog's patterns). Parity: 34 of 34.
 | **C9** | Create New Array (:73-75), Create New Object (:49-55), Set Object Properties (modelcrudbase.ts :538-543) | two `Do` presses in one frame: ONE outcome; Array's Fetch, Set Variable's Do and Array Filter's Filter report one PER press (:294-300, :137-145, :411-419) | *"Three Do nodes answer once for two presses in a frame; their siblings answer twice. ERG-001 §4 says once per press. Make the three report per press?"* — the spec follows the contract; 79 / 51 / 59 sequences counted | fix the three, alone |
 | **C10** | Array Filter (:343), Array Map (:233) | `Items` handed a number, a boolean or a plain object THROWS in the setter (`collection.on is not a function`) — a wire can carry any of them | *"A non-array on Items crashes the node instead of refusing."* 21 / 42 counted | guard `on` (a `Failure` on the next run, or treat as no array) |
 | **C11** | Object (:451-460, :517-525; nodescope.ts :149-153) | **`<property> Changed` never fires**: the editor draws the port, nothing registers it — a wire from it throws inside the connection and is dropped, and the pulse at :113 is guarded by `hasOutput` | *"Every Object node offers a 'name Changed' signal per property. None of them has ever fired, and wiring one silently fails."* 32 counted; s04 and three Model2 scenarios under the row | register `changed-<p>` in `registerOutputIfNeeded` — one line, ships alone |
+| **C59** (s35) | Array Filter (:508 `applyFilter(m.data, filter)`) | **a plain array of plain objects — what a Function outputs — fails every filtered run**: a plain object has no `data`, so the first row throws and the run is `array-filter/filter-failed` with "Cannot read properties of undefined (reading '<field>')", Count 0. The sort reads `data` only from a record (:95-117) | *"A Function's list of plain objects wired into Array Filter fails as soon as a filter is set. Records work. Read a plain object's own fields too, as the sort does?"* — measured in a real two-node graph: records → Count 2, the same rows plain → Count 0 + the error | `applyFilter(isRecord(m) ? m.data : m, filter)`, one line, ships alone |
 | **D13** | Array `changed` description (:213) | "suppressed while Fetch is connected" — NDA-017 §2 replaced that rule with the `Array contents` checkbox (:73) | a sentence from before the checkbox | rewrite |
 | **C12** (s10) | Receive Event `consume` (eventreceiver.ts :51-62, :142-143; nodecontext.ts :1148) | **Consume = Always has never applied to a Global event**: the global path emits to every listener and `onEventReceived` drops `handleEvent`'s return — scenario `t05` "Consume = Always on one receiver stops a global event…" records both receivers firing | *"Consume says it stops an event reaching other receivers on the channel. For a Global event — the default — it never has. Make it stop, or say it applies to Parent / Children / Siblings only?"* | behaviour: honour it on the global path (the emitter's listeners in order, stop on the first `true`) — or rewrite the sentence |
 | **C13** (s10) | nodescope.ts `sendEventFromThisScope` :573-581 (children), :597-605 (siblings) | **a consumed Children or Siblings event stops only inside the component that consumed it**: `if (consumed) return true` sits in a `forEach` callback and returns from the callback, not the walk — `t05` "Consume = Always in the first child component…" records the second child firing | *"Consume inside one child component does not stop the event reaching the next child."* | fix: a `for…of` with an early return (one line each), ships alone |
@@ -197,4 +198,44 @@ Complete off holds the queue until Fail; Send / Receive: global delivery with th
 `parent` / `children` (grandchildren too) / `siblings` each reach exactly the components the description
 names; Repeater Item reads the enclosing instance's item and one outside any template says so on the error
 channel.
+
+### 6.5 s35, 2026-10-03 — Array Filter v2: "Is one of" / "Is not one of", and seven scenarios that never filtered
+
+**The change (P109, `2c38d43a4`):** two operators on string and number filters — `in` ("Is one of") and `nin` ("Is not
+one of"). The value is a list: a wired array's records by id (a plain array's records too; other members as they are),
+typed text split on commas (each piece trimmed, an empty one dropped), any other single value a list of one; members
+compared loosely like `eq`. `nin` sits before the missing-property check, like `neq`, so it keeps a row without the
+property; `in` sits after it and drops one. The value port reads `Values` under either. **The spec is v2** (a behaviour
+change is a version, NSP-010): under v1 an Op of `in` tested only that the property was present. Every line cite moved
+(the runtime file grew 25 lines) — remapped with a line-matching diff of the two versions and spot-read, the scenarios'
+`because` too.
+
+**What s35 found first — row C59.** The first scenario's name said "one record, Filtered, First Item Id and Count"; its
+trace on both targets was a `filter-failed` with "Cannot read properties of undefined (reading 'a')". The filter reads
+each row's `data` (:508), and the scenario handed a plain array of plain objects. **Seven of the eleven hand scenarios did
+the same**, so equals, the regex (and its case box) and the uncompilable pattern (its message was the `data` failure, not
+the pattern's) had been graded only on this one failure since s15, and every generated sequence that set a filter on the
+`items` examples failed the same way. Measured as a product defect in a real two-node graph (a source node → Array
+Filter): an Array of records gives Count 2; the same rows as a plain JS array give Count 0 and the error. A Function's
+`Outputs.Items = [{…}]` hands exactly that (simplejavascript.ts does not wrap it). Filed `P107-C59`; the spec keeps the
+runtime's reading (R3 (a)); the scenario is renamed to say what it shows and keeps no `row` (the targets agree).
+
+**The scenarios:** 11 → 16. The six that meant to filter now bind a seeded registry array (`$array: rows`); the plain one
+stays as C59's evidence beside a records twin with the name it always claimed. Four v2 scenarios: a typed list (trimmed,
+the empty piece dropped, a row without the property out under `in` and in under `nin`); loose comparison on a number
+filter (`'2, 3,'` matches 2, 3 and `'3'`; a row of `0` stays out because the empty piece is dropped — `0 == ''`); a plain
+array as Values; a wired Array of records as Values, by id.
+
+**The generator:** Array Filter has its own registry pool (six rows over `a` / `name` / `owner`, two owner records, an empty
+registry); `items` draws a registry array 10 times in 13; the Op draws `in` / `nin` more often; Values draws the typed and
+wired lists. Reach, measured on 400 at three seeds: 69–71 sequences set `in` / `nin`, 59–80 bind seeded rows, **10–18 do
+both** — low by construction (the Op candidate is field `a`, while the drawn filter fields vary), so the hand scenarios
+carry the operators.
+
+**Gates.** Six defects planted in an in-memory copy of the runtime node: five caught by the hand scenarios (none by the
+generated sequences). The sixth (a plain JS array of RECORDS as Values not mapped to ids) is out of the format's reach: a
+scenario cannot hand a plain array holding registry records (`$array` resolves at the top level only), so that branch is
+read, not graded. Runtime: conforms at seeds 20729, 13 and 20730 (15 / 16 scenarios + C10's known; 200 / 200, 0
+divergences; mutants 98 / 98), and at 10,000 / 10,000 with 0 divergences (C10 counted 469). Package: 18 suites, 837
+passed, exit 0. Whole runtime `test/node-spec/`: 3 suites, 193 passed, exit 0. `tsc --noEmit` exit 0.
 

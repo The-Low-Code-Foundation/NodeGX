@@ -1,7 +1,7 @@
 [
   {
-    "name": "A plain array filtered by a = 2: one record, Filtered, First Item Id and Count; Items is a new array (replaced)",
-    "because": "filtercollectionnode.ts :483-536, :44-68",
+    "name": "A plain array of plain objects (what a Function outputs) filtered by a = 2: the filter reads each row's `data`, which a plain object has not — filter-failed and Count 0 (row C59; the spec states the runtime's reading)",
+    "because": ":508 `applyFilter(m.data, filter)` — a plain object's `data` is undefined; :526-532",
     "params": {
       "filterFilter": "a",
       "filterFilterValue-a": 2,
@@ -22,8 +22,44 @@
     ]
   },
   {
+    "name": "Records filtered by a = 2: one record, Filtered, First Item Id and Count; Items is a new array (replaced)",
+    "because": "filtercollectionnode.ts :502-555, :44-72",
+    "params": {
+      "filterFilter": "a",
+      "filterFilterValue-a": 2,
+      "items": {
+        "$array": "rows"
+      }
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "a": 1
+          },
+          "r2": {
+            "a": 2
+          },
+          "r3": {
+            "a": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        }
+      }
+    }
+  },
+  {
     "name": "A Filter pulse with no array: failure no-items; a setting arriving before any array stays silent",
-    "because": ":466-480",
+    "because": ":485-499",
     "params": {},
     "steps": [
       {
@@ -39,13 +75,11 @@
   },
   {
     "name": "A pattern that will not compile: filter-failed with the thrown message; the press owes its outcome; the same message is not raised twice",
-    "because": ":491-514, :420-452",
+    "because": ":510-533, :439-471",
     "params": {
-      "items": [
-        {
-          "a": "x"
-        }
-      ],
+      "items": {
+        "$array": "rows"
+      },
       "filterFilter": "a",
       "filterFilterOp-a": "regex",
       "filterFilterValue-a": "["
@@ -56,11 +90,25 @@
         "signal": "filter"
       },
       "settle"
-    ]
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "a": "x"
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1"
+          ]
+        }
+      }
+    }
   },
   {
     "name": "Sort descending with a limit of 2; Enabled false then passes everything through",
-    "because": ":370-393, :485, :516-520",
+    "because": ":389-412, :504, :535-539",
     "params": {
       "items": [
         {
@@ -89,13 +137,11 @@
   },
   {
     "name": "Refresh re-runs and reports done; a value-path failure with no press pulses Failure as a plain signal",
-    "because": ":240-248, :449-451",
+    "because": ":259-267, :468-470",
     "params": {
-      "items": [
-        {
-          "a": 1
-        }
-      ]
+      "items": {
+        "$array": "rows"
+      }
     },
     "steps": [
       "settle",
@@ -116,23 +162,29 @@
         "value": "("
       },
       "settle"
-    ]
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "a": 1
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1"
+          ]
+        }
+      }
+    }
   },
   {
     "name": "A regex, case-insensitive by default",
-    "because": ":58-64",
+    "because": ":62-68",
     "params": {
-      "items": [
-        {
-          "name": "Ada"
-        },
-        {
-          "name": "ada"
-        },
-        {
-          "name": "Lin"
-        }
-      ],
+      "items": {
+        "$array": "rows"
+      },
       "filterFilter": "name",
       "filterFilterOp-name": "regex",
       "filterFilterValue-name": "^a"
@@ -144,20 +196,37 @@
         "value": true
       },
       "settle"
-    ]
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "name": "Ada"
+          },
+          "r2": {
+            "name": "ada"
+          },
+          "r3": {
+            "name": "Lin"
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        }
+      }
+    }
   },
   {
     "name": "Enabled unticked: Enabled moving re-runs nothing (a stuck run flag would)",
-    "because": ":223 shouldRunOnValueChanged('enabled') — the box governs the re-run",
+    "because": ":242 shouldRunOnValueChanged('enabled') — the box governs the re-run",
     "params": {
-      "items": [
-        {
-          "a": 1
-        },
-        {
-          "a": 2
-        }
-      ],
+      "items": {
+        "$array": "rows"
+      },
       "filterFilter": "a",
       "filterFilterValue-a": 1,
       "runOnChange-enabled": false
@@ -170,11 +239,29 @@
       },
       "settle",
       "settle"
-    ]
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "a": 1
+          },
+          "r2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2"
+          ]
+        }
+      }
+    }
   },
   {
     "name": "Items unticked: a new array arriving binds but re-runs nothing until Filter is pressed",
-    "because": ":210 shouldRunOnValueChange('items')",
+    "because": ":229 shouldRunOnValueChange('items')",
     "params": {
       "items": [
         {
@@ -205,13 +292,11 @@
   },
   {
     "name": "A repeated failure is silent; with Enabled's box unticked an Enabled change then re-runs nothing (a stuck run flag would pass everything through)",
-    "because": ":434-435 the dedup; :223 the box governs the re-run",
+    "because": ":453-454 the dedup; :242 the box governs the re-run",
     "params": {
-      "items": [
-        {
-          "a": "x"
-        }
-      ],
+      "items": {
+        "$array": "rows"
+      },
       "filterFilter": "a",
       "filterFilterOp-a": "regex",
       "filterFilterValue-a": "(",
@@ -229,20 +314,29 @@
         "value": false
       },
       "settle"
-    ]
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "a": "x"
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1"
+          ]
+        }
+      }
+    }
   },
   {
     "name": "Filter settings unticked: a setting arriving re-runs nothing until Filter is pressed",
-    "because": ":560 shouldRunOnValueChanged('filterSettings')",
+    "because": ":579 shouldRunOnValueChanged('filterSettings')",
     "params": {
-      "items": [
-        {
-          "a": 1
-        },
-        {
-          "a": 2
-        }
-      ]
+      "items": {
+        "$array": "rows"
+      }
     },
     "steps": [
       "settle",
@@ -263,11 +357,29 @@
         "signal": "filter"
       },
       "settle"
-    ]
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "a": 1
+          },
+          "r2": {
+            "a": 2
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2"
+          ]
+        }
+      }
+    }
   },
   {
     "name": "A number on Items: the runtime's setter throws on `collection.on` (row C10); the spec binds it and a run finds no rows to read",
-    "because": ":343 `collection && collection.on(…)` on a value with no `on`",
+    "because": ":362 `collection && collection.on(…)` on a value with no `on`",
     "row": "NSP-012 §6 C10",
     "params": {},
     "steps": [
@@ -281,5 +393,205 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "v2: Is one of, typed ' Ada , x,': each piece trimmed, the empty one dropped; a row without the property fails; Is not one of then keeps it",
+    "because": ":51-53, :61, :82-87 listOf — a string is a comma list; `$nin` before the missing-key check, `$in` after it",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "filterFilter": "name",
+      "filterFilterOp-name": "in",
+      "filterFilterValue-name": " Ada , x,"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "filterFilterOp-name",
+        "value": "nin"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "name": "Ada"
+          },
+          "r2": {
+            "name": "Lin"
+          },
+          "r3": {
+            "name": "x"
+          },
+          "r4": {
+            "a": 1
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3",
+            "r4"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "name": "v2: Is one of on a number filter compares loosely: typed '2, 3,' matches 2, 3 and '3' — the empty piece dropped, or 0 == '' would let a 0 in; a number on its own is a list of one",
+    "because": ":61, :86 — `==` like `$eq`; any other single value is `[value]`",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "filterFilter": "a",
+      "filterFilterType-a": "number",
+      "filterFilterOp-a": "in",
+      "filterFilterValue-a": "2, 3,"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "filterFilterValue-a",
+        "value": 1
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "a": 1
+          },
+          "r2": {
+            "a": 2
+          },
+          "r3": {
+            "a": 3
+          },
+          "r4": {
+            "a": "3"
+          },
+          "r5": {
+            "a": 0
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3",
+            "r4",
+            "r5"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "name": "v2: a plain array as Values: its members as they are, loosely; Is not one of drops what is in it",
+    "because": ":84 — a JS array's non-record members are themselves",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "filterFilter": "a",
+      "filterFilterOp-a": "in",
+      "filterFilterValue-a": [
+        2,
+        "3"
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "filterFilterOp-a",
+        "value": "nin"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "a": 1
+          },
+          "r2": {
+            "a": 2
+          },
+          "r3": {
+            "a": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        }
+      }
+    }
+  },
+  {
+    "name": "v2: a wired Array of records as Values: they count by id, so rows whose owner is one of these records pass",
+    "because": ":83 — a Collection's records map to `getId()`",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "filterFilter": "owner",
+      "filterFilterOp-owner": "in",
+      "filterFilterValue-owner": {
+        "$array": "owners"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "filterFilterOp-owner",
+        "value": "nin"
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "owner": "u1"
+          },
+          "r2": {
+            "owner": "u2"
+          },
+          "r3": {
+            "owner": "u3"
+          },
+          "r4": {
+            "title": "no owner"
+          },
+          "u1": {
+            "name": "Ada"
+          },
+          "u2": {
+            "name": "Lin"
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3",
+            "r4"
+          ],
+          "owners": [
+            "u1",
+            "u2"
+          ]
+        }
+      }
+    }
   }
 ]
