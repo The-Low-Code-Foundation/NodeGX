@@ -78,6 +78,13 @@ asks timed out). The tablet's own CPU decides the real speed. A copy:
 "Run anyway"), with its `drive-report.json`, `contract-win-cpu.json` and the app's `logs/`. The first run (37104459782)
 died at `npm ci`: bug P108-S9-LOCKFILE.
 
+**Rebuilt after s9 (2026-10-03/04, from `e36bab588` — the tip `e839f2424` was not pushed: P112-S1-LOCKFILE):** the
+Windows installer, run 37154635479, both jobs green — production engine (`index-43f12bb78e53aecd.js`), installed app's
+upgrade drive PASS 10/10; Olive on the runner's CPU: exam 23 pass / 9 withheld (six at the 12 s limit — a slower runner:
+asks median 9.6 s, 39/55 ok; none of those rungs changed in s9). Copy: `garden-desktop/shell/dist/windows/` (replaced).
+The Mac app: `build-app.js --allow-development-engine` + `npm run dist:mac` (signed 23:23, `index-26e802802c58eb5f.js`,
+the shell's table carries the new hints), `drive-upgrade.js` PASS 10/10.
+
 To open it: Finder → `dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/dist/mac-arm64/` → Olive's
 Island. It keeps its islands in its own data folder (not the browser), so a sitting starts clean.
 
