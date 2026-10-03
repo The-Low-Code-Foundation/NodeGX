@@ -85,4 +85,4 @@ README §1 reading 2. The prototype reused `@nodegx/node-spec` unchanged but had
 7. **AC2, the gates**: `typecheck:node-spec` clean; the package suite **840 passed, 17 skipped, 1 failed → the
    stranger hash gate on `src/world.ts`**, which guards the strangers' suite against change and fails on any edit to
    that file; its docblock's re-record step was run (the digest moved implementation, not bytes, as sha2.test.ts
-   proves). The runtime-side runs are recorded below once they finish.
+   proves). **Runtime side:** `test/node-spec/{graph,runtime-target}.test.ts` 102 passed; `conformance.test.ts` **91 passed, 0 failed (457 s)**, every node CONFORMS, Hash and Open File Picker among them; `nodegx-export` node-spec tests 12 passed. One trap on the way: the runtime compiles this package's SOURCE under its own tsconfig, below ES2020, so the first SHA-2 (BigInt) was a red runtime suite while every package gate was green; sha2.ts is 32-bit for that reason.
