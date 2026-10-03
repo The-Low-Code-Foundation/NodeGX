@@ -1192,6 +1192,18 @@
       "toProperty": "ticked"
     },
     {
+      "fromId": "plRecord",
+      "fromProperty": "world",
+      "toId": "plOut",
+      "toProperty": "runWorld"
+    },
+    {
+      "fromId": "plRecord",
+      "fromProperty": "ran",
+      "toId": "plOut",
+      "toProperty": "ticked"
+    },
+    {
       "fromId": "plIn",
       "fromProperty": "lang",
       "toId": "plRunner",

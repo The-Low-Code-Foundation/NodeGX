@@ -161,7 +161,7 @@ describe('P108 s9 (5) — the wiring: no save write can reset the Workshop', () 
   it('🔴 Play: the drawn start comes from Land start after Start world; the runner, the pad and Teach start from Land lift; nothing reads Start world’s world directly', () => {
     const { nodes, wires } = component(path.join('Workshop', 'Play'));
     expect(nodes.filter((n) => ['plLandStart', 'plLandLift'].includes(n.id)).map((n) => n.id).sort()).toEqual(['plLandLift', 'plLandStart']);
-    for (const w of ['plStart.ran>plLandStart.go', 'plLandStart.world>plSetWorld.value', 'plLandStart.ran>plSetWorld.do', 'plLandLift.world>plRunner.start', 'plLandLift.world>plPad.world', 'plLandLift.world>plTeachStart.start', 'plIn.land>plLandStart.land', 'plIn.land>plLandLift.land', 'plRunner.world>plOut.runWorld', 'plRunner.ticked>plOut.ticked']) expect(wires).toContain(w);
+    for (const w of ['plStart.ran>plLandStart.go', 'plLandStart.world>plSetWorld.value', 'plLandStart.ran>plSetWorld.do', 'plLandLift.world>plRunner.start', 'plLandLift.world>plPad.world', 'plLandLift.world>plTeachStart.start', 'plIn.land>plLandStart.land', 'plIn.land>plLandLift.land', 'plRunner.world>plOut.runWorld', 'plRunner.ticked>plOut.ticked', 'plRecord.world>plOut.runWorld', 'plRecord.ran>plOut.ticked']) expect(wires).toContain(w);
     // The Predict challenge's two readers stay on Start world: her land never has a challenge (Start world: challenge '').
     expect(wires.filter((w) => w.startsWith('plStart.world>')).sort()).toEqual(['plStart.world>plGuessEnd.world', 'plStart.world>plLandLift.world', 'plStart.world>plLandStart.world', 'plStart.world>plSetWorldAsk.value']);
     // Start world itself is not fed her land (a write would re-run it, and its Ran clears her program).

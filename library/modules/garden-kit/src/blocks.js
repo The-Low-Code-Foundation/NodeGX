@@ -1436,8 +1436,11 @@ var gardenKitBlocks = (function () {
     // over a white halo, so it reads on every block colour; the bar floats at the top of the node's own box.
     '.gd-bk .gd-multi>.blocklyPath{stroke:#2E2A3D!important;stroke-width:4px!important;stroke-dasharray:9 5;filter:drop-shadow(0 0 2px #fff) drop-shadow(0 0 2px #fff)}\n' +
     '.gd-bk.gd-several .gd-bk-host{box-shadow:inset 0 0 0 4px #4A2FA6}\n' +
-    '.gd-bk-sel{position:absolute;left:0;right:0;top:12px;z-index:5;display:flex;justify-content:center;pointer-events:none}\n' +
-    '.gd-bk.gd-narrow .gd-bk-sel{top:58px}\n' +
+    // P108 s9 (driven): one row at the top RIGHT — centred, it covered the drawer's first block; past the drawer, the narrow
+    // program side stacked it over the chosen blocks; at the bottom it fell below the fold of a 900 px screen. Narrow:
+    // under the drawer's strip.
+    '.gd-bk-sel{position:absolute;left:0;right:8px;top:12px;z-index:5;display:flex;justify-content:flex-end;pointer-events:none}\n' +
+    '.gd-bk.gd-narrow .gd-bk-sel{top:58px;justify-content:center}\n' +
     '.gd-bk-sel-in{pointer-events:auto;display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:calc(100% - 24px);padding:8px;border-radius:14px;background:#EEE8FF;box-shadow:0 4px 14px rgba(0,0,0,.2)}\n' +
     '.gd-bk-sel button{border:0;border-radius:999px;min-height:40px;padding:8px 14px;font-weight:800;font-size:15px;font-family:inherit;cursor:pointer;touch-action:manipulation;background:#fff;color:#4A2FA6}\n' +
     '.gd-bk-sel button[data-sel-act="delete"]{background:#B3361C;color:#fff}\n' +

@@ -855,7 +855,7 @@
       "path": "Workshop/Play",
       "type": "visual",
       "nodeCount": 165,
-      "connectionCount": 459,
+      "connectionCount": 461,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1087,6 +1087,6 @@
   "stats": {
     "totalComponents": 135,
     "totalNodes": 1111,
-    "totalConnections": 3569
+    "totalConnections": 3571
   }
 }

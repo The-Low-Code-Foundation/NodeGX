@@ -1161,7 +1161,7 @@ const PLAY: CgComponent = {
     setVariable('plClearWon', 'gardenWon', 'Hide it', { setWith: 'boolean', value: false }),
     logic('plWinSum', L('Win summary'), 'The win in words'),
     outputs('plOut', [['won', 'signal'], ['bloom', 'array'], ['reward', 'object'], ['wonRequest', 'string'], ['island', 'signal'], ['found', 'boolean'], ['blocks', 'number'], ['running', 'boolean'], ['cardsSeen', 'array'], ['cardSeen', 'signal'],
-      // P108 s9: the run's world after each tick, for the page's Land keep here (her land's parts into her save at once).
+      // P108 s9: the world after each runner tick or pad press, for the page's Land keep here (her land's parts into her save at once).
       ['runWorld', 'object'], ['ticked', 'signal']])
   ],
   connections: [
@@ -1389,9 +1389,12 @@ const PLAY: CgComponent = {
     // Play, One step: the runner. Play ends teaching and any prediction.
     wire('plRead', 'program', 'plRunner', 'program'),
     wire('plLandLift', 'world', 'plRunner', 'start'),
-    // P108 s9: each tick's world out to the page (values before the signal).
+    // P108 s9: each tick's world out to the page (values before the signal) — and each pad press's (Drive or Teach): a
+    // part the robot puts down by the pad is as built as one a program put there.
     wire('plRunner', 'world', 'plOut', 'runWorld'),
     wire('plRunner', 'ticked', 'plOut', 'ticked'),
+    wire('plRecord', 'world', 'plOut', 'runWorld'),
+    wire('plRecord', 'ran', 'plOut', 'ticked'),
     wire('plIn', 'lang', 'plRunner', 'lang'),
     wire('plIn', 'stepMs', 'plRunner', 'stepMs'),
     wire('plPlay', 'onClick', 'plRunner', 'play'),
