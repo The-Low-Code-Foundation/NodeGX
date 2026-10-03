@@ -68,6 +68,16 @@ Built 2026-10-01 from the session-7 tree (`c051ca68d`), on Richard's Mac:
 bundle). `drive-upgrade.js --exe "<the app>/Contents/MacOS/Olive's Island"` → **PASS, 10/10 clauses**. This is the
 build for the sitting; the s7 one is gone (overwritten in place).
 
+**The Windows installer for the tablets (2026-10-03, from `a9c10ff8c`):** built by `garden-desktop.yml` on a push to
+`p105-garden-desktop`, run 37104659311 — **both jobs green, the first green Windows run of this game**: the PRODUCTION
+engine (`developmentEngine: false`, `index-c1f50a5125f6c04f.js`), installed silently, egress blocked, the installed
+app's upgrade drive PASS 10/10. Olive on the runner's CPU: model loaded in 5.8 s, first-launch exam 28 pass / 4 withheld
+(RD2-en, P31, P22 timeouts, P35 unfaithful), asks median 8.0 s, max 12.0 s, 49/54 ok (P105 s4 on the same runner: 55/80
+asks timed out). The tablet's own CPU decides the real speed. A copy:
+`garden-desktop/shell/dist/windows/OlivesIsland-Setup-0.0.1.exe` (628 MB, unsigned by D2 — SmartScreen: "More info" →
+"Run anyway"), with its `drive-report.json`, `contract-win-cpu.json` and the app's `logs/`. The first run (37104459782)
+died at `npm ci`: bug P108-S9-LOCKFILE.
+
 To open it: Finder → `dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/dist/mac-arm64/` → Olive's
 Island. It keeps its islands in its own data folder (not the browser), so a sitting starts clean.
 
