@@ -25,7 +25,7 @@ import type { LegacyProject } from '../../noodl-editor/src/editor/src/io/Project
 import { createServer } from '../src/server';
 
 import { pinRunOnValueChangeDefaultsInDirectory, readAsLegacyProject } from './templateArtefact';
-import { copyTree, pinComponentFiles, pinRegistry, pinRootNode } from './templatePins';
+import { copyTree, pinRootNode } from './templatePins';
 import { APP_NODES, APP_WIRES, C, CG003_COMPONENTS, CgComponent, GAME_NAME, PAGES, REQUIRED_MODULES } from './cg003Components';
 import { GARDEN_PRESET, GARDEN_TOKENS } from './cg007Look';
 
@@ -118,6 +118,11 @@ export function declaration(c: CgComponent): Record<string, unknown> {
 
 export interface BuildOptions {
   components?: ReadonlyArray<CgComponent>;
+  /**
+   * P109 ISL-019 AC7's control arm only: start the door on the wall clock, as an agent's session does. The artefact
+   * then differs from the checked-in one in every `component.json` and the registry, which is what the gate must see.
+   */
+  wallClock?: boolean;
 }
 
 /** Author the whole template through the plan door and read it back. */
@@ -128,7 +133,11 @@ export async function buildGardenTemplateProject(options: BuildOptions = {}): Pr
   const modules = installModules(dir);
   const components = options.components ?? CG003_COMPONENTS;
 
-  const { server } = createServer({ projectDir: dir, allowWrites: true });
+  // P109 ISL-019 AC7: the door writes the stable bytes itself (ids from the 'cg003' namespace, every stamp the epoch),
+  // so the artefact needs no pins. The pins wrote a trailing newline the door and the editor both leave out (ISL-018),
+  // so dropping them re-baselined every component file and the registry by that one byte, once.
+  const reproducible = options.wallClock ? undefined : { namespace: 'cg003', epoch: TEMPLATE_EPOCH };
+  const { server } = createServer({ projectDir: dir, allowWrites: true, reproducible });
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   const client = new Client({ name: 'cg003-garden', version: '0.0.0' });
   await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
@@ -192,8 +201,6 @@ export async function buildGardenTemplateProject(options: BuildOptions = {}): Pr
 
 export function prepareGardenArtefact(built: AuthoredGarden, output: string): void {
   pinRunOnValueChangeDefaultsInDirectory(built.projectDir);
-  pinComponentFiles(built.projectDir, 'cg003', TEMPLATE_EPOCH);
-  pinRegistry(built.projectDir, TEMPLATE_EPOCH);
 
   if (path.basename(output) !== TEMPLATE_ID) throw new Error(`refusing to clear ${output}`);
   fs.rmSync(output, { recursive: true, force: true });
@@ -205,14 +212,6 @@ export function prepareGardenArtefact(built: AuthoredGarden, output: string): vo
   }
   writeStartHere(output);
   pinRootNode(output, C.app);
-  pinProjectModified(output);
-}
-
-function pinProjectModified(output: string): void {
-  const file = path.join(output, 'nodegx.project.json');
-  const doc = JSON.parse(fs.readFileSync(file, 'utf8')) as Record<string, unknown>;
-  doc.modified = TEMPLATE_EPOCH;
-  fs.writeFileSync(file, `${JSON.stringify(doc, null, 2)}\n`);
 }
 
 function writeStartHere(output: string): void {
