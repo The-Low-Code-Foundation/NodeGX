@@ -73,6 +73,9 @@
  * moment on the clock. An outcome reducer's `settles` reports its input's still-pending invocations before its own opens.
  * (s33) An `unsubscribe` then a `subscribe` effect record `backend` events in the request group (world.ts REALTIME); what a
  * subscription tells runs `spec.world.realtime` at its moment on the clock.
+ * (s34) A `socket` effect's calls record `socket` events in the request group (world.ts SOCKET); what a socket fires runs
+ * `spec.world.socket` at its moment on the clock. A streamed body's pieces land in the inbox like a response and run
+ * `spec.world.stream`; its request stays open (an abort reaches it) until the body ends or fails.
  *
  * THE REGISTRY (NSP-012, registry.ts). Reducers reach it through `world.registry` and WRITE to it
  * directly; a write notifies every OTHER instance watching the entry (`world.watch`) synchronously
@@ -95,10 +98,10 @@ import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
 import { isRegistryEntry } from './registry';
-import type { AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SpecBackendCall, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
+import type { AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SocketEvent, SpecBackendCall, StreamEvent, SpecRequest, SpecSocketOp, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
-import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type WorldSubscription } from './world';
+import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type StreamDelivery, type WorldSocket, type WorldSubscription } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
 type Inbound =
@@ -117,7 +120,11 @@ type Inbound =
   // s31: the person answered a click on the node's file input (world.ts PICKER)
   | { kind: 'picker'; event: PickerEvent }
   // s33: a subscription the node opened told it something (world.ts REALTIME)
-  | { kind: 'realtime'; event: RealtimeEvent };
+  | { kind: 'realtime'; event: RealtimeEvent }
+  // s34: a WebSocket the node made fired an event (world.ts SOCKET)
+  | { kind: 'socket'; event: SocketEvent }
+  // s34: a streamed body said something after its head (world.ts NETWORK, A STREAMED BODY)
+  | { kind: 'stream'; event: StreamEvent };
 
 interface OutcomeSlot {
   port: string;
@@ -163,6 +170,8 @@ export interface Instance {
   resizeOff?: () => void;
   /** NSP-014 s33: the spec's subscription ids → the world's handles (world.ts REALTIME), until disposed. */
   subscriptions?: Map<string, WorldSubscription>;
+  /** NSP-014 s34: the WebSockets this instance made, by the spec's id (world.ts SOCKET). */
+  sockets?: Map<string, WorldSocket>;
 }
 
 export class SpecError extends Error {
@@ -272,7 +281,8 @@ function viewOf(inst: Instance): WorldView {
     session: (backend) => world.backend.session(backend),
     userService: () => startUserService(world),
     authReturn: () => world.backend.authReturn,
-    pickerAnswer: (ahead) => world.picker.answer(ahead ?? 0)
+    pickerAnswer: (ahead) => world.picker.answer(ahead ?? 0),
+    socketAnswer: (url) => world.sockets.answerFor(url)
   };
 }
 
@@ -566,9 +576,17 @@ export function signal(inst: Instance, port: string): void {
  */
 export function advance(inst: Instance, ms: number): void {
   inst.trace.push({ t: 'advance', ms });
-  deliver(inst);
-  inst.world.clock.advance(ms);
-  deliver(inst);
+  const everyone = () => {
+    for (const i of [...instancesOf(inst.world).all]) deliver(i);
+  };
+  everyone();
+  // world.ts CLOCK (s34): timer by timer, what each delivered landing before the next fires — at ITS moment. One sweep then one
+  // delivery handed an answer that landed at +2 to its handler at the advance's end: a handler that reads the clock (Server-Sent
+  // Events' Last Message Time) read +3 where the runtime target, which yields between timers (T6), read +2.
+  const target = inst.world.clock.now() + Math.max(0, ms);
+  while (inst.world.clock.step(target)) everyone();
+  inst.world.clock.advance(target - inst.world.clock.now());
+  everyone();
 }
 
 /** Every output of the instance: the declared ones and the derived ones (NSP-012). */
@@ -620,6 +638,7 @@ interface PatchLike {
   settles?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
   unsubscribe?: readonly string[];
   subscribe?: SpecBackendCall;
+  socket?: readonly SpecSocketOp[];
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -733,8 +752,10 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     if (!spec.world?.response) throw new SpecError(`${spec.type}.${port}: issued a request but the spec has no world.response handler`);
     const r = patch.request;
     if (typeof r.id !== 'string' || inst.requests.has(r.id)) throw new SpecError(`${spec.type}.${port}: a request needs an id the instance has not used (${String(r.id)})`);
-    const worldId = world.network.issue({ method: r.method, url: r.url, headers: r.headers, body: r.body }, (d: Delivery) => {
-      inst.inbox.push({ kind: 'response', response: { id: r.id, ...d } as WorldResponse });
+    const worldId = world.network.issue({ method: r.method, url: r.url, headers: r.headers, body: r.body }, (d: Delivery | StreamDelivery) => {
+      // s34 — what a streamed body does after its head lands like a read resolving: in the inbox, to `world.stream`
+      if ('chunk' in d || 'end' in d || 'streamError' in d) inst.inbox.push({ kind: 'stream', event: { id: r.id, ...d } as StreamEvent });
+      else inst.inbox.push({ kind: 'response', response: { id: r.id, ...d } as WorldResponse });
     });
     inst.requests.set(r.id, worldId);
     const record = world.network.requests[world.network.requests.length - 1];
@@ -776,6 +797,34 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
       subs.set(c.id, world.backend.subscribe({ op: 'subscribe', backend: c.backend, args: c.args }, (told) => handleInbound(inst, { kind: 'realtime', event: { id: c.id, ...told } as RealtimeEvent })));
     }
     for (const call of world.backend.calls.slice(recordFrom)) inst.pending.requests.push(backendEvent(call));
+  }
+  // SOCKET (world.ts, NSP-014 s34): calls on WebSockets in the order made — each a `socket` event in the request group, as the
+  // world records it; what a socket tells runs the spec's handler at its moment on the clock
+  if (patch.socket !== undefined) {
+    const sockets = (inst.sockets ??= new Map());
+    const recordFrom = world.sockets.calls.length;
+    for (const op of patch.socket) {
+      if (op.op === 'connect') {
+        if (!spec.world?.socket) throw new SpecError(`${spec.type}.${port}: made a WebSocket but the spec has no world.socket handler`);
+        if (typeof op.id !== 'string' || sockets.has(op.id)) throw new SpecError(`${spec.type}.${port}: a socket needs an id not already made`);
+        const id = op.id;
+        try {
+          sockets.set(id, world.sockets.open(op.url, op.protocols, (told) => handleInbound(inst, { kind: 'socket', event: { id, ...told } as SocketEvent })));
+        } catch {
+          // the script's constructor throw (world.ts SOCKET): recorded; what follows it is the spec's, read from `socketAnswer`
+        }
+      } else if (op.op === 'send' || op.op === 'close') {
+        const socket = sockets.get(op.id);
+        if (!socket) throw new SpecError(`${spec.type}.${port}: a ${op.op} on socket ${JSON.stringify(op.id)}, which it never made`);
+        try {
+          if (op.op === 'send') socket.send(op.data);
+          else socket.close(op.code, op.reason);
+        } catch {
+          // a send while CONNECTING throws (world.ts SOCKET): recorded; what follows it is the spec's
+        }
+      } else throw new SpecError(`${spec.type}.${port}: a socket effect's op is connect, send or close, not ${String((op as { op?: unknown }).op)}`);
+    }
+    for (const e of world.sockets.calls.slice(recordFrom)) inst.pending.requests.push(e);
   }
   // LOCATION (world.ts): only with a window — a spec reads `viewport()` first, as a node checks `typeof window`
   if ((patch.open || patch.push || patch.dispatch !== undefined) && !world.location) {
@@ -892,6 +941,14 @@ function handleInbound(inst: Instance, item: Inbound): void {
   } else if (item.kind === 'realtime') {
     name = 'world.realtime';
     patch = asWriter(inst, () => spec.world!.realtime!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'socket') {
+    name = 'world.socket';
+    patch = asWriter(inst, () => spec.world!.socket!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'stream') {
+    name = 'world.stream';
+    if (!spec.world?.stream) throw new SpecError(`${spec.type}: a streamed body said something and the spec has no world.stream handler`);
+    patch = asWriter(inst, () => spec.world!.stream!(inst.state as never, inst.inputs as never, item.event, view));
+    if (!('chunk' in item.event)) inst.requests.delete(item.event.id);
   } else if (item.kind === 'mount') {
     name = 'world.mount';
     patch = asWriter(inst, () => spec.world!.mount!(inst.state as never, inst.inputs as never, view));
@@ -914,7 +971,8 @@ function handleInbound(inst: Instance, item: Inbound): void {
     name = 'world.response';
     if (!spec.world?.response) throw new SpecError(`${spec.type}: an answer landed and the spec has no world.response handler`);
     patch = asWriter(inst, () => spec.world!.response!(inst.state as never, inst.inputs as never, item.response, view));
-    inst.requests.delete(item.response.id);
+    // s34 — a head whose body streams keeps its request open (an abort still reaches it) until the body ends
+    if (!('stream' in item.response && item.response.stream)) inst.requests.delete(item.response.id);
   }
   const sends = apply(inst, `<${name}>`, patch, false);
   resolveOpen(inst, name, (patch as { outcomes?: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }> }).outcomes ?? [], ['pending']);

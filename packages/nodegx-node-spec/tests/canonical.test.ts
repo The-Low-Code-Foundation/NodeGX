@@ -31,6 +31,11 @@ describe('canonicalise — the table', () => {
     ['a class instance is its own enumerable keys, no class tag', new (class Model { b = 1; a = 2; })(), { a: 2, b: 1 }],
     ['top-level undefined stays undefined (the caller decides)', undefined, undefined],
     // NSP-014 s30 — the two file shapes
+    // NSP-014 s34 — bytes are tagged and listed in order: a typed array's own keys sort "10" before "2", an ArrayBuffer has none
+    ['an ArrayBuffer is its bytes', new Uint8Array([104, 105]).buffer, { $bytes: [104, 105] }],
+    ['a typed array is the bytes it views, in order', new Uint8Array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]).subarray(1), { $bytes: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11] }],
+    ['a DataView is the bytes it views', new DataView(new Uint8Array([7, 8, 9]).buffer, 1, 1), { $bytes: [8] }],
+    ['a TextEncoder result is its UTF-8 bytes', new TextEncoder().encode('é'), { $bytes: [195, 169] }],
     ['a File is tagged: name, size, type — no bytes, no lastModified', new NodeFile([new Uint8Array(3)], 'photo.png', { type: 'image/png', lastModified: 5 }), { $file: { name: 'photo.png', size: 3, type: 'image/png' } }],
     ['a bare Blob is tagged without a name', new NodeBlob(['ab'], { type: 'text/plain' }), { $file: { size: 2, type: 'text/plain' } }],
     ['a stored file is tagged from its getters, an absent field dropped', new StoredFile({ name: 'k_a.png', url: 'u', size: 0 }), { $cloudFile: { name: 'k_a.png', size: 0, url: 'u' } }],

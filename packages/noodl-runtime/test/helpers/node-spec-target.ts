@@ -131,6 +131,9 @@
  *     `cloudservices` metadata is the script's for the play and the session for its app id is in the play's storage
  *     (`installBackend`); `installWorld` gives every play the world's `XMLHttpRequest` beside its `fetch`, so Cloud
  *     Function's request is the world's and is attributed like any other (the after-inputs callback runs in its update).
+ *   - **the WebSockets** (NSP-014 s34, world.ts SOCKET): `installWorld` gives every play the world's `WebSocket` (Node 22's own
+ *     would reach a real network) and no `EventSource`; a construction is attributed to the node updating or being pulsed, or
+ *     the only one mounted, and every later call on that socket to the same node (`recordSocket`).
  *   - **the realtime subscriptions** (NSP-014 s33, world.ts REALTIME, R9): `createRealtimeSubscription` (the realtime
  *     module's export, which Subscribe To Changes calls through the module object at each reconfigure) becomes the world's
  *     `subscribe` for the play — the options without their three callbacks recorded as handed, what the world's handle
@@ -1011,6 +1014,22 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     s.frame.location.push(event);
   }
 
+  /**
+   * A call on a WebSocket the world saw (world.ts SOCKET, NSP-014 s34), in the request group. A construction is the node's that
+   * is updating, or being pulsed (a Connect reaches `new WebSocket` inside `setInputValue`), or the only one mounted (a
+   * reconnect timer fires inside `advance`, in no node's context); every later call on that socket is that node's.
+   */
+  const socketOwners = new WeakMap<object, State>();
+  function recordSocket(event: TraceEvent, socket: object): void {
+    let s = socketOwners.get(socket);
+    if (!s && (event as { op?: unknown }).op === 'connect') {
+      s = updating.getStore() ?? inUpdate ?? [...states.values()].find((st) => st.currentInput !== undefined) ?? (states.size === 1 ? [...states.values()][0] : undefined);
+      if (s) socketOwners.set(socket, s);
+    }
+    if (!s) throw new Error('runtime: a WebSocket call was made that no mounted node can be named for — it cannot be attributed');
+    s.frame.requests.push(event);
+  }
+
   /** POPUP (world.ts) for the play: the popups `showPopup` built in the root scope, in the order built — what the person's close addresses. */
   let popups: RuntimeNode[] = [];
   /** Inside a `showPopup` call: its `createNode` builds a popup (the call reaches it synchronously, before its first `await`). */
@@ -1443,6 +1462,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       w.location?.onCall(recordLocation);
       // PICKER (world.ts, NSP-014 s31) — the document itself is `installWorld`'s; a click is the clicking node's
       w.picker.onCall(recordPicker);
+      // SOCKET (world.ts, NSP-014 s34) — the WebSocket itself is `installWorld`'s; each call is the node's that made the socket
+      w.sockets.onCall(recordSocket);
       // PROJECT (world.ts, NSP-015 s17) — the settings a node reads through `NoodlRuntime.instance`:
       // the app has one runtime, so the static is this target's for the play, and its project's
       // settings are the script's (graphmodel.ts `setSettings`, what `importEditorData` calls)

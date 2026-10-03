@@ -1,7 +1,7 @@
 # NSP-014 — Batch: records, users, files, HTTP, streams, and the cloud-only nodes
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world's network and backend) and R4 = continue.
-**Status: 🟡 s33 (2026-10-03): Subscribe To Changes conforms on the runtime, first run (0 divergences; three survivors, the stuck-flag kind, declared equivalent), two more seeds and at 10,000. It opens its subscription through the realtime layer (`createRealtimeSubscription`), so the world's BACKEND grew REALTIME: the subscribe recorded as handed, answered by a scripted STREAM of statuses, changes and errors on the clock, by the handle's own rules; the unsubscribe recorded too (§6.37). Row C55 (a same-value write reconnects). 22 of 24. Left: WebSocket, Server-Sent Events.** s32 (2026-10-03): Cloud Function conforms on the runtime, first run (one survivor, a dead deletion, removed), two more seeds and at 10,000. It makes its OWN request — a raw `XMLHttpRequest` to `<endpoint>/functions/<name>`, not the backend contract — so it joined NETWORK, which grew an XHR face, and PROJECT grew the project's cloud services; rows C54 (a `null` success body never answers the Call), D28 (Error can be an object) (§6.34). 21 of 24. Left: WebSocket, Server-Sent Events, Subscribe To Changes.** s31 (2026-10-03): Open File Picker conforms on the runtime, first run (one survivor closed by a scenario), two seeds and at 10,000 — the world's PICKER, the 13th seam (a `document` only where the script has a picker; a file input whose `accept` / `capture` reflect; the n-th click answered by the n-th scripted answer, to whatever handler the element holds when it lands); the format's `settles` (a press that supersedes a pending one); rows C53, D27 (§6.31). 20 of 24 — T2 complete. Left: Cloud Function, WebSocket, Server-Sent Events, Subscribe To Changes.** s30: Cloud File, Upload File and Sign File URL conform on the runtime, first run, two seeds and at 10,000 — the world's BACKEND grew FILES (the contract's `uploadFile` / `signFileUrl`, a failure as one envelope, the REST adapter's not-a-file refusal); a scenario can hand a node a file (`$file`) or a stored file (`$cloudFile`); rows C51, C52, D26 (§6.28). 19 of 24. Left: Open File Picker (a FILE PICKER seam), WebSocket, Server-Sent Events, Subscribe To Changes, Cloud Function.** s29: Sign In With slice B — the return leg (§6.25). s28: Request Magic Link, Sign In With (16 of 24). s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24. s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
+**Status: 🟡 s34 (2026-10-03): WebSocket and Server-Sent Events conform on the runtime — WebSocket on its first run, SSE after one interpreter fix (T17: an answer landing mid-`advance` was handled at the advance's end) — three seeds each and at 10,000; six defects planted in copies of the two runtime nodes, all caught. The world grew SOCKET (a WebSocket server is a script on the clock; every play has the world's `WebSocket`, none has an `EventSource`) and NETWORK's STREAMED BODY (a `fetch` body that arrives in pieces); canonical `$bytes` (§6.40). Rows C56, C57, C58. **24 of 24 — every node conforms. Left: AC2's export half (the batch is T3: it needs the export adapter to play the world, P18).** s33 (2026-10-03): Subscribe To Changes conforms on the runtime, first run (0 divergences; three survivors, the stuck-flag kind, declared equivalent), two more seeds and at 10,000. It opens its subscription through the realtime layer (`createRealtimeSubscription`), so the world's BACKEND grew REALTIME: the subscribe recorded as handed, answered by a scripted STREAM of statuses, changes and errors on the clock, by the handle's own rules; the unsubscribe recorded too (§6.37). Row C55 (a same-value write reconnects). 22 of 24. Left: WebSocket, Server-Sent Events.** s32 (2026-10-03): Cloud Function conforms on the runtime, first run (one survivor, a dead deletion, removed), two more seeds and at 10,000. It makes its OWN request — a raw `XMLHttpRequest` to `<endpoint>/functions/<name>`, not the backend contract — so it joined NETWORK, which grew an XHR face, and PROJECT grew the project's cloud services; rows C54 (a `null` success body never answers the Call), D28 (Error can be an object) (§6.34). 21 of 24. Left: WebSocket, Server-Sent Events, Subscribe To Changes.** s31 (2026-10-03): Open File Picker conforms on the runtime, first run (one survivor closed by a scenario), two seeds and at 10,000 — the world's PICKER, the 13th seam (a `document` only where the script has a picker; a file input whose `accept` / `capture` reflect; the n-th click answered by the n-th scripted answer, to whatever handler the element holds when it lands); the format's `settles` (a press that supersedes a pending one); rows C53, D27 (§6.31). 20 of 24 — T2 complete. Left: Cloud Function, WebSocket, Server-Sent Events, Subscribe To Changes.** s30: Cloud File, Upload File and Sign File URL conform on the runtime, first run, two seeds and at 10,000 — the world's BACKEND grew FILES (the contract's `uploadFile` / `signFileUrl`, a failure as one envelope, the REST adapter's not-a-file refusal); a scenario can hand a node a file (`$file`) or a stored file (`$cloudFile`); rows C51, C52, D26 (§6.28). 19 of 24. Left: Open File Picker (a FILE PICKER seam), WebSocket, Server-Sent Events, Subscribe To Changes, Cloud Function.** s29: Sign In With slice B — the return leg (§6.25). s28: Request Magic Link, Sign In With (16 of 24). s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24. s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
 
 ## 1. The person sentence
 
@@ -1172,3 +1172,118 @@ pinned by hand scenarios. At 10,000 the counts are 25× these.
 | `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
 | count | **104** (+1); T3 20 / 39 |
 | `node scripts/node-spec/census.js` | NOT run: a peer's uncommitted viewer and export work still moves it (s30, s32), and no census number depends on specs |
+
+### 6.40 s34 (2026-10-03) — WebSocket and Server-Sent Events; the world's SOCKET and NETWORK's streamed body
+
+**Built.** `websocket.ts` (59 scenarios) and `sse.ts` (68 scenarios, two of them row C57). **Both conform on the runtime:**
+WebSocket on its first run (28 / 28 scenarios, 200 / 200, 0 divergences), SSE after one interpreter fix (T17, below) and one
+declared coercion. Both on seeds 20729, 13 and 20730, and at 10,000. **106 / 147. NSP-014: 24 of 24.**
+
+**Read first (all four files, as the handoff asked).** Neither node touches the backend layer. Each owns its connection
+class (`WebSocketConnection`, `SseConnection`), so the reconnect backoff, WebSocket's jitter and heartbeat, and SSE's
+duplicate window are the NODE'S code and are graded here, on the world's clock and random stream. WebSocket reaches the
+browser through the `WebSocket` constructor. SSE reaches it through `fetch` with a body that streams (its `auto` transport
+is fetch whenever fetch exists — always, in a play) or through `EventSource` when asked for it.
+
+**What the probe measured first (zz probes, deleted).** Jest's Node 22 environment HAS a real `WebSocket` (a play's socket
+would have reached the network), has no `EventSource`, and has `ReadableStream` and `Response`. A `Response` built from `''`
+has a body that yields no chunk; from `null`, no body; a stream errored with an `AbortError` rejects a read with it. The
+real WebSocket node, played against the new face, opened, took messages, answered heartbeats and reconnected with jitter
+before any spec was written.
+
+**The world (additive; the hash refresh named exactly `src/spec.ts`, `src/world.ts`; the three stranger rounds green).**
+- **SOCKET**, the 14th seam (world.ts header). Every play has the world's `WebSocket` (`worldWebSocket`) and NO
+  `EventSource`. A construction is recorded as handed (`socket` trace event `{ op: 'connect', url, protocols }`, request
+  group) and answered by the first fitting rule (`match.url`, `times`): a script of events on the clock — `open`, a text
+  `message`, a `binary` one, an `error`, a `close` (`code` absent → 1006, `wasClean` absent → `code !== 1006`) — or `never`,
+  or `throws` (a `SyntaxError` inside the constructor, recorded first). `send` and `close` are recorded as handed; a send
+  while CONNECTING throws `InvalidStateError` (the browser's rule); the rule's `replies` answer a sent text (`ping` →
+  `pong`) after a delay. After a `close` event, or the node's `close()`, nothing more is delivered. A construction no rule
+  answers is a VIOLATION.
+- **NETWORK, A STREAMED BODY.** A response may carry `chunks` instead of a `body`: the head lands at `after`, then each
+  piece `at` ms after the head — text, `end`, or `error` (a dropped connection). The `fetch` face hands a `ReadableStream`
+  the world feeds in UTF-8; aborting while the body is read fails it with an `AbortError`; a reader's cancel drops the rest
+  silently. An XHR reading a streamed body is a script error.
+- **The format.** A `socket` patch effect (ops `connect` / `send` / `close` by the spec's own socket id), a
+  `WorldView.socketAnswer(url)` (a constructor that will throw is read before the connect is named, as `pickerAnswer` is),
+  two handlers — `world.socket` and `world.stream` — each in the FOUR places (spec.ts `WorldHandlers` + the erased
+  `AnyNodeSpec.world`, interpreter.ts `handleInbound`, mutants.ts `reducerNames` + `wrapReducers`), the need `socket` with
+  its pool `sockets`, the mutation kind `drop-socket`, the trace event `socket` (trace.ts, schema.ts, the JSON schema,
+  compare.ts), and `settles` entries may now name another outcome input's `port` (a Disconnect settles a Connect still
+  shaking hands; the interpreter's spread already honoured it). **Canonical `$bytes`** for an `ArrayBuffer`, a typed array or
+  a `DataView`, recognised by brand: a binary frame canonicalised by its own keys was `{}` for every buffer.
+
+**T17 — the interpreter's `advance` fired every timer and only then delivered its inbox.** An answer that landed at +2
+inside an `advance(2)` from +1 reached its handler at +3; the runtime target, which yields between timers (T6), read +2.
+No earlier spec read the clock inside a response handler; SSE's Last Message Time does (eight scenarios differed by that one
+value). world.ts CLOCK already says "what each timer delivers lands BEFORE the next one fires": the interpreter now steps the
+clock timer by timer and delivers every instance's inbox after each — what s24 and s26 did for store writes and the
+start-up check, done once for all. The whole runtime suite and the package suite were re-run after it (§6.42).
+
+**A declared coercion found by a divergence.** SSE's Headers is an `object` port, and `node.ts` parses a JSON string on an
+object port before the setter sees it: the runtime sent a header the spec did not. `coerce: 'object-literal'`.
+
+**How the two specs are written.** One call into the node (a reducer, the frame end, a timer, a socket event, a stream
+piece) runs on a working copy of the state (`Run`), as the runtime runs it on the node's internals, and is handed back as a
+patch: the keys that moved, the signals in order, the effects in order, the Connect it settled. WebSocket's status outputs
+are read at the call's end (checked path by path: nothing moves after its last flag). SSE's are recorded AT each flag
+(`world.send`), because SSE flags Retry Count before it raises it and does not re-flag when the state is already
+`reconnecting` — what the wire then carries is row C56.
+
+**The survivors, and what closed them.** First runs: WebSocket 45 of 586, SSE 33 of 474. Two families were provably
+silent and are declared (`equivalent-mutants.ts`):
+- a URL / Protocols / Auto Connect write that changes nothing, and the frame end's flag left set (Map Collection's
+  `STUCK_FLAG`): between frames a live connection always matches the URL it was opened against, and with none there is no
+  URL or Auto Connect is off — every write that could change that schedules too;
+- SSE only: Event Types (it reaches only the EventSource transport, which no play has), With Credentials (`credentials`
+  is not on the world's request record), and a Connect that fails inside the call swapping one dead connection for another;
+  WebSocket only: the refused constructor's id counter, and a blank Heartbeat Interval's NaN-for-0 on a live connection.
+
+Everything else was killed by a hand scenario. Most were one defect class: a connection's end of life (a stream ended, a
+final failure, a teardown) not kept, which shows only when a later Disconnect reports Done instead of Unchanged, or when a
+reconnect does or does not go out. The generator rarely presses Disconnect right after, so the scenarios carry it.
+The interpreter-side survivor count was then read at 200 on eight to ten seeds per node and at 10,000 on two: zero.
+
+**Planted on COPIES of the runtime nodes (in memory, never the files).** Six defects, each caught at 200: WebSocket — 1008
+retried, the queue flushed newest first, On Reconnect on the first open; SSE — a replayed id delivered despite Dedupe By Id,
+a 429 treated as final, the unfinished last event dropped at the end.
+
+**Reach (400 generated sequences, seeds 20729 + 13), after weighting the pools.** WebSocket: a socket made in 94, open in
+19, a message in 14, a reconnect in 4 (before weighting the URLs: 41 / 9 / 7 / 1 — the string pool a wire can deliver held
+no ws:// URL). SSE: a request in 108, open in 58, an event in 27, a reconnect in 10. The rest is the nodes' own churn (every
+URL write rebuilds) and sequences with no URL; the scenarios pin the deep paths. At 10,000 the counts are 25× these.
+
+### 6.41 Rows (s34)
+
+- **C56** — Server-Sent Events: **Last Error, Retry Count and Duplicates Suppressed change without being sent.** Last
+  Error is not re-sent when a retry opens (the wire keeps the old failure beside `open`); Retry Count is sent before it is
+  raised and not re-sent while already `reconnecting` (the wire lags one behind); Duplicates Suppressed reaches the wire only
+  at the next error. ([P107-C56](../../bugs/p107-c56-sse-three-outputs-move-without-being-sent.md))
+- **C57** — Server-Sent Events: **Event Types or Method wired a value that is not text throws at Connect** (`value || …`
+  kept, then `.split` / `.toUpperCase`). The spec reads both as text; the runtime's throw is a known row (`sseNonText`).
+  ([P107-C57](../../bugs/p107-c57-sse-non-text-event-types-or-method-throws-at-connect.md))
+- **C58** — Server-Sent Events: **a URL change with Auto Connect off tears the stream down silently, and Connected stays
+  true** (Connection State is the node's field; the teardown sends nothing). WebSocket's rebuild sends every status output
+  after disposing. ([P107-C58](../../bugs/p107-c58-sse-says-connected-after-a-url-change-tore-the-stream-down.md))
+- WebSocket: none. Its heartbeat reply is filtered only while a heartbeat runs (documented, conn :723-727); a Disconnect of a
+  connection a Send made idle reports Unchanged and still sets `closed` (documented, :518-522).
+
+### 6.42 Gate readings (s34, 2026-10-03; load 1.6–3.2 — this session's jest only, one at a time)
+
+| gate | reading |
+|---|---|
+| probes on the runtime FIRST (zz, deleted) | §6.40, before any spec was written: the host's globals; the real WebSocket node through the new face |
+| runtime: WebSocket at 200, today's seed (20729) | **first run: 28 / 28, 200 / 200, 0 divergences**; 45 / 586 survivors → scenarios and 12 declared. Final: **60 / 60, 0 divergences, CONFORMS** |
+| runtime: SSE at 200, today's seed | first run: 8 scenarios and 9 sequences differed — all Last Message Time (T17), then three headers (the object coercion), then the C57 throws (known). Final: **69 / 71 + 2 known (C57), 0 divergences, CONFORMS**; C57 known in 22 generated |
+| runtime, seeds 13 and 20730 | **CONFORMS** both, both nodes, final scenario sets |
+| runtime deep, `NSP_DEEP=10000` | WebSocket **10,000 / 10,000, 0 divergences** (903 s; one tail survivor, killed by a scenario after). SSE **10,000 / 10,000, 0 divergences** (1,438 s; C57 known 1,102; six tail survivors, killed by scenarios after). Interpreter-side survivors at 10,000 after the last scenarios: **0** for both (seeds 20729 and 13 for SSE) |
+| interpreter-side survivors at 200, after the last scenario | 0 — SSE on 13, 20728, 20729, 20730, 20735, 20736; WebSocket on 13, 20728–20731 (and 20732–20740 at earlier scenario sets) |
+| planted defects on copies of the runtime nodes | **6 / 6 caught** (§6.40) |
+| two runtime traces read by hand | WebSocket (open, a JSON message, the heartbeat's ping answered and measured, a 1001 close reconnecting with jitter, a dead heartbeat) and SSE (open, three events, the end) — read event by event; the C56 and C58 traces (§6.41) |
+| reach, 400 generated sequences | §6.40 |
+| runtime: the WHOLE `test/node-spec/` | first: **192 passed, 1 failed** (412 s) — every other spec CONFORMS and the GRAPH scenarios pass after T17 and the world's WebSocket in every play; the one red was SSE's survivor the newest scenario examples exposed, killed since. **Final: 3 suites, 193 passed, exit 0** (414 s) — s33's 191 + WebSocket + SSE; every spec CONFORMS, the one DOES NOT CONFORM is AC1's planted off-by-one, as designed; GRAPH unchanged |
+| `nodegx-node-spec`: `npx jest` | hash refresh first — it named exactly the five guarded files this session changed (`schema/trace.schema.json`, `src/canonical.ts`, `src/spec.ts`, `src/trace.ts`, `src/world.ts`). With +4 SOCKET and +3 STREAMED BODY tests in `world.test.ts`, +4 `$bytes` rows in `canonical.test.ts`, and both nodes in `batch-records.test.ts` (two seeds each; WebSocket's four failure codes each beside its Last Error and a no-socket scenario beside connecting ones; SSE's six Connect failures beside their Last Error, the two after-open failures on Last Error beside On Error, a no-request scenario beside requesting ones): **18 suites, 837 passed, 17 skipped, exit 0** — the three stranger rounds green |
+| export: `tests/node-spec-*` | 2 suites, 12 passed |
+| `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
+| count | **106** (+2); T3 22 / 39 — NSP-014 24 / 24 |
+| `node scripts/node-spec/census.js` | NOT run: a peer's uncommitted viewer and export work still moves it (s30–s33); no census number depends on specs |

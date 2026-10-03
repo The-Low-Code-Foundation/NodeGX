@@ -31,7 +31,9 @@ const PICKER = ['Open File Picker'];
 const CLOUD = ['CloudFunction2'];
 /** s33 — Subscribe To Changes (world.ts REALTIME): a subscription, told on the clock — no operation answered once */
 const REALTIME = ['SubscribeToChanges'];
-const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS, ...FILES, ...PICKER, ...CLOUD, ...REALTIME];
+/** s34 — the WebSocket (world.ts SOCKET): the node's own connection over a server script — no backend */
+const SOCKETS = ['net.noodl.WebSocket', 'net.noodl.SSE'];
+const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS, ...FILES, ...PICKER, ...CLOUD, ...REALTIME, ...SOCKETS];
 
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {
   for (const type of CONFORMING) {
@@ -164,6 +166,73 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
     expect(bad.slice(0, bad.findIndex((e) => e.t === 'set' && e.port === 'backendId' && e.value === '_active_')).some((e) => e.t === 'backend')).toBe(false);
     expect(all.filter((x) => ops(x.trace).includes('subscribe')).length).toBeGreaterThan(5);
     expect(all.filter((x) => ops(x.trace).includes('unsubscribe')).length).toBeGreaterThan(2);
+  });
+
+  // s34 — the WebSocket: every failure code an outcome can carry, each beside the Last Error that says why; a scenario makes no
+  // socket at all — beside ones that connect, send and close (the control)
+  test('net.noodl.WebSocket: every failure code beside its Last Error; scenarios that make no socket — beside ones that connect, send and close', async () => {
+    const all = await traces('net.noodl.WebSocket');
+    const errors = new Map<string, Set<string>>();
+    for (const { trace } of all) {
+      let lastError = '';
+      for (const e of trace) {
+        if (e.t === 'value' && e.port === 'lastError') lastError = e.value as string;
+        if (e.t === 'outcome' && e.value === 'failure') {
+          const set = errors.get(e.error!) ?? new Set<string>();
+          set.add(lastError);
+          errors.set(e.error!, set);
+        }
+      }
+    }
+    expect([...errors.keys()].sort()).toEqual(['websocket/connect-failed', 'websocket/not-connected', 'websocket/nothing-to-send', 'websocket/queue-full']);
+    expect([...errors.get('websocket/connect-failed')!].sort()).toEqual([
+      'Connection lost (no close frame): Could not connect to ws://srv/a; gave up after 0 reconnect attempts',
+      "Could not open WebSocket: The URL 'wss://bad host/' is invalid.",
+      'URL is required to connect',
+      'URL must start with ws:// or wss:// — got: http://srv/a'
+    ]);
+    for (const code of ['websocket/not-connected', 'websocket/nothing-to-send', 'websocket/queue-full']) expect([...errors.get(code)!].every((m) => m.length > 0)).toBe(true);
+    const ops = (t: TraceEvent[]) => t.filter((e) => e.t === 'socket').map((e) => (e as TraceEvent & { op: string }).op);
+    expect(all.filter((x) => ops(x.trace).length === 0).map((x) => x.name)).toContain('Disconnect with nothing made: Unchanged, no connection');
+    for (const op of ['connect', 'send', 'close']) expect(all.filter((x) => ops(x.trace).includes(op)).length).toBeGreaterThan(5);
+  });
+
+  // s34 — Server-Sent Events: every way a Connect can fail, each with the Last Error the stream reported; a scenario that makes no
+  // request — beside ones that do (the control)
+  test('net.noodl.SSE: every failure a Connect meets, beside its Last Error; scenarios that make no request — beside ones that do', async () => {
+    const all = await traces('net.noodl.SSE');
+    const sentences = new Set<string>();
+    for (const { trace } of all) {
+      let lastError = '';
+      for (const e of trace) {
+        if (e.t === 'value' && e.port === 'lastError') lastError = e.value as string;
+        if (e.t === 'outcome' && e.port === 'connect' && e.value === 'failure') {
+          expect(e.error).toBe('sse/connect-failed');
+          sentences.add(lastError);
+        }
+      }
+    }
+    expect([...sentences].sort()).toEqual([
+      'EventSource is not available in this environment',
+      'No URL was set on the stream',
+      'Stream request failed: Failed to fetch',
+      'The stream endpoint returned HTTP 404',
+      'The stream endpoint returned HTTP 429 (gave up after 2 attempts)',
+      'The stream endpoint returned HTTP 503 (gave up after 1 attempts)'
+    ]);
+    // the failures that come AFTER the stream opened (its Connect already Done): each on Last Error beside On Error
+    const afterOpen = new Set<string>();
+    for (const { trace } of all) {
+      let lastError = '';
+      for (const e of trace) {
+        if (e.t === 'value' && e.port === 'lastError') lastError = e.value as string;
+        if (e.t === 'signal' && e.port === 'onError' && lastError) afterOpen.add(lastError);
+      }
+    }
+    for (const sentence of ['The response has no readable body; this environment cannot stream fetch responses', 'The event stream was interrupted: terminated']) expect([...afterOpen]).toContain(sentence);
+    const requests = (t: TraceEvent[]) => t.filter((e) => e.t === 'request').length;
+    expect(all.filter((x) => requests(x.trace) === 0).map((x) => x.name)).toContain('A Connect with no URL fails for good');
+    expect(all.filter((x) => requests(x.trace) > 0).length).toBeGreaterThan(20);
   });
 
   // s30 — the file operations (world.ts FILES): every failure sentence on Error beside a Failure — before the call (no

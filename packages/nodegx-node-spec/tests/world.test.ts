@@ -570,3 +570,148 @@ describe('PICKER (NSP-014 s31) — the person at the file dialog, through the on
     expect(() => run(Waiter, {}, ['settle'], new World({}))).toThrow(/needs a picker/);
   });
 });
+
+describe('SOCKET (NSP-014 s34): a WebSocket server is a script on the clock; every call on a socket is recorded as handed', () => {
+  const server = (answers: unknown[]) => new World({ sockets: { answers } } as never);
+
+  test('a construction is recorded as handed; the script is told at `at` (never before 1); readyState moves with it; nothing after a close', () => {
+    const w = server([{ answer: { events: [{ open: true }, { at: 3, message: 'hi' }, { at: 5, binary: [1, 255] }, { at: 7, close: { code: 1001, reason: 'bye' } }, { at: 9, message: 'late' }] } }]);
+    const told: unknown[] = [];
+    const socket = w.sockets.open('ws://srv/a', ['json'], (e) => told.push(e));
+    expect(socket.readyState).toBe(0);
+    expect(told).toEqual([]);
+    w.clock.advance(1);
+    expect(told).toEqual([{ kind: 'open' }]);
+    expect(socket.readyState).toBe(1);
+    w.clock.advance(20);
+    expect(told).toEqual([{ kind: 'open' }, { kind: 'message', data: 'hi' }, { kind: 'binary', bytes: [1, 255] }, { kind: 'close', code: 1001, reason: 'bye', wasClean: true }]);
+    expect(socket.readyState).toBe(3);
+    expect(w.sockets.calls).toEqual([{ t: 'socket', op: 'connect', url: 'ws://srv/a', protocols: ['json'] }]);
+    expect(validateTrace(w.sockets.calls).ok).toBe(true);
+  });
+
+  test('a close with no code is 1006 and not clean; a send while CONNECTING throws, recorded first; a close ends the script, recorded with what was handed', () => {
+    const w = server([{ answer: { events: [{ at: 2, open: true }, { at: 4, close: {} }] } }]);
+    const told: unknown[] = [];
+    const a = w.sockets.open('ws://srv/a', undefined, (e) => told.push(e));
+    expect(() => a.send('early')).toThrow(/CONNECTING/);
+    w.clock.advance(10);
+    expect(told).toEqual([{ kind: 'open' }, { kind: 'close', code: 1006, reason: '', wasClean: false }]);
+    const b = w.sockets.open('ws://srv/b', undefined, (e) => told.push(e));
+    b.close(1000, 'Client disconnect');
+    expect(b.readyState).toBe(2);
+    w.clock.advance(10);
+    expect(told).toHaveLength(2);
+    expect(w.sockets.calls).toEqual([
+      { t: 'socket', op: 'connect', url: 'ws://srv/a' },
+      { t: 'socket', op: 'send', data: 'early' },
+      { t: 'socket', op: 'connect', url: 'ws://srv/b' },
+      { t: 'socket', op: 'close', code: 1000, reason: 'Client disconnect' }
+    ]);
+  });
+
+  test("replies answer a sent text `after` ms later, only while open; bytes are recorded as $bytes; `times` spends a rule; a throw is the constructor's, recorded first; no rule is a VIOLATION", () => {
+    const w = server([
+      { match: { url: 'wss://bad*' }, answer: { throws: 'invalid URL' } },
+      { times: 1, answer: { never: true } },
+      { answer: { events: [{ open: true }], replies: [{ to: 'ping', with: 'pong', after: 3 }] } }
+    ]);
+    expect(w.sockets.answerFor('wss://bad host/')).toEqual({ throws: 'invalid URL' });
+    expect(() => w.sockets.open('wss://bad host/', undefined, () => undefined)).toThrow('invalid URL');
+    const quiet = w.sockets.open('ws://srv/a', undefined, () => undefined);
+    const told: unknown[] = [];
+    const s = w.sockets.open('ws://srv/a', undefined, (e) => told.push(e));
+    w.clock.advance(1);
+    s.send('ping');
+    s.send(new TextEncoder().encode('é'));
+    w.clock.advance(2);
+    expect(told).toEqual([{ kind: 'open' }]);
+    w.clock.advance(1);
+    expect(told).toEqual([{ kind: 'open' }, { kind: 'message', data: 'pong' }]);
+    expect(quiet.readyState).toBe(0);
+    expect(w.sockets.calls.map((c) => (c as { op: string }).op)).toEqual(['connect', 'connect', 'connect', 'send', 'send']);
+    expect(w.sockets.calls[4]).toEqual({ t: 'socket', op: 'send', data: { $bytes: [195, 169] } });
+    expect(w.violations).toEqual([]);
+    const bare = new World({});
+    bare.sockets.open('ws://srv/a', undefined, () => undefined);
+    expect(bare.violations).toEqual(["socket ws://srv/a: no rule in the world's script answers it"]);
+  });
+
+  test('installWorld gives every play the world\'s WebSocket (handler properties, binaryType, a throwing handler reported) and no EventSource', () => {
+    const w = server([{ answer: { events: [{ open: true }, { at: 2, binary: [7] }, { at: 3, message: 'x' }] } }]);
+    const installed = installWorld(w);
+    try {
+      expect(typeof (globalThis as { EventSource?: unknown }).EventSource).toBe('undefined');
+      const WS = (globalThis as unknown as { WebSocket: new (url: string) => Record<string, unknown> }).WebSocket;
+      const ws = new WS('ws://srv/a');
+      const seen: unknown[] = [];
+      ws.binaryType = 'arraybuffer';
+      ws.onopen = () => {
+        seen.push('open');
+        throw new Error('a handler that throws');
+      };
+      ws.onmessage = (e: unknown) => seen.push((e as { data: unknown }).data);
+      w.clock.advance(5);
+      expect(seen[0]).toBe('open');
+      expect(Object.prototype.toString.call(seen[1])).toBe('[object ArrayBuffer]');
+      expect([...new Uint8Array(seen[1] as ArrayBuffer)]).toEqual([7]);
+      expect(seen[2]).toBe('x');
+      expect(ws.readyState).toBe(1);
+    } finally {
+      installed.restore();
+    }
+    expect(typeof (globalThis as { WebSocket?: unknown }).WebSocket).toBe('function');
+  });
+});
+
+describe('NETWORK — A STREAMED BODY (NSP-014 s34): the head lands, then the body says its pieces on the clock', () => {
+  const flush = () => new Promise((r) => setImmediate(r));
+
+  test('the head says `stream`; pieces at `at` after it (never before 1); the end; nothing after', () => {
+    const w = new World({ network: [{ answer: { status: 200, chunks: [{ text: 'data: a\n\n' }, { at: 4, text: 'data: b\n\n' }, { at: 6, end: true }, { at: 9, text: 'late' }] }, after: 2 }] });
+    const got: unknown[] = [];
+    w.network.issue({ url: 'https://x/s' }, (d) => got.push(d));
+    w.clock.advance(2);
+    expect(got).toEqual([{ status: 200, statusText: '', headers: {}, body: null, stream: true }]);
+    w.clock.advance(20);
+    expect(got.slice(1)).toEqual([{ chunk: 'data: a\n\n' }, { chunk: 'data: b\n\n' }, { end: true }]);
+  });
+
+  test('a failure while read; an abort while read fails the body with an AbortError; a cancel drops the rest silently; an abort after the end does nothing', () => {
+    const w = new World({ network: [{ match: { url: 'https://x/fail' }, answer: { status: 200, chunks: [{ at: 1, text: 'x' }, { at: 2, error: 'terminated' }] } }, { answer: { status: 200, chunks: [{ at: 5, text: 'never read' }] } }] });
+    const fail: unknown[] = [];
+    w.network.issue({ url: 'https://x/fail' }, (d) => fail.push(d));
+    const aborted: unknown[] = [];
+    const a = w.network.issue({ url: 'https://x/a' }, (d) => aborted.push(d));
+    const cancelled: unknown[] = [];
+    const c = w.network.issue({ url: 'https://x/c' }, (d) => cancelled.push(d));
+    w.network.abort(a);
+    w.network.cancelStream(c);
+    w.clock.advance(10);
+    expect(fail.slice(1)).toEqual([{ chunk: 'x' }, { streamError: { name: 'TypeError', message: 'terminated' } }]);
+    expect(aborted.slice(1)).toEqual([{ streamError: { name: 'AbortError', message: 'This operation was aborted' } }]);
+    expect(cancelled).toHaveLength(1);
+    w.network.abort(a);
+    expect(aborted).toHaveLength(2);
+  });
+
+  test('on the fetch face the body is a ReadableStream of UTF-8 bytes; abort errors it; a null-body status has none; a chunked answer to an XHR is a script error; chunks and a body together are refused', async () => {
+    const w = new World({ network: [{ match: { url: 'https://x/204' }, answer: { status: 204, chunks: [{ text: 'x' }] } }, { answer: { status: 200, chunks: [{ at: 1, text: 'é' }, { at: 2, text: 'b' }] } }] });
+    const f = worldFetch(w);
+    const controller = new AbortController();
+    const res = await f('https://x/s', { signal: controller.signal });
+    const reader = res.body!.getReader();
+    w.clock.advance(1);
+    const first = await reader.read();
+    expect(new TextDecoder().decode(first.value)).toBe('é');
+    controller.abort();
+    await expect(reader.read()).rejects.toMatchObject({ name: 'AbortError' });
+    expect((await f('https://x/204')).body).toBeNull();
+    await flush();
+    const X = worldXMLHttpRequest(w);
+    const x = new X();
+    x.open('GET', 'https://x/s');
+    expect(() => x.send()).toThrow(/streamed body/);
+    expect(() => toDelivery({ status: 200, body: 'a', chunks: [] })).toThrow(/not both/);
+  });
+});

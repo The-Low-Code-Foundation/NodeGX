@@ -46,6 +46,16 @@
  *           (then `onerror`); an abort is state 4, `status` 0 (then `onabort`). A handler that THROWS is
  *           the DOM's "report the exception": the throw goes no further and the next handler still runs
  *           (a throw out of a node's `readystatechange` — row C54 — never reaches the play as a rejection).
+ *           A STREAMED BODY (s34). A response may carry `chunks` instead of a `body`: the head lands as any answer does (at
+ *           `after`), its body STREAMING — what it says arrives after, each piece `at` ms after the head landed (CLOCK's rule:
+ *           never before 1, absent 1): `{ text }` a piece of the body (UTF-8 bytes on the wire, the text a reader decodes), `{ end }`
+ *           the body finished, `{ error }` it failed while being read (a `TypeError` carrying the message — a dropped
+ *           connection). With no end or error it never finishes. On the `fetch` face the body is a `ReadableStream` the world
+ *           feeds; a read resolves as a promise does (a microtask after its moment). ABORTING the request while its body is still
+ *           read drops the rest and FAILS the body with an `AbortError` at once; a reader that CANCELS the body drops the rest
+ *           silently. A spec hears the head at `response` (`stream: true`, `body` null) and the rest at `stream`. A null-body
+ *           status (204, 205, 304) has no body whatever was scripted. Only a `fetch` reads a streamed body: an XHR waits for the
+ *           whole one, so a chunked answer to an XHR is a script error.
  *
  * WHAT GOES ON THE WIRE, in both directions, is fixed here once so the trace's `request` event
  * and the spec's response event mean the same thing on every target:
@@ -422,6 +432,42 @@
  *           world file has none), the dialog's own filtering by `accept` / `capture` (the browser's — the click's record
  *           is the seam), more than one file (`multiple` — no node sets it), and drag-and-drop.
  *
+ *   SOCKET. (NSP-014 s34) The WebSocket servers a node talks to, through the one browser surface it reaches: the `WebSocket`
+ *           constructor. EVERY play has the world's (`worldWebSocket`) — a host's own would reach a real network (Node 22 has
+ *           one). A socket is a conversation that answers MANY times, so a construction is answered by a SCRIPT of what the
+ *           server does, each entry on the clock, as REALTIME's stream is:
+ *             A CONSTRUCTION (`new WebSocket(url, protocols)`) — recorded as handed, a `socket` trace event `{ op: 'connect',
+ *               url, protocols }` in the request group (`protocols` absent when not handed), answered by the first of the
+ *               script's `answers` whose `match` fits (`url` exact, or a prefix when it ends in `*`; absent fits all) and whose
+ *               `times` is not spent (a refusal, then a retry the next rule answers):
+ *                 `{ events }` — what the server does, in order, each entry `at` ms after the construction (CLOCK's rule: never
+ *                   before 1, absent 1 — no socket opens inside the call that made it): `open`; a text `message`; a `binary`
+ *                   message (its bytes); an `error`; a `close` — `code` (absent: 1006, the connection lost without a close
+ *                   frame), `reason` (absent: ''), `wasClean` (absent: `code !== 1006`);
+ *                 `{ never: true }` — nothing ever happens: it stays CONNECTING;
+ *                 `{ throws: message }` — the constructor THROWS a `SyntaxError` `DOMException` carrying `message` (a browser
+ *                   refuses a URL it cannot parse in the call). Recorded first: the call was made.
+ *               A construction no rule answers is a VIOLATION: nothing happens on it, and the runner fails the run.
+ *             THE SOCKET — `readyState` 0 (CONNECTING) until `open`, then 1 (OPEN); 3 (CLOSED) at a `close`; 2 (CLOSING) once
+ *               the node calls `close()`, unless already CLOSED. Each event fires the handler PROPERTY it names as it is
+ *               THEN (`onopen`; `onmessage` with `{ data }` — the text, or the bytes as an `ArrayBuffer` when `binaryType` is
+ *               `arraybuffer`, a `Blob` otherwise; `onerror`; `onclose` with `{ code, reason, wasClean }`), synchronously,
+ *               inside the `advance` that reaches it; a handler that THROWS is the DOM's to report and goes no further. After
+ *               a `close` event, or once the node has called `close()`, nothing more is delivered.
+ *             A SEND (`send(data)`) — recorded as handed, `{ op: 'send', data }` (canonical: text as itself, bytes as
+ *               `$bytes`). While CONNECTING it THROWS an `InvalidStateError` `DOMException` (the browser's rule), recorded
+ *               first. The rule's `replies` are the server answering what it is sent: a send whose text is a reply's `to`
+ *               is answered by a `message` carrying its `with`, `after` ms later (never before 1, absent 1) — dropped if the
+ *               socket has ended by then. Only on an OPEN socket.
+ *             A CLOSE (`close(code, reason)`) — recorded as handed, `{ op: 'close', code, reason }`, each absent when not
+ *               handed. What a browser fires after it (a `close` event; an `error` first, while still CONNECTING) is not
+ *               played: the socket node takes its handlers off the socket before it closes it, so nothing it does could hear
+ *               them.
+ *           Not played: `addEventListener` (the node uses the handler properties), `bufferedAmount` (0), the subprotocol the
+ *           server chose (`protocol` is ''), extensions.
+ *           The OTHER stream a browser has, `EventSource`, is ABSENT from every play (`installWorld` hides a host's): a node that
+ *           reaches for one finds none, as a Node host has none — not played yet.
+ *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
  *   `now()` = `world.clock.now()` · `random()` / `bytes(n)` / `uuid()` = `world.random.next()` /
@@ -440,7 +486,9 @@
  *   `writeStoreEvent(world.registry, e)`. · (s31) `pickerAnswer(ahead)` = `world.picker.answer(ahead)` · a `picker` effect =
  *   `world.picker.click(held, element, deliver)` — what the element holds at the click, the handler that delivers the answer.
  *   (s33) a `subscribe` effect = `world.backend.subscribe(call, tell)` (the handle it returns: `status`, `dispose()` — an
- *   `unsubscribe` effect).
+ *   `unsubscribe` effect). (s34) `socketAnswer(url)` = `world.sockets.answerFor(url)` · a `socket` effect's `connect` =
+ *   `world.sockets.open(url, protocols, tell)` (the socket it returns: `readyState`, `send(data)`, `close(code, reason)` — the
+ *   effect's `send` / `close`).
  */
 
 import { File as NodeFile } from 'buffer';
@@ -483,7 +531,51 @@ export interface WorldScript {
   picker?: PickerScript;
   /** NSP-014 s32: the project's cloud services and the browser's session for them (PROJECT above). Absent: none. */
   cloudServices?: CloudServicesScript;
+  /** NSP-014 s34: the WebSocket servers (SOCKET above). Absent: none answers — every construction is a violation. */
+  sockets?: SocketScript;
 }
+
+/** SOCKET above: how the servers answer a construction, first match wins. */
+export interface SocketScript {
+  answers?: readonly SocketRule[];
+}
+
+/** SOCKET above: one rule — `match.url` exact, or a prefix when it ends in `*`; `times` the constructions it answers before it fits none. */
+export interface SocketRule {
+  match?: { url?: string };
+  times?: number;
+  answer: SocketAnswer;
+}
+
+/** SOCKET above: what the server does with one socket — a script of events on the clock, nothing, or a throw inside the constructor. */
+export type SocketAnswer = { events: readonly SocketScriptEvent[]; replies?: readonly SocketReply[] } | { never: true } | { throws: string };
+
+/** SOCKET above: one thing the server does, `at` ms after the construction (never before 1; absent 1). */
+export type SocketScriptEvent = { at?: number } & (
+  | { open: true }
+  | { message: string }
+  | { binary: readonly number[] }
+  | { error: true }
+  | { close: { code?: number; reason?: string; wasClean?: boolean } }
+);
+
+/** SOCKET above: the server answers a send whose text is `to` with a message carrying `with`, `after` ms later (never before 1). */
+export interface SocketReply {
+  to: string;
+  with: string;
+  after?: number;
+}
+
+/** SOCKET above: what a socket tells the node — the event it fires, as a spec's `world.socket` handler is handed it (spec.ts `SocketEvent`). */
+export type SocketTold =
+  | { kind: 'open' }
+  | { kind: 'message'; data: string }
+  | { kind: 'binary'; bytes: readonly number[] }
+  | { kind: 'error' }
+  | { kind: 'close'; code: number; reason: string; wasClean: boolean };
+
+/** SOCKET above: a call the node made on the world's WebSocket, as handed. */
+export type SocketCall = { op: 'connect'; url: unknown; protocols?: unknown } | { op: 'send'; data: unknown } | { op: 'close'; code?: unknown; reason?: unknown };
 
 /** PROJECT above (s32): the project's `cloudservices` metadata as handed, and the session the browser holds for its app id. */
 export interface CloudServicesScript {
@@ -738,8 +830,11 @@ export interface NetworkRule {
 }
 
 export type Answer =
-  /** A response. `body`: a string travels as text; anything else travels as its JSON text. */
-  | { status: number; statusText?: string; headers?: Record<string, string>; body?: unknown }
+  /**
+   * A response. `body`: a string travels as text; anything else travels as its JSON text. (s34) `chunks` instead of a `body`: a
+   * body that STREAMS (NETWORK above, A STREAMED BODY) — its text, its end or its failure, each on the clock after the head lands.
+   */
+  | { status: number; statusText?: string; headers?: Record<string, string>; body?: unknown; chunks?: readonly StreamChunk[] }
   /** The request never reaches a server: rejected with a `TypeError` carrying this message. */
   | { error: string }
   /** No answer ever comes (until the request is aborted). */
@@ -755,14 +850,23 @@ export interface RequestRecord {
   body?: string | { $form: Array<[string, string]> };
 }
 
-/** The world's answer as a spec sees it (spec.ts `WorldResponse` adds the request id). */
+/** NETWORK above (s34), A STREAMED BODY: one piece of a streamed body, `at` ms after the head lands (never before 1; absent 1). */
+export type StreamChunk = { at?: number } & ({ text: string } | { end: true } | { error: string });
+
+/**
+ * The world's answer as a spec sees it (spec.ts `WorldResponse` adds the request id). A head whose body streams says so
+ * (`stream: true`, `body` null); what the body then does arrives as `StreamDelivery`s.
+ */
 export type Delivery =
-  | { status: number; statusText: string; headers: Record<string, string>; body: string | null }
+  | { status: number; statusText: string; headers: Record<string, string>; body: string | null; stream?: true }
   | { error: { name: string; message: string } }
   | { aborted: true };
 
-/** What the world hands a request's issuer when the answer lands. */
-export type Deliver = (d: Delivery) => void;
+/** NETWORK above (s34): what a streamed body does after its head — text, its end, or its failure (an abort's included). Spec.ts `StreamEvent` adds the request id. */
+export type StreamDelivery = { chunk: string } | { end: true } | { streamError: { name: string; message: string } };
+
+/** What the world hands a request's issuer when the answer lands — and, for a streamed body, each thing the body does after it. */
+export type Deliver = (d: Delivery | StreamDelivery) => void;
 
 // ------------------------------------------------------------------------------------------------
 // the clock
@@ -891,6 +995,8 @@ interface InFlight {
   deliver: Deliver;
   timer?: number;
   done: boolean;
+  /** s34: the head of a streamed body has landed; these are the timers of what the body still has to say */
+  streaming?: number[];
 }
 
 export class Network {
@@ -933,17 +1039,59 @@ export class Network {
     }
     if ('never' in rule.answer) return id;
     const delivery = toDelivery(rule.answer);
-    if (rule.after !== undefined && rule.after > 0) entry.timer = this.clock.schedule(rule.after, () => this.land(entry, delivery));
-    else this.land(entry, delivery);
+    const chunks = 'chunks' in rule.answer ? rule.answer.chunks : undefined;
+    const arrive = () => (chunks ? this.head(entry, delivery, chunks) : this.land(entry, delivery));
+    if (rule.after !== undefined && rule.after > 0) entry.timer = this.clock.schedule(rule.after, arrive);
+    else arrive();
     return id;
   }
 
-  /** Aborts a request still in flight: its answer is dropped and `{ aborted }` lands at once. A finished request is left alone. */
+  /**
+   * Aborts a request still in flight: its answer is dropped and `{ aborted }` lands at once. (s34) A request whose streamed body
+   * is still being read: the rest of the body is dropped and the body FAILS with an `AbortError` at once. A finished request is
+   * left alone.
+   */
   abort(id: number): void {
     const entry = this.inFlight.get(id);
     if (!entry || entry.done) return;
+    if (entry.streaming) {
+      this.endStream(entry, { streamError: { name: 'AbortError', message: 'This operation was aborted' } });
+      return;
+    }
     if (entry.timer !== undefined) this.clock.cancel(entry.timer);
     this.land(entry, { aborted: true });
+  }
+
+  /** s34 — the reader CANCELLED a streamed body (`reader.cancel()`): the rest is dropped and nothing more is said. */
+  cancelStream(id: number): void {
+    const entry = this.inFlight.get(id);
+    if (!entry || entry.done || !entry.streaming) return;
+    this.endStream(entry);
+  }
+
+  /** s34 — a streamed body's head lands; what the body says is then on the clock, each piece `at` ms after this moment. */
+  private head(entry: InFlight, delivery: Delivery, chunks: readonly StreamChunk[]): void {
+    if (entry.done) return;
+    const timers: number[] = [];
+    entry.streaming = timers;
+    entry.deliver({ ...delivery, body: null, stream: true } as Delivery);
+    for (const c of chunks) {
+      const t = this.clock.schedule(c.at ?? 1, () => {
+        timers.splice(timers.indexOf(t), 1);
+        if (entry.done) return;
+        if ('text' in c) entry.deliver({ chunk: c.text });
+        else if ('end' in c) this.endStream(entry, { end: true });
+        else this.endStream(entry, { streamError: { name: 'TypeError', message: c.error } });
+      });
+      timers.push(t);
+    }
+  }
+
+  private endStream(entry: InFlight, last?: StreamDelivery): void {
+    for (const t of (entry.streaming ?? []).splice(0)) this.clock.cancel(t);
+    entry.done = true;
+    this.inFlight.delete(entry.id);
+    if (last) entry.deliver(last);
   }
 
   private land(entry: InFlight, d: Delivery): void {
@@ -990,6 +1138,7 @@ export function normaliseRequest(request: { method?: unknown; url: unknown; head
 export function toDelivery(answer: Answer): Delivery {
   if ('error' in answer) return { error: { name: 'TypeError', message: answer.error } };
   if ('never' in answer) throw new Error('a never-answer has no delivery');
+  if (answer.chunks !== undefined && answer.body !== undefined) throw new Error('world: an answer streams its body (chunks) or has one (body), not both');
   const headers: Record<string, string> = {};
   for (const [k, v] of Object.entries(answer.headers ?? {})) headers[k.toLowerCase()] = String(v);
   let body: string | null = null;
@@ -2013,6 +2162,188 @@ export class WorldFileInput {
   }
 }
 
+// ------------------------------------------------------------------------------------------------
+// the WebSocket servers (SOCKET above)
+
+/** A `socket` trace event for a call (SOCKET above): each value canonical, a field the node did not hand absent. */
+export function socketEvent(c: SocketCall): TraceEvent {
+  const e: Record<string, unknown> = { t: 'socket', op: c.op };
+  const put = (name: string, v: unknown) => {
+    if (v !== undefined) e[name] = canonicalise(v);
+  };
+  if (c.op === 'connect') {
+    put('url', c.url);
+    put('protocols', c.protocols);
+  } else if (c.op === 'send') put('data', c.data);
+  else {
+    put('code', c.code);
+    put('reason', c.reason);
+  }
+  return e as unknown as TraceEvent;
+}
+
+/** SOCKET above: a socket as the world keeps it — its state, and the three calls the node makes on it. */
+export interface WorldSocket {
+  readonly readyState: number;
+  send(data: unknown): void;
+  close(code?: unknown, reason?: unknown): void;
+}
+
+/** The WebSocket servers (SOCKET above): every construction recorded, answered by the script's first fitting rule. */
+export class WorldSockets {
+  /** Every call made on a world socket, as the trace records it, in order. */
+  readonly calls: TraceEvent[] = [];
+  /** Constructions no rule answered (AC5). */
+  readonly violations: string[] = [];
+  private readonly listeners: Array<(e: TraceEvent, socket: WorldSocket) => void> = [];
+  private readonly answered = new Map<SocketRule, number>();
+
+  constructor(
+    private readonly clock: Clock,
+    private readonly script: SocketScript = {}
+  ) {}
+
+  /** Called with every call as it is made, and the socket it was made on — how a target attributes it to the node that holds the socket. */
+  onCall(listener: (e: TraceEvent, socket: WorldSocket) => void): void {
+    this.listeners.push(listener);
+  }
+
+  private record(c: SocketCall, socket: WorldSocket): void {
+    const e = socketEvent(c);
+    this.calls.push(e);
+    for (const l of this.listeners) l(e, socket);
+  }
+
+  private fits(rule: SocketRule, url: string): boolean {
+    if (rule.times !== undefined && (this.answered.get(rule) ?? 0) >= rule.times) return false;
+    const m = rule.match?.url;
+    if (m === undefined) return true;
+    return m.endsWith('*') ? url.startsWith(m.slice(0, -1)) : url === m;
+  }
+
+  /** What the next construction for `url` would meet (SOCKET above), without spending a rule's `times`; `undefined`: no rule — a violation. */
+  answerFor(url: unknown): SocketAnswer | undefined {
+    return (this.script.answers ?? []).find((r) => this.fits(r, String(url)))?.answer;
+  }
+
+  /** A construction (SOCKET above): recorded, answered by its rule; what the server does is told through `tell` at its moment. Throws where the script says the constructor throws. */
+  open(url: unknown, protocols: unknown, tell: (e: SocketTold) => void): WorldSocket {
+    let readyState = 0;
+    /** a `close` event arrived, or the node called `close()`: nothing more is delivered */
+    let ended = false;
+    const timers: number[] = [];
+    // the DOM's "report the exception": a handler's throw goes no further
+    const safely = (e: SocketTold) => {
+      try {
+        tell(e);
+      } catch {
+        /* reported, never propagated */
+      }
+    };
+    const later = (at: number | undefined, fn: () => void) => {
+      const id = this.clock.schedule(at ?? 1, () => {
+        timers.splice(timers.indexOf(id), 1);
+        if (!ended) fn();
+      });
+      timers.push(id);
+    };
+    const end = () => {
+      ended = true;
+      for (const t of timers.splice(0)) this.clock.cancel(t);
+    };
+    let replies: readonly SocketReply[] = [];
+    const socket: WorldSocket = {
+      get readyState() {
+        return readyState;
+      },
+      send: (data: unknown) => {
+        this.record({ op: 'send', data }, socket);
+        if (readyState === 0) throw new DOMException("Failed to execute 'send' on 'WebSocket': Still in CONNECTING state.", 'InvalidStateError');
+        if (readyState !== 1 || typeof data !== 'string') return;
+        const reply = replies.find((r) => r.to === data);
+        if (reply) later(reply.after, () => safely({ kind: 'message', data: reply.with }));
+      },
+      close: (code?: unknown, reason?: unknown) => {
+        this.record({ op: 'close', code, reason }, socket);
+        if (readyState !== 3) readyState = 2;
+        end();
+      }
+    };
+    this.record({ op: 'connect', url, protocols }, socket);
+    const rule = (this.script.answers ?? []).find((r) => this.fits(r, String(url)));
+    if (!rule) {
+      this.violations.push(`socket ${String(url)}: no rule in the world's script answers it`);
+      return socket;
+    }
+    this.answered.set(rule, (this.answered.get(rule) ?? 0) + 1);
+    const a = rule.answer;
+    if ('throws' in a) throw new DOMException(a.throws, 'SyntaxError');
+    if ('never' in a) return socket;
+    replies = a.replies ?? [];
+    for (const entry of a.events) {
+      later(entry.at, () => {
+        if ('open' in entry) {
+          readyState = 1;
+          safely({ kind: 'open' });
+        } else if ('message' in entry) safely({ kind: 'message', data: entry.message });
+        else if ('binary' in entry) safely({ kind: 'binary', bytes: [...entry.binary] });
+        else if ('error' in entry) safely({ kind: 'error' });
+        else {
+          const code = entry.close.code ?? 1006;
+          readyState = 3;
+          end();
+          safely({ kind: 'close', code, reason: entry.close.reason ?? '', wasClean: entry.close.wasClean ?? code !== 1006 });
+        }
+      });
+    }
+    return socket;
+  }
+}
+
+/** A `WebSocket` class over this world (SOCKET above): the handler properties, `binaryType`, `readyState`, `send`, `close`. */
+export function worldWebSocket(world: World): new (url: unknown, protocols?: unknown) => unknown {
+  return class WorldWebSocketFace {
+    static readonly CONNECTING = 0;
+    static readonly OPEN = 1;
+    static readonly CLOSING = 2;
+    static readonly CLOSED = 3;
+    binaryType = 'blob';
+    readonly bufferedAmount = 0;
+    readonly protocol = '';
+    readonly url: string;
+    onopen: ((e: unknown) => void) | null = null;
+    onmessage: ((e: unknown) => void) | null = null;
+    onerror: ((e: unknown) => void) | null = null;
+    onclose: ((e: unknown) => void) | null = null;
+    private readonly socket: WorldSocket;
+
+    constructor(url: unknown, protocols?: unknown) {
+      this.url = String(url);
+      this.socket = world.sockets.open(url, protocols, (e) => {
+        if (e.kind === 'open') this.onopen?.call(this, { type: 'open', target: this });
+        else if (e.kind === 'message') this.onmessage?.call(this, { type: 'message', target: this, data: e.data });
+        else if (e.kind === 'binary') {
+          const bytes = new Uint8Array(e.bytes);
+          this.onmessage?.call(this, { type: 'message', target: this, data: this.binaryType === 'arraybuffer' ? bytes.buffer : new Blob([bytes]) });
+        } else if (e.kind === 'error') this.onerror?.call(this, { type: 'error', target: this });
+        else this.onclose?.call(this, { type: 'close', target: this, code: e.code, reason: e.reason, wasClean: e.wasClean });
+      });
+    }
+
+    get readyState(): number {
+      return this.socket.readyState;
+    }
+
+    send(data: unknown): void {
+      this.socket.send(data);
+    }
+
+    close(code?: unknown, reason?: unknown): void {
+      this.socket.close(code, reason);
+    }
+  };
+}
+
 export class World {
   readonly script: WorldScript;
   readonly clock = new Clock();
@@ -2039,6 +2370,8 @@ export class World {
   readonly picker: WorldPicker;
   /** The project's cloud services (PROJECT above, s32), or none. */
   readonly cloudServices: Readonly<CloudServicesScript> | undefined;
+  /** The WebSocket servers (SOCKET above, s34) — always: a play with no script answers no construction. */
+  readonly sockets: WorldSockets;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -2055,11 +2388,12 @@ export class World {
     this.backend = new WorldBackend(this.clock, script.backend ?? {});
     this.picker = new WorldPicker(this.clock, script.picker);
     this.cloudServices = script.cloudServices ? { ...script.cloudServices } : undefined;
+    this.sockets = new WorldSockets(this.clock, script.sockets ?? {});
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */
   get violations(): string[] {
-    return [...this.network.violations, ...this.backend.violations];
+    return [...this.network.violations, ...this.backend.violations, ...this.sockets.violations];
   }
 }
 
@@ -2079,10 +2413,23 @@ export function worldFetch(world: World): (input: unknown, init?: RequestInit) =
   return (input, init) => {
     const url = typeof input === 'string' ? input : input && typeof input === 'object' && 'url' in (input as object) ? String((input as { url: unknown }).url) : String(input);
     return new Promise<Response>((resolve, reject) => {
+      // s34 — a streamed body: a ReadableStream the world feeds, bytes as UTF-8; a reader's cancel tells the world
+      let body: ReadableStreamDefaultController<Uint8Array> | undefined;
       const id = world.network.issue({ method: init?.method, url, headers: init?.headers, body: init?.body }, (d) => {
-        if ('aborted' in d) reject(new DOMException('This operation was aborted', 'AbortError'));
+        if ('chunk' in d) body?.enqueue(new TextEncoder().encode(d.chunk));
+        else if ('end' in d) body?.close();
+        else if ('streamError' in d) body?.error(d.streamError.name === 'AbortError' ? new DOMException(d.streamError.message, 'AbortError') : new TypeError(d.streamError.message));
+        else if ('aborted' in d) reject(new DOMException('This operation was aborted', 'AbortError'));
         else if ('error' in d) reject(Object.assign(new TypeError(d.error.message), { name: d.error.name }));
-        else resolve(new Response(NULL_BODY_STATUSES.has(d.status) ? null : d.body, { status: d.status, statusText: d.statusText, headers: d.headers }));
+        else if (d.stream) {
+          const stream = new ReadableStream<Uint8Array>({
+            start: (c) => {
+              body = c;
+            },
+            cancel: () => world.network.cancelStream(id)
+          });
+          resolve(new Response(NULL_BODY_STATUSES.has(d.status) ? null : stream, { status: d.status, statusText: d.statusText, headers: d.headers }));
+        } else resolve(new Response(NULL_BODY_STATUSES.has(d.status) ? null : d.body, { status: d.status, statusText: d.statusText, headers: d.headers }));
       });
       const signal = init?.signal;
       if (signal) {
@@ -2155,6 +2502,7 @@ export function worldXMLHttpRequest(world: World): new () => WorldXMLHttpRequest
 
     send(body?: unknown): void {
       this.id = world.network.issue({ method: this.method, url: this.url, headers: this.headers, body: body === null ? undefined : body }, (d) => {
+        if (!('status' in d || 'error' in d || 'aborted' in d) || ('stream' in d && d.stream)) throw new Error('world: a streamed body (chunks) answers a fetch only — an XHR waits for the whole body');
         void Promise.resolve().then(() => this.land(d));
       });
     }
@@ -2273,6 +2621,9 @@ export function installWorld(world: World): Installed {
   define('clearTimeout', fakeClearTimeout);
   define('fetch', worldFetch(world));
   define('XMLHttpRequest', worldXMLHttpRequest(world));
+  // SOCKET (s34): the world's WebSocket in every play — a host's would reach a real network; no EventSource at all
+  define('WebSocket', worldWebSocket(world));
+  define('EventSource', undefined);
   const hostCrypto = g.crypto as { subtle?: Record<string, unknown> } | undefined;
   const hostSubtle = hostCrypto?.subtle;
   const restoreZone = installTimeZone(world);

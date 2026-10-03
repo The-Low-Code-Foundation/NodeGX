@@ -2,7 +2,7 @@
  * The agent family's text helpers in one place — read from
  * `packages/noodl-runtime/src/nodes/std-library/agent/stream-parsers.ts` on 2026-10-01 (NSP-013),
  * for JSON Stream Parser, Pattern Extractor and Text Accumulator. Verbatim but for types (this
- * package is strict; the runtime's is not) and the SSE / path halves, which no specced node reads.
+ * package is strict; the runtime's is not). The SSE and path halves joined in NSP-014 s34, for Server-Sent Events.
  *
  * THE RULES (the module comment, :1-16): every function is a total mapping from (buffer, options)
  * to (values, leftover); a caller keeps `rest` and prepends the next fragment. Splitting on an
@@ -249,4 +249,125 @@ export function describeError(e: unknown): string {
   } catch {
     return 'Unknown error';
   }
+}
+
+// ------------------------------------------------------------------------------------------------
+// SSE — :22-155 (NSP-014 s34, for Server-Sent Events)
+//
+// THE RULES (the WHATWG `text/event-stream` reading, :48-64): lines end with CRLF, LF or CR; a blank line dispatches; a line
+// starting `:` is a comment; a field with no colon has an empty value; ONE space after the colon is stripped; `data:` lines
+// join with `\n` and one trailing newline is removed on dispatch; an event with no `data:` field is NOT dispatched (its type and
+// retry reset); `id` persists across the events of one call and a value holding NUL is ignored; `retry` counts only when it is
+// all digits; unknown fields are ignored; a BOM at the very start is skipped. Only whole events are consumed — a partial one
+// stays in `rest` — and a buffer ending in a lone `\r` stops there (the first half of a CRLF still to come).
+
+export interface SseFrame {
+  event: string;
+  data: string;
+  id: string;
+  retry?: number;
+}
+
+export function parseSseChunk(buffer: string): { frames: SseFrame[]; rest: string } {
+  const frames: SseFrame[] = [];
+  let i = buffer.charCodeAt(0) === 0xfeff ? 1 : 0;
+  let consumed = i;
+  let eventType = '';
+  let data: string | null = null;
+  let id = '';
+  let retry: number | undefined;
+  const dispatch = () => {
+    if (data === null) {
+      eventType = '';
+      retry = undefined;
+      return;
+    }
+    frames.push({ event: eventType || 'message', data: data.endsWith('\n') ? data.slice(0, -1) : data, id, ...(retry !== undefined ? { retry } : {}) });
+    eventType = '';
+    data = null;
+    retry = undefined;
+  };
+  while (i < buffer.length) {
+    let lineEnd = -1;
+    let nextStart = -1;
+    for (let j = i; j < buffer.length; j++) {
+      const c = buffer.charCodeAt(j);
+      if (c === 10) {
+        lineEnd = j;
+        nextStart = j + 1;
+        break;
+      }
+      if (c === 13) {
+        if (j + 1 >= buffer.length) return { frames, rest: buffer.slice(consumed) };
+        lineEnd = j;
+        nextStart = buffer.charCodeAt(j + 1) === 10 ? j + 2 : j + 1;
+        break;
+      }
+    }
+    if (lineEnd === -1) break;
+    const line = buffer.slice(i, lineEnd);
+    i = nextStart;
+    if (line.length === 0) {
+      dispatch();
+      consumed = i;
+      continue;
+    }
+    if (line.charCodeAt(0) === 58) continue;
+    const colon = line.indexOf(':');
+    const field = colon === -1 ? line : line.slice(0, colon);
+    let value = colon === -1 ? '' : line.slice(colon + 1);
+    if (value.charCodeAt(0) === 32) value = value.slice(1);
+    if (field === 'event') eventType = value;
+    else if (field === 'data') data = data === null ? value + '\n' : data + value + '\n';
+    else if (field === 'id') {
+      if (value.indexOf('\u0000') === -1) id = value;
+    } else if (field === 'retry') {
+      if (/^\d+$/.test(value)) retry = parseInt(value, 10);
+    }
+  }
+  return { frames, rest: buffer.slice(consumed) };
+}
+
+/** :333-351 — JSON when the trimmed text could be JSON and parses (`true`, `false`, `null`, a number, a string, an object or array); the text as it came otherwise. */
+export function parseJsonOrText(text: string): unknown {
+  const trimmed = text.trim();
+  if (trimmed === '') return text;
+  const first = trimmed.charCodeAt(0);
+  const couldBeJson = first === 123 || first === 91 || first === 34 || first === 45 || (first >= 48 && first <= 57) || trimmed === 'true' || trimmed === 'false' || trimmed === 'null';
+  if (!couldBeJson) return text;
+  const outcome = tryParseJson(trimmed);
+  return outcome.ok ? outcome.value : text;
+}
+
+// ------------------------------------------------------------------------------------------------
+// paths — :505-566: `a.0.b` and `a[0].b` are one path; a step through a non-object, or `__proto__` / `constructor` /
+// `prototype`, is undefined; an empty path is the root. The TEXT for a path: no path, the raw text; a string as itself, a
+// number or boolean as `String`; anything else blank.
+
+export function splitPath(path: string): string[] {
+  if (!path) return [];
+  return path
+    .replace(/\[(\d+)\]/g, '.$1')
+    .split('.')
+    .map((segment) => segment.trim())
+    .filter((segment) => segment !== '');
+}
+
+export function valueAtPath(root: unknown, path: string): unknown {
+  let current: unknown = root;
+  for (const segment of splitPath(path)) {
+    if (current === null || typeof current !== 'object') return undefined;
+    if (segment === '__proto__' || segment === 'constructor' || segment === 'prototype') return undefined;
+    current = (current as Record<string, unknown>)[segment];
+  }
+  return current;
+}
+
+export function textForPath(raw: string, parsed: unknown, path: string): string {
+  if (!path) return raw;
+  const value = valueAtPath(parsed, path);
+  const kind = typeof value;
+  if (kind === 'string') return value as string;
+  if (kind === 'number' || kind === 'boolean') return String(value);
+  return '';
 }

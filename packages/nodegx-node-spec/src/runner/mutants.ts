@@ -21,12 +21,13 @@
  *   - `drop-backend`   the branch's backend call is never made (NSP-014 s21: the same defect, one seam over)
  *   - `drop-picker`    the branch's click on the file input is never made (NSP-014 s31: the dialog never opens)
  *   - `drop-subscribe` / `drop-unsubscribe`  the branch's subscription is never opened / never disposed (NSP-014 s33)
+ *   - `drop-socket`    the branch's calls on its WebSockets are never made — no connect, no send, no close (NSP-014 s34)
  * A mutation that would leave the patch unchanged (drop-emit on a branch with no emit) is not
  * generated: it could only survive, and would say nothing.
  *
  * The world handlers (NSP-007, `spec.world.timer` / `spec.world.response`; NSP-012's
  * `spec.world.change`) are reducers like any
- * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`, (s24) `world.store`, (s26) `world.auth`, (s29) `world.authReturn` and `world.mount`, (s31) `world.picker`, (s33) `world.realtime`; whether a branch issues a request
+ * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`, (s24) `world.store`, (s26) `world.auth`, (s29) `world.authReturn` and `world.mount`, (s31) `world.picker`, (s33) `world.realtime`, (s34) `world.socket` and `world.stream`; whether a branch issues a request
  * — or calls a backend — is part of its shape. A branch's `after` / `cancel` / `abort` effects are NOT in the shape and have no
  * mutant of their own yet (a dropped timeout timer shows only in a sequence that waits past it
  * with an answer that never comes) — named in NSP-007 §5 as the runner's next hole.
@@ -34,7 +35,7 @@
 
 import type { AnyNodeSpec, ErasedReducer } from '../spec';
 
-export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend' | 'drop-picker' | 'drop-subscribe' | 'drop-unsubscribe';
+export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend' | 'drop-picker' | 'drop-subscribe' | 'drop-unsubscribe' | 'drop-socket';
 
 export interface Branch {
   reducer: string;
@@ -79,6 +80,8 @@ export interface PatchLike {
   /** NSP-014 s33: a subscription opened, and the ones disposed (spec.ts `Patch.subscribe` / `unsubscribe`). */
   subscribe?: unknown;
   unsubscribe?: readonly string[];
+  /** NSP-014 s34: calls on WebSockets (spec.ts `Patch.socket`). */
+  socket?: ReadonlyArray<{ op: string }>;
 }
 
 export function shapeOf(patch: unknown): string {
@@ -102,7 +105,9 @@ export function shapeOf(patch: unknown): string {
     ...(p.settles !== undefined && p.settles.length > 0 ? { settles: [...new Set(p.settles.map((o) => o.outcome))].sort() } : {}),
     // s33 — likewise only when the branch opens or disposes a subscription
     ...(p.subscribe !== undefined ? { subscribe: true } : {}),
-    ...(p.unsubscribe !== undefined && p.unsubscribe.length > 0 ? { unsubscribe: true } : {})
+    ...(p.unsubscribe !== undefined && p.unsubscribe.length > 0 ? { unsubscribe: true } : {}),
+    // s34 — likewise only when the branch makes calls on a WebSocket: WHICH calls, not how many
+    ...(p.socket !== undefined && p.socket.length > 0 ? { socket: [...new Set(p.socket.map((o) => o.op))].sort() } : {})
   });
 }
 
@@ -125,6 +130,8 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.mount) names.push('world.mount');
   if (spec.world?.picker) names.push('world.picker');
   if (spec.world?.realtime) names.push('world.realtime');
+  if (spec.world?.socket) names.push('world.socket');
+  if (spec.world?.stream) names.push('world.stream');
   return names;
 }
 
@@ -165,6 +172,10 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     if (spec.world.picker) w.picker = wrap('world.picker', spec.world.picker as unknown as ErasedReducer) as unknown as typeof spec.world.picker;
     // s33 — what a subscription tells (world.ts REALTIME): a copy without it never hears a change
     if (spec.world.realtime) w.realtime = wrap('world.realtime', spec.world.realtime as unknown as ErasedReducer) as unknown as typeof spec.world.realtime;
+    // s34 — what a WebSocket fires (world.ts SOCKET): a copy without it never hears a socket open
+    if (spec.world.socket) w.socket = wrap('world.socket', spec.world.socket as unknown as ErasedReducer) as unknown as typeof spec.world.socket;
+    // s34 — what a streamed body says (world.ts NETWORK): a copy without it never hears a chunk
+    if (spec.world.stream) w.stream = wrap('world.stream', spec.world.stream as unknown as ErasedReducer) as unknown as typeof spec.world.stream;
     out.world = w;
   }
   return out;
@@ -251,6 +262,10 @@ function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike):
       const { unsubscribe: _u, ...rest } = patch;
       return rest;
     }
+    case 'drop-socket': {
+      const { socket: _s, ...rest } = patch;
+      return rest;
+    }
     default:
       return patch;
   }
@@ -277,6 +292,7 @@ export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mut
     if (ex.picker !== undefined) kinds.push(['drop-picker', undefined]);
     if (ex.subscribe !== undefined) kinds.push(['drop-subscribe', undefined]);
     if (ex.unsubscribe !== undefined && ex.unsubscribe.length > 0) kinds.push(['drop-unsubscribe', undefined]);
+    if (ex.socket !== undefined && ex.socket.length > 0) kinds.push(['drop-socket', undefined]);
     for (const sibling of byReducer.get(b.reducer) ?? []) {
       if (sibling.shape !== b.shape) kinds.push(['swap-branch', sibling]);
     }

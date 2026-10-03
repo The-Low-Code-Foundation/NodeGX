@@ -28,7 +28,7 @@ import type { Step } from '../adapter';
 import type { AnyNodeSpec, InputDecl } from '../spec';
 import { isSignalInput } from '../spec';
 import type { RegistryScript } from '../registry';
-import type { Answer, BackendScript, PickerScript, PopupScript, RouterScript, StackScript, ViewportScript, WorldScript } from '../world';
+import type { Answer, BackendScript, PickerScript, PopupScript, RouterScript, SocketScript, StackScript, ViewportScript, WorldScript } from '../world';
 import { mulberry32, sequenceSeed, type Rng } from './random';
 import type { Reach } from './reach';
 
@@ -84,7 +84,8 @@ export const DEFAULT_WORLD_POOL = Object.freeze({
   // NSP-014 s21: one backend, `main`, that answers every call at once with nothing
   backends: Object.freeze([{ answers: [{ answer: { ok: null } }] }] as ReadonlyArray<BackendScript>),
   // NSP-014 s31: a document whose file dialog nobody answers
-  pickers: Object.freeze([{}] as ReadonlyArray<PickerScript>)
+  pickers: Object.freeze([{}] as ReadonlyArray<PickerScript>),
+  sockets: Object.freeze([{}] as ReadonlyArray<SocketScript>)
 });
 
 export interface GenerateOptions {
@@ -248,6 +249,8 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   if (needs.includes('backend')) world.backend = rng.pick(pool.backends ?? DEFAULT_WORLD_POOL.backends);
   // NSP-014 s31 — PICKER: one of the pool's, always — the node makes its file input at its making, so the play has a document
   if (needs.includes('picker')) world.picker = rng.pick(pool.pickers ?? DEFAULT_WORLD_POOL.pickers);
+  // NSP-014 s34 — SOCKET: one of the pool's (the default answers nothing: every construction a violation)
+  if (needs.includes('socket')) world.sockets = rng.pick(pool.sockets ?? DEFAULT_WORLD_POOL.sockets);
   return { seed, params, steps, world };
 }
 

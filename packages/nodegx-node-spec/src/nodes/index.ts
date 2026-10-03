@@ -64,6 +64,8 @@ import { CloudFile } from './cloud-file';
 import { OpenFilePicker } from './open-file-picker';
 import { CloudFunction } from './cloud-function';
 import { SubscribeToChanges } from './subscribe-to-changes';
+import { WebSocketNode } from './websocket';
+import { ServerSentEvents } from './sse';
 import { SignFileUrl, UploadFile } from './upload-file';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
@@ -170,6 +172,8 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [OpenFilePicker.type]: OpenFilePicker, // s31 (the world's PICKER)
   [CloudFunction.type]: CloudFunction, // s32 (NETWORK's XHR face, PROJECT's cloud services)
   [SubscribeToChanges.type]: SubscribeToChanges, // s33 (BACKEND's REALTIME: a subscription told on the clock)
+  [WebSocketNode.type]: WebSocketNode, // s34 (the world's SOCKET: a server script on the clock)
+  [ServerSentEvents.type]: ServerSentEvents, // s34 (NETWORK's streamed body)
   [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
@@ -249,6 +253,8 @@ export {
   OpenFilePicker,
   CloudFunction,
   SubscribeToChanges,
+  WebSocketNode,
+  ServerSentEvents,
   States,
   RandomBytes,
   Repeat,

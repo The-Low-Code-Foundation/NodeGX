@@ -22,6 +22,7 @@
  * | object with `toJSON`                 | `toJSON()` first, then the rules above           |
  * | a FILE the browser hands (NSP-014 s30): a `Blob` — `arrayBuffer()` a function, `size` a number, `type` a string | `{ "$file": { "name"?, "size", "type" } }` — the bytes are not on the wire, `name` only when it is a string (a `File`; a bare `Blob` has none), `lastModified` never (a clock reading) |
  * | a STORED file (NSP-014 s30): `getUrl`, `getName` and `getTarget` all functions — the runtime's `CloudFile` | `{ "$cloudFile": { "name", "url", "contentType"?, "size"?, "target"? } }` from those getters (and `getContentType` / `getSize`), each canonical, an absent one dropped. Tagged, unlike other class instances (below): Cloud File, Sign File URL and a record's file property take ONLY a stored file (`instanceof CloudFile`) and drop a plain object with the same keys, so the difference is behaviour a trace must show |
+ * | BYTES (NSP-014 s34): an `ArrayBuffer`, a typed array or a `DataView` | `{ "$bytes": [b, …] }` — the bytes it views, each 0–255, in order. Tagged: a WebSocket's binary frame is behaviour on the wire, and a typed array's own keys sort `"10"` before `"2"` while an `ArrayBuffer` has none at all — `{}` for every buffer graded nothing |
  * | other object (class instance, Map…)  | its own enumerable keys, sorted — no class tag (see below) |
  * | `undefined` (top level)              | `undefined` — the CALLER decides: a `value` event never carries it (C3), a `set` event omits the field |
  * | function, symbol, bigint, circular   | refused: `CanonicalError` naming the path         |
@@ -91,6 +92,9 @@ function walk(value: unknown, path: string, seen: object[]): Canonical | undefin
   if (obj instanceof Date) {
     return { $date: Number.isNaN(obj.getTime()) ? null : obj.toISOString() };
   }
+  // NSP-014 s34 — bytes, by brand rather than by `instanceof` (a host's `TextEncoder` hands a typed array of ITS realm)
+  if (ArrayBuffer.isView(obj)) return { $bytes: Array.from(new Uint8Array(obj.buffer, obj.byteOffset, obj.byteLength)) };
+  if (Object.prototype.toString.call(obj) === '[object ArrayBuffer]') return { $bytes: Array.from(new Uint8Array(obj as ArrayBuffer)) };
   seen.push(obj);
   try {
     // NSP-014 s30 — the two file shapes, duck-typed (a target's own classes; never by constructor)

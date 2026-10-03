@@ -17,6 +17,9 @@
 import type { EquivalentMutant } from '../runner/conformance';
 
 const STUCK_FLAG = 'a stuck "scheduled" flag re-runs a silent run silently: no port of this node can show it';
+const WS_SAME_VALUE = 'a same-value write of URL, Protocols or Auto Connect schedules a rebuild that cannot act (the frame end finds the connection matching, or no URL, or Auto Connect off)';
+const SSE_SAME_VALUE = 'a same-value write of URL or Auto Connect schedules a pass that cannot act (the connection was opened against this URL, or there is no URL, or Auto Connect is off)';
+const SSE_DEAD = 'a Connect that fails inside the call leaves a dead connection (error, no transport, no timer, 0 retries); which dead one is kept is invisible — a later Connect or pass replaces it, a Disconnect sends closed / false / 0 from either';
 const GRAPH = (what: string, scenario: string) => `${what} is written onto the registry and no port of this node reads it back — graded by ${scenario}`;
 
 export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
@@ -31,6 +34,55 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG }
+  ],
+  // NSP-014 s34 — the rebuild's flag. A write of URL, Protocols or Auto Connect that changes nothing still schedules a rebuild,
+  // and that rebuild cannot act: between frames a live connection always matches the URL and protocols (both setters
+  // schedule, and a connection is made from the node's config), and with none there is no URL or Auto Connect is off (both
+  // setters schedule). So the flag left set, or set where it already was, re-runs a silent rebuild silently.
+  'net.noodl.WebSocket': [
+    { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
+    ...(['url', 'protocols', 'autoConnect'] as const).flatMap((reducer) => [
+      { reducer, kind: 'drop-set' as const, branch: '"set":["scheduled"],"emit":[]', why: WS_SAME_VALUE },
+      { reducer, kind: 'swap-branch' as const, branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: WS_SAME_VALUE },
+      { reducer, kind: 'swap-branch' as const, branch: '"set":[],"emit":[]', swappedWith: '"set":["scheduled"],"emit":[]', why: WS_SAME_VALUE }
+    ]),
+    // a constructor the script refuses: the socket id the spec drew for it was never kept, so the counter is all that moved
+    { reducer: 'connect', kind: 'drop-set', branch: '"set":["nextId"],"emit":["onError"],"outcome":"failure"', why: 'the spec\'s own id counter is all the branch moves (the refused socket was never kept); ids are not on the wire' },
+    // Heartbeat Interval written blank again on a live connection: the connection's copy goes 0 → NaN, and both mean "no heartbeat"
+    ...(['drop-set', 'swap-branch'] as const).map((kind) => ({
+      reducer: 'heartbeatInterval',
+      kind,
+      branch: '"set":["conn"],"emit":[]',
+      ...(kind === 'swap-branch' ? { swappedWith: '"set":[],"emit":[]' } : {}),
+      why: 'the live connection keeps 0 where the original holds NaN — both start no heartbeat (`!interval`), and the next blank write restarts it either way (NaN !== 0, NaN !== NaN); the swap is to the branch that sets nothing, the same drop'
+    }))
+  ],
+  // NSP-014 s34 — Server-Sent Events. The frame end's pass and a same-value URL / Auto Connect write as WebSocket's (between
+  // frames a live connection was opened against the URL; with none there is no URL or Auto Connect is off). Two inputs no play
+  // can observe. And a Connect that fails inside the call (no URL, an EventSource) leaves a DEAD connection — state error, no
+  // transport, no timer, 0 retries — so which dead one the node keeps is invisible: a later Connect or pass replaces it, and a
+  // Disconnect on either sends `closed`, false, 0. (A swap that also moves `connectedUrl` is killed by a scenario.)
+  'net.noodl.SSE': [
+    { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
+    ...(['url', 'autoConnect'] as const).flatMap((reducer) => [
+      { reducer, kind: 'drop-set' as const, branch: '"set":["scheduled"],"emit":[]', why: SSE_SAME_VALUE },
+      { reducer, kind: 'swap-branch' as const, branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: SSE_SAME_VALUE },
+      { reducer, kind: 'swap-branch' as const, branch: '"set":[],"emit":[]', swappedWith: '"set":["scheduled"],"emit":[]', why: SSE_SAME_VALUE }
+    ]),
+    { reducer: 'eventTypes', why: 'Event Types reaches only the EventSource transport (conn :328-334), which no play has (world.ts SOCKET, last line)' },
+    { reducer: 'withCredentials', why: "With Credentials is a fetch init's `credentials` (conn :459), which the world's request record does not carry — the world's server is on no other origin" },
+    { reducer: 'connect', kind: 'drop-set', branch: '"set":["conn"],"emit":["onError","onClose"],"outcome":"failure"', why: SSE_DEAD },
+    ...([
+      ['"set":[],"emit":["onError","onClose"],"outcome":"failure"', '"set":["conn","connectionState"],"emit"'],
+      ['"set":[],"emit":["onError","onClose"],"outcome":"failure"', '"set":["conn"],"emit"'],
+      ['"set":["conn","connectionState"],"emit":["onError","onClose"],"outcome":"failure"', '"set":["conn"],"emit"'],
+      ['"set":["conn"],"emit":["onError","onClose"],"outcome":"failure"', '"set":[],"emit"'],
+      ['"set":["conn"],"emit":["onError","onClose"],"outcome":"failure"', '"set":["conn","connectionState"],"emit"']
+    ] as const).map(([branch, swappedWith]) => ({ reducer: 'connect', kind: 'swap-branch' as const, branch, swappedWith, why: SSE_DEAD }))
   ],
   // NSP-014 s23 — the frame end's two quiet branches: no job, and a bind of a node already bound to nothing. Each sibling's
   // example writes what the state already holds (`jobs: []` on an empty list; `bound: undefined` on an unbound node).

@@ -221,6 +221,12 @@ export interface WorldView {
    * the `picker` effect, to report what the throw makes it report. Reads; the effect consumes.
    */
   pickerAnswer(ahead?: number): import('./world').PickerAnswer;
+  /**
+   * NSP-014 s34 — what the next `new WebSocket(url, …)` would meet (world.ts SOCKET), without spending it: `{ throws }` when the
+   * constructor throws inside the call, a script or `never` otherwise; `undefined` when no rule answers (a violation — nothing
+   * happens on the socket). A node whose construction may throw reads this before it names the `connect`.
+   */
+  socketAnswer(url: unknown): import('./world').SocketAnswer | undefined;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -256,9 +262,28 @@ export type BackendAnswerEvent = { id: string } & ({ ok: unknown } | { error: st
 /** NSP-014 s33 — what a subscription this node opened told it (`subscribe` effect, world.ts REALTIME), delivered to `WorldHandlers.realtime` with the subscription's `id`. */
 export type RealtimeEvent = { id: string } & import('./world').RealtimeTold;
 
-/** The world's answer to a `SpecRequest`, delivered to `WorldHandlers.response`. */
+/**
+ * NSP-014 s34 — a call on a WebSocket this node holds (world.ts SOCKET), by the spec's own id for the socket: `connect` makes it
+ * (`new WebSocket(url, protocols)` — `protocols` left `undefined` is not handed), `send` / `close` are made on the socket the id
+ * names. The id is not on the wire.
+ */
+export type SpecSocketOp =
+  | { op: 'connect'; id: string; url: unknown; protocols?: unknown }
+  | { op: 'send'; id: string; data: unknown }
+  | { op: 'close'; id: string; code?: unknown; reason?: unknown };
+
+/** NSP-014 s34 — what a socket this node made told it (world.ts SOCKET), delivered to `WorldHandlers.socket` with the socket's `id`. */
+export type SocketEvent = { id: string } & import('./world').SocketTold;
+
+/** NSP-014 s34 — what a streamed body said after its head (world.ts NETWORK, A STREAMED BODY), delivered to `WorldHandlers.stream` with the request's `id`. */
+export type StreamEvent = { id: string } & import('./world').StreamDelivery;
+
+/**
+ * The world's answer to a `SpecRequest`, delivered to `WorldHandlers.response`. (s34) `stream: true`: the body streams — `body` is
+ * null here, and what it says arrives at `WorldHandlers.stream`.
+ */
 export type WorldResponse = { id: string } & (
-  | { status: number; statusText: string; headers: Record<string, string>; body: string | null }
+  | { status: number; statusText: string; headers: Record<string, string>; body: string | null; stream?: true }
   | { error: { name: string; message: string } }
   | { aborted: true }
 );
@@ -456,6 +481,9 @@ export interface Patch<S, O> {
    *   `subscribe` NSP-014 s33 — opens a subscription (`createRealtimeSubscription`, world.ts REALTIME): a `subscribe` `backend`
    *             event in the request group, as handed. What it tells arrives at `WorldHandlers.realtime` with the `id`, each at
    *             its moment on the clock (never inside the call: its status is `connecting` there).
+   *   `socket`  NSP-014 s34 — calls on WebSockets, in the order made (world.ts SOCKET): each a `socket` event in the request group,
+   *             as handed. What a socket the node made tells arrives at `WorldHandlers.socket` with its `id`, each at its moment
+   *             on the clock. A `connect` the world's script refuses by throwing is still recorded — read `socketAnswer` first.
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
@@ -472,6 +500,7 @@ export interface Patch<S, O> {
   picker?: import('./world').PickerClick;
   unsubscribe?: readonly string[];
   subscribe?: SpecBackendCall;
+  socket?: readonly SpecSocketOp[];
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -483,8 +512,10 @@ export interface OutcomePatch<S, O> extends Patch<S, O> {
    * NSP-014 s31 — invocations of THIS input still `pending`, settled here, oldest first, BEFORE this invocation is opened: a
    * press that supersedes an earlier one the world has not answered yet (Open File Picker — a second Open makes the first
    * `Unchanged` inside its own handler, openfilepicker.ts :66-70). Reported in this frame, ahead of this press's own outcome.
+   * (s34) An entry that names a `port` settles that outcome input's pending invocation instead: a WebSocket's Disconnect makes
+   * a Connect still shaking hands `Unchanged` before it reports its own (websocket.ts :375-386).
    */
-  settles?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
+  settles?: ReadonlyArray<{ port?: string; outcome: Outcome; error?: string }>;
 }
 
 /**
@@ -685,6 +716,18 @@ export interface WorldHandlers<S, I, O> {
    * moment on the clock, synchronously inside the `advance` that reaches it. Never after the node disposed it.
    */
   realtime?: (state: Readonly<S>, inputs: Inputs<I>, event: RealtimeEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-014 s34 — a WebSocket this node made fired an event (world.ts SOCKET): `open`, a text `message`, a `binary` one, an
+   * `error` or a `close`, at its moment on the clock, synchronously inside the `advance` that reaches it. Never after the node
+   * closed that socket, or after its `close`.
+   */
+  socket?: (state: Readonly<S>, inputs: Inputs<I>, event: SocketEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-014 s34 — a request's streamed body said something after its head (world.ts NETWORK, A STREAMED BODY): its text, its end,
+   * or its failure (an abort while it is read is one, `AbortError`) — landing as a read resolves, like a response. After an end or
+   * a failure nothing more.
+   */
+  stream?: (state: Readonly<S>, inputs: Inputs<I>, event: StreamEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -725,6 +768,8 @@ export interface WorldPool {
   backends?: ReadonlyArray<import('./world').BackendScript>;
   /** NSP-014 s31: the people at the file dialog a `picker` spec's sequences play with (one is drawn per sequence; the default never answers). */
   pickers?: ReadonlyArray<import('./world').PickerScript>;
+  /** NSP-014 s34: the WebSocket servers a `socket` spec's sequences play with (one is drawn per sequence; the default answers nothing — every construction a violation). */
+  sockets?: ReadonlyArray<import('./world').SocketScript>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -789,8 +834,9 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * navigate, or sits in a Router's page (world.ts ROUTE). s20 adds `popup` — the node shows a popup, or sits
  * inside one (world.ts POPUP). NSP-014 s21 makes `backend` real — the node hands a backend an operation (world.ts
  * BACKEND, R9). s31 adds `picker` — the node makes a file input and clicks it (world.ts PICKER): the play has a `document`.
+ * s34 adds `socket` — the node opens WebSockets (world.ts SOCKET): its sequences play with a server script from the pool.
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker' | 'socket';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
@@ -879,6 +925,8 @@ export interface AnyNodeSpec {
     mount?: (state: never, inputs: never, world: WorldView) => unknown;
     picker?: (state: never, inputs: never, event: import('./world').PickerEvent, world: WorldView) => unknown;
     realtime?: (state: never, inputs: never, event: RealtimeEvent, world: WorldView) => unknown;
+    socket?: (state: never, inputs: never, event: SocketEvent, world: WorldView) => unknown;
+    stream?: (state: never, inputs: never, event: StreamEvent, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

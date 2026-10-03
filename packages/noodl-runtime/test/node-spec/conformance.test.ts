@@ -218,6 +218,17 @@ const sortCannotCompare = (d: Divergence) => {
 const nullContains = (d: Divergence) => /Cannot read properties of null \(reading 'contains'\)/.test(d.difference.threw ?? '') && d.reference.slice(0, d.difference.index + 1).some((e) => isSet(e, 'items', (v, present) => present && v === null));
 
 /**
+ * NSP-014 §6.41 C57 — Server-Sent Events keeps a non-text Event Types / Method (`value || ''`, `value || 'GET'`) and Connect calls
+ * `.split` / `.toUpperCase` on it. Narrow: such a write is on the reference before the difference, and the runtime either threw
+ * that TypeError or (a throw inside the frame end, logged by the scheduler) never made the request.
+ */
+const sseNonText = (d: Divergence) => {
+  const bad = d.reference.findIndex((e) => e.t === 'set' && (e.port === 'eventTypes' || e.port === 'method') && 'value' in e && typeof (e as { value?: unknown }).value !== 'string' && !!(e as { value?: unknown }).value);
+  if (bad < 0 || d.difference.index <= bad) return false;
+  return d.difference.threw === undefined || /(split|toUpperCase) is not a function/.test(d.difference.threw);
+};
+
+/**
  * NSP-014 §6.35 C54 — Cloud Function's success reads `res.result` after checking only `res !== undefined`
  * (cloudfunction2.ts :292, :301): a 200 / 201 whose body is JSON `null` throws inside the XHR's `readystatechange` —
  * nothing is sent and the call's presses are never answered. The spec reads it as no result: Done. Narrow: the world
@@ -234,6 +245,8 @@ const nullSuccessBody = (d: Divergence) => {
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s32 — the one throw on the success path DEF-026 left (it made the error path total)
+  // s34 — Server-Sent Events: a setter keeps a non-text value (`value || ''`) that Connect calls a string method on
+  'net.noodl.SSE': [{ row: 'NSP-014 §6.41 C57 — Event Types or Method wired a value that is not text: Connect throws calling `.split` / `.toUpperCase` on it', matches: sseNonText }],
   CloudFunction2: [{ row: 'NSP-014 §6.35 C54 — a success whose body is JSON null throws reading `.result`: nothing sent, the presses never answered', matches: nullSuccessBody }],
   // s25 — Array Filter's twin: the same `bindCollection` (filterdbmodelsnode.ts :316-320), and a sort outside the `try`
   FilterDBModels: [
