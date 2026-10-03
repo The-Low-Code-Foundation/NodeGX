@@ -3,7 +3,7 @@
 **Scoped:** 2026-10-01, at HEAD `27d891bf3`, from [the island audit](AUDIT-2026-10-01.md). The audit read P105, P106 and
 P108 (Olive's Island, [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md)): their task files, 225 commits, 57
 session and lane transcripts, the generator, both kits, the desktop shell and the shipped template.
-**Status: 🟡 OPEN — session 7 (2026-10-03): 4 of 25 closed (ISL-001, ISL-002, ISL-011, ISL-014); ISL-009's two rulings built and driven, and s7's AC7: the island's plot card scrolls itself and the owl row has names; only the export half is open (P18's pile); ISL-007 AC1 read (288 of 334 texts switch, 0 braces); **s8: ISL-007 built (the i18next add-on 1.1.0), AC2/AC3/AC5 driven; Array Filter "Is one of" built (a "Native nodes first" gap); the island rebuild scoped as P108 IW-010;** DEF038 attributed (not ISL-018; the gate's control arm fixed); ISL-019 built (AC6, AC7 open); ISL-005 researched and ruled "Native nodes first"; ISL-022 built (AC6 open); ISL-018 built (one case open); ISL-025 W1–W3, W13, W21 removed (§8).** **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+**Status: 🟡 OPEN — s9 (2026-10-03): ISL-003 ruled "Each list keeps its rows" and built (Repeater + Static Data; doctrine; AC5 control driven, treatment owes the engine rebuild); ISL-007 AC7's catalog half ✅ (the add-on's nodes say what they do). Session 7 (2026-10-03): 4 of 25 closed (ISL-001, ISL-002, ISL-011, ISL-014); ISL-009's two rulings built and driven, and s7's AC7: the island's plot card scrolls itself and the owl row has names; only the export half is open (P18's pile); ISL-007 AC1 read (288 of 334 texts switch, 0 braces); **s8: ISL-007 built (the i18next add-on 1.1.0), AC2/AC3/AC5 driven; Array Filter "Is one of" built (a "Native nodes first" gap); the island rebuild scoped as P108 IW-010;** DEF038 attributed (not ISL-018; the gate's control arm fixed); ISL-019 built (AC6, AC7 open); ISL-005 researched and ruled "Native nodes first"; ISL-022 built (AC6 open); ISL-018 built (one case open); ISL-025 W1–W3, W13, W21 removed (§8).** **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
 > "Phase 108 has been a beast. I forgot to tell the model to record learnings about NodeGX during the push. I'm sure
 > there must be a tonne of stuff we can fix and improve in NodeGX and the way the MCP works. Can you do an audit and start
@@ -96,12 +96,12 @@ the work:
 | **Track A** | | | | |
 | [ISL-001](ISL-001-A-LIST-GIVEN-TWICE-DRAWS-ONE-SET-OF-ROWS.md) | A list given twice while it is building draws one set of rows — **✅ CLOSED s3: fix (s1); AC6 (s2, 14→9 on the page); AC5 (80/80; the minimal page's control blind — said so); AC7 (8 modes runs 90/90, no lost press)** | F01, F06, **D85** | runtime | §5 after AC2 |
 | [ISL-002](ISL-002-A-FALSE-FROM-A-STATES-NODE-REACHES-ITS-WIRE.md) | A `false` from a States node's first state reaches its wire (it leaves as `0`: `states.ts:633`, and the exporter too) — **✅ CLOSED s3: ruled and fixed (`06e65ab47`) in the runtime, the export and P107's spec; AC1–AC5 met (AC5 on a deployed page, `boolean:false` / `string:""` vs the control's `0`), AC6 written** | F02 | runtime, export | ✓ ruled |
-| [ISL-003](ISL-003-TWO-LISTS-WITH-THE-SAME-ROW-IDS-KEEP-THEIR-OWN-ROWS.md) | Two lists that reuse row ids keep their own rows | F03 | runtime | ✓ |
+| [ISL-003](ISL-003-TWO-LISTS-WITH-THE-SAME-ROW-IDS-KEEP-THEIR-OWN-ROWS.md) | Two lists that reuse row ids keep their own rows — **🟢 s9: ruled "Each list keeps its rows", built in the form that changes least (a list keeps its own records only for ids another live list holds; Repeater and Static Data opt in); AC1–AC4, AC6 ✅; AC5 control 3/3 (card 3's lines ×3), treatment owes the deploy bundle** | F03 | runtime | ✓ ruled |
 | [ISL-004](ISL-004-A-COMPONENT-KEEPS-ITS-OWN-STATE.md) | A page you come back to can be as you left it (instances already have their own store; leaving a page destroys it) | F04, F05 | runtime | ✓ |
 | **Track B** | | | | |
 | [ISL-005](ISL-005-TWO-FUNCTIONS-SHARE-ONE-PIECE-OF-CODE.md) | Two Functions share one piece of code — **🔬 s5: census done ([report](ISL-005-CENSUS-2026-10-02.md)): of 88 Functions, 26 could be native nodes, 33 fit a logic component, 29 are genuine script (15 need shared code mid-logic); re-ask with the numbers** | F08 | runtime | ✓ |
 | [ISL-006](ISL-006-A-FUNCTION-SAYS-WHAT-ITS-PORTS-ARE.md) | A Function says what its ports are | F09 | runtime | ✓ |
-| [ISL-007](ISL-007-AN-APP-SPEAKS-TWO-LANGUAGES-WITHOUT-A-SCRIPT.md) | An app speaks two languages without a script — **🟡 s8: BUILT — the add-on 1.1.0 rebuilt from its recovered sources: text as typed, missing words/variables named, `<html lang>` follows; AC2/AC3/AC5 ✅ (spec 5/5 vs 1/5 as imported; deployed drive 16/16, control 5/5); AC8 in P47. Open: "words for this page", AC4 (the island moves), AC6, AC7's catalog half** (s7: AC1 288 of 334, 0 braces) | F10 | node library | ✓ |
+| [ISL-007](ISL-007-AN-APP-SPEAKS-TWO-LANGUAGES-WITHOUT-A-SCRIPT.md) | An app speaks two languages without a script — **🟡 s8: BUILT — the add-on 1.1.0 rebuilt from its recovered sources: text as typed, missing words/variables named, `<html lang>` follows; AC2/AC3/AC5 ✅ (spec 5/5 vs 1/5 as imported; deployed drive 16/16, control 5/5); AC8 in P47. Open: AC4 (moved to IW-010), AC6 (read s9: the door already sets a column in one call; the opt-in warning is a question). s9: AC7's catalog half ✅** (s7: AC1 288 of 334, 0 braces) | F10 | node library | ✓ |
 | [ISL-008](ISL-008-A-STYLESHEET-CAN-PLACE-A-GROUP.md) | A stylesheet can place a Group | F11 | runtime styling | ✓ |
 | [ISL-009](ISL-009-A-NODE-CAN-BE-NAMED-FOR-A-TEST-AND-SCROLLED-TO.md) | A node can be named for a test and scrolled to — **🟢 s6: a `data-*` list on every visual node but Drag (each name an input, typed or wired; `onclick` refused by the door with the rule); the deployed drive selects every element by `[data-testid]` only, 4/4 at 1024 and 390 with its control. s5: Scroll Into View on all 27. s7: ✅ AC7 (the plot card scrolls itself; control at −999 px without the wire). ⬜ export only (P18 s101's pile in `component.ts`)** | F12 | node library | ✓ ruled (2 of 3) |
 | [ISL-010](ISL-010-A-RUNNING-APP-CAN-ASK-A-LOCAL-MODEL.md) | A running app can ask a local model | F13 | cloud nodes | ✓ |
@@ -222,6 +222,14 @@ feature has its own copy with the same bug. Should both be fixed in one commit?"
 - **ISL-011 AC6 / ISL-025 W13 — ✅ Ruled: "Remove the force."** Asked as *"…the kit forces 'display: grid' every time it
   draws. So if someone types 'display: flex' into that node's CSS Style box… it's undone on the next redraw… the force
   isn't needed for the grid any more. Remove it?"*
+
+**Session 9 (2026-10-03):**
+
+- **ISL-003 — ✅ Ruled: "Each list keeps its rows"** (the recommendation, after a census of 236 projects). Asked as
+  *"Olive's Island had five lesson cards, each with its own little list of lines numbered l0, l1, l2. All five cards
+  showed the same card's lines. … The exported React app does NOT do this … What should happen when two lists use the
+  same row ids?"* Options: each list keeps its rows / keep shared, warn / keep shared, document it. Built so a single
+  list behaves as before (ISL-003 §8 s9 says why), which drops the quoted cost (the Table prefab) to zero.
 
 **Session 4 (2026-10-02), round 1 of the Track B/D questions** — each checked first for an existing mechanism:
 

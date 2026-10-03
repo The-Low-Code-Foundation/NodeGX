@@ -1,57 +1,47 @@
-# Next session — P109 session 9
+# Next session — P109 session 10
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 8 (2026-10-03, on `cline-dev`, `a36d28e90` … `2c38d43a4`):** ISL-007 **built** (the i18next add-on 1.1.0);
-the island's rebuild scoped as [P108 IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md);
-Array Filter **"Is one of"** built (one of IW-010's three product gaps). **4 of 25 closed** (ISL-007 stays 🟡: AC4
-moved to IW-010, AC6 and AC7's catalog half open).
+**Session 9 (2026-10-03, on `cline-dev`, `f2df328a0` … ):** ISL-003 **ruled "Each list keeps its rows" and built**
+(Repeater + Static Data, doctrine, For Each page); ISL-007 AC7's catalog half ✅ (the add-on's three nodes say what they
+do to an agent; they were dead URLs). **4 of 25 closed** (ISL-003 closes on AC5's treatment).
 
 ## Read first
 
-1. ISL-007 §8 s8: the build route (sources recovered from the map, `build.mjs`, no install), what changed, the AC
-   table, and "Later in s8": why AC4 belongs to the island's rebuild (69 of 88 Functions make words themselves).
-2. [IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md): its dependency table is the gap list.
-3. Bugs filed or moved in s8: `P109-S8-I18NESCAPE` (fixed), `P78-TPL011-TRANSLATION` (fixed), `P109-S5-ARRAYFILTERIN`
-   (fixed, in-list half), `P109-S8-ARRAYFILTERPATH` (needs a ruling).
+1. ISL-003 §8 s9: the census table (what "each list keeps its rows" would break: one prefab Function), the ruling with
+   its question, **why it is built in the form that changes least** (a list keeps its own records only for ids another
+   LIVE list holds; a single list is unchanged, so lookups by id still work), the Static Data catch (it converts its
+   rows itself, and re-parses into a fresh collection: the list is the NODE), and the AC5 state.
+2. ISL-007 §8 s9: the door readings (`get_node_type` summaries, `list_node_types` queries) and AC6 read.
+3. Bug filed: `P109-S9-CMP001RATE` (the doctrine's 33% corpus rate reads 39%; stale 25+ catalog commits; P85's gate).
 
 ## Do, in this order
 
-1. **ISL-003, the last product gap IW-010 waits on** (rows shared app-wide by id). Its §5 has 🔒 rulings: check the
-   existing mechanism first (how For Each / Model ids scope today), then ask in plain words with a "what X is" sentence.
-2. **ISL-007 AC6, the door:** an agent lists a project's strings and sets a French column in one call each. Check
-   what the door already offers for a module's nodes (`get_node_type` on `Translation`, the kit overlay) before
-   designing a tool. Also AC7's catalog half: what `get_node_type('Translation')` says about `{{x}}`, escaping, and the
-   missing-word warnings.
-3. **ISL-009's export half**, only when `nodegx-export/src/emit/component.ts` is committed by P18 (still that pile on
-   10-03, mtime Sep 26).
-4. **ISL-019's remainder:** AC6 (needs `noodl-mcp` dist rebuilt), AC7 (decide the trailing-newline byte first).
-5. **Round 3 questions**, each mechanism checked first: ISL-016, ISL-017, ISL-021, ISL-008, ISL-010, ISL-018's open
-   case (the DBT demo at format 4), and now `P109-S8-ARRAYFILTERPATH`. Then the ISL-022 follow-ups and the s4 bugs.
+1. **ISL-003 AC5 treatment, if s9 did not finish it** (check §8 first): rebuild the deploy bundle from HEAD
+   (`noodl.deploy.js` via `webpack.deploy.dev.js`; check `keepPlainRowsApart` is in it), `nodegx deploy
+   isl003-three-cards <out> --allow-development-engine`, `drive-isl003-three-cards.js <out>` → each card its own lines.
+   Then close ISL-003 (README row + status).
+2. **ISL-007 AC6's open question** (ask in plain words, mechanism first): should the validator warn about a typed word
+   on a page in a project that carries the translation add-on? What counts as opted in, and which ports count (s7 read
+   46 of 334 island texts that did not switch, unclassified — classify them before asking).
+3. **ISL-009's export half**, only when `nodegx-export/src/emit/component.ts` is committed by P18 (still a pile on 10-03).
+4. **ISL-019's remainder:** AC6 (needs `noodl-mcp` dist rebuilt — in a worktree: `src/cloud/bundleEntry.js` has a
+   peer's uncommitted edit), AC7 (the trailing-newline byte first).
+5. **Round 3 questions**, mechanism first: ISL-016, ISL-017, ISL-021, ISL-008, ISL-010, ISL-018's open case,
+   `P109-S8-ARRAYFILTERPATH`. Then the ISL-022 follow-ups and the s4 bugs.
 
 ## Decisions for Richard (not yours)
 
-- `P109-S8-ARRAYFILTERPATH`: should `owner.id` in Array Filter's list mean "the id inside owner"? (A key literally
-  named `owner.id` would read differently.)
-- ISL-018's open case; Round 3 above. Pushing `cline-dev` is Richard's call.
+- `P109-S8-ARRAYFILTERPATH`; ISL-018's open case; Round 3 above; ISL-007 AC6's warning. Pushing `cline-dev` is his call.
 
-## Readings taken in session 8 (2026-10-03)
+## Facts measured in session 9 that are not in a task file
 
-- Runtime spec [`isl-007-i18next-module.test.js`](../../../packages/noodl-runtime/test/isl-007-i18next-module.test.js)
-  (the BUILT `index.js` through `registerModule`): 5/5; the module as imported 1/5; the verbatim source rebuilt reads the
-  same 1/5 (parity).
-- Deployed new project `isl007-two-languages/` (`nodegx deploy` exit 0): `drive-isl007-two-languages.js` **16/16**,
-  `--control` on the imported module **5/5** (`Hello Tom &amp; &lt;Jerry&gt;`, `<html lang>` stuck at `en`).
-- `tpl011Template.test.ts` 35/35; `library:check` i18next OK (the one FAIL is the peer's untracked `nightbook-kit`).
-- Array Filter: [`isl-005-array-filter-in-list.test.ts`](../../../packages/noodl-runtime/test/isl-005-array-filter-in-list.test.ts)
-  7/7, mutant 6 red + control green; existing suites 8/8 (runtime) and 58/58 (viewer corpus).
-
-## Facts measured in session 8 that are not in a task file
-
-- **A stub `editorConnection` needs `isConnected()`:** the runtime calls it on every signal; without it the throw
-  lands inside i18next's event emitter and silently stops every later listener (the language changed, no node told).
-- **The node docs generator has no `--only`**, and 27 pages under `docs-site/docs/nodes` were already stale on
-  10-03. To change one page: regenerate, then put the others back with `git show HEAD:<path> > <path>` (they were clean).
-- `library/modules/*/project/noodl_modules/*/index.js.map` often carries `sourcesContent`: a module imported as a
-  bundle can be rebuilt from its own sources with no install (`library/modules/i18next-translation/build.mjs` is the shape).
-- The root `package-lock.json` diff on 10-03 is the REVERSE of `a9c10ff8c` plus an editor version (mtime Sep 24): a
-  stale working-tree copy, not a fresh edit. Still not ours to touch.
+- **`noodl-viewer-react` type-checks against `noodl-runtime/dist-types`, not the source** (its tsconfig `paths`). A new
+  member on a runtime module reads `TS2339` in a viewer spec until `npm run build:types` in `packages/noodl-runtime`.
+- **A row component in a corpus graph needs `ports: [{ name, plug: 'input' }]` on the COMPONENT**, as well as on its
+  Component Inputs node, or the instance has no inputs and every row reads `undefined`.
+- **A kit node's `docs` is the agent's summary** (`noodl-mcp/src/catalog.ts` `summaryOf`); an old module carrying a URL
+  there tells an agent nothing. `list_node_types`' `query` is a substring match: "translate" did not find "Translation".
+- **AWP-005's storefront basket (`nodeDocBudget.test.ts`) had 4 tokens free**: one more For Each anti-pattern line
+  broke it. Count before adding enrichment to For Each, Group, Text and the other basket types.
+- `search_project` returns locations only (no parameter values).
+- The node docs generator still rewrites 27 stale pages; put them back from HEAD after `docs:nodes` (as s8).
