@@ -590,26 +590,24 @@ Outputs.stale = !!(card && card.stale);
 /**
  * `Logic/Find robots` — the flat island's "find my robots": every robot on the island scrolled into view in the
  * island's own scroll box (a phone shows part of it) and ringed for a moment. The 3D island frames them itself (its
- * Focus). With `what` = `card` (a parameter), the plot card is scrolled into view instead (a request card tapped far
- * down a phone's list opens the plot card above it). Page glue: the ONE script here that touches the page, and only
- * the island's own elements.
+ * Focus). Page glue: the ONE script here that touches the page, and only the island's own elements.
+ *
+ * P109 ISL-009 AC7: the plot card no longer comes here — the card scrolls itself, on its own `Scroll Into View`
+ * (`iwFound` → `iwCard`). 🔴 This branch STAYS, and why: the robots are drawn inside the garden kit's node, and a
+ * kit's own elements are out of a node action's reach (ISL-009 §5: "say so, do not fake it"); the ring's restart
+ * (`void box.offsetWidth`) is ISL-009 ruling 3's named need, not a scroll.
  */
 export const FIND_ROBOTS_SCRIPT = `
 var found = 0;
 if (typeof document !== 'undefined') {
-  if (String(Inputs.what) === 'card') {
-    var card = document.querySelector('.bg-plot-card');
-    if (card && card.scrollIntoView) { card.scrollIntoView({ block: 'nearest' }); found = 1; }
-  } else {
-    var box = document.querySelector('.bg-isle-scroll');
-    var bots = box ? box.querySelectorAll('.gd-bot') : [];
-    found = bots.length;
-    if (bots.length && bots[0].scrollIntoView) bots[0].scrollIntoView({ block: 'nearest', inline: 'center' });
-    if (box) {
-      box.classList.remove('bg-isle-found');
-      void box.offsetWidth;
-      box.classList.add('bg-isle-found');
-    }
+  var box = document.querySelector('.bg-isle-scroll');
+  var bots = box ? box.querySelectorAll('.gd-bot') : [];
+  found = bots.length;
+  if (bots.length && bots[0].scrollIntoView) bots[0].scrollIntoView({ block: 'nearest', inline: 'center' });
+  if (box) {
+    box.classList.remove('bg-isle-found');
+    void box.offsetWidth;
+    box.classList.add('bg-isle-found');
   }
 }
 Outputs.found = found;

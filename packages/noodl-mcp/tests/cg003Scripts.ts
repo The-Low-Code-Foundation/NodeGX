@@ -1549,7 +1549,7 @@ export const GLUE_SCRIPTS: ReadonlyArray<{ component: string; script: string; se
   { component: 'Logic/Island tick', script: ISLAND_TICK_SCRIPT, seam: 'one tick of the island: every pinned run stepped in turn on its own plot' },
   { component: 'Logic/Plot at', script: PLOT_AT_SCRIPT, seam: 'which plot a tapped tile is on' },
   { component: 'Logic/Island choose', script: ISLAND_CHOOSE_SCRIPT, seam: 'the plot card: who asks, what, whether it opens, and bring the robot home' },
-  { component: 'Logic/Find robots', script: FIND_ROBOTS_SCRIPT, seam: 'the flat island\u2019s find my robots, and the plot card scrolled into view' },
+  { component: 'Logic/Find robots', script: FIND_ROBOTS_SCRIPT, seam: 'the flat island\u2019s find my robots' },
   // P106 IG-005 (lane B): robots for the job.
   { component: 'Logic/Job robot', script: JOB_ROBOT_SCRIPT, seam: 'the robot this request needs, hers of that kind, its look, its step time' },
   { component: 'Logic/Gift line', script: GIFT_LINE_SCRIPT, seam: 'the win card\u2019s line for the robot lent and the upgrade given' },

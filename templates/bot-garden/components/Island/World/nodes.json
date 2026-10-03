@@ -674,14 +674,14 @@
       "type": "/Logic/Crew chips",
       "label": "The crew for this job",
       "x": 590,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "iwAssign",
       "type": "/Logic/Assign robot",
       "label": "A robot sent here, or home",
       "x": 590,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "iwAssignOk",
@@ -716,7 +716,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 4120
+      "y": 2080
     },
     {
       "id": "iwWorld",
@@ -730,7 +730,7 @@
       "type": "/Logic/Island tick",
       "label": "One tick of the island",
       "x": 590,
-      "y": 4240
+      "y": 4120
     },
     {
       "id": "iwVar",
@@ -740,7 +740,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 4360
+      "y": 4240
     },
     {
       "id": "iwSetBuilt",
@@ -750,7 +750,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 4480
+      "y": 4360
     },
     {
       "id": "iwSetTick",
@@ -760,7 +760,7 @@
         "name": "gardenIsland"
       },
       "x": 590,
-      "y": 4600
+      "y": 4480
     },
     {
       "id": "iwBeat",
@@ -770,7 +770,7 @@
         "interval": 760
       },
       "x": 590,
-      "y": 4720
+      "y": 4600
     },
     {
       "id": "iwDraw",
@@ -794,7 +794,7 @@
       "type": "/Logic/Island choose",
       "label": "The plot card",
       "x": 590,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "iwHome",
@@ -811,35 +811,12 @@
         "duration": 400
       },
       "x": 590,
-      "y": 4840
-    },
-    {
-      "id": "iwRevealWait",
-      "type": "Timer",
-      "label": "A moment for the card to be drawn",
-      "parameters": {
-        "duration": 80
-      },
-      "x": 590,
-      "y": 4960
-    },
-    {
-      "id": "iwReveal",
-      "type": "/Logic/Find robots",
-      "label": "The card scrolled into view",
-      "parameters": {
-        "what": "card"
-      },
-      "x": 590,
-      "y": 5080
+      "y": 4720
     },
     {
       "id": "iwFindFn",
       "type": "/Logic/Find robots",
       "label": "The robots found on the flat island",
-      "parameters": {
-        "what": "robots"
-      },
       "x": 590,
       "y": 1480
     },
@@ -898,21 +875,21 @@
         "keys": "renderer"
       },
       "x": 590,
-      "y": 5200
+      "y": 4840
     },
     {
       "id": "iwRendRead",
       "type": "/Logic/Renderer",
       "label": "Draw in 3D here?",
       "x": 590,
-      "y": 5320
+      "y": 4960
     },
     {
       "id": "iwRendIs3d",
       "type": "Condition",
       "label": "In 3D?",
       "x": 590,
-      "y": 5440
+      "y": 5080
     },
     {
       "id": "iwRendOk",
@@ -929,7 +906,7 @@
         "event": "unsupported"
       },
       "x": 590,
-      "y": 5560
+      "y": 5200
     },
     {
       "id": "iwRendSlow",
@@ -951,7 +928,7 @@
         "merge": false
       },
       "x": 590,
-      "y": 5680
+      "y": 5320
     },
     {
       "id": "iwKeep",
@@ -968,7 +945,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 5800
+      "y": 5440
     },
     {
       "id": "iwPay",
@@ -1013,7 +990,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 5920
+      "y": 5560
     },
     {
       "id": "iwPayWait",
@@ -1023,7 +1000,7 @@
         "duration": 4000
       },
       "x": 590,
-      "y": 6040
+      "y": 5680
     },
     {
       "id": "iwLand",
@@ -1267,7 +1244,7 @@
         "name": "gardenGhost"
       },
       "x": 590,
-      "y": 6160
+      "y": 5800
     },
     {
       "id": "iwSetGhost",
@@ -1277,7 +1254,7 @@
         "name": "gardenGhost"
       },
       "x": 590,
-      "y": 6280
+      "y": 5920
     },
     {
       "id": "iwGhostStart",
@@ -1327,14 +1304,14 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 6400
+      "y": 6040
     },
     {
       "id": "iwWithGhost",
       "type": "/Logic/With ghost",
       "label": "The island with the ghost on it",
       "x": 590,
-      "y": 6520
+      "y": 6160
     },
     {
       "id": "iwLandBotVar",
@@ -1344,7 +1321,7 @@
         "name": "gardenLandBot"
       },
       "x": 590,
-      "y": 6640
+      "y": 6280
     },
     {
       "id": "iwSetLandBot",
@@ -1354,7 +1331,7 @@
         "name": "gardenLandBot"
       },
       "x": 590,
-      "y": 6760
+      "y": 6400
     },
     {
       "id": "iwChoseIs",
@@ -1364,7 +1341,7 @@
         "runOnChange-condition": false
       },
       "x": 590,
-      "y": 6880
+      "y": 6520
     },
     {
       "id": "iwOut",

@@ -992,7 +992,9 @@
         "paddingBottom": "var(--space-3)",
         "paddingLeft": "var(--space-3)",
         "paddingRight": "var(--space-3)",
-        "cssClassName": "bg-owl"
+        "cssClassName": "bg-owl",
+        "dataAttributes": "data-testid",
+        "data-testid": "owl-row"
       },
       "x": 220,
       "y": 3640
@@ -1109,7 +1111,9 @@
         },
         "color": "var(--ink)",
         "fontWeight": "700",
-        "cssClassName": "bg-owl-say"
+        "cssClassName": "bg-owl-say",
+        "dataAttributes": "data-testid",
+        "data-testid": "owl-say"
       },
       "x": 340,
       "y": 4000

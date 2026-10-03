@@ -527,7 +527,7 @@
       "path": "Logic/Find robots",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 4,
+      "connectionCount": 3,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -846,8 +846,8 @@
     "Island/World": {
       "path": "Island/World",
       "type": "visual",
-      "nodeCount": 82,
-      "connectionCount": 199,
+      "nodeCount": 80,
+      "connectionCount": 198,
       "modified": "2026-09-27T00:00:00.000Z",
       "created": "2026-09-27T00:00:00.000Z"
     },
@@ -1062,7 +1062,7 @@
   },
   "stats": {
     "totalComponents": 132,
-    "totalNodes": 1100,
-    "totalConnections": 3534
+    "totalNodes": 1098,
+    "totalConnections": 3532
   }
 }

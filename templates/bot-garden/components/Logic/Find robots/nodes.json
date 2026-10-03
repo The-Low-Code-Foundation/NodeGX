@@ -12,11 +12,6 @@
           "name": "go",
           "plug": "output",
           "type": "signal"
-        },
-        {
-          "name": "what",
-          "plug": "output",
-          "type": "string"
         }
       ],
       "x": 40,
@@ -27,19 +22,11 @@
       "type": "JavaScriptFunction",
       "label": "Find robots",
       "parameters": {
-        "functionScript": "\nvar found = 0;\nif (typeof document !== 'undefined') {\n  if (String(Inputs.what) === 'card') {\n    var card = document.querySelector('.bg-plot-card');\n    if (card && card.scrollIntoView) { card.scrollIntoView({ block: 'nearest' }); found = 1; }\n  } else {\n    var box = document.querySelector('.bg-isle-scroll');\n    var bots = box ? box.querySelectorAll('.gd-bot') : [];\n    found = bots.length;\n    if (bots.length && bots[0].scrollIntoView) bots[0].scrollIntoView({ block: 'nearest', inline: 'center' });\n    if (box) {\n      box.classList.remove('bg-isle-found');\n      void box.offsetWidth;\n      box.classList.add('bg-isle-found');\n    }\n  }\n}\nOutputs.found = found;\n",
-        "runOnChange-in-what": false
+        "functionScript": "\nvar found = 0;\nif (typeof document !== 'undefined') {\n  var box = document.querySelector('.bg-isle-scroll');\n  var bots = box ? box.querySelectorAll('.gd-bot') : [];\n  found = bots.length;\n  if (bots.length && bots[0].scrollIntoView) bots[0].scrollIntoView({ block: 'nearest', inline: 'center' });\n  if (box) {\n    box.classList.remove('bg-isle-found');\n    void box.offsetWidth;\n    box.classList.add('bg-isle-found');\n  }\n}\nOutputs.found = found;\n"
       },
       "x": 40,
       "y": 160,
       "ports": [
-        {
-          "name": "in-what",
-          "displayName": "what",
-          "plug": "input",
-          "type": "*",
-          "group": "Inputs"
-        },
         {
           "name": "out-found",
           "displayName": "found",

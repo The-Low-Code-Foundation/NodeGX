@@ -1,6 +1,6 @@
 # ISL-009 — A node can be named for a test and scrolled to
 
-**Status:** 🟢 s6 (2026-10-03): **both rulings built.** ruling 1 ("A data-* list"): a `Data Attributes` list on every visual node but Drag, each listed `data-*` name an input of that name, typed or wired, in the markup; the door refuses a name outside `data-*` with the rule; the deployed drive now finds every element by `[data-testid]` only, 4/4 at 1024 and 390 with its control (§8 s6). ruling 2 (s5): `Scroll Into View` on all 27. ⬜ The export half (a week-old peer pile in `component.ts`), ⬜ AC7 (the island uses it). `kitAgreement` re-recorded (s6). Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟢 s6 (2026-10-03): **both rulings built.** ruling 1 ("A data-* list"): a `Data Attributes` list on every visual node but Drag, each listed `data-*` name an input of that name, typed or wired, in the markup; the door refuses a name outside `data-*` with the rule; the deployed drive now finds every element by `[data-testid]` only, 4/4 at 1024 and 390 with its control (§8 s6). ruling 2 (s5): `Scroll Into View` on all 27. ⬜ The export half (P18 s101's §76 pile in `component.ts`, still uncommitted on 2026-10-03), ✅ AC7 (s7: the island uses it). `kitAgreement` re-recorded (s6). Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F12](AUDIT-2026-10-01.md) · [P105 CG-003 line 114](../phase-105-the-coding-garden/CG-003-THE-PAGES.md) ("there is no `[data-owl-row]` attribute — a node cannot write one") · [CG-005 §8 hook 2](../phase-105-the-coding-garden/CG-005-OLIVE-IN-THE-GAME.md) line 166 · the island's `Logic/Find robots` page glue
 **Side:** product (shared visual-node ports in `noodl-viewer-react`, the export, the door's vocabulary)
 
@@ -135,7 +135,7 @@ Ruling 3 (restarting a CSS animation) stays out, as recommended.
 | AC4 | ✅ Native Group: seen false → true, the box's `scrollTop` 0 → 920. **iScroll Group: seen false → true through iScroll** — the scroller's transform `matrix3d(…, 0, -920, …)`, the box's own `scrollTop` stays 0, so it was not `element.scrollIntoView`. |
 | AC5 | Held until mount: specced (two presses before the element → one scroll when it arrives, with `innerReactComponentRef` left unset). The `data-*` refusal waits on ruling 1. |
 | AC6 | Catalog, enriched catalog (Group and Page enrichment lines), port groups, CHR-007 snapshot (+54 rows, exactly the two ports on 27 types: signal → no row class, enum → `EnumType`), FB-017's panel tier (`Scroll Into View` filed as plumbing beside `Scroll To Element`; Group 21 → 22 headings, basic unmoved at 10). ⬜ **Export:** not done — a peer has `nodegx-export` open (`plan.ts`, `component.ts`, `coverage-ledger.json` uncommitted). `hls001-catalog-cardinality` green. |
-| AC7 | ⬜ Not started (the island's `FIND_ROBOTS_SCRIPT` card branch). |
+| AC7 | ✅ s7 — see §8 s7: the plot card scrolls itself (`iwFound.ontrue → iwCard.scrollIntoView`; the 80 ms Timer and `FIND_ROBOTS_SCRIPT`'s card branch gone), driven with a control; the owl row is `data-testid` `owl-row`/`owl-say` and the CG-005 drive reads it. |
 
 **Specs:** [`tests/isl-009/`](../../../packages/noodl-viewer-react/tests/isl-009/) 5/5 — mutants: pending run removed from
 `setDOMElement` → red; the `document` guard removed → red; both restored from a `cp`.
@@ -253,3 +253,45 @@ the element sync off → 1; the sync removing names it did not set → 1. `noodl
 **Editor gates (2026-10-03):** `test:main` **568 suites, 8,835 tests, 1 failed**: `exp-013/exportBadge`, red in s5
 too, reads the peer's uncommitted export ledger. Run before the editor-session fixes; the suites those touched were
 re-run after (CN-006b, CN-008, CN-014, SB-017, cn-003: 68 + 22 green; isl-009 7/7).
+
+### Session 7 — 2026-10-03: AC7, the island uses it
+
+**What changed** (generator in `packages/noodl-mcp/tests/`, the artefact regenerated with `npm run template:garden`, exit 0,
+7 files in `templates/bot-garden`, nothing else drifted):
+
+- **The plot card scrolls itself.** `iwFound.ontrue → iwCard.scrollIntoView` (align left at its default, Nearest edge).
+  Gone: the `iwRevealWait` Timer (80 ms, "a moment for the card to be drawn": the held-until-mount makes it unneeded)
+  and `iwReveal` (`Logic/Find robots` with `what: 'card'`). Island/World: 82 → 80 nodes, 199 → 198 connections.
+- **`FIND_ROBOTS_SCRIPT` keeps its robots branch, with the reason beside it:** the robots are drawn inside the garden
+  kit's node and a kit's own elements are out of a node action's reach (§5); the ring's restart (`void box.offsetWidth`)
+  is ruling 3's named need. `what` is gone from the script, so it is gone from the component's ports. ISL-025's W11
+  therefore stays `present` (it matches the robots branch), and correctly.
+- **The owl row has names:** `plOwl` `data-testid="owl-row"`, `plOwlSay` `data-testid="owl-say"` (a `testId()` helper
+  in `cg003Components.ts`); the classes stay for the look. `drive-cg005-olive.js` reads the names (`OWL`, `SAY`, and the
+  P-390 fit box).
+
+**Selector count, garden drives (`scripts/devtools/drive-*.js` reading the owl row):** `drive-cg005-olive.js` moved
+from 2 class selectors to 2 names (`OWL`/`SAY` read on 9 lines, the P-390 fit box among them; its contrast list keeps
+`.bg-owl-say`, a look check). Still on the classes (uses, `grep -o`): `drive-cg003-pages.js` 8, `drive-ig003-modes.js` 4,
+`drive-iw-look.js` 3, `drive-iw001-workshop.js` 2 (AC7 asked for the CG-005 hook; these can follow without a product
+change). Card: `drive-ig004-island.js` and `drive-ig005-robots.js` read `.bg-plot-card` (the look's class), unchanged.
+
+**Spec** (`cg003Template.test.ts`): hook 2 now pins both names; a new row "the plot card scrolls itself into view, and no
+script reaches into the page for it" (one wire into `iwCard.scrollIntoView`, from `iwFound.ontrue`; no `iwRevealWait` /
+`iwReveal`; `iwFindFn` with no parameters; no script queries `.bg-plot-card`, beside the known-firing `.bg-isle-scroll`).
+Mutants, each from a `cp`: the wire removed → red; `querySelector('.bg-plot-card')` put back in the script → red.
+Garden specs: 17 suites, **768/768**.
+
+**Drive** (one `nodegx deploy` of an assembled copy, exit 0; the deploy's engine carries `scrollIntoViewAlign` and
+`dataAttributes`): `drive-ig004-island.js` gained a clause. The **last request** in the list (Mamie Rose; Pip's garden
+is free play and goes straight to the Workshop) is tapped where it sits, and the plot card must be on the screen.
+- A first version tapped ANOTHER's request (AC3's step) and read 4/4 PASS with **the page scroll 429 → 429**: the card
+  was already on the screen. That grades nothing; the clause was moved to the case the scroll exists for.
+- **Main: 70/70.** 390 EN: page scroll 1537 → 776, card top 0; 390 FR 1631 → 777, top −1 (sub-pixel; the clause takes
+  ≥ −1); 1368 EN 873 → 592, FR 980 → 615, top 0.
+- **Control** (the same deploy rebuilt from a copy with only that wire removed): **66/70, the 4 AC7 clauses red**: the
+  page does not move (390 EN 1537 → 1775), and the card sits at top −999 (390 EN), −1139 (390 FR), −281 / −365 (1368).
+- `drive-cg005-olive.js pages`: **19 pass / 3 fail**, and its pre-edit copy (class selectors) reads the same 19/3 on
+  the same deploy. The names are read positively ("the owl says she is thinking", "Play and the owl on screen at
+  390"). The 3 reds are the drive walking the layout from before P108 R7's can: filed `P109-S7-OLIVEDRIVE` (P108's).
+- P108's s8 handoff lists the island drive as "not re-driven since the tab renumbering": it reads **70/70** here.

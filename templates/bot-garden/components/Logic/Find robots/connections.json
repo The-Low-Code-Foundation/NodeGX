@@ -5,12 +5,6 @@
   "connections": [
     {
       "fromId": "findrobotsIn",
-      "fromProperty": "what",
-      "toId": "findrobotsFn",
-      "toProperty": "in-what"
-    },
-    {
-      "fromId": "findrobotsIn",
       "fromProperty": "go",
       "toId": "findrobotsFn",
       "toProperty": "run"

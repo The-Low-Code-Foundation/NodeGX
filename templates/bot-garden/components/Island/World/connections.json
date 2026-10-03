@@ -348,14 +348,8 @@
     {
       "fromId": "iwFound",
       "fromProperty": "ontrue",
-      "toId": "iwRevealWait",
-      "toProperty": "start"
-    },
-    {
-      "fromId": "iwRevealWait",
-      "fromProperty": "timerFinished",
-      "toId": "iwReveal",
-      "toProperty": "go"
+      "toId": "iwCard",
+      "toProperty": "scrollIntoView"
     },
     {
       "fromId": "iwCardState",

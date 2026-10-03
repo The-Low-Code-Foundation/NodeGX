@@ -148,6 +148,13 @@ type N = Record<string, unknown>;
 function text(id: string, label: string, parent: string, value: string, params: N = {}): N {
   return { id, type: 'Text', label, parent, parameters: { text: value, sizeMode: 'contentHeight', ...params } };
 }
+/**
+ * P109 ISL-009: a name a drive finds this element by, written as `data-testid` (the node's Data Attributes list).
+ * The class stays for the look; a drive that reads the name no longer depends on a class the look may rename.
+ */
+function testId(name: string): N {
+  return { dataAttributes: 'data-testid', 'data-testid': name };
+}
 function group(id: string, label: string, parent: string | undefined, params: N, children?: string[]): N {
   const node: N = { id, type: 'Group', label, parameters: params };
   if (parent) node.parent = parent;
@@ -982,7 +989,7 @@ const PLAY: CgComponent = {
     place('plStopRun', BUTTON_NODE, 'Stop', 'plControls', { ...btn('stop', 'stop'), label: 'Stop', mounted: false }),
     place('plStep', BUTTON_NODE, 'One step', 'plControls', { ...btn('plain', 'step'), label: 'One step' }),
     place('plReset', BUTTON_NODE, 'Start over', 'plControls', { ...btn('plain', 'reset'), label: 'Start over' }),
-    group('plOwl', 'The owl', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-owl' }, ['plOwlPic', 'plOwlCol']),
+    group('plOwl', 'The owl', 'plLeft', { width: pct(100), sizeMode: 'contentHeight', backgroundColor: 'var(--violet-2)', borderRadius: px(16), ...pad(12), cssClassName: 'bg-owl', ...testId('owl-row') }, ['plOwlPic', 'plOwlCol']),
     // P108 IW-003 (lane M): the job card (IW-000's graded look) — how much is done, then source · carrier · target ·
     // finish line · wear, one labelled line each (a row per line, Job card's rows); only on a request with a card.
     group('plJob', 'The job, in five lines', 'plLeft', { ...column({ rowGap: sp(6) }), cssClassName: 'bg-job', mounted: false }, ['plJobSum', 'plJobEach']),
@@ -990,7 +997,7 @@ const PLAY: CgComponent = {
     { ...logic('plJobEach', FOR_EACH_NODE, 'One line per part of the job', { template: C.jobLine, templateType: 'explicit' }), parent: 'plJob' },
     group('plOwlPic', 'Olive', 'plOwl', { sizeMode: 'explicit', width: px(64), height: px(64), cssClassName: 'bg-owl-pic bg-sp-owl' }),
     group('plOwlCol', 'What she says', 'plOwl', column({ rowGap: sp(4) }), ['plOwlSay', 'plOwlThinking', 'plOwlResting', 'plProposal', 'plOwlMeta']),
-    text('plOwlSay', 'The hint', 'plOwlCol', '', { ...T_BODY, fontWeight: '700', cssClassName: 'bg-owl-say' }),
+    text('plOwlSay', 'The hint', 'plOwlCol', '', { ...T_BODY, fontWeight: '700', cssClassName: 'bg-owl-say', ...testId('owl-say') }),
     // CG-005 s3: the owl's two small tags — thinking (dots, no clock) while a question is out; resting after a fallback.
     text('plOwlThinking', 'Olive is thinking', 'plOwlCol', '', { fontSize: px(13), fontWeight: '800', color: 'var(--violet-ink)', cssClassName: 'bg-owl-tag bg-owl-thinking', mounted: false }),
     text('plOwlResting', 'Olive is resting', 'plOwlCol', '', { fontSize: px(13), fontWeight: '800', color: 'var(--violet-ink)', cssClassName: 'bg-owl-tag bg-owl-resting', mounted: false }),
@@ -1763,9 +1770,7 @@ const ISLE_WORLD: CgComponent = {
     logic('iwChoose', L('Island choose'), 'The plot card'),
     logic('iwHome', L('Bring home'), 'Bring the robot home'),
     logic('iwAgain', TIMER_NODE, 'A moment for the family to be read again', { duration: 400 }),
-    logic('iwRevealWait', TIMER_NODE, 'A moment for the card to be drawn', { duration: 80 }),
-    logic('iwReveal', L('Find robots'), 'The card scrolled into view', { what: 'card' }),
-    logic('iwFindFn', L('Find robots'), 'The robots found on the flat island', { what: 'robots' }),
+    logic('iwFindFn', L('Find robots'), 'The robots found on the flat island'),
     withStates('iwView', 'The whole island, or framed on the robots', ['island', 'robots'], {
       camera: { type: 'string', by: { island: 'island', robots: 'plot' } },
       onRobots: { type: 'boolean', by: { island: false, robots: true } }
@@ -1854,8 +1859,9 @@ const ISLE_WORLD: CgComponent = {
     wire('iwChoose', 'ran', 'iwFound', 'eval'),
     wire('iwFound', 'ontrue', 'iwCardState', 'to-shown'),
     wire('iwFound', 'onfalse', 'iwCardState', 'to-hidden'),
-    wire('iwFound', 'ontrue', 'iwRevealWait', 'start'),
-    wire('iwRevealWait', 'timerFinished', 'iwReveal', 'go'),
+    // P109 ISL-009 AC7: the card scrolls itself into view (a request tapped far down a phone's list opens the card
+    // above it). Held until the card is drawn, so the 80 ms Timer and the Function that reached into the page are gone.
+    wire('iwFound', 'ontrue', 'iwCard', 'scrollIntoView'),
     wire('iwCardState', 'shown', 'iwCard', 'mounted'),
     wire('iwChoose', 'faceClass', 'iwCardFace', 'cssClassName'),
     wire('iwChoose', 'who', 'iwCardWho', 'text'),

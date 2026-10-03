@@ -25,7 +25,8 @@
  * Skills through the route (the stub's readout answers); every first palette tap opens its card (Got it, then place).
  * Part P (session 3, lane HOOKS: the pages now carry CG-005's hooks) makes a band 10–12 player through the Profiles
  * form, then enters FREE PLAY from the island for each clause (free play offers every rung the exam passed; a reload of
- * /workshop has no request and goes to the island, CG-003 AC8). The owl's line is `.bg-owl-say`, the row `.bg-owl`.
+ * /workshop has no request and goes to the island, CG-003 AC8). The owl's line is `[data-testid="owl-say"]`, the row
+ * `[data-testid="owl-row"]` (P109 ISL-009 AC7: by name, not by the look's classes; the contrast list below keeps classes).
  *   P-AC6  a new ask block says "Fill in every slot first."; the text field's maxLength is 40 and 41 characters leave
  *          40; a listed word shows the refusal under the block list (`.bg-slot-msg`); Play sends nothing to the model
  *          (the stub's calls, the hint voicings apart, do not grow) and the owl does not claim she is resting
@@ -240,8 +241,8 @@ async function pagesPart() {
           await until(CARD_UP, (v) => v === false, 2000);
         }
       };
-      const OWL = '.bg-owl';
-      const SAY = '.bg-owl-say';
+      const OWL = '[data-testid="owl-row"]';
+      const SAY = '[data-testid="owl-say"]';
 
       // A fresh family: one band 10–12 player (Olive's rungs are band 10–12 only, ruling 4), in English.
       await page.setViewport({ width: 1368, height: 912, mobile: false });
@@ -455,7 +456,7 @@ async function pagesPart() {
       await enterFree('P-390');
       await wait(900);
       await ev('window.scrollTo(0, 0)');
-      const fit = await ev(`(() => { const box = (s) => { const e = [...document.querySelectorAll(s)].find((x) => x.offsetParent !== null); if (!e) return null; const r = e.getBoundingClientRect(); return { top: r.top, bottom: r.bottom }; }; return { play: box('.bg-controls .bg-i-play'), owl: box('.bg-owl'), vw: innerWidth, vh: innerHeight, sx: document.scrollingElement.scrollWidth }; })()`);
+      const fit = await ev(`(() => { const box = (s) => { const e = [...document.querySelectorAll(s)].find((x) => x.offsetParent !== null); if (!e) return null; const r = e.getBoundingClientRect(); return { top: r.top, bottom: r.bottom }; }; return { play: box('.bg-controls .bg-i-play'), owl: box(${JSON.stringify(OWL)}), vw: innerWidth, vh: innerHeight, sx: document.scrollingElement.scrollWidth }; })()`);
       await shot('workshop-free-390');
       check('P-390 free play at 390×844: Play and the owl on screen at scroll 0, nothing wider than the phone', !!fit.play && fit.play.bottom <= fit.vh && !!fit.owl && fit.owl.top < fit.vh && fit.vw === 390 && fit.sx <= 390, fit);
       await page.setViewport({ width: 1368, height: 912, mobile: false });

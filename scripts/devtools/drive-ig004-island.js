@@ -322,6 +322,31 @@ withDeployedSite({ dir: DIR, ...CHROME }, async (page) => {
         check('IG-004 AC7: … and the island still shows her robot at work on the tulips’ plot', onPlot(again), again);
       }
 
+      // P109 ISL-009 AC7: the plot card scrolls ITSELF into view (its Scroll Into View, from iwFound) — no Timer, no
+      // Function reaching into the page. The case it exists for: the LAST request, tapped far down the list, opens the
+      // card above it. Read the page's scroll before and after the tap beside where the card sits: a card already on
+      // the screen with nothing scrolled would grade nothing (at 1368 the list fits, so only the reading is kept there).
+      {
+        const SCROLLED = `Math.round(document.scrollingElement.scrollTop)`;
+        // The last REQUEST (Pip's garden, free play, is last of all and goes straight to the Workshop: no card).
+        const titles = JSON.stringify(REQUESTS.map((r) => titleOf(lang, r)));
+        const LAST = `[...document.querySelectorAll('.bg-quest')].filter((e) => e.offsetParent !== null && ${titles}.some((t) => e.innerText.includes(t))).pop()`;
+        await where(LAST);
+        const before = await evaluate(SCROLLED);
+        const lastTitle = await evaluate(`(${LAST} || {}).innerText`);
+        await tap(LAST, `the last request (${tag})`);
+        await until(CARD, (c) => c.up, 3000);
+        await wait(300);
+        const cardAt = await evaluate(`(() => { const c = [...document.querySelectorAll('.bg-plot-card')].find((e) => e.offsetParent !== null); if (!c) return null; const r = c.getBoundingClientRect(); return { top: Math.round(r.top), bottom: Math.round(r.bottom), vh: innerHeight, docTop: Math.round(r.top + document.scrollingElement.scrollTop) }; })()`);
+        const after = await evaluate(SCROLLED);
+        readings[`card-at-${tag}`] = { ...cardAt, scrolledBefore: before, scrolledAfter: after, last: String(lastTitle || '').split('\n')[0] };
+        // `>= -1`: `nearest` puts the card's top at the screen's edge, and a rounded sub-pixel reads -1 (390 FR, s7).
+        const wasOff = !!cardAt && (cardAt.docTop < before || cardAt.docTop >= before + cardAt.vh);
+        check(`ISL-009 AC7 ${tag}: the last request opens the plot card ON the screen${wasOff ? ' (it opens off the screen: it must scroll itself there)' : ' (reading only: the card opened on the screen without a scroll)'}`, !!cardAt && cardAt.top >= -1 && cardAt.top < cardAt.vh && (wasOff || !tag.startsWith('390')), readings[`card-at-${tag}`]);
+        await page.navigate('/island');
+        await wait(1500);
+      }
+
       // AC3: another of the robot's jobs while it works the tulips → the plot card says so and offers home. (IG-005: was the
       // stones; they need another robot now, so their card is a padlock — drive-ig005-robots.js grades that.)
       await tap(byText('.bg-quest', titleOf(lang, ANOTHER)), `${ANOTHER.id} (${tag})`);

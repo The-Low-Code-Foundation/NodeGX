@@ -611,6 +611,11 @@ describe('CG-003 — Bot Garden, the artefact', () => {
 
     it('hook 2: the owl row the drives read — the line is .bg-owl-say, the row .bg-owl (its tags inside it)', () => {
       expect([params(node('plOwl')).cssClassName, params(node('plOwlSay')).cssClassName]).toEqual(['bg-owl', 'bg-owl-say']);
+      // P109 ISL-009 AC7: and by name — the CG-005 drive reads [data-testid="owl-row"] / [data-testid="owl-say"].
+      expect([node('plOwl'), node('plOwlSay')].map((n) => [params(n).dataAttributes, params(n)['data-testid']])).toEqual([
+        ['data-testid', 'owl-row'],
+        ['data-testid', 'owl-say']
+      ]);
       expect(into('plOwlSay', 'text')).toEqual(['plOwlRow.text>text']);
       expect((node('plOwlCol').children ?? []).map((n) => n.id)).toEqual(['plOwlSay', 'plOwlThinking', 'plOwlResting', 'plProposal', 'plOwlMeta']);
     });
@@ -972,6 +977,19 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(['drive', 'rec', 'play', 'step', 'reset'].every((i) => used.has(i))).toBe(true);
       expect([...used].filter((i) => !GARDEN_CSS.includes(`.bg-i-${i}::before`)).sort()).toEqual([]);
       expect(String(params(nodesOf(built, C.isleWorld).find((n) => n.id === 'iwFind')!).cssClassName)).toBe('bg-btn bg-i-find bg-isle-find');
+    });
+
+    it('🔴 P109 ISL-009 AC7: the plot card scrolls itself into view, and no script reaches into the page for it', () => {
+      const isle = nodesOf(built, C.isleWorld);
+      const wires = connectionsOf(built, C.isleWorld);
+      expect(wires.filter((c) => c.toId === 'iwCard' && c.toProperty === 'scrollIntoView').map((c) => `${c.fromId}.${c.fromProperty}`)).toEqual(['iwFound.ontrue']);
+      // The Timer that waited for the card and the Function that reached for it are gone; the robots' Function stays.
+      expect(isle.filter((n) => n.id === 'iwRevealWait' || n.id === 'iwReveal')).toEqual([]);
+      expect(isle.filter((n) => n.type === '/Logic/Find robots').map((n) => [n.id, n.parameters ?? {}])).toEqual([['iwFindFn', {}]]);
+      // Known-firing beside the absence: the robots branch still scrolls (inside the kit, out of a node's reach).
+      const scripts = [...tree(OUTPUT_OF(built)).entries()].map(([, buf]) => buf.toString('utf8'));
+      expect(scripts.some((t) => t.includes('.bg-isle-scroll'))).toBe(true);
+      expect(scripts.filter((t) => t.includes("querySelector('.bg-plot-card')"))).toEqual([]);
     });
 
     it('🔴 AC1–3: one States node drive | teach | play (no transitions, opens in Drive); the pad shows in Drive and Teach and records only in Teach; a request and Start over open in Drive', () => {
