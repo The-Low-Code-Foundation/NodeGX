@@ -1,0 +1,160 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8ee04873-4e1b-5b1a-8b30-4146ee5ee10f",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "h_page",
+      "type": "Page",
+      "label": "Home",
+      "parameters": {
+        "title": "Three cards",
+        "urlPath": ""
+      },
+      "children": [
+        "h_root"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "h_root",
+      "type": "Group",
+      "label": "Root",
+      "parent": "h_page",
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "children": [
+        "h_card1",
+        "h_card2",
+        "h_card3"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "h_card1",
+      "type": "Group",
+      "label": "Card 1",
+      "parent": "h_root",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "dataAttributes": "data-testid",
+        "data-testid": "card-1"
+      },
+      "children": [
+        "h_list1"
+      ],
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "h_list1",
+      "type": "For Each",
+      "label": "Lines 1",
+      "parent": "h_card1",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Cards/Line"
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "h_data1",
+      "type": "Static Data",
+      "label": "Lines of card 1",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"l0\",\"text\":\"card 1 line 0\"},{\"id\":\"l1\",\"text\":\"card 1 line 1\"},{\"id\":\"l2\",\"text\":\"card 1 line 2\"}]"
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "h_card2",
+      "type": "Group",
+      "label": "Card 2",
+      "parent": "h_root",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "dataAttributes": "data-testid",
+        "data-testid": "card-2"
+      },
+      "children": [
+        "h_list2"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "h_list2",
+      "type": "For Each",
+      "label": "Lines 2",
+      "parent": "h_card2",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Cards/Line"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "h_data2",
+      "type": "Static Data",
+      "label": "Lines of card 2",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"l0\",\"text\":\"card 2 line 0\"},{\"id\":\"l1\",\"text\":\"card 2 line 1\"},{\"id\":\"l2\",\"text\":\"card 2 line 2\"}]"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "h_card3",
+      "type": "Group",
+      "label": "Card 3",
+      "parent": "h_root",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "dataAttributes": "data-testid",
+        "data-testid": "card-3"
+      },
+      "children": [
+        "h_list3"
+      ],
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "h_list3",
+      "type": "For Each",
+      "label": "Lines 3",
+      "parent": "h_card3",
+      "parameters": {
+        "templateType": "explicit",
+        "template": "/Cards/Line"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "h_data3",
+      "type": "Static Data",
+      "label": "Lines of card 3",
+      "parameters": {
+        "type": "json",
+        "json": "[{\"id\":\"l0\",\"text\":\"card 3 line 0\"},{\"id\":\"l1\",\"text\":\"card 3 line 1\"},{\"id\":\"l2\",\"text\":\"card 3 line 2\"}]"
+      },
+      "x": 470,
+      "y": 880
+    }
+  ],
+  "visualRoots": [
+    "h_page"
+  ]
+}

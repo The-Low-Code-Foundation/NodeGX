@@ -234,3 +234,13 @@ made an edited table look like a second list holding its own ids: the list is no
 Neighbours: runtime `test/corpus` + collection/model/GAM-007/CSV/ISL-005 + node-spec graph **837 green** (6 skipped as
 before); viewer `tests/corpus` **878/878**; P107 conformance `NSP_ONLY="Static Data"` **CONFORMS, 200/200, 0
 divergences**. Export: a Static Data table exports as its own `const …_DATA` array, so it agrees.
+
+**AC5 — control arm ✅, treatment owed the engine rebuild.** Project [`isl003-three-cards/`](isl003-three-cards) built
+through the door by [`isl003ThreeCards.ts`](../../../packages/noodl-mcp/tests/isl003ThreeCards.ts) (0 errors; one
+`page-cannot-scroll` warning, the three cards fit): three cards, each a Repeater over its own Static Data, lines
+`l0…l2` in every table, each card `data-testid="card-N"`. Drive
+[`drive-isl003-three-cards.js`](../../../scripts/devtools/drive-isl003-three-cards.js) (known-firing in both modes: every
+card draws three lines). **Control** — `nodegx deploy … --allow-development-engine` exit 0 on the engine bundle on disk
+(`noodl.deploy.js`, 10-03 09:13, `keepPlainRowsApart` ×0): **3/3, every card reads `card 3 line 0…2`** — the island's
+defect, in a browser. The treatment waits for the deploy bundle to be rebuilt (a peer's 10,000-case conformance run held
+the box all session; one heavy job at a time).

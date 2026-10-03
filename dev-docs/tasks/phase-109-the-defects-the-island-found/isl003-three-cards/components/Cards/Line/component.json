@@ -1,0 +1,10 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "62057c8d-a781-5a6f-8e41-86b0493a70ae",
+  "name": "Line",
+  "path": "/Cards/Line",
+  "type": "visual",
+  "created": "2026-10-03T18:19:53.411Z",
+  "modified": "2026-10-03T18:19:53.411Z",
+  "modifiedBy": "noodl-mcp"
+}
