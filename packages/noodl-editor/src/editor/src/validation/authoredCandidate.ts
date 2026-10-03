@@ -74,6 +74,7 @@ import { checkParameterValues } from './parameterValues';
 import { checkPublicWriteDoor, type FunctionSecurityPolicy } from './publicWriteDoor';
 import { checkRepeaterTemplate } from './repeaterTemplate';
 import { checkVariableInRepeatedComponent } from './repeatedComponentVariable';
+import { checkTypedWordNotTranslated } from './typedWordNotTranslated';
 import { checkLayoutInertCombination } from './layoutInertCombination';
 import { checkOneWayGate } from './oneWayGate';
 import { checkQueryBeforeFilter } from './queryBeforeFilter';
@@ -620,6 +621,9 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     // shares. Reads the views rather than `nodes`, because the copies are counted project-wide and
     // the holder may be a component this candidate places, not the candidate itself.
     ...(views ? checkVariableInRepeatedComponent({ component, views }) : []),
+    // P109 ISL-007 AC6 — a typed word in an app that translates stays the same in every language. Reads the views
+    // for the project-wide opt-in (a placed Translation node); omitted views means "do not check" inside the check.
+    ...checkTypedWordNotTranslated(nodes, { component, views, connectedInputs: connections }),
     // DEF-010 (SB-009) — the other twelve of the catalog's thirteen
     // component-typed ports. `For Each.template` is skipped inside the check:
     // the line above owns it, and a second producer over one population is a

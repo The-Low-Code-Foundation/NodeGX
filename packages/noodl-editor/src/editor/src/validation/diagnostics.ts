@@ -785,6 +785,14 @@ export enum DiagnosticCode {
   RowCannotWrap = 'row-cannot-wrap',
 
   /**
+   * P109 ISL-007 AC6 — a word typed into a Text, a label, a placeholder or a page title, with no wire into it, in an
+   * app that places at least one `Translation` node (the translation add-on). The word has no key, so it stays the same
+   * when the app switches language. Opt-in by a PLACED Translation node, not by the add-on being installed
+   * ("Warn if app translates", Richard, 2026-10-03). A **warning**, advisory. See `typedWordNotTranslated.ts`.
+   */
+  TypedWordNotTranslated = 'typed-word-not-translated',
+
+  /**
    * DEF-020 (P78 D32) — a row `Group` whose `justifyContent` distributes free
    * space, with two or more children that grow: the free space never exists,
    * the children split the row evenly, and the parameter is silently inert.

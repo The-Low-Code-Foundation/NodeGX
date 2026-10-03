@@ -1,6 +1,6 @@
 # ISL-007 — An app speaks two languages without a script
 
-**Status:** 🟡 **s11: AC6 ruled "Warn if app translates" (see §8 s11).** Ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). s7: AC1 read (288 of 334 texts switch, 0 braces, the route costs 16 placements + 342 KB); the module's source recovered from its map. **s8: BUILT — module 1.1.0 rebuilt from its recovered sources (no install, root lock untouched); AC2, AC3, AC5 ✅ (spec 5/5, imported module 1/5; deployed drive 16/16, control 5/5); AC8 recorded in P47. Open: the "words for this page" clause, AC4 (the island moves), AC6 (the door). s9: AC7's catalog half ✅ (each node says what it does to an agent; was a dead URL).** Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 **s11: AC6 ruled "Warn if app translates" and BUILT (`typed-word-not-translated`, §8 s11). Open: AC4 (→ IW-010).** Ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). s7: AC1 read (288 of 334 texts switch, 0 braces, the route costs 16 placements + 342 KB); the module's source recovered from its map. **s8: BUILT — module 1.1.0 rebuilt from its recovered sources (no install, root lock untouched); AC2, AC3, AC5 ✅ (spec 5/5, imported module 1/5; deployed drive 16/16, control 5/5); AC8 recorded in P47. Open: the "words for this page" clause, AC4 (the island moves), AC6 (the door). s9: AC7's catalog half ✅ (each node says what it does to an agent; was a dead URL).** Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F10](AUDIT-2026-10-01.md) · the island's 693-row word table and `Logic/Translate words` · the same need met by [TPL-007](../phase-78-the-templates/TPL-007-THE-MATHS-AND-TYPING-GAME.md) §2.6 (Static Data route) and [TPL-011](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md) (i18next route)
 **Side:** product (a translation primitive, or the shipped i18next module) — and a scope ruling against [P47](../phase-47-internationalisation/README.md)
 
@@ -280,3 +280,44 @@ word only in a project that places at least one `Translation` node; a word is a 
 into it is skipped. Expected on the population above: Tailr 162, DBT 1, the fixture 2, hsseq 0, nightbook 0.
 AC6's other two clauses were met in s9 (one call each, through the bundle). Next: build the rule (AC6) — census-first
 gate with the table above as its expected counts, the hsseq pair as the silent arm, Tailr as the firing arm.
+
+**AC6 built (s11).** New warning **`typed-word-not-translated`**
+([`typedWordNotTranslated.ts`](../../../packages/noodl-editor/src/editor/src/validation/typedWordNotTranslated.ts)),
+in `authoredPreconditionDiagnostics`, the one pipeline the editor's AI gate, the MCP write tools, `validate_component`
+and `validate_project` all call. Opt-in: a placed `Translation` node in any component (or the candidate). Ports: the
+visual built-ins' word inputs, **read from the shipped catalog** (12: Text, Button / Checkbox / Dropdown / Radio Button
+/ Text Input labels and placeholders, the three deprecated originals, and **Page `title`**, the browser tab's name);
+data/cloud `text` ports and kit ports abstain (a kit's `label` is the island's aria-label, an id, or a caption: only its
+author knows). A word = a letter in any script; a wired port is skipped. Advisory, blocks nothing.
+
+**What it says, measured** (the built rule bundled with esbuild and run over each project; both formats):
+
+| project | warnings | by port |
+|---|---|---|
+| Tailr | **149** | Text 90, Button 13, Text Input placeholder 23 / label 18, Dropdown 2, Page title 3 |
+| hsseq ×2 (add-on installed, no Translation) | 0 | — |
+| `templates/digital-bricks-training` | 11 | Page title 11 (10 English words + the brand) → filed [`P109-S11-DBTPAGETITLES`](../../bugs/p109-s11-dbtpagetitles-the-training-apps-tab-titles-stay-english-in-french.md) |
+| `templates/digital-bricks-training-demo` | 6 | Page title 6 |
+| `templates/nightbook` (untracked) | 11 | Page title 11, every one "Nightbook" (the app's name: the message says to leave a name typed) |
+| AC2's fixture | 3 | EN, FR buttons (right to stay) + Page title "Two languages" (a real miss in our own fixture) |
+| `library/modules/i18next-translation/project` | 0 | — |
+| `templates/bot-garden` (control: 12 typed, unwired, no Translation) | 0 | — |
+
+Tailr's 162 (s11 census, text/label/placeholder on ANY node) became 146 on the ruled ports (16 were component and
+Avatar ports, which abstain) + 3 page titles. ⚠️ My first scratch census read Tailr as 221: it mapped the legacy
+format's wires to `targetId`, but `project.json` stores `toId`/`toProperty` too — the rule was right, the probe saw
+no wires. Recounted directly: 155 Text words, 65 wired.
+
+**Graded:** [`tests-unit/isl-007/typedWordNotTranslated.test.ts`](../../../packages/noodl-editor/tests-unit/isl-007/typedWordNotTranslated.test.ts)
+**16/16** — the firing arm with each silent arm beside it on the same candidate (no Translation placed; a wire into
+THAT port, and not into another; symbols/numbers/age bands; a kit label, a CSV and an email text; views omitted), every
+table port fires, through the pipeline (warning, `isBlockingForAuthoredOutput` false), the table pinned to the catalog
+both ways (each entry a string input; no visual built-in word port left out), and the census of the repo's three
+tracked translating projects. **Mutant** (opt-in check removed, on a backed-up copy, restored and `cmp`-checked):
+**3 red** — the hsseq arm, the pipeline's silent arm, the island control. **Through the door:** `buildTwoLanguages`
+re-run into the scratchpad with the in-process server: `create_component` returns the three warnings to the agent.
+`tsc` on the rule clean; `typecheck:mcp` shows exactly s10's 8 spec-file errors, none here. No spec gates on the
+fixture's or the templates' warnings (searched: `tpl011Template.test.ts` collects and does not assert).
+
+⚠️ A live agent (Claude Code on `noodl-mcp/dist`) sees this only after the MCP `dist` is rebuilt — and that rebuild
+waits on the peer's uncommitted `src/cloud/bundleEntry.js` (ISL-019 AC6's note): build it in a worktree. **AC6 ✅.**

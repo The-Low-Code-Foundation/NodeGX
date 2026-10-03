@@ -2,6 +2,7 @@
 id: P109-S11-NODATAATTRTYPES
 title: The published kit types lacked `noDataAttributes`, which the runtime's node definition declares — the types' drift gate was red
 status: fixed
+commit: b8dfe0571
 severity: low
 area: tooling / @nodegx/node-kit-types (drift.test.js), the kit copies of the types
 found: P109 ISL-015 s11, 2026-10-03 (a red neighbour when the types package ran whole)
