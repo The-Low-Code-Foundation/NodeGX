@@ -131,6 +131,12 @@
  *     `cloudservices` metadata is the script's for the play and the session for its app id is in the play's storage
  *     (`installBackend`); `installWorld` gives every play the world's `XMLHttpRequest` beside its `fetch`, so Cloud
  *     Function's request is the world's and is attributed like any other (the after-inputs callback runs in its update).
+ *   - **the realtime subscriptions** (NSP-014 s33, world.ts REALTIME, R9): `createRealtimeSubscription` (the realtime
+ *     module's export, which Subscribe To Changes calls through the module object at each reconfigure) becomes the world's
+ *     `subscribe` for the play — the options without their three callbacks recorded as handed, what the world's handle
+ *     tells handed to the node's `onStatus` / `onEvent` / `onError`, the handle itself (`status`, `dispose`) the node's.
+ *     The transports and `RealtimeSubscription` under it are the backend layer's, not played. `realtimeSupportFor` stays
+ *     the real one: every play's backend is a `directus` one, which it calls supported.
  */
 
 import { AsyncLocalStorage } from 'async_hooks';
@@ -298,6 +304,8 @@ const CloudStore = require('../../src/api/cloudstore') as {
   _fromJSON(item: Record<string, unknown>, collectionName: string, modelScope?: unknown): unknown;
 };
 // eslint-disable-next-line @typescript-eslint/no-require-imports
+/** NSP-014 s33 — the realtime module, whose `createRealtimeSubscription` export a play stands in (world.ts REALTIME). */
+const realtimeModule = require('../../src/api/backends/realtime') as { createRealtimeSubscription: (handle: { id: string }, options: Record<string, unknown>) => unknown };
 const { parseSessionStore } = require('../../src/api/backends/SessionStore') as { parseSessionStore(appId: string | undefined): { write(session: Record<string, unknown>): void } };
 
 /** What a backend operation's options carry back (`@noodl/backend-contract` `Callbacks`). */
@@ -576,6 +584,16 @@ function installBackend(w: World, graphModel: { getMetaData(k: string): unknown;
     if (event.object) CloudStore._fromJSON({ ...event.object }, event.collection, undefined);
     CloudStore.forBackend(undefined, backend)!._adapter.emitAdapterEvent(event);
   });
+  // s33 — REALTIME (world.ts): the subscribe is the world's; what its handle tells reaches the node's three callbacks
+  const savedCreate = realtimeModule.createRealtimeSubscription;
+  realtimeModule.createRealtimeSubscription = (handle, options) => {
+    const { onEvent, onStatus, onError, ...args } = options as Record<string, unknown> & { onEvent?: (c: unknown) => void; onStatus?: (s: string) => void; onError?: (e: unknown) => void };
+    return w.backend.subscribe({ op: 'subscribe', backend: handle.id, args }, (told) => {
+      if ('status' in told) onStatus?.(told.status);
+      else if ('change' in told) onEvent?.(told.change);
+      else onError?.(told.error);
+    });
+  };
   const restoreUser = installUser(w);
   const restoreAuth = installAuth(w);
   // s32 — PROJECT's cloud services (world.ts): the play's `cloudservices` metadata is the script's (none above — R9's
@@ -590,6 +608,7 @@ function installBackend(w: World, graphModel: { getMetaData(k: string): unknown;
     if (sessionToken !== undefined) store.write({ objectId: 'world', sessionToken });
   }
   return () => {
+    realtimeModule.createRealtimeSubscription = savedCreate;
     offStore();
     restoreAuth();
     restoreUser();

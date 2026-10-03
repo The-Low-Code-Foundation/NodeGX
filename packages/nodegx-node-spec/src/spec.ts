@@ -253,6 +253,9 @@ export interface SpecBackendCall {
 /** NSP-014 s21 — a backend's answer to a `SpecBackendCall`, delivered to `WorldHandlers.backend`: what the success callback is handed, or the failure's message (`undefined`: none) and (s22) the backend's `detail` when it gave one. */
 export type BackendAnswerEvent = { id: string } & ({ ok: unknown } | { error: string | undefined; detail?: Record<string, unknown> });
 
+/** NSP-014 s33 — what a subscription this node opened told it (`subscribe` effect, world.ts REALTIME), delivered to `WorldHandlers.realtime` with the subscription's `id`. */
+export type RealtimeEvent = { id: string } & import('./world').RealtimeTold;
+
 /** The world's answer to a `SpecRequest`, delivered to `WorldHandlers.response`. */
 export type WorldResponse = { id: string } & (
   | { status: number; statusText: string; headers: Record<string, string>; body: string | null }
@@ -448,6 +451,11 @@ export interface Patch<S, O> {
    *             element's two attributes in its state, as the node's assignments leave them). The answer arrives at
    *             `WorldHandlers.picker` at its moment; a throw is `WorldView.pickerAnswer`'s, read before. Only in a play
    *             whose script has a picker (a `picker` need).
+   *   `unsubscribe` NSP-014 s33 — disposes subscriptions this node opened, by id (world.ts REALTIME): an `unsubscribe` `backend`
+   *             event each, in the request group, the subscribe's args; nothing more is told. Before `subscribe`.
+   *   `subscribe` NSP-014 s33 — opens a subscription (`createRealtimeSubscription`, world.ts REALTIME): a `subscribe` `backend`
+   *             event in the request group, as handed. What it tells arrives at `WorldHandlers.realtime` with the `id`, each at
+   *             its moment on the clock (never inside the call: its status is `connecting` there).
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
@@ -462,6 +470,8 @@ export interface Patch<S, O> {
   popup?: import('./world').PopupCall;
   backend?: SpecBackendCall | readonly SpecBackendCall[];
   picker?: import('./world').PickerClick;
+  unsubscribe?: readonly string[];
+  subscribe?: SpecBackendCall;
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -670,6 +680,11 @@ export interface WorldHandlers<S, I, O> {
    * element: whether one is there to hear it is the spec's to say, as a DOM event meets whatever handler is there then.
    */
   picker?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').PickerEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-014 s33 — a subscription this node opened told it something (world.ts REALTIME): a status, a change or an error, at its
+   * moment on the clock, synchronously inside the `advance` that reaches it. Never after the node disposed it.
+   */
+  realtime?: (state: Readonly<S>, inputs: Inputs<I>, event: RealtimeEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -863,6 +878,7 @@ export interface AnyNodeSpec {
     authReturn?: (state: never, inputs: never, ret: import('./world').AuthReturnState, world: WorldView) => unknown;
     mount?: (state: never, inputs: never, world: WorldView) => unknown;
     picker?: (state: never, inputs: never, event: import('./world').PickerEvent, world: WorldView) => unknown;
+    realtime?: (state: never, inputs: never, event: RealtimeEvent, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

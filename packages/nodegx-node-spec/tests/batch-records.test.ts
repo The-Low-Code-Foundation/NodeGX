@@ -29,7 +29,9 @@ const FILES = ['Cloud File', 'Upload File', 'Sign File URL'];
 const PICKER = ['Open File Picker'];
 /** s32 — Cloud Function: its own request (world.ts NETWORK, the XHR face) to the project's cloud services (PROJECT) — no backend */
 const CLOUD = ['CloudFunction2'];
-const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS, ...FILES, ...PICKER, ...CLOUD];
+/** s33 — Subscribe To Changes (world.ts REALTIME): a subscription, told on the clock — no operation answered once */
+const REALTIME = ['SubscribeToChanges'];
+const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS, ...FILES, ...PICKER, ...CLOUD, ...REALTIME];
 
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {
   for (const type of CONFORMING) {
@@ -140,6 +142,28 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
     expect(requests.length).toBeGreaterThan(0);
     expect(none.map((x) => x.name).some((n) => n.startsWith('no cloud services'))).toBe(true);
     for (const { trace } of requests) for (const e of trace) if (e.t === 'request') expect((e as TraceEvent & { method: string; url: string }).method).toBe('POST');
+  });
+
+  // s33 — Subscribe To Changes: every failure on Realtime Error beside a Realtime Failure — before the subscribe (a Backend the
+  // project does not have) and told (retryable, fatal) — and a scenario that subscribes to nothing beside ones that do
+  test('SubscribeToChanges: every failure on Realtime Error beside a Realtime Failure; a scenario subscribes to nothing — beside ones that subscribe and unsubscribe', async () => {
+    const all = await traces('SubscribeToChanges');
+    const codes = new Set<string>();
+    for (const { trace } of all) {
+      const failed = trace.some((e) => e.t === 'signal' && e.port === 'realtimeFailure');
+      for (const e of trace) if (failed && e.t === 'value' && e.port === 'realtimeError' && e.value) codes.add((e.value as { code: string }).code);
+    }
+    for (const code of ['CAPABILITY_UNAVAILABLE', 'AUTH_FAILED', 'CONNECT_FAILED', 'SUBSCRIPTION_REJECTED']) expect([...codes]).toContain(code);
+    const ops = (t: TraceEvent[]) => t.filter((e) => e.t === 'backend').map((e) => (e as TraceEvent & { op: string }).op);
+    const none = all.filter((x) => ops(x.trace).length === 0);
+    expect(none.map((x) => x.name).some((n) => n.startsWith('no Class'))).toBe(true);
+    // the not-configured Backend: Realtime Failure and no call while it is set — then the active one subscribes (the control)
+    const bad = all.find((x) => x.name.includes('does not have'))!.trace;
+    const firstCall = bad.findIndex((e) => e.t === 'backend');
+    expect(bad.findIndex((e) => e.t === 'signal' && e.port === 'realtimeFailure')).toBeLessThan(firstCall);
+    expect(bad.slice(0, bad.findIndex((e) => e.t === 'set' && e.port === 'backendId' && e.value === '_active_')).some((e) => e.t === 'backend')).toBe(false);
+    expect(all.filter((x) => ops(x.trace).includes('subscribe')).length).toBeGreaterThan(5);
+    expect(all.filter((x) => ops(x.trace).includes('unsubscribe')).length).toBeGreaterThan(2);
   });
 
   // s30 — the file operations (world.ts FILES): every failure sentence on Error beside a Failure — before the call (no

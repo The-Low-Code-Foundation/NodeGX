@@ -1,7 +1,7 @@
 # NSP-014 — Batch: records, users, files, HTTP, streams, and the cloud-only nodes
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world's network and backend) and R4 = continue.
-**Status: 🟡 s32 (2026-10-03): Cloud Function conforms on the runtime, first run (one survivor, a dead deletion, removed), two more seeds and at 10,000. It makes its OWN request — a raw `XMLHttpRequest` to `<endpoint>/functions/<name>`, not the backend contract — so it joined NETWORK, which grew an XHR face, and PROJECT grew the project's cloud services; rows C54 (a `null` success body never answers the Call), D28 (Error can be an object) (§6.34). 21 of 24. Left: WebSocket, Server-Sent Events, Subscribe To Changes.** s31 (2026-10-03): Open File Picker conforms on the runtime, first run (one survivor closed by a scenario), two seeds and at 10,000 — the world's PICKER, the 13th seam (a `document` only where the script has a picker; a file input whose `accept` / `capture` reflect; the n-th click answered by the n-th scripted answer, to whatever handler the element holds when it lands); the format's `settles` (a press that supersedes a pending one); rows C53, D27 (§6.31). 20 of 24 — T2 complete. Left: Cloud Function, WebSocket, Server-Sent Events, Subscribe To Changes.** s30: Cloud File, Upload File and Sign File URL conform on the runtime, first run, two seeds and at 10,000 — the world's BACKEND grew FILES (the contract's `uploadFile` / `signFileUrl`, a failure as one envelope, the REST adapter's not-a-file refusal); a scenario can hand a node a file (`$file`) or a stored file (`$cloudFile`); rows C51, C52, D26 (§6.28). 19 of 24. Left: Open File Picker (a FILE PICKER seam), WebSocket, Server-Sent Events, Subscribe To Changes, Cloud Function.** s29: Sign In With slice B — the return leg (§6.25). s28: Request Magic Link, Sign In With (16 of 24). s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24. s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
+**Status: 🟡 s33 (2026-10-03): Subscribe To Changes conforms on the runtime, first run (0 divergences; three survivors, the stuck-flag kind, declared equivalent), two more seeds and at 10,000. It opens its subscription through the realtime layer (`createRealtimeSubscription`), so the world's BACKEND grew REALTIME: the subscribe recorded as handed, answered by a scripted STREAM of statuses, changes and errors on the clock, by the handle's own rules; the unsubscribe recorded too (§6.37). Row C55 (a same-value write reconnects). 22 of 24. Left: WebSocket, Server-Sent Events.** s32 (2026-10-03): Cloud Function conforms on the runtime, first run (one survivor, a dead deletion, removed), two more seeds and at 10,000. It makes its OWN request — a raw `XMLHttpRequest` to `<endpoint>/functions/<name>`, not the backend contract — so it joined NETWORK, which grew an XHR face, and PROJECT grew the project's cloud services; rows C54 (a `null` success body never answers the Call), D28 (Error can be an object) (§6.34). 21 of 24. Left: WebSocket, Server-Sent Events, Subscribe To Changes.** s31 (2026-10-03): Open File Picker conforms on the runtime, first run (one survivor closed by a scenario), two seeds and at 10,000 — the world's PICKER, the 13th seam (a `document` only where the script has a picker; a file input whose `accept` / `capture` reflect; the n-th click answered by the n-th scripted answer, to whatever handler the element holds when it lands); the format's `settles` (a press that supersedes a pending one); rows C53, D27 (§6.31). 20 of 24 — T2 complete. Left: Cloud Function, WebSocket, Server-Sent Events, Subscribe To Changes.** s30: Cloud File, Upload File and Sign File URL conform on the runtime, first run, two seeds and at 10,000 — the world's BACKEND grew FILES (the contract's `uploadFile` / `signFileUrl`, a failure as one envelope, the REST adapter's not-a-file refusal); a scenario can hand a node a file (`$file`) or a stored file (`$cloudFile`); rows C51, C52, D26 (§6.28). 19 of 24. Left: Open File Picker (a FILE PICKER seam), WebSocket, Server-Sent Events, Subscribe To Changes, Cloud Function.** s29: Sign In With slice B — the return leg (§6.25). s28: Request Magic Link, Sign In With (16 of 24). s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24. s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
 
 ## 1. The person sentence
 
@@ -1080,3 +1080,95 @@ runtime keeps each batch in a closure. So the deletion was removed rather than d
 | `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
 | count | **103** (+1); T3 19 / 39 |
 | `node scripts/node-spec/census.js` | run, then RESTORED from HEAD (a peer's uncommitted viewer and export work moves dynamic ports 68 → 69 and test counts; Cloud Function's row does not move). No census number depends on specs |
+
+### 6.37 s33 (2026-10-03) — Subscribe To Changes; BACKEND's REALTIME
+
+**Built.** `subscribe-to-changes.ts`, 14 scenarios. It **conforms on the runtime on the first run**: 200 / 200 and 0
+divergences. Three mutants survived, all the stuck-flag kind, and are declared equivalent (below). It also conforms on seeds
+13 and 20730 and at 10,000. **104 / 147.** 22 of NSP-014's 24.
+
+**Read first (all three stream nodes, as the handoff asked).** Subscribe To Changes reaches its backend through ONE call:
+`createRealtimeSubscription(handle, { collection, where, primaryKey, onEvent, onStatus, onError })`
+(subscribetochanges.ts :437-444). It asks `realtimeSupportFor(handle.type)` first. Under the call sit five transports (the
+SSE dialects, Directus's socket, Parse's probe) and `RealtimeSubscription`, which holds the reconnect backoff and the connect
+deadline. **Query Records' realtime half goes through the same door** (dbcollectionnode2.ts :697-707), so this seam serves
+both. Server-Sent Events and WebSocket do not touch the backend layer at all: each owns a raw connection (`SseConnection`
+with two transports; `WebSocketConnection`). So the handoff's guess holds: **two seams**. This one is R9's, at the
+operation. The other is a STREAM face on NETWORK, still to build.
+
+**The world (additive; the hash refresh named exactly `src/spec.ts`, `src/world.ts`; the three stranger rounds green).**
+- **BACKEND, REALTIME.** `world.backend.subscribe(call, tell)` records `{ op: 'subscribe', backend, args }` (the options
+  without their three callbacks) and returns the HANDLE the node holds (`status`, `dispose()`). The first rule that fits
+  answers it with `{ stream: [ { at, status | change | error } ] }`, or with `never`. Each entry is told `at` ms after the
+  subscribe, never before 1 (a connection answers nothing inside the call that opened it). The handle's own rules
+  (RealtimeSubscription.ts) are the world's:
+  - a status equal to the one held is not told (`_setStatus`);
+  - a change is completed to the contract's `RealtimeChange`: the subscription's collection, and `ids` / `records` `[]`
+    and `recordsComplete` `true` when the entry gives none;
+  - an error's `kind` defaults to the contract's classification (`REALTIME_FAILURE_KINDS`, copied, because this package
+    depends on no contract). A `fatal` error then stops the subscription: `stopped` is told and nothing after it;
+  - a handler's throw is swallowed (`_notify`), the rule s32 set for every face;
+  - `dispose()` records `{ op: 'unsubscribe', backend, args }` with the subscribe's args, sets `stopped` WITHOUT telling it,
+    and tells nothing more. A second dispose does nothing.
+
+  A subscribe no rule answers is a VIOLATION and tells nothing. A stream answering any other operation is a script error.
+- **The format.** Two new patch effects: `unsubscribe` (ids, applied first) and `subscribe` (a `SpecBackendCall` with op
+  `subscribe`). Both are recorded as `backend` events in the request group. The new handler `world.realtime` was added in
+  the FOUR places (spec.ts `WorldHandlers` and the erased `AnyNodeSpec.world`, interpreter.ts `handleInbound`, mutants.ts
+  `reducerNames` + `wrapReducers`). There are two new mutation kinds, `drop-subscribe` and `drop-unsubscribe`, and the patch
+  shape names the two effects only when present, so every earlier spec's shapes are the strings they were.
+
+**Runtime target.** `installBackend` replaces the realtime module's `createRealtimeSubscription` export for the play. The
+node calls it through the module object at each reconfigure; the probe measured this before anything was built.
+`realtimeSupportFor` stays the real one, and every play's backend is `directus`, which it calls supported.
+
+**What the probe measured first (zz probe, deleted).** The handle the node gets is `{ status, dispose }`, and it reads
+`status` once, right after the call (`connecting`). `primaryKey` is `id` (no class schema in a play). `where` is absent
+with no Filter. **Writing the Class it already holds disposes the subscription and opens another (C55).** Enabled `false`
+disposes it and clears the status. An unknown Backend raises `CAPABILITY_UNAVAILABLE` with no call.
+
+**The survivors.** The frame end's quiet reconfigure (Enabled off, or no Class, with nothing held) has nothing to tear
+down and nothing to open. A stuck `scheduled` flag therefore re-runs it silently, and every input that could change the
+outcome schedules a reconfigure anyway. These are Map Collection's three `STUCK_FLAG` rows, declared in
+`equivalent-mutants.ts`. The teardown now clears `sub` only when one was held, so the quiet branch sets `scheduled` alone.
+Before the hand scenarios, six more `world.realtime` mutants survived: a value told and then overwritten before any
+settle. The scenarios killed all six.
+
+**Planted on a COPY of the runtime node (in memory, never the file).** Three defects, each caught at 200 on today's seed:
+`init` pulsing; a held error not cleared by `subscribed`; Enabled read as `=== true` (untouched = off). The suite grades
+the runtime, not only the interpreter's mutants.
+
+**Reach (400 generated sequences, seeds 20729 + 13).** 138 subscribe, 95 unsubscribe. Signals: Record Created 23, Record
+Updated 21, Record Deleted 18, Records Changed 25, Realtime Failure 68. Realtime Status `subscribed` was seen in only 5
+and `interrupted` in 1. Any input write tears the subscription down, so a told status is observed only when an advance is
+followed by a settle with no write between. That limit is the node's own churn, not the pool. The pool already tells
+something at every doubling of the clock (Query Records' WRITES), which lifted the signals from 3–18; the status paths are
+pinned by hand scenarios. At 10,000 the counts are 25× these.
+
+### 6.38 Rows (s33)
+
+- **C55** — Subscribe To Changes: **a write of the value an input already holds tears the subscription down and opens a new
+  one** (every setter schedules a reconfigure unconditionally, :327-348, :567-572). Subscribed goes false until the backend
+  confirms again, and a change in the gap is lost (no replay). Its twin, Query Records, guards with `valueDidChange`. The
+  spec states the runtime's reading (R3 (a)).
+  ([P107-C55](../../bugs/p107-c55-subscribe-to-changes-a-same-value-write-reconnects.md))
+- The teardown keeps Realtime Error: an old error stays until a NEW subscription says `subscribed`. It is consistent with
+  the docblock ("The last realtime failure") and is in the spec. Not a row.
+
+### 6.39 Gate readings (s33, 2026-10-03; load 2.2–5 — this session's jest only, no peer suite)
+
+| gate | reading |
+|---|---|
+| probe on the runtime FIRST (zz probe, the export stood in by hand, deleted) | §6.37, before any spec was written |
+| runtime: `NSP_ONLY=SubscribeToChanges`, at 200, today's seed (20729) | first run, before any scenario: 200 / 200, 0 divergences, **8 survivors** (6 overwritten-before-a-settle, 2 stuck-flag). With the 14 scenarios: 14 / 14, survivors 3 (stuck flag). Declared: **CONFORMS**, 138 / 141 + 3 equivalent |
+| runtime, seeds 13 and 20730 | **CONFORMS** both, 14 / 14, 138 / 141 + 3 equivalent (and again after the doubling pool) |
+| runtime deep, `NSP_DEEP=10000` | **CONFORMS**: 10,000 / 10,000, 0 divergences (113 s); C6 known 14 (a `{ unit, value }` on `qp-min` merged into a later number — R7's row, not this node's) |
+| a runtime trace printed by hand | a stream (subscribed, a create, a key-only delete, a fatal error, a change after it) and an Enabled write: the subscribe with the lowered `where`, `created` / `deleted` / `realtimeFailure`, the unsubscribe and the new subscribe — read event by event |
+| planted defects on a copy of the runtime node | 3 / 3 caught (§6.37) |
+| reach, 400 generated sequences | §6.37 |
+| runtime: the WHOLE `test/node-spec/` | **3 suites, 191 passed, exit 0** (s32's 190 + Subscribe To Changes); graph scenarios unmoved |
+| `nodegx-node-spec`: `npx jest` | hash refresh first (named exactly `src/spec.ts`, `src/world.ts`). With +4 REALTIME tests in `world.test.ts` and Subscribe To Changes in `batch-records.test.ts` (two seeds; the failure codes on Realtime Error beside Realtime Failure; no call while the Backend is unknown, beside the subscribe that follows): **18 suites, 814 passed, 17 skipped, exit 0**. Catalog parity first failed on four port descriptions abridged in the spec; now copied verbatim |
+| export: `tests/node-spec-*` | 2 suites, 12 passed |
+| `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
+| count | **104** (+1); T3 20 / 39 |
+| `node scripts/node-spec/census.js` | NOT run: a peer's uncommitted viewer and export work still moves it (s30, s32), and no census number depends on specs |

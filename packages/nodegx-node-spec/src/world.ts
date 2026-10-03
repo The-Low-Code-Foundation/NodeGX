@@ -293,6 +293,32 @@
  *           adapter event follows a file operation). Upload PROGRESS is not played: the REST adapter never calls
  *           `onUploadProgress` (RestDataAdapter.ts :1725-1732 — `fetch` has no upload progress); only the Parse wire's XHR does.
  *
+ *           REALTIME (s33; R9 again) — a subscription a node opens on its backend (`createRealtimeSubscription(handle,
+ *           { collection, where, primaryKey, onEvent, onStatus, onError })`, api/backends/realtime/index.ts :114-121). The
+ *           OPERATION is the seam, not the five wires under it (NodeGX and PocketBase SSE, Directus's socket, Parse's probe):
+ *           which transport, its reconnect backoff and its connect deadline are the backend layer's (`RealtimeSubscription`,
+ *           graded by its own tests), and what reaches the node is what the handle TELLS it.
+ *             A SUBSCRIBE — recorded as handed, a `backend` event `{ op: 'subscribe', backend, args }` (`args` the options
+ *               with the three callbacks left out), answered by the first rule that fits it (`op` `subscribe`): `{ stream }`
+ *               — what the subscription tells, in order, each entry `at` ms after the call (CLOCK's rule: never before 1 — a
+ *               connection answers nothing inside the call that opened it; absent: 1); `{ never: true }` — it tells nothing
+ *               (stays `connecting`). A subscribe no rule answers is a VIOLATION and tells nothing. Any other answer to a
+ *               subscribe is a script error.
+ *             THE HANDLE — the node reads its `status` (`connecting` from the call on; it moves with what is told) and may
+ *               `dispose()` it. The handle's rules (RealtimeSubscription.ts) are the world's: a STATUS equal to the one held is
+ *               not told (`_setStatus`); a CHANGE is told as the contract's `RealtimeChange` — `{ type, collection: <the
+ *               subscription's>, ids, records, recordsComplete }`, `ids` / `records` `[]` and `recordsComplete` `true` when the
+ *               entry gives none; an ERROR is told as `{ message, code, kind }`, `kind` the contract's classification
+ *               (`REALTIME_FAILURE_KINDS`) when the entry gives none, and a `fatal` one then STOPS the subscription — `stopped`
+ *               told after it (`fail`). A stopped subscription has closed its transport: nothing more is told. A handler that
+ *               THROWS is the handle's to swallow (`_notify` logs and goes on).
+ *             AN UNSUBSCRIBE — `dispose()`: recorded as a `backend` event `{ op: 'unsubscribe', backend, args }`, the args of
+ *               the subscribe it ends; its status becomes `stopped` and is NOT told (`dispose` sets `_status` directly); nothing
+ *               more is told. A second dispose does nothing and records nothing.
+ *           Not played: `realtimeSupportFor` — every backend a play has is a REST one that speaks realtime, so no node is told
+ *           `CAPABILITY_UNAVAILABLE` by the support table; the schema's primary key (no play's backend has a class schema — the
+ *           key a node asks for is the wire's convention, `id`).
+ *
  *   AUTH.   (NSP-014 s26; R9 again — "the request, not the wire") Who is signed in, per backend, and the auth operations a
  *           user node hands its backend: the contract's (`@noodl/backend-contract` `IAuthAdapter`) and the one beside it,
  *           `setUserProperties` (AUTH_OPS). An auth call is a BACKEND call — recorded as handed (`{ op, backend, args }`, a
@@ -413,6 +439,8 @@
  *   `world.backend.user` · (s24) a spec's `world.store` handler is fed from `world.backend.onStoreEvent` after
  *   `writeStoreEvent(world.registry, e)`. · (s31) `pickerAnswer(ahead)` = `world.picker.answer(ahead)` · a `picker` effect =
  *   `world.picker.click(held, element, deliver)` — what the element holds at the click, the handler that delivers the answer.
+ *   (s33) a `subscribe` effect = `world.backend.subscribe(call, tell)` (the handle it returns: `status`, `dispose()` — an
+ *   `unsubscribe` effect).
  */
 
 import { File as NodeFile } from 'buffer';
@@ -588,8 +616,37 @@ export interface BackendRule {
   times?: number;
 }
 
-/** What a backend answers an operation (BACKEND above). */
-export type BackendAnswer = { ok: unknown } | { error: string | null; detail?: Record<string, unknown>; lost?: true } | { never: true };
+/** What a backend answers an operation (BACKEND above); (s33) a `subscribe` is answered by a `stream` (REALTIME above). */
+export type BackendAnswer = { ok: unknown } | { error: string | null; detail?: Record<string, unknown>; lost?: true } | { never: true } | { stream: readonly RealtimeScriptEvent[] };
+
+/** REALTIME above (s33): one thing a subscription tells, `at` ms after the subscribe (never before 1; absent: 1). */
+export type RealtimeScriptEvent =
+  | { at?: number; status: string }
+  | { at?: number; change: { type: string; ids?: readonly unknown[]; records?: readonly unknown[]; recordsComplete?: boolean } }
+  | { at?: number; error: { message: string; code: string; kind?: string } };
+
+/** REALTIME above (s33): what a subscription tells its node — the handle's `onStatus`, `onEvent` and `onError`. */
+export type RealtimeTold =
+  | { status: string }
+  | { change: { type: string; collection: unknown; ids: readonly unknown[]; records: readonly unknown[]; recordsComplete: boolean } }
+  | { error: { message: string; code: string; kind: string | undefined } };
+
+/** `@noodl/backend-contract/realtime` `REALTIME_FAILURE_KINDS` (realtime.ts :176-184) — the one classification, copied: this package depends on no contract. */
+export const REALTIME_FAILURE_KINDS: Readonly<Record<string, string>> = Object.freeze({
+  TRANSPORT_UNAVAILABLE: 'fatal',
+  CONNECT_FAILED: 'retryable',
+  CONNECT_TIMEOUT: 'retryable',
+  AUTH_FAILED: 'fatal',
+  SUBSCRIPTION_REJECTED: 'retryable',
+  HEARTBEAT_MISSED: 'retryable',
+  CAPABILITY_UNAVAILABLE: 'fatal'
+});
+
+/** REALTIME above (s33): the handle a subscribe hands back — its status now, and the dispose. */
+export interface WorldSubscription {
+  readonly status: string;
+  dispose(): void;
+}
 
 /** One backend call, as handed (BACKEND above). */
 export interface BackendCall {
@@ -959,7 +1016,7 @@ export function backendEvent(c: BackendCall): TraceEvent {
 }
 
 /** What lands for an answer rule that answers (BACKEND above). */
-function deliveryOf(a: Exclude<BackendAnswer, { never: true }>): BackendDelivery {
+function deliveryOf(a: Exclude<BackendAnswer, { never: true } | { stream: readonly RealtimeScriptEvent[] }>): BackendDelivery {
   if ('ok' in a) return { ok: a.ok };
   const d: BackendDelivery = { error: a.error === null ? undefined : a.error };
   if (a.detail !== undefined) d.detail = a.detail;
@@ -1183,6 +1240,7 @@ export class WorldBackend {
       return true;
     }
     if ('never' in rule.answer) return true;
+    if ('stream' in rule.answer) throw new Error('world: the start-up check was answered by a stream — only a subscribe is (REALTIME)');
     const d = deliveryOf(rule.answer);
     this.clock.schedule(Math.max(1, rule.after ?? 0), () => deliver(d));
     return true;
@@ -1377,9 +1435,82 @@ export class WorldBackend {
     }
     const a = rule.answer;
     if ('never' in a) return;
+    if ('stream' in a) throw new Error(`world: ${call.op} was answered by a stream — only a subscribe is (REALTIME)`);
     const d = deliveryOf(a);
     if (rule.after !== undefined && rule.after > 0) this.clock.schedule(rule.after, () => deliver(d));
     else deliver(d);
+  }
+
+  /**
+   * REALTIME (s33): opens a subscription — recorded as handed, answered by its rule's stream on the clock, each entry told
+   * through `tell` at its moment by the handle's rules (REALTIME above). Returns the handle the node holds.
+   */
+  subscribe(call: BackendCall, tell: (e: RealtimeTold) => void): WorldSubscription {
+    const record = (op: string) => {
+      const recorded: BackendCall = { op, backend: call.backend, args: call.args };
+      this.calls.push(recorded);
+      for (const l of this.listeners) l(recorded);
+    };
+    record('subscribe');
+    let status = 'connecting';
+    /** stopped or disposed: the transport is closed and nothing more is told */
+    let ended = false;
+    let disposed = false;
+    const timers: number[] = [];
+    const handle: WorldSubscription = {
+      get status() {
+        return status;
+      },
+      // RealtimeSubscription.ts `dispose` — guarded by `_disposed` alone: a subscription a fatal error stopped is still disposed
+      dispose: () => {
+        if (disposed) return;
+        disposed = true;
+        ended = true;
+        status = 'stopped';
+        for (const t of timers.splice(0)) this.clock.cancel(t);
+        record('unsubscribe');
+      }
+    };
+    // the handle's `_notify`: a handler's throw is logged and goes no further
+    const safely = (e: RealtimeTold) => {
+      try {
+        tell(e);
+      } catch {
+        /* RealtimeSubscription.ts `_notify` — "the subscription is unaffected" */
+      }
+    };
+    const setStatus = (next: string) => {
+      if (status === next) return;
+      status = next;
+      if (next === 'stopped') ended = true;
+      safely({ status: next });
+    };
+    const collection = (call.args as { collection?: unknown }).collection;
+    const rule = this.ruleFor({ op: 'subscribe', backend: call.backend, args: call.args });
+    if (!rule) {
+      this.violations.push(`subscribe ${String(collection)} on ${call.backend}: no rule in the world's script answers it`);
+      return handle;
+    }
+    const a = rule.answer;
+    if ('never' in a) return handle;
+    if (!('stream' in a)) throw new Error(`world: a subscribe is answered by a stream or never (REALTIME), not ${JSON.stringify(a)}`);
+    for (const entry of a.stream) {
+      const id = this.clock.schedule(entry.at ?? 1, () => {
+        timers.splice(timers.indexOf(id), 1);
+        if (ended) return;
+        if ('status' in entry) setStatus(entry.status);
+        else if ('change' in entry) {
+          const c = entry.change;
+          safely({ change: { type: c.type, collection, ids: c.ids ?? [], records: c.records ?? [], recordsComplete: c.recordsComplete ?? true } });
+        } else {
+          const kind = entry.error.kind ?? REALTIME_FAILURE_KINDS[entry.error.code];
+          safely({ error: { message: entry.error.message, code: entry.error.code, kind } });
+          if (kind === 'fatal') setStatus('stopped');
+        }
+      });
+      timers.push(id);
+    }
+    return handle;
   }
 
   /** How many calls each rule has answered (s28 `times`). */

@@ -337,6 +337,79 @@ describe('BACKEND (NSP-014 s21, R9) — the backends a record node asks, at the 
   });
 });
 
+describe('BACKEND — REALTIME (NSP-014 s33): a subscription, recorded as handed, telling what its stream says on the clock', () => {
+  const stream = (entries: unknown[]) => ({ backend: { answers: [{ match: { op: 'subscribe' }, answer: { stream: entries } }] } }) as never;
+
+  test('a subscribe is recorded as handed; its stream is told at `at` (never before 1); a status equal to the one held is not told; a change is completed', () => {
+    const w = new World(stream([{ status: 'connecting' }, { at: 2, status: 'subscribed' }, { at: 2, status: 'subscribed' }, { at: 5, change: { type: 'create', ids: ['r1'] } }]));
+    const seen: string[] = [];
+    w.backend.onCall((c) => seen.push(c.op));
+    const told: unknown[] = [];
+    const sub = w.backend.subscribe({ op: 'subscribe', backend: 'main', args: { collection: 'Lesson', primaryKey: 'id', onEvent: () => undefined } }, (e) => told.push(e));
+    expect(seen).toEqual(['subscribe']);
+    expect(sub.status).toBe('connecting');
+    expect(told).toEqual([]); // never inside the call — `connecting` at +1 is the status held, not told
+    w.clock.advance(1);
+    expect(told).toEqual([]);
+    w.clock.advance(1);
+    expect(told).toEqual([{ status: 'subscribed' }]);
+    expect(sub.status).toBe('subscribed');
+    w.clock.advance(3);
+    expect(told[1]).toEqual({ change: { type: 'create', collection: 'Lesson', ids: ['r1'], records: [], recordsComplete: true } });
+    expect(backendEvent(w.backend.calls[0])).toEqual({ t: 'backend', op: 'subscribe', backend: 'main', args: { collection: 'Lesson', primaryKey: 'id' } });
+    expect(w.violations).toEqual([]);
+  });
+
+  test('an error is told with the contract\'s kind; a fatal one then stops — `stopped` told, nothing after; a retryable one goes on', () => {
+    const w = new World(stream([{ at: 1, error: { message: 'x', code: 'CONNECT_FAILED' } }, { at: 2, error: { message: 'y', code: 'AUTH_FAILED' } }, { at: 3, change: { type: 'update' } }, { at: 4, status: 'subscribed' }]));
+    const told: unknown[] = [];
+    const sub = w.backend.subscribe({ op: 'subscribe', backend: 'main', args: { collection: 'Lesson' } }, (e) => told.push(e));
+    w.clock.advance(10);
+    expect(told).toEqual([{ error: { message: 'x', code: 'CONNECT_FAILED', kind: 'retryable' } }, { error: { message: 'y', code: 'AUTH_FAILED', kind: 'fatal' } }, { status: 'stopped' }]);
+    expect(sub.status).toBe('stopped');
+    // a stopped subscription is still disposed by its node, and that is recorded
+    sub.dispose();
+    expect(w.backend.calls.map((c) => c.op)).toEqual(['subscribe', 'unsubscribe']);
+  });
+
+  test('dispose: an `unsubscribe` with the subscribe\'s args, status stopped and NOT told, nothing more told; a second dispose does nothing — beside one never disposed, which is told', () => {
+    const entries = [{ at: 5, status: 'subscribed' }];
+    const w = new World(stream(entries));
+    const told: unknown[] = [];
+    const kept: unknown[] = [];
+    const sub = w.backend.subscribe({ op: 'subscribe', backend: 'main', args: { collection: 'Lesson' } }, (e) => told.push(e));
+    w.backend.subscribe({ op: 'subscribe', backend: 'main', args: { collection: 'Note' } }, (e) => kept.push(e));
+    sub.dispose();
+    sub.dispose();
+    expect(sub.status).toBe('stopped');
+    w.clock.advance(10);
+    expect(told).toEqual([]);
+    expect(kept).toEqual([{ status: 'subscribed' }]);
+    expect(w.backend.calls.map((c) => `${c.op} ${String(c.args.collection)}`)).toEqual(['subscribe Lesson', 'subscribe Note', 'unsubscribe Lesson']);
+  });
+
+  test('a handler that throws is swallowed and the next entry is still told; a subscribe no rule answers is a VIOLATION and tells nothing; a stream answers only a subscribe', () => {
+    const w = new World(stream([{ at: 1, status: 'subscribed' }, { at: 2, change: { type: 'delete' } }]));
+    const told: unknown[] = [];
+    w.backend.subscribe({ op: 'subscribe', backend: 'main', args: { collection: 'Lesson' } }, (e) => {
+      told.push(e);
+      throw new Error('a node threw');
+    });
+    expect(() => w.clock.advance(5)).not.toThrow();
+    expect(told).toHaveLength(2);
+    const bare = new World({ backend: { answers: [{ match: { op: 'query' }, answer: { ok: [] } }] } });
+    const none: unknown[] = [];
+    expect(bare.backend.subscribe({ op: 'subscribe', backend: 'main', args: { collection: 'Lesson' } }, (e) => none.push(e)).status).toBe('connecting');
+    bare.clock.advance(100);
+    expect(none).toEqual([]);
+    expect(bare.violations).toEqual(["subscribe Lesson on main: no rule in the world's script answers it"]);
+    const wrong = new World({ backend: { answers: [{ answer: { stream: [] } }] } });
+    expect(() => wrong.backend.issue({ op: 'query', backend: 'main', args: { collection: 'Lesson' } }, () => undefined)).toThrow(/only a subscribe/);
+    const notStream = new World({ backend: { answers: [{ answer: { ok: null } }] } });
+    expect(() => notStream.backend.subscribe({ op: 'subscribe', backend: 'main', args: { collection: 'Lesson' } }, () => undefined)).toThrow(/stream or never/);
+  });
+});
+
 describe('NETWORK — the XHR face (NSP-014 s32): one server, two faces; the project\'s cloud services', () => {
   const flush = () => new Promise((r) => setImmediate(r));
 

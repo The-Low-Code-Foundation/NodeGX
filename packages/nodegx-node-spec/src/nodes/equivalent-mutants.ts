@@ -25,6 +25,13 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG }
   ],
+  // NSP-014 s33 — the frame end's quiet reconfigure (Enabled off, or no Class, with no subscription held): nothing to tear
+  // down and nothing to open, so re-running it every frame is silent; every input that could change it schedules anyway
+  SubscribeToChanges: [
+    { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG }
+  ],
   // NSP-014 s23 — the frame end's two quiet branches: no job, and a bind of a node already bound to nothing. Each sibling's
   // example writes what the state already holds (`jobs: []` on an empty list; `bound: undefined` on an unbound node).
   DbModel2: [

@@ -71,6 +71,8 @@
  * world handler's `opens` opens and reports invocations no input invoked, at once, recorded with the port `''`.
  * (s31) A `picker` effect records the click in the LOCATION group; the person's answer runs `spec.world.picker` at its
  * moment on the clock. An outcome reducer's `settles` reports its input's still-pending invocations before its own opens.
+ * (s33) An `unsubscribe` then a `subscribe` effect record `backend` events in the request group (world.ts REALTIME); what a
+ * subscription tells runs `spec.world.realtime` at its moment on the clock.
  *
  * THE REGISTRY (NSP-012, registry.ts). Reducers reach it through `world.registry` and WRITE to it
  * directly; a write notifies every OTHER instance watching the entry (`world.watch`) synchronously
@@ -93,10 +95,10 @@ import type { Step } from './adapter';
 import { canonicalise, canonicalKey } from './canonical';
 import { coerce } from './coerce';
 import { isRegistryEntry } from './registry';
-import type { AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, ReducerOutcome, SignalOutputDecl, SpecBackendCall, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
+import type { AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, RealtimeEvent, ReducerOutcome, SignalOutputDecl, SpecBackendCall, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
-import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent } from './world';
+import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent, type WorldSubscription } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
 type Inbound =
@@ -113,7 +115,9 @@ type Inbound =
   | { kind: 'authReturn'; state: AuthReturnState }
   | { kind: 'mount' }
   // s31: the person answered a click on the node's file input (world.ts PICKER)
-  | { kind: 'picker'; event: PickerEvent };
+  | { kind: 'picker'; event: PickerEvent }
+  // s33: a subscription the node opened told it something (world.ts REALTIME)
+  | { kind: 'realtime'; event: RealtimeEvent };
 
 interface OutcomeSlot {
   port: string;
@@ -157,6 +161,8 @@ export interface Instance {
   watches: Map<string, () => void>;
   /** NSP-013 s13: the unsubscribe of this instance's `resize` listener (`WorldView.listen`), when it listens. */
   resizeOff?: () => void;
+  /** NSP-014 s33: the spec's subscription ids → the world's handles (world.ts REALTIME), until disposed. */
+  subscriptions?: Map<string, WorldSubscription>;
 }
 
 export class SpecError extends Error {
@@ -612,6 +618,8 @@ interface PatchLike {
   opens?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
   picker?: PickerClick;
   settles?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
+  unsubscribe?: readonly string[];
+  subscribe?: SpecBackendCall;
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -749,6 +757,26 @@ function effects(inst: Instance, port: string, patch: PatchLike): void {
     world.backend.issue(call, (d) => inst.inbox.push(auth ? { kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent, auth: { ...auth, delivery: d } } : { kind: 'backend', answer: { id: c.id, ...d } as BackendAnswerEvent }));
     inst.pending.requests.push(backendEvent(call));
   }
+  // REALTIME (world.ts, NSP-014 s33): the subscriptions disposed, then the one opened — each a `backend` event in the request
+  // group, as the world records it; what an open one tells runs the spec's handler at its moment on the clock
+  if (patch.unsubscribe !== undefined || patch.subscribe !== undefined) {
+    const subs = (inst.subscriptions ??= new Map());
+    const recordFrom = world.backend.calls.length;
+    for (const id of patch.unsubscribe ?? []) {
+      const sub = subs.get(id);
+      if (!sub) throw new SpecError(`${spec.type}.${port}: unsubscribed ${JSON.stringify(id)}, which is not open`);
+      subs.delete(id);
+      sub.dispose();
+    }
+    if (patch.subscribe) {
+      const c = patch.subscribe;
+      if (!spec.world?.realtime) throw new SpecError(`${spec.type}.${port}: subscribed but the spec has no world.realtime handler`);
+      if (c.op !== 'subscribe') throw new SpecError(`${spec.type}.${port}: a subscribe effect's op is subscribe, not ${String(c.op)}`);
+      if (typeof c.id !== 'string' || subs.has(c.id)) throw new SpecError(`${spec.type}.${port}: a subscription needs an id not already open`);
+      subs.set(c.id, world.backend.subscribe({ op: 'subscribe', backend: c.backend, args: c.args }, (told) => handleInbound(inst, { kind: 'realtime', event: { id: c.id, ...told } as RealtimeEvent })));
+    }
+    for (const call of world.backend.calls.slice(recordFrom)) inst.pending.requests.push(backendEvent(call));
+  }
   // LOCATION (world.ts): only with a window — a spec reads `viewport()` first, as a node checks `typeof window`
   if ((patch.open || patch.push || patch.dispatch !== undefined) && !world.location) {
     throw new SpecError(`${spec.type}.${port}: used the location in a play with no window`);
@@ -861,6 +889,9 @@ function handleInbound(inst: Instance, item: Inbound): void {
   } else if (item.kind === 'picker') {
     name = 'world.picker';
     patch = asWriter(inst, () => spec.world!.picker!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'realtime') {
+    name = 'world.realtime';
+    patch = asWriter(inst, () => spec.world!.realtime!(inst.state as never, inst.inputs as never, item.event, view));
   } else if (item.kind === 'mount') {
     name = 'world.mount';
     patch = asWriter(inst, () => spec.world!.mount!(inst.state as never, inst.inputs as never, view));
