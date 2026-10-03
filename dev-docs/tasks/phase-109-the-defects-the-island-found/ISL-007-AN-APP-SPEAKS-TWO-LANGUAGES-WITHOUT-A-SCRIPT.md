@@ -1,6 +1,6 @@
 # ISL-007 — An app speaks two languages without a script
 
-**Status:** 🔒→✅ ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). Not built. Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). s7: AC1 read (288 of 334 texts switch, 0 braces, the route costs 16 placements + 342 KB); the module's source recovered from its map. Not built. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F10](AUDIT-2026-10-01.md) · the island's 693-row word table and `Logic/Translate words` · the same need met by [TPL-007](../phase-78-the-templates/TPL-007-THE-MATHS-AND-TYPING-GAME.md) §2.6 (Static Data route) and [TPL-011](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md) (i18next route)
 **Side:** product (a translation primitive, or the shipped i18next module) — and a scope ruling against [P47](../phase-47-internationalisation/README.md)
 
@@ -102,4 +102,58 @@ is counted. The door can list and set strings in one call each (INT-009's shape)
 
 ## 8. Session log
 
-None yet.
+### Session 7 — 2026-10-03: AC1 read; the module read from its own source
+
+**AC1 (the before-reading), on a `nodegx deploy` of `templates/bot-garden` at `faafbcdd4` (exit 0).** New drive
+[`drive-isl007-words.js`](../../../scripts/devtools/drive-isl007-words.js) (AC4 re-runs it): a new player, then on five
+pages every visible text keyed by its DOM path, read in English, FR pressed live (no reload), read again; every press
+checked with `elementFromPoint`. Exit 0.
+
+| page | texts in both | changed on FR | unchanged (all names, symbols, band and language buttons) |
+|---|---|---|---|
+| Island | 66 | 45 | 7–9, 10–12, EN, FR, Ada, Sami, Mamie Rose, Biscuit, → |
+| Workshop (free play) | 39 | 31 | 7–9, 10–12, EN, FR, Ada, +, −, ⤢ |
+| My robots | 118 | 112 | 7–9, 10–12, EN, FR, Ada, Cobble |
+| Skills | 70 | 65 | 7–9, 10–12, EN, FR, Ada |
+| Grown-ups | 41 | 35 | 7–9, 10–12, EN, FR, Ada, — |
+
+- (i) **288 of 334** texts change; no English is left on screen in French.
+- (ii) **0** strings show a `{…}` placeholder, in either language. On these five pages, for a new player, the audit's
+  inferred brace leak does not happen: whatever of the other 24 placeholders these states show was filled downstream
+  (`fill` / `fillIn`). This does not reach states a new player never sees (a robot at work, a win card, Olive's lines).
+  Control: Pip's name (a `{b}` word) is on screen in both languages on all five pages.
+- (iii) The route: `/Logic/Translate words` placed **16** times (one per page or panel: Top bar, Profiles form, the six
+  pages, four Grown-ups panels, Shop, Robot options, Olive lessons, Workshop Play); its component file **243,961 bytes**
+  (762 `Outputs.` lines); `Data/Words` **760 rows**, the table **98,491 bytes** (693 rows / 89,117 when scoped on 10-01).
+- Two false readings on the way, both from the probe: a create button looked for as "Create" (it is "Let's go!") read
+  every page with no player and 0 changed; `/my-robot` is not a route (the tab goes to `/robot`) and read the Profiles
+  page. Both are now failures in the drive (the landing check, the per-page changed > 0).
+
+**The module, read from its own source.** `index.js` is a webpack bundle; its map carries `sourcesContent`, and
+`src/i18next-module.js` (471 lines) is recoverable from it. What it does (i18next v19 + the browser language detector):
+
+- `i18next` node: Language in, Change Language signal, Language Changed / Current Language out. **The detector picks
+  the browser's language at start**; nothing persists a person's choice (ruling 3's "explicit, persisted" is the app's).
+- `Language Bundle`: a JSON bundle (or a fetched file) per language and namespace, `addResourceBundle(…, deep, overwrite)`.
+- `Translation`: **one node per word.** Key (a `{x}` in the KEY builds the key from an input), Variables (a list; each a
+  port; `count` parsed as a number), one Translation output. A **missing key sets nothing**: the output keeps its last
+  value, silently (no warning; the line that would say so is commented out).
+- **Escaping is on** (`escapeValue: true` in both copies of the defaults in the bundle): an interpolated `&` becomes
+  `&amp;` on screen (TPL-011's finding). The fix is one init option, `interpolation: { escapeValue: false }`: a Noodl Text
+  renders text, so escaping is a double encoding there, as react-i18next sets it.
+- A placeholder in a TRANSLATION is i18next's `{{name}}`, fed through Variables. A missing variable: not yet measured
+  (AC3).
+
+**Ruling 2 (placeholder syntax), settled by the existing mechanism, not re-asked:** the add-on's own `{{name}}`. Changing
+its interpolation to `{name}` would break every string already written for it (nightbook's ~250, the DBT template) and
+every i18next page a person or an agent reads. The island's 25 `{x}` placeholders convert mechanically when it moves
+(AC4). Recorded here so a later reader sees it was a choice.
+
+**The build route, and why it is not started this session.** Fixing the module means rebuilding the bundle from the
+recovered source with i18next as a dependency, and i18next is in no `node_modules` in the tree. Adding it touches the root
+`package-lock.json`, which holds a peer's uncommitted edit today (2026-10-03). Next: (1) put the recovered source in the
+repo beside the module with a build script; (2) the escaping option and a missing-key warning; (3) AC2's new-project drive
+with AC3 and AC5's cases in it (`&`, `<`, *l'île*, a missing variable); (4) a "words for this page" shape cheaper than one
+node per word, the ruling's third clause; (5) then AC4, the island moved, with `drive-isl007-words.js` re-run beside
+this table.
+
