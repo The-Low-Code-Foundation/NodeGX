@@ -1,9 +1,9 @@
 ---
 id: P109-S6-DEF038
-title: Four shipped templates would be rewritten by an editor load — DEF-038's settled gate is red (6 rows)
+title: The DBT demo template would be rewritten by an editor load — 6 Function inputs lose their run-on-change (DEF-038's settled gate)
 status: open
 severity: medium
-area: templates / run-on-value-change settling (NDA-017, DEF-038; P109 ISL-018 AC7)
+area: templates / digital-bricks-training-demo, run-on-value-change settling (NDA-017, DEF-038)
 found: P109 s6, 2026-10-03 (the first full `noodl-mcp` run in P109; met as a red neighbour, not this session's change)
 evidence: packages/noodl-mcp/tests/def038SettledTemplates.test.ts — 6 failed, full suite JSON 2026-10-03 08:57
 ---
@@ -20,3 +20,26 @@ P107 commits land beside it. Not the P109 s6 data-* change (it touches no run-on
 
 **Reproduce:** `cd packages/noodl-mcp && npx jest tests/def038SettledTemplates.test.ts`. First step: run it at
 `b2ba0320a^` and at `b2ba0320a` in a worktree (`scripts/make-worktree.sh`) to settle (a).
+
+## Measured in s7 (2026-10-03) — the six red rows were three different things
+
+Run in a clean worktree at HEAD `5fc537fb5` (`scripts/devtools/make-worktree.sh`), so only committed artefacts:
+**3 red**, not 6. The other three were a peer's **uncommitted** templates (`nightbook`, `planning`, `planning-demo`
+have no commits at all), which the gate sweeps from the working tree.
+
+- **Not ISL-018.** The same 3 rows at `b2ba0320a^` and at `b2ba0320a`. Between the two, the gate's only changed
+  input is the contract file, and that diff adds an export and a comment; the planner is untouched.
+- **Two were the gate's own control arm** (`rocket-school`, `digital-bricks-training`): it deleted a key the planner
+  never reads. Filed and fixed separately: `P109-S7-DEF038CONTROL`. The peer's `planning` / `planning-demo` were
+  the same.
+- **One is real and is this bug:** `templates/digital-bricks-training-demo`, red **from its first commit**
+  (`eb9ace9da` 2026-09-24, `feat(dbt-template/l180)`). Six `JavaScriptFunction` inputs (`in-conceptId` ×3,
+  `in-field`, `in-value`, `in-learnerId`) on `sr_call`, `ls_finish_call`, `pr_about`, `le_call` carry no answer.
+  The project is at format `"4"`, so since ISL-018 the editor's first open runs the migration once, writes `false` on
+  all six (those Functions stop re-running when their input changes) and saves the project as format 5.
+- The peer's uncommitted `nightbook` reads the same shape (DbCollection2 `records`, 261 lines of diff); it turns
+  this gate red the moment it is committed unless its generator pins.
+
+**Owner:** the dbt-template workstream (commits `dbt template: …` / `feat(dbt-template/…)`); no generator for the
+demo lives in this repo. **Fix, either:** pin the six keys to `true` with `pinRunOnValueChangeDefaults` (what every
+generated template does), or stamp the template at format `"5"` (what `create_project` writes since ISL-018).

@@ -2,6 +2,7 @@
 id: P109-S5-KITRECORDING
 title: `kitAgreement` is red: its editor side is a recording that predates the two shared ports every visual node gained
 status: fixed
+commit: 0951dbbe3
 severity: medium
 area: `noodl-mcp/tests/kitAgreement.test.ts` against `noodl-editor/tests-unit/cn-003/fixtures/kit-app.editor-nodelibrary.json` (recorded 2026-08-17)
 found: P109 s5, 2026-10-02 — ISL-009 (`6a9d00cee`)
