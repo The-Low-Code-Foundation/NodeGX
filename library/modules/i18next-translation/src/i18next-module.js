@@ -5,7 +5,8 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 const i18nextNode = Noodl.defineNode ({
 	category:'i18next-noodl',
 	name:"i18next",
-	docs:'https://docs.noodl.net/modules/i18next/i18next-node',
+	// P109 ISL-007 AC7: a kit node's `docs` is its sentence to an agent and the editor (CN-009); these were dead URLs.
+	docs:'The app\'s current language. Set Language ("fr") and send Change Language: every Translation node changes at once, with no reload, and the page\'s <html lang> follows. With no Language, the browser\'s language is used, or the one the person last chose (kept in the browser). Place one, in App.',
 	inputs:{
 		Language:"string"
 	},
@@ -38,7 +39,7 @@ const i18nextNode = Noodl.defineNode ({
 const LanguageBundleNode = Noodl.defineNode({
 	category:'i18next-noodl',
 	name:'Language Bundle',
-	docs:'https://docs.noodl.net/modules/i18next/language-bundle',
+	docs:'The words of one language. Bundle is JSON, key to word: {"greet": "Hello {{name}}"}. Set Language (default "en") and Namespace (default "common"). One Language Bundle per language, in App. A word may hold {{name}} for a value the Translation node fills in.',
 	inputs:{
 		Bundle:{type:{name:'string', codeeditor:"JSON"}},
 		ExternalFilePath: {
@@ -154,7 +155,7 @@ const LanguageBundleNode = Noodl.defineNode({
 const TranslationNode = Noodl.defineNode({
 	category:'i18next-noodl',
 	name:'Translation',
-	docs:'https://docs.noodl.net/modules/i18next/translation',	
+	docs:'Translates one word into the current language: set Key, and wire Translation into a Text. For a {{name}} in the word, add name to Variables and connect a value to the new input. The word shows exactly as typed (& < and apostrophes are not escaped). A missing word, or a {{name}} with no value, is named in a warning on this node, never shown as braces.',	
 	inputs:{
 		Key: {
             type: { name: 'string'},

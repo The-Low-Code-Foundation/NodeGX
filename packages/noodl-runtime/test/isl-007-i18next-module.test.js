@@ -11,6 +11,8 @@
  *    variable. A word missing from every bundle shows nothing (not the previous word) and the editor names it.
  *  - An emptied key clears the word with no warning (P78-TPL011-TRANSLATION: the last word stayed on screen).
  *  - A word missing in French falls back to English, with no warning.
+ *  - AC7: each node's `docs` is a sentence an agent reads (`get_node_type`'s summary, CN-009), not the dead
+ *    docs.noodl.net URL it carried, and the Translation sentence says the three things TPL-011 met the hard way.
  *
  * Sabotage: `ISL007_MODULE=<the module as imported>` points this at another build; the escaping and warning cases go
  * red (measured 2026-10-03 against the 1.0.4 bundle at HEAD `4017a9922`).
@@ -32,6 +34,7 @@ const settle = () => new Promise((resolve) => setTimeout(resolve, 20));
 
 let rt;
 let warnings;
+let loaded;
 
 /** Load the module once: i18next is a singleton inside it, as it is on a page. */
 beforeAll(async () => {
@@ -51,6 +54,7 @@ beforeAll(async () => {
   let module;
   const Noodl = { defineModule: (m) => rt.registerModule((module = Object.assign({ name: 'i18next-noodl' }, m))) };
   vm.runInNewContext(fs.readFileSync(MODULE, 'utf8'), { Noodl, console, setTimeout, clearTimeout, Promise });
+  loaded = module;
   // The runtime runs a module's setup when it loads the graph (`noodl-runtime.ts`, "Run setup on all modules").
   module.setup.apply(module);
   await settle();
@@ -153,4 +157,15 @@ describe('ISL-007 — the i18next add-on', () => {
     expect(shown(node)).toBe('Only in English');
     expect(warned(node)).toEqual([]);
   });
+});
+
+test('AC7: each node says what it does in a sentence, and Translation names {{name}}, escaping and the warning', () => {
+  const docs = Object.fromEntries(loaded.nodes.map((n) => n.node || n).map((n) => [n.name, n.docs]));
+  expect(Object.keys(docs).sort()).toEqual(['Language Bundle', 'Translation', 'i18next']);
+  for (const sentence of Object.values(docs)) expect(sentence).not.toMatch(/^https?:/);
+  expect(docs.Translation).toMatch(/^Translates/); // `list_node_types` query "translate" matched nothing before
+  expect(docs.Translation).toContain('{{name}}');
+  expect(docs.Translation).toMatch(/not escaped/);
+  expect(docs.Translation).toMatch(/warning/);
+  expect(docs.i18next).toContain('<html lang>');
 });

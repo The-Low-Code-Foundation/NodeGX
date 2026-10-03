@@ -1,6 +1,6 @@
 # ISL-007 — An app speaks two languages without a script
 
-**Status:** 🟡 ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). s7: AC1 read (288 of 334 texts switch, 0 braces, the route costs 16 placements + 342 KB); the module's source recovered from its map. **s8: BUILT — module 1.1.0 rebuilt from its recovered sources (no install, root lock untouched); AC2, AC3, AC5 ✅ (spec 5/5, imported module 1/5; deployed drive 16/16, control 5/5); AC8 recorded in P47. Open: the "words for this page" clause, AC4 (the island moves), AC6 (the door), AC7's catalog half.** Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). s7: AC1 read (288 of 334 texts switch, 0 braces, the route costs 16 placements + 342 KB); the module's source recovered from its map. **s8: BUILT — module 1.1.0 rebuilt from its recovered sources (no install, root lock untouched); AC2, AC3, AC5 ✅ (spec 5/5, imported module 1/5; deployed drive 16/16, control 5/5); AC8 recorded in P47. Open: the "words for this page" clause, AC4 (the island moves), AC6 (the door). s9: AC7's catalog half ✅ (each node says what it does to an agent; was a dead URL).** Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F10](AUDIT-2026-10-01.md) · the island's 693-row word table and `Logic/Translate words` · the same need met by [TPL-007](../phase-78-the-templates/TPL-007-THE-MATHS-AND-TYPING-GAME.md) §2.6 (Static Data route) and [TPL-011](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md) (i18next route)
 **Side:** product (a translation primitive, or the shipped i18next module) — and a scope ruling against [P47](../phase-47-internationalisation/README.md)
 
@@ -214,3 +214,33 @@ the 16 Translate words (48 Text, 18 Button label, 28 component inputs), while **
 (fill / fillIn / lookups over the table, placed 6 times). AC4 therefore moves to
 [IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md) AC4, the island's own rebuild.
 
+### Session 9 (2026-10-03) — AC7's catalog half, and AC6 read
+
+**What the door said, measured** (`get_node_type` / `list_node_types` through an in-process server on a scratch copy of
+`isl007-two-languages/`, read-only): each of the three nodes came back as a port list and a `summary` that was the
+**dead URL** `https://docs.noodl.net/modules/i18next/…`. A kit node's `docs` is read as the author's sentence (CN-009,
+`noodl-mcp/src/catalog.ts` `summaryOf`), and this module's author wrote a URL, so an agent got nothing about `{{x}}`,
+escaping or the warnings. And `list_node_types` `query: "translate"` matched **nothing** ("Translation" does not contain
+"translate"); `translation`, `language` and `i18n` matched all three; `french`, `bilingual`, `locale` matched none.
+
+**Built:** the three `docs` in `src/i18next-module.js` are sentences (rebuilt by `build.mjs`; version stays 1.1.0 —
+s8's 1.1.0 has not left this machine). Translation's opens with *"Translates"*, names `{{name}}` → Variables, "shown
+exactly as typed (… not escaped)", and the warning; Language Bundle gives the JSON shape and both defaults (`en`,
+`common`); i18next names `<html lang>` and the browser/last-choice default. After: `query: "translate"` → `Translation`.
+
+| reading | before | after |
+|---|---|---|
+| `get_node_type` summary, all three | `https://docs.noodl.net/…` | the sentence |
+| `list_node_types` `translate` | `[]` | `["Translation"]` |
+| [`isl-007-i18next-module.test.js`](../../../packages/noodl-runtime/test/isl-007-i18next-module.test.js) new AC7 test | — | 6/6; **s8's build (HEAD) reddens AC7 only** (`Received "https://docs.noodl.net/modules/i18next/i18next-node"`) |
+| `library:check` | — | i18next OK (the one FAIL is still the peer's untracked `nightbook-kit`) |
+
+**AC6 read, not built.** (i) *Set a French column in one call:* with the add-on, a language's words are ONE parameter
+(`Bundle`, JSON) on a Language Bundle node, so one `update_component` operation sets them all — already one call.
+(ii) *List the project's words in one call:* the same bundle, read by one `get_component`, IS the list when the words
+live in bundles. What the door cannot do in one call is list the **keys pages use**: `search_project` returns
+locations only (`SearchMatch` = component, nodeId, type, label — no parameters), so finding a key used on a page but
+missing from French costs one `get_component` per component. The runtime warning (AC3) names it once the page runs.
+(iii) *Warn on a typed word on an opted-in project* (INT-009's rule) is a new validator rule, and the question it needs
+is what counts as opted in and what a word is (the island has 334 visible texts and s7 read 46 that did not switch, not classified
+by kind). Put to Richard with this session's other questions.
