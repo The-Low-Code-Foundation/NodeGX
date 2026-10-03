@@ -1,6 +1,6 @@
 # ISL-007 — An app speaks two languages without a script
 
-**Status:** 🟡 ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). s7: AC1 read (288 of 334 texts switch, 0 braces, the route costs 16 placements + 342 KB); the module's source recovered from its map. Not built. Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 ruled s4 (2026-10-02): **"Adopt the add-on"** — `library/modules/i18next-translation`, its gaps fixed and taught to agents (README §8). s7: AC1 read (288 of 334 texts switch, 0 braces, the route costs 16 placements + 342 KB); the module's source recovered from its map. **s8: BUILT — module 1.1.0 rebuilt from its recovered sources (no install, root lock untouched); AC2, AC3, AC5 ✅ (spec 5/5, imported module 1/5; deployed drive 16/16, control 5/5); AC8 recorded in P47. Open: the "words for this page" clause, AC4 (the island moves), AC6 (the door), AC7's catalog half.** Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F10](AUDIT-2026-10-01.md) · the island's 693-row word table and `Logic/Translate words` · the same need met by [TPL-007](../phase-78-the-templates/TPL-007-THE-MATHS-AND-TYPING-GAME.md) §2.6 (Static Data route) and [TPL-011](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md) (i18next route)
 **Side:** product (a translation primitive, or the shipped i18next module) — and a scope ruling against [P47](../phase-47-internationalisation/README.md)
 
@@ -134,6 +134,9 @@ checked with `elementFromPoint`. Exit 0.
 
 - `i18next` node: Language in, Change Language signal, Language Changed / Current Language out. **The detector picks
   the browser's language at start**; nothing persists a person's choice (ruling 3's "explicit, persisted" is the app's).
+  🔴 **Wrong, corrected in s8:** the detector's defaults (`caches: ['localStorage']`, order `querystring, cookie,
+  localStorage, sessionStorage, navigator, htmlTag`) store every change under `i18nextLng` and read it first on the
+  next load. Measured on the deployed module AS IMPORTED: French kept across a reload (`stored fr`).
 - `Language Bundle`: a JSON bundle (or a fetched file) per language and namespace, `addResourceBundle(…, deep, overwrite)`.
 - `Translation`: **one node per word.** Key (a `{x}` in the KEY builds the key from an input), Variables (a list; each a
   port; `count` parsed as a number), one Translation output. A **missing key sets nothing**: the output keeps its last
@@ -156,4 +159,49 @@ repo beside the module with a build script; (2) the escaping option and a missin
 with AC3 and AC5's cases in it (`&`, `<`, *l'île*, a missing variable); (4) a "words for this page" shape cheaper than one
 node per word, the ruling's third clause; (5) then AC4, the island moved, with `drive-isl007-words.js` re-run beside
 this table.
+
+### Session 8 — 2026-10-03: built (module 1.1.0); AC2, AC3, AC5 driven
+
+**The build route that does not touch the root lock.** `package-lock.json` still held the peer's edit (mtime Sep 24;
+its diff is the REVERSE of `a9c10ff8c`'s node-spec entries plus an editor version, so not mine to touch). Nothing had
+to be installed: the map carries every file the bundle was built from, so all 14 are recovered into
+[`src/`](../../../library/modules/i18next-translation/src) (the module) and `src/vendor/` (i18next 19, the detector,
+ten Babel helpers, the Noodl SDK; one import path fixed; [vendor README](../../../library/modules/i18next-translation/src/vendor/README.md)),
+and [`build.mjs`](../../../library/modules/i18next-translation/build.mjs) bundles them with the repo's esbuild through
+aliases. Deterministic (built twice, `cmp` equal). ⚠️ `dist` is gitignored repo-wide, so the vendor paths are flat.
+Parity: the verbatim source rebuilt reads exactly as the imported bundle in the spec below (the same 3 red, the same
+1 green) before any edit.
+
+**What changed in the module** (`src/i18next-module.js`, version 1.0.4 → 1.1.0):
+1. `interpolation: { escapeValue: false }`.
+2. `translate()`: a `{{variable}}` with no value → `''` in its place and a warning naming the word and the variable
+   (i18next's per-call `missingInterpolationHandler`); a key in no bundle → `''` and a warning naming it; an EMPTIED key
+   → `''`, no warning (P78-TPL011-TRANSLATION, open since 09-26: the last word stayed on screen).
+3. `<html lang>` follows `languageChanged` (P41 ACC-005's hard-coded `lang="en"`, for these apps).
+4. `onNodeDeleted` unhooked `added` from i18next instead of its store (a listener leak).
+
+**Measured, i18next v19 as imported, before the fix:** a missing variable is replaced by `''` silently (the logger warns
+only with `debug`), so braces never reached a screen — the risk was silence, not braces. An `&` in a WORD is shown as
+typed; only interpolated VALUES were escaped.
+
+| AC | reading |
+|---|---|
+| AC2 | ✅ **A new project, deployed.** [`isl007-two-languages/`](isl007-two-languages) built through the door by [`isl007TwoLanguages.ts`](../../../packages/noodl-mcp/tests/isl007TwoLanguages.ts) (0 errors; no Function node; the switch is Button → Set Variable → i18next). `nodegx deploy … --allow-development-engine` exit 0. [`drive-isl007-two-languages.js`](../../../scripts/devtools/drive-isl007-two-languages.js), browser `en-GB`, nothing stored: a name typed, EN read, FR pressed (reach by `elementFromPoint`), FR read in the same document (marker kept: no reload), reloaded (still French), EN pressed. **16/16**; console errors 0. `<html lang>` `en-GB` → `fr` → (reload) `fr` → `en`. |
+| AC3 | ✅ **By spec, through the runtime** ([`isl-007-i18next-module.test.js`](../../../packages/noodl-runtime/test/isl-007-i18next-module.test.js): the BUILT `index.js` loaded by `NoodlRuntime.registerModule`, a stub editor connection recording warnings): a bare `{{name}}` shows `Hello ` and warns `"common:greet" … {{name}}`; a key in no bundle shows `''` (not the last word) and warns naming it; the warning goes when the word is found. On the deployed page the bare word reads `Hello` / `Bonjour`, no brace in any of 4 reads. ⚠️ The warning was read through the stub, not in a running editor. |
+| AC5 | ✅ `Tom & <Jerry>` typed → `Hello Tom & <Jerry>` / `Bonjour Tom & <Jerry>`; the word `l'île & <mer>` / `the island & <sea>` as typed; `&amp;`/`&lt;` nowhere. |
+| control | The module AS IMPORTED (HEAD's `index.js` in a copy of the project): spec **1/5** (fallback green — the known-firing case), drive `--control` **5/5**: `Hello Tom &amp; &lt;Jerry&gt;` on the page, `<html lang>` stays `en` in French. |
+| AC7 | 🟡 The module's docs pages carry the new behaviour (`docs-site/imported-prose/modules/i18next/`, regenerated: only the two i18next pages moved, `docs:library:check` clean). ⚠️ A re-import of the prose (`docs:library:import`, pinned) would put the old text back. The node catalog's descriptions were not checked. |
+| AC8 | ✅ Recorded in the [P47 README](../../phase-47-internationalisation/README.md) status (nothing built as an INT task); P65's unassigned check answered. |
+
+Gates: `library:check` i18next OK (the run's one FAIL is the peer's untracked `nightbook-kit`, no `library.json`);
+`tpl011Template.test.ts` 35/35 (the journal template copies this module). Templates that carry their OWN copy of 1.0.4
+(`nightbook`, untracked; `digital-bricks-training`) get 1.1.0 when they are next regenerated; not touched here.
+
+Met on the way: the runtime calls `editorConnection.isConnected()` on every signal, so a stub without it throws inside
+i18next's event emitter and silently stops every later listener (the switch "happened" with no node told). Recorded in
+the spec's stub; a test-harness trap, not a product defect.
+
+**Next:** the ruling's third clause ("words for this page" cheaper than a node per word: the cost is a Translation per
+Text, and a Text is there anyway, so first measure what a `T` component costs against Translate words' 16 placements);
+then AC4 (the island moves, `drive-isl007-words.js` re-run beside the AC1 table), AC6.
 

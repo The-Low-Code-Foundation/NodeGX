@@ -1,0 +1,72 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "eec87169-32e8-5176-8a32-709e188c6365",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "a_root",
+      "type": "Group",
+      "label": "App",
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "children": [
+        "a_router"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "a_router",
+      "type": "Router",
+      "label": "Router",
+      "parent": "a_root",
+      "parameters": {
+        "name": "Main",
+        "pages": {
+          "startPage": "/Pages/Home",
+          "routes": [
+            "/Pages/Home"
+          ]
+        }
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "a_i18n",
+      "type": "i18next",
+      "label": "Languages",
+      "parameters": {},
+      "x": 350,
+      "y": 40
+    },
+    {
+      "id": "a_en",
+      "type": "Language Bundle",
+      "label": "English",
+      "parameters": {
+        "Language": "en",
+        "Namespace": "common",
+        "Bundle": "{\"title\":\"My garden\",\"greet\":\"Hello {{name}}\",\"isle\":\"the island & <sea>\"}"
+      },
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "a_fr",
+      "type": "Language Bundle",
+      "label": "French",
+      "parameters": {
+        "Language": "fr",
+        "Namespace": "common",
+        "Bundle": "{\"title\":\"Mon jardin\",\"greet\":\"Bonjour {{name}}\",\"isle\":\"l'île & <mer>\"}"
+      },
+      "x": 350,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "a_root"
+  ]
+}

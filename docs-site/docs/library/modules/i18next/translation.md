@@ -25,3 +25,18 @@ You can also add custom inputs to the translation node. They will be mapped to v
 
 **Translation**
 This translated and formatted text string.
+
+## Text shows as typed
+
+A word, and every value you connect to one of its variables, shows exactly as written: `Tom & <Jerry>` stays
+`Tom & <Jerry>`, and `l'île` stays `l'île`. (Before version 1.1.0 of the module, a value in a variable was escaped
+for HTML and a Text showed `Tom &amp; &lt;Jerry&gt;`.)
+
+## When a word or a value is missing
+
+- **A `{{variable}}` with no value** shows nothing in its place, never the braces, and the node shows a warning in the
+  editor naming the word and the variable. Add the variable under **Variables** and connect something to it.
+- **A key that no Language Bundle holds** shows nothing (not the word the node showed before), and the node shows a
+  warning naming the key. A word missing in one language but present in the fallback (English) shows the English
+  word, with no warning.
+- **An empty key** shows nothing, with no warning. Emptying the key is how an app clears a message.

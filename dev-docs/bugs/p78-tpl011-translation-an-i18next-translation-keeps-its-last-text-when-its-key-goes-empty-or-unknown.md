@@ -1,7 +1,8 @@
 ---
 id: P78-TPL011-TRANSLATION
 title: An i18next Translation node keeps showing its last text when its key goes empty or names nothing
-status: open
+status: fixed
+regression: packages/noodl-runtime/test/isl-007-i18next-module.test.js
 severity: medium
 area: library / i18next Translation (i18next-translation module)
 found: P78 TPL-011 s3 (V1-2), 2026-09-26
@@ -21,3 +22,9 @@ string. Nightbook works around it in `UI/Say`, which draws nothing for no key.
 
 **Proposed:** set `Translation` to `''` when the key is empty, and decide what an unknown key shows (`''`, or the
 key with a warning, as i18next itself would). Rebuild the module and bump its version. Small.
+
+**Fixed (P109 s8, 2026-10-03, ISL-007; module 1.1.0 rebuilt from its recovered sources):** an emptied key shows `''`
+with no warning; a key no bundle holds shows `''` and the node warns, naming it (`No word "common:x" in fr or its
+fallback`). Measured in the runtime spec: the module as imported keeps `the island & <sea>` after its key goes unknown
+or empty (both cases red), the rebuilt one shows nothing. Nightbook's `UI/Say` workaround can go when that template
+next copies the module (it carries its own copy of 1.0.4).
