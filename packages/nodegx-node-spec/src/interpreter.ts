@@ -255,6 +255,7 @@ function viewOf(inst: Instance): WorldView {
     opens: (target, features) => !!world.location && openReturnsWindow(target, features, world.location.activation),
     pushes: (url) => !!world.location && pushTarget(url, world.location.href) !== null,
     projectSettings: () => world.projectSettings,
+    cloudServices: () => world.cloudServices,
     stackAnswer: (op, stack, target) => world.stack.answer(op, stack, target),
     backAnswer: (ahead) => world.stack.backAnswer(ahead ?? 0),
     routeAnswer: (router, target, openInNewTab) => world.router.answer(router, target, openInNewTab),

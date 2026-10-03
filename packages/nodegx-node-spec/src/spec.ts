@@ -162,6 +162,11 @@ export interface WorldView {
   /** NSP-015 s17 — the project's settings (world.ts PROJECT): what `NoodlRuntime.instance.getProjectSettings()` reads. */
   projectSettings(): Readonly<Record<string, unknown>>;
   /**
+   * NSP-014 s32 — the project's cloud services (world.ts PROJECT): what `NoodlRuntime.instance.getMetaData('cloudservices')`
+   * reads, with the token of the session the browser holds for its app id beside it; `undefined`: the project has none.
+   */
+  cloudServices(): Readonly<import('./world').CloudServicesScript> | undefined;
+  /**
    * NSP-015 s18 — what the Component Stacks tell a push or a replace handed under `stack` for
    * `target` (world.ts STACK): `done`, `unchanged` or a `failure`; `undefined` when no stack is
    * registered under the name — the request is queued and never answered in the play. A node that
@@ -693,6 +698,8 @@ export interface WorldPool {
   activations?: ReadonlyArray<boolean | null>;
   /** NSP-015 s17: the project settings a `project` spec's sequences play with (one is drawn per sequence; the default is `{}` alone). */
   projectSettings?: ReadonlyArray<Record<string, unknown>>;
+  /** NSP-014 s32: the cloud services a `project` spec's sequences play with (one is drawn per sequence, only when the pool names them; `null` is none). */
+  cloudServices?: ReadonlyArray<import('./world').CloudServicesScript | null>;
   /** NSP-015 s18: the Component Stacks a `stack` spec's sequences play with (one is drawn per sequence; the default is none registered alone). */
   stacks?: ReadonlyArray<import('./world').StackScript>;
   /** NSP-015 s19: the Routers a `router` spec's sequences play with (one is drawn per sequence; the default is none registered alone). */

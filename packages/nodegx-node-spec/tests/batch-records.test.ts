@@ -27,7 +27,9 @@ const USERS = ['net.noodl.user.User', 'net.noodl.user.SetUserProperties', 'net.n
 const FILES = ['Cloud File', 'Upload File', 'Sign File URL'];
 /** s31 — the file dialog (world.ts PICKER): no backend at all, graded beside the file family it feeds */
 const PICKER = ['Open File Picker'];
-const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS, ...FILES, ...PICKER];
+/** s32 — Cloud Function: its own request (world.ts NETWORK, the XHR face) to the project's cloud services (PROJECT) — no backend */
+const CLOUD = ['CloudFunction2'];
+const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS, ...FILES, ...PICKER, ...CLOUD];
 
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {
   for (const type of CONFORMING) {
@@ -121,6 +123,23 @@ describe('NSP-014 AC5 / AC6 — failures carry their sentence; a call is made on
     expect(calls.length).toBeGreaterThan(0);
     expect(none.map((x) => x.name).some((n) => n.includes('does not have'))).toBe(true);
     for (const { trace } of calls) for (const e of trace) if (e.t === 'backend') expect((e as TraceEvent & { op: string }).op).toBe(op);
+  });
+
+  // s32 — Cloud Function: every failure sentence on Error beside a Failure — before the request (no cloud services) and
+  // answered (an error body, a JSON string, no answer at all, a 204) — and a scenario that makes no request beside one that does
+  test('CloudFunction2: every failure sentence on Error beside a Failure; a scenario makes no request — beside one that does', async () => {
+    const all = await traces('CloudFunction2');
+    const errors = new Set<string>();
+    for (const { trace } of all) {
+      const failed = trace.some(isFailure);
+      for (const e of trace) if (failed && e.t === 'value' && e.port === 'error') errors.add(String((e as { value: unknown }).value));
+    }
+    for (const s of ['No cloud services defined in this project.', 'Missing parameter a', 'plain text error', 'Could not reach the backend at https://cloud.example', 'Failed running cloud function.']) expect([...errors]).toContain(s);
+    const requests = all.filter((x) => x.trace.some((e) => e.t === 'request'));
+    const none = all.filter((x) => !x.trace.some((e) => e.t === 'request') && x.trace.some(isFailure));
+    expect(requests.length).toBeGreaterThan(0);
+    expect(none.map((x) => x.name).some((n) => n.startsWith('no cloud services'))).toBe(true);
+    for (const { trace } of requests) for (const e of trace) if (e.t === 'request') expect((e as TraceEvent & { method: string; url: string }).method).toBe('POST');
   });
 
   // s30 — the file operations (world.ts FILES): every failure sentence on Error beside a Failure — before the call (no

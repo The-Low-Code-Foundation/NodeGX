@@ -62,6 +62,7 @@ import { LogIn, LogOut, SignUp } from './user-actions';
 import { RequestMagicLink, SignInWith } from './user-handovers';
 import { CloudFile } from './cloud-file';
 import { OpenFilePicker } from './open-file-picker';
+import { CloudFunction } from './cloud-function';
 import { SignFileUrl, UploadFile } from './upload-file';
 import { RandomBytes } from './random-bytes';
 import { Repeat } from './repeat';
@@ -166,6 +167,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [UploadFile.type]: UploadFile,
   [SignFileUrl.type]: SignFileUrl,
   [OpenFilePicker.type]: OpenFilePicker, // s31 (the world's PICKER)
+  [CloudFunction.type]: CloudFunction, // s32 (NETWORK's XHR face, PROJECT's cloud services)
   [States.type]: States,
   [ToCSV.type]: ToCSV,
   [Repeat.type]: Repeat,
@@ -243,6 +245,7 @@ export {
   UploadFile,
   SignFileUrl,
   OpenFilePicker,
+  CloudFunction,
   States,
   RandomBytes,
   Repeat,

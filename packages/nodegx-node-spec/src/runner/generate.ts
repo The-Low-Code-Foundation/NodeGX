@@ -223,6 +223,11 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   if (needs.includes('project')) {
     const settings = rng.pick(pool.projectSettings ?? DEFAULT_WORLD_POOL.projectSettings);
     if (Object.keys(settings).length > 0) world.projectSettings = { ...settings };
+    // NSP-014 s32 — its cloud services, drawn only when the pool names them: every `project` spec before s32 draws what it drew
+    if (pool.cloudServices) {
+      const cloud = rng.pick(pool.cloudServices);
+      if (cloud) world.cloudServices = { ...cloud };
+    }
   }
   // NSP-015 s18 — STACK: one of the pool's (the default pool registers none)
   if (needs.includes('stack')) {

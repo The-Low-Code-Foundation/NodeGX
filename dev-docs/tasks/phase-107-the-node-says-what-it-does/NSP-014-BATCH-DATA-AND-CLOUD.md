@@ -1,7 +1,7 @@
 # NSP-014 — Batch: records, users, files, HTTP, streams, and the cloud-only nodes
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world's network and backend) and R4 = continue.
-**Status: 🟡 s31 (2026-10-03): Open File Picker conforms on the runtime, first run (one survivor closed by a scenario), two seeds and at 10,000 — the world's PICKER, the 13th seam (a `document` only where the script has a picker; a file input whose `accept` / `capture` reflect; the n-th click answered by the n-th scripted answer, to whatever handler the element holds when it lands); the format's `settles` (a press that supersedes a pending one); rows C53, D27 (§6.31). 20 of 24 — T2 complete. Left: Cloud Function, WebSocket, Server-Sent Events, Subscribe To Changes.** s30: Cloud File, Upload File and Sign File URL conform on the runtime, first run, two seeds and at 10,000 — the world's BACKEND grew FILES (the contract's `uploadFile` / `signFileUrl`, a failure as one envelope, the REST adapter's not-a-file refusal); a scenario can hand a node a file (`$file`) or a stored file (`$cloudFile`); rows C51, C52, D26 (§6.28). 19 of 24. Left: Open File Picker (a FILE PICKER seam), WebSocket, Server-Sent Events, Subscribe To Changes, Cloud Function.** s29: Sign In With slice B — the return leg (§6.25). s28: Request Magic Link, Sign In With (16 of 24). s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24. s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
+**Status: 🟡 s32 (2026-10-03): Cloud Function conforms on the runtime, first run (one survivor, a dead deletion, removed), two more seeds and at 10,000. It makes its OWN request — a raw `XMLHttpRequest` to `<endpoint>/functions/<name>`, not the backend contract — so it joined NETWORK, which grew an XHR face, and PROJECT grew the project's cloud services; rows C54 (a `null` success body never answers the Call), D28 (Error can be an object) (§6.34). 21 of 24. Left: WebSocket, Server-Sent Events, Subscribe To Changes.** s31 (2026-10-03): Open File Picker conforms on the runtime, first run (one survivor closed by a scenario), two seeds and at 10,000 — the world's PICKER, the 13th seam (a `document` only where the script has a picker; a file input whose `accept` / `capture` reflect; the n-th click answered by the n-th scripted answer, to whatever handler the element holds when it lands); the format's `settles` (a press that supersedes a pending one); rows C53, D27 (§6.31). 20 of 24 — T2 complete. Left: Cloud Function, WebSocket, Server-Sent Events, Subscribe To Changes.** s30: Cloud File, Upload File and Sign File URL conform on the runtime, first run, two seeds and at 10,000 — the world's BACKEND grew FILES (the contract's `uploadFile` / `signFileUrl`, a failure as one envelope, the REST adapter's not-a-file refusal); a scenario can hand a node a file (`$file`) or a stored file (`$cloudFile`); rows C51, C52, D26 (§6.28). 19 of 24. Left: Open File Picker (a FILE PICKER seam), WebSocket, Server-Sent Events, Subscribe To Changes, Cloud Function.** s29: Sign In With slice B — the return leg (§6.25). s28: Request Magic Link, Sign In With (16 of 24). s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24. s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
 
 ## 1. The person sentence
 
@@ -991,3 +991,92 @@ Open).
 | count | **102** (+1); T2 11 / 11 |
 | `node scripts/node-spec/census.js` | run, then RESTORED from HEAD (the peer's viewer-react work is still uncommitted: dynamic ports 68 → 69, test counts). No census number depends on specs |
 | `node scripts/bugs.js check` | C53 and D27 valid; 1 problem, a PEER's file (`p109-s5-kitrecording-…`: status fixed, no commit line), not touched |
+
+### 6.34 s32 (2026-10-03) — Cloud Function; NETWORK's XHR face, PROJECT's cloud services
+
+**Built.** `cloud-function.ts`, 18 scenarios (one the C54 row). It **conforms on the runtime on the first run** (17 / 17
+and 200 / 200; one mutant survived and the branch it named was removed, below), on seeds 13 and 20730, and at 10,000;
+mutants 26 / 26. **103 / 147.** 21 of NSP-014's 24.
+
+**Read first (what does it CALL?).** Not the backend contract, so R9 does not reach it. The node makes its OWN request:
+`new XMLHttpRequest()`, `POST <cloudservices.endpoint>/functions/<encodeURIComponent(name)>` (cloudfunction2.ts :38-79,
+:286), headers `X-Parse-Application-Id`, `Content-Type: application/json`, `x-noodl-cloud-version` (a deployed backend
+only) and `X-Parse-Session-Token` (when the browser holds a session for the app id, read through `parseSessionStore`). The
+body is the JSON of the held parameters. So it is a NETWORK conversation with the project's cloud services. The handoff
+asked "BACKEND or NETWORK?": NETWORK, but through a face the world did not have, because NETWORK played `fetch` only.
+
+**The world (additive; the hash refresh named exactly `src/spec.ts`, `src/world.ts`; the three stranger rounds green).**
+- **NETWORK, TWO FACES.** `worldXMLHttpRequest(world)` issues into the same rules and records the same request as
+  `worldFetch`. `open` fires `readystatechange` at 1 synchronously. A second value for one header name is APPENDED after
+  `, ` (XHR's rule). `send(null)` sends no body. The answer lands a microtask after its moment, where a fetch's resolution
+  lands; a browser uses a task, and no node in a play can tell the two apart. A response walks `readyState` 2, 3, 4; a
+  network error is state 4, status 0, `''`, then `onerror`. **A handler that throws is reported, never propagated** (the
+  DOM's rule). Found by C54: the runtime's throw first escaped as an unhandled rejection and failed the jest suite.
+  `installWorld` gives EVERY play the XHR face beside `fetch`, and the whole runtime suite was re-run to show no other spec
+  moved.
+- **PROJECT, `cloudServices`.** The project's `cloudservices` metadata as handed (`{ appId, endpoint, deployVersion? }`,
+  absent: none). Beside it, `sessionToken` is the session the browser holds for that app id. That is a fact of the play's
+  STORAGE, so the target writes it through the real `SessionStore` and never into the metadata. `WorldView.cloudServices()`.
+  `WorldPool.cloudServices` is drawn ONLY when a pool names it, so every earlier `project` spec draws what it drew (a
+  world test checks it).
+
+**Runtime target.** `data/cloudfunction2` joined `VIEWER_NODES`. `installBackend` sets the play's `cloudservices` (it
+used to set none). It does so AFTER the legacy store and the user service are made, so neither binds to it. The session
+store for the app id is made there too, before `installWorld` (s25's T13: its constructor draws `Math.random`). The
+request is attributed like HTTP Request's: the after-inputs callback runs inside the node's update.
+
+**What the probe measured first (zz probe, a stand-in XHR, deleted).**
+- Two presses in a frame: one request, two Dones. A press while a call is out owns the next batch; answers landing in
+  reverse settle their own batches.
+- No cloud services: `No cloud services defined in this project.` and Failure, no request.
+- An unset function posts to `/functions/undefined`.
+- A 204 is a Failure (`Failed running cloud function.`): only 200 and 201 succeed.
+- Error is the body when it is a JSON string, else its `error` field. That field can be an OBJECT (D28). Status 0 gives
+  `Could not reach the backend at <endpoint>`.
+- A body that is not JSON (or none) is Done with nothing moved. A string `result` is iterated by index.
+- Results and Error are never cleared: a later call that drops a key, or succeeds, leaves them.
+- **A 200 whose body is `null` throws `Cannot read properties of null (reading 'result')` inside the XHR's handler: no
+  outcome ever (C54).**
+
+**The ports.** All are dynamic. The editor draws `in-<p>` and `out-<r>` from the PROJECT's cloud function (its Request and
+Response nodes, CloudFunctionAdapter.ts :79-121), not from the params. As with Record's FIELDS, a play's function takes
+`a`, `b` and answers `sum`, `message` (`RESULT_FIELDS`). `function` and `in-*` are discovered on first write. A result key
+the graph does not wire is held and never sent (`hasOutput`, :304). The spec sends only `RESULT_FIELDS`, and the
+runtime target registers exactly those.
+
+**The survivor.** At 200 on today's seed, `world.response drop-set` on the no-result branch survived: dropping the deletion
+of the finished call from `inFlight`. Nothing reads that deletion, because an answer lands once (the world's rule) and the
+runtime keeps each batch in a closure. So the deletion was removed rather than declared equivalent. Then 26 / 26.
+
+**Reach (400 generated sequences, today's seed).** 265 requests; Done 179, Failure 302; `out-sum` sent 44 times,
+`out-message` 23. That is after weighting the answer pool with three more results that move (before: 25 result sends).
+
+### 6.35 Rows (s32)
+
+- **C54** — Cloud Function: **a success whose body is JSON `null` throws reading `.result`, and the Call is never answered**
+  (:292 checks `res !== undefined`, :301 reads `res.result`). DEF-026 made the error path total; this is the success
+  path's one hole. The spec reads it as no result (Done). Graded by a scenario, and hit 216 times in the 10,000.
+  ([P107-C54](../../bugs/p107-c54-cloud-function-a-null-success-body-never-answers-the-call.md))
+- **D28** — Cloud Function: **Error carries an object when the backend's `error` field is one** (:324-327), on a port
+  typed `string`. Upload File has the same habit (§6.28). The spec states the runtime's reading.
+  ([P107-D28](../../bugs/p107-d28-cloud-function-error-can-be-an-object-on-a-string-port.md))
+- Error and the results never cleared across calls: **D25's family**. No new row.
+- A 204 as a Failure: our backend answers a function with `{ result }` and 200 (not measured against a live one). Written
+  into the spec; not a row.
+
+### 6.36 Gate readings (s32, 2026-10-03; load 2.3–3.5 — this session's jest only, no peer suite)
+
+| gate | reading |
+|---|---|
+| probe on the runtime FIRST (zz probe, a stand-in XHR, deleted) | the measurements in §6.34, before any spec was written |
+| runtime: `NSP_ONLY=CloudFunction2`, at 200, today's seed (20729) | first run: 17 / 17 + C54 known, 200 / 200, **one survivor** (`world.response drop-set`), and C54's throw escaped as an unhandled rejection. After the XHR face swallows a handler's throw and the dead deletion went: **CONFORMS**, mutants 26 / 26 |
+| runtime, seeds 13 and 20730 | **CONFORMS** both (C54 known 2 and 4 times; C6 1 and 2) |
+| runtime deep, `NSP_DEEP=10000` | **CONFORMS**: 10,000 / 10,000, 0 divergences, 26 / 26 (85 s); C54 known 216, C6 55 |
+| two runtime traces printed by hand | "one call" (request with lower-cased headers, `out-message`, `out-sum`, Done) and "a press while a call is out" (the later call's `sum` 2 first, the earlier's 1 at +100). Both IDENTICAL to the interpreter's, read event by event |
+| reach, 400 generated sequences | §6.34 |
+| runtime: the WHOLE `test/node-spec/` | **3 suites, 190 passed, exit 0** (s31's 189 + Cloud Function); GRAPH 76 / 76. Every play now has the world's `XMLHttpRequest`; nothing else moved |
+| `nodegx-node-spec`: `npx jest` | hash refresh first (named exactly `src/spec.ts`, `src/world.ts`). With +4 XHR / cloud-services tests in `world.test.ts` and Cloud Function in `batch-records.test.ts` (interpreter, two seeds; the failure sentences; a no-request scenario beside requesting ones): **18 suites, 804 passed, 17 skipped, exit 0** |
+| export: `tests/node-spec-*` | 2 suites, 12 passed |
+| `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
+| count | **103** (+1); T3 19 / 39 |
+| `node scripts/node-spec/census.js` | run, then RESTORED from HEAD (a peer's uncommitted viewer and export work moves dynamic ports 68 → 69 and test counts; Cloud Function's row does not move). No census number depends on specs |

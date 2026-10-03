@@ -127,6 +127,10 @@
  *     world's `document`, so Open File Picker's `initialize` makes the WORLD's file input; a click is attributed to the
  *     node whose `_internal.inputElement` it is (the click is made inside the node's own Open, but a pulse over a wire
  *     reaches it in another node's update, so neither the async context nor `inUpdate` names it).
+ *   - **the cloud services** (NSP-014 s32, world.ts PROJECT `cloudServices`; NETWORK's XHR face): the project's
+ *     `cloudservices` metadata is the script's for the play and the session for its app id is in the play's storage
+ *     (`installBackend`); `installWorld` gives every play the world's `XMLHttpRequest` beside its `fetch`, so Cloud
+ *     Function's request is the world's and is attributed like any other (the after-inputs callback runs in its update).
  */
 
 import { AsyncLocalStorage } from 'async_hooks';
@@ -574,6 +578,17 @@ function installBackend(w: World, graphModel: { getMetaData(k: string): unknown;
   });
   const restoreUser = installUser(w);
   const restoreAuth = installAuth(w);
+  // s32 — PROJECT's cloud services (world.ts): the play's `cloudservices` metadata is the script's (none above — R9's
+  // backends never read it), set only AFTER the legacy store and the user service were made, so neither binds to it; the
+  // session the browser holds for its app id is written through the REAL session store into the play's storage, the
+  // store made here, before `installWorld` (its constructor draws `Math.random` — s25, T13)
+  const cloud = w.cloudServices;
+  if (cloud) {
+    const { sessionToken, ...metadata } = cloud;
+    graphModel.setMetaData('cloudservices', metadata);
+    const store = parseSessionStore(cloud.appId);
+    if (sessionToken !== undefined) store.write({ objectId: 'world', sessionToken });
+  }
   return () => {
     offStore();
     restoreAuth();
@@ -626,7 +641,7 @@ function resetRegistry(world: World): void {
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout', 'user/requestmagiclink', 'user/signinwith', 'uploadfile', 'openfilepicker'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout', 'user/requestmagiclink', 'user/signinwith', 'uploadfile', 'openfilepicker', 'data/cloudfunction2'] as const;
 
 /** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (s17 Navigate To Path … s20 Show / Close Popup). */
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;

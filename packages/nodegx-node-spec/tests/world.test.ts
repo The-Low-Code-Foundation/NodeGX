@@ -15,7 +15,7 @@
  *   And the world's own rules: the timer delay rule, the wire forms, the delivery order.
  */
 
-import { backendEvent, Clock, DEFAULT_WORLD_POOL, generateSequence, installWorld, interpreterAdapter, normaliseRequest, play, run, runConformance, specs, timerDelay, toDelivery, validateTrace, World, worldFetch, defineNode, type AnyNodeSpec, type TraceEvent } from '../src';
+import { backendEvent, Clock, DEFAULT_WORLD_POOL, generateSequence, installWorld, interpreterAdapter, normaliseRequest, play, run, runConformance, specs, timerDelay, toDelivery, validateTrace, World, worldFetch, worldXMLHttpRequest, defineNode, type AnyNodeSpec, type TraceEvent } from '../src';
 import { Delay, HttpRequest, Uuid } from '../src/nodes';
 
 const WORLD_NODES = ['Timer', 'net.noodl.UUID', 'net.noodl.HTTP'];
@@ -334,6 +334,62 @@ describe('BACKEND (NSP-014 s21, R9) — the backends a record node asks, at the 
     w.backend.issue({ op: 'delete', backend: 'main', args: { collection: 'Lesson' } }, (d) => got.push(d));
     expect(got).toEqual([{ error: 'the world has no answer for delete Lesson on main' }]);
     expect(w.violations).toEqual(["delete Lesson on main: no rule in the world's script answers it"]);
+  });
+});
+
+describe('NETWORK — the XHR face (NSP-014 s32): one server, two faces; the project\'s cloud services', () => {
+  const flush = () => new Promise((r) => setImmediate(r));
+
+  test('open / setRequestHeader / send issue the same request a fetch records; duplicate header names are appended; null body is none', async () => {
+    const w = new World({ network: [{ answer: { status: 200, body: { result: 1 } } }] });
+    const X = worldXMLHttpRequest(w);
+    const x = new X();
+    const states: number[] = [];
+    x.onreadystatechange = () => states.push(x.readyState);
+    x.open('POST', 'https://cloud.example/functions/add');
+    x.setRequestHeader('X-A', 'one');
+    x.setRequestHeader('x-a', 2);
+    x.setRequestHeader('Content-Type', 'application/json');
+    x.send(null);
+    expect(w.network.requests).toEqual([{ method: 'POST', url: 'https://cloud.example/functions/add', headers: { 'x-a': 'one, 2', 'content-type': 'application/json' } }]);
+    // the answer lands a microtask after its moment — not inside send
+    expect(states).toEqual([1]);
+    await flush();
+    expect(states).toEqual([1, 2, 3, 4]);
+    expect([x.status, x.response, x.responseText]).toEqual([200, '{"result":1}', '{"result":1}']);
+  });
+
+  test('a network error is state 4, status 0, an empty response, then onerror; a throwing handler goes no further', async () => {
+    const w = new World({ network: [{ answer: { error: 'connect ECONNREFUSED' } }] });
+    const x = new (worldXMLHttpRequest(w))();
+    const seen: string[] = [];
+    x.onreadystatechange = () => {
+      seen.push('rsc ' + x.readyState + ' ' + x.status);
+      throw new TypeError('a node that throws in its handler');
+    };
+    x.onerror = () => seen.push('error');
+    x.open('POST', 'u');
+    x.send('{}');
+    await flush();
+    expect(seen).toEqual(['rsc 1 0', 'rsc 4 0', 'error']);
+    expect(x.response).toBe('');
+  });
+
+  test('installWorld gives every play the XHR face beside fetch, and restore takes it away; a play has cloud services only when its script names them', () => {
+    const before = (globalThis as Record<string, unknown>).XMLHttpRequest;
+    const installed = installWorld(new World());
+    expect(typeof (globalThis as Record<string, unknown>).XMLHttpRequest).toBe('function');
+    installed.restore();
+    expect((globalThis as Record<string, unknown>).XMLHttpRequest).toBe(before);
+    expect(new World().cloudServices).toBeUndefined();
+    expect(new World({ cloudServices: { appId: 'a', endpoint: 'e', sessionToken: 't' } }).cloudServices).toEqual({ appId: 'a', endpoint: 'e', sessionToken: 't' });
+  });
+
+  test('a project spec draws cloud services only when its pool names them: every earlier project spec draws what it drew', () => {
+    const cloud = specs['CloudFunction2'];
+    const drawn = new Set(Array.from({ length: 60 }, (_, i) => JSON.stringify(generateSequence(cloud, 5, i).world?.cloudServices ?? null)));
+    expect(drawn.size).toBeGreaterThan(2);
+    for (const spec of Object.values(specs)) if (spec.type !== 'CloudFunction2' && spec.needs?.includes('project')) expect(generateSequence(spec, 5, 0).world?.cloudServices).toBeUndefined();
   });
 });
 

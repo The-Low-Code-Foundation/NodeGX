@@ -217,7 +217,24 @@ const sortCannotCompare = (d: Divergence) => {
  */
 const nullContains = (d: Divergence) => /Cannot read properties of null \(reading 'contains'\)/.test(d.difference.threw ?? '') && d.reference.slice(0, d.difference.index + 1).some((e) => isSet(e, 'items', (v, present) => present && v === null));
 
+/**
+ * NSP-014 §6.35 C54 — Cloud Function's success reads `res.result` after checking only `res !== undefined`
+ * (cloudfunction2.ts :292, :301): a 200 / 201 whose body is JSON `null` throws inside the XHR's `readystatechange` —
+ * nothing is sent and the call's presses are never answered. The spec reads it as no result: Done. Narrow: the world
+ * answers some request with a success whose body is `null`, and the first difference is the spec's Done on Call.
+ */
+const nullSuccessBody = (d: Divergence) => {
+  const ref = d.difference.reference;
+  if (!ref || ref.t !== 'outcome' || ref.port !== 'call' || ref.value !== 'done') return false;
+  return (d.world?.network ?? []).some((r) => {
+    const a = r.answer as { status?: number; body?: unknown };
+    return (a.status === 200 || a.status === 201) && (a.body === null || a.body === 'null');
+  });
+};
+
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
+  // s32 — the one throw on the success path DEF-026 left (it made the error path total)
+  CloudFunction2: [{ row: 'NSP-014 §6.35 C54 — a success whose body is JSON null throws reading `.result`: nothing sent, the presses never answered', matches: nullSuccessBody }],
   // s25 — Array Filter's twin: the same `bindCollection` (filterdbmodelsnode.ts :316-320), and a sort outside the `try`
   FilterDBModels: [
     { row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems },

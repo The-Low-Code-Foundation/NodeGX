@@ -32,6 +32,20 @@
  *           a network error so the play can go on, and the runner fails the run (AC5). Aborting a
  *           request (a node's `Cancel`, its own timeout) delivers `{ aborted }` at once and drops
  *           any answer still due.
+ *           TWO FACES, one server (s32). `fetch` and `XMLHttpRequest` both issue into the same rules and
+ *           record the same request. The XHR face (`WorldXMLHttpRequest`, what Cloud Function talks
+ *           through): `open(method, url)` holds the two and fires `readystatechange` at state 1, as a
+ *           browser does, synchronously; `setRequestHeader(name, value)` holds `String(value)` — a
+ *           second value for one name is APPENDED after `, ` (XHR's rule, unlike `Headers.set`);
+ *           `send(body)` issues — `body` absent for `null` / `undefined`, otherwise as handed (a string
+ *           travels as itself). Its answer lands a MICROTASK after its moment, where a `fetch`'s
+ *           resolution lands (a browser fires XHR events as tasks; no node in a play can tell the two
+ *           apart — a settle drains both): a response sets `status`, `statusText`, `response` /
+ *           `responseText` (the body text, `''` for none) and walks `readyState` 2, 3, 4, firing
+ *           `readystatechange` at each; a network error is state 4 with `status` 0 and `response` `''`
+ *           (then `onerror`); an abort is state 4, `status` 0 (then `onabort`). A handler that THROWS is
+ *           the DOM's "report the exception": the throw goes no further and the next handler still runs
+ *           (a throw out of a node's `readystatechange` — row C54 — never reaches the play as a rejection).
  *
  * WHAT GOES ON THE WIRE, in both directions, is fixed here once so the trace's `request` event
  * and the spec's response event mean the same thing on every target:
@@ -112,6 +126,14 @@
  *           object of setting name → value; absent, `{}`: a project that set nothing, where every
  *           reader takes its own default (Navigate To Path: `navigationPathType` unset is `hash`).
  *           Fixed for the play.
+ *           (NSP-014 s32) And its CLOUD SERVICES — the project's `cloudservices` metadata, as a node reads
+ *           it (`NoodlRuntime.instance.getMetaData('cloudservices')`, cloudfunction2.ts :61, :252): the
+ *           script's `cloudServices`, `{ appId, endpoint, deployVersion? }` as handed; absent, none (a
+ *           project with no cloud services). Beside it, `sessionToken` — the session the BROWSER holds
+ *           for that app id (`Parse/<appId>/currentUser`, read through SessionStore.ts
+ *           `parseSessionStore(appId).read()`): its token; absent, nobody is signed in there. A fact of
+ *           the play's storage, not of the metadata — the target writes it where the store reads it and
+ *           never hands it to the metadata. Fixed for the play.
  *   STACK.  (NSP-015 s18) The Component Stacks a play's navigation nodes hand their requests to —
  *           played by the world as the network plays a server: what a stack DOES with a request
  *           (which page, how deep, the transition) is the Component Stack's own behaviour (a visual
@@ -431,6 +453,18 @@ export interface WorldScript {
   backend?: BackendScript;
   /** NSP-014 s31: the person at the file dialog (PICKER above). Absent: no `document` in the play. */
   picker?: PickerScript;
+  /** NSP-014 s32: the project's cloud services and the browser's session for them (PROJECT above). Absent: none. */
+  cloudServices?: CloudServicesScript;
+}
+
+/** PROJECT above (s32): the project's `cloudservices` metadata as handed, and the session the browser holds for its app id. */
+export interface CloudServicesScript {
+  appId?: string;
+  endpoint?: string;
+  /** Set only for a deployed backend: pinned on every request as `x-noodl-cloud-version`. */
+  deployVersion?: string;
+  /** The token of the session stored under `Parse/<appId>/currentUser`; absent, nobody is signed in there. Never in the metadata. */
+  sessionToken?: string;
 }
 
 /** PICKER above: how the person answers each click on a file input, the n-th click by the n-th entry (the last repeating). Absent or empty: never. */
@@ -1872,6 +1906,8 @@ export class World {
   readonly backend: WorldBackend;
   /** The person at the file dialog (PICKER above) — always; `present` only when the script has a `picker`. */
   readonly picker: WorldPicker;
+  /** The project's cloud services (PROJECT above, s32), or none. */
+  readonly cloudServices: Readonly<CloudServicesScript> | undefined;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -1887,6 +1923,7 @@ export class World {
     this.popup = new WorldPopup(script.popup ?? {});
     this.backend = new WorldBackend(this.clock, script.backend ?? {});
     this.picker = new WorldPicker(this.clock, script.picker);
+    this.cloudServices = script.cloudServices ? { ...script.cloudServices } : undefined;
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */
@@ -1897,7 +1934,7 @@ export class World {
 
 // ------------------------------------------------------------------------------------------------
 // the globals — how a target whose nodes reach the world through JavaScript's own seams
-// (`setTimeout`, `fetch`, `crypto`, `Math.random`, `Date.now`) is pointed at this world.
+// (`setTimeout`, `fetch`, `XMLHttpRequest`, `crypto`, `Math.random`, `Date.now`) is pointed at this world.
 
 export interface Installed {
   /** Puts every global back exactly as it was. */
@@ -1927,6 +1964,108 @@ export function worldFetch(world: World): (input: unknown, init?: RequestInit) =
 
 /** Statuses a `Response` may not carry a body for (the Fetch standard's null body statuses). */
 const NULL_BODY_STATUSES = new Set([101, 103, 204, 205, 304]);
+
+/**
+ * The XHR face of the world's network (NETWORK above, s32): the surface a node that talks through `XMLHttpRequest` reads —
+ * `open`, `setRequestHeader`, `send`, `abort`, `readyState`, `status`, `statusText`, `response` / `responseText` and the
+ * `onreadystatechange` / `onload` / `onerror` / `onabort` properties. Made per play by `worldXMLHttpRequest`.
+ */
+export interface WorldXMLHttpRequest {
+  readyState: number;
+  status: number;
+  statusText: string;
+  response: string;
+  readonly responseText: string;
+  onreadystatechange: ((e: unknown) => void) | null;
+  onload: ((e: unknown) => void) | null;
+  onerror: ((e: unknown) => void) | null;
+  onabort: ((e: unknown) => void) | null;
+  open(method: unknown, url: unknown): void;
+  setRequestHeader(name: unknown, value: unknown): void;
+  send(body?: unknown): void;
+  abort(): void;
+}
+
+/** An `XMLHttpRequest` class over this world (NETWORK above, TWO FACES). */
+export function worldXMLHttpRequest(world: World): new () => WorldXMLHttpRequest {
+  return class implements WorldXMLHttpRequest {
+    readyState = 0;
+    status = 0;
+    statusText = '';
+    response = '';
+    onreadystatechange: ((e: unknown) => void) | null = null;
+    onload: ((e: unknown) => void) | null = null;
+    onerror: ((e: unknown) => void) | null = null;
+    onabort: ((e: unknown) => void) | null = null;
+    private method: unknown;
+    private url: unknown;
+    private headers: Record<string, string> = {};
+    private id: number | undefined;
+
+    get responseText(): string {
+      return this.response;
+    }
+
+    open(method: unknown, url: unknown): void {
+      this.method = method;
+      this.url = url;
+      this.headers = {};
+      this.id = undefined;
+      this.state(1);
+    }
+
+    setRequestHeader(name: unknown, value: unknown): void {
+      const key = String(name);
+      const v = String(value);
+      const held = Object.keys(this.headers).find((k) => k.toLowerCase() === key.toLowerCase());
+      if (held === undefined) this.headers[key] = v;
+      else this.headers[held] = this.headers[held] + ', ' + v;
+    }
+
+    send(body?: unknown): void {
+      this.id = world.network.issue({ method: this.method, url: this.url, headers: this.headers, body: body === null ? undefined : body }, (d) => {
+        void Promise.resolve().then(() => this.land(d));
+      });
+    }
+
+    abort(): void {
+      if (this.id !== undefined) world.network.abort(this.id);
+    }
+
+    private land(d: Delivery): void {
+      if ('status' in d) {
+        this.status = d.status;
+        this.statusText = d.statusText;
+        this.response = d.body ?? '';
+        this.state(2);
+        this.state(3);
+        this.state(4);
+        this.fire(this.onload, 'load');
+        return;
+      }
+      this.status = 0;
+      this.response = '';
+      this.state(4);
+      if ('aborted' in d) this.fire(this.onabort, 'abort');
+      else this.fire(this.onerror, 'error');
+    }
+
+    private state(n: number): void {
+      this.readyState = n;
+      this.fire(this.onreadystatechange, 'readystatechange');
+    }
+
+    /** A DOM dispatch: a handler's throw is reported, never propagated (NETWORK above, TWO FACES). */
+    private fire(handler: ((e: unknown) => void) | null, type: string): void {
+      if (typeof handler !== 'function') return;
+      try {
+        handler.call(this, { type, target: this });
+      } catch {
+        // the DOM's "report the exception" — the play has no console to report to
+      }
+    }
+  };
+}
 
 /**
  * Makes the world's zone the process's for a play (TIME ZONE above) and hands back the undo.
@@ -2002,6 +2141,7 @@ export function installWorld(world: World): Installed {
   define('setTimeout', fakeSetTimeout);
   define('clearTimeout', fakeClearTimeout);
   define('fetch', worldFetch(world));
+  define('XMLHttpRequest', worldXMLHttpRequest(world));
   const hostCrypto = g.crypto as { subtle?: Record<string, unknown> } | undefined;
   const hostSubtle = hostCrypto?.subtle;
   const restoreZone = installTimeZone(world);
