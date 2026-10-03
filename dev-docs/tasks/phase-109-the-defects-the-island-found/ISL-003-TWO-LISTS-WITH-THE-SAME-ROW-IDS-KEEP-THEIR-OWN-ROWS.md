@@ -1,6 +1,6 @@
 # ISL-003 — Two lists that reuse row ids keep their own rows, or the author is told they share them
 
-**Status: 🟢 ruled and built s9 (2026-10-03): "Each list keeps its rows" — AC1 ✅, AC2 ✅, AC3 ✅, AC4 ✅ (census), AC6 ✅; ⬜ AC5 (browser). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F03 ·
+**Status: ✅ CLOSED s9 (2026-10-03): ruled "Each list keeps its rows" and built — AC1–AC6 ✅ (AC5 deployed: treatment 6/6, control 3/3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F03 ·
 [P106 IG-006](../phase-106-the-island-grows/IG-006-OLIVE-READS.md) §7, deviation 10 (lines 166-167) · the template's
 prefixes at `packages/noodl-mcp/tests/cg003Scripts.ts:330` and `:1250-1252` · **Side:** product (runtime: `Model`,
 `Collection`, the For Each row; doctrine)
@@ -244,3 +244,9 @@ card draws three lines). **Control** — `nodegx deploy … --allow-development-
 (`noodl.deploy.js`, 10-03 09:13, `keepPlainRowsApart` ×0): **3/3, every card reads `card 3 line 0…2`** — the island's
 defect, in a browser. The treatment waits for the deploy bundle to be rebuilt (a peer's 10,000-case conformance run held
 the box all session; one heavy job at a time).
+
+**AC5 ✅ — treatment.** After the peer's run exited, the deploy bundle was rebuilt from HEAD
+(`webpack-configs/webpack.deploy.dev.js`, compiled in 10 s — 🔴 that config has `watch: true`, so the command never
+returns: stop it after "compiled successfully"); `keepPlainRowsApart` ×5 in `noodl.deploy.js`. `nodegx deploy` exit 0;
+the drive **6/6**: `card 1 line 0…2`, `card 2 line 0…2`, `card 3 line 0…2`, no two alike, every card three lines, no
+console errors. Beside the control (old engine) 3/3: card 3's lines in all three. **ISL-003 closed.**
