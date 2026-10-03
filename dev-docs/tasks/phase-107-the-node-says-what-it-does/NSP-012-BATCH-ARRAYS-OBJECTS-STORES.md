@@ -117,6 +117,7 @@ derived from a comma list (the catalog's patterns). Parity: 34 of 34.
 | **C10** | Array Filter (:343), Array Map (:233) | `Items` handed a number, a boolean or a plain object THROWS in the setter (`collection.on is not a function`) — a wire can carry any of them | *"A non-array on Items crashes the node instead of refusing."* 21 / 42 counted | guard `on` (a `Failure` on the next run, or treat as no array) |
 | **C11** | Object (:451-460, :517-525; nodescope.ts :149-153) | **`<property> Changed` never fires**: the editor draws the port, nothing registers it — a wire from it throws inside the connection and is dropped, and the pulse at :113 is guarded by `hasOutput` | *"Every Object node offers a 'name Changed' signal per property. None of them has ever fired, and wiring one silently fails."* 32 counted; s04 and three Model2 scenarios under the row | register `changed-<p>` in `registerOutputIfNeeded` — one line, ships alone |
 | **C59** (s35) | Array Filter (:508 `applyFilter(m.data, filter)`) | **a plain array of plain objects — what a Function outputs — fails every filtered run**: a plain object has no `data`, so the first row throws and the run is `array-filter/filter-failed` with "Cannot read properties of undefined (reading '<field>')", Count 0. The sort reads `data` only from a record (:95-117) | *"A Function's list of plain objects wired into Array Filter fails as soon as a filter is set. Records work. Read a plain object's own fields too, as the sort does?"* — measured in a real two-node graph: records → Count 2, the same rows plain → Count 0 + the error | `applyFilter(isRecord(m) ? m.data : m, filter)`, one line, ships alone |
+| **C60** (s35) | Array Map (:348 `model.get(mapping)`) | **C59's twin: a plain array of plain objects fails every property mapping** — "The map script failed: model.get is not a function"; a function mapping is handed the row as it is, so the default script's own `o.get(…)` example fails too | *"A Function's list of plain objects wired into Array Map fails any script that copies a property. Records work. Read a plain object's own fields too?"* | one read helper shared with C59's fix, ships with it |
 | **D13** | Array `changed` description (:213) | "suppressed while Fetch is connected" — NDA-017 §2 replaced that rule with the `Array contents` checkbox (:73) | a sentence from before the checkbox | rewrite |
 | **C12** (s10) | Receive Event `consume` (eventreceiver.ts :51-62, :142-143; nodecontext.ts :1148) | **Consume = Always has never applied to a Global event**: the global path emits to every listener and `onEventReceived` drops `handleEvent`'s return — scenario `t05` "Consume = Always on one receiver stops a global event…" records both receivers firing | *"Consume says it stops an event reaching other receivers on the channel. For a Global event — the default — it never has. Make it stop, or say it applies to Parent / Children / Siblings only?"* | behaviour: honour it on the global path (the emitter's listeners in order, stop on the first `true`) — or rewrite the sentence |
 | **C13** (s10) | nodescope.ts `sendEventFromThisScope` :573-581 (children), :597-605 (siblings) | **a consumed Children or Siblings event stops only inside the component that consumed it**: `if (consumed) return true` sits in a `forEach` callback and returns from the callback, not the walk — `t05` "Consume = Always in the first child component…" records the second child firing | *"Consume inside one child component does not stop the event reaching the next child."* | fix: a `for…of` with an early return (one line each), ships alone |
@@ -238,4 +239,23 @@ scenario cannot hand a plain array holding registry records (`$array` resolves a
 read, not graded. Runtime: conforms at seeds 20729, 13 and 20730 (15 / 16 scenarios + C10's known; 200 / 200, 0
 divergences; mutants 98 / 98), and at 10,000 / 10,000 with 0 divergences (C10 counted 469). Package: 18 suites, 837
 passed, exit 0. Whole runtime `test/node-spec/`: 3 suites, 193 passed, exit 0. `tsc --noEmit` exit 0.
+
+**Then a sweep, because C59 was a scenario NAME nobody read against its trace.** Every scenario of every spec (1,151) played on
+the interpreter, listing those whose trace fails (a `failure` outcome or pulse, or a non-empty Error) while the name says
+nothing of failing. 17 candidates, read one by one: 14 fail on purpose partway through (a first press refused, a 429 before
+the retry, an unbound Id). Three were holes:
+- **Array Map — row C60, C59's twin.** Its only scenario that copied a property handed a plain array, and its trace was
+  `model.get is not a function` from s9 on. No scenario or generated run had ever graded a mapping that worked. A records
+  twin now copies `title` from `name` and computes `twice` (a mapping that kept its own key would have passed `name:
+  'name'`). The generator draws a registry array 6 times in 8, from its own pool. Three defects planted in a copy of the
+  runtime node (a string mapping that reads the key; a function handed `data`; function mappings dropped): all caught by
+  the twin and by generated runs (4, 10 and 13 divergences in 200). Conforms at seeds 20729, 13 and 20730 (mutants 33 / 33
+  with the declared stuck flag) and at 10,000 / 10,000, 0 divergences.
+- **Upload File (NSP-014) — "the Backend picker names the second backend: the call goes there"** never called: the world
+  listed no `backends`, so `other` was refused as not configured, and the script's answer for `other` was never read.
+  `backends: ["main", "other"]` added; the call now reaches `other` and its answer lands. Conforms at three seeds (19 / 19,
+  mutants 25 / 25). Every other scenario naming a second backend was checked: each lists it.
+
+The sweep reads names, so it cannot see a scenario whose name and trace agree on the wrong thing. It is cheap (seconds) and
+was deleted with the session's probes. Worth re-running whenever a batch closes.
 

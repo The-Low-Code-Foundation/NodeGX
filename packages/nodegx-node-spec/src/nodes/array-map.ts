@@ -66,6 +66,8 @@ export const MapCollection = defineNode({
   version: 1,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/mapcollectionnode.ts',
   needs: ['registry', 'random'],
+  // s35 — the records a generated run maps, and an empty registry
+  worldPool: { registries: [{ models: { r1: { name: 'Ada', n: 1 }, r2: { name: 'Lin', n: 2 }, r3: { name: 'x' } }, collections: { rows: ['r1', 'r2', 'r3'] } }, {}] },
 
   // :35-74, :82-105 — the default script is compiled at creation (:102)
   state: { source: undefined, mappedId: undefined, mapCode: DEFAULT_MAP_CODE, compiled: true, compileError: undefined, lastError: undefined, lastReported: undefined, tokens: 0, scheduled: false } as MapState,
@@ -79,7 +81,9 @@ export const MapCollection = defineNode({
       displayName: 'Items',
       group: 'General',
       description: 'Array to map; the node re-runs whenever this array reports a change',
-      examples: [[{ name: 'Ada', n: 1 }, { name: 'Lin', n: 2 }]]
+      // s35 — mostly a registry array: a string mapping reads `model.get` (:348), which a plain object has not (row C60),
+      // so while a plain array was the only example no generated run ever mapped a property
+      examples: [...Array(6).fill({ $array: 'rows' }), [{ name: 'Ada', n: 1 }, { name: 'Lin', n: 2 }], []]
     },
     // :117-133 — panel only
     mapScript: {

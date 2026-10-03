@@ -594,6 +594,10 @@
     ],
     "world": {
       "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
         "answers": [
           {
             "match": {

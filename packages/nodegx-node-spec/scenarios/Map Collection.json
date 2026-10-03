@@ -17,8 +17,8 @@
     ]
   },
   {
-    "name": "A script copying a property and computing another",
-    "because": ":345-348",
+    "name": "A script copying a property and computing another, over a PLAIN array of plain objects (what a Function outputs): the string mapping reads `model.get`, which a plain object has not — map-failed (row C60; the spec states the runtime's reading)",
+    "because": ":348 `m.set(key, model.get(mapping))`; :354-362",
     "params": {
       "items": [
         {
@@ -31,6 +31,39 @@
     "steps": [
       "settle"
     ]
+  },
+  {
+    "name": "A script copying a property under another name and computing another, over records: `title` from `name`, `twice` from the record",
+    "because": ":339-353 — each record mapped into a new record; a string mapping is `model.get`, a function is handed the record",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "mapScript": "map({ title: 'name', twice: function (o) { return o.get('n') * 2; } })"
+    },
+    "steps": [
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "name": "Ada",
+            "n": 1
+          },
+          "r2": {
+            "name": "Lin",
+            "n": 2
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2"
+          ]
+        }
+      }
+    }
   },
   {
     "name": "A script that will not compile: Failure once on the value path, then script-failed on Refresh",
