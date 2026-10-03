@@ -7,9 +7,7 @@
  * wires to the receivers (set / signal); repeat until a wave carries nothing. It is NOT the
  * runtime's scheduler (per-setter delivery inside one pass, CONTRACT C7) — it is wave-at-a-time.
  */
-import { advance, mount, set, settle, signal, type Instance } from '../../../../../packages/nodegx-node-spec/src/interpreter';
-import { specFor } from '../../../../../packages/nodegx-node-spec/src/nodes';
-import { World } from '../../../../../packages/nodegx-node-spec/src/world';
+import { advance, mount, set, settle, signal, specFor, World, type Instance } from '../../../../../packages/nodegx-node-spec/src/browser';
 
 export interface NodeDecl {
   type: string;

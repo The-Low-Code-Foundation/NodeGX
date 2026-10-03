@@ -1,6 +1,6 @@
 import { GraphRun, type NodeDecl, type WireDecl } from './graphrun';
 import { nodes, wires } from './app';
-import { specs } from '../../../../../packages/nodegx-node-spec/src/nodes';
+import { specs } from '../../../../../packages/nodegx-node-spec/src/browser';
 import picker from './picker.json';
 
 const clone = <T>(x: T): T => JSON.parse(JSON.stringify(x));

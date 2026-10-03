@@ -8,9 +8,9 @@ mkdir -p dist
 # the picker list: specced nodes whose world this page can give them (clock, random, timezone)
 "$ESBUILD" tools/genpicker.ts --bundle --platform=node --outfile=tools/genpicker.cjs --log-level=warning
 node tools/genpicker.cjs
-# the spec package for a browser: interpreter + specs + runner; `crypto` (only the Hash node uses it) stubbed
+# the spec package's browser entry (OWN-002): no aliases, no defines, no stubs
 "$ESBUILD" src/entry.ts --bundle --platform=browser --format=iife --global-name=NGX --minify \
-  --alias:crypto=./src/crypto-stub.js --define:process.env.TZ=undefined --outfile=dist/ngx.js --log-level=warning
+  --outfile=dist/ngx.js --log-level=warning
 node -e '
 const fs=require("fs");const b=fs.readFileSync("dist/ngx.js","utf8");
 if(/<\/script/i.test(b)) throw new Error("bundle contains </script");

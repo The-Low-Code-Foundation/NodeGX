@@ -20,13 +20,14 @@
 import { findNonCanonical } from './canonical';
 import type { TraceEvent } from './trace';
 
-// eslint-disable-next-line @typescript-eslint/no-var-requires
-const traceSchema = require('../schema/trace.schema.json') as Record<string, unknown>;
+import traceSchemaJson from '../schema/trace.schema.json';
+
+const traceSchema = traceSchemaJson as Record<string, unknown>;
 
 /** The JSON schema, as data — for a target that wants to embed it. */
 export const TRACE_SCHEMA = traceSchema;
 
-export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup', 'backend', 'picker', 'socket'] as const;
+export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup', 'backend', 'picker', 'socket', 'act'] as const;
 export const OUTCOME_VALUES = ['done', 'unchanged', 'failure'] as const;
 
 /** Fields each kind requires and allows, beyond `t` and the always-optional `subject`. */
@@ -56,7 +57,9 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   // NSP-014 s31 — the file dialog (world.ts PICKER): what the element held at the click — in the LOCATION group
   picker: { required: ['accept', 'capture'], optional: [] },
   // NSP-014 s34 — the WebSocket servers (world.ts SOCKET): a connect carries url, protocols?; a send data; a close code?, reason? — in the request group
-  socket: { required: ['op'], optional: ['url', 'protocols', 'data', 'code', 'reason'] }
+  socket: { required: ['op'], optional: ['url', 'protocols', 'data', 'code', 'reason'] },
+  // NSP-016 s37 — the person (spec.ts THE PERSON): a stimulus — which act, and the value it carries, if any
+  act: { required: ['act'], optional: ['value'] }
 });
 
 export type Validation = { ok: true; events: TraceEvent[] } | { ok: false; path: string; message: string };

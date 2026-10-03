@@ -34,7 +34,7 @@ import { compareTraces, differenceWithThrow, formatDifference, hasObservation, t
 import { generateSequence } from './generate';
 import { discoverBranches, mutantsOf, type Branch, type MutationKind } from './mutants';
 import { outsideReach, projectTrace, type Reach } from './reach';
-import { loadScenarios, writeReplay, type Scenario } from './scenario';
+import { scenarioIO, type Scenario } from './scenario';
 import { shrink } from './shrink';
 
 export interface ConformanceOptions {
@@ -223,7 +223,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   }
 
   // 1. hand scenarios
-  for (const sc of options.scenarios ?? loadScenarios(spec.type)) {
+  for (const sc of options.scenarios ?? scenarioIO.load(spec.type)) {
     const outside = reach ? outsideReach(sc.params, sc.steps, reach) : undefined;
     if (outside !== undefined) {
       report.scenarios.push({ name: sc.name, status: 'outside', row: sc.row, reason: outside });
@@ -276,7 +276,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
           because: formatDifference(again.difference, 'interpreter', target.name)
         };
         if (result.world) replay.world = result.world;
-        div.replayFile = writeReplay(options.replayDir, replay);
+        div.replayFile = scenarioIO.writeReplay(options.replayDir, replay);
       }
     }
     report.generated.divergences.push(div);
@@ -286,7 +286,7 @@ export async function runConformance(spec: AnyNodeSpec, target: TargetAdapter, o
   // 3. mutants — the suite is the hand scenarios plus the same generated sequences
   if (options.mutants) {
     const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript }> = [
-      ...(options.scenarios ?? loadScenarios(spec.type))
+      ...(options.scenarios ?? scenarioIO.load(spec.type))
         .filter((s) => !reach || outsideReach(s.params, s.steps, reach) === undefined)
         .map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world }))
     ];

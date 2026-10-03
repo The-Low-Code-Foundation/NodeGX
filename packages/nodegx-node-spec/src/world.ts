@@ -491,8 +491,8 @@
  *   effect's `send` / `close`).
  */
 
-import { File as NodeFile } from 'buffer';
-import * as nodeCrypto from 'crypto';
+import { HostFileCtor, type HostFile } from './host-file';
+import { sha256, sha384, sha512 } from './sha2';
 
 import { canonicalise } from './canonical';
 import { Registry, type RegistryScript } from './registry';
@@ -2063,8 +2063,8 @@ export function pickerEvent(c: PickerClick): TraceEvent {
 }
 
 /** A file the person chose (PICKER above): Node's own `File` — the class a browser's `File` is — its bytes zeros. */
-export function pickedFile(desc: { name: string; type?: string; size?: number }): NodeFile {
-  return new NodeFile([new Uint8Array(desc.size ?? 0)], desc.name, { type: desc.type ?? '', lastModified: 0 });
+export function pickedFile(desc: { name: string; type?: string; size?: number }): HostFile {
+  return new HostFileCtor([new Uint8Array(desc.size ?? 0)], desc.name, { type: desc.type ?? '', lastModified: 0 });
 }
 
 /** The person at the file dialog of a play (PICKER above): every click, and how each is answered. */
@@ -2569,17 +2569,17 @@ export function installTimeZone(world: World): () => void {
   };
 }
 
-/** WebCrypto's digest names and Node's, the three WebCrypto has (crypto/encoding.ts `DigestAlgorithm`). */
-const DIGESTS: Readonly<Record<string, string>> = Object.freeze({ 'SHA-256': 'sha256', 'SHA-384': 'sha384', 'SHA-512': 'sha512' });
+/** WebCrypto's digest names, the three WebCrypto has (crypto/encoding.ts `DigestAlgorithm`), each to the package's own SHA-2 (sha2.ts; OWN-002: no Node `crypto`, so a page gets the same bytes). */
+const DIGESTS: Readonly<Record<string, (data: Uint8Array) => Uint8Array>> = Object.freeze({ 'SHA-256': sha256, 'SHA-384': sha384, 'SHA-512': sha512 });
 
 /**
  * The world's digest (DIGEST above): the standard's bytes for a name WebCrypto knows, computed
  * now. An unknown name throws — the message a node's `Error` port then carries, on every target.
  */
 export function digestBytes(algorithm: unknown, data: Uint8Array): Uint8Array {
-  const name = DIGESTS[String(algorithm)];
-  if (!name) throw new Error(`Unrecognized algorithm name: ${String(algorithm)}`);
-  return new Uint8Array(nodeCrypto.createHash(name).update(data).digest());
+  const fn = DIGESTS[String(algorithm)];
+  if (!fn) throw new Error(`Unrecognized algorithm name: ${String(algorithm)}`);
+  return fn(data);
 }
 
 /**

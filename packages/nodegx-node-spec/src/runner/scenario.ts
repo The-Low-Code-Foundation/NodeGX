@@ -14,9 +14,6 @@
  * (JSON.stringify would have turned either into `null`).
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-
 import type { Step } from '../adapter';
 import { canonicalise, revive } from '../canonical';
 import type { TraceEvent } from '../trace';
@@ -44,17 +41,23 @@ export interface Scenario {
   row?: string;
 }
 
-/** The package's own scenarios directory. */
-export const SCENARIOS_DIR = path.join(__dirname, '..', '..', 'scenarios');
+/**
+ * Where scenarios come from when a caller does not hand them over (`runConformance` without
+ * `options.scenarios`), and where a replay goes when `options.replayDir` is set. In Node the
+ * `/node` entry (scenario-files.ts) fills both with the package's files on import; in a page
+ * nothing does, and each says so instead of reaching for a file system it does not have. OWN-002.
+ */
+export const scenarioIO: { load: (type: string) => Scenario[]; writeReplay: (dir: string, scenario: Scenario) => string } = {
+  load: (type) => {
+    throw new Error(`no scenario files here for ${type}: pass options.scenarios, or import '@nodegx/node-spec/node' (the file loader)`);
+  },
+  writeReplay: (dir) => {
+    throw new Error(`cannot write a replay to ${dir} here: import '@nodegx/node-spec/node' (the file writer), or leave replayDir unset`);
+  }
+};
 
-export function scenarioFile(type: string, dir = SCENARIOS_DIR): string {
-  return path.join(dir, `${type}.json`);
-}
-
-export function loadScenarios(type: string, dir = SCENARIOS_DIR): Scenario[] {
-  const file = scenarioFile(type, dir);
-  if (!fs.existsSync(file)) return [];
-  const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as unknown;
+/** The scenarios of one parsed scenario file (an array), values revived; `file` names the file in errors, `type` the node. Reads nothing. */
+export function reviveScenarios(parsed: unknown, type: string, file = `${type}.json`): Scenario[] {
   if (!Array.isArray(parsed)) throw new Error(`${file}: a scenario file is an array of scenarios`);
   return parsed.map((s, i) => {
     const sc = s as Scenario;
@@ -92,14 +95,12 @@ function canonicalStep(step: Step): Step {
   return c === undefined ? { set: step.set } : { set: step.set, value: c };
 }
 
-/** Writes a replay scenario file named after the node and the seed; returns its path. */
-export function writeReplay(dir: string, scenario: Scenario): string {
-  fs.mkdirSync(dir, { recursive: true });
-  const file = path.join(dir, `${scenario.node}-seed-${scenario.seed ?? 'hand'}.json`);
+/** A scenario as it is written to disk: values canonicalised (NaN, -0, dates survive JSON). The file name a replay takes is `replayFileName`. */
+export function canonicalScenario(scenario: Scenario): Scenario {
   const onDisk: Scenario = { ...scenario, params: canonicalParams(scenario.params), steps: scenario.steps.map(canonicalStep) };
   if (scenario.world?.network) {
     onDisk.world = { ...scenario.world, network: scenario.world.network.map((r) => ('body' in r.answer && r.answer.body !== undefined ? { ...r, answer: { ...r.answer, body: canonicalise(r.answer.body) } } : r)) };
   }
-  fs.writeFileSync(file, JSON.stringify([onDisk], null, 2) + '\n');
-  return file;
+  return onDisk;
 }
+export const replayFileName = (scenario: Scenario) => `${scenario.node}-seed-${scenario.seed ?? 'hand'}.json`;

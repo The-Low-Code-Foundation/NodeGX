@@ -1,0 +1,17 @@
+{
+  // Declarations only, for `src`. `rootDir` is `packages/` because the specs import the backend contract's
+  // translators by relative path (`../nodegx-backend-contract/src/translators`, record-match.ts) and schema.ts
+  // imports `schema/trace.schema.json` beside `src`; the `exports` map points at
+  // `dist/types/nodegx-node-spec/src/*.d.ts` accordingly. OWN-002 §6 names the dependency. The JS itself is bundled by build.mjs (esbuild).
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationMap": true,
+    "rootDir": "..",
+    "outDir": "dist/types",
+    "types": ["node"]
+  },
+  "include": ["src/**/*"]
+}

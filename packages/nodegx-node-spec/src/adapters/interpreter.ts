@@ -13,7 +13,7 @@
  * reads a calendar reads it in the script's zone, exactly as the runtime target's nodes do.
  */
 
-import { File as NodeFile } from 'buffer';
+import { HostFileCtor } from '../host-file';
 
 import type { AnyNodeSpec } from '../spec';
 import type { Handle, TargetAdapter } from '../adapter';
@@ -79,7 +79,7 @@ export function interpreterAdapter(options: InterpreterAdapterOptions = {}): Tar
     },
     // NSP-014 s30 — a file the browser hands: Node's `File`, its bytes zeros (adapter.ts)
     file(desc) {
-      return new NodeFile([new Uint8Array(desc.size ?? 0)], desc.name, { type: desc.type ?? '', lastModified: 0 });
+      return new HostFileCtor([new Uint8Array(desc.size ?? 0)], desc.name, { type: desc.type ?? '', lastModified: 0 });
     },
     // NSP-014 s30 — a stored file: the world's `StoredFile` (world.ts FILES)
     cloudFile(desc) {

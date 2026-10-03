@@ -63,9 +63,6 @@
  * holds one component per name.
  */
 
-import * as fs from 'fs';
-import * as path from 'path';
-
 import type { Handle, TargetAdapter } from './adapter';
 import { canonicalKey, revive } from './canonical';
 import type { TraceEvent } from './trace';
@@ -275,16 +272,14 @@ export function isGraphTarget<H extends Handle>(t: TargetAdapter<H>): t is Graph
   return typeof (t as GraphTarget<H>).mountGraph === 'function';
 }
 
-/** The package's own graph scenarios directory. */
-export const GRAPH_SCENARIOS_DIR = path.join(__dirname, '..', 'scenarios', 'graph');
-
-/** Every scenario in every `*.json` of the directory, file order then array order, values revived. */
-export function loadGraphScenarios(dir = GRAPH_SCENARIOS_DIR): GraphScenario[] {
-  if (!fs.existsSync(dir)) return [];
+/**
+ * Every scenario of one parsed graph-scenario file (an array), checked and with its values revived;
+ * `file` names the file in every error. Reads nothing: a page hands it JSON it fetched, Node's
+ * `loadGraphScenarios` (graph-files.ts, the `/node` entry) hands it each file of the directory.
+ */
+export function reviveGraphScenarios(parsed: unknown, file: string): GraphScenario[] {
   const out: GraphScenario[] = [];
-  for (const name of fs.readdirSync(dir).filter((f) => f.endsWith('.json')).sort()) {
-    const file = path.join(dir, name);
-    const parsed = JSON.parse(fs.readFileSync(file, 'utf8')) as unknown;
+  {
     if (!Array.isArray(parsed)) throw new Error(`${file}: a graph scenario file is an array of scenarios`);
     parsed.forEach((s, i) => {
       const sc = s as GraphScenario;

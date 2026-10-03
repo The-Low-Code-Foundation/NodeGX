@@ -36,6 +36,37 @@ run(Counter, { startValue: 5 }, ['settle', { signal: 'increase' }, 'settle']);
   (NSP-004) and the first batch (NSP-011: the four Variables, Boolean To String, Color Blend, Inverter, Log, Number
   Remapper, Or, String Mapper, Substring, Value Changed).
 
+## In a page, and as a package (phase 112, OWN-002)
+
+Two entries, split by one rule: what touches the file system is on `/node`, nothing else is.
+
+- **`@nodegx/node-spec`** (`src/browser.ts`) runs in a browser as it is: the format, the interpreter, the world, the
+  registry, every spec, the canonical form, the schema and the whole runner (generate, compare, shrink, mutants,
+  `runConformance`, the graph runner). No `fs`, no `path`, no Node `crypto` (SHA-2 is the package's own, `src/sha2.ts`,
+  derived from the primes and graded against Node's on every length to 300 bytes), no `buffer` (the host's `File`).
+  A page that fetched a scenario file hands it to `reviveScenarios` / `reviveGraphScenarios`, and to `runConformance`
+  as `options.scenarios`.
+- **`@nodegx/node-spec/node`** (`src/index.ts`) adds the scenario files on disk: `loadScenarios`, `writeReplay`,
+  `SCENARIOS_DIR`, `loadGraphScenarios`, `GRAPH_SCENARIOS_DIR`. Importing it fills `scenarioIO`, so `runConformance`
+  without `options.scenarios` reads the package's files, as every test in this repo expects. Inside the repo, tests and
+  scripts import `src/index.ts` by path, as they always did.
+
+```
+npm run build          # dist/index.mjs + index.cjs (browser-safe), dist/node.cjs, dist/types/ (gitignored)
+npm run size           # the browser entry, minified and gzipped, with and without fast-xml-parser; a budget
+npm run browser-check  # headless Chrome mounts Counter and Hash from the bundle, no aliases, no stubs (needs Chrome)
+```
+
+Measured 2026-10-03, 86 specs: **520 KB minified, 147.6 KB gzipped** without `fast-xml-parser` (the XML and feed
+parsers' dependency, left external for the consumer's bundler); 555 KB / 158 KB with it. The specs are 65% of the
+bundle (about 1.1 KB gzipped each; WebSocket, SSE and Query Records the largest), the world 5%, the runner 5%, the
+interpreter 4%, the trace schema 2%. The budget is 240 KB gzipped without the parser: room for the full vocabulary.
+
+Two things the package carries that an outsider should know: it bundles a slice of `@noodl/backend-contract` (the
+query translators and backend descriptors, about 30 KB minified) because the record specs are written against the
+contract's neutral filter; and its `scenarios/` and `schema/` directories ship with it. Not published yet: README §8 R2
+of phase 112 decides when, at 0.x.
+
 No dependency on the runtime, the editor or React. Strict TypeScript, `noImplicitReturns`.
 Tests type-check (ts-jest without `isolatedModules`) because `tests/types.test.ts` is graded by
 `@ts-expect-error` lines.
