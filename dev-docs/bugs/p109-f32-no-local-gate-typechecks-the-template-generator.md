@@ -1,7 +1,8 @@
 ---
 id: P109-F32
 title: No local gate typechecks the template generators — jest and `template:*` pass over a `Duplicate identifier` that `tsc` refuses
-status: scheduled
+status: fixed
+commit: 5ff15228b
 phase: P109
 task: ISL-023
 severity: low
@@ -24,3 +25,8 @@ CI's `typecheck:mcp` (`pr.yml:51`) would catch it, but only after a push (local 
 
 **Proposed:** a local typecheck step before the generator writes (or `diagnostics: true` for the generator's specs),
 `scripts/` in a typecheck program, and remove the two duplicate imports. Small.
+
+**Fixed (P109 ISL-023, session 10, 2026-10-03):** every `template:*` now runs `scripts/template-gate.js` first: a
+typecheck of the generator's own files under the options ts-node uses, plus a source scan for a stray backtick and a
+`${…}` inside a produced comment, each named by file and line, and the generator writes nothing on a red. The two
+duplicate imports are removed. `typecheck:mcp`'s remaining spec-file errors are `P109-S10-TYPECHECKMCP`.

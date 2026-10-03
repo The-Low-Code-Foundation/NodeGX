@@ -120,7 +120,7 @@ the work:
 | [ISL-021](ISL-021-AN-AGENT-CAN-PRESS-AND-TYPE-ON-A-RENDERED-PAGE.md) | An agent can press and type on a rendered page | F28 | MCP, render | ✓ |
 | [ISL-022](ISL-022-THE-WRAPPED-ROW-WARNING-MEANS-A-ROW-WILL-OVERFLOW.md) | The wrapped-row warning means a row will overflow — **🟢 s4: built on "Yes, both": the three false alarms silent, `row-cannot-wrap` names `brTabs`; census 22 → 14 + 7 new; four pins moved, landing-pages fixed at source. ⬜ AC6 (Claude Code over the door)** | F29 | validator | ✓ |
 | **Track E** | | | | |
-| [ISL-023](ISL-023-THE-GENERATOR-GATES-CATCH-A-TYPE-ERROR-AND-A-STRAY-BACKTICK.md) | The generator's gates catch a type error and a stray backtick | F32, F33 | tooling | — |
+| [ISL-023](ISL-023-THE-GENERATOR-GATES-CATCH-A-TYPE-ERROR-AND-A-STRAY-BACKTICK.md) | The generator's gates catch a type error and a stray backtick — **✅ s10: CLOSED (`5ff15228b`): `scripts/template-gate.js` runs before every `template:*` (types of the generator's own files + a source scan for a stray backtick and a `${…}` in a produced comment, by file and line; 9 generators, 1,219 literals in 2.9 s); garden + rocket arms red with nothing written; the old gates measured blind (a backtick pair left 2 of 3 green)** | F32, F33 | tooling | — |
 | [ISL-024](ISL-024-A-TEMPLATE-LIVES-IN-ITS-OWN-FOLDER.md) | A template lives in its own folder | F34 | repo | ✓ |
 | [ISL-025](ISL-025-THE-ISLAND-DROPS-THE-WORKAROUNDS.md) | The island drops the workarounds (closing task) — **🟡 s2: W1, W2 and W3 (ruling 1) landed and driven; the census spec pins 22 rows; s4: W13 ("Remove the force") and W21 (ISL-022) removed** | every WA | template | per row |
 
@@ -336,4 +336,4 @@ job each.
 | B | 0 (ISL-009 🟢 scroll half built s5; ISL-005 ruled "Native nodes first" s5) | 6 |
 | C | **2** (ISL-011 ✅ s4, ISL-014 ✅ s4) | 5 |
 | D | 0 (ISL-022 🟢 built, AC6 run once — inconclusive; ISL-018 🟡 built, one case open; ISL-019 🟢 built s5, AC6/AC7 open) | 7 |
-| E | 0 (ISL-025 🟡 W1–W3, W13, W21 removed) | 3 |
+| E | **1** (ISL-023 ✅ s10; ISL-025 🟡 W1–W3, W13, W21 removed) | 3 |

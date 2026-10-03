@@ -2,6 +2,7 @@
 id: P109-S5-ARRAYFILTERIN
 title: Array Filter cannot test "is in this list", a nested field or a computed value
 status: fixed
+commit: 2c38d43a4
 regression: packages/noodl-runtime/test/isl-005-array-filter-in-list.test.ts
 severity: medium
 area: `noodl-runtime/src/nodes/std-library/data/filtercollectionnode.ts:22` (`eq | neq | gt | lt | gte | lte | regex`)

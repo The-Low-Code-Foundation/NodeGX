@@ -1,6 +1,6 @@
 # ISL-023 — The generator's gates catch a type error and a stray backtick
 
-**Status: ⬜ not started — scoped 2026-10-01 at 27d891bf3.** **Source:** [AUDIT](AUDIT-2026-10-01.md) F32 + F33; P105
+**Status: ✅ closed — session 10, 2026-10-03 (AC1–AC6 met, §8; AC2's revert is read on the gate — the full generators were not re-run). Scoped 2026-10-01 at 27d891bf3.** **Source:** [AUDIT](AUDIT-2026-10-01.md) F32 + F33; P105
 README §7 ("Backticks"); P108 s4 (from the audit; the transcript was not re-read here) · **Side:** tooling (the template
 generators and their jest gates). Applies to every `scripts/generate-*-template.ts` and the `packages/noodl-mcp/tests/`
 modules they import, not only the garden's.
@@ -114,4 +114,36 @@ Constraints:
 
 ## 8. Record
 
-None yet.
+### Session 10 (2026-10-03) — built and closed
+
+**What was built.** `scripts/template-gate.js` (plain Node over the repo's TypeScript 5.9, no ts-node), run first by
+every `template:*` script (`node scripts/template-gate.js <entry> && ts-node -T …`) and on its own as
+`npm run template:gate` (every generator `package.json` names). Two halves, both read from the source:
+
+1. **Types.** One program rooted at the generator's entry, with the options ts-node runs it under
+   (`scripts/tsconfig.json`), reporting syntax and type errors in the generator's **own** files: its entry and every
+   module it imports that is not a package's `src/`. 🔴 **Why not the product source too:** under the root's
+   `moduleResolution: node`, zod's types in `noodl-mcp/src` exhausted a 4 GB heap after 210 s (measured: the program
+   loads 838 files in 1 s; the checker died in `noodl-mcp/src/tools/*`). Product source has its own package typecheck
+   (`typecheck:mcp`, Node16, 9 s); the gate's job is the generator's files.
+2. **Template literals.** A small lexer over each literal's **cooked** text says, for every `${…}`, whether it lands
+   inside a `//` or block comment of the produced text (a `//` opens one only at a line start or after a space, so
+   `https://${host}` does not). After a syntax error it names the literal that closed last before the error: that
+   closing backtick is the likely stray one. Escape hatch: `${/* template-gate: comment ok */ x}`. At HEAD across all
+   1,592 substitutions in the nine generators, **no substitution sits in a comment**, so the escape is unused.
+
+Also: the two duplicate imports removed (`cg005Olive.test.ts`, `ig004Island.test.ts`); the three old gates' comments
+now say what they catch; `refusedDerivedNames` (`dynamicPortRules.ts:351`, **this phase's own** red from ISL-009 s6,
+`0951dbbe3`) narrowed; `isl023TemplateGate.test.ts` (7 specs) pins the arms and the reach.
+
+| AC | result |
+|---|---|
+| AC1 | **RED at HEAD `4e965d3c2`:** `tsc -p packages/noodl-mcp --noEmit` exit 2, **17 errors**: the 8 TS2300 (`cg005Olive.test.ts:21`/`:24` and `ig004Island.test.ts:15`/`:21`, each for `ENGINE` and `helper`), and 9 others: `dynamicPortRules.ts:351` TS18048 (fixed here, ours); `cg001GardenKit.test.ts:331` TS2345; `cg002Engine.test.ts:2824` TS2339; `cg003Template.test.ts:795`, `:1595`, `:2388` TS2352; `ig007Garden3d.test.ts:175` TS2345; `iw007Animals.test.ts:176` TS2339; `p108s8Feedback.test.ts:53` TS2352. **None is in a generator module**: all are in spec files (filed as `P109-S10-TYPECHECKMCP`). **Known-firing control:** the HEAD versions of the two duplicate-carrying specs, run as scratch copies, pass jest **79/79**. After: 8 errors, the same 8 spec-file errors as before, shifted by the new comment lines. |
+| AC2 | **Garden:** `sprite: 'house'` → `sprite: 7` in `cg003Content.ts:428`; `npm run template:garden` exit 1, `cg003Content.ts:428:37 TS2322 Type 'number' is not assignable to type 'string'`, "Nothing written"; the 428 files of `templates/bot-garden/` have the same mtimes (hash of `stat` before and after). **Control:** the old command's path, `ts-node -T`, loads the same module and reads `sprite = 7`, exit 0. **Rocket:** `token: 42` in `tpl007Theme.ts:64`; `npm run template:rocket` exit 1, `tpl007Theme.ts:64:5 TS2322`; `templates/rocket-school/` mtimes unchanged. Both restored by `cp` and `cmp`. Reverted: the gate reads green (garden 33 files, 345 literals, 558 substitutions). The full generators were not re-run: the gate is the only thing added in front of them. |
+| AC3 | Scratch copies beside the originals. **(a)** a backtick pair in a comment of `START_WORLD_SCRIPT`: red, `isl023ArmA.ts:149:42 the template literal opened at …:141:35 closes here`, then the first three TS1005s. **(b)** `${CAN_MAX}` in a `//` comment of the same script: red, `isl023ArmB.ts:156:119 ${CAN_MAX} sits inside a // comment`. **At HEAD (b) fails silently:** `ts-node -T` exit 0, and the produced script reads *"… (free play has none: 0; a can holds 3)."* **(c)** a backtick pair in a comment of `GARDEN_CSS`: red, `isl023ArmC.ts:219:49 … opened at …:218:27 closes here`. The spec repeats all three on self-contained fixtures, and a control file of legal shapes (a substitution in code, in `'…'` and `"…"`, after `https://`, an escaped `\${` and `` \` ``, a marked one, a `${` in a plain string) stays green. |
+| AC4 | Arms in the real modules, one at a time, restored by `cp` + `cmp`, all three clean against HEAD afterwards. **(a):** `cg002Engine` AC9 (arm in `SENSE_SCRIPT`) **green**; `cg005Olive` "the scripts" (arm in `OWL_ROW_SCRIPT`) **green**; `cg003Template` glue gate (arm in `START_WORLD_SCRIPT`) **red, naming something else**: the door refuses `Workshop/Play` with `connection-unknown-instance-port` (Start world has 2 inputs and 1 output). **(b):** all three **green**. ⚠️ **The expectation was wrong in the same direction as the defect:** (a) does not stop the suite from running. ts-jest with `diagnostics: false` transpiles anyway, and `transpileModule` cuts the literal at the stray backtick: the emitted `START_WORLD_SCRIPT` ends at *"the robot doing the job ("*. `ts-node -T` (the generators' own path) **does** report the TS1005s, at the right line. The comments now say what each gate catches (an *escaped* backtick or dollar-brace) and point at the template gate. |
+| AC5 | `npm run template:gate`: **9 generators, 69 files, 1,219 template literals, 1,592 substitutions in 2.9 s**, red for one reason: `template:planner: its entry scripts/generate-planner-template.ts does not exist`. That is a peer's uncommitted rename in the working tree (TPL-010's planner → planning, files dated 09-23/09-26); at HEAD the file exists. Not touched. The spec reads every generator whose entry exists (≥ 60 files, ≥ 1,000 literals) and is green; a missing entry and an unresolved import (TS2307) are each red in their own arm. The list is read from `package.json`, not a glob, so ISL-024's move carries it. |
+| AC6 | **Cost:** 2.5–3.8 s per generator, 2.9 s for all nine in one program (`typecheck:mcp`: 8–9 s). Under 20 s. The narrowing to own files is for the heap (above), not the clock. |
+
+**Not done here, on purpose.** `diagnostics` stays `false` in jest (§5 choice 1). The eight spec-file type errors are
+filed, not fixed: they are in specs of P105–P108, and none reaches a generator.

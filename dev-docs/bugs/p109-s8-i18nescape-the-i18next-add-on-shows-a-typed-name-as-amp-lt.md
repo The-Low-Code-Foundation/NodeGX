@@ -2,6 +2,7 @@
 id: P109-S8-I18NESCAPE
 title: The i18next add-on shows a name with "&" or "<" in it as "&amp;" / "&lt;", and never says a word or a variable is missing
 status: fixed
+commit: a36d28e90
 severity: medium
 area: library / i18next Translation (library/modules/i18next-translation)
 found: P78 TPL-011 s3 (the escaping, recorded there as a caveat); measured on a deployed page P109 s8, 2026-10-03
