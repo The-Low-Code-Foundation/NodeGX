@@ -188,7 +188,10 @@ export const FilterCollection = defineNode({
   // the value is a list (a wired array's records by id, typed text split on commas, else a list of one), members
   // compared loosely like `eq`; `nin` keeps a row without the property, like `neq`, and `in` drops it. v1 had no such
   // operators: an Op of `in` tested only that the property was present.
-  version: 2,
+  // v3 (s36, row C59 ruled "fix both" by Richard 2026-10-03): the filter tests a RECORD's data and any other row as it
+  // is — the sort's rule (:95-97). A plain array of plain objects (what a Function outputs) now filters; v2 failed every
+  // filtered run on it with `array-filter/filter-failed` ("Cannot read properties of undefined"). A `null` row still fails.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/filtercollectionnode.ts',
   needs: ['registry', 'random'],
   worldPool: { registries: REGISTRIES },
@@ -205,8 +208,8 @@ export const FilterCollection = defineNode({
       displayName: 'Items',
       group: 'General',
       description: 'Array to filter; the node re-runs whenever this array changes, unless you untick it under Run On Value Change',
-      // s35 — mostly a registry array: the filter reads each row's `data` (:508), so a plain array of plain objects
-      // fails every filtered run (row C59) and, while it was the only example, no generated run ever applied a filter
+      // s35 — mostly a registry array: while a plain array was the only example no generated run ever applied a filter
+      // (v2 failed every one on it, row C59); v3 filters both
       examples: [...Array(10).fill({ $array: 'rows' }), { $array: 'owners' }, [{ a: 1, name: 'Ada' }, { a: 2, name: 'Lin' }, { a: 3, name: 'ada' }], []]
     },
     // :232-244
@@ -352,7 +355,7 @@ export const FilterCollection = defineNode({
         const filter = getFilter(s.settings);
         const sort = getSort(s.settings);
         try {
-          if (filter) filtered = filtered.filter((m) => applyFilter((m as { data: Record<string, unknown> }).data, filter, w.registry.isRecord, w.registry.isCollection)); // :508
+          if (filter) filtered = filtered.filter((m) => applyFilter((w.registry.isRecord(m) ? m.data : m) as Record<string, unknown>, filter, w.registry.isRecord, w.registry.isCollection)); // :508 — v3, C59: a record's data, any other row as it is
           if (sort) filtered.sort(sorter.bind(sort, w.registry.isRecord)); // :509
         } catch (e) {
           return fail('array-filter/filter-failed', 'The filter could not be applied: ' + ((e as Error).message || String(e))); // :526-532

@@ -505,7 +505,7 @@ const FilterCollectionNode: NodeDefinitionOptions = {
           const filter = this.getFilter();
           const sort = this.getSort();
           try {
-            if (filter) filtered = filtered.filter((m) => applyFilter(m.data, filter));
+            if (filter) filtered = filtered.filter((m) => applyFilter(m instanceof Model ? m.data : (m as unknown as Record<string, unknown>), filter)); // P107 C59: a record's data, any other row as it is (the sorter's rule); `null` still throws into the catch
             if (sort) filtered.sort(sorter.bind(sort));
           } catch (e) {
             /**

@@ -1,11 +1,14 @@
 ---
 id: P107-C60
 title: Array Map cannot map a plain array of plain objects (what a Function outputs) — a property mapping fails with "model.get is not a function"
-status: needs-ruling
+status: fixed
+commit: PENDING
 severity: medium
 area: runtime / Array Map (`mapcollectionnode.ts` :348 — `m.set(key, model.get(mapping))`)
 found: P107 (the node says what it does) s35, 2026-10-03
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md §6.5; scenario "A script copying a property and computing another, over a PLAIN array …" (packages/nodegx-node-spec/scenarios/Map Collection.json), passing on the interpreter AND the runtime — the spec states the runtime's reading; its records twin maps as described
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/Map Collection.json "v2 (C60 fixed): a script copying a property and computing another, over a PLAIN array of plain objects"
 ---
 
 Array Map runs its script once per row. A string mapping (`map({ title: 'name' })`) copies through `model.get('name')`
@@ -23,7 +26,7 @@ fields too?"*
 **Proposed:** read through one helper, as the Array Filter fix would: `isRecord(model) ? model.get(mapping) : model[mapping]`,
 and hand a function mapping the record (unchanged). Ship with C59.
 
-**Ruling:** R3 (a) — the runtime wins until Richard rules. The spec states the runtime's reading.
+**Ruling:** Richard, 2026-10-03: *"Yes, fix both"* (C59 and C60 asked as one). Fixed in s36: a record is read as before, any other row as it is (the sorter's rule). The spec moved with it (Array Filter v3, Array Map v2); control red → treatment green on three seeds and at 10,000 (NSP-012 §6.6).
 
 **Found because:** the only Array Map scenario that copied a property ("A script copying a property and computing another")
 handed a plain array, and its trace was this failure from s9 on, on both targets. No scenario or generated run had ever

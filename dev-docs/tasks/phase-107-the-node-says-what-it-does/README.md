@@ -472,7 +472,7 @@ never registered, so a wire from it is dropped inside the connection. Register i
 change shipped alone?"* Then **C9** — *"Create New Array, Create New Object and Set Object Properties answer
 ONCE for two Do presses in a frame; Array's Fetch, Set Variable and Array Filter answer twice, as ERG-001 §4
 says. Make the three answer per press?"*; **C10** — *"A number, a boolean or a plain object wired into Array
-Filter's or Array Map's Items crashes the node in the setter instead of refusing."*; **C59** (s35) — *"A Function's list of plain objects wired into Array Filter fails as soon as a filter is set ('Cannot read properties of undefined'); records work. Read a plain object's own fields too, as the sort already does?"*; **C60** (s35, its twin) — *"…and Array Map fails any script that copies a property ('model.get is not a function'). Ship both with one fix?"*; **D13** — Array's
+Filter's or Array Map's Items crashes the node in the setter instead of refusing."*; **C59 + C60** ✅ **ruled "Yes, fix both" 2026-10-03, fixed s36** (NSP-012 §6.6 — a record's data, any other row as it is); **D13** — Array's
 `Changed` description still names the pre-checkbox rule.
 
 **R6 — Is the editor a target?** Asked by s1 as *"can we make sure the work in this phase prepares

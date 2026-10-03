@@ -345,7 +345,7 @@ const MapCollectionNode: NodeDefinitionOptions = {
                 if (typeof mapping === 'function') {
                   m.set(key, mapping(model));
                 } else if (typeof mapping === 'string') {
-                  m.set(key, model.get(mapping));
+                  m.set(key, model instanceof Model ? model.get(mapping) : (model as unknown as Record<string, unknown>)[mapping]); // P107 C60: a record through `get`, any other row's own property
                 }
               }
             }, model);

@@ -63,7 +63,11 @@ type Outcomes = Array<{ port: 'refresh'; outcome: 'done' | 'failure'; error?: st
 
 export const MapCollection = defineNode({
   type: 'Map Collection',
-  version: 1,
+  // v2 (s36, row C60 ruled "fix both" by Richard 2026-10-03, with C59): a string mapping copies a RECORD's property
+  // through `get` and any other row's own property; v1 failed every run over a plain array of plain objects (what a
+  // Function outputs) with `array-map/map-failed` ("model.get is not a function"). A function mapping is still handed
+  // the row as it is.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/mapcollectionnode.ts',
   needs: ['registry', 'random'],
   // s35 — the records a generated run maps, and an empty registry
@@ -81,8 +85,8 @@ export const MapCollection = defineNode({
       displayName: 'Items',
       group: 'General',
       description: 'Array to map; the node re-runs whenever this array reports a change',
-      // s35 — mostly a registry array: a string mapping reads `model.get` (:348), which a plain object has not (row C60),
-      // so while a plain array was the only example no generated run ever mapped a property
+      // s35 — mostly a registry array: while a plain array was the only example no generated run ever mapped a
+      // property (v1 failed every one on it, row C60); v2 maps both
       examples: [...Array(6).fill({ $array: 'rows' }), [{ name: 'Ada', n: 1 }, { name: 'Lin', n: 2 }], []]
     },
     // :117-133 — panel only
@@ -184,7 +188,7 @@ export const MapCollection = defineNode({
             for (const key in mappings) {
               const mapping = mappings[key];
               if (typeof mapping === 'function') m.set(key, (mapping as (o: unknown) => unknown)(model)); // :345-346
-              else if (typeof mapping === 'string') m.set(key, (model as RecordRef).get(mapping)); // :347-348
+              else if (typeof mapping === 'string') m.set(key, w.registry.isRecord(model) ? model.get(mapping) : (model as Record<string, unknown>)[mapping]); // :347-348 — v2, C60: a record through `get`, any other row's own property
             }
           }, model);
           return m;

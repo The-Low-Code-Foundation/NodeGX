@@ -1,7 +1,7 @@
 [
   {
-    "name": "A plain array of plain objects (what a Function outputs) filtered by a = 2: the filter reads each row's `data`, which a plain object has not — filter-failed and Count 0 (row C59; the spec states the runtime's reading)",
-    "because": ":508 `applyFilter(m.data, filter)` — a plain object's `data` is undefined; :526-532",
+    "name": "v3 (C59 fixed): a plain array of plain objects (what a Function outputs) filtered by a = 2: the filter reads a plain row's own fields — one row passes, Filtered, Count 1",
+    "because": ":508 v3 — a record's `data`, any other row as it is (the sort's rule, :95-97); v2 failed here with filter-failed (row C59)",
     "params": {
       "filterFilter": "a",
       "filterFilterValue-a": 2,
@@ -15,6 +15,23 @@
         {
           "a": 3
         }
+      ]
+    },
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "v3: a plain array holding a null row, filtered — the test cannot read null: filter-failed and Count 0 (a row that is not an object still fails, as in v2)",
+    "because": ":508, :526-532 — `null[key]` throws inside the `try`",
+    "params": {
+      "filterFilter": "a",
+      "filterFilterValue-a": 2,
+      "items": [
+        {
+          "a": 2
+        },
+        null
       ]
     },
     "steps": [

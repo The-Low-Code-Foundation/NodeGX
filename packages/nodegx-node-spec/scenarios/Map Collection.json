@@ -17,8 +17,8 @@
     ]
   },
   {
-    "name": "A script copying a property and computing another, over a PLAIN array of plain objects (what a Function outputs): the string mapping reads `model.get`, which a plain object has not — map-failed (row C60; the spec states the runtime's reading)",
-    "because": ":348 `m.set(key, model.get(mapping))`; :354-362",
+    "name": "v2 (C60 fixed): a script copying a property and computing another, over a PLAIN array of plain objects (what a Function outputs): the string mapping reads the row's own property — one record, name Ada, twice 2",
+    "because": ":347-348 v2 — a record through `get`, any other row's own property; v1 failed here with map-failed (row C60)",
     "params": {
       "items": [
         {
@@ -131,6 +131,23 @@
         "set": "items",
         "value": 5
       },
+      "settle"
+    ]
+  },
+  {
+    "name": "v2: a plain array holding a null row — the string mapping cannot read null: map-failed",
+    "because": ":347-348, :354-362 — `null[mapping]` throws inside the `try`",
+    "params": {
+      "items": [
+        {
+          "name": "Ada",
+          "n": 1
+        },
+        null
+      ],
+      "mapScript": "map({ name: 'name' })"
+    },
+    "steps": [
       "settle"
     ]
   }
