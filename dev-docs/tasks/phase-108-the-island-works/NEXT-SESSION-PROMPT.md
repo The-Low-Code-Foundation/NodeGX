@@ -4,8 +4,8 @@
 >
 > **Session 8 (2026-10-02/03) was Richard's own play, not the children's sitting.** He reported five things; all five are
 > built and driven (below). **Ask Richard first whether the children's sitting (IW-009 §4–§5) has happened** — its notes
-> are session 9's work list. The Mac app built in s7 (`garden-desktop/shell/dist/mac-arm64/Olive's Island.app`) is from
-> BEFORE s8: rebuild it (IW-009 §5's steps) before the sitting, or the children play without s8's fixes.
+> are session 9's work list. The Mac app (`garden-desktop/shell/dist/mac-arm64/Olive's Island.app`) was REBUILT
+> from the s8 tree on 2026-10-03 (IW-009 §5, "Rebuilt after s8") — it carries s8's fixes.
 >
 > **Read first:** [README.md](README.md) §3 (R1–R8 ruled — **R7, R8 are session 8's**; D1–D13), §6 (the board);
 > [IW-009](IW-009-THE-KIDS-VERDICT.md).
@@ -50,7 +50,7 @@
 > `drives/drive-all.sh`) — tabs, the can, the go keys, the walk on her land (11 tiles, ~4 s), the divider, her land's
 > chips and lines.
 >
-> **Open for Richard (not blocking):** IW-009 (the sitting; rebuild the Mac app first); the tablet; the FR lines — s8 adds
+> **Open for Richard (not blocking):** IW-009 (the sitting; the Mac app is the s8 build); the tablet; the FR lines — s8 adds
 > « Ici, il faut des planches. » … (`sayWants*`), « Le rocher est vide. Il repousse, une pierre à la fois. » (`sayGrows*`),
 > « L’arrosoir est dans l’herbe : remplis-le à la mare, et reviens ! », « l’arrosoir au bord de la mare »; the rows-trick
 > can on the pond's edge tile (the only 12-block layout — a can drawn on water); the prices; D10–D13.

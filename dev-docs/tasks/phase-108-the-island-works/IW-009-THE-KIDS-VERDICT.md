@@ -62,6 +62,12 @@ Built 2026-10-01 from the session-7 tree (`c051ca68d`), on Richard's Mac:
   in a sandboxed renderer) — twice in three launches; the page and every clause were unaffected.
 - Everything the island does in this build was driven on the deployed web build of the same tree (IW-007 §4 "Session 7").
 
+**Rebuilt after s8 (2026-10-03, from `746f0dff9`, the template at `4914f6e86`):** the same two steps, both exit 0 —
+`build-app.js --allow-development-engine` (`index-1ad13a9b2b92cb01.js`, same origin, model sha256 verified), then
+`npm run dist:mac` (signed with the Developer ID at 08:30, not notarized; the app's `Resources/app` carries that
+bundle). `drive-upgrade.js --exe "<the app>/Contents/MacOS/Olive's Island"` → **PASS, 10/10 clauses**. This is the
+build for the sitting; the s7 one is gone (overwritten in place).
+
 To open it: Finder → `dev-docs/tasks/phase-105-the-coding-garden/garden-desktop/shell/dist/mac-arm64/` → Olive's
 Island. It keeps its islands in its own data folder (not the browser), so a sitting starts clean.
 
