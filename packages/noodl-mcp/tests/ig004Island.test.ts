@@ -18,7 +18,7 @@ import { PAGE_WORDS } from './cg003Content';
 import { ISLAND_HOLD_TICKS, ISLAND_TICK_SCRIPT, PLOT_AT_SCRIPT, islandWorldScript } from './ig004Island';
 // P108 IW-003 (lane B): the plot's laid start (a seeded request), and the teach-again rows at the end.
 import { ISLAND_ENGINE } from './ig004Island';
-import { ENGINE, helper } from './cg002Scripts';
+// (ENGINE and helper are imported above: a second import of them was TS2300 under tsc — P109 ISL-023.)
 // P108 IW-002 (lane J): the job tick — the wear clock it runs.
 import { WEAR } from './cg002Content';
 

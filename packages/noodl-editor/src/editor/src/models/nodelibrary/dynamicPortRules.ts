@@ -348,7 +348,7 @@ export function refusedDerivedNames(
   const out: Array<{ parameter: string; name: string; rule: string }> = [];
   for (const rule of namedPortsDerivedRules(dynamicports)) {
     for (const name of namesFromListParameter(parameters ? parameters[rule.parameter] : undefined)) {
-      if (!derivedRuleAccepts(rule, name)) out.push({ parameter: rule.parameter, name, rule: rule.accept.rule });
+      if (!derivedRuleAccepts(rule, name)) out.push({ parameter: rule.parameter, name, rule: rule.accept?.rule ?? '' }); // refused ⇒ `accept` is set
     }
   }
   return out;

@@ -20,8 +20,8 @@ import { KIT_PALETTE_SCRIPT } from './cg003Scripts';
 // P108 IW-003 (lane S): Start world's own seed helper, for the requests on the job model.
 import { ENGINE, helper } from './cg002Scripts';
 import { APPLY_DELTA_SCRIPT, DIAL_TEMPERATURE, GOAL_SCRIPT, NEW_RUN_SCRIPT, PALETTE_SCRIPT, STEP_SCRIPT, portsOf, runScript } from './cg002Scripts';
-// P108 IW-003 (lane P): the world a request opens on, laid by the engine's own seedWorld.
-import { ENGINE, helper } from './cg002Scripts';
+// P108 IW-003 (lane P): the world a request opens on, laid by the engine's own seedWorld (ENGINE and helper, imported
+// above by lane S: two lanes each added the same import, which is TS2300 under tsc and ran silently — P109 ISL-023).
 import {
   ACCEPT_PROPOSAL_SCRIPT,
   ASK_OLIVE_SCRIPT,
@@ -826,6 +826,10 @@ describe('CG-005 — Olive in the game', () => {
 
   describe('the scripts', () => {
     it('no backtick, no dollar-brace; only Ask Olive reaches the network, and only the shell’s route', () => {
+      // What this catches: an ESCAPED backtick or dollar-brace reaching a script. A bare one in the generator's source is
+      // not visible here (P109 ISL-023 AC4, measured): a bare backtick ends the literal early and ts-jest, with
+      // `diagnostics: false`, runs the cut script (this stayed green); a bare `${x}` in a comment arrives as x's value.
+      // Those are `scripts/template-gate.js`'s, run before every `template:*` and by `isl023TemplateGate.test.ts`.
       const all = [...OLIVE_SCRIPTS, { component: 'Logic/Palette', script: PALETTE_SCRIPT, seam: '' }];
       for (const { component, script } of all) expect({ component, backtick: script.includes('`'), dollar: script.includes('${') }).toEqual({ component, backtick: false, dollar: false });
       for (const { component, script } of all) {

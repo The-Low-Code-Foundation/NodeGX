@@ -427,6 +427,10 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     });
 
     it('no backtick and no dollar-brace inside any glue script (README §7)', () => {
+      // What this catches: an ESCAPED backtick or dollar-brace reaching a script. A bare one in the generator's source is
+      // not visible here (P109 ISL-023 AC4, measured): a bare backtick ends the literal early and ts-jest, with
+      // `diagnostics: false`, runs the cut script (this stayed green); a bare `${x}` in a comment arrives as x's value.
+      // Those are `scripts/template-gate.js`'s, run before every `template:*` and by `isl023TemplateGate.test.ts`.
       for (const g of GLUE_SCRIPTS) expect({ c: g.component, bad: /`|\$\{/.test(g.script) }).toEqual({ c: g.component, bad: false });
       expect(/`/.test(GARDEN_CSS)).toBe(false);
     });

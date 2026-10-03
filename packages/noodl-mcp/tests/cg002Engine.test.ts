@@ -1252,11 +1252,15 @@ describe('CG-002 — the engine', () => {
   });
 
   describe('AC9 — no backtick, no interpolation, in any script', () => {
+    // What this catches: an ESCAPED backtick or dollar-brace reaching a script. A bare one in the generator's source is
+    // not visible here (P109 ISL-023 AC4, measured): a bare backtick ends the literal early and ts-jest, with
+    // `diagnostics: false`, runs the cut script (this stayed green); a bare `${x}` in a comment arrives as x's value.
+    // Those are `scripts/template-gate.js`'s, run before every `template:*` and by `isl023TemplateGate.test.ts`.
     it('🔴 every script text is free of ` and ${', () => {
       for (const { component, script } of FUNCTION_SCRIPTS) {
         expect({ component, backtick: script.includes('`'), dollar: script.includes('${') }).toEqual({ component, backtick: false, dollar: false });
       }
-      // Known-firing beside it.
+      // Known-firing beside it — it grades `includes`, not this gate's reach (see above).
       expect('a `b` c'.includes('`')).toBe(true);
     });
   });
