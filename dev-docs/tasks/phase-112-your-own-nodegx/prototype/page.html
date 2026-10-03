@@ -363,9 +363,10 @@ for (const id of ids()) rows[id] = computeRows(id);
 
 /* ================= layout ================= */
 const PX = 0.01;
-const CARD_W = 150 * PX, HEAD = 44 * PX, ROW = 20 * PX, FOOT = 8 * PX;
+const LOOK = NGX.look; // @nodegx/canvas-look (OWN-005): the editor's own metrics and colours, generated
+const CARD_W = LOOK.card.size.width * PX, HEAD = 44 * PX, ROW = LOOK.card.propertyConnectionHeight * PX, FOOT = LOOK.card.verticalSpacing * PX;
 const cardH = (id) => HEAD + rows[id].length * ROW + FOOT;
-const COL_GAP = 1.3, ROW_GAP = 0.7, STEP = 0.8, INDENT = 20 * PX, CHILD_GAP = 10 * PX, PITCH = CARD_W + COL_GAP;
+const COL_GAP = 1.3, ROW_GAP = 0.7, STEP = 0.8, INDENT = LOOK.card.childMargin * PX, CHILD_GAP = LOOK.card.childSpacing * PX, PITCH = CARD_W + COL_GAP;
 const place = {};
 {
   // the first layout: columns by longest path (loop-back wires ignored), visual stack last, barycentre ordering
@@ -463,7 +464,7 @@ try {
   $('err').textContent = 'This page needs WebGL to draw the graph. The app itself still runs in the Preview.';
 }
 const scene = new THREE.Scene();
-const GROUND = new THREE.Color('#141318');
+const GROUND = new THREE.Color(LOOK.colors.dark.ground);
 const clear = new THREE.Color();
 scene.fog = new THREE.Fog(GROUND, 30, 90);
 const camera = new THREE.PerspectiveCamera(14, 1, 0.5, 600);
@@ -520,11 +521,8 @@ for (let k = 1; k <= 16; k++) {
 }
 
 /* ================= cards ================= */
-const SCHEMES = {
-  default: { base: '#333c46', header: '#2b323b', outline: '#2b323b', text: '#EEF2F6' },
-  visual: { base: '#2d435b', header: '#243850', outline: '#5ca9ff', text: '#EEF2F6' }
-};
-const WIRE = { data: '#45d08a', signal: '#35c3e8' };
+const SCHEMES = { default: NGX.nodeScheme('default'), visual: { ...NGX.nodeScheme('visual'), outline: NGX.nodeScheme('visual').outlineHighlighted } };
+const WIRE = { data: NGX.wireColors('number').normal, signal: NGX.wireColors('signal').normal };
 const SCALE = 3;
 const fmt = (v) => {
   if (v === undefined) return '';
@@ -644,14 +642,15 @@ const lane = new THREE.Group();
 const laneParts = [];
 {
   const gs = Object.keys(GHOSTS);
-  const x0 = Math.min(...gs.map((i) => place[i].x)) - 12 * PX, x1 = Math.max(...gs.map((i) => place[i].x + CARD_W)) + 12 * PX;
-  const z0 = Math.min(...gs.map((i) => place[i].z)) - 34 * PX, z1 = Math.max(...gs.map((i) => place[i].z + cardH(i))) + 12 * PX;
-  const r = 10 * PX;
+  const LP = LOOK.lane.padding * PX, LE = LOOK.lane.eyebrowHeight * PX;
+  const x0 = Math.min(...gs.map((i) => place[i].x)) - LP, x1 = Math.max(...gs.map((i) => place[i].x + CARD_W)) + LP;
+  const z0 = Math.min(...gs.map((i) => place[i].z)) - (LP + LE), z1 = Math.max(...gs.map((i) => place[i].z + cardH(i))) + LP;
+  const r = LOOK.lane.cornerRadius * PX;
   const shape = new THREE.Shape();
   shape.moveTo(x0 + r, z0); shape.lineTo(x1 - r, z0); shape.quadraticCurveTo(x1, z0, x1, z0 + r); shape.lineTo(x1, z1 - r);
   shape.quadraticCurveTo(x1, z1, x1 - r, z1); shape.lineTo(x0 + r, z1); shape.quadraticCurveTo(x0, z1, x0, z1 - r); shape.lineTo(x0, z0 + r);
   shape.quadraticCurveTo(x0, z0, x0 + r, z0);
-  const washMat = new THREE.MeshBasicMaterial({ color: 0x5ca9ff, transparent: true, opacity: 0.05, depthWrite: false, side: THREE.DoubleSide });
+  const washMat = new THREE.MeshBasicMaterial({ color: new THREE.Color(LOOK.colors.dark.categoryVisual), transparent: true, opacity: LOOK.lane.washAlpha, depthWrite: false, side: THREE.DoubleSide });
   const wash = new THREE.Mesh(new THREE.ShapeGeometry(shape, 8), washMat);
   wash.rotation.x = Math.PI / 2;
   const outlineMat = new THREE.LineDashedMaterial({ color: 0x6a6680, dashSize: 0.05, gapSize: 0.05, transparent: true });
@@ -661,7 +660,7 @@ const laneParts = [];
   const x = c.getContext('2d');
   x.font = `600 30px ${MONO}`;
   if ('letterSpacing' in x) x.letterSpacing = '4px';
-  x.fillStyle = '#8a93a0'; x.textBaseline = 'middle'; x.fillText('STRUCTURE', 0, 30);
+  x.fillStyle = '#8a93a0'; x.textBaseline = 'middle'; x.fillText(LOOK.lane.eyebrowLabel, 0, 30);
   const eyeTex = new THREE.CanvasTexture(c); eyeTex.colorSpace = THREE.SRGBColorSpace; eyeTex.anisotropy = 8;
   const eyeMat = new THREE.MeshBasicMaterial({ map: eyeTex, transparent: true, depthWrite: false });
   const eye = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 0.15), eyeMat);

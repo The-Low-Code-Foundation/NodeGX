@@ -2,6 +2,7 @@ import { GraphRun, type NodeDecl, type WireDecl } from './graphrun';
 import { nodes, wires } from './app';
 import { specs } from '../../../../../packages/nodegx-node-spec/src/browser';
 import picker from './picker.json';
+import { look, nodeScheme, wireColors } from '../../../../../packages/nodegx-canvas-look/src';
 
 const clone = <T>(x: T): T => JSON.parse(JSON.stringify(x));
 export function create() {
@@ -11,7 +12,7 @@ export function create() {
 export function createFrom(n: Record<string, NodeDecl>, w: WireDecl[]) {
   return new GraphRun(clone(n), w.map((x) => ({ ...x })));
 }
-export { nodes, wires, picker };
+export { nodes, wires, picker, look, nodeScheme, wireColors };
 export const specCount = Object.keys(specs).length;
 export const hasDerived = (type: string) => !!(specs as Record<string, { derived?: unknown }>)[type]?.derived;
 

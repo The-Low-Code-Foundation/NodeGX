@@ -4,7 +4,7 @@
 phase 107 makes possible and ended with a working prototype: a NodeGX graph running in a browser page on the node
 specs, drawn as the editor's canvas, lifted into 3D, and editable (add a node, drag a wire, set a property), with
 missions a copy of the graph checks. The prototype is kept in [`prototype/`](prototype/README.md); a second, better one, Under the Lid (2026-10-03), in [`prototype-under-the-lid/`](prototype-under-the-lid/README.md) (reading 12).
-**Status: 🟡 IN PROGRESS — s1 (2026-10-03): OWN-000 built (NEEDS.md, CENSUS.md, the second prototype kept); OWN-002 built (the browser entry, the build, the size); OWN-010's ledger half built 2026-10-02. Six rulings to ask (§8).** **Prefix: `OWN`.**
+**Status: 🟡 IN PROGRESS — s1 (2026-10-03): OWN-000 built (NEEDS.md, CENSUS.md, the second prototype kept); OWN-002 built (the browser entry, the build, the size); OWN-005 built (`@nodegx/canvas-look`, generated, gated; the prototype reads it); OWN-010's ledger half built 2026-10-02. Six rulings to ask (§8).** **Prefix: `OWN`.**
 Task files: [OWN-000](OWN-000-THE-PROTOTYPE-MEASURED.md) … [OWN-010](OWN-010-EVERY-BUG-TEACHES-THE-KIT.md). The board is §6.
 
 > "Would someone who wants to view their NodeGX project as some crazy 3D mapping they've invented … would 107 open up
