@@ -711,6 +711,7 @@ const DbCollectionNode: NodeDefinitionOptions = {
         onStatus: this.handleRealtimeStatus.bind(this),
         onError: this.handleRealtimeError.bind(this)
       });
+      this.handleRealtimeStatus(this._internal.subscription.status); // P107 D29: `connecting` is never told (a status is told on a CHANGE) — read it off the handle, as Subscribe To Changes does
     },
 
     teardownRealtime: function (this: DbCollectionNodeInstance) {

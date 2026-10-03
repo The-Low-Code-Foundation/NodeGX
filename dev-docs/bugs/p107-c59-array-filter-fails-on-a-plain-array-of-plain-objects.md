@@ -2,7 +2,7 @@
 id: P107-C59
 title: Array Filter cannot filter a plain array of plain objects (what a Function outputs) — every filtered run fails with "Cannot read properties of undefined"
 status: fixed
-commit: PENDING
+commit: a6f629a2e
 severity: medium
 area: runtime / Array Filter (`filtercollectionnode.ts` :508 — `applyFilter(m.data, filter)`)
 found: P107 (the node says what it does) s35, 2026-10-03

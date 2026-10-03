@@ -1336,7 +1336,7 @@ exist.**
 
 ### 6.44 Rows (s35)
 
-- **D29** — Query Records: **Realtime Status reads empty while connecting**. Its description and Subscribe To Changes say
+- **D29** ✅ ruled *"Yes, say connecting"* 2026-10-03, fixed s36 (§6.46) — Query Records: **Realtime Status reads empty while connecting**. Its description and Subscribe To Changes say
   `connecting`. Proposed: read the handle's status after subscribing, as Subscribe To Changes does
   ([P107-D29](../../bugs/p107-d29-query-records-realtime-status-is-empty-while-connecting.md)).
 - **C55 reaches Query Records**: a same-value write of the Class, the Backend or Subscribe To Changes reconnects. Noted in
@@ -1357,3 +1357,25 @@ exist.**
 - Package: 18 suites, 837 passed, exit 0 (after the hash refresh); the three stranger rounds green. Whole runtime
   `test/node-spec/`: 3 suites, 193 passed, exit 0. Both `tsc --noEmit` exit 0.
 
+### 6.46 s36 (2026-10-03) — D29 fixed: Realtime Status says `connecting` (Richard: "Yes, say connecting")
+
+Asked in plain words with the next batch and C59 + C60. The runtime fix is Subscribe To Changes' own line, after the
+subscription is made: `this.handleRealtimeStatus(this._internal.subscription.status)` (dbcollectionnode2.ts :714). It is
+one added line, so every cite past :713 moved by one. All 70 in `query-records.ts` and 19 in `DbCollection2.json` were
+shifted by a script and spot-checked against the file (:717 teardownRealtime, :745 handleRealtimeChange, :778
+handleRealtimeStatus, :832 fetch, :1216 userInputSetter, :1228 updatePorts).
+
+- **Query Records v2**: a subscription made sets `connecting` and sends Subscribed and Realtime Status at once. A teardown
+  now has a status to clear: Realtime Status goes back to `""`. Three scenarios whose name or reason said the v1 reading
+  ("stays empty until the subscription says subscribed", "nothing told, so no status to clear", "the teardown with no
+  status held") now say what the trace shows. They were read from printed traces first: `connecting` at the subscribe,
+  `subscribed` when told, `""` after Subscribe To Changes is turned off.
+
+**Gate readings (load 3.2–5.6, this session's jest only).** Control: the v2 spec against the unfixed runtime (HEAD's file
+copied back, then the fix restored by `cp`) gave DOES NOT CONFORM, 39 / 58 scenarios, 19 generated divergences. Treatment:
+CONFORMS at seeds 20729, 13 and 20730 (58 / 58, 0 divergences; mutants 1224 / 1226, 1131 / 1133, 1224 / 1226, the 2
+survivors being s35's two declared equivalents). At 10,000 / 10,000 it also conforms, with 0 divergences and mutants
+1323 / 1325, the same 2 declared. s35's first deep run did NOT conform (3 survivors); this one does. Package: 18 suites, 837
+passed, exit 0 (`query-records.ts` is not a guarded file; the hash gate is green). `tsc --noEmit` exit 0 for both packages.
+Runtime: the whole jest suite, 183 suites, 3,210 passed, exit 0, 511 s. Its one "DOES NOT CONFORM" line is AC1's planted
+Counter defect (seed 1), as it should be.

@@ -8,43 +8,43 @@
  * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
  *
  * THE RULE, before the citations: a Query Records node has NO declared input — every port is registered on its
- * first write (:1147-1208). Writing the Class, the Search or a filter parameter (`qp-<name>`) re-queries when the
+ * first write (:1148-1209). Writing the Class, the Search or a filter parameter (`qp-<name>`) re-queries when the
  * value CHANGED and that port's own Run On Value Change box is on; the Backend and every query setting (the visual
  * filter, the sort, Use limit / Limit / Skip, Fetch total count, any other name) share ONE box, `Query settings` —
- * the visual filter and the sort re-query on every write, changed or not (:1118-1127); `Do` (`storageFetch`)
- * re-queries always. However many arrive in a frame, ONE query runs at the frame's end (:820-829).
+ * the visual filter and the sort re-query on every write, changed or not (:1119-1128); `Do` (`storageFetch`)
+ * re-queries always. However many arrive in a frame, ONE query runs at the frame's end (:821-830).
  *
- * THE QUERY (:831-944): a Backend the project does not have fails at once with the not-configured sentence (no
+ * THE QUERY (:832-945): a Backend the project does not have fails at once with the not-configured sentence (no
  * call). Otherwise a fresh anonymous array is made for the answer (a guid draw, `Collection.get()`), then the filter
- * is built (:946-1089): the visual filter becomes the contract's NEUTRAL filter (two saved shapes; a rule whose
+ * is built (:947-1090): the visual filter becomes the contract's NEUTRAL filter (two saved shapes; a rule whose
  * parameter port has supplied nothing does not narrow the query) and ALSO the Parse `where` the local matcher reads
  * — and that lowering can REFUSE a filter (a `pointsTo` with no class schema), which fails the query with the
  * refusal's message and makes no call. Then the node hands its backend `query({ collection: <Class>, where: <the
  * neutral filter>, sort: <'-'-prefixed names, from the visual sort>, limit, skip, count, search })` (world.ts BACKEND,
- * R9): `limit` / `skip` only under Use limit (`Limit || 10`, `Skip || 0`, :1092-1102), `count` whether Fetch total
+ * R9): `limit` / `skip` only under Use limit (`Limit || 10`, `Skip || 0`, :1093-1103), `count` whether Fetch total
  * count is on, `search` the Search text or nothing when it is empty.
- * SUCCESS (:888-904): each row becomes a registry record under its `objectId` (`_fromJSON`, as Record's — the Class
+ * SUCCESS (:889-905): each row becomes a registry record under its `objectId` (`_fromJSON`, as Record's — the Class
  * as it is when the answer lands), the array holds them in the answer's order; a total count handed back is kept and
  * re-sent on `Total Count`; the array becomes `Items` (Items, First Record Id, Is Empty and Count re-sent) and Success
- * pulses. FAILURE (:905-943): the FIRST failure publishes the empty array (Items `[]`, Is Empty true); a later one
+ * pulses. FAILURE (:906-944): the FIRST failure publishes the empty array (Items `[]`, Is Empty true); a later one
  * keeps the rows already shown (REL-011b). Error is the backend's message or `Failed to fetch.`, then Failure pulses.
  * Error is never cleared. A Do while a query is out is a second query; each answer publishes its own array.
  *
  * THE OUTPUTS: `Items` is the array itself (`undefined` before the first answer), First Record Id the first record's
  * id, Is Empty true until an array is held, Count its size or 0. `Total Count` (and any other output a graph wires,
- * :1109-1116) reads the stored setting of that name. The Realtime outputs read nothing until a subscription runs.
+ * :1110-1117) reads the stored setting of that name. The Realtime outputs read nothing until a subscription runs.
  *
  * NO OUTCOME CONTRACT: `Success` is `fetched` and `Failure` a plain signal — Do has no tokens; this node predates
  * ERG-001 (the Record node's twin has them).
  *
  * WATCHING THE STORE (slice B, s24; :251-363, :600-616). The node listens to ONE store: the legacy store from creation
- * (:372, which no world write reaches), then the store of the backend each query resolved (:850 — before the filter
+ * (:372, which no world write reaches), then the store of the backend each query resolved (:851 — before the filter
  * is built, so a refused filter still moves it; the not-configured backend does not). A write ANOTHER node made on
  * that backend (world.ts BACKEND `events`; graph s08 with the real writers) is heard when the `Record changes` box is
  * ticked, an array is held (an answer or the first failure landed), and the write's class is the Class AS IT IS NOW.
  * With a Search term the node re-queries at the next frame end (BAK-008) and patches nothing. Otherwise the record is
  * read from the registry (which already holds the write) and matched against the query MADE last — its Parse `where`,
- * sort and limit (:873-879), even while that query's answer is still out — by the LOCAL matcher (record-match.ts):
+ * sort and limit (:874-880), even while that query's answer is still out — by the LOCAL matcher (record-match.ts):
  *   - `create`: a match joins — under a sort before the first member that sorts after it, with none at the end; then,
  *     over Limit, one is dropped: the LAST under a descending first sort key, otherwise the FIRST (row C40);
  *   - `save`: a member that no longer matches leaves; a non-member that now matches joins as a create does; a member
@@ -54,26 +54,26 @@
  * and a delete re-sends the four even when nothing was removed (unchanged values: no trace shows it). The node's own array watcher (:237-249) re-sends three of them
  * at the frame end — the same values, so no trace shows it.
  *
- * SUBSCRIBE TO CHANGES (slice C, s35; :650-805 — Subscribe To Changes' twin, BCN-008). Writing `realtime` (`!!value`,
- * :650-653), the Class (:570 — every write, changed or not, whatever its box) or the Backend (:1186 — likewise) schedules
+ * SUBSCRIBE TO CHANGES (slice C, s35; :650-806 — Subscribe To Changes' twin, BCN-008). Writing `realtime` (`!!value`,
+ * :650-653), the Class (:570 — every write, changed or not, whatever its box) or the Backend (:1187 — likewise) schedules
  * ONE reconnect at the frame's end (:656-663). The frame end runs its two callbacks — the query and the reconnect — in the
  * order they were FIRST scheduled that frame (`scheduleAfterInputsHaveUpdated`), so a reconnect asked for before the query
- * makes its calls first (`subscribeFirst`). A reconnect (:665-714) first TEARS DOWN (:716-726): the subscription held is
+ * makes its calls first (`subscribeFirst`). A reconnect (:665-715) first TEARS DOWN (:717-727): the subscription held is
  * disposed, and a status held is cleared — Subscribed and Realtime Status sent. Then, with `realtime` on and a Class, it
  * resolves the Backend: none is the not-configured error with the backend id as written (:685-693 — the Backend id raw in
  * the sentence); otherwise it subscribes `{ collection, primaryKey }` — no filter (the header at :640-648: a transport that
- * cannot filter server-side must not filter client-side) — and, unlike Subscribe To Changes, does NOT read the new
- * subscription's status: Realtime Status stays empty until the subscription tells one (world.ts REALTIME: `connecting` is
- * never told). What the subscription tells lands as Subscribe To Changes' does (:744-805): a STATUS (a `subscribed` clears
+ * cannot filter server-side must not filter client-side) — and then, as Subscribe To Changes does, reads the new
+ * subscription's status off the handle (:714, v2 — row D29 fixed): Realtime Status is `connecting` from the subscribe
+ * (world.ts REALTIME: `connecting` is never TOLD, so v1 showed it empty until the backend's first status). What the subscription tells lands as Subscribe To Changes' does (:745-806): a STATUS (a `subscribed` clears
  * a held error), a CHANGE (the four Change outputs; `init` pulses nothing, a create / update / delete its signal then
  * Records Changed, anything else Records Changed alone — and then, but for `init`, the query re-runs at the next frame
- * end when the `Record changes` box is ticked, :772-774), an ERROR (Realtime Error, Realtime Failure). The error is not
+ * end when the `Record changes` box is ticked, :773-775), an ERROR (Realtime Error, Realtime Failure). The error is not
  * cleared by a teardown.
  *
  * NOT SPECCED, named (each a later slice or a seam not built):
  *   - in the realtime half: the SSR gate (:681-682 — no play is a server render), `realtimeSupportFor` (every play's
  *     backend speaks realtime), the schema's primary key (none has a class schema: `id`), `_onNodeDeleted`'s teardown.
- *   - THE JAVASCRIPT FILTER (`Filter` = Javascript, :996-1089): the author's script, run with `where` / `filter` /
+ *   - THE JAVASCRIPT FILTER (`Filter` = Javascript, :997-1090): the author's script, run with `where` / `filter` /
  *     `sort` / `Inputs` / `$vars` — NSP-017's escape hatch. `storageFilterType`, `storageJSONFilter` and
  *     `storageFilterValue-…` are not accepted here.
  *   - the success's schema conversions (as Record's); a relation filter's class read off the record store; the
@@ -92,30 +92,30 @@ import { compareObjects, lowerToParse, matchesQuery, toNeutral } from './record-
 type QueryRecordsState = {
   /** `_internal.name` — the Class (:563-570) */
   name: unknown;
-  /** `_internal.backendId` (:1179-1186) */
+  /** `_internal.backendId` (:1180-1187) */
   backendId: unknown;
-  /** `_internal.visualFilter` (:1118-1122) */
+  /** `_internal.visualFilter` (:1119-1123) */
   visualFilter: unknown;
-  /** `_internal.visualSorting` (:1123-1127) */
+  /** `_internal.visualSorting` (:1124-1128) */
   visualSorting: unknown;
-  /** `_internal.search` (:1131-1138) */
+  /** `_internal.search` (:1132-1139) */
   search: unknown;
-  /** `_internal.queryParameters`, by bare name (:1139-1146) */
+  /** `_internal.queryParameters`, by bare name (:1140-1147) */
   queryParameters: Readonly<Record<string, unknown>>;
-  /** `_internal.storageSettings` — every other port, by name (:1215-1222); a success's total count lands here too (:899) */
+  /** `_internal.storageSettings` — every other port, by name (:1216-1223); a success's total count lands here too (:900) */
   settings: Readonly<Record<string, unknown>>;
   /** `_internal.collection`, by the array's id (`undefined` until the first answer or first failure) */
   collection: string | undefined;
-  /** `_internal.error` (:814) */
+  /** `_internal.error` (:815) */
   error: string | undefined;
-  /** `_internal.fetchScheduled` (:822-828) */
+  /** `_internal.fetchScheduled` (:823-829) */
   fetchScheduled: boolean;
-  /** every query made, by the spec's call id: the array minted for its answer (:852) */
+  /** every query made, by the spec's call id: the array minted for its answer (:853) */
   calls: Readonly<Record<string, string>>;
   nextCall: number;
-  /** s24 — `_internal.boundStore`: the backend whose store the node listens to (:600-616, rebound at a query :850); `undefined`: the legacy store it bound in `initialize` (:372), which no world write reaches */
+  /** s24 — `_internal.boundStore`: the backend whose store the node listens to (:600-616, rebound at a query :851); `undefined`: the legacy store it bound in `initialize` (:372), which no world write reaches */
   bound: string | undefined;
-  /** s24 — `_internal.currentQuery` (:873-879): the Parse `where`, sort and limit of the last query MADE — what a write made elsewhere is matched against */
+  /** s24 — `_internal.currentQuery` (:874-880): the Parse `where`, sort and limit of the last query MADE — what a write made elsewhere is matched against */
   query: { where: Readonly<Record<string, unknown>> | undefined; sort: readonly string[] | undefined; limit: number | undefined } | undefined;
   /** s24 — the `Record changes` box (`runOnChange-records`, :233), read by the store listener (:253) */
   recordsBox: boolean;
@@ -137,7 +137,7 @@ type QueryRecordsState = {
   recordId: unknown;
 };
 
-/** :1205-1207 → :1215-1222 — any other name is a stored setting, re-querying when it changed under the Query settings box. */
+/** :1206-1208 → :1216-1223 — any other name is a stored setting, re-querying when it changed under the Query settings box. */
 const GENERIC_SETTING = (name: string): InputDecl => ({
   type: '*',
   coerce: 'none',
@@ -147,7 +147,7 @@ const GENERIC_SETTING = (name: string): InputDecl => ({
   examples: SETTING_EXAMPLES[name] ?? [true, 'x']
 });
 
-/** The settings the editor draws (updatePorts :1227-1456), with the values a panel holds. */
+/** The settings the editor draws (updatePorts :1228-1457), with the values a panel holds. */
 const SETTING_EXAMPLES: Readonly<Record<string, readonly unknown[]>> = {
   storageEnableLimit: [true, true, false],
   storageLimit: [2, 1, 0, 5],
@@ -167,7 +167,7 @@ const FILTERS: readonly unknown[] = [
 
 const SORTS: readonly unknown[] = [[{ property: 'title', order: 'ascending' }], [{ property: 'n', order: 'descending' }, { property: 'title', order: 'ascending' }], []];
 
-/** :1153-1159 — a filter parameter port; the bare name keys `queryParameters`. */
+/** :1154-1160 — a filter parameter port; the bare name keys `queryParameters`. */
 const queryParameter = (name: string): InputDecl => ({ type: '*', coerce: 'none', displayName: name, group: 'Query Parameters', description: 'The value the filter reads for ' + name, examples: [1, 3, 'a', undefined] });
 
 /** run-on-value-change.ts — a checkbox: absent or anything but `false` is ticked. */
@@ -182,7 +182,7 @@ const checkbox = (displayName: string): InputDecl => ({
 
 const ticked = (derived: Readonly<Record<string, unknown>>, governed: string) => derived['runOnChange-' + governed] !== false;
 
-/** :1227-1456 updatePorts — `Do`, `Class`, `Backend`, `Search`, the visual filter and sort, by first write. */
+/** :1228-1457 updatePorts — `Do`, `Class`, `Backend`, `Search`, the visual filter and sort, by first write. */
 function discover(port: string): InputDecl | undefined {
   if (port === 'storageFetch') return { type: 'signal', displayName: 'Do', group: 'Actions', description: 'Runs the query again now' };
   if (port === 'collectionName') return { type: 'string', coerce: 'none', displayName: 'Class', group: 'General', description: 'The class to query', examples: ['Lesson', 'Lesson', 'Lesson', 'Lesson', 'Lesson', 'Note', '', undefined] };
@@ -192,7 +192,7 @@ function discover(port: string): InputDecl | undefined {
   if (port === 'visualSort') return { type: 'array', coerce: 'none', editOnly: true, displayName: 'Sort', group: 'Sorting', description: 'The visual sort', examples: SORTS };
   if (port.startsWith('qp-')) return queryParameter(port.slice('qp-'.length));
   if (port.startsWith('runOnChange-')) return checkbox(port.slice('runOnChange-'.length));
-  // :1326-1336 — s35, slice C
+  // :1327-1337 — s35, slice C
   if (port === 'realtime')
     return {
       type: 'boolean',
@@ -205,7 +205,7 @@ function discover(port: string): InputDecl | undefined {
     };
   // NOT IN THIS SPEC (header): the Javascript filter
   if (port === 'storageFilterType' || port === 'storageJSONFilter' || port.startsWith('storageFilterValue-')) return undefined;
-  return GENERIC_SETTING(port); // :1205-1207 userInputSetter
+  return GENERIC_SETTING(port); // :1206-1208 userInputSetter
 }
 
 /**
@@ -273,15 +273,15 @@ const BACKENDS: ReadonlyArray<BackendScript> = QUERY_BACKENDS.map((b, i) => ({ .
 
 type QueryPatch = { set?: Partial<QueryRecordsState>; send?: string[]; emit?: string[]; backend?: unknown };
 
-/** :831-944 — the query, when one is due (the frame end's first callback, or its second — afterInputs). */
+/** :832-945 — the query, when one is due (the frame end's first callback, or its second — afterInputs). */
 function query(s: QueryRecordsState, w: WorldView): QueryPatch {
   if (!s.fetchScheduled) return { send: [] };
   const failed = (error: string) => ({ set: { fetchScheduled: false, error }, send: ['error' as const], emit: ['failure' as const] });
-  const backend = w.backendFor(s.backendId); // :843-849
+  const backend = w.backendFor(s.backendId); // :844-850
   if (backend === undefined) return failed(NO_BACKEND_MESSAGE(s.backendId));
-  // :850 — the store's listeners move to this backend's store now, before the filter is built
-  const c = w.registry.collection(); // :852 — the answer's array, minted (a guid draw) before the filter is built
-  // :947-995 — the simple filter (the only one in slice A)
+  // :851 — the store's listeners move to this backend's store now, before the filter is built
+  const c = w.registry.collection(); // :853 — the answer's array, minted (a guid draw) before the filter is built
+  // :948-996 — the simple filter (the only one in slice A)
   let neutral: Filter | undefined;
   let where: Readonly<Record<string, unknown>> | undefined;
   if (s.visualFilter !== undefined) {
@@ -289,22 +289,22 @@ function query(s: QueryRecordsState, w: WorldView): QueryPatch {
       neutral = toNeutral(s.visualFilter, s.queryParameters, 'qp-');
       where = lowerToParse(neutral);
     } catch (e) {
-      const f = failed((e as Error).message || 'The filter could not be applied.'); // :982, :853-856
+      const f = failed((e as Error).message || 'The filter could not be applied.'); // :983, :854-857
       return { ...f, set: { ...f.set, bound: backend } };
     }
   }
   const sort = s.visualSorting !== undefined ? (s.visualSorting as Array<{ property: string; order?: string }>).map((x) => (x.order === 'descending' ? '-' : '') + x.property) : undefined; // queryutils.ts :440-444
-  const useLimit = !!s.settings.storageEnableLimit; // :1092-1102
+  const useLimit = !!s.settings.storageEnableLimit; // :1093-1103
   const limit = useLimit ? (s.settings.storageLimit as number) || 10 : undefined;
   const skip = useLimit ? (s.settings.storageSkip as number) || 0 : undefined;
-  const count = !!s.settings.storageEnableCount; // :1104-1107
-  const search = s.search || undefined; // :865
+  const count = !!s.settings.storageEnableCount; // :1105-1108
+  const search = s.search || undefined; // :866
   const id = 'query:' + s.nextCall;
   return {
-    // :873-879 — the query MADE is what a later write is matched against, whether or not its answer has landed
+    // :874-880 — the query MADE is what a later write is matched against, whether or not its answer has landed
     set: { fetchScheduled: false, calls: { ...s.calls, [id]: c.getId() }, nextCall: s.nextCall + 1, bound: backend, query: { where, sort, limit } },
     send: [],
-    // :880-889
+    // :881-890
     backend: { id, op: 'query', backend, args: { collection: s.name, where: neutral, sort, limit, skip, count, search } }
   };
 }
@@ -312,10 +312,10 @@ function query(s: QueryRecordsState, w: WorldView): QueryPatch {
 const STATUS_SENDS = ['subscribed', 'realtimeStatus'];
 const CHANGE_SENDS = ['changedEvent', 'changedRecord', 'changedRecords', 'changedRecordId'];
 
-/** :665-726 — the reconnect, when one is due: the teardown, then the subscription (slice C). */
+/** :665-727 — the reconnect, when one is due: the teardown, then the subscription (slice C). */
 function reconnect(s: QueryRecordsState, w: WorldView): { set: Partial<QueryRecordsState>; send?: string[]; emit?: string[]; unsubscribe?: string[]; subscribe?: { id: string; op: string; backend: string; args: Record<string, unknown> } } {
   if (!s.rtScheduled) return { set: {} };
-  // :716-726 — the teardown: the subscription disposed; a status held cleared and sent
+  // :717-727 — the teardown: the subscription disposed; a status held cleared and sent
   const set: Partial<QueryRecordsState> = { rtScheduled: false, rtFirst: false };
   const send: string[] = [];
   const unsubscribe = s.sub !== undefined ? [s.sub] : undefined;
@@ -329,18 +329,22 @@ function reconnect(s: QueryRecordsState, w: WorldView): { set: Partial<QueryReco
   if (!s.name) return torn; // :669-670
   const backend = w.backendFor(s.backendId); // :684
   if (backend === undefined) {
-    // :685-693 → :797-802 — the Backend id as written, raw
+    // :685-693 → :798-803 — the Backend id as written, raw
     const rtError = { message: `The backend this node is set to ("${String(s.backendId)}") is not configured in this project.`, code: 'CAPABILITY_UNAVAILABLE', kind: 'fatal' };
     return { ...torn, set: { ...set, rtError }, send: [...send, 'realtimeError'], emit: ['realtimeFailure'] };
   }
-  // :707-713 — no filter; the primary key the wire's convention (header); the status NOT read
+  // :707-713 — no filter; the primary key the wire's convention (header); then :714 (v2, D29) — the new subscription's
+  // status, read off the handle: `connecting`, Subscribed and Realtime Status sent
   const id = 'sub:' + s.nextSub;
-  return { ...torn, set: { ...set, sub: id, nextSub: s.nextSub + 1 }, subscribe: { id, op: 'subscribe', backend, args: { collection: s.name, primaryKey: 'id' } } };
+  return { ...torn, set: { ...set, sub: id, nextSub: s.nextSub + 1, status: 'connecting' }, send: [...new Set([...send, ...STATUS_SENDS])], subscribe: { id, op: 'subscribe', backend, args: { collection: s.name, primaryKey: 'id' } } };
 }
 
 export const QueryRecords = defineNode({
   type: 'DbCollection2',
-  version: 1,
+  // v2 (s36, row D29 ruled "Yes, say connecting" by Richard 2026-10-03): a subscription made shows Realtime Status
+  // `connecting` at once, read off the handle (:714) as Subscribe To Changes does; v1 showed it empty until the backend's
+  // first status. Every cite past :713 moved by one line with the fix.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/dbcollectionnode2.ts; api/queryutils.ts; @noodl/backend-contract translators',
   needs: ['backend', 'registry', 'random'],
   worldPool: { backends: BACKENDS },
@@ -452,7 +456,7 @@ export const QueryRecords = defineNode({
     derived: {
       // :233-234 — the two boxes registered in `initialize`, whatever the params
       inputs: () => ({ 'runOnChange-records': checkbox('records'), 'runOnChange-querySettings': checkbox('querySettings') }),
-      // :1109-1116 — an output a graph wires reads the stored setting of its name; the editor draws `Total Count` (:1348-1354)
+      // :1110-1117 — an output a graph wires reads the stored setting of its name; the editor draws `Total Count` (:1349-1355)
       outputs: () => ({
         storageTotalCount: { type: 'number', displayName: 'Total Count', group: 'Total Count', description: 'How many records match, ignoring Limit', from: (s) => s.settings.storageTotalCount } as OutputDecl<QueryRecordsState>
       }),
@@ -470,25 +474,25 @@ export const QueryRecords = defineNode({
           const fetch = schedule(valueDidChange(s.name, v) && ticked(derived, 'collectionName'));
           return { set: { name: v, ...fetch, ...reconnect(s.fetchScheduled || 'fetchScheduled' in fetch) }, send: [] };
         }
-        if (port === 'search') return { set: { search: v, ...schedule(valueDidChange(s.search, v) && ticked(derived, 'search')) }, send: [] }; // :1131-1138
-        if (port === 'visualFilter') return { set: { visualFilter: v, ...schedule(ticked(derived, 'querySettings')) }, send: [] }; // :1118-1122
-        if (port === 'visualSort') return { set: { visualSorting: v, ...schedule(ticked(derived, 'querySettings')) }, send: [] }; // :1123-1127
+        if (port === 'search') return { set: { search: v, ...schedule(valueDidChange(s.search, v) && ticked(derived, 'search')) }, send: [] }; // :1132-1139
+        if (port === 'visualFilter') return { set: { visualFilter: v, ...schedule(ticked(derived, 'querySettings')) }, send: [] }; // :1119-1123
+        if (port === 'visualSort') return { set: { visualSorting: v, ...schedule(ticked(derived, 'querySettings')) }, send: [] }; // :1124-1128
         if (port === 'backendId') {
-          // :1177-1187 — likewise: the query when it changed under Query settings, the reconnect at every write
+          // :1178-1188 — likewise: the query when it changed under Query settings, the reconnect at every write
           const fetch = schedule(valueDidChange(s.backendId, v) && ticked(derived, 'querySettings'));
           return { set: { backendId: v, ...fetch, ...reconnect(s.fetchScheduled || 'fetchScheduled' in fetch) }, send: [] };
         }
         if (port.startsWith('qp-')) {
-          const name = port.slice('qp-'.length); // :1139-1146
+          const name = port.slice('qp-'.length); // :1140-1147
           return { set: { queryParameters: { ...s.queryParameters, [name]: v }, ...schedule(valueDidChange(s.queryParameters[name], v) && ticked(derived, port)) }, send: [] };
         }
-        // :1215-1222 userInputSetter
+        // :1216-1223 userInputSetter
         return { set: { settings: { ...s.settings, [port]: v }, ...schedule(valueDidChange(s.settings[port], v) && ticked(derived, 'querySettings')) }, send: [] };
       },
-      // :1161-1168 — Do: one query at the frame end, always
+      // :1162-1169 — Do: one query at the frame end, always
       signal: () => ({ set: { fetchScheduled: true }, send: [] })
     },
-    // :820-829 + :656-663 — the frame's end: the query and the reconnect, each in the order first scheduled (slice C)
+    // :821-830 + :656-663 — the frame's end: the query and the reconnect, each in the order first scheduled (slice C)
     afterInputs: (s, _i, w) => {
       if (!s.fetchScheduled && !s.rtScheduled) return { send: [] };
       const q = query(s, w);
@@ -511,11 +515,11 @@ export const QueryRecords = defineNode({
         const publish = { collection: c.getId() };
         const all = ['items', 'firstItemId', 'isEmpty', 'count'] as const;
         if (!('ok' in answer)) {
-          // :941-942 — the first failure publishes the empty array; a later one keeps what is shown
+          // :942-943 — the first failure publishes the empty array; a later one keeps what is shown
           const first = s.collection === undefined;
           return { set: { ...(first ? publish : {}), error: answer.error || 'Failed to fetch.' }, send: [...(first ? all : []), 'error'], emit: ['failure'] };
         }
-        // :888-904
+        // :889-905
         const { results, count } = answer.ok as { results?: Array<Record<string, unknown>>; count?: number };
         if (results !== undefined) {
           c.set(
@@ -576,15 +580,15 @@ export const QueryRecords = defineNode({
         c.remove(m);
         return { send: all };
       },
-      // s35 — :744-805: what the subscription tells (world.ts REALTIME), as Subscribe To Changes hears it
+      // s35 — :745-806: what the subscription tells (world.ts REALTIME), as Subscribe To Changes hears it
       realtime: (s, _i, e) => {
         if ('status' in e) {
-          // :777-785
+          // :778-786
           if (e.status === 'subscribed' && s.rtError) return { set: { status: e.status, rtError: null }, send: ['realtimeError', ...STATUS_SENDS] as never[] };
           return { set: { status: e.status }, send: [...STATUS_SENDS] as never[] };
         }
-        if ('error' in e) return { set: { rtError: e.error }, send: ['realtimeError'] as never[], emit: ['realtimeFailure'] }; // :797-802
-        // :744-775
+        if ('error' in e) return { set: { rtError: e.error }, send: ['realtimeError'] as never[], emit: ['realtimeFailure'] }; // :798-803
+        // :745-776
         const c = e.change;
         const set: Partial<QueryRecordsState> = {
           event: c.type,
@@ -592,9 +596,9 @@ export const QueryRecords = defineNode({
           records: c.recordsComplete ? c.records : [],
           recordId: c.ids.length > 0 ? c.ids[0] : ''
         };
-        if (c.type === 'init') return { set, send: [...CHANGE_SENDS] as never[] }; // :760
+        if (c.type === 'init') return { set, send: [...CHANGE_SENDS] as never[] }; // :761
         const signal = ({ create: 'created', update: 'updated', delete: 'deleted' } as const)[c.type as 'create' | 'update' | 'delete'];
-        // :772-774 — and the query again at the next frame end, under the Record changes box
+        // :773-775 — and the query again at the next frame end, under the Record changes box
         if (s.recordsBox && !s.fetchScheduled) set.fetchScheduled = true;
         return { set, send: [...CHANGE_SENDS] as never[], emit: signal ? [signal, 'changed'] : ['changed'] };
       }

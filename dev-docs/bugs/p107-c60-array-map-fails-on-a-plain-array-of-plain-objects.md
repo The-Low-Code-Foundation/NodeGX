@@ -2,7 +2,7 @@
 id: P107-C60
 title: Array Map cannot map a plain array of plain objects (what a Function outputs) — a property mapping fails with "model.get is not a function"
 status: fixed
-commit: PENDING
+commit: a6f629a2e
 severity: medium
 area: runtime / Array Map (`mapcollectionnode.ts` :348 — `m.set(key, model.get(mapping))`)
 found: P107 (the node says what it does) s35, 2026-10-03

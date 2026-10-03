@@ -1819,7 +1819,7 @@
   },
   {
     "name": "a write to another backend's store is not heard: the node listens to the store of the backend it queried",
-    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :600-616, :850 — bindStoreEvents(cloudstore)",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :600-616, :851 — bindStoreEvents(cloudstore)",
     "params": {},
     "steps": [
       {
@@ -1947,7 +1947,7 @@
   },
   {
     "name": "after the first failure a write joins the empty array it published",
-    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :941 then :321-329 — the failure published an array; the query made is matched",
+    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :942 then :321-329 — the failure published an array; the query made is matched",
     "params": {},
     "steps": [
       {
@@ -1985,8 +1985,8 @@
     }
   },
   {
-    "name": "slice C: Subscribe To Changes on with a Class — the query, then the subscribe `{ collection, primaryKey }` with NO filter though one is set; Realtime Status stays empty until the subscription says subscribed",
-    "because": "dbcollectionnode2.ts :563-571 (the query first, then the reconnect), :707-713 (no where; the status never read), :777-785",
+    "name": "slice C: Subscribe To Changes on with a Class — the query, then the subscribe `{ collection, primaryKey }` with NO filter though one is set; Realtime Status `connecting` at once (v2, D29 fixed), `subscribed` when the subscription says so",
+    "because": "dbcollectionnode2.ts :563-571 (the query first, then the reconnect), :707-714 (no where; v2 — the status read off the handle, D29), :778-786",
     "params": {
       "collectionName": "Lesson",
       "visualFilter": {
@@ -2111,7 +2111,7 @@
   },
   {
     "name": "slice C: a create told — Change Type, Changed Record, Changed Records, Changed Record Id; Record Created then Records Changed; the query runs again at the next frame end",
-    "because": ":744-775 — and :772-774 scheduleFetch under the Record changes box",
+    "because": ":745-776 — and :773-775 scheduleFetch under the Record changes box",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2182,7 +2182,7 @@
   },
   {
     "name": "slice C: Record changes unticked — a create is still told and pulsed, and nothing is queried again",
-    "because": ":772-774 shouldRunOnValueChange('records')",
+    "because": ":773-775 shouldRunOnValueChange('records')",
     "params": {
       "collectionName": "Lesson",
       "realtime": true,
@@ -2254,7 +2254,7 @@
   },
   {
     "name": "slice C: init publishes the snapshot and pulses nothing, and re-queries nothing; an update pulses Record Updated; a key-only delete leaves Changed Record null and Changed Records empty with the id; resync pulses Records Changed alone",
-    "because": ":748-760 (recordsComplete is the gate; init returns early), :766-771",
+    "because": ":749-761 (recordsComplete is the gate; init returns early), :767-772",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2361,7 +2361,7 @@
   },
   {
     "name": "slice C: an error told — Realtime Error and Realtime Failure; a later subscribed clears the error; a fatal one stops the subscription",
-    "because": ":797-802; :777-783 a subscribed clears a held error; world.ts REALTIME — a fatal error tells stopped",
+    "because": ":798-803; :778-784 a subscribed clears a held error; world.ts REALTIME — a fatal error tells stopped",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2436,7 +2436,7 @@
   },
   {
     "name": "slice C: a Backend the project has not — the query fails, then the reconnect says so on Realtime Error with the id as written; Failure then Realtime Failure",
-    "because": ":1177-1187 (the query scheduled first), :843-849, :685-693",
+    "because": ":1178-1188 (the query scheduled first), :844-850, :685-693",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2489,7 +2489,7 @@
   },
   {
     "name": "slice C: the same Class re-written reconnects — the old subscription disposed, Subscribed false, a new one opened — and queries nothing",
-    "because": ":563-571 — the reconnect at every write, the query only when the Class changed; :716-726",
+    "because": ":563-571 — the reconnect at every write, the query only when the Class changed; :717-727",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2618,7 +2618,7 @@
   },
   {
     "name": "slice C: the Backend switched — the query goes to other, then the subscription follows it there",
-    "because": ":1177-1187 — BCN-008: the subscription follows the picker",
+    "because": ":1178-1188 — BCN-008: the subscription follows the picker",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2730,7 +2730,7 @@
   },
   {
     "name": "slice C: a subscription held, then Subscribe To Changes written again and Do in one frame — the old one disposed and a new one opened BEFORE the query",
-    "because": ":650-663 scheduled first, :1161-1168 Do second — the frame end runs them in that order",
+    "because": ":650-663 scheduled first, :1162-1169 Do second — the frame end runs them in that order",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2794,7 +2794,7 @@
   },
   {
     "name": "slice C: a subscription held, then Subscribe To Changes off and Do in one frame — disposed BEFORE the query; Do then the Class written: the query before the reconnect",
-    "because": ":650-663 then :1161-1168; then Do first, :563-571 second",
+    "because": ":650-663 then :1162-1169; then Do first, :563-571 second",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2925,7 +2925,7 @@
   },
   {
     "name": "slice C: Subscribe To Changes then a Backend the project has not, in one frame — the reconnect fails first: Realtime Failure, then Failure",
-    "because": ":650-663 scheduled before :1177-1187's query; :685-693, :843-849",
+    "because": ":650-663 scheduled before :1178-1188's query; :685-693, :844-850",
     "params": {
       "collectionName": "Lesson"
     },
@@ -2981,7 +2981,7 @@
   },
   {
     "name": "slice C: Record changes unticked — create, update, a whole delete and resync each told and pulsed, the Change outputs moving each time, and nothing queried again",
-    "because": ":744-775 with shouldRunOnValueChange('records') false",
+    "because": ":745-776 with shouldRunOnValueChange('records') false",
     "params": {
       "collectionName": "Lesson",
       "realtime": true,
@@ -3111,7 +3111,7 @@
   },
   {
     "name": "slice C: a filter the translator refuses beside a quiet reconnect (realtime on, no Class) — Failure; then Do, a good filter and the Class: the query before the subscribe (a reconnect flag left set would put the subscribe first)",
-    "because": ":656-663 the flag clears when the reconnect runs, quiet or not; :982 the refusal",
+    "because": ":656-663 the flag clears when the reconnect runs, quiet or not; :983 the refusal",
     "params": {},
     "steps": [
       "settle",
@@ -3197,7 +3197,7 @@
   },
   {
     "name": "slice C: a subscription that never answers, the Class re-written twice — each reconnect disposes the one before (Realtime Status empty throughout); realtime off disposes the third, and on again opens a fourth",
-    "because": ":716-726 the teardown disposes what is held; :707-713 the status is never read",
+    "because": ":717-727 the teardown disposes what is held; :707-713 the status is never read",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -3260,7 +3260,7 @@
   },
   {
     "name": "slice C: the Class, realtime and a refused filter in one frame — Error and Failure, the subscription opened anyway; realtime off then disposes it",
-    "because": ":982 the query refused; :707-713 the subscription takes no filter; :665-668",
+    "because": ":983 the query refused; :707-713 the subscription takes no filter; :665-668",
     "params": {},
     "steps": [
       "settle",
@@ -3333,7 +3333,7 @@
   },
   {
     "name": "slice C: a subscription still connecting and a second query, then Subscribe To Changes off and Do in one frame — disposed before the query, whose answer lands as Items; on again opens a new one",
-    "because": ":650-663 then :1161-1168; :716-726 (nothing told, so no status to clear)",
+    "because": ":650-663 then :1162-1169; :717-727 (v2: the `connecting` read at the subscribe cleared — Realtime Status empty)",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -3393,7 +3393,7 @@
   },
   {
     "name": "slice C: a subscription still connecting (the third), then a refused filter and Subscribe To Changes off in one frame — Error and Failure, the third disposed; on again opens a fourth",
-    "because": ":982 the refusal; :716-726 the teardown with no status held",
+    "because": ":983 the refusal; :717-727 the teardown clears the `connecting` read at the subscribe (v2)",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
