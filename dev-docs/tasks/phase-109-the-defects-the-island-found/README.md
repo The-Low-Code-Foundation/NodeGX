@@ -3,7 +3,7 @@
 **Scoped:** 2026-10-01, at HEAD `27d891bf3`, from [the island audit](AUDIT-2026-10-01.md). The audit read P105, P106 and
 P108 (Olive's Island, [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md)): their task files, 225 commits, 57
 session and lane transcripts, the generator, both kits, the desktop shell and the shipped template.
-**Status: 🟡 OPEN — session 5 (2026-10-02): 4 of 25 closed (ISL-001, ISL-002, ISL-011, ISL-014); ISL-019 built (AC6, AC7 open); ISL-009's scroll signal built and driven (ruling 1, the data-* list, ruled and not built); ISL-005 researched and ruled "Native nodes first"; ISL-022 built (AC6 open); ISL-018 built (one case open); ISL-025 W1–W3, W13, W21 removed (§8).** **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+**Status: 🟡 OPEN — session 6 (2026-10-03): 4 of 25 closed (ISL-001, ISL-002, ISL-011, ISL-014); ISL-009's two rulings both built and driven — the data-* list (s6) and the scroll signal (s5); export half, AC7 and the kitAgreement re-record open; ISL-019 built (AC6, AC7 open); ISL-005 researched and ruled "Native nodes first"; ISL-022 built (AC6 open); ISL-018 built (one case open); ISL-025 W1–W3, W13, W21 removed (§8).** **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
 > "Phase 108 has been a beast. I forgot to tell the model to record learnings about NodeGX during the push. I'm sure
 > there must be a tonne of stuff we can fix and improve in NodeGX and the way the MCP works. Can you do an audit and start
@@ -103,7 +103,7 @@ the work:
 | [ISL-006](ISL-006-A-FUNCTION-SAYS-WHAT-ITS-PORTS-ARE.md) | A Function says what its ports are | F09 | runtime | ✓ |
 | [ISL-007](ISL-007-AN-APP-SPEAKS-TWO-LANGUAGES-WITHOUT-A-SCRIPT.md) | An app speaks two languages without a script | F10 | node library | ✓ |
 | [ISL-008](ISL-008-A-STYLESHEET-CAN-PLACE-A-GROUP.md) | A stylesheet can place a Group | F11 | runtime styling | ✓ |
-| [ISL-009](ISL-009-A-NODE-CAN-BE-NAMED-FOR-A-TEST-AND-SCROLLED-TO.md) | A node can be named for a test and scrolled to — **🟢 s5: Scroll Into View on all 27 visual types, Page included; deployed drive 4/4 arms at 1024 and 390 with its control, iScroll through iScroll. ⬜ ruling 1 (data-* names) not asked; ⬜ export, AC7, `kitAgreement` re-record** | F12 | node library | ✓ ruled (2 of 3) |
+| [ISL-009](ISL-009-A-NODE-CAN-BE-NAMED-FOR-A-TEST-AND-SCROLLED-TO.md) | A node can be named for a test and scrolled to — **🟢 s6: a `data-*` list on every visual node but Drag (each name an input, typed or wired; `onclick` refused by the door with the rule); the deployed drive selects every element by `[data-testid]` only, 4/4 at 1024 and 390 with its control. s5: Scroll Into View on all 27. ⬜ export (a week-old peer pile in `component.ts`), AC7, `kitAgreement` re-record** | F12 | node library | ✓ ruled (2 of 3) |
 | [ISL-010](ISL-010-A-RUNNING-APP-CAN-ASK-A-LOCAL-MODEL.md) | A running app can ask a local model | F13 | cloud nodes | ✓ |
 | **Track C** | | | | |
 | [ISL-011](ISL-011-A-KIT-NODE-KEEPS-ITS-OWN-DISPLAY.md) | A kit node keeps its own display — **✅ s4: closed — AC6 on W13's ruling (the force removed, a person's display sticks; page drive 50/50)** | F15 | kit bridge, docs, export | — |

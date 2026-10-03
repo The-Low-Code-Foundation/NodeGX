@@ -1279,6 +1279,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "enabled",
           "displayName": "Enabled",
           "group": "General",
@@ -2151,14 +2164,44 @@
             "inputs": [
               "height"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -2527,6 +2570,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "enabled",
@@ -3215,8 +3271,50 @@
           "description": "Fires just before this element is removed from the page, while it still exists"
         }
       ],
-      "dynamicPorts": null,
-      "parameterEncoding": null
+      "dynamicPorts": {
+        "mechanisms": [
+          "declared-port-groups"
+        ],
+        "description": "Declares conditional/expandable port groups whose visibility depends on parameter values (see declaredPortGroups).",
+        "declaredPortGroups": [
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "parameterEncoding": {
+        "known": true,
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      }
     },
     {
       "typeName": "Circle",
@@ -3406,6 +3504,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "dragKind",
@@ -4584,14 +4695,44 @@
               "dropIndex",
               "isDropTarget"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -8752,6 +8893,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "flexDirection",
           "displayName": "Layout",
           "group": "Layout",
@@ -9543,14 +9697,44 @@
             "inputs": [
               "height"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -10400,6 +10584,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "flexDirection",
           "displayName": "Layout",
           "group": "Layout",
@@ -11205,14 +11402,44 @@
             "inputs": [
               "height"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -12300,6 +12527,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "dragKind",
@@ -13984,14 +14224,44 @@
               "boxShadowSpreadRadius",
               "boxShadowColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -14817,6 +15087,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "dragKind",
@@ -16090,14 +16373,44 @@
               "boxShadowSpreadRadius",
               "boxShadowColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -17062,6 +17375,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "fontFamily",
           "displayName": "Font Family",
           "editorName": "Font Family",
@@ -18019,14 +18345,44 @@
               "borderBottomWidth",
               "borderBottomColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -20350,6 +20706,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "enabled",
           "displayName": "Enabled",
           "group": "General",
@@ -21318,14 +21687,44 @@
             "inputs": [
               "height"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -21436,6 +21835,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "description",
@@ -22043,9 +22455,29 @@
       ],
       "dynamicPorts": {
         "mechanisms": [
+          "declared-port-groups",
           "runtime-discovered"
         ],
-        "description": "Some ports are discovered at runtime from user code, parameters or connected components, and are pushed to the editor per instance; the static port list below is incomplete for such instances."
+        "description": "Declares conditional/expandable port groups whose visibility depends on parameter values (see declaredPortGroups). Some ports are discovered at runtime from user code, parameters or connected components, and are pushed to the editor per instance; the static port list below is incomplete for such instances.",
+        "declaredPortGroups": [
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
+          }
+        ]
       },
       "parameterEncoding": {
         "known": false,
@@ -22110,6 +22542,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "mounted",
@@ -22390,14 +22835,35 @@
       ],
       "dynamicPorts": {
         "mechanisms": [
+          "declared-port-groups",
           "runtime-discovered"
         ],
-        "description": "Per-page signal outputs and transition parameters are generated from the \"pages\" parameter."
+        "description": "Per-page signal outputs and transition parameters are generated from the \"pages\" parameter.",
+        "declaredPortGroups": [
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
+          }
+        ]
       },
       "parameterEncoding": {
         "known": true,
         "seededBy": [
-          "pages"
+          "pages",
+          "dataAttributes"
         ],
         "patterns": [
           {
@@ -22416,6 +22882,16 @@
             "group": "General",
             "valueType": "enum",
             "example": "startPage"
+          },
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
           }
         ]
       }
@@ -23529,6 +24005,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "enabled",
           "displayName": "Enabled",
           "group": "General",
@@ -24215,8 +24704,50 @@
           "description": "Fires just before this element is removed from the page, while it still exists"
         }
       ],
-      "dynamicPorts": null,
-      "parameterEncoding": null
+      "dynamicPorts": {
+        "mechanisms": [
+          "declared-port-groups"
+        ],
+        "description": "Declares conditional/expandable port groups whose visibility depends on parameter values (see declaredPortGroups).",
+        "declaredPortGroups": [
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "parameterEncoding": {
+        "known": true,
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      }
     },
     {
       "typeName": "Radio Button Group",
@@ -24329,6 +24860,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "flexDirection",
@@ -25145,14 +25689,44 @@
             "inputs": [
               "height"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -25362,6 +25936,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "enabled",
@@ -26198,8 +26785,50 @@
           "description": "Fires just before this element is removed from the page, while it still exists"
         }
       ],
-      "dynamicPorts": null,
-      "parameterEncoding": null
+      "dynamicPorts": {
+        "mechanisms": [
+          "declared-port-groups"
+        ],
+        "description": "Declares conditional/expandable port groups whose visibility depends on parameter values (see declaredPortGroups).",
+        "declaredPortGroups": [
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "parameterEncoding": {
+        "known": true,
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      }
     },
     {
       "typeName": "RemoveDbModelRelation",
@@ -26602,6 +27231,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "mounted",
           "displayName": "Mounted",
           "group": "General",
@@ -26889,10 +27531,30 @@
       ],
       "dynamicPorts": {
         "mechanisms": [
+          "declared-port-groups",
           "runtime-discovered",
           "editor-adapter"
         ],
         "description": "The \"pages\" parameter determines which pages exist; the editor (RouterAdapter) derives ports and navigation metadata from the page components.",
+        "declaredPortGroups": [
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
+          }
+        ],
         "editorAdapter": "RouterAdapter"
       },
       "parameterEncoding": {
@@ -29675,6 +30337,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "dragKind",
           "displayName": "Drag Kind",
           "group": "Drag Source",
@@ -31117,14 +31792,44 @@
               "dropIndex",
               "isDropTarget"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -31446,6 +32151,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "enabled",
@@ -32479,14 +33197,44 @@
             "inputs": [
               "height"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -34010,6 +34758,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "dragKind",
           "displayName": "Drag Kind",
           "group": "Drag Source",
@@ -35492,14 +36253,44 @@
               "borderBottomWidth",
               "borderBottomColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -43072,6 +43863,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "enabled",
           "displayName": "Enabled",
           "group": "General",
@@ -44499,14 +45303,44 @@
               "boxShadowSpreadRadius",
               "boxShadowColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -45305,6 +46139,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "enabled",
@@ -46595,14 +47442,44 @@
               "boxShadowSpreadRadius",
               "boxShadowColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -47387,6 +48264,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "enabled",
@@ -49116,13 +50006,43 @@
               "boxShadowSpreadRadius",
               "boxShadowColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
         "notes": "This node mints no port names. Its `value` input is declared `string` above and is republished per instance as an `enum` whose choices are this node's own `items` — labels from each option's `Label`, values from its `Value` — so the port list above is complete and only the `type` field moves. A value that matches no option is offered back as a choice of its own rather than being dropped."
       }
     },
@@ -49897,6 +50817,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "enabled",
@@ -51219,14 +52152,44 @@
               "boxShadowSpreadRadius",
               "boxShadowColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -51411,6 +52374,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "enabled",
@@ -53536,14 +54512,44 @@
               "thumbBoxShadowSpreadRadius",
               "thumbBoxShadowColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {
@@ -54352,6 +55358,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "enabled",
@@ -56278,13 +57297,43 @@
               "boxShadowSpreadRadius",
               "boxShadowColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
         "notes": "This node mints no port names. Its two value ports are declared `'*'` above and are republished per instance with a narrowed type — `number` when the `type` parameter is `number`, `string` otherwise — so the port list above is complete and only the `type` field moves."
       }
     },
@@ -57587,6 +58636,19 @@
           "index": 100010
         },
         {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
+        },
+        {
           "name": "direction",
           "displayName": "Layout Direction",
           "group": "Layout Settings",
@@ -58010,8 +59072,50 @@
           "description": "Fires just before this element is removed from the page, while it still exists"
         }
       ],
-      "dynamicPorts": null,
-      "parameterEncoding": null
+      "dynamicPorts": {
+        "mechanisms": [
+          "declared-port-groups"
+        ],
+        "description": "Declares conditional/expandable port groups whose visibility depends on parameter values (see declaredPortGroups).",
+        "declaredPortGroups": [
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
+          }
+        ]
+      },
+      "parameterEncoding": {
+        "known": true,
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
+      }
     },
     {
       "typeName": "net.noodl.visual.icon",
@@ -58122,6 +59226,19 @@
           "default": "",
           "description": "Extra CSS class names to put on this element, for styling from a stylesheet you supply",
           "index": 100010
+        },
+        {
+          "name": "dataAttributes",
+          "displayName": "Data Attributes",
+          "group": "Data Attributes",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true
+          },
+          "isSignal": false,
+          "description": "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input",
+          "index": 100015
         },
         {
           "name": "iconColor",
@@ -58817,14 +59934,44 @@
               "iconIconSource",
               "iconColor"
             ]
+          },
+          {
+            "accept": {
+              "example": "data-testid",
+              "pattern": "^data-[a-z0-9][a-z0-9._-]*$",
+              "rule": "a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "name": "namedports/derived",
+            "parameter": "dataAttributes",
+            "port": {
+              "description": "Written on this element as {{*}}",
+              "displayName": "{{*}}",
+              "group": "Data Attributes",
+              "name": "{{*}}",
+              "plug": "input",
+              "type": "string"
+            }
           }
         ]
       },
       "parameterEncoding": {
         "known": true,
-        "patterns": [],
-        "seededBy": [],
-        "notes": "This node computes no port names. Its dynamic behaviour is visibility only: every port it can ever have is listed in `inputs`/`outputs` above, and `dynamicPorts.declaredPortGroups` says which parameter values reveal which of them."
+        "patterns": [
+          {
+            "pattern": "<name>",
+            "plug": "input",
+            "variables": {
+              "name": "one of the names listed in the `dataAttributes` parameter; a data attribute name: \"data-\", then a lowercase letter or digit, then lowercase letters, digits, \".\", \"_\" or \"-\""
+            },
+            "group": "Data Attributes",
+            "valueType": "string",
+            "example": "data-testid"
+          }
+        ],
+        "seededBy": [
+          "dataAttributes"
+        ],
+        "notes": "Every port is listed in `inputs`/`outputs` above except the ones named by a list parameter (the patterns here): `dynamicPorts.declaredPortGroups` says which parameter values reveal which listed port, and holds the `namedports/derived` rule that turns each listed name into a port."
       }
     },
     {

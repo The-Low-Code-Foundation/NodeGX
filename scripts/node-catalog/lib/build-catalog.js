@@ -7,7 +7,7 @@
  */
 const { sanitize, normalizeType, tooltipToText, assignDefined } = require('./sanitize');
 const { NOTES, EDITOR_ADAPTER_TYPES } = require('./dynamic-port-notes');
-const { deriveEncoding, RETYPES_DECLARED_PORTS } = require('./derive-encoding');
+const { deriveEncoding, withDerivedRules, RETYPES_DECLARED_PORTS } = require('./derive-encoding');
 
 // 1.1.0 — SUB-013 adds `parameterEncoding` to every node with dynamic ports. Additive, so a
 // minor bump: a reader written against 1.0.0 sees an unknown key and is otherwise unaffected.
@@ -261,7 +261,10 @@ function buildCatalog(records, extras) {
     // SUB-013 — what the dynamic ports are *called*. `dynamicPorts.description` says they exist;
     // without this an author has prose and no way to write a key. Null for nodes with no dynamic
     // ports; never absent for nodes that have them, so a gap cannot pass for "nothing to say".
-    node.parameterEncoding = deriveEncoding(typeName, metadata, rawDef, node.dynamicPorts);
+    node.parameterEncoding = withDerivedRules(
+      deriveEncoding(typeName, metadata, rawDef, node.dynamicPorts),
+      metadata.dynamicports
+    );
 
     nodes.push(node);
   }

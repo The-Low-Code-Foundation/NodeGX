@@ -490,6 +490,12 @@ export interface ReactNodeDefinition {
 
   /** Passes the node itself to the React component as `props.noodlNode`. */
   noodlNodeAsProp?: boolean;
+  /**
+   * P109 ISL-009 — `true` for a node with no element of its own (Drag moves its child), which
+   * therefore offers no Data Attributes list: an attribute it wrote would land on the child and
+   * overwrite the child's own list.
+   */
+  noDataAttributes?: boolean;
   /** Set `false` to omit the standard `mounted` input. */
   mountedInput?: boolean;
   /** See {@link ReactNodeFrame} — currently unused. */
@@ -764,6 +770,116 @@ function defineSignalInputProp(input: ReactInputPropDefinition, name: string) {
   };
 }
 
+/**
+ * P109 ISL-009 — "A data-* list" (Richard, 2026-10-02). A node could not carry a name for a test, so
+ * the garden's drives found everything by styling class (499 `querySelector`s). Every visual node now
+ * lists `data-*` attributes by name, and each listed name becomes an input whose value — typed or
+ * wired — is written on the element, in server render too.
+ *
+ * The names are the rule's, carried as data on the node definition so the editor, the catalog and
+ * the door read this exact sentence and pattern: `data-` keeps the list away from behaviour
+ * (`onclick`) and from ACC-006's `aria-*`/`role`.
+ */
+export const DATA_ATTRIBUTE_NAME_PATTERN = '^data-[a-z0-9][a-z0-9._-]*$';
+const DATA_ATTRIBUTE_NAME = new RegExp(DATA_ATTRIBUTE_NAME_PATTERN);
+const DATA_ATTRIBUTES_PARAMETER = 'dataAttributes';
+
+/**
+ * The `namedports/derived` rule every visual node declares: one string input per listed name, the
+ * port named exactly as the attribute. Derived by the editor on read (`dynamicPortRules.ts`), so it
+ * never competes with a node's own `sendDynamicPorts` (Page Stack, Router, Text Input).
+ */
+export const DATA_ATTRIBUTES_RULE: DynamicPortEntry = {
+  name: 'namedports/derived',
+  parameter: DATA_ATTRIBUTES_PARAMETER,
+  accept: {
+    pattern: DATA_ATTRIBUTE_NAME_PATTERN,
+    rule: 'a data attribute name: "data-", then a lowercase letter or digit, then lowercase letters, digits, ".", "_" or "-"',
+    example: 'data-testid'
+  },
+  port: {
+    name: '{{*}}',
+    displayName: '{{*}}',
+    type: 'string',
+    plug: 'input',
+    group: 'Data Attributes',
+    description: 'Written on this element as {{*}}'
+  }
+};
+
+/** The names a `dataAttributes` value lists, read the way the editor's stringlist writes it. */
+function listedDataAttributeNames(value: unknown): string[] {
+  if (value === undefined || value === null || value === '') return [];
+  const names = Array.isArray(value) ? value.map((v) => String(v)) : typeof value === 'string' ? value.split(',') : [];
+  return names.filter((name) => DATA_ATTRIBUTE_NAME.test(name));
+}
+
+/**
+ * Put the listed attributes on `props.dom`, the channel every built-in component spreads on its
+ * root element, and take off any it no longer lists. A listed name with no value is written
+ * empty: listing it is what puts it there.
+ */
+function applyDataAttributes(node: ReactNodeInstance): void {
+  const names = node._dataAttributeNames || [];
+  const values = node._dataAttributeValues || {};
+  const dom = { ...(node.props.dom || {}) };
+  for (const key of Object.keys(dom)) if (key.startsWith('data-')) delete dom[key];
+  for (const name of names) {
+    const value = values[name];
+    dom[name] = value === undefined || value === null ? '' : typeof value === 'object' ? JSON.stringify(value) : String(value);
+  }
+  node.props.dom = dom;
+  node.forceUpdate();
+  syncDataAttributesOnElement(node);
+}
+
+/**
+ * Make the element the node reports carry exactly the listed attributes — for a component that
+ * does not spread `props.dom` on its root, which is every kit component that predates the list.
+ * Built-ins already render them (and in server render); for them this finds nothing to change.
+ *
+ * Only names this function set itself are ever removed, so a `data-*` the element got from
+ * anywhere else (the runtime's own `data-ndl-*`, a kit's markup) is left alone. Client-only: there
+ * is no element during server render, and a kit node's attribute is therefore not in its HTML.
+ */
+function syncDataAttributesOnElement(node: ReactNodeInstance): void {
+  if (typeof document === 'undefined' || !node._dataAttributeNames) return;
+  const el = node.getDOMElement() as Element | null;
+  if (!el || typeof el.setAttribute !== 'function') return;
+  const want: Record<string, string> = {};
+  const dom = node.props.dom || {};
+  for (const name of node._dataAttributeNames as string[]) if (name in dom) want[name] = String(dom[name]);
+  for (const name of (node._appliedDataAttributes as string[]) || []) if (!(name in want)) el.removeAttribute(name);
+  for (const name of Object.keys(want)) if (el.getAttribute(name) !== want[name]) el.setAttribute(name, want[name]);
+  node._appliedDataAttributes = Object.keys(want);
+}
+
+/**
+ * Claim a `data-*` input the moment something names one — a saved parameter (`setVariant` asks
+ * `registerInputIfNeeded` for each) or a wire. Installed per instance, chained onto whatever the
+ * node already answers, so a node's own dynamic ports (Page Stack's `pageComp-…`) are untouched.
+ *
+ * ⚠️ Not a `registerInputIfNeeded` method on the definition: the catalog generator calls any type
+ * with one `runtime-discovered`, and that switches off GAM-019's unknown-port checks on all 27
+ * visual types. These ports are declared — by {@link DATA_ATTRIBUTES_RULE} — and the catalog says so.
+ */
+function claimDataAttributeInputs(node: ReactNodeInstance): void {
+  const own = node.registerInputIfNeeded;
+  node.registerInputIfNeeded = function (this: ReactNodeInstance, name: string) {
+    if (!this.hasInput(name) && DATA_ATTRIBUTE_NAME.test(name)) {
+      this.registerInput(name, {
+        set(value: unknown) {
+          const self = this as unknown as ReactNodeInstance;
+          self._dataAttributeValues = { ...(self._dataAttributeValues || {}), [name]: value };
+          if ((self._dataAttributeNames || []).includes(name)) applyDataAttributes(self);
+        }
+      });
+      return;
+    }
+    return own ? own.call(this, name) : undefined;
+  };
+}
+
 /** P109 ISL-009 — the alignments `Scroll Align` offers, as `scrollIntoView` spells them. */
 const SCROLL_ALIGNMENTS = ['nearest', 'start', 'center', 'end'] as const;
 type ScrollAlignment = (typeof SCROLL_ALIGNMENTS)[number];
@@ -857,12 +973,18 @@ export class NoodlReactComponent extends React.Component<NoodlReactComponentProp
       node._pendingScrollIntoView = false;
       runScrollIntoView(node);
     }
+    syncDataAttributesOnElement(node);
     // During SSR (server) and SSR hydration (client pre-settle), triggerDidMount()
     // already sent this node's didMount before React committed; sending it again on
     // commit would double-fire user graphs. The flag is cleared on unmount below so
     // a genuine remount fires didMount normally.
     if (this.props.noodlNode.didCallTriggerDidMount) return;
     this.props.noodlNode.sendSignalOnOutput('didMount');
+  }
+
+  componentDidUpdate() {
+    // P109 ISL-009 — a list or value change re-renders through here.
+    syncDataAttributesOnElement(this.props.noodlNode);
   }
 
   componentWillUnmount() {
@@ -1130,6 +1252,7 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
       }
 
       this.props = { styles: {} };
+      if (!def.noDataAttributes) claimDataAttributeInputs(this as unknown as ReactNodeInstance);
       this.outputPropValues = {};
       this.style = Object.assign({}, startStyle);
 
@@ -1199,7 +1322,8 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
     },
     getInspectInfo: def.getInspectInfo,
     nodeScopeDidInitialize: def.nodeScopeDidInitialize,
-    dynamicports,
+    // P109 ISL-009 — every visual node also declares the Data Attributes rule.
+    dynamicports: def.noDataAttributes ? dynamicports : [...(dynamicports || []), DATA_ATTRIBUTES_RULE],
     // P88 GAM-019 — NDA-017 §2's field was dropped here, so Text Input's `runOnValueChange` never
     // reached `defineNode`: its Run On Value Change checkbox was not a declared port, not in the
     // catalog and not in the panel, while a saved `runOnChange-startValue` still worked through
@@ -1231,6 +1355,18 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         description: 'Raw CSS declarations applied to this element, overriding the styling ports above',
         set(value) {
           this.updateAdvancedStyle({ content: value });
+        }
+      },
+      dataAttributes: {
+        index: 100015,
+        displayName: 'Data Attributes',
+        group: 'Data Attributes',
+        type: { name: 'stringlist', allowEditOnly: true },
+        description: 'data-* names (data-testid) for tests and scripts to find this element by; each gets a value input',
+        set(value) {
+          const node = this as unknown as ReactNodeInstance;
+          node._dataAttributeNames = listedDataAttributeNames(value);
+          applyDataAttributes(node);
         }
       },
       /*
@@ -1616,6 +1752,15 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           ref: (ref) => {
             this.reactComponentRef = ref;
             if (ref) {
+              // P109 ISL-009 — React attaches this ref AFTER the wrapper's `componentDidMount`, so a
+              // third-party component that reports no root (a kit's plain function component) has no
+              // reachable element until now. Found in the editor's preview: the kit Badge listed
+              // `data-testid` and its element never got it. A held Scroll Into View waited the same way.
+              syncDataAttributesOnElement(this);
+              if (this._pendingScrollIntoView && this.getDOMElement()) {
+                this._pendingScrollIntoView = false;
+                runScrollIntoView(this);
+              }
               // Built-ins and host elements have already reported their root
               // via setDOMElement (child refs commit first), which also set
               // the observer target. The deferred fallback only matters for
@@ -1796,6 +1941,7 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           this._pendingScrollIntoView = false;
           runScrollIntoView(this);
         }
+        if (element) syncDataAttributesOnElement(this);
       },
       /**
        * NDA-012 (Visual) check A3 — run an imperative action on the inner React component,
@@ -2105,6 +2251,9 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
       }
     }
   };
+
+  // P109 ISL-009 — a node with no element of its own offers no list (see `noDataAttributes`).
+  if (def.noDataAttributes) delete ReactComponentNode.inputs.dataAttributes;
 
   if (useVariants) {
     ReactComponentNode.inputs.variant = {

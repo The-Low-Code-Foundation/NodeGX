@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import RadioButtonContext from '../../../contexts/radiobuttoncontext';
 import Layout from '../../../layout';
 import { Noodl, Slot } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 
 export interface RadioButtonGroupProps extends Noodl.ReactProps {
   name: string;
@@ -47,7 +47,7 @@ export function RadioButtonGroup(props: RadioButtonGroupProps) {
 
   return (
     <RadioButtonContext.Provider value={context}>
-      <div ref={noodlRootRef(props.noodlNode)} className={className} style={style}>
+      <div ref={noodlRootRef(props.noodlNode)} {...dataAttributeProps(props.dom)} className={className} style={style}>
         {props.children}
       </div>
     </RadioButtonContext.Provider>

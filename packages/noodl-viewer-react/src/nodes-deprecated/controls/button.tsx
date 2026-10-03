@@ -6,6 +6,7 @@ import guid from '../../guid';
 import Layout from '../../layout';
 import NodeSharedPortDefinitions from '../../node-shared-port-definitions';
 import { createNodeFromReactComponent, type ReactNodeDefinition, type StyleObject } from '../../react-component-node';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import type { Noodl, Slot } from '../../types';
 import Utils from './utils';
 
@@ -71,6 +72,7 @@ function Button(props: ButtonProps) {
   return (
     <button
       className={className}
+      {...dataAttributeProps(props.dom)}
       disabled={!props.enabled}
       {...Utils.controlEvents(props)}
       type={props.buttonType}

@@ -12,6 +12,7 @@ import {
   type StyleObject
 } from '../../react-component-node';
 import type { Noodl } from '../../types';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import Utils from './utils';
 
 interface OptionsProps extends Noodl.ReactProps {
@@ -93,6 +94,7 @@ function Options(props: OptionsProps) {
   return (
     <select
       className={className}
+      {...dataAttributeProps(props.dom)}
       ref={(el) => {
         if (el) el.selectedIndex = selectedIndex;
       }}

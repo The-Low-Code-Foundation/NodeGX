@@ -139,6 +139,8 @@ export const nonexistentPort: Rule = {
 
           if (catalog.hasPort(node.type, plug, port)) continue; // (1)
           if (node.instancePorts.includes(port)) continue; // (2)
+          // (2b) P109 ISL-009 — minted by the type's derived-port rule from this node's own list.
+          if (catalog.derivedPortNames(node.type, plug, node.parameters).includes(port)) continue;
 
           if (catalog.hasRuntimeDynamicPorts(node.type)) {
             // (3) — runtime/adapter/numbered/component ports. Never an error.

@@ -25,3 +25,15 @@ message), so `dedupeDiagnostics` no longer collapses them. The authoring doors p
 **Not fixed here:** ISL-014's AC named it only as a neighbour; the owner is whoever owns the strict pipeline
 (`validate.ts` `validateOnDisk` / the precondition set, AAQ-005 / D13 lineage). Count the two diagnostics' codes and
 keys before changing either producer.
+
+## 🔴 Re-measured 2026-10-03 (P109 s6): the diagnosis above is wrong — it is the fixture's wire
+
+Printed the strict report's errors on this row: **one** `unknown-node-type` (the stray node) and one
+`nonexistent-port` — *"dynports.kit.Panel has no output named "title""*. The failing assertion is
+`expect(report.summary.errors).toBe(1)`, not the `unknown-node-type` count (which is 1, and passes). The fixture's
+stray wire is `{ fromId: 'dyn_panel', fromProperty: 'title', … }`, and Panel's `title` is an **input**
+(`tests/fixtures/kit-dynports/noodl_modules/dynports-kit/index.js:40`). The validator is right to refuse it.
+
+So there is no duplicate producer. The fix is in the spec's fixture: wire from a real Panel output (e.g. the shared
+`childIndex`), or count `unknown-node-type` errors only. Not fixed here (CN-004's spec, not ISL-009's); the title of
+this file is kept so its links hold, and is now known to be false.

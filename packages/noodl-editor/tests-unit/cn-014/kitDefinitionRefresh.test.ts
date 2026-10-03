@@ -183,7 +183,10 @@ describe('CN-014 — the cloud library does not capture the browser\'s definitio
   const shared = cloudLib.nodetypes.map((n) => n.name).filter((n) => browserByName.has(n));
 
   it('the two shipped payloads collide AND disagree, or the control below is vacuous', () => {
-    expect(shared.length).toBe(84);
+    // 84 → 88 with the 2026-10-03 re-record of the browser payload (P109 ISL-009): four of the five built-ins
+    // added since August are in the cloud library too: net.noodl.ParseXML, net.noodl.ParseFeed,
+    // noodl.cloud.modelrequest and noodl.cloud.listusersinrole (Repeat is browser-only).
+    expect(shared.length).toBe(88);
     expect(shared).toContain('Expression');
 
     // 🔴 Overlap alone would not make the control able to fail: if the two
@@ -194,7 +197,7 @@ describe('CN-014 — the cloud library does not capture the browser\'s definitio
         JSON.stringify(browserByName.get(name)) !==
         JSON.stringify(cloudLib.nodetypes.find((n) => n.name === name))
     );
-    expect(disagree.length).toBe(84);
+    expect(disagree.length).toBe(shared.length);
   });
 
   it('keeps every shared name on the browser definition while adding the cloud runtime', () => {

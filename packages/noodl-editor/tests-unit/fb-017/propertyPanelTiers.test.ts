@@ -232,8 +232,11 @@ describe('the ruling, swept over the real node catalog', () => {
     //
     // 21 → 22 and 11 → 12 is P109 ISL-009's `Scroll Into View` (a signal on every visual node),
     // filed beside `Scroll To Element`; basic is unmoved at 10.
-    expect(groups.length).toBe(22);
-    expect(advanced.length).toBe(12);
+    //
+    // 22 → 23 and 12 → 13 is P109 ISL-009's `Data Attributes` list (data-* names on every visual
+    // node), filed beside `Advanced HTML`; basic is unmoved at 10.
+    expect(groups.length).toBe(23);
+    expect(advanced.length).toBe(13);
     expect(basic.length).toBe(10);
     expect(namesOf(basic)[0]).toBe('General');
   });

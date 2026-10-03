@@ -6,7 +6,7 @@ import type { NodeOutcome, OutcomeFailureOptions, OutcomeToken } from '@noodl/ty
 import type { TSFixme } from '../../../typings/global';
 
 import ASyncQueue from '../../async-queue';
-import { noodlRootRef } from '../../components/noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../components/noodl-root-ref';
 import guid from '../../guid';
 import { createNodeFromReactComponent } from '../../react-component-node';
 import { Noodl, Slot } from '../../types';
@@ -30,7 +30,10 @@ function RouterReactComponent(props: RouterReactComponentProps) {
   }, []);
 
   return (
-    <div ref={noodlRootRef((props as TSFixme).noodlNode)} className={props.className} style={style}>
+    <div
+      ref={noodlRootRef((props as TSFixme).noodlNode)}
+      {...dataAttributeProps((props as TSFixme).dom)}
+      className={props.className} style={style}>
       {children}
     </div>
   );

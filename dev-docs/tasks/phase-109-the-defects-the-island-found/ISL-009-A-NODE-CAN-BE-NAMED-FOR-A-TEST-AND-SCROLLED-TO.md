@@ -1,6 +1,6 @@
 # ISL-009 — A node can be named for a test and scrolled to
 
-**Status:** 🟢 s5 (2026-10-02): **ruling 2 built** ("Signal on every node") — `Scroll Into View` + `Scroll Align` on all 27 visual node types, Page included; driven on a deployed page at 1024 and 390 with its control (§8 s5). ✅ Ruling 1 asked in round 2 and ruled **"A data-* list"** (§5 1(b): name/value rows, `data-*` only, wirable, server-rendered) — not built. ⬜ The export half, ⬜ AC7 (the island uses it), ⬜ `kitAgreement`'s editor recording. Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟢 s6 (2026-10-03): **both rulings built.** ruling 1 ("A data-* list"): a `Data Attributes` list on every visual node but Drag, each listed `data-*` name an input of that name, typed or wired, in the markup; the door refuses a name outside `data-*` with the rule; the deployed drive now finds every element by `[data-testid]` only, 4/4 at 1024 and 390 with its control (§8 s6). ruling 2 (s5): `Scroll Into View` on all 27. ⬜ The export half (a week-old peer pile in `component.ts`), ⬜ AC7 (the island uses it). `kitAgreement` re-recorded (s6). Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F12](AUDIT-2026-10-01.md) · [P105 CG-003 line 114](../phase-105-the-coding-garden/CG-003-THE-PAGES.md) ("there is no `[data-owl-row]` attribute — a node cannot write one") · [CG-005 §8 hook 2](../phase-105-the-coding-garden/CG-005-OLIVE-IN-THE-GAME.md) line 166 · the island's `Logic/Find robots` page glue
 **Side:** product (shared visual-node ports in `noodl-viewer-react`, the export, the door's vocabulary)
 
@@ -164,3 +164,92 @@ above); `cmp001`, `cmp004Parts`, `cn004`, `fld013` on s4's HEAD-red list; `fld01
 
 **Ruling 1, the same evening: "A data-* list"** (README §8 round 2). Build it next: AC2's drive then selects the card by
 `[data-testid=…]`, and AC3's and AC5's attribute halves become runnable.
+
+### Session 6 — 2026-10-03: ruling 1 built ("A data-* list") and driven
+
+**As built.** Read P41 first: ACC-006's mixin does not exist, so the list sits beside `cssClassName` in
+`react-component-node.ts`'s shared inputs, like s5's scroll ports.
+
+- **The rule is data, declared once.** `DATA_ATTRIBUTES_RULE`, a `namedports/derived` entry in every visual node's
+  `dynamicports`: parameter `dataAttributes` (a stringlist), port template `{{*}}` (the port is named exactly as the
+  attribute), type string, group `Data Attributes`, and `accept: { pattern: '^data-[a-z0-9][a-z0-9._-]*$', rule, example }`.
+  The runtime, the catalog, the editor and the door all read that one entry.
+- 🔴 **Why a new rule name and not WFA-009's `namedports/list`:** a `list` rule is pushed by `NamedPortsAdapter`
+  through `setDynamicPorts`, which REPLACES a node's dynamic ports. Page Stack, Router (runtime) and Text Input /
+  Options (runtime-narrowed) already have a writer there, so two writers would erase each other on every parameter
+  change (the trap `CloudDynamicPortsAdapter.ts:22` records). A `derived` rule is read by `NodeGraphNode.getPorts()` on
+  read (`dynamicPortRules.derivedPortsForNode`), so it competes with nothing.
+- 🔴 **Why the runtime claim is per instance:** the catalog generator calls any type with a `registerInputIfNeeded`
+  method `runtime-discovered`, and that switches off GAM-019's unknown-port and unknown-parameter checks. These ports
+  are declared, so `claimDataAttributeInputs` chains onto the instance in `initialize`, and the catalog records
+  `declared-port-groups`. Measured: no visual type gained `runtime-discovered`.
+- **Runtime.** A listed name with no value is written empty; a value for an unlisted name is not written; taking a
+  name off the list takes it off the element; a name outside `data-*` is never claimed. The values go through
+  `props.dom`, and every built-in root that did not spread it now spreads its `data-*` keys (`dataAttributeProps`,
+  beside `noodlRootRef`): 13 current types and 9 deprecated controls. A control whose label wrapper also takes the
+  root ref carries the attribute once, on the wrapper. **Drag offers no list** (`noDataAttributes`): it has no element
+  of its own; it moves its child.
+- **Kit nodes** inherit the rule, and a kit component need not spread `props.dom`, so the runtime also writes the
+  listed attributes onto the element the node reports (`syncDataAttributesOnElement`), removing only names it set
+  itself. That path is client-only: a kit node's attribute is not in server HTML.
+- **Validator / door.** `CatalogIndex.derivedPortNames` and `refusedDerivedNames` read the rule from the catalog's
+  `declaredPortGroups`. `nonexistentPort` accepts a wire to a listed name (step 2b); `parameterValues` accepts a value
+  for one; a list entry the rule refuses is an `invalid-parameter-value` **error** naming the rule (it blocks the
+  door). Existing code, not a new one (the `layoutString` grammar precedent).
+- **Catalog.** `derive-encoding.withDerivedRules` writes the `<name>` pattern; 🔴 the seeder no longer seeds a
+  derived list: seeding it drove Page's setup as if it read the list, and turned Page's true `known: false` into a
+  false `known: true` (caught in the diff and fixed before commit). Four types newly dynamic (Checkbox, Radio Button,
+  Range, Columns) got a `runtimeBehavior`. `nodegx-kit-catalog` keeps a derived entry verbatim and declared: 🔴 read as a
+  `port` entry, it had made every kit visual node `runtime-discovered`, and CN-010's port checks on kit nodes stopped
+  (its AC3 went red — found by running the catalog readers, fixed, now green). A kit node whose only dynamism is
+  declared gets a `known: true` encoding.
+
+**AC readings**
+
+| AC | reading |
+|---|---|
+| AC2 | ✅ **Selected by `[data-testid]` only.** The project carries no `cssClassName` at all (all ten replaced by `data-testid`), and the iScroll card's name arrives **over a wire** from an Expression. Redeployed with both bundles rebuilt from this change (`noodl.deploy.js` and `nodegx-deploy.cjs` 09:00), `nodegx deploy` exit 0. Drive: all ten names found on the page, 0 `isl009-` classes (the drive fails otherwise). **1024×768** 4/4 unseen → seen (page scrollY 0 → 1570; native box `scrollTop` 920; iScroll `matrix3d(… -920 …)`); **390×844** 4/4; console errors 0; **control** 4/4 unmoved. Screenshot looked at (390, iScroll arm: the card at the window's foot). |
+| AC3 | ✅ **By spec, through the server-render path:** `renderToStaticMarkup(node.render())` in jest's plain `node` environment (no `document`) shows the attribute on Text, Button, Checkbox (with and without label), Text Input (both), Icon, Columns and the deprecated Label. ⚠️ `nodegx deploy` does not prerender, and the SSR server itself (`static/ssr/server-core.js`) was not run. |
+| AC5 | ✅ The door refuses `onclick` in the list with an error that quotes the rule, and a value for it as never read. **Sabotage arm:** the pattern widened to `'.*'` and the catalog regenerated → 2 rows red; restored, `catalog:check` up to date. `validate:project` on a copy with `onclick` → 1 error, same sentence. |
+| AC6 | Catalog, enriched catalog (Group's `dataAttributes` line is the one place `get_node_type` says a listed name becomes a port), CHR-007 snapshot (+26 rows, exactly `dataAttributes → StringListType`), FB-017 tier (`Data Attributes` = plumbing beside `Advanced HTML`; 22 → 23 headings, basic unmoved at 10), AWP-005 ratchets (below). ⬜ **Export:** `component.ts` / `coverage-ledger.json` still hold a peer's uncommitted pile from **Sep 26** (a week old). Until then the export reports `dataAttributes` and each `data-*` value as unmapped ("no style/content mapping — dropped"): loud, not silent. |
+
+**Specs.** `noodl-viewer-react/tests/isl-009/data-attributes.test.ts` 14/14 and `data-attributes-element.test.ts` 1/1.
+Mutants, each restored from a `cp`: the claim removed → 13 red; Button's spread removed → 1; any name accepted → 1;
+the element sync off → 1; the sync removing names it did not set → 1. `noodl-editor/tests-unit/isl-009/dataAttributesDoor.test.ts`
+7/7. Mutants: the wire accept (2b) removed → 1 red; the value accept removed → 2; the pattern widened → 2.
+`nodegx-kit-catalog` +3 rows (81/81).
+
+**What the list moved elsewhere, each attributed:**
+- **AWP-005** (`nodeDocBudget`): basket summary 8,115 → 8,254, ratchet 8,200 → 8,350; `Group` full 16,141 → 16,261,
+  ceiling 16,200 → 16,350 (the port entry +67; Group's enrichment line +53). Table in the spec.
+- **CN-010** population 88 → 92 (the four newly dynamic types) and kit `Feed`'s mechanisms; **CN-004** Feed's
+  mechanisms; **kitOverlay** Badge is no longer static. Each row says why in the spec.
+- 🔴 **`P109-S1-CN004` was misdiagnosed** (re-measured, bug file corrected): the strict arm's second error is the
+  fixture's own wire *from* Panel's `title`, which is an input; there is no duplicate `unknown-node-type`.
+
+**Gates (2026-10-03).** viewer-react **131 suites, 1,691 tests, 0 failed**. Full `noodl-mcp` (first time in P109):
+166 suites, 3,585 tests, 20 failed in 10 suites. Attributed: this change 0 after its fixes (the expectations above);
+`kitAgreement` 3 (the owed re-record); on s4/s5's HEAD-red list `cmp004Parts` 2, `cmp004RoundTrip` 2,
+`nodeIdAllocation` 1, `cmp001` 1, `fld013` 1, `cn004` 1 (above). Red and not this change, filed:
+`def038SettledTemplates` 6 (`P109-S6-DEF038`, possibly ISL-018's AC7, unrecorded), `d54ThemePresetIdentity` 1
+(`P109-S6-D54`), `tpl007Template` 1 (`P109-S6-TPL007`, a peer has its files open). Editor: §8 s6 gates row below.
+
+**The editor, the same session (one launch, a throwaway profile, a copy of `kit-app`; torn down after).**
+- **`kitAgreement` re-recorded** (`P109-S5-KITRECORDING` fixed): see the bug file for the diff against August. 9/9.
+- 🔴 **The re-record exposed a product miss:** `ContextBuilder.KIT_BASE_INPUT_PORTS`, the shared inputs the kit
+  handout leaves out of a kit author's port list, had never learned s5's two scroll ports; the stale recording hid it.
+  Its own comment predicted this ("it cannot catch the runtime *adding* one"). Now seven names; CN-008 green.
+- **Live:** `setParameter('dataAttributes', 'data-testid,onclick')` on the copy's Group and its kit Badge → each
+  node's `getPorts()` lists `data-testid` (string) and no `onclick`. In the editor's preview, the Group's element
+  carried `data-testid`, and 🔴 **the kit Badge's did not**. React attaches the wrapper's ref *after* the wrapper's
+  `componentDidMount`, so for a component that reports no root, the sync found no element and nothing ran again. Now
+  the wrapper's ref callback runs the sync (and a held Scroll Into View, which waited the same way). After that:
+  the Badge's own element carries `data-testid="app_badge-name"`, though its component never renders `props.dom`.
+  Spec row + mutant (the ref-path sync removed → red).
+- After that fix: both bundles rebuilt from the final source; redeployed; the drive re-run at 1024 and 390 (4/4
+  each, ten names, 0 classes, 0 console errors) and the control (4/4 unmoved). viewer-react full again: **131 suites,
+  1,692 tests, 0 failed**.
+
+**Editor gates (2026-10-03):** `test:main` **568 suites, 8,835 tests, 1 failed**: `exp-013/exportBadge`, red in s5
+too, reads the peer's uncommitted export ledger. Run before the editor-session fixes; the suites those touched were
+re-run after (CN-006b, CN-008, CN-014, SB-017, cn-003: 68 + 22 green; isl-009 7/7).

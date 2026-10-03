@@ -167,8 +167,16 @@ function seedRunFor(typeName, metadata, seedIndex) {
   };
 
   const inputs = metadata.inputs || {};
+  // P109 ISL-009 — a list a `namedports/derived` rule reads (every visual node's Data Attributes) is
+  // not a setup input: the editor mints its ports from the rule, and `withDerivedRules` writes their
+  // pattern. Seeding it here drove Page's setup as if it read the list, and turned Page's true
+  // "ports follow the component the page renders" into a false `known: true`.
+  const derivedLists = new Set(
+    (metadata.dynamicports || []).filter((d) => d && d.name === 'namedports/derived').map((d) => d.parameter)
+  );
   const listInputs = Object.keys(inputs)
     .sort()
+    .filter((name) => !derivedLists.has(name))
     .filter((name) => {
       const type = inputs[name].type;
       const typeName2 = typeof type === 'string' ? type : type && type.name;

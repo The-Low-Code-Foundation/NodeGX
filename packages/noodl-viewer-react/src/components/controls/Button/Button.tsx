@@ -3,7 +3,7 @@ import React from 'react';
 import Layout from '../../../layout';
 import Utils from '../../../nodes/controls/utils';
 import { Noodl, Slot } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
 
 export interface ButtonProps extends Noodl.ReactProps {
@@ -139,6 +139,7 @@ export function Button(props: ButtonProps) {
   return (
     <button
       ref={noodlRootRef(props.noodlNode)}
+      {...dataAttributeProps(props.dom)}
       className={className}
       disabled={!props.enabled}
       {...events}

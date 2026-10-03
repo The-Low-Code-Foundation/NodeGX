@@ -3,5 +3,6 @@
   "summary": "Legacy radio-button visual, hidden from the node picker — superseded by net.noodl.controls.radiobutton.",
   "description": "The original Radio Button visual, kept only so old projects load. The Radio Button control (net.noodl.controls.radiobutton), used inside a Radio Button Group, supersedes it with group value handling, visual states and accessibility.",
   "whenToUse": "Do not use in new graphs — use net.noodl.controls.radiobutton instead.",
+  "runtimeBehavior": "Its only dynamic ports are its Data Attributes list: each data-* name listed in `dataAttributes` becomes a string input of that name, written on the element (declared-port-groups). Every other port is static.",
   "relatedNodes": ["net.noodl.controls.radiobutton"]
 }

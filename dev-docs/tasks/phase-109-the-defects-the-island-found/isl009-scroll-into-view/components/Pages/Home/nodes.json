@@ -12,8 +12,9 @@
       ],
       "parameters": {
         "title": "Home",
-        "cssClassName": "isl009-page",
-        "scrollIntoViewAlign": "start"
+        "scrollIntoViewAlign": "start",
+        "dataAttributes": "data-testid",
+        "data-testid": "page"
       }
     },
     {
@@ -58,7 +59,6 @@
         "bPageT"
       ],
       "parameters": {
-        "cssClassName": "isl009-bPage",
         "backgroundColor": "#dde",
         "paddingLeft": {
           "value": 8,
@@ -68,7 +68,9 @@
           "value": 8,
           "unit": "px"
         },
-        "sizeMode": "contentSize"
+        "sizeMode": "contentSize",
+        "dataAttributes": "data-testid",
+        "data-testid": "bPage"
       }
     },
     {
@@ -88,7 +90,6 @@
         "bNativeT"
       ],
       "parameters": {
-        "cssClassName": "isl009-bNative",
         "backgroundColor": "#dde",
         "paddingLeft": {
           "value": 8,
@@ -98,7 +99,9 @@
           "value": 8,
           "unit": "px"
         },
-        "sizeMode": "contentSize"
+        "sizeMode": "contentSize",
+        "dataAttributes": "data-testid",
+        "data-testid": "bNative"
       }
     },
     {
@@ -118,7 +121,6 @@
         "bIscrollT"
       ],
       "parameters": {
-        "cssClassName": "isl009-bIscroll",
         "backgroundColor": "#dde",
         "paddingLeft": {
           "value": 8,
@@ -128,7 +130,9 @@
           "value": 8,
           "unit": "px"
         },
-        "sizeMode": "contentSize"
+        "sizeMode": "contentSize",
+        "dataAttributes": "data-testid",
+        "data-testid": "bIscroll"
       }
     },
     {
@@ -148,7 +152,6 @@
         "bTopT"
       ],
       "parameters": {
-        "cssClassName": "isl009-bTop",
         "backgroundColor": "#dde",
         "paddingLeft": {
           "value": 8,
@@ -158,7 +161,9 @@
           "value": 8,
           "unit": "px"
         },
-        "sizeMode": "contentSize"
+        "sizeMode": "contentSize",
+        "dataAttributes": "data-testid",
+        "data-testid": "bTop"
       }
     },
     {
@@ -192,13 +197,14 @@
         "pageCardT"
       ],
       "parameters": {
-        "cssClassName": "isl009-pageCard",
         "sizeMode": "explicit",
         "height": {
           "value": 120,
           "unit": "px"
         },
-        "backgroundColor": "#fc9"
+        "backgroundColor": "#fc9",
+        "dataAttributes": "data-testid",
+        "data-testid": "pageCard"
       }
     },
     {
@@ -219,7 +225,6 @@
         "nativeCard"
       ],
       "parameters": {
-        "cssClassName": "isl009-nativeBox",
         "sizeMode": "explicit",
         "height": {
           "value": 200,
@@ -227,7 +232,9 @@
         },
         "scrollEnabled": true,
         "nativeScroll": true,
-        "clip": true
+        "clip": true,
+        "dataAttributes": "data-testid",
+        "data-testid": "nativeBox"
       }
     },
     {
@@ -253,13 +260,14 @@
         "nativeCardT"
       ],
       "parameters": {
-        "cssClassName": "isl009-nativeCard",
         "sizeMode": "explicit",
         "height": {
           "value": 120,
           "unit": "px"
         },
-        "backgroundColor": "#9cf"
+        "backgroundColor": "#9cf",
+        "dataAttributes": "data-testid",
+        "data-testid": "nativeCard"
       }
     },
     {
@@ -280,7 +288,6 @@
         "iscrollCard"
       ],
       "parameters": {
-        "cssClassName": "isl009-iscrollBox",
         "sizeMode": "explicit",
         "height": {
           "value": 200,
@@ -288,7 +295,9 @@
         },
         "scrollEnabled": true,
         "nativeScroll": false,
-        "clip": true
+        "clip": true,
+        "dataAttributes": "data-testid",
+        "data-testid": "iscrollBox"
       }
     },
     {
@@ -314,13 +323,13 @@
         "iscrollCardT"
       ],
       "parameters": {
-        "cssClassName": "isl009-iscrollCard",
         "sizeMode": "explicit",
         "height": {
           "value": 120,
           "unit": "px"
         },
-        "backgroundColor": "#9f9"
+        "backgroundColor": "#9f9",
+        "dataAttributes": "data-testid"
       }
     },
     {
@@ -343,6 +352,14 @@
           "unit": "px"
         },
         "backgroundColor": "#f4f4f4"
+      }
+    },
+    {
+      "id": "iscrollCardName",
+      "type": "Expression",
+      "label": "iScroll card's test name",
+      "parameters": {
+        "expression": "'iscrollCard'"
       }
     }
   ],

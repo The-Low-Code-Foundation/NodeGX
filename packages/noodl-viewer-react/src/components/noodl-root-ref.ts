@@ -25,3 +25,19 @@ export function noodlRootRef(noodlNode: NoodlNodeLike | undefined): ((el: Elemen
   }
   return ref;
 }
+
+/**
+ * P109 ISL-009 — the `data-*` attributes a node's Data Attributes list put on `props.dom`, for the
+ * element `noodlRootRef` reports. Only the `data-*` keys: a control that also uses `props.dom` for
+ * its inner input (the deprecated Text Input) keeps those on the input. Spread on the same element
+ * as the root ref, so a test that finds `[data-testid]` finds what Scroll Into View scrolls.
+ */
+export function dataAttributeProps(dom: Record<string, unknown> | undefined): Record<string, string> | undefined {
+  if (!dom) return undefined;
+  let out: Record<string, string> | undefined;
+  for (const key of Object.keys(dom)) {
+    if (!key.startsWith('data-')) continue;
+    (out || (out = {}))[key] = String(dom[key]);
+  }
+  return out;
+}

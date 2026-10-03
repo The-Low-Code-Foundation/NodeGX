@@ -115,8 +115,12 @@ describe('extraction', () => {
     // node that computes none — a pairing that occurs on no shipped type.
     // The `known: false` arm is still asserted, on a node that DOES declare
     // dynamic ports, in `nodegx-kit-catalog/tests/overlay.test.js`.
-    expect(badge?.dynamicPorts).toBeNull();
-    expect(badge?.parameterEncoding).toBeNull();
+    //
+    // P109 ISL-009 (2026-10-03): no longer `null`. Every visual node — a kit's included — declares
+    // its Data Attributes list, so Badge has a declared, enumerable dynamic half, and its encoding is
+    // known from the rule. The static-node `null` arm now needs a node with no element.
+    expect(badge?.dynamicPorts?.mechanisms).toEqual(['declared-port-groups']);
+    expect(badge?.parameterEncoding).toMatchObject({ known: true, seededBy: ['dataAttributes'] });
   });
 
   it('survives a throwing kit, names it, and keeps its neighbours', () => {

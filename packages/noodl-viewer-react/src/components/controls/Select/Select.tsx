@@ -5,7 +5,7 @@ import Layout from '../../../layout';
 import Utils from '../../../nodes/controls/utils';
 import type { StyleObject } from '../../../react-component-node';
 import { Noodl } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
 
 export interface SelectProps extends Noodl.ReactProps {
@@ -186,6 +186,7 @@ export function Select(props: SelectProps) {
   const inputWrapper = (
     <div
       ref={noodlRootRef(props.noodlNode)}
+      {...(props.useLabel ? undefined : dataAttributeProps(props.dom))}
       className="ndl-controls-pointer"
       style={inputWrapperStyle}
       noodl-style-tag="inputWrapper"
@@ -231,7 +232,7 @@ export function Select(props: SelectProps) {
     }
 
     return (
-      <div ref={noodlRootRef(props.noodlNode)} style={outerWrapperStyle}>
+      <div ref={noodlRootRef(props.noodlNode)} {...dataAttributeProps(props.dom)} style={outerWrapperStyle}>
         <label
           htmlFor={props.id}
           style={{

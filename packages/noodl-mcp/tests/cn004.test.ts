@@ -246,7 +246,10 @@ describe('item 4 — a kit whose ports are runtime-determined is not accused of 
     const panel = overlay.nodes.find((n) => n.typeName === 'dynports.kit.Panel');
     const feed = overlay.nodes.find((n) => n.typeName === 'dynports.kit.Feed');
     expect(panel?.dynamicPorts?.mechanisms).toEqual(['declared-port-groups']);
-    expect(feed?.dynamicPorts?.mechanisms).toEqual(['runtime-discovered']);
+    // P109 ISL-009 (2026-10-03): Feed is a visual kit node, so it now also declares the Data Attributes
+    // list — a declared, enumerable half beside its runtime channel port. Still runtime-discovered,
+    // which is what keeps `channelName` from being accused.
+    expect(feed?.dynamicPorts?.mechanisms).toEqual(['declared-port-groups', 'runtime-discovered']);
     // 🔴 The fact that makes the carve-out load-bearing rather than tidy: the
     // exporter keeps a channel port out of the static list, so nothing but the
     // mechanism can vouch for `channelName`.

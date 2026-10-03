@@ -5,6 +5,7 @@ import Layout from '../../layout';
 import NodeSharedPortDefinitions from '../../node-shared-port-definitions';
 import { createNodeFromReactComponent, type ReactNodeDefinition, type StyleObject } from '../../react-component-node';
 import type { Noodl } from '../../types';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import Utils from './utils';
 
 interface RangeProps extends Noodl.ReactProps {
@@ -129,6 +130,7 @@ function Range(props: RangeProps) {
   return (
     <input
       className={className}
+      {...dataAttributeProps(props.dom)}
       {...Utils.controlEvents(props)}
       type="range"
       {...tagProps}

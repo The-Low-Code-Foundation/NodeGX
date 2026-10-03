@@ -2,7 +2,7 @@ import React from 'react';
 
 import Layout from '../../../layout';
 import { Noodl } from '../../../types';
-import { noodlRootRef } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 import { IconGlyph } from './IconGlyph';
 
 export interface IconProps extends Noodl.ReactProps {
@@ -42,7 +42,7 @@ export function Icon(props: IconProps) {
   if (props.className) className = className + ' ' + props.className;
 
   return (
-    <div ref={noodlRootRef(props.noodlNode)} className={className} style={style}>
+    <div ref={noodlRootRef(props.noodlNode)} {...dataAttributeProps(props.dom)} className={className} style={style}>
       {_renderIcon()}
     </div>
   );

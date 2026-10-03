@@ -17,6 +17,11 @@
  * `undefined`: the wires and presses are identical, and nothing may move. Proves the instrument sees a press that
  * does nothing.
  *
+ * 🔴 Every element is selected by `[data-testid]`, never by class (ISL-009 ruling 1, "A data-* list"): the project
+ * carries no `cssClassName` at all, and the iScroll card's name arrives over a wire from an Expression, so a name a
+ * wire writes is graded in a browser too. The first build (s5) selected by class because a node could not carry a
+ * name; `CLASS_FREE` below fails the drive if any `isl009-` class comes back.
+ *
  * Usage: drive-isl009-scroll-into-view.js <deploy-dir> [--control] [--width 1024] [--height 768] [--shot prefix]
  * Exits 0 when every arm reads as expected for its mode, 1 when one does not or the drive could not run, 2 on usage.
  */
@@ -52,23 +57,25 @@ function controlCopy(dir) {
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 
 /** Whether a person can see the element: its centre is inside the viewport and the topmost hit there is inside it. */
-const SEEN = (cls) => `(() => {
-  const el = document.querySelector('.${cls}');
+const BY = (id) => `[data-testid="${id}"]`;
+
+const SEEN = (id) => `(() => {
+  const el = document.querySelector('${BY(id)}');
   if (!el) return { found: false };
   const r = el.getBoundingClientRect();
   const x = r.left + r.width / 2, y = r.top + r.height / 2;
   const inViewport = x >= 0 && y >= 0 && x < innerWidth && y < innerHeight;
   const hit = inViewport ? document.elementFromPoint(x, y) : null;
   return { found: true, seen: Boolean(hit && el.contains(hit)), top: Math.round(r.top), scrollY: Math.round(scrollY),
-    nativeScrollTop: Math.round((document.querySelector('.isl009-nativeBox') || {}).scrollTop || 0),
+    nativeScrollTop: Math.round((document.querySelector('${BY('nativeBox')}') || {}).scrollTop || 0),
     // iScroll moves its one scroller child with a transform, and the Group itself never scrolls natively (AC4).
-    iscrollTransform: (() => { const b = document.querySelector('.isl009-iscrollBox'); const c = b && b.children[0];
+    iscrollTransform: (() => { const b = document.querySelector('${BY('iscrollBox')}'); const c = b && b.children[0];
       return c ? getComputedStyle(c).transform : null; })(),
-    iscrollBoxScrollTop: Math.round((document.querySelector('.isl009-iscrollBox') || {}).scrollTop || 0) };
+    iscrollBoxScrollTop: Math.round((document.querySelector('${BY('iscrollBox')}') || {}).scrollTop || 0) };
 })()`;
 
-const CENTRE = (cls) => `(() => {
-  const el = document.querySelector('.${cls}');
+const CENTRE = (id) => `(() => {
+  const el = document.querySelector('${BY(id)}');
   if (!el) return null;
   const r = el.getBoundingClientRect();
   const x = r.left + r.width / 2, y = r.top + r.height / 2;
@@ -76,19 +83,19 @@ const CENTRE = (cls) => `(() => {
   return { x, y, reachable: Boolean(hit && el.contains(hit)) };
 })()`;
 
-async function press(client, evaluate, cls) {
-  const at = await evaluate(CENTRE(cls));
-  if (!at || !at.reachable) throw new Error(`the button .${cls} is not reachable: ${JSON.stringify(at)}`);
+async function press(client, evaluate, id) {
+  const at = await evaluate(CENTRE(id));
+  if (!at || !at.reachable) throw new Error(`the button ${BY(id)} is not reachable: ${JSON.stringify(at)}`);
   for (const type of ['mousePressed', 'mouseReleased']) {
     await client.send('Input.dispatchMouseEvent', { type, x: at.x, y: at.y, button: 'left', clickCount: 1 });
   }
 }
 
 const ARMS = [
-  { name: 'page card (body scroll)', button: 'isl009-bPage', target: 'isl009-pageCard' },
-  { name: 'card in a native-scroll Group', button: 'isl009-bNative', target: 'isl009-nativeCard' },
-  { name: 'card in an iScroll Group (Native Scroll off)', button: 'isl009-bIscroll', target: 'isl009-iscrollCard' },
-  { name: 'the Page itself, Scroll Align Start', scrollFirst: 2500, button: 'isl009-bTop', target: 'isl009-bTop' }
+  { name: 'page card (body scroll)', button: 'bPage', target: 'pageCard' },
+  { name: 'card in a native-scroll Group', button: 'bNative', target: 'nativeCard' },
+  { name: 'card in an iScroll Group (Native Scroll off; its name wired)', button: 'bIscroll', target: 'iscrollCard' },
+  { name: 'the Page itself, Scroll Align Start', scrollFirst: 2500, button: 'bTop', target: 'bTop' }
 ];
 
 const DIR = CONTROL ? controlCopy(SRC) : SRC;
@@ -108,20 +115,28 @@ withDeployedSite({ dir: DIR }, async ({ client, evaluate, navigate, setViewport,
     else {
       // The "to top" button scrolled away with the page; press it where the page put it is not possible, so press
       // it through the DOM — what is graded is the scroll, not the press.
-      await evaluate(`document.querySelector('.${arm.button}').click()`);
+      await evaluate(`document.querySelector('${BY(arm.button)}').click()`);
     }
     await wait(1500);
     const after = await evaluate(SEEN(arm.target));
     if (SHOT) await screenshot(`${SHOT}-${results.length}.png`);
     results.push({ arm: arm.name, before, after });
   }
-  return { dir: SRC, mode: CONTROL ? 'control (the call replaced by undefined)' : 'as deployed', viewport: `${WIDTH}x${HEIGHT}`, results, consoleErrors: consoleErrors.slice(0, 10) };
+  // What the page's names are: every data-testid, and any `isl009-` class (there must be none).
+  const names = await evaluate(`(() => ({
+    testids: [...document.querySelectorAll('[data-testid]')].map((e) => e.getAttribute('data-testid')).sort(),
+    isl009Classes: document.querySelectorAll('[class*="isl009-"]').length
+  }))()`);
+  return { dir: SRC, mode: CONTROL ? 'control (the call replaced by undefined)' : 'as deployed', viewport: `${WIDTH}x${HEIGHT}`, names, results, consoleErrors: consoleErrors.slice(0, 10) };
 })
   .then((result) => {
     console.log(JSON.stringify(result, null, 2));
-    const ok = result.results.every((r) =>
-      CONTROL ? r.before.seen === false && r.after.seen === false : r.before.seen === false && r.after.seen === true
-    );
+    const CLASS_FREE = result.names.isl009Classes === 0;
+    const ok =
+      CLASS_FREE &&
+      result.results.every((r) =>
+        CONTROL ? r.before.seen === false && r.after.seen === false : r.before.seen === false && r.after.seen === true
+      );
     if (CONTROL) fs.rmSync(DIR, { recursive: true, force: true });
     console.log(ok ? 'DRIVE OK' : 'DRIVE FAILED');
     process.exit(ok ? 0 : 1);

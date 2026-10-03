@@ -7,6 +7,7 @@ import { NodeGrapPort } from '@noodl-models/NodeGraphPort';
 import { replaceOrAppendPorts } from '@noodl-models/nodegraphmodel/portOverrides';
 import { NodeLibrary } from '@noodl-models/nodelibrary';
 import { BasicNodeType } from '@noodl-models/nodelibrary/BasicNodeType';
+import { derivedPortsForNode } from '@noodl-models/nodelibrary/dynamicPortRules';
 import { UnknownNodeType } from '@noodl-models/nodelibrary/UnknownNodeType';
 import { UndoActionGroup, UndoQueue } from '@noodl-models/undo-queue-model';
 import { WarningsModel } from '@noodl-models/warningsmodel';
@@ -517,6 +518,13 @@ export class NodeGraphNode extends Model {
       // if(instanceports) ports = ports.concat(instanceports);
       // Any user defined ports
       if (this.ports) ports = ports.concat(this.ports);
+
+      // P109 ISL-009 — ports the type's `namedports/derived` rules mint from this node's own
+      // parameters (a visual node's Data Attributes list). Derived here, on read, rather than
+      // pushed through `setDynamicPorts`, which replaces: Page Stack, Router and Text Input already
+      // have a writer there, and two writers erase each other.
+      const derived = derivedPortsForNode(type.dynamicports, this.parameters);
+      if (derived.length) ports = ports.concat(derived);
 
       // Dynamic instance ports on this instance. FB-026 — these *replace* a static port of the
       // same name and plug rather than appearing beside it; see `portOverrides.ts`.

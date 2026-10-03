@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect, useLayoutEffect, useCallback, isValidElement } from 'react';
 
 import { ForEachComponent } from '../../../nodes/std-library/data/foreach';
+import { dataAttributeProps } from '../../noodl-root-ref';
 import { Noodl, Slot } from '../../../types';
 
 export interface ColumnsProps extends Noodl.ReactProps {
@@ -602,6 +603,7 @@ export function Columns(props: ColumnsProps) {
     <div
       className={['columns-container', props.className].join(' ')}
       ref={rootRef}
+      {...dataAttributeProps((props as { dom?: Record<string, unknown> }).dom)}
       style={{
         // Deliberately not `visibility: hidden until measured`. That painted blank on first
         // render and, because a server render never gets a `ResizeObserver` callback, blank

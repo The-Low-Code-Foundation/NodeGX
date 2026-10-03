@@ -15,6 +15,9 @@
 // Type-only import of the generated catalog shape (no runtime cost).
 import type { NodeCatalog, CatalogNode, CatalogPort, Typecast } from '../../../../../noodl-types/src/node-catalog';
 import type { DeclaredPortGroup, ParameterBag } from './portConditions';
+// Import-free by construction (its header says why), the way `derivedPortTargets` reaches
+// `nameListParameter`: one reader of a derived-port rule, not a second copy here.
+import { derivedPortsForNode, refusedDerivedNames } from '../models/nodelibrary/dynamicPortRules';
 
 export type { NodeCatalog, CatalogNode, CatalogPort };
 
@@ -168,6 +171,30 @@ export class CatalogIndex {
    */
   declaredPortGroups(typeName: string): DeclaredPortGroup[] | undefined {
     return this.byType.get(typeName)?.dynamicPorts?.declaredPortGroups as DeclaredPortGroup[] | undefined;
+  }
+
+  /**
+   * P109 ISL-009 — the ports a node's `namedports/derived` rules mint from its own parameters.
+   *
+   * These are enumerable, which is the whole difference from a runtime-discovered port: the rule is
+   * in the catalog and the names are in the node's parameter. So a port rule asks this before it
+   * errors, instead of the type being marked runtime-dynamic and every unknown port on all 27
+   * visual types going unchecked.
+   */
+  derivedPortNames(typeName: string, plug: Plug, parameters: ParameterBag | null | undefined): string[] {
+    const groups = this.byType.get(typeName)?.dynamicPorts?.declaredPortGroups;
+    return derivedPortsForNode(groups, parameters ?? undefined)
+      .filter((p) => !p.plug || p.plug === plug)
+      .map((p) => p.name);
+  }
+
+  /** P109 ISL-009 — the names a node lists that its type's derived-port rule refuses. */
+  refusedDerivedNames(
+    typeName: string,
+    parameters: ParameterBag | null | undefined
+  ): Array<{ parameter: string; name: string; rule: string }> {
+    const groups = this.byType.get(typeName)?.dynamicPorts?.declaredPortGroups;
+    return refusedDerivedNames(groups, parameters ?? undefined);
   }
 
   /** A short human note describing why a port could not be checked. */

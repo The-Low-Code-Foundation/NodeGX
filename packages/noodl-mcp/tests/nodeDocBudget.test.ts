@@ -128,6 +128,14 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
     tokens(await callRawText(session, 'get_node_type', { type_names: types, detail }));
 
   /**
+   * 🔴 **Ratchet moved 8,200 → 8,350 by P109/ISL-009's second ruling, "A data-* list" (2026-10-03).**
+   * Every visual node gained one input, `dataAttributes` (a stringlist of `data-*` names; each listed
+   * name becomes a port of that name). A summary carries one line per port and no description, so it
+   * is that one line on the basket's seven visual types: **8,115 → 8,254** (+139), measured with this
+   * spec's harness before and after. Headroom kept near s5's 85: **96**.
+   *
+   * ---
+   *
    * 🔴 **Ratchet moved 8,000 → 8,200 by P109/ISL-009 (2026-10-02).** Every visual node gained
    * `Scroll Into View` and `Scroll Align` (Richard's ruling, "Signal on every node"). A summary
    * line carries no description, so nothing could be trimmed: it is the two port lines on the
@@ -140,9 +148,9 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
    * 3,940 → 4,223, `textinput` 14,520 → 14,765). ⚠️ That leaves 59 tokens, and `HEAD`'s `Group`
    * had already grown 279 past P99's recorded 15,561 — not attributed here.
    */
-  it('keeps the 8-type storefront basket under 8,200 tokens at summary detail', async () => {
+  it('keeps the 8-type storefront basket under 8,350 tokens at summary detail', async () => {
     // Was 30,815 at full detail — more than all 89 tool schemas combined.
-    expect(await cost(STOREFRONT_TYPES, 'summary')).toBeLessThan(8_200);
+    expect(await cost(STOREFRONT_TYPES, 'summary')).toBeLessThan(8_350);
   });
 
   it('keeps any single summary response under 3,000 tokens', async () => {
@@ -155,6 +163,15 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
   });
 
   /**
+   * 🔴 **Ratchet moved 16,200 → 16,350 by P109/ISL-009, "A data-* list" (2026-10-03).** `Group`, the
+   * worst single, **16,141 → 16,261** (+120): the `dataAttributes` port entry every visual type now
+   * carries (+67, its descriptions already cut to one line each and still unshown here, because port
+   * descriptions come from enrichment) and Group's one enrichment line telling an agent that each
+   * listed name becomes a port of that exact name (+53). That line is the only place `get_node_type`
+   * says so; dropping it to stay under 16,200 would ship the port undocumented. Headroom: **89**.
+   *
+   * ---
+   *
    * 🔴 **Ratchet moved 14,300 → 16,200 by P99/HLT-017 (2026-09-22). Two growths, attributed apart.**
    * Measured with this spec's own harness (`get_node_type`, full detail, the wire text ÷ 4) against
    * the enriched catalog at `HEAD` `447c33fef` and against the working tree:
@@ -234,11 +251,11 @@ describe('AWP-005 — the response budget (a ratchet: move the number, say why)'
    * 12,500), 601 now (12,899 of 13,500). This ceiling exists to catch growth
    * nobody noticed; this growth was measured before it was taken.
    */
-  it('keeps any single full-detail response under 16,200 tokens', async () => {
+  it('keeps any single full-detail response under 16,350 tokens', async () => {
     const over: Array<{ name: string; cost: number }> = [];
     for (const name of allTypeNames()) {
       const c = await cost([name], 'full');
-      if (c >= 16_200) over.push({ name, cost: c });
+      if (c >= 16_350) over.push({ name, cost: c });
     }
     expect(over).toEqual([]);
   });

@@ -26,6 +26,12 @@
       "fromProperty": "onClick",
       "toId": "page",
       "toProperty": "scrollIntoView"
+    },
+    {
+      "fromId": "iscrollCardName",
+      "fromProperty": "result",
+      "toId": "iscrollCard",
+      "toProperty": "data-testid"
     }
   ]
 }

@@ -27,6 +27,8 @@ function readSnapCoordinate(value: unknown): number | undefined {
 
 const DragNode: ReactNodeDefinition = {
   name: 'Drag',
+  // P109 ISL-009 — Drag has no element of its own; it moves its child, which carries its own list.
+  noDataAttributes: true,
   docs: 'https://docs.noodl.net/nodes/utilities/drag',
   allowChildren: true,
   noodlNodeAsProp: true,

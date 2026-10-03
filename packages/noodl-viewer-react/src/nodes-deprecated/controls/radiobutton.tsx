@@ -6,6 +6,7 @@ import Layout from '../../layout';
 import NodeSharedPortDefinitions from '../../node-shared-port-definitions';
 import { createNodeFromReactComponent, type ReactNodeDefinition, type StyleObject } from '../../react-component-node';
 import type { Noodl } from '../../types';
+import { dataAttributeProps } from '../../components/noodl-root-ref';
 import Utils from './utils';
 
 interface RadioButtonProps extends Noodl.ReactProps {
@@ -65,6 +66,7 @@ function RadioButton(props: RadioButtonProps) {
   return (
     <input
       className={className}
+      {...dataAttributeProps(props.dom)}
       {...Utils.controlEvents(props)}
       type="radio"
       name={radioButtonGroup ? radioButtonGroup.name : undefined}

@@ -15,7 +15,7 @@ import type {
 
 import type { TSFixme } from '../../../typings/global';
 import ASyncQueue from '../../async-queue';
-import { noodlRootRef } from '../../components/noodl-root-ref';
+import { noodlRootRef, dataAttributeProps } from '../../components/noodl-root-ref';
 import guid from '../../guid';
 import { createNodeFromReactComponent, ReactNodeInstance } from '../../react-component-node';
 import { Noodl, Slot } from '../../types';
@@ -41,7 +41,7 @@ function PageStackReactComponent(props: PageStackReactComponentProps) {
   }, []);
 
   return (
-    <div ref={noodlRootRef((props as TSFixme).noodlNode)} style={style}>
+    <div ref={noodlRootRef((props as TSFixme).noodlNode)} {...dataAttributeProps((props as TSFixme).dom)} style={style}>
       {children}
     </div>
   );
