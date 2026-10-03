@@ -1,6 +1,6 @@
 # ISL-003 — Two lists that reuse row ids keep their own rows, or the author is told they share them
 
-**Status: 🟡 AC1 red recorded (s9, 2026-10-03); ruling 1 asked — scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F03 ·
+**Status: 🟢 ruled and built s9 (2026-10-03): "Each list keeps its rows" — AC1 ✅, AC2 ✅, AC4 ✅ (census), AC6 ✅; ⬜ AC3 (doctrine), ⬜ AC5 (browser). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F03 ·
 [P106 IG-006](../phase-106-the-island-grows/IG-006-OLIVE-READS.md) §7, deviation 10 (lines 166-167) · the template's
 prefixes at `packages/noodl-mcp/tests/cg003Scripts.ts:330` and `:1250-1252` · **Side:** product (runtime: `Model`,
 `Collection`, the For Each row; doctrine)
@@ -132,3 +132,73 @@ test spelling its ids with its own suffix (the record table outlives a test).
 well as the Component Inputs node, or the instance has no inputs and both arms read `undefined` (a known-firing arm
 caught it, not the defect arm).
 
+**The export already keeps each list's rows (§4's "record what the exported app does"). *Read from the emitter and its
+specs, not run.*** A Repeater over plain data exports as `{DATA.map((item) => (<Row text={item.text} key={item.id} />))}`
+(`nodegx-export/tests/static-data.test.ts:87-93`; the emitter at `src/emit/component.ts` `rowAttrs`, props read straight
+off the item). There is no app-wide record table in the exported app, so two lists with ids `l0` each show their own
+text there. **So the editor/deployed runtime and the exported React app disagree today**, and ruling (b)/(c) keeps that
+disagreement while (a) removes it for plain rows.
+
+**Census before the ruling (what ruling (a) would break), 2026-10-03.** A scratch parser over both project formats
+(the split `nodegx.project.json` + `components/…` and the single `project.json`), tracing wires through Component
+Inputs/Outputs and instances. Shipped: 14 `templates/` (159 Repeaters), 18 lessons, 46 prefabs (31 Repeaters), 35
+modules (0), agent-chat; plus 109 fixtures, counted apart. `idSource` defaults to `'explicit'` (`modelnode2.ts:211`).
+
+| what | shipped | how measured |
+|---|---|---|
+| a row component's Object/Record node looks the row up by a wired `Id`/`id` | **0** | traced |
+| …by the row's id through another Object node | 5 (`filters`, `form`, `multi-select` prefabs) — rows are **records** (`Noodl.Object.create`), untouched by (a) | traced |
+| a Function in a template calls `Noodl.Object.get(`/`Noodl.Objects[`/`Noodl.Model.get(` | **0** (re-grepped by me over `templates/**/nodes.json`) | grep |
+| a row's click id (`itemActionItemId`) reaches an Object node | **0** — 21 wires, all to a Function, a Variable or a page link (re-read by me) | traced |
+| **plain rows looked up by id from outside the list** | **1: the `table` prefab** — "Extract Headers" builds plain `RowItems` with `id: Component.Object.id + '-row-' + i.id`, and a /Table Function reads `Noodl.Object.get(Inputs.RowId).ItemId` (re-read by me in `library/prefabs/table/project/project.json`) | traced + read |
+| one literal id as a plain row in two Repeaters with different fields | **0** (closest: rocket-school's Curriculum / Teach cards share 4 ids, neither reaches a For Each) | traced |
+| ids prefixed by hand in shipped Functions (the workaround) | 22 places (todo `'t:'+…`, rocket-school `'r'+…`, bot-garden `padkey-`, dbt `'requires-'+…`) | regex |
+| Repeater feeds | 155 Function output, 17 a parent row's field, 9 Component Object, 6 DbCollection, 3 Static Data, 3 other | traced |
+
+Not measurable statically: ids a Function makes at runtime, and what an author hands a prefab. So (a)'s measured
+shipped cost is **one prefab Function**, against the scoping's worry that it "silently breaks the id-lookup idioms".
+
+**🔒 Ruling 1, asked 2026-10-03 in plain words** (verbatim question: *"Olive's Island had five lesson cards, each with its
+own little list of lines numbered l0, l1, l2. All five cards showed the same card's lines. … The exported React app does
+NOT do this … What should happen when two lists use the same row ids?"*; options: each list keeps its rows / keep
+shared, warn / keep shared, document it) → **"Each list keeps its rows"** (the recommendation; its cost was quoted as
+"one Function in the Table prefab … would need a one-line change"). Ruling 2 (how loud) falls away.
+
+**Built in the form that changes least** (`noodl-runtime/src/collection.ts` `keptApart` / `plainRowRecord`, opted in by
+`Collection.keepPlainRowsApart` from `foreach.tsx`'s private collection only):
+- a plain row whose id no other **live** list holds → the app-wide record, exactly as before, and this list owns it;
+- a plain row whose id another live list holds → this list's own record (`Model.Scope`: same id, its own fields);
+- an id this list already keeps apart stays apart (the diff keys by id; a list must never swap which record an id means);
+- the F50 identity cache re-checks on a hit, so the same object re-sent after another list took the id is kept apart;
+- records handed in (query, Array node, Create New Object) are untouched; an Array node's collection is not opted in.
+
+**Why not the pure form** (every Repeater gets its own records): the census can count only shipped projects, and a row
+component finding its row with an Object node by its `Id` is the old Noodl idiom an imported project carries. In this
+form a single list behaves as before, so that idiom, `Noodl.Object.get(rowId)` and **the `table` prefab keep working
+with no change** (the quoted cost drops to zero). The cost moved instead: a lookup by id finds the **first** list's
+row (load order), and two Repeaters fed the same plain objects no longer share edits. Neither was seen in the census.
+
+**AC2 ✅** — [`isl-003-two-lists-same-row-ids.test.ts`](../../../packages/noodl-viewer-react/tests/corpus/isl-003-two-lists-same-row-ids.test.ts) 8/8:
+
+| arm | reads |
+|---|---|
+| known-firing: distinct ids | A `['a0','a1']`, B `['b0','b1']` |
+| **ids `l0,l1` in both** (HEAD: A read `['b0','b1']`) | **A `['a0','a1']`, B `['b0','b1']`**; B's rows still carry ids `l0,l1` |
+| an Object node "From repeater" in each row | its own list's text |
+| a lookup by id (`Model.get('l0')`) | the first list's row, `a0` |
+| both lists re-set with new objects, same ids | A `['A0','A1']`, B `['B0','B1']`, B still 2 rows |
+| A emptied, then B binds `l0` | B owns the app-wide record (`Model.get` → `b0`) |
+| two `Collection.create` (Array node) with one id | still one shared record (unchanged) |
+| warnings | none on A/B, beside `items-not-a-collection` on the third |
+
+Sabotage: drop the opt-in in `foreach.tsx` → **4 red** (the four that grade the fix), 4 green; make `keptApart` ignore
+`contains` → the "A emptied" arm red, alone. Neighbours: the viewer's Repeater corpus (F50, ISL-001, NDA-001/012/013/015,
+OBS-003, ERG-001) 81/81; runtime collection/model/GAM-007/ISL-005 85 green (6 skipped as before); node-spec
+`graph.test.ts` **87/87** (NSP-012's S1/S2 shared-object scenarios among them). `dist-types` regenerated
+(`npm run build:types` in `noodl-runtime`: the viewer type-checks against it, not the source).
+
+**AC6 ✅ (read):** with this rule, `<lesson>:l<i>` and `help:<block>` (rows in different lists) and `<cardId>|<block>`
+are unnecessary; `padkey-<op>` (one list) never was. None changed here; the "P105 D57" comment is P108's (IW-010
+rebuilds the island).
+
+**Export:** now agrees for the colliding case (each list its own rows, §8 above); it never had app-wide rows.

@@ -9,10 +9,12 @@
  * the first list's records, and the first list's rows (bound to `model.on('change')`) re-render
  * with the second list's values.
  *
- * AC1 is the reading at HEAD, before any change: RED for the person sentence ("each list shows its
- * own rows"), with distinct ids beside it as the known-firing arm, and a second arm that no
- * diagnostic says anything about the shared id, beside a known-firing `repeater/items-not-a-collection`
- * on a third Repeater in the same graph.
+ * AC1 was read at HEAD `23bb0a073` before any change (ISL-003 §8 s9): ids `l0,l1` in both lists read `['b0','b1']`
+ * in A, and nothing said so. 🔒 Ruled 2026-10-03 "Each list keeps its rows", built in the form that changes least
+ * (`collection.ts` `plainRowRecord`): the first list keeps the app-wide records (a lookup by id still finds them),
+ * and a list reusing an id another live list holds keeps its own. An Array node's collection is not opted in.
+ *
+ * Sabotage: drop `Collection.keepPlainRowsApart` from `foreach.tsx` and the defect arm reads `['b0','b1']` again.
  *
  * 🔴 Traps (task §7): both lists must be alive at once, and their fields must DIFFER — equal fields
  * pass at HEAD whatever the code does. `Model`'s table outlives a test, so every test spells its
@@ -26,7 +28,10 @@ import type { NodeInstance, NodeModule } from '@noodl/types';
 import { createCorpusGraph, type CorpusGraph } from '../../../noodl-runtime/test/corpus/graph-harness';
 
 import NoodlRuntime from '@noodl/runtime';
+import Collection = require('@noodl/runtime/src/collection');
+import Model = require('@noodl/runtime/src/model');
 import ComponentInputs = require('@noodl/runtime/src/nodes/componentinputs');
+import ObjectNodeModule = require('@noodl/runtime/src/nodes/std-library/data/modelnode2');
 
 import ForEachModule from '../../src/nodes/std-library/data/foreach';
 
@@ -79,10 +84,21 @@ const LineTextModule: NodeModule = {
 type ItemNode = NodeInstance & { nodeScope: { getNodesWithIdRecursive(id: string): NodeInstance[] } };
 type RepeaterInternals = { _internal: { itemNodes: ItemNode[] } };
 
+function rows(graph: CorpusGraph, repeaterId: string): ItemNode[] {
+  return (graph.node(repeaterId) as unknown as RepeaterInternals)._internal.itemNodes;
+}
+
 /** The text each row of one Repeater shows, in row order. */
 function rowTexts(graph: CorpusGraph, repeaterId: string): unknown[] {
-  const repeater = graph.node(repeaterId) as unknown as RepeaterInternals;
-  return repeater._internal.itemNodes.map((item) => item.nodeScope.getNodesWithIdRecursive('line-text')[0]._internal.text);
+  return rows(graph, repeaterId).map((item) => item.nodeScope.getNodesWithIdRecursive('line-text')[0]._internal.text);
+}
+
+/** What an Object node set to "From repeater" in each row reads. */
+function fromRepeaterTexts(graph: CorpusGraph, repeaterId: string): unknown[] {
+  return rows(graph, repeaterId).map((item) => {
+    const object = item.nodeScope.getNodesWithIdRecursive('line-object')[0] as NodeInstance & { _internal: { model?: { get(k: string): unknown } } };
+    return object._internal.model?.get('text');
+  });
 }
 
 function warningsFor(graph: CorpusGraph, nodeId: string): Array<{ key: string; message: string }> {
@@ -93,7 +109,7 @@ function warningsFor(graph: CorpusGraph, nodeId: string): Array<{ key: string; m
 async function twoListsGraph(): Promise<CorpusGraph> {
   const repeater = (id: string) => ({ id, type: 'For Each', parameters: { template: '/Line', templateType: 'explicit' } });
   return createCorpusGraph({
-    modules: [ForEachModule, ContainerModule, LineTextModule, ComponentInputs],
+    modules: [ForEachModule, ContainerModule, LineTextModule, ComponentInputs, ObjectNodeModule as unknown as NodeModule],
     rootComponent: '/root',
     data: {
       components: [
@@ -111,7 +127,8 @@ async function twoListsGraph(): Promise<CorpusGraph> {
           ports: [{ name: 'text', plug: 'input', type: 'string' }],
           nodes: [
             { id: 'line-in', type: 'Component Inputs', ports: [{ name: 'text', plug: 'output', type: 'string' }] },
-            { id: 'line-text', type: 'corpus.LineText' }
+            { id: 'line-text', type: 'corpus.LineText' },
+            { id: 'line-object', type: 'Model2', parameters: { idSource: 'foreach' } }
           ],
           connections: [{ sourceId: 'line-in', sourcePort: 'text', targetId: 'line-text', targetPort: 'text' }]
         }
@@ -122,17 +139,19 @@ async function twoListsGraph(): Promise<CorpusGraph> {
 
 let run = 0;
 
+const plainRows = (ids: string[], prefix: string) => ids.map((id, i) => ({ id, text: `${prefix}${i}` }));
+
 /** Binds both lists (both stay mounted), plus a number on the third Repeater, and settles. */
 async function bind(aIds: string[], bIds: string[]) {
   const graph = await twoListsGraph();
-  graph.node('list-a').setInputValue('items', aIds.map((id, i) => ({ id, text: `a${i}` })));
-  graph.node('list-b').setInputValue('items', bIds.map((id, i) => ({ id, text: `b${i}` })));
+  graph.node('list-a').setInputValue('items', plainRows(aIds, 'a'));
+  graph.node('list-b').setInputValue('items', plainRows(bIds, 'b'));
   graph.node('list-c').setInputValue('items', 42);
   await graph.settle(8);
   return graph;
 }
 
-describe('ISL-003 AC1: two lists whose rows reuse ids, both alive', () => {
+describe('ISL-003: two lists whose rows reuse ids, both alive', () => {
   const savedNoodlRuntimeInstance = (NoodlRuntime as unknown as { instance?: unknown }).instance;
 
   beforeAll(() => {
@@ -155,20 +174,69 @@ describe('ISL-003 AC1: two lists whose rows reuse ids, both alive', () => {
     expect(rowTexts(graph, 'list-b')).toEqual(['b0', 'b1']);
   });
 
-  test('RED at HEAD: the same ids `l0`, `l1` — list A shows list B\'s rows', async () => {
+  test('AC2: the same ids `l0`, `l1` — each list shows its own rows (HEAD: A read B\'s)', async () => {
     const graph = await bind([`l0-${run}`, `l1-${run}`], [`l0-${run}`, `l1-${run}`]);
 
-    // The person sentence says ['a0', 'a1']. HEAD reads B's values: the last list written wins.
-    expect(rowTexts(graph, 'list-a')).toEqual(['b0', 'b1']);
+    expect(rowTexts(graph, 'list-a')).toEqual(['a0', 'a1']);
     expect(rowTexts(graph, 'list-b')).toEqual(['b0', 'b1']);
+    // The row still carries its own id: a row's `Id` and the Repeater's item id are unchanged.
+    expect(rows(graph, 'list-b').map((r) => (r as unknown as { _forEachModel: { getId(): string } })._forEachModel.getId())).toEqual([`l0-${run}`, `l1-${run}`]);
   });
 
-  test('RED at HEAD: nothing says so — beside a known-firing Items diagnostic in the same graph', async () => {
+  test('AC2: an Object node set to "From repeater" reads its own list\'s row', async () => {
     const graph = await bind([`l0-${run}`, `l1-${run}`], [`l0-${run}`, `l1-${run}`]);
 
-    // Known-firing: the third Repeater was handed a number, and the diagnostic channel carries it.
+    expect(fromRepeaterTexts(graph, 'list-a')).toEqual(['a0', 'a1']);
+    expect(fromRepeaterTexts(graph, 'list-b')).toEqual(['b0', 'b1']);
+  });
+
+  test('the first list keeps the app-wide records: a lookup by id still finds its rows', async () => {
+    const graph = await bind([`l0-${run}`, `l1-${run}`], [`l0-${run}`, `l1-${run}`]);
+    void graph;
+
+    expect(Model.get(`l0-${run}`).get('text')).toBe('a0');
+    expect(Model.get(`l1-${run}`).get('text')).toBe('a1');
+  });
+
+  test('a list given new rows with the same ids keeps them apart, and the other list does not move', async () => {
+    const graph = await bind([`l0-${run}`, `l1-${run}`], [`l0-${run}`, `l1-${run}`]);
+
+    graph.node('list-b').setInputValue('items', plainRows([`l0-${run}`, `l1-${run}`], 'B'));
+    await graph.settle(8);
+    graph.node('list-a').setInputValue('items', plainRows([`l0-${run}`, `l1-${run}`], 'A'));
+    await graph.settle(8);
+
+    expect(rowTexts(graph, 'list-a')).toEqual(['A0', 'A1']);
+    expect(rowTexts(graph, 'list-b')).toEqual(['B0', 'B1']);
+    expect(rows(graph, 'list-b')).toHaveLength(2);
+  });
+
+  test('a list that dropped its rows no longer claims their ids', async () => {
+    const graph = await twoListsGraph();
+    graph.node('list-a').setInputValue('items', plainRows([`l0-${run}`], 'a'));
+    await graph.settle(8);
+    graph.node('list-a').setInputValue('items', []);
+    await graph.settle(8);
+    graph.node('list-b').setInputValue('items', plainRows([`l0-${run}`], 'b'));
+    await graph.settle(8);
+
+    // B now holds the app-wide record, as a single list always did.
+    expect(rowTexts(graph, 'list-b')).toEqual(['b0']);
+    expect(Model.get(`l0-${run}`).get('text')).toBe('b0');
+  });
+
+  test('unchanged: an Array node\'s collection (not a Repeater\'s) still shares rows by id', () => {
+    const one = Collection.create(plainRows([`s0-${run}`], 'one'));
+    const two = Collection.create(plainRows([`s0-${run}`], 'two'));
+
+    expect(one.get(0)).toBe(two.get(0));
+    expect(one.get(0).get('text')).toBe('two0');
+  });
+
+  test('nothing raises a warning on either list, beside a known-firing Items diagnostic in the same graph', async () => {
+    const graph = await bind([`l0-${run}`, `l1-${run}`], [`l0-${run}`, `l1-${run}`]);
+
     expect(warningsFor(graph, 'list-c').map((w) => w.key)).toContain('repeater/items-not-a-collection');
-    // Silent on both lists that share `l0`/`l1` with different text.
     expect(warningsFor(graph, 'list-a')).toEqual([]);
     expect(warningsFor(graph, 'list-b')).toEqual([]);
   });

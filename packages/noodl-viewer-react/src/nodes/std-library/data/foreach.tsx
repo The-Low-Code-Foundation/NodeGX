@@ -230,6 +230,8 @@ const ForEachDefinition: NodeDefinitionOptions = {
     this._internal.itemOutputSignals = {};
     this._internal.itemOutputs = {};
     this._internal.collection = Collection.get(); // We keep an internal collection so we don't have to refresh all content if the input items collection changes
+    // ISL-003: plain rows reusing an id another live list holds keep their own records (`collection.ts`).
+    Collection.keepPlainRowsApart(this._internal.collection);
     this._internal.queuedOperations = [];
     this._internal.pendingRefreshOutcomes = [];
     this._internal.mountedOperations = [];

@@ -45,7 +45,7 @@
  * @module noodl-runtime
  */
 
-import type { CollectionChangeEvent, CollectionLike, ModelLike } from '@noodl/types';
+import type { CollectionChangeEvent, CollectionLike, ModelLike, ModelScopeLike } from '@noodl/types';
 
 import Model = require('./model');
 import { raiseUnattributedRuntimeError } from './runtimeerror';
@@ -63,6 +63,11 @@ interface PatchedArray extends CollectionLike {
    * of the same array diffs as unchanged. F50; see `set`.
    */
   _plainItemModels?: WeakMap<object, ModelLike>;
+  /**
+   * ISL-003: this list's own records, for plain rows whose id another live list already holds.
+   * Present only on a collection opted in by {@link CollectionConstructor.keepPlainRowsApart}.
+   */
+  _plainRowScope?: ModelScopeLike;
 }
 
 interface CollectionConstructor {
@@ -84,6 +89,13 @@ interface CollectionConstructor {
   /** A plain `instanceof` test: null-safe, and narrower than "has the patched members". */
   instanceOf(collection: unknown): boolean;
   exists(name: string): boolean;
+
+  /**
+   * ISL-003 (🔒 2026-10-03, "Each list keeps its rows"): plain rows this collection converts keep
+   * their own records when another live list already holds their id. The Repeater opts its private
+   * collection in; an Array node's or a query's collection is not opted in and stays app-wide.
+   */
+  keepPlainRowsApart(collection: CollectionLike): void;
 
   /**
    * Live entry counts per tier. Diagnostic/test-facing: the DEBT-014 success criterion is
@@ -477,6 +489,44 @@ Object.defineProperty(Array.prototype, "id", {
     return this.getId();
   },
 });
+/**
+ * ISL-003 — which opted-in list converted a plain row into an app-wide record. Weak both ways: the
+ * record is app-wide and lives for ever, and must not keep a deleted Repeater's list alive.
+ */
+const plainRowOwner = new WeakMap<ModelLike, WeakRef<PatchedArray>>();
+
+/**
+ * ISL-003. The record a plain row with an explicit id becomes, in a list opted in by
+ * `keepPlainRowsApart`.
+ *
+ * A row's id is app-wide (`Model.create` → `Model.get(id)`), so two lists that number their rows
+ * `l0, l1…` wrote one set of records and both showed the last list's rows (Olive's Island: five
+ * lesson cards, one card's lines). Ruled 2026-10-03: each list keeps its rows. Done in the form
+ * that changes least, because a lookup by id (an Object node given the row's `Id`, `Noodl.Object.get`
+ * of it, the `table` prefab) is an idiom this cannot see in the projects it runs:
+ *
+ *  - an id no other live list holds → the app-wide record, exactly as before, and this list owns it;
+ *  - an id another live list holds → this list's own record (`Model.Scope`), same id, its own fields;
+ *  - an id this list already keeps apart → stays apart, so a list never swaps which record an id
+ *    means (the diff below keys by id and would hold both).
+ *
+ * "Holds" is read live (`contains`), so a list that dropped its rows no longer claims them.
+ */
+function keptApart(self: PatchedArray, id: string): boolean {
+  if (self._plainRowScope!.exists(id)) return true;
+  if (!Model.exists(id)) return false;
+  const shared = Model.get(id);
+  const owner = plainRowOwner.get(shared)?.deref();
+  return owner !== undefined && owner !== self && owner.contains(shared);
+}
+
+function plainRowRecord(self: PatchedArray, plain: Record<string, unknown>): ModelLike {
+  if (keptApart(self, plain.id as string)) return self._plainRowScope!.create(plain);
+  const model = Model.create(plain);
+  plainRowOwner.set(model, new WeakRef(self));
+  return model;
+}
+
 Object.defineProperty(Array.prototype, "set", {
   enumerable: false,
   writable: false,
@@ -533,6 +583,11 @@ Object.defineProperty(Array.prototype, "set", {
 
       const plain = item as Record<string, unknown>;
       let model = typeof plain === 'object' && plain !== null ? plainModels.get(plain) : undefined;
+      // ISL-003: the same object again, but another list has taken its app-wide record since.
+      const apart = self._plainRowScope !== undefined && typeof plain === 'object' && plain !== null && plain.id !== undefined;
+      if (apart && model !== undefined && keptApart(self, plain.id as string) && self._plainRowScope!.get(plain.id as string) !== model) {
+        model = undefined;
+      }
       if (model === undefined) {
         if (typeof plain === 'object' && plain !== null) {
           for (const key of Object.keys(plain)) {
@@ -541,7 +596,7 @@ Object.defineProperty(Array.prototype, "set", {
             if (!reserved.has(key)) reserved.set(key, i);
           }
         }
-        model = Model.create(plain);
+        model = apart ? plainRowRecord(self, plain) : Model.create(plain);
         if (typeof plain === 'object' && plain !== null) plainModels.set(plain, model);
       } else {
         // The same object, mutated in place since it was last seen. Writing the fields back
@@ -784,6 +839,12 @@ Collection.create = function (items?: ArrayLike<ModelLike | Record<string, unkno
     collection.set(items);
   }
   return proxyOf(collection);
+};
+
+Collection.keepPlainRowsApart = function (collection: CollectionLike) {
+  const self = rawOf(collection);
+  if (self._plainRowScope !== undefined) return;
+  Object.defineProperty(self, '_plainRowScope', { value: new Model.Scope(), enumerable: false, writable: false });
 };
 
 Collection.get = function (name?: string): CollectionLike {
