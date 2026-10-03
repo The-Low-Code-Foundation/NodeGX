@@ -336,3 +336,108 @@ describe('BACKEND (NSP-014 s21, R9) — the backends a record node asks, at the 
     expect(w.violations).toEqual(["delete Lesson on main: no rule in the world's script answers it"]);
   });
 });
+
+describe('PICKER (NSP-014 s31) — the person at the file dialog, through the one file input a node makes', () => {
+  const g = globalThis as unknown as { document?: { createElement(tag: string): Record<string, unknown> & { click(): void } } };
+
+  test('a document only when the script has a picker; it makes a file input and nothing else; restore takes it away', () => {
+    const none = installWorld(new World({}));
+    expect(g.document).toBeUndefined();
+    none.restore();
+    const installed = installWorld(new World({ picker: {} }));
+    try {
+      expect(typeof g.document!.createElement('input').click).toBe('function');
+      expect(() => g.document!.createElement('div')).toThrow(/only a file input/);
+    } finally {
+      installed.restore();
+    }
+    expect(g.document).toBeUndefined();
+  });
+
+  test('accept and capture reflect as strings — "" until assigned, String(v) after (undefined is "undefined")', () => {
+    const w = new World({ picker: {} });
+    const installed = installWorld(w);
+    try {
+      const input = g.document!.createElement('input');
+      expect([input.accept, input.capture]).toEqual(['', '']);
+      input.accept = undefined;
+      input.capture = null;
+      expect([input.accept, input.capture]).toEqual(['undefined', 'null']);
+      input.accept = ['image/*', '.png'];
+      expect(input.accept).toBe('image/*,.png');
+    } finally {
+      installed.restore();
+    }
+  });
+
+  test('the n-th click is answered by the n-th entry, the last repeating; each recorded as held, at the click; an answer lands at `after` on the clock (never before 1)', () => {
+    const w = new World({ picker: { answers: [{ file: { name: 'a.png', type: 'image/png', size: 3 } }, { cancel: true, after: 20 }] } });
+    const heard: string[] = [];
+    const deliver = (e: { kind: string; file?: unknown }) => heard.push(e.kind + (e.file ? ':' + (e.file as { name: string }).name : ''));
+    expect(w.picker.answer(0)).toEqual({ file: { name: 'a.png', type: 'image/png', size: 3 } });
+    w.picker.click({ accept: 'image/*', capture: '' }, 'el', deliver);
+    w.clock.advance(0);
+    expect(heard).toEqual([]);
+    w.clock.advance(1);
+    expect(heard).toEqual(['change:a.png']);
+    w.picker.click({ accept: '', capture: 'user' }, 'el', deliver);
+    w.picker.click({ accept: '', capture: 'user' }, 'el', deliver);
+    w.clock.advance(20);
+    expect(heard).toEqual(['change:a.png', 'cancel', 'cancel']);
+    expect(w.picker.calls).toEqual([
+      { t: 'picker', accept: 'image/*', capture: '' },
+      { t: 'picker', accept: '', capture: 'user' },
+      { t: 'picker', accept: '', capture: 'user' }
+    ]);
+    for (const e of w.picker.calls) expect(validateTrace([e]).ok).toBe(true);
+    expect(new World({ picker: {} }).picker.answer(0)).toEqual({ never: true });
+  });
+
+  test('an answer fires the handler the element holds WHEN it lands — a replaced one is what it meets, a removed one hears nothing; a refused click throws after it is recorded', () => {
+    const w = new World({ picker: { answers: [{ file: { name: 'a.png' }, after: 10 }, { never: true }, { empty: true }, { throws: 'blocked' }] } });
+    const installed = installWorld(w);
+    try {
+      const input = g.document!.createElement('input') as Record<string, unknown> & { click(): void; files: ArrayLike<unknown> };
+      const heard: string[] = [];
+      input.onchange = () => heard.push('first');
+      input.click();
+      input.onchange = () => heard.push('second ' + input.files.length);
+      input.click();
+      w.clock.advance(10);
+      expect(heard).toEqual(['second 1']);
+      input.onchange = null;
+      input.click();
+      w.clock.advance(1);
+      expect(heard).toEqual(['second 1']);
+      expect(input.files.length).toBe(0);
+      expect(() => input.click()).toThrow('blocked');
+      expect(w.picker.calls.length).toBe(4);
+    } finally {
+      installed.restore();
+    }
+  });
+
+  test('`settles` is an outcome reducer\'s only, and settles a pending press of its own input; a spec needing a picker refuses a play with none', () => {
+    const Waiter = defineNode({
+      type: 'test/waiter',
+      version: 1,
+      source: 'test',
+      needs: ['picker'],
+      state: { pending: false },
+      outcomes: ['done', 'unchanged'],
+      inputs: { go: { type: 'signal', outcome: true }, bad: { type: 'signal' } },
+      outputs: {}
+    }).on(
+      {
+        go: (s) => ({ set: { pending: true }, outcome: 'pending', settles: s.pending ? [{ outcome: 'unchanged' }] : undefined, picker: { accept: '', capture: '' } }),
+        bad: () => ({ settles: [{ outcome: 'unchanged' }] }) as never
+      },
+      { world: { picker: () => ({ send: [] }) } }
+    ) as unknown as AnyNodeSpec;
+    const trace = run(Waiter, {}, ['settle', { signal: 'go' }, { signal: 'go' }, 'settle'], new World({ picker: {} }));
+    expect(trace.filter((e) => e.t === 'outcome')).toEqual([{ t: 'outcome', port: 'go', value: 'unchanged' }]);
+    expect(trace.filter((e) => e.t === 'picker').length).toBe(2);
+    expect(() => run(Waiter, {}, ['settle', { signal: 'bad' }], new World({ picker: {} }))).toThrow(/only an outcome input/);
+    expect(() => run(Waiter, {}, ['settle'], new World({}))).toThrow(/needs a picker/);
+  });
+});

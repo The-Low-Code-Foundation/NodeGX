@@ -26,7 +26,7 @@ const traceSchema = require('../schema/trace.schema.json') as Record<string, unk
 /** The JSON schema, as data — for a target that wants to embed it. */
 export const TRACE_SCHEMA = traceSchema;
 
-export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup', 'backend'] as const;
+export const EVENT_KINDS = ['set', 'in', 'settle', 'value', 'signal', 'outcome', 'advance', 'request', 'open', 'history', 'dispatch', 'stack', 'route', 'popup', 'backend', 'picker'] as const;
 export const OUTCOME_VALUES = ['done', 'unchanged', 'failure'] as const;
 
 /** Fields each kind requires and allows, beyond `t` and the always-optional `subject`. */
@@ -52,7 +52,9 @@ export const EVENT_FIELDS: Readonly<Record<(typeof EVENT_KINDS)[number], { requi
   // s20 — the popups (world.ts POPUP): a show carries target?, params, stackPolicy, closeOnEscape, modal, accessibleName?; a close popup?, action?, results
   popup: { required: ['op'], optional: ['target', 'params', 'stackPolicy', 'closeOnEscape', 'modal', 'accessibleName', 'popup', 'action', 'results'] },
   // NSP-014 s21 — the backends (world.ts BACKEND): op, backend, args — in the request group
-  backend: { required: ['op', 'backend', 'args'], optional: [] }
+  backend: { required: ['op', 'backend', 'args'], optional: [] },
+  // NSP-014 s31 — the file dialog (world.ts PICKER): what the element held at the click — in the LOCATION group
+  picker: { required: ['accept', 'capture'], optional: [] }
 });
 
 export type Validation = { ok: true; events: TraceEvent[] } | { ok: false; path: string; message: string };
@@ -133,6 +135,9 @@ export function validateTrace(input: unknown): Validation {
       if (e.args === null || typeof e.args !== 'object' || Array.isArray(e.args)) return bad(`${at}.args`, 'args is the options object as handed');
       const nc = findNonCanonical(e.args, `${at}.args`);
       if (nc) return bad(nc, 'args is not in canonical form');
+    } else if (t === 'picker') {
+      if (typeof e.accept !== 'string') return bad(`${at}.accept`, 'accept is what the element held at the click, a string');
+      if (typeof e.capture !== 'string') return bad(`${at}.capture`, 'capture is what the element held at the click, a string');
     } else if ('value' in e) {
       if (t === 'value' && e.value === undefined) return bad(`${at}.value`, 'a value event never carries undefined (C3)');
       if (e.value !== undefined) {

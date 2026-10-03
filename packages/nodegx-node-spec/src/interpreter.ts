@@ -69,6 +69,8 @@
  * (s29) `spec.world.mount` runs once at mount, after `init` and before the params — the rest of the node's `initialize` —
  * and `spec.world.authReturn` at each `oauthReturn` the world's user service announces (world.ts AUTH, THE RETURN LEG). A
  * world handler's `opens` opens and reports invocations no input invoked, at once, recorded with the port `''`.
+ * (s31) A `picker` effect records the click in the LOCATION group; the person's answer runs `spec.world.picker` at its
+ * moment on the clock. An outcome reducer's `settles` reports its input's still-pending invocations before its own opens.
  *
  * THE REGISTRY (NSP-012, registry.ts). Reducers reach it through `world.registry` and WRITE to it
  * directly; a write notifies every OTHER instance watching the entry (`world.watch`) synchronously
@@ -94,7 +96,7 @@ import { isRegistryEntry } from './registry';
 import type { AnyNodeSpec, BackendAnswerEvent, ChangeEvent, Outcome, InputDecl, ReducerOutcome, SignalOutputDecl, SpecBackendCall, SpecRequest, ErasedValueOutput, WatchTarget, WorldResponse, WorldView } from './spec';
 import { isSignalInput } from './spec';
 import type { TraceEvent } from './trace';
-import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PopupCall, type PopupEvent, type StoreEvent } from './world';
+import { backendEvent, installTimeZone, isAuthOp, locationEvent, openReturnsWindow, pushTarget, userRecordEvent, World, writeStoreEvent, type AuthNotice, type AuthReturnState, type AuthStep, type BackendDelivery, type Delivery, type LocationCall, type PickerClick, type PickerEvent, type PopupCall, type PopupEvent, type StoreEvent } from './world';
 
 /** One thing the world handed back, waiting to be delivered to the spec. */
 type Inbound =
@@ -109,7 +111,9 @@ type Inbound =
   | { kind: 'auth'; event: AuthNotice }
   // s29: the service's `oauthReturn` event (world.ts AUTH, THE RETURN LEG); the end of the node's initialize (spec.ts `WorldHandlers.mount`)
   | { kind: 'authReturn'; state: AuthReturnState }
-  | { kind: 'mount' };
+  | { kind: 'mount' }
+  // s31: the person answered a click on the node's file input (world.ts PICKER)
+  | { kind: 'picker'; event: PickerEvent };
 
 interface OutcomeSlot {
   port: string;
@@ -260,7 +264,8 @@ function viewOf(inst: Instance): WorldView {
     backendUser: () => world.backend.user,
     session: (backend) => world.backend.session(backend),
     userService: () => startUserService(world),
-    authReturn: () => world.backend.authReturn
+    authReturn: () => world.backend.authReturn,
+    pickerAnswer: (ahead) => world.picker.answer(ahead ?? 0)
   };
 }
 
@@ -446,6 +451,8 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
     }
   }
   deliverChanges(inst);
+  // s31 — a node that makes a file input at its making plays only where there is a document (world.ts PICKER)
+  if (spec.needs?.includes('picker') && !world.picker.present) throw new SpecError(`${spec.type}: needs a picker and the play's script has none — no document to make its file input in`);
   // s29 — the end of the node's initialize (spec.ts `WorldHandlers.mount`): after `init`, before the params
   if (spec.world?.mount) handleInbound(inst, { kind: 'mount' });
   for (const name of Object.keys(params)) set(inst, name, params[name]);
@@ -602,6 +609,8 @@ interface PatchLike {
   popup?: PopupCall;
   backend?: SpecBackendCall;
   opens?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
+  picker?: PickerClick;
+  settles?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
 }
 
 /** Applies a reducer's patch; returns the value outputs the write sends (`send` + `sendDerived`), or undefined for all. */
@@ -663,11 +672,15 @@ function apply(inst: Instance, port: string, patchUnknown: unknown, outcomeRequi
     if (o === 'pending' && !spec.world) {
       throw new SpecError(`${spec.type}.${port}: left an outcome pending but the spec has no world handlers to resolve it`);
     }
+    // s31 — this input's invocations still pending, settled before this one opens (spec.ts `OutcomePatch.settles`)
+    if (patch.settles) resolveOpen(inst, port, patch.settles.map((r) => ({ port, ...r })), ['pending']);
     const slot: OutcomeSlot = patch.error === undefined ? { port, outcome: o } : { port, outcome: o, error: patch.error };
     if (o !== 'deferred' && o !== 'pending') slot.reportedAt = inst.reports++;
     inst.pending.outcomes.push(slot);
   } else if (patch.outcome !== undefined) {
     throw new SpecError(`${spec.type}.${port}: returned an outcome but the input is not declared outcome: true`);
+  } else if (patch.settles !== undefined) {
+    throw new SpecError(`${spec.type}.${port}: settled earlier invocations — only an outcome input's reducer may (spec.ts \`settles\`)`);
   }
   if (patch.send) {
     for (const name of patch.send) {
@@ -789,6 +802,16 @@ function stackEffects(inst: Instance, port: string, patch: PatchLike): void {
     world.popup.record(patch.popup);
     inst.pending.location.push(world.popup.calls[world.popup.calls.length - 1]);
   }
+  // PICKER (world.ts, NSP-014 s31): a click recorded as the element holds it — a `picker` event in the same group; the
+  // answer fires at its moment, as a DOM event's handler runs at its dispatch (inside the `advance` that reaches it)
+  if (patch.picker) {
+    if (!world.picker.present) throw new SpecError(`${spec.type}.${port}: clicked a file input in a play with no picker (no document)`);
+    if (!spec.world?.picker) throw new SpecError(`${spec.type}.${port}: clicked a file input but the spec has no world.picker handler`);
+    const c = patch.picker;
+    if (typeof c.accept !== 'string' || typeof c.capture !== 'string') throw new SpecError(`${spec.type}.${port}: a click hands what the element holds — accept and capture are strings`);
+    world.picker.click({ accept: c.accept, capture: c.capture }, inst, (e) => handleInbound(inst, { kind: 'picker', event: e }));
+    inst.pending.location.push(world.picker.calls[world.picker.calls.length - 1]);
+  }
 }
 
 /**
@@ -834,6 +857,9 @@ function handleInbound(inst: Instance, item: Inbound): void {
   } else if (item.kind === 'authReturn') {
     name = 'world.authReturn';
     patch = asWriter(inst, () => spec.world!.authReturn!(inst.state as never, inst.inputs as never, item.state, view));
+  } else if (item.kind === 'picker') {
+    name = 'world.picker';
+    patch = asWriter(inst, () => spec.world!.picker!(inst.state as never, inst.inputs as never, item.event, view));
   } else if (item.kind === 'mount') {
     name = 'world.mount';
     patch = asWriter(inst, () => spec.world!.mount!(inst.state as never, inst.inputs as never, view));

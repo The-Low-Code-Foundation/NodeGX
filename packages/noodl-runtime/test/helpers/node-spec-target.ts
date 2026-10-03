@@ -123,6 +123,10 @@
  *     store's session, where the access rules read it (`installUser`). (s24) A write made elsewhere (`events`) goes
  *     through the REAL `_fromJSON` and then the REAL store of its backend (`emitAdapterEvent`), so a Query Records'
  *     own subscription is what hears it.
+ *   - **the file dialog** (NSP-014 s31, world.ts PICKER): `installWorld` gives a play whose script has a picker the
+ *     world's `document`, so Open File Picker's `initialize` makes the WORLD's file input; a click is attributed to the
+ *     node whose `_internal.inputElement` it is (the click is made inside the node's own Open, but a pulse over a wire
+ *     reaches it in another node's update, so neither the async context nor `inUpdate` names it).
  */
 
 import { AsyncLocalStorage } from 'async_hooks';
@@ -622,7 +626,7 @@ function resetRegistry(world: World): void {
  * (ts-jest compiles them under this package's config), so a spec of a viewer node is graded
  * against the code the app runs, and no copy is kept. A viewer node specced later is added here.
  */
-export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout', 'user/requestmagiclink', 'user/signinwith', 'uploadfile'] as const;
+export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 'timer', 'eventsender', 'eventreceiver', 'data/foreachactions', 'repeat', 'animate-to-value', 'screenresolution', 'states', 'componentutils/parentcomponentobject', 'componentutils/setparentcomponentobjectproperties', 'externallink', 'user/login', 'user/signup', 'user/logout', 'user/requestmagiclink', 'user/signinwith', 'uploadfile', 'openfilepicker'] as const;
 
 /** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (s17 Navigate To Path … s20 Show / Close Popup). */
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
@@ -964,6 +968,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   function recordPopup(event: TraceEvent): void {
     // no sole-subject fallback: a graph of ONE subject whose popup holds a Show Popup is exactly where it misattributed
     if (inUpdate) inUpdate.frame.location.push(event);
+  }
+
+  /** A click on a file input the world saw (world.ts PICKER, NSP-014 s31), in the LOCATION group — attributed to the node that made the element. */
+  function recordPicker(event: TraceEvent, element: unknown): void {
+    const s = [...states.values()].find((st) => (st.h.node as unknown as { _internal?: { inputElement?: unknown } })._internal?.inputElement === element);
+    if (!s) throw new Error('runtime: a file input was clicked that no mounted node made — it cannot be attributed');
+    s.frame.location.push(event);
   }
 
   /** POPUP (world.ts) for the play: the popups `showPopup` built in the root scope, in the order built — what the person's close addresses. */
@@ -1396,6 +1407,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       world = w;
       w.network.onRequest(recordRequest);
       w.location?.onCall(recordLocation);
+      // PICKER (world.ts, NSP-014 s31) — the document itself is `installWorld`'s; a click is the clicking node's
+      w.picker.onCall(recordPicker);
       // PROJECT (world.ts, NSP-015 s17) — the settings a node reads through `NoodlRuntime.instance`:
       // the app has one runtime, so the static is this target's for the play, and its project's
       // settings are the script's (graphmodel.ts `setSettings`, what `importEditorData` calls)

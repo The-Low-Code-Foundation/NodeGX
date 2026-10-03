@@ -6,7 +6,7 @@
  * (changed since the last settle only), then `signal` events in emission order, then `outcome`
  * events in the order they were REPORTED, then `request` events and (s21) `backend` events, one group, in the order they
  * were issued, then
- * the LOCATION events — `open`, `history`, `dispatch`, (s18) `stack`, (s19) `route` and (s20) `popup`, one group — in the order they were made
+ * the LOCATION events — `open`, `history`, `dispatch`, (s18) `stack`, (s19) `route`, (s20) `popup` and (NSP-014 s31) `picker`, one group — in the order they were made
  * (NSP-015).
  * "Changed" is canonical inequality with the last value RECORDED for
  * the port (nothing before the first settle, so the first settle records every defined output),
@@ -29,7 +29,8 @@
  * — it dispatched an event on the window (`window.dispatchEvent(event)`: `event` is its type). s18 adds `stack` — it handed a
  * Component Stack a push, a replace or a pop (world.ts STACK); s19 `route` — it handed the Routers a navigate
  * (world.ts ROUTE). NSP-014 s21 adds `backend` — it handed a backend an operation in the backend contract's words
- * (world.ts BACKEND, R9): `op`, `backend` the id it went to, `args` canonical, callbacks left out. The world's answers are not events: they are scripted (world.ts), so what they were is
+ * (world.ts BACKEND, R9): `op`, `backend` the id it went to, `args` canonical, callbacks left out. s31 adds `picker` — it clicked a file
+ * input (world.ts PICKER): `accept` and `capture`, what the element held at the click, each a string. The world's answers are not events: they are scripted (world.ts), so what they were is
  * known from the scenario, and what the node did with them is on the wire.
  * That grouping is a rule of the FORMAT, so that a runtime which
  * pulses a signal synchronously inside a setter and delivers the value at frame end (the
@@ -93,7 +94,12 @@ export type TraceEvent =
    * method name (`delete`, `query`, …), `backend` the id it went to, `args` the options as handed, callbacks left out,
    * canonical at the call. In the request group.
    */
-  | (Base & { t: 'backend'; op: string; backend: string; args: unknown });
+  | (Base & { t: 'backend'; op: string; backend: string; args: unknown })
+  /**
+   * observation (NSP-014 s31): the node clicked a file input (world.ts PICKER) — `input.click()`: `accept` and `capture`, what
+   * the element held at the click (reflected attributes, so strings; `''` when never assigned). In the LOCATION group.
+   */
+  | (Base & { t: 'picker'; accept: string; capture: string });
 
 /** Trace-format version — must match the `/v1.json` in the schema's `$id` (tests/schema.test.ts). */
 export const TRACE_FORMAT_VERSION = 1;

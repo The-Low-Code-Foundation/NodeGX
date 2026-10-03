@@ -19,12 +19,13 @@
  *                      "condition inverted" defect (the Counter limit guard reading `>` for `>=`)
  *   - `drop-request`   the branch's request is never issued (NSP-007: the "forgot to fetch" defect)
  *   - `drop-backend`   the branch's backend call is never made (NSP-014 s21: the same defect, one seam over)
+ *   - `drop-picker`    the branch's click on the file input is never made (NSP-014 s31: the dialog never opens)
  * A mutation that would leave the patch unchanged (drop-emit on a branch with no emit) is not
  * generated: it could only survive, and would say nothing.
  *
  * The world handlers (NSP-007, `spec.world.timer` / `spec.world.response`; NSP-012's
  * `spec.world.change`) are reducers like any
- * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`, (s24) `world.store`, (s26) `world.auth`, (s29) `world.authReturn` and `world.mount`; whether a branch issues a request
+ * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`, (s24) `world.store`, (s26) `world.auth`, (s29) `world.authReturn` and `world.mount`, (s31) `world.picker`; whether a branch issues a request
  * — or calls a backend — is part of its shape. A branch's `after` / `cancel` / `abort` effects are NOT in the shape and have no
  * mutant of their own yet (a dropped timeout timer shows only in a sequence that waits past it
  * with an answer that never comes) — named in NSP-007 §5 as the runner's next hole.
@@ -32,7 +33,7 @@
 
 import type { AnyNodeSpec, ErasedReducer } from '../spec';
 
-export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend';
+export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend' | 'drop-picker';
 
 export interface Branch {
   reducer: string;
@@ -70,6 +71,10 @@ export interface PatchLike {
   backend?: unknown;
   /** NSP-014 s29: invocations no input opened, reported at once (spec.ts `AfterInputsPatch.opens`). */
   opens?: ReadonlyArray<{ outcome: string; error?: string }>;
+  /** NSP-014 s31: a click on the file input (spec.ts `Patch.picker`). */
+  picker?: unknown;
+  /** NSP-014 s31: this input's pending invocations settled before its own opens (spec.ts `OutcomePatch.settles`). */
+  settles?: ReadonlyArray<{ outcome: string; error?: string }>;
 }
 
 export function shapeOf(patch: unknown): string {
@@ -87,7 +92,10 @@ export function shapeOf(patch: unknown): string {
     // NSP-014 s21 — present only when the branch calls a backend, so every earlier spec's shapes are the strings they were
     ...(p.backend !== undefined ? { backend: true } : {}),
     // s29 — likewise only when the branch opens an invocation: WHICH outcomes it reports, as `outcomes`
-    ...(p.opens !== undefined && p.opens.length > 0 ? { opens: [...new Set(p.opens.map((o) => o.outcome))].sort() } : {})
+    ...(p.opens !== undefined && p.opens.length > 0 ? { opens: [...new Set(p.opens.map((o) => o.outcome))].sort() } : {}),
+    // s31 — likewise only when the branch clicks a file input, or settles earlier presses of its input
+    ...(p.picker !== undefined ? { picker: true } : {}),
+    ...(p.settles !== undefined && p.settles.length > 0 ? { settles: [...new Set(p.settles.map((o) => o.outcome))].sort() } : {})
   });
 }
 
@@ -108,6 +116,7 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.auth) names.push('world.auth');
   if (spec.world?.authReturn) names.push('world.authReturn');
   if (spec.world?.mount) names.push('world.mount');
+  if (spec.world?.picker) names.push('world.picker');
   return names;
 }
 
@@ -144,6 +153,8 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     // s29 — and the return leg's two (a copy without them never hears a sign-in come back, and never applies one at its making)
     if (spec.world.authReturn) w.authReturn = wrap('world.authReturn', spec.world.authReturn as unknown as ErasedReducer) as unknown as typeof spec.world.authReturn;
     if (spec.world.mount) w.mount = wrap('world.mount', spec.world.mount as unknown as ErasedReducer) as unknown as typeof spec.world.mount;
+    // s31 — the file dialog's answer (world.ts PICKER): a copy without it never hears the person choose
+    if (spec.world.picker) w.picker = wrap('world.picker', spec.world.picker as unknown as ErasedReducer) as unknown as typeof spec.world.picker;
     out.world = w;
   }
   return out;
@@ -200,6 +211,7 @@ function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike):
       if (patch.outcome !== undefined && patch.outcome !== 'deferred' && patch.outcome !== 'pending') flipped.outcome = flip(patch.outcome);
       if (patch.outcomes) flipped.outcomes = patch.outcomes.map((o) => ({ ...o, outcome: flip(o.outcome) as string }));
       if (patch.opens) flipped.opens = patch.opens.map((o) => ({ ...o, outcome: flip(o.outcome) as string }));
+      if (patch.settles) flipped.settles = patch.settles.map((o) => ({ ...o, outcome: flip(o.outcome) as string }));
       return flipped;
     }
     case 'swap-branch': {
@@ -215,6 +227,10 @@ function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike):
     }
     case 'drop-backend': {
       const { backend: _b, ...rest } = patch;
+      return rest;
+    }
+    case 'drop-picker': {
+      const { picker: _p, ...rest } = patch;
       return rest;
     }
     default:
@@ -237,9 +253,10 @@ export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mut
     if ((ex.emit && ex.emit.length > 0) || (ex.emitDerived && ex.emitDerived.length > 0) || (ex.pulses && ex.pulses.length > 0)) kinds.push(['drop-emit', undefined]);
     if (ex.set && Object.keys(ex.set).length > 0) kinds.push(['drop-set', undefined]);
     // a `deferred` outcome has nothing to flip (its resolution is afterInputs' branch, mutated there)
-    if ((ex.outcome !== undefined && ex.outcome !== 'deferred' && ex.outcome !== 'pending') || (ex.outcomes && ex.outcomes.length > 0) || (ex.opens && ex.opens.length > 0)) kinds.push(['flip-outcome', undefined]);
+    if ((ex.outcome !== undefined && ex.outcome !== 'deferred' && ex.outcome !== 'pending') || (ex.outcomes && ex.outcomes.length > 0) || (ex.opens && ex.opens.length > 0) || (ex.settles && ex.settles.length > 0)) kinds.push(['flip-outcome', undefined]);
     if (ex.request !== undefined) kinds.push(['drop-request', undefined]);
     if (ex.backend !== undefined) kinds.push(['drop-backend', undefined]);
+    if (ex.picker !== undefined) kinds.push(['drop-picker', undefined]);
     for (const sibling of byReducer.get(b.reducer) ?? []) {
       if (sibling.shape !== b.shape) kinds.push(['swap-branch', sibling]);
     }

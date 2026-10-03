@@ -210,6 +210,12 @@ export interface WorldView {
    * the service consumes the return as it is made).
    */
   authReturn(): import('./world').AuthReturnState;
+  /**
+   * NSP-014 s31 — how the click `ahead` clicks from now (0 = the next) on a file input will be answered (world.ts PICKER): a
+   * file, an empty list, a cancel, never, or a throw INSIDE the call. A node whose click may throw reads this before it names
+   * the `picker` effect, to report what the throw makes it report. Reads; the effect consumes.
+   */
+  pickerAnswer(ahead?: number): import('./world').PickerAnswer;
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -432,6 +438,11 @@ export interface Patch<S, O> {
    *             list is several calls made in that order — a node whose every press in a frame is its own call
    *             (Upload File): each recorded and issued before the next, so an answer one gives inside the call
    *             (world.ts FILES' refusal) lands before the next call is made.
+   *   `picker`  NSP-014 s31 — a click on the node's file input (`input.click()`, world.ts PICKER): a `picker` event in the
+   *             LOCATION group, `accept` / `capture` what the ELEMENT holds at the click (strings — a spec keeps the
+   *             element's two attributes in its state, as the node's assignments leave them). The answer arrives at
+   *             `WorldHandlers.picker` at its moment; a throw is `WorldView.pickerAnswer`'s, read before. Only in a play
+   *             whose script has a picker (a `picker` need).
    */
   after?: ReadonlyArray<{ ms: unknown; tag: string }>;
   cancel?: readonly string[];
@@ -445,6 +456,7 @@ export interface Patch<S, O> {
   route?: { router: unknown; target: unknown; params: unknown; openInNewTab: unknown };
   popup?: import('./world').PopupCall;
   backend?: SpecBackendCall | readonly SpecBackendCall[];
+  picker?: import('./world').PickerClick;
 }
 
 export interface OutcomePatch<S, O> extends Patch<S, O> {
@@ -452,6 +464,12 @@ export interface OutcomePatch<S, O> extends Patch<S, O> {
   outcome: ReducerOutcome;
   /** With `outcome: 'failure'`, the error the node reports. */
   error?: string;
+  /**
+   * NSP-014 s31 — invocations of THIS input still `pending`, settled here, oldest first, BEFORE this invocation is opened: a
+   * press that supersedes an earlier one the world has not answered yet (Open File Picker — a second Open makes the first
+   * `Unchanged` inside its own handler, openfilepicker.ts :66-70). Reported in this frame, ahead of this press's own outcome.
+   */
+  settles?: ReadonlyArray<{ outcome: Outcome; error?: string }>;
 }
 
 /**
@@ -641,6 +659,12 @@ export interface WorldHandlers<S, I, O> {
    * state at its making needs none.
    */
   mount?: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-014 s31 — the person answered a click on this node's file input (world.ts PICKER), at the answer's moment: a `change`
+   * (with the file chosen, or none — the empty list) or a `cancel`. Handed whether or not the node still has a handler on the
+   * element: whether one is there to hear it is the spec's to say, as a DOM event meets whatever handler is there then.
+   */
+  picker?: (state: Readonly<S>, inputs: Inputs<I>, event: import('./world').PickerEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /** What `.on()` takes beside the reducers. */
@@ -677,6 +701,8 @@ export interface WorldPool {
   popups?: ReadonlyArray<import('./world').PopupScript>;
   /** NSP-014 s21: the backend worlds a `backend` spec's sequences play with (one is drawn per sequence; the default answers every call `{ ok: null }` at once). */
   backends?: ReadonlyArray<import('./world').BackendScript>;
+  /** NSP-014 s31: the people at the file dialog a `picker` spec's sequences play with (one is drawn per sequence; the default never answers). */
+  pickers?: ReadonlyArray<import('./world').PickerScript>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -740,9 +766,9 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * hands a Component Stack a request (world.ts STACK). s19 adds `router` — the node hands the Routers a
  * navigate, or sits in a Router's page (world.ts ROUTE). s20 adds `popup` — the node shows a popup, or sits
  * inside one (world.ts POPUP). NSP-014 s21 makes `backend` real — the node hands a backend an operation (world.ts
- * BACKEND, R9).
+ * BACKEND, R9). s31 adds `picker` — the node makes a file input and clicks it (world.ts PICKER): the play has a `document`.
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
@@ -829,6 +855,7 @@ export interface AnyNodeSpec {
     auth?: (state: never, inputs: never, event: import('./world').AuthNotice, world: WorldView) => unknown;
     authReturn?: (state: never, inputs: never, ret: import('./world').AuthReturnState, world: WorldView) => unknown;
     mount?: (state: never, inputs: never, world: WorldView) => unknown;
+    picker?: (state: never, inputs: never, event: import('./world').PickerEvent, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

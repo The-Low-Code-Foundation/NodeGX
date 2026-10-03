@@ -344,6 +344,36 @@
  *           own steps inside a sign-in (Directus writes the tokens, then `/users/me` merged — two `sessionChanged`;
  *           PocketBase one; a sign-up's create-then-sign-in is two requests): the contract's operation is the seam (R9).
  *
+ *   PICKER. (NSP-014 s31) The person choosing a file, through the one browser surface a node reaches for it: a file
+ *           `<input>` the node makes (`document.createElement('input')`) and clicks. A play whose script has a `picker` (`{}`
+ *           included) has a `document` — none otherwise, so no other node's play changes — whose `createElement('input')`
+ *           hands the world's FILE INPUT (`WorldFileInput`; any other tag is refused: no node specced makes one). The
+ *           element is a DOM element as far as a node reads it: `accept` and `capture` REFLECT their attributes, so what is
+ *           assigned is held as a string (`String(v)` — WebIDL's DOMString: `undefined` is `"undefined"`, `null` `"null"`),
+ *           `''` until assigned; `files` is a list (`length`, index, `item(i)`), empty until the person picks; assigning
+ *           `value = ''` empties it; `onchange` / `oncancel` are handler PROPERTIES, `null` until assigned.
+ *             A CLICK (`input.click()`) — recorded as handed, a `picker` trace event in the LOCATION group, in the frame it
+ *               is made: `{ accept, capture }`, what the element holds AT THE CLICK (not what the node last set: a node
+ *               that skips an assignment leaves the previous one there). Then the person answers it — the n-th click of the
+ *               play by the script's n-th `answers` entry (the last repeating; none: never):
+ *                 `{ file: { name, type?, size? } }` — they chose that file: `files` becomes the one file (Node's `File`,
+ *                   `size` zero bytes, `type` `''` when absent, `lastModified` 0 — adapter.ts `file`), then `change`;
+ *                 `{ empty: true }` — `change` with an EMPTY list (a re-pick backed out of: NDA-004 §2);
+ *                 `{ cancel: true }` — the dialog closed with nothing chosen: `cancel`;
+ *                 `{ never: true }` — no answer comes in the play (the dialog left open; also how a browser that refuses
+ *                   a click without a person's gesture behaves — Chrome logs and opens nothing);
+ *                 `{ throws: message }` — the click is refused BY THROWING, inside the call (a `NotAllowedError`
+ *                   `DOMException` carrying `message`; the node's comment names a sandboxed frame — not measured on a
+ *                   browser here: the world plays a throw where the script says one). Recorded first: the call was made.
+ *               A file, an empty list or a cancel lands at `after` on the clock (CLOCK's rule: never before 1 — a
+ *               person answers no dialog inside the frame that opened it) and fires the element's handler AS IT IS THEN
+ *               (`onchange` / `oncancel`, with `{ type, target: <the element> }`), as a DOM event fires whatever its
+ *               handler property holds when it is dispatched: a handler the node took off, or replaced by a later click's,
+ *               is what the answer meets.
+ *           Not played: Electron's `path` on a chosen file (the desktop app's addition — a browser's `File` has none, so a
+ *           world file has none), the dialog's own filtering by `accept` / `capture` (the browser's — the click's record
+ *           is the seam), more than one file (`multiple` — no node sets it), and drag-and-drop.
+ *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
  *   `now()` = `world.clock.now()` · `random()` / `bytes(n)` / `uuid()` = `world.random.next()` /
@@ -359,9 +389,11 @@
  *   only (a graph's trace is assembled per node, runner/graph.ts). (s21) `backendFor(id)` =
  *   `world.backend.resolve(id)` · a `backend` effect = `world.backend.issue(call, deliver)` · (s22) `backendUser()` =
  *   `world.backend.user` · (s24) a spec's `world.store` handler is fed from `world.backend.onStoreEvent` after
- *   `writeStoreEvent(world.registry, e)`.
+ *   `writeStoreEvent(world.registry, e)`. · (s31) `pickerAnswer(ahead)` = `world.picker.answer(ahead)` · a `picker` effect =
+ *   `world.picker.click(held, element, deliver)` — what the element holds at the click, the handler that delivers the answer.
  */
 
+import { File as NodeFile } from 'buffer';
 import * as nodeCrypto from 'crypto';
 
 import { canonicalise } from './canonical';
@@ -397,6 +429,30 @@ export interface WorldScript {
   popup?: PopupScript;
   /** NSP-014 s21: the backends (BACKEND above). Absent: one, `main`, that no rule answers — every call a violation. */
   backend?: BackendScript;
+  /** NSP-014 s31: the person at the file dialog (PICKER above). Absent: no `document` in the play. */
+  picker?: PickerScript;
+}
+
+/** PICKER above: how the person answers each click on a file input, the n-th click by the n-th entry (the last repeating). Absent or empty: never. */
+export interface PickerScript {
+  answers?: readonly PickerAnswer[];
+}
+
+/** PICKER above: one answer to one click. `after` (ms on the clock, never before 1) for the three that land. */
+export type PickerAnswer =
+  | { file: { name: string; type?: string; size?: number }; after?: number }
+  | { empty: true; after?: number }
+  | { cancel: true; after?: number }
+  | { never: true }
+  | { throws: string };
+
+/** PICKER above: what a spec's `world.picker` handler is handed (spec.ts) — the event the answer fires; a `change` with no `file` is the empty list. */
+export type PickerEvent = { kind: 'change'; file?: unknown } | { kind: 'cancel' };
+
+/** PICKER above: what the element holds at a click — the two reflected attributes, as strings. */
+export interface PickerClick {
+  accept: string;
+  capture: string;
 }
 
 /** BACKEND above: the project's backends (the first the active one) and how they answer. */
@@ -1687,6 +1743,111 @@ export class WorldLocation {
   }
 }
 
+/** The trace event a click is recorded as (PICKER above; trace.ts): what the element holds at the click. */
+export function pickerEvent(c: PickerClick): TraceEvent {
+  return { t: 'picker', accept: c.accept, capture: c.capture };
+}
+
+/** A file the person chose (PICKER above): Node's own `File` — the class a browser's `File` is — its bytes zeros. */
+export function pickedFile(desc: { name: string; type?: string; size?: number }): NodeFile {
+  return new NodeFile([new Uint8Array(desc.size ?? 0)], desc.name, { type: desc.type ?? '', lastModified: 0 });
+}
+
+/** The person at the file dialog of a play (PICKER above): every click, and how each is answered. */
+export class WorldPicker {
+  /** Every click, as its trace event, in the order made. */
+  readonly calls: TraceEvent[] = [];
+  private listeners: Array<(e: TraceEvent, element: unknown) => void> = [];
+  private clicks = 0;
+
+  constructor(
+    private readonly clock: Clock,
+    readonly script: PickerScript | undefined
+  ) {}
+
+  /** Whether the play has a `document` at all — the script has a `picker`. */
+  get present(): boolean {
+    return this.script !== undefined;
+  }
+
+  /** Called with every click's event and the element clicked, as it is made — how a target attributes it to the node that made the element. */
+  onCall(listener: (e: TraceEvent, element: unknown) => void): void {
+    this.listeners.push(listener);
+  }
+
+  /** How the click `ahead` clicks from now (0 = the next) will be answered. Reads; consumes nothing. */
+  answer(ahead = 0): PickerAnswer {
+    const list = this.script?.answers ?? [];
+    if (list.length === 0) return { never: true };
+    return list[Math.min(this.clicks + ahead, list.length - 1)];
+  }
+
+  /**
+   * A click: recorded as the element holds it, then answered — `deliver` fired at the answer's moment with the event (a
+   * file made then), unless the answer is `never` or a throw. Returns the answer; a throw is the CALLER's to throw (the
+   * element throws it; a spec reports it).
+   */
+  click(held: PickerClick, element: unknown, deliver: (e: PickerEvent) => void): PickerAnswer {
+    const answer = this.answer(0);
+    const e = pickerEvent(held);
+    this.calls.push(e);
+    for (const l of this.listeners) l(e, element);
+    this.clicks++;
+    if ('never' in answer || 'throws' in answer) return answer;
+    this.clock.schedule(answer.after, () => {
+      deliver('file' in answer ? { kind: 'change', file: pickedFile(answer.file) } : 'empty' in answer ? { kind: 'change' } : { kind: 'cancel' });
+    });
+    return answer;
+  }
+}
+
+/** A file list as a node reads one (`FileList`): `length`, the files by index, `item(i)`. */
+function fileList(files: readonly unknown[]): ArrayLike<unknown> & { item(i: number): unknown } {
+  const list: Record<number, unknown> & { length: number; item(i: number): unknown } = { length: files.length, item: (i: number) => files[i] ?? null };
+  files.forEach((f, i) => (list[i] = f));
+  return list;
+}
+
+/** The file input the play's `document` hands a node (PICKER above): reflected `accept` / `capture`, `files`, the two handler properties, `click()`. */
+export class WorldFileInput {
+  type = 'text';
+  onchange: ((e: unknown) => void) | null = null;
+  oncancel: ((e: unknown) => void) | null = null;
+  files: ArrayLike<unknown> & { item(i: number): unknown } = fileList([]);
+  private held: PickerClick = { accept: '', capture: '' };
+
+  constructor(private readonly picker: WorldPicker) {}
+
+  get accept(): string {
+    return this.held.accept;
+  }
+  set accept(v: unknown) {
+    this.held = { ...this.held, accept: String(v) };
+  }
+  get capture(): string {
+    return this.held.capture;
+  }
+  set capture(v: unknown) {
+    this.held = { ...this.held, capture: String(v) };
+  }
+  get value(): string {
+    const first = this.files[0] as { name?: string } | undefined;
+    return first ? 'C:\\fakepath\\' + String(first.name) : '';
+  }
+  set value(v: unknown) {
+    if (String(v) === '') this.files = fileList([]);
+  }
+
+  click(): void {
+    const answer = this.picker.click({ ...this.held }, this, (e) => {
+      this.files = fileList(e.kind === 'change' && e.file !== undefined ? [e.file] : []);
+      const handler = e.kind === 'change' ? this.onchange : this.oncancel;
+      if (typeof handler === 'function') handler.call(this, { type: e.kind, target: this });
+    });
+    if ('throws' in answer) throw new DOMException(answer.throws, 'NotAllowedError');
+  }
+}
+
 export class World {
   readonly script: WorldScript;
   readonly clock = new Clock();
@@ -1709,6 +1870,8 @@ export class World {
   readonly popup: WorldPopup;
   /** The backends (BACKEND above) — always: a play with no script has one, `main`, that answers nothing. */
   readonly backend: WorldBackend;
+  /** The person at the file dialog (PICKER above) — always; `present` only when the script has a `picker`. */
+  readonly picker: WorldPicker;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -1723,6 +1886,7 @@ export class World {
     this.router = new WorldRouter(script.router ?? {});
     this.popup = new WorldPopup(script.popup ?? {});
     this.backend = new WorldBackend(this.clock, script.backend ?? {});
+    this.picker = new WorldPicker(this.clock, script.picker);
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */
@@ -1935,6 +2099,15 @@ export function installWorld(world: World): Installed {
         }
       }
     );
+  }
+  // PICKER: a `document` only when the script has a picker — none otherwise, as the host has it
+  if (world.picker.present) {
+    define('document', {
+      createElement(tag: unknown) {
+        if (String(tag).toLowerCase() !== 'input') throw new Error(`world: document.createElement(${String(tag)}) — the play's document makes only a file input (PICKER)`);
+        return new WorldFileInput(world.picker);
+      }
+    });
   }
   // PROJECT: the settings a node reads through the runtime are the target's to install (the runtime target's `install`)
   Math.random = () => world.random.next();

@@ -25,7 +25,9 @@ const BATCH = ['DeleteDbModelProperties', 'AddDbModelRelation', 'RemoveDbModelRe
 const USERS = ['net.noodl.user.User', 'net.noodl.user.SetUserProperties', 'net.noodl.user.LogIn', 'net.noodl.user.SignUp', 'net.noodl.user.LogOut', 'net.noodl.user.RequestMagicLink', 'net.noodl.user.SignInWith'];
 /** s30 — the file nodes (world.ts FILES): Cloud File calls nothing; Upload File and Sign File URL hand the contract's file operations */
 const FILES = ['Cloud File', 'Upload File', 'Sign File URL'];
-const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS, ...FILES];
+/** s31 — the file dialog (world.ts PICKER): no backend at all, graded beside the file family it feeds */
+const PICKER = ['Open File Picker'];
+const CONFORMING = [...BATCH, 'FilterDBModels', ...USERS, ...FILES, ...PICKER];
 
 describe('NSP-014 — every batch spec conforms on the interpreter: scenarios, 200 sequences on two seeds, every mutant killed or declared', () => {
   for (const type of CONFORMING) {

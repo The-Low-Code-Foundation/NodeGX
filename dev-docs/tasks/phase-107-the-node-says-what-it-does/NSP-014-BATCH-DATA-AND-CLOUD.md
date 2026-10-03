@@ -1,7 +1,7 @@
 # NSP-014 — Batch: records, users, files, HTTP, streams, and the cloud-only nodes
 
 **Opened 2026-09-29.** **Depends on NSP-007** (the world's network and backend) and R4 = continue.
-**Status: 🟡 s30 (2026-10-03): Cloud File, Upload File and Sign File URL conform on the runtime, first run, two seeds and at 10,000 — the world's BACKEND grew FILES (the contract's `uploadFile` / `signFileUrl`, a failure as one envelope, the REST adapter's not-a-file refusal); a scenario can hand a node a file (`$file`) or a stored file (`$cloudFile`); rows C51, C52, D26 (§6.28). 19 of 24. Left: Open File Picker (a FILE PICKER seam), WebSocket, Server-Sent Events, Subscribe To Changes, Cloud Function.** s29: Sign In With slice B — the return leg (§6.25). s28: Request Magic Link, Sign In With (16 of 24). s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24. s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
+**Status: 🟡 s31 (2026-10-03): Open File Picker conforms on the runtime, first run (one survivor closed by a scenario), two seeds and at 10,000 — the world's PICKER, the 13th seam (a `document` only where the script has a picker; a file input whose `accept` / `capture` reflect; the n-th click answered by the n-th scripted answer, to whatever handler the element holds when it lands); the format's `settles` (a press that supersedes a pending one); rows C53, D27 (§6.31). 20 of 24 — T2 complete. Left: Cloud Function, WebSocket, Server-Sent Events, Subscribe To Changes.** s30: Cloud File, Upload File and Sign File URL conform on the runtime, first run, two seeds and at 10,000 — the world's BACKEND grew FILES (the contract's `uploadFile` / `signFileUrl`, a failure as one envelope, the REST adapter's not-a-file refusal); a scenario can hand a node a file (`$file`) or a stored file (`$cloudFile`); rows C51, C52, D26 (§6.28). 19 of 24. Left: Open File Picker (a FILE PICKER seam), WebSocket, Server-Sent Events, Subscribe To Changes, Cloud Function.** s29: Sign In With slice B — the return leg (§6.25). s28: Request Magic Link, Sign In With (16 of 24). s27 (2026-10-02): Log In, Sign Up, Log Out conform on the runtime, first run and at 10,000; graph s10 (the session moving); target hole T14; row D24 (§6.19). 14 of 24. s26: User and Set User Properties — the world's AUTH seam (§6.16); rows C45–C49, D23. 11 of 24. s25: Filter Records (9 of 24). s24: Query Records slice B. **s23 (2026-10-02): Record (`DbModel2`) and Query Records (`DbCollection2`, slice A — the query) conform on the runtime, first run and at 10,000; `fetch` and `query` joined the BACKEND seam; rows C37, C38, C39, D22. 8 of 24.** s22: Create Record and Update Record conform on the runtime (the world's BACKEND grew a failure's `detail` and the signed-in USER); the deep run found row C36 in s21's Delete Record; rows C34–C36 filed. 6 of 24 at s22 (HTTP Request s8; Delete Record, Add / Remove Record Relation s21; Create / Update Record s22). s21: split (the 17 cloud-only nodes → [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md)); the world's BACKEND seam built (R9: the request, not the wire).
 
 ## 1. The person sentence
 
@@ -897,3 +897,97 @@ stored file carries. Left as tiered (a judgement for the census's owner, not thi
 | `node scripts/node-spec/census.js` | run, then RESTORED from HEAD: it picked up a peer's uncommitted viewer-react work (dynamic ports 68 → 69, Button / Columns / Text test counts). No census number depends on specs |
 | `node scripts/bugs.js check` | 164 files, every header valid |
 | export `test:main` | NOT RUN: no export code was touched |
+
+### 6.31 s31 (2026-10-03) — Open File Picker; the world's PICKER (the 13th seam)
+
+**Built.** `open-file-picker.ts`, 16 scenarios. It **conforms on the runtime on the first run** (15 scenarios and 200
+sequences; one mutant survived and was closed by a 16th scenario, below), on seeds 20729 and 13, and at 10,000; mutants
+26 / 26. **102 / 147 — and T2 is complete (11 / 11).** 20 of NSP-014's 24.
+
+**Read first (what does it CALL?).** One browser surface, and no backend: `document.createElement('input')` in
+`initialize` (once, reused for every Open — :43-51, for Safari); on Open, `accept` / `capture` assigned, `onchange` /
+`oncancel` assigned, `input.click()`. The person then answers through the element's handlers. The handoff's sketch held,
+with one correction: the n-th answer reaches the handler the element holds WHEN it lands, not "the n-th Open". That
+difference is the race below.
+
+**The world (world.ts PICKER).**
+- A play has a `document` exactly when its script has a `picker` (`{}` included), so no other node's play changes.
+  `createElement('input')` hands the world's file input; any other tag is refused.
+- The element REFLECTS `accept` and `capture`: assigned values are held as strings (`String(v)`, WebIDL's DOMString),
+  `''` until assigned. That is where D27 shows: `undefined` → `"undefined"`.
+- A click is a `picker` trace event in the LOCATION group, carrying `{ accept, capture }` as the ELEMENT holds them at the
+  click, not as the node last set them. That is where C53 shows: the node skips an assignment, the element keeps the old
+  value.
+- The n-th click is answered by the script's n-th entry (the last repeating; none: never): `{ file }`, `{ empty }`,
+  `{ cancel }`, `{ never }`, or `{ throws }` (inside the call, after it is recorded). The three that land do so at `after`
+  (never before 1 ms) and fire the handler the element holds THEN, as a DOM event does.
+- Not played, named: Electron's `path` (a world file has none, so Path is never sent), the dialog's own filtering,
+  `multiple`, drag-and-drop. Whether a real browser ever THROWS from `click()` was not measured: the node's comment says
+  a sandboxed frame does; Chrome without a gesture opens nothing (the world's `never`).
+
+**The format (additive; the hash refresh named exactly `schema/trace.schema.json`, `src/spec.ts`, `src/trace.ts`,
+`src/world.ts`; the three stranger rounds green).**
+- trace: a `picker` event `{ accept, capture }` (two strings) in the LOCATION group; schema.ts and the JSON schema.
+- spec.ts: the `picker` need; `WorldView.pickerAnswer(ahead)` (a reducer reads a throw before it reports); a `picker`
+  effect; `WorldHandlers.picker`; `WorldPool.pickers`.
+- **spec.ts: `OutcomePatch.settles`** — an outcome reducer settles its OWN input's still-pending invocations, oldest first,
+  BEFORE its own opens. A second Open makes the first Unchanged inside its own handler (:66-70). No existing field could
+  say it: a world handler's `outcomes` would land after the new press's in-call Failure, out of report order. Refused on
+  a non-outcome reducer, and on nothing pending.
+- mutants.ts: `world.picker` wrapped and named. **s24's trap again**: the first run threw "the spec has no world.picker
+  handler" because `wrapReducers` copies handlers by name. Also new in mutants.ts: a click and `settles` in a branch's
+  shape (only when present, so every earlier shape is unchanged), `flip-outcome` flips `settles`, and a new
+  `drop-picker` mutant (the dialog never opens).
+
+**Runtime target.** `openfilepicker` joined `VIEWER_NODES`; the `document` is `installWorld`'s. A click is attributed to
+the node whose `_internal.inputElement` is the element clicked. Neither the async context nor `inUpdate` would do: a
+pulse over a wire reaches Open inside ANOTHER node's update.
+
+**What the probe measured first (zz probe on the runtime, a hand-made document, deleted).**
+- Never set, Accepted file types reaches the element as `"undefined"` (D27).
+- Capture `user` → Open → Capture `''` → Open: the second click still holds `capture: "user"` (C53).
+- A second Open makes the first Unchanged in its own frame, before anything of its own.
+- A pick fired outside any frame sends its four values and Done in the next settle.
+- A refused click puts `Could not open the file picker: <message>` on Error with Failure `open-file-picker/open-failed`.
+  A later pick is Done, and Error is not cleared (D25's family).
+- After any answer both handlers are `null`.
+
+**The race the world makes gradeable.** A first dialog's answer that lands while a second Open waits meets the SECOND's
+handler: the second press is Done with the first dialog's file. One that lands after the second was answered meets no
+handler and does nothing. Both are scenarios; the spec models "a handler is there" as `pending`, which is exactly when
+the element's handlers are the node's.
+
+**The survivor.** At 200 on today's seed, `open drop-set` on the superseding branch survived. No scenario changed
+Capture across a superseding Open and then cleared it. It was closed by "C53 through a superseding Open". Then 26 / 26.
+
+**Reach (400 generated sequences).** 582 clicks; Done in 51 sequences, Unchanged in 162, Failure in 34, File sent in 51.
+The pool is weighted to the success path (a pick at once, late, after a cancel, after a refused click, racing a later
+Open).
+
+### 6.32 Rows (s31)
+
+- **C53** — Open File Picker: **clearing Capture after an Open that used it still opens the camera.** `capture` is
+  assigned only when truthy, on an element reused for every Open (:143-145). Graded by two scenarios.
+  ([P107-C53](../../bugs/p107-c53-open-file-picker-capture-cleared-still-opens-the-camera.md))
+- **D27** — with Accepted file types never set, **the dialog's `accept` is the string `"undefined"`** (:141, unguarded).
+  Latent: the browsers ignore an unknown token, which was not measured here. Rides with C53's fix.
+  ([P107-D27](../../bugs/p107-d27-open-file-picker-accept-is-the-string-undefined-when-blank.md))
+- Error keeping the last failure across a later Done is **D25's family** (Request Magic Link, Upload File). No new row.
+
+### 6.33 Gate readings (s31, 2026-10-03; load 2.9–3.7 — this session's jest only, no peer suite)
+
+| gate | reading |
+|---|---|
+| probe on the runtime FIRST (zz probe, deleted) | the measurements in §6.31 — before any spec was written |
+| runtime: `NSP_ONLY="Open File Picker"`, at 200, today's seed | first run: 15 / 15 scenarios, 200 / 200, **one survivor** (`open drop-set`, the superseding branch); after the 16th scenario **CONFORMS**, 16 / 16, mutants 26 / 26 |
+| runtime, seeds 20729 and 13 | **CONFORMS** both |
+| runtime deep, `NSP_DEEP=10000` | **CONFORMS**: 10,000 / 10,000, 0 divergences, 26 / 26 (99 s) |
+| two runtime traces printed by hand | C53 (the second click `capture: "user"`) and the race (the second press Done with the first dialog's `photo.png`): read event by event, as §6.31 says |
+| reach, 400 generated sequences | §6.31 |
+| runtime: the WHOLE `test/node-spec/` | **3 suites, 189 passed, exit 0**, 340 s (s30's 188 + Open File Picker); the one DOES NOT CONFORM is AC1's planted off-by-one. GRAPH 76 / 76 |
+| `nodegx-node-spec`: `npx jest` | first run 786 passed / **1 red, the hash gate**, naming exactly `schema/trace.schema.json`, `src/spec.ts`, `src/trace.ts`, `src/world.ts`. Refreshed: 787 passed. With +5 PICKER tests in `world.test.ts` and Open File Picker in `batch-records.test.ts`'s `CONFORMING` (interpreter, two seeds): **18 suites, 794 passed, 17 skipped (the opt-in deep runs), exit 0** |
+| export: `tests/node-spec-*` | 2 suites, 12 passed |
+| `tsc --noEmit` node-spec, runtime | exit 0 · exit 0 |
+| count | **102** (+1); T2 11 / 11 |
+| `node scripts/node-spec/census.js` | run, then RESTORED from HEAD (the peer's viewer-react work is still uncommitted: dynamic ports 68 → 69, test counts). No census number depends on specs |
+| `node scripts/bugs.js check` | C53 and D27 valid; 1 problem, a PEER's file (`p109-s5-kitrecording-…`: status fixed, no commit line), not touched |
