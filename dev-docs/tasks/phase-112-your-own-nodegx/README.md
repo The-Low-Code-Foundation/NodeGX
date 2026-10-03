@@ -1,0 +1,186 @@
+# Phase 112 — Your own NodeGX
+
+**Scoped:** 2026-10-02, at HEAD `3bb2e084e`, from a conversation with Richard that started as a question about what
+phase 107 makes possible and ended with a working prototype: a NodeGX graph running in a browser page on the node
+specs, drawn as the editor's canvas, lifted into 3D, and editable (add a node, drag a wire, set a property), with
+missions a copy of the graph checks. The prototype is kept in [`prototype/`](prototype/README.md); a second, better one, Under the Lid (2026-10-03), in [`prototype-under-the-lid/`](prototype-under-the-lid/README.md) (reading 12).
+**Status: 🟡 IN PROGRESS — s1 (2026-10-03): OWN-000 built (NEEDS.md, CENSUS.md, the second prototype kept); OWN-010's ledger half built 2026-10-02. Six rulings to ask (§8).** **Prefix: `OWN`.**
+Task files: [OWN-000](OWN-000-THE-PROTOTYPE-MEASURED.md) … [OWN-010](OWN-010-EVERY-BUG-TEACHES-THE-KIT.md). The board is §6.
+
+> "Would someone who wants to view their NodeGX project as some crazy 3D mapping they've invented … would 107 open up
+> the path a bit more easily for their Claude Code to mock them up something … completely independently of NodeGX
+> editor?" — Richard, 2026-10-02, the opening question
+
+> "I just want it to show off the node concept as something that's actually worth considering." — Richard, 2026-10-02
+
+> "Can we write this up into a phase? … not a template … a new NodeGX? Not the exact thing you've made but the method
+> via which you can get Claude Code to make you your own NodeGX editor basically." — Richard, 2026-10-02
+
+## 0. The idea in one paragraph
+
+A NodeGX project is files, a vocabulary of nodes and a contract for how they behave. The editor is one way to look at
+and change those files, and phase 107 ruled that it should be replaceable (P107 R6). This phase makes that true for a
+person, not only for the architecture: **someone with Claude Code asks for the NodeGX editor they want, a 3D map, a
+big-block editor for children, a table with one row per node, and their agent builds it in an afternoon from a kit,
+opens their real project in it, and knows it is finished because a suite says so.** The kit is mostly things NodeGX
+already has but keeps inside its own editor: the project format, the node specs, a way to run a graph, the real app's
+preview, the canvas look. The method is the brief their agent reads. The proof is three agents who have never seen
+this repo each building a different editor from the kit alone, and Richard building his own.
+
+## 1. What was measured before scoping
+
+Read on 2026-10-02 from the working tree at `3bb2e084e` and from the prototype, which ran in headless Chrome.
+
+| # | fact | consequence |
+|---|---|---|
+| 1 | **The prototype** (`prototype/`): one page, 1,546 lines plus a 139-line graph runner, built in five versions between 21:33 and 23:08 in one conversation. It runs a focus timer of **18 specced nodes and 24 wires**, beside **8 visual nodes and 11 wires the page has to stand in for**. It edits: add from a picker, drag a wire, set properties, delete. Its three missions check a fresh copy of the graph on the specs in about a millisecond; `#selftest` fails all three on the untouched graph, `#demo` passes all three after building them. | 🔴 **An agent can build a working NodeGX editor in an evening.** What it cannot do yet is build one that opens a real project, because of readings 3, 4 and 6. |
+| 2 | **What the prototype reused unchanged:** `@nodegx/node-spec`'s interpreter and all of its specs (76 when the prototype was built, 78 at scoping: a peer is adding the user nodes), port names, types and descriptions through one `describe()` call. It bundled from `src/interpreter` and `src/nodes`, because **the package root is not browser-safe**: `index.ts` re-exports `graph.ts` (imports `fs`, `path`) and `world.ts` imports Node's `crypto` for the Hash node. The bundle is 418 KB minified, `fast-xml-parser` included. | The vocabulary half of an editor exists and works in a page. It needs a browser entry and a build (OWN-002). |
+| 3 | **What the prototype invented, part one: a graph runner.** `graph.ts`'s header says the package has no graph interpreter on purpose: *"it would be a second runtime; a stranger may build one, NSP-006"*. So the prototype wrote one: wave-at-a-time, one `World` per node, **never graded** against the package's **76 graph scenarios** (C1–C11, S1–S10, T1–T12), and known to differ from the runtime on C7 (lockstep). | 🔴 Every home-made editor will write its own and each will differ. The scenarios to grade one already exist (OWN-003, R1). |
+| 4 | **What the prototype invented, part two: the project.** It used its own graph shape, because **the v2 project format lives inside the Electron editor's source**: eight JSON Schemas and the validator in `noodl-editor/src/editor/src/schemas/` (1,465 lines), the semantic validation beside them (11,710 lines in `validation/`). The MCP server reaches in by relative path through `editor-deps.ts` (735 lines). Every file's `$schema` names `opennoodl.dev`; no document in `dev-docs/reference` describes the format. The format itself is small: a component is a folder of `component.json`, `nodes.json` (`{id, type, label, parameters, children, parent, x, y}`) and `connections.json` (`{fromId, fromProperty, toId, toProperty}`). | 🔴 Nothing outside this repo can depend on the format. P107 NSP-021 already names the home: `@nodegx/project-contract`, *"do not grow a second one"* (OWN-001). |
+| 5 | **What the prototype invented, part three: the screen.** **0 of 19 visual nodes has a spec** (NSP-016 not started: research and a ruling before any build). The prototype drew the screen itself from the values the visual nodes' wires carried, and said so on the page. Meanwhile **`@noodl/preview` already renders a v2 project in a browser with no editor process** and reloads when the files change, and `nodegx-observe` reads a running app's values over a socket from a session dictionary that ships topology. | A home-made editor does not have to wait for NSP-016: the real app can sit beside it (OWN-004, R4). |
+| 6 | **How much of a real app a page can run today.** Scoped from a rough count; **measured on 2026-10-03 by `scripts/own/census.js` with the P107 census rule** ([CENSUS.md](CENSUS.md)): of the todo template's **531 nodes, 19 run in a page** on the clock, randomness and time zone alone; 92 are specced but need a registry, a backend, a router, a popup or a viewport (across every template the registry alone is 950 of the 1,133 such nodes); 199 are visual; 53 are escape hatches (Function, Expression, CSS Definition); 71 are component instances; 2 are `Page`, outside the picker population; 95 are in the population with no spec, and 95 of those 95 are `Component Inputs` and `Component Outputs`. Planning: 972 nodes, 16 / 141 / 521 / 93 / 67 / 2 / 132. The rough count's three cells that moved (visual 201, script 52, other 96) were the two `Page` nodes counted as visual and `CSS Definition` counted as other. Over all 13 templates: 9,164 nodes, 313 page, 1,133 world, 3,560 visual, 1,299 script, 1,270 component instances, 360 outside the population (196 of them `Translation`, 66 `Page`, the rest kit nodes), 1,229 unspecced (1,071 of them Component Inputs / Outputs). | 🔴 **On a real project a home-made editor runs almost nothing by itself.** The levers, now ranked by the count: one shared `World` per graph (the registry: 950 nodes), the real runtime for the rest (R1), and NSP-015's Component Inputs / Outputs spec landing in the package (1,071 nodes). |
+| 7 | **What the prototype invented, part four: the look.** Version 1 drew its own space-themed world; Richard: *"I can't show this to anyone, it looks insane."* Version 2 copied the editor's canvas (150 px cards, the `default` and `visual` category schemes, green value and cyan signal wires, the white pulse, the STRUCTURE lane) by reading `CanvasTheme.ts`, `NodeGraphEditorNode.ts` and `structureLane.ts`, and from then on the reactions were *"very cool"*, *"getting cool"*. The editor already keeps a second copy of its palette in `nodelibraryexport.ts`, held honest only by `CanvasThemeNodeSchemes.test.ts`; the prototype is a third, held honest by nothing. | Recognisable first, then surprising. The look is part of the kit, and it must be generated, not copied (OWN-005, R5). |
+| 8 | **Nothing is installable from outside the repo.** `npm view` on 2026-10-02: `@nodegx/node-spec` 404, `@noodl/preview` 404, `@nodegx/project-contract` is `private`. Only `@nodegx/core` is published (0.1.0). `@nodegx/node-spec`'s `main` is its TypeScript source; it has no build. | 🔴 "Your own NodeGX" today means "a checkout of this repo". R2. |
+| 9 | **The editor with no screen already exists.** `noodl-mcp` creates components, connects ports, validates and renders reports over a wire (NSP-021 §2), and its `ProjectStore` refuses a write when the files changed since it read them (optimistic revisions, temp file and atomic rename). | The rules a home-made editor needs to write safely are already written. They move into the format package with the format. |
+| 10 | **The method for "an agent builds it from a spec alone" exists.** NSP-006 handed three strangers the spec and the suite, nothing else; all three were green on the first run, and their 15 questions became sentences in the format files. | OWN-008 is NSP-006 for editors: the brief is the kit's documentation, graded by strangers. |
+| 11 | P107's editor tasks: **NSP-020** (ports from the spec for the 50 nodes whose ports exist only once a viewer runs) and **NSP-021** (the second editor: a census of everything the editor knows about a node, and the MCP ↔ Electron round trip) are **not started**. | This phase depends on both and duplicates neither (§5). |
+| 12 | **The second prototype** ([`prototype-under-the-lid/`](prototype-under-the-lid/README.md), 2026-10-03, artifact `9tAKJ2QcxSqPJadkj7ssfR`): one 2,513-line page, no build, no WebGL. The same potter's site as three layers in 3D (JSON → node objects → HTML), run live, slowed or stepped with every step narrated, a journey that follows one Counter from the editor to the screen, and an inspector with a small conformance check. Richard: *"much better than the first prototype."* It imported nothing: the project is hand-written in the **deployed** shape (`sourceId` / `sourcePort`, which the runtime reads) rather than the editor's v2 files; Counter is ported by hand from its spec; 41 port names, 16 signal ports, 8 spec statuses and the P107 progress table are typed, and the table was stale within a day. [NEEDS.md](NEEDS.md) §2 has the 17 rows. | 🔴 **Two shapes of "the format" exist and nothing names them** (OWN-001 must carry the transform). 🔴 **Nothing machine-readable says which nodes conform** (a conformance ledger: NEEDS §3). The explainer's one sentence, *"JSON never turns into HTML; JSON turns into JavaScript objects, some of which keep a piece of HTML up to date"*, is the brief's opening (OWN-007). |
+
+## 2. The person sentences
+
+> **Ask for it:** "I tell my agent what kind of NodeGX editor I want, a 3D map, a big-block one for the kids, a table,
+> and that afternoon it opens my real project in it."
+
+> **Same files:** "Whatever editor I use, my project is the same files. The official editor opens what mine saved,
+> and nothing changed that I did not change."
+
+> **Same behaviour:** "A node does the same thing in my editor as in my app, because both run its spec, and the app
+> itself is right there beside my editor."
+
+> **Done means done:** "My agent knows the editor is finished because a suite says so, not because the screen looks
+> right."
+
+## 3. What an editor is, in NodeGX terms
+
+The prototype answered six questions. Each row says where its answer came from and where it comes from after this
+phase.
+
+| part | the question | the prototype | after this phase |
+|---|---|---|---|
+| **Format** | what is in the project, and how do I save a change? | invented its own graph | `@nodegx/project-contract` reads, validates and writes v2, in a page or in Node, with the MCP's write rules (OWN-001) |
+| **Vocabulary** | which nodes exist, what are their ports, what do they say they do? | `describe()` on the spec, plus the catalog for names | the same, from a browser entry with a build (OWN-002); ports for every node when NSP-020 lands |
+| **Logic** | what does the graph do when this changes? | a 139-line wave runner, ungraded, one world per node | one graph runner, graded by the 76 scenarios, one shared world per graph, or the real runtime headless (OWN-003, R1) |
+| **Screen** | what does the app look like right now? | drawn by hand | the real app beside the editor through `@noodl/preview`, live values through the observe protocol (OWN-004) |
+| **Look** | does it look like NodeGX? | copied by reading three files | an optional package generated from `CanvasTheme` (OWN-005) |
+| **Done** | is it right? | three hand-written missions | the editor suite: open, edit, save, round trip against the reference writer, the validator, and the graph scenarios on the editor's own runner (OWN-006) |
+
+And the seventh, which is the method: **the brief** an agent reads before it starts (OWN-007).
+
+## 4. The design, in brief
+
+**The kit is three packages, one suite and one brief.** Almost none of it is new code; it is code that already exists
+inside the editor or the repo, moved to where an outsider can use it.
+
+1. **The format leaves the editor** (OWN-001). The v2 types, the eight schemas, the structural validator, `loadV2Project`
+   and `ProjectStore`'s read/write rules move into `@nodegx/project-contract`, which the editor and the MCP then import
+   instead of reaching across. Two file backends: Node's file system and an in-memory set of files (a page, a test, a
+   zip the person dropped in). The semantic validator stays in the editor for now; the suite runs it.
+2. **The spec runs in a page** (OWN-002). A browser entry for `@nodegx/node-spec` with no `fs`, `path` or Node `crypto`
+   (Web Crypto for the Hash node), an ESM build with types, and a size number.
+3. **One way to run a graph** (OWN-003). Ruled by R1: either a graph runner in `@nodegx/node-spec` that implements the
+   package's own `GraphTarget` and passes the 76 scenarios, with one shared `World` per graph so stores and records run,
+   or the real runtime mounted headless in a page if OWN-003's first measurement says it can be.
+4. **The real app beside it** (OWN-004). `@noodl/preview` as a library a page can embed, pointed at the in-memory files
+   the editor is changing, plus the observe protocol for the last value on every wire from the real runtime.
+5. **The look** (OWN-005). `@nodegx/canvas-look`: the category schemes, card metrics, wire colours and structure lane
+   constants, generated from `CanvasTheme` by a script with a parity gate, so it is a projection and not a third palette.
+6. **The editor suite** (OWN-006). An editor implements a small adapter (`open(files)`, `apply(edit)`, `save()`, and
+   optionally `graphTarget()`). The suite opens fixture projects, applies a scripted list of edits through the editor's
+   own code path, and compares the saved files with the same edits applied through the reference writer. Ids are
+   matched, layout is free, everything else must be equal; the validator must report nothing new; the official editor's
+   loader must open the result.
+7. **The brief** (OWN-007). What an editor is in NodeGX terms (§3), the packages, the adapter, the suite, and every
+   trap the prototype and the strangers hit, written as sentences. Served where R3 rules.
+
+## 5. Depends on
+
+| On | Why | State at scoping |
+|---|---|---|
+| P107 NSP-020 | ports from the spec for the 50 nodes whose ports appear only once a viewer runs; until then the kit's port lists come from the catalog and say so | 📋 not started |
+| P107 NSP-021 | its §3.1 census of what the editor knows about a node is OWN-000's second half, and its round trip (MCP ↔ Electron) is OWN-006's first fixture. **Build each once:** the census lives in P107's folder and both phases cite it | 📋 not started |
+| P107 NSP-016 | visual nodes with specs. **Not waited for** (R4): the preview draws the screen until then | 📋 not started |
+| P107 NSP-008 | the 76 graph scenarios OWN-003 is graded by | ✅ built |
+| P111 SEE-002 | the text form. A home-made editor may write the text form instead of JSON once it exists; nothing here needs it | 📋 not started |
+| P111 SEE-001 | the honesty number. A home-made editor shows it if it exists; nothing here needs it | 📋 not started |
+| P93 TVW-006 | the structure lane OWN-005 projects | 🟢 built |
+
+**OWN-000, OWN-001 and OWN-002 need none of these to start.**
+
+## 6. Tasks
+
+| id | task | side | needs |
+|---|---|---|---|
+| [OWN-000](OWN-000-THE-PROTOTYPE-MEASURED.md) | **The prototype, measured.** Every question the prototype answered and every file it reached into, as a table; the runnable census redone with the P107 census rule for every template; the editor-knowledge census done once with NSP-021. | tooling | — |
+| [OWN-001](OWN-001-THE-FORMAT-LEAVES-THE-EDITOR.md) | **The format leaves the editor.** v2 types, schemas, structural validator, loader and the MCP's write rules in `@nodegx/project-contract`; the editor and the MCP import them; a page can read and write a project held in memory. | format + editor + MCP | — |
+| [OWN-002](OWN-002-THE-SPEC-IN-A-PAGE.md) | **The spec in a page.** A browser entry and an ESM build for `@nodegx/node-spec`; Web Crypto for Hash; the scenario loader moved to a Node-only entry; a size budget. | spec | — |
+| [OWN-003](OWN-003-ONE-WAY-TO-RUN-A-GRAPH.md) | **One way to run a graph.** First measure whether the runtime mounts headless in a page. Then, as R1 rules, the graded runner (76 / 76 scenarios or each divergence named) with one shared world per graph. | spec or runtime | OWN-002, R1 |
+| [OWN-004](OWN-004-THE-REAL-APP-BESIDE-IT.md) | **The real app beside it.** `@noodl/preview` embeddable and fed from memory; live wire values from the observe protocol; the prototype's hand-drawn screen replaced by the real one. | preview + observe | OWN-001 |
+| [OWN-005](OWN-005-THE-LOOK-AS-A-PROJECTION.md) | **The look, as a projection.** `@nodegx/canvas-look` generated from `CanvasTheme`, with a parity gate; the prototype reads it instead of its copy. | editor + tooling | — |
+| [OWN-006](OWN-006-THE-EDITOR-SUITE.md) | **The editor suite.** The adapter, the edit vocabulary, the fixtures, the reference writer, the round trip, the validator and the graph scenarios as one command that says PASS or names what differs. | tooling | OWN-001, OWN-003 |
+| [OWN-007](OWN-007-THE-BRIEF.md) | **The brief.** The method as one document an agent reads first, served where R3 rules, every sentence earned by a trap someone hit. | docs + MCP | OWN-001…006 |
+| [OWN-008](OWN-008-THREE-STRANGERS.md) | **Three strangers.** Three fresh agents, the kit and a one-line wish each (a 3D map, a children's block editor, a table); each must pass the suite on the todo template. Their questions become sentences in the brief. | proof | OWN-007 |
+| [OWN-009](OWN-009-RICHARDS-OWN.md) | **Richard's own.** Richard asks his own Claude Code for the editor he wants and uses it on a real project. The phase closes on his words. | Richard | OWN-008 |
+| [OWN-010](OWN-010-EVERY-BUG-TEACHES-THE-KIT.md) | **Every bug teaches the kit.** A ledger bug about a node, the format or the kit names its package (`kit:`) and, once fixed, the regression that ships in that package's suite (`regression:`); bugs about specced nodes are played through the spec before they are filed; each release's changelog is generated from the ledger and the spec `changes` entries; an open blocker stops a release. The ledger half is built. | ledger + release | the ledger, NSP-010, R2 |
+
+**Order:** OWN-000 → OWN-001, OWN-002 and OWN-005 in parallel → OWN-003 (after R1) → OWN-004 → OWN-006 → OWN-007 →
+OWN-008 → OWN-009. **OWN-010 runs alongside all of them**: its ledger half is built, the backlog is tagged as each package is touched, and its changelog and release gate land with each package's first release.
+
+## 7. Acceptance criteria for the phase
+
+1. Three agents that have never seen this repo each build a different editor from the kit alone; each passes the
+   suite on the todo template; the official editor opens what each saved with zero new validator diagnostics and no
+   difference in the files beyond ids and layout (OWN-008).
+2. The kit is a list of packages and one brief. A stranger reads nothing outside them, which is NSP-021 AC4's
+   sentence graded by people who could not cheat (OWN-008).
+3. A graph runs outside the app in one way, graded: 76 / 76 graph scenarios, or every divergence named in the runner's
+   own words (OWN-003).
+4. The format no longer lives in the editor: `editor-deps.ts` loses every import the format accounted for, and the
+   editor and the MCP read and write projects through `@nodegx/project-contract` (OWN-001).
+5. The kit's look cannot drift from the editor's: it is generated, and a gate fails when they differ (OWN-005).
+6. Richard has asked for his own editor, used it on a real project, and given his verdict (OWN-009).
+7. Every fixed bug about a kit package names a regression that ships in that package's suite and fails on the code
+   before the fix, and each package's first changelog is generated from the ledger (OWN-010).
+
+## 8. Rulings to ask (plain words)
+
+| # | Question | Recommendation |
+|---|---|---|
+| R1 | **When a home-made editor wants to show values moving through a graph, what runs the graph?** The spec package runs one node at a time. My prototype wrote its own 139-line loop to connect them; it was never tested and differs from the real app in one known way. Three choices: ship one tested runner in the spec package, so every editor gets the same answer (costs a second way to run graphs, which P107 deliberately avoided); or let editors run the real app's engine in the page (it already runs every node, specced or not, but nobody has measured whether it works outside the app); or let each editor write its own and have the suite test it. | **Measure the real engine first** (OWN-003 step 1: does it run in a page, and how big is it?). If it does, it is the runner: it is already the reference everything is graded against, and it runs every node type whether or not it has a spec (the todo app has about 220 non-visual nodes without one, §1 reading 6). If it does not, ship the tested runner. Either way, the suite tests any editor that writes its own. |
+| R2 | **Should the kit be installable by people who do not have this repo?** Today nobody outside can install the node specs, the project format or the preview: none is on npm, only `@nodegx/core` is. "Your own NodeGX" means a person with Claude Code and an empty folder. Publishing means version numbers, a release step, and not breaking these packages without saying so. | **Publish, at 0.x,** so breaking changes stay allowed while the phase runs, and say so in each README. |
+| R3 | **Where does an agent find the method?** Three places: the `nodegx` MCP server that people already install (it works with no project open); a Claude Code skill in a public repository; a page on nodegx.io. | **The MCP server first**, served as a document the agent reads rather than another tool (the tool list has a strict token budget), and the same text on nodegx.io. OWN-007 measures whether the server can serve it that way. |
+| R4 | **How does a home-made editor show the app's screen?** No visual node (Group, Text, Button and 16 more) has a spec yet, and specifying them is research that has not started. The preview package already draws the real app in a browser, from the files. | **Show the real preview beside the editor, now.** Do not wait for visual specs; when they exist the editor can draw the screen itself as well. |
+| R5 | **Should the kit give home-made editors NodeGX's look?** Version 1 of the prototype looked like nothing in NodeGX and could not be shown; version 2 copied the editor's canvas and was recognised at once. The look today lives in the editor's code and one extra copy. | **Yes, as an optional package generated from the editor's theme,** so a home-made editor can look like NodeGX without being a fourth copy that drifts. Editors that want their own look ignore it. |
+| R6 | **Should a known serious bug stop a package from being published?** Once the specs and the kit are on npm, a bug this repo finds in them reaches every outside user until a new version ships. The ledger can already say which package a bug belongs to. Choices: a package cannot publish while one of its bugs is marked blocker and still open; or it publishes anyway and lists its open bugs as known issues. | **Block on an open blocker; publish with everything less serious listed as known issues.** A blocker is defined in the ledger as freezes, crashes, loses data or blocks a release, so it is rare, and shipping one knowingly to strangers is the outcome to avoid. |
+
+## 9. Not this phase
+
+- **Replacing the official editor.** P92 and P93 own its chrome (P111 §9 says the same). This phase makes other
+  editors possible; it does not make one of them the product.
+- **A new file format.** v2 stays the file. P111 R1 decides whether the text form ever becomes one.
+- **Specs for the visual nodes.** NSP-016 owns them (R4).
+- **A gallery of home-made editors.** Sharing editors is a later question; this phase proves people can have them.
+- **The prototype as a product.** It stays in `prototype/` as evidence and as OWN-004's and OWN-005's first customer.
+
+## 10. Risks
+
+- **Home-made editors fork the format.** An editor writes something the official editor half-reads. The suite's round
+  trip is the guard, and the format package is the only writer the kit offers.
+- **A home-made editor damages a real project.** The format package carries the MCP's rule (refuse a write when the
+  files changed since they were read), and the brief tells agents to start on a copy, as memory says of every drive.
+- **The 19-of-531 trap.** On a real app a home-made editor that runs only specced nodes runs almost nothing (reading 6),
+  and the person concludes it does not work. R1's measurement and OWN-004's preview are the answers; the brief says it
+  plainly; OWN-008 runs on the todo template precisely so this cannot be hidden.
+- **The vocabulary moves under the kit.** The spec count went from 76 to 78 during this scoping. The kit pins package
+  versions; the suite reads the vocabulary from the installed package, never from a list in the brief.
+- **A demo is not a tool.** The prototype looks finished. Memory's *correct and usable were never the same criterion*
+  applies: OWN-009 is Richard using his own editor on his own project, not watching one.
