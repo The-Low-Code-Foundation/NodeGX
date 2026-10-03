@@ -142,6 +142,11 @@ console message — the page cannot show what it is never told.
 ### 9. Data-shaped inputs
 One array port feeding a \`For Each\`: \`Items\`, \`Options\`, \`Headers\`, \`Filters\`,
 \`Rows Per Page Options\`. Never one port per row, and never a component per row.
+Two lists may number their plain rows the same (\`l0\`, \`l1\`…): each list keeps its own rows. An id still
+names one record for the whole app, though, so anything that finds a row *by its id* (an \`Object\` node
+given the row's \`Id\`, a page writing to \`itemActionItemId\`) finds the first list's row. Inside a row,
+read it with an \`Object\` node set to \`From repeater\`; give rows the page edits by id ids no other
+list uses.
 
 ### 10. The named utility publishes too
 \`Component Inputs\` → one or two working nodes → \`Component Outputs\`, under a name that is a job:

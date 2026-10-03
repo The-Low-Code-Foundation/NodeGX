@@ -186,6 +186,13 @@ describe('CMP-001 AC2 — the playbook reaches the agent', () => {
     expect(received).toMatch(/A logic component with no .Component Outputs. is a node with extra steps/);
   });
 
+  it('P109 ISL-003: says two lists may number rows the same, and what a lookup by id then finds', () => {
+    // Ruled 2026-10-03 "Each list keeps its rows"; the first list keeps the app-wide records (collection.ts).
+    expect(received).toMatch(/Two lists may number their plain rows the same/);
+    expect(received).toMatch(/finds the first list's row/);
+    expect(received).toMatch(/From repeater/);
+  });
+
   it('states the floors nowhere — a graded build must not be able to count its way to a pass', () => {
     // CMP-001 AC3's three floors (50% / 20% / 0.15) grade the CMP-002 build, which reads this field.
     // 🔴 An absence is only evidence beside a signal known to fire: on a blank field every

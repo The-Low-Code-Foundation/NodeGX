@@ -1,6 +1,6 @@
 # ISL-003 — Two lists that reuse row ids keep their own rows, or the author is told they share them
 
-**Status: 🟢 ruled and built s9 (2026-10-03): "Each list keeps its rows" — AC1 ✅, AC2 ✅, AC4 ✅ (census), AC6 ✅; ⬜ AC3 (doctrine), ⬜ AC5 (browser). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F03 ·
+**Status: 🟢 ruled and built s9 (2026-10-03): "Each list keeps its rows" — AC1 ✅, AC2 ✅, AC3 ✅, AC4 ✅ (census), AC6 ✅; ⬜ AC5 (browser). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F03 ·
 [P106 IG-006](../phase-106-the-island-grows/IG-006-OLIVE-READS.md) §7, deviation 10 (lines 166-167) · the template's
 prefixes at `packages/noodl-mcp/tests/cg003Scripts.ts:330` and `:1250-1252` · **Side:** product (runtime: `Model`,
 `Collection`, the For Each row; doctrine)
@@ -202,3 +202,17 @@ are unnecessary; `padkey-<op>` (one list) never was. None changed here; the "P10
 rebuilds the island).
 
 **Export:** now agrees for the colliding case (each list its own rows, §8 above); it never had app-wide rows.
+
+**AC3 ✅ — the doctrine, rewritten for the ruled behaviour.** The scoped sentence ("a row's id is app-wide … prefix
+ids per list") is no longer true, so the interface doctrine §9 (`noodl-editor/…/authoring/prompts/interfaces.ts`) now
+says: *two lists may number their plain rows the same and each keeps its own; an id still names one record for the
+whole app, so a lookup by id (an Object node given the row's `Id`, a page writing to `itemActionItemId`) finds the first
+list's row; inside a row use `From repeater`, and give rows the page edits by id ids no other list uses.* That last
+clause matters because the same doctrine teaches "take the id from `itemActionItemId` and write to that row".
+Graded through a live `get_project_info` in `cmp001InterfaceDoctrine.test.ts` (new test green; delete the sentence →
+red). The For Each page and catalog carry it as a "Watch out for" line (`docs/node-catalog/enrichment/for-each.json`
+→ `catalog:merge` → `docs:nodes`; the 27 other pages the generator rewrote were put back from HEAD, as in s8).
+🔴 The first wording pushed AWP-005's storefront basket to **8,354 / 8,350** tokens (`nodeDocBudget.test.ts`); shortened
+to fit (15/15), not the limit moved. ⚠️ `cmp001InterfaceDoctrine.test.ts` has one red that is not this change: the
+corpus publish rate reads 39%, the doctrine says 33%, stale for 25+ catalog commits — filed `P109-S9-CMP001RATE`.
+MCP doctrine/budget specs: 126/127 (that row) + nodeDocBudget 15/15.

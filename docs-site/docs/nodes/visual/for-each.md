@@ -86,6 +86,7 @@ Two dynamic mechanisms: `template`/`templateScript` swap in and out based on `te
 
 - Triggering `refresh` whenever data changes: the repeater already diffs `items`; refresh forces a full rebuild and loses instance state.
 - Binding huge unpaged query results into a repeater; page or limit the query instead.
+- Two lists numbering rows alike (`l0, l1…`) each keep their own, but a lookup by id (an Object node given the row's `Id`, a write to `itemActionItemId`) finds the first list's row. In a row, use From repeater; give rows edited by id unique ids.
 
 ## Examples
 
