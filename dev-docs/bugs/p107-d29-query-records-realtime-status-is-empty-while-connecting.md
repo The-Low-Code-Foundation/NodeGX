@@ -2,7 +2,7 @@
 id: P107-D29
 title: Query Records — Realtime Status reads empty while the subscription is connecting; its description (and Subscribe To Changes) say "connecting"
 status: fixed
-commit: PENDING
+commit: 4763f5a00
 severity: low
 area: runtime / Query Records (`dbcollectionnode2.ts` :707-713 — `createRealtimeSubscription` without reading the handle's status; Subscribe To Changes reads it, subscribetochanges.ts :451)
 found: P107 (the node says what it does) s35, 2026-10-03

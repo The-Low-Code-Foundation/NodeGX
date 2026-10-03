@@ -1,103 +1,118 @@
 # P107 — next session
 
-**Written 2026-10-03 (s35).** Read the [README](README.md) §2–§7. s35's record is in two places: [NSP-012 §6.5](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md)
-(Array Filter v2, C59, the name sweep, C60, the Upload File hole) and [NSP-014 §6.43–§6.45](NSP-014-BATCH-DATA-AND-CLOUD.md)
-(Query Records slice C, `subscribeFirst`, D29). s34's is NSP-014 §6.40–§6.42.
+**Written 2026-10-03 (s36).** Read the [README](README.md) §2–§7. s36's record is in four places: [NSP-012 §6.6](NSP-012-BATCH-ARRAYS-OBJECTS-STORES.md)
+(C59 + C60 fixed), [NSP-014 §6.46](NSP-014-BATCH-DATA-AND-CLOUD.md) (D29 fixed), [NSP-016 §7.1](NSP-016-VISUAL-NODES.md) and
+[RESEARCH-LAYOUT-SEMANTICS.md](RESEARCH-LAYOUT-SEMANTICS.md) (the visual nodes' research and R10).
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
-| NSP-000 the census | ✅ s1; s21 the `NSP-022` batch | `3bd71e837`, s21 |
-| NSP-001 the spec + interpreter | ✅ s1 … s34; **s35: `subscribeFirst` (a patch's subscriptions before its backend calls)** | s1 … s35 |
-| NSP-002 traces + adapter + runtime target | ✅; **s34: the `socket` trace event; canonical `$bytes`; the target attributes each socket call to the node that made the socket** | s2 … s34 |
-| NSP-003 the runner | ✅; s24 `wrapReducers`; s29 `opens`; s31 `world.picker`, `settles`; s33 `drop-subscribe` / `drop-unsubscribe`; s34 `drop-socket`; **s35 `drop-subscribe-first`** | s2 … s35 |
+| NSP-000 the census | ✅ s1; s21 the `NSP-022` batch; **s36: `scripts/node-spec/visual-census.js` (the T5 inputs, classed)** | `3bd71e837`, s21, `bf90b170d` |
+| NSP-001 the spec + interpreter | ✅ s1 … s35 | s1 … s35 |
+| NSP-002 traces + adapter + runtime target | ✅ (s34 last) | s2 … s34 |
+| NSP-003 the runner | ✅ (s35 last) | s2 … s35 |
 | NSP-004 the pilot five | ✅ s3 | `ef6f3b6e1` |
 | NSP-005 the export adapter | ✅ (s13); plays the latch nodes only | s13, s15 |
-| NSP-006 the stranger | ✅ rounds 1, 2, 3, 3b — s35 refreshed the hashes (`src/spec.ts` only), the three rounds green | `fec895706`, s21 … s35 |
-| NSP-007 the world | ✅; … REALTIME (s33), **SOCKET and NETWORK's STREAMED BODY (s34)**; AC1's export half ✗ | s13, s16 … s34 |
+| NSP-006 the stranger | ✅ rounds 1, 2, 3, 3b (s35's hashes) | `fec895706`, s21 … s35 |
+| NSP-007 the world | ✅ (s34 last); AC1's export half ✗ | s13, s16 … s34 |
 | NSP-008 the graph | ✅ — 76 / 76 | s15, s20, s23 … s29 |
 | NSP-010 a change is a version | rows only (two holes, §4) | — |
-| NSP-011 / NSP-012 | as s15; **s35: Array Filter v2 (`in` / `nin`); seven of its scenarios had never filtered (C59); Array Map's one mapping scenario had never mapped (C60)** | s15, s35 |
+| NSP-011 / NSP-012 | as s15; s35 Array Filter v2; **s36: C59 + C60 fixed — Array Filter v3, Array Map v2** | s15, s35, `a6f629a2e` |
 | NSP-013 the time batch | 🟡 24 / 24 conform. Left: AC2, the deep run for s11–s14 | s16 |
-| **NSP-014 records, users, files, HTTP, streams** | **🟡 24 of 24 conform — s35: Query Records slice C (its realtime half). Left: AC2's export half (P18)** | s8, s21 … s35 |
+| NSP-014 records, users, files, HTTP, streams | 🟡 24 of 24 conform; **s36: D29 fixed — Query Records v2**. Left: AC2's export half (P18) | s8, s21 … s35, `4763f5a00` |
 | NSP-015 navigation + components | 🟡 14 of 14 conform. Left: AC2 (export, P18) | s15 … s20 |
+| **NSP-016 the visual nodes** | **🟡 s36: AC1 (research) + AC2 (R10 ruled). AC3 (logic specs) is the build; AC4 waits for NSP-017** | `bf90b170d` |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 opened s21 (needs a second runtime target, `noodl-viewer-cloud`) | s21 |
-| NSP-009, NSP-016 … NSP-019, NSP-021 | — | — |
+| NSP-009, NSP-017 … NSP-019, NSP-021 | — | — |
 
-**106 of 147 conform on the runtime (72.1%)** (T1 46/46 · T2 11/11 · **T3 22/39** · T4 27/27; 0 exempt). Graph 76 / 76. What is
-left of the 147: the 17 cloud-only nodes (NSP-022, T3), 19 visual nodes (NSP-016, T5), 5 escape hatches (NSP-017, T6).
+**106 of 147 conform on the runtime (72.1%)** (T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27; 0 exempt). Graph 76 / 76. Left: the
+19 visual nodes (NSP-016, T5), the 17 cloud-only nodes (NSP-022, T3), the 5 escape hatches (NSP-017, T6).
 
 ## Commits this session (on `cline-dev`)
 
-- `3ae3f7288` — Array Filter v2 (spec, scenarios 11 → 16, its own records pool), row C59, NSP-012 §6.5, the README.
-- `be5223e48` — the name sweep: Array Map's records twin and pool, row C60, Upload File's second backend, NSP-012 §6.5.
-- the slice C commit — `query-records.ts` (realtime half), `DbCollection2.json` (37 → 56), spec.ts + interpreter.ts
-  `subscribeFirst`, runner/mutants.ts `drop-subscribe-first`, equivalent-mutants.ts (2 rows), the hashes, row D29, C55's
-  note, NSP-014 §6.43–§6.45, the README and this handoff.
-- **The census is still NOT regenerated into a commit**: a peer's viewer and export work moves it. No census number
-  depends on specs.
+- `a6f629a2e` — **C59 + C60 fixed** (Richard: *"Yes, fix both"*): Array Filter and Array Map read a record as before and any
+  other row as it is. Runtime one line each, line-count neutral (no cite moved); specs v3 / v2; renamed scenarios and two
+  null-row scenarios.
+- `4763f5a00` — **D29 fixed** (*"Yes, say connecting"*): Query Records reads the handle's status after subscribing
+  (dbcollectionnode2.ts :714, one ADDED line). Spec v2; its 70 cites past :713 and 19 in `DbCollection2.json` shifted by
+  a script and spot-checked; three v1-worded scenarios renamed from printed traces.
+- `bf90b170d` — **NSP-016 research + R10**: RESEARCH-LAYOUT-SEMANTICS.md, `visual-params.json` (hand-kept classes),
+  `visual-census.json` (generated), `scripts/node-spec/visual-census.js` (`--check`), README §7 R10 + the three ruled rows.
+- The handoff commit: this file, the D29 ledger hash.
 
-## Gate readings
+## Gate readings (2026-10-03, load 3.2–5.6, this session's jest only; all taken BEFORE a P112 peer's node-spec edits at 22:15)
 
-NSP-012 §6.5 and NSP-014 §6.45. In short: Array Filter v2, Array Map and Query Records each conform at seeds 20729, 13 and
-20730 and at 10,000 / 10,000 with 0 divergences; mutants killed or declared (Query Records: 2 new declared rows); planted
-defects in copies of the runtime nodes caught (Array Filter 5 of 6, the sixth out of the format's reach; Array Map 3 of 3;
-Query Records 4 of 4). Package: 18 suites, exit 0, the three stranger rounds green. Whole runtime `test/node-spec/`:
-3 suites, 193 passed, exit 0. Both `tsc --noEmit` exit 0.
+- C59 + C60: control (spec changed, runtime not) **red** — Array Filter 15, Array Map 7 generated divergences. Treatment:
+  both CONFORM at seeds 20729 / 13 / 20730 and at 10,000 / 10,000 (0 divergences; mutants 98 / 98, 33 / 33).
+- D29: control **red** (39 / 58 scenarios, 19 generated divergences). Treatment: CONFORMS at three seeds (58 / 58) and at
+  10,000 (0 divergences, mutants 1323 / 1325 — s35's two declared equivalents; s35's deep run did NOT conform, this one does).
+- Package `nodegx-node-spec`: 18 suites, 837 passed, exit 0 (twice). Runtime: the WHOLE jest suite twice, 183 suites,
+  3,210 passed, exit 0 (511 s; its one "DOES NOT CONFORM" line is AC1's planted Counter defect). `tsc --noEmit` exit 0,
+  both packages.
+- `node scripts/node-spec/visual-census.js --check`: 274 inputs, every one classed.
 
-## What s35 settled
+## What s36 settled
 
-1. **A scenario's NAME is a claim, and nobody had read it against its trace.** Array Filter's "one record, Filtered, First
-   Item Id and Count" was a filter-failed on both targets from s15. The filter reads each row's `data`, and the scenario
-   handed plain objects. Seven of its eleven scenarios did the same, so equals, regex and the uncompilable pattern were
-   graded on one failure. That is also a product defect: a Function's plain array cannot be filtered (C59), nor mapped by
-   Array Map (C60). A sweep of all 1,151 scenarios (a failing trace under a name that says nothing of failing) found 17
-   candidates and three holes. It takes seconds: **re-run it whenever a batch closes** (NSP-012 §6.5 has the method).
-2. **A generated pool must hold what the node can USE.** Array Filter's and Array Map's `items` examples were plain arrays,
-   so no generated run ever filtered or mapped. Both now draw registry records from their own pool.
-3. **Two frame-end callbacks run in the order first scheduled** (`scheduleAfterInputsHaveUpdated`). Query Records' query and
-   reconnect do, and the request group shows it. The format's `subscribeFirst` says so. A spec sets it only when the patch also
-   calls a backend: with nothing to order against, its mutant cannot be killed.
-4. **A 200-sequence green does not grade a branch the 200 never reach.** Query Records' first deep run had 0 divergences and
-   still did NOT conform: three mutant survivors on branches only 10,000 sequences found (a still-connecting subscription
-   torn down beside a query). The deep run is where mutants of rare branches first exist. Read its `mutants:` line, not
-   only `generated:`.
-5. **A swap survivor is often a swap into a twin that differs only in flags already at that value.** Declare exact shapes;
-   the reverse direction usually IS killable by a follow-up step that reads the flag (an order it would flip).
+1. **The rulings asked first paid off at once.** The next batch, C59 + C60 and D29 went to Richard as ONE AskUserQuestion,
+   in plain words, and came back in one answer. Each fix shipped alone: spec first, control red, then the runtime, green.
+2. **A runtime fix that ADDS a line moves every cite after it.** A one-line fix inside an existing line (C59, C60) moves
+   nothing. D29's added line shifted 89 cites, done by a script that skips cites prefixed by another file's name and then
+   spot-checked against the file. Prefer a line-neutral fix when it reads as well. When it does not, shift by script and
+   spot-check.
+3. **The visual nodes' layout is not the hard part.** 96.6% of the templates' 11,041 layout settings fall in the subset
+   Yoga, SwiftUI, Compose and Flutter share; the one real gap is `flexWrap: wrap` on rows (173). **What a parameter spec
+   cannot see is the CSS beside the parameters**: 9 of 10 shelf templates carry a hand-written sheet (`CSS Definition`, or a
+   Function injecting `<style>`): 1,084 rules, 185 KB, `!important` 445 times, and 17% of visual nodes take a class
+   from it. That is NSP-017's question, and it bounds any geometry grading.
+4. **`as` (the HTML tag) is semantics, not styling**: `h1` / `h2` / `section` / `main` = heading levels and landmarks, which
+   native platforms say as accessibility roles. A spec should carry it as a role, not drop it as web-only. It is classed
+   web-only in `visual-params.json` today; reconsider when the build writes classes into `PortMeta`.
+5. **The picker stamps defaults** on Text, Button, Checkbox and Text Input (`ElementConfigRegistry.applyDefaults`). A
+   template value is not proof an author chose it.
 
-## What s36 does
+## What s37 does
 
-- **A batch: NSP-022 (the 17 cloud-only nodes) or NSP-016 (the 19 visual nodes).** Both need research first. NSP-022 needs a
-  second runtime target (`noodl-viewer-cloud`: read what it is and how its nodes run before anything). NSP-016 needs a
-  viewer seam for React nodes. **Ask Richard which, in plain words**, if the board does not settle it: *"The next batch is
-  either the nodes that only run in cloud functions (17), or the visual nodes like Group, Text and Repeater (19). Which
-  first?"*
-- **Cheap, on a QUIET box only:** the deep runs s20 listed (clock-driven specs under T9, Pop Component Stack, s11–s14 at
-  `NSP_DEEP=10000`); the D24 probe on a `nodegx`-type backend; the name sweep again (it was a throwaway — a gate is better:
-  consider making it a package test that lists the candidates and fails on a NEW one).
-- **Array Filter's generated reach is low by construction**: the Op candidate is `filterFilterOp-a` while the drawn filter
-  fields vary, so 10–18 of 400 sequences pair `in` / `nin` with records (NSP-012 §6.5). The hand scenarios carry it.
+**NSP-016 AC3: the logic specs for the 19 visual nodes (R10), starting with the seam.**
+- **First, coordinate.** A P112 session (`opennoodl-14`, OWN-002) has uncommitted edits at 22:15 in node-spec `graph.ts`,
+  `index.ts`, `runner/conformance.ts`, `runner/scenario.ts`, `schema.ts` and `world.ts` (+ new `browser.ts`,
+  `graph-files.ts`, `runner/scenario-files.ts`, `sha2.ts`). Four of those are guarded format files. `git status` +
+  `stat` before touching any of them; if they are still open, send ONE short message before editing `world.ts`. When they
+  land, the stranger hashes must have been refreshed with the three rounds green. Check that in their commit.
+- **The PERSON face** (design, from reading s36): a control's events come from its React component calling a prop
+  callback the node made (`outputProps` → `props.onClick`; Checkbox's `props.checkedChanged`, Dropdown's
+  `props.valueChanged`, Slider's `props.updateOutputValue`). The component also holds rules of its own. A disabled button
+  never calls `onClick`; the DOM `disabled` attribute does that. **Stand in for the component and you copy those rules
+  instead of grading them.** So render the real component: react-dom + jsdom + `act`, as the export target already does
+  (s6: 1–3 ms a mount from a cache). A person act is a DOM event on the element a person sees (click, input, change, key),
+  recorded in the trace as what the person did. The corpus harness (`noodl-runtime/test/corpus/graph-harness.ts`, ERG-001
+  rows) shows how these nodes are made and what the viewer context needs stubbed (`styles`, `setNodeFocused`, the Group's
+  three scroll-plugin mocks). The runtime jest env is `node`: a per-file jsdom docblock or a scoped jsdom.
+- **Order:** Button (one signal) → Checkbox (value + Check / Uncheck + Unchanged) → Text Input → Dropdown, Slider,
+  Radio Button (+ Group) → Group / Text / Image / Circle / Icon / Columns / Video (pointer + drop + scroll actions:
+  65 logic inputs in all, `visual-census.json` lists them per node) → Drag → Repeater, Component Stack, Page Router,
+  Component Children (each needs a component boundary or a stack; check what NSP-015's seams already give).
+- **R10's second half:** write each input's class from `visual-params.json` into the spec's port metadata. That is a
+  `PortMeta` field, so it is a FORMAT change: the hash refresh and three stranger rounds, in the same commit.
+- **Not this task:** geometry (AC4), until NSP-017 says what a CSS Definition sheet is.
+
+**Cheap, on a QUIET box only:** the deep runs s20 listed (clock-driven specs, Pop Component Stack, s11–s14 at
+`NSP_DEEP=10000`); the D24 probe; the name sweep as a package test.
 
 **Human decisions outstanding:** rows to ask, in plain words (README §7 has them written):
-- **C27 + C29 together** (one ruling: "hand a copy"), then **C30**, **C26**, **C24**, C31, C32, C28, C25, D20, D21.
+- **C27 + C29 together** ("hand a copy"), then **C30**, **C26**, **C24**, C31, C32, C28, C25, D20, D21.
 - Then C22, D19 (second half), C11 **with C37**, C12, C15, C16, C20, C7, D14, D16.
 - The Record family: C34, C36, C35, C33, D22.
 - Query Records: C38, C39, C40 + C41 together.
 - Filter Records: **C42**, C44, C43.
 - The user nodes: **C47**, C45 + C46 together, C48 (with C11 + C37), C49 (with R7), D23, D24, C50, D25 (with C47).
-- The files (s30): **C52**, C51, D26 (with C47 + D25).
-- The file dialog (s31): C53, D27 (rides with it).
-- Cloud Function (s32): **C54**, D28.
-- Subscribe To Changes (s33): C55.
-- Server-Sent Events (s34): C58 (says Connected after a URL change tore the stream down — WebSocket says idle), C56 (Last
-  Error / Retry Count / Duplicates Suppressed move unsent), C57 (a non-text Event Types or Method throws).
-- **s35, worth asking FIRST — one fix, two nodes: C59 + C60** — *"A Function's list of plain objects wired into Array Filter
-  fails as soon as a filter is set, and Array Map fails any script that copies a property. Records work. Make both read a
-  plain object's own fields too?"* Then **D29** (Query Records' Realtime Status blank while connecting; C55 now covers Query
-  Records too).
+- The files: **C52**, C51, D26. The file dialog: C53, D27. Cloud Function: **C54**, D28. Subscribe To Changes: C55.
+- Server-Sent Events: C58, C56, C57.
 - Then R7, R8, R4's confirmation and G1.
+- **New from s36's research (not a row yet, worth raising with NSP-017):** the templates' CSS sheets — should a template
+  be allowed to restyle nodes with `!important` at all, or should what the sheets do (grids, hover / press states,
+  phone-only rules) become node parameters?
 
 The list: `node scripts/bugs.js --from P107`.
 
