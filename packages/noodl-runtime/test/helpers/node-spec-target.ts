@@ -264,6 +264,12 @@ interface Page {
   root: { render(el: unknown): void; unmount(): void };
   /** The holder's React instance — re-rendered for a paint, and by the node's Mounted (the stand-in parent's `forceUpdate`). */
   host: { forceUpdate(): void } | null;
+  /**
+   * NSP-016 s42 — the node's CHILDREN on the page, when its spec says the page holds some (a Radio Button Group's buttons,
+   * radiobuttongroup.ts THE FIRST VISUAL WITH CHILDREN): real nodes added with the node's own `addChild`, not subjects — each
+   * with the Value it was made with, which is how a `pick` finds it. Deleted with the page.
+   */
+  children?: Array<{ node: RuntimeNode; value: unknown }>;
 }
 
 /**
@@ -784,7 +790,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -1402,6 +1408,18 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         context.scheduleUpdate();
       }
     };
+    // NSP-016 s42 — a Radio Button Group's page holds its buttons (radiobuttongroup.ts `PAGE_VALUES`): each a real Radio
+    // Button made in the group's scope, its Value set as a loaded project sets a parameter, added through the group's own
+    // `addChild` (which schedules Children Count, react-component-node.ts :1611-1620) before the first render
+    if (s.h.type === 'Radio Button Group') {
+      const values = (specFor(s.h.type)?.acts?.pick?.values ?? []) as readonly unknown[];
+      page.children = values.map((value, i) => {
+        const child = context.nodeRegister.createNode('net.noodl.controls.radiobutton', `${s.h.id}/button${i}`, (s.h.node as unknown as { nodeScope: never }).nodeScope) as unknown as RuntimeNode;
+        if (value !== undefined) (child as unknown as NodeInstance).setInputValue('value', value);
+        (s.h.node as unknown as { addChild(c: unknown): void }).addChild(child);
+        return { node: child, value };
+      });
+    }
     const React = d.React;
     class Host extends React.Component {
       render() {
@@ -1424,6 +1442,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       page.root.unmount();
     });
     page.container.remove();
+    // the children go with the page: off it already, their teardown cannot reach a render
+    for (const c of page.children ?? []) {
+      try {
+        c.node._onNodeDeleted();
+      } catch {
+        // a page child's teardown assumes nothing of the play; what it raises is not the node's
+      }
+    }
     (s.h.node as unknown as { parent?: unknown }).parent = undefined;
     s.page = undefined;
     onPage.delete(s);
@@ -1450,7 +1476,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   function personActs(s: State, act: string, value: unknown): void {
     const d = ensureDom();
     const w = d.window;
-    const el = elementSeen(s.h.node as unknown as { getDOMElement(): unknown }, s.page?.container);
+    // NSP-016 s42 — a `pick` acts on the CHILD whose Value is the act's (a Radio Button Group's button): the control a person sees
+    // inside it; a Value no child carries, or a child off the page, is nothing to act on
+    const el = act === 'pick' ? pickedElement(s, value) : elementSeen(s.h.node as unknown as { getDOMElement(): unknown }, s.page?.container);
     if (!el) return;
     const mouse = (type: string, init: Record<string, unknown> = {}) => el.dispatchEvent(new w.MouseEvent(type, { bubbles: true, cancelable: true, composed: true, button: 0, ...init }));
     const touch = (type: string) => el.dispatchEvent(new w.TouchEvent(type, { bubbles: true, cancelable: true, composed: true }));
@@ -1479,6 +1507,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         if (!disabled) mouse('mouseup');
         break;
       case 'click':
+      // NSP-016 s42 — a pick is a click on the picked child's control (`pickedElement`): the browser's rules for it are a click's
+      case 'pick':
         if (disabled) break;
         press();
         mouse('mouseup');
@@ -1560,6 +1590,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       default:
         throw new Error(`runtime: no person face for the act "${act}"${value === undefined ? '' : ` (${JSON.stringify(value)})`}`);
     }
+  }
+
+  /** PERSON (above, NSP-016 s42) — the control of the page child whose Value is `value` (`Object.is`), if it is on the page. */
+  function pickedElement(s: State, value: unknown): any {
+    const child = s.page?.children?.find((c) => Object.is(c.value, value));
+    if (!child) return null;
+    const el = elementSeen(child.node as unknown as { getDOMElement(): unknown });
+    return el && el.isConnected ? el : null;
   }
 
   /**

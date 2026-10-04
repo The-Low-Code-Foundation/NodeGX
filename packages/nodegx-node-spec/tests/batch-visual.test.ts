@@ -13,7 +13,7 @@ const VISUAL = Object.values(specs)
 
 describe('NSP-016 — every visual spec conforms on the interpreter: scenarios, 200 sequences, every mutant killed or declared', () => {
   test('the batch is the specs that need a person', () => {
-    expect(VISUAL).toEqual(['net.noodl.controls.button', 'net.noodl.controls.checkbox', 'net.noodl.controls.options', 'net.noodl.controls.range', 'net.noodl.controls.textinput', 'net.noodl.visual.icon']);
+    expect(VISUAL).toEqual(['Radio Button Group', 'net.noodl.controls.button', 'net.noodl.controls.checkbox', 'net.noodl.controls.options', 'net.noodl.controls.range', 'net.noodl.controls.textinput', 'net.noodl.visual.icon']);
   });
   for (const type of VISUAL) {
     test(`${type}`, async () => {

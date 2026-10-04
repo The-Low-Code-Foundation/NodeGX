@@ -1,0 +1,206 @@
+/**
+ * Radio Button Group (`Radio Button Group`) — read from `packages/noodl-viewer-react/src/nodes/controls/radiobuttongroup.ts`,
+ * `components/controls/RadioButtonGroup/RadioButtonGroup.tsx` (the component and the context it provides),
+ * `components/controls/RadioButton/RadioButton.tsx` (how a button inside reads that context and answers a click) and
+ * `react-component-node.ts` (Mounted, Did Mount, Will Unmount, the Advanced and Bounding Box outputs, `addChild`) on
+ * 2026-10-04 (NSP-016 s42).
+ *
+ * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
+ *
+ * THE FIRST VISUAL WITH CHILDREN. A group's whole behaviour is what its Radio Buttons do inside it: a person never acts
+ * on the group, only on a button in it. So the group's PAGE holds its buttons — one Radio Button per value the `pick` act
+ * draws (`PAGE_VALUES`, in that order; the one drawn as `undefined` is a button with no Value), each enabled, each a real
+ * child of the group (`addChild`) — and `pick` is a person clicking the button whose Value is the act's (no value: the
+ * button with none). A target builds that page when it puts the group on it; a pick of a Value no button on the page
+ * carries raises nothing. The buttons are the page, not subjects: what they report is the Radio Button's spec.
+ *
+ * THE RULE, before the citations. A Radio Button Group is a `<div>` that provides a context to the buttons inside it
+ * (RadioButtonGroup.tsx :49-53): the SELECTION (`useState({ value, fromUser })`, :21), its `name`, and `checkedChanged`.
+ *   - **the selection follows the node's renders** (:37-39): `useState` starts it at the node's Value at the mount, and
+ *     the effect `[props.value]` sets it to the node's Value at every render whose Value differs (`Object.is`) from the
+ *     last one's. The node keeps `props.value` and `_internal.value` together on both its write paths (radiobuttongroup.ts
+ *     :20-23, :93), but a render is the NODE's: each paint hands React a fresh copy of the props (react-component-node.ts
+ *     :1076-1103), and the component's own re-render after a pick (its `setSelection`) reuses the last copy. So the spec
+ *     keeps three: the node's Value, the Value the last paint rendered, and the selection. A pick moves the node's Value
+ *     at once and the rendered one only at the frame's end — a Value written back to the rendered one in the same frame
+ *     is no change to the effect, and the picked button stays selected under a Value that says another (row C76).
+ *   - **a button is selected** when the selection `===` its Value (RadioButton.tsx :58) — a strict compare: the number 1
+ *     is not the text `"1"`, and while the group's Value has never been written the button with NO Value is the selected
+ *     one (`undefined === undefined`).
+ *   - **a pick** (RadioButton.tsx :187-189): a click on a selected radio changes nothing in a browser — no `change`, React
+ *     raises no `onChange`. A click on any other selects it (the context's `checkedChanged(<its Value>)`, :27-30) and calls
+ *     the node's `valueChanged` (radiobuttongroup.ts :20-29): when the Value it holds `!==` the button's, it takes it, sends
+ *     **Value** and fires **Changed**. The two conditions are one while the selection is the node's Value — every paint
+ *     makes it so, but for C76's frame: there a pick of the button the Value names selects it and fires nothing.
+ *   - **Value** (radiobuttongroup.ts :84-99): a value that is not text but has a `toString` is converted by it (a number,
+ *     a boolean, an object, an array); what is still not text then (null, undefined) is ignored. A change sends Value and
+ *     NOT Changed (the description). The same value again: nothing.
+ *   - **Mounted**, **Did Mount**, **Will Unmount**, **Child Index** (0, a lone node), **This**, the **Bounding Box** outputs,
+ *     **Scroll Into View**: the Icon's. **Children Count** (react-component-node.ts :1599-1609, :1611-1620): the buttons
+ *     on its page — each `addChild` schedules the count for the frame's end, so it is sent in the first frame, whether or
+ *     not the group is mounted. A person's pick on a group off the page reaches no button.
+ */
+
+import { defineNode, type Patch } from '../spec';
+import { SELF_REFERENCE } from '../trace';
+
+/** The Values of the Radio Buttons on the group's page, in order (THE FIRST VISUAL WITH CHILDREN, above): `undefined` is a button with no Value. */
+export const PAGE_VALUES: readonly unknown[] = ['a', 'b', 1, undefined];
+
+type State = {
+  /** radiobuttongroup.ts :21-22, :93 — `_internal.value` (and `props.value`, kept with it) */
+  value: unknown;
+  /** the node's Value at its last paint — what the component's effect `[props.value]` last compared (RadioButtonGroup.tsx :37-39) */
+  rendered: unknown;
+  /** the component's selection (RadioButtonGroup.tsx :21 `selection.value`) — a button is selected when it `===` the button's Value */
+  selected: unknown;
+  /** react-component-node.ts :1267 `wantsToBeMounted` */
+  mounted: boolean;
+  /** the element is on the page: mounted and painted */
+  onPage: boolean;
+};
+
+type O = typeof RadioButtonGroup extends { outputs: infer X } ? X : never;
+type Send = Patch<State, O>;
+type Pulse = 'didMount' | 'willUnmount' | 'onChange';
+type Act = { set?: Partial<State>; send: Array<'value'>; emit?: Pulse[] };
+
+const NOTHING: Send = { send: [] };
+const NONE: Act = { send: [] };
+
+export const RadioButtonGroup = defineNode({
+  type: 'Radio Button Group',
+  version: 1,
+  source: 'packages/noodl-viewer-react/src/nodes/controls/radiobuttongroup.ts',
+  needs: ['person'],
+  // the page's syncs (spec.ts `synced`): not branches — the component's side of the selection, as the Slider's `shown`
+  synced: ['rendered', 'selected'],
+
+  state: { value: undefined, rendered: undefined, selected: undefined, mounted: true, onPage: false } as State,
+
+  acts: {
+    pick: { description: 'a person clicks the Radio Button inside this group whose Value is the one given (none given: the button with no Value)', values: PAGE_VALUES }
+  },
+
+  inputs: {
+    // ---- logic ----
+    // radiobuttongroup.ts :77-99
+    value: { type: 'string', coerce: 'none', displayName: 'Value', group: 'General', description: 'Selects the radio button whose own Value matches this; setting it from the graph does not fire Changed', portability: 'logic', examples: ['a', 'b', '1', 1] },
+    // react-component-node.ts :2302-2321
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic' },
+    // react-component-node.ts :1380-1395
+    scrollIntoView: { type: 'signal', displayName: 'Scroll Into View', group: 'Scroll Into View', description: 'Scrolls the page, or the scrolling Group holding this element, until the element can be seen', portability: 'logic' },
+    scrollIntoViewAlign: { type: 'enum', enums: ['nearest', 'start', 'center', 'end'], default: 'nearest', coerce: 'none', displayName: 'Scroll Align', group: 'Scroll Into View', description: 'Where Scroll Into View leaves the element: Nearest edge moves only as far as needed', portability: 'logic' },
+
+    // ---- look and layout (R10): stored, written to the style, read by no output; each with its class (visual-params.json) ----
+
+  alignX: { type: "enum", enums: ["left", "center", "right"], coerce: 'none', displayName: "Align X", group: "Alignment", description: "Horizontal alignment of this element within the space its parent gives it", portability: "layout-shared" },
+  alignY: { type: "enum", enums: ["top", "center", "bottom"], coerce: 'none', displayName: "Align Y", group: "Alignment", description: "Vertical alignment of this element within the space its parent gives it", portability: "layout-shared" },
+  boxSizing: { type: "enum", enums: ["border-box", "content-box"], default: "border-box", coerce: 'none', displayName: "Box Sizing", group: "Margin and padding", description: "Whether Width and Height include this element's padding and border, or only its content", portability: "web-only" },
+  cssClassName: { type: "string", default: "", coerce: 'none', displayName: "CSS Class", group: "Advanced HTML", description: "Extra CSS class names to put on this element, for styling from a stylesheet you supply", portability: "web-only" },
+  dataAttributes: { type: "stringlist", coerce: 'none', editOnly: true, displayName: "Data Attributes", group: "Data Attributes", description: "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input", portability: "web-only" },
+  flexDirection: { type: "enum", enums: ["column", "row"], default: "column", coerce: 'none', displayName: "Layout", group: "Layout", description: "Stacks the radio buttons inside this group vertically or lays them out in a row", portability: "layout-shared" },
+  height: { type: "dimension", default: 100, coerce: 'none', displayName: "Height", group: "Dimensions", description: "Height of the element; how the value is read depends on Size Mode", portability: "layout-shared" },
+  marginBottom: { type: "number", coerce: 'none', displayName: "Margin Bottom", group: "Margin and padding", description: "Space outside the element's bottom edge, between it and its neighbours", portability: "layout-expressible" },
+  marginLeft: { type: "number", coerce: 'none', displayName: "Margin Left", group: "Margin and padding", description: "Space outside the element's left edge, between it and its neighbours", portability: "layout-expressible" },
+  marginRight: { type: "number", coerce: 'none', displayName: "Margin Right", group: "Margin and padding", description: "Space outside the element's right edge, between it and its neighbours", portability: "layout-expressible" },
+  marginTop: { type: "number", coerce: 'none', displayName: "Margin Top", group: "Margin and padding", description: "Space outside the element's top edge, between it and its neighbours", portability: "layout-expressible" },
+  maxHeight: { type: "number", coerce: 'none', displayName: "Max Height", group: "Dimension Constraints", description: "Largest height the element may grow to, taking priority over Height", portability: "layout-shared" },
+  maxWidth: { type: "number", coerce: 'none', displayName: "Max Width", group: "Dimension Constraints", description: "Largest width the element may grow to, taking priority over Width", portability: "layout-shared" },
+  minHeight: { type: "number", coerce: 'none', displayName: "Min Height", group: "Dimension Constraints", description: "Smallest height the element may shrink to, taking priority over Height", portability: "layout-shared" },
+  minWidth: { type: "number", coerce: 'none', displayName: "Min Width", group: "Dimension Constraints", description: "Smallest width the element may shrink to, taking priority over Width", portability: "layout-shared" },
+  mixBlendMode: { type: "enum", enums: ["normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"], default: "normal", coerce: 'none', displayName: "Blend Mode", group: "Style", description: "How this element's colours blend with whatever is painted behind it", portability: "look-expressible" },
+  opacity: { type: "number", default: 1, coerce: 'none', displayName: "Opacity", group: "Style", description: "How opaque this element is, from 0 for invisible to 1 for solid", portability: "look-shared" },
+  paddingBottom: { type: "number", default: 0, coerce: 'none', displayName: "Pad Bottom", group: "Margin and padding", description: "Space inside the element's bottom edge, between it and its content", portability: "layout-shared" },
+  paddingLeft: { type: "number", default: 0, coerce: 'none', displayName: "Pad Left", group: "Margin and padding", description: "Space inside the element's left edge, between it and its content", portability: "layout-shared" },
+  paddingRight: { type: "number", default: 0, coerce: 'none', displayName: "Pad Right", group: "Margin and padding", description: "Space inside the element's right edge, between it and its content", portability: "layout-shared" },
+  paddingTop: { type: "number", default: 0, coerce: 'none', displayName: "Pad Top", group: "Margin and padding", description: "Space inside the element's top edge, between it and its content", portability: "layout-shared" },
+  position: { type: "enum", enums: ["relative", "absolute", "sticky", "fixed"], default: "relative", coerce: 'none', displayName: "Position", group: "Layout", description: "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space", portability: "layout-expressible" },
+  sizeMode: { type: "enum", enums: ["explicit", "contentWidth", "contentHeight", "contentSize"], default: "contentSize", coerce: 'none', editOnly: true, displayName: "Size Mode", group: "Dimensions", description: "Whether Width and Height are used as given, or the element sizes itself to fit its contents", portability: "layout-shared" },
+  styleCss: { type: "string", default: "/* background-color: red; */", coerce: 'none', editOnly: true, displayName: "CSS Style", group: "Advanced HTML", description: "Raw CSS declarations applied to this element, overriding the styling ports above", portability: "web-only" },
+  transformOriginX: { type: "number", default: "50", coerce: 'none', displayName: "Transform Origin X", group: "Placement", description: "Horizontal point the element rotates and scales around, as a fraction of its width", portability: "layout-shared" },
+  transformOriginY: { type: "number", default: "50", coerce: 'none', displayName: "Transform Origin Y", group: "Placement", description: "Vertical point the element rotates and scales around, as a fraction of its height", portability: "layout-shared" },
+  transformRotation: { type: "number", default: 0, coerce: 'none', displayName: "Rotation", group: "Placement", description: "Rotates the element clockwise in degrees, without affecting the layout", portability: "layout-shared" },
+  transformScale: { type: "number", default: 1, coerce: 'none', displayName: "Scale", group: "Placement", description: "Scales the element about its transform origin; 1 leaves it unscaled", portability: "layout-shared" },
+  transformX: { type: "number", default: 0, coerce: 'none', displayName: "Pos X", group: "Placement", description: "Moves the element right after layout, without moving its siblings", portability: "layout-shared" },
+  transformY: { type: "number", default: 0, coerce: 'none', displayName: "Pos Y", group: "Placement", description: "Moves the element down after layout, without moving its siblings", portability: "layout-shared" },
+  visible: { type: "boolean", default: true, coerce: 'none', displayName: "Visible", group: "Style", description: "Hides the element while keeping the space it occupies in the layout", portability: "look-shared" },
+  width: { type: "dimension", default: 100, coerce: 'none', displayName: "Width", group: "Dimensions", description: "Width of the element; how the value is read depends on Size Mode", portability: "layout-shared" },
+  zIndex: { type: "number", coerce: 'none', displayName: "zIndex", group: "Style", description: "Paint order among overlapping siblings; higher numbers paint on top", portability: "look-shared" },
+
+  },
+
+  outputs: {
+    // radiobuttongroup.ts :103-110
+    value: { type: 'string', from: (s) => s.value, displayName: 'Value', group: 'States', description: 'Value of the radio button currently selected, or nothing if none is' },
+    // radiobuttongroup.ts :112-117
+    onChange: { type: 'signal', displayName: 'Changed', group: 'Events', description: 'Fires when the user picks a different radio button; a value arriving on the Value input does not fire it' },
+    // react-component-node.ts :982-990, :993-1003
+    didMount: { type: 'signal', displayName: 'Did Mount', group: 'Mounted', description: 'Fires once this element has been added to the page and can be measured' },
+    willUnmount: { type: 'signal', displayName: 'Will Unmount', group: 'Mounted', description: 'Fires just before this element is removed from the page, while it still exists' },
+    // react-component-node.ts :1428-1444
+    childIndex: { type: 'number', from: () => 0, displayName: 'Child Index', group: 'Advanced', description: "This element's position among its parent's children, counting from 0" },
+    // react-component-node.ts :1599-1609, :2299-2311 — the buttons on its page
+    childrenCount: { type: 'number', from: () => PAGE_VALUES.length, displayName: 'Children Count', group: 'Advanced', description: 'How many child elements are currently mounted inside this one' },
+    this: { type: 'reference', from: () => SELF_REFERENCE, displayName: 'This', group: 'Advanced', description: 'A reference to this node itself, for ports that take a node rather than a value' },
+    // react-component-node.ts :1446-1500 — never measured here
+    screenPositionX: { type: 'number', from: () => undefined, displayName: 'Screen Position X', group: 'Bounding Box', description: "Distance in pixels from the left edge of the window to this element's left edge" },
+    screenPositionY: { type: 'number', from: () => undefined, displayName: 'Screen Position Y', group: 'Bounding Box', description: "Distance in pixels from the top edge of the window to this element's top edge" },
+    boundingWidth: { type: 'number', from: () => undefined, displayName: 'Width', group: 'Bounding Box', description: 'Width this element actually ended up with after layout, in pixels' },
+    boundingHeight: { type: 'number', from: () => undefined, displayName: 'Height', group: 'Bounding Box', description: 'Height this element actually ended up with after layout, in pixels' }
+  }
+}).on(
+  {
+    // radiobuttongroup.ts :84-99 — text, or what a `toString` makes text; anything else ignored; a change sends Value, never Changed
+    value: (s, v) => {
+      let text: unknown = v;
+      if (typeof text !== 'string' && (text as { toString?: unknown } | null | undefined)?.toString !== undefined) text = (text as { toString(): unknown }).toString();
+      if (typeof text !== 'string' || text === s.value) return NOTHING;
+      return { set: { value: text }, send: ['value'] };
+    },
+    // react-component-node.ts :2310-2320
+    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
+    scrollIntoView: () => NOTHING
+  },
+  {
+    // placed on the page with its params set and its buttons added — the first render: Did Mount; the buttons' count at the frame's end
+    world: { place: (s) => ({ ...painted(s), send: ['childrenCount'] }) },
+    // every frame's end is a paint (react-component-node.ts :1675-1689)
+    afterInputs: (s) => ({ ...painted(s), send: [] }),
+    // a person acts on a PAINTED page (adapter.ts `act`): the page follows first — the selection is then the node's Value
+    person: {
+      pick: (s, _i, v) =>
+        onPainted(s, (p) => {
+          // a Value no button on the page carries: nothing to click
+          if (!PAGE_VALUES.includes(v)) return NONE;
+          // RadioButton.tsx :58 — the picked button is the selected one: a click on a selected radio changes nothing
+          if (p.selected === v) return NONE;
+          // RadioButton.tsx :187-189 → RadioButtonGroup.tsx :27-30 selects it (the re-render reuses the last paint's props:
+          // `rendered` stays) → radiobuttongroup.ts :20-29 takes the Value when it differs (row C76: it may not)
+          if (p.value === v) return { set: { selected: v }, send: [] };
+          return { set: { selected: v, value: v }, send: ['value'], emit: ['onChange'] };
+        })
+    }
+  }
+);
+
+/**
+ * The page follows what the node wants (button.ts `painted`): a mount starts the selection at the Value (RadioButtonGroup.tsx
+ * :21, and the mount's effect sets the same); a paint on the page whose Value differs from the last one rendered runs the
+ * effect (:37-39).
+ */
+function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[] } {
+  if (s.mounted && !s.onPage) return { set: { onPage: true, rendered: s.value, selected: s.value }, emit: ['didMount'] };
+  if (!s.mounted && s.onPage) return { set: { onPage: false }, emit: ['willUnmount'] };
+  if (s.onPage && !Object.is(s.rendered, s.value)) return { set: { rendered: s.value, selected: s.value }, emit: [] };
+  return { set: {}, emit: [] };
+}
+
+/** The act on the painted page (button.ts `onPainted`). */
+function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act): Act {
+  const p = painted(s);
+  const after: State = { ...s, ...p.set };
+  const a = after.onPage ? then(after) : NONE;
+  return { set: { ...p.set, ...a.set }, send: a.send, emit: [...p.emit, ...(a.emit ?? [])] };
+}

@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s42 (2026-10-04): the Radio Button Group conforms on both targets at 200 and 10,000 (7 of 19; row C76, §7.7) — the first visual with children: its buttons are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`) and a person `pick`s one; the Radio Button gets its group as a world seam next. s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -609,3 +609,56 @@ random sequence could reach. (3) **A store and a flag can read different compari
 never steps; the face writes the browser's rule, as the memory says the face must — (5) **but only a rule jsdom will keep**: jsdom
 re-sanitizes every value the face writes, so where jsdom and a browser disagree on a rule jsdom applies (the attribute parse, a reversed
 range), the face reads as jsdom and the disagreement is written down as a face choice, not played.
+
+### 7.7 s42, 2026-10-04 — the Radio Button Group conforms (113 of 147): the first visual with children
+
+**The design (not a ruling — an engineering choice, recorded).** s41 recommended a graph-format change (parent–child edges, an `act`
+step, a context hook) for the visual tree. Read against what "conforms" counts, it was the wrong first move: a graph scenario is graded
+against a RECORDED runtime trace (graph.ts WHO IS THE REFERENCE — there is no graph interpreter), so it would add tests, not specs, and
+every one of the 112 is a per-node spec with a generator, mutants and a 10,000 run. A parent's context is, from the node's side, its
+WORLD — the ROUTE seam already models "the Router whose page a Page Inputs sits in" that way. So:
+- **a node with children** carries them on its PAGE: the spec declares them (here `PAGE_VALUES`, the Values of the four Radio Buttons the
+  group holds — `'a'`, `'b'`, the number 1, and one with no Value), the target builds them when it puts the node on the page (real nodes,
+  added through the node's own `addChild`, not subjects), and a person acts on a child through an act of the PARENT's (`pick`, a click on
+  the child whose Value is the act's — no value: the child with none). No format change: `acts.pick.values` is the page, and an act value
+  of `undefined` is already "no value" in the generator and the JSON.
+- **a node inside a parent** (the Radio Button, next) gets the parent as a world seam: GROUP — present or not, its Value at load, the graph
+  writing its Value at a time on the clock — and its siblings on the page for the same `pick`.
+
+**The Radio Button Group** (`Radio Button Group`, [radiobuttongroup.ts](../../../packages/nodegx-node-spec/src/nodes/radiobuttongroup.ts),
+21 scenarios) — read from `radiobuttongroup.ts`, `RadioButtonGroup.tsx`, `RadioButton.tsx` and `react-component-node.ts`. A pick moves
+the Value and fires Changed exactly when the picked button's Value is not the one the group holds (a click on a selected radio raises no
+`change`); the Value input converts by `toString` and ignores null / undefined, and never fires Changed; a STRICT compare decides which
+button is selected — the number 1 is not `"1"`, and while the group's Value has never been written the button with NO Value is the
+selected one; Children Count (4) is sent in the first frame whether or not the group is mounted (each `addChild` schedules it). The
+spec keeps three values apart because the component does: the node's Value, the Value its last PAINT rendered, and the selection
+(`useState`, synced by an effect on `props.value`) — `rendered` and `selected` are `synced` (the Slider's `shown`).
+
+**The face** ([node-spec-target.ts](../../../packages/noodl-runtime/test/helpers/node-spec-target.ts)): `putOnPage` builds a Radio Button
+Group's buttons (one `net.noodl.controls.radiobutton` per `acts.pick.values`, its Value set, `addChild` before the first render) and
+`takeOffPage` deletes them; `pick` is a `click` on the picked child's control (`pickedElement`; a Value no child carries, or a child off
+the page, is nothing). `VIEWER_VISUAL_NODES` gained `controls/radiobuttongroup` and `controls/radiobutton`.
+
+**Row C76** (medium, [the ledger](../../bugs/p107-c76-a-radio-groups-value-written-back-in-the-pick-frame-leaves-the-pick-selected.md)) —
+**a Value written back in the same frame as a pick leaves the picked button selected** under a Value that names another: each render of
+the node hands React a fresh COPY of the props (react-component-node.ts :1076-1103) and the component's own re-render after a pick reuses
+the last paint's copy, so the effect `[props.value]` compares with what the last paint rendered; the write-back equals it and the effect
+never runs. Picking that button again raises nothing; picking the one the Value names selects it and fires NO Changed. Found by the
+side-by-side probe on the scenarios' first run (the runtime held the pick). The family of C71 (Dropdown) and C67 (Checkbox). The spec
+models it (both targets agree), two scenarios name it.
+
+**Lessons.** (1) **A person reducer is `(state, inputs, value, world)`** — written `(s, v)` the act read the INPUTS as its value, `pick`
+did nothing on the interpreter, and the interpreter's own conformance was green at three seeds (it grades the spec against itself;
+28 / 28 mutants, because the dead branch had none). The side-by-side probe showed the runtime picking and the interpreter not; fixed,
+the mutants went 28 → 36. A green interpreter run says the spec is self-consistent, never that it does anything. (2) **A pre-act paint's
+sync is equivalent to the frame end's** when the synced state is a function of what the paint compares — five swap / drop survivors of
+the pick's paint branch went when `rendered` / `selected` were declared `synced`, the Slider's precedent. (3) The 10,000 run reached an
+act whose paint MOUNTS and which picks nothing (placed off, Mounted on, a pick of no button, Mounted off) — 200 sequences never did; one
+scenario.
+
+**Gate readings (2026-10-04, load 3–5).** Interpreter: CONFORMS at 200 on 13, 20729 and 20730 (21 / 21, 48 / 48 mutants each) and at
+10,000 on 20729 (0 divergences, 48 / 48). Runtime: CONFORMS at 200 on 13 (19 / 21 + 2 known — C62, C63 — 0 divergences, 48 / 48) and
+20730 (18 / 20 + 2 known before the 21st scenario; 0 divergences), and at 10,000 on 20730 (140 s, 0 divergences, 1,159 throws attributed
+to C62 and 640 to C63, 48 / 48). The side-by-side probe (every scenario on both targets, traces printed): identical but the two known
+rows. The package suite green (20 suites, 870 passed, zz excluded; the visual batch's list grew the group); `tsc --noEmit` exit 0 on
+both packages; `node scripts/bugs.js check` 227 headers valid.

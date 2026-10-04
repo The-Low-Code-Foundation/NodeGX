@@ -48,6 +48,7 @@ import { TextInput } from './text-input';
 import { Dropdown } from './dropdown';
 import { Slider } from './slider';
 import { Icon } from './icon';
+import { RadioButtonGroup } from './radiobuttongroup';
 import { NavigateToPath } from './navigate-to-path';
 import { PushComponentToStack } from './push-component-to-stack';
 import { PopComponentStack } from './pop-component-stack';
@@ -156,6 +157,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [Dropdown.type]: Dropdown,
   [Slider.type]: Slider,
   [Icon.type]: Icon,
+  [RadioButtonGroup.type]: RadioButtonGroup,
   [NavigateToPath.type]: NavigateToPath,
   [PushComponentToStack.type]: PushComponentToStack,
   [PopComponentStack.type]: PopComponentStack,
@@ -244,6 +246,7 @@ export {
   Dropdown,
   Slider,
   Icon,
+  RadioButtonGroup,
   NavigateToPath,
   PushComponentToStack,
   PopComponentStack,

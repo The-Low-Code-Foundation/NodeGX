@@ -394,6 +394,8 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   'net.noodl.controls.range': VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
   // s41 — the Icon: no text style either — the Placement and units-typed style setters
   'net.noodl.visual.icon': VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
+  // s42 — the Radio Button Group: no text style either — the Placement and units-typed style setters
+  'Radio Button Group': VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
   'net.noodl.controls.checkbox': [
     ...VISUAL_ROWS,
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
