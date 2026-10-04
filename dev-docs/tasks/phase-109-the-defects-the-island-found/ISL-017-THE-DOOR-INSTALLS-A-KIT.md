@@ -1,6 +1,6 @@
 # ISL-017 — The door installs a kit, and a project need not carry a copy
 
-**Status: 🟢 s13 (2026-10-04): AC1, AC4, AC6 met — the fonts are a library entry, provenance names the entry not the path, the garden installs through the door. Ruled s13: ruling 2 "Copy on install" (AC7's census next); ruling 1 (a) as the engineering default (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F24 and F19](AUDIT-2026-10-01.md) ·
+**Status: 🟢 s15 (2026-10-04): AC2 and AC7 met — `templates/bot-garden` commits its four kits' record and not the kits (438 → 414 files), every reader that copies it resolves them from `library/`, and the shelf publish stages and resolves; AC3 and AC5 open. s13: AC1, AC4, AC6 met — the fonts are a library entry, provenance names the entry not the path, the garden installs through the door. Ruled s13: ruling 2 "Copy on install" (AC7's census next); ruling 1 (a) as the engineering default (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F24 and F19](AUDIT-2026-10-01.md) ·
 P108 s2 lane B and every merge note since (the built kit copies conflicted on each merge) · **Side:** product (MCP door,
 `noodl-mcp`; module install; template packaging)
 
@@ -215,4 +215,38 @@ P78 edit** (Sep 23: counts, the planner → planning rename, `--unpublish`); a p
 is one stage-then-resolve step; do it through a temporary index (memory "tmp-idx: CAS") or once the pile is
 committed. Then the six readers (§8 s13), then drop the four library-identical folders from `templates/bot-garden`
 and commit the record only.
+
+### Session 15 (2026-10-04) — ruling 2 built: the publish hook, the readers, the folders dropped; AC2 and AC7 met
+
+**1. The publish hook** (`45cf8bba0`). `publish-templates-to-shelf.sh` copies each template to a stage, runs
+`resolve-template-kits.js --write` on it, refuses before the tunnel when a record names a kit the library cannot supply,
+counts the STAGE's files and publishes the stage. Committed from HEAD's blob through a temporary index: the file still
+carries the peer's uncommitted Sep 23 P78 edit, which stays in the working tree. 🔴 **Measured, not in the s14 plan:**
+the script's six rows are planning, planner, rocket-school, pixel-dungeon, story-engine and todo-list — **the garden is
+not on the shelf, and none of the six has a record**, so the hook is inert for every row it publishes today. Read with
+the tunnel port held (the script stops before ssh): the five live rows stage at their old counts (story-engine's
+35-for-30 refusal unchanged); a garden copy with its kits dropped (414) stages at **438**; control without the resolve
+call refuses at 414; a record for `0.9.0` refuses by name; the source folder is never written.
+
+**2. The readers** (`dfffeed99`). 🔴 **The s13 census said six; 39 files read `templates/bot-garden`.** It counted the
+readers that check kit folders and missed every one that renders or deploys the garden. Of the 39, ~20 deploy drives
+take a folder made by `drive-cg003-pages.js assemble` (also the P105/P108 `drive-pages.sh` / `drive-all.sh`), so
+`assemble` is one seam; the rest read components only or copy the garden themselves. `resolve-template-kits.js` gained
+`resolveTemplateCopy` (a reader puts the kits back, or throws naming what the library cannot supply) and
+`dropReferencedKits` (the generator: drops a folder only when it is byte-identical to its entry; a differing or
+unresolvable one is refused). Resolving now: `assemble`, the P105 desktop `build-app.js`, `isl021DrivePage`,
+`isl021ShopParity`, `isl022WrappedRow`, `isl017ResolveKits`. `cg003Template` reads garden-3d-kit from the authoring
+project and checks a resolved copy against the library; ISL-025 W13 names the library's two copies only.
+
+**3. The folders dropped.** `prepareGardenArtefact` calls `dropReferencedKits`; `npm run template:garden` (exit 0)
+deleted **exactly the 24 kit files** and changed nothing else. Peers (three OpenNoodl sessions) told in one line.
+
+| AC | reading |
+|---|---|
+| AC2 | ✅ On a resolved, assembled copy, through `drive-steps.js`: the Profiles page's `H1 "Who is playing?"` is set in Fredoka and the Fredoka face is **`loaded`** (a face loads only when text on the page uses it); control (the `bot-garden-fonts` folder removed): **no Fredoka face at all**. 🔴 `document.fonts.check('16px Fredoka')` read `true` in BOTH arms — with no matching face it answers true — so it grades nothing; the face status is the reading. |
+| AC7 | ✅ Built. `git ls-files templates \| grep -c "noodl_modules/.*/index.js"` **9 → 6** (counted at HEAD after the commit; one of the 9 is DBT's `index.js.map`, so kit `index.js` files 8 → 5). `templates/bot-garden` 438 → 414 files. |
+| gates | `cg003Template`, `isl017ResolveKits`, `isl025Census`, `isl021DrivePage`, `isl021ShopParity`, `isl022WrappedRow`, `libraryTools`, `isl017LibraryProvenance` **213/213** (JSON fresh). `assemble` exit 0 with the four kits; 🔴 control (no resolve) **exit 1**, modules = the record and the preset font. 🔴 Generator control (no drop): `cg003` AC2's byte gate red, 149/150. **Deployed** (`assemble` + `nodegx deploy` exit 0): the shop drive `--quick` **28/28**, s14's reading. |
+
+**Not done:** AC3 (two install orders), AC5 (an agent round). The other templates (rocket-school, pixel-game, DBT) have no
+records: their generators would have to install through the door first, as the garden's does since s13.
 

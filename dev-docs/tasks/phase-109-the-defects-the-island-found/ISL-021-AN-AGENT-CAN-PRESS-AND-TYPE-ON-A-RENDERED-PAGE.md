@@ -1,6 +1,6 @@
 # ISL-021 — An agent can press and type on a rendered page
 
-**Status: 🟢 slice 2 built s14 (2026-10-04) — all eleven verbs (`stub_route` added); AC2, AC4, AC5, AC6, AC7 met; AC3 counted but its bar NOT met (17 non-drag/touch clauses — a ruling or more verbs). Slice 1 s13. Ruled s13: "One call, a step list"; rulings 2–3 as recommended (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F28](AUDIT-2026-10-01.md) · the 18
+**Status: ✅ CLOSED s15 (2026-10-04) — AC3 met on Richard's ruling "build the cheap 9, drop 8": `read` gained `console_errors`, `network_errors` and `other_origins` (each a list so far), and a twelfth verb `reduced_motion`; the 8 changing/delayed/body-matched fake-server answers ruled out of scope, so the only "not" left is those 8 and drag (2). All seven ACs met. s14: all eleven verbs (`stub_route` added); AC2, AC4, AC5, AC6, AC7 met. Slice 1 s13. Ruled s13: "One call, a step list"; rulings 2–3 as recommended (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F28](AUDIT-2026-10-01.md) · the 18
 CDP drives of P105, P106 and P108 · **Side:** product (MCP door, `noodl-mcp` render harness; possibly `nodegx-observe`)
 
 `render_report` loads every page and measures it as it first draws. It cannot press a button, type a name, wait for
@@ -183,4 +183,45 @@ input the runner waits two animation frames, not a sleep.
 | AC3 | 🟡 **Counted; the bar is not met** (149 `check(` call sites; a read-only agent, line-cited): **88 expressible, 42 only through an `expression` into app internals, 19 not.** Of the 19: drag **2** (cg003 393, 858), touch **0**, other **17** — no network errors in the run output (3: iw006 404, cg003 645, 1480), console errors per step (3: 644, 757, 960), a stub whose answer depends on a value read mid-run (3: 887–889), a stub answering in a set order (3: 912, 913, 919), a stub that holds its reply (2: 1274, 1290), reduced-motion emulation (2: 1413, 1414), a whole-run request log (1: 1400). **So the AC's "drag and touch are the only not" is NOT met** — 17 others, named. The count was taken BEFORE the edit form; it is the missing verb the agent ranked first (11 iw006 + 3 cg003 sites needed only a save edit — they move from "internals" to plain steps that still need the save's format). Next by reach: a wheel/scroll at a target (11 cg003 sites use Blockly's `reveal`), network output (4), per-step console errors (3), stub `sequence`/`delay_ms`/match-on-body (5). |
 | AC6 | ✅ **Round 2.** Claude Code 2.1.251, `claude -p`, sonnet, `--strict-mcp-config`, the stdio server from the worktree's `dist` (built at `78707c829`), `--disallowedTools Bash Edit Write NotebookEdit Agent`, a git-tracked copy of `demo-app`. Told only: *"add a page called "Sign up" with two text fields — Name and Email — and a Submit button. When Submit is pressed, the name … should be saved into a Variable called signupName. Then prove to me that it actually works, not just that it draws … Use the nodegx tools."* It built `Pages/SignUp`, called `render_report` three times, then — on the new last line of that answer — `find_tools({ query: "press" })` → `drive_page`, and drove its own form: **`PASSED — 5 of 5`**: `signupName` null → type "Ada Lovelace" → still null → tap Submit → **"Ada Lovelace"**. 36 turns, **$1.47**. Its transcript holds the steps and the value; it wrote no browser script (it could not: Write and Bash were removed, so that clause holds by construction). **Round 1** (the same prompt, `Agent` allowed, the server at `2a05865f9`) never called `find_tools`: it read `render_report` four times, searched Claude Code's OWN `ToolSearch` ("nodegx interact click type fill test runtime") — which cannot see a tool the server has not advertised — then the `run` skill, then subagents hunting Playwright; stopped by me. **Fixed between the rounds** (`ae295e7bb`, `78707c829`): `render_report` ends with `FIRST_FRAME_NOTE` (response text, 0 resident tokens), and `find_tools` falls back to words (`P109-S13-FINDTOOLSPHRASE`). **Round 2's failed tries, each fixed after (`403dae9bf`):** a `testid` it never set (it took the node id for one — the description now says Data Attributes); `text_contains: "Your name"` found nothing (a placeholder is not `innerText` — a field's placeholder/aria-label now counts); a second name typed into a filled field read "Grace HopperKatherine Johnson" (`type` appends, as a keyboard; `replace: true` added and said); it expected the last call's Variable to survive (each call is a fresh browser — now said). Spec 8/8, reverted arm (no placeholder match) red. |
 | AC7 | ✅ `isl021ShopParity.test.ts` 4/4: the shop's SHORT and BUY (+ the reload check) at 1368 × 900, EN and FR, as one step list per language through the in-process client on a copy rendered from disk; a copy with `shBuy.onClick → shBuyFn.go` removed → `failed`, clause **BUY**, SHORT green, both languages. **The CDP drive on the same pair, DEPLOYED** (`assemble` + `nodegx deploy` exit 0 each, `--quick`): template **28/28**; without the wire **SHORT ×4 PASS, BUY ×4 FAIL** (EN and FR) plus the later clauses that need a bought robot. Same verdict per clause. One difference, by design: the step list stops at its first failure, so its BUY-reload is not run; the CDP drive grades it red. The drive_page side cannot run on the deployed artefact (§7's first trap): the comparison is from-disk vs deployed of the same template. |
+
+### Session 15 (2026-10-04) — AC3 ruled "build the cheap 9, drop 8", built; ✅ CLOSED
+
+**Asked** (round 4, one question, in plain words): *"`drive_page` is the tool that lets an agent press and type on a
+rendered app page and check what it sees … Counted: 88 can be written plainly, 42 only by reading the app's internals
+with a JS expression, 19 can't. 2 of the 19 are drag. The other 17: 'no network request failed' (3) and 'nothing was
+fetched from Google Fonts' (1), because the result doesn't list requests; 'no console errors yet' at a given step (3),
+because the result only gives the whole run's errors; 'under reduced motion nothing animates' (2), because the tool
+can't switch reduced motion on; and 8 where the fake server answer has to change from call to call, wait before
+replying, or depend on what the app sent. What should I do?"* Options: build the cheap 9, drop 8 (recommended) / build
+all 17 / accept the count as is. **✅ Ruled: "Build the cheap 9, drop 8."**
+
+**Built** (`scripts/devtools/drive-steps.js`, `render.ts`, `renderTools.ts`):
+
+- **Three `read` forms answered from the run, not the page**, each the list so far, so `"expect": []` is "none yet" at
+  that step: `{ console_errors: true }` (the harness's per-tab buffer), `{ network_errors: true }` and
+  `{ other_origins: true }`. The result carries `networkErrors` and `otherOrigins` beside `consoleErrors`, and the
+  headline says "N failed request(s)".
+- **The network log starts before the first load** (`Network.enable` in `beforeBoot`, beside the leading stubs), so a
+  font the page asks a CDN for at boot is seen. A failure is `Network.loadingFailed` (the drives' reading) **or** a
+  response of 400+, with its URL. Not counted: a **cancelled** request (a reload cancels what was in flight — the
+  step's doing) and **Chrome's own `/favicon.ico`** — 🔴 measured: with 400+ counted, the garden's clean boot read
+  `["404 …/favicon.ico"]`, every run; the browser asks for it, not the app, and the CDP drives never counted it.
+- `other_origins` is every http(s) origin other than the requesting document's own — **including another port on
+  127.0.0.1** (an app asking a local model on `:11434` is exactly what a person would want named; ISL-010).
+- **`{ reduced_motion: true | false }`, the twelfth verb** — `Emulation.setEmulatedMedia` `prefers-reduced-motion`;
+  per session, so it holds across later navigations (read `true` after a reload). The row's value is what
+  `matchMedia` then answers.
+
+**The 9 clauses, re-read:** iw006 404 + cg003 645, 1480 → `network_errors`; cg003 644, 757, 960 → `console_errors`;
+1400 → `other_origins` (the drive's "only 127.0.0.1, data:, blob:, about:" is exactly "no other http(s) origin");
+1413, 1414 → `reduced_motion` then an `expression` read of computed style (the page's CSS, not the app's internals).
+**AC3's count now: 97 expressible, 42 through an `expression` into app internals, 10 not — drag 2, and the 8 ruled out
+of scope** (cg003 887–889, 912, 913, 919, 1274, 1290). **✅ AC3 met.**
+
+| reading | |
+|---|---|
+| `isl021DrivePage` | **10/10** (2 new): a clean garden boot reads `[]` for all three, then a fetch to `https://isl021.invalid` and a `console.error` are named by each read and in the result (the known-firing arm beside each absence); an injected element whose animation honours `prefers-reduced-motion` reads running **1 → 0 → 1** across `reduced_motion` true/false. 🔴 The garden's own home page reads **0 in both arms** — it grades nothing, so the spec brings its own animation. |
+| 🔴 reverted arms | `reduced_motion` sending no preference + the network log never enabled → **both new specs red**, the eight others skipped by `-t`; restored from a `cp` (`cmp` equal). |
+| neighbours | `toolDisclosure`, `renderTools`, `isl021ShopParity`, `p109FindToolsPhrase`, `rel011cAdminSurfaces` **64/64** (`drive_page` is deferred: its longer description costs 0 resident tokens). |
+| `tsc --noEmit -p packages/noodl-mcp` | **8 errors, the same six spec files** — the floor. |
 

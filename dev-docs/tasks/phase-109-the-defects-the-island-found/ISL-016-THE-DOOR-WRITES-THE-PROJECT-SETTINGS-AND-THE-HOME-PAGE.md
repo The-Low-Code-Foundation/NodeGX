@@ -1,6 +1,6 @@
 # ISL-016 — The door writes the project settings and the home page
 
-**Status: 🟢 built s13 (2026-10-04) — AC2, AC3, AC4, AC7 met; AC6's agent half met (editor reading owed); AC5 open; AC8 listed. Ruled s13: "Replace, say what changed"; ruling 2 (b); "home" = the editor's "Make home" (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F23](AUDIT-2026-10-01.md) · the
+**Status: ✅ CLOSED s15 (2026-10-04) — AC5 (FLD-009's guard: the door's home write refused or kept, never lost) and AC6's editor reading met; AC8 met — four of the seven other generators (tpl001, tpl003, tpl005, tpl006) set their home through the door, each template one pinned `modified` line; tpl007/008/010 (peer-dirty) still call the helper, which stays. Built s13 — AC2, AC3, AC4, AC7 met; AC6's agent half met (editor reading owed); AC5 open. Ruled s13: "Replace, say what changed"; ruling 2 (b); "home" = the editor's "Make home" (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F23](AUDIT-2026-10-01.md) · the
 home-page half is P78 register [D9](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) ("a generated project can ship
 with no HOME node"), fixed then in the generator, never in the door · **Side:** product (MCP door, `noodl-mcp`)
 
@@ -177,4 +177,25 @@ assertion now reads `missing`.
   and its pin step pins the project file's `modified` to `TEMPLATE_EPOCH` as `pinComponentFiles` does the
   components' — one added line per template, then regenerate and re-baseline each, gate by gate (four `template:*`
   runs, four gates). Or move each generator to reproducible mode (ISL-019), which re-derives every id: larger.
+
+### Session 15 (2026-10-04) — AC8: four generators through the door
+
+The s14 plan, as written: each generator calls `set_project_settings({ home: "App" })` at the end of its own MCP
+session (after `find_tools { group: "project" }`), and its pin step pins the project file's `modified` to its
+`TEMPLATE_EPOCH` with a new `templatePins.pinProjectModified` (key order and file ending kept; a file without the key is
+left alone). Regenerated **one at a time** — `template:landing`, `:members`, `:pixel`, `:story`, each exit 0 — and each
+template changed by **exactly one line**, `"modified": "<its epoch>"`, as predicted; file counts unchanged (the shelf
+script's expected counts hold); the editor's embedded landing-pages copy did not move. `tpl001`'s private copy of
+`pinRootNode` deleted (`9ae63929d`, `f21c62870`).
+
+| AC | reading |
+|---|---|
+| AC8 | ✅ **Listed:** tpl001 ✅, tpl003 ✅, tpl005 ✅, tpl006 ✅ use the tool; **tpl007, tpl008, tpl010 still call `templatePins.pinRootNode`** — each has peer-dirty files today (14 in all), so a regeneration would bake a peer's pile into its template. The helper stays until none calls it, as the AC says. Gates: `tpl003Template` + `isl016ProjectSettings` 59/59; `tpl001` + `tpl005` + `tpl006` 202/202. 🔴 Reverted arms: tpl003 with the door call removed, and with the pin removed — each reddens its byte gate ("regenerating … reproduces every committed byte"), 49/50; tpl001's door call removed — red, 81/82. `tsc --noEmit -p packages/noodl-mcp` 8 = the floor. |
+
+**Later s15 — AC5 and AC6's editor reading; ✅ CLOSED.**
+
+| AC | reading |
+|---|---|
+| AC5 | ✅ (`b5fd6d744`) Three arms in FLD-009's `tests/services/ProjectStructure/projectLevelGuard.test.ts`, the door's write simulated as `ProjectStore.writeProjectFields` does it (read, merge, `modified`, `rootNodeId`, write), the editor's own project-level change a retitle: the editor's save is **refused** and `rootNodeId` stays the door's; 🔴 **reverted arm** (the guard off): the save writes the editor's copy, which has no home — **the door's `rootNodeId` is gone**; once the editor **adopts** the write, its retitle saves and the home survives. Graded under plain jest with the editor's real `ProjectStructureService` over `MemFs` (`jest --testMatch` on the one file): **16/16**. ⚠️ The file's home runner is the Electron `test:ci` suite — not run this session. |
+| AC6 | ✅ **Editor reading.** The s13 agent's copy no longer exists, so its exact call was replayed in-process on a fresh copy of `demo-app` (`find_tools { group: "project" }` → `set_project_settings({ home: "App", name: "Olive's Island", settings: { htmlTitle: "Olive's Island" } })` → the same three changes the agent's `git diff` showed). `npm run dev:debug` on a throwaway profile (`NOODL_USER_DATA_DIR` in the scratchpad; the 9222 listener's `--user-data-dir` checked before driving), opened through `LocalProjectsModel.openProjectFromFolder`: the editor's `ProjectModel` holds **home `app_group` (a Group in `/App`), title "Olive's Island"**. Control, the same fixture without the call: **home `null`, title "Demo App"**. ⚠️ "No HOME" in the editor's text read false in BOTH arms — that message is the preview's, which was not open — so it graded nothing and is not the reading. Stack stopped with `dev:stop` (26 processes); the 7 MCP servers survived. |
 
