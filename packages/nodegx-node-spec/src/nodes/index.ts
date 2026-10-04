@@ -44,6 +44,8 @@ import { ScreenResolution } from './screen-resolution';
 import { ExternalLink } from './external-link';
 import { Button } from './button';
 import { Checkbox } from './checkbox';
+import { TextInput } from './text-input';
+import { Dropdown } from './dropdown';
 import { NavigateToPath } from './navigate-to-path';
 import { PushComponentToStack } from './push-component-to-stack';
 import { PopComponentStack } from './pop-component-stack';
@@ -148,6 +150,8 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   // NSP-016 — the visual nodes: logic, with each look and layout port's portability (R10); acted on by THE PERSON (spec.ts)
   [Button.type]: Button,
   [Checkbox.type]: Checkbox,
+  [TextInput.type]: TextInput,
+  [Dropdown.type]: Dropdown,
   [NavigateToPath.type]: NavigateToPath,
   [PushComponentToStack.type]: PushComponentToStack,
   [PopComponentStack.type]: PopComponentStack,
@@ -232,6 +236,8 @@ export {
   ExternalLink,
   Button,
   Checkbox,
+  TextInput,
+  Dropdown,
   NavigateToPath,
   PushComponentToStack,
   PopComponentStack,

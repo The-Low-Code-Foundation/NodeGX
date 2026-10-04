@@ -31,7 +31,12 @@ interface CatalogNode {
   typeName: string;
   inputs: CatalogPort[];
   outputs: CatalogPort[];
-  dynamicPorts: null | { mechanisms: string[]; numberedInputs?: Array<{ nameBase: string; displayPrefix: string; type: { name: string } }> };
+  dynamicPorts: null | {
+    mechanisms: string[];
+    numberedInputs?: Array<{ nameBase: string; displayPrefix: string; type: { name: string } }>;
+    /** NSP-016 s38 — a `namedports/derived` rule carries the names it accepts and one example of them */
+    declaredPortGroups?: Array<{ parameter?: string; accept?: { example?: string } }>;
+  };
   parameterEncoding: null | { known: boolean; seededBy?: string[] };
 }
 
@@ -91,7 +96,13 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
         // a LIST parameter (`proplist` — the Record writes' Access Control Rules, NSP-014 s22) is probed with one row
         // whose id is the probe, as the editor stores it; every other seed with the text
         const isList = (seed: string) => node.inputs.some((i) => i.name === seed && typeof i.type === 'object' && i.type.name === 'proplist');
-        const probe = Object.fromEntries(node.parameterEncoding.seededBy.map((seed) => [seed, isList(seed) ? [{ id: 'probe', label: 'probe' }] : 'probe']));
+        // NSP-016 s38 — a rule that ACCEPTS only some names (the visual nodes' Data Attributes: `data-…`) is probed with the
+        // name the catalog's own rule gives as its example; a rule with no such filter keeps the plain probe
+        const token =
+          node.dynamicPorts.declaredPortGroups?.find(
+            (e) => e.parameter !== undefined && node.parameterEncoding!.seededBy!.includes(e.parameter) && e.accept?.example
+          )?.accept?.example ?? 'probe';
+        const probe = Object.fromEntries(node.parameterEncoding.seededBy.map((seed) => [seed, isList(seed) ? [{ id: 'probe', label: 'probe' }] : token]));
         // a pattern whose variable names no seed parameter is seeded by the PROJECT (`seededByProjectMetadata` — a class
         // schema's `prop-<property>`, the Class picker): no parameter draws it, so the spec must accept it on first write
         const fromParameter = (p: { variables?: Record<string, string> }) =>
@@ -104,7 +115,7 @@ describe('catalog parity — every spec draws the same ports the editor draws', 
           const inputs = Object.keys(spec.derived!.inputs(probe));
           const outputs = Object.keys(spec.derived!.outputs?.(probe) ?? {});
           for (const p of patterns) {
-            const name = p.pattern.replace(/<[^>]+>/g, 'probe');
+            const name = p.pattern.replace(/<[^>]+>/g, token);
             if ((node.parameterEncoding as { seededByProjectMetadata?: string[] }).seededByProjectMetadata && !fromParameter(p as { variables?: Record<string, string> })) {
               if (p.plug === 'input') expect(spec.derived!.discover?.(name)).toBeDefined();
               continue;

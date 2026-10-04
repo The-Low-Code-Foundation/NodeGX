@@ -1,6 +1,6 @@
 # The census — every picker node, its tier, and where its behaviour is written
 
-**Generated 2026-10-03 by `scripts/node-spec/census.js` — do not edit by hand; edit `tiers.json` and regenerate.**
+**Generated 2026-10-04 by `scripts/node-spec/census.js` — do not edit by hand; edit `tiers.json` and regenerate.**
 
 Catalog format 1.1.0: **180** node types, of which **147** are in the picker and not deprecated (the population), **33** excluded (listed at the end). Cardinality checked both ways by the script.
 
@@ -48,13 +48,13 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | # | node | tier | batch | places | plan.ts lines | emit libs | tests typed | tests loose |
 |---:|---|---|---|---:|---:|---|---:|---:|
 | 1 | **Text** | T5 | NSP-016 | 63 | 1 | sseLib.ts | 60 | 97 |
-| 2 | **Group** | T5 | NSP-016 | 59 | 0 | — | 58 | 95 |
+| 2 | **Group** | T5 | NSP-016 | 60 | 0 | — | 59 | 96 |
 | 3 | **Set Variable** | T1 | NSP-012 | 49 | 12 | — | 36 | 43 |
 | 4 | **Repeater** (`For Each`) | T5 | NSP-016 | 47 | 24 | — | 22 | 49 |
 | 5 | **Component Inputs** | T4 | NSP-015 | 35 | 10 | — | 24 | 48 |
 | 6 | **Component Outputs** | T4 | NSP-015 | 34 | 20 | — | 13 | 25 |
 | 7 | **String** | T1 | NSP-011 | 27 | 1 | — | 25 | 36 |
-| 8 | **Button** (`net.noodl.controls.button`) | T5 | NSP-016 | 25 | 0 | — | 24 | 42 |
+| 8 | **Button** (`net.noodl.controls.button`) | T5 | NSP-016 | 25 | 0 | — | 24 | 41 |
 | 9 | **Variable** (`Variable2`) | T1 | NSP-012 | 22 | 5 | — | 16 | 24 |
 | 10 | **States** | T2 | NSP-013 | 21 | 10 | statesLib.ts | 9 | 25 |
 
@@ -118,7 +118,7 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Run Tasks** | `RunTasks` | T4 | browser+cloud | `noodl-runtime/src/nodes/std-library/runtasks.ts` | ✓ |  | 4 | errorsLib, runTasksLib | translated | 11 / 13 | runs a template component per item — graph by construction |
 | **Set Variable** | `Set Variable` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/setvariablenode.ts` | ✓ | ✓ | 12 |  | translated | 36 / 43 |  |
 | **Set Object Properties** | `SetModelProperties` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/setmodelpropertiesnode.ts` |  | ✓ | 1 |  | translated | 2 / 6 |  |
-| **Static Array** | `Static Data` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/staticdata.ts` |  | ✓ | 8 |  | translated | 6 / 15 |  |
+| **Static Array** | `Static Data` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/staticdata.ts` |  | ✓ | 8 |  | translated | 6 / 16 |  |
 | **Variable** | `Variable2` | T1 | browser+cloud | `noodl-runtime/src/nodes/std-library/data/variablenode2.ts` | ✓ |  | 5 |  | translated | 16 / 24 |  |
 
 ### NSP-013 — dates, time, randomness, parsers, animation (24)
@@ -206,14 +206,14 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | **Component Children** | `Component Children` | T5 | browser | `noodl-runtime/src/nodelibraryexport.ts` |  |  | 4 |  | translated | 1 / 5 | providedBy noodl-editor in the catalog |
 | **Drag** | `Drag` | T5 | browser | `noodl-viewer-react/src/nodes/visual/drag.ts` |  |  | 10 | dragLib | translated | 3 / 10 |  |
 | **Repeater** | `For Each` | T5 | browser | `noodl-viewer-react/src/nodes/std-library/data/foreach.tsx` | ✓ | ✓ | 24 |  | translated | 22 / 49 |  |
-| **Group** | `Group` | T5 | browser | `noodl-viewer-react/src/nodes/visual/group.ts` | ✓ | ✓ | 0 |  | translated | 58 / 95 |  |
+| **Group** | `Group` | T5 | browser | `noodl-viewer-react/src/nodes/visual/group.ts` | ✓ | ✓ | 0 |  | translated | 59 / 96 |  |
 | **Image** | `Image` | T5 | browser | `noodl-viewer-react/src/nodes/visual/image.ts` |  | ✓ | 0 |  | translated | 2 / 11 |  |
-| **Button** | `net.noodl.controls.button` | T5 | browser | `noodl-viewer-react/src/nodes/controls/button.ts` |  | ✓ | 0 |  | translated | 24 / 42 |  |
-| **Checkbox** | `net.noodl.controls.checkbox` | T5 | browser | `noodl-viewer-react/src/nodes/controls/checkbox.ts` | ✓ | ✓ | 1 |  | translated | 2 / 12 |  |
-| **Dropdown** | `net.noodl.controls.options` | T5 | browser | `noodl-viewer-react/src/nodes/controls/options.ts` |  | ✓ | 0 |  | translated | 1 / 5 |  |
+| **Button** | `net.noodl.controls.button` | T5 | browser | `noodl-viewer-react/src/nodes/controls/button.ts` |  | ✓ | 0 |  | translated | 24 / 41 |  |
+| **Checkbox** | `net.noodl.controls.checkbox` | T5 | browser | `noodl-viewer-react/src/nodes/controls/checkbox.ts` | ✓ | ✓ | 1 |  | translated | 2 / 11 |  |
+| **Dropdown** | `net.noodl.controls.options` | T5 | browser | `noodl-viewer-react/src/nodes/controls/options.ts` |  | ✓ | 0 |  | translated | 1 / 6 |  |
 | **Radio Button** | `net.noodl.controls.radiobutton` | T5 | browser | `noodl-viewer-react/src/nodes/controls/radiobutton.ts` |  | ✓ | 0 |  | translated | 1 / 7 |  |
 | **Slider** | `net.noodl.controls.range` | T5 | browser | `noodl-viewer-react/src/nodes/controls/slider.ts` |  | ✓ | 0 |  | translated | 1 / 4 |  |
-| **Text Input** | `net.noodl.controls.textinput` | T5 | browser | `noodl-viewer-react/src/nodes/controls/text-input.ts` | ✓ | ✓ | 0 |  | translated | 8 / 19 |  |
+| **Text Input** | `net.noodl.controls.textinput` | T5 | browser | `noodl-viewer-react/src/nodes/controls/text-input.ts` | ✓ | ✓ | 0 |  | translated | 8 / 20 |  |
 | **Columns** | `net.noodl.visual.columns` | T5 | browser | `noodl-viewer-react/src/nodes/visual/columns.ts` |  | ✓ | 0 |  | translated | 3 / 10 |  |
 | **Icon** | `net.noodl.visual.icon` | T5 | browser | `noodl-viewer-react/src/nodes/visual/icon.ts` |  | ✓ | 0 |  | translated | 0 / 4 |  |
 | **Component Stack** | `Page Stack` | T5 | browser | `noodl-viewer-react/src/nodes/navigation/navigation-stack.tsx` | ✓ | ✓ | 4 |  | translated | 1 / 5 |  |
@@ -227,9 +227,9 @@ The drift-risk order: `placesWritten` = the runtime file + `plan.ts` lines that 
 | node | type name | tier | runs in | runtime file | out | dyn | plan | libs | export | tests | note |
 |---|---|---|---|---|:-:|:-:|---:|---|---|---:|---|
 | **CSS Definition** | `CSS Definition` | T6 | browser | `noodl-viewer-react/src/nodes/visual/css-definition.ts` |  |  | 5 |  | translated | 1 / 5 | web-only by nature — exempt with that reason, or spec only its outputs |
-| **Expression** | `Expression` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/expression.ts` | ✓ | ✓ | 0 |  | translated | 12 / 23 | not really an escape hatch — its grammar is ours; the most valuable spec in the batch |
+| **Expression** | `Expression` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/expression.ts` | ✓ | ✓ | 0 |  | translated | 13 / 24 | not really an escape hatch — its grammar is ours; the most valuable spec in the batch |
 | **Script** | `Javascript2` | T6 | browser | `noodl-viewer-react/src/nodes/std-library/javascript.ts` |  | ✓ | 1 | scriptLib | translated | 2 / 6 |  |
-| **Function** | `JavaScriptFunction` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/simplejavascript.ts` | ✓ | ✓ | 0 |  | translated | 18 / 36 |  |
+| **Function** | `JavaScriptFunction` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/simplejavascript.ts` | ✓ | ✓ | 0 |  | translated | 18 / 37 |  |
 | **Visual Function** | `Logic Builder` | T6 | browser+cloud | `noodl-runtime/src/nodes/std-library/logic-builder.ts` | ✓ | ✓ | 0 |  | translated | 4 / 11 | the Blockly node; the user's blocks are the behaviour |
 
 ### NSP-022 — the cloud-only nodes (split from NSP-014, s21) (17)

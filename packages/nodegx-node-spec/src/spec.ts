@@ -771,7 +771,20 @@ export interface WorldHandlers<S, I, O> {
  * (the keyboard put on / taken off it, as a Tab does), `type` (text entered), `choose` (an option
  * picked), `key` (a key pressed while it has focus) — a spec declares the ones its node answers.
  */
-export type PersonReducers<S, I, O> = Readonly<Record<string, (state: Readonly<S>, inputs: Inputs<I>, value: unknown, world: WorldView) => Patch<S, O>>>;
+export type PersonReducers<S, I, O> = Readonly<Record<string, (state: Readonly<S>, inputs: Inputs<I>, value: unknown, world: WorldView) => PersonPatch<S, I, O>>>;
+
+/**
+ * NSP-016 s38 — what a person's act returns: an ordinary patch, which may also resolve invocations this frame
+ * `deferred` to its end. The viewer drains the graph's dirty nodes inside every pointer handler it installs
+ * (pointerlisteners.ts :173-186 — "that is what makes a click update the graph in the same frame"), so the node's
+ * frame-end work queued BEFORE a pointer act runs at the act, after the act's own handler, and a write queued after
+ * it still waits for the frame's end (Text Input: an Insert Text, then a touch, then a Clear — the Clear wins).
+ * `outcomes` as `AfterInputsPatch`'s: one per deferred invocation resolved, in invocation order; what the act leaves
+ * unresolved, `afterInputs` still must.
+ */
+export interface PersonPatch<S, I, O> extends Patch<S, O> {
+  outcomes?: ReadonlyArray<ResolvedOutcome<I>>;
+}
 
 /** NSP-016 s37 — one act a person can do to this node (`NodeDecl.acts`): what it means, and the values a sequence draws for it. */
 export interface ActDecl {

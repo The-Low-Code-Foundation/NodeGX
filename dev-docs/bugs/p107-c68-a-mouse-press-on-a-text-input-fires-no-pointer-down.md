@@ -1,0 +1,28 @@
+---
+id: P107-C68
+title: A mouse press on a Text Input fires no Pointer Down and never sets Pressed — the component's own onMouseDown replaces the control's; a Text Area, a finger and the release still report
+status: needs-ruling
+severity: medium
+area: runtime / Text Input (components/controls/TextInput/TextInput.tsx)
+found: P107 NSP-016 s38, 2026-10-04
+evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.3 (row C68); scenario "a mouse press on the field puts the keyboard on it (Focused) and fires NO Pointer Down" in packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json "a mouse press on the field puts the keyboard on it (Focused) and fires NO Pointer Down and no Pressed; the release fires Pointer Up; a click is the same pair"
+---
+
+A mouse button going down on a Text Input moves nothing on **Pressed** and fires no **Pointer Down**; the release still
+fires **Pointer Up** (and writes Pressed false), a finger still fires both and sets Pressed, and a Text Area fires all of
+them. The control's shared pointer handlers (controls/utils.ts :255-259, :285-293) are spread onto the `<input>` and
+then overridden.
+
+**Where:** `packages/noodl-viewer-react/src/components/controls/TextInput/TextInput.tsx` :202-204 — `{...inputProps}`
+carries the control's `onMouseDown` (from `Utils.controlEvents`), and the `<input>` then sets its own
+`onMouseDown={() => window.addEventListener('click', preventGlobalFocusChange, true)}` after the spread, which wins.
+The `<textarea>` branch (:211-221) sets none, so it keeps the control's. The component's handler also skips the
+pointer wrapper's drain (pointerlisteners.ts :173-186), so a mousedown on a Text Input does not update the graph in
+the same frame while every other control's does.
+
+**Reproduce:** the scenario named above on the runtime target; compare with "a Text Area: a press fires Pointer Down".
+
+**Proposed fix:** compose — `onMouseDown={(e) => { inputProps.onMouseDown?.(e); window.addEventListener(...) }}` — one
+line. The spec models today's behaviour (press on an `<input>`: the keyboard moves, nothing else).

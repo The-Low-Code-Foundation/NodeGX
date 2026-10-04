@@ -27,3 +27,19 @@ input).
 
 **Proposed fix:** one root ref — on the outermost element only (the wrapper when there is a label, the box when
 there is not); or `setDOMElement` ignoring a `null` for an element that is not the one it holds. One line either way.
+
+**Second instance (P107 NSP-016 s38, 2026-10-04): Text Input.** TextInput.tsx :250 and :272 put `noodlRootRef(noodlNode)` on
+the wrapper `div` AND the outer `div` when Enable Label is on; turning the label off removes the inner one, which nulls the
+root. Not on this node's wire: its Focus / Blur go through `innerReactComponentRef` (text-input.ts :422-437), not the
+root — so Focus still works, Scroll Into View and the bounding box do not. Read from the source; the spec's `useLabel`
+scenarios show the keyboard leaving with the rebuilt input (D30's shape), not a lost root.
+
+**Third instance (P107 NSP-016 s39, 2026-10-04): Dropdown — on the wire.** Select.tsx :188 and :235 put `noodlRootRef(noodlNode)`
+on the input wrapper AND the outer `div` when Enable Label is on; turning the label off keeps the outer `div`'s fiber as
+the new root (same type, same ref, not re-invoked) and removes the old wrapper, whose ref call with `null` empties the
+node's element. The Dropdown's Focus / Blur go through the root (`_focusTarget`, utils.ts :419-423), so **Focus reports
+Unchanged and takes nothing** with the dropdown on the page, until the next Enable Label on or a remount restores the
+ref. Measured: scenario "Enable Label turned off, then the Focus action" in
+`packages/nodegx-node-spec/scenarios/net.noodl.controls.options.json` (marked row) and known row `lostRootAfterLabelOff`
+for the Dropdown in `conformance.test.ts`. The spec's matrix scenario starts every segment from a remount with the
+label off so that a rebuild in it is always off → on, which keeps the root.

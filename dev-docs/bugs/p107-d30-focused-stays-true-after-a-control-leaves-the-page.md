@@ -27,3 +27,14 @@ Focused still true throughout; Blurred never fired.
 **Proposed fix (for a ruling):** at unmount, drop the three states and tell the wire — `focusState` / `hoverState` /
 `pressedState` to false, with `onBlur` / `hoverEnd` when they were true — so the outputs describe the page. The spec
 models today's behaviour (the element's own focus is tracked beside the node's reported one).
+
+**Also measured on Text Input (P107 NSP-016 s38, 2026-10-04):** the same, through its own Focus / Blur (text-input.ts
+:288-320) — scenario "focused, then Mounted off and on" in `packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json`;
+and twice more where the element is REBUILT in place: Enable Label changing (TextInput.tsx :248-281) and Type changing
+between Text Area and the rest (:192-223) each give a new element, the keyboard leaves with the old one and Focused
+stays true (scenarios "focused, then Enable Label turned on" and "focused, then Type changed to Text Area").
+
+**Also measured on Dropdown (P107 NSP-016 s39, 2026-10-04):** the same through the shared Focus / Blur (utils.ts
+:366-440) — scenarios "focused, then Mounted off and on" and "focused, then Enable Label turned on" in
+`packages/nodegx-node-spec/scenarios/net.noodl.controls.options.json`: Enable Label changing rebuilds the tree around a
+new `<select>` (Select.tsx :223-252), the keyboard leaves with the old one and Focused stays true.

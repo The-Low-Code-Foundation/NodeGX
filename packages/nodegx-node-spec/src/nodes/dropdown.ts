@@ -1,0 +1,469 @@
+/**
+ * Dropdown (`net.noodl.controls.options`) — read from
+ * `packages/noodl-viewer-react/src/nodes/controls/options.ts`, `components/controls/Select/Select.tsx` (the
+ * component), `controls/utils.ts` (the control events and states, the Focus / Blur actions) and
+ * `react-component-node.ts` on 2026-10-04 (NSP-016 s39). Its person face, page model and the shared ports are the
+ * Checkbox's (checkbox.ts): what differs is the pick.
+ *
+ * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
+ *
+ * THE RULE, before the citations. A Dropdown is a `<select>` drawn invisible (`opacity: 0`, Select.tsx :84-91) over
+ * a span that shows the chosen option's Label (:179-183, :207-219), in a wrapper, with a `<label>` above it when
+ * Enable Label is on (:223-249); a PERSON picks an option from it. Four things hold the choice, and the spec keeps
+ * them apart because the runtime does:
+ *
+ *   - **the node's value** (`_internal.value`, options.ts :107): what the Value OUTPUT reads (:245-247). A pick writes
+ *     it (`valueChanged`, :109-116: on a change, Value is sent and Changed fires) and so does the **Value** input
+ *     (:181-200: `null` is ignored — it has no `toString` — anything else that is not text is made text with
+ *     `toString`, `undefined` is kept; on a change Value is sent and Changed never fires).
+ *   - **the author's Value** (`props.value`, :194): what the Value input last wrote, changed or not. The component's
+ *     effect keys on it (Select.tsx :44-47).
+ *   - **the shown value** (the component's `useState`, Select.tsx :42): what the `<select>` is told to select and the
+ *     span labels. A pick writes it at once (:213). The component's effect (:44-47, `[props.value, props.items]`)
+ *     writes it to the author's Value at the mount and at a paint whose render saw a different Items ARRAY (by
+ *     identity) or a different author's Value than the render before — and then calls `valueChanged(props.value)`:
+ *     when the node's value differs, which is after a person's pick, the node takes the author's Value back, SENDS IT
+ *     AND FIRES CHANGED with nobody picking (row D34: a remount, or Items written again after a pick). The spec writes
+ *     the shown value on every Value write that changes the node's value; the runtime's effect misses the one that
+ *     writes back the very value React last rendered — after a pick, the author's own Value — and leaves the pick on
+ *     the screen (row C71, a `row` scenario).
+ *   - **what the browser selects** (the `<select>`'s own selectedness, `domSelected`): the shown value while it names
+ *     an option (:210 — React controls the element); otherwise React lets go (`value={undefined}`) and the browser
+ *     keeps what it had — a fresh element selects the hidden empty option (:217), and an option that leaves the list
+ *     hands the selection to the first enabled option (HTML's reset; the hidden one is disabled). A person picking
+ *     the option already selected raises no `change` (the browser), so nothing moves.
+ *   - **Items** (options.ts :158-171): `undefined` ignored; otherwise kept as handed — the same array again included —
+ *     and the paint re-renders. A truthy value that is not a list throws in the render (`props.items.map`, Select.tsx
+ *     :118; row C70) — here it offers no options. An option's value is its `Value` as text (`<option value>`, :119), or
+ *     its Label's text when it has none (HTML's fallback); an option with `Disabled` true or `'true'` cannot be picked.
+ *   - **Enabled**, **the pointer, the keyboard, a click's focus** (utils.ts :157-311 on the `<select>`, Select.tsx
+ *     :211), **Focus** / **Blur** (utils.ts :366-440, the target is the `<select>`), **Mounted**, **Enable Label** (a
+ *     rebuild around a NEW `<select>`, Select.tsx :223-252: the keyboard leaves with the old one, silently), **Label**
+ *     (drawn raw, :245 — row C65's third instance), **Placeholder** (drawn, never on the wire) and the look: the
+ *     Checkbox's. A pick is a keyboard pick: it puts the keyboard on the element first (the focusing steps), as a Tab
+ *     does, and a disabled element takes no pick.
+ */
+
+import { defineNode, type Patch } from '../spec';
+import { SELF_REFERENCE } from '../trace';
+import { dataAttributeInput, dataAttributeNames } from './text-input';
+
+type State = {
+  /** utils.ts :75-89 `_internal.enabled` */
+  enabled: boolean;
+  hover: boolean;
+  pressed: boolean;
+  focused: boolean;
+  /** react-component-node.ts :1267 `wantsToBeMounted` */
+  mounted: boolean;
+  /** `!!useLabel` as written (Select.tsx :223 decides the tree by it) */
+  wantsLabel: boolean;
+  /** `!!useLabel` as PAINTED: a change rebuilds the tree around a new `<select>` (:223-252), and the keyboard leaves with the old one, silently */
+  labelOn: boolean;
+  /** the element's `disabled` attribute follows Enabled at each paint (Select.tsx :209) — what the Focus and Blur actions meet */
+  pageEnabled: boolean;
+  /** the element holds the keyboard — what the PAGE knows (`focused` is what the node REPORTS; an element leaving the page tells nobody, row D30) */
+  elementFocused: boolean;
+  /** the component is on the page: mounted and painted */
+  onPage: boolean;
+  /** options.ts :107 `_internal.value` — the Value output; `undefined` after a Value input of undefined (never sent, C3) */
+  value: string | undefined;
+  /** options.ts :194 `props.value` — what the Value input last wrote, changed or not */
+  authorValue: string | undefined;
+  /** options.ts :164-168 `_internal.items` / `props.items` — the list as handed (identity matters: the effect's dependency) */
+  items: unknown;
+  /** Select.tsx :42 the component's `value` state — what the `<select>` is told to select; meaningless off the page */
+  shown: string | undefined;
+  /** the `<select>`'s own selection: an option's value, or '' for the hidden empty option (:217) */
+  domSelected: string;
+  /** `props.items` as the last render saw it (Select.tsx :47) */
+  paintedItems: unknown;
+};
+
+type O = typeof Dropdown extends { outputs: infer X } ? X : never;
+type Send = Patch<State, O>;
+type Pulse = 'didMount' | 'willUnmount' | 'pointerDown' | 'pointerUp' | 'onFocus' | 'onBlur' | 'hoverStart' | 'hoverEnd' | 'onChange';
+type ValueOut = 'pressedState' | 'focusState' | 'hoverState' | 'value';
+type Act = { set?: Partial<State>; send: ValueOut[]; emit?: Pulse[] };
+
+const NOTHING: Send = { send: [] };
+const NONE: Act = { send: [] };
+
+/** options.ts :27-30 — what a placed Dropdown offers before Items is ever written */
+const DEFAULT_ITEMS: readonly unknown[] = [
+  { Label: 'Option 1', Value: 'Option 1' },
+  { Label: 'Option 2', Value: 'Option 2' }
+];
+
+export const Dropdown = defineNode({
+  type: 'net.noodl.controls.options',
+  version: 1,
+  source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
+  needs: ['person'],
+  // the page's syncs (spec.ts `synced`): not branches — the React side of the choice with them
+  synced: ['pageEnabled', 'labelOn', 'shown', 'domSelected', 'paintedItems'],
+
+  state: {
+    enabled: true, hover: false, pressed: false, focused: false, mounted: true, wantsLabel: false, labelOn: false, pageEnabled: true, elementFocused: false, onPage: false,
+    value: 'Option 1', authorValue: 'Option 1', items: DEFAULT_ITEMS, shown: undefined, domSelected: '', paintedItems: undefined
+  } as State,
+  // utils.ts :402-411 `outcomeOutputs({ done, unchanged })` (addFocusActions)
+  outcomes: ['done', 'unchanged'],
+
+  acts: {
+    hover: { description: 'the pointer moves onto the dropdown' },
+    leave: { description: 'the pointer moves off it' },
+    press: { description: 'a mouse button goes down on it' },
+    release: { description: 'the mouse button comes up on it' },
+    click: { description: 'a press and a release on it, and the click that follows — which opens the list and picks nothing' },
+    touch: { description: 'a finger goes down on it' },
+    lift: { description: 'the finger comes up' },
+    focus: { description: 'the keyboard is put on it (a Tab reaching it)' },
+    blur: { description: 'the keyboard is taken off it (a Tab leaving it)' },
+    choose: {
+      description: "an option is picked by its value — a keyboard pick: the keyboard goes onto the element first; a value the list does not offer, or a disabled option, cannot be picked, and picking the option already selected raises nothing",
+      values: ['Option 1', 'Option 2', 's', 'l', 'a', 'b', 'c', 'zz']
+    }
+  },
+
+  inputs: {
+    // ---- logic ----
+    // utils.ts :75-89
+    enabled: { type: 'boolean', default: true, coerce: 'none', displayName: 'Enabled', group: 'General', description: 'Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing', portability: 'logic' },
+    // options.ts :122-172
+    items: {
+      type: 'optionslist', default: DEFAULT_ITEMS, coerce: 'none', displayName: 'Items', group: 'General',
+      description: 'Options to offer. Type a label per option — the value it sends is the label — or switch the editor to Advanced and give an option its own Value when it must send something different',
+      portability: 'logic',
+      examples: [
+        [{ Label: 'Option 1', Value: 'Option 1' }, { Label: 'Option 2', Value: 'Option 2' }],
+        [{ Label: 'Small', Value: 's' }, { Label: 'Large', Value: 'l' }],
+        [{ Label: 'A', Value: 'a' }, { Label: 'B', Value: 'b', Disabled: true }, { Label: 'C', Value: 'c' }],
+        []
+      ]
+    },
+    // options.ts :173-201
+    value: { type: 'string', default: 'Option 1', coerce: 'none', displayName: 'Value', group: 'General', description: 'Selects the option with this Value; a value matching no option deselects everything. Setting it from the graph does not fire Changed', portability: 'logic', examples: ['Option 2', 's', 'l', 'a', 'c'] },
+    // options.ts :225-230 — drawn in the span while nothing is selected (Select.tsx :181-183); nothing on the wire
+    placeholder: { type: 'string', coerce: 'none', displayName: 'Placeholder', group: 'Placeholder', description: 'Text shown while nothing is selected', portability: 'logic' },
+    // react-component-node.ts :2302-2321
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic' },
+    // utils.ts :366-398
+    focus: { type: 'signal', outcome: true, displayName: 'Focus', group: 'Actions', description: 'Puts the keyboard on this dropdown, so Enter, Space and the arrow keys go to it', portability: 'logic' },
+    blur: { type: 'signal', outcome: true, displayName: 'Blur', group: 'Actions', description: 'Takes the keyboard away from this dropdown, which is what fires Blurred', portability: 'logic' },
+    // react-component-node.ts :1380-1395
+    scrollIntoView: { type: 'signal', displayName: 'Scroll Into View', group: 'Scroll Into View', description: 'Scrolls the page, or the scrolling Group holding this element, until the element can be seen', portability: 'logic' },
+    scrollIntoViewAlign: { type: 'enum', enums: ['nearest', 'start', 'center', 'end'], default: 'nearest', coerce: 'none', displayName: 'Scroll Align', group: 'Scroll Into View', description: 'Where Scroll Into View leaves the element: Nearest edge moves only as far as needed', portability: 'logic' },
+    // node-shared-port-definitions.ts `addLabelInputs` (enableSpacing) — Select.tsx :245 draws Label raw (row C65)
+    label: { type: 'string', default: 'Label', coerce: 'none', displayName: 'Label', group: 'Label', description: 'Text shown on this element', portability: 'logic' },
+    useLabel: { type: 'boolean', default: false, coerce: 'none', displayName: 'Enable Label', group: 'Label', description: 'Shows a text label on this element', portability: 'logic' },
+    // utils.ts :93-120 — what reaches the nodes around it; a graph scenario's matter
+    blockTouch: { type: 'boolean', coerce: 'none', displayName: 'Block Pointer Events', group: 'Pointer Events', description: 'Stops every pointer event that lands on this control from reaching the nodes it sits inside. Blunt: it takes hover and pointer-down with it, so reach for Click Bubbling first if it is only clicks you want to keep in', portability: 'logic' },
+    clickBubbling: { type: 'enum', enums: ['auto', 'always', 'never'], default: 'auto', coerce: 'none', displayName: 'Click Bubbling', group: 'Pointer Events', description: "Whether a click on this control also fires Click on the nodes it sits inside. Automatic keeps it here as soon as this control's own Click is connected, so a Favourite button inside a clickable card runs Favourite and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not", portability: 'logic' },
+
+    // ---- look and layout (R10): stored, written to the style, read by no output; each with its class (visual-params.json) ----
+  alignX: { type: "enum", enums: ["left", "center", "right"], coerce: 'none', displayName: "Align X", group: "Alignment", description: "Horizontal alignment of this element within the space its parent gives it", portability: "layout-shared" },
+  alignY: { type: "enum", enums: ["top", "center", "bottom"], coerce: 'none', displayName: "Align Y", group: "Alignment", description: "Vertical alignment of this element within the space its parent gives it", portability: "layout-shared" },
+  backgroundColor: { type: "color", default: "transparent", coerce: 'none', displayName: "Background Color", group: "Style", description: "Fill colour of the closed dropdown; the open list is drawn by the browser and cannot be styled here", portability: "look-shared" },
+  borderBottomColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Border Style", description: "Colour of the bottom edge only, overriding Border Color", portability: "look-shared" },
+  borderBottomLeftRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Corner Radius", description: "Rounds the bottom-left corner only, overriding Corner Radius", portability: "look-shared" },
+  borderBottomRightRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Corner Radius", description: "Rounds the bottom-right corner only, overriding Corner Radius", portability: "look-shared" },
+  borderBottomStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Border Style", description: "Line style for the bottom edge only, overriding Border Style; None hides that edge", portability: "look-expressible" },
+  borderBottomWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Border Style", description: "Thickness of the bottom edge in pixels, and it adds to the element's size", portability: "look-shared" },
+  borderColor: { type: "color", default: "#000000", coerce: 'none', displayName: "Border Color", group: "Border Style", description: "Colour of the border, which has no effect while Border Style is None", portability: "look-shared" },
+  borderLeftColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Border Style", description: "Colour of the left edge only, overriding Border Color", portability: "look-shared" },
+  borderLeftStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Border Style", description: "Line style for the left edge only, overriding Border Style; None hides that edge", portability: "look-expressible" },
+  borderLeftWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Border Style", description: "Thickness of the left edge in pixels, and it adds to the element's size", portability: "look-shared" },
+  borderRadius: { type: "number", default: 5, coerce: 'none', displayName: "Corner Radius", group: "Corner Radius", description: "Rounds all four corners, except any corner that sets its own radius", portability: "look-shared" },
+  borderRightColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Border Style", description: "Colour of the right edge only, overriding Border Color", portability: "look-shared" },
+  borderRightStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Border Style", description: "Line style for the right edge only, overriding Border Style; None hides that edge", portability: "look-expressible" },
+  borderRightWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Border Style", description: "Thickness of the right edge in pixels, and it adds to the element's size", portability: "look-shared" },
+  borderStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], default: "solid", coerce: 'none', displayName: "Border Style", group: "Border Style", description: "Line style for all four edges; None hides the border and leaves Border Width and Color inactive", portability: "look-expressible" },
+  borderTopColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Border Style", description: "Colour of the top edge only, overriding Border Color", portability: "look-shared" },
+  borderTopLeftRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Corner Radius", description: "Rounds the top-left corner only, overriding Corner Radius", portability: "look-shared" },
+  borderTopRightRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Corner Radius", description: "Rounds the top-right corner only, overriding Corner Radius", portability: "look-shared" },
+  borderTopStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Border Style", description: "Line style for the top edge only, overriding Border Style; None hides that edge", portability: "look-expressible" },
+  borderTopWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Border Style", description: "Thickness of the top edge in pixels, and it adds to the element's size", portability: "look-shared" },
+  borderWidth: { type: "number", default: 2, coerce: 'none', displayName: "Border Width", group: "Border Style", description: "Thickness of the border in pixels, which adds to the element's size unless Box Sizing accounts for it", portability: "look-shared" },
+  boxShadowBlurRadius: { type: "number", default: 5, coerce: 'none', displayName: "Blur Radius", group: "Box Shadow", description: "How soft the shadow edge is; 0 gives a hard edge", portability: "look-expressible" },
+  boxShadowColor: { type: "color", default: "#00000033", coerce: 'none', displayName: "Shadow Color", group: "Box Shadow", description: "Colour of the shadow, including how transparent it is", portability: "look-expressible" },
+  boxShadowEnabled: { type: "boolean", default: false, coerce: 'none', displayName: "Shadow Enabled", group: "Box Shadow", description: "Turns the drop shadow on", portability: "look-expressible" },
+  boxShadowInset: { type: "boolean", default: false, coerce: 'none', displayName: "Inset", group: "Box Shadow", description: "Draws the shadow inside the element instead of behind it", portability: "web-only" },
+  boxShadowOffsetX: { type: "number", default: 0, coerce: 'none', displayName: "Offset X", group: "Box Shadow", description: "How far to the right the shadow is cast from the element", portability: "look-expressible" },
+  boxShadowOffsetY: { type: "number", default: 0, coerce: 'none', displayName: "Offset Y", group: "Box Shadow", description: "How far down the shadow is cast from the element", portability: "look-expressible" },
+  boxShadowSource: { type: "enum", enums: ["custom", "token"], default: "custom", coerce: 'none', displayName: "Shadow Source", group: "Box Shadow", description: "Where the shadow comes from: Custom builds it from the six fields below; From a style token wears one of the project’s shadow tokens, so every element sharing that token changes together", portability: "look-shared" },
+  boxShadowSpreadRadius: { type: "number", default: 2, coerce: 'none', displayName: "Spread Radius", group: "Box Shadow", description: "How much larger than the element the shadow is drawn", portability: "look-expressible" },
+  boxShadowToken: { type: "string", default: "var(--shadow-md)", coerce: 'none', displayName: "Shadow Token", group: "Box Shadow", description: "The project shadow this element wears, as var(--shadow-md). Pick one from the list; compose new ones in the Styles panel", portability: "look-shared" },
+  boxSizing: { type: "enum", enums: ["border-box", "content-box"], default: "border-box", coerce: 'none', displayName: "Box Sizing", group: "Margin and padding", description: "Whether Width and Height include this element's padding and border, or only its content", portability: "web-only" },
+  color: { type: "color", coerce: 'none', displayName: "Color", group: "Text Style", description: "Colour of the text itself, not of the element behind it", portability: "look-shared" },
+  cssClassName: { type: "string", default: "", coerce: 'none', displayName: "CSS Class", group: "Advanced HTML", description: "Extra CSS class names to put on this element, for styling from a stylesheet you supply", portability: "web-only" },
+  dataAttributes: { type: "stringlist", coerce: 'none', editOnly: true, displayName: "Data Attributes", group: "Data Attributes", description: "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input", portability: "web-only" },
+  fontFamily: { type: "font", coerce: 'none', displayName: "Font Family", group: "Text Style", description: "Typeface to render the text in, either a web-safe family name or a font file added to the project", portability: "look-shared" },
+  fontSize: { type: "number", coerce: 'none', displayName: "Font Size", group: "Text Style", description: "Height of the text, in pixels", portability: "look-shared" },
+  fontStyle: { type: "enum", enums: ["normal", "italic"], default: "normal", coerce: 'none', displayName: "Font Style", group: "Text Style", description: "Renders the text upright or italic", portability: "look-shared" },
+  fontVariantNumeric: { type: "enum", enums: ["normal", "tabular-nums"], default: "normal", coerce: 'none', displayName: "Numerals", group: "Text Style", description: "Tabular draws every digit at the same width so columns of numbers align; Normal follows the font", portability: "look-expressible" },
+  fontWeight: { type: "number", default: "Auto", coerce: 'none', displayName: "Font Weight", group: "Text Style", description: "How heavy the text is drawn, from 100 (thin) to 900 (black); leave as Auto to use the weight the font family sets", portability: "look-shared" },
+  height: { type: "dimension", default: 100, coerce: 'none', displayName: "Height", group: "Dimensions", description: "Height of the element; how the value is read depends on Size Mode", portability: "layout-shared" },
+  iconColor: { type: "color", default: "#000000", coerce: 'none', displayName: "Color", group: "Icon", description: "Colour of the icon", portability: "look-shared" },
+  iconIconSource: { type: "icon", coerce: 'none', displayName: "Icon Source", group: "Icon", description: "Which glyph to show, picked from an installed icon set", portability: "look-shared" },
+  iconImageSource: { type: "image", coerce: 'none', displayName: "Image Source", group: "Icon", description: "Image file to show instead of an icon-set glyph", portability: "look-shared" },
+  iconPlacement: { type: "enum", enums: ["left", "right"], default: "left", coerce: 'none', displayName: "Placement", group: "Icon", description: "Which side of the label the icon sits on, with Icon Spacing as the gap between them", portability: "layout-shared" },
+  iconSize: { type: "number", default: 16, coerce: 'none', displayName: "Size", group: "Icon", description: "Height of the icon", portability: "look-shared" },
+  iconSourceType: { type: "enum", enums: ["image", "icon"], default: "icon", coerce: 'none', displayName: "Type", group: "Icon", description: "Whether the icon comes from an installed icon set or from an image file, which decides the source port below", portability: "look-shared" },
+  iconSpacing: { type: "number", default: 10, coerce: 'none', displayName: "Spacing", group: "Icon", description: "Gap between the icon and the text beside it", portability: "layout-shared" },
+  labelcolor: { type: "color", coerce: 'none', displayName: "Color", group: "Label Text Style", description: "Colour of the text itself, not of the element behind it", portability: "look-shared" },
+  labelfontFamily: { type: "font", coerce: 'none', displayName: "Font Family", group: "Label Text Style", description: "Typeface to render the text in, either a web-safe family name or a font file added to the project", portability: "look-shared" },
+  labelfontSize: { type: "number", coerce: 'none', displayName: "Font Size", group: "Label Text Style", description: "Height of the text, in pixels", portability: "look-shared" },
+  labelfontStyle: { type: "enum", enums: ["normal", "italic"], default: "normal", coerce: 'none', displayName: "Font Style", group: "Label Text Style", description: "Renders the text upright or italic", portability: "look-shared" },
+  labelfontVariantNumeric: { type: "enum", enums: ["normal", "tabular-nums"], default: "normal", coerce: 'none', displayName: "Numerals", group: "Label Text Style", description: "Tabular draws every digit at the same width so columns of numbers align; Normal follows the font", portability: "look-expressible" },
+  labelfontWeight: { type: "number", default: "Auto", coerce: 'none', displayName: "Font Weight", group: "Label Text Style", description: "How heavy the text is drawn, from 100 (thin) to 900 (black); leave as Auto to use the weight the font family sets", portability: "look-shared" },
+  labelletterSpacing: { type: "number", default: "Auto", coerce: 'none', displayName: "Letter Spacing", group: "Label Text Style", description: "Extra space added between characters; leave as Auto to use the spacing built into the font", portability: "look-shared" },
+  labellineHeight: { type: "number", default: "Auto", coerce: 'none', displayName: "Line Height", group: "Label Text Style", description: "Vertical space each line of text occupies; leave as Auto to follow the font", portability: "look-shared" },
+  labelSpacing: { type: "number", default: 10, coerce: 'none', displayName: "Spacing", group: "Label", description: "Gap between the label and the edges around it", portability: "layout-shared" },
+  labeltextStyle: { type: "textStyle", default: "None", coerce: 'none', displayName: "Text Style", group: "Label Text Style", description: "Applies one of the project's saved text styles; the individual font ports below override whatever it sets", portability: "look-shared" },
+  labeltextTransform: { type: "enum", enums: ["none", "uppercase", "lowercase", "capitalize"], default: "none", coerce: 'none', displayName: "Case", group: "Label Text Style", description: "Forces the text to upper case, lower case or capitalised without changing the underlying value", portability: "look-shared" },
+  letterSpacing: { type: "number", default: "Auto", coerce: 'none', displayName: "Letter Spacing", group: "Text Style", description: "Extra space added between characters; leave as Auto to use the spacing built into the font", portability: "look-shared" },
+  lineHeight: { type: "number", default: "Auto", coerce: 'none', displayName: "Line Height", group: "Text Style", description: "Vertical space each line of text occupies; leave as Auto to follow the font", portability: "look-shared" },
+  marginBottom: { type: "number", coerce: 'none', displayName: "Margin Bottom", group: "Margin and padding", description: "Space outside the element's bottom edge, between it and its neighbours", portability: "layout-expressible" },
+  marginLeft: { type: "number", coerce: 'none', displayName: "Margin Left", group: "Margin and padding", description: "Space outside the element's left edge, between it and its neighbours", portability: "layout-expressible" },
+  marginRight: { type: "number", coerce: 'none', displayName: "Margin Right", group: "Margin and padding", description: "Space outside the element's right edge, between it and its neighbours", portability: "layout-expressible" },
+  marginTop: { type: "number", coerce: 'none', displayName: "Margin Top", group: "Margin and padding", description: "Space outside the element's top edge, between it and its neighbours", portability: "layout-expressible" },
+  maxHeight: { type: "number", coerce: 'none', displayName: "Max Height", group: "Dimension Constraints", description: "Largest height the element may grow to, taking priority over Height", portability: "layout-shared" },
+  maxWidth: { type: "number", coerce: 'none', displayName: "Max Width", group: "Dimension Constraints", description: "Largest width the element may grow to, taking priority over Width", portability: "layout-shared" },
+  minHeight: { type: "number", coerce: 'none', displayName: "Min Height", group: "Dimension Constraints", description: "Smallest height the element may shrink to, taking priority over Height", portability: "layout-shared" },
+  minWidth: { type: "number", coerce: 'none', displayName: "Min Width", group: "Dimension Constraints", description: "Smallest width the element may shrink to, taking priority over Width", portability: "layout-shared" },
+  mixBlendMode: { type: "enum", enums: ["normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"], default: "normal", coerce: 'none', displayName: "Blend Mode", group: "Style", description: "How this element's colours blend with whatever is painted behind it", portability: "look-expressible" },
+  opacity: { type: "number", default: 1, coerce: 'none', displayName: "Opacity", group: "Style", description: "How opaque this element is, from 0 for invisible to 1 for solid", portability: "look-shared" },
+  paddingBottom: { type: "number", default: 6, coerce: 'none', displayName: "Pad Bottom", group: "Margin and padding", description: "Space inside the element's bottom edge, between it and its content", portability: "layout-shared" },
+  paddingLeft: { type: "number", default: 8, coerce: 'none', displayName: "Pad Left", group: "Margin and padding", description: "Space inside the element's left edge, between it and its content", portability: "layout-shared" },
+  paddingRight: { type: "number", default: 8, coerce: 'none', displayName: "Pad Right", group: "Margin and padding", description: "Space inside the element's right edge, between it and its content", portability: "layout-shared" },
+  paddingTop: { type: "number", default: 6, coerce: 'none', displayName: "Pad Top", group: "Margin and padding", description: "Space inside the element's top edge, between it and its content", portability: "layout-shared" },
+  placeholderOpacity: { type: "number", default: 0.5, coerce: 'none', displayName: "Placeholder opacity", group: "Placeholder", description: "How faded the placeholder text is, from 0 to 1", portability: "look-shared" },
+  position: { type: "enum", enums: ["relative", "absolute", "sticky", "fixed"], default: "relative", coerce: 'none', displayName: "Position", group: "Layout", description: "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space", portability: "layout-expressible" },
+  showChevron: { type: "boolean", default: true, coerce: 'none', displayName: "Show Chevron", group: "Style", description: "Draws the small downward arrow at the end of the control that marks it as a dropdown", portability: "look-shared" },
+  sizeMode: { type: "enum", enums: ["explicit", "contentWidth", "contentHeight", "contentSize"], default: "contentSize", coerce: 'none', editOnly: true, displayName: "Size Mode", group: "Dimensions", description: "Whether Width and Height are used as given, or the element sizes itself to fit its contents", portability: "layout-shared" },
+  styleCss: { type: "string", default: "/* background-color: red; */", coerce: 'none', editOnly: true, displayName: "CSS Style", group: "Advanced HTML", description: "Raw CSS declarations applied to this element, overriding the styling ports above", portability: "web-only" },
+  textStyle: { type: "textStyle", default: "None", coerce: 'none', displayName: "Text Style", group: "Text Style", description: "Applies one of the project's saved text styles; the individual font ports below override whatever it sets", portability: "look-shared" },
+  textTransform: { type: "enum", enums: ["none", "uppercase", "lowercase", "capitalize"], default: "none", coerce: 'none', displayName: "Case", group: "Text Style", description: "Forces the text to upper case, lower case or capitalised without changing the underlying value", portability: "look-shared" },
+  transformOriginX: { type: "number", default: "50", coerce: 'none', displayName: "Transform Origin X", group: "Placement", description: "Horizontal point the element rotates and scales around, as a fraction of its width", portability: "layout-shared" },
+  transformOriginY: { type: "number", default: "50", coerce: 'none', displayName: "Transform Origin Y", group: "Placement", description: "Vertical point the element rotates and scales around, as a fraction of its height", portability: "layout-shared" },
+  transformRotation: { type: "number", default: 0, coerce: 'none', displayName: "Rotation", group: "Placement", description: "Rotates the element clockwise in degrees, without affecting the layout", portability: "layout-shared" },
+  transformScale: { type: "number", default: 1, coerce: 'none', displayName: "Scale", group: "Placement", description: "Scales the element about its transform origin; 1 leaves it unscaled", portability: "layout-shared" },
+  transformX: { type: "number", default: 0, coerce: 'none', displayName: "Pos X", group: "Placement", description: "Moves the element right after layout, without moving its siblings", portability: "layout-shared" },
+  transformY: { type: "number", default: 0, coerce: 'none', displayName: "Pos Y", group: "Placement", description: "Moves the element down after layout, without moving its siblings", portability: "layout-shared" },
+  useIcon: { type: "boolean", default: false, coerce: 'none', displayName: "Enable Icon", group: "Icon", description: "Shows an icon on this element", portability: "look-shared" },
+  variant: { type: "string", coerce: 'none', displayName: "Variant", group: "General", description: "Name of a saved variant of this node type to apply, replacing the styling set here", portability: "look-shared" },
+  visible: { type: "boolean", default: true, coerce: 'none', displayName: "Visible", group: "Style", description: "Hides the element while keeping the space it occupies in the layout", portability: "look-shared" },
+  width: { type: "dimension", default: 100, coerce: 'none', displayName: "Width", group: "Dimensions", description: "Width of the element; how the value is read depends on Size Mode", portability: "layout-shared" },
+  zIndex: { type: "number", coerce: 'none', displayName: "zIndex", group: "Style", description: "Paint order among overlapping siblings; higher numbers paint on top", portability: "look-shared" }
+  },
+
+  outputs: {
+    // options.ts :240-248
+    value: { type: 'string', from: (s) => s.value, displayName: 'Value', group: 'States', description: 'Value of the option currently selected' },
+    // options.ts :249-254
+    onChange: { type: 'signal', displayName: 'Changed', group: 'Events', description: 'Fires when the user picks a different option; a value arriving on the Value input does not fire it' },
+    // utils.ts :157-195
+    focusState: { type: 'boolean', from: (s) => s.focused, displayName: 'Focused', group: 'States', description: 'True while this control holds keyboard focus, so typing and Enter go to it' },
+    onFocus: { type: 'signal', displayName: 'Focused', group: 'Focus Events', description: 'Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action' },
+    onBlur: { type: 'signal', displayName: 'Blurred', group: 'Focus Events', description: 'Fires when keyboard focus leaves this control, which is the usual place to validate what was entered' },
+    // utils.ts :204-243
+    hoverState: { type: 'boolean', from: (s) => s.hover, displayName: 'Hover', group: 'States', description: 'True while the pointer is over this control; stays false on touch devices with no pointer' },
+    hoverStart: { type: 'signal', displayName: 'Hover Start', group: 'Pointer Events', description: 'Fires when the pointer moves onto this control' },
+    hoverEnd: { type: 'signal', displayName: 'Hover End', group: 'Pointer Events', description: 'Fires when the pointer leaves this control, including when it leaves while a button is still held' },
+    // utils.ts :246-311
+    pressedState: { type: 'boolean', from: (s) => s.pressed, displayName: 'Pressed', group: 'States', description: 'True while a mouse button or finger is held down on this control, and false again the moment it is released or slides off' },
+    pointerDown: { type: 'signal', displayName: 'Pointer Down', group: 'Pointer Events', description: 'Fires as a mouse button or finger goes down on this control, before any click has completed' },
+    pointerUp: { type: 'signal', displayName: 'Pointer Up', group: 'Pointer Events', description: 'Fires when the mouse button or finger is lifted, and also when a touch is cancelled by the system' },
+    // utils.ts :314-325
+    enabled: { type: 'boolean', from: (s) => s.enabled, displayName: 'Enabled', group: 'States', description: 'Reports back whether this control is currently accepting interaction, following the Enabled input' },
+    // react-component-node.ts :982-990, :993-1003
+    didMount: { type: 'signal', displayName: 'Did Mount', group: 'Mounted', description: 'Fires once this element has been added to the page and can be measured' },
+    willUnmount: { type: 'signal', displayName: 'Will Unmount', group: 'Mounted', description: 'Fires just before this element is removed from the page, while it still exists' },
+    // react-component-node.ts :1428-1444 — no Children Count: `allowChildren` is false (options.ts :36)
+    childIndex: { type: 'number', from: () => 0, displayName: 'Child Index', group: 'Advanced', description: "This element's position among its parent's children, counting from 0" },
+    this: { type: 'reference', from: () => SELF_REFERENCE, displayName: 'This', group: 'Advanced', description: 'A reference to this node itself, for ports that take a node rather than a value' },
+    // react-component-node.ts :1446-1500 — never measured here
+    screenPositionX: { type: 'number', from: () => undefined, displayName: 'Screen Position X', group: 'Bounding Box', description: "Distance in pixels from the left edge of the window to this element's left edge" },
+    screenPositionY: { type: 'number', from: () => undefined, displayName: 'Screen Position Y', group: 'Bounding Box', description: "Distance in pixels from the top edge of the window to this element's top edge" },
+    boundingWidth: { type: 'number', from: () => undefined, displayName: 'Width', group: 'Bounding Box', description: 'Width this element actually ended up with after layout, in pixels' },
+    boundingHeight: { type: 'number', from: () => undefined, displayName: 'Height', group: 'Bounding Box', description: 'Height this element actually ended up with after layout, in pixels' }
+  }
+}).on(
+  {
+    // utils.ts :82-89
+    enabled: (s, v) => {
+      const enabled = !!v;
+      if (enabled === s.enabled) return NOTHING;
+      return { set: { enabled }, send: ['enabled'] };
+    },
+    // options.ts :158-171 — `undefined` is no opinion; anything else is kept as handed (the same array again too) and the
+    // frame's end re-renders: whether the render's effect runs is the paint's to decide (identity, `painted`)
+    items: (s, v) => (v === undefined ? NOTHING : { set: { items: v }, send: [] }),
+    // options.ts :181-200 — `null` has no `toString` and is ignored (:182-184); what is not text is made text; the author's
+    // Value is written whether or not it changed (:194); a change sends Value and never Changed. The shown value follows a
+    // change (the intent: the runtime's effect keys on the author's Value React last rendered, Select.tsx :44-47, so a write
+    // back to it after a pick leaves the pick on the screen — row C71)
+    value: (s, v) => {
+      if (v === null) return NOTHING;
+      const value = v === undefined ? undefined : String(v);
+      if (value === s.value) return { set: { authorValue: value }, send: [] };
+      return { set: { value, authorValue: value, shown: value }, send: ['value'] };
+    },
+    // react-component-node.ts :2310-2320
+    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    // node-shared-port-definitions.ts `addLabelInputs` — stored; Select.tsx :223 reads its truthiness at each render
+    useLabel: (_s, v) => ({ set: { wantsLabel: !!v }, send: [] }),
+    // utils.ts :370-384 — on the `<select>` (utils.ts :419-423 `_focusTarget`), as the Checkbox's
+    focus: (s) => {
+      if (!s.onPage) return { send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
+      return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+    },
+    // utils.ts :385-395 — a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless
+    blur: (s) => {
+      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
+      return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
+    },
+    // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
+    scrollIntoView: () => NOTHING
+  },
+  {
+    // react-component-node.ts :785-830 `DATA_ATTRIBUTES_RULE` — one string input per name the Data Attributes list names, written
+    // on the element as that attribute: nothing on the wire. The catalog also marks this node `runtime-narrowed` (options.ts
+    // :393-421 republishes `value` to the EDITOR as an enum over this instance's Items): the port list is complete above and the
+    // wire's type is `string` either way — the narrowing is a sentence here, not a port.
+    derived: {
+      inputs: (params) => Object.fromEntries(dataAttributeNames(params.dataAttributes).map((name) => [name, dataAttributeInput(name)])),
+      on: () => NOTHING
+    },
+    // placed on the page with its params set — the first render: Did Mount, and the mount's effect (Select.tsx :44-47)
+    world: { place: (s) => painted(s) },
+    afterInputs: (s) => painted(s),
+    person: {
+      hover: (s) => onPainted(s, () => ({ set: { hover: true }, send: ['hoverState'], emit: ['hoverStart'] })),
+      leave: (s) => onPainted(s, () => ({ set: { hover: false, pressed: false }, send: ['hoverState', 'pressedState'], emit: ['hoverEnd'] })),
+      press: (s) => onPainted(s, (p) => (p.pageEnabled ? pressed(p) : NONE)),
+      release: (s) => onPainted(s, (p) => (p.pageEnabled ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
+      // the press, the release and the click (utils.ts :285-311) — a click on a `<select>` opens its list and picks nothing
+      click: (s) =>
+        onPainted(s, (p) => {
+          if (!p.pageEnabled) return NONE;
+          const d = pressed(p);
+          return { set: { ...d.set, pressed: false }, send: d.send, emit: [...(d.emit ?? []), 'pointerUp'] };
+        }),
+      touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
+      lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
+      focus: (s) => onPainted(s, (p) => (p.pageEnabled && !p.elementFocused ? focusTaken() : NONE)),
+      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.pageEnabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE)),
+      // the pick (Select.tsx :212-215 the `<select>`'s `onChange`: the shown value, then `valueChanged`, options.ts :109-116). The
+      // browser's rules first: a disabled element takes no pick; only an enabled option the list offers can be picked; the keyboard
+      // goes onto the element (the focusing steps); and picking the option the element already selects raises no `change`
+      choose: (s, _inputs, v) =>
+        onPainted(s, (p) => {
+          if (!p.pageEnabled) return NONE;
+          const picked = String(v);
+          const option = optionsOf(p.items).find((o) => o.value === picked);
+          if (!option || option.disabled) return NONE;
+          const focus = p.elementFocused ? NONE : focusTaken();
+          if (p.domSelected === picked) return focus;
+          const changed = p.value !== picked;
+          return join(focus, { set: { shown: picked, domSelected: picked, ...(changed ? { value: picked } : {}) }, send: changed ? ['value'] : [], emit: changed ? ['onChange'] : [] });
+        })
+    }
+  }
+);
+
+type Option = { value: string; disabled: boolean };
+
+/** HTML's `option.value` fallback: the option's text with ASCII whitespace stripped at the ends and collapsed within */
+const optionText = (label: unknown): string => (label === undefined || label === null || typeof label === 'boolean' ? '' : String(label)).replace(/[ \t\n\f\r]+/g, ' ').trim();
+
+/**
+ * Select.tsx :115-124 — the `<option>`s the list offers: a falsy Items offers none (:117); a truthy one that is not a list throws in
+ * the render on the runtime (`props.items.map`, row C70) and offers none here; each item's `Value` as text (`<option value>`, :119),
+ * or its Label's text when it has none; `Disabled` true or `'true'` disables it (:119)
+ */
+function optionsOf(items: unknown): Option[] {
+  if (!items || !Array.isArray(items)) return [];
+  return items.map((item) => {
+    const o = (item !== null && typeof item === 'object' ? item : {}) as { Value?: unknown; Label?: unknown; Disabled?: unknown };
+    const value = o.Value === undefined || o.Value === null || typeof o.Value === 'boolean' ? optionText(o.Label) : String(o.Value);
+    return { value, disabled: o.Disabled === true || o.Disabled === 'true' };
+  });
+}
+
+/**
+ * The page follows what the node wants (checkbox.ts `painted`), and the component's effect and the `<select>`'s selection with it.
+ *   - Enabled is painted onto the element; Enable Label changing rebuilds the tree around a NEW `<select>` (Select.tsx :223-252):
+ *     the keyboard leaves with the old one, no blur fires (row D30), and the new element selects afresh.
+ *   - Mounted off: the element leaves with the keyboard it held; Mounted on: Did Mount, a fresh component (`useState(props.value)`).
+ *   - the effect (Select.tsx :44-47): at the mount, and at a render that saw another Items array than the render before, the shown
+ *     value becomes the author's Value and `valueChanged(props.value)` runs — a node holding a person's pick takes the author's
+ *     Value back, sends it and fires Changed (row D34).
+ *   - the selection: React controls the element while the shown value names an option (:210); otherwise the browser keeps what it
+ *     had — a fresh element selects the hidden empty option (:217), and a selected option that left the list hands the selection
+ *     to the first enabled option (HTML's reset; the hidden one is disabled).
+ */
+function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
+  const set: Partial<State> = s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled };
+  let fresh = false;
+  if (s.wantsLabel !== s.labelOn) {
+    set.labelOn = s.wantsLabel;
+    if (s.onPage && s.mounted) {
+      set.elementFocused = false;
+      fresh = true;
+    }
+  }
+  if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false }, send: [], emit: ['willUnmount'] };
+  if (!s.mounted) return { set, send: [], emit: [] };
+  const send: ValueOut[] = [];
+  const emit: Pulse[] = [];
+  const mounting = !s.onPage;
+  if (mounting) {
+    set.onPage = true;
+    emit.push('didMount');
+    fresh = true;
+  }
+  let shown = s.shown;
+  if (mounting || s.items !== s.paintedItems) {
+    shown = s.authorValue;
+    set.shown = shown;
+    set.paintedItems = s.items;
+    if (s.value !== s.authorValue) {
+      set.value = s.authorValue;
+      send.push('value');
+      emit.push('onChange');
+    }
+  }
+  const options = optionsOf(s.items);
+  const inList = shown !== undefined && options.some((o) => o.value === shown);
+  let dom = s.domSelected;
+  if (fresh) dom = inList ? (shown as string) : '';
+  else if (inList) dom = shown as string;
+  else if (dom !== '' && !options.some((o) => o.value === dom)) dom = options.find((o) => !o.disabled)?.value ?? '';
+  if (dom !== s.domSelected) set.domSelected = dom;
+  return { set, send, emit };
+}
+
+/** The act on the painted page (checkbox.ts `onPainted`). */
+function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act): Act {
+  const p = painted(s);
+  const after: State = { ...s, ...p.set };
+  const a = after.onPage ? then(after) : NONE;
+  return { set: { ...p.set, ...a.set }, send: [...p.send, ...a.send], emit: [...p.emit, ...(a.emit ?? [])] };
+}
+
+/** The keyboard onto the element (utils.ts :163-166, :181-183): Focused true and sent, Focused fires. */
+function focusTaken(): Act {
+  return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'] };
+}
+
+/** A mouse button down on an enabled element (utils.ts :255-259, :285-293), then the keyboard onto it — the browser's `mousedown` default — if it is not there already. */
+function pressed(s: Readonly<State>): Act {
+  return s.elementFocused ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] } : join({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] }, focusTaken());
+}
+
+function join(a: Act, b: Act): Act {
+  return { set: { ...a.set, ...b.set }, send: [...a.send, ...b.send], emit: [...(a.emit ?? []), ...(b.emit ?? [])] };
+}

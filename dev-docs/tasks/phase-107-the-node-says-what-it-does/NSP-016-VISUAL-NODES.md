@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s37 (2026-10-03): AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (2 of 19; rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -204,3 +204,184 @@ swap must keep the branch's own syncs, or a sibling's stale value hides the diff
 values), Dropdown (`choose`), Slider (`slide`), Radio Button (+ Group); Group / Text / Image / Circle / Icon / Columns /
 Video need the pointer, drop and scroll acts; Drag; then Repeater, Component Stack, Page Router, Component Children
 (a boundary or a stack each). AC4 waits for NSP-017.
+
+### 7.3 s38, 2026-10-04 — Text Input conforms (109 of 147)
+
+**Text Input** (`net.noodl.controls.textinput`, 117 inputs — 22 logic (incl. `runOnChange-startValue`), 95 classed — 24 outputs, 11 acts:
+the Button's nine plus **`type`** (a text, typed one key at a time) and **`key`** (`Enter`)): 68 scenarios (one marked `row`, C61 — one of them THE MATRIX, below);
+**the runtime 67 / 68 + 1 known and 0 divergences at seeds 20730 and 13; the interpreter at 13, 20729, 20730; mutants 3,051 / 3,061 killed
+at 20730, 10 declared** (`equivalent-mutants.ts`: the placing and the four pointer acts off the page, an empty frame end, a Clear off the
+page that finds everything empty, a press / release / click / Tab / typing / key on a disabled field during an Enable Label or Type rebuild —
+the frame's end redoes the rebuild — and, found by the first 10,000 run, a pointer act whose drain LANDED a Set swapped with its rebuild
+twin: the Set landing means no keyboard on the field, so the twin's `elementFocused: false` writes what is there). Deep runs: see the gate readings below. Ports generated from the catalog by the new
+`scripts/node-spec/gen-ports.js <typeName>` (the handoff asked for it; the Checkbox's copied port was the lesson) — logic ports listed for
+hand-writing, look and layout ports emitted with their class.
+
+**The text, three times over.** The spec keeps what the runtime keeps: the AUTHOR'S VALUE (`_internal.text`, what Value last wrote — null
+is the field's empty value, undefined ignored, a repeat ignored), the START VALUE (`props.startValue`, written by every Value / Set / Clear /
+Insert / Backspace AND every keystroke, what the next mount starts from), the FIELD (the component's `state.value`, raw text) and the
+VALUE OUTPUT (`outwardValueForFieldType`: the text, or a Number field's parsed number / null). A write through the component sends the output
+and fires Value Changed on EVERY call; a write while off the page sets the output alone and the next mount announces what was not announced
+(`_announcedValueIs`). Type's six values each paint a different element (`<textarea>` for Text Area; the `type` attribute otherwise) and the
+spec runs HTML's value sanitization on what the element SHOWS (a Number field shows nothing for text that is not a number; Email / URL trim
+their ends) — typing appends to what the element shows, not to what the component holds.
+
+**Two rules the runtime taught the spec, both measured side by side before they were written:**
+- **A write from the graph is a `setState` React commits at the frame's end; a person's keystroke is a browser event React commits at once.**
+  `edit` (Insert Text, Backspace) reads `this.state.value` — the text React last COMMITTED — so an edit in the same frame as another write
+  works on stale text and React's last `setState` wins: Value `abc` then Backspace → Unchanged; two Backspaces → one character; **Clear then
+  Backspace → the field holds `ab`** (row C69, high). The spec holds `field` (committed) beside `pending` (written), the paint commits.
+- **A pointer act drains the frame.** Every pointer handler the control installs runs the graph's dirty nodes after its own work
+  (pointerlisteners.ts :173-186 — "that is what makes a click update the graph in the same frame"), so a Set or Insert Text queued for the
+  frame's end runs AT a hover, leave, release, click, touch or lift, in the order pressed, its `setState` committed with the event; an
+  Insert, a touch, then a Clear leaves the field empty where the same without the touch leaves the inserted text. Inputs themselves apply
+  at once (a Clear reports in its own step); only the node's scheduled callbacks wait. The format grew **`PersonPatch`**: a person's act may
+  resolve invocations `deferred` to the frame's end (spec.ts, interpreter.ts `act` → `resolveOpen`; hashes refreshed, three stranger rounds
+  green). A Text Area's press drains too — inside the handler, BEFORE the mousedown's default puts the keyboard on it (a Set landing at the
+  press is Done, not absorbed); an `<input>`'s press does not (C68). A Tab, a key and typing drain nothing (not pointer handlers).
+
+**The face grew two acts** (`node-spec-target.ts` PERSON `typeKey`): `type` puts the keyboard on the field first (the focusing steps, as a
+Tab's — a disabled field takes nothing), then one key at a time through the element's PROTOTYPE value setter (past React's tracker on the
+instance, as a keystroke is) and an `input` event; the browser's rules written down: a key past the element's `maxlength` is refused (text-like
+inputs and a textarea; never a Number field), a Number field refuses every key but a digit (a sign, point or exponent mid-entry is a state
+jsdom and a browser disagree on — jsdom drops it, a browser keeps it on screen with an empty value — not graded), and Enter's default action
+in a `<textarea>` writes a newline. `key` dispatches `keydown` / `keyup` with the key.
+
+**Rows** (ledger `node scripts/bugs.js --from P107`; the three shared setters C61–C63 reach 117 of the 200 runs at 20730):
+- **C68** — a mouse press on a Text Input fires no Pointer Down and never sets Pressed: TextInput.tsx :204 puts the component's own
+  `onMouseDown` after the spread of the control's; the release still fires Pointer Up, a finger and a Text Area fire all of them; the
+  press skips the pointer drain too. ([P107-C68](../../bugs/p107-c68-a-mouse-press-on-a-text-input-fires-no-pointer-down.md))
+- **C69** (high) — Insert Text and Backspace read the field as React last drew it (above). ([P107-C69](../../bugs/p107-c69-insert-text-and-backspace-read-the-field-as-react-last-drew-it.md))
+- **D31** — Set fires Value Changed and reports Done with the Value already in the field ("fires whenever the Value output changes").
+  ([P107-D31](../../bugs/p107-d31-set-fires-value-changed-with-nothing-changed.md))
+- **D32** — a text field given the number 5 publishes `'5'` on the page and `5` off it (text-input.ts :535 hands the raw value to
+  `outwardValueForFieldType`). ([P107-D32](../../bugs/p107-d32-a-text-fields-value-output-keeps-the-type-it-was-given-while-off-the-page.md))
+- **D33** — Clear on a Number field says Unchanged while it empties text the field held (`wasEmpty` reads the author's Value and the output,
+  not the field). ([P107-D33](../../bugs/p107-d33-clear-on-a-number-field-reports-unchanged-while-it-empties-the-field.md))
+- Second instances filed on existing rows: **C65** (TextInput.tsx :274 renders `{props.label}` raw — 3 of 200 runs at 20730, known row),
+  **C66** (two divs carry the root ref when the label is on; not on this node's wire — its Focus goes through the inner component),
+  **D30** (Focused survives Mounted off, an Enable Label change and a Type change between Text Area and the rest — each a new element).
+- The catalog marks this node `runtime-narrowed` (`startValue` / `onTextChanged` republished as `number` or `string` per Type) and derives
+  one string input per Data Attributes name: the spec's `derived` carries the data-attribute ports (the first visual spec to need one); the
+  narrowing is a sentence, a declared port cannot be re-derived. The parity gate now probes a derived rule with the name its own
+  `accept.example` gives (`data-testid`), not the bare `probe` the rule would refuse.
+
+**Mutants: what the shapes taught.** The first spec computed its `set` by diffing states — NaN keys and fresh objects read as changes on
+every patch and bred 70 survivors a seed; the patches now name the keys the runtime WRITES (a Clear writes the author's Value and the start
+value whether or not they move), and the off-page Clear writes the output regardless (one branch, not two twins). `field` / `pending`
+(React's commit) join the page's synced keys. The painted-page scenarios run every act under the four Mounted / Enabled toggles as the
+Button's do, plus: the rebuild (Enable Label toggling with every act, focused and disabled), the drain (every pointer act with a Set and an
+empty Insert queued and a Clear after; each write alone, keyboard off and on; inside a rebuild, with a Focus action after), the remount's
+announce inside an act, the stale read (two Sets and an Insert in one frame; Max
+length 3), the remount's announce, and a Focus before the first frame. **The first two 10,000 runs each left ~30 swap survivors on
+combinations no single-axis scenario reached (a disabled field remounted inside a release; a rebuild with one write queued; a touch
+during a rebuild with an empty Insert queued), so one GENERATED scenario — the matrix — now plays every act × enabled / disabled × the
+keyboard off / on × rebuild or not × remounting in the frame or not × nothing / a Set / an empty Insert / a writing Insert queued, each
+segment ending with a Clear (orders the drain) and a Focus action (reads the page): 704 segments, 10,913 steps, 0 divergences on the
+runtime (170 s a run), mutants ~3,000 and none surviving at 200 on three seeds.**
+
+**Gate readings (2026-10-04, load 1.5–2.6).** Interpreter: CONFORMS at 200 on 13, 20729, 20730 (3,018 / 3,029 · 3,105 / 3,115 · 3,051 / 3,061
+killed; `tests/batch-visual.test.ts` now pins seed 13 for every `person` spec). Runtime: CONFORMS at 200 on 20730 (0
+divergences, 120 of 200 known rows — C61 89 · C62 21 · C63 7 · C65 3) and on 13; Button and Checkbox re-run on both seeds, unmoved. Deep
+runs (s39 read them: s38 launched the third and cleared): the interpreter at 10,000 (seed 20729, the matrix in the suite, 2,358 s) — 68 / 68
+scenarios, 0 divergences, 4,197 / 4,215 mutants killed, **8 swap twins left** (a hover or leave whose drain found both queued jobs Unchanged,
+swapped with the act that drained nothing; a release or key inside a remount that announced the Value, swapped with the bare act or the
+rebuild's reset — each on a disabled or already-focused field, to kill with a scenario or declare next); the runtime at 10,000: see §7.4's
+gate readings. Catalog parity 267 / 267; three stranger rounds green on the refreshed hashes; `node scripts/bugs.js check` — the
+two problems it lists are a peer's P109 files; census regenerated (`T5 3/19`).
+
+**Lessons.** (1) **Measure the ORDER, not just the values**: two writes and an act in one frame told the drain apart from the paint only in
+a side-by-side trace; a single-step probe would have shown both targets agreeing. (2) **A component method the node calls reads React's
+committed state**, which inside the runtime's frame is the previous one — look for `this.state` reads behind a node's actions. (3) A patch's
+`set` names what the code WRITES, never what changed (a diff turns every NaN into a branch). (4) A derived-port rule with an `accept`
+pattern needs the gate to probe with a name it accepts.
+
+**Left (AC3):** 16 visual nodes: Dropdown (`choose`), Slider (`slide`), Radio Button (+ Group) through the same face; Group / Text / Image /
+Circle / Icon / Columns / Video need the pointer, drop and scroll acts; Drag; then Repeater, Component Stack, Page Router, Component
+Children (a boundary or a stack each). Every control with `addControlEventsAndStates` is a candidate for C68's shape (a component handler
+after the spread) and for the drain's ordering. AC4 waits for NSP-017.
+
+### 7.4 s39, 2026-10-04 — Dropdown conforms (110 of 147)
+
+**Dropdown** (`net.noodl.controls.options`, 107 inputs — 12 logic, 95 classed — 23 outputs, 10 acts: the Checkbox's nine plus **`choose`** (an
+option's value)): 48 scenarios (three marked `row`: C71, C65, C66 — one of them a 704-segment matrix); **the runtime 45 / 48 + 3 known and 0
+divergences at seeds 13 and 20730; the interpreter at 13, 20729, 20730; mutants 1,290 / 1,296 killed at 13 (1,290 / 1,297 at 20729), 6 declared**
+(`equivalent-mutants.ts`: the placing and the four pointer acts off the page, and a press / release / click / Tab / pick on a disabled element
+during an Enable Label rebuild — the Checkbox's reasons). Ports from `gen-ports.js` (its classed block repeats `mounted`, which the logic block
+declares — one line to drop). `src/nodes/dropdown.ts`, `scenarios/net.noodl.controls.options.json`, the face's `choose`, an `optionslist` pool in
+`generate.ts` (a list, an option with no Value, items that are not options, nothing, and the legacy string form).
+
+**The choice, four times over.** The spec keeps what the runtime keeps: the NODE'S VALUE (`_internal.value`, the output — a pick and the Value
+input write it), the AUTHOR'S VALUE (`props.value` — the Value input writes it changed or not; the component's effect keys on it), the SHOWN
+VALUE (the component's `useState` — a pick writes it at once; the effect writes it to the author's at the mount and at a render that saw a new
+Items ARRAY by identity) and WHAT THE BROWSER SELECTS (`domSelected` — React controls the `<select>` while the shown value names an option;
+otherwise the browser keeps what it had: a fresh element selects the hidden empty option, an option that left the list hands the selection to
+the first enabled one — HTML's reset, written down and measured). The mount's and the array's effect end in `valueChanged(props.value)`: after a
+pick the node takes the author's Value back, sends it and fires Changed with nobody picking (row D34). The runner's `set` hands the SAME
+example array to both targets (the interpreter marks a set value external and never freezes it), so identity on the wire is one fact.
+
+**The face's `choose`** (`node-spec-target.ts` PERSON): a keyboard pick — a disabled element takes none; only an enabled option the list offers
+can be picked (the hidden empty option is disabled); the keyboard goes onto the element first (the focusing steps); picking the option already
+selected raises no `change`; else the value through the element's PROTOTYPE setter, then `input` and `change`. A mouse pick is a press, a
+choose and a release in a scenario.
+
+**Two rules measured before they were written** (`zz` probes playing both targets, traces aligned, then the face instrumented to print
+`el.value`, `selectedIndex` and the span):
+- **The effect compares with the last RENDER, and a Value write that changes nothing never renders.** Placed on 'Option 2': pick 'Option 1',
+  write Value 'Option 1' (no change — no render), write Value 'Option 2' (a change — a render whose `props.value` equals the last rendered
+  'Option 2'): the effect does not run, the `<select>` and the span keep 'Option 1' while the output says 'Option 2', even with a frame between
+  the writes (probe Pa). Row **C71**; the spec writes the shown value on every Value write that changes the node's value (the intent) and the
+  runner knows the row (`pickWriteBackPick`: a pick of V, a Value write, a pick of V again, the difference on Value or Changed). A one-frame
+  scenario of mine was C71-laden by construction (a pick and a write to the pick's value); it now goes through a third option.
+- **The pre-act paint re-renders the node** (the holder's `forceUpdate` reaches the component, so an Items array written in the act's frame runs
+  the effect before the act — the matrix's picked + Items segments agree on both targets), and the frame's end renders only what scheduled a
+  render (the Value setter does not when the node's value stood).
+
+**Rows** (ledger `node scripts/bugs.js --from P107`; the three shared setters C61–C63 reach 121 of the 200 runs at 13):
+- **C70** (high) — Items wired a truthy value that is not a list (the legacy stored form is a string; a Text node or a backend field wired in
+  delivers one), or a list holding null: Select.tsx :60 / :118 / :119 throw in the render; the whole page. 3 of 200 runs at 13 (`items: "x"`).
+  ([P107-C70](../../bugs/p107-c70-a-dropdowns-items-wired-a-value-that-is-not-a-list-crashes-the-render.md))
+- **C71** — a Value written back to the value React last rendered, after a pick, leaves the pick on the screen (above).
+  ([P107-C71](../../bugs/p107-c71-a-dropdowns-value-written-back-after-a-pick-leaves-the-pick-on-the-screen.md))
+- **D34** — a remount, or Items written again after a pick, takes the author's Value back and fires Changed with nobody picking; a Dropdown fed
+  by a live list cannot keep a person's choice across a refresh.
+  ([P107-D34](../../bugs/p107-d34-a-dropdown-fires-changed-with-nobody-picking-after-a-remount-or-an-items-write.md))
+- Instances on existing rows: **C65** third and fourth (Select.tsx :245 renders `{props.label}` raw, :182 `{props.placeholder}` raw — 2 + 1 of 200
+  runs at 13; `objectPlaceholder` joins the known rows), **C66** third — ON THE WIRE here (Select.tsx :188 and :235 share the root ref; label
+  on → off nulls it and the Dropdown's Focus / Blur go through the root: Focus reports Unchanged with the dropdown on the page; scenario marked
+  `row`, `lostRootAfterLabelOff` known for the Dropdown), **D30** (Mounted off, Enable Label changing — a new `<select>` each time).
+- Not a row: a `<select>`'s pointer handlers are the control's (`Utils.controlEvents` spread last, Select.tsx :211) — no C68 shape; the
+  component's own handler is `onChange` only. No Click output (`addControlEventsAndStates` adds none here); a click opens the list and picks
+  nothing.
+
+**Mutants: the matrix and the lost root.** The first runtime run left 14 swap twins differing by the rebuild's `elementFocused` reset on a
+disabled element — killed on the interpreter by the C66 scenario, which the runtime excludes as a known row. Two hand scenarios now read the
+keyboard through a Blur action after re-enabling (every act on a disabled element; Items rewritten, Enable Label turned on, or both, with the
+act), which kills them on both. The matrix at first toggled the label on and off across segments, so after the first off every Focus action in
+it read C66's lost root: **every segment now starts from a remount with the label off, and a rebuild in a segment is always off → on** (704
+segments, 11,617 steps, ~60 s on the runtime). Killers the first interpreter run asked for: a Value written to the pick's value then Items
+(the author's Value brought up to the pick — no Changed), Items written undefined (no opinion), and three acts inside a remount or an Items
+write WITHOUT the trailing Focus action (the action hides a focus the act failed to take).
+
+**Gate readings (2026-10-04, load 2–3).** Interpreter: CONFORMS at 200 on 13, 20729, 20730 (1,290 / 1,296 · 1,290 / 1,297 · 1,290 / 1,296 killed; 77–79 s each);
+`tests/batch-visual.test.ts` lists the Dropdown. Runtime: CONFORMS at 200 on 13 (0 divergences, 124 of 200 known rows — C61 91 · C62 21 ·
+C63 9 · C65 3 · C70 3, mutants 1,290 / 1,296, 102 s) and on 20730 (0 divergences, 132 of 200 known rows — C61 98 · C62 26 · C63 4 · C65 2 · C70 2, mutants 1,290 / 1,296, 103 s). Deep runs: launched after the gates in one chain (the Dropdown at 10,000 on the interpreter, seed 20729, then on the runtime; then the Text
+Input's runtime 10,000) — pending at the commit; a follow-up commit carries the readings. Catalog parity 270 / 270; package `nodegx-node-spec` 20 suites, 858 passed; `tsc --noEmit` exit 0 in
+both packages; `node scripts/bugs.js check` — the three problems it lists are a peer's P109 files; census regenerated (`T5 4/19`). **The
+runtime's full node-spec batch outgrew its ten-minute hook** (90 of 110 specs in 760 s, then every test red): the hook is thirty minutes
+now; the 20 the cut batch never reached were run by name at 20730 and conform (States alone 134 s). Two specs do NOT conform at today's
+seed 20730 and do at 20729 — NavigationClosePopup (one `afterInputs` drop-set surviving) and DbModel2 (two `modelId` swaps surviving):
+seed-dependent kills no scenario pins, older than this session; left for s40.
+
+**Lessons.** (1) **Instrument the face when two targets disagree on a pick**: three probes and one print of `el.value` / the span found C71's
+general form in minutes where reasoning about React's effect deps had gone round twice. (2) **A known row of one scenario hides the kills it
+made**: a scenario the runtime knows as a row is excluded from mutant grading, so a twin the interpreter kills there survives on the runtime —
+kill it with a scenario the runtime passes. (3) **A generated matrix must not cross a known row's state**: C66's lost root after label off
+would have read as a hundred divergences; start every segment from a state the row cannot reach. (4) **The parallel-Bash cwd trap again, twice**
+(a runtime run executed in the wrong package; a ledger read failed): one Bash call per run, absolute paths, never two heavy calls at once.
+
+**Left (AC3):** 15 visual nodes: Slider (`slide`; the browser clamps and steps a range input's value — write that rule in the face), Radio Button
+(+ Group, a graph scenario — the group owns the value) through the same face; Group / Text / Image / Circle / Icon / Columns / Video need the
+pointer, drop and scroll acts; Drag; then Repeater, Component Stack, Page Router, Component Children (a boundary or a stack each). Every control
+whose component keeps the value in `useState` and follows the node through an effect (Checkbox, Dropdown — the Slider and Radio Button are to be
+read for it) is a candidate for C67 / C71's shape. AC4 waits for NSP-017.

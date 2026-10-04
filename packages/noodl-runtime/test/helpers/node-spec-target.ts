@@ -784,7 +784,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -1496,9 +1496,60 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       case 'blur':
         el.blur();
         break;
+      // NSP-016 s38 — the keyboard acts on a field (Text Input). The browser's rules, not the component's: a person types
+      // into the field the keyboard is on (the focusing steps first, as a Tab's); a disabled field takes no key; each key
+      // writes one character at the caret — the end, here — and raises `input`; the element's `maxlength` refuses a key
+      // once the value is at it (text-like inputs and a textarea; never a Number field); a Number field refuses every
+      // key but a digit (a sign, a point or an exponent mid-entry is a state jsdom and a browser disagree on — see the
+      // Text Input spec); Enter's default action in a <textarea> writes a newline. The value is written through the
+      // element's PROTOTYPE setter — past React's value tracker on the instance, as a keystroke is — so React's
+      // `onChange` fires exactly when the value changed.
+      case 'type':
+        if (disabled) break;
+        if (d.document.activeElement !== el) el.focus();
+        for (const ch of Array.from(String(value))) typeKey(w, el, ch);
+        break;
+      case 'key': {
+        if (disabled) break;
+        if (d.document.activeElement !== el) el.focus();
+        const key = String(value);
+        const notCancelled = el.dispatchEvent(new w.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, composed: true }));
+        if (notCancelled && key === 'Enter' && el.tagName === 'TEXTAREA') typeKey(w, el, '\n');
+        el.dispatchEvent(new w.KeyboardEvent('keyup', { key, bubbles: true, cancelable: true, composed: true }));
+        break;
+      }
+      // NSP-016 s39 — a pick on a `<select>` (Dropdown). The browser's rules, not the component's: a disabled element takes no
+      // pick; a person can pick only an option the list offers and that is not disabled (the hidden empty option is disabled);
+      // a pick is a keyboard pick here — the keyboard goes onto the element first (the focusing steps), as a Tab's would, and
+      // the arrow keys move the selection; picking the option already selected raises no `change`. The value is written
+      // through the element's PROTOTYPE setter (as the keyboard acts are) and `input` then `change` are raised, as a browser
+      // raises them for a selection a person made.
+      case 'choose': {
+        if (disabled || el.tagName !== 'SELECT') break;
+        const picked = String(value);
+        const option = Array.from(el.options as ArrayLike<{ value: string; disabled: boolean }>).find((o) => o.value === picked && !o.disabled);
+        if (!option) break;
+        if (d.document.activeElement !== el) el.focus();
+        if (el.value === picked) break;
+        Object.getOwnPropertyDescriptor(w.HTMLSelectElement.prototype, 'value')!.set!.call(el, picked);
+        el.dispatchEvent(new w.Event('input', { bubbles: true, composed: true }));
+        el.dispatchEvent(new w.Event('change', { bubbles: true, composed: true }));
+        break;
+      }
       default:
         throw new Error(`runtime: no person face for the act "${act}"${value === undefined ? '' : ` (${JSON.stringify(value)})`}`);
     }
+  }
+
+  /** PERSON (above) — one key on a text field: refused past `maxlength` or, on a Number field, when not a digit; else written and `input` raised. */
+  function typeKey(w: any, el: any, ch: string): void {
+    const area = el.tagName === 'TEXTAREA';
+    const limited = area || ['text', 'search', 'url', 'tel', 'email', 'password'].includes(el.type);
+    if (!area && el.type === 'number' && !/^[0-9]$/.test(ch)) return;
+    if (limited && el.maxLength >= 0 && el.value.length + ch.length > el.maxLength) return;
+    const proto = area ? w.HTMLTextAreaElement.prototype : w.HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(proto, 'value')!.set!.call(el, el.value + ch);
+    el.dispatchEvent(new w.Event('input', { bubbles: true, composed: true }));
   }
 
   /**

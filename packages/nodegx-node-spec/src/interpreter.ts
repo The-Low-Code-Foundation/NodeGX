@@ -586,7 +586,12 @@ export function act(inst: Instance, name: string, value?: unknown): void {
   markExternal(value);
   const c = canonicalise(value);
   inst.trace.push(c === undefined ? { t: 'act', act: name } : { t: 'act', act: name, value: c });
-  observe(inst, apply(inst, `<person.${name}>`, asWriter(inst, () => reducer(inst.state as never, inst.inputs as never, value, view)), false));
+  const patch = asWriter(inst, () => reducer(inst.state as never, inst.inputs as never, value, view));
+  const sends = apply(inst, `<person.${name}>`, patch, false);
+  // NSP-016 s38 (spec.ts `PersonPatch`) — a pointer act drains the node's frame-end work: what the frame deferred before
+  // the act is resolved here, in order; the rest still waits for `afterInputs`
+  resolveOpen(inst, `person.${name}`, (patch as { outcomes?: ReadonlyArray<{ port: string; outcome: Outcome; error?: string }> }).outcomes ?? [], ['deferred', 'pending']);
+  observe(inst, sends);
   deliverChanges(inst);
 }
 

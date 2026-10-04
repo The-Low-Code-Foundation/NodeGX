@@ -115,7 +115,11 @@ const POOLS: Readonly<Record<string, readonly unknown[]>> = Object.freeze({
   array: [[], [1], [1, 2, 3], ['a', 'b'], [{ a: 1 }], {}, null, undefined, 'x', 5, '[1,2]'],
   '*': [...CROSS_TYPE, NaN, { value: 1, unit: 'px' }, new Date(0)],
   date: [new Date(0), new Date('2026-09-30T12:00:00Z'), new Date('nope'), 0, 1700000000000, '2026-01-01', '', null, undefined],
-  dimension: [0, 1, 100, { value: 12, unit: 'px' }, { value: 50, unit: '%' }, '12px', null, undefined, NaN]
+  dimension: [0, 1, 100, { value: 12, unit: 'px' }, { value: 50, unit: '%' }, '12px', null, undefined, NaN],
+  // NSP-016 s39 — a Dropdown's Items: what a wire delivers is a list (the editor's codec has already decoded it), an option
+  // with no Value (its Label stands in), items that are not options, nothing, and — the legacy stored form, a string — one
+  // value that is not a list at all (Select.tsx :118 throws on it, row C70)
+  optionslist: [[], [{ Label: 'X', Value: 'x' }], [{ Label: 'Only' }], [1, 2], null, undefined, 'x']
 });
 
 export function poolFor(decl: InputDecl): readonly unknown[] {

@@ -23,3 +23,12 @@ with a label (Radio Button, …) are to be measured the same way.
 act) on the runtime target.
 
 **Proposed fix:** `String(props.label)` as the Button does. One token.
+
+**Second instance (P107 NSP-016 s38, 2026-10-04): Text Input.** TextInput.tsx :273-275 renders `{props.label}` raw inside the
+`<label>` the same way; measured in the Text Input's generated runs (3 of 200 at seed 20730, known row C65 in
+`conformance.test.ts`). The same one-token fix.
+
+**Third and fourth instances (P107 NSP-016 s39, 2026-10-04): Dropdown.** Select.tsx :245 renders `{props.label}` raw inside
+the `<label>`, and :182 renders `{props.placeholder}` raw in the span while nothing is selected — a Placeholder wired an
+object crashes the render the same way (measured in the Dropdown's generated runs at seed 13: 2 runs on Label, 1 on
+Placeholder; known rows C65 `objectLabel` and `objectPlaceholder` in `conformance.test.ts`). `String()` on both.

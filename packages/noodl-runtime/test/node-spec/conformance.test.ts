@@ -274,12 +274,15 @@ const unitCssPort = (port: string) => UNIT_CSS_NAMES.some((n) => port === n || p
  * throws at the next paint (a settle or an act). Narrow: React's own message, and a `set` of `label` to an object or an
  * array somewhere in the reference before the difference (a parameter is a set at the mount).
  */
-const objectLabel = (d: Divergence) => {
+const objectChild = (port: string) => (d: Divergence) => {
   if (d.difference.threw === undefined || !/Objects are not valid as a React child/.test(d.difference.threw)) return false;
   // a throw at the mount (index 0) leaves no trace: any parameter set qualifies; else a set before the paint that threw
   const upTo = d.difference.index === 0 ? d.reference.findIndex((e) => e.t !== 'set') : d.difference.index + 1;
-  return d.reference.slice(0, upTo < 0 ? d.reference.length : upTo).some((e) => isSet(e, 'label', (v, present) => present && typeof v === 'object' && v !== null));
+  return d.reference.slice(0, upTo < 0 ? d.reference.length : upTo).some((e) => isSet(e, port, (v, present) => present && typeof v === 'object' && v !== null));
 };
+const objectLabel = objectChild('label');
+/** s39 — C65's fourth instance: Select.tsx :182 renders `{props.placeholder}` raw while nothing is selected */
+const objectPlaceholder = objectChild('placeholder');
 /**
  * NSP-016 §6 C66 — a Checkbox whose Enable Label went from on to off has lost its root element (two elements, one ref
  * callback: the removed one nulls it), so a Focus action reports Unchanged with the box on the page. Narrow: the
@@ -327,6 +330,41 @@ const clickActionClick = (d: Divergence) => {
   return stage === 3;
 };
 
+/**
+ * NSP-016 §6 C70 — a Dropdown's Items wired a truthy value that is not a list (the legacy stored form is a string), or a list
+ * holding null: Select.tsx :118 maps it (`props.items.map`) and :119 reads `.Value` of each item, and React throws at the
+ * next paint. Narrow: the throw's own message, and a `set` of `items` to such a value before the paint that threw.
+ */
+const itemsNotAList = (d: Divergence) => {
+  if (d.difference.threw === undefined || !/props\.items\.(map|findIndex) is not a function|Cannot read properties of null \(reading 'Value'\)/.test(d.difference.threw)) return false;
+  const upTo = d.difference.index === 0 ? d.reference.findIndex((e) => e.t !== 'set') : d.difference.index + 1;
+  const offending = (v: unknown, present: boolean) => present && ((!!v && !Array.isArray(v)) || (Array.isArray(v) && v.some((i) => i === null)));
+  return d.reference.slice(0, upTo < 0 ? d.reference.length : upTo).some((e) => isSet(e, 'items', offending));
+};
+/**
+ * NSP-016 §6 C71 — a Value written back to the very value React last rendered, after a person's pick, does not move the
+ * selection: the component's effect keys on `props.value` (Select.tsx :44-47), which that write did not change, so the
+ * `<select>` keeps the pick; the output says the author's Value, the screen the pick, and picking it again raises nothing.
+ * Narrow: an act `choose` of V, a `set` of `value` after it, then a `choose` of V again — all before the difference, which
+ * is on `value` or `onChange` (the reference has them, the runtime has nothing).
+ */
+const pickWriteBackPick = (d: Divergence) => {
+  const ref = d.difference.reference as TraceEvent | undefined;
+  const act = d.difference.actual as TraceEvent | undefined;
+  const onPick = (e: TraceEvent | undefined) => !!e && ((e.t === 'value' && e.port === 'value') || (e.t === 'signal' && e.port === 'onChange'));
+  if (!onPick(ref) && !onPick(act)) return false;
+  const before = d.reference.slice(0, d.difference.index);
+  let stage = 0;
+  let picked: unknown;
+  for (const e of before) {
+    if (e.t === 'act' && e.act === 'choose') {
+      if (stage === 2 && 'value' in e && e.value === picked) stage = 3;
+      else if (stage < 2) { stage = 1; picked = 'value' in e ? e.value : undefined; }
+    } else if (stage === 1 && e.t === 'set' && e.port === 'value') stage = 2;
+  }
+  return stage === 3;
+};
+
 const VISUAL_ROWS: KnownRow[] = [
   { row: 'NSP-016 §6 C61 — Font Family wired a truthy value that is not text: the setter throws calling `.split` on it', matches: throwsOnSet((p) => p.endsWith('fontFamily'), truthyNonString, /family\.split is not a function/) },
   { row: 'NSP-016 §6 C62 — a units-typed style input wired null: the generated setter reads `.value` of null and throws', matches: throwsOnSet(unitCssPort, isNull, /Cannot read properties of null \(reading 'value'\)/) },
@@ -336,6 +374,20 @@ const VISUAL_ROWS: KnownRow[] = [
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // NSP-016 s37 — the visual nodes share three throwing setters (VISUAL_ROWS)
   'net.noodl.controls.button': VISUAL_ROWS,
+  'net.noodl.controls.textinput': [
+    ...VISUAL_ROWS,
+    // s38 — C65's second instance: TextInput.tsx :274 renders `{props.label}` raw too
+    { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel }
+  ],
+  // s39 — the Dropdown: C65's third instance (Select.tsx :245 renders `{props.label}` raw), and two of its own
+  'net.noodl.controls.options': [
+    ...VISUAL_ROWS,
+    { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
+    { row: 'NSP-016 §6 C65 — a Placeholder wired an object or an array, with nothing selected: React throws rendering it at the next paint', matches: objectPlaceholder },
+    { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the dropdown on the page', matches: lostRootAfterLabelOff },
+    { row: 'NSP-016 §6 C70 — Items wired a truthy value that is not a list, or a list holding null: the render throws at the next paint', matches: itemsNotAList },
+    { row: "NSP-016 §6 C71 — a Value written back to the value React last rendered, after a pick, leaves the pick selected: picking it again raises nothing", matches: pickWriteBackPick }
+  ],
   'net.noodl.controls.checkbox': [
     ...VISUAL_ROWS,
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
@@ -424,7 +476,9 @@ describe('NSP-004 / NSP-011 — every registered spec on the runtime, 200 sequen
       console.log(formatReport(report));
       reports.set(spec.type, report);
     }
-  }, 600_000);
+    // s39 — the visual nodes' matrix scenarios made the whole batch outgrow ten minutes (Text Input 197 s, Dropdown 124 s, States
+    // 134 s; 110 specs ≈ 900 s on a loaded box): thirty, so the hook does not cut the batch at the 90th spec and redden every test
+  }, 1_800_000);
 
   for (const type of pilot.map((s) => s.type)) {
     test(`${type} conforms on the runtime (known rows counted, not hidden)`, () => {

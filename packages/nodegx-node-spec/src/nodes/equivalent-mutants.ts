@@ -53,6 +53,40 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
       { reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":[],"emit":[]', swappedWith: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED }
     ])
   ],
+  'net.noodl.controls.textinput': [
+    { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
+    ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
+    // a frame's end with no callback scheduled and nothing to paint writes nothing (the Button's afterInputs always syncs; this one consumes a queue only when it held something)
+    { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":[],"emit":[]', why: 'a frame end with nothing scheduled and nothing to paint: its set is empty, there is nothing to drop' },
+    // Clear off the page with the author's Value and the output already empty: every writer of the output writes the start value with
+    // it, so the start value is empty too — the three keys it writes already hold the value (text-input.ts :490-497)
+    { reducer: 'clear', kind: 'drop-set', branch: '"set":["out","startValue","text"],"emit":[],"outcome":"unchanged"', why: "a Clear off the page that finds the author's Value, the start value and the output already empty writes what is there" },
+    // a press, release, click, Tab or key on a DISABLED field while Enable Label or Type is changing: the act itself meets nothing and
+    // its paint rebuilds the element (`elementFocused` false); dropped, the paint's sync (`labelOn` / `areaOn`) is dropped with it,
+    // so the frame's end rebuilds again and resets the same key — nothing reads it in between (the Focus and Blur actions read a
+    // disabled element as nothing to do). Measured s38 on the interpreter: the swaps of these branches are killed, the drops not.
+    ...['press', 'release', 'click', 'focus', 'type', 'key'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED })),
+    // a pointer act whose drain LANDED a Set (Done: the field had no keyboard — `setText` abstains while it has one) has a twin that
+    // also rebuilt the element (Enable Label / Type changed in the frame) and reset `elementFocused` — to the false it already was.
+    // Swapped either way, the branches write the same keys to the same values. Found by the 10,000 deep run (s38).
+    ...['hover', 'leave', 'press', 'release', 'click', 'touch', 'lift'].flatMap((act) =>
+      ['"outcomes":["insert:unchanged","set:done"]', '"outcomes":["set:done"]', '"outcomes":["insert:done","set:done"]'].map((o) => ({
+        reducer: `person.${act}`,
+        kind: 'swap-branch' as const,
+        branch: o,
+        swappedWith: o,
+        why: "a drain that landed a Set found no keyboard on the field; its rebuild twin resets elementFocused to the false it already was"
+      }))
+    )
+  ],
+  // NSP-016 s39 — the Dropdown: the placing off the page and the four acts that meet no element (the Button's); a press, release,
+  // click, Tab or pick on a DISABLED element while Enable Label is changing (the Checkbox's REBUILT_WHILE_DISABLED: the act meets
+  // nothing, the paint rebuilds the `<select>` and resets `elementFocused`, which no action reads while disabled)
+  'net.noodl.controls.options': [
+    { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
+    ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
+    ...['press', 'release', 'click', 'focus', 'choose'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED }))
+  ],
   'Map Collection': [
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },

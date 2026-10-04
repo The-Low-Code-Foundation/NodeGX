@@ -1394,8 +1394,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 3,
-        "noodl-mcp": 4,
-        "total": 23
+        "noodl-mcp": 5,
+        "total": 24
       },
       "testsTyped": {
         "noodl-runtime": 8,
@@ -1403,12 +1403,12 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 0,
-        "noodl-mcp": 2,
-        "total": 12
+        "noodl-mcp": 3,
+        "total": 13
       },
       "dynamicPorts": true,
       "dynamicPortMechanisms": 1,
-      "placesWritten": 13,
+      "placesWritten": 14,
       "warnings": []
     },
     {
@@ -1642,8 +1642,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 12,
-        "noodl-mcp": 62,
-        "total": 95
+        "noodl-mcp": 63,
+        "total": 96
       },
       "testsTyped": {
         "noodl-runtime": 1,
@@ -1651,12 +1651,12 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 4,
-        "noodl-mcp": 47,
-        "total": 58
+        "noodl-mcp": 48,
+        "total": 59
       },
       "dynamicPorts": true,
       "dynamicPortMechanisms": 1,
-      "placesWritten": 59,
+      "placesWritten": 60,
       "warnings": []
     },
     {
@@ -1819,8 +1819,8 @@
         "noodl-viewer-cloud": 1,
         "nodegx-core": 0,
         "nodegx-export": 1,
-        "noodl-mcp": 22,
-        "total": 36
+        "noodl-mcp": 23,
+        "total": 37
       },
       "testsTyped": {
         "noodl-runtime": 10,
@@ -2269,13 +2269,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 3,
+        "noodl-runtime": 2,
         "noodl-viewer-react": 3,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 18,
         "noodl-mcp": 18,
-        "total": 42
+        "total": 41
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -2313,13 +2313,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 3,
+        "noodl-runtime": 2,
         "noodl-viewer-react": 2,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 3,
         "noodl-mcp": 4,
-        "total": 12
+        "total": 11
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -2355,13 +2355,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 0,
+        "noodl-runtime": 1,
         "noodl-viewer-react": 1,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 2,
         "noodl-mcp": 2,
-        "total": 5
+        "total": 6
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -2481,13 +2481,13 @@
       "emitLibs": [],
       "exportStatus": "translated",
       "tests": {
-        "noodl-runtime": 1,
+        "noodl-runtime": 2,
         "noodl-viewer-react": 3,
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 9,
         "noodl-mcp": 6,
-        "total": 19
+        "total": 20
       },
       "testsTyped": {
         "noodl-runtime": 0,
@@ -6207,8 +6207,8 @@
         "noodl-viewer-cloud": 0,
         "nodegx-core": 0,
         "nodegx-export": 2,
-        "noodl-mcp": 10,
-        "total": 15
+        "noodl-mcp": 11,
+        "total": 16
       },
       "testsTyped": {
         "noodl-runtime": 0,
