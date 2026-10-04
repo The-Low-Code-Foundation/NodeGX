@@ -54,6 +54,7 @@ import { TPL001_CLOUD_COMPONENTS } from './tpl001Cloud';
 import { TPL002_CLOUD_COMPONENTS } from './tpl002Cloud';
 import { APP_NODES, APP_WIRES, TPL001_COMPONENTS, createPass } from './tpl001Components';
 import { TPL001_PRESET, TPL001_TOKENS } from './tpl001Theme';
+import { pinProjectModified } from './templatePins';
 
 /** The template's id and the directory name it is prepared into. */
 export const TEMPLATE_ID = 'members-area';
@@ -288,6 +289,11 @@ export async function buildMembersTemplateProject(options: BuildOptions = {}): P
     if (!c.deferred?.length) continue;
     await call('update_component', { path: c.path, set: { nodes: c.nodes, connections: c.connections } }, c.path);
   }
+  // P109 ISL-016 AC8: the home through the door (the raw `pinRootNode` after the door closed is gone).
+  if (!options.omitApp) {
+    await call('find_tools', { group: 'project' }, 'project:reveal');
+    await call('set_project_settings', { home: APP_COMPONENT }, 'home');
+  }
 
   await client.close();
   await server.close();
@@ -431,6 +437,7 @@ export function prepareArtefact(built: AuthoredTemplate, output: string, policyS
 
   pinComponentFiles(built.projectDir);
   pinRegistry(built.projectDir);
+  pinProjectModified(built.projectDir, TEMPLATE_EPOCH);
 
   // ⚠️ Replaced wholesale rather than merged: the door's output IS the artefact,
   // so a file surviving here that the door no longer writes would be a component
@@ -450,7 +457,6 @@ export function prepareArtefact(built: AuthoredTemplate, output: string, policyS
   fs.copyFileSync(policySource, path.join(output, POLICY_FILE));
 
   writeStartHere(output);
-  pinRootNode(output);
 }
 
 /** Where the note lands. `docs/` is the editor's own folder for prose a person reads. */
@@ -577,41 +583,3 @@ there.*
   fs.writeFileSync(path.join(output, START_HERE_FILE), body);
 }
 
-/**
- * 🔴 **Record which node is the app's HOME, or the editor previews an error.**
- *
- * Found by opening the artefact as a project and pressing preview: the viewer
- * rendered *"ERROR — No HOME component selected"* instead of the landing page.
- * `ProjectModel.fromJSON` resolves the home from `rootNodeId`, and the skeleton
- * this generator writes has no such field, so `rootNode` stayed undefined and
- * every screen behind it was unreachable — on the first thing a person does
- * after picking the template.
- *
- * ⚠️ **The control that made it a defect rather than a guess**: the only other
- * template in the repository, `site-builder.content.json`, carries
- * `rootComponent: '/App'`. Same mechanism, one arm sets it and one did not, and
- * the arm that did not is the one that errors.
- *
- * 🔴 **`rootNodeId`, NOT `rootComponent`.** `rootComponent` is the LEGACY
- * spelling — `import-engine/legacy/assess.ts` reports it as a field it rewrites
- * on load — and `project-v2.schema.json` sets `additionalProperties: false`, so
- * a v2 project file carrying it is not a project file that validates.
- * `fromJSON` accepts it only as a fallback for templates it is upgrading.
- *
- * ⚠️ **Derived from the artefact, never typed.** The door de-duplicates node ids
- * project-wide, so `app_root` is `app_root` only because `App` is written first
- * and nothing claims it earlier. Reading the root back out of the file that was
- * actually written is what keeps this true if that ever changes.
- */
-function pinRootNode(output: string): void {
-  const appNodes = path.join(output, 'components', APP_COMPONENT, 'nodes.json');
-  const nodes = (JSON.parse(fs.readFileSync(appNodes, 'utf-8')) as { nodes?: Array<{ id: string; parent?: string }> })
-    .nodes;
-  const root = (nodes ?? []).find((n) => !n.parent);
-  if (!root) throw new Error(`refusing to write: ${APP_COMPONENT} has no root node to be the app's home`);
-
-  const projectFile = path.join(output, 'nodegx.project.json');
-  const project = JSON.parse(fs.readFileSync(projectFile, 'utf-8')) as Record<string, unknown>;
-  project.rootNodeId = root.id;
-  fs.writeFileSync(projectFile, JSON.stringify(project, null, 2));
-}

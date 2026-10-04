@@ -59,7 +59,7 @@ import type { LegacyProject } from '../../noodl-editor/src/editor/src/io/Project
 import { createServer } from '../src/server';
 
 import { pinRunOnValueChangeDefaultsInDirectory, readAsLegacyProject } from './templateArtefact';
-import { copyTree, pinComponentFiles, pinRegistry, pinRootNode } from './templatePins';
+import { copyTree, pinComponentFiles, pinProjectModified, pinRegistry } from './templatePins';
 import {
   APP_COMPONENT,
   APP_NODES,
@@ -253,6 +253,12 @@ export async function buildPixelTemplateProject(options: BuildOptions = {}): Pro
     await create(c.path, c.nodes, c.connections);
   }
 
+  // P109 ISL-016 AC8: the home through the door (the raw `pinRootNode` after the door closed is gone).
+  if (!options.omitApp) {
+    await call('find_tools', { group: 'project' }, 'project:reveal');
+    await call('set_project_settings', { home: APP_COMPONENT }, 'home');
+  }
+
   await client.close();
   await server.close();
 
@@ -281,6 +287,7 @@ export function preparePixelArtefact(built: AuthoredTemplate, output: string): v
   pinRunOnValueChangeDefaultsInDirectory(built.projectDir);
   pinComponentFiles(built.projectDir, 'tpl005', TEMPLATE_EPOCH);
   pinRegistry(built.projectDir, TEMPLATE_EPOCH);
+  pinProjectModified(built.projectDir, TEMPLATE_EPOCH);
 
   if (path.basename(output) !== TEMPLATE_ID) throw new Error(`refusing to clear ${output}`);
   fs.rmSync(output, { recursive: true, force: true });
@@ -299,7 +306,6 @@ export function preparePixelArtefact(built: AuthoredTemplate, output: string): v
   }
 
   writeStartHere(output);
-  pinRootNode(output, APP_COMPONENT);
 }
 
 /** The note a person reads first. Generated, so it cannot drift from the graph it describes. */
