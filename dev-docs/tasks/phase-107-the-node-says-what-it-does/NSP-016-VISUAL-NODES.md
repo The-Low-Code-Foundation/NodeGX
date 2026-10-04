@@ -286,8 +286,8 @@ divergences, 120 of 200 known rows — C61 89 · C62 21 · C63 7 · C65 3) and o
 runs (s39 read them: s38 launched the third and cleared): the interpreter at 10,000 (seed 20729, the matrix in the suite, 2,358 s) — 68 / 68
 scenarios, 0 divergences, 4,197 / 4,215 mutants killed, **8 swap twins left** (a hover or leave whose drain found both queued jobs Unchanged,
 swapped with the act that drained nothing; a release or key inside a remount that announced the Value, swapped with the bare act or the
-rebuild's reset — each on a disabled or already-focused field, to kill with a scenario or declare next); the runtime at 10,000: see §7.4's
-gate readings. Catalog parity 267 / 267; three stranger rounds green on the refreshed hashes; `node scripts/bugs.js check` — the
+rebuild's reset — each on a disabled or already-focused field, to kill with a scenario or declare next); the runtime at 10,000 (s39 ran it):
+10 divergences no row takes and 12 survivors — §7.4's gate readings and [TEXT-INPUT-DEEP-RUN-2026-10-04.md](TEXT-INPUT-DEEP-RUN-2026-10-04.md). Catalog parity 267 / 267; three stranger rounds green on the refreshed hashes; `node scripts/bugs.js check` — the
 two problems it lists are a peer's P109 files; census regenerated (`T5 3/19`).
 
 **Lessons.** (1) **Measure the ORDER, not just the values**: two writes and an act in one frame told the drain apart from the paint only in
@@ -365,8 +365,17 @@ write WITHOUT the trailing Focus action (the action hides a focus the act failed
 
 **Gate readings (2026-10-04, load 2–3).** Interpreter: CONFORMS at 200 on 13, 20729, 20730 (1,290 / 1,296 · 1,290 / 1,297 · 1,290 / 1,296 killed; 77–79 s each);
 `tests/batch-visual.test.ts` lists the Dropdown. Runtime: CONFORMS at 200 on 13 (0 divergences, 124 of 200 known rows — C61 91 · C62 21 ·
-C63 9 · C65 3 · C70 3, mutants 1,290 / 1,296, 102 s) and on 20730 (0 divergences, 132 of 200 known rows — C61 98 · C62 26 · C63 4 · C65 2 · C70 2, mutants 1,290 / 1,296, 103 s). Deep runs: launched after the gates in one chain (the Dropdown at 10,000 on the interpreter, seed 20729, then on the runtime; then the Text
-Input's runtime 10,000) — pending at the commit; a follow-up commit carries the readings. Catalog parity 270 / 270; package `nodegx-node-spec` 20 suites, 858 passed; `tsc --noEmit` exit 0 in
+C63 9 · C65 3 · C70 3, mutants 1,290 / 1,296, 102 s) and on 20730 (0 divergences, 132 of 200 known rows — C61 98 · C62 26 · C63 4 · C65 2 · C70 2, mutants 1,290 / 1,296, 103 s). Deep runs: the interpreter at 10,000 (seed 20729, 176 s) CONFORMS — 48 / 48, 0 divergences, 1,290 / 1,300 killed, the 10 reached beyond
+the 200-run all declared, no survivor; the runtime at 10,000 (the day's seed, 348 s): 45 / 48 + 3 known, 10,000 run, 6,284 of them known rows (C61 4,534 · C62 1,130 ·
+C63 300 · C65 49 on Label + 103 on Placeholder · C66 3 · C70 165), mutants 1,290 / 1,300 (the 10 declared), and ONE divergence the matchers
+did not take: a `transformX` written undefined, shrunk to that one step — C63's throw (`undefined.value`), which `throwsOnSet`'s window
+("the difference no later than the step after the set") misses in the unshrunk sequence; a matcher gap on a known row, not a Dropdown
+finding — s40 widens the window to the next settle after measuring the unshrunk shape. **The Text Input's runtime 10,000** (s38's pending
+step, run here): 67 / 68 + 1 known, 10,000 run, **10 divergences no row takes** (typed text landing before the field's text — `aabc` vs
+`abca`, `false0` vs `fals0`; a Number field showing `""` where the spec says `42`; `null` vs `""` on the output; a Backspace Unchanged where
+the spec pulses Text Changed) and **12 surviving mutants** beside the 10 declared — the shrunk sequences and the survivors are kept in
+[TEXT-INPUT-DEEP-RUN-2026-10-04.md](TEXT-INPUT-DEEP-RUN-2026-10-04.md) so s40 need not re-run the hour. The Text Input conforms at 200 on
+two seeds and not yet at 10,000. Catalog parity 270 / 270; package `nodegx-node-spec` 20 suites, 858 passed; `tsc --noEmit` exit 0 in
 both packages; `node scripts/bugs.js check` — the three problems it lists are a peer's P109 files; census regenerated (`T5 4/19`). **The
 runtime's full node-spec batch outgrew its ten-minute hook** (90 of 110 specs in 760 s, then every test red): the hook is thirty minutes
 now; the 20 the cut batch never reached were run by name at 20730 and conform (States alone 134 s). Two specs do NOT conform at today's

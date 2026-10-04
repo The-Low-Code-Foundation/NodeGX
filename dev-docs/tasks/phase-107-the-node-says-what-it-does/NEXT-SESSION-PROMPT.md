@@ -49,11 +49,19 @@ Left: 15 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-
 
 ## What s40 does
 
-**First, the leftovers (small):**
-- The Text Input's **8 swap twins** at 10,000 (NSP-016 §7.3's deep-run line lists them): a hover / leave whose drain found both queued jobs
-  Unchanged ↔ the act that drained nothing; a release / key inside a remount that announced the Value ↔ the bare act or the rebuild's reset.
-  Kill with a scenario that reads the queue after the act (a Clear in the next frame tells a drained queue from an undrained one) or declare
-  with the reason; then re-run `tests/zz-deep.test.ts`-style at 10,000 (~40 min) and fill §7.3's line.
+**First, the Text Input at 10,000 (not small — a session's first half):** its runtime deep run (s39 ran it for s38) shows **10 divergences no
+row takes and 12 surviving mutants** — every shrunk sequence is in [TEXT-INPUT-DEEP-RUN-2026-10-04.md](TEXT-INPUT-DEEP-RUN-2026-10-04.md), so
+replay those (a `zz` test playing both targets, traces aligned — §7.4 describes it) before re-running the hour. The shapes: typed text landing
+BEFORE the field's text (`aabc` vs `abca`, `false0` vs `fals0`, `[object Object]0` vs `0[object Object]` — the face types at the end of
+`el.value`, the component may put the caret elsewhere, or the paint commits a graph write after the keystroke); a Number field showing `""`
+where the spec says `42` or `x y`; `null` vs `""` on the Value output; a Backspace reporting Unchanged where the spec pulses Text Changed.
+Each is a rule to measure, then write (R3a) or file. Then the twins: the interpreter's 8 at 10,000 (§7.3: a hover / leave whose drain found
+both queued jobs Unchanged ↔ the act that drained nothing; a release / key inside a remount that announced the Value ↔ the bare act or the
+rebuild's reset) and the runtime's 12 (the file) — kill with a scenario that reads the queue after the act or declare with the reason; then
+10,000 on both and fill §7.3's line.
+- **C63's matcher window:** one Dropdown divergence at 10,000 was C63's `undefined.value` throw after a `transformX` written undefined,
+  unattributed because `throwsOnSet` wants the difference no later than the step after the set and the unshrunk sequence had more between.
+  Measure the unshrunk shape (the report prints the shrunk one; replay seed 2322856817 with `NSP_REPLAY_DIR`), then widen to the next settle.
 - **Two seed-dependent survivors** the full runtime batch shows at seed 20730 and not at 20729: NavigationClosePopup (`afterInputs`
   drop-set on the branch resolving `close` and both `closeAction-*`) and DbModel2 (two `modelId` swap-branches into `set:[]`). A kill that
   moves with the seed is a kill no scenario pins: add the scenario to each (`scenarios/NavigationClosePopup.json`, `scenarios/DbModel2.json`).
