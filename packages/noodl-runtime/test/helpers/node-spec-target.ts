@@ -784,7 +784,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -1541,9 +1541,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // Tab's would; the value lands as the BROWSER sanitizes it (`browserRangeValue`: jsdom clamps a range input's value but
       // never rounds it to the step, so the face does, and reads the value the element holds the same way); a slide to the
       // value already held raises nothing. Written through the element's PROTOTYPE setter (as the keyboard acts are), then
-      // `input` and `change`, as a browser raises them for a value a person set.
+      // `input` and `change`, as a browser raises them for a value a person set. A REVERSED range (`max` below `min`) takes no
+      // slide here — a face choice, written down: jsdom's sanitization of it does not settle (a value at or above `min` becomes
+      // `max`, below `min` becomes `min`), so what the element holds depends on the history of React's writes, where HTML clamps
+      // no overflow on a reversed range and Chromium raises `max` to `min`; jsdom and a browser disagree, as on a Number field's
+      // sign mid-entry.
       case 'slide': {
-        if (disabled || el.type !== 'range') break;
+        if (disabled || el.type !== 'range' || rangeReversed(el)) break;
         if (d.document.activeElement !== el) el.focus();
         const held = browserRangeValue(el, el.value);
         const to = browserRangeValue(el, value);
@@ -1559,31 +1563,52 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   }
 
   /**
-   * PERSON (above) — the value a BROWSER's `<input type="range">` holds for `v` (HTML: the range state's value sanitization,
-   * underflow, overflow and step-mismatch rules; Chromium `StepRange::ClampValue`), against the element's attributes: `min`
-   * (default 0), `max` (default 100; below `min` it is `min`), `step` (default 1; not a positive number → the default; the step
-   * base is `min`, else the `value` attribute, else 0). Not a number → the middle (`min` when `max` is below it); clamped;
-   * rounded to base + n × step, a tie upwards; a rounding past `max` steps back one, below `min` forward one; still outside →
-   * the clamped value. jsdom's sanitization clamps only. Number arithmetic: exact for the steps the scenarios use (dyadic).
+   * PERSON (above) — the value an `<input type="range">` holds for `v`: jsdom's value sanitization, which it applies to every
+   * write (form-controls.js, the `range` case: not a valid floating-point number → the middle, or `min` when `max` is below it;
+   * below `min` → `min`; else above `max` → `max`; the attributes read by HTML's lenient rules for parsing floating-point number
+   * values, `parseFloatingPointNumber` — `"1,2"` is 1), then the BROWSER's step-mismatch rule, which jsdom lacks (HTML; Chromium
+   * `StepRange::ClampValue`), when `max` is not below `min`: rounded to base + n × step (base `min`, else the `value` attribute,
+   * else 0), a tie upwards, a rounding past `max` stepped back one, below `min` forward one, still outside → the clamped value;
+   * `step` default 1, not a positive number → the default. Face choices, written down: a reversed range is clamped as jsdom
+   * clamps it, and an attribute is parsed as jsdom parses it (Chromium reads `min` / `max` strictly) — jsdom re-sanitizes
+   * whatever the face writes, so a rule it does not share cannot be played. Number arithmetic: exact for dyadic steps.
    */
+  /** PERSON (above) — `max` below `min`, both read as `browserRangeValue` reads them */
+  function rangeReversed(el: any): boolean {
+    const attr = (name: string, dflt: number): number => {
+      const s = el.getAttribute(name);
+      if (s === null || /[^\t\n\f\r ]/.test(s.slice(0, s.length - s.trimStart().length))) return dflt;
+      const n = parseFloat(s);
+      return Number.isFinite(n) ? n : dflt;
+    };
+    return attr('max', 100) < attr('min', 0);
+  }
+
   function browserRangeValue(el: any, v: unknown): string {
-    const num = (t: unknown): number | undefined => {
-      if (t === undefined || t === null || typeof t === 'boolean') return undefined;
-      const s = String(t);
-      if (!/^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/.test(s)) return undefined;
-      const n = Number(s);
+    const attr = (name: string): number | undefined => {
+      const s = el.getAttribute(name);
+      if (s === null) return undefined;
+      const lead = s.length - s.trimStart().length;
+      if (/[^\t\n\f\r ]/.test(s.slice(0, lead))) return undefined;
+      const n = parseFloat(s);
       return Number.isFinite(n) ? n : undefined;
     };
-    const minAttr = num(el.getAttribute('min'));
+    const valid = (t: unknown): number | undefined => {
+      const s = typeof t === 'number' ? (Number.isFinite(t) ? String(t) : '') : t;
+      if (typeof s !== 'string' || !/^-?(?:\d+|\d*\.\d+)(?:[eE][-+]?\d+)?$/.test(s)) return undefined;
+      const n = parseFloat(s);
+      return Number.isFinite(n) ? n : undefined;
+    };
+    const minAttr = attr('min');
     const min = minAttr ?? 0;
-    const maxAttr = num(el.getAttribute('max')) ?? 100;
-    const max = maxAttr < min ? min : maxAttr;
-    const stepAttr = num(el.getAttribute('step'));
+    const max = attr('max') ?? 100;
+    const parsed = valid(v);
+    const proposed = parsed === undefined ? (max < min ? min : (min + max) / 2) : parsed;
+    const inRange = parsed === undefined ? proposed : proposed < min ? min : proposed > max ? max : proposed;
+    if (max < min) return String(inRange);
+    const stepAttr = attr('step');
     const step = stepAttr !== undefined && stepAttr > 0 ? stepAttr : 1;
-    const base = minAttr ?? num(el.getAttribute('value')) ?? 0;
-    const parsed = num(typeof v === 'number' && !Number.isFinite(v) ? undefined : v);
-    const proposed = parsed === undefined ? (maxAttr < min ? min : min + (max - min) / 2) : parsed;
-    const inRange = Math.max(min, Math.min(proposed, max));
+    const base = minAttr ?? attr('value') ?? 0;
     const rounded = base + Math.round((inRange - base) / step) * step;
     const clamped = rounded > max ? rounded - step : rounded < min ? rounded + step : rounded;
     return String(clamped < min || clamped > max ? inRange : clamped);

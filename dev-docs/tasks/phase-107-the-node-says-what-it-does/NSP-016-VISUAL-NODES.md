@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -487,3 +487,125 @@ a rule for two sessions; HTML names where the cursor is in every case met, and j
 an EXAMPLE, and a shape can hold two code paths**: a twin that "cannot be killed" may be carrying the other path's values; print the branch
 examples (`discoverBranches` after the scenarios) before declaring. (4) **An event-loop turn is not a frame**: the runtime target's `advance`
 commits React and runs no frame end; the format needed the distinction (`turn`), not a wider `afterInputs`.
+
+### 7.6 s41, 2026-10-04 — Slider and Icon conform (112 of 147)
+
+**The Slider** (`net.noodl.controls.range`, [slider.ts](../../../packages/nodegx-node-spec/src/nodes/slider.ts), 45 scenarios) — read from
+`nodes/controls/slider.ts`, `components/controls/Slider/Slider.tsx` and `react-component-node.ts` (`initialize`, `defineRegularInputProp`).
+The Dropdown's page model and control ports; what differs is the slide, and four copies of the value the spec keeps apart because the runtime
+does: **the author's Value** (`props.value`: Min at the making, then what the Value input writes — empty abstains, not-a-number abstains with a
+runtime error, else `Math.max(Min, Math.min(Max, n))` over the props AS WRITTEN, kept when `!==`; Min and Max re-clamp it in their `onChange`),
+**the node's value** (`_internal.outputValue`, 0 at the making — what the Value output reads; `updateOutputValue(v)` sends it and FIRES CHANGED
+on any `!==`, whoever calls it), **the shown value** (the component's `useState`; a slide writes it, the effect `[props.value]` writes it to the
+author's at the mount and at a render whose author's Value differs by `Object.is`, then calls `updateOutputValue`), and **what the browser
+holds** (the shown value sanitized by the browser's range rules against the rendered attributes — read only by the slide's no-change rule).
+No `world.turn`: the component's own `setState` calls happen inside React events and the effect, which the paint commits.
+
+**The face's new act, `slide`** ([node-spec-target.ts](../../../packages/noodl-runtime/test/helpers/node-spec-target.ts) `personActs`,
+`browserRangeValue`): a keyboard slide — a disabled element takes none; the keyboard goes onto the element first; the value lands as the
+BROWSER sanitizes it; a slide to the value already held raises nothing; else the prototype setter, `input`, `change`. **jsdom clamps a range
+input's value but never rounds it to the step** (form-controls.js, the `range` case), so the face writes HTML's step-mismatch rule itself
+(Chromium `StepRange::ClampValue`: round from the step base — `min`, else the `value` attribute, else 0 — a tie upwards, step back inside when
+the rounding leaves the range; a `step` that is not a positive number is the default 1; `max` below `min` is `min`) and reads the held value the
+same way. Number arithmetic, exact for the dyadic steps the scenarios use (a browser uses decimal). Probe: Value 33.5 with Step 1 — a slide to
+34 raises nothing (the browser already shows 34; jsdom alone would have said `"33.5"` → `"34"` and fired Changed).
+
+**Measured side by side before any scenario** (a `zz` probe playing sixteen cases on both targets, traces aligned): all sixteen identical on
+the first run, so the traces were printed and read — real slides, real effects, the step rule exercised. Then the conformance runs found ONE
+more rule: **the runtime STORES a recomputed Value Percent whatever `!==` says** (`this._internal.valuePercent = valuePercent` before the
+`changed && flagOutputDirty`), so a `-0` (Min `"1e3"` above Max `"5"`: `Math.floor(0 / -995 * 100)`) replaces a `0` unsent and is read by the
+next send — the spec now keeps it by `Object.is` and sends it by `!==` (five of seed 13's divergences, all `valuePercent: 0` vs `-0`).
+
+**Rows (the spec models today's behaviour in all four — the runtime is self-consistent in each, unlike C71, so no `row` scenario):**
+- **D36** (medium): **Changed fires with nobody sliding** — a Value written from the graph (the description says it does not), a Min or Max
+  that clamps the value, a slider placed with Min 10, a remount after a slide (the mount's effect takes the author's Value back), and every
+  report while Value Percent is NaN. The effect calls the same `updateOutputValue` a slide does. The Dropdown's D34, wider.
+- **C73** (medium): **a Value written back after a slide does nothing** when it equals the last Value the author wrote — the slide never moved
+  `props.value`, so a Reset to the default leaves the handle at the person's 70. C71's shape on the Slider (here the output does not move either).
+- **C74** (low): **the Value output disagrees with the handle** — a slid 80 survives Max lowered to 60 (the browser draws 60; sliding to 60 or 70
+  raises nothing); Value 33.5 with Step 1 reads 33.5 while the browser shows 34; Value Percent keeps its figure when Min or Max moves.
+- **C75** (low): **Min equal to Max reports Value Percent NaN** (`0 / 0`), re-flagged on every report; a Min written undefined makes the author's
+  Value NaN.
+
+**Mutants.** Seed 13 left three: the placing off the page (declared, the Button's PLACED_OFF_PAGE) and two swaps between a remount with a
+Tab / slide on an enabled element and on a disabled one — the matrix closes every segment with a Focus action in the same frame, and a frame's
+signals are grouped, so the act's Focused and the action's cannot be told apart; the Dropdown's "remount and a Tab in one frame" scenarios
+(no action after) kill them, and had not been carried over. Seed 20729 left two the generated sequences alone reached: **a press on a focused
+element was only ever reached with the button already held** — the matrix's reset released nothing, so every later press found Pressed true
+(the reset now ends with a `leave`); and a remount whose effect changes the Value but not the Value Percent (30.5 → 30) under a Tab away —
+one scenario runs that remount under every act. 1,140 / 1,141 at 13 and 20729, 1,172 / 1,173 at 20730.
+
+**Catalog parity** says the Slider derives no ports (its catalog entry lists only `declared-port-groups`, though its `parameterEncoding`
+names the Data Attributes pattern) — so no `derived`, the Button's and the Checkbox's way. **Known rows:** C62 and C63 only (no label, no
+text style — C61 cannot fire, and the "each row still fires" gate said so); two hand `row` scenarios (Margin Top null, Pos X undefined).
+
+**Gate readings (2026-10-04, load 2–4).** Interpreter: CONFORMS at 200 on 13 (41 / 41, 1,140 / 1,141), 20729 (1,140 / 1,141) and 20730
+(1,172 / 1,173) with 41 scenarios. Runtime: CONFORMS at 200 on 13 (39 / 41 + 2 known, 0 divergences, 26 throws attributed to C62 / C63,
+68 s) and 20730 (39 / 41 + 2 known, 0 divergences, 71 s). The package suite green (20 suites, 862 passed, zz excluded; the visual batch's
+list grew the Slider); `tsc --noEmit` exit 0; `node scripts/bugs.js check` every header valid. Committed `d7ef6a87a`.
+
+**The runtime at 10,000 (the day's seed 20730, 1,264 s): 10 divergences, one rule — the face read the attributes as Chromium does and jsdom
+reads them as HTML does.** Every one shrank to Max wired an ARRAY (`[1, 2]`) and a slide: React writes the attribute `"1,2"`; the face's
+strict parse (Chromium's `ParseToDoubleForNumberType` reads the whole string) called it no number — Max 100 — while jsdom's conversion is HTML's
+rules for parsing floating-point number values, a PREFIX parse (`parseFloatingPointNumber`: ASCII whitespace, `parseFloat`, finite), so Max 1;
+the face wrote 100 and jsdom re-sanitized it to 1, which is what React's `onChange` read. **jsdom re-sanitizes whatever the face writes, so the
+face cannot play a rule jsdom does not share**: the face and the spec now read `min` / `max` / `step` as jsdom does (lenient; the VALUE itself
+strictly, as jsdom checks it), and apply jsdom's clamp (not a valid number → the middle; below Min → Min; else above Max → Max) plus the one
+browser rule jsdom lacks, the step. Replaying the ten and twelve more shapes on both targets found the second half: **a REVERSED range (Max below
+Min — `"1,2"` under Min 3, or Min `"1e3"` over Max `"5"`) does not settle under jsdom** (a value at or above Min becomes Max, below Min becomes
+Min, so what the element holds depends on the history of React's re-writes) where HTML clamps no overflow on a reversed range and Chromium
+raises Max to Min. Recorded as a face choice beside the Number field's sign mid-entry: **a slide on a reversed range is not played** (no
+keyboard, no value), in the face and in the spec. Two scenarios pin it (Max `[1, 2]`; Min 50 over Max 10 — 43 now). The interpreter's 10,000
+run that had begun on the old rule was stopped (by its parent pid) and both reruns are below.
+
+**The second deep runs (the jsdom rule in).** The runtime at 10,000 (20730, 1,198 s): **0 divergences**, the C62 / C63 throws attributed
+(589, 706), 1,497 / 1,505 killed and seven alive; the interpreter at 10,000 (20729, 713 s): 0 divergences, 1,522 / 1,528, five alive. Three
+families: (1) a leave, lift or touch on a node OFF the page (its set holds only the page syncs) — the Dropdown's declared ACT_OFF_PAGE twin,
+declared here too; (2) a remount on a DISABLED element under a click, a press or a Focus — the every-act remount scenario had enabled
+segments only; it now runs each act disabled as well; (3) swaps differing only in `percent` — the branch examples printed (`discoverBranches`
+over the scenarios and the 20730 run) showed the release sibling storing a silent `-0` (visible only through the FIRST frame's report: a
+release before the first frame kills it) and the press sibling a NaN case (a press whose paint runs the effect with the Value moving and the
+percent not — Value 30.25 after a slide to 30.5, Step 0.5 — kills it, with every other act). The new scenarios at first closed each segment
+with a Focus action and so masked the act's own Focused again (§7.6 above); enabled segments now close with a Blur action (it gives up a
+keyboard the act took), disabled ones with a Focus action (Done only on the page). 45 scenarios: the interpreter CONFORMS at 200 on 13
+(1,612 / 1,613), 20729 (1,644 / 1,645) and 20730 (1,612 / 1,613); the runtime at 13 and 20730 (43 / 45 + 2 known, 0 divergences, 93 s).
+
+**The Icon's 10,000** (the same runtime run, 104 s): 0 survivors and ONE divergence — unshrunk (a `zz` replay of the generated sequence from
+its seed), Transform Origin X held an OBJECT (`{}`) and was then written `null`: node.ts :416 merges a bare value into the port's held unit
+object only while that object HAS a `unit`, so the null reached the Placement setter raw and `null.value` threw. C63's defect (the unguarded
+Placement setters) — its matcher took only `undefined`; widened to `null` with its own message, and the row says so. (The shrinker had
+reduced it to an undefined, which C63 would take; attribution reads the original.) The interpreter's 10,000 for the Icon CONFORMS (4 s).
+
+**The third deep runs (45 scenarios, C63 widened).** The runtime at 10,000 (20730, 711 s for both nodes): **the Slider 0 divergences**,
+1,704 / 1,709 killed — four declared (the placing and three acts off the page) and ONE alive: the release swap into the sibling whose recorded
+example stores Value Percent `-0` unsent. The release-before-the-first-frame scenario reaches the original branch and does not kill it: the
+first frame's report is taken before an act's patch can show, and a `-0` stored where `0` was is read by nothing (`!percent` reads both as
+falsy; `p !== percent` calls them equal; the output is read only when a recompute has just stored the value it sends) — declared, exact
+shapes (`SILENT_NEGATIVE_ZERO`). **The Icon CONFORMS at 10,000** (0 divergences — the null shape now C63's, 649 attributed — 105 / 105).
+**The interpreter at 10,000 (20729, 186 s): the Slider CONFORMS** — 45 / 45, 0 divergences, 1,696 / 1,700 killed, 4 declared. The package
+suite green after the declaration (20 suites, 866 passed, zz probes deleted).
+
+**The Icon** (`net.noodl.visual.icon`, [icon.ts](../../../packages/nodegx-node-spec/src/nodes/icon.ts), 10 scenarios) — the smallest visual:
+no output of its own, no handler, a `<div>` that takes no keyboard; 34 inputs, of which Mounted and Scroll Into View are logic. The spec is the
+page — Did Mount at the paint that puts it on, Will Unmount at the paint that takes it off, at a person's act or at the frame's end — and nine
+acts that raise nothing but that paint. Seed 13 left 17 survivors, one family: an act's paint (mount or unmount) swapped for nothing, which
+the frame's end repaints identically; only a Mounted write AFTER the act in the same frame tells them apart (off, act, on → Will Unmount and
+Did Mount; from off, on, act, off → Did Mount and Will Unmount) — one scenario, every act. Then 105 / 105 at 13, 20729 and 20730; the runtime
+CONFORMS at 13 and 20730 (8 / 10 + 2 known — C62, C63 — 0 divergences, 2.6 s), traces printed (Will Unmount at the hover's paint, Did Mount at
+the frame's end).
+
+**Left after s41 — every remaining visual needs a piece of infrastructure first:** a VISUAL TREE with context (Radio Button reads its Radio
+Button Group through React context, `radiobuttoncontext.ts`; Component Children, Repeater and the stacks place children) — the graph format
+has no `act` step and no parent–child edge, and the interpreter no context; DRAG AND DROP (Text, Image, Circle and Group carry
+`addDragDropPorts` / `addFileDropPorts` — drag-drop.ts, 967 lines, drop zones, hold timers, file drops); GEOMETRY (Columns picks its breakpoint
+from its CONTAINER's width, which jsdom measures as 0 — a spec would be grading jsdom); MEDIA (Video). Recommended order: the tree (four or
+five nodes), then drag and drop (four), then geometry with NSP-017.
+
+**Lessons.** (1) **A first-run green is a reason to print the traces, not to stop**: all sixteen probe cases agreed, and reading them showed
+the face's step rule really exercised — a run that compared two empty traces would also have agreed. (2) **A matrix's reset owes every state
+a person can leave behind** — Pressed survives a remount, so a reset without a release made "press on a focused element" a branch only a
+random sequence could reach. (3) **A store and a flag can read different comparisons**: the runtime stores whatever it computed and flags by
+`!==`; a spec that sets only on change loses the `-0` the next send reads. (4) **jsdom is not the browser for a range input** — it clamps and
+never steps; the face writes the browser's rule, as the memory says the face must — (5) **but only a rule jsdom will keep**: jsdom
+re-sanitizes every value the face writes, so where jsdom and a browser disagree on a rule jsdom applies (the attribute parse, a reversed
+range), the face reads as jsdom and the disagreement is written down as a face choice, not played.

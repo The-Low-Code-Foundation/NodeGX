@@ -31,6 +31,8 @@ const GRAPH = (what: string, scenario: string) => `${what} is written onto the r
 /** The same for a pointer or a finger meeting no element (these four acts do nothing only when the node is off the page): the act's set holds only the page syncs. */
 const ACT_OFF_PAGE = 'a hover, leave, touch or lift on a node off the page: its set holds only the page syncs, which nothing reads before the frame end repaints them';
 const REBUILT_WHILE_DISABLED = 'a press or release on a disabled box during an Enable Label rebuild: the rebuild unfocuses the element, which no action can read while it is disabled, and the frame end that paints Enabled paints the rebuild too';
+/** NSP-016 s41 — the Slider's Value Percent: a sibling whose example stored -0 unsent, handed to a branch that kept 0. */
+const SILENT_NEGATIVE_ZERO = 'a Value Percent of -0 stored where 0 was, unsent (`0 !== -0` is false): `!percent` reads both as falsy and every later send of the output follows a recompute that stores the value it sends, so the -0 is never read';
 const PLACED_OFF_PAGE = 'a placing on a node placed off the page: its set holds only the page syncs, which nothing reads before the frame end repaints them';
 
 export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
@@ -87,8 +89,13 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
     ...['press', 'release', 'click', 'focus', 'choose'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED }))
   ],
-  // NSP-016 s41 — the Slider: the placing off the page (the Button's)
-  'net.noodl.controls.range': [{ reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE }],
+  // NSP-016 s41 — the Slider: the placing off the page and the four acts that meet no element (the Button's; the 10,000 run)
+  'net.noodl.controls.range': [
+    { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
+    ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
+    // the runtime's 10,000 (20730): the sibling's recorded example stores Value Percent -0 where this branch keeps 0, unsent
+    { reducer: 'person.release', kind: 'swap-branch', branch: '{"set":["onPage","pressed"],"emit":["didMount","pointerUp"],"outcome":null,"outcomes":[],"request":false}', swappedWith: '{"set":["onPage","percent","pressed"],"emit":["didMount","pointerUp"],"outcome":null,"outcomes":[],"request":false}', why: SILENT_NEGATIVE_ZERO }
+  ],
   'Map Collection': [
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },

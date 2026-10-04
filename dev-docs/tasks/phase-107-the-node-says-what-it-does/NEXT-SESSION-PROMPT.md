@@ -1,8 +1,9 @@
 # P107 — next session
 
-**Written 2026-10-04 (s40).** Read the [README](README.md) §2–§7. s40's record is [NSP-016 §7.5](NSP-016-VISUAL-NODES.md) (the Text
-Input at 10,000: six rules, rows C72 and D35, the caret, the format's `turn`); s39's is §7.4 (Dropdown, `choose`, rows C70, C71, D34); s38's
-§7.3 (Text Input, `type` / `key`, `PersonPatch`, the drain, rows C68, C69, D31–D33); s37's §7.2 (THE PERSON face, Button and Checkbox).
+**Written 2026-10-04 (s41).** Read the [README](README.md) §2–§7. s41's record is [NSP-016 §7.6](NSP-016-VISUAL-NODES.md) (the Slider and
+the Icon; the face's `slide`; jsdom's range rule; rows D36, C73, C74, C75; the remaining visuals' infrastructure map); s40's is §7.5 (the Text
+Input at 10,000: six rules, rows C72 and D35, the caret, the format's `turn`); s39's §7.4 (Dropdown, `choose`); s38's §7.3 (Text Input); s37's
+§7.2 (THE PERSON face, Button and Checkbox).
 
 ## Board (from the task files)
 
@@ -10,7 +11,7 @@ Input at 10,000: six rules, rows C72 and D35, the caret, the format's `turn`); s
 |---|---|---|
 | NSP-000 the census | ✅ s1; s21; s36 `scripts/node-spec/visual-census.js`; s38 `scripts/node-spec/gen-ports.js` | `3bd71e837`, s21, `bf90b170d`, s39 |
 | NSP-001 the spec + interpreter | ✅ s1 … s40 (`act`, `acts` / `person`, `place`, `portability`, `PersonPatch`, **s40 `WorldHandlers.turn`**) | s1 … s40 |
-| NSP-002 traces + adapter + runtime target | ✅ s37 the PERSON face; s38 `type` / `key`; s39 `choose`; **s40 `typeKey` writes at the cursor** | s2 … s40 |
+| NSP-002 traces + adapter + runtime target | ✅ s37 the PERSON face; s38 `type` / `key`; s39 `choose`; s40 `typeKey` writes at the cursor; **s41 `slide` (`browserRangeValue`: jsdom's sanitization + the browser's step)** | s2 … s41 |
 | NSP-003 the runner | ✅ (s39 last: an `optionslist` pool in `generate.ts`) | s2 … s39 |
 | NSP-004 the pilot five | ✅ s3 | `ef6f3b6e1` |
 | NSP-005 the export adapter | ✅ (s13); plays the latch nodes only | s13, s15 |
@@ -22,72 +23,74 @@ Input at 10,000: six rules, rows C72 and D35, the caret, the format's `turn`); s
 | NSP-013 the time batch | 🟡 24 / 24 conform. Left: AC2, the deep run for s11–s14 | s16 |
 | NSP-014 records, users, files, HTTP, streams | 🟡 24 of 24 conform; s36 D29 fixed; **s40 DbModel2's seed-dependent twins pinned**. Left: AC2's export half (P18) | s8, s21 … s40 |
 | NSP-015 navigation + components | 🟡 14 of 14 conform; **s40 NavigationClosePopup's seed-dependent survivor pinned**. Left: AC2 (export, P18) | s15 … s40 |
-| **NSP-016 the visual nodes** | **🟡 4 of 19 conform (Button, Checkbox, Text Input, Dropdown); s40: the Text Input's 10,000 settled (§7.5). AC4 waits for NSP-017** | `aa8abb06f`, s39, s40 |
+| **NSP-016 the visual nodes** | **🟡 6 of 19 conform (Button, Checkbox, Text Input, Dropdown, Slider, Icon — s41, §7.6). The other 13 each need infrastructure first (§7.6 "Left after s41"). AC4 waits for NSP-017** | `aa8abb06f`, s39, s40, `d7ef6a87a`, s41 |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 opened s21 (needs a second runtime target, `noodl-viewer-cloud`) | s21 |
 | NSP-009, NSP-017 … NSP-019, NSP-021 | — | — |
 
-**110 of 147 conform on the runtime (74.8%)** (T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 4/19; 0 exempt). Graph 76 / 76.
-Left: 15 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-017).
+**112 of 147 conform on the runtime (76.2%)** (T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 6/19; 0 exempt). Graph 76 / 76.
+Left: 13 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-017).
 
-## What s40 settled
+## What s41 settled
 
-1. **The ten divergences were six rules, none a face gap, one the spec's own**: HTML parses `maxlength="-0.5"` as 0 (`-0` is not negative) —
-   measure a bare jsdom (and read the HTML parse) before "fixing" the face into a lie.
-2. **The component converts with `this.props.type` and measures with `this.props.maxLength` as LAST RENDERED** (row C72): the spec keeps
-   `shownType` / `shownMaxLength`, synced at each paint; `areaOn` is gone (derived from `shownType`).
-3. **An `advance` is a TURN of the event loop, not a frame**: the runtime target yields there and React commits the component's own
-   `setState`; the node's props wait for the frame's end. The format grew `WorldHandlers.turn` (spec.ts, the erased `AnyNodeSpec.world`,
-   interpreter.ts `Inbound` / `handleInbound` / `advance`, runner/mutants.ts `reducerNames` / `wrapReducers`). A spec whose component keeps
-   no state of its own needs none. Hashes refreshed (spec.ts is guarded).
-4. **The caret is HTML's and the spec carries it** (`caret`, `hadCaret`, `editCaret`): a fresh `<input>` at the END (React assigns its value),
-   a fresh `<textarea>` at the START (default content), a type change from a type without the selection API (email, number) to one with it
-   (text, url, password) at the START, a keystroke after the key, a committed changing write at the end, an `edit`'s callback after what it
-   wrote if the keyboard is on the field. **The face's `typeKey` now writes at `selectionStart` / `selectionEnd`** and puts the cursor back after
-   the key; it had typed at the end whatever the cursor said. Row D35: a Focus action counts as a placed caret, so a Text Area given a Focus
-   then an Insert Text writes at its start.
-5. **The wire keeps the last DEFINED value inside ONE patch** ([[last-sent-value]] met in a drain): state `wire` beside `out`; the Value output
-   reads `wire`, the Done / Unchanged comparisons read `out`.
-6. **A swap hands a RECORDED EXAMPLE, and one shape can hold two code paths with different `send`s** (DbModel2's `{"set":["modelId"]}`: the
-   passive write with `send: ['id']` and a bind whose `bound` did not move with `send: []`): print the branch examples (`discoverBranches` after
-   the scenarios) before declaring a twin unkillable; a step that reads the state DIRECTLY (a Fetch reads `modelId`; the Id output shows `bound`
-   first) tells them apart. Worth splitting the bucket by `send` — not done.
-7. `caret` and `editCaret` are `synced` (the paint leaves them; a drop or a swap would otherwise fork every paint branch); `hadCaret` is a branch
-   key (written at a focus only).
+1. **The Slider conforms** (45 scenarios, a 704-segment matrix): both targets at 200 on their seeds and at 10,000 — the runtime 0 divergences
+   with one declared silent `-0` twin, the interpreter CONFORMS. Four copies of the value, kept apart because the runtime keeps
+   them apart: the author's Value (`props.value`, clamped over the props AS WRITTEN), the node's value (`_internal.outputValue` — whoever calls
+   `updateOutputValue` fires Changed on any `!==`), the shown value (`useState`, the effect `[props.value]`), and what the `<input>` holds. No
+   `world.turn` (the component's own `setState` runs in React events and the effect, which the paint commits).
+2. **The face's `slide`** = jsdom's range sanitization (which it applies to every write and which reads `min` / `max` / `step` by HTML's
+   LENIENT parse — Max wired `[1, 2]` is the attribute `"1,2"`, a Max of 1) **plus the browser's step rule, which jsdom lacks**. The first
+   10,000 run's ten divergences were the face reading the attributes strictly (Chromium's way) while jsdom re-sanitized what it wrote.
+   **Lesson: the face can only play a browser rule jsdom will keep** — where they disagree on a rule jsdom applies, read as jsdom and write the
+   disagreement down as a face choice.
+3. **The runtime STORES a recomputed Value Percent whatever `!==` says** (a `-0` replaces a `0` unsent; the next send reads it) — the spec
+   stores by `Object.is`, sends by `!==`.
+4. **The Icon conforms** (10 scenarios): the page model alone. An act's paint and the frame end's paint are identical; only a Mounted write
+   AFTER the act in the same frame tells them apart.
+5. **C63 takes null too**: node.ts :416 merges a bare value into the held unit object only while it has a `unit`; after `{}` a null reaches the
+   Placement setter raw. The old open item "C63's matcher window" was this shape (the matcher reads the UNSHRUNK sequence — replay it from
+   its seed, `zz-replay`, before believing the shrunk one).
+6. **Mutant lessons**: a matrix's reset owes every state a person leaves behind (Pressed survives a remount — reset with a `leave`); a Focus
+   action closing a segment MASKS an act's own Focused (a frame's signals are grouped) — close enabled segments with a Blur action, disabled
+   ones with a Focus action; a swap differing only in a stored `-0` is visible only through the FIRST frame's report (an act before the first
+   settle kills it); print the branch examples (`discoverBranches` over the scenarios plus the generated run, `zz-branches`) before declaring.
+7. **Every remaining visual needs infrastructure** (§7.6): a VISUAL TREE with context (Radio Button + Group, Component Children, Repeater, the
+   stacks — the graph format has no `act` step and no parent–child edge; the interpreter has no context); DRAG AND DROP (Text, Image, Circle,
+   Group — drag-drop.ts, 967 lines); GEOMETRY (Columns breaks on its CONTAINER's width — jsdom measures 0); MEDIA (Video).
 
-## What s41 does
+## What s42 does
 
-**First, read §7.5's deep-run paragraph.** The Text Input at 10,000: **the runtime (day seed 20730, 3,003 s) 0 divergences** — s39's ten are
-gone — with three `afterInputs` drop-sets (a frame end that answers a press and mounts / unmounts: a second frame tells them; scenario 80); the
-interpreter (20729) 0 divergences, ten swap twins → two after scenarios 78–79 (1,645 s) → scenario 81 for the last two (a release that landed a
-Set AND a writing Insert, ordered against a Clear). Every scenario was graded at 200 on three interpreter seeds and two runtime seeds (chain E's
-line in §7.5 is the last reading). **Owed, if the number is wanted: a third interpreter 10,000** (`NSP_N=10000 NSP_SEED=20729` on a `zz` test
-calling `runConformance` — s40's file is deleted; `tests/batch-visual.test.ts` pins 200 at 13) and the runtime's 10,000 again
-(`NSP_DEEP=10000 NSP_ONLY=net.noodl.controls.textinput NODE_OPTIONS=--max-old-space-size=8192 npx jest test/node-spec/conformance.test.ts -t deep`,
-~50 min; the deep describe takes no `NSP_SEED`). A survivor whose twin differs only in a synced key is a key missing from `synced`; a swap into a
-twin differing in a key already at that value is killed by a scenario reading the key LATER in the same frame (a Clear orders outcomes, a Focus /
-Blur action reads the page) — or declared with the reason.
+**NSP-016 AC3 needs a design before a node.** Recommended: **the visual tree**, because four or five nodes wait on it (Radio Button + Radio
+Button Group first — the smallest case of a parent's context read by a child):
+- **Read first:** `radiobuttongroup.ts` (the group's `valueChanged`, its Value input — `toString`, abstains on non-text), `RadioButtonGroup.tsx`
+  (`useState({ value, fromUser })`, the effect `[props.value]`, the context it provides), `radiobutton.ts` (`checkedChanged(checked, fromUser)`
+  fires Changed only from a user; `groupMissing` raises a runtime error) and `RadioButton.tsx` (how it reads the context and when its effect
+  calls `checkedChanged`). Then `src/graph.ts` (the graph scenario format, `GraphTarget.mountGraph`), `src/runner/graph.ts` (`playGraph` — no
+  `act` step today) and the runtime target's `putOnPage` (one node under a stand-in holder).
+- **The format change to design** (an ADDITIVE format change — hashes and the three stranger rounds): a graph scenario's visual parent–child
+  edges (`children`), an `act` step addressed to a node, the runtime target putting the ROOT on the page with its children added through the
+  node's own `addChild`, and the interpreter's half — a parent's state a child reads (context) — as a spec hook, with its mutants (a new
+  world-handler-like kind goes in four places; `turn` is the model). Ask Richard if the shape is a choice he should make (README §7's plain
+  words), otherwise build it.
+- **Alternatively** (if the tree is ruled later): the drag-and-drop research — `drag-drop.ts` and `addDragDropPorts` / `addFileDropPorts`
+  (a drag is pointer moves past a threshold or a held press — `holdTime` is a timer — then a drop zone's accept rules) — as a RESEARCH file
+  like `RESEARCH-LAYOUT-SEMANTICS.md` before any spec.
+- Per node, the recipe is unchanged (§ below, "Per node").
 
-**Then NSP-016 AC3, the next controls through the same face** (the handoff's order holds):
-- **Slider** (`net.noodl.controls.range`): act `slide` (a number; the input's `input` / `change`), `min` / `max` / `step` / `value`; the browser
-  clamps and steps a range input's value (jsdom's `range` case in form-controls.js :239-252) — write that rule in the face; read
-  `controls/range.ts` and its component for a `useState` + effect (C67 / C71's shape) first; a range input has no caret.
-- **Radio Button** + **Radio Button Group**: a graph scenario (the group owns the value; `radiobuttoncontext.ts`).
-- Then Group / Text / Image / Circle / Icon / Columns / Video — pointer, drop and scroll acts (65 logic inputs, `visual-census.json`);
-  Drag; Repeater, Component Stack, Page Router, Component Children (a boundary or a stack each).
-- Per node: `node scripts/node-spec/gen-ports.js <typeName>` (drop the classed `mounted` line); hand-write the logic; scenarios (copy the
-  Dropdown's painted-page scenarios and generate its MATRIX for the node's acts and toggles, every segment from a fresh element);
-  interpreter at three seeds (`tests/batch-visual.test.ts` pins seed 13 — a new `person` spec joins its list automatically; update the
-  expected list in its first test); runtime at two seeds (`NSP_SEED=13 NSP_ONLY=<type> npx jest test/node-spec/conformance.test.ts`);
-  survivors with NO equivalents first, then declare with reasons; deep run 10,000 on both; `VISUAL_ROWS` (+ C65's `objectLabel` if the
-  component renders its label raw) in `KNOWN_ROWS`; the viewer file in `VIEWER_VISUAL_NODES`; a new act kind is a face addition
-  (`personActs`) with its browser rule in the PERSON docblock. **A control whose component keeps state of its own (a class `setState`, a
-  `useState` the node writes) needs `world.turn`** (the Text Input is the model); one that only follows props does not.
-- **C63's matcher window** (from s39): one Dropdown divergence at 10,000 was C63's `undefined.value` throw after a `transformX` written
-  undefined, unattributed because `throwsOnSet` wants the difference no later than the step after the set. Measure the unshrunk shape (replay
-  seed 2322856817 with `NSP_REPLAY_DIR`), then widen to the next settle.
+**Per node** (unchanged): `node scripts/node-spec/gen-ports.js <typeName>` (drop the classed `mounted` line); hand-write the logic; scenarios
+(copy the Slider's painted-page scenarios — `/tmp`-style generator scripts are fine, the JSON is the artefact — and its MATRIX; every segment
+from a fresh element, the reset ending with a `leave`); interpreter at three seeds (`tests/batch-visual.test.ts` pins seed 13 — update the
+expected list in its first test); runtime at two seeds (`NSP_SEED=13 NSP_ONLY=<type> npx jest test/node-spec/conformance.test.ts`); a `row`
+scenario for each `KNOWN_ROWS` row (the "each row still fires" gate wants one; drop C61 for a node with no text style); survivors with NO
+equivalents first, then declare with reasons; deep run 10,000 on both; the viewer file in `VIEWER_VISUAL_NODES`; the catalog decides `derived`
+(only a `runtime-narrowed` node has one — the Button, Checkbox, Slider and Icon have none); a new act kind is a face addition (`personActs`)
+with its browser rule in the PERSON docblock — and only a rule jsdom keeps.
 
 **Human decisions outstanding** — rows to ask, in plain words (README §7 has the earlier ones written):
+- **New (s41, the Slider):** D36 (Changed fires with nobody sliding — a graph Value, a clamping Min or Max, a remount; the effect should sync
+  without announcing, the Dropdown's D34 the same), C73 (a Reset to the author's last Value after a slide does nothing — compare with the
+  output, not `props.value`), C74 (the output keeps a slid value past a lowered Max and a graph value off the step; Value Percent goes stale —
+  re-sanitize the shown value as the browser does), C75 (Min equal to Max: Value Percent NaN — make it 0).
 - **New (s40):** C72 (a Clear, Backspace or frame-end write in the frame a Type or Max length change arrives converts / measures with the old
   value — read the node's live props, or convert in the node), D35 (a Focus action sets `hadCaret`: on a Text Area an Insert Text then writes
   at the START; three rulings offered in the file).
@@ -102,11 +105,14 @@ Blur action reads the page) — or declared with the reason.
   user nodes C47, C45 + C46, C48, C49, D23, D24, C50, D25; the files C52, C51, D26; C53, D27; C54, D28; C55; C58, C56, C57; then R7, R8,
   R4's confirmation and G1; and NSP-017's question about the templates' CSS sheets.
 
-The list: `node scripts/bugs.js --from P107`. (`check` lists no problem: 221 valid.)
+The list: `node scripts/bugs.js --from P107`. (`check`: every header valid.)
 
 **Known face choices, written down (not gaps):** a press is a focus — the face has no geometry for a click's point, so the cursor stays where it
 was (a browser's click past the text puts it at the end). jsdom has no focus fixup rule — a control that becomes disabled while it holds the
-keyboard keeps it. A Number field's sign / point / exponent mid-entry is not typed. A Dropdown's `choose` is a keyboard pick.
+keyboard keeps it. A Number field's sign / point / exponent mid-entry is not typed. A Dropdown's `choose` is a keyboard pick. **s41:** a
+Slider's `slide` is a keyboard slide (no geometry for a drag); a range input's attributes are read as jsdom reads them (HTML's lenient parse —
+Chromium is strict); a REVERSED range (Max below Min) takes no slide (jsdom's sanitization of it does not settle; HTML clamps no overflow there,
+Chromium raises Max to Min).
 
 ## Before you start
 
@@ -121,6 +127,10 @@ keyboard keeps it. A Number field's sign / point / exponent mid-entry is not typ
   same session. The play sinks `console.*` — print with `process.stdout.write`. The runtime's `zz-ti.test.ts` shape (s40): `play(...)` on
   `interpreterAdapter({ resolve: () => Spec })` and on `withViewerNodes(runtimeTarget())`, each with `new World({})`, the two traces printed
   by index with `!!` on a difference — fourteen cases in 3 s. **A jest run that must not include the probes: `--testPathIgnorePatterns 'zz-'`.**
+- **s41's probes** (deleted; rebuild in a minute): `zz-replay` — `generateRun(spec, daySeed, 10000)` and `find` the sequence whose JSON
+  holds the reported seed, then play it on both targets (the matchers read the UNSHRUNK sequence); `zz-branches` — `discoverBranches(spec)`,
+  play the scenarios and a generated run through the wrapped spec, print each branch's recorded example (JSON turns NaN into null; a replacer
+  shows `-0`).
 - A survivor list across seeds is cheap on the interpreter (a `zz` test calling `runConformance` with `NSP_TYPE` / `NSP_SEED` is 1–2 s for a
   logic node, 2 min for the Text Input's matrix). The mutants are graded interpreter-side even in the runtime batch: a runtime batch's survivor
   reproduces on the interpreter at the same seed.

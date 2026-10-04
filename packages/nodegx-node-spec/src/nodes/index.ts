@@ -47,6 +47,7 @@ import { Checkbox } from './checkbox';
 import { TextInput } from './text-input';
 import { Dropdown } from './dropdown';
 import { Slider } from './slider';
+import { Icon } from './icon';
 import { NavigateToPath } from './navigate-to-path';
 import { PushComponentToStack } from './push-component-to-stack';
 import { PopComponentStack } from './pop-component-stack';
@@ -154,6 +155,7 @@ export const specs: Readonly<Record<string, AnyNodeSpec>> = Object.freeze({
   [TextInput.type]: TextInput,
   [Dropdown.type]: Dropdown,
   [Slider.type]: Slider,
+  [Icon.type]: Icon,
   [NavigateToPath.type]: NavigateToPath,
   [PushComponentToStack.type]: PushComponentToStack,
   [PopComponentStack.type]: PopComponentStack,
@@ -241,6 +243,7 @@ export {
   TextInput,
   Dropdown,
   Slider,
+  Icon,
   NavigateToPath,
   PushComponentToStack,
   PopComponentStack,

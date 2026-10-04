@@ -14,7 +14,9 @@ A visual node's Pos X, Pos Y, Rotation, Transform Origin X or Transform Origin Y
 other end that was never set — throws in its setter (`value.value` on undefined), and the update that delivered it
 stops there. Scale does not throw (it stores the value as it is). Every other pool value, `null` included, passes:
 `null.value` would throw too, but these ports' values pass through node.ts's unit merge first, which hands the
-setter `{ value: null, unit }`.
+setter `{ value: null, unit }` — but only while the port holds a unit object WITH a `unit` (node.ts :416); after an object
+wired in without one (`{}`), a `null` reaches the setter raw and throws the same way (`null.value`) — found by the Icon's 10,000
+run, NSP-016 §7.6 (s41).
 
 **Where:** `packages/noodl-viewer-react/src/node-shared-port-definitions.ts` :582, :600, :618 (`value.value +
 value.unit`) and the two origins' setters.

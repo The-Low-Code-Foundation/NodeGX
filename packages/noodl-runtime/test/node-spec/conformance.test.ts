@@ -265,7 +265,7 @@ const throwsOnSet = (ports: readonly string[] | ((port: string) => boolean), val
   );
 };
 const truthyNonString = (v: unknown, present: boolean) => present && !!v && typeof v !== 'string';
-const isUndefined = (_v: unknown, present: boolean) => !present;
+const isUndefinedOrNull = (v: unknown, present: boolean) => !present || v === null;
 /** A units-typed `inputCss` port: the shared ones by name, with a styleTag prefix (Checkbox's `labelfontSize`), and a control's own box (`width` / `height`). */
 const UNIT_CSS_NAMES = ['fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'marginBottom', 'marginLeft', 'marginRight', 'marginTop', 'paddingBottom', 'paddingLeft', 'paddingRight', 'paddingTop', 'maxHeight', 'maxWidth', 'minHeight', 'minWidth', 'borderWidth', 'borderTopWidth', 'borderBottomWidth', 'borderLeftWidth', 'borderRightWidth', 'borderRadius', 'borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomLeftRadius', 'borderBottomRightRadius', 'iconSize', 'iconSpacing', 'labelSpacing', 'width', 'height'] as const;
 const unitCssPort = (port: string) => UNIT_CSS_NAMES.some((n) => port === n || port.endsWith(n.charAt(0).toUpperCase() + n.slice(1)) || port.endsWith(n));
@@ -368,7 +368,9 @@ const pickWriteBackPick = (d: Divergence) => {
 const VISUAL_ROWS: KnownRow[] = [
   { row: 'NSP-016 §6 C61 — Font Family wired a truthy value that is not text: the setter throws calling `.split` on it', matches: throwsOnSet((p) => p.endsWith('fontFamily'), truthyNonString, /family\.split is not a function/) },
   { row: 'NSP-016 §6 C62 — a units-typed style input wired null: the generated setter reads `.value` of null and throws', matches: throwsOnSet(unitCssPort, isNull, /Cannot read properties of null \(reading 'value'\)/) },
-  { row: 'NSP-016 §6 C63 — a Placement input wired undefined: `value.value` throws', matches: throwsOnSet(['transformX', 'transformY', 'transformRotation', 'transformOriginX', 'transformOriginY'], isUndefined, /Cannot read properties of undefined \(reading 'value'\)/) }
+  // s41 — and null: node.ts :416 merges a bare value into the held unit object only while it HAS a `unit`; after an object wired in
+  // without one (`{}`), a null reaches the setter raw (the Icon's 10,000)
+  { row: 'NSP-016 §6 C63 — a Placement input wired undefined: `value.value` throws', matches: throwsOnSet(['transformX', 'transformY', 'transformRotation', 'transformOriginX', 'transformOriginY'], isUndefinedOrNull, /Cannot read properties of (undefined|null) \(reading 'value'\)/) }
 ];
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
@@ -390,6 +392,8 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   // s41 — the Slider: no label and no text style, so two of the three throwing setters (the Placement and units-typed style inputs)
   'net.noodl.controls.range': VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
+  // s41 — the Icon: no text style either — the Placement and units-typed style setters
+  'net.noodl.visual.icon': VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
   'net.noodl.controls.checkbox': [
     ...VISUAL_ROWS,
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },

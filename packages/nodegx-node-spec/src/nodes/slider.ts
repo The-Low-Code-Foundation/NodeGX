@@ -34,7 +34,9 @@
  *   - **Enabled**, **the pointer, the keyboard, a click's focus** (utils.ts :157-311 on the `<input>`, Slider.tsx :178),
  *     **Focus** / **Blur** (utils.ts :366-440, the target is the `<input>`), **Mounted** and the look: the Dropdown's. A slide is
  *     a keyboard slide: it puts the keyboard on the element first (the focusing steps), as a Tab does, and a disabled element
- *     takes none. A click is a press and a release where the handle already is (the face has no geometry): it moves nothing.
+ *     takes none — nor does a reversed range (Max below Min), whose sanitization jsdom and a browser disagree on (the face's
+ *     choice). The attributes are read as jsdom reads them (HTML's lenient parse: Max wired `[1, 2]` is the attribute `"1,2"`,
+ *     a Max of 1); jsdom clamps but never steps, and the face adds the browser's step rule. A click is a press and a release where the handle already is (the face has no geometry): it moves nothing.
  */
 
 import { defineNode, type Patch } from '../spec';
@@ -107,7 +109,7 @@ export const Slider = defineNode({
     focus: { description: 'the keyboard is put on it (a Tab reaching it)' },
     blur: { description: 'the keyboard is taken off it (a Tab leaving it)' },
     slide: {
-      description: 'the handle is moved to a value — a keyboard slide: the keyboard goes onto the element first; the browser clamps the value to Min and Max and rounds it to the step, and a slide to the value it already holds raises nothing',
+      description: 'the handle is moved to a value — a keyboard slide: the keyboard goes onto the element first; the browser clamps the value to Min and Max and rounds it to the step, and a slide to the value it already holds raises nothing; a reversed range (Max below Min) takes none',
       values: [0, 25, 50, 50.25, 51, 99.5, 100, 150, -10, 7]
     }
   },
@@ -314,10 +316,11 @@ export const Slider = defineNode({
       // the slide (Slider.tsx :183 the `<input>`'s `onChange`: `Number(e.target.value)` into the shown value, then
       // `updateOutputValue`, slider.ts :39-54). The browser's rules first: a disabled element takes none; the keyboard goes
       // onto the element (the focusing steps); the value lands sanitized (clamped, rounded to the step); a slide to the value
-      // the browser already holds raises no `input`, so nothing moves
+      // the browser already holds raises no `input`, so nothing moves. A reversed range (Max below Min, as the attributes read)
+      // takes no slide: jsdom's sanitization of it does not settle where a browser's does — not played (the face's choice)
       slide: (s, _inputs, v) =>
         onPainted(s, (p) => {
-          if (!p.pageEnabled) return NONE;
+          if (!p.pageEnabled || reversed(p)) return NONE;
           const focus = p.elementFocused ? NONE : focusTaken();
           const held = rangeValue(p, p.shown);
           const to = rangeValue(p, v);
@@ -374,35 +377,53 @@ function reported(s: Readonly<State>, v: number): Act {
   return { set, send, emit };
 }
 
-/** HTML's rules for parsing a floating-point number attribute, as `<input type=range>` converts `min` / `max` / `step`: a number written as text, else none */
+/**
+ * An attribute as React writes it (`String(v)`; `undefined`, `null`, a boolean, a function draw none) read by HTML's rules for
+ * parsing floating-point number values — the lenient prefix parse jsdom uses for a range input's `min` / `max` / `step`
+ * (`parseFloatingPointNumber`: ASCII whitespace, then `parseFloat`, finite): `"1,2"` is 1, `"[object Object]"` none. Chromium
+ * reads the whole string strictly (`"1,2"` would be none); jsdom re-sanitizes every value the face writes, so the face and
+ * this spec read it as jsdom does (README §7, NSP-016 §7.6).
+ */
 function attrNumber(v: unknown): number | undefined {
-  if (v === undefined || v === null || typeof v === 'boolean') return undefined;
-  const t = String(v);
-  if (!/^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/.test(t)) return undefined;
-  const n = Number(t);
+  if (v === undefined || v === null || typeof v === 'boolean' || typeof v === 'function' || typeof v === 'symbol') return undefined;
+  const str = String(v);
+  const lead = str.length - str.trimStart().length;
+  if (/[^\t\n\f\r ]/.test(str.slice(0, lead))) return undefined;
+  const n = parseFloat(str);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+/** A value as a range input checks it: a VALID floating-point number (HTML's strict syntax), else none */
+function valueNumber(v: unknown): number | undefined {
+  if (typeof v === 'number') return Number.isFinite(v) ? valueNumber(String(v)) : undefined;
+  if (typeof v !== 'string' || !/^-?(?:\d+|\d*\.\d+)(?:[eE][-+]?\d+)?$/.test(v)) return undefined;
+  const n = parseFloat(v);
   return Number.isFinite(n) ? n : undefined;
 }
 
 /**
- * The BROWSER's value of a range input holding `v` (HTML: the range state's value sanitization, its underflow / overflow and
- * step mismatch rules; Chromium `StepRange::ClampValue`), against the attributes as rendered: `min` (default 0), `max`
- * (default 100), and `step` only when Step is truthy (Slider.tsx :120-122; default 1, a step that is not a positive number is
- * the default; the step base is `min`, else the `value` attribute, else 0). Not a number → the middle (Min when Max is below
- * it); clamped; rounded to base + n × step, a tie upwards; a rounding past Max steps back one, below Min forward one; still
- * outside → the clamped value. Returned as the text the element holds.
+ * The value a range input holds for `v`: the range state's value sanitization as jsdom applies it to every write (not a valid
+ * number → the middle, or Min when Max is below it; below Min → Min; else above Max → Max), then — when Max is not below Min —
+ * the browser's step-mismatch rule, which jsdom lacks (HTML; Chromium `StepRange::ClampValue`): rounded to base + n × step, a tie
+ * upwards, a rounding past Max stepped back one, below Min forward one, still outside → the clamped value. Attributes as
+ * rendered: `min` (default 0), `max` (default 100), `step` only when Step is truthy (Slider.tsx :120-122; default 1, a step that
+ * is not a positive number is the default); the step base is `min`, else the `value` attribute React keeps in step with the
+ * shown value, else 0. Returned as the text the element holds.
  */
+/** Max below Min, as the rendered attributes read (`rangeValue`'s defaults): a range the face does not slide */
+const reversed = (s: Readonly<State>): boolean => (attrNumber(s.max) ?? 100) < (attrNumber(s.min) ?? 0);
+
 function rangeValue(s: Readonly<State>, v: unknown): string {
   const minAttr = attrNumber(s.min);
   const min = minAttr ?? 0;
-  const maxAttr = attrNumber(s.max) ?? 100;
-  const max = maxAttr < min ? min : maxAttr;
+  const max = attrNumber(s.max) ?? 100;
+  const parsed = valueNumber(v);
+  const proposed = parsed === undefined ? (max < min ? min : (min + max) / 2) : parsed;
+  const inRange = parsed === undefined ? proposed : proposed < min ? min : proposed > max ? max : proposed;
+  if (max < min) return String(inRange);
   const stepAttr = s.step ? attrNumber(s.step) : undefined;
   const step = stepAttr !== undefined && stepAttr > 0 ? stepAttr : 1;
-  const parsed = attrNumber(typeof v === 'number' ? (Number.isFinite(v) ? v : undefined) : v);
-  const proposed = parsed === undefined ? (maxAttr < min ? min : min + (max - min) / 2) : parsed;
-  const inRange = Math.max(min, Math.min(proposed, max));
-  // the step base: `min`, else the `value` attribute React keeps in step with the shown value (ReactDOMInput `defaultValue`), else 0
-  const base = minAttr ?? attrNumber(Number.isFinite(s.shown) ? s.shown : undefined) ?? 0;
+  const base = minAttr ?? attrNumber(s.shown) ?? 0;
   const rounded = base + Math.round((inRange - base) / step) * step;
   const clamped = rounded > max ? rounded - step : rounded < min ? rounded + step : rounded;
   return String(clamped < min || clamped > max ? inRange : clamped);

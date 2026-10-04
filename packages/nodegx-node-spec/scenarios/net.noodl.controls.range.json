@@ -631,7 +631,7 @@
     ]
   },
   {
-    "name": "Step 0.5: Value 30, a slide to 30.5 (Value Percent 30 either way), Mounted off; Mounted on and an act in the same frame — the act paints the remount first: Did Mount, Value back to 30 with Changed and Value Percent unchanged, then the act; a Focus action after it meets the element on the page — every act, each segment from a fresh element",
+    "name": "Step 0.5: Value 30, a slide to 30.5 (Value Percent 30 either way), Mounted off; Mounted on and an act in the same frame — the act paints the remount first: Did Mount, Value back to 30 with Changed and Value Percent unchanged, then the act; then, enabled, a Blur action (it gives up a keyboard the act took) or, disabled, a Focus action (Done: the element is on the page) — every act, enabled and disabled, each segment from a fresh element",
     "because": "Slider.tsx :88-90 the mount's effect → `updateOutputValue(30)` (slider.ts :39-54: 30 against 30.5 is a change; `Math.floor` puts both at 30); the face paints before the act",
     "params": {
       "step": 0.5
@@ -670,6 +670,61 @@
       "settle",
       {
         "act": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
       },
       "settle",
       {
@@ -735,6 +790,61 @@
         "act": "leave"
       },
       {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
         "signal": "focus"
       },
       "settle",
@@ -770,6 +880,61 @@
       "settle",
       {
         "act": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
       },
       "settle",
       {
@@ -835,6 +1000,61 @@
         "act": "release"
       },
       {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
         "signal": "focus"
       },
       "settle",
@@ -870,6 +1090,61 @@
       "settle",
       {
         "act": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
       },
       "settle",
       {
@@ -935,6 +1210,61 @@
         "act": "touch"
       },
       {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
         "signal": "focus"
       },
       "settle",
@@ -970,6 +1300,61 @@
       "settle",
       {
         "act": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
       },
       "settle",
       {
@@ -1035,6 +1420,61 @@
         "act": "focus"
       },
       {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
         "signal": "focus"
       },
       "settle",
@@ -1085,6 +1525,61 @@
         "act": "blur"
       },
       {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
         "signal": "focus"
       },
       "settle",
@@ -1120,6 +1615,62 @@
       "settle",
       {
         "act": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "slide",
+        "value": 70
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
       },
       "settle",
       {
@@ -1187,6 +1738,62 @@
         "value": 30
       },
       {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "slide",
+        "value": 30
+      },
+      {
         "signal": "focus"
       },
       "settle"
@@ -1213,6 +1820,1140 @@
       "settle",
       {
         "set": "transformX"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Max wired [1, 2]: React writes the attribute \"1,2\", which HTML's lenient parse (jsdom's) reads as 1 — a slide to 150 lands on 1: Value 1 with Changed; the author's Value is clamped with `Math.min([1, 2], n)`, NaN; Max 100 again: a slide to 40 lands on 40",
+    "because": "Slider.tsx :116-117 `max={props.max}` (React stringifies); a range input converts its attributes with the rules for parsing floating-point number values (a prefix parse) — the 10,000 run's ten divergences, s41; slider.ts :263 the clamp over the prop as written",
+    "steps": [
+      "settle",
+      {
+        "set": "max",
+        "value": [
+          1,
+          2
+        ]
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 150
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 40
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a reversed range (Min 50, Max 10): the author's Value is clamped to 50 (`Math.max(50, Math.min(10, 0))`) and the mount's effect sends it with Changed; slides take nothing — not even the keyboard (the face does not play a slide on a reversed range: jsdom's sanitization of it does not settle where a browser's does); Max 100: a slide to 70 lands on 70",
+    "because": "slider.ts :263 the clamp; the face's choice for a reversed range (node-spec-target.ts PERSON `slide`, NSP-016 §7.6)",
+    "params": {
+      "min": 50,
+      "max": 10
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "slide",
+        "value": 70
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "max",
+        "value": 100
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 70
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Step 0.5: a slide to 30.5, then Value 30.25 and an act in the same frame — the act's paint runs the effect: Value 30.25 with Changed and Value Percent unchanged (30 either way), then the act, then a Blur action (enabled) or a Focus action (disabled) — every act, enabled and disabled",
+    "because": "Slider.tsx :88-90 the effect at the act's paint (the author's Value moved); slider.ts :39-54 — the percent recomputed to what it was",
+    "params": {
+      "step": 0.5
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "slide",
+        "value": 70
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "slide",
+        "value": 70
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "slide",
+        "value": 30
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": 30
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30.5
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": 30.25
+      },
+      {
+        "act": "slide",
+        "value": 30
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a release before the first frame: the act's paint puts the slider on the page — Did Mount and Pointer Up — and the first frame then reports every output as it stands: Value 0, Value Percent 0",
+    "because": "the face paints before the act; the first settle sends each output's value (the runtime's first-frame report)",
+    "steps": [
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "act": "press"
       },
       "settle"
     ]
