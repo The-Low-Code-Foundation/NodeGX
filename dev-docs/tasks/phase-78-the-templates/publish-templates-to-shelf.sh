@@ -74,6 +74,16 @@ selected() {
 }
 
 # ── refusals, before anything is touched ─────────────────────────────────────
+#
+# P109 ISL-017 ruling 2 ("copy on install", 2026-10-04): what is published is a STAGED copy of each template
+# whose referenced kits are put back from this checkout's library/ (`resolve-template-kits.js --write`, by the
+# `entry` each kit-provenance.json record names). So a template may commit the record without the built kit,
+# and the shelf still gets the kit. A template with no record stages exactly as it is (every row below, 2026-10-04);
+# a kit the library cannot supply — no entry, or another version — refuses before the tunnel opens. The file
+# count is the STAGE's, so it counts the kits whether or not the repo carries them.
+
+STAGE_ROOT="$(mktemp -d "${TMPDIR:-/tmp}/publish-templates.XXXXXX")"
+trap 'rm -rf "$STAGE_ROOT"' EXIT
 
 for row in "${TEMPLATES[@]}"; do
   IFS='|' read -r slug dir category expected title summary <<<"$row"
@@ -86,7 +96,13 @@ for row in "${TEMPLATES[@]}"; do
       exit 1
     fi
   done
-  files="$(find "$path" -type f | wc -l | tr -d ' ')"
+  cp -R "$path" "$STAGE_ROOT/$slug"
+  if ! node "$REPO_ROOT/scripts/library/resolve-template-kits.js" "$STAGE_ROOT/$slug" --write >"$STAGE_ROOT/$slug.kits.json"; then
+    echo "REFUSING: $slug references a kit this checkout's library/ cannot supply:" >&2
+    cat "$STAGE_ROOT/$slug.kits.json" >&2
+    exit 1
+  fi
+  files="$(find "$STAGE_ROOT/$slug" -type f | wc -l | tr -d ' ')"
   if [ "$files" != "$expected" ]; then
     echo "REFUSING: $slug has $files files, expected $expected (measured at 3206e12e5)." >&2
     exit 1
@@ -117,7 +133,7 @@ fi
 echo "==> opening tunnel localhost:$LOCAL_PORT -> $HOST 127.0.0.1:5432"
 ssh -i "$SSH_KEY" -N -L "$LOCAL_PORT:127.0.0.1:5432" "$HOST" &
 TUNNEL_PID=$!
-trap 'kill "$TUNNEL_PID" 2>/dev/null || true' EXIT
+trap 'kill "$TUNNEL_PID" 2>/dev/null || true; rm -rf "$STAGE_ROOT"' EXIT
 for _ in $(seq 1 20); do
   lsof -nP -iTCP:"$LOCAL_PORT" -sTCP:LISTEN >/dev/null 2>&1 && break
   sleep 0.5
@@ -135,7 +151,7 @@ cd "$COMMUNITY"
 for row in "${TEMPLATES[@]}"; do
   IFS='|' read -r slug dir category expected title summary <<<"$row"
   selected "$slug" || continue
-  ARGS=("$slug" "$REPO_ROOT/templates/$dir" "$category" "$summary" --title "$title")
+  ARGS=("$slug" "$STAGE_ROOT/$slug" "$category" "$summary" --title "$title")
   [ "$PUBLISH" = "1" ] && ARGS+=(--publish)
   if [ "$PUBLISH" = "1" ]; then echo "==> $slug: publishing (visible on the shelf)"; else echo "==> $slug: writing a DRAFT row"; fi
   DATABASE_URL="$DB_URL_LOCAL" npx tsx scripts/publish-project-template.ts "${ARGS[@]}"
