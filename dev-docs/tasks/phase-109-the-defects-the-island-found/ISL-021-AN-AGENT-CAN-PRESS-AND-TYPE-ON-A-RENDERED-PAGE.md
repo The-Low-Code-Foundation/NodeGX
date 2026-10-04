@@ -1,6 +1,6 @@
 # ISL-021 — An agent can press and type on a rendered page
 
-**Status: 🔒✓ ruled s13 (2026-10-04): "One call, a step list" (`drive_page`); rulings 2–3 as recommended (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F28](AUDIT-2026-10-01.md) · the 18
+**Status: 🟢 slice 1 built s13 (2026-10-04) — `drive_page` + `scripts/devtools/drive-steps.js`, ten of eleven verbs; AC2, AC4, AC5 met. Ruled s13: "One call, a step list"; rulings 2–3 as recommended (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F28](AUDIT-2026-10-01.md) · the 18
 CDP drives of P105, P106 and P108 · **Side:** product (MCP door, `noodl-mcp` render harness; possibly `nodegx-observe`)
 
 `render_report` loads every page and measures it as it first draws. It cannot press a button, type a name, wait for
@@ -107,4 +107,45 @@ Constraints:
 
 ## 8. Record
 
-None yet.
+### Session 13 (2026-10-04) — ruled "One call, a step list"; slice 1 built; AC2, AC4 met, AC5 by PID
+
+**Ruled** (README §8 round 3), asked with the census: 114 hand-written `drive-*.js` in `scripts/devtools/`, 45,773
+lines, 22 for the island (12,402 lines; 18 / 10,209 at scoping). Rulings 2–3 as recommended.
+
+**Built:**
+
+- `scripts/devtools/drive-steps.js` — the step runner, inside the render harness's own `withRenderedPage` (one
+  Chrome, its server, its teardown and signal handlers; no second launcher). Ten verbs: `tap`, `type`, `key`,
+  `wait_for`, `read` (+ `expect`), `navigate`, `viewport`, `screenshot`, `seed_storage`, `clear_storage`.
+  🔴 **`stub_route` (the eleventh) is NOT built**: the harness's CDP client takes its event handler at connect time,
+  so `Fetch.requestPaused` needs a change inside `render-report.js`'s `attachTab` — left for slice 2.
+- `drive_page` (`src/tools/renderTools.ts`, runner resolved beside the harness in `src/render.ts`
+  `resolveDriveCli`; `NODEGX_DRIVE_CLI` overrides), deferred in `explore` with keywords `press`, `click`, `tap`,
+  `drive`, `interact`, `play`, `test the page`. Resident surface **8,261 before and after**. A PASSED/FAILED headline
+  before the JSON, as `render_report`'s verdict is; caveats for a hidden page, no WebGL2, console errors.
+- Packaged: `drive-steps.js` added to the editor's `render-harness` mapping (`noodl-editor/package.json`) and to
+  `uni-012/harness-packaging.test.ts`'s list (7/7).
+
+🔴 **Met on the way — a near-miss, recorded:** the runner was first written to `scripts/devtools/drive-page.js`,
+which EXISTS (P77's persistent URL driver, last committed `f77e66476`). The Write tool overwrote it. Restored from
+HEAD at once; no peer had uncommitted edits in it (40 most recent transcripts searched: none edited it). The new
+runner is `drive-steps.js`, and two of P77's designed-in traps were taken from the file it nearly replaced: text
+matches **exactly** (`text_contains` is the opt-in — a substring once pressed `Published` for `Publish`), and text is
+searched inside `<body>` among elements with area (`<title>` matches every query with zero area).
+
+**The rules designed in** (each from a drive that once read wrong): a tap is `Input.dispatchMouseEvent` at the
+centre after `scrollIntoView`, refused unless `elementFromPoint` there is the element or inside it (`el.contains(at)`
+only — never an ancestor); the element is lent `pointer-events: auto` for that one measurement (a label inside a
+button) and restored before the press, so the press lands where a finger's would; waits poll a condition; after an
+input the runner waits two animation frames, not a sleep.
+
+| AC | reading |
+|---|---|
+| AC1 | Red at HEAD by source: `render_report`'s inputs are `viewports`, `screenshot`, `scale`, `backend_port`, `page`, `out_dir` and no deferred tool presses or types (`find_tools` "press"/"click" revealed nothing before this). Not re-run as a spec at HEAD. |
+| AC2 | ✅ `isl021DrivePage.test.ts` through the MCP door on a copy of `templates/bot-garden` rendered from disk: clear storage → `/` → tap "New player" → type "Ada" into the first input → tap "10–12" → tap "Let’s go!" → wait for `island` → read the saved family's active profile name → **`Ada`**, `PASSED — 8 of 8 steps`, 0 console errors (~2 s). The covered arm: a real full-screen element added to the page, then tap "New player" → `FAILED at step 2 (tap)`: *"… a finger at its centre would press div#isl021-cover"*, step 3 not run. |
+| AC3 | ⬜ The corpus count (`drive-iw006-shop.js`, `drive-cg003-pages.js` clause by clause) — not done. |
+| AC4 | ✅ 🔴 Reverted arm (the hit test removed): the covered case red (it tapped through the cover), the other three green. Restored. |
+| AC5 | ✅ The run reports `visibilityState: "visible"` (and `webgl2: false` — headless; said in the headline). No Chrome left behind: orphaned render-profile Chromes by PID, before vs after, none new. |
+| AC6 | ⬜ An agent proves a form of its own — not run. |
+| AC7 | ⬜ The shop drive's `SHORT`/`BUY` as step lists vs the CDP drive on the deployed artefact — not run; note the runner drives a FROM-DISK render, the drives a deployed one (§7's first trap). |
+

@@ -74,6 +74,8 @@ describe('UNI-012 — what the packaging names still exists', () => {
     expect(scripts).toEqual(
       expect.arrayContaining([
         'measure-from-disk.js',
+        // P109 ISL-021 — `drive_page`'s step runner, found beside the harness (`render.ts` resolveDriveCli).
+        'drive-steps.js',
         'render-report.js',
         'render-from-disk.js',
         'harness-paths.js'

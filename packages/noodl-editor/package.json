@@ -83,6 +83,7 @@
         "to": "render-harness",
         "filter": [
           "measure-from-disk.js",
+          "drive-steps.js",
           "render-report.js",
           "render-from-disk.js",
           "harness-paths.js"

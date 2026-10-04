@@ -1,0 +1,390 @@
+#!/usr/bin/env node
+/**
+ * P109 ISL-021 — press, type, wait and read on a page rendered from disk, from one step list.
+ *
+ * Usage:
+ *   node scripts/devtools/drive-steps.js <project-dir> --steps '<json array>' [options]
+ *
+ *   --steps <json|@file>   the step list (below), inline JSON or `@path/to/steps.json`
+ *   --page <path>          start on this page ("/" or omitted = the start page), as `render_report --page`
+ *   --viewport <spec>      "desktop", "phone" or WIDTHxHEIGHT (default: desktop)
+ *   --out-dir <dir>        where `screenshot` steps write their PNGs (default: none are written)
+ *   --backend-port <n>     proxy /__backend to this port
+ *
+ * Prints ONE JSON object on stdout: `{ verdict, steps: [...], consoleErrors, page: {...} }`, or
+ * `{ error: { message, problems, actionable } }`. Exit 0 either way when a run happened — a failed step
+ * is a verdict, not a crash (the render harness's rule); exit 2 is a usage error.
+ *
+ * ## Why this exists (ISL-021, ruled 2026-10-04: "One call, a step list")
+ *
+ * `render_report` measures the first frame. Olive's Island is a game, and nothing it does is visible on
+ * the first frame, so every claim about it was proved by a hand-written CDP script: 114 `drive-*.js`
+ * files in this folder, 45,773 lines, none of which an agent using the MCP door could write or run.
+ * This is the door's half: the verbs those drives use, measured from them (ISL-021 §2's census), in a
+ * form a model can send as data.
+ *
+ * ## The rules it inherits from those drives, each of which cost a wrong reading once
+ *
+ * - **A tap is a finger, not `el.click()`.** `Input.dispatchMouseEvent` at the element's centre, after
+ *   `scrollIntoView`, and only when `elementFromPoint` at that centre is the element or inside it
+ *   (`el.contains(at)` — an ANCESTOR at the point is not the element: memory "a rect is not visibility").
+ *   Refused otherwise, naming what the finger would have hit.
+ * - **`pointer-events: none` hides an element from the hit test** (a label inside a button). The element
+ *   is lent `pointer-events: auto` for the one measurement and restored before the press, so the press
+ *   lands where a finger's would — on the button under the label.
+ * - **A wait is a condition with a timeout**, polled; never a fixed sleep (a sleep grades the machine).
+ * - **The run says whether the page was visible** (`document.visibilityState`, `hasFocus`): an occluded
+ *   window throttles timers ~1000× (P56 BEN-003), and a 2D fallback must not read as a 3D pass (F36), so
+ *   it reports whether WebGL2 was available too.
+ *
+ * Reuses `withRenderedPage` — the render harness's own Chrome, server and teardown. No second launcher.
+ *
+ * ⚠️ **Not `drive-page.js`.** That is P77's persistent driver for a URL (a browser kept alive between shell
+ * calls — the "exploratory session" shape ISL-021 ruled against), and two of its traps are designed in here:
+ * a SUBSTRING text match once pressed `Published` when asked for `Publish` and reported a reachable click on the
+ * wrong element, so `text` is EXACT and `text_contains` is the opt-in that says what it matched; and `<title>`
+ * matches every text query with zero area, so text is searched inside `body` among elements with area.
+ *
+ * ## Steps — each an object with ONE verb key
+ *
+ *   { "tap": T }                         press the element T (below)
+ *   { "type": "Ada", "into": T? }        tap T first when given, then type the text as a keyboard would
+ *   { "key": "Enter" }                   one key press (Enter, Escape, Tab, Backspace, ArrowDown, …)
+ *   { "wait_for": C, "timeout_ms": n? }  poll until C holds (default 5000 ms); C is one of
+ *                                        { "text": "…" } on the page, { "testid" | "selector": "…" } visible,
+ *                                        { "url": "…" } in the path or hash, { "expression": "js" } truthy
+ *   { "read": R, "expect": V? }          R is { "text": T } (its innerText), { "variable": "name" } (an app
+ *                                        Variable), { "storage": "key" } (localStorage), { "url": true } or
+ *                                        { "expression": "js" }; with `expect` the step passes only when the
+ *                                        value equals V, or contains V.contains
+ *   { "navigate": "/island" }            go to a route, as the router would
+ *   { "viewport": "phone" | "390x844" }  resize
+ *   { "screenshot": "name" }             a PNG of the viewport into --out-dir
+ *   { "seed_storage": { "key": "value" } } write localStorage (navigate afterwards to load it)
+ *   { "clear_storage": true }            clear this origin's storage
+ *
+ *   T (a target) is { "text": "New player" } (exact, after trimming), { "text_contains": "player" } (the
+ *   opt-in substring form), { "testid": "plot-card" } (a `data-testid`, ISL-009) or { "selector": "css" };
+ *   a bare string means { "text": … }. Every press reports what it pressed.
+ *
+ * A step that fails stops the run: every later step was written assuming it had happened.
+ */
+const fs = require('fs');
+const path = require('path');
+
+const { withRenderedPage, routedPages, resolvePageRequest, parseViewports } = require('./render-report');
+
+const VERBS = [
+  'tap',
+  'type',
+  'key',
+  'wait_for',
+  'read',
+  'navigate',
+  'viewport',
+  'screenshot',
+  'seed_storage',
+  'clear_storage'
+];
+
+/** The keys `key` understands, as CDP wants them. */
+const KEYS = {
+  Enter: { key: 'Enter', code: 'Enter', keyCode: 13, text: '\r' },
+  Escape: { key: 'Escape', code: 'Escape', keyCode: 27 },
+  Tab: { key: 'Tab', code: 'Tab', keyCode: 9 },
+  Backspace: { key: 'Backspace', code: 'Backspace', keyCode: 8 },
+  Delete: { key: 'Delete', code: 'Delete', keyCode: 46 },
+  Space: { key: ' ', code: 'Space', keyCode: 32, text: ' ' },
+  ArrowUp: { key: 'ArrowUp', code: 'ArrowUp', keyCode: 38 },
+  ArrowDown: { key: 'ArrowDown', code: 'ArrowDown', keyCode: 40 },
+  ArrowLeft: { key: 'ArrowLeft', code: 'ArrowLeft', keyCode: 37 },
+  ArrowRight: { key: 'ArrowRight', code: 'ArrowRight', keyCode: 39 }
+};
+
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+
+class UsageError extends Error {
+  constructor(message) {
+    super(message);
+    this.usage = true;
+  }
+}
+
+/** The one verb a step names, or a usage error naming what is wrong with it. */
+function verbOf(step, n) {
+  if (!step || typeof step !== 'object' || Array.isArray(step)) {
+    throw new UsageError(`Step ${n} is not an object: ${JSON.stringify(step)}.`);
+  }
+  const verbs = Object.keys(step).filter((k) => VERBS.includes(k));
+  if (verbs.length !== 1) {
+    throw new UsageError(
+      `Step ${n} must name exactly one of ${VERBS.join(', ')}; it names ${verbs.length ? verbs.join(' and ') : 'none'} ` +
+        `(${JSON.stringify(step)}).`
+    );
+  }
+  return verbs[0];
+}
+
+/** A target as a page-side expression returning `{ el, matched }`. */
+function finder(target) {
+  const t = typeof target === 'string' ? { text: target } : target || {};
+  if (typeof t.testid === 'string') {
+    return `(() => { const all = [...document.querySelectorAll('[data-testid=' + ${JSON.stringify(JSON.stringify(t.testid))} + ']')]; return { all }; })()`;
+  }
+  if (typeof t.selector === 'string') {
+    return `(() => ({ all: [...document.querySelectorAll(${JSON.stringify(t.selector)})] }))()`;
+  }
+  if (typeof t.text === 'string' || typeof t.text_contains === 'string') {
+    // The DEEPEST elements inside <body> with area whose text is the needle (EXACT for `text`, a substring
+    // only for `text_contains`), so a button's label is found rather than the page that holds it.
+    const exact = typeof t.text === 'string';
+    return `(() => {
+      const needle = ${JSON.stringify(exact ? t.text : t.text_contains)};
+      const shown = (e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== 'hidden'; };
+      const own = (e) => (e.innerText || '').trim();
+      const test = ${exact} ? (s) => s === needle : (s) => s.includes(needle);
+      const hits = [...document.body.querySelectorAll('*')].filter((e) => shown(e) && test(own(e)));
+      return { all: hits.filter((e) => !hits.some((o) => o !== e && e.contains(o))) };
+    })()`;
+  }
+  throw new UsageError(`A target is { text }, { text_contains }, { testid } or { selector }; got ${JSON.stringify(target)}.`);
+}
+
+/** What the finger would press: the centre of the first matching element a finger can reach. */
+function locateExpression(target) {
+  return `(() => {
+    const { all } = ${finder(target)};
+    const describe = (e) => e ? (e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + (e.getAttribute('data-testid') ? '[data-testid=' + e.getAttribute('data-testid') + ']' : '') + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\\s+/).slice(0, 2).join('.') : '') + ' "' + (e.innerText || '').trim().slice(0, 40) + '"') : 'nothing';
+    if (all.length === 0) return { found: false, matched: 0 };
+    let last;
+    for (const el of all) {
+      el.scrollIntoView({ block: 'center', inline: 'center' });
+      const r = el.getBoundingClientRect();
+      const x = r.left + r.width / 2, y = r.top + r.height / 2;
+      if (x < 0 || y < 0 || x >= innerWidth || y >= innerHeight) { last = { x, y, offscreen: true, wouldHit: 'nothing (off screen)' }; continue; }
+      // Lent pointer-events for the one measurement: elementFromPoint skips an element that has none.
+      const before = el.style.pointerEvents;
+      el.style.pointerEvents = 'auto';
+      const at = document.elementFromPoint(x, y);
+      el.style.pointerEvents = before;
+      if (at && el.contains(at)) return { found: true, matched: all.length, x, y, target: describe(el) };
+      last = { x, y, wouldHit: describe(at), target: describe(el) };
+    }
+    return { found: true, matched: all.length, covered: true, ...last };
+  })()`;
+}
+
+function waitExpression(c) {
+  if (!c || typeof c !== 'object') throw new UsageError(`wait_for takes { text | testid | selector | url | expression }; got ${JSON.stringify(c)}.`);
+  if (typeof c.text === 'string') return `(document.body.innerText || '').includes(${JSON.stringify(c.text)})`;
+  if (typeof c.testid === 'string' || typeof c.selector === 'string') {
+    return `(() => { const { all } = ${finder(c)}; return all.some((e) => e.getClientRects().length > 0); })()`;
+  }
+  if (typeof c.url === 'string') return `(location.pathname + location.hash).includes(${JSON.stringify(c.url)})`;
+  if (typeof c.expression === 'string') return `(async () => !!(${c.expression}))()`;
+  throw new UsageError(`wait_for takes { text | testid | selector | url | expression }; got ${JSON.stringify(c)}.`);
+}
+
+function readExpression(r) {
+  if (!r || typeof r !== 'object') throw new UsageError(`read takes { text | variable | storage | url | expression }; got ${JSON.stringify(r)}.`);
+  if (r.text !== undefined) {
+    return `(() => { const { all } = ${finder(r.text)}; const e = all[0]; return e ? (e.value !== undefined && e.value !== null && e.value !== '' ? e.value : (e.innerText || '').trim()) : null; })()`;
+  }
+  if (typeof r.variable === 'string') {
+    return `(() => { const N = window.Noodl; if (!N || !N.Variables) throw new Error('This page has no Noodl.Variables to read.'); const v = N.Variables[${JSON.stringify(r.variable)}]; return v === undefined ? null : JSON.parse(JSON.stringify(v)); })()`;
+  }
+  if (typeof r.storage === 'string') return `localStorage.getItem(${JSON.stringify(r.storage)})`;
+  if (r.url) return `location.pathname + location.hash`;
+  if (typeof r.expression === 'string') return `(async () => { const v = await (${r.expression}); return v === undefined ? null : JSON.parse(JSON.stringify(v)); })()`;
+  throw new UsageError(`read takes { text | variable | storage | url | expression }; got ${JSON.stringify(r)}.`);
+}
+
+function matches(value, expected) {
+  if (expected && typeof expected === 'object' && !Array.isArray(expected) && 'contains' in expected) {
+    const hay = typeof value === 'string' ? value : JSON.stringify(value);
+    return typeof hay === 'string' && hay.includes(String(expected.contains));
+  }
+  return JSON.stringify(value) === JSON.stringify(expected);
+}
+
+/** Run every step until one fails. Returns the rows. */
+async function runSteps(page, steps, { outDir }) {
+  const rows = [];
+  const { client, evaluate } = page;
+  // After an input, let the app answer before the next step looks: two animation frames is a condition
+  // (React has committed and painted), not a sleep.
+  const frames = () => evaluate('new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(() => r(true))))');
+  const press = async (target) => {
+    let p = await evaluate(locateExpression(target));
+    // A target that is not there YET (an animation, a route still mounting) gets a short grace, as the
+    // drives give it; one that is there and covered is refused at once.
+    for (let i = 0; i < 20 && !p.found; i++) {
+      await wait(100);
+      p = await evaluate(locateExpression(target));
+    }
+    if (!p.found) throw new Error(`nothing on the page matches ${JSON.stringify(target)}`);
+    if (p.covered) {
+      throw new Error(
+        `${p.target} is there but a finger at its centre would press ${p.wouldHit}` +
+          (p.offscreen ? ' (its centre is off screen even after scrolling)' : '')
+      );
+    }
+    for (const type of ['mousePressed', 'mouseReleased']) {
+      await client.send('Input.dispatchMouseEvent', { type, x: p.x, y: p.y, button: 'left', clickCount: 1 });
+    }
+    return p;
+  };
+
+  for (let i = 0; i < steps.length; i++) {
+    const step = steps[i];
+    const verb = verbOf(step, i + 1);
+    const started = Date.now();
+    const row = { n: i + 1, do: verb, ok: true };
+    try {
+      if (verb === 'tap') {
+        const p = await press(step.tap);
+        row.pressed = p.target;
+        if (p.matched > 1) row.matched = p.matched;
+        await frames();
+      } else if (verb === 'type') {
+        if (typeof step.type !== 'string') throw new UsageError(`Step ${i + 1}: type takes a string.`);
+        if (step.into !== undefined) await press(step.into);
+        await client.send('Input.insertText', { text: step.type });
+        await frames();
+        row.value = await evaluate(`(() => { const e = document.activeElement; return e && 'value' in e ? e.value : null; })()`);
+      } else if (verb === 'key') {
+        const k = KEYS[step.key];
+        if (!k) throw new UsageError(`Step ${i + 1}: key "${step.key}" is not one of ${Object.keys(KEYS).join(', ')}.`);
+        await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: k.key, code: k.code, windowsVirtualKeyCode: k.keyCode, ...(k.text ? { text: k.text } : {}) });
+        await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: k.key, code: k.code, windowsVirtualKeyCode: k.keyCode });
+        await frames();
+      } else if (verb === 'wait_for') {
+        const expr = waitExpression(step.wait_for);
+        const timeout = Number(step.timeout_ms ?? 5000);
+        const end = Date.now() + timeout;
+        let ok = await evaluate(expr);
+        while (!ok && Date.now() < end) {
+          await wait(100);
+          ok = await evaluate(expr);
+        }
+        if (!ok) throw new Error(`not true within ${timeout} ms: ${JSON.stringify(step.wait_for)}`);
+      } else if (verb === 'read') {
+        row.value = await evaluate(readExpression(step.read));
+        if ('expect' in step && !matches(row.value, step.expect)) {
+          row.ok = false;
+          row.error = `read ${JSON.stringify(row.value)}, expected ${JSON.stringify(step.expect)}`;
+        }
+      } else if (verb === 'navigate') {
+        if (typeof step.navigate !== 'string') throw new UsageError(`Step ${i + 1}: navigate takes a route string.`);
+        await page.navigate(step.navigate.startsWith('/') ? step.navigate : `/${step.navigate}`);
+        row.url = await evaluate('location.pathname + location.hash');
+      } else if (verb === 'viewport') {
+        const [vp] = parseViewports(String(step.viewport));
+        await page.setViewport(vp);
+        row.viewport = `${vp.width}x${vp.height}`;
+      } else if (verb === 'screenshot') {
+        if (!outDir) throw new UsageError(`Step ${i + 1}: screenshot needs --out-dir (render_report's out_dir rule).`);
+        const name = String(step.screenshot).replace(/[^A-Za-z0-9._-]+/g, '-') || `step-${i + 1}`;
+        const shot = await client.send('Page.captureScreenshot', { format: 'png' });
+        fs.mkdirSync(outDir, { recursive: true });
+        const file = path.join(outDir, `${name}.png`);
+        fs.writeFileSync(file, Buffer.from(shot.data, 'base64'));
+        row.file = file;
+      } else if (verb === 'seed_storage') {
+        const pairs = step.seed_storage;
+        if (!pairs || typeof pairs !== 'object') throw new UsageError(`Step ${i + 1}: seed_storage takes { key: value }.`);
+        await evaluate(
+          `(() => { const p = ${JSON.stringify(pairs)}; for (const k of Object.keys(p)) localStorage.setItem(k, typeof p[k] === 'string' ? p[k] : JSON.stringify(p[k])); return Object.keys(p).length; })()`
+        );
+        row.keys = Object.keys(pairs);
+      } else if (verb === 'clear_storage') {
+        const origin = await evaluate('location.origin');
+        await client.send('Storage.clearDataForOrigin', { origin, storageTypes: 'local_storage,indexeddb,cache_storage,service_workers' });
+      }
+    } catch (error) {
+      if (error.usage) throw error;
+      row.ok = false;
+      row.error = error instanceof Error ? error.message : String(error);
+    }
+    row.ms = Date.now() - started;
+    rows.push(row);
+    if (!row.ok) break;
+  }
+  return rows;
+}
+
+async function main() {
+  const argv = process.argv.slice(2);
+  const VALUE_FLAGS = new Set(['--steps', '--page', '--viewport', '--out-dir', '--backend-port']);
+  const flag = (name) => {
+    const i = argv.indexOf(name);
+    return i === -1 ? undefined : argv[i + 1];
+  };
+  const projectDir = argv.find((a, i) => !a.startsWith('--') && !VALUE_FLAGS.has(argv[i - 1]));
+  const usage = (message) => {
+    process.stdout.write(JSON.stringify({ error: { message, problems: [message], actionable: true } }));
+    process.exit(2);
+  };
+  if (!projectDir) usage('drive-page.js <project-dir> --steps <json|@file> [--page p] [--viewport v] [--out-dir d]');
+
+  let steps;
+  try {
+    const raw = flag('--steps');
+    if (!raw) throw new UsageError('--steps is required: a JSON array of steps.');
+    steps = JSON.parse(raw.startsWith('@') ? fs.readFileSync(raw.slice(1), 'utf8') : raw);
+    if (!Array.isArray(steps) || steps.length === 0) throw new UsageError('--steps must be a non-empty JSON array.');
+    steps.forEach((s, i) => verbOf(s, i + 1));
+  } catch (error) {
+    usage(error.message);
+  }
+
+  let viewport;
+  try {
+    [viewport] = parseViewports(flag('--viewport') || 'desktop');
+  } catch (error) {
+    usage(error.message);
+  }
+
+  // Resolved before Chrome starts, as `render_report --page` is (EL-009 AC3).
+  const routes = routedPages(projectDir);
+  let start;
+  if (flag('--page') !== undefined) {
+    const resolved = resolvePageRequest(routes, flag('--page'));
+    if (!resolved.ok) usage(resolved.message);
+    start = resolved.page;
+  }
+
+  const backendPort = flag('--backend-port') ? Number(flag('--backend-port')) : undefined;
+  const outDir = flag('--out-dir');
+
+  try {
+    const result = await withRenderedPage({ projectDir, backendPort }, async (page) => {
+      await page.setViewport(viewport);
+      if (start && !start.isStart) await page.navigate(start.url);
+      const rows = await runSteps(page, steps, { outDir });
+      const pageState = await page.evaluate(`(() => {
+        let webgl2 = false;
+        try { webgl2 = !!document.createElement('canvas').getContext('webgl2'); } catch (e) {}
+        return { url: location.pathname + location.hash, visibilityState: document.visibilityState, focused: document.hasFocus(), webgl2 };
+      })()`);
+      return {
+        verdict: rows.length === steps.length && rows.every((r) => r.ok) ? 'passed' : 'failed',
+        steps: rows,
+        ran: rows.length,
+        of: steps.length,
+        viewport: `${viewport.width}x${viewport.height}`,
+        page: pageState,
+        consoleErrors: page.consoleErrors.slice(0, 20)
+      };
+    });
+    process.stdout.write(JSON.stringify(result));
+  } catch (error) {
+    if (error.usage) usage(error.message);
+    const problems = error.problems || [error instanceof Error ? error.message : String(error)];
+    process.stdout.write(JSON.stringify({ error: { message: problems.join(' '), problems, actionable: Boolean(error.actionable) } }));
+  }
+}
+
+if (require.main === module) main();
+
+module.exports = { runSteps, locateExpression, VERBS };

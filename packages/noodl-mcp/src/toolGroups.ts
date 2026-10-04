@@ -315,7 +315,12 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
     // the fourth library tool is free too. "publish" and "share" are here
     // because somebody who has built a good part reaches for those words, not
     // for "export".
-    keywords: ['prefab', 'shelf', 'recipe', 'find', 'search', 'where is', 'understand', 'publish', 'share', 'reuse'],
+    // P109 ISL-021 — `drive_page` appended (ruling 3 (a), 0 resident tokens: "7 tools" and "8 tools" are the
+    // same length), and the words for it: a model that wants to press a button searches in those.
+    keywords: [
+      'prefab', 'shelf', 'recipe', 'find', 'search', 'where is', 'understand', 'publish', 'share', 'reuse',
+      'press', 'click', 'tap', 'drive', 'interact', 'play', 'test the page'
+    ],
     tools: [
       'search_project',
       'explain_component',
@@ -323,7 +328,8 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'list_library',
       'get_library_entry',
       'install_prefab',
-      'export_to_library'
+      'export_to_library',
+      'drive_page'
     ],
     resident: false
   },
