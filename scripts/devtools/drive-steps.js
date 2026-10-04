@@ -48,7 +48,11 @@
  * ## Steps — each an object with ONE verb key
  *
  *   { "tap": T }                         press the element T (below)
- *   { "type": "Ada", "into": T? }        tap T first when given, then type the text as a keyboard would
+ *   { "type": "Ada", "into": T?, "replace": true? }
+ *                                        tap T first when given, then type the text as a keyboard would — it
+ *                                        APPENDS to what the field holds; `replace` selects all first (⌘A).
+ *                                        Measured s14: an agent typed a second name into a filled field and read
+ *                                        "Grace HopperKatherine Johnson"
  *   { "key": "Enter" }                   one key press (Enter, Escape, Tab, Backspace, ArrowDown, …)
  *   { "wait_for": C, "timeout_ms": n? }  poll until C holds (default 5000 ms); C is one of
  *                                        { "text": "…" } on the page, { "testid" | "selector": "…" } visible,
@@ -84,7 +88,7 @@
  *                                        `{ hits, body }` — how many requests it answered, and the last body
  *                                        one sent (parsed when it is JSON)
  *
- *   T (a target) is { "text": "New player" } (exact, after trimming), { "text_contains": "player" } (the
+ *   T (a target) is { "text": "New player" } (exact, after trimming; a field's placeholder or aria-label counts), { "text_contains": "player" } (the
  *   opt-in substring form), { "testid": "plot-card" } (a `data-testid`, ISL-009) or { "selector": "css" };
  *   a bare string means { "text": … }. Every press reports what it pressed.
  *
@@ -165,7 +169,9 @@ function finder(target) {
       const shown = (e) => { const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== 'hidden'; };
       const own = (e) => (e.innerText || '').trim();
       const test = ${exact} ? (s) => s === needle : (s) => s.includes(needle);
-      const hits = [...document.body.querySelectorAll('*')].filter((e) => shown(e) && test(own(e)));
+      // A field is found by what a person reads on it: its placeholder or aria-label (an input has no text).
+      const field = (e) => (e.tagName === 'INPUT' || e.tagName === 'TEXTAREA') && test((e.getAttribute('placeholder') || e.getAttribute('aria-label') || '').trim());
+      const hits = [...document.body.querySelectorAll('*')].filter((e) => shown(e) && (test(own(e)) || field(e)));
       return { all: hits.filter((e) => !hits.some((o) => o !== e && e.contains(o))) };
     })()`;
   }
@@ -397,6 +403,9 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), beforeB
       } else if (verb === 'type') {
         if (typeof step.type !== 'string') throw new UsageError(`Step ${i + 1}: type takes a string.`);
         if (step.into !== undefined) await press(step.into);
+        if (step.replace === true) {
+          await evaluate(`(() => { const e = document.activeElement; if (e && typeof e.select === 'function') e.select(); return true; })()`);
+        }
         await client.send('Input.insertText', { text: step.type });
         await frames();
         row.value = await evaluate(`(() => { const e = document.activeElement; return e && 'value' in e ? e.value : null; })()`);

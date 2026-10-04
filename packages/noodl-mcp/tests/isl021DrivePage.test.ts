@@ -166,6 +166,25 @@ describeOrSkip('P109 ISL-021 — drive_page on Olive’s Island, rendered from d
     expect(headline).toMatch(/^FAILED at step 2 \(tap\)/);
   }, 120_000);
 
+  it('AC6 s14 — a field is found by its placeholder, `type` appends as a keyboard does, and `replace` types over it', async () => {
+    const { result } = await drive(session, {
+      steps: [
+        {
+          read: {
+            expression:
+              "(() => { const i = document.createElement('input'); i.placeholder = 'Your name'; i.style.cssText = 'position:fixed;top:8px;left:8px;width:200px;height:32px;z-index:99999'; document.body.appendChild(i); return true; })()"
+          }
+        },
+        { type: 'Grace Hopper', into: { text: 'Your name' } },
+        { type: 'Katherine Johnson', into: { text: 'Your name' } },
+        { read: { expression: "document.querySelector('input[placeholder=\"Your name\"]').value" }, expect: 'Grace HopperKatherine Johnson' },
+        { type: 'Katherine Johnson', into: { text: 'Your name' }, replace: true },
+        { read: { expression: "document.querySelector('input[placeholder=\"Your name\"]').value" }, expect: 'Katherine Johnson' }
+      ]
+    });
+    expect({ verdict: result.verdict, failed: result.steps.find((r) => !r.ok)?.error ?? null }).toEqual({ verdict: 'passed', failed: null });
+  }, 120_000);
+
   /**
    * Slice 2 — `stub_route`, the eleventh verb (22 of the drives hand-wrote `Fetch.requestPaused`). The stylesheet
    * is a request the garden's FIRST load makes and can lose harmlessly (the font falls back), so it is what a

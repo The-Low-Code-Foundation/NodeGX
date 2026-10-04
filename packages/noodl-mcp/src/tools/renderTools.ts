@@ -166,17 +166,18 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
       title: 'Drive a rendered page',
       description:
         'Render this project from disk in a headless browser, run a list of steps on it, and report one row per ' +
-        'step — so you can prove a button, a form or a game WORKS, not just that it draws. Steps (each an object ' +
-        'with one verb): {tap: T}, {type: "text", into?: T}, {key: "Enter"}, {wait_for: {text|testid|selector|url|' +
-        'expression}, timeout_ms?}, {read: {text: T}|{variable: name}|{storage: key}|{url: true}|{stub: path}|' +
-        '{expression}, expect?: value|{contains}}, {navigate: "/route"}, {viewport: "phone"|"390x844"}, ' +
-        '{screenshot: name}, {seed_storage: {key: value}} or {seed_storage: "key", edit: "js changing v"} (applied ' +
-        'again on the next load, before the app can overwrite it), {clear_storage: true}, {stub_route: "/api/x", json?, ' +
-        'body?, status?} (answers that path itself; put it first to meet a fetch made at boot). A target T is ' +
-        '{text: "exact label"}, ' +
-        '{text_contains}, {testid} (a data-testid) or {selector}; a bare string is exact text. A tap is a real ' +
-        'pointer press at the element\'s centre and is REFUSED when something else covers it, naming what a ' +
-        'finger would hit. The first failing step stops the run.',
+        'step — so you can prove a button, a form or a game WORKS, not just that it draws. Each call is a fresh ' +
+        'browser: nothing carries over from the last call. Steps (each an object with one verb): {tap: T}, ' +
+        '{type: "text", into?: T, replace?: true} (appends to what the field holds unless replace), {key: "Enter"}, ' +
+        '{wait_for: {text|testid|selector|url|expression}, timeout_ms?}, {read: {text: T}|{variable: name}|' +
+        '{storage: key}|{url: true}|{stub: path}|{expression}, expect?: value|{contains}}, {navigate: "/route"}, ' +
+        '{viewport: "phone"|"390x844"}, {screenshot: name}, {seed_storage: {key: value}} or {seed_storage: "key", ' +
+        'edit: "js changing v"} (applied again on the next load, before the app can overwrite it), ' +
+        '{clear_storage: true}, {stub_route: "/api/x", json?, body?, status?} (answers that path itself; put it ' +
+        'first to meet a fetch made at boot). A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
+        'placeholder counts), {testid} (a data-testid set in the node\'s Data Attributes list — NOT its node id) ' +
+        'or {selector}; a bare string is exact text. A tap is a real pointer press at the element\'s centre and is ' +
+        'REFUSED when something else covers it, naming what a finger would hit. The first failing step stops the run.',
       inputSchema: {
         steps: z
           .array(z.record(z.unknown()))
