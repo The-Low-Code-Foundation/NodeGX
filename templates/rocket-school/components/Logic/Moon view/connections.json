@@ -1,0 +1,205 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f3813c00-15fe-591f-87be-af0749395074",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "moonviewIn",
+      "fromProperty": "app",
+      "toId": "moonviewFn",
+      "toProperty": "in-app"
+    },
+    {
+      "fromId": "moonviewIn",
+      "fromProperty": "draftSpecies",
+      "toId": "moonviewFn",
+      "toProperty": "in-draftSpecies"
+    },
+    {
+      "fromId": "moonviewIn",
+      "fromProperty": "draftColour",
+      "toId": "moonviewFn",
+      "toProperty": "in-draftColour"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-aliens",
+      "toId": "moonviewOut",
+      "toProperty": "aliens"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-has",
+      "toId": "moonviewOut",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-count",
+      "toId": "moonviewOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-full",
+      "toId": "moonviewOut",
+      "toProperty": "full"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-purse",
+      "toId": "moonviewOut",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-purseLine",
+      "toId": "moonviewOut",
+      "toProperty": "purseLine"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selId",
+      "toId": "moonviewOut",
+      "toProperty": "selId"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selName",
+      "toId": "moonviewOut",
+      "toProperty": "selName"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selSpecies",
+      "toId": "moonviewOut",
+      "toProperty": "selSpecies"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selColour",
+      "toId": "moonviewOut",
+      "toProperty": "selColour"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selGrown",
+      "toId": "moonviewOut",
+      "toProperty": "selGrown"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selHat",
+      "toId": "moonviewOut",
+      "toProperty": "selHat"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selEyes",
+      "toId": "moonviewOut",
+      "toProperty": "selEyes"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selNeck",
+      "toId": "moonviewOut",
+      "toProperty": "selNeck"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selHappy",
+      "toId": "moonviewOut",
+      "toProperty": "selHappy"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-selLine",
+      "toId": "moonviewOut",
+      "toProperty": "selLine"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-favLine",
+      "toId": "moonviewOut",
+      "toProperty": "favLine"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-foods",
+      "toId": "moonviewOut",
+      "toProperty": "foods"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-wear",
+      "toId": "moonviewOut",
+      "toProperty": "wear"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-adoptSpecies",
+      "toId": "moonviewOut",
+      "toProperty": "adoptSpecies"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-adoptColours",
+      "toId": "moonviewOut",
+      "toProperty": "adoptColours"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-draftSpecies",
+      "toId": "moonviewOut",
+      "toProperty": "draftSpecies"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-draftColour",
+      "toId": "moonviewOut",
+      "toProperty": "draftColour"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-adoptCost",
+      "toId": "moonviewOut",
+      "toProperty": "adoptCost"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-adoptFree",
+      "toId": "moonviewOut",
+      "toProperty": "adoptFree"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-canAdopt",
+      "toId": "moonviewOut",
+      "toProperty": "canAdopt"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-suggestedName",
+      "toId": "moonviewOut",
+      "toProperty": "suggestedName"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-adoptButton",
+      "toId": "moonviewOut",
+      "toProperty": "adoptButton"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "out-anotherLine",
+      "toId": "moonviewOut",
+      "toProperty": "anotherLine"
+    },
+    {
+      "fromId": "moonviewFn",
+      "fromProperty": "success",
+      "toId": "moonviewOut",
+      "toProperty": "done"
+    }
+  ]
+}

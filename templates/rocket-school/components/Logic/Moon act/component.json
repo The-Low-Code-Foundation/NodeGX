@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1044da1f-927d-5e29-847b-b5e4ec7c27e5",
+  "name": "Moon act",
+  "path": "/Logic/Moon act",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "P113 REV-005: one thing done on the moon. Action is a parameter, placed once per action: adopt (Species, Colour, Name; the first alien free), select (Alien Id), feed (Food Id), buy (Wear Id: bought once and put on) or wear (Wear Id, owned: on, or off). Refused with nothing changed when the purse is short, the moon is full or the thing is not theirs (Why). Said is the line to show."
+}

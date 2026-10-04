@@ -98,6 +98,23 @@ owns its box and types at the caret. A pad key never takes the focus, so the car
 On a touch screen a numeric pad's box is display-only, so no soft keyboard covers the game. A typing pad always keeps a
 real box, because a typing lesson needs the letters.
 
+## Alien (`game-kit.Alien`) — visual
+
+| Port | Direction | Type | Description |
+|---|---|---|---|
+| Species | input | enum | `blob` (one big eye), `bean` (antennae), `trio` (three eyes), `squid` (little legs), `fuzz` (spiky), `star`. |
+| Name | input | string | The picture's label for a screen reader, and its tooltip. |
+| Size | input | px | The box it is drawn in, grown up. Default 96. |
+| Grown | input | number | 0 a baby, 1 young, 2 grown up (default). It grows from its feet, so a row of aliens stands on one line. |
+| Happy | input | number | A count. Each time it goes up, the alien hops once; the count it mounts with does not. |
+| Hat, Eyes, Neck | input | enum | What it wears: `tophat`, `party`, `crown`, `bow`, `beanie` · `glasses`, `sunglasses`, `starglasses`, `monocle` · `scarf`, `bowtie`, `necklace`. An id it does not know draws nothing. |
+| Colour, Outline, Trim, Gold | input | colour | Tokens by default. Every part is edged in Outline, so any Colour reads on any ground. |
+| Click | output | signal | |
+
+Built for Rocket School's moon (P113 REV-005), where stars adopt aliens and buy them food and things to wear. It decides
+nothing: the graph says what it is, what it wears and when it is happy. It breathes gently while it waits; reduced motion
+stills the breathing and the hop.
+
 ## Licences
 
 - `@dicebear/core` — MIT. <https://github.com/dicebear/dicebear>

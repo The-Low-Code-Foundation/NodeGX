@@ -43,9 +43,17 @@
  *     backwards  at least one question was asked from the answer side (the buttons were the question side)
  *     forwards   and at least one the usual way (each is a coin toss: eight questions miss one side 1 time in 128)
  *     rightBack  every answer was the list's own (a backwards one answered with the question) and graded right: eight answers stored, no item missed
+ *   moon (EN 1366×768, FR 390×844) — REV-005, ruling 4 (the prizes are aliens on a moon):
+ *     moonPage   stars earned by a list race; the result card → the hangar → the moon: the adopt card (first one free), six species drawn, the purse
+ *     adopted    Fuzz, Pink, "Zorp", Adopt: stored (species, colour, name), nothing spent, the welcome line, the card folds to "Adopt another · 60 ⭐"
+ *     fed        a strawberry: 3 ⭐ spent, a meal (two if it is the favourite), the yum line, and the alien hopped (its Happy count rose)
+ *     asks       a bow (not owned) asks first: the purse, and what is left after 20 ⭐; nothing spent yet
+ *     bought     Yes: 20 ⭐ spent, owned, worn — the kit draws it on the alien
+ *     offFree    a tap on the bow again takes it off, and costs nothing
+ *     keptMoon   /moon reloads as itself: Zorp and the meals are still there
  *   every cell: quiet — no console error
  *
- * Usage: node scripts/devtools/drive-p113-focus.js <deploy-dir> [--arm focus|lists|monster|editor|both] [--only 1366x768] [--shots <dir>]
+ * Usage: node scripts/devtools/drive-p113-focus.js <deploy-dir> [--arm focus|lists|monster|editor|both|moon] [--only 1366x768] [--shots <dir>]
  * Exits 0 when every clause passed in every cell.
  */
 const fs = require('fs');
@@ -64,7 +72,7 @@ if (!DIR || DIR.startsWith('--')) {
 }
 const SHOTS = arg('--shots');
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
-const ARMS = arg('--arm') ? [arg('--arm')] : ['focus', 'lists', 'monster', 'editor', 'both'];
+const ARMS = arg('--arm') ? [arg('--arm')] : ['focus', 'lists', 'monster', 'editor', 'both', 'moon'];
 const ONLY = arg('--only') ? arg('--only').split(',') : null;
 const VPS = {
   '1366x768': { width: 1366, height: 768, mobile: false },
@@ -77,13 +85,19 @@ const WORDS = {
     race: 'Rocket Race', start: 'Start', next: 'Next', change: 'Change', practiseThis: 'Practise this', maths: '🔢 Maths', tables: 'Times tables', t5: '5 times table', t8: '8 times table',
     everything: 'Maths · everything (CE2)', two: 'Maths · 5 times table, 8 times table', title: 'What do you want to practise?', lists: '📚 My lists', noLists: 'No list yet.', editLists: 'Make or edit a list',
     listsTitle: 'My revision lists', newList: 'New list', save: 'Save', count: '4 questions', home: 'Home', myList: 'My list · ',
-    monster: 'Monster Gate', edit: 'Edit', del: 'Delete', delAsk: 'Delete this list?', yes: 'Yes, delete', no: 'No, keep', both: 'Ask both ways'
+    monster: 'Monster Gate', edit: 'Edit', del: 'Delete', delAsk: 'Delete this list?', yes: 'Yes, delete', no: 'No, keep', both: 'Ask both ways',
+    toHangar: 'To the hangar', visitMoon: '🌙 Visit your aliens on the Moon', moonTitle: 'The Moon', adoptFirst: 'Adopt your first alien — it’s free!', purse: 'You have {n} ⭐',
+    fuzz: 'Fuzz', pink: 'Pink', adoptFree: 'Adopt · free!', welcome: 'Welcome to the moon, Zorp!', another: '＋ Adopt another alien · 60 ⭐', strawberry: 'Strawberry', yum: 'Zorp munches 🍓. Yum!', loves: 'Zorp LOVES 🍓!',
+    bow: 'Bow', yesBuy: 'Yes, buy it'
   },
   fr: {
     race: 'Course de fusées', start: 'Commencer', next: 'Suivant', change: 'Changer', practiseThis: 'Réviser ça', maths: '🔢 Maths', tables: 'Tables de multiplication', t5: 'Table de 5', t8: 'Table de 8',
     everything: 'Maths · tout (CE2)', two: 'Maths · Table de 5, Table de 8', title: 'Qu’est-ce que tu veux réviser ?', lists: '📚 Mes listes', noLists: 'Pas encore de liste.', editLists: 'Créer ou modifier une liste',
     listsTitle: 'Mes listes de révision', newList: 'Nouvelle liste', save: 'Enregistrer', count: '4 questions', home: 'Accueil', myList: 'Ma liste · ',
-    monster: 'La porte du monstre', edit: 'Modifier', del: 'Supprimer', delAsk: 'Supprimer cette liste ?', yes: 'Oui, supprimer', no: 'Non, garder', both: 'Dans les deux sens'
+    monster: 'La porte du monstre', edit: 'Modifier', del: 'Supprimer', delAsk: 'Supprimer cette liste ?', yes: 'Oui, supprimer', no: 'Non, garder', both: 'Dans les deux sens',
+    toHangar: 'Au hangar', visitMoon: '🌙 Va voir tes aliens sur la Lune', moonTitle: 'La Lune', adoptFirst: 'Adopte ton premier alien — c’est gratuit !', purse: 'Tu as {n} ⭐',
+    fuzz: 'Poilu', pink: 'Rose', adoptFree: 'Adopter · gratuit !', welcome: 'Bienvenue sur la Lune, Zorp !', another: '＋ Adopter un autre alien · 60 ⭐', strawberry: 'Fraise', yum: 'Zorp croque 🍓. Miam !', loves: 'Zorp ADORE 🍓 !',
+    bow: 'Nœud', yesBuy: 'Oui, achète'
   }
 };
 
@@ -126,7 +140,7 @@ const LOOK = `(() => {
         const listStates = Object.keys(skills).filter((k) => k.startsWith('set:')).map((k) => { const it = skills[k].items || {}; return { id: k, learned: skills[k].learned || 0, items: Object.keys(it).length, ok: Object.keys(it).filter((x) => it[x] && it[x].ok).length, missed: Object.keys(it).filter((x) => it[x] && it[x].k !== it[x].n).length, asked: Object.keys(it).reduce((n, x) => n + ((it[x] && it[x].n) || 0), 0) }; });
         stored = {
           sets: (app.sets || []).map((s) => ({ id: s.id, name: s.name, count: (s.items || []).length, both: s.both === true, lines: (s.items || []).map((it) => it.q + ' = ' + it.a) })),
-          active: p && { name: p.name, level: p.level, lang: p.lang, focus: p.focus || null, answered: p.model ? p.model.answered : 0, lastSkill: p.model ? p.model.lastSkill : '', stars: p.model ? p.model.stars : 0, listStates }
+          active: p && { name: p.name, level: p.level, lang: p.lang, focus: p.focus || null, answered: p.model ? p.model.answered : 0, lastSkill: p.model ? p.model.lastSkill : '', stars: p.model ? p.model.stars : 0, spent: p.model ? p.model.spent || 0 : 0, moon: p.moon || null, listStates }
         };
         break;
       }
@@ -139,6 +153,7 @@ const LOOK = `(() => {
     inputs: inputs.map((i) => ({ tag: i.tagName.toLowerCase(), value: i.value, box: box(i) })),
     padBox: box(document.querySelector('.gk-pad input:not([disabled])')),
     options: [...document.querySelectorAll('button')].filter((b) => vis(b) && !b.closest('.gk-pad')).map((b) => ({ text: b.innerText.trim(), box: box(b) })),
+    aliens: [...document.querySelectorAll('svg[data-alien]')].filter(vis).map((s) => ({ alien: s.dataset.alien, grown: Number(s.dataset.grown), hops: Number(s.dataset.hops), w: Math.round(s.getBoundingClientRect().width), wear: [...s.querySelectorAll('[data-wear]')].map((g) => g.dataset.wear) })),
     stored
   };
 })()`;
@@ -153,7 +168,8 @@ const EXPECT = {
   lists: ['noLists', 'listsPage', 'count', 'row', 'lineList', 'fromList', 'learned', 'quiet'],
   monster: ['line0M', 'savedM', 'only58M', 'shared', 'lineListM', 'fromListM', 'quiet'],
   editor: ['filled', 'edited', 'asks', 'keptNo', 'deleted', 'quiet'],
-  both: ['bothSaved', 'backwards', 'forwards', 'rightBack', 'quiet']
+  both: ['bothSaved', 'backwards', 'forwards', 'rightBack', 'quiet'],
+  moon: ['moonPage', 'adopted', 'fed', 'asks', 'bought', 'offFree', 'keptMoon', 'quiet']
 };
 
 async function driveCell(arm, vpName, lang) {
@@ -424,6 +440,70 @@ async function driveCell(arm, vpName, lang) {
       clause('rightBack', asked.length === 8 && asked.every((a) => a.known && a.skill === 'set:' + set.id) && !!state && state.asked === 8 && state.missed === 0, JSON.stringify({ asked: asked.length, state }));
     }
 
+    if (arm === 'moon') {
+      if (!(await newPlayer('Ellie', '6e'))) return note('could not make the player');
+      cell.reached = true;
+      // Stars first, the honest way: a list race, eight right answers.
+      const lost = await toListsPage(w.race);
+      if (lost) return note(lost);
+      const set = await makeList(LIST_NAME, LIST_LINES, false);
+      if (!set) return note(`the list was not saved — ${(await look()).body}`);
+      await click(w.home);
+      await until((r) => r.bodyFull.includes(w.race), 4000);
+      if (!(await chooseList(w.race, LIST_NAME, 4))) return note('could not choose the list');
+      if (!(await click(w.start))) return note('no Start');
+      for (let i = 0; i < 8; i++) {
+        const a = await answerList(LIST_LINES);
+        if (a.kind === 'none') break;
+      }
+      // The result card's way to the hangar, then the hangar's way to the moon.
+      if (!(await click(w.toHangar))) return note(`no "${w.toHangar}" on the result card — ${(await look()).body}`);
+      const hangar = await until((r) => r.bodyFull.includes(w.visitMoon), 5000);
+      await shoot('hangar');
+      if (!(await click(w.visitMoon))) return note(`no "${w.visitMoon}" in the hangar — ${hangar.body}`);
+      const moon = await until((r) => r.bodyFull.includes(w.moonTitle) && r.aliens.length >= 6, 5000);
+      await shoot('moon');
+      const purse0 = moon.stored.active.stars - moon.stored.active.spent;
+      clause('moonPage', moon.bodyFull.includes(w.adoptFirst) && moon.aliens.filter((a) => a.w > 0).length === 6 && new Set(moon.aliens.map((a) => a.alien)).size === 6 && moon.bodyFull.includes(w.purse.replace('{n}', purse0)) && purse0 >= 25, JSON.stringify({ purse0, aliens: moon.aliens, body: moon.body }));
+      // Adopt: a species, a colour and a name, then Adopt (the first is free, so no question).
+      await click(w.fuzz);
+      await click(w.pink);
+      await typeInto(0, 'Zorp');
+      if (!(await click(w.adoptFree))) return note(`no "${w.adoptFree}" — ${(await look()).body}`);
+      const adopted = await until((r) => r.stored.active.moon && r.stored.active.moon.aliens && r.stored.active.moon.aliens.length === 1, 5000);
+      await shoot('adopted');
+      const zorp = adopted.stored.active.moon && adopted.stored.active.moon.aliens[0];
+      const big = (r) => r.aliens.reduce((m, a) => (a.w > (m ? m.w : 0) ? a : m), null);
+      clause('adopted', !!zorp && zorp.species === 'fuzz' && zorp.colour === 'pink' && zorp.name === 'Zorp' && adopted.stored.active.spent === 0 && adopted.bodyFull.includes(w.welcome) && big(adopted).alien === 'fuzz' && adopted.bodyFull.includes(w.another), JSON.stringify({ zorp, spent: adopted.stored.active.spent, big: big(adopted), body: adopted.body }));
+      // Feed: one tap, its price, a meal (two if it is the favourite), and a hop.
+      const hops0 = big(adopted).hops;
+      if (!(await click(w.strawberry))) return note(`no "${w.strawberry}" tile`);
+      const fed = await until((r) => r.stored.active.moon.aliens[0].meals > 0, 4000);
+      await shoot('fed');
+      const meals = fed.stored.active.moon.aliens[0].meals;
+      clause('fed', (meals === 1 || meals === 2) && fed.stored.active.spent === 3 && (fed.bodyFull.includes(w.yum) || fed.bodyFull.includes(w.loves)) && big(fed).hops === hops0 + 1, JSON.stringify({ meals, spent: fed.stored.active.spent, hops0, big: big(fed), body: fed.body }));
+      // Something to wear: not owned, so it asks first, with the purse, the price and what is left.
+      if (!(await click(w.bow))) return note(`no "${w.bow}" tile`);
+      const asking = await until((r) => r.bodyFull.includes(w.yesBuy), 3000);
+      await shoot('asks');
+      const p1 = purse0 - 3;
+      clause('asks', asking.bodyFull.includes(w.yesBuy) && asking.bodyFull.includes(`${p1} ⭐`) && asking.bodyFull.includes(`${p1 - 20} ⭐`) && asking.stored.active.spent === 3 && (asking.stored.active.moon.owned || []).length === 0, JSON.stringify({ p1, spent: asking.stored.active.spent, body: asking.body }));
+      if (!(await click(w.yesBuy))) return note(`no "${w.yesBuy}"`);
+      const bought = await until((r) => (r.stored.active.moon.owned || []).includes('bow'), 4000);
+      await shoot('bought');
+      clause('bought', bought.stored.active.spent === 23 && bought.stored.active.moon.aliens[0].wear.hat === 'bow' && big(bought).wear.includes('hat:bow') && !bought.bodyFull.includes(w.yesBuy), JSON.stringify({ spent: bought.stored.active.spent, wear: bought.stored.active.moon.aliens[0].wear, big: big(bought) }));
+      // Theirs now: a tap takes it off, and costs nothing.
+      await click(w.bow);
+      const off = await until((r) => r.stored.active.moon.aliens[0].wear.hat === '', 3000);
+      clause('offFree', off.stored.active.moon.aliens[0].wear.hat === '' && off.stored.active.spent === 23 && !big(off).wear.includes('hat:bow') && !off.bodyFull.includes(w.yesBuy), JSON.stringify({ spent: off.stored.active.spent, wear: off.stored.active.moon.aliens[0].wear }));
+      // The moon is kept: /moon reloads as itself, with the alien and its meals.
+      await send('Page.reload', {});
+      await wait(3500);
+      const kept = await until((r) => r.bodyFull.includes(w.moonTitle) && r.bodyFull.includes('Zorp'), 5000);
+      await shoot('kept');
+      clause('keptMoon', kept.bodyFull.includes('Zorp') && big(kept) && big(kept).alien === 'fuzz' && kept.stored.active.moon.aliens[0].meals === meals, JSON.stringify({ big: big(kept), body: kept.body }));
+    }
+
     if (arm === 'focus') {
       if (!(await newPlayer('Saoirse', 'CE2'))) return note('could not make the player');
       cell.reached = true;
@@ -529,7 +609,7 @@ async function driveCell(arm, vpName, lang) {
 (async () => {
   const plan = [];
   for (const arm of ARMS) {
-    const cellsFor = arm === 'focus' || arm === 'monster' ? [['1366x768', 'en'], ['390x844', 'fr']] : [['1366x768', 'en']];
+    const cellsFor = arm === 'focus' || arm === 'monster' || arm === 'moon' ? [['1366x768', 'en'], ['390x844', 'fr']] : [['1366x768', 'en']];
     for (const [vpName, lang] of cellsFor) if (!ONLY || ONLY.includes(vpName)) plan.push([arm, vpName, lang]);
   }
   for (const [arm, vpName, lang] of plan) {

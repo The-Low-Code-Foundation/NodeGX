@@ -30,7 +30,10 @@ distract themselves from the horror of rote memorisation as possible."*
 - Driven: `drive-p113-focus.js --arm lists`, clause `learned` (the stored model counts ≥ 2 learned, stars grew beyond the
   answers alone).
 
-## 4. NOT built — the prizes (a ruling)
+## 4. The prizes — Richard ruled "something new": the moon ([REV-005](REV-005-THE-MOON.md))
+
+*Session 3:* *"For the something new, something more concrete like adopting little aliens on a moon in the game and buying
+food and accessories for them."* What follows is the menu he chose from.
 
 The hangar sells 47 items: face parts (DiceBear, per look) and the rocket's paints (theme tokens) and patterns (decals
 the kit draws: stripes, dots, checker, chevron, flames, stars, bolt). Adding a prize means one of:
@@ -52,5 +55,5 @@ the point is to make the grind visible, not to inflate the shop. None of it is b
 |---|---|---|
 | AC1 | An item learned pays once; a list learned pays once; nothing is ever taken back | ✅ gate + driven |
 | AC2 | The verdict line and the result card say what learning paid | ✅ gate (line) + driven (card) |
-| AC3 | More prizes on the shelf, of a kind Richard chose | ⬜ ruling |
+| AC3 | More prizes on the shelf, of a kind Richard chose | ✅ ruling 4 → [REV-005](REV-005-THE-MOON.md): aliens on a moon, food and things to wear; gated + driven |
 | AC4 | The kids say it is less boring | ⬜ |

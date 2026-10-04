@@ -79,6 +79,11 @@ never ran counts as failed.
 
 - The editor has no explicit buttons per item (`opts`): a list item gets the OTHER items' answers as its wrong buttons
   (four items or more), or is typed. A `question = answer | wrong | wrong` syntax would be a small parser change if wanted.
-- Lists live in the browser's store like profiles; the save code (`Encode save code`) does not carry them yet.
+- ~~Lists live in the browser's store like profiles; the save code does not carry them yet.~~ **Ruling 5 (Richard,
+  2026-10-04: "yep"), built in session 3:** save code v4 carries every list in the store under its own id (so the learning
+  kept under `set:<id>` still names its list on the other computer), the player's chosen focus, and their moon (REV-005).
+  Decoding replaces a list with the same id (the code is the newer copy), adds any other, removes nothing, and adds no list
+  when it refuses the code (a full store). A v1–v3 code still loads. Engine gate: "the save code carries the lists and the
+  focus". 🟡 Not driven in a browser.
 - The lists page is reached from the chooser's My lists step and by URL (`/lists`); Home is at 32 nodes, so it has no card
   there, and the player menu's Header would cost every page a node.

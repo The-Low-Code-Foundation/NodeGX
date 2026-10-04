@@ -35,6 +35,7 @@ import { reducedMotionReport } from './reducedMotion';
 import { DRAW_HUNT_SCRIPT, MONSTER_LOOKS, runScript } from './tpl007Scripts';
 import { AuthoredTemplate, buildRocketTemplateProject, prepareRocketArtefact, TEMPLATE_ID } from './tpl007Template';
 import { DISPLAY_FONT, LARGE_TEXT_SIZES, requestedCompositions, ROLE, tpl007TokenEntries, USED_COMPOSITIONS } from './tpl007Theme';
+import { ALIEN_COLOURS } from './tpl007Moon';
 
 jest.setTimeout(600_000);
 
@@ -1839,6 +1840,70 @@ describe('TPL-007 — Rocket School, the artefact', () => {
         const row = WORDS[key];
         // "{n} questions" is the same sentence in both languages.
         expect({ key, en: row.en.length > 0, fr: row.fr.length > 0, differ: key === 'listCount' || row.en !== row.fr }).toEqual({ key, en: true, fr: true, differ: true });
+      }
+    });
+  });
+
+  describe('P113 REV-005 — the moon (ruling 4: the prizes are aliens on a moon), held in the graph', () => {
+    const has = (conns: LegacyConnection[], [fromId, fromProperty, toId, toProperty]: string[]) => conns.some((c) => c.fromId === fromId && c.fromProperty === fromProperty && c.toId === toId && c.toProperty === toProperty);
+    const missing = (name: string, wires: string[][]) => wires.filter((w) => !has(connectionsOf(built, name), w)).map((w) => w.join(' → '));
+    const into = (name: string, toId: string, toProperty: string) => connectionsOf(built, name).filter((c) => c.toId === toId && c.toProperty === toProperty).map((c) => `${c.fromId}.${c.fromProperty}`).sort();
+
+    it('the moon is a page of its own, reached from the hangar and back, and not a card on Home (the hangar is not a game: 2026-09-14)', () => {
+      expect(PAGES).toContain(C.pageMoon);
+      expect(nodesOf(built, C.pageMoon).find((n) => n.type === 'Page')!.parameters).toEqual(expect.objectContaining({ urlPath: 'moon' }));
+      expect(missing(C.pageHangar, [['hgMoon', 'onClick', 'hgGoMoon', 'navigate'], ['hgT', 'visitMoon', 'hgMoon', 'label']])).toEqual([]);
+      expect((nodesOf(built, C.pageHangar).find((n) => n.id === 'hgGoMoon')!.parameters as { target?: string }).target).toBe(C.pageMoon);
+      expect(missing(C.pageMoon, [['mnBack', 'onClick', 'mnGoHangar', 'navigate']])).toEqual([]);
+      expect(nodesOf(built, C.pageHome).some((n) => (n.parameters as { target?: string } | undefined)?.target === C.pageMoon)).toBe(false);
+    });
+
+    it('🔴 a food tap feeds; a thing to wear that is theirs goes on or off; one that is not ASKS first and is bought only on Yes', () => {
+      expect(
+        missing(C.moonCare, [
+          ['mcFoodEach', 'itemOutput-id', 'mcFeed', 'foodId'], ['mcFoodEach', 'itemOutputSignal-use', 'mcFeed', 'run'],
+          ['mcWearEach', 'itemOutput-id', 'mcWear', 'wearId'], ['mcWearEach', 'itemOutputSignal-use', 'mcWear', 'run'],
+          ['mcWearEach', 'itemOutputSignal-ask', 'mcAsk', 'to-asking'], ['mcAsk', 'asking', 'mcConfirm', 'mounted'], ['mcWearEach', 'itemOutput-cost', 'mcConfirm', 'cost'], ['mcIn', 'purse', 'mcConfirm', 'purse'],
+          ['mcConfirm', 'yes', 'mcBuy', 'run'], ['mcWearEach', 'itemOutput-id', 'mcBuy', 'wearId']
+        ])
+      ).toEqual([]);
+      // The purchase runs on Yes and on nothing else: never straight from a tile (P95 PLY-002's "auto-buy").
+      expect(into(C.moonCare, 'mcBuy', 'run')).toEqual(['mcConfirm.yes']);
+      expect(into(C.moonCare, 'mcFeed', 'run')).toEqual(['mcFoodEach.itemOutputSignal-use']);
+      const acts = nodesOf(built, C.moonCare).filter((n) => n.type === logicName('Logic/Moon act')).map((n) => [n.id, (n.parameters as { action?: string }).action]);
+      expect(acts.sort()).toEqual([['mcBuy', 'buy'], ['mcFeed', 'feed'], ['mcWear', 'wear']]);
+      // Only the tile's card answers a tap (the alien inside it publishes Click too).
+      expect(into(C.moonItem, 'miCanUse', 'eval')).toEqual(['miCard.onClick']);
+      expect(into(C.moonItem, 'miCanAsk', 'eval')).toEqual(['miCard.onClick']);
+    });
+
+    it('🔴 the first alien comes at once; a later one asks first; adopting writes the store, folds the card and empties the name', () => {
+      expect(
+        missing(C.moonAdopt, [
+          ['maAdopt', 'onClick', 'maIsFree', 'eval'], ['maIn', 'free', 'maIsFree', 'condition'], ['maIsFree', 'ontrue', 'maDo', 'run'], ['maIsFree', 'onfalse', 'maAsk', 'to-asking'], ['maConfirm', 'yes', 'maDo', 'run'],
+          ['maSpVar', 'value', 'maDo', 'species'], ['maColVar', 'value', 'maDo', 'colour'], ['maNameVar', 'value', 'maDo', 'name'],
+          ['maDo', 'app', 'maOut', 'app'], ['maDo', 'done', 'maOut', 'write'], ['maDo', 'done', 'maOpen', 'to-folded'], ['maDo', 'done', 'maClearName', 'do'], ['maClearName', 'done', 'maName', 'set'],
+          ['maName', 'onTextChanged', 'maNameVar', 'value'], ['maNameVar', 'value', 'maName', 'startValue']
+        ])
+      ).toEqual([]);
+      expect(into(C.moonAdopt, 'maDo', 'run')).toEqual(['maConfirm.yes', 'maIsFree.ontrue']);
+      expect((nodesOf(built, C.moonAdopt).find((n) => n.id === 'maDo')!.parameters as { action?: string }).action).toBe('adopt');
+      // The page: every writer of the store is wired to Write, and the adopt card's draft reaches the view that draws it.
+      expect(
+        missing(C.pageMoon, [
+          ['mnCare', 'app', 'mnStore', 'app'], ['mnCare', 'write', 'mnStore', 'write'], ['mnAdopt', 'app', 'mnStore', 'app'], ['mnAdopt', 'write', 'mnStore', 'write'], ['mnSelect', 'app', 'mnStore', 'app'], ['mnSelect', 'done', 'mnStore', 'write'],
+          ['mnAdopt', 'draftSpecies', 'mnView', 'draftSpecies'], ['mnAdopt', 'draftColour', 'mnView', 'draftColour'], ['mnEach', 'itemOutputSignal-tap', 'mnSelect', 'run'], ['mnView', 'selHappy', 'mnCare', 'happy']
+        ])
+      ).toEqual([]);
+    });
+
+    it('every alien colour is a token the theme emits, and every alien is drawn by the kit node the project installs', () => {
+      const tokens = new Map(tpl007TokenEntries().map((t: { name: string; value: string }) => [t.name, t.value]));
+      for (const c of ALIEN_COLOURS) expect({ token: c.token, value: tokens.get(c.token) }).toEqual({ token: c.token, value: c.hex });
+      const drawn = [C.moonTile, C.moonItem, C.moonCare].flatMap((name) => nodesOf(built, name).filter((n) => n.type === 'game-kit.Alien').map((n) => `${name}:${n.id}`));
+      expect(drawn).toEqual(['/Moon/Alien tile:mtAlien', '/Moon/Shop tile:miAlien', '/Moon/Care:mcAlien']);
+      for (const key of ['moonTitle', 'visitMoon', 'moonFeed', 'moonDress', 'moonAdoptFirst', 'moonAdoptMore', 'moonName', 'moonAdoptQ', 'backToHangar']) {
+        expect({ key, en: !!WORDS[key]?.en, fr: !!WORDS[key]?.fr, differ: WORDS[key]?.en !== WORDS[key]?.fr }).toEqual({ key, en: true, fr: true, differ: true });
       }
     });
   });

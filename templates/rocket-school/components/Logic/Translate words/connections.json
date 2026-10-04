@@ -89,6 +89,12 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-backToHangar",
+      "toId": "translateworOut",
+      "toProperty": "backToHangar"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-badCode",
       "toId": "translateworOut",
       "toProperty": "badCode"
@@ -575,6 +581,54 @@
     },
     {
       "fromId": "translateworFn",
+      "fromProperty": "out-moonAdoptFirst",
+      "toId": "translateworOut",
+      "toProperty": "moonAdoptFirst"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonAdoptMore",
+      "toId": "translateworOut",
+      "toProperty": "moonAdoptMore"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonAdoptQ",
+      "toId": "translateworOut",
+      "toProperty": "moonAdoptQ"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonBlurb",
+      "toId": "translateworOut",
+      "toProperty": "moonBlurb"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonDress",
+      "toId": "translateworOut",
+      "toProperty": "moonDress"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonFeed",
+      "toId": "translateworOut",
+      "toProperty": "moonFeed"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonName",
+      "toId": "translateworOut",
+      "toProperty": "moonName"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-moonTitle",
+      "toId": "translateworOut",
+      "toProperty": "moonTitle"
+    },
+    {
+      "fromId": "translateworFn",
       "fromProperty": "out-moves",
       "toId": "translateworOut",
       "toProperty": "moves"
@@ -950,6 +1004,12 @@
       "fromProperty": "out-typingMode",
       "toId": "translateworOut",
       "toProperty": "typingMode"
+    },
+    {
+      "fromId": "translateworFn",
+      "fromProperty": "out-visitMoon",
+      "toId": "translateworOut",
+      "toProperty": "visitMoon"
     },
     {
       "fromId": "translateworFn",

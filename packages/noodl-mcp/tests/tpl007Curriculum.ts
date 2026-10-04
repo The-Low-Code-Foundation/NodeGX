@@ -84,6 +84,11 @@ export interface Skill {
   teach: string;
   /** Marks a skill built to catch a misconception. */
   trap?: boolean;
+  /**
+   * P113 ruling 1 (Richard, 2026-10-04): a skill from a later class's programme, shipped "just identify them" for a child whose
+   * test asks it early. The chooser offers it marked with that class; it is never part of "everything" — only a tick asks it.
+   */
+  beyond?: '5e';
 }
 
 const s = (en: string, fr: string): Bi => ({ en, fr });
@@ -795,7 +800,7 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   familiar: s('Getting there', 'En route'),
   newSkill: s('New', 'Nouveau'),
   saveCode: s('Save code', 'Code de sauvegarde'),
-  saveCodeHelp: s('Copy this code to keep your progress safe, or to carry it to another computer.', 'Copie ce code pour garder tes progrès, ou pour les emmener sur un autre ordinateur.'),
+  saveCodeHelp: s('Copy this code to keep your progress and your lists safe, or to carry them to another computer.', 'Copie ce code pour garder tes progrès et tes listes, ou pour les emmener sur un autre ordinateur.'),
   loadCode: s('Load a save code', 'Charger un code'),
   loaded: s('Loaded!', 'Chargé !'),
   badCode: s('That code did not work.', 'Ce code ne fonctionne pas.'),
@@ -847,7 +852,18 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   backToGames: s('Back to the games', 'Retour aux jeux'),
   // P113 REV-004: what learning pays.
   learnedItem: s('learned', 'appris'),
-  learnedList: s('whole list learned', 'liste entière apprise')
+  learnedList: s('whole list learned', 'liste entière apprise'),
+  // P113 REV-005: the moon. The lines that carry a number or a name are written by Logic/Moon view and Logic/Moon act.
+  moonTitle: s('The Moon', 'La Lune'),
+  moonBlurb: s('Your aliens live here. Your stars buy them food and things to wear.', 'Tes aliens vivent ici. Tes étoiles leur achètent à manger et de quoi s’habiller.'),
+  visitMoon: s('🌙 Visit your aliens on the Moon', '🌙 Va voir tes aliens sur la Lune'),
+  moonFeed: s('Something to eat', 'Quelque chose à manger'),
+  moonDress: s('Something to wear', 'Quelque chose à porter'),
+  moonAdoptFirst: s('Adopt your first alien — it’s free!', 'Adopte ton premier alien — c’est gratuit !'),
+  moonAdoptMore: s('Adopt an alien', 'Adopter un alien'),
+  moonName: s('Its name', 'Son nom'),
+  moonAdoptQ: s('Adopt this alien?', 'Adopter cet alien ?'),
+  backToHangar: s('🚀 Back to the hangar', '🚀 Retour au hangar')
 };
 
 /**

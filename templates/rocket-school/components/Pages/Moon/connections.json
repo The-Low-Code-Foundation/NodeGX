@@ -1,0 +1,559 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8b1720b7-fbd4-579b-8886-42d5c12426cb",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "mnStore",
+      "fromProperty": "app",
+      "toId": "mnMe",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnWords",
+      "fromProperty": "words",
+      "toId": "mnT",
+      "toProperty": "words"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "lang",
+      "toId": "mnT",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "hasProfile",
+      "toId": "mnNoOne",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "mnNoOne",
+      "fromProperty": "result",
+      "toId": "mnGuard",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "mnPage",
+      "fromProperty": "didMount",
+      "toId": "mnGuard",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "mnGuard",
+      "fromProperty": "ontrue",
+      "toId": "mnGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mnHeader",
+      "fromProperty": "hangar",
+      "toId": "mnGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "name",
+      "toId": "mnHeader",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "look",
+      "toId": "mnHeader",
+      "toProperty": "look"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "seed",
+      "toId": "mnHeader",
+      "toProperty": "seed"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "lang",
+      "toId": "mnHeader",
+      "toProperty": "lang"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "level",
+      "toId": "mnHeader",
+      "toProperty": "level"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "layout",
+      "toId": "mnHeader",
+      "toProperty": "layout"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "soundMode",
+      "toId": "mnHeader",
+      "toProperty": "soundMode"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "answerMode",
+      "toId": "mnHeader",
+      "toProperty": "answerMode"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "profileId",
+      "toId": "mnHeader",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "faceOptions",
+      "toId": "mnHeader",
+      "toProperty": "options"
+    },
+    {
+      "fromId": "mnStore",
+      "fromProperty": "app",
+      "toId": "mnHeader",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnHeader",
+      "fromProperty": "app",
+      "toId": "mnStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnHeader",
+      "fromProperty": "write",
+      "toId": "mnStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mnHeader",
+      "fromProperty": "switchPlayer",
+      "toId": "mnGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mnHeader",
+      "fromProperty": "deleted",
+      "toId": "mnGoProfiles",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mnHeader",
+      "fromProperty": "home",
+      "toId": "mnGoHome",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mnBack",
+      "fromProperty": "onClick",
+      "toId": "mnGoHangar",
+      "toProperty": "navigate"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "backToHangar",
+      "toId": "mnBack",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonTitle",
+      "toId": "mnTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mnStore",
+      "fromProperty": "app",
+      "toId": "mnView",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnAdopt",
+      "fromProperty": "draftSpecies",
+      "toId": "mnView",
+      "toProperty": "draftSpecies"
+    },
+    {
+      "fromId": "mnAdopt",
+      "fromProperty": "draftColour",
+      "toId": "mnView",
+      "toProperty": "draftColour"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "purseLine",
+      "toId": "mnPurse",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "aliens",
+      "toId": "mnEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "has",
+      "toId": "mnAliens",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mnStore",
+      "fromProperty": "app",
+      "toId": "mnSelect",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "profileId",
+      "toId": "mnSelect",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mnEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "mnSelect",
+      "toProperty": "alienId"
+    },
+    {
+      "fromId": "mnEach",
+      "fromProperty": "itemOutputSignal-tap",
+      "toId": "mnSelect",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "mnSelect",
+      "fromProperty": "app",
+      "toId": "mnStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnSelect",
+      "fromProperty": "done",
+      "toId": "mnStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "has",
+      "toId": "mnCare",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "mnStore",
+      "fromProperty": "app",
+      "toId": "mnCare",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "profileId",
+      "toId": "mnCare",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "selName",
+      "toId": "mnCare",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "selSpecies",
+      "toId": "mnCare",
+      "toProperty": "species"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "selColour",
+      "toId": "mnCare",
+      "toProperty": "colour"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "selGrown",
+      "toId": "mnCare",
+      "toProperty": "grown"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "selHat",
+      "toId": "mnCare",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "selEyes",
+      "toId": "mnCare",
+      "toProperty": "eyes"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "selNeck",
+      "toId": "mnCare",
+      "toProperty": "neck"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "selHappy",
+      "toId": "mnCare",
+      "toProperty": "happy"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "selLine",
+      "toId": "mnCare",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "favLine",
+      "toId": "mnCare",
+      "toProperty": "favLine"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "foods",
+      "toId": "mnCare",
+      "toProperty": "foods"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "wear",
+      "toId": "mnCare",
+      "toProperty": "wear"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "purse",
+      "toId": "mnCare",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "mnAdopt",
+      "fromProperty": "said",
+      "toId": "mnCare",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonFeed",
+      "toId": "mnCare",
+      "toProperty": "feedWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonDress",
+      "toId": "mnCare",
+      "toProperty": "dressWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "buyTitle",
+      "toId": "mnCare",
+      "toProperty": "buyTitle"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "youHave",
+      "toId": "mnCare",
+      "toProperty": "haveWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "itCosts",
+      "toId": "mnCare",
+      "toProperty": "costWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "youllHave",
+      "toId": "mnCare",
+      "toProperty": "leftWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "yesBuy",
+      "toId": "mnCare",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "noThanks",
+      "toId": "mnCare",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "mnCare",
+      "fromProperty": "app",
+      "toId": "mnStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnCare",
+      "fromProperty": "write",
+      "toId": "mnStore",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "mnStore",
+      "fromProperty": "app",
+      "toId": "mnAdopt",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnMe",
+      "fromProperty": "profileId",
+      "toId": "mnAdopt",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "has",
+      "toId": "mnAdopt",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "full",
+      "toId": "mnAdopt",
+      "toProperty": "full"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "canAdopt",
+      "toId": "mnAdopt",
+      "toProperty": "canAdopt"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "adoptFree",
+      "toId": "mnAdopt",
+      "toProperty": "free"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "adoptCost",
+      "toId": "mnAdopt",
+      "toProperty": "cost"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "purse",
+      "toId": "mnAdopt",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "adoptButton",
+      "toId": "mnAdopt",
+      "toProperty": "button"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "anotherLine",
+      "toId": "mnAdopt",
+      "toProperty": "another"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "suggestedName",
+      "toId": "mnAdopt",
+      "toProperty": "suggestedName"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "adoptSpecies",
+      "toId": "mnAdopt",
+      "toProperty": "species"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "adoptColours",
+      "toId": "mnAdopt",
+      "toProperty": "colours"
+    },
+    {
+      "fromId": "mnView",
+      "fromProperty": "draftColour",
+      "toId": "mnAdopt",
+      "toProperty": "colour"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonAdoptFirst",
+      "toId": "mnAdopt",
+      "toProperty": "firstWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonAdoptMore",
+      "toId": "mnAdopt",
+      "toProperty": "moreWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonName",
+      "toId": "mnAdopt",
+      "toProperty": "nameWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "moonAdoptQ",
+      "toId": "mnAdopt",
+      "toProperty": "askWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "cancel",
+      "toId": "mnAdopt",
+      "toProperty": "cancelWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "youHave",
+      "toId": "mnAdopt",
+      "toProperty": "haveWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "itCosts",
+      "toId": "mnAdopt",
+      "toProperty": "costWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "youllHave",
+      "toId": "mnAdopt",
+      "toProperty": "leftWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "yesBuy",
+      "toId": "mnAdopt",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "mnT",
+      "fromProperty": "noThanks",
+      "toId": "mnAdopt",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "mnAdopt",
+      "fromProperty": "app",
+      "toId": "mnStore",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "mnAdopt",
+      "fromProperty": "write",
+      "toId": "mnStore",
+      "toProperty": "write"
+    }
+  ]
+}

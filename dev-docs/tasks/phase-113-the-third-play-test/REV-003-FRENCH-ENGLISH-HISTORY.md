@@ -73,12 +73,39 @@ mode? · 12/20 ✓".
 | AC1 | Every French, English and history skill generates soundly 60× in both languages, with its card | ✅ gate |
 | AC2 | The conjugation tables are right (the 20 verbs, 9 tenses) | ✅ 15 exact forms gated; 🟡 the rest read by me, not by a French teacher |
 | AC3 | Official terminology, with the textbook term in the note | ✅ |
-| AC4 | Dates as "around", distractors an order of magnitude apart, the disagreement in the note | ✅ |
+| AC4 | Dates as "around", distractors an order of magnitude apart, the disagreement in the note | ✅ (ruling 2: "Sure try it for now") |
 | AC5 | The interface stays EN by default; content is the French school's | ✅ |
 | AC6 | A French teacher (or Richard) reads the banks and the paradigms | ⬜ |
 | AC7 | The eldest's verdict after her test | ⬜ |
 
-## 6. Open
+## 6. Ruling 1 (Richard, 2026-10-04) — the 5e verb material, identify-only
+
+*"Put in the choices but maybe a simple watered down 'just identify them' version for 5e."*
+
+Built in session 3:
+
+- **`beyond: '5e'`** on a skill (`tpl007Curriculum.ts` `Skill`): the picker never serves it as part of "everything"
+  (`PICK_QUESTION_SCRIPT` skips it in the unfocused loop and in the fallback); a tick still asks it, whatever the class;
+  the chooser labels it with that class ("Repérer le subjonctif · 5e") instead of the child's own.
+- **"Spot the subjonctif"** (`fr-verb-subj`, 6e, beyond 5e): "Subjonctif or indicatif?", fourteen items, each subjonctif
+  beside an indicatif of the same verb (*qu'il vienne / il vient*, *bien qu'il pleuve / il pleut*), so the « que » and the
+  ending are what tell. Two buttons: a spot-it question, not a coin toss over items.
+- **"Active, passive, pronominal"** (`fr-verb-voice`) keeps its bank (it was already identify-only) and is now beyond 5e.
+- **"Which mode?" and "Which tense?"** lost their seven subjonctif items, so they hold only the 6e programme; "Which mode?"
+  no longer mentions the subjonctif in its strategy.
+- **The typed subjonctif** (`fr-conj-subjonctif`) is gone. French still has 22 skills (one out, one in).
+- Gate (engine, REV-001 block): the two 5e skills are lists answered by buttons; no programme bank asks the subjonctif;
+  300 draws of "everything" at 6e never serve a 5e skill and a focus serves only it, with its two buttons; the chooser tags
+  both "· 5e"; **sabotage arm**: without the picker's skip, "everything" serves one. Artefact: `Data/Curriculum` ships
+  `beyond` on exactly the two.
+- 🟡 Not driven in a browser (the chooser's label and the picker are gated with the shipped curriculum).
+
+Rulings 2 and 3: kept as built (*"Sure try it for now"*; *"Dunno"*).
+
+## 7. Open
+
+- Ruling 1 was read as above. The game's classes stop at 6e, so "a version for 5e" has no class to live in; if Richard
+  meant a fuller 5e version for a 5e child, that is a new level (`LEVELS`), not a field.
 
 - Content is authored from my own knowledge of French grammar and the briefing's sources; it has not been read by a
   French teacher. The homophone sentences and the word-class sentences are the likeliest places for a slip.

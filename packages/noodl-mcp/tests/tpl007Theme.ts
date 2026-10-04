@@ -30,6 +30,7 @@
  *
  * @module noodl-mcp/tests/tpl007Theme
  */
+import { ALIEN_COLOURS } from './tpl007Moon';
 import { buildStyleVocabulary, getPreset } from '../src/editor-deps';
 
 export const TPL007_PRESET = 'playful';
@@ -113,7 +114,9 @@ export const TPL007_TOKENS: ReadonlyArray<{ name: string; value: string }> = [
   { name: '--font-sans', value: '"Nunito", ui-rounded, system-ui, sans-serif' },
   // P87 RKT-011 — rocket paints from the hangar. Each is ≥ 3:1 on the paper, the card and the track, and none is tomato
   // (rocket A's own colour) or teal (the computer's). The template gate recomputes them.
-  ...ROCKET_PAINTS.map((p) => ({ name: p.token, value: p.hex }))
+  ...ROCKET_PAINTS.map((p) => ({ name: p.token, value: p.hex })),
+  // P113 REV-005: the alien colours (tpl007Moon.ts names them). Every alien is edged in ink, so the outline carries the contrast.
+  ...ALIEN_COLOURS.map((c) => ({ name: c.token, value: c.hex }))
 ];
 
 export const VOCABULARY = buildStyleVocabulary({ getMetaData: () => undefined });

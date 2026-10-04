@@ -359,7 +359,7 @@
       "path": "Logic/Translate words",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 169,
+      "connectionCount": 179,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -368,6 +368,22 @@
       "type": "visual",
       "nodeCount": 3,
       "connectionCount": 5,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Logic/Moon view": {
+      "path": "Logic/Moon view",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 33,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Logic/Moon act": {
+      "path": "Logic/Moon act",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 16,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -699,6 +715,38 @@
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
+    "Moon/Alien tile": {
+      "path": "Moon/Alien tile",
+      "type": "visual",
+      "nodeCount": 8,
+      "connectionCount": 15,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Moon/Shop tile": {
+      "path": "Moon/Shop tile",
+      "type": "visual",
+      "nodeCount": 13,
+      "connectionCount": 26,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Moon/Care": {
+      "path": "Moon/Care",
+      "type": "visual",
+      "nodeCount": 23,
+      "connectionCount": 54,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Moon/Adopt": {
+      "path": "Moon/Adopt",
+      "type": "visual",
+      "nodeCount": 30,
+      "connectionCount": 60,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
+    },
     "Pages/Profiles": {
       "path": "Pages/Profiles",
       "type": "page",
@@ -726,8 +774,8 @@
     "Pages/Hangar": {
       "path": "Pages/Hangar",
       "type": "page",
-      "nodeCount": 26,
-      "connectionCount": 66,
+      "nodeCount": 28,
+      "connectionCount": 68,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
     },
@@ -762,11 +810,19 @@
       "connectionCount": 74,
       "modified": "2026-09-12T00:00:00.000Z",
       "created": "2026-09-12T00:00:00.000Z"
+    },
+    "Pages/Moon": {
+      "path": "Pages/Moon",
+      "type": "page",
+      "nodeCount": 22,
+      "connectionCount": 92,
+      "modified": "2026-09-12T00:00:00.000Z",
+      "created": "2026-09-12T00:00:00.000Z"
     }
   },
   "stats": {
-    "totalComponents": 95,
-    "totalNodes": 1042,
-    "totalConnections": 2759
+    "totalComponents": 102,
+    "totalNodes": 1146,
+    "totalConnections": 3067
   }
 }

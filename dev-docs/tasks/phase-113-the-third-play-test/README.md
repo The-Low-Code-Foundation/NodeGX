@@ -34,7 +34,8 @@ The two children are the players named in `kids-ellie-saoirse` (memory); their n
 | [REV-001 — choose what to practise](REV-001-CHOOSE-WHAT-TO-PRACTISE.md) | Before a race or a monster game, a child picks a subject, a topic, and ticks the skills — "the tables of 5 and 8" — and the game asks nothing else. A topic the class has not reached stays unticked. | built · gated · driven (3 cells; Monster Gate EN + FR, session 2) · Richard's replay owed |
 | [REV-002 — my revision lists](REV-002-MY-REVISION-LISTS.md) | What the teacher gave, typed one line per question, becomes a list every game asks, with the teacher's own answers. | built · gated · driven (race, Monster Gate, Edit/Delete, both ways) · Richard's replay owed |
 | [REV-003 — French, English, history](REV-003-FRENCH-ENGLISH-HISTORY.md) | The school has more than maths: conjugation, the verb's modes/tenses/voices, word classes, homophones, agreement; English vocabulary and grammar; periods, centuries, prehistory and Antiquity. Content from the French programmes, interface EN or FR. | built (46 skills, 500 items, 10 cards) · gated · the content needs a French teacher's eye |
-| [REV-004 — what learning pays](REV-004-WHAT-LEARNING-PAYS.md) | Learning an item of a list pays, and learning the whole list pays more, so rote memorisation has a score. More prizes are owed. | stars built · gated · driven · prizes NOT built (a ruling) |
+| [REV-004 — what learning pays](REV-004-WHAT-LEARNING-PAYS.md) | Learning an item of a list pays, and learning the whole list pays more, so rote memorisation has a score. More prizes are owed. | stars built · gated · driven · the prizes are REV-005 (ruling 4) |
+| [REV-005 — the moon](REV-005-THE-MOON.md) | The stars adopt little aliens on a moon, and buy them food and things to wear: they hop when fed, grow, and never get worse. | built (session 3) · gated · driven (EN laptop + FR phone, 8/8 each) · the kids' verdict owed |
 
 Research: [`rev-research-briefing.md`](rev-research-briefing.md) — the programmes in force in 2026-27, the Terminologie
 grammaticale 2020, the 6e verb list, prehistory dates (scholarly ranges against textbook figures), with URLs.
@@ -50,7 +51,30 @@ history skill and the teacher's typed list are all `generator: 'list'` banks ser
 by one grader, learned item by item in one model, paid by one star rule. The chooser sits over the same model (a focus
 is a list of skill ids on the profile), so a list the child made is one more subject in it.
 
+## Richard's rulings (2026-10-04, his words, then what was built)
+
+1. **The verb study** — *"Put in the choices but maybe a simple watered down 'just identify them' version for 5e."*
+   Read as: the cycle-4 (5e) material stays in the chooser as choices, never in "everything", and asks the child only to
+   SPOT it. Built (session 3): `beyond: '5e'` on a skill keeps it out of "everything" and tags it "· 5e" in the chooser; the
+   subjonctif left "Which mode?" and "Which tense?" for a new "Spot the subjonctif" (subjonctif or indicatif?, fourteen
+   pairs); "Active, passive, pronominal" (already identify-only) is marked 5e; the typed subjonctif conjugation is gone.
+   🟡 The game's classes stop at 6e, so there is no 5e level to give a fuller version to. If "for 5e" meant something
+   else, the mark is one field per skill. REV-003 §7.
+2. **Dates as "around"** — *"Sure try it for now."* Kept as built.
+3. **Conjugation typed by default** — *"Dunno."* Kept as built (typed; buttons on a profile set to "Answers: buttons"); the
+   kids' replay is what will say.
+4. **The prizes** — *"For the something new, something more concrete like adopting little aliens on a moon in the game and
+   buying food and accessories for them."* Built (session 3): [REV-005](REV-005-THE-MOON.md).
+5. **The save code carries the lists** — *"yep."* Built (session 3): save code v4 carries every list (by id, so the
+   learning kept under `set:<id>` still names it), the chosen focus, and the moon. REV-002 §6.
+
 ## Richard's rulings owed (none taken for granted)
+
+All five answered on 2026-10-04 (above). Still owed: the kids' verdicts, in their words, on the chooser, the lists, the
+French/history banks and the moon. And two small judgements made in session 3 that are his to overrule (REV-005 §6): a
+food tap feeds at once with no "Buy it?" card (a meal is 3–8 ⭐ and its price is on the tile), and the first alien is free.
+
+## Rulings as they were asked (2026-10-04, session 1)
 
 1. **The 6e verb study goes past the 2025 programme.** The subjunctive, the passive and the pronominal voice are cycle 4
    in the text; they are shipped because the test asked them. Keep, or move them behind a tick?

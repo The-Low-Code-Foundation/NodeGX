@@ -1,0 +1,518 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "dcadc9f5-898e-577f-8ba9-71a1c6121532",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mcIn",
+      "type": "Component Inputs",
+      "label": "The chosen alien, and the store",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "species",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "colour",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "grown",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "hat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "eyes",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "neck",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "happy",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "favLine",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "said",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "foods",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "wear",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "purse",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "feedWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dressWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "buyTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "haveWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "costWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "leftWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "yesWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "noWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 470,
+      "y": 160
+    },
+    {
+      "id": "mcCard",
+      "type": "Group",
+      "label": "Close up",
+      "children": [
+        "mcAlien",
+        "mcName",
+        "mcLine",
+        "mcFav",
+        "mcSaid",
+        "mcFeedLabel",
+        "mcFoods",
+        "mcDressLabel",
+        "mcStack"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-3)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-5)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mcAlien",
+      "type": "game-kit.Alien",
+      "label": "The chosen alien",
+      "parent": "mcCard",
+      "parameters": {
+        "size": 200
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mcName",
+      "type": "Text",
+      "label": "Its name",
+      "parent": "mcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "mcLine",
+      "type": "Text",
+      "label": "How grown, and how far to go",
+      "parent": "mcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "mcFav",
+      "type": "Text",
+      "label": "Its favourite food",
+      "parent": "mcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "mcSaid",
+      "type": "Text",
+      "label": "What just happened",
+      "parent": "mcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "mcFeedLabel",
+      "type": "Text",
+      "label": "Something to eat",
+      "parent": "mcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "mcFoods",
+      "type": "Group",
+      "label": "The food",
+      "parent": "mcCard",
+      "children": [
+        "mcFoodEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center"
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "mcFoodEach",
+      "type": "For Each",
+      "label": "One tile per food",
+      "parameters": {
+        "template": "/Moon/Shop tile",
+        "templateType": "explicit"
+      },
+      "parent": "mcFoods",
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "mcDressLabel",
+      "type": "Text",
+      "label": "Something to wear",
+      "parent": "mcCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 1120
+    },
+    {
+      "id": "mcStack",
+      "type": "Group",
+      "label": "The things to wear, and the question over them",
+      "parent": "mcCard",
+      "children": [
+        "mcWearBox",
+        "mcOver"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "cssClassName": "rkt-shelf-stack"
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "mcWearBox",
+      "type": "Group",
+      "label": "The things to wear",
+      "parent": "mcStack",
+      "children": [
+        "mcWearEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "stretch",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "justifyContent": "center"
+      },
+      "x": 160,
+      "y": 1360
+    },
+    {
+      "id": "mcWearEach",
+      "type": "For Each",
+      "label": "One tile per thing to wear",
+      "parameters": {
+        "template": "/Moon/Shop tile",
+        "templateType": "explicit"
+      },
+      "parent": "mcWearBox",
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "mcOver",
+      "type": "Group",
+      "label": "The question, over the tiles",
+      "parent": "mcStack",
+      "children": [
+        "mcConfirm"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center",
+        "cssClassName": "rkt-buy-over",
+        "mounted": false
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "mcConfirm",
+      "type": "/Hangar/Confirm",
+      "label": "Buy it?",
+      "parent": "mcOver",
+      "parameters": {
+        "mounted": false
+      },
+      "x": 220,
+      "y": 1720
+    },
+    {
+      "id": "mcAsk",
+      "type": "States",
+      "label": "The tiles, or the question",
+      "parameters": {
+        "states": "idle,asking",
+        "values": "idle,asking",
+        "useTransitions": false,
+        "type-idle": "boolean",
+        "value-idle-idle": true,
+        "value-asking-idle": false,
+        "type-asking": "boolean",
+        "value-idle-asking": false,
+        "value-asking-asking": true
+      },
+      "x": 470,
+      "y": 1600
+    },
+    {
+      "id": "mcBuyTitle",
+      "type": "Expression",
+      "label": "Buy what?",
+      "parameters": {
+        "expression": "String(word || '').replace('{item}', String(label || ''))"
+      },
+      "x": 470,
+      "y": 1720
+    },
+    {
+      "id": "mcFeed",
+      "type": "/Logic/Moon act",
+      "label": "Feed it",
+      "parameters": {
+        "action": "feed"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "mcWear",
+      "type": "/Logic/Moon act",
+      "label": "Put it on, or take it off",
+      "parameters": {
+        "action": "wear"
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "mcBuy",
+      "type": "/Logic/Moon act",
+      "label": "Buy it, and put it on",
+      "parameters": {
+        "action": "buy"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "mcShown",
+      "type": "Expression",
+      "label": "Shown unless told not to",
+      "parameters": {
+        "expression": "m !== false"
+      },
+      "x": 470,
+      "y": 40
+    },
+    {
+      "id": "mcOut",
+      "type": "Component Outputs",
+      "label": "The store to write",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "write",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 470,
+      "y": 1840
+    }
+  ],
+  "visualRoots": [
+    "mcCard"
+  ]
+}

@@ -1,0 +1,224 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "1044da1f-927d-5e29-847b-b5e4ec7c27e5",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "moonactIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "app",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "profileId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "action",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "alienId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "foodId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "wearId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "species",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "colour",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "moonactFn",
+      "type": "JavaScriptFunction",
+      "label": "Moon act",
+      "parameters": {
+        "functionScript": "\nvar PROB_PARTS = {\"pixel-art/glasses\":1,\"big-smile/accessories\":1,\"adventurer/glasses\":1,\"adventurer/features\":1,\"pixel-art/hat\":1,\"pixel-art/accessories\":1};\nvar SHOP_FROM = 15;\nfunction ownedOf(p) { return p && Array.isArray(p.owned) ? p.owned.filter(function (x) { return typeof x === 'string'; }) : []; }\nfunction costOf(item) { var c = item && Number(item.cost); return isFinite(c) && c > 0 ? Math.round(c) : 0; }\nfunction spentOf(model) { var s = model && Number(model.spent); return isFinite(s) && s > 0 ? Math.round(s) : 0; }\nfunction purseOf(model) { return Math.max(0, (Number(model && model.stars) || 0) - spentOf(model)); }\nfunction ownsItem(p, item) { return !!item && (item.free === true || ownedOf(p).indexOf(item.id) !== -1); }\nfunction canAfford(item, purse) { return costOf(item) <= (Number(purse) || 0); }\nfunction wearOf(p) { var w = p && p.wear && typeof p.wear === 'object' ? p.wear : {}; return { face: w.face && typeof w.face === 'object' ? JSON.parse(JSON.stringify(w.face)) : {}, paint: typeof w.paint === 'string' ? w.paint : '', pattern: typeof w.pattern === 'string' ? w.pattern : '' }; }\nfunction wearOptions(look, wear) { var parts = (wear && wear.face && wear.face[look]) || {}; var o = {}; for (var part in parts) { if (typeof parts[part] !== 'string' || !parts[part]) continue; o[part] = [parts[part]]; if (PROB_PARTS[look + '/' + part]) o[part + 'Probability'] = 100; } return o; }\nfunction itemFits(item, look) { return !!item && (item.kind === 'rocket' || !!(item.faces && item.faces[look])); }\nfunction itemLayer(item) { return item && typeof item.pattern === 'string' && item.pattern ? 'pattern' : 'paint'; }\nfunction itemWorn(item, look, wear) {\n  if (!item) return false;\n  if (item.kind === 'rocket') return itemLayer(item) === 'pattern' ? wear.pattern === item.pattern : wear.paint === item.paint;\n  var o = item.faces && item.faces[look];\n  return !!o && !!wear.face[look] && wear.face[look][o.part] === o.value;\n}\nfunction putOn(item, look, wear) {\n  if (item.kind === 'rocket') { if (itemLayer(item) === 'pattern') wear.pattern = item.pattern; else wear.paint = item.paint; return wear; }\n  var o = item.faces[look];\n  if (!wear.face[look]) wear.face[look] = {};\n  wear.face[look][o.part] = o.value;\n  return wear;\n}\nfunction takeOff(item, look, wear) {\n  if (item.kind === 'rocket') { if (itemLayer(item) === 'pattern') { if (wear.pattern === item.pattern) wear.pattern = ''; } else if (wear.paint === item.paint) wear.paint = ''; return wear; }\n  var o = item.faces[look];\n  if (wear.face[look] && wear.face[look][o.part] === o.value) delete wear.face[look][o.part];\n  return wear;\n}\nfunction shelfItem(shelf, id) { var list = Array.isArray(shelf) ? shelf : []; for (var i = 0; i < list.length; i++) if (list[i] && list[i].id === id) return list[i]; return null; }\n/** PLY-001 §3.2: what a child owns that today's face cannot wear. Never hidden, never offered, never taken away — just counted. */\nfunction ownedElsewhere(p, shelf, look) {\n  var owned = ownedOf(p), n = 0;\n  for (var i = 0; i < owned.length; i++) { var it = shelfItem(shelf, owned[i]); if (it && it.kind === 'face' && !itemFits(it, look)) n++; }\n  return n;\n}\n\nfunction today() { var d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }\nfunction appOf(v) { var a = v && typeof v === 'object' ? JSON.parse(JSON.stringify(v)) : {}; if (!Array.isArray(a.profiles)) a.profiles = []; if (!Array.isArray(a.sets)) a.sets = []; if (typeof a.activeId !== 'string') a.activeId = ''; return a; }\nfunction dueCount(model) { var n = 0, now = Date.now(); var sk = (model && model.skills) || {}; for (var id in sk) if (sk[id].m > 0 && sk[id].due && sk[id].due <= now) n++; return n; }\nfunction daysThisWeek(days) { var now = new Date(); var start = new Date(now); start.setDate(now.getDate() - ((now.getDay() + 6) % 7)); var s = start.getFullYear() + '-' + String(start.getMonth() + 1).padStart(2, '0') + '-' + String(start.getDate()).padStart(2, '0'); var n = 0; for (var i = 0; i < (days || []).length; i++) if (days[i] >= s) n++; return n; }\nfunction decorate(p) { var out = JSON.parse(JSON.stringify(p)); out.due = dueCount(p.model); out.days7 = daysThisWeek(p.days); out.answered = (p.model && p.model.answered) || 0; out.faceOptions = wearOptions(p.look, wearOf(p)); return out; }\n\nvar STAR_RULE = {\"right\":1,\"finish\":5,\"level\":10,\"best\":5,\"item\":2,\"list\":25};\nfunction withStars(model) {\n  if (!model.skills) model.skills = {};\n  if (!model.bests || typeof model.bests !== 'object') model.bests = {};\n  // PLY-002: what has been spent in the hangar. A model from the RKT-011 pick era has none, so its old picks are never charged for.\n  if (typeof model.spent !== 'number' || !(model.spent >= 0)) model.spent = 0;\n  if (typeof model.stars === 'number') return model;\n  var grant = 0;\n  for (var id in model.skills) { var lv = Number(model.skills[id].m) || 0; grant += STAR_RULE.level * lv; model.skills[id].paid = lv; }\n  model.stars = grant;\n  return model;\n}\n\nvar MOON = {\"species\":[{\"id\":\"blob\",\"name\":{\"en\":\"Blob\",\"fr\":\"Blob\"},\"names\":[\"Zib\",\"Plop\",\"Mimo\",\"Bloop\"]},{\"id\":\"bean\",\"name\":{\"en\":\"Bean\",\"fr\":\"Haricot\"},\"names\":[\"Zorp\",\"Tilly\",\"Nok\",\"Beep\"]},{\"id\":\"trio\",\"name\":{\"en\":\"Trio\",\"fr\":\"Trio\"},\"names\":[\"Trix\",\"Oko\",\"Pip\",\"Lumo\"]},{\"id\":\"squid\",\"name\":{\"en\":\"Squiggle\",\"fr\":\"Gribouille\"},\"names\":[\"Wiggo\",\"Tako\",\"Squee\",\"Flo\"]},{\"id\":\"fuzz\",\"name\":{\"en\":\"Fuzz\",\"fr\":\"Poilu\"},\"names\":[\"Fizz\",\"Puff\",\"Koko\",\"Ruff\"]},{\"id\":\"star\",\"name\":{\"en\":\"Twinkle\",\"fr\":\"Étincelle\"},\"names\":[\"Stella\",\"Zing\",\"Nova\",\"Pix\"]}],\"colours\":[{\"id\":\"lime\",\"token\":\"--alien-lime\",\"name\":{\"en\":\"Lime\",\"fr\":\"Citron vert\"}},{\"id\":\"mint\",\"token\":\"--alien-mint\",\"name\":{\"en\":\"Mint\",\"fr\":\"Menthe\"}},{\"id\":\"sky\",\"token\":\"--alien-sky\",\"name\":{\"en\":\"Sky\",\"fr\":\"Ciel\"}},{\"id\":\"lilac\",\"token\":\"--alien-lilac\",\"name\":{\"en\":\"Lilac\",\"fr\":\"Lilas\"}},{\"id\":\"pink\",\"token\":\"--alien-pink\",\"name\":{\"en\":\"Pink\",\"fr\":\"Rose\"}},{\"id\":\"sunny\",\"token\":\"--alien-sunny\",\"name\":{\"en\":\"Sunny\",\"fr\":\"Soleil\"}}],\"foods\":[{\"id\":\"strawberry\",\"glyph\":\"🍓\",\"name\":{\"en\":\"Strawberry\",\"fr\":\"Fraise\"},\"cost\":3},{\"id\":\"cookie\",\"glyph\":\"🍪\",\"name\":{\"en\":\"Cookie\",\"fr\":\"Cookie\"},\"cost\":4},{\"id\":\"doughnut\",\"glyph\":\"🍩\",\"name\":{\"en\":\"Doughnut\",\"fr\":\"Beignet\"},\"cost\":5},{\"id\":\"pizza\",\"glyph\":\"🍕\",\"name\":{\"en\":\"Pizza\",\"fr\":\"Pizza\"},\"cost\":6},{\"id\":\"cheese\",\"glyph\":\"🧀\",\"name\":{\"en\":\"Moon cheese\",\"fr\":\"Fromage de lune\"},\"cost\":7},{\"id\":\"cake\",\"glyph\":\"🍰\",\"name\":{\"en\":\"Star cake\",\"fr\":\"Gâteau étoilé\"},\"cost\":8}],\"wear\":[{\"id\":\"bow\",\"slot\":\"hat\",\"name\":{\"en\":\"Bow\",\"fr\":\"Nœud\"},\"cost\":20},{\"id\":\"party\",\"slot\":\"hat\",\"name\":{\"en\":\"Party hat\",\"fr\":\"Chapeau de fête\"},\"cost\":25},{\"id\":\"beanie\",\"slot\":\"hat\",\"name\":{\"en\":\"Bobble hat\",\"fr\":\"Bonnet\"},\"cost\":30},{\"id\":\"tophat\",\"slot\":\"hat\",\"name\":{\"en\":\"Top hat\",\"fr\":\"Haut-de-forme\"},\"cost\":45},{\"id\":\"crown\",\"slot\":\"hat\",\"name\":{\"en\":\"Crown\",\"fr\":\"Couronne\"},\"cost\":80},{\"id\":\"glasses\",\"slot\":\"eyes\",\"name\":{\"en\":\"Glasses\",\"fr\":\"Lunettes\"},\"cost\":20},{\"id\":\"sunglasses\",\"slot\":\"eyes\",\"name\":{\"en\":\"Sunglasses\",\"fr\":\"Lunettes de soleil\"},\"cost\":35},{\"id\":\"monocle\",\"slot\":\"eyes\",\"name\":{\"en\":\"Monocle\",\"fr\":\"Monocle\"},\"cost\":40},{\"id\":\"starglasses\",\"slot\":\"eyes\",\"name\":{\"en\":\"Star glasses\",\"fr\":\"Lunettes étoiles\"},\"cost\":50},{\"id\":\"scarf\",\"slot\":\"neck\",\"name\":{\"en\":\"Scarf\",\"fr\":\"Écharpe\"},\"cost\":25},{\"id\":\"bowtie\",\"slot\":\"neck\",\"name\":{\"en\":\"Bow tie\",\"fr\":\"Nœud papillon\"},\"cost\":30},{\"id\":\"necklace\",\"slot\":\"neck\",\"name\":{\"en\":\"Necklace\",\"fr\":\"Collier\"},\"cost\":40}],\"cost\":[0,60,90,120,160,200],\"max\":6,\"grow\":[6,18],\"fav\":2};\nfunction moonText(bi, lang) { return bi ? (lang === 'fr' ? bi.fr : bi.en) : ''; }\nfunction moonFind(list, id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; return null; }\nfunction moonOf(p) {\n  var m = p && p.moon && typeof p.moon === 'object' ? p.moon : {};\n  var aliens = Array.isArray(m.aliens) ? m.aliens.filter(function (a) { return a && typeof a.id === 'string' && a.id; }) : [];\n  return {\n    aliens: aliens.map(function (a) {\n      var w = a.wear && typeof a.wear === 'object' ? a.wear : {};\n      return { id: a.id, species: moonFind(MOON.species, a.species) ? a.species : MOON.species[0].id, colour: moonFind(MOON.colours, a.colour) ? a.colour : MOON.colours[0].id, name: String(a.name || ''), meals: Math.max(0, Math.floor(Number(a.meals) || 0)), fav: moonFind(MOON.foods, a.fav) ? a.fav : MOON.foods[0].id, found: a.found === true, wear: { hat: typeof w.hat === 'string' ? w.hat : '', eyes: typeof w.eyes === 'string' ? w.eyes : '', neck: typeof w.neck === 'string' ? w.neck : '' } };\n    }),\n    sel: typeof m.sel === 'string' ? m.sel : '',\n    owned: Array.isArray(m.owned) ? m.owned.filter(function (x) { return typeof x === 'string'; }) : []\n  };\n}\nfunction moonStage(meals) { return meals >= MOON.grow[1] ? 2 : meals >= MOON.grow[0] ? 1 : 0; }\nfunction moonAlienCost(n) { return n < MOON.cost.length ? MOON.cost[n] : MOON.cost[MOON.cost.length - 1]; }\nfunction moonColour(id) { var c = moonFind(MOON.colours, id) || MOON.colours[0]; return 'var(' + c.token + ')'; }\nfunction moonSelected(moon) { return moonFind(moon.aliens, moon.sel) || moon.aliens[0] || null; }\n\nvar app = appOf(Inputs.app);\nvar id = String(Inputs.profileId || app.activeId);\nvar action = String(Inputs.action || '');\nvar ok = false, why = 'noProfile', said = '', alienId = '';\nfor (var i = 0; i < app.profiles.length; i++) {\n  var p = app.profiles[i];\n  if (p.id !== id) continue;\n  var lang = p.lang === 'fr' ? 'fr' : 'en';\n  var fr = lang === 'fr';\n  var moon = moonOf(p);\n  var model = withStars(JSON.parse(JSON.stringify(p.model || {})));\n  var purse = purseOf(model);\n  var al = moonFind(moon.aliens, String(Inputs.alienId || '')) || moonSelected(moon);\n  why = '';\n  if (action === 'adopt') {\n    var n = moon.aliens.length;\n    var cost = moonAlienCost(n);\n    if (n >= MOON.max) why = 'full';\n    else if (cost > purse) why = 'tooDear';\n    else {\n      var sp = moonFind(MOON.species, String(Inputs.species || '')) || MOON.species[0];\n      var col = moonFind(MOON.colours, String(Inputs.colour || '')) || MOON.colours[0];\n      var nm = String(Inputs.name || '').trim().slice(0, 16) || sp.names[n % sp.names.length];\n      al = { id: 'a' + Date.now().toString(36) + Math.floor(Math.random() * 1000).toString(36), species: sp.id, colour: col.id, name: nm, meals: 0, fav: MOON.foods[Math.floor(Math.random() * MOON.foods.length)].id, found: false, wear: { hat: '', eyes: '', neck: '' } };\n      moon.aliens.push(al);\n      model.spent = spentOf(model) + cost;\n      said = (fr ? 'Bienvenue sur la Lune, {n} !' : 'Welcome to the moon, {n}!').replace('{n}', nm);\n      ok = true;\n    }\n  } else if (!al) why = 'noAlien';\n  else if (action === 'select') ok = true;\n  else if (action === 'feed') {\n    var food = moonFind(MOON.foods, String(Inputs.foodId || ''));\n    if (!food) why = 'unknown';\n    else if (food.cost > purse) why = 'tooDear';\n    else {\n      var before = moonStage(al.meals);\n      var loved = food.id === al.fav;\n      al.meals += loved ? MOON.fav : 1;\n      model.spent = spentOf(model) + food.cost;\n      if (loved && !al.found) said = fr ? '{n} ADORE {f} ! C’est son plat préféré : deux repas d’un coup.' : '{n} LOVES {f}! It’s the favourite: two meals in one.';\n      else if (loved) said = fr ? '{n} ADORE {f} ! (+2 repas)' : '{n} LOVES {f}! (+2 meals)';\n      else said = fr ? '{n} croque {f}. Miam !' : '{n} munches {f}. Yum!';\n      if (loved) al.found = true;\n      said = said.replace('{n}', al.name).replace('{f}', food.glyph);\n      if (moonStage(al.meals) > before) said += (fr ? ' {n} a grandi !' : ' {n} grew!').replace('{n}', al.name);\n      ok = true;\n    }\n  } else if (action === 'buy' || action === 'wear') {\n    var item = moonFind(MOON.wear, String(Inputs.wearId || ''));\n    var owns = !!item && moon.owned.indexOf(item.id) !== -1;\n    if (!item) why = 'unknown';\n    else if (action === 'buy' && owns) why = 'owned';\n    else if (action === 'wear' && !owns) why = 'notOwned';\n    else if (action === 'buy' && item.cost > purse) why = 'tooDear';\n    else {\n      var thing = moonText(item.name, lang);\n      if (action === 'buy') { moon.owned.push(item.id); model.spent = spentOf(model) + item.cost; }\n      if (action === 'wear' && al.wear[item.slot] === item.id) {\n        al.wear[item.slot] = '';\n        said = (fr ? '{n} enlève : {i}.' : '{n} takes off the {i}.').replace('{n}', al.name).replace('{i}', fr ? thing : thing.toLowerCase());\n      } else {\n        al.wear[item.slot] = item.id;\n        said = (fr ? 'Et voilà : {i} pour {n} !' : '{n} is wearing the {i}!').replace('{n}', al.name).replace('{i}', fr ? thing : thing.toLowerCase());\n      }\n      ok = true;\n    }\n  } else why = 'action';\n  if (why === 'tooDear') said = fr ? 'Pas encore assez d’étoiles : une partie en rapporte !' : 'Not enough stars yet: a game earns more!';\n  if (ok) {\n    if (al) moon.sel = al.id;\n    p.model = model;\n    p.moon = moon;\n    alienId = al ? al.id : '';\n  }\n}\nOutputs.app = app;\nOutputs.ok = ok;\nOutputs.why = why;\nOutputs.said = said;\nOutputs.alienId = alienId;\n",
+        "runOnChange-in-app": false,
+        "runOnChange-in-profileId": false,
+        "runOnChange-in-action": false,
+        "runOnChange-in-alienId": false,
+        "runOnChange-in-foodId": false,
+        "runOnChange-in-wearId": false,
+        "runOnChange-in-species": false,
+        "runOnChange-in-colour": false,
+        "runOnChange-in-name": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-app",
+          "displayName": "app",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-profileId",
+          "displayName": "profileId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-action",
+          "displayName": "action",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-alienId",
+          "displayName": "alienId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-species",
+          "displayName": "species",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-colour",
+          "displayName": "colour",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-foodId",
+          "displayName": "foodId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-wearId",
+          "displayName": "wearId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-app",
+          "displayName": "app",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-ok",
+          "displayName": "ok",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-why",
+          "displayName": "why",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-said",
+          "displayName": "said",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-alienId",
+          "displayName": "alienId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "moonactOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "app",
+          "plug": "input",
+          "type": "object"
+        },
+        {
+          "name": "ok",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "why",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "said",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "alienId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

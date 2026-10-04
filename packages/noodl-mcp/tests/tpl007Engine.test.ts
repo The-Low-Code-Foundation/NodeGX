@@ -66,6 +66,8 @@ import {
   LIST_PROFILES_SCRIPT,
   LIST_SETS_SCRIPT,
   MAX_PROFILES,
+  MOON_ACT_SCRIPT,
+  MOON_VIEW_SCRIPT,
   NEW_BOARD_SCRIPT,
   PARSE_SET_SCRIPT,
   PICK_ITEM_SCRIPT,
@@ -2161,6 +2163,39 @@ describe('TPL-007 — the engine', () => {
       expect(plain.has('frac-quotient')).toBe(false);
     });
 
+    it('🔴 ruling 1 (2026-10-04): the 5e verb study is a choice, identify-only — never in "everything", asked only when ticked, marked 5e', () => {
+      const beyond = CURRICULUM.filter((sk) => sk.beyond);
+      expect(beyond.map((sk) => `${sk.id}:${sk.beyond}`).sort()).toEqual(['fr-verb-subj:5e', 'fr-verb-voice:5e']);
+      // Identify-only: no 5e skill makes the child produce a form, and the typed subjonctif is gone.
+      expect(beyond.every((sk) => sk.generator === 'list' && sk.answer === 'options')).toBe(true);
+      expect(CURRICULUM.some((sk) => sk.id === 'fr-conj-subjonctif')).toBe(false);
+      // The programme's own banks no longer ask the subjonctif: it lives only in the 5e spot-it bank.
+      const bankOf = (id: string) => ((CURRICULUM.find((sk) => sk.id === id)!.params as any).items as Array<{ a: { en: string } }>).map((it) => it.a.en);
+      expect(bankOf('fr-verb-mode').some((a) => /subjonctif/.test(a))).toBe(false);
+      expect(bankOf('fr-verb-tense').some((a) => /subjonctif/.test(a))).toBe(false);
+      expect([...new Set(bankOf('fr-verb-subj'))].sort()).toEqual(['indicatif', 'subjonctif']);
+      // Everything at 6e, 300 draws: never a 5e skill. Ticked, it is all that is asked, with its two buttons.
+      const plain = new Set<string>();
+      for (let i = 0; i < 300; i++) plain.add(pick({ level: '6e', mode: 'french' }).skillId);
+      expect(plain.size).toBeGreaterThan(5);
+      expect([...plain].filter((id) => beyond.some((sk) => sk.id === id))).toEqual([]);
+      for (let i = 0; i < 20; i++) {
+        const q = pick({ level: '6e', mode: 'french', focus: ['fr-verb-subj'] });
+        expect(q.skillId).toBe('fr-verb-subj');
+        expect([...q.options].sort()).toEqual(['indicatif', 'subjonctif']);
+      }
+      // The chooser offers both, unticked, each saying 5e (not the child's own 6e).
+      const rows = runScript(FOCUS_CHOICES_SCRIPT, { curriculum: CURRICULUM, sets: [], level: '6e', lang: 'fr', subject: 'french', topic: 'verb-study', skills: [] }).skillRows as Array<{ value: string; label: string; selected: boolean }>;
+      expect(rows.filter((r) => /· 5e$/.test(r.label)).map((r) => r.value).sort()).toEqual(['fr-verb-subj', 'fr-verb-voice']);
+      expect(rows.find((r) => r.value === 'fr-verb-subj')!.label).toBe('Repérer le subjonctif · 5e');
+      // Sabotage: without the picker's skip, "everything" serves a 5e skill.
+      const leaky = PICK_QUESTION_SCRIPT.replace('if (sk.beyond) continue;', '');
+      expect(leaky).not.toBe(PICK_QUESTION_SCRIPT);
+      const leaked = new Set<string>();
+      for (let i = 0; i < 300; i++) leaked.add(runScript(leaky, { curriculum: CURRICULUM, model: freshModel(), level: '6e', lang: 'en', layout: 'qwerty', mode: 'french', answerMode: 'auto', wordLists: WORD_LIST_ROWS, nonce: 1 }).skillId);
+      expect([...leaked].some((id) => beyond.some((sk) => sk.id === id))).toBe(true);
+    });
+
     it('🔴 a subject mode serves that subject at the child’s level and below, and maths never serves French', () => {
       const bySubject = (mode: string, level: string) => {
         const seen = new Set<string>();
@@ -2496,6 +2531,165 @@ describe('TPL-007 — the engine', () => {
       expect(helper<boolean>('sameAnswer', 'etais', 'étais')).toBe(false);
       expect(helper<boolean>('sameAnswer', '12.', '12')).toBe(true);
       expect(helper<boolean>('sameAnswer', '2.5', '2,5')).toBe(true);
+    });
+
+    it('🔴 the save code carries the lists and the focus (Richard, 2026-10-04: "yep"), under their own ids, and a refused code adds no list', () => {
+      let app: any = runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Ellie', level: '6e' }).app;
+      app = runScript(UPSERT_SET_SCRIPT, { app, setId: 'sHist', name: 'History Monday', items: [{ q: 'Lascaux', a: 'vers -20 000' }], both: false }).app;
+      app = runScript(UPSERT_SET_SCRIPT, { app, setId: 'sVoc', name: 'English words', items: [{ q: 'le chien', a: 'the dog' }, { q: 'la maison', a: 'the house' }], both: true }).app;
+      app = runScript(UPDATE_SETTINGS_SCRIPT, { app, focusSubject: 'set:sVoc', focusSkills: [] }).app;
+      const code = runScript(ENCODE_SAVE_SCRIPT, { app }).code;
+      expect(code).toMatch(/^RS1\.[A-Za-z0-9_-]+$/);
+
+      // Another computer, empty: the player, the focus on the list, and both lists with their ids and both-ways flag.
+      const there = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code });
+      expect(there.ok).toBe(true);
+      expect(there.app.sets).toEqual([
+        { id: 'sHist', name: 'History Monday', items: [{ q: 'Lascaux', a: 'vers -20 000' }], both: false },
+        { id: 'sVoc', name: 'English words', items: [{ q: 'le chien', a: 'the dog' }, { q: 'la maison', a: 'the house' }], both: true }
+      ]);
+      expect(runScript(ACTIVE_PROFILE_SCRIPT, { app: there.app }).focusSubject).toBe('set:sVoc');
+
+      // A computer that has an older copy of one list and a list of its own: the code's copy wins, the other list stays.
+      const busy = { profiles: [], activeId: '', sets: [{ id: 'sHist', name: 'History (old)', items: [], both: false }, { id: 'sMine', name: 'Mine', items: [{ q: 'a', a: 'b' }], both: false }] };
+      const merged = runScript(DECODE_SAVE_SCRIPT, { app: busy, code });
+      expect(merged.app.sets.map((x: any) => `${x.id}:${x.name}`)).toEqual(['sHist:History Monday', 'sMine:Mine', 'sVoc:English words']);
+
+      // A full store refuses the code, and its lists do not slip in.
+      let full: any = { profiles: [], activeId: '', sets: [] };
+      for (let i = 0; i < MAX_PROFILES; i++) full = runScript(CREATE_PROFILE_SCRIPT, { app: full, name: `P${i}` }).app;
+      const refused = runScript(DECODE_SAVE_SCRIPT, { app: full, code });
+      expect([refused.ok, refused.error, refused.app.sets.length]).toEqual([false, 'full', 0]);
+
+      // A v3 code (before lists) still loads, with no list and no focus.
+      const v3 = 'RS1.' + Buffer.from(JSON.stringify({ v: 3, n: 'Sam', k: 'thumbs', s: 'Sam', l: 'CM1', g: 'en', y: 'qwerty', r: 0, a: 0, d: [], sk: {}, st: 0, b: {}, o: [], w: {}, sp: 0 }), 'utf8').toString('base64url');
+      const old = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code: v3 });
+      expect([old.ok, old.app.sets.length, old.app.profiles[0].focus]).toEqual([true, 0, undefined]);
+    });
+  });
+
+  describe('P113 REV-005 — the moon: adopt, feed, dress, and nothing ever gets worse', () => {
+    const withPurse = (stars: number, lang = 'en') => {
+      let app: any = runScript(CREATE_PROFILE_SCRIPT, { app: undefined, name: 'Ellie', level: '6e', lang }).app;
+      app = runScript(SAVE_MODEL_SCRIPT, { app, model: { rating: 0, answered: 0, lastSkill: '', skills: {}, stars, spent: 0, bests: {} } }).app;
+      return app;
+    };
+    const act = (app: any, action: string, over: Record<string, unknown> = {}) => runScript(MOON_ACT_SCRIPT, { app, action, ...over });
+    const view = (app: any, over: Record<string, unknown> = {}) => runScript(MOON_VIEW_SCRIPT, { app, ...over });
+    const me = (app: any) => app.profiles.find((p: any) => p.id === app.activeId);
+
+    it('🔴 the first alien is free, the next costs 60 ⭐ from the hangar’s purse, and a short purse changes nothing', () => {
+      let app = withPurse(50);
+      expect(view(app)).toEqual(expect.objectContaining({ has: false, adoptFree: true, canAdopt: true, adoptButton: 'Adopt · free!', purseLine: 'You have 50 ⭐' }));
+      const first = act(app, 'adopt', { species: 'bean', colour: 'pink', name: '  Zorpina  ' });
+      expect([first.ok, first.said]).toEqual([true, 'Welcome to the moon, Zorpina!']);
+      app = first.app;
+      expect(me(app).model.spent).toBe(0);
+      const v = view(app);
+      expect(v.aliens).toEqual([expect.objectContaining({ name: 'Zorpina', species: 'bean', colour: 'var(--alien-pink)', grown: 0, selected: true, line: 'Baby' })]);
+      expect([v.adoptCost, v.canAdopt, v.anotherLine]).toEqual([60, false, '＋ Adopt another alien · 60 ⭐']);
+      // 50 ⭐ is not 60: refused, said gently, and the store is exactly as it was.
+      const short = act(app, 'adopt', { species: 'blob' });
+      expect([short.ok, short.why, short.said]).toEqual([false, 'tooDear', 'Not enough stars yet: a game earns more!']);
+      expect(short.app).toEqual(app);
+      // With 60 more earned, the second comes, and is spent for.
+      app = runScript(SAVE_MODEL_SCRIPT, { app, model: { ...me(app).model, stars: 110 } }).app;
+      const second = act(app, 'adopt', { species: 'fuzz', colour: 'nope', name: '' });
+      expect(second.ok).toBe(true);
+      const two = me(second.app);
+      expect([two.moon.aliens.length, two.model.spent, two.model.stars, two.moon.aliens[1].colour, two.moon.aliens[1].name]).toEqual([2, 60, 110, 'lime', 'Puff']);
+      expect(two.moon.sel).toBe(two.moon.aliens[1].id);
+    });
+
+    it('a moon holds six aliens, and the seventh is refused', () => {
+      let app = withPurse(10000);
+      for (let i = 0; i < 6; i++) app = act(app, 'adopt', { species: 'star' }).app;
+      expect(view(app)).toEqual(expect.objectContaining({ count: 6, full: true, canAdopt: false, anotherLine: '' }));
+      const seventh = act(app, 'adopt', {});
+      expect([seventh.ok, seventh.why, me(seventh.app).moon.aliens.length]).toEqual([false, 'full', 6]);
+      expect(me(app).model.spent).toBe(60 + 90 + 120 + 160 + 200);
+    });
+
+    it('🔴 a meal spends its price and counts; the favourite counts two and is found the first time; six meals grow it, eighteen grow it up', () => {
+      let app = act(withPurse(500), 'adopt', { species: 'blob', name: 'Zib' }).app;
+      const fav = me(app).moon.aliens[0].fav as string;
+      const other = ['strawberry', 'cookie', 'doughnut', 'pizza', 'cheese', 'cake'].find((f) => f !== fav)!;
+      expect(view(app).favLine).toBe('Favourite food: ❓ — find it!');
+      const yum = act(app, 'feed', { foodId: other });
+      expect(yum.ok).toBe(true);
+      expect(yum.said).toMatch(/^Zib munches .+\. Yum!$/);
+      app = yum.app;
+      const loved = act(app, 'feed', { foodId: fav });
+      expect(loved.said).toMatch(/^Zib LOVES .+! It’s the favourite: two meals in one\.$/);
+      app = loved.app;
+      expect([me(app).moon.aliens[0].meals, me(app).moon.aliens[0].found]).toEqual([3, true]);
+      expect(view(app).favLine).toMatch(/^Favourite food: \S+ /);
+      expect(view(app).selLine).toBe('Baby · 3 meals · 3 more to grow');
+      // Three more of the favourite: 9 meals, it grew on the way past 6, and said so.
+      let said = '';
+      for (let i = 0; i < 2; i++) { const r = act(app, 'feed', { foodId: fav }); app = r.app; said = r.said; }
+      expect(said).toMatch(/ Zib grew!$/);
+      expect([view(app).selGrown, view(app).selLine]).toEqual([1, 'Young · 7 meals · 11 more to grow']);
+      for (let i = 0; i < 6; i++) app = act(app, 'feed', { foodId: fav }).app;
+      expect([view(app).selGrown, view(app).selLine, view(app).aliens[0].line]).toEqual([2, 'Grown up! · 19 meals', 'Grown up']);
+      // Spent is every meal's price; stars (earned) never moved.
+      expect(me(app).model.stars).toBe(500);
+      expect(view(app).foods.every((f: any) => f.use === true)).toBe(true);
+    });
+
+    it('🔴 something to wear is bought once, put on the chosen alien at once, and then goes on or off any alien for free', () => {
+      let app = withPurse(160);
+      app = act(app, 'adopt', { species: 'squid', name: 'Tako' }).app;
+      app = act(app, 'adopt', { species: 'trio', name: 'Oko' }).app; // 60
+      const crown = view(app).wear.find((w: any) => w.id === 'crown');
+      expect(crown).toEqual(expect.objectContaining({ line: '80 ⭐', use: false, ask: true, dim: false, showAlien: true, species: 'trio', hat: 'crown' }));
+      const bought = act(app, 'buy', { wearId: 'crown' });
+      expect([bought.ok, bought.said]).toEqual([true, 'Oko is wearing the crown!']);
+      app = bought.app;
+      expect([me(app).moon.owned, me(app).moon.aliens[1].wear.hat, me(app).model.spent]).toEqual([['crown'], 'crown', 140]);
+      expect(view(app).wear.find((w: any) => w.id === 'crown')).toEqual(expect.objectContaining({ line: 'On ✓', use: true, ask: false, worn: true }));
+      // Bought twice: refused. Off again: free. On the other alien: free.
+      expect(act(app, 'buy', { wearId: 'crown' }).why).toBe('owned');
+      const off = act(app, 'wear', { wearId: 'crown' });
+      expect([off.said, me(off.app).moon.aliens[1].wear.hat]).toEqual(['Oko takes off the crown.', '']);
+      app = act(off.app, 'select', { alienId: me(off.app).moon.aliens[0].id }).app;
+      app = act(app, 'wear', { wearId: 'crown' }).app;
+      expect([me(app).moon.aliens[0].wear.hat, me(app).model.spent]).toEqual(['crown', 140]);
+      // Not owned cannot be worn; too dear cannot be bought, and is greyed.
+      expect(act(app, 'wear', { wearId: 'tophat' }).why).toBe('notOwned');
+      expect(act(app, 'buy', { wearId: 'starglasses' }).why).toBe('tooDear');
+      expect(view(app).wear.find((w: any) => w.id === 'starglasses')).toEqual(expect.objectContaining({ dim: true, ask: false }));
+    });
+
+    it('the moon speaks French to a French player, and the adopt card draws every species in the colour being chosen', () => {
+      let app = withPurse(100, 'fr');
+      const v0 = view(app, { draftSpecies: 'star', draftColour: 'sky' });
+      expect(v0.adoptSpecies).toHaveLength(6);
+      expect(v0.adoptSpecies.every((r: any) => r.colour === 'var(--alien-sky)')).toBe(true);
+      expect(v0.adoptSpecies.filter((r: any) => r.selected).map((r: any) => r.id)).toEqual(['star']);
+      expect([v0.suggestedName, v0.adoptButton, v0.purseLine, v0.adoptColours[0].label]).toEqual(['Stella', 'Adopter · gratuit !', 'Tu as 100 ⭐', 'Citron vert']);
+      const r = act(app, 'adopt', { species: 'star', colour: 'sky', name: 'Nova' });
+      expect(r.said).toBe('Bienvenue sur la Lune, Nova !');
+      app = r.app;
+      expect(view(app).selLine).toBe('Bébé · 0 repas · encore 6 pour grandir');
+      expect(act(app, 'buy', { wearId: 'bow' }).said).toBe('Et voilà : Nœud pour Nova !');
+    });
+
+    it('🔴 nothing on the moon has a clock: the same store read later says the same thing, and the save code carries the moon', () => {
+      let app = act(withPurse(100), 'adopt', { species: 'bean', name: 'Beep' }).app;
+      app = act(app, 'feed', { foodId: 'cookie' }).app;
+      const now = view(app);
+      const realNow = Date.now;
+      try {
+        Date.now = () => realNow() + 1000 * 60 * 60 * 24 * 30;
+        expect(view(app)).toEqual(now);
+      } finally {
+        Date.now = realNow;
+      }
+      const code = runScript(ENCODE_SAVE_SCRIPT, { app }).code;
+      const there = runScript(DECODE_SAVE_SCRIPT, { app: { profiles: [], activeId: '', sets: [] }, code });
+      expect(view(there.app).aliens).toEqual(now.aliens);
+      expect(view(there.app).purse).toBe(now.purse);
     });
   });
 });

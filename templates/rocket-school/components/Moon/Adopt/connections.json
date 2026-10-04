@@ -1,0 +1,367 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "4f0d6552-35a8-56d7-8625-4fc607d0faee",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "maOpen",
+      "fromProperty": "open",
+      "toId": "maBodyShown",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "has",
+      "toId": "maBodyShown",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "maBodyShown",
+      "fromProperty": "result",
+      "toId": "maBody",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "maOpen",
+      "fromProperty": "open",
+      "toId": "maMoreShown",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "has",
+      "toId": "maMoreShown",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "full",
+      "toId": "maMoreShown",
+      "toProperty": "full"
+    },
+    {
+      "fromId": "maMoreShown",
+      "fromProperty": "result",
+      "toId": "maMore",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "another",
+      "toId": "maMore",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "maMore",
+      "fromProperty": "onClick",
+      "toId": "maOpen",
+      "toProperty": "to-open"
+    },
+    {
+      "fromId": "maCancel",
+      "fromProperty": "onClick",
+      "toId": "maOpen",
+      "toProperty": "to-folded"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "has",
+      "toId": "maCancel",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "firstWord",
+      "toId": "maTitleText",
+      "toProperty": "first"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "moreWord",
+      "toId": "maTitleText",
+      "toProperty": "more"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "has",
+      "toId": "maTitleText",
+      "toProperty": "has"
+    },
+    {
+      "fromId": "maTitleText",
+      "fromProperty": "result",
+      "toId": "maTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "cancelWord",
+      "toId": "maCancel",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "species",
+      "toId": "maSpeciesEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "maSpeciesEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "maSetSp",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "maSpeciesEach",
+      "fromProperty": "itemOutputSignal-tap",
+      "toId": "maSetSp",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "colours",
+      "toId": "maColours",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "colour",
+      "toId": "maColours",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "maColours",
+      "fromProperty": "value",
+      "toId": "maSetCol",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "maColours",
+      "fromProperty": "changed",
+      "toId": "maSetCol",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "nameWord",
+      "toId": "maNameLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "suggestedName",
+      "toId": "maName",
+      "toProperty": "placeholder"
+    },
+    {
+      "fromId": "maNameVar",
+      "fromProperty": "value",
+      "toId": "maName",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "maName",
+      "fromProperty": "onTextChanged",
+      "toId": "maNameVar",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "button",
+      "toId": "maAdopt",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "canAdopt",
+      "toId": "maAdopt",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "free",
+      "toId": "maIsFree",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "maAdopt",
+      "fromProperty": "onClick",
+      "toId": "maIsFree",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "maIsFree",
+      "fromProperty": "ontrue",
+      "toId": "maDo",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "maIsFree",
+      "fromProperty": "onfalse",
+      "toId": "maAsk",
+      "toProperty": "to-asking"
+    },
+    {
+      "fromId": "maAsk",
+      "fromProperty": "asking",
+      "toId": "maOver",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "maAsk",
+      "fromProperty": "asking",
+      "toId": "maConfirm",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "askWord",
+      "toId": "maConfirm",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "cost",
+      "toId": "maConfirm",
+      "toProperty": "cost"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "purse",
+      "toId": "maConfirm",
+      "toProperty": "purse"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "haveWord",
+      "toId": "maConfirm",
+      "toProperty": "haveWord"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "costWord",
+      "toId": "maConfirm",
+      "toProperty": "costWord"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "leftWord",
+      "toId": "maConfirm",
+      "toProperty": "leftWord"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "yesWord",
+      "toId": "maConfirm",
+      "toProperty": "yesWord"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "noWord",
+      "toId": "maConfirm",
+      "toProperty": "noWord"
+    },
+    {
+      "fromId": "maConfirm",
+      "fromProperty": "no",
+      "toId": "maAsk",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "maConfirm",
+      "fromProperty": "yes",
+      "toId": "maAsk",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "maConfirm",
+      "fromProperty": "yes",
+      "toId": "maDo",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "app",
+      "toId": "maDo",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "maIn",
+      "fromProperty": "profileId",
+      "toId": "maDo",
+      "toProperty": "profileId"
+    },
+    {
+      "fromId": "maSpVar",
+      "fromProperty": "value",
+      "toId": "maDo",
+      "toProperty": "species"
+    },
+    {
+      "fromId": "maColVar",
+      "fromProperty": "value",
+      "toId": "maDo",
+      "toProperty": "colour"
+    },
+    {
+      "fromId": "maNameVar",
+      "fromProperty": "value",
+      "toId": "maDo",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "maDo",
+      "fromProperty": "app",
+      "toId": "maOut",
+      "toProperty": "app"
+    },
+    {
+      "fromId": "maDo",
+      "fromProperty": "done",
+      "toId": "maOut",
+      "toProperty": "write"
+    },
+    {
+      "fromId": "maDo",
+      "fromProperty": "said",
+      "toId": "maOut",
+      "toProperty": "said"
+    },
+    {
+      "fromId": "maDo",
+      "fromProperty": "done",
+      "toId": "maOpen",
+      "toProperty": "to-folded"
+    },
+    {
+      "fromId": "maEmpty",
+      "fromProperty": "result",
+      "toId": "maClearName",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "maDo",
+      "fromProperty": "done",
+      "toId": "maClearName",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "maClearName",
+      "fromProperty": "done",
+      "toId": "maName",
+      "toProperty": "set"
+    },
+    {
+      "fromId": "maSpVar",
+      "fromProperty": "value",
+      "toId": "maOut",
+      "toProperty": "draftSpecies"
+    },
+    {
+      "fromId": "maColVar",
+      "fromProperty": "value",
+      "toId": "maOut",
+      "toProperty": "draftColour"
+    }
+  ]
+}

@@ -66,6 +66,8 @@ import {
   LIST_SETS_SCRIPT,
   MARK_SELECTED_SCRIPT,
   MONSTER_LOOKS,
+  MOON_ACT_SCRIPT,
+  MOON_VIEW_SCRIPT,
   MONSTER_MOVE_SCRIPT,
   NEW_BOARD_SCRIPT,
   NEW_HUNT_SCRIPT,
@@ -132,6 +134,7 @@ const KIT_KEYBOARD = 'game-kit.KeyboardMap';
 const KIT_PAD = 'game-kit.AnswerPad';
 const KIT_SOUND = 'game-kit.Sound';
 const KIT_KEEP = 'game-kit.KeepStorage';
+const KIT_ALIEN = 'game-kit.Alien';
 
 // ── Component names, spelled once ───────────────────────────────────────────
 
@@ -194,7 +197,13 @@ export const C = {
   focusPicker: '/Game/Focus picker',
   listRow: '/Lists/Set row',
   listEditor: '/Lists/Editor',
-  pageLists: '/Pages/Lists'
+  pageLists: '/Pages/Lists',
+  // P113 REV-005 — the moon.
+  moonTile: '/Moon/Alien tile',
+  moonItem: '/Moon/Shop tile',
+  moonCare: '/Moon/Care',
+  moonAdopt: '/Moon/Adopt',
+  pageMoon: '/Pages/Moon'
 } as const;
 
 /** The arrow keys, from the `keyboard-shortcuts` library module (TPL-005 vendored it for the same job). */
@@ -621,6 +630,18 @@ const LOGIC_SPECS: ReadonlyArray<LogicSpec> = [
     description: 'Rows with the chosen one flagged selected — what a segmented control repeats over.',
     ins: [['items', 'array'], ['value', 'string']],
     outs: [['rows', 'array'], ['count', 'number']]
+  },
+  {
+    name: 'Logic/Moon view', script: MOON_VIEW_SCRIPT,
+    description: 'P113 REV-005: the moon as the active player sees it — their aliens as rows, the chosen one close up and its lines, the food and the things to wear as tiles with what a tap does, and the adopt card (each species in the Draft Colour, the next alien’s price, a name to suggest). Every line in their language.',
+    ins: [['app', 'object'], ['draftSpecies', 'string'], ['draftColour', 'string']],
+    outs: [['aliens', 'array'], ['has', 'boolean'], ['count', 'number'], ['full', 'boolean'], ['purse', 'number'], ['purseLine', 'string'], ['selId', 'string'], ['selName', 'string'], ['selSpecies', 'string'], ['selColour', 'string'], ['selGrown', 'number'], ['selHat', 'string'], ['selEyes', 'string'], ['selNeck', 'string'], ['selHappy', 'number'], ['selLine', 'string'], ['favLine', 'string'], ['foods', 'array'], ['wear', 'array'], ['adoptSpecies', 'array'], ['adoptColours', 'array'], ['draftSpecies', 'string'], ['draftColour', 'string'], ['adoptCost', 'number'], ['adoptFree', 'boolean'], ['canAdopt', 'boolean'], ['suggestedName', 'string'], ['adoptButton', 'string'], ['anotherLine', 'string']]
+  },
+  {
+    name: 'Logic/Moon act', script: MOON_ACT_SCRIPT, run: true,
+    description: 'P113 REV-005: one thing done on the moon. Action is a parameter, placed once per action: adopt (Species, Colour, Name; the first alien free), select (Alien Id), feed (Food Id), buy (Wear Id: bought once and put on) or wear (Wear Id, owned: on, or off). Refused with nothing changed when the purse is short, the moon is full or the thing is not theirs (Why). Said is the line to show.',
+    ins: [['app', 'object'], ['profileId', 'string'], ['action', 'string'], ['alienId', 'string'], ['foodId', 'string'], ['wearId', 'string'], ['species', 'string'], ['colour', 'string'], ['name', 'string']],
+    outs: [['app', 'object'], ['ok', 'boolean'], ['why', 'string'], ['said', 'string'], ['alienId', 'string']]
   },
   {
     name: 'Logic/Teach card', script: TEACH_CARD_SCRIPT,
@@ -3529,9 +3550,11 @@ const PAGE_HANGAR: Tpl007Component = {
   nodes: [
     { id: 'hgPage', type: 'Page', label: 'Hangar', parameters: { title: 'Rocket School', urlPath: 'hangar' }, children: ['hgOuter'] },
     group('hgOuter', 'The ground', 'hgPage', column({ alignItems: 'center' }), ['hgWrap']),
-    group('hgWrap', 'The screen', 'hgOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['hgHeader', 'hgTitle', 'hgPreview', 'hgStack']),
+    group('hgWrap', 'The screen', 'hgOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['hgHeader', 'hgTitle', 'hgMoon', 'hgPreview', 'hgStack']),
     place('hgHeader', C.header, 'The bar', 'hgWrap', { showHome: true, showHangar: false }),
     text('hgTitle', 'Hangar', 'hgWrap', '', T_SECTION),
+    // P113 REV-005: the way to the moon, where the stars adopt and feed aliens. The hangar is where a child spends; so is the moon.
+    place('hgMoon', BUTTON_NODE, 'To the moon', 'hgWrap', { ...BTN_PRIMARY, label: 'Visit your aliens on the Moon', fontSize: 'var(--text-lg)' }),
     place('hgPreview', C.hangarPreview, 'Your face and rocket', 'hgWrap'),
     /*
      * 🔴 R6 (Richard, 2026-09-18) — the buy card sits OVER the shelf, and the shelf keeps the tab the child was on.
@@ -3564,7 +3587,8 @@ const PAGE_HANGAR: Tpl007Component = {
     logic('hgNoOne', EXPRESSION_NODE, 'Nobody signed in?', { expression: 'has === false' }),
     gate('hgGuard', 'Send them to the profiles?'),
     logic('hgGoProfiles', NAVIGATE_NODE, 'To the profiles', { router: ROUTER, target: C.pageProfiles }),
-    logic('hgGoHome', NAVIGATE_NODE, 'Home', { router: ROUTER, target: C.pageHome })
+    logic('hgGoHome', NAVIGATE_NODE, 'Home', { router: ROUTER, target: C.pageHome }),
+    logic('hgGoMoon', NAVIGATE_NODE, 'To the moon', { router: ROUTER, target: C.pageMoon })
   ],
   connections: [
     ...pageCommon('hg').connections,
@@ -3576,6 +3600,8 @@ const PAGE_HANGAR: Tpl007Component = {
     ...headerWires('hg', { hangar: false }),
     wire('hgHeader', 'home', 'hgGoHome', 'navigate'),
     wire('hgT', 'hangar', 'hgTitle', 'text'),
+    wire('hgT', 'visitMoon', 'hgMoon', 'label'),
+    wire('hgMoon', 'onClick', 'hgGoMoon', 'navigate'),
     // The preview: what the next race will show.
     wire('hgMe', 'name', 'hgPreview', 'name'),
     wire('hgMe', 'look', 'hgPreview', 'look'),
@@ -4845,6 +4871,406 @@ const PAGE_LISTS: Tpl007Component = {
   ]
 };
 
+// ── P113 REV-005 — the moon ─────────────────────────────────────────────────
+
+/**
+ * One alien in a row: drawn by the kit, its name, and what stage it is at. The chosen one is sunshine. Used for the moon's own
+ * aliens (a tap chooses) and for the adopt card's species (a tap picks the species). Publishes Tap with the Id.
+ */
+const MOON_TILE: Tpl007Component = {
+  path: 'Moon/Alien tile',
+  description: 'One alien: the kit draws it (species, colour, what it wears, how grown), its name and a line under it. Selected fills it sunshine. Publishes Tap with its Id — only the card answers, never the picture as well.',
+  inputs: [port('id', 'string'), port('name', 'string'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string'), port('happy', 'number'), port('selected', 'boolean'), port('line', 'string')],
+  outputs: [port('tap', 'signal'), port('id', 'string')],
+  nodes: [
+    inputs('mtIn', 'The alien', [['id', 'string'], ['name', 'string'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['happy', 'number'], ['selected', 'boolean'], ['line', 'string']]),
+    group('mtCard', 'The tile', undefined, { ...CARD, width: px(120), sizeMode: 'contentHeight', alignItems: 'center', rowGap: 'var(--space-1)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-3)', paddingLeft: 'var(--space-2)', paddingRight: 'var(--space-2)' }, ['mtAlien', 'mtName', 'mtLine']),
+    place('mtAlien', KIT_ALIEN, 'The alien', 'mtCard', { size: 92 }),
+    text('mtName', 'Its name', 'mtCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
+    text('mtLine', 'How grown', 'mtCard', '', { ...T_META, textAlignX: 'center' }),
+    logic('mtToneOf', EXPRESSION_NODE, 'Chosen?', { expression: "selected === true ? 'on' : 'off'" }),
+    withStates('mtTone', 'Chosen, or not', ['off', 'on'], { ground: { type: 'color', by: { off: 'var(--surface)', on: ROLE.picked } } }),
+    outputs('mtOut', 'Tapped', [['tap', 'signal'], ['id', 'string']])
+  ],
+  connections: [
+    ...(['species', 'name', 'grown', 'hat', 'eyes', 'neck', 'happy'] as const).map((f) => wire('mtIn', f, 'mtAlien', f)),
+    wire('mtIn', 'colour', 'mtAlien', 'color'),
+    wire('mtIn', 'name', 'mtName', 'text'),
+    wire('mtIn', 'line', 'mtLine', 'text'),
+    wire('mtIn', 'selected', 'mtToneOf', 'selected'),
+    wire('mtToneOf', 'result', 'mtTone', 'currentState'),
+    wire('mtTone', 'ground', 'mtCard', 'backgroundColor'),
+    wire('mtCard', 'onClick', 'mtOut', 'tap'),
+    wire('mtIn', 'id', 'mtOut', 'id')
+  ]
+};
+
+/**
+ * One thing the moon offers: a food (its glyph) or something to wear (the chosen alien drawn wearing it), its name and what a
+ * tap does — its price, Put it on, or On ✓. Use (theirs to use: feed, or put on and take off) and Ask (not theirs yet: the buy
+ * card) are worked out by Logic/Moon view; a tile that can do neither (too dear) is greyed and answers nothing.
+ */
+const MOON_ITEM: Tpl007Component = {
+  path: 'Moon/Shop tile',
+  description: 'One food or one thing to wear: a glyph, or the chosen alien wearing it; its name; and its price or what a tap does. Worn fills it sunshine; Dim greys it (not enough stars yet). Publishes Use (feed it, or put it on or take it off) or Ask (buy it first), with the Id, Label and Cost.',
+  inputs: [port('id', 'string'), port('glyph', 'string'), port('label', 'string'), port('line', 'string'), port('cost', 'number'), port('use', 'boolean'), port('ask', 'boolean'), port('dim', 'boolean'), port('worn', 'boolean'), port('showAlien', 'boolean'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string')],
+  outputs: [port('use', 'signal'), port('ask', 'signal'), port('id', 'string'), port('label', 'string'), port('cost', 'number')],
+  nodes: [
+    inputs('miIn', 'The thing', [['id', 'string'], ['glyph', 'string'], ['label', 'string'], ['line', 'string'], ['cost', 'number'], ['use', 'boolean'], ['ask', 'boolean'], ['dim', 'boolean'], ['worn', 'boolean'], ['showAlien', 'boolean'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string']]),
+    group('miCard', 'The tile', undefined, { ...CARD, width: px(112), sizeMode: 'contentHeight', alignItems: 'center', rowGap: 'var(--space-1)', paddingTop: 'var(--space-3)', paddingBottom: 'var(--space-3)', paddingLeft: 'var(--space-2)', paddingRight: 'var(--space-2)' }, ['miGlyph', 'miAlienBox', 'miLabel', 'miLine']),
+    text('miGlyph', 'The food', 'miCard', '', { ...T_BODY, fontSize: 'var(--text-4xl)', textAlignX: 'center' }),
+    // A placed node has no Mounted of its own, so the alien sits in a Group that has one.
+    group('miAlienBox', 'Wearing it', 'miCard', { sizeMode: 'contentSize', mounted: false }, ['miAlien']),
+    place('miAlien', KIT_ALIEN, 'The alien, wearing it', 'miAlienBox', { size: 88 }),
+    text('miLabel', 'Its name', 'miCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
+    text('miLine', 'Its price, or what a tap does', 'miCard', '', { ...T_META, textAlignX: 'center' }),
+    logic('miGlyphShown', EXPRESSION_NODE, 'A food?', { expression: 'showAlien !== true' }),
+    logic('miToneOf', EXPRESSION_NODE, 'Worn, plain or greyed?', { expression: "worn === true ? 'worn' : dim === true ? 'dim' : 'plain'" }),
+    withStates('miTone', 'Worn, plain or greyed', ['plain', 'worn', 'dim'], {
+      ground: { type: 'color', by: { plain: 'var(--surface)', worn: ROLE.picked, dim: 'var(--muted)' } },
+      opacity: { type: 'number', by: { plain: 1, worn: 1, dim: 0.8 } }
+    }),
+    gate('miCanUse', 'Theirs to use?'),
+    gate('miCanAsk', 'To buy first?'),
+    outputs('miOut', 'Tapped', [['use', 'signal'], ['ask', 'signal'], ['id', 'string'], ['label', 'string'], ['cost', 'number']])
+  ],
+  connections: [
+    wire('miIn', 'glyph', 'miGlyph', 'text'),
+    wire('miIn', 'showAlien', 'miGlyphShown', 'showAlien'),
+    wire('miGlyphShown', 'result', 'miGlyph', 'mounted'),
+    wire('miIn', 'showAlien', 'miAlienBox', 'mounted'),
+    ...(['species', 'grown', 'hat', 'eyes', 'neck'] as const).map((f) => wire('miIn', f, 'miAlien', f)),
+    wire('miIn', 'colour', 'miAlien', 'color'),
+    wire('miIn', 'label', 'miLabel', 'text'),
+    wire('miIn', 'line', 'miLine', 'text'),
+    wire('miIn', 'worn', 'miToneOf', 'worn'),
+    wire('miIn', 'dim', 'miToneOf', 'dim'),
+    wire('miToneOf', 'result', 'miTone', 'currentState'),
+    wire('miTone', 'ground', 'miCard', 'backgroundColor'),
+    wire('miTone', 'opacity', 'miCard', 'opacity'),
+    wire('miIn', 'use', 'miCanUse', 'condition'),
+    wire('miIn', 'ask', 'miCanAsk', 'condition'),
+    wire('miCard', 'onClick', 'miCanUse', 'eval'),
+    wire('miCard', 'onClick', 'miCanAsk', 'eval'),
+    wire('miCanUse', 'ontrue', 'miOut', 'use'),
+    wire('miCanAsk', 'ontrue', 'miOut', 'ask'),
+    wire('miIn', 'id', 'miOut', 'id'),
+    wire('miIn', 'label', 'miOut', 'label'),
+    wire('miIn', 'cost', 'miOut', 'cost')
+  ]
+};
+
+const MOON_ROW_FIELDS = ['id', 'name', 'species', 'colour', 'grown', 'hat', 'eyes', 'neck', 'happy', 'selected', 'line'];
+const MOON_ITEM_FIELDS = ['id', 'glyph', 'label', 'line', 'cost', 'use', 'ask', 'dim', 'worn', 'showAlien', 'species', 'colour', 'grown', 'hat', 'eyes', 'neck'];
+/** The hangar's buy card, worded for the moon: what the child has, what it costs, what is left. */
+const moonConfirmWords = (from: string, to: string): unknown[] => [
+  wire(from, 'haveWord', to, 'haveWord'),
+  wire(from, 'costWord', to, 'costWord'),
+  wire(from, 'leftWord', to, 'leftWord'),
+  wire(from, 'yesWord', to, 'yesWord'),
+  wire(from, 'noWord', to, 'noWord')
+];
+const MOON_CONFIRM_PORTS: Array<[string, string]> = [['haveWord', 'string'], ['costWord', 'string'], ['leftWord', 'string'], ['yesWord', 'string'], ['noWord', 'string']];
+
+/**
+ * The chosen alien, close up: big, its name, how grown it is, its favourite food (❓ until found), what it just said, then the
+ * food and the things to wear. A food tap feeds at once (its price is on the tile, and a meal is small). Something not owned
+ * asks first, on the hangar's card (P95 PLY-002: the balance, the price, what is left). The setup's shape: the store goes in,
+ * and the store to write comes out.
+ */
+const MOON_CARE: Tpl007Component = {
+  path: 'Moon/Care',
+  description: 'The chosen alien close up, then Something to eat and Something to wear. A food tap feeds it (Logic/Moon act, feed); something already owned goes on or off; something not owned asks first on Hangar/Confirm, then is bought and put on. App in; App and Write out.',
+  inputs: [port('mounted', 'boolean'), port('app', 'object'), port('profileId', 'string'), port('name', 'string'), port('species', 'string'), port('colour', 'string'), port('grown', 'number'), port('hat', 'string'), port('eyes', 'string'), port('neck', 'string'), port('happy', 'number'), port('line', 'string'), port('favLine', 'string'), port('said', 'string'), port('foods', 'array'), port('wear', 'array'), port('purse', 'number'), port('feedWord', 'string'), port('dressWord', 'string'), port('buyTitle', 'string'), ...MOON_CONFIRM_PORTS.map(([n, t]) => port(n, t))],
+  outputs: [port('app', 'object'), port('write', 'signal')],
+  repeats: { source: 'array', rowFields: MOON_ITEM_FIELDS },
+  instantiates: [C.moonItem, C.hangarConfirm, logicName('Logic/Moon act')],
+  nodes: [
+    inputs('mcIn', 'The chosen alien, and the store', [['mounted', 'boolean'], ['app', 'object'], ['profileId', 'string'], ['name', 'string'], ['species', 'string'], ['colour', 'string'], ['grown', 'number'], ['hat', 'string'], ['eyes', 'string'], ['neck', 'string'], ['happy', 'number'], ['line', 'string'], ['favLine', 'string'], ['said', 'string'], ['foods', 'array'], ['wear', 'array'], ['purse', 'number'], ['feedWord', 'string'], ['dressWord', 'string'], ['buyTitle', 'string'], ...MOON_CONFIRM_PORTS]),
+    group('mcCard', 'Close up', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-5)', paddingBottom: 'var(--space-5)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)' }, ['mcAlien', 'mcName', 'mcLine', 'mcFav', 'mcSaid', 'mcFeedLabel', 'mcFoods', 'mcDressLabel', 'mcStack']),
+    place('mcAlien', KIT_ALIEN, 'The chosen alien', 'mcCard', { size: 200 }),
+    text('mcName', 'Its name', 'mcCard', '', { ...T_CARD, textAlignX: 'center' }),
+    text('mcLine', 'How grown, and how far to go', 'mcCard', '', { ...T_BODY, textAlignX: 'center' }),
+    text('mcFav', 'Its favourite food', 'mcCard', '', { ...T_META, textAlignX: 'center' }),
+    text('mcSaid', 'What just happened', 'mcCard', '', { ...T_BODY, fontWeight: 'var(--font-bold)', textAlignX: 'center' }),
+    text('mcFeedLabel', 'Something to eat', 'mcCard', '', { ...T_META, fontWeight: 'var(--font-semibold)', textAlignX: 'center' }),
+    group('mcFoods', 'The food', 'mcCard', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['mcFoodEach']),
+    logic('mcFoodEach', FOR_EACH_NODE, 'One tile per food', { template: C.moonItem, templateType: 'explicit' }),
+    text('mcDressLabel', 'Something to wear', 'mcCard', '', { ...T_META, fontWeight: 'var(--font-semibold)', textAlignX: 'center' }),
+    // The buy card is fixed over the screen by .rkt-buy-over (APP_CSS), so the tiles stay where they are under it.
+    group('mcStack', 'The things to wear, and the question over them', 'mcCard', { ...column({ alignItems: 'stretch' }), cssClassName: 'rkt-shelf-stack' }, ['mcWearBox', 'mcOver']),
+    group('mcWearBox', 'The things to wear', 'mcStack', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['mcWearEach']),
+    logic('mcWearEach', FOR_EACH_NODE, 'One tile per thing to wear', { template: C.moonItem, templateType: 'explicit' }),
+    group('mcOver', 'The question, over the tiles', 'mcStack', { ...column({ alignItems: 'center' }), cssClassName: 'rkt-buy-over', mounted: false }, ['mcConfirm']),
+    place('mcConfirm', C.hangarConfirm, 'Buy it?', 'mcOver', { mounted: false }),
+    withStates('mcAsk', 'The tiles, or the question', ['idle', 'asking'], {
+      idle: { type: 'boolean', by: { idle: true, asking: false } },
+      asking: { type: 'boolean', by: { idle: false, asking: true } }
+    }),
+    logic('mcBuyTitle', EXPRESSION_NODE, 'Buy what?', { expression: "String(word || '').replace('{item}', String(label || ''))" }),
+    logic('mcFeed', logicName('Logic/Moon act'), 'Feed it', { action: 'feed' }),
+    logic('mcWear', logicName('Logic/Moon act'), 'Put it on, or take it off', { action: 'wear' }),
+    logic('mcBuy', logicName('Logic/Moon act'), 'Buy it, and put it on', { action: 'buy' }),
+    logic('mcShown', EXPRESSION_NODE, 'Shown unless told not to', { expression: 'm !== false' }),
+    outputs('mcOut', 'The store to write', [['app', 'object'], ['write', 'signal']])
+  ],
+  connections: [
+    wire('mcIn', 'mounted', 'mcShown', 'm'),
+    wire('mcShown', 'result', 'mcCard', 'mounted'),
+    ...(['species', 'name', 'grown', 'hat', 'eyes', 'neck', 'happy'] as const).map((f) => wire('mcIn', f, 'mcAlien', f)),
+    wire('mcIn', 'colour', 'mcAlien', 'color'),
+    wire('mcIn', 'name', 'mcName', 'text'),
+    wire('mcIn', 'line', 'mcLine', 'text'),
+    wire('mcIn', 'favLine', 'mcFav', 'text'),
+    wire('mcIn', 'feedWord', 'mcFeedLabel', 'text'),
+    wire('mcIn', 'dressWord', 'mcDressLabel', 'text'),
+    wire('mcIn', 'foods', 'mcFoodEach', 'items'),
+    wire('mcIn', 'wear', 'mcWearEach', 'items'),
+    // What just happened: the adopt card's welcome (from the page), or this card's own yum and it's-wearing-it.
+    wire('mcIn', 'said', 'mcSaid', 'text'),
+    wire('mcFeed', 'said', 'mcSaid', 'text'),
+    wire('mcWear', 'said', 'mcSaid', 'text'),
+    wire('mcBuy', 'said', 'mcSaid', 'text'),
+    // Feed: the repeater publishes the row's values before its signal.
+    wire('mcIn', 'app', 'mcFeed', 'app'),
+    wire('mcIn', 'profileId', 'mcFeed', 'profileId'),
+    wire('mcFoodEach', 'itemOutput-id', 'mcFeed', 'foodId'),
+    wire('mcFoodEach', 'itemOutputSignal-use', 'mcFeed', 'run'),
+    // On or off: owned, so no question.
+    wire('mcIn', 'app', 'mcWear', 'app'),
+    wire('mcIn', 'profileId', 'mcWear', 'profileId'),
+    wire('mcWearEach', 'itemOutput-id', 'mcWear', 'wearId'),
+    wire('mcWearEach', 'itemOutputSignal-use', 'mcWear', 'run'),
+    // Not owned: the hangar's card asks, with the purse, the price and what is left.
+    wire('mcWearEach', 'itemOutputSignal-ask', 'mcAsk', 'to-asking'),
+    wire('mcAsk', 'asking', 'mcOver', 'mounted'),
+    wire('mcAsk', 'asking', 'mcConfirm', 'mounted'),
+    wire('mcIn', 'buyTitle', 'mcBuyTitle', 'word'),
+    wire('mcWearEach', 'itemOutput-label', 'mcBuyTitle', 'label'),
+    wire('mcBuyTitle', 'result', 'mcConfirm', 'title'),
+    wire('mcWearEach', 'itemOutput-cost', 'mcConfirm', 'cost'),
+    wire('mcIn', 'purse', 'mcConfirm', 'purse'),
+    ...moonConfirmWords('mcIn', 'mcConfirm'),
+    wire('mcConfirm', 'no', 'mcAsk', 'to-idle'),
+    wire('mcConfirm', 'yes', 'mcAsk', 'to-idle'),
+    wire('mcIn', 'app', 'mcBuy', 'app'),
+    wire('mcIn', 'profileId', 'mcBuy', 'profileId'),
+    wire('mcWearEach', 'itemOutput-id', 'mcBuy', 'wearId'),
+    wire('mcConfirm', 'yes', 'mcBuy', 'run'),
+    // Out: the store to write.
+    ...(['mcFeed', 'mcWear', 'mcBuy'] as const).flatMap((a) => [wire(a, 'app', 'mcOut', 'app'), wire(a, 'done', 'mcOut', 'write')])
+  ]
+};
+
+/**
+ * The adopt card: pick a species (each drawn in the colour being chosen), a colour and a name, then Adopt. The first alien is
+ * free and comes at once; a later one shows its price on the button and asks first on the hangar's card. With aliens already
+ * on the moon, the card is folded to one button until the child opens it. The draft lives in Variables (RKT-006: a Text Input
+ * mounts from Start Value, and typing never writes it), and its species and colour go out so the page's view draws them.
+ */
+const MOON_ADOPT: Tpl007Component = {
+  path: 'Moon/Adopt',
+  description: 'Adopt an alien: a species (drawn in the colour being chosen), a colour and a name, then Adopt (free for the first; a later one asks first on Hangar/Confirm). Folded to one button once the moon has aliens. App in; App, Write and Said out, and the draft Species and Colour for the view.',
+  inputs: [port('app', 'object'), port('profileId', 'string'), port('has', 'boolean'), port('full', 'boolean'), port('canAdopt', 'boolean'), port('free', 'boolean'), port('cost', 'number'), port('purse', 'number'), port('button', 'string'), port('another', 'string'), port('suggestedName', 'string'), port('species', 'array'), port('colours', 'array'), port('colour', 'string'), port('firstWord', 'string'), port('moreWord', 'string'), port('nameWord', 'string'), port('askWord', 'string'), port('cancelWord', 'string'), ...MOON_CONFIRM_PORTS.map(([n, t]) => port(n, t))],
+  outputs: [port('app', 'object'), port('write', 'signal'), port('said', 'string'), port('draftSpecies', 'string'), port('draftColour', 'string')],
+  repeats: { source: 'array', rowFields: MOON_ROW_FIELDS },
+  instantiates: [C.moonTile, C.choiceRow, C.hangarConfirm, logicName('Logic/Moon act')],
+  nodes: [
+    inputs('maIn', 'The adopt card', [['app', 'object'], ['profileId', 'string'], ['has', 'boolean'], ['full', 'boolean'], ['canAdopt', 'boolean'], ['free', 'boolean'], ['cost', 'number'], ['purse', 'number'], ['button', 'string'], ['another', 'string'], ['suggestedName', 'string'], ['species', 'array'], ['colours', 'array'], ['colour', 'string'], ['firstWord', 'string'], ['moreWord', 'string'], ['nameWord', 'string'], ['askWord', 'string'], ['cancelWord', 'string'], ...MOON_CONFIRM_PORTS]),
+    group('maCard', 'Adopt an alien', undefined, { ...CARD, alignItems: 'center', rowGap: 'var(--space-3)', paddingTop: 'var(--space-5)', paddingBottom: 'var(--space-5)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)' }, ['maMore', 'maBody', 'maOver']),
+    place('maMore', BUTTON_NODE, 'Adopt another', 'maCard', { ...BTN_OUTLINE, label: 'Adopt another alien' }),
+    group('maBody', 'The choices', 'maCard', column({ alignItems: 'center', rowGap: 'var(--space-3)' }), ['maTitle', 'maSpecies', 'maColours', 'maNameLabel', 'maName', 'maButtons']),
+    text('maTitle', 'Adopt an alien', 'maBody', '', { ...T_CARD, textAlignX: 'center' }),
+    group('maSpecies', 'The species', 'maBody', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['maSpeciesEach']),
+    logic('maSpeciesEach', FOR_EACH_NODE, 'One tile per species', { template: C.moonTile, templateType: 'explicit' }),
+    place('maColours', C.choiceRow, 'The colour', 'maBody'),
+    text('maNameLabel', 'Its name', 'maBody', '', { ...T_META, fontWeight: 'var(--font-semibold)', textAlignX: 'center' }),
+    place('maName', TEXT_INPUT_NODE, 'The name box', 'maBody', { ...FIELD, fontSize: 'var(--text-xl)', maxWidth: px(320) }),
+    group('maButtons', 'Adopt, or not now', 'maBody', row({ justifyContent: 'center' }), ['maAdopt', 'maCancel']),
+    place('maAdopt', BUTTON_NODE, 'Adopt', 'maButtons', { ...BTN_PRIMARY, label: 'Adopt' }),
+    place('maCancel', BUTTON_NODE, 'Not now', 'maButtons', { ...BTN_OUTLINE, label: 'Cancel' }),
+    group('maOver', 'The question, over the screen', 'maCard', { ...column({ alignItems: 'center' }), cssClassName: 'rkt-buy-over', mounted: false }, ['maConfirm']),
+    place('maConfirm', C.hangarConfirm, 'Adopt it?', 'maOver', { mounted: false }),
+    // The draft. One adopt card on screen at a time.
+    { ...(logic('maSpVar', VARIABLE_NODE, 'The species so far', { name: 'moonDraftSpecies' }) as object), comment: 'One adopt card on screen at a time: the draft is the card’s own.' },
+    logic('maColVar', VARIABLE_NODE, 'The colour so far', { name: 'moonDraftColour' }),
+    logic('maNameVar', VARIABLE_NODE, 'The name so far', { name: 'moonDraftName' }),
+    logic('maSetSp', SET_VARIABLE_NODE, 'Pick a species', { name: 'moonDraftSpecies' }),
+    logic('maSetCol', SET_VARIABLE_NODE, 'Pick a colour', { name: 'moonDraftColour' }),
+    logic('maEmpty', EXPRESSION_NODE, 'No name', { expression: "''" }),
+    logic('maClearName', SET_VARIABLE_NODE, 'Clear the name', { name: 'moonDraftName' }),
+    // Folded or open: open when there is no alien yet, or the child asked.
+    withStates('maOpen', 'Folded, or open', ['folded', 'open'], { open: { type: 'boolean', by: { folded: false, open: true } } }),
+    logic('maBodyShown', EXPRESSION_NODE, 'Open?', { expression: 'open === true || has !== true' }),
+    logic('maMoreShown', EXPRESSION_NODE, 'The fold button?', { expression: 'has === true && open !== true && full !== true' }),
+    logic('maTitleText', EXPRESSION_NODE, 'The first, or another', { expression: 'has === true ? more : first' }),
+    gate('maIsFree', 'Free, or ask first?'),
+    withStates('maAsk', 'The card, or the question', ['idle', 'asking'], { asking: { type: 'boolean', by: { idle: false, asking: true } } }),
+    logic('maDo', logicName('Logic/Moon act'), 'Adopt it', { action: 'adopt' }),
+    outputs('maOut', 'Adopted', [['app', 'object'], ['write', 'signal'], ['said', 'string'], ['draftSpecies', 'string'], ['draftColour', 'string']])
+  ],
+  connections: [
+    // Folded or open.
+    wire('maOpen', 'open', 'maBodyShown', 'open'),
+    wire('maIn', 'has', 'maBodyShown', 'has'),
+    wire('maBodyShown', 'result', 'maBody', 'mounted'),
+    wire('maOpen', 'open', 'maMoreShown', 'open'),
+    wire('maIn', 'has', 'maMoreShown', 'has'),
+    wire('maIn', 'full', 'maMoreShown', 'full'),
+    wire('maMoreShown', 'result', 'maMore', 'mounted'),
+    wire('maIn', 'another', 'maMore', 'label'),
+    wire('maMore', 'onClick', 'maOpen', 'to-open'),
+    wire('maCancel', 'onClick', 'maOpen', 'to-folded'),
+    wire('maIn', 'has', 'maCancel', 'mounted'),
+    wire('maIn', 'firstWord', 'maTitleText', 'first'),
+    wire('maIn', 'moreWord', 'maTitleText', 'more'),
+    wire('maIn', 'has', 'maTitleText', 'has'),
+    wire('maTitleText', 'result', 'maTitle', 'text'),
+    wire('maIn', 'cancelWord', 'maCancel', 'label'),
+    // The species: drawn in the colour being chosen; a tap picks it.
+    wire('maIn', 'species', 'maSpeciesEach', 'items'),
+    wire('maSpeciesEach', 'itemOutput-id', 'maSetSp', 'value'),
+    wire('maSpeciesEach', 'itemOutputSignal-tap', 'maSetSp', 'do'),
+    // The colour.
+    wire('maIn', 'colours', 'maColours', 'items'),
+    wire('maIn', 'colour', 'maColours', 'value'),
+    wire('maColours', 'value', 'maSetCol', 'value'),
+    wire('maColours', 'changed', 'maSetCol', 'do'),
+    // The name: the suggestion shows in the empty box, and an empty box adopts with it.
+    wire('maIn', 'nameWord', 'maNameLabel', 'text'),
+    wire('maIn', 'suggestedName', 'maName', 'placeholder'),
+    wire('maNameVar', 'value', 'maName', 'startValue'),
+    wire('maName', 'onTextChanged', 'maNameVar', 'value'),
+    // Adopt: free comes at once; a price asks first.
+    wire('maIn', 'button', 'maAdopt', 'label'),
+    wire('maIn', 'canAdopt', 'maAdopt', 'mounted'),
+    wire('maIn', 'free', 'maIsFree', 'condition'),
+    wire('maAdopt', 'onClick', 'maIsFree', 'eval'),
+    wire('maIsFree', 'ontrue', 'maDo', 'run'),
+    wire('maIsFree', 'onfalse', 'maAsk', 'to-asking'),
+    wire('maAsk', 'asking', 'maOver', 'mounted'),
+    wire('maAsk', 'asking', 'maConfirm', 'mounted'),
+    wire('maIn', 'askWord', 'maConfirm', 'title'),
+    wire('maIn', 'cost', 'maConfirm', 'cost'),
+    wire('maIn', 'purse', 'maConfirm', 'purse'),
+    ...moonConfirmWords('maIn', 'maConfirm'),
+    wire('maConfirm', 'no', 'maAsk', 'to-idle'),
+    wire('maConfirm', 'yes', 'maAsk', 'to-idle'),
+    wire('maConfirm', 'yes', 'maDo', 'run'),
+    wire('maIn', 'app', 'maDo', 'app'),
+    wire('maIn', 'profileId', 'maDo', 'profileId'),
+    wire('maSpVar', 'value', 'maDo', 'species'),
+    wire('maColVar', 'value', 'maDo', 'colour'),
+    wire('maNameVar', 'value', 'maDo', 'name'),
+    // Adopted: written, folded, and the name box emptied for the next one.
+    wire('maDo', 'app', 'maOut', 'app'),
+    wire('maDo', 'done', 'maOut', 'write'),
+    wire('maDo', 'said', 'maOut', 'said'),
+    wire('maDo', 'done', 'maOpen', 'to-folded'),
+    wire('maEmpty', 'result', 'maClearName', 'value'),
+    wire('maDo', 'done', 'maClearName', 'do'),
+    wire('maClearName', 'done', 'maName', 'set'),
+    wire('maSpVar', 'value', 'maOut', 'draftSpecies'),
+    wire('maColVar', 'value', 'maOut', 'draftColour')
+  ]
+};
+
+/**
+ * Pages/Moon — Richard's ruling 4 (2026-10-04): the prize is the moon. The child's aliens in a row (a tap chooses one), the
+ * chosen one close up with food and things to wear, and the adopt card. Reached from the hangar (the hangar is not a game, so
+ * the moon is not a Home card either: Richard, 2026-09-14), and back to it.
+ */
+const PAGE_MOON: Tpl007Component = {
+  path: 'Pages/Moon',
+  description: 'The moon (P113 REV-005): the player’s aliens as tiles, the chosen one close up (Moon/Care: feed it, dress it), and Moon/Adopt. Spends the same purse as the hangar. Reached from the hangar.',
+  instantiates: [C.header, C.moonTile, C.moonCare, C.moonAdopt, C.store, logicName('Logic/Active profile'), logicName('Logic/Translate words'), logicName('Logic/Moon view'), logicName('Logic/Moon act'), C.words],
+  repeats: { source: 'array', rowFields: MOON_ROW_FIELDS },
+  nodes: [
+    { id: 'mnPage', type: 'Page', label: 'Moon', parameters: { title: 'Rocket School', urlPath: 'moon' }, children: ['mnOuter'] },
+    group('mnOuter', 'The ground', 'mnPage', column({ alignItems: 'center' }), ['mnWrap']),
+    group('mnWrap', 'The screen', 'mnOuter', column({ alignItems: 'stretch', rowGap: 'var(--space-4)', paddingTop: 'var(--space-4)', paddingBottom: 'var(--space-8)', paddingLeft: 'var(--space-4)', paddingRight: 'var(--space-4)', maxWidth: px(960) }), ['mnHeader', 'mnTitle', 'mnPurse', 'mnAliens', 'mnCare', 'mnAdopt', 'mnBack']),
+    place('mnHeader', C.header, 'The bar', 'mnWrap', { showHome: true, showHangar: true }),
+    text('mnTitle', 'The Moon', 'mnWrap', '', T_SECTION),
+    text('mnPurse', 'The stars to spend', 'mnWrap', '', { ...T_LEAD, fontWeight: 'var(--font-bold)' }),
+    group('mnAliens', 'The aliens', 'mnWrap', row({ width: pct(100), sizeMode: 'contentHeight', justifyContent: 'center', alignItems: 'stretch' }), ['mnEach']),
+    logic('mnEach', FOR_EACH_NODE, 'One tile per alien', { template: C.moonTile, templateType: 'explicit' }),
+    place('mnCare', C.moonCare, 'The chosen alien', 'mnWrap'),
+    place('mnAdopt', C.moonAdopt, 'Adopt an alien', 'mnWrap'),
+    place('mnBack', BUTTON_NODE, 'Back to the hangar', 'mnWrap', { ...BTN_OUTLINE, label: 'Back to the hangar' }),
+    logic('mnStore', C.store, 'The store'),
+    logic('mnMe', logicName('Logic/Active profile'), 'Who is playing'),
+    logic('mnWords', C.words, 'The words'),
+    logic('mnT', logicName('Logic/Translate words'), 'In their language'),
+    logic('mnView', logicName('Logic/Moon view'), 'The moon, as they see it'),
+    logic('mnSelect', logicName('Logic/Moon act'), 'Choose an alien', { action: 'select' }),
+    logic('mnNoOne', EXPRESSION_NODE, 'Nobody signed in?', { expression: 'has === false' }),
+    gate('mnGuard', 'Send them to the profiles?'),
+    logic('mnGoProfiles', NAVIGATE_NODE, 'To the profiles', { router: ROUTER, target: C.pageProfiles }),
+    logic('mnGoHome', NAVIGATE_NODE, 'Home', { router: ROUTER, target: C.pageHome }),
+    logic('mnGoHangar', NAVIGATE_NODE, 'To the hangar', { router: ROUTER, target: C.pageHangar })
+  ],
+  connections: [
+    wire('mnStore', 'app', 'mnMe', 'app'),
+    wire('mnWords', 'words', 'mnT', 'words'),
+    wire('mnMe', 'lang', 'mnT', 'lang'),
+    wire('mnMe', 'hasProfile', 'mnNoOne', 'has'),
+    wire('mnNoOne', 'result', 'mnGuard', 'condition'),
+    wire('mnPage', 'didMount', 'mnGuard', 'eval'),
+    wire('mnGuard', 'ontrue', 'mnGoProfiles', 'navigate'),
+    ...headerWires('mn'),
+    wire('mnHeader', 'home', 'mnGoHome', 'navigate'),
+    wire('mnBack', 'onClick', 'mnGoHangar', 'navigate'),
+    wire('mnT', 'backToHangar', 'mnBack', 'label'),
+    wire('mnT', 'moonTitle', 'mnTitle', 'text'),
+    // The moon, as the player sees it, with the adopt card's draft drawn in.
+    wire('mnStore', 'app', 'mnView', 'app'),
+    wire('mnAdopt', 'draftSpecies', 'mnView', 'draftSpecies'),
+    wire('mnAdopt', 'draftColour', 'mnView', 'draftColour'),
+    wire('mnView', 'purseLine', 'mnPurse', 'text'),
+    wire('mnView', 'aliens', 'mnEach', 'items'),
+    wire('mnView', 'has', 'mnAliens', 'mounted'),
+    // A tap on a tile chooses that alien.
+    wire('mnStore', 'app', 'mnSelect', 'app'),
+    wire('mnMe', 'profileId', 'mnSelect', 'profileId'),
+    wire('mnEach', 'itemOutput-id', 'mnSelect', 'alienId'),
+    wire('mnEach', 'itemOutputSignal-tap', 'mnSelect', 'run'),
+    wire('mnSelect', 'app', 'mnStore', 'app'),
+    wire('mnSelect', 'done', 'mnStore', 'write'),
+    // Close up.
+    wire('mnView', 'has', 'mnCare', 'mounted'),
+    wire('mnStore', 'app', 'mnCare', 'app'),
+    wire('mnMe', 'profileId', 'mnCare', 'profileId'),
+    ...([['selName', 'name'], ['selSpecies', 'species'], ['selColour', 'colour'], ['selGrown', 'grown'], ['selHat', 'hat'], ['selEyes', 'eyes'], ['selNeck', 'neck'], ['selHappy', 'happy'], ['selLine', 'line'], ['favLine', 'favLine'], ['foods', 'foods'], ['wear', 'wear'], ['purse', 'purse']] as const).map(([from, to]) => wire('mnView', from, 'mnCare', to)),
+    wire('mnAdopt', 'said', 'mnCare', 'said'),
+    wire('mnT', 'moonFeed', 'mnCare', 'feedWord'),
+    wire('mnT', 'moonDress', 'mnCare', 'dressWord'),
+    wire('mnT', 'buyTitle', 'mnCare', 'buyTitle'),
+    wire('mnT', 'youHave', 'mnCare', 'haveWord'),
+    wire('mnT', 'itCosts', 'mnCare', 'costWord'),
+    wire('mnT', 'youllHave', 'mnCare', 'leftWord'),
+    wire('mnT', 'yesBuy', 'mnCare', 'yesWord'),
+    wire('mnT', 'noThanks', 'mnCare', 'noWord'),
+    wire('mnCare', 'app', 'mnStore', 'app'),
+    wire('mnCare', 'write', 'mnStore', 'write'),
+    // Adopt.
+    wire('mnStore', 'app', 'mnAdopt', 'app'),
+    wire('mnMe', 'profileId', 'mnAdopt', 'profileId'),
+    ...([['has', 'has'], ['full', 'full'], ['canAdopt', 'canAdopt'], ['adoptFree', 'free'], ['adoptCost', 'cost'], ['purse', 'purse'], ['adoptButton', 'button'], ['anotherLine', 'another'], ['suggestedName', 'suggestedName'], ['adoptSpecies', 'species'], ['adoptColours', 'colours'], ['draftColour', 'colour']] as const).map(([from, to]) => wire('mnView', from, 'mnAdopt', to)),
+    wire('mnT', 'moonAdoptFirst', 'mnAdopt', 'firstWord'),
+    wire('mnT', 'moonAdoptMore', 'mnAdopt', 'moreWord'),
+    wire('mnT', 'moonName', 'mnAdopt', 'nameWord'),
+    wire('mnT', 'moonAdoptQ', 'mnAdopt', 'askWord'),
+    wire('mnT', 'cancel', 'mnAdopt', 'cancelWord'),
+    wire('mnT', 'youHave', 'mnAdopt', 'haveWord'),
+    wire('mnT', 'itCosts', 'mnAdopt', 'costWord'),
+    wire('mnT', 'youllHave', 'mnAdopt', 'leftWord'),
+    wire('mnT', 'yesBuy', 'mnAdopt', 'yesWord'),
+    wire('mnT', 'noThanks', 'mnAdopt', 'noWord'),
+    wire('mnAdopt', 'app', 'mnStore', 'app'),
+    wire('mnAdopt', 'write', 'mnStore', 'write')
+  ]
+};
+
 /** Every component, in the order the plan creates them — a component before anything that places it. */
 export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
   ...DATA_COMPONENTS,
@@ -4892,6 +5318,11 @@ export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
   // P113 REV-002: the lists page's parts.
   LIST_ROW,
   LIST_EDITOR,
+  // P113 REV-005: the moon's parts.
+  MOON_TILE,
+  MOON_ITEM,
+  MOON_CARE,
+  MOON_ADOPT,
   PAGE_PROFILES,
   PAGE_HOME,
   PAGE_RACE,
@@ -4899,11 +5330,12 @@ export const TPL007_COMPONENTS: ReadonlyArray<Tpl007Component> = [
   PAGE_MERGE,
   PAGE_HUNT,
   PAGE_MONSTER,
-  PAGE_LISTS
+  PAGE_LISTS,
+  PAGE_MOON
 ];
 
 /** The library modules the door must find installed before authoring. */
 export const REQUIRED_MODULES = ['game-kit', 'keyboard-shortcuts'] as const;
 
 /** The pages, for the gate and the start page. */
-export const PAGES = [C.pageProfiles, C.pageHome, C.pageRace, C.pageHangar, C.pageMerge, C.pageHunt, C.pageMonster, C.pageLists] as const;
+export const PAGES = [C.pageProfiles, C.pageHome, C.pageRace, C.pageHangar, C.pageMerge, C.pageHunt, C.pageMonster, C.pageLists, C.pageMoon] as const;

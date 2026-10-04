@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "669d32c7-6d49-55fa-8e77-08c99edd711c",
+  "name": "Shop tile",
+  "path": "/Moon/Shop tile",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One food or one thing to wear: a glyph, or the chosen alien wearing it; its name; and its price or what a tap does. Worn fills it sunshine; Dim greys it (not enough stars yet). Publishes Use (feed it, or put it on or take it off) or Ask (buy it first), with the Id, Label and Cost."
+}

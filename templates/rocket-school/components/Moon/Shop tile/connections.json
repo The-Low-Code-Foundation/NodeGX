@@ -1,0 +1,163 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "669d32c7-6d49-55fa-8e77-08c99edd711c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "miIn",
+      "fromProperty": "glyph",
+      "toId": "miGlyph",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "showAlien",
+      "toId": "miGlyphShown",
+      "toProperty": "showAlien"
+    },
+    {
+      "fromId": "miGlyphShown",
+      "fromProperty": "result",
+      "toId": "miGlyph",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "showAlien",
+      "toId": "miAlienBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "species",
+      "toId": "miAlien",
+      "toProperty": "species"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "grown",
+      "toId": "miAlien",
+      "toProperty": "grown"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "hat",
+      "toId": "miAlien",
+      "toProperty": "hat"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "eyes",
+      "toId": "miAlien",
+      "toProperty": "eyes"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "neck",
+      "toId": "miAlien",
+      "toProperty": "neck"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "colour",
+      "toId": "miAlien",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "label",
+      "toId": "miLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "line",
+      "toId": "miLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "worn",
+      "toId": "miToneOf",
+      "toProperty": "worn"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "dim",
+      "toId": "miToneOf",
+      "toProperty": "dim"
+    },
+    {
+      "fromId": "miToneOf",
+      "fromProperty": "result",
+      "toId": "miTone",
+      "toProperty": "currentState"
+    },
+    {
+      "fromId": "miTone",
+      "fromProperty": "ground",
+      "toId": "miCard",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "miTone",
+      "fromProperty": "opacity",
+      "toId": "miCard",
+      "toProperty": "opacity"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "use",
+      "toId": "miCanUse",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "ask",
+      "toId": "miCanAsk",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "miCard",
+      "fromProperty": "onClick",
+      "toId": "miCanUse",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "miCard",
+      "fromProperty": "onClick",
+      "toId": "miCanAsk",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "miCanUse",
+      "fromProperty": "ontrue",
+      "toId": "miOut",
+      "toProperty": "use"
+    },
+    {
+      "fromId": "miCanAsk",
+      "fromProperty": "ontrue",
+      "toId": "miOut",
+      "toProperty": "ask"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "id",
+      "toId": "miOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "label",
+      "toId": "miOut",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "miIn",
+      "fromProperty": "cost",
+      "toId": "miOut",
+      "toProperty": "cost"
+    }
+  ]
+}

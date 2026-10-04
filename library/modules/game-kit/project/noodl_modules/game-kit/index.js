@@ -7,7 +7,7 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
 /**
  * Game Kit — a NodeGX node kit for small games.
  *
- * Six nodes, and each one exists because the graph cannot draw or play the
+ * Seven nodes, and each one exists because the graph cannot draw or play the
  * thing itself:
  *
  * | node | kind | why it is not nodes |
@@ -18,6 +18,7 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
  * | `Race Track`   | React | two sprites positioned along an SVG path — there is no SVG node |
  * | `Keyboard Map` | React | an on-screen keyboard with a colour per finger |
  * | `Answer Pad`   | React | keys that type at the caret and read a key's `code` — Text Input can do neither (D60) |
+ * | `Alien`        | React | a creature with what it wears, in SVG — P113 REV-005's moon; there is no SVG node |
  *
  * Hand-written in the shape of `keyboard-shortcuts`: no SDK, no npm install,
  * no bundler for THIS file. The avatar library is vendored into `index.js`
@@ -1916,10 +1917,316 @@ var NodegxDicebear=(()=>{var F=Object.defineProperty;var l2=Object.getOwnPropert
     }
   };
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Alien — a React node (P113 REV-005)
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * P113 REV-005 — Richard, 2026-10-04: *"adopting little aliens on a moon in the game and buying food and accessories for
+   * them"*. A small creature drawn in SVG (there is no SVG node): a body by Species, filled with Colour and outlined in ink,
+   * its eyes and a smile, and what it wears in three places — on its head (Hat), over its eyes (Eyes) and round its neck
+   * (Neck). Grown 0 is a baby, 1 young, 2 grown up; it grows from its feet, so a row of aliens stands on one line.
+   *
+   * Nothing here decides anything about a game: the graph says what the alien is, what it wears and when it is happy. A
+   * Happy count that goes UP makes it hop once (the count it mounts with does not, so a remount replays nothing); it
+   * breathes gently while it waits. Reduced motion stills both.
+   *
+   * The outline is the contrast: every part is edged in Outline (ink by default), so an alien of any Colour reads against
+   * any ground.
+   */
+  var ALIEN_BOX = '-5 -12 110 110';
+  /** Where the alien stands: its feet, the point it grows from. */
+  var ALIEN_FEET = [50, 92];
+  /** How big each stage is drawn, from baby to grown up. */
+  var ALIEN_GROWN = [0.62, 0.8, 1];
+
+  /**
+   * The six species. `top` is where a hat sits, `neck` where a scarf goes and `half` how wide the body is there; `eyes` are
+   * [x, y, r]. `parts` are drawn in order, so legs and antennae go before the body that covers their roots.
+   */
+  var ALIEN_SPECIES = {
+    blob: { top: 32, neck: 82, half: 32, eyes: [[50, 58, 11]], parts: [['path', 'M 18 90 C 6 90 8 54 30 46 C 38 26 62 26 70 46 C 92 54 94 90 82 90 Z']] },
+    bean: { top: 35, neck: 84, half: 20, eyes: [[42, 56, 6.5], [58, 56, 6.5]], parts: [['antenna', 43, 38, 33, 15], ['antenna', 57, 38, 67, 15], ['ellipse', 50, 63, 23, 29]] },
+    trio: { top: 35, neck: 85, half: 24, eyes: [[37, 58, 5.5], [50, 52, 6.5], [63, 58, 5.5]], parts: [['circle', 50, 62, 28]] },
+    squid: { top: 38, neck: 71, half: 27, eyes: [[40, 56, 6.5], [60, 56, 6.5]], parts: [['legs', [28, 42, 58, 72], 68, 91], ['path', 'M 22 74 C 22 26 78 26 78 74 Z']] },
+    fuzz: { top: 34, neck: 86, half: 24, eyes: [[41, 60, 6.5], [59, 60, 6.5]], parts: [['spikes', 50, 62, 31, 25, 18]] },
+    star: { top: 27, neck: 73, half: 17, eyes: [[43, 60, 5], [57, 60, 5]], parts: [['star', 50, 62, 37, 20]] }
+  };
+  var ALIEN_SPECIES_IDS = Object.keys(ALIEN_SPECIES);
+
+  /** What an alien can wear, in each of its three places. An id the kit does not know draws nothing. */
+  var ALIEN_WEAR = {
+    hat: ['tophat', 'party', 'crown', 'bow', 'beanie'],
+    eyes: ['glasses', 'sunglasses', 'starglasses', 'monocle'],
+    neck: ['scarf', 'bowtie', 'necklace']
+  };
+
+  var ALIEN_CSS =
+    '@keyframes gk-alien-hop { 0% { transform: translateY(0) scale(1, 1); } 25% { transform: translateY(-16px) scale(0.94, 1.07); } ' +
+    '55% { transform: translateY(0) scale(1.07, 0.93); } 75% { transform: translateY(-5px) scale(1, 1); } 100% { transform: translateY(0) scale(1, 1); } }\n' +
+    '@keyframes gk-alien-breathe { 0%, 100% { transform: scale(1, 1); } 50% { transform: scale(1.02, 0.98); } }\n' +
+    '.gk-alien-hop { transform-box: fill-box; transform-origin: 50% 100%; animation: gk-alien-hop 750ms ease-out both; }\n' +
+    '.gk-alien-breathe { transform-box: fill-box; transform-origin: 50% 100%; animation: gk-alien-breathe 3200ms ease-in-out infinite; }\n' +
+    '@media (prefers-reduced-motion: reduce) {\n' +
+    '  .gk-alien-hop, .gk-alien-breathe { animation: none; }\n' +
+    '}';
+
+  function starPoints(cx, cy, outer, inner, n) {
+    var pts = [];
+    for (var i = 0; i < n * 2; i++) {
+      var r = i % 2 === 0 ? outer : inner;
+      var a = (Math.PI * i) / n - Math.PI / 2;
+      pts.push((cx + r * Math.cos(a)).toFixed(1) + ',' + (cy + r * Math.sin(a)).toFixed(1));
+    }
+    return pts.join(' ');
+  }
+
+  /** The body: every part filled with the alien's colour and edged in ink. */
+  function alienBody(sp, colour, ink, gold) {
+    var edge = { stroke: ink, strokeWidth: 3, strokeLinejoin: 'round' };
+    var out = [];
+    sp.parts.forEach(function (p, i) {
+      var k = 'b' + i;
+      if (p[0] === 'path') out.push(h('path', Object.assign({ key: k, d: p[1], fill: colour }, edge)));
+      else if (p[0] === 'ellipse') out.push(h('ellipse', Object.assign({ key: k, cx: p[1], cy: p[2], rx: p[3], ry: p[4], fill: colour }, edge)));
+      else if (p[0] === 'circle') out.push(h('circle', Object.assign({ key: k, cx: p[1], cy: p[2], r: p[3], fill: colour }, edge)));
+      else if (p[0] === 'spikes') out.push(h('polygon', Object.assign({ key: k, points: starPoints(p[1], p[2], p[3], p[4], p[5]), fill: colour }, edge)));
+      else if (p[0] === 'star') out.push(h('polygon', Object.assign({ key: k, points: starPoints(p[1], p[2], p[3], p[4], 5), fill: colour }, edge)));
+      else if (p[0] === 'antenna') {
+        out.push(h('line', { key: k + 'l', x1: p[1], y1: p[2], x2: p[3], y2: p[4], stroke: ink, strokeWidth: 3, strokeLinecap: 'round' }));
+        out.push(h('circle', Object.assign({ key: k + 'b', cx: p[3], cy: p[4], r: 4.5, fill: gold }, edge)));
+      } else if (p[0] === 'legs') {
+        p[1].forEach(function (x, j) {
+          out.push(h('ellipse', Object.assign({ key: k + 'g' + j, cx: x, cy: (p[2] + p[3]) / 2, rx: 6, ry: (p[3] - p[2]) / 2, fill: colour }, edge)));
+        });
+      }
+    });
+    return out;
+  }
+
+  /** The eyes, the cheeks and the smile. */
+  function alienFace(sp, ink, cheek) {
+    var out = [];
+    var low = 0;
+    sp.eyes.forEach(function (e, i) {
+      out.push(h('circle', { key: 'e' + i, cx: e[0], cy: e[1], r: e[2], fill: '#ffffff', stroke: ink, strokeWidth: 2.5 }));
+      out.push(h('circle', { key: 'p' + i, cx: e[0] + e[2] * 0.15, cy: e[1] + e[2] * 0.12, r: e[2] * 0.5, fill: ink }));
+      out.push(h('circle', { key: 's' + i, cx: e[0] - e[2] * 0.05, cy: e[1] - e[2] * 0.2, r: Math.max(1.2, e[2] * 0.17), fill: '#ffffff' }));
+      low = Math.max(low, e[1] + e[2]);
+    });
+    var left = sp.eyes[0][0] - sp.eyes[0][2];
+    var right = sp.eyes[sp.eyes.length - 1][0] + sp.eyes[sp.eyes.length - 1][2];
+    var my = low + 6;
+    out.push(h('ellipse', { key: 'cl', cx: left - 2, cy: my - 1, rx: 4, ry: 2.6, fill: cheek, opacity: 0.45 }));
+    out.push(h('ellipse', { key: 'cr', cx: right + 2, cy: my - 1, rx: 4, ry: 2.6, fill: cheek, opacity: 0.45 }));
+    out.push(h('path', { key: 'm', d: 'M 43 ' + my + ' Q 50 ' + (my + 7) + ' 57 ' + my, fill: 'none', stroke: ink, strokeWidth: 2.5, strokeLinecap: 'round' }));
+    return out;
+  }
+
+  /** What the alien wears in one place, or nothing for an id the kit does not know. Exposed for the gate. */
+  function alienWear(slot, id, sp, ink, trim, gold) {
+    var edge = { stroke: ink, strokeWidth: 2.5, strokeLinejoin: 'round' };
+    var T = sp.top;
+    var N = sp.neck;
+    var H = sp.half;
+    var e0 = sp.eyes[0];
+    if (slot === 'hat') {
+      if (id === 'tophat')
+        return [
+          h('rect', { key: 'c', x: 37, y: T - 27, width: 26, height: 24, rx: 2, fill: ink }),
+          h('rect', { key: 'r', x: 37, y: T - 10, width: 26, height: 5, fill: trim }),
+          h('rect', { key: 'b', x: 29, y: T - 5, width: 42, height: 6, rx: 3, fill: ink })
+        ];
+      if (id === 'party')
+        return [
+          h('path', Object.assign({ key: 'c', d: 'M 38 ' + (T + 1) + ' L 50 ' + (T - 29) + ' L 62 ' + (T + 1) + ' Z', fill: gold }, edge)),
+          h('path', { key: 's', d: 'M 42 ' + (T - 8) + ' L 58 ' + (T - 12) + ' M 45 ' + (T - 17) + ' L 55 ' + (T - 20), stroke: trim, strokeWidth: 3, strokeLinecap: 'round' }),
+          h('circle', Object.assign({ key: 'p', cx: 50, cy: T - 30, r: 4.5, fill: trim }, edge))
+        ];
+      if (id === 'crown')
+        return [
+          h('path', Object.assign({ key: 'c', d: 'M 34 ' + (T + 1) + ' L 34 ' + (T - 18) + ' L 42 ' + (T - 9) + ' L 50 ' + (T - 22) + ' L 58 ' + (T - 9) + ' L 66 ' + (T - 18) + ' L 66 ' + (T + 1) + ' Z', fill: gold }, edge)),
+          h('circle', { key: 'g', cx: 50, cy: T - 5, r: 3, fill: trim })
+        ];
+      if (id === 'bow')
+        return [
+          h('path', Object.assign({ key: 'l', d: 'M 50 ' + T + ' L 35 ' + (T - 10) + ' L 35 ' + (T + 8) + ' Z', fill: trim }, edge)),
+          h('path', Object.assign({ key: 'r', d: 'M 50 ' + T + ' L 65 ' + (T - 10) + ' L 65 ' + (T + 8) + ' Z', fill: trim }, edge)),
+          h('circle', Object.assign({ key: 'k', cx: 50, cy: T, r: 4.5, fill: trim }, edge))
+        ];
+      if (id === 'beanie')
+        return [
+          h('path', Object.assign({ key: 'c', d: 'M 32 ' + (T + 4) + ' C 32 ' + (T - 22) + ' 68 ' + (T - 22) + ' 68 ' + (T + 4) + ' Z', fill: trim }, edge)),
+          h('rect', Object.assign({ key: 'b', x: 30, y: T - 1, width: 40, height: 8, rx: 3, fill: gold }, edge)),
+          h('circle', Object.assign({ key: 'p', cx: 50, cy: T - 17, r: 5, fill: gold }, edge))
+        ];
+      return [];
+    }
+    if (slot === 'eyes') {
+      var rims = function (fill, opacity) {
+        var out = sp.eyes.map(function (e, i) {
+          return h('circle', { key: 'g' + i, cx: e[0], cy: e[1], r: e[2] + 3.5, fill: fill, fillOpacity: opacity, stroke: ink, strokeWidth: 2.5 });
+        });
+        for (var i = 1; i < sp.eyes.length; i++) {
+          var a = sp.eyes[i - 1];
+          var b = sp.eyes[i];
+          out.push(h('line', { key: 'br' + i, x1: a[0] + a[2] + 3.5, y1: a[1], x2: b[0] - b[2] - 3.5, y2: b[1], stroke: ink, strokeWidth: 2.5 }));
+        }
+        return out;
+      };
+      if (id === 'glasses') return rims('none', 0);
+      if (id === 'sunglasses') return rims(ink, 0.88);
+      if (id === 'starglasses')
+        return sp.eyes.map(function (e, i) {
+          return h('polygon', { key: 's' + i, points: starPoints(e[0], e[1], e[2] + 8, e[2] + 3, 5), fill: gold, fillOpacity: 0.45, stroke: trim, strokeWidth: 2.5, strokeLinejoin: 'round' });
+        });
+      if (id === 'monocle')
+        return [
+          h('circle', { key: 'm', cx: e0[0], cy: e0[1], r: e0[2] + 3.5, fill: 'none', stroke: gold, strokeWidth: 3 }),
+          h('path', { key: 'c', d: 'M ' + (e0[0] - e0[2] - 3) + ' ' + (e0[1] + 2) + ' Q ' + (e0[0] - e0[2] - 10) + ' ' + (e0[1] + 16) + ' ' + (e0[0] - e0[2] - 4) + ' ' + (e0[1] + 26), fill: 'none', stroke: gold, strokeWidth: 1.8 })
+        ];
+      return [];
+    }
+    if (slot === 'neck') {
+      if (id === 'scarf')
+        return [
+          h('rect', Object.assign({ key: 'w', x: 50 - H, y: N - 5, width: 2 * H, height: 9, rx: 4.5, fill: trim }, edge)),
+          h('rect', Object.assign({ key: 't', x: 50 + H * 0.3, y: N - 1, width: 8, height: 11, rx: 3, fill: trim }, edge))
+        ];
+      if (id === 'bowtie')
+        return [
+          h('path', Object.assign({ key: 'l', d: 'M 50 ' + N + ' L 39 ' + (N - 7) + ' L 39 ' + (N + 7) + ' Z', fill: trim }, edge)),
+          h('path', Object.assign({ key: 'r', d: 'M 50 ' + N + ' L 61 ' + (N - 7) + ' L 61 ' + (N + 7) + ' Z', fill: trim }, edge)),
+          h('rect', Object.assign({ key: 'k', x: 46.5, y: N - 3.5, width: 7, height: 7, rx: 2, fill: trim }, edge))
+        ];
+      if (id === 'necklace') {
+        var beads = [];
+        for (var b = 0; b < 7; b++) {
+          var t = b / 6;
+          var x = 50 - H * 0.8 + t * H * 1.6;
+          var y = N - 4 + Math.sin(Math.PI * t) * 7;
+          beads.push(h('circle', { key: 'n' + b, cx: x, cy: y, r: 3, fill: b === 3 ? trim : gold, stroke: ink, strokeWidth: 1.5 }));
+        }
+        return beads;
+      }
+      return [];
+    }
+    return [];
+  }
+
+  /** A Grown port as a stage index, 0 to 2. */
+  function alienStage(v) {
+    var n = Math.round(Number(v));
+    return isFinite(n) ? Math.max(0, Math.min(ALIEN_GROWN.length - 1, n)) : ALIEN_GROWN.length - 1;
+  }
+
+  /** @type {import('./types/node-kit').ReactNodeDefinition} */
+  var Alien = {
+    name: 'game-kit.Alien',
+    displayNodeName: 'Alien',
+    docs:
+      'A small creature for a game to look after: one of six Species, in any Colour, outlined in ink, with eyes and a smile. ' +
+      'It wears a Hat, something over its Eyes and something round its Neck (an id it does not know draws nothing). Grown 0 ' +
+      'is a baby, 1 young, 2 grown up; it grows from its feet. A Happy count that goes up makes it hop once; reduced motion ' +
+      'stills the hop and its gentle breathing.',
+    ssr: { compat: 'safe' },
+    noodlNodeAsProp: true,
+    usePortAsLabel: 'name',
+
+    /** The species, what can be worn and the motion, exposed so a gate can grade them without a browser. */
+    alien: { species: ALIEN_SPECIES, speciesIds: ALIEN_SPECIES_IDS, wear: ALIEN_WEAR, wearShapes: alienWear, grown: ALIEN_GROWN, css: ALIEN_CSS, burstRose: burstRose },
+
+    getReactComponent: function () {
+      return function AlienComponent(props) {
+        var el = React.useRef(null);
+        React.useEffect(function () {
+          props.noodlNode && props.noodlNode.setDOMElement(el.current);
+        }, []);
+        // A Happy count that has risen since the last render is one hop; the count it mounts with is not.
+        var hops = React.useRef(null);
+        if (hops.current === null) hops.current = { happy: props.happy, n: 0 };
+        if (hops.current.happy !== props.happy) {
+          if (burstRose(hops.current.happy, props.happy)) hops.current.n++;
+          hops.current.happy = props.happy;
+        }
+        var size = padPx(props.size, 96);
+        var species = ALIEN_SPECIES[props.species] ? props.species : 'blob';
+        var sp = ALIEN_SPECIES[species];
+        var stage = alienStage(props.grown);
+        var scale = ALIEN_GROWN[stage];
+        var ink = props.outlineColor || 'var(--foreground)';
+        var colour = props.color || 'var(--secondary)';
+        var trim = props.trimColor || 'var(--primary)';
+        var gold = props.goldColor || 'var(--accent)';
+        var worn = [];
+        [['neck', props.neck], ['eyes', props.eyes], ['hat', props.hat]].forEach(function (pair) {
+          var shapes = pair[1] ? alienWear(pair[0], String(pair[1]), sp, ink, trim, gold) : [];
+          if (shapes.length) worn.push(h('g', { key: 'w-' + pair[0], 'data-wear': pair[0] + ':' + pair[1] }, shapes));
+        });
+        var grow = 'translate(' + ALIEN_FEET[0] + ' ' + ALIEN_FEET[1] + ') scale(' + scale + ') translate(' + -ALIEN_FEET[0] + ' ' + -ALIEN_FEET[1] + ')';
+        var creature = h('g', { className: 'gk-alien-breathe' }, alienBody(sp, colour, ink, gold).concat(alienFace(sp, ink, trim), worn));
+        var hopping = hops.current.n > 0 ? h('g', { key: 'hop' + hops.current.n, className: 'gk-alien-hop' }, creature) : h('g', { key: 'still' }, creature);
+        return h(
+          'div',
+          {
+            ref: el,
+            style: Object.assign({ width: size + 'px', height: size + 'px', display: 'inline-block', flexShrink: 0, cursor: props.onClick ? 'pointer' : undefined }, props.style),
+            onClick: props.onClick,
+            title: props.name || ''
+          },
+          h(
+            'svg',
+            {
+              viewBox: ALIEN_BOX,
+              width: size,
+              height: size,
+              role: 'img',
+              'aria-label': props.name || species,
+              'data-alien': species,
+              'data-grown': stage,
+              'data-hops': hops.current.n,
+              style: { display: 'block', overflow: 'visible' }
+            },
+            h('style', null, ALIEN_CSS),
+            h('ellipse', { cx: 50, cy: 93, rx: 30 * scale, ry: 4, fill: ink, opacity: 0.12 }),
+            h('g', { transform: grow }, hopping)
+          )
+        );
+      };
+    },
+
+    defaultCss: { display: 'inline-block' },
+
+    inputProps: {
+      species: {
+        type: { name: 'enum', enums: ALIEN_SPECIES_IDS.map(function (id) { return { value: id, label: id.charAt(0).toUpperCase() + id.slice(1) }; }) },
+        displayName: 'Species',
+        group: 'Alien',
+        default: 'blob',
+        description: 'The body: blob (one big eye), bean (antennae), trio (three eyes), squid (little legs), fuzz (spiky) or star.'
+      },
+      name: { type: 'string', displayName: 'Name', group: 'Alien', default: '', description: 'What it is called: the picture’s label for a screen reader, and its tooltip.' },
+      size: { type: { name: 'number', units: ['px'], defaultUnit: 'px' }, displayName: 'Size', group: 'Alien', default: 96, description: 'The box it is drawn in, grown up. A baby is drawn smaller in the same box.' },
+      grown: { type: 'number', displayName: 'Grown', group: 'Alien', default: 2, description: '0 a baby, 1 young, 2 grown up. It grows from its feet.' },
+      happy: { type: 'number', displayName: 'Happy', group: 'Alien', default: 0, description: 'A count. Each time it goes up, the alien hops once (the count it starts with does not).' },
+      hat: { type: { name: 'enum', enums: [{ value: '', label: 'None' }].concat(ALIEN_WEAR.hat.map(function (id) { return { value: id, label: id }; })) }, displayName: 'Hat', group: 'Wearing', default: '', description: 'On its head: ' + ALIEN_WEAR.hat.join(', ') + '.' },
+      eyes: { type: { name: 'enum', enums: [{ value: '', label: 'None' }].concat(ALIEN_WEAR.eyes.map(function (id) { return { value: id, label: id }; })) }, displayName: 'Eyes', group: 'Wearing', default: '', description: 'Over its eyes, every one of them: ' + ALIEN_WEAR.eyes.join(', ') + '.' },
+      neck: { type: { name: 'enum', enums: [{ value: '', label: 'None' }].concat(ALIEN_WEAR.neck.map(function (id) { return { value: id, label: id }; })) }, displayName: 'Neck', group: 'Wearing', default: '', description: 'Round its neck: ' + ALIEN_WEAR.neck.join(', ') + '.' },
+      color: { type: 'color', displayName: 'Colour', group: 'Style', default: 'var(--secondary)' },
+      outlineColor: { type: 'color', displayName: 'Outline', group: 'Style', default: 'var(--foreground)', description: 'Every edge, the pupils and the smile. The outline is what makes any Colour read against any ground.' },
+      trimColor: { type: 'color', displayName: 'Trim', group: 'Style', default: 'var(--primary)', description: 'The cheeks, and the main colour of what it wears.' },
+      goldColor: { type: 'color', displayName: 'Gold', group: 'Style', default: 'var(--accent)', description: 'Crowns, beads and antenna tips.' }
+    },
+
+    outputProps: {
+      onClick: { type: 'signal', displayName: 'Click', group: 'Events' }
+    }
+  };
+
   /** @type {import('./types/node-kit').NodeKitModule} */
   var kit = {
     nodes: [Sound, KeepStorage],
-    reactNodes: h ? [Avatar, RaceTrack, KeyboardMap, AnswerPad] : []
+    reactNodes: h ? [Avatar, RaceTrack, KeyboardMap, AnswerPad, Alien] : []
   };
 
   Noodl.defineModule(kit);

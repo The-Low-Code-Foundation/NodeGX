@@ -216,23 +216,19 @@ export interface ListParams {
 const MODE_NOTE = s('Officially (2020) the conditionnel is a tense of the indicatif; some books still call it a mode.', 'Officiellement (2020), le conditionnel est un temps de l’indicatif ; des manuels en font encore un mode.');
 
 const VERB_MODES: ListItem[] = [
-  { q: same('que nous finissions'), a: same('subjonctif'), note: s('After « que », a wish or a doubt: subjonctif.', 'Après « que », un souhait ou un doute : subjonctif.') },
   { q: same('finissez !'), a: same('impératif'), note: s('An order, no subject pronoun: impératif.', 'Un ordre, sans pronom sujet : impératif.') },
   { q: same('nous finirions'), a: same('indicatif'), note: MODE_NOTE },
   { q: same('finir'), a: same('infinitif'), note: s('The verb’s name, as in the dictionary: infinitif.', 'Le nom du verbe, comme dans le dictionnaire : infinitif.') },
   { q: same('finissant'), a: same('participe'), note: s('The -ant form (participe présent) and the -é/-i/-u form (participe passé) are the participe.', 'La forme en -ant (participe présent) et la forme en -é/-i/-u (participe passé) sont le participe.') },
   { q: same('nous finissons'), a: same('indicatif'), note: s('A fact, stated: indicatif.', 'Un fait, affirmé : indicatif.') },
-  { q: same('qu’il vienne'), a: same('subjonctif') },
   { q: same('viens ici !'), a: same('impératif') },
   { q: same('elle viendra'), a: same('indicatif') },
   { q: same('venu'), a: same('participe') },
-  { q: same('il faut que tu sois là'), a: same('subjonctif'), note: s('« il faut que » always takes the subjonctif.', '« il faut que » appelle toujours le subjonctif.') },
   { q: same('soyez prudents !'), a: same('impératif') },
   { q: same('nous avons chanté'), a: same('indicatif'), note: s('A compound tense of the indicatif (passé composé).', 'Un temps composé de l’indicatif (le passé composé).') },
   { q: same('je voudrais un gâteau'), a: same('indicatif'), note: MODE_NOTE },
   { q: same('chanter'), a: same('infinitif') },
   { q: same('ayant'), a: same('participe') },
-  { q: same('que vous fassiez'), a: same('subjonctif') },
   { q: same('allons-y !'), a: same('impératif') },
   { q: same('ils prirent la route'), a: same('indicatif'), note: s('The passé simple is a tense of the indicatif.', 'Le passé simple est un temps de l’indicatif.') },
   { q: same('pris'), a: same('participe') }
@@ -245,7 +241,6 @@ const VERB_TENSES: ListItem[] = [
   { q: same('vous chanterez'), a: same('futur simple') },
   { q: same('j’avais chanté'), a: same('plus-que-parfait') },
   { q: same('elle chanterait'), a: same('conditionnel présent'), note: MODE_NOTE },
-  { q: same('que tu chantes'), a: same('subjonctif présent') },
   { q: same('chantons !'), a: same('impératif présent') },
   { q: same('il aura chanté'), a: same('futur antérieur') },
   { q: same('nous chantons'), a: same('présent') },
@@ -255,14 +250,33 @@ const VERB_TENSES: ListItem[] = [
   { q: same('tu finiras'), a: same('futur simple') },
   { q: same('vous aviez fini'), a: same('plus-que-parfait') },
   { q: same('nous finirions'), a: same('conditionnel présent'), note: MODE_NOTE },
-  { q: same('qu’il finisse'), a: same('subjonctif présent') },
   { q: same('finis !'), a: same('impératif présent') },
   { q: same('elles seront parties'), a: same('futur antérieur') },
   { q: same('je prends'), a: same('présent') },
   { q: same('il prit'), a: same('passé simple') },
   { q: same('nous étions venus'), a: same('plus-que-parfait') },
-  { q: same('vous verriez'), a: same('conditionnel présent'), note: MODE_NOTE },
-  { q: same('que nous ayons'), a: same('subjonctif présent') }
+  { q: same('vous verriez'), a: same('conditionnel présent'), note: MODE_NOTE }
+];
+
+/**
+ * P113 ruling 1 (Richard, 2026-10-04): the subjonctif is cycle 4 (5e), so a 6e child only SPOTS it — "subjonctif or indicatif?" —
+ * and never conjugates it. Each subjonctif sits beside an indicatif of the same verb, so the « que » and the ending are what tell.
+ */
+const VERB_SUBJ_SPOT: ListItem[] = [
+  { q: same('qu’il vienne'), a: same('subjonctif'), note: s('After « que », a wish or a doubt: subjonctif.', 'Après « que », un souhait ou un doute : subjonctif.') },
+  { q: same('il vient'), a: same('indicatif'), note: s('A fact, stated: indicatif.', 'Un fait, affirmé : indicatif.') },
+  { q: same('il faut que tu sois là'), a: same('subjonctif'), note: s('« il faut que » always takes the subjonctif.', '« il faut que » appelle toujours le subjonctif.') },
+  { q: same('tu es là'), a: same('indicatif') },
+  { q: same('que vous fassiez'), a: same('subjonctif') },
+  { q: same('vous faites'), a: same('indicatif') },
+  { q: same('je veux qu’elle parte'), a: same('subjonctif'), note: s('« vouloir que » wants something: subjonctif.', '« vouloir que » exprime un souhait : subjonctif.') },
+  { q: same('elle part'), a: same('indicatif') },
+  { q: same('qu’il finisse'), a: same('subjonctif') },
+  { q: same('il finit'), a: same('indicatif') },
+  { q: same('que nous ayons'), a: same('subjonctif') },
+  { q: same('nous avons'), a: same('indicatif') },
+  { q: same('bien qu’il pleuve'), a: same('subjonctif'), note: s('« bien que » always takes the subjonctif.', '« bien que » appelle toujours le subjonctif.') },
+  { q: same('il pleut'), a: same('indicatif') }
 ];
 
 const VERB_VOICES: ListItem[] = [
@@ -619,6 +633,7 @@ function list(d: Draft, params: ListParams): Skill {
 const ASK_MODE = s('Which mode is this verb in?', 'À quel mode est ce verbe ?');
 const ASK_TENSE = s('Which tense is this?', 'Quel est ce temps ?');
 const ASK_VOICE = s('Active, passive, or pronominal voice?', 'Voix active, passive, ou pronominale ?');
+const ASK_SUBJ = s('Subjonctif or indicatif?', 'Subjonctif ou indicatif ?');
 const ASK_SIMPLE = s('Simple or compound tense?', 'Temps simple ou temps composé ?');
 const ASK_GROUP = s('Which group?', 'Quel groupe ?');
 const ASK_AUX = s('Which auxiliary in the passé composé?', 'Quel auxiliaire au passé composé ?');
@@ -639,14 +654,15 @@ export const FRENCH_SKILLS: ReadonlyArray<Skill> = [
   { id: 'fr-conj-passe-simple', level: 'CM2', subject: 'french', topic: 'conjugation', strand: 'conjugation', generator: 'conjugate', params: { verbs: ['être', 'avoir', 'aller', 'faire', 'chanter', 'finir', 'dire', 'venir', 'prendre', 'voir'], tenses: ['passeSimple'], persons: [2, 5] }, answer: 'typed', fluentMs: 9000, diff: 0.6, name: s('Passé simple (il, ils)', 'Le passé simple (il, ils)'), strategy: s('The tense of stories: il chanta, ils chantèrent; il fut, ils furent.', 'Le temps des récits : il chanta, ils chantèrent ; il fut, ils furent.'), teach: 'conjugation' },
   { id: 'fr-conj-plus-que-parfait', level: '6e', subject: 'french', topic: 'conjugation', strand: 'conjugation', generator: 'conjugate', params: { verbs: ['être', 'avoir', 'aller', 'faire', 'chanter', 'finir', 'venir', 'prendre', 'voir', 'partir'], tenses: ['plusQueParfait'] }, answer: 'typed', fluentMs: 9000, diff: 0.55, name: s('Plus-que-parfait', 'Le plus-que-parfait'), strategy: s('Auxiliary in the imparfait + participe passé: j’avais fini, j’étais venu.', 'Auxiliaire à l’imparfait + participe passé : j’avais fini, j’étais venu.'), teach: 'conjugation' },
   { id: 'fr-conj-conditionnel', level: '6e', subject: 'french', topic: 'conjugation', strand: 'conjugation', generator: 'conjugate', params: { verbs: ['être', 'avoir', 'aller', 'faire', 'chanter', 'finir', 'venir', 'prendre', 'pouvoir', 'vouloir', 'voir'], tenses: ['conditionnel'] }, answer: 'typed', fluentMs: 9000, diff: 0.6, name: s('Conditionnel présent', 'Le conditionnel présent'), strategy: s('The futur’s stem with the imparfait’s endings: je chanterais, je serais, j’irais.', 'Le radical du futur avec les terminaisons de l’imparfait : je chanterais, je serais, j’irais.'), teach: 'conjugation' },
-  { id: 'fr-conj-subjonctif', level: '6e', subject: 'french', topic: 'conjugation', strand: 'conjugation', generator: 'conjugate', params: { verbs: ['être', 'avoir', 'aller', 'faire', 'chanter', 'finir', 'venir', 'prendre', 'pouvoir', 'savoir'], tenses: ['subjonctif'] }, answer: 'typed', fluentMs: 9000, diff: 0.7, name: s('Subjonctif présent', 'Le subjonctif présent'), strategy: s('After « que »: que je chante, que je finisse, que je sois, que j’aie, que j’aille.', 'Après « que » : que je chante, que je finisse, que je sois, que j’aie, que j’aille.'), teach: 'verb-study' },
   { id: 'fr-conj-imperatif', level: '6e', subject: 'french', topic: 'conjugation', strand: 'conjugation', generator: 'conjugate', params: { verbs: ['être', 'avoir', 'aller', 'faire', 'chanter', 'finir', 'dire', 'venir', 'prendre', 'voir'], tenses: ['imperatif'] }, answer: 'typed', fluentMs: 8000, diff: 0.5, name: s('Impératif présent', 'L’impératif présent'), strategy: s('Three persons, no pronoun: chante, chantons, chantez. No s on « chante », « va ».', 'Trois personnes, sans pronom : chante, chantons, chantez. Pas de s à « chante », « va ».'), teach: 'verb-study' },
   // The verb, studied (6e). 🔴 The 2025 cycle 3 programme stops at the conditionnel présent and the impératif; the subjonctif,
-  // the passive and the pronominal voice are cycle 4. They are here because a 6e test on « l’étude du verbe » asked them
-  // (Richard, 2026-10-04), and the chooser lets a child leave them unticked.
-  list({ id: 'fr-verb-mode', level: '6e', subject: 'french', topic: 'verb-study', name: s('Which mode?', 'Quel mode ?'), strategy: s('Indicatif states, impératif orders, subjonctif wishes (after « que »), infinitif names, participe describes.', 'L’indicatif affirme, l’impératif ordonne, le subjonctif souhaite (après « que »), l’infinitif nomme, le participe décrit.'), teach: 'verb-study', diff: 0.6 }, { items: VERB_MODES, ask: ASK_MODE }),
+  // the passive and the pronominal voice are cycle 4 (5e). A 6e test on « l’étude du verbe » asked them (Richard, 2026-10-04), and
+  // his ruling the same day: "put in the choices but maybe a simple watered down 'just identify them' version for 5e". So they are
+  // `beyond: '5e'` — identify-only, offered in the chooser marked 5e, never in "everything" — and the typed subjonctif is gone.
+  list({ id: 'fr-verb-mode', level: '6e', subject: 'french', topic: 'verb-study', name: s('Which mode?', 'Quel mode ?'), strategy: s('Indicatif states, impératif orders, infinitif names, participe describes.', 'L’indicatif affirme, l’impératif ordonne, l’infinitif nomme, le participe décrit.'), teach: 'verb-study', diff: 0.6 }, { items: VERB_MODES, ask: ASK_MODE }),
   list({ id: 'fr-verb-tense', level: '6e', subject: 'french', topic: 'verb-study', name: s('Which tense?', 'Quel temps ?'), strategy: s('Look at the ending, and whether there is an auxiliary.', 'Regarde la terminaison, et s’il y a un auxiliaire.'), teach: 'verb-study', diff: 0.6 }, { items: VERB_TENSES, ask: ASK_TENSE }),
-  list({ id: 'fr-verb-voice', level: '6e', subject: 'french', topic: 'verb-study', name: s('Active, passive, pronominal', 'Voix active, passive, pronominale'), strategy: s('Passive: être + participe passé, the subject undergoes. Pronominal: a pronoun looks back at the subject.', 'Passive : être + participe passé, le sujet subit. Pronominale : un pronom renvoie au sujet.'), teach: 'verb-study', diff: 0.65 }, { items: VERB_VOICES, ask: ASK_VOICE }),
+  list({ id: 'fr-verb-subj', level: '6e', beyond: '5e', subject: 'french', topic: 'verb-study', name: s('Spot the subjonctif', 'Repérer le subjonctif'), strategy: s('« que » before the verb, and a wish, a doubt or « il faut »: subjonctif. A plain fact: indicatif.', '« que » devant le verbe, et un souhait, un doute ou « il faut » : subjonctif. Un fait : indicatif.'), teach: 'verb-study', diff: 0.45 }, { items: VERB_SUBJ_SPOT, ask: ASK_SUBJ }),
+  list({ id: 'fr-verb-voice', level: '6e', beyond: '5e', subject: 'french', topic: 'verb-study', name: s('Active, passive, pronominal', 'Voix active, passive, pronominale'), strategy: s('Passive: être + participe passé, the subject undergoes. Pronominal: a pronoun looks back at the subject.', 'Passive : être + participe passé, le sujet subit. Pronominale : un pronom renvoie au sujet.'), teach: 'verb-study', diff: 0.65 }, { items: VERB_VOICES, ask: ASK_VOICE }),
   list({ id: 'fr-verb-simple-compound', level: '6e', subject: 'french', topic: 'verb-study', name: s('Simple or compound tense', 'Temps simple ou composé'), strategy: s('One word: simple. Auxiliary + participe: compound.', 'Un mot : simple. Auxiliaire + participe : composé.'), teach: 'verb-study', diff: 0.3 }, { items: VERB_SIMPLE_COMPOUND, ask: ASK_SIMPLE }),
   list({ id: 'fr-verb-group', level: 'CM1', subject: 'french', topic: 'verb-study', name: s('The three groups', 'Les trois groupes'), strategy: s('-er is first (except aller); -ir with -issons is second; everything else is third.', '-er, c’est le 1er (sauf aller) ; -ir avec -issons, le 2e ; tout le reste, le 3e.'), teach: 'conjugation', diff: 0.35 }, { items: VERB_GROUPS, ask: ASK_GROUP }),
   list({ id: 'fr-verb-aux', level: 'CM2', subject: 'french', topic: 'verb-study', name: s('Être or avoir in the passé composé', 'Être ou avoir au passé composé'), strategy: s('Movement and change take être; almost everything else takes avoir.', 'Les verbes de mouvement et de changement prennent être ; presque tout le reste prend avoir.'), teach: 'conjugation', diff: 0.4 }, { items: VERB_AUX, ask: ASK_AUX }),

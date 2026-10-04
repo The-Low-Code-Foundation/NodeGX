@@ -1,0 +1,312 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "669d32c7-6d49-55fa-8e77-08c99edd711c",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "miIn",
+      "type": "Component Inputs",
+      "label": "The thing",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "glyph",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "line",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cost",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "use",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "ask",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "dim",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "worn",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "showAlien",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "species",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "colour",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "grown",
+          "plug": "output",
+          "type": "number"
+        },
+        {
+          "name": "hat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "eyes",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "neck",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "miCard",
+      "type": "Group",
+      "label": "The tile",
+      "children": [
+        "miGlyph",
+        "miAlienBox",
+        "miLabel",
+        "miLine"
+      ],
+      "parameters": {
+        "width": {
+          "value": 112,
+          "unit": "px"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "alignItems": "center",
+        "rowGap": "var(--space-1)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "miGlyph",
+      "type": "Text",
+      "label": "The food",
+      "parent": "miCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-4xl)",
+        "color": "var(--foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "miAlienBox",
+      "type": "Group",
+      "label": "Wearing it",
+      "parent": "miCard",
+      "children": [
+        "miAlien"
+      ],
+      "parameters": {
+        "sizeMode": "contentSize",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "miAlien",
+      "type": "game-kit.Alien",
+      "label": "The alien, wearing it",
+      "parent": "miAlienBox",
+      "parameters": {
+        "size": 88
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "miLabel",
+      "type": "Text",
+      "label": "Its name",
+      "parent": "miCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-bold)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "miLine",
+      "type": "Text",
+      "label": "Its price, or what a tap does",
+      "parent": "miCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "textAlignX": "center"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "miGlyphShown",
+      "type": "Expression",
+      "label": "A food?",
+      "parameters": {
+        "expression": "showAlien !== true"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "miToneOf",
+      "type": "Expression",
+      "label": "Worn, plain or greyed?",
+      "parameters": {
+        "expression": "worn === true ? 'worn' : dim === true ? 'dim' : 'plain'"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "miTone",
+      "type": "States",
+      "label": "Worn, plain or greyed",
+      "parameters": {
+        "states": "plain,worn,dim",
+        "values": "ground,opacity",
+        "useTransitions": false,
+        "type-ground": "color",
+        "value-plain-ground": "var(--surface)",
+        "value-worn-ground": "var(--accent)",
+        "value-dim-ground": "var(--muted)",
+        "type-opacity": "number",
+        "value-plain-opacity": 1,
+        "value-worn-opacity": 1,
+        "value-dim-opacity": 0.8
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "miCanUse",
+      "type": "Condition",
+      "label": "Theirs to use?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "miCanAsk",
+      "type": "Condition",
+      "label": "To buy first?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "miOut",
+      "type": "Component Outputs",
+      "label": "Tapped",
+      "ports": [
+        {
+          "name": "use",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "ask",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "cost",
+          "plug": "input",
+          "type": "number"
+        }
+      ],
+      "x": 410,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "miCard"
+  ]
+}
