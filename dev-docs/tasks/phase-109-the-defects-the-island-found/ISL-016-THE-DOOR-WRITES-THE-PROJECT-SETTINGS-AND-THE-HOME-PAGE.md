@@ -1,6 +1,6 @@
 # ISL-016 — The door writes the project settings and the home page
 
-**Status: 🔒✓ ruled s13 (2026-10-04): "Replace, say what changed"; ruling 2 (b); "home" = the editor's "Make home" (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F23](AUDIT-2026-10-01.md) · the
+**Status: 🟢 built s13 (2026-10-04) — AC2, AC3, AC4, AC7 met; AC5, AC6 open; AC8 listed. Ruled s13: "Replace, say what changed"; ruling 2 (b); "home" = the editor's "Make home" (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F23](AUDIT-2026-10-01.md) · the
 home-page half is P78 register [D9](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) ("a generated project can ship
 with no HOME node"), fixed then in the generator, never in the door · **Side:** product (MCP door, `noodl-mcp`)
 
@@ -118,4 +118,40 @@ Constraints:
 
 ## 8. Record
 
-None yet.
+### Session 13 (2026-10-04) — ruled and built; AC2, AC3, AC4, AC7 met
+
+**Ruled** (README §8 round 3): *"Replace, say what changed"*, with Richard's correction that the home is the editor's
+"Make home" — the component the project starts from (App, holding the Router), not a page. Asked after a census:
+8 generators call `pinRootNode`, 10 call `writeSkeleton`; of the 13 template folders, 12 carry `rootNodeId` and
+**Nightbook does not** (its generator `tpl011Template.ts` neither pins nor names a `rootComponent`) → filed
+[`P109-S13-NIGHTBOOKHOME`](../../bugs/p109-s13-nightbookhome-the-nightbook-template-has-no-home.md).
+
+**Built:** `set_project_settings({ name?, settings?, home? })` (`src/tools/projectSettingsTools.ts`), deferred in the
+`project` group, keywords `settings`, `title`, `home`, `make home`, `root`, `rename`, `app name`. Resident surface
+**8,261 before and after** (`toolDisclosure.test.ts`). `ProjectStore.writeProjectFields` is the one write: every key
+keeps its place, a new `rootNodeId` lands last after `modified` (where `pinRootNode` put it), and a request that
+changes nothing writes nothing. `get_project_info.rootComponent` now reads the home from `rootNodeId` (the editor's
+field), registry `root` row as fallback, `{ nodeId, missing: true }` when no component holds it.
+
+**Two departures from §5, both measured:**
+
+1. **No registry re-type** (§5.3 proposed typing the home's row `root`). The editor never does that for a component a
+   person makes home: `inferComponentType` (`ProjectExporter.ts:189`) gives `root` only to a legacy `%rootcomponent`
+   name. A door that re-typed would write what the editor does not save (ISL-018's sentence). AC3's "re-types the
+   registry rows" is replaced by `get_project_info` reading `rootNodeId`.
+2. **The home node is resolved as the editor resolves it**, not "refuse when two": `makeComponentHome` /
+   `findExportRootNode` (`useComponentActions.ts`) take the FIRST top-level node whose type may be an export root
+   (every visual type but `Page`, `allowAsExportRoot: false`). The result reports `candidates` so a caller sees when
+   there was a choice.
+
+| AC | reading |
+|---|---|
+| AC1 | Red at HEAD **by source and census, not re-run as a spec at HEAD**: no tool in `src` wrote `rootNodeId` or `settings` but `create_project` (grep); `get_project_info` read the home only from a registry `root` row, and the garden has 0 such rows (census above), so it answered `undefined`. After: `find_tools` reveals `set_project_settings` for "settings", "home", "title", "make home", each on a fresh server. On a copy of `templates/bot-garden` over the in-process protocol: `rootComponent: {"path":"App","nodeId":"app_root"}`. |
+| AC2 | ✅ `isl016ProjectSettings.test.ts`: name, title, path style, scroll overwritten with `was`/`now` rows; `homePage`, `navigationPathType: "hashbang"`, `bodyScroll: "yes"` each refused by name, project file byte-identical after. 🔴 Mutant (the plan door's skip-if-set rule in `writeProjectFields`): AC2 red by name. |
+| AC3 | ✅ `home: "App"` writes `app_group`, appended after `modified`; `get_project_info` → `{ path: "App", nodeId: "app_group" }`; a logic-only component and an unknown one refused by name, nothing written. The garden's shape (rootNodeId, App typed `visual`) read correctly; a `rootNodeId` no component holds → `missing: true`. On the garden copy, `home: "App"` resolves to `app_root`, the id `pinRootNode` wrote → `unchanged: true`, file byte-identical. |
+| AC4 | ✅ 🔴 Reverted arm (any parentless node, as `pinRootNode` took): AC4 red (it pointed at the Expression) and the no-visual refusal red. Restored. |
+| AC5 | ⬜ FLD-009's editor guard arm — not run. |
+| AC6 | ⬜ The person's door (Claude Code over stdio + an editor reading) — not run this session at the time of writing. |
+| AC7 | ✅ `cg003Template.ts` drops `pinRootNode` and calls `set_project_settings({ home })` through its in-process client right after `apply_plan`. `cg003Template.test.ts` **150/150** (CG-003 AC2: two builds agree and equal the checked-in tree). Control (the call removed): AC2 red, the diff names **`nodegx.project.json` only**. The two hand-typed settings stay in `writeSkeleton`: moving them reorders keys (§7's first trap), and ruling 2 is (b). |
+| AC8 | The other seven: `tpl001`, `tpl003`, `tpl005`, `tpl006`, `tpl007` (clean at HEAD) still call `pinRootNode`; `tpl008` and `tpl010` are peer-dirty and were not touched. `templatePins.pinRootNode` stays until none calls it. |
+

@@ -240,6 +240,55 @@ export class ProjectStore {
   }
 
   /**
+   * P109 ISL-016 — an explicit request to change the project file, which **does** overwrite: ruled
+   * 2026-10-04, "Replace, say what changed". The plan door's non-overwriting rule above stays as it
+   * is (a plan states what a *new* app needs); this is the door a caller uses when it means a value.
+   *
+   * Returns one row per field that changed, `was` → `now`. A request that changes nothing writes
+   * nothing — not even `modified` (ISL-019: a no-change write leaves the bytes alone). The caller
+   * validates; this only writes. `rootNodeId` is appended where the editor's save and `pinRootNode`
+   * put it, after the keys already there.
+   */
+  writeProjectFields(fields: {
+    name?: string;
+    settings?: Record<string, unknown>;
+    rootNodeId?: string;
+  }): Array<{ field: string; was: unknown; now: unknown }> {
+    const p = this.projectFilePath;
+    if (!fs.existsSync(p)) {
+      throw new ToolError('not-found', `Missing nodegx.project.json in ${this.projectDir}; cannot store settings.`);
+    }
+    const project = readJson<ProjectV2File & { rootNodeId?: string }>(p);
+    const changes: Array<{ field: string; was: unknown; now: unknown }> = [];
+    const next: Record<string, unknown> = { ...project };
+    if (fields.name !== undefined && fields.name !== project.name) {
+      changes.push({ field: 'name', was: project.name, now: fields.name });
+      next.name = fields.name;
+    }
+    const settings: Record<string, unknown> = { ...(project.settings ?? {}) };
+    for (const [key, value] of Object.entries(fields.settings ?? {})) {
+      if (value === undefined || canonicalJson(settings[key]) === canonicalJson(value)) continue;
+      changes.push({ field: `settings.${key}`, was: settings[key], now: value });
+      settings[key] = value;
+    }
+    if (changes.some((c) => c.field.startsWith('settings.'))) next.settings = settings;
+    if (fields.rootNodeId !== undefined && fields.rootNodeId !== project.rootNodeId) {
+      changes.push({ field: 'rootNodeId', was: project.rootNodeId, now: fields.rootNodeId });
+      next.rootNodeId = fields.rootNodeId;
+    }
+    if (changes.length === 0) return [];
+    // Every key keeps its place (key order is bytes). A NEW `rootNodeId` goes last, after
+    // `modified`, where `pinRootNode` has always put it.
+    if (project.rootNodeId === undefined && next.rootNodeId !== undefined) {
+      const { rootNodeId, ...rest } = next;
+      writeJsonAtomic(p, { ...rest, modified: this.now(), rootNodeId });
+    } else {
+      writeJsonAtomic(p, { ...next, modified: this.now() });
+    }
+    return changes;
+  }
+
+  /**
    * GAM-021 — what {@link writeProjectSettings} would leave, without writing it.
    *
    * The write calls this, and so does the plan door's `page-cannot-scroll` check,

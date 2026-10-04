@@ -25,7 +25,7 @@ import type { LegacyProject } from '../../noodl-editor/src/editor/src/io/Project
 import { createServer } from '../src/server';
 
 import { pinRunOnValueChangeDefaultsInDirectory, readAsLegacyProject } from './templateArtefact';
-import { copyTree, pinRootNode } from './templatePins';
+import { copyTree } from './templatePins';
 import { APP_NODES, APP_WIRES, C, CG003_COMPONENTS, CgComponent, GAME_NAME, PAGES, REQUIRED_MODULES } from './cg003Components';
 import { GARDEN_PRESET, GARDEN_TOKENS } from './cg007Look';
 
@@ -190,6 +190,10 @@ export async function buildGardenTemplateProject(options: BuildOptions = {}): Pr
     }
     const applied = await call('apply_plan', { plan_id: planId, render: 'off' }, 'apply');
     for (const [k, v] of Object.entries((applied.registeredPages as Record<string, unknown>) ?? {})) registrations[k] = v;
+    // P109 ISL-016 AC7: the home through the door, at the point `pinRootNode` ran (after the plan, so `rootNodeId`
+    // still lands last, after the plan's `modified`). The raw write after the door closed is gone.
+    await call('find_tools', { group: 'project' }, 'project:reveal');
+    await call('set_project_settings', { home: C.app }, 'home');
     return { project: readAsLegacyProject(dir), order, planId, registrations, projectDir: dir, diagnostics, modules, applied };
   } finally {
     await client.close();
@@ -211,7 +215,6 @@ export function prepareGardenArtefact(built: AuthoredGarden, output: string): vo
     if (!fs.existsSync(path.join(output, 'noodl_modules', name, 'manifest.json'))) throw new Error(`refusing to write: noodl_modules/${name} is missing`);
   }
   writeStartHere(output);
-  pinRootNode(output, C.app);
 }
 
 function writeStartHere(output: string): void {

@@ -123,6 +123,30 @@ export function kitsReport(): ProjectKitsReport | undefined {
   };
 }
 
+/**
+ * P109 ISL-016 — the project's home, by `rootNodeId` first: that is the field the editor opens on
+ * (`projectmodel.ts`, `json.rootNodeId`) and the one "Make home" and `set_project_settings` write. The
+ * shipped garden has `rootNodeId` and no registry row typed `root`, so the registry alone answered
+ * "no home" for a project that has one.
+ */
+function homeOf(
+  store: ProjectStore,
+  rootNodeId: string | undefined,
+  registryRoot: string | undefined
+): ProjectInfoResponse['rootComponent'] {
+  if (rootNodeId) {
+    const registry = store.readRegistry();
+    // The registry's root first, then everything else: the home is almost always there.
+    const keys = Object.keys(registry.components).sort((a, b) => Number(b === registryRoot) - Number(a === registryRoot));
+    for (const key of keys) {
+      const nodes = store.readComponent(key).files.nodes.nodes ?? [];
+      if (nodes.some((n) => n.id === rootNodeId)) return { path: key, nodeId: rootNodeId };
+    }
+    return { nodeId: rootNodeId, missing: true };
+  }
+  return registryRoot ? { path: registryRoot } : undefined;
+}
+
 export function registerReadTools(server: McpServer, binding: ProjectBinding, options: { allowWrites: boolean }): void {
   server.registerTool(
     'get_project_info',
@@ -153,7 +177,7 @@ export function registerReadTools(server: McpServer, binding: ProjectBinding, op
         version: project?.version,
         runtimeVersion: project?.runtimeVersion,
         settings: project?.settings,
-        rootComponent: rootEntry ? { path: rootEntry[0] } : undefined,
+        rootComponent: homeOf(store, (project as { rootNodeId?: string } | undefined)?.rootNodeId, rootEntry?.[0]),
         routes: routes?.routes,
         styles: styles
           ? {

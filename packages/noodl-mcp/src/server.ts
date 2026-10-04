@@ -40,6 +40,7 @@ import { registerExportReactTools } from './tools/exportReact';
 import { registerOpenInEditorTools } from './tools/openInEditor';
 import { registerSessionStatusTools } from './tools/sessionStatus';
 import { registerKitTools } from './tools/kitTools';
+import { registerProjectSettingsTools } from './tools/projectSettingsTools';
 import { registerLibraryTools } from './tools/libraryTools';
 import { registerLessonTools } from './tools/lessonTools';
 import { ToolDisclosure, recordTools, registerFindTools } from './tools/disclosure';
@@ -274,6 +275,9 @@ export function createServer(options: ServerOptions): CreatedServer {
     // the project this server is pointed at, which is also why it is refused
     // outright on an unbound server rather than asking for a directory.
     registerKitTools(rec, binding);
+    // P109 ISL-016 — the project file's name, settings and home. Takes the binding: it writes
+    // into the project this server is pointed at.
+    registerProjectSettingsTools(rec, binding);
   }
   // AWP-006 — last, and it has to be: the handles do not all exist until every
   // registration has run, and disabling a group before its tools are registered

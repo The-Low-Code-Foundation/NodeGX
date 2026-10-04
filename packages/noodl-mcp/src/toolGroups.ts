@@ -456,7 +456,16 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'who',
       'unsaved',
       'conflict',
-      'is anyone'
+      'is anyone',
+      // P109 ISL-016 — `set_project_settings`. The words for what it sets, none of them in the
+      // purpose line; matched server-side, never sent.
+      'settings',
+      'title',
+      'home',
+      'make home',
+      'root',
+      'rename',
+      'app name'
     ],
     tools: [
       'list_projects',
@@ -466,7 +475,11 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'create_node_kit',
       'open_in_editor',
       'export_react',
-      'session_status'
+      'session_status',
+      // P109 ISL-016 — appended on the arithmetic the notes above record: 0 resident tokens ("8
+      // tools" and "9 tools" are the same length). `tests/isl016ProjectSettings.test.ts` measures
+      // that and reaches it through `find_tools` by keyword.
+      'set_project_settings'
     ],
     resident: false
   },
@@ -569,6 +582,8 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   'open_project',
   // CN-006 — writes a folder into the project.
   'create_node_kit',
+  // P109 ISL-016 — writes `nodegx.project.json`.
+  'set_project_settings',
   'set_project_tokens',
   'set_style_preset'
 ]);
