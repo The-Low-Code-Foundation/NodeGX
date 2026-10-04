@@ -682,6 +682,14 @@ export interface WorldHandlers<S, I, O> {
   /** NSP-013 s13 — the viewport was resized (`WorldView.listen`): called at the resize, `world.viewport()` already the new size. */
   resize?: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
   /**
+   * NSP-016 s40 — the EVENT LOOP TURNED: an `advance` step began, after what the world had already delivered landed and before
+   * the clock moves (interpreter.ts `advance`; the runtime target yields to the event loop there). What a browser does between
+   * two tasks with no frame of the graph in between: React commits a component's own `setState` the graph made (a Text Input's
+   * field), its callbacks with it — the node's props still wait for the holder's render at the frame's end. A `settle` is one
+   * task with the frame's end inside it, so nothing turns there. A spec whose component keeps no state of its own needs none.
+   */
+  turn?: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
    * NSP-015 s19 — the Router whose page this node sits in handed it params (world.ts ROUTE `page`):
    * the script's first entries when the page is built (the mount; they land in the first settle),
    * later ones at their time on the clock. Only a spec that needs `router` is handed any.
@@ -1004,6 +1012,7 @@ export interface AnyNodeSpec {
     response?: (state: never, inputs: never, response: WorldResponse, world: WorldView) => unknown;
     change?: (state: never, inputs: never, event: ChangeEvent, world: WorldView) => unknown;
     resize?: (state: never, inputs: never, world: WorldView) => unknown;
+    turn?: (state: never, inputs: never, world: WorldView) => unknown;
     page?: (state: never, inputs: never, params: Readonly<Record<string, unknown>>, world: WorldView) => unknown;
     popup?: (state: never, inputs: never, event: import('./world').PopupEvent, world: WorldView) => unknown;
     backend?: (state: never, inputs: never, answer: BackendAnswerEvent, world: WorldView) => unknown;

@@ -1151,5 +1151,113 @@
         }
       }
     }
+  },
+  {
+    "name": "a repeated Id is stored nowhere and re-sent as it stands: Id r1 binds; the checkbox unticked, Id r2 is stored (no bind); ticked again, Id r3 binds; Id r3 again re-sends r3 — not the r2 the passive write stored, not an earlier bind; ticked again, an empty Id unbinds (Id empty) and an empty Id again re-sends the empty — not the r1 the passive write stored; a Fetch then fails for the missing Id (the repeat left the empty Id, not something else)",
+    "because": "dbmodelnode2.ts :268-274 — the repeat branch writes nothing and sends Id; pins the two `modelId` swap twins the full batch left at seed 20730 (s40): a swap hands the sibling branch's LAST patch, which only a repeat after a different path can tell apart; the Fetch reads modelId itself (an empty one fails, anything else is called for), which the Id output — bound first — does not show",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "runOnChange-modelId",
+        "value": false
+      },
+      {
+        "set": "modelId",
+        "value": "r2"
+      },
+      "settle",
+      {
+        "set": "runOnChange-modelId",
+        "value": true
+      },
+      {
+        "set": "modelId",
+        "value": "r3"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r3"
+      },
+      "settle",
+      {
+        "set": "runOnChange-modelId",
+        "value": false
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "set": "runOnChange-modelId",
+        "value": true
+      },
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      "settle",
+      {
+        "set": "modelId",
+        "value": ""
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1"
+              }
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r2"
+              }
+            }
+          },
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r3"
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "one"
+          },
+          "r2": {
+            "title": "two"
+          },
+          "r3": {
+            "title": "three"
+          }
+        }
+      }
+    }
   }
 ]

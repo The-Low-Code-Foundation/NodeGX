@@ -268,5 +268,36 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Close and two actions in one frame, then a quiet frame: the one close took every press with it (nothing pending), so the next frame closes nothing and reports nothing — no second close, no Failure for the popup that is gone",
+    "because": "closepopup.ts :267-268, :291-292 — the frame end consumes `pending` and `closeAction`; pins the `afterInputs` drop-set the full batch left at seed 20730 (s40): a frame end that kept its pending list would close again",
+    "world": {
+      "popup": {
+        "inside": [
+          "Popup"
+        ]
+      }
+    },
+    "params": {
+      "closeActions": "Save,Cancel"
+    },
+    "steps": [
+      {
+        "signal": "close"
+      },
+      {
+        "signal": "closeAction-Cancel"
+      },
+      {
+        "signal": "closeAction-Save"
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "closeAction-Save"
+      },
+      "settle"
+    ]
   }
 ]

@@ -130,6 +130,7 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.response) names.push('world.response');
   if (spec.world?.change) names.push('world.change');
   if (spec.world?.resize) names.push('world.resize');
+  if (spec.world?.turn) names.push('world.turn');
   if (spec.world?.page) names.push('world.page');
   if (spec.world?.popup) names.push('world.popup');
   if (spec.world?.backend) names.push('world.backend');
@@ -169,6 +170,8 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     if (spec.world.response) w.response = wrap('world.response', spec.world.response as unknown as ErasedReducer) as unknown as typeof spec.world.response;
     if (spec.world.change) w.change = wrap('world.change', spec.world.change as unknown as ErasedReducer) as unknown as typeof spec.world.change;
     if (spec.world.resize) w.resize = wrap('world.resize', spec.world.resize as unknown as ErasedReducer) as unknown as typeof spec.world.resize;
+    // NSP-016 s40 — the turn, as the rest: a copy without it never commits what the graph wrote at an `advance`
+    if (spec.world.turn) w.turn = wrap('world.turn', spec.world.turn as unknown as ErasedReducer) as unknown as typeof spec.world.turn;
     if (spec.world.page) w.page = wrap('world.page', spec.world.page as unknown as ErasedReducer) as unknown as typeof spec.world.page;
     if (spec.world.popup) w.popup = wrap('world.popup', spec.world.popup as unknown as ErasedReducer) as unknown as typeof spec.world.popup;
     if (spec.world.backend) w.backend = wrap('world.backend', spec.world.backend as unknown as ErasedReducer) as unknown as typeof spec.world.backend;

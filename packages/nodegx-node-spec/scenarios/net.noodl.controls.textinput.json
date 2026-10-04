@@ -35047,5 +35047,544 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Max length -0.5 is a limit of 0 (HTML reads the attribute's leading digits after a sign; -0 is not negative): typing lands nothing after the keyboard goes on; Insert Text 'ab' still writes (the component measures room only above 0); Max length -1 is no limit and '7' lands after the inserted text; Max length 0 refuses again",
+    "because": "HTML rules for parsing non-negative integers (jsdom reflects maxlength=\"-0.5\" as 0, as a browser does); TextInput.tsx :346-350 `Number(maxLength) > 0`; the 10,000 deep run (s40)",
+    "params": {
+      "maxLength": -0.5,
+      "textToInsert": "ab"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "type",
+        "value": "42"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      "settle",
+      {
+        "set": "maxLength",
+        "value": -1
+      },
+      "settle",
+      {
+        "act": "type",
+        "value": "7"
+      },
+      "settle",
+      {
+        "set": "maxLength",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "type",
+        "value": "x"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the component converts with the Type it last rendered (C72): Type Number and Clear in one frame publish '' (the old Type's empty), Done; a Clear in the next frame publishes null (the output was not the number field's empty), Done; a Backspace on a field holding '3' in the frame Type turns Number publishes '' too",
+    "because": "TextInput.tsx :94 `outwardValueForFieldType(this.props.type, text)` — the props of the last render; the holder re-renders at the frame end (react-component-node.ts); the 10,000 deep run (s40)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "type",
+        "value": "number"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "type",
+        "value": "text"
+      },
+      {
+        "set": "startValue",
+        "value": "3"
+      },
+      "settle",
+      {
+        "set": "type",
+        "value": "number"
+      },
+      {
+        "signal": "backspace"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the component measures an Insert Text's room with the Max length it last rendered (C72): Max length 2 written with the Insert in one frame lets 'xy' through onto 'abcd'; the next frame's Insert finds no room (Unchanged)",
+    "because": "TextInput.tsx :346 `Number(this.props.maxLength)` — the props of the last render; the 10,000 deep run (s40)",
+    "params": {
+      "textToInsert": "xy"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "type",
+        "value": "abcd"
+      },
+      "settle",
+      {
+        "set": "maxLength",
+        "value": 2
+      },
+      {
+        "signal": "insert"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "React commits a graph write at the next turn of the event loop: a Backspace, an advance of 0 ms, then an Insert Text at the frame's end edits the shortened text ('ab0'); without the turn the Insert reads the text before the Backspace and its write wins ('ab00' from 'ab0'); a Clear, a turn, then a Backspace is Unchanged where C69's same frame puts text back",
+    "because": "world.turn (spec.ts, s40): the runtime target yields to the event loop at an advance and React commits the component setState; the holder render waits for the frame end. Measured on both targets (s40)",
+    "params": {
+      "startValue": "abc",
+      "textToInsert": "0"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "backspace"
+      },
+      {
+        "advance": 0
+      },
+      {
+        "signal": "insert"
+      },
+      "settle",
+      {
+        "signal": "backspace"
+      },
+      {
+        "signal": "insert"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      {
+        "advance": 0
+      },
+      {
+        "signal": "backspace"
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "xyz"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      {
+        "signal": "backspace"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Text Area's cursor starts at the START (React writes its default content): a Focus action then an Insert Text 'x' writes 'xabc' (D35); typing 'y' goes in after it ('xyabc'); Backspace removes the 'y' before the cursor; after a Blur action the Insert still lands at the cursor ('xxabc')",
+    "because": "HTML: a textarea element whose text is default content has its text entry cursor at 0, and a value set to the same text moves nothing; TextInput.tsx :304-316 reads the selection once the field has held focus; measured (s40 probe P2)",
+    "params": {
+      "type": "textArea",
+      "startValue": "abc",
+      "textToInsert": "x"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      "settle",
+      {
+        "act": "type",
+        "value": "y"
+      },
+      "settle",
+      {
+        "signal": "backspace"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "an <input>'s cursor starts at the END (React assigns its value): a Focus action then an Insert Text 'x' writes 'abcx'; a Value from the graph while unfocused moves the cursor to the end of the new text; after Enable Label rebuilds the input the fresh element's cursor is at the end again ('defxx' after a Focus and an Insert)",
+    "because": "HTML: setting value moves the text entry cursor to the end when the API value changed; a rebuilt <input> is fresh; measured (s40 probes P1, P3, P5)",
+    "params": {
+      "startValue": "abc",
+      "textToInsert": "x"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "def"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Type change from Email (no selection API) to Text puts the cursor at the START: 'a' typed into an Email field, Type Text, then Insert Text 'bc' writes 'bca'; typing 'z' then goes in after the inserted text ('bcza'); a Text Area made from a typed text field is a fresh element with its cursor at the start",
+    "because": "HTML's type change steps: previouslySelectable false and nowSelectable true → the text entry cursor to the start (jsdom follows it: the 10,000 run's 'abca'); a <textarea> replacing an <input> is a new element (TextInput.tsx :192-223); measured (s40 probes D1, P6)",
+    "params": {
+      "type": "email",
+      "textToInsert": "bc"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "type",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "type",
+        "value": "text"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      "settle",
+      {
+        "act": "type",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "type",
+        "value": "textArea"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "off the page, an Insert Text and a Set with no Value ever written in one frame: the wire gets '0' (the Insert's) and keeps it while the output's getter is emptied by the Set (undefined is never sent); a second Set is Unchanged (the getter already reads it); Mounted on announces the empty field ('')",
+    "because": "node.ts sends at every flag and never sends undefined (last-sent-value); text-input.ts :521-540 setText(undefined) off the page; the 10,000 deep run (s40)",
+    "params": {
+      "textToInsert": "0",
+      "mounted": false
+    },
+    "steps": [
+      {
+        "signal": "insert"
+      },
+      {
+        "signal": "set"
+      },
+      "settle",
+      {
+        "signal": "set"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then disabled; Enabled on and an act in the same frame, then a Blur action: the act's paint re-enabled the element, so the Blur takes the keyboard off it (Blurred, Done) — every act (a Tab away blurs it itself; the Blur after it is Done alone; a press or Enter lands on the re-enabled field)",
+    "because": "the act's paint syncs `pageEnabled` before the act; a Blur action in the same frame reads it (text-input.ts :315-319 → the element's blur(), which a disabled element refuses nothing) — kills a drop of the paint's syncs on an act whose own set is empty (s40, the surviving `person.key` drop-set at seed 13)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "type",
+        "value": "q"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
   }
 ]

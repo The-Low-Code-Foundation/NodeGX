@@ -2,6 +2,20 @@
 
 Raw excerpt of `NSP_DEEP=10000 NSP_ONLY=net.noodl.controls.textinput npx jest test/node-spec/conformance.test.ts` (runtime, the day's seed); the 200-run before it conforms. Kept so s40 need not re-run the hour: the ten unattributed divergences (shrunk) and the twenty-two surviving mutants. Interpreter at 10,000 (seed 20729): 0 divergences, 8 swap twins (NSP-016 §7.3).
 
+## s40's reading (2026-10-04) — every one replayed on both targets, traces aligned; six rules, none a face gap
+
+| seed | shape | the rule (NSP-016 §7.5) |
+|---|---|---|
+| 3033132983 | `aabc` vs `abca` — Insert after a Type change Email → Text lands at the start | HTML's type change steps: a type without the selection API to one with it puts the cursor at the START; the spec now keeps the caret (`caret`, `hadCaret`); row D35's second half |
+| 282795636 | off the page, Insert `0` then Set with no Value ever written: the wire holds `'0'` | node.ts never sends `undefined`: the wire keeps the last defined value while the getter is emptied (`wire` beside `out`, [[last-sent-value]]) |
+| 2571860563 · 1540320501 · 1028244634 | Max length `-0.5`: typing lands nothing | HTML parses `maxlength="-0.5"` as 0 (`-0` is not negative) — the SPEC's parse refused the sign and read "no limit"; the face was right |
+| 3516661601 | Backspace, `advance 0`, Insert: `fals0` | an `advance` is a turn of the event loop: React commits the component's own setState (`world.turn`, a new world-handler kind) |
+| 3346361197 | Value `[]`, `advance 0`, Backspace Unchanged | the same turn: the Value's `''` committed before the Backspace read the field |
+| 3064539079 | Text Area `[object Object]`, Insert queued, Focus action: `0[object Object]` | a fresh `<textarea>`'s cursor is at the START (default content) — the Focus action set `hadCaret`, the Insert went to the cursor: row D35 |
+| 3832506663 · 955539596 | Type Number then Clear / Backspace in one frame: `''` not `null` | the component converts with `this.props.type` as LAST RENDERED (`shownType`; the Max length too, `shownMaxLength`): row C72 |
+
+The twelve survivors: see §7.5 (the `person.key` drop-set is killed by a Blur-reading scenario; the rest re-measured after the rules above).
+
 ```
     net.noodl.controls.textinput v1 on runtime: CONFORMS (171517 ms, seed 20730)
     net.noodl.controls.textinput v1 on runtime: DOES NOT CONFORM (3522839 ms, seed 20730)

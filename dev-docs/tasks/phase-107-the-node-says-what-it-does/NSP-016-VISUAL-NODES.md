@@ -394,3 +394,74 @@ would have read as a hundred divergences; start every segment from a state the r
 pointer, drop and scroll acts; Drag; then Repeater, Component Stack, Page Router, Component Children (a boundary or a stack each). Every control
 whose component keeps the value in `useState` and follows the node through an effect (Checkbox, Dropdown — the Slider and Radio Button are to be
 read for it) is a candidate for C67 / C71's shape. AC4 waits for NSP-017.
+
+### 7.5 s40, 2026-10-04 — the Text Input at 10,000: six rules, two rows, the caret and the turn
+
+**The ten divergences the runtime's 10,000 run left (§7.4, [TEXT-INPUT-DEEP-RUN-2026-10-04.md](TEXT-INPUT-DEEP-RUN-2026-10-04.md)), each
+replayed on both targets with the traces aligned (a `zz` test playing the shrunk sequence on the interpreter and the runtime, printing the two
+traces side by side), fall into six rules — none a face gap, one the SPEC's own mistake:**
+
+1. **`maxlength="-0.5"` is a limit of 0.** HTML's rules for parsing a non-negative integer take the sign, then the leading digits; `-0` is not
+   negative, so the attribute reads 0 and every key is refused — jsdom reflects it so and a browser types nothing. The spec's parse had refused
+   the sign and read "no limit" (three of the ten). The face was right; `maxLengthAttribute` now follows HTML (`-1` is still no limit). Measured
+   with a bare jsdom before the spec was touched.
+2. **The component converts and measures with the props it LAST RENDERED** — row **C72** (low). `TextInput.setText` converts the published
+   value with `this.props.type` (:94) and `edit` measures an Insert Text's room with `this.props.maxLength` (:346); the holder's render hands the
+   component the node's props at the frame's end, so a Type turned Number with a Clear or a Backspace in the same frame publishes `''` where the
+   next frame says `null`, and a Max length written with an Insert Text is measured next frame. The spec keeps `shownType` / `shownMaxLength`
+   (synced at each paint; `shownType` replaces `areaOn`). The C69 family — the component reads React's last commit, here its props.
+3. **React commits a graph write at the frame's end — or at the next turn of the event loop.** The runtime target's `advance` yields to the
+   event loop before the clock moves, and React commits the component's own `setState` there (a Backspace, `advance 0`, then an Insert Text at
+   the frame's end found the shortened text — two of the ten); the node's props still wait for the holder's render. **New world-handler kind
+   `turn`** (spec.ts `WorldHandlers.turn`, the four places: the erased `AnyNodeSpec.world`, interpreter.ts `Inbound` / `handleInbound` /
+   `advance` — pushed to every listening instance after what the world already delivered and before the clock moves — and
+   runner/mutants.ts `reducerNames` / `wrapReducers`). The Text Input's `turn` commits `pending` through the same `committed` helper the paint
+   uses. A `settle` is one task with the frame's end inside it: nothing turns there.
+4. **The caret is HTML's, and the face must type at it.** Measured through jsdom, which follows the spec: a fresh `<input>` has its text entry
+   cursor at the END (React assigns `node.value`; the setter moves the cursor to the end when the API value changed); a fresh `<textarea>` at the
+   START (React writes its default content, then sets the same text, which moves nothing); a type change from a type WITHOUT the selection API
+   (email, number) to one with it (text, url, password) puts it at the start (HTML's type change steps — the run's `abca`); a keystroke leaves it
+   after the key; a committed graph write moves it to the end of the new value when the API value changed; an `edit`'s callback then sets it
+   after what was written if the field has the keyboard (:359-369). The component's `edit` reads the selection only once the field has held
+   focus (`hadCaret`, :319 — set by the element's `onFocus`, a Focus ACTION included) and only on a type that has one. **Row D35** (low): a Text
+   Area given a Focus action and then an Insert Text writes at the START of its text; a field whose Type moved from Email or Number to Text
+   inserts at the start too — the browser's rule faithfully applied, the question being whether a Focus action should count as a caret the person
+   placed. The spec keeps `caret`, `hadCaret`, `editCaret` (the first two synced); **the face's `typeKey` now writes each key at
+   `selectionStart` / `selectionEnd` on a type with the API (appending on email and number) and puts the cursor back after the key**, as a
+   keystroke leaves it — the face had typed at the end whatever the cursor said (probe P4: a focused fresh Text Area typed at the end on both
+   targets, both wrong against a browser).
+5. **The wire keeps the last DEFINED value while the getter reads undefined** ([[last-sent-value]], s4's rule met inside ONE patch): off the page,
+   an Insert Text then a Set with no Value ever written (`setText(undefined)`) in one frame — the Insert's `'0'` is sent at its flag, the Set's
+   `undefined` never is, and the interpreter's observation reads the state at the END of the drain's patch. State `wire` beside `out` (every
+   writer writes both; `wire` keeps its value on an undefined write); the Value output reads `wire`, the Done / Unchanged comparisons read `out`.
+6. (The tenth, `[object Object]0`, is rule 4's Text Area.)
+
+**Scenarios:** nine hand scenarios added (77 now): the `-0.5` / `-1` / `0` limits; C72's Type and Max length in the same frame; the turn
+(Backspace, `advance 0`, Insert; Clear, a turn, Backspace); the Text Area's start cursor through Insert, typing, Backspace and a Blur; the
+`<input>`'s end cursor through a Value write and a label rebuild; the Email → Text and Text → Text Area cursors; the off-page wire; and a
+Blur-reading one (focused, disabled, Enabled on with each act and a Blur action in the same frame) that kills the `person.key` drop-set the
+deep run and seed 13 both left (an Enter on a focused field whose paint re-enabled it: its own set is empty, so only an action reading the
+paint's syncs can tell the drop). The Clear's declared equivalent now names `wire` (the shape grew the key).
+
+**The two seed-dependent survivors from §7.4** (the full runtime batch at 20730, not 20729) reproduced on the interpreter in a second
+(the mutants are graded there), and are pinned: **NavigationClosePopup** — Close and two actions in one frame, then a quiet frame and a
+later action (a frame end that kept its `pending` would close again); **DbModel2** — the two `modelId` swap twins. The second needed the
+mechanism read: a swap hands the sibling branch's RECORDED EXAMPLE, and the `{"set":["modelId"]}` shape holds two code paths (the passive
+write, `send: ['id']`; and a bind whose `bound` did not move, `send: []`) — the example was the second's, `modelId: null` with no send, which
+the Id output (bound first) never shows. A Fetch reads `modelId` itself (`null` is neither undefined nor empty: it is called for; `''` fails
+with the missing-Id message) and tells them apart; a passive Id then a repeat after a different path tells the other twin. Both conform at
+13, 20729 and 20730 now. (A shape that holds two code paths with different `send`s is a bucket worth splitting — noted, not done.)
+
+**Gate readings (2026-10-04, load 2–3).** Interpreter: CONFORMS at 200 on 13 (77 / 77, 3,074 / 3,086 killed, 12 declared), 20729 (3,147 /
+3,160) and 20730 (3,107 / 3,117); the 10,000 run below. Runtime: CONFORMS at 200 on 13 (76 / 77 + 1 known, 0 divergences, 3,074 / 3,086, 189 s)
+and on 20730 (76 / 77 + 1 known, 0 divergences, 3,107 / 3,117, 184 s). `tsc --noEmit` exit 0 in `nodegx-node-spec` and `nodegx-export`;
+stranger hashes refreshed (spec.ts is guarded) and `tests/stranger.test.ts` green (41 passed, the 17 skipped are the rounds' optional
+re-grades). Rows C72 and D35 filed (`node scripts/bugs.js check`: 221 valid). The package suite and the deep runs: see the end of this section.
+
+**Lessons.** (1) **Measure the attribute's parse, not the runner's first explanation**: the `-0.5` divergence read as "the face refuses what the
+browser allows" until a bare jsdom printed `maxLength` 0 and HTML's parse agreed — the spec was the one wrong, and the face would have been
+"fixed" into a lie. (2) **A cursor is state the spec must carry once a face types at it**: the face's "the end, here" was a choice that read as
+a rule for two sessions; HTML names where the cursor is in every case met, and jsdom follows it — nothing here is a jsdom gap. (3) **A swap hands
+an EXAMPLE, and a shape can hold two code paths**: a twin that "cannot be killed" may be carrying the other path's values; print the branch
+examples (`discoverBranches` after the scenarios) before declaring. (4) **An event-loop turn is not a frame**: the runtime target's `advance`
+commits React and runs no frame end; the format needed the distinction (`turn`), not a wider `afterInputs`.

@@ -53,12 +53,27 @@
  *     (through the component when on the page, focused or not; the output alone when off it);
  *     Unchanged when both the author's Value and the output already read empty. **Insert Text**
  *     (:255-267, at the frame's end) and **Backspace** (:268-277, at once): on the page the
- *     component edits at the caret (TextInput.tsx :330-371) — the end of the text here, where a
- *     typed field's caret is — within `Number(Max length)` when it is above 0 (:346-350, code
- *     points kept while they fit); off the page the start value is appended to or trimmed
- *     (:463-483). Done when the text changed, Unchanged when not; both write the start value as
- *     typing does (`_typed`, :358). Insert Text writes while the field has the keyboard (that is
- *     what it is for, GAM-011).
+ *     component edits at the CARET (TextInput.tsx :330-371) — the element's selection once the
+ *     field has held focus (`hadCaret`, :319) and the type has one (not Email, not Number), else
+ *     the end — within `Number(Max length)` when it is above 0 (:346-350, code points kept while
+ *     they fit); off the page the start value is appended to or trimmed (:463-483). Done when the
+ *     text changed, Unchanged when not; both write the start value as typing does (`_typed`,
+ *     :358). Insert Text writes while the field has the keyboard (that is what it is for, GAM-011).
+ *     Where the caret IS is the browser's (State `caret`, s40): a fresh `<textarea>`'s sits at the
+ *     start, so a Text Area given a Focus action and then an Insert Text takes the text at its
+ *     START (row D35); a field whose Type moved from Email or Number to Text has it at the start
+ *     too (HTML's type change steps).
+ *   - **what the component last rendered** (s40, row C72): `setText` converts with `this.props.type`
+ *     (:94) and `edit` measures its room with `this.props.maxLength` (:346) — the props React gave
+ *     the component at its last render, which the node's `props.type` reaches at the next paint. A
+ *     Clear or a Backspace in the frame a Type change arrives converts with the old Type (a Number
+ *     field just made publishes `''` where the next frame says `null`); a Max length written with
+ *     an Insert Text is measured next frame.
+ *   - **React commits a graph write at the frame's end — or at the next turn of the event loop**
+ *     (s40, `world.turn`): an `advance` step between two frames lets React commit the component's
+ *     `setState` (the field, an edit's caret callback) while the node's props still wait for the
+ *     holder's render; a Backspace, an advance, then an Insert Text at the frame's end edits the
+ *     shortened text (measured).
  *   - **Type** (`props.type`, TextInput.tsx :201): a value the component reads at each render and
  *     each write; a change between Text Area and the rest rebuilds the element (`<textarea>` ↔
  *     `<input>`, :192-223) and the keyboard leaves with the old one, silently. The field's text is
@@ -110,8 +125,14 @@ type State = {
   field: string;
   /** the `setState` React has not committed yet (null: none); committed at the frame's end and before any act */
   pending: string | null;
-  /** `outputPropValues.onTextChanged` — the Value output; unset until the first write */
+  /** `outputPropValues.onTextChanged` — the Value output's GETTER; unset until the first write */
   out: unknown;
+  /**
+   * What the WIRE holds: the last DEFINED value sent on Value. node.ts sends at every flag and never sends `undefined`
+   * ([[last-sent-value]]), so a Set with no Value ever written (`setText(undefined)`, off the page) empties the getter and
+   * leaves the wire where it was — an Insert Text in the same frame had put `'0'` there (s40, deep run).
+   */
+  wire: unknown;
   /** text-input.ts :376 `_internal.announced.value` — what the component last reported (meaningful once `hasAnnounced`) */
   announced: unknown;
   /** text-input.ts :454 — the component has reported at least once */
@@ -129,8 +150,31 @@ type State = {
   wantsLabel: boolean;
   /** `!!useLabel` as PAINTED: a change moves the input in the tree (:248-281 — a new element either way), and the keyboard leaves with the old one, silently */
   labelOn: boolean;
-  /** Type is Text Area as PAINTED: a change swaps `<textarea>` for `<input>` (:192-223) — a new element, the keyboard leaves with the old one */
-  areaOn: boolean;
+  /**
+   * `this.props.type` as React LAST RENDERED it (s40): what `render` draws (:192, :201 — Text Area ↔ the rest swaps `<textarea>` for
+   * `<input>`, a new element, the keyboard leaves with the old one), what `setText` converts with (:94) and `componentDidMount` reads
+   * (:107). The node's `fieldType` reaches it at the next paint (the holder's render hands the component the node's props), so a
+   * Clear or a Backspace in the frame a Type change arrives converts with the OLD type — row C72.
+   */
+  shownType: unknown;
+  /** `this.props.maxLength` as last rendered (s40): the element's `maxlength` (:185) and the room an Insert Text has (:346) — C72's shape */
+  shownMaxLength: unknown;
+  /**
+   * The element's TEXT ENTRY CURSOR (HTML), in code units — meaningful on a type the selection API applies to (text, url,
+   * password, a textarea; HTML's "selection API applies" list — not email, not number). Where HTML puts it (s40, measured
+   * through jsdom, which follows it): a fresh `<input>` has it at the END (React assigns `node.value`, and the value setter
+   * moves the cursor to the end when the API value changed); a fresh `<textarea>` at the START (React writes its default
+   * content; the setter it then calls with the same text changes nothing); a type change from a type without the API to
+   * one with it puts it at the start (the type change steps); a keystroke leaves it after the key; a graph write React
+   * commits moves it to the end of the new value when the API value changed, and an `edit`'s callback then sets it after
+   * what was written if the field has the keyboard (:359-369). A press is a focus here (the face has no geometry for a
+   * click's point): the cursor stays.
+   */
+  caret: number;
+  /** TextInput.tsx :319 `hadCaret` — the element's `onFocus` has fired since the COMPONENT mounted (:177-180): `edit` reads the selection only then (:306) */
+  hadCaret: boolean;
+  /** TextInput.tsx :359-369 — the caret an `edit` will set when React commits it, if the field has the keyboard then (null: none pending) */
+  editCaret: number | null;
   /** the element's `disabled` attribute follows Enabled at each paint (TextInput.tsx :181) — what the Focus and Blur actions meet */
   pageEnabled: boolean;
   /** the element holds the keyboard — what the PAGE knows; `focused` is what the node REPORTS (button.ts, row D30) */
@@ -192,11 +236,19 @@ function sanitize(t: unknown, v: string): string {
  */
 function maxLengthAttribute(v: unknown): number {
   if (v === null || v === undefined || typeof v === 'boolean') return -1;
-  const m = /^[ \t\n\f\r]*\+?(\d+)/.exec(String(v));
+  // HTML's rules for parsing integers: a sign, then the leading digits; a negative result is an error for a non-negative
+  // integer — and `-0` is not negative, so `maxlength="-0.5"` IS a limit of 0 (s40: the deep run's `-0.5` typed nothing on the
+  // runtime, as a browser types nothing; the first parse here refused the sign and read "no limit")
+  const m = /^[ \t\n\f\r]*([-+]?)(\d+)/.exec(String(v));
   if (!m) return -1;
-  const n = Number(m[1]);
+  const n = Number(m[2]);
+  if (m[1] === '-' && n !== 0) return -1;
   return n > 2147483647 ? -1 : n;
 }
+/** HTML: the types the selection API applies to (`selectionStart` is a number, `setSelectionRange` works) — text, url, password and a textarea here; email and number have none */
+const selectable = (t: unknown): boolean => ['text', 'url', 'password', 'textArea'].includes(elementType(t));
+/** What the wire holds after a write of `out`: the last DEFINED value (node.ts never sends `undefined` — [[last-sent-value]]) */
+const sent = (s: Readonly<State>, out: unknown): Pick<State, 'out' | 'wire'> => ({ out, wire: out === undefined ? s.wire : out });
 /** TextInput.tsx :349, text-input.ts :475 — code points kept while they fit the room */
 const fit = (text: string, room: number): string => Array.from(text).reduce((kept, ch) => (kept.length + ch.length <= room ? kept + ch : kept), '');
 
@@ -207,7 +259,8 @@ export const TextInput = defineNode({
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches. `field` / `pending` are React's commit of what the graph wrote: the
   // page following the node at each paint, like the disabled attribute
-  synced: ['pageEnabled', 'labelOn', 'areaOn', 'field', 'pending'],
+  // (s40) `caret` and `editCaret` too: the element's cursor as the paint leaves it, and the callback the paint consumes
+  synced: ['pageEnabled', 'labelOn', 'shownType', 'shownMaxLength', 'field', 'pending', 'caret', 'editCaret'],
 
   state: {
     fieldType: 'text',
@@ -219,6 +272,7 @@ export const TextInput = defineNode({
     field: '',
     pending: null,
     out: undefined,
+    wire: undefined,
     announced: undefined,
     hasAnnounced: false,
     queue: [],
@@ -229,7 +283,11 @@ export const TextInput = defineNode({
     mounted: true,
     wantsLabel: false,
     labelOn: false,
-    areaOn: false,
+    shownType: 'text',
+    shownMaxLength: undefined,
+    caret: 0,
+    hadCaret: false,
+    editCaret: null,
     pageEnabled: true,
     elementFocused: false,
     onPage: false
@@ -392,7 +450,7 @@ export const TextInput = defineNode({
 
   outputs: {
     // text-input.ts :365-379
-    onTextChanged: { type: '*', from: (s) => s.out, displayName: 'Value', group: 'General', description: 'What the field currently contains, updated as the user types. A number when Type is Number, otherwise text' },
+    onTextChanged: { type: '*', from: (s) => s.wire, displayName: 'Value', group: 'General', description: 'What the field currently contains, updated as the user types. A number when Type is Number, otherwise text' },
     // text-input.ts :390-397 — fired by every write through the component (:377), changed or not
     textChanged: { type: 'signal', displayName: 'Value Changed', group: 'General', description: 'Fires whenever the Value output changes, so a graph can sequence off the new value rather than poll it' },
     // text-input.ts :382-387; TextInput.tsx :284-288
@@ -471,7 +529,7 @@ export const TextInput = defineNode({
     focus: (s) => {
       if (!s.onPage) return { send: [], outcome: 'unchanged' };
       if (s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
-      return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+      return { set: { focused: true, elementFocused: true, hadCaret: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // text-input.ts :315-319 → focus-tracker.ts :87-89: `blur()` on the element; Done either way
     blur: (s) => {
@@ -491,8 +549,14 @@ export const TextInput = defineNode({
       inputs: (params) => Object.fromEntries(dataAttributeNames(params.dataAttributes).map((name) => [name, dataAttributeInput(name)])),
       on: () => NOTHING
     },
-    // placed on the page with its params set — the first render: Did Mount, and the mount's announcement of the Value (TextInput.tsx :97-110)
-    world: { place: (s) => painted(s) },
+    world: {
+      // placed on the page with its params set — the first render: Did Mount, and the mount's announcement of the Value (TextInput.tsx :97-110)
+      place: (s) => painted(s),
+      // s40 — the event loop turned (an `advance`, before the clock moves): React commits the component's own `setState` the graph
+      // made (TextInput.tsx :93) — the field, and an edit's caret callback; the node's props wait for the holder's render at the
+      // frame's end. Measured: a Backspace, an `advance 0`, then an Insert Text at the frame's end found the shortened text.
+      turn: (s) => (s.onPage && s.pending !== null ? { set: committed(s, s.pending), send: [] } : NOTHING)
+    },
     // the frame's end: the scheduled callbacks in order (nodecontext.ts :478-486 — before the paint, which the target's frame
     // end raises after `update()`), then the paint
     afterInputs: (s) => {
@@ -551,7 +615,7 @@ export const TextInput = defineNode({
           let set: Partial<State> = { ...first.set };
           const send: ValueOut[] = [...first.send];
           const emit: Pulse[] = [...(first.emit ?? []), 'onEnter'];
-          if (elementType(p.fieldType) === 'textArea') {
+          if (elementType(p.shownType) === 'textArea') {
             const w = typed({ ...p, ...first.set }, '\n');
             if (w) {
               set = { ...set, ...w.set };
@@ -567,7 +631,7 @@ export const TextInput = defineNode({
 
 /** The keyboard onto the field (utils.ts :157-168; TextInput.tsx :177-180 `hadCaret`) */
 function focusTaken(): Act {
-  return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'] };
+  return { set: { focused: true, elementFocused: true, hadCaret: true }, send: ['focusState'], emit: ['onFocus'] };
 }
 
 /**
@@ -582,7 +646,7 @@ function setText(s: Readonly<State>, text: unknown, committed = false): Write {
     const c = componentSetText(s, text, committed); // :526
     return { set: { ...startValue, ...c.set }, send: c.send, emit: c.emit, landed: true };
   }
-  if (s.out !== text) return { set: { ...startValue, out: outward(s.fieldType, text) }, send: ['onTextChanged'], emit: [], landed: true }; // :530-537
+  if (s.out !== text) return { set: { ...startValue, ...sent(s, outward(s.fieldType, text)) }, send: ['onTextChanged'], emit: [], landed: true }; // :530-537
   return { set: startValue, send: [], emit: [], landed: false };
 }
 
@@ -591,11 +655,27 @@ function setText(s: Readonly<State>, text: unknown, committed = false): Write {
  * graph wrote it, `pending`; at once when a person's event did, `committed`), the output converted, and `onTextChanged` →
  * announced, Value Changed (text-input.ts :374-378)
  */
-function componentSetText(s: Readonly<State>, value: unknown, committed = false): Omit<Write, 'landed'> {
+function componentSetText(s: Readonly<State>, value: unknown, commit = false, edited: number | null = null): Omit<Write, 'landed'> {
   const text = str(value);
-  const out = outward(s.fieldType, text);
-  const field: Partial<State> = committed ? { field: text, pending: null } : { pending: text };
-  return { set: { ...field, out, announced: out, hasAnnounced: true }, send: ['onTextChanged'], emit: ['textChanged'] };
+  const out = outward(s.shownType, text); // :94 `this.props.type` — the type as last rendered (C72)
+  const field: Partial<State> = commit ? committed(s, text, edited) : edited === null ? { pending: text } : { pending: text, editCaret: edited };
+  return { set: { ...field, ...sent(s, out), announced: out, hasAnnounced: true }, send: ['onTextChanged'], emit: ['textChanged'] };
+}
+
+/**
+ * React commits `text` into the element the component holds (no render of the holder: the props stand). The caret (State
+ * `caret`): the value setter moves it to the end when the API value — the text sanitised by the element's type — changed; then
+ * an edit's callback (`edited`, or the one still pending) puts it after what was written, if the field has the keyboard
+ * (TextInput.tsx :359-369 — `setSelectionRange` clamps to the value; on a type without the API it throws and is caught).
+ */
+function committed(s: Readonly<State>, text: string, edited: number | null = null): Partial<State> {
+  const before = sanitize(s.shownType, s.field);
+  const after = sanitize(s.shownType, text);
+  let caret = s.caret;
+  if (after !== before) caret = after.length;
+  const cb = edited ?? s.editCaret;
+  if (cb !== null && s.elementFocused && selectable(s.shownType)) caret = Math.min(cb, after.length);
+  return { field: text, pending: null, editCaret: null, caret };
 }
 
 /** text-input.ts :485-512 */
@@ -609,33 +689,34 @@ function clear(s: Readonly<State>): Write {
   }
   // :505-509 — the output written when it differs; written here regardless (the same value is silent on the wire), so an
   // off-page Clear is one branch and not two twins a mutant cannot tell apart
-  return { set: { ...written, out: empty }, send: ['onTextChanged'], emit: [], landed: !wasEmpty };
+  return { set: { ...written, ...sent(s, empty) }, send: ['onTextChanged'], emit: [], landed: !wasEmpty };
 }
 
 /**
- * text-input.ts :463-483 `edit` → TextInput.tsx :330-371 on the page: at the caret — the end of the text, where a typed
- * field's caret is — within `Number(Max length)` when above 0; off the page the start value is appended to or trimmed.
+ * text-input.ts :463-483 `edit` → TextInput.tsx :330-371 on the page: at the caret (`caretOf`) within `Number(Max length)`
+ * when above 0 — both as the component LAST RENDERED them; off the page the start value is appended to or trimmed.
  */
-function edit(s: Readonly<State>, mode: 'insert' | 'backspace', replacement: string, committed = false): Write {
+function edit(s: Readonly<State>, mode: 'insert' | 'backspace', replacement: string, commit = false): Write {
   const none: Write = { set: {}, send: [], emit: [], landed: false };
   if (s.onPage) {
     const value = s.field; // :331 `this.state.value` — what React last committed, not what this frame wrote (row C69)
-    let from = value.length;
+    const at = caretOf(s, value); // :332 — no selection ever: start and end are one
+    let from = at;
     let text = replacement;
     if (mode === 'backspace') {
       text = '';
-      if (value.length === 0) return none; // :339
-      const before = Array.from(value);
-      from = value.length - before[before.length - 1].length; // :341-342 — one character, not one code unit
+      if (at === 0) return none; // :339
+      const before = Array.from(value.slice(0, at));
+      from = at - before[before.length - 1].length; // :341-342 — one character, not one code unit
     } else {
-      const maxLength = Number(s.maxLength); // :346-350
+      const maxLength = Number(s.shownMaxLength); // :346-350 — `this.props.maxLength`, as last rendered (C72)
       if (maxLength > 0) text = fit(text, Math.max(0, maxLength - value.length));
       if (text.length === 0) return none; // :351
     }
-    const next = value.slice(0, from) + text; // :354 — nothing after the caret
+    const next = value.slice(0, from) + text + value.slice(at); // :354
     if (next === value) return none; // :355
-    // :358-359 — `_typed(next)` then `setText(next)`
-    const c = componentSetText(s, next, committed);
+    // :358-359 — `_typed(next)` then `setText(next, …)` with the caret after what was written (:356)
+    const c = componentSetText(s, next, commit, from + text.length);
     return { set: { startValue: next, ...c.set }, send: c.send, emit: c.emit, landed: true };
   }
   const current = str(s.startValue); // :466
@@ -651,7 +732,16 @@ function edit(s: Readonly<State>, mode: 'insert' | 'backspace', replacement: str
   }
   if (next === current) return none; // :477
   // :479-481 — the start value and the output, converted; no announcement, no Value Changed
-  return { set: { startValue: next, out: outward(s.fieldType, next) }, send: ['onTextChanged'], emit: [], landed: true };
+  return { set: { startValue: next, ...sent(s, outward(s.fieldType, next)) }, send: ['onTextChanged'], emit: [], landed: true };
+}
+
+/**
+ * TextInput.tsx :304-316 `caret`: the element's selection once the field has held focus (`hadCaret`) and the type has one
+ * (`selectionStart` is null on an Email or Number field: append), clamped to the committed text; else the end.
+ */
+function caretOf(s: Readonly<State>, value: string): number {
+  if (s.hadCaret && selectable(s.shownType)) return Math.min(s.caret, value.length);
+  return value.length;
 }
 
 /**
@@ -661,18 +751,21 @@ function edit(s: Readonly<State>, mode: 'insert' | 'backspace', replacement: str
  * (TextInput.tsx :290-297): `_typed`, then `setText`. Returns undefined for a refused or ineffective key.
  */
 function typed(s: Readonly<State>, ch: string): Omit<Write, 'landed'> | undefined {
-  const kind = elementType(s.fieldType);
-  const shown = sanitize(s.fieldType, s.field);
+  const kind = elementType(s.shownType); // the element as painted
+  const shown = sanitize(s.shownType, s.field);
   if (kind === 'number') {
     if (!/^[0-9]$/.test(ch)) return undefined;
   } else {
-    const max = maxLengthAttribute(s.maxLength);
+    const max = maxLengthAttribute(s.shownMaxLength);
     if (max >= 0 && shown.length + ch.length > max) return undefined;
   }
-  const next = sanitize(s.fieldType, shown + ch);
+  // the key goes in at the text entry cursor where the type has one; where it does not (email, number) the face appends
+  const at = selectable(s.shownType) ? Math.min(s.caret, shown.length) : shown.length;
+  const next = sanitize(s.shownType, shown.slice(0, at) + ch + shown.slice(at));
   if (next === shown) return undefined; // React fires no change for a value that did not change
   const c = componentSetText(s, next, true); // :295-296 — `_typed(next)`, then `setText(next)`; a browser event: committed before it returns
-  return { set: { startValue: next, ...c.set }, send: c.send, emit: c.emit };
+  // the cursor sits after the key (React's commit finds the element already holding the text and moves nothing)
+  return { set: { startValue: next, ...c.set, caret: Math.min(at + ch.length, next.length) }, send: c.send, emit: c.emit };
 }
 
 /**
@@ -683,24 +776,43 @@ function typed(s: Readonly<State>, ch: string): Omit<Write, 'landed'> | undefine
  */
 function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
   const set: Partial<State> = s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled };
-  const area = elementType(s.fieldType) === 'textArea';
-  if (s.wantsLabel !== s.labelOn || area !== s.areaOn) {
+  const type = s.fieldType; // the holder's render hands the component the node's props: `props.type` is this from here on
+  const area = elementType(type) === 'textArea';
+  // a new element: the label moving the input in the tree, or <textarea> ↔ <input>; the keyboard leaves with the old one
+  const rebuilt = s.wantsLabel !== s.labelOn || area !== (elementType(s.shownType) === 'textArea');
+  if (rebuilt) {
     set.labelOn = s.wantsLabel;
-    set.areaOn = area;
     if (s.onPage && s.mounted) set.elementFocused = false;
   }
   if (s.mounted && !s.onPage) {
     const field = str(s.startValue); // TextInput.tsx :78 — the constructor; a fresh component has nothing pending
-    const o = outward(s.fieldType, field); // :106-107
-    if (s.hasAnnounced && s.announced === o) return { set: { ...set, onPage: true, field, pending: null }, send: [], emit: ['didMount'] };
-    const c = componentSetText(s, s.startValue, true); // :109 — inside the mount's commit
-    return { set: { ...set, onPage: true, ...c.set }, send: c.send, emit: [...c.emit, 'didMount'] };
+    const o = outward(type, field); // :106-107
+    // a fresh component on a fresh element: `hadCaret` false (:319); the cursor at the end of an <input> (React assigns its value), at the start of a <textarea>
+    const fresh: Partial<State> = { onPage: true, field, pending: null, shownType: type, shownMaxLength: s.maxLength, hadCaret: false, editCaret: null, caret: area ? 0 : sanitize(type, field).length };
+    if (s.hasAnnounced && s.announced === o) return { set: { ...set, ...fresh }, send: [], emit: ['didMount'] };
+    const c = componentSetText({ ...s, ...fresh }, s.startValue, true); // :109 — inside the mount's commit; the same text: the cursor stays
+    return { set: { ...set, ...fresh, ...c.set }, send: c.send, emit: [...c.emit, 'didMount'] };
   }
   // the element leaves with the keyboard it held; the node's Focused is not told (row D30); a setState on it is never committed
-  if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false, pending: null }, send: [], emit: ['willUnmount'] };
-  // the paint commits what the graph wrote this frame (React renders every pending update on the root)
-  if (s.pending !== null) return { set: { ...set, field: s.pending, pending: null }, send: [], emit: [] };
-  return { set, send: [], emit: [] };
+  if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false, pending: null, editCaret: null }, send: [], emit: ['willUnmount'] };
+  if (!s.onPage) return { set, send: [], emit: [] };
+  // on the page: ONE render commits the node's props (the type, the max length — a new element when `rebuilt`) and what the graph
+  // wrote this frame (every pending update on the root). The cursor: a fresh element's as at the mount; else HTML's type change
+  // steps (a type without the selection API to one with it: the start), then the value setter (the end, when the API value
+  // changed — the element's old value re-sanitised by the new type is what it held), then an edit's callback (after what it wrote,
+  // if the element still has the keyboard — a rebuilt one does not)
+  const value = s.pending ?? s.field;
+  const after = sanitize(type, value);
+  let caret = s.caret;
+  if (rebuilt) caret = area ? 0 : after.length;
+  else {
+    if (!selectable(s.shownType) && selectable(type)) caret = 0;
+    const before = sanitize(type, sanitize(s.shownType, s.field));
+    if (after !== before) caret = after.length;
+  }
+  const keyboard = rebuilt ? false : s.elementFocused;
+  if (s.editCaret !== null && keyboard && selectable(type)) caret = Math.min(s.editCaret, after.length);
+  return { set: { ...set, shownType: type, shownMaxLength: s.maxLength, field: value, pending: null, editCaret: null, caret }, send: [], emit: [] };
 }
 
 /** The act on the painted page (button.ts `onPainted`): nothing to act on when the element is not there; else `then` on the painted state, after the paint's own pulses. */
@@ -752,7 +864,7 @@ function thenDrained(p: Readonly<State>, a: Act): Act {
  */
 function pressed(s: Readonly<State>): Act {
   // the handler's work and, on a Text Area, its drain (pointerlisteners.ts :180-183) — both BEFORE the mousedown's default action
-  const down: Act = elementType(s.fieldType) === 'textArea' ? thenDrained(s, { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] }) : NONE;
+  const down: Act = elementType(s.shownType) === 'textArea' ? thenDrained(s, { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] }) : NONE;
   if (s.elementFocused) return down;
   return join(down, focusTaken());
 }

@@ -60,9 +60,9 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":[],"emit":[]', why: 'a frame end with nothing scheduled and nothing to paint: its set is empty, there is nothing to drop' },
     // Clear off the page with the author's Value and the output already empty: every writer of the output writes the start value with
     // it, so the start value is empty too — the three keys it writes already hold the value (text-input.ts :490-497)
-    { reducer: 'clear', kind: 'drop-set', branch: '"set":["out","startValue","text"],"emit":[],"outcome":"unchanged"', why: "a Clear off the page that finds the author's Value, the start value and the output already empty writes what is there" },
+    { reducer: 'clear', kind: 'drop-set', branch: '"set":["out","startValue","text","wire"],"emit":[],"outcome":"unchanged"', why: "a Clear off the page that finds the author's Value, the start value and the output already empty writes what is there (s40: the wire's copy too)" },
     // a press, release, click, Tab or key on a DISABLED field while Enable Label or Type is changing: the act itself meets nothing and
-    // its paint rebuilds the element (`elementFocused` false); dropped, the paint's sync (`labelOn` / `areaOn`) is dropped with it,
+    // its paint rebuilds the element (`elementFocused` false); dropped, the paint's sync (`labelOn` / `shownType`) is dropped with it,
     // so the frame's end rebuilds again and resets the same key — nothing reads it in between (the Focus and Blur actions read a
     // disabled element as nothing to do). Measured s38 on the interpreter: the swaps of these branches are killed, the drops not.
     ...['press', 'release', 'click', 'focus', 'type', 'key'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED })),

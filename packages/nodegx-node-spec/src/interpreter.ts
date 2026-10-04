@@ -110,6 +110,8 @@ type Inbound =
   // s26: an AUTH call's answer carries the call and the session at the call — its landing runs the adapter's steps (world.ts AUTH)
   | { kind: 'backend'; answer: BackendAnswerEvent; auth?: { op: string; backend: string; args: Readonly<Record<string, unknown>>; atCall: Readonly<Record<string, unknown>> | undefined; delivery: BackendDelivery } }
   | { kind: 'resize' }
+  // NSP-016 s40: the event loop turned — an `advance` began (spec.ts `WorldHandlers.turn`)
+  | { kind: 'turn' }
   | { kind: 'page'; params: Readonly<Record<string, unknown>> }
   | { kind: 'popup'; event: PopupEvent }
   | { kind: 'store'; event: StoreEvent }
@@ -607,6 +609,9 @@ export function advance(inst: Instance, ms: number): void {
   const everyone = () => {
     for (const i of [...instancesOf(inst.world).all]) deliver(i);
   };
+  // NSP-016 s40 — the event loop turns: what already landed is delivered, then every instance whose spec listens for the turn
+  // (spec.ts `WorldHandlers.turn` — React's commit of a component's own state) hears it, before the clock moves
+  for (const i of [...instancesOf(inst.world).all]) if (i.spec.world?.turn) i.inbox.push({ kind: 'turn' });
   everyone();
   // world.ts CLOCK (s34): timer by timer, what each delivered landing before the next fires — at ITS moment. One sweep then one
   // delivery handed an answer that landed at +2 to its handler at the advance's end: a handler that reads the clock (Server-Sent
@@ -959,6 +964,10 @@ function handleInbound(inst: Instance, item: Inbound): void {
     name = 'world.resize';
     if (!spec.world?.resize) throw new SpecError(`${spec.type}: the viewport was resized and the spec listens with no world.resize handler`);
     patch = asWriter(inst, () => spec.world!.resize!(inst.state as never, inst.inputs as never, view));
+  } else if (item.kind === 'turn') {
+    name = 'world.turn';
+    if (!spec.world?.turn) throw new SpecError(`${spec.type}: the event loop turned for an instance whose spec has no world.turn handler`);
+    patch = asWriter(inst, () => spec.world!.turn!(inst.state as never, inst.inputs as never, view));
   } else if (item.kind === 'popup') {
     name = 'world.popup';
     if (!spec.world?.popup) throw new SpecError(`${spec.type}: the person did something to a popup and the spec has no world.popup handler`);

@@ -1541,14 +1541,25 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     }
   }
 
-  /** PERSON (above) — one key on a text field: refused past `maxlength` or, on a Number field, when not a digit; else written and `input` raised. */
+  /**
+   * PERSON (above) — one key on a text field: refused past `maxlength` or, on a Number field, when not a digit; else written at
+   * the TEXT ENTRY CURSOR and `input` raised. NSP-016 s40: the key goes in where the browser's cursor is — `selectionStart` on a
+   * type the selection API applies to (text, search, url, tel, password, a textarea; HTML keeps it there as a browser does: a
+   * fresh `<textarea>` at the start, a type change from a type without the API to one with it at the start, a value write at the
+   * end), appended where the type has no readable cursor (email, number). The value setter moves the cursor to the end, so it is
+   * put back after the key, as a keystroke leaves it. `maxLength` reads the attribute as HTML does (`-0.5` is a limit of 0).
+   */
   function typeKey(w: any, el: any, ch: string): void {
     const area = el.tagName === 'TEXTAREA';
     const limited = area || ['text', 'search', 'url', 'tel', 'email', 'password'].includes(el.type);
     if (!area && el.type === 'number' && !/^[0-9]$/.test(ch)) return;
     if (limited && el.maxLength >= 0 && el.value.length + ch.length > el.maxLength) return;
+    const cursor = area || ['text', 'search', 'url', 'tel', 'password'].includes(el.type);
+    const at: number = cursor ? el.selectionStart : el.value.length;
+    const end: number = cursor ? el.selectionEnd : at;
     const proto = area ? w.HTMLTextAreaElement.prototype : w.HTMLInputElement.prototype;
-    Object.getOwnPropertyDescriptor(proto, 'value')!.set!.call(el, el.value + ch);
+    Object.getOwnPropertyDescriptor(proto, 'value')!.set!.call(el, el.value.slice(0, at) + ch + el.value.slice(end));
+    if (cursor) el.setSelectionRange(at + ch.length, at + ch.length);
     el.dispatchEvent(new w.Event('input', { bubbles: true, composed: true }));
   }
 
