@@ -227,6 +227,11 @@ export interface WorldView {
    * happens on the socket). A node whose construction may throw reads this before it names the `connect`.
    */
   socketAnswer(url: unknown): import('./world').SocketAnswer | undefined;
+  /**
+   * NSP-016 s42 — the Radio Button Group the node sits in (world.ts GROUP): whether there is one, and the group's Value parameter at
+   * load (raw, as the script sets it; `undefined`: never set). What the graph writes to it later reaches `WorldHandlers.group`.
+   */
+  group(): { present: boolean; load: { value: unknown } | undefined };
 }
 
 /** One registry entry to watch: a record by id or an array by name (the raw id, as the registry keeps it). */
@@ -760,6 +765,12 @@ export interface WorldHandlers<S, I, O> {
    * a failure nothing more.
    */
   stream?: (state: Readonly<S>, inputs: Inputs<I>, event: StreamEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
+   * NSP-016 s42 — the graph wrote the Value input of the Radio Button Group this node sits in (world.ts GROUP), at its moment on
+   * the clock, inside the `advance` that reaches it: the value RAW, as the wire carries it. The group takes it at once and renders
+   * it at the frame's end. Only a spec that needs `group` is handed any.
+   */
+  group?: (state: Readonly<S>, inputs: Inputs<I>, value: unknown, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
 /**
@@ -843,6 +854,8 @@ export interface WorldPool {
   pickers?: ReadonlyArray<import('./world').PickerScript>;
   /** NSP-014 s34: the WebSocket servers a `socket` spec's sequences play with (one is drawn per sequence; the default answers nothing — every construction a violation). */
   sockets?: ReadonlyArray<import('./world').SocketScript>;
+  /** NSP-016 s42: the Radio Button Groups a `group` spec's sequences play in (one is drawn per sequence; the default: none, one never written, one with a Value at load, one written later). */
+  groups?: ReadonlyArray<import('./world').GroupScript>;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -925,8 +938,9 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * s34 adds `socket` — the node opens WebSockets (world.ts SOCKET): its sequences play with a server script from the pool.
  * NSP-016 s37 adds `person` — a person can act on the node (`NodeDecl.acts`, `PersonReducers`): a target plays it only
  * with a person face (`TargetAdapter.act`), and the node is on a page — a document — for the whole play.
+ * s42 adds `group` — the node sits in a Radio Button Group, or in none (world.ts GROUP): its sequences play in a group from the pool.
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker' | 'socket' | 'person';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker' | 'socket' | 'person' | 'group';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
@@ -1025,6 +1039,7 @@ export interface AnyNodeSpec {
     realtime?: (state: never, inputs: never, event: RealtimeEvent, world: WorldView) => unknown;
     socket?: (state: never, inputs: never, event: SocketEvent, world: WorldView) => unknown;
     stream?: (state: never, inputs: never, event: StreamEvent, world: WorldView) => unknown;
+    group?: (state: never, inputs: never, value: unknown, world: WorldView) => unknown;
   };
 }
 export interface ErasedValueOutput extends PortMeta {

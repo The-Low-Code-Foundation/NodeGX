@@ -55,6 +55,21 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
       { reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":[],"emit":[]', swappedWith: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED }
     ])
   ],
+  // NSP-016 s42 — the Radio Button: the Checkbox's page model, so the Checkbox's three — and a click joins the rebuild family: a
+  // click on a disabled button meets nothing as a press does (the Checkbox's click toggles the box, so its click never had this shape)
+  'net.noodl.controls.radiobutton': [
+    { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
+    ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
+    // a pick that changes Checked and sets nothing else (no keyboard here, no page change, the group already holding the Value — C76),
+    // handed a sibling's example that also sets `elementFocused`: every pick branch that sets it sets it FALSE (a rebuild, or the
+    // keyboard moving to the sibling), and in this branch it is already false — the keyboard is not on a button whose pick moved none
+    { reducer: 'person.pick', kind: 'swap-branch', branch: '"set":[],"emit":["onChange"]', swappedWith: '"set":["elementFocused"],"emit":["onChange"]', why: 'every pick that sets elementFocused sets it false, and a pick that moved no keyboard finds it false already' },
+    ...['press', 'release', 'focus', 'click'].flatMap((act) => [
+      { reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED },
+      { reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":["elementFocused"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: REBUILT_WHILE_DISABLED },
+      { reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":[],"emit":[]', swappedWith: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED }
+    ])
+  ],
   'net.noodl.controls.textinput': [
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),

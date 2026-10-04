@@ -28,7 +28,7 @@
  *
  * The world handlers (NSP-007, `spec.world.timer` / `spec.world.response`; NSP-012's
  * `spec.world.change`) are reducers like any
- * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`, (s24) `world.store`, (s26) `world.auth`, (s29) `world.authReturn` and `world.mount`, (s31) `world.picker`, (s33) `world.realtime`, (s34) `world.socket` and `world.stream`; whether a branch issues a request
+ * other here, named `world.timer`, `world.response`, `world.change`, (s13) `world.resize`, (s19) `world.page`, (s20) `world.popup` and (NSP-014 s21) `world.backend`, (s24) `world.store`, (s26) `world.auth`, (s29) `world.authReturn` and `world.mount`, (s31) `world.picker`, (s33) `world.realtime`, (s34) `world.socket` and `world.stream`, (NSP-016 s42) `world.group`; whether a branch issues a request
  * — or calls a backend — is part of its shape. A branch's `after` / `cancel` / `abort` effects are NOT in the shape and have no
  * mutant of their own yet (a dropped timeout timer shows only in a sequence that waits past it
  * with an answer that never comes) — named in NSP-007 §5 as the runner's next hole.
@@ -143,6 +143,7 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.realtime) names.push('world.realtime');
   if (spec.world?.socket) names.push('world.socket');
   if (spec.world?.stream) names.push('world.stream');
+  if (spec.world?.group) names.push('world.group');
   // NSP-016 s37 — the person's acts (spec.ts THE PERSON), one reducer each
   for (const act of Object.keys(spec.person ?? {})) names.push(`person.${act}`);
   return names;
@@ -193,6 +194,8 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     if (spec.world.socket) w.socket = wrap('world.socket', spec.world.socket as unknown as ErasedReducer) as unknown as typeof spec.world.socket;
     // s34 — what a streamed body says (world.ts NETWORK): a copy without it never hears a chunk
     if (spec.world.stream) w.stream = wrap('world.stream', spec.world.stream as unknown as ErasedReducer) as unknown as typeof spec.world.stream;
+    // NSP-016 s42 — the graph's writes to the group the node sits in (world.ts GROUP): a copy without it never hears one
+    if (spec.world.group) w.group = wrap('world.group', spec.world.group as unknown as ErasedReducer) as unknown as typeof spec.world.group;
     out.world = w;
   }
   // NSP-016 s37 — the person's acts: a copy without one would refuse the act the original answers

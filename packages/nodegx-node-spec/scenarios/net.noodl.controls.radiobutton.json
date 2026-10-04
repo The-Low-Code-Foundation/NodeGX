@@ -1,0 +1,5665 @@
+[
+  {
+    "name": "a fresh radio button in a group never written: Did Mount, Child Index 0, This itself — Checked stays false while the group selects the button with no Value (this one has none either: selected, so Checked true)",
+    "because": "RadioButton.tsx :58 `selected === props.value` — undefined === undefined; the effect at the mount (:78-84) reports it, nobody's (radiobutton.ts :39-55)",
+    "steps": [
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "with a Value, in a group never written: not selected — Checked never sent; a click selects it: Pointer Down, Focused, Pointer Up, Checked true, Changed; a second click: the pointer events alone (a selected radio raises no change)",
+    "because": "RadioButton.tsx :187-189 → RadioButtonGroup.tsx :27-30 (a person's selection) → the re-render and the effect (:78-84) with `selectionFromUser` true",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "in no group: never selected, whatever its Value; a click is the pointer events alone (the input toggles in the DOM and React puts it back)",
+    "because": "RadioButton.tsx :58 — `radioButtonGroup ? … : false`; :187-189 `radioButtonGroup && …` — world.ts GROUP `none`",
+    "world": {
+      "group": {
+        "none": true
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the group's Value at load names this button: Checked true in the first frame, no Changed",
+    "because": "RadioButtonGroup.tsx :21 `useState({ value: props.value, fromUser: false })`; the button's effect at the mount",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the group's Value at load is the NUMBER 1 and this button's Value the number 1: the group converts it to \"1\", so not selected — a strict compare",
+    "because": "radiobuttongroup.ts :89 converts by `toString`; RadioButton.tsx :58 `===`",
+    "params": {
+      "value": 1
+    },
+    "world": {
+      "group": {
+        "value": 1
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "selected, then a sibling picked: this button is deselected — Checked false and Changed (a person's selection, read by this button too)",
+    "because": "RadioButtonGroup.tsx :27-30 — the selection a person made reaches every button through the context; radiobutton.ts :39-55 fires Changed on a deselect",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row D37 — a sibling picked that carries THIS button's Value: both are selected, and this one fires Changed though the person picked the other",
+    "because": "RadioButton.tsx :58 compares Values, not buttons; the selection is a person's — NSP-016 §7.7 D37",
+    "params": {
+      "value": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the graph writes the group's Value to this button's Value: Checked true at the frame's end, no Changed; to another: Checked false, no Changed",
+    "because": "world.ts GROUP — the group renders the write at the frame's end, its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); a write the group ignores (null) does nothing",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          },
+          {
+            "at": 100,
+            "value": null
+          },
+          {
+            "at": 1000,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a write and an advance with no frame between: the selection waits for the frame's end — a click on the still-selected button in between raises the pointer events alone",
+    "because": "the group's forceUpdate renders at the frame's end (react-component-node.ts :1675-1689); an act paints the page first (adapter.ts `act`)",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 5,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "advance": 5
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row D37 — a click, then this button's Value written in the same frame: the frame's end renders the new Value against a selection a person made, so Checked false AND Changed — nobody deselected it",
+    "because": "the button's effect runs before the group's in one commit (a child's effects first): the selection is still the click's, `fromUser` true — NSP-016 §7.7 D37",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "this button's Value written to the group's: selected at the frame's end, nobody's — Checked true, no Changed; written away: Checked false, no Changed",
+    "because": "react-component-node.ts `defineRegularInputProp` renders it at the frame's end; the selection is the group's load (nobody's)",
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off: Will Unmount, Checked keeps its value, a click finds nothing, a sibling picked still moves the selection; Mounted on: Did Mount, and the effect at the mount reads the selection — Checked false, and NO Changed: the pick's own frame end made the selection nobody's",
+    "because": "react-component-node.ts :2302-2321; the button is the group's child, the siblings stay on the page; the effect runs at every mount (RadioButton.tsx :78-84) and reads `selectionFromUser`, which the group's effect cleared at the pick's frame end (RadioButtonGroup.tsx :37-39)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then a sibling picked: the mouse button down on the sibling takes the keyboard — Blurred — and the pick deselects this one (Changed)",
+    "because": "the browser's mousedown default: the keyboard onto the pressed control; utils.ts :157-195 onBlur",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling picked in no group: there is no sibling — nothing",
+    "because": "world.ts GROUP `none`: the button renders alone",
+    "world": {
+      "group": {
+        "none": true
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "disabled: a click takes nothing, but a sibling with this button's Value picked still selects it — Checked true and Changed (a disabled radio still shows the group's selection)",
+    "because": "the face withholds a person's click from a disabled control; RadioButton.tsx :58 reads the group whatever Enabled says",
+    "params": {
+      "value": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a sibling pick, then a click in one frame: each moves the selection — Checked true, false, true: sent as true, Changed three times",
+    "because": "each click re-renders at once (React's event batch); the frame records the last value",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a disabled button takes no click, press, release or focus — the pointer still hovers it and a finger still lands",
+    "because": "RadioButton.tsx :57 `disabled: !props.enabled`; React drops onClick / onMouseDown / onMouseUp on a disabled control; the browser does not toggle a disabled radio button; utils.ts :216-243, :260-275 (carried from the Checkbox: the same page model, utils.ts)",
+    "params": {
+      "enabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "act": "leave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Focus action puts the keyboard on the input (Focused, Done); again: Done alone; Blur: Blurred, Done; again: Done alone",
+    "because": "utils.ts :340-364; focus-tracker.ts :57-78, :88-90; the target is the input (:402-405) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enabled off and a Focus in the same frame: the button is still enabled on the page, so it takes the keyboard; in the next frame a Focus is Done and takes nothing",
+    "because": "utils.ts :82-89 writes the prop; the element follows at the frame's end (react-component-node.ts :1675-1689); a disabled input is not a focusable area (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then disabled: Focused stays true — a disabled element gives the keyboard up to nobody, so a Blur is Done and nothing fires; re-enabled, Blur takes it",
+    "because": "the browser's focusing steps: a disabled control is not a focusable area, so `blur()` on it does nothing (focus-tracker.ts :88 calls `_blur` regardless and reports Done) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enabled follows its input as a boolean and is sent only on a change",
+    "because": "utils.ts :82-89 (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": "no"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Scroll Into View and every look or layout input change nothing on the wire",
+    "because": "react-component-node.ts :1380-1395; the style inputs write the element's style and no output reads it (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "signal": "scrollIntoView"
+      },
+      {
+        "set": "backgroundColor",
+        "value": "#ff0000"
+      },
+      {
+        "set": "width",
+        "value": 24
+      },
+      {
+        "set": "label",
+        "value": "Go"
+      },
+      {
+        "set": "labelSpacing",
+        "value": 4
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Mounted written off and an act in the same frame find no element (a Focus after it is Unchanged); written on, the act meets the element (a Focus after it is Done) — every act, both ways",
+    "because": "the holder re-renders before the act is dispatched (node-spec-target.ts PERSON), as a browser paints before a person can act; each pair toggles the page (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Enabled written off and an act in the same frame meet a disabled element (a Focus after it takes nothing, a Blur gives nothing up); written on, an enabled one — every act, both ways",
+    "because": "the element's disabled attribute is painted with the page (Button.tsx :145 / RadioButton.tsx :57); the Focus and Blur actions meet the painted element (utils.ts :340-364) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed disabled: a Focus before the first frame is Done and takes nothing — the element was drawn disabled",
+    "because": "the params are set before the first render (react-component-node.ts :1740-1743 reads what the params wrote); a disabled control is not a focusable area (carried from the Checkbox: the same page model, utils.ts)",
+    "params": {
+      "enabled": false
+    },
+    "steps": [
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press held, then disabled and re-enabled across frames, then a click: Pressed true until the click's own release ends it",
+    "because": "utils.ts :82-89 touches only `enabled`; the press is not released by disabling; the click's mouseup releases (utils.ts :265-269) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Mounted off and on: Focused still reads true while the element that came back holds no keyboard — a Focus action takes it again and fires Focused; a Tab away then fires Blurred",
+    "because": "the element leaves with the keyboard (the browser's focus fixup fires no blur) and nothing resets `outputPropValues.focusState` (utils.ts :157-168, NoodlReactComponent :993-1003); focus-tracker.ts drops the node at unmount (`nodeUnmounted`) so the next Focus is a fresh one — NSP-016 §7.2 row D30 (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Enabled and Mounted both written and an act in the same frame — off together (no element; a Focus after it Unchanged), on together (Did Mount, an enabled element) — every act, both ways",
+    "because": "the paint inside the act commits the remount and the enabled attribute at once; a Focus and a Blur after it read what was painted (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "disabled and unmounted in one frame, then enabled and remounted in one frame, then a quiet frame: Did Mount once, Enabled true, and nothing more",
+    "because": "the frame's end paints the remount and the attribute together (react-component-node.ts :1675-1689); the next frame paints nothing (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Enabled off with Mounted on (a disabled element arrives: Did Mount, the act takes nothing, a Focus after it Done and nothing focused), then Enabled on with Mounted off (the element leaves) — every act, both ways",
+    "because": "the paint inside the act commits a remount and the attribute at once; the crossed pairs reach the branches the matched pairs cannot (a release or press on a remounted but disabled element) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed disabled, Mounted off then on with a press in the same frame: Did Mount and nothing else (a disabled element takes no press); a Focus after it Done and nothing focused; the same with a release",
+    "because": "the paint inside the act commits the remount; the element arrives disabled, so the press and the release meet nothing (React drops them; the browser dispatches none) (carried from the Checkbox: the same page model, utils.ts)",
+    "params": {
+      "enabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label turned on: the tree is rebuilt around a new input and the keyboard leaves with the old one (Focused still reads true, no Blurred); a press then takes it again and fires Focused; turned off again while focused: the same, and a Tab onto it fires Focused",
+    "because": "RadioButton.tsx :167-210 — with and without a label the input is a different element; a removed element fires no blur (the focus fixup rule) and utils.ts never resets focusState (row D30); C66 does not reach a person's act (the face finds the button on the page) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and a Tab away in the same frame: the keyboard already left with the rebuilt input, so nothing fires; a Blur action after it gives nothing up either",
+    "because": "RadioButton.tsx :167-210 — the rebuilt input is a new element; the paint inside the act commits it before the Tab away (D30: Focused still reads true) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "pressed and focused, then Enable Label changed and the release in the same frame: Pointer Up fires, the keyboard already left with the rebuilt input (a Blur action after it gives nothing up); a Tab onto the new input then fires Focused",
+    "because": "RadioButton.tsx :167-210 — the rebuilt input is a new element; utils.ts :265-269 the release still reaches the wrapper or the input (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off then on, and a Tab onto the button in the same frame: Did Mount and Focused together; the same with Enabled off: Did Mount alone, a Focus after it Done",
+    "because": "the act paints the page first — the remount commits (didMount) and then the Tab meets the new input; a disabled one takes nothing, but it IS on the page (focus-tracker.ts :61) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press held across a frame, then the release and a Blur action in the same frame: Pointer Up, then Blurred — the keyboard the press gave is still there to take away",
+    "because": "utils.ts :255-269 the press and the release; :356-364 the Blur action meets the focused input (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then disabled; Enable Label changed and a release in the same frame (nothing: a disabled input takes no release, but the rebuilt input holds no keyboard); re-enabled and painted, a Blur action gives nothing up — the keyboard left with the old input",
+    "because": "RadioButton.tsx :167-210 the rebuild; the browser dispatches no mouseup to a disabled control; a removed element fires no blur (D30) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and the pointer moving onto the button in the same frame: Hover Start, and the keyboard already left with the rebuilt input — a Blur action after it gives nothing up",
+    "because": "RadioButton.tsx :167-210 the rebuild; utils.ts :216-234 the hover reaches the new input; a removed element fires no blur (D30) (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then the pointer onto the button and a Blur action in the same frame: Hover Start, then Blurred — a hover alone moves no keyboard",
+    "because": "utils.ts :216-234 the hover; :356-364 the Blur action meets the focused input (carried from the Checkbox: the same page model, utils.ts)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a hover, then this button's Value written away, in one frame: the hover's paint ran the group's effect first — the selection is nobody's now — so the frame's end deselects with no Changed",
+    "because": "adapter.ts `act`: the page paints before the act (the group renders the click's Value, its effect makes the selection nobody's, RadioButtonGroup.tsx :37-39); without that paint the frame's end would read the click's selection and fire Changed (D37)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a leave, then this button's Value written away, in one frame: the leave's paint ran the group's effect first — the selection is nobody's now — so the frame's end deselects with no Changed",
+    "because": "adapter.ts `act`: the page paints before the act (the group renders the click's Value, its effect makes the selection nobody's, RadioButtonGroup.tsx :37-39); without that paint the frame's end would read the click's selection and fire Changed (D37)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a press, then this button's Value written away, in one frame: the press's paint ran the group's effect first — the selection is nobody's now — so the frame's end deselects with no Changed",
+    "because": "adapter.ts `act`: the page paints before the act (the group renders the click's Value, its effect makes the selection nobody's, RadioButtonGroup.tsx :37-39); without that paint the frame's end would read the click's selection and fire Changed (D37)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a release, then this button's Value written away, in one frame: the release's paint ran the group's effect first — the selection is nobody's now — so the frame's end deselects with no Changed",
+    "because": "adapter.ts `act`: the page paints before the act (the group renders the click's Value, its effect makes the selection nobody's, RadioButtonGroup.tsx :37-39); without that paint the frame's end would read the click's selection and fire Changed (D37)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a click, then this button's Value written away, in one frame: the click's paint ran the group's effect first — the selection is nobody's now — so the frame's end deselects with no Changed",
+    "because": "adapter.ts `act`: the page paints before the act (the group renders the click's Value, its effect makes the selection nobody's, RadioButtonGroup.tsx :37-39); without that paint the frame's end would read the click's selection and fire Changed (D37)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a touch, then this button's Value written away, in one frame: the touch's paint ran the group's effect first — the selection is nobody's now — so the frame's end deselects with no Changed",
+    "because": "adapter.ts `act`: the page paints before the act (the group renders the click's Value, its effect makes the selection nobody's, RadioButtonGroup.tsx :37-39); without that paint the frame's end would read the click's selection and fire Changed (D37)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a lift, then this button's Value written away, in one frame: the lift's paint ran the group's effect first — the selection is nobody's now — so the frame's end deselects with no Changed",
+    "because": "adapter.ts `act`: the page paints before the act (the group renders the click's Value, its effect makes the selection nobody's, RadioButtonGroup.tsx :37-39); without that paint the frame's end would read the click's selection and fire Changed (D37)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a focus, then this button's Value written away, in one frame: the focus's paint ran the group's effect first — the selection is nobody's now — so the frame's end deselects with no Changed",
+    "because": "adapter.ts `act`: the page paints before the act (the group renders the click's Value, its effect makes the selection nobody's, RadioButtonGroup.tsx :37-39); without that paint the frame's end would read the click's selection and fire Changed (D37)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a blur, then this button's Value written away, in one frame: the blur's paint ran the group's effect first — the selection is nobody's now — so the frame's end deselects with no Changed",
+    "because": "adapter.ts `act`: the page paints before the act (the group renders the click's Value, its effect makes the selection nobody's, RadioButtonGroup.tsx :37-39); without that paint the frame's end would read the click's selection and fire Changed (D37)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, then a pick of a sibling, then this button's Value written away, in one frame: the pick's paint ran the group's effect first — the selection is nobody's now — so the frame's end deselects with no Changed",
+    "because": "adapter.ts `act`: the page paints before the act (the group renders the click's Value, its effect makes the selection nobody's, RadioButtonGroup.tsx :37-39); without that paint the frame's end would read the click's selection and fire Changed (D37)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling picked while this button is not selected: nothing on this button — but the selection moved: this button's Value written to it later is selected (nobody's: no Changed)",
+    "because": "RadioButtonGroup.tsx :27-30 moves the selection whoever is clicked; the frame's end makes it nobody's",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed off the page in a group whose Value at load names it: nothing; Mounted on: Did Mount, Checked true, no Changed",
+    "because": "the group is on the page whatever the button's Mounted says; the effect at the mount reads its selection (nobody's)",
+    "params": {
+      "mounted": false,
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, the graph writing the group's Value, then a hover, then this button's Value written away, in one frame: the hover's paint runs the group's effect (the write is the selection now, nobody's), so the frame's end fires no second Changed",
+    "because": "adapter.ts `act`: the page paints before the act — the group renders the written Value and its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); the button's effect at the frame's end then reads a selection nobody made",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, the graph writing the group's Value, then a leave, then this button's Value written away, in one frame: the leave's paint runs the group's effect (the write is the selection now, nobody's), so the frame's end fires no second Changed",
+    "because": "adapter.ts `act`: the page paints before the act — the group renders the written Value and its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); the button's effect at the frame's end then reads a selection nobody made",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, the graph writing the group's Value, then a press, then this button's Value written away, in one frame: the press's paint runs the group's effect (the write is the selection now, nobody's), so the frame's end fires no second Changed",
+    "because": "adapter.ts `act`: the page paints before the act — the group renders the written Value and its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); the button's effect at the frame's end then reads a selection nobody made",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, the graph writing the group's Value, then a release, then this button's Value written away, in one frame: the release's paint runs the group's effect (the write is the selection now, nobody's), so the frame's end fires no second Changed",
+    "because": "adapter.ts `act`: the page paints before the act — the group renders the written Value and its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); the button's effect at the frame's end then reads a selection nobody made",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, the graph writing the group's Value, then a click, then this button's Value written away, in one frame: the click's paint runs the group's effect (the write is the selection now, nobody's), so the frame's end fires no second Changed",
+    "because": "adapter.ts `act`: the page paints before the act — the group renders the written Value and its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); the button's effect at the frame's end then reads a selection nobody made",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, the graph writing the group's Value, then a touch, then this button's Value written away, in one frame: the touch's paint runs the group's effect (the write is the selection now, nobody's), so the frame's end fires no second Changed",
+    "because": "adapter.ts `act`: the page paints before the act — the group renders the written Value and its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); the button's effect at the frame's end then reads a selection nobody made",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, the graph writing the group's Value, then a lift, then this button's Value written away, in one frame: the lift's paint runs the group's effect (the write is the selection now, nobody's), so the frame's end fires no second Changed",
+    "because": "adapter.ts `act`: the page paints before the act — the group renders the written Value and its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); the button's effect at the frame's end then reads a selection nobody made",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, the graph writing the group's Value, then a focus, then this button's Value written away, in one frame: the focus's paint runs the group's effect (the write is the selection now, nobody's), so the frame's end fires no second Changed",
+    "because": "adapter.ts `act`: the page paints before the act — the group renders the written Value and its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); the button's effect at the frame's end then reads a selection nobody made",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, the graph writing the group's Value, then a blur, then this button's Value written away, in one frame: the blur's paint runs the group's effect (the write is the selection now, nobody's), so the frame's end fires no second Changed",
+    "because": "adapter.ts `act`: the page paints before the act — the group renders the written Value and its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); the button's effect at the frame's end then reads a selection nobody made",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, the graph writing the group's Value, then a pick, then this button's Value written away, in one frame: the pick's paint runs the group's effect (the write is the selection now, nobody's), so the frame's end fires no second Changed",
+    "because": "adapter.ts `act`: the page paints before the act — the group renders the written Value and its effect makes the selection nobody's (RadioButtonGroup.tsx :37-39); the button's effect at the frame's end then reads a selection nobody made",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, then Mounted off, a hover (on nothing), Mounted on and this button's Value written away, in one frame: the hover's paint still ran the group's effect (the group is on the page), so the remount reads a selection nobody made — no second Changed",
+    "because": "the group and the siblings stay on the page while the button is off it; an act paints the page first (adapter.ts `act`)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, then Mounted off, a leave (on nothing), Mounted on and this button's Value written away, in one frame: the leave's paint still ran the group's effect (the group is on the page), so the remount reads a selection nobody made — no second Changed",
+    "because": "the group and the siblings stay on the page while the button is off it; an act paints the page first (adapter.ts `act`)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, then Mounted off, a touch (on nothing), Mounted on and this button's Value written away, in one frame: the touch's paint still ran the group's effect (the group is on the page), so the remount reads a selection nobody made — no second Changed",
+    "because": "the group and the siblings stay on the page while the button is off it; an act paints the page first (adapter.ts `act`)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, then Mounted off, a lift (on nothing), Mounted on and this button's Value written away, in one frame: the lift's paint still ran the group's effect (the group is on the page), so the remount reads a selection nobody made — no second Changed",
+    "because": "the group and the siblings stay on the page while the button is off it; an act paints the page first (adapter.ts `act`)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, then Mounted off, a click (on nothing), Mounted on and this button's Value written away, in one frame: the click's paint still ran the group's effect (the group is on the page), so the remount reads a selection nobody made — no second Changed",
+    "because": "the group and the siblings stay on the page while the button is off it; an act paints the page first (adapter.ts `act`)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, then Mounted off, a focus (on nothing), Mounted on and this button's Value written away, in one frame: the focus's paint still ran the group's effect (the group is on the page), so the remount reads a selection nobody made — no second Changed",
+    "because": "the group and the siblings stay on the page while the button is off it; an act paints the page first (adapter.ts `act`)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, then Mounted off, a blur (on nothing), Mounted on and this button's Value written away, in one frame: the blur's paint still ran the group's effect (the group is on the page), so the remount reads a selection nobody made — no second Changed",
+    "because": "the group and the siblings stay on the page while the button is off it; an act paints the page first (adapter.ts `act`)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, then Mounted off, a press (on nothing), Mounted on and this button's Value written away, in one frame: the press's paint still ran the group's effect (the group is on the page), so the remount reads a selection nobody made — no second Changed",
+    "because": "the group and the siblings stay on the page while the button is off it; an act paints the page first (adapter.ts `act`)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a sibling carrying this button's Value picked, then Mounted off, a release (on nothing), Mounted on and this button's Value written away, in one frame: the release's paint still ran the group's effect (the group is on the page), so the remount reads a selection nobody made — no second Changed",
+    "because": "the group and the siblings stay on the page while the button is off it; an act paints the page first (adapter.ts `act`)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C76 seen from a button: a sibling carrying this button's Value picked and the group's Value written back to the one it rendered, in ONE frame — the group's effect never runs, so this button stays Checked under a group Value naming another; the other sibling picked then deselects it (Changed), a click selects it again",
+    "because": "RadioButtonGroup.tsx :37-39 — the effect compares the Value the last paint rendered ('a', the load) with the write-back ('a'): no change, the pick stays (NSP-016 §7.7 C76)",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "C76 and D37: after a pick and a write-back in one frame the selection stays the person's across frames, so this button's Value written to the picked one is selected WITH Changed",
+    "because": "the C76 state keeps `selectionFromUser` true; the button's effect reads it for a change nobody made (NSP-016 §7.7 C76, D37)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a write the group ignores (null) or already holds between two it takes: nothing moves",
+    "because": "radiobuttongroup.ts :89-95 — null is ignored, the same text is no change",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          },
+          {
+            "at": 2,
+            "value": null
+          },
+          {
+            "at": 3,
+            "value": "a"
+          },
+          {
+            "at": 4,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a write the group ignores while it holds nothing: this button (Value 'a') stays unselected — a write it takes, beside it, selects it",
+    "because": "radiobuttongroup.ts :89-90 — null is ignored; the next write is taken and rendered at the frame's end",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": null
+          },
+          {
+            "at": 2,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a write the group ignores while it holds nothing: this button (Value 'b') stays unselected — a write it takes, beside it, selects it",
+    "because": "radiobuttongroup.ts :89-90 — null is ignored; the next write is taken and rendered at the frame's end",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "writes": [
+          {
+            "at": 1,
+            "value": null
+          },
+          {
+            "at": 2,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and the pointer leaving in the same frame: Hover End, and the keyboard already left with the rebuilt input — a Blur action after it is Done alone",
+    "because": "the Checkbox's rebuild (RadioButton.tsx :194 decides the tree): the old input took the keyboard with it, no blur fires",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and a pick of the sibling already selected in the same frame: nothing (the keyboard already left with the rebuilt input, the selected radio raises no change) — a Blur action after it is Done alone",
+    "because": "the rebuild unfocuses silently; a click on a selected radio raises no change",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, a sibling picked: Blurred, and the group takes its Value — this button's Value written to it later is selected (nobody's: no Changed)",
+    "because": "the mousedown moves the keyboard; RadioButtonGroup.tsx :27-30 and radiobuttongroup.ts :20-29 move the group's Value",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, the sibling already selected picked: Blurred and nothing else — the group keeps its Value, so this button's Value written to the OTHER sibling's stays unselected",
+    "because": "a click on a selected radio raises no change; the mousedown still moves the keyboard",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row D37 — a remount in C76's state: Mounted off, this button's Value written to the picked one, Mounted on — the effect at the mount selects it WITH Changed",
+    "because": "the effect runs at every mount (RadioButton.tsx :78-84) and reads `selectionFromUser`, still the pick's (C76) — NSP-016 §7.7 D37",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later: a sibling picked (this button carries its Value) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written away: no Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted off in its frame: a sibling picked (this button carries its Value) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written away: no Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted on in its frame: a sibling picked (this button carries its Value) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written away: no Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused and Enable Label changed in its frame: a sibling picked (this button carries its Value) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written away: no Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused: a sibling picked (this button carries its Value) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written away: no Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later: a sibling picked (this button does not) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written to it: no Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted off in its frame: a sibling picked (this button does not) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written to it: no Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted on in its frame: a sibling picked (this button does not) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written to it: no Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused and Enable Label changed in its frame: a sibling picked (this button does not) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written to it: no Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused: a sibling picked (this button does not) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written to it: no Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later: a sibling picked (this button carries its Value) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written away: a Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted off in its frame: a sibling picked (this button carries its Value) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written away: a Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted on in its frame: a sibling picked (this button carries its Value) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written away: a Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused and Enable Label changed in its frame: a sibling picked (this button carries its Value) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written away: a Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused: a sibling picked (this button carries its Value) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written away: a Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later: a sibling picked (this button does not) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written to it: a Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted off in its frame: a sibling picked (this button does not) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written to it: a Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted on in its frame: a sibling picked (this button does not) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written to it: a Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused and Enable Label changed in its frame: a sibling picked (this button does not) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written to it: a Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused: a sibling picked (this button does not) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written to it: a Changed",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a",
+        "writes": [
+          {
+            "at": 1,
+            "value": "a"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected (this button carries its Value): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written away and back fires no Changed",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21)",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, Mounted off in its frame (this button carries its Value): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written away and back fires no Changed",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, Mounted on in its frame (this button carries its Value): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written away and back fires no Changed",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, focused and Enable Label changed in its frame (this button carries its Value): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written away and back fires no Changed",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, focused (this button carries its Value): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written away and back fires no Changed",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21)",
+    "params": {
+      "value": "a"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected (this button does not): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written to it and away fires no Changed",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, Mounted off in its frame (this button does not): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written to it and away fires no Changed",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, Mounted on in its frame (this button does not): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written to it and away fires no Changed",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, focused and Enable Label changed in its frame (this button does not): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written to it and away fires no Changed",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, focused (this button does not): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written to it and away fires no Changed",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "a"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later: a sibling picked (this button carries its Value) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written away: no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted off in its frame: a sibling picked (this button carries its Value) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written away: no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted on in its frame: a sibling picked (this button carries its Value) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written away: no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused and Enable Label changed in its frame: a sibling picked (this button carries its Value) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written away: no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused: a sibling picked (this button carries its Value) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written away: no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "b"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later: a sibling picked (this button does not) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written to it: no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted off in its frame: a sibling picked (this button does not) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written to it: no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted on in its frame: a sibling picked (this button does not) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written to it: no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused and Enable Label changed in its frame: a sibling picked (this button does not) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written to it: no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused: a sibling picked (this button does not) from a group that never held it — the group takes the Value, its frame end makes the selection nobody's; then this button's Value written to it: no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "c"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later: a sibling picked (this button carries its Value) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written away: a Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "b",
+        "writes": [
+          {
+            "at": 1,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted off in its frame: a sibling picked (this button carries its Value) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written away: a Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "b",
+        "writes": [
+          {
+            "at": 1,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted on in its frame: a sibling picked (this button carries its Value) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written away: a Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "b",
+        "writes": [
+          {
+            "at": 1,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused and Enable Label changed in its frame: a sibling picked (this button carries its Value) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written away: a Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "b",
+        "writes": [
+          {
+            "at": 1,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused: a sibling picked (this button carries its Value) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written away: a Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "b",
+        "writes": [
+          {
+            "at": 1,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later: a sibling picked (this button does not) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written to it: a Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b",
+        "writes": [
+          {
+            "at": 1,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted off in its frame: a sibling picked (this button does not) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written to it: a Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b",
+        "writes": [
+          {
+            "at": 1,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, Mounted on in its frame: a sibling picked (this button does not) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written to it: a Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b",
+        "writes": [
+          {
+            "at": 1,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused and Enable Label changed in its frame: a sibling picked (this button does not) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written to it: a Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b",
+        "writes": [
+          {
+            "at": 1,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pick's group Value, read a frame later, focused: a sibling picked (this button does not) in C76's state — the group already holds that Value, so the selection stays a person's; then this button's Value written to it: a Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "radiobuttongroup.ts :20-29 takes the Value only when it differs; RadioButtonGroup.tsx :37-39 clears `selectionFromUser` only when the group renders a new Value — the button's effect reads the flag (D37, C76). The deep run at 10,000 reached every pre-paint of a pick crossed with both",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b",
+        "writes": [
+          {
+            "at": 1,
+            "value": "b"
+          }
+        ]
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected (this button carries its Value): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written away and back fires no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21)",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, Mounted off in its frame (this button carries its Value): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written away and back fires no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, Mounted on in its frame (this button carries its Value): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written away and back fires no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, focused and Enable Label changed in its frame (this button carries its Value): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written away and back fires no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, focused (this button carries its Value): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written away and back fires no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21)",
+    "params": {
+      "value": "b"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected (this button does not): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written to it and away fires no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, Mounted off in its frame (this button does not): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written to it and away fires no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Focus action after the pick in its frame reads that the pick's paint took the button off the page (Unchanged)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, Mounted on in its frame (this button does not): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written to it and away fires no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Focus action after the pick in its frame reads whether the pick's paint put the button on the page (the Icon's lesson)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, focused and Enable Label changed in its frame (this button does not): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written to it and away fires no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21) A Blur action after the pick in its frame reads that the rebuild already took the keyboard",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of the sibling already selected, focused (this button does not): the selected radio raises no change — the group keeps its Value and the selection stays nobody's, so this button's Value written to it and away fires no Changed — the same with the two siblings' Values exchanged ('b' picked)",
+    "because": "a click on a selected radio raises no change (RadioButton.tsx :187-189); the group's Value at load is its selection, nobody's (RadioButtonGroup.tsx :21)",
+    "params": {
+      "value": "c"
+    },
+    "world": {
+      "group": {
+        "value": "b"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "z"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and a touch in the same frame: the keyboard already left with the rebuilt input — a Blur action after it is Done alone",
+    "because": "the Checkbox's rebuild (RadioButton.tsx :194 decides the tree): the old input took the keyboard with it, no blur fires; the act moves no keyboard",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and a lift in the same frame: the keyboard already left with the rebuilt input — a Blur action after it is Done alone",
+    "because": "the Checkbox's rebuild (RadioButton.tsx :194 decides the tree): the old input took the keyboard with it, no blur fires; the act moves no keyboard",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and a leave in the same frame: the keyboard already left with the rebuilt input — a Blur action after it is Done alone",
+    "because": "the Checkbox's rebuild (RadioButton.tsx :194 decides the tree): the old input took the keyboard with it, no blur fires; the act moves no keyboard",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enable Label turned off, then the Focus action: the button is on the page and takes the keyboard (Focused, Done)",
+    "because": "utils.ts :340-355 — a button on the page can be asked; RadioButton.tsx :167 and :199 put the SAME root ref on the button and on the wrapper, so the wrapper's removal nulls the node's element (react-component-node.ts :1934-1945) and `_focusTarget` finds nothing — the runtime reports Unchanged with the button in plain sight (NSP-016 §7.2 row C66) (carried from the Checkbox: the same page model, utils.ts)",
+    "params": {
+      "useLabel": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ],
+    "row": "NSP-016 §6 C66"
+  },
+  {
+    "name": "a Label that is an object with Enable Label on: the label is drawn as its text on the interpreter — the runtime's React throws rendering it",
+    "because": "RadioButton.tsx :205-207 renders `{props.label}` as it is (the Button renders `String(props.label)`) — NSP-016 §7.2 row C65 (carried from the Checkbox: the same page model, utils.ts)",
+    "row": "NSP-016 §6 C65",
+    "params": {
+      "useLabel": true,
+      "label": {
+        "a": 1
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Margin Top wired null: the interpreter stores it and nothing moves on the wire — the runtime's generated setter reads `.value` of null and throws",
+    "because": "react-component-node.ts the `inputCss` units setter (`typeof value !== 'object'` lets null through, then `value.value`); every node with margins — NSP-016 §7.2 row C62",
+    "row": "NSP-016 §6 C62",
+    "steps": [
+      "settle",
+      {
+        "set": "marginTop",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Pos X wired undefined: the interpreter stores it and nothing moves on the wire — the runtime's setter reads `.value` of undefined and throws",
+    "because": "node-shared-port-definitions.ts the Placement setters read `value.value`; every node with Placement inputs — NSP-016 §7.2 row C63",
+    "row": "NSP-016 §6 C63",
+    "steps": [
+      "settle",
+      {
+        "set": "transformX"
+      },
+      "settle"
+    ]
+  }
+]

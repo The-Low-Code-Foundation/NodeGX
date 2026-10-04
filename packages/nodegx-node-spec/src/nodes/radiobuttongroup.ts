@@ -153,9 +153,8 @@ export const RadioButtonGroup = defineNode({
   {
     // radiobuttongroup.ts :84-99 — text, or what a `toString` makes text; anything else ignored; a change sends Value, never Changed
     value: (s, v) => {
-      let text: unknown = v;
-      if (typeof text !== 'string' && (text as { toString?: unknown } | null | undefined)?.toString !== undefined) text = (text as { toString(): unknown }).toString();
-      if (typeof text !== 'string' || text === s.value) return NOTHING;
+      const text = asGroupValue(v);
+      if (text === undefined || text === s.value) return NOTHING;
       return { set: { value: text }, send: ['value'] };
     },
     // react-component-node.ts :2310-2320
@@ -184,6 +183,16 @@ export const RadioButtonGroup = defineNode({
     }
   }
 );
+
+/**
+ * radiobuttongroup.ts :89-90 — what the Value input takes: text, or what a `toString` makes text; `undefined` for anything it
+ * ignores (null, undefined). Shared with the Radio Button, whose world writes its group's Value (world.ts GROUP).
+ */
+export function asGroupValue(v: unknown): string | undefined {
+  let text: unknown = v;
+  if (typeof text !== 'string' && (text as { toString?: unknown } | null | undefined)?.toString !== undefined) text = (text as { toString(): unknown }).toString();
+  return typeof text === 'string' ? text : undefined;
+}
 
 /**
  * The page follows what the node wants (button.ts `painted`): a mount starts the selection at the Value (RadioButtonGroup.tsx

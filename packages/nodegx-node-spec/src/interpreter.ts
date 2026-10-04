@@ -113,6 +113,8 @@ type Inbound =
   // NSP-016 s40: the event loop turned — an `advance` began (spec.ts `WorldHandlers.turn`)
   | { kind: 'turn' }
   | { kind: 'page'; params: Readonly<Record<string, unknown>> }
+  // NSP-016 s42: the graph wrote the Value of the Radio Button Group the node sits in (world.ts GROUP)
+  | { kind: 'group'; value: unknown }
   | { kind: 'popup'; event: PopupEvent }
   | { kind: 'store'; event: StoreEvent }
   | { kind: 'auth'; event: AuthNotice }
@@ -286,7 +288,8 @@ function viewOf(inst: Instance): WorldView {
     userService: () => startUserService(world),
     authReturn: () => world.backend.authReturn,
     pickerAnswer: (ahead) => world.picker.answer(ahead ?? 0),
-    socketAnswer: (url) => world.sockets.answerFor(url)
+    socketAnswer: (url) => world.sockets.answerFor(url),
+    group: () => ({ present: world.group.present, load: world.group.load })
   };
 }
 
@@ -486,6 +489,13 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
       const item: Inbound = { kind: 'page', params: deepFreeze({ ...p.params }) };
       if (p.at > 0) world.clock.schedule(p.at, () => handleInbound(inst, item));
       else inst.inbox.push(item);
+    }
+  }
+  // GROUP (world.ts, NSP-016 s42): the graph's writes to the Value of the group the node sits in, each at its time on the clock
+  if (spec.needs?.includes('group')) {
+    for (const w of world.group.writes) {
+      const item: Inbound = { kind: 'group', value: deepFreeze(w.value) };
+      world.clock.schedule(w.at, () => handleInbound(inst, item));
     }
   }
   // POPUP (world.ts, NSP-015 s20): what the person does to the popups, each at its time on the clock — handed
@@ -1016,6 +1026,10 @@ function handleInbound(inst: Instance, item: Inbound): void {
   } else if (item.kind === 'store') {
     name = 'world.store';
     patch = asWriter(inst, () => spec.world!.store!(inst.state as never, inst.inputs as never, item.event, view));
+  } else if (item.kind === 'group') {
+    name = 'world.group';
+    if (!spec.world?.group) throw new SpecError(`${spec.type}: the graph wrote its group's Value and the spec has no world.group handler`);
+    patch = asWriter(inst, () => spec.world!.group!(inst.state as never, inst.inputs as never, item.value, view));
   } else if (item.kind === 'page') {
     name = 'world.page';
     if (!spec.world?.page) throw new SpecError(`${spec.type}: a Router handed its page params and the spec has no world.page handler`);

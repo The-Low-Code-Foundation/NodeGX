@@ -467,6 +467,19 @@
  *           server chose (`protocol` is ''), extensions.
  *           The OTHER stream a browser has, `EventSource`, is ABSENT from every play (`installWorld` hides a host's): a node that
  *           reaches for one finds none, as a Node host has none — not played yet.
+ *   GROUP.  (NSP-016 s42) The Radio Button Group a Radio Button sits in — its PARENT on the page, played by the world as
+ *           ROUTE plays the Router whose page a Page Inputs sits in: the group is another node (its own spec, Radio Button
+ *           Group); what reaches the button through it is the button's. The script's `group`:
+ *             `none: true` — the button sits in no group (it renders alone; no context reaches it). Absent `group` or
+ *               `none` absent: it sits in one, with the siblings its spec's page declares (the `pick` act's values).
+ *             `value` — the group's Value parameter at load, set before the first render (absent: never set). Raw: the
+ *               group converts it as its Value input does (`toString`; null and undefined ignored).
+ *             `writes` — the graph writing the group's Value input later, each `at` ≥ 1 ms on the clock, in order:
+ *               handed to the button's spec RAW (`WorldHandlers.group`) at that moment, inside the `advance` that
+ *               reaches it; the group renders it at the frame's end, as any write is. Not a trace event — the world's
+ *               hand-off, as a timer's firing is not.
+ *           A target holds a REAL group: the button is added to it (`addChild`) with its siblings, the group's Value
+ *           parameter set at load and its Value input written at each `at`; the page renders the group.
  *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:
@@ -489,6 +502,8 @@
  *   `unsubscribe` effect). (s34) `socketAnswer(url)` = `world.sockets.answerFor(url)` · a `socket` effect's `connect` =
  *   `world.sockets.open(url, protocols, tell)` (the socket it returns: `readyState`, `send(data)`, `close(code, reason)` — the
  *   effect's `send` / `close`).
+ *   (s42) `group()` = `world.group` read as `{ present, load }` · a spec's `world.group` handler is fed each of `world.group.writes`
+ *   at its `at` (`world.clock.schedule`).
  */
 
 import { HostFileCtor, type HostFile } from './host-file';
@@ -533,6 +548,38 @@ export interface WorldScript {
   cloudServices?: CloudServicesScript;
   /** NSP-014 s34: the WebSocket servers (SOCKET above). Absent: none answers — every construction is a violation. */
   sockets?: SocketScript;
+  /** NSP-016 s42: the Radio Button Group the node sits in (GROUP above). Absent: one, never written. */
+  group?: GroupScript;
+}
+
+/** GROUP above: whether there is a group, its Value at load, and the graph's later writes to it. */
+export interface GroupScript {
+  /** The node sits in no group. */
+  none?: boolean;
+  /** The group's Value parameter at load, raw; absent: never set. */
+  value?: unknown;
+  /** The graph writing the group's Value input, each `at` ≥ 1 ms on the clock, raw (`value` absent: undefined). */
+  writes?: ReadonlyArray<{ at: number; value?: unknown }>;
+}
+
+/** GROUP above, as a play holds it. */
+export class WorldGroup {
+  /** Whether the node sits in a group. */
+  readonly present: boolean;
+  /** The group's Value parameter at load, when the script sets one. */
+  readonly load: { value: unknown } | undefined;
+  /** The graph's writes, in script order. */
+  readonly writes: ReadonlyArray<{ at: number; value: unknown }>;
+  constructor(script: GroupScript = {}) {
+    this.present = script.none !== true;
+    this.load = this.present && 'value' in script ? { value: script.value } : undefined;
+    this.writes = this.present
+      ? (script.writes ?? []).map((w) => {
+          if (!(w.at >= 1)) throw new Error(`world: a group write is at ≥ 1 ms on the clock, not ${JSON.stringify(w.at)} — a Value at load is the script's \`value\``);
+          return { at: w.at, value: w.value };
+        })
+      : [];
+  }
 }
 
 /** SOCKET above: how the servers answer a construction, first match wins. */
@@ -2372,6 +2419,8 @@ export class World {
   readonly cloudServices: Readonly<CloudServicesScript> | undefined;
   /** The WebSocket servers (SOCKET above, s34) — always: a play with no script answers no construction. */
   readonly sockets: WorldSockets;
+  /** The Radio Button Group the node sits in (GROUP above, s42) — always: a play with no script has one, never written. */
+  readonly group: WorldGroup;
 
   constructor(script: WorldScript = {}) {
     this.script = script;
@@ -2389,6 +2438,7 @@ export class World {
     this.picker = new WorldPicker(this.clock, script.picker);
     this.cloudServices = script.cloudServices ? { ...script.cloudServices } : undefined;
     this.sockets = new WorldSockets(this.clock, script.sockets ?? {});
+    this.group = new WorldGroup(script.group);
   }
 
   /** The AC5 check: every way this play touched something the script did not answer. */

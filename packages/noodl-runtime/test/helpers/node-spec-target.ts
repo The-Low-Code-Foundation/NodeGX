@@ -270,6 +270,11 @@ interface Page {
    * with the Value it was made with, which is how a `pick` finds it. Deleted with the page.
    */
   children?: Array<{ node: RuntimeNode; value: unknown }>;
+  /**
+   * NSP-016 s42 — the Radio Button Group the node sits in (world.ts GROUP), when its spec needs `group` and the script has one:
+   * a real node, holding the node and its siblings (`children`); the page renders IT. Deleted with the page.
+   */
+  group?: RuntimeNode & { cachedChildren?: unknown };
 }
 
 /**
@@ -1390,10 +1395,45 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // viewer.jsx :457 — the app root's click capture feeds the focus tracker
     container.addEventListener('click', (e: { target: unknown }) => focusTracker.onClickCapture(e.target), true);
     const page: Page = { container, root: d.createRoot(container), host: null };
+    // NSP-016 s42 — the page's other nodes: a Radio Button Group's buttons (radiobuttongroup.ts `PAGE_VALUES`), or, for a node that
+    // needs `group` (world.ts GROUP), the group it sits in and its siblings. Each button a real Radio Button made in the node's
+    // scope, its Value set as a loaded project sets a parameter (none for `undefined`), added through the group's own `addChild`
+    // (which schedules Children Count, react-component-node.ts :1611-1620) before the first render.
+    const spec = specFor(s.h.type);
+    const values = (spec?.acts?.pick?.values ?? []) as readonly unknown[];
+    const scope = (s.h.node as unknown as { nodeScope: never }).nodeScope;
+    const button = (value: unknown, i: number) => {
+      const child = context.nodeRegister.createNode('net.noodl.controls.radiobutton', `${s.h.id}/button${i}`, scope) as unknown as RuntimeNode;
+      if (value !== undefined) (child as unknown as NodeInstance).setInputValue('value', value);
+      return { node: child, value };
+    };
+    type Holder = { render(): unknown; parent?: unknown; addChild(c: unknown): void };
+    let root: Holder = node as unknown as Holder;
+    if (s.h.type === 'Radio Button Group') {
+      page.children = values.map((value, i) => {
+        const b = button(value, i);
+        root.addChild(b.node);
+        return b;
+      });
+    } else if (spec?.needs?.includes('group') && world?.group.present) {
+      const group = context.nodeRegister.createNode('Radio Button Group', `${s.h.id}/group`, scope) as unknown as RuntimeNode & Holder;
+      // the group's Value parameter at load, then the node, then its siblings — the order a loaded project builds them
+      if (world.group.load) (group as unknown as NodeInstance).setInputValue('value', world.group.load.value);
+      group.addChild(node);
+      page.children = values.map((value, i) => {
+        const b = button(value, i);
+        group.addChild(b.node);
+        return b;
+      });
+      // the graph writing the group's Value later, each at its time on the clock (inside the `advance` that reaches it)
+      for (const w of world.group.writes) world.clock.schedule(w.at, () => (group as unknown as NodeInstance).setInputValue('value', w.value));
+      page.group = group;
+      root = group;
+    }
     // what `getVisualParentNode` reads of the Group holding a lone node (react-component-node.ts :2061-2062): the
     // layout it lays children out in (NoodlReactComponent :1070-1075) and the re-render a Mounted change asks for
     // (:2310-2320 `parent.cachedChildren = undefined; parent.forceUpdate()`)
-    node.parent = {
+    root.parent = {
       props: { layout: 'column' },
       // :1843 — `setStyle` reads the holder's `style.flexDirection` to place a child in it; a root Group lays out a column
       style: { flexDirection: 'column' },
@@ -1408,22 +1448,10 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         context.scheduleUpdate();
       }
     };
-    // NSP-016 s42 — a Radio Button Group's page holds its buttons (radiobuttongroup.ts `PAGE_VALUES`): each a real Radio
-    // Button made in the group's scope, its Value set as a loaded project sets a parameter, added through the group's own
-    // `addChild` (which schedules Children Count, react-component-node.ts :1611-1620) before the first render
-    if (s.h.type === 'Radio Button Group') {
-      const values = (specFor(s.h.type)?.acts?.pick?.values ?? []) as readonly unknown[];
-      page.children = values.map((value, i) => {
-        const child = context.nodeRegister.createNode('net.noodl.controls.radiobutton', `${s.h.id}/button${i}`, (s.h.node as unknown as { nodeScope: never }).nodeScope) as unknown as RuntimeNode;
-        if (value !== undefined) (child as unknown as NodeInstance).setInputValue('value', value);
-        (s.h.node as unknown as { addChild(c: unknown): void }).addChild(child);
-        return { node: child, value };
-      });
-    }
     const React = d.React;
     class Host extends React.Component {
       render() {
-        return node.render() ?? null;
+        return root.render() ?? null;
       }
     }
     void d.act(() => {
@@ -1443,13 +1471,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     });
     page.container.remove();
     // the children go with the page: off it already, their teardown cannot reach a render
-    for (const c of page.children ?? []) {
+    for (const n of [...(page.children ?? []).map((c) => c.node), ...(page.group ? [page.group] : [])]) {
       try {
-        c.node._onNodeDeleted();
+        n._onNodeDeleted();
       } catch {
-        // a page child's teardown assumes nothing of the play; what it raises is not the node's
+        // a page node's teardown assumes nothing of the play; what it raises is not the node's
       }
     }
+    if (page.group) (page.group as unknown as { parent?: unknown }).parent = undefined;
     (s.h.node as unknown as { parent?: unknown }).parent = undefined;
     s.page = undefined;
     onPage.delete(s);
@@ -1459,9 +1488,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     }
   }
 
-  /** PERSON (above) — the page paints what the node holds, as a browser does before a person can act. */
+  /**
+   * PERSON (above) — the page paints what the node holds, as a browser does before a person can act. NSP-016 s42: a page whose root
+   * is the node's GROUP drops the group's memoised children first (`cachedChildren`, react-component-node.ts :1782-1800), so the node
+   * renders from what it holds now — as the frame's end would render it — and not from the element the group last built.
+   */
   function paint(s: State): void {
     const d = ensureDom();
+    if (s.page?.group) s.page.group.cachedChildren = undefined;
     void d.act(() => {
       s.page?.host?.forceUpdate();
     });
@@ -1478,7 +1512,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const w = d.window;
     // NSP-016 s42 — a `pick` acts on the CHILD whose Value is the act's (a Radio Button Group's button): the control a person sees
     // inside it; a Value no child carries, or a child off the page, is nothing to act on
-    const el = act === 'pick' ? pickedElement(s, value) : elementSeen(s.h.node as unknown as { getDOMElement(): unknown }, s.page?.container);
+    const el = act === 'pick' ? pickedElement(s, value) : ownElement(s);
     if (!el) return;
     const mouse = (type: string, init: Record<string, unknown> = {}) => el.dispatchEvent(new w.MouseEvent(type, { bubbles: true, cancelable: true, composed: true, button: 0, ...init }));
     const touch = (type: string) => el.dispatchEvent(new w.TouchEvent(type, { bubbles: true, cancelable: true, composed: true }));
@@ -1590,6 +1624,21 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       default:
         throw new Error(`runtime: no person face for the act "${act}"${value === undefined ? '' : ` (${JSON.stringify(value)})`}`);
     }
+  }
+
+  /**
+   * PERSON (above) — the element a person sees of the node itself (`elementSeen`). NSP-016 s42: on a page whose root is the node's
+   * GROUP the container holds its siblings too, so the fallback for a node that lost its root (C66) is its OWN control — found by
+   * the `id` its component renders on the input (RadioButton.tsx `inputProps.id`) — and never the first control on the page, which
+   * with the node unmounted is a sibling's.
+   */
+  function ownElement(s: State): any {
+    const node = s.h.node as unknown as { getDOMElement(): any; props?: { id?: unknown } };
+    if (!s.page?.group) return elementSeen(node, s.page?.container);
+    const root = node.getDOMElement();
+    if (root && root.isConnected) return elementSeen(node);
+    const id = node.props?.id;
+    return typeof id === 'string' ? s.page.container.querySelector(`[id="${id}"]`) : null;
   }
 
   /** PERSON (above, NSP-016 s42) — the control of the page child whose Value is `value` (`Object.is`), if it is on the page. */
