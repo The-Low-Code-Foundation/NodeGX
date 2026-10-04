@@ -26,6 +26,7 @@ const fs = require('fs');
 const path = require('path');
 
 const PROVENANCE = path.join('noodl_modules', 'kit-provenance.json');
+const DEFAULT_LIBRARY = path.join(__dirname, '..', '..', 'library');
 
 /** Every file under `dir`, relative to it, sorted. */
 function filesUnder(dir) {
@@ -108,6 +109,32 @@ function resolveTemplateKits(projectDir, { library, write = false }) {
   return report;
 }
 
+/**
+ * For whatever COPIES a template to run it (a drive's `assemble`, a spec's fixture, the desktop app's build): put the
+ * referenced kits back in the copy, or throw naming the ones the library cannot supply. ISL-017 s15: a template in
+ * this repo commits the record and not the kit, so a copy without this step renders with no kit at all.
+ */
+function resolveTemplateCopy(projectDir, library = DEFAULT_LIBRARY) {
+  const report = resolveTemplateKits(projectDir, { library, write: true });
+  if (report.unresolvable.length > 0) {
+    throw new Error(`${projectDir}: kits this checkout's library/ cannot supply: ${JSON.stringify(report.unresolvable)}`);
+  }
+  return report;
+}
+
+/**
+ * For a generator WRITING a template: drop each referenced kit folder that is byte-identical to the library's, and keep
+ * the record. A folder that differs is refused rather than dropped (the template would then name a kit it does not
+ * carry), as is a record the library cannot answer. Returns the modules dropped.
+ */
+function dropReferencedKits(projectDir, library = DEFAULT_LIBRARY) {
+  const report = resolveTemplateKits(projectDir, { library });
+  const wrong = [...report.unresolvable, ...report.differs, ...report.missing.map((module) => ({ module, reason: 'absent before the drop' }))];
+  if (wrong.length > 0) throw new Error(`refusing to drop the kits of ${projectDir}: ${JSON.stringify(wrong)}`);
+  for (const module of report.identical) fs.rmSync(path.join(projectDir, 'noodl_modules', module), { recursive: true });
+  return report.identical;
+}
+
 function main() {
   const argv = process.argv.slice(2);
   const flag = (name) => {
@@ -119,7 +146,7 @@ function main() {
     process.stderr.write('usage: resolve-template-kits.js <project-dir> [--library <dir>] [--write]\n');
     process.exit(2);
   }
-  const library = path.resolve(flag('--library') || path.join(__dirname, '..', '..', 'library'));
+  const library = path.resolve(flag('--library') || DEFAULT_LIBRARY);
   const write = argv.includes('--write');
   const report = resolveTemplateKits(path.resolve(projectDir), { library, write });
   process.stdout.write(JSON.stringify(report, null, 2) + '\n');
@@ -128,4 +155,4 @@ function main() {
 
 if (require.main === module) main();
 
-module.exports = { resolveTemplateKits };
+module.exports = { resolveTemplateKits, resolveTemplateCopy, dropReferencedKits };

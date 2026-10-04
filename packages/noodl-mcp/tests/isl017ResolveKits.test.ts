@@ -2,8 +2,9 @@
  * P109 ISL-017 ruling 2 — "copy on install": a template can ship the record of a kit without the kit, and the
  * publish step puts the kit back from the library (`scripts/library/resolve-template-kits.js`).
  *
- * The round trip is the claim: drop Olive's Island's four library-identical kit folders from a copy, resolve, and
- * the copy is the template again, byte for byte. The red arms are the ways a publish could ship the wrong kit: a
+ * The round trip is the claim: drop Olive's Island's four library-identical kit folders from a resolved copy, resolve,
+ * and the copy is what it was, byte for byte. Since s15 the committed template carries the record only (the generator
+ * drops the folders), so every copy here is resolved first, as every reader of the template now does. The red arms are the ways a publish could ship the wrong kit: a
  * folder that drifted from its entry, a record whose version the library no longer holds, and a folder never
  * resolved.
  */
@@ -12,7 +13,7 @@ import * as os from 'os';
 import * as path from 'path';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { resolveTemplateKits } = require('../../../scripts/library/resolve-template-kits.js');
+const { resolveTemplateKits, resolveTemplateCopy } = require('../../../scripts/library/resolve-template-kits.js');
 
 const REPO = path.join(__dirname, '..', '..', '..');
 const GARDEN = path.join(REPO, 'templates', 'bot-garden');
@@ -28,6 +29,8 @@ function gardenCopy(): string {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'isl017-resolve-'));
   made.push(dir);
   fs.cpSync(GARDEN, dir, { recursive: true });
+  // ISL-017 ruling 2: the template carries its kits' record, not the kits.
+  resolveTemplateCopy(dir);
   return dir;
 }
 
@@ -46,18 +49,20 @@ function tree(dir: string): Record<string, string> {
 }
 
 describe('P109 ISL-017 ruling 2 — a template ships the record, the publish resolves the kit', () => {
-  it('the garden records every kit by entry and version, and every folder is the library’s', () => {
+  it('the garden records every kit by entry and version and carries none of them; a copy resolves each to the library’s', () => {
     const records = JSON.parse(fs.readFileSync(path.join(GARDEN, 'noodl_modules', 'kit-provenance.json'), 'utf8'));
     expect(records.map((r: { module: string; entry?: string; entryVersion?: string }) => [r.module, r.entry, typeof r.entryVersion])).toEqual(
       KITS.map((k) => [k, k, 'string'])
     );
     const report = resolveTemplateKits(GARDEN, { library: LIBRARY });
     expect({ identical: report.identical, missing: report.missing, differs: report.differs, unresolvable: report.unresolvable }).toEqual({
-      identical: KITS,
-      missing: [],
+      identical: [],
+      missing: KITS,
       differs: [],
       unresolvable: []
     });
+    const copy = resolveTemplateKits(gardenCopy(), { library: LIBRARY });
+    expect({ identical: copy.identical, missing: copy.missing }).toEqual({ identical: KITS, missing: [] });
   });
 
   it('round trip: the four folders dropped are reported missing, and resolving them gives back the template byte for byte', () => {

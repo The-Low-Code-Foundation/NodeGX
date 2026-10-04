@@ -22,6 +22,9 @@ import * as path from 'node:path';
 
 import { call, connect, type TestSession } from './helpers';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { resolveTemplateCopy } = require('../../../scripts/library/resolve-template-kits.js');
+
 const GARDEN = path.resolve(__dirname, '..', '..', '..', 'templates', 'bot-garden');
 const CODES = new Set(['uncollapsible-multi-column', 'row-cannot-wrap']);
 
@@ -39,6 +42,8 @@ beforeAll(async () => {
   tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), 'isl022-'));
   const dir = path.join(tempRoot, 'bot-garden');
   fs.cpSync(GARDEN, dir, { recursive: true });
+  // ISL-017 ruling 2: the template carries its kits' record, not the kits.
+  resolveTemplateCopy(dir);
   session = await connect(dir, false);
 }, 120_000);
 

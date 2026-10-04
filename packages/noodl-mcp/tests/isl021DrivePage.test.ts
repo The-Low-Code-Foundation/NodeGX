@@ -18,6 +18,8 @@ import type { DrivePagePayload } from '../src/render';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const harness = require('../../../scripts/devtools/render-report.js');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { resolveTemplateCopy } = require('../../../scripts/library/resolve-template-kits.js');
 
 const REPO = path.join(__dirname, '..', '..', '..');
 const GARDEN = path.join(REPO, 'templates', 'bot-garden');
@@ -100,6 +102,8 @@ describeOrSkip('P109 ISL-021 — drive_page on Olive’s Island, rendered from d
   beforeAll(async () => {
     projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'isl021-garden-'));
     fs.cpSync(GARDEN, projectDir, { recursive: true });
+    // ISL-017 ruling 2: the template carries its kits' record, not the kits.
+    resolveTemplateCopy(projectDir);
     session = await connect(projectDir, false);
     await call(session, 'find_tools', { group: 'explore' });
   }, 60_000);

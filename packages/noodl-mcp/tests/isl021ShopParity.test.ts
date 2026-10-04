@@ -23,6 +23,8 @@ import type { DrivePagePayload } from '../src/render';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const harness = require('../../../scripts/devtools/render-report.js');
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { resolveTemplateCopy } = require('../../../scripts/library/resolve-template-kits.js');
 
 const GARDEN = path.join(__dirname, '..', '..', '..', 'templates', 'bot-garden');
 
@@ -192,6 +194,8 @@ async function driveShop(session: TestSession, lang: Lang): Promise<{ result: Dr
 function gardenCopy(breakBuy: boolean): string {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), breakBuy ? 'isl021-nobuy-' : 'isl021-shop-'));
   fs.cpSync(GARDEN, dir, { recursive: true });
+  // ISL-017 ruling 2: the template carries its kits' record, not the kits.
+  resolveTemplateCopy(dir);
   if (breakBuy) {
     const file = path.join(dir, 'components', 'Island', 'Shop', 'connections.json');
     const raw = JSON.parse(fs.readFileSync(file, 'utf8'));

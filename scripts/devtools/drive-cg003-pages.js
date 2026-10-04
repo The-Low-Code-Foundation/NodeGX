@@ -54,6 +54,8 @@ if (process.argv[2] === 'assemble') {
   }
   fs.rmSync(out, { recursive: true, force: true });
   fs.cpSync(TEMPLATE, out, { recursive: true });
+  // P109 ISL-017 ruling 2: the template commits its kits' record, not the kits — put them back from library/.
+  require('../library/resolve-template-kits.js').resolveTemplateCopy(out);
   const modules = fs.readdirSync(path.join(out, 'noodl_modules')).sort();
   console.log(JSON.stringify({ assembled: out, modules, components: fs.readdirSync(path.join(out, 'components')).length }, null, 1));
   process.exit(['bot-garden-fonts', 'game-kit', 'garden-kit'].every((m) => modules.includes(m)) ? 0 : 1);

@@ -95,6 +95,8 @@ for (const sub of ['backend', 'policy', 'workflows', 'licenses', 'model']) fs.mk
 const work = fs.mkdtempSync(path.join(os.tmpdir(), 'garden-app-'));
 const project = path.join(work, 'project');
 fs.cpSync(PROJECT, project, { recursive: true });
+// P109 ISL-017 ruling 2: a template commits its kits' record, not the kits — copy them back from THIS checkout's library/.
+require(path.join(REPO, 'scripts/library/resolve-template-kits.js')).resolveTemplateCopy(project);
 const manifestFile = path.join(project, 'nodegx.project.json');
 const manifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
 // An EMPTY endpoint means NO backend to the runtime (resolveBackend.pure.ts): the loopback origin is baked.

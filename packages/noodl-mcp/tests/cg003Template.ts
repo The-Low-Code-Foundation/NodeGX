@@ -29,6 +29,11 @@ import { copyTree } from './templatePins';
 import { APP_NODES, APP_WIRES, C, CG003_COMPONENTS, CgComponent, GAME_NAME, PAGES, REQUIRED_MODULES } from './cg003Components';
 import { GARDEN_PRESET, GARDEN_TOKENS } from './cg007Look';
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { dropReferencedKits } = require('../../../scripts/library/resolve-template-kits.js') as {
+  dropReferencedKits: (projectDir: string) => string[];
+};
+
 export const TEMPLATE_ID = 'bot-garden';
 /** What a person sees the project called (ruling 7). The template's id, its folder and the storage key stay bot-garden. */
 export const TEMPLATE_PROJECT_NAME = GAME_NAME;
@@ -222,6 +227,10 @@ export function prepareGardenArtefact(built: AuthoredGarden, output: string): vo
   for (const name of [...REQUIRED_MODULES, 'bot-garden-fonts']) {
     if (!fs.existsSync(path.join(output, 'noodl_modules', name, 'manifest.json'))) throw new Error(`refusing to write: noodl_modules/${name} is missing`);
   }
+  // P109 ISL-017 ruling 2, "copy on install": the template keeps `kit-provenance.json` (each record names its library
+  // entry and version) and not the built kits — they are copied back from library/ by whatever copies the template to
+  // run it (`resolveTemplateCopy`) and by the shelf publish. Only a folder byte-identical to the library's is dropped.
+  dropReferencedKits(output);
   writeStartHere(output);
 }
 

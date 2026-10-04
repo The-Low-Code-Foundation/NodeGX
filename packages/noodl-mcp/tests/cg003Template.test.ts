@@ -71,6 +71,11 @@ import { ROBOT_NAME_MAX } from './cg002Scripts';
 import { DARKENED_FILLS, GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } from './cg007Look';
 import { reducedMotionReport } from './reducedMotion';
 import { RESERVED_ROW_FIELD_NAMES } from '../../noodl-editor/src/editor/src/validation';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { resolveTemplateCopy } = require('../../../scripts/library/resolve-template-kits.js') as {
+  resolveTemplateCopy: (projectDir: string) => { resolved: string[]; unresolvable: unknown[] };
+};
 import { FAMILY_SCRIPT, ISLAND_PINS_SCRIPT, LOOK_ROWS_SCRIPT, REQUEST_CARD_SCRIPT, SELECT_PROFILE_SCRIPT, SKILL_ROWS_SCRIPT } from './cg003Scripts';
 // P106 IG-005: robots for the job.
 import { GIFT_LINE_SCRIPT, JOB_ROBOT_SCRIPT, ROBOT_CARDS_SCRIPT } from './cg003Scripts';
@@ -296,11 +301,21 @@ describe('CG-003 — Bot Garden, the artefact', () => {
     expect([...a.keys()].filter((f) => !a.get(f)!.equals(committed.get(f)!))).toEqual([]);
   });
 
-  it('the kits in the artefact are the ones the library ships', () => {
+  /**
+   * P109 ISL-017 ruling 2 ("copy on install"): the artefact names its kits (`kit-provenance.json`, entry + version) and
+   * carries none of them; a copy resolves every one from library/ with the library's bytes.
+   */
+  it('the artefact carries the kits’ record, not the kits — and a copy resolves the ones the library ships', () => {
+    const kits = [...REQUIRED_MODULES, 'bot-garden-fonts'];
+    expect(kits.filter((name) => fs.existsSync(path.join(OUTPUT, 'noodl_modules', name)))).toEqual([]);
+    const copy = path.join(fs.mkdtempSync(path.join(os.tmpdir(), 'cg003-resolve-')), TEMPLATE_ID);
+    fs.cpSync(OUTPUT, copy, { recursive: true });
+    expect(resolveTemplateCopy(copy).resolved.sort()).toEqual([...kits].sort());
     for (const name of REQUIRED_MODULES) {
       const lib = path.join(REPO, 'library', 'modules', name, 'project', 'noodl_modules', name, 'index.js');
-      expect({ name, same: fs.readFileSync(path.join(OUTPUT, 'noodl_modules', name, 'index.js')).equals(fs.readFileSync(lib)) }).toEqual({ name, same: true });
+      expect({ name, same: fs.readFileSync(path.join(copy, 'noodl_modules', name, 'index.js')).equals(fs.readFileSync(lib)) }).toEqual({ name, same: true });
     }
+    fs.rmSync(path.dirname(copy), { recursive: true, force: true });
   });
 
   describe('AC2 — the phase-85 floors, recomputed', () => {
@@ -869,7 +884,8 @@ describe('CG-003 — Bot Garden, the artefact', () => {
 
     it('🔴 AC6: the template carries garden-3d-kit (three.js beside it, its manifest naming it), installed before authoring', () => {
       expect(built.modules).toContain('garden-3d-kit');
-      const dir = path.join(OUTPUT, 'noodl_modules', 'garden-3d-kit');
+      // The authoring project's copy: the artefact carries the record only (ISL-017 ruling 2).
+      const dir = path.join(built.projectDir, 'noodl_modules', 'garden-3d-kit');
       expect(JSON.parse(fs.readFileSync(path.join(dir, 'manifest.json'), 'utf8')).dependencies).toEqual(['three.min.js']);
       expect(fs.statSync(path.join(dir, 'three.min.js')).size).toBe(651651);
       expect(fs.existsSync(path.join(dir, 'LICENSE.txt'))).toBe(true);
