@@ -94,11 +94,11 @@ export interface ProjectInfoResponse {
   settings?: Record<string, unknown>;
   /**
    * The home: the component the project starts from (the editor's "Make home"). P109 ISL-016 — read
-   * from `rootNodeId`, where the editor reads it, with `nodeId` the node it points at; a registry
-   * row typed `root` is the fallback (`create_project`'s App). `missing` when `rootNodeId` names a node
-   * no component holds — the editor then shows "No HOME component selected".
+   * from `rootNodeId` only, where the editor reads it, with `nodeId` the node it points at. `missing`
+   * (with `fix`) when there is no `rootNodeId` or no component holds it — the editor then shows
+   * "No HOME component selected".
    */
-  rootComponent?: { path?: string; nodeId?: string; missing?: true };
+  rootComponent?: { path?: string; nodeId?: string; missing?: true; fix?: string };
   routes?: unknown;
   styles?: { colors?: unknown; textStyles?: string[]; variantCount?: number };
   stats: RegistryV2File['stats'] | { totalComponents: number };

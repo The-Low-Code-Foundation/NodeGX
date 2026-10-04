@@ -131,7 +131,12 @@ Constraints:
 **8,261 before and after** (`toolDisclosure.test.ts`). `ProjectStore.writeProjectFields` is the one write: every key
 keeps its place, a new `rootNodeId` lands last after `modified` (where `pinRootNode` put it), and a request that
 changes nothing writes nothing. `get_project_info.rootComponent` now reads the home from `rootNodeId` (the editor's
-field), registry `root` row as fallback, `{ nodeId, missing: true }` when no component holds it.
+field) **only**, and says `{ missing: true, fix }` when there is none or no component holds it. 🔴 The first cut kept
+the registry `root` row as a fallback; reading the editor's load (`projectmodel.ts:267` reads `rootNodeId`, then a
+legacy template-only `rootComponent`; the v2 importer carries nothing else, `ProjectImporter.ts:374`) showed the row is
+never read, so the fallback answered "App" for the `demo-app` fixture — App typed `root`, no `rootNodeId` — a project
+the editor opens with "No HOME component selected". HEAD had the same lie, and `tools.test.ts:101` pinned it; that
+assertion now reads `missing`.
 
 **Two departures from §5, both measured:**
 

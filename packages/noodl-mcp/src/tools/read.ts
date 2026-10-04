@@ -124,11 +124,16 @@ export function kitsReport(): ProjectKitsReport | undefined {
 }
 
 /**
- * P109 ISL-016 — the project's home, by `rootNodeId` first: that is the field the editor opens on
- * (`projectmodel.ts`, `json.rootNodeId`) and the one "Make home" and `set_project_settings` write. The
- * shipped garden has `rootNodeId` and no registry row typed `root`, so the registry alone answered
- * "no home" for a project that has one.
+ * P109 ISL-016 — the project's home, read from `rootNodeId` ONLY: that is the field the editor opens on
+ * (`projectmodel.ts`, `json.rootNodeId`; the v2 importer carries nothing else, `ProjectImporter.ts`)
+ * and the one "Make home" and `set_project_settings` write. The registry row typed `root` used to be
+ * the whole answer, and it was wrong both ways: the shipped garden has `rootNodeId` and no such row
+ * (answered "no home" for a project that has one), and the `demo-app` fixture has the row and no
+ * `rootNodeId` (answered "App" for a project the editor opens with "No HOME component selected"). The
+ * row is only an ordering hint for the search.
  */
+const SET_HOME = 'find_tools "home" reveals set_project_settings; call it with { home: "App" } (the component holding the Router).';
+
 function homeOf(
   store: ProjectStore,
   rootNodeId: string | undefined,
@@ -142,9 +147,9 @@ function homeOf(
       const nodes = store.readComponent(key).files.nodes.nodes ?? [];
       if (nodes.some((n) => n.id === rootNodeId)) return { path: key, nodeId: rootNodeId };
     }
-    return { nodeId: rootNodeId, missing: true };
+    return { nodeId: rootNodeId, missing: true, fix: SET_HOME };
   }
-  return registryRoot ? { path: registryRoot } : undefined;
+  return { missing: true, fix: SET_HOME };
 }
 
 export function registerReadTools(server: McpServer, binding: ProjectBinding, options: { allowWrites: boolean }): void {

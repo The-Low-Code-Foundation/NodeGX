@@ -94,10 +94,11 @@ describe('P109 ISL-016 — set_project_settings', () => {
   });
 
   it('AC3 — home names a component; the project points at its first top-level visual node, and get_project_info says so', async () => {
-    // The fixture has no `rootNodeId`: the D9 shape. Its App's registry row is `root`, so before this
-    // the answer came from the registry with no node.
+    // The fixture has no `rootNodeId`: the D9 shape. Its App's registry row is `root`, and before this
+    // that row was the whole answer ("App") — for a project the editor opens with no home.
     const before = await call<ProjectInfoResponse>(session, 'get_project_info');
-    expect(before.data.rootComponent).toEqual({ path: 'App' });
+    expect(before.data.rootComponent).toMatchObject({ missing: true });
+    expect(before.data.rootComponent?.path).toBeUndefined();
 
     const res = await call<SetProjectSettingsResponse>(session, 'set_project_settings', { home: 'App' });
     expect(res.data).toEqual({
@@ -159,7 +160,7 @@ describe('P109 ISL-016 — set_project_settings', () => {
     // And a `rootNodeId` no component holds is reported, not hidden.
     fs.writeFileSync(projectFile(session), JSON.stringify({ ...project, rootNodeId: 'gone' }, null, 2));
     const missing = await call<ProjectInfoResponse>(session, 'get_project_info');
-    expect(missing.data.rootComponent).toEqual({ nodeId: 'gone', missing: true });
+    expect(missing.data.rootComponent).toMatchObject({ nodeId: 'gone', missing: true });
   });
 });
 
