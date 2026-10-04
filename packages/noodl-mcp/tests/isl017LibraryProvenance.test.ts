@@ -67,7 +67,14 @@ describe('P109 ISL-017 AC4 — library provenance names the entry, not the machi
   it('names the entry and its version on the imported arm, with no path in it', async () => {
     const { bytes, shelf } = await installFromShelfAt('a', 'tiny-kit');
     expect(JSON.parse(bytes)).toEqual([
-      { module: 'tiny-kit', origin: 'imported', fromProject: 'the NodeGX library entry "tiny-kit" 1.0.0', importedAt: EPOCH }
+      {
+        module: 'tiny-kit',
+        origin: 'imported',
+        fromProject: 'the NodeGX library entry "tiny-kit" 1.0.0',
+        importedAt: EPOCH,
+        entry: 'tiny-kit',
+        entryVersion: '1.0.0'
+      }
     ]);
     expect({ holdsTheShelfPath: bytes.includes(shelf), holdsAnyAbsolutePath: /"\//.test(bytes) }).toEqual({
       holdsTheShelfPath: false,

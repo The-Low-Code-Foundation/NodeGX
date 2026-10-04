@@ -570,8 +570,15 @@ export async function scanExecutableModules(sourceDirectory: string): Promise<Sc
 export type KitProvenance =
   /** Scaffolded in this project. There is no verification field on this arm. */
   | { module: string; origin: 'local'; createdAt: string }
-  /** Copied in from another project on this machine. Local code, no gate, no consent. */
-  | { module: string; origin: 'imported'; fromProject: string; importedAt: string }
+  /**
+   * Copied in from another project on this machine. Local code, no gate, no consent.
+   *
+   * P109 ISL-017 ruling 2 ("copy on install") — `entry`/`entryVersion` name the NodeGX library entry the
+   * door's `install_prefab` copied it from, as data: `fromProject` is a sentence for the Kits panel, and a
+   * folder's name can differ from its entry's (`i18next-noodl` ⊂ `i18next-translation`). A template can ship
+   * the record without the folder, and the shelf publish resolves the folder from the library by them.
+   */
+  | { module: string; origin: 'imported'; fromProject: string; importedAt: string; entry?: string; entryVersion?: string }
   /** Unpacked from a URL. Cannot exist without a verification result and a consent stamp. */
   | {
       module: string;

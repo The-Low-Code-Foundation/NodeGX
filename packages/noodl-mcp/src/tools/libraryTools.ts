@@ -427,7 +427,10 @@ export function registerLibraryTools(
             module,
             origin: 'imported' as const,
             fromProject,
-            importedAt: now
+            importedAt: now,
+            // ISL-017 ruling 2 — the same two facts as data, for the publish step that resolves the folder.
+            entry: entry.slug,
+            ...(entry.meta.version ? { entryVersion: entry.meta.version } : {})
           }))
         );
         if (!recorded.ok) {
