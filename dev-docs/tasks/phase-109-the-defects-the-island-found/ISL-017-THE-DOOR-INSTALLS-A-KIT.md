@@ -153,4 +153,7 @@ removes. Ruling 1 (a) taken as the engineering default.
 working tree, not this change (`OK modules/bot-garden-fonts`); `library:build` stops on the same folder.
 `library:verify-origin` (a release gate) lists Bot Garden Fonts as unpublished at the origin beside Garden Kit and
 Garden 3D Kit, which were already there at HEAD; the baseline was not updated (publishing is Richard's call).
+**On the committed tree** (the worktree `../OpenNoodl-worktrees/p109-s12` at `79ed6ce0f`, no peer files):
+`library:check` **exit 0, 82/82 clean**; `library:build` exit 0; `library:verify-dist` **exit 0** — modules 36
+entries, 0 with problems (the editor's own install path walked against the built dist).
 
