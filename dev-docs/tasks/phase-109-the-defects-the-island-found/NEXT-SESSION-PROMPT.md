@@ -1,55 +1,66 @@
-# Next session — P109 session 13
+# Next session — P109 session 14
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 12 (2026-10-03, on `cline-dev`, `79e84faab`, `97a53c579`):** **7 of 25 closed** — ISL-015 ✅ (AC5, the stranger round, run twice) and
-ISL-019 AC7 ✅ (the garden drops its pins). Two MCP door defects found by the stranger and fixed; a ruling owed on
-ISL-019 AC6.
+**Session 13 (2026-10-04, on `cline-dev`, `e310b68a7`…`dec6cf6cb`, 9 commits):** **8 of 25 closed** — ISL-019 ✅
+(AC6 ruled "Accept it"). Round 3 ruled in one question round, all four as recommended. Built: ISL-016
+(`set_project_settings`), ISL-017's first half (Fredoka a library entry, path-free provenance, the garden installs
+through `install_prefab`), ISL-021 slice 1 (`drive_page`). Fixed `P109-S12-KITGROUPPURPOSE`.
 
 ## Read first
 
-1. ISL-015 §8 s12 — the stranger round's setup, both rounds, the four-arm drive table, and why the person's own
-   wiring grades nothing on re-renders.
-2. ISL-019 §8 s12 — AC7's four arms (407 newline-only → re-baseline → 0 differ → wall-clock control red), AC6's two
-   rounds and the update-route check.
-3. Bugs filed s12: `P109-S12-KITONDISK` (fixed), `-SETROOTSOP` (fixed), `-WORKTREEVIEWER` (fixed),
-   `-CAMELROOTS` (open), `-KITGROUPPURPOSE` (open), `-REBUILDSTAMPS` (needs-ruling).
-4. Memory: `a-stranger-agent-round-recipe` (what made the agent rounds grade the product, not the setup).
+1. README §8 "Session 13, round 3": the four questions as asked, and **Richard's correction**: the "home" is the
+   editor's right-click **Make home**, the App component holding the Router. It is not a page.
+2. ISL-016 §8 s13: two departures from §5 (no registry re-type; the editor's first-export-root rule) and why
+   `get_project_info` now reads `rootNodeId` only.
+3. ISL-017 §8 s13: the AC7 census and the **proposed build for "copy on install"**. The resolve step goes in the
+   shelf publish script, because no editor path copies `templates/`.
+4. ISL-021 §8 s13: the runner's rules, the near-miss (Write overwrote P77's `drive-page.js`, restored), and what is
+   open.
+5. Bugs filed s13: `P109-S13-NIGHTBOOKHOME` (open, a peer's untracked template), `P109-S13-FINDTOOLSPHRASE` (open:
+   a multi-word `find_tools` query reveals nothing).
 
-## Gate readings taken s12 (2026-10-03, over `e839f2424` + this session's change)
+## Gate readings taken s13 (2026-10-04, over `dec6cf6cb`)
 
-- `noodl-mcp` full, `--maxWorkers=2`, 178 s: **170 suites, 3,623 tests, 12 failed in 9 suites, every one a HEAD-red by
-  name**: CMP-004 ×4 + `nodeIdAllocation` (s5), DEF-038 ×2 (peer templates: dbt-demo, nightbook), FLD-013, D54's mutant,
-  TPL-007's byte gate (peer-dirty rocket-school), CN-004's strict arm (`P109-S1-CN004`, Expected 1 Received 2),
-  CMP-001 AC2's rate (`CMP001RATE`).
-- `tsc --noEmit -p packages/noodl-mcp`: **8 errors, the same 8 in the same six spec files** as HEAD
-  (`P109-S10-TYPECHECKMCP`; the committed tree reads 11 — three more in `tpl010`, cleared by a peer's uncommitted edit).
-- `cg003Template.test.ts` **150/150**; `npm run template:garden` exit 0 (engine gate 259/259).
-- New specs: `isl015KitOnDisk.test.ts` 2/2 (red 2/2 at HEAD), `setVisualRootsOp.test.ts` 3/3 (2 red at HEAD, the A20
-  derive case green both sides); `kitTools.test.ts` 10/10.
-- `nodegx-node-kit-types`: `isl015-kit-traps` + `docsamples` 34/34 after the docs edit.
+- `noodl-mcp` full, `--maxWorkers=2`: **173 suites, 3,639 tests, 12 failed in 9 suites, the s12 baseline by name**
+  (CMP-004 ×4 + `nodeIdAllocation`, DEF-038 ×2, FLD-013, D54's mutant, TPL-007's byte gate, CN-004 strict,
+  CMP-001 AC2's rate). The JSON's mtime was checked (09:27).
+- `tsc --noEmit -p packages/noodl-mcp`: the same 8 errors in the same six spec files (`P109-S10-TYPECHECKMCP`).
+- Resident surface **8,261 / 8,280, 19 free** (6 spent on the kit purpose; both new tools at 0).
+- `cg003Template.test.ts` **150/150** after `npm run template:garden` (exit 0).
+- New specs: `isl016ProjectSettings` 9/9, `isl017LibraryProvenance` 2/2, `isl021DrivePage` 4/4 (real Chrome; it
+  skips loudly without the viewer bundle). Each has a reverted arm recorded red in its task file.
+- `library:check` on the committed tree (worktree): exit 0, 82/82. In the primary checkout it fails only on
+  `modules/nightbook-kit` (a peer's untracked folder with no `library.json`).
+- Editor `uni-012/harness-packaging` 7/7 (ships `drive-steps.js`).
 
 ## Do, in this order
 
-1. **ISL-009's export half**, only when `nodegx-export/src/emit/component.ts` is committed by P18 (still dirty since
-   Sep 26 on 10-03).
-2. **Round 3 questions**, mechanism first, plain words with what X is, measured populations first (s11's way):
-   ISL-019 AC6 (`P109-S12-REBUILDSTAMPS`: restore the old bytes on a same-session delete + create, steer "rebuild" to
-   `set`, or accept the update route), ISL-016, ISL-017, ISL-021, ISL-008, ISL-010, ISL-018's open case,
-   `P109-S8-ARRAYFILTERPATH` (re-read first: `a6f629a2e`). Then the ISL-022 follow-ups and the s4 bugs.
-3. **Small, buildable without a ruling:** `P109-S12-KITGROUPPURPOSE` (add "scaffold a node kit" to the `project`
-   group's purpose; measure against `toolDisclosure.test.ts`'s surface gate first).
-4. Reuse for any "person's door" AC: the worktree `../OpenNoodl-worktrees/p109-s12` (its `dist` is HEAD + this session's
-   three `src` files; remove it with `git worktree remove` when done), `drive-isl015-stranger-kit.js`'s shape.
+1. **ISL-021 slice 2.** `stub_route` needs `render-report.js`'s `attachTab` to take a `Fetch.requestPaused`
+   handler; AC3's corpus count over `drive-iw006-shop.js` + `drive-cg003-pages.js`; AC7 against the deployed drive
+   (the runner drives a FROM-DISK render; see §7's first trap); AC6 (an agent proves its own form).
+2. **ISL-017 ruling 2**, the proposed build: machine fields `entry`/`entryVersion` on the `imported` record, a
+   resolver in `publish-templates-to-shelf.sh`, then the six repo readers, then drop the library-identical kit
+   folders. `dbt-lesson` stays copied. Measure the shelf bundle's file counts before and after.
+3. **ISL-016's rest:** AC8 (`tpl001`, `tpl003`, `tpl005`, `tpl006`, `tpl007` → the tool; `tpl008`/`tpl010` are
+   peer-dirty, so leave them), AC5 (FLD-009's editor arm), AC6's editor reading (open the agent's copy in the
+   editor; a throwaway profile, never Richard's store).
+4. `P109-S13-FINDTOOLSPHRASE`: phrase first, then words of 4+ letters; keep `kitTools`' control arm green.
+5. Round 4 questions (mechanism first, plain words, populations measured): ISL-008, ISL-010, ISL-018's open case,
+   `P109-S8-ARRAYFILTERPATH`, the ISL-022 follow-ups.
 
 ## Decisions for Richard (not yours)
 
-- Round 3 above, ISL-019 AC6 first. Pushing `cline-dev` is his call (CI meets `P109-S10-TYPECHECKMCP`).
+- Round 4 above. Publishing Bot Garden Fonts / Garden Kit / Garden 3D Kit at the origin (`library:verify-origin`,
+  a release gate, lists all three as unpublished; the baseline was not touched). Pushing `cline-dev`.
 
-## Facts measured in session 12 that are not in a task file
+## Facts measured in session 13 that are not in a task file
 
-- **D3 (P69 CN-003) sanctions an mtime-keyed in-memory kit cache**; CN-006's comment had read it as forbidden. The kit
-  overlay now refreshes from `guarded()`, so every tool call costs one `readdir` + a `stat` per kit file.
-- **`claude -p --allowedTools` pre-approves, it does not restrict**: both stranger agents also had Bash.
-- **AAQ-005's three blocking warnings are forgiven only on an update** (already on disk). A delete + create of a
-  component that carries one (a `RouterNavigate` with no target) cannot be written back as it was.
-- **The `demo-app` fixture's Router has no pages**; any page drive on it needs a write that registers Home first.
+- **The editor reads the home ONLY from `rootNodeId`** (`projectmodel.ts:267`, plus a legacy template-only
+  `rootComponent`); the v2 importer carries nothing else. The registry's `root` type comes only from a
+  `%rootcomponent` legacy name.
+- **The editor's own local-kit provenance has no path** (`moduleGate.ts`: "a project on this computer"), and the
+  Kits panel prints `imported` as "Copied in from {fromProject} on {date}".
+- The worktree `../OpenNoodl-worktrees/p109-s12` is at `79ed6ce0f` with a real `dist` (noodl-mcp built at
+  `de9a3a5c4`) and a real `library-dist`. Rebuild before reuse, and remove it with `git worktree remove` when done.
+- An agent round over stdio cost $0.55 for 18 turns. `--disallowedTools Bash Edit Write NotebookEdit` really removes
+  them (the init's tool list confirms it); `--allowedTools` alone does not.
