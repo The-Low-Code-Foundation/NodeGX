@@ -1,6 +1,6 @@
 # ISL-021 — An agent can press and type on a rendered page
 
-**Status: 🟢 slice 1 built s13 (2026-10-04) — `drive_page` + `scripts/devtools/drive-steps.js`, ten of eleven verbs; AC2, AC4, AC5 met. Ruled s13: "One call, a step list"; rulings 2–3 as recommended (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F28](AUDIT-2026-10-01.md) · the 18
+**Status: 🟢 slice 2 built s14 (2026-10-04) — all eleven verbs (`stub_route` added); AC2, AC4, AC5, AC7 met; AC3 counted but its bar NOT met (17 non-drag/touch clauses); AC6 open. Slice 1 s13. Ruled s13: "One call, a step list"; rulings 2–3 as recommended (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F28](AUDIT-2026-10-01.md) · the 18
 CDP drives of P105, P106 and P108 · **Side:** product (MCP door, `noodl-mcp` render harness; possibly `nodegx-observe`)
 
 `render_report` loads every page and measures it as it first draws. It cannot press a button, type a name, wait for
@@ -148,4 +148,39 @@ input the runner waits two animation frames, not a sleep.
 | AC5 | ✅ The run reports `visibilityState: "visible"` (and `webgl2: false` — headless; said in the headline). No Chrome left behind: orphaned render-profile Chromes by PID, before vs after, none new. |
 | AC6 | ⬜ An agent proves a form of its own — not run. |
 | AC7 | ⬜ The shop drive's `SHORT`/`BUY` as step lists vs the CDP drive on the deployed artefact — not run; note the runner drives a FROM-DISK render, the drives a deployed one (§7's first trap). |
+
+### Session 14 (2026-10-04) — slice 2: `stub_route`; AC3 counted; AC7 met; two runner rules the corpus forced
+
+**Built** (`ede6bf86b`, `2a05865f9`):
+
+- **`stub_route`, the eleventh verb.** `{ stub_route: "/path", json? | body?, status?, content_type? }` answers that
+  path through CDP `Fetch` (a route ending `*` is a prefix; a full `https://` URL stubs another origin); unclaimed
+  paused requests continue. **Stubs at the head of the list are installed before the page first loads** — the
+  harness gained `withRenderedPage({ beforeBoot })` and an `onEvent` hook on `attachTab` (its `connect` took one
+  handler at connect time, which is why slice 1 stopped). `read: { stub }` gives `{ hits, body }`; the result
+  lists every stub's hits. Spec `isl021DrivePage` 7/7: the boot stylesheet stubbed first reads **1 hit**, the same
+  stub after a step reads **0** (the control); 🔴 reverted arm (no before-boot install) → the first red, hits 0.
+  ⚠️ An unstubbed path is **200**, not 404 — `render-from-disk` falls back to `index.html`; the known-firing control
+  reads the body.
+- **`navigate` reloads the document on a path-routed project**, even to the route it is on (the garden, 4 of 4,
+  a `window` mark lost each time). That is how a step list proves what survives a reload; on a hash-routed project
+  it would be a fragment change. Written into the runner's header.
+- 🔴 **A seed is written again at the start of the NEXT document load, before the app's scripts, once.** The AC7
+  lists first seeded with a `read` expression (the drives' `writeStore`) and went red in 3 of 4 arms, shells 0: the
+  island writes its model **7–23 ms after a page appears, or not at all** (3 runs instrumented, `setItem` hooked) —
+  so no condition on the page orders a step after it, and the drive's own `wait(700)` is what hid it.
+  `Page.addScriptToEvaluateOnNewDocument`, guarded by a `sessionStorage` mark so a LATER reload is not reset; the
+  scripts are removed after the next `navigate`. 🔴 Reverted arm (the mark check replaced by `return`): 4 of 4 red,
+  twice. **Edit form** `{ seed_storage: "key", edit: "js changing v" }` — the corpus's `writeStore` (the profile id
+  is made at runtime, so a whole-value seed cannot be written by a model); the edited value is computed once and
+  that value re-written, so an edit never applies twice.
+- 🔴 **A tap waits for its target to hold still** (the same centre two animation frames apart, ≤ 2 s). Without it,
+  2 suite runs in 7 failed at "A new Pip" — the Robots tab was pressed while the shop's sheet slid in. The CDP drive
+  had this as `wait(200)` + re-measure. With it: 6 + 8 suite runs, 0 failures.
+
+| AC | reading |
+|---|---|
+| AC3 | 🟡 **Counted; the bar is not met** (149 `check(` call sites; a read-only agent, line-cited): **88 expressible, 42 only through an `expression` into app internals, 19 not.** Of the 19: drag **2** (cg003 393, 858), touch **0**, other **17** — no network errors in the run output (3: iw006 404, cg003 645, 1480), console errors per step (3: 644, 757, 960), a stub whose answer depends on a value read mid-run (3: 887–889), a stub answering in a set order (3: 912, 913, 919), a stub that holds its reply (2: 1274, 1290), reduced-motion emulation (2: 1413, 1414), a whole-run request log (1: 1400). **So the AC's "drag and touch are the only not" is NOT met** — 17 others, named. The count was taken BEFORE the edit form; it is the missing verb the agent ranked first (11 iw006 + 3 cg003 sites needed only a save edit — they move from "internals" to plain steps that still need the save's format). Next by reach: a wheel/scroll at a target (11 cg003 sites use Blockly's `reveal`), network output (4), per-step console errors (3), stub `sequence`/`delay_ms`/match-on-body (5). |
+| AC6 | ⬜ not run. |
+| AC7 | ✅ `isl021ShopParity.test.ts` 4/4: the shop's SHORT and BUY (+ the reload check) at 1368 × 900, EN and FR, as one step list per language through the in-process client on a copy rendered from disk; a copy with `shBuy.onClick → shBuyFn.go` removed → `failed`, clause **BUY**, SHORT green, both languages. **The CDP drive on the same pair, DEPLOYED** (`assemble` + `nodegx deploy` exit 0 each, `--quick`): template **28/28**; without the wire **SHORT ×4 PASS, BUY ×4 FAIL** (EN and FR) plus the later clauses that need a bought robot. Same verdict per clause. One difference, by design: the step list stops at its first failure, so its BUY-reload is not run; the CDP drive grades it red. The drive_page side cannot run on the deployed artefact (§7's first trap): the comparison is from-disk vs deployed of the same template. |
 
