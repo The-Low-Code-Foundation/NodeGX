@@ -63,7 +63,16 @@
  *                                        fragment change and nothing reloads
  *   { "viewport": "phone" | "390x844" }  resize
  *   { "screenshot": "name" }             a PNG of the viewport into --out-dir
- *   { "seed_storage": { "key": "value" } } write localStorage (navigate afterwards to load it)
+ *   { "seed_storage": { "key": "value" } } write localStorage, and navigate afterwards to load it
+ *   { "seed_storage": "key", "edit": "js" } change a saved value in place: `edit` is a body run on `v`, the key's
+ *                                        parsed JSON (`v.model.shells = 22`) — the drives' `writeStore`
+ *                                        🔴 A seed is written now AND again at the start of the NEXT document load,
+ *                                        before the app's own scripts, once. A running app that saves its model
+ *                                        (the garden writes it 7–23 ms after a page appears, or not at all —
+ *                                        measured s14, 3 runs) would otherwise overwrite the seed before the reload
+ *                                        reads it, and no condition on the page orders a step after that write.
+ *                                        The edit form computes its value now and re-writes that value, so an
+ *                                        edit is never applied twice; a later reload is not reset to it.
  *   { "clear_storage": true }            clear this origin's storage
  *   { "stub_route": "/__garden/status", "json": V?, "body": "text"?, "status": 200?, "content_type"? }
  *                                        answer every later request for that path with V (or the text), and
@@ -309,6 +318,22 @@ function readExpression(r) {
   throw new UsageError(`read takes { text | variable | storage | url | stub | expression }; got ${JSON.stringify(r)}.`);
 }
 
+/** A `seed_storage` step as the `{ key: text }` pairs to write — the edit form computed on the page, now. */
+async function seedPairs(step, n, evaluate) {
+  const seed = step.seed_storage;
+  if (typeof seed === 'string') {
+    if (typeof step.edit !== 'string') throw new UsageError(`Step ${n}: seed_storage "${seed}" edits a saved value and needs edit: "js that changes v".`);
+    return evaluate(`(() => { const k = ${JSON.stringify(seed)}; const raw = localStorage.getItem(k);
+      if (raw === null) throw new Error('localStorage has no ' + JSON.stringify(k) + ' to edit');
+      const v = JSON.parse(raw); (function (v) { ${step.edit}
+      })(v); return { [k]: JSON.stringify(v) }; })()`);
+  }
+  if (!seed || typeof seed !== 'object' || Array.isArray(seed)) {
+    throw new UsageError(`Step ${n}: seed_storage takes { key: value } or a key with edit: "js that changes v".`);
+  }
+  return Object.fromEntries(Object.entries(seed).map(([k, v]) => [k, typeof v === 'string' ? v : JSON.stringify(v)]));
+}
+
 function matches(value, expected) {
   if (expected && typeof expected === 'object' && !Array.isArray(expected) && 'contains' in expected) {
     const hay = typeof value === 'string' ? value : JSON.stringify(value);
@@ -320,6 +345,7 @@ function matches(value, expected) {
 /** Run every step until one fails. Returns the rows. */
 async function runSteps(page, steps, { outDir, stubs = routeStubs(page), beforeBoot = 0 }) {
   const rows = [];
+  const pendingSeeds = [];
   const { client, evaluate } = page;
   // After an input, let the app answer before the next step looks: two animation frames is a condition
   // (React has committed and painted), not a sleep.
@@ -331,6 +357,18 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), beforeB
     for (let i = 0; i < 20 && !p.found; i++) {
       await wait(100);
       p = await evaluate(locateExpression(target));
+    }
+    if (!p.found) throw new Error(`nothing on the page matches ${JSON.stringify(target)}`);
+    // A target still moving (a sheet sliding in) is pressed where it WAS: the press lands on whatever has moved
+    // under that point. Measured s14: the shop's Robots tab, tapped as its panel opened, 1 run in ~8 never
+    // selected. The drives waited 200 ms and measured again; here the condition is the same centre two frames
+    // apart, for up to 2 s.
+    for (const end = Date.now() + 2000; p.found && !p.covered && Date.now() < end; ) {
+      await frames();
+      const again = await evaluate(locateExpression(target));
+      const still = again.found && !again.covered && Math.abs(again.x - p.x) < 0.5 && Math.abs(again.y - p.y) < 0.5;
+      p = again;
+      if (still) break;
     }
     if (!p.found) throw new Error(`nothing on the page matches ${JSON.stringify(target)}`);
     if (p.covered) {
@@ -390,6 +428,10 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), beforeB
       } else if (verb === 'navigate') {
         if (typeof step.navigate !== 'string') throw new UsageError(`Step ${i + 1}: navigate takes a route string.`);
         await page.navigate(step.navigate.startsWith('/') ? step.navigate : `/${step.navigate}`);
+        // The load the seeds were waiting for has happened; their once-mark already spent them.
+        for (const identifier of pendingSeeds.splice(0)) {
+          await client.send('Page.removeScriptToEvaluateOnNewDocument', { identifier }).catch(() => {});
+        }
         row.url = await evaluate('location.pathname + location.hash');
       } else if (verb === 'viewport') {
         const [vp] = parseViewports(String(step.viewport));
@@ -404,11 +446,14 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), beforeB
         fs.writeFileSync(file, Buffer.from(shot.data, 'base64'));
         row.file = file;
       } else if (verb === 'seed_storage') {
-        const pairs = step.seed_storage;
-        if (!pairs || typeof pairs !== 'object') throw new UsageError(`Step ${i + 1}: seed_storage takes { key: value }.`);
-        await evaluate(
-          `(() => { const p = ${JSON.stringify(pairs)}; for (const k of Object.keys(p)) localStorage.setItem(k, typeof p[k] === 'string' ? p[k] : JSON.stringify(p[k])); return Object.keys(p).length; })()`
-        );
+        const pairs = await seedPairs(step, i + 1, evaluate);
+        await evaluate(`(() => { const p = ${JSON.stringify(pairs)}; for (const k of Object.keys(p)) localStorage.setItem(k, p[k]); return true; })()`);
+        // Again on the next load, before the app runs — once (a sessionStorage mark survives the reload).
+        const mark = JSON.stringify(`__drive_steps_seed_${process.pid}_${i + 1}`);
+        const { identifier } = await client.send('Page.addScriptToEvaluateOnNewDocument', {
+          source: `(() => { try { if (sessionStorage.getItem(${mark})) return; sessionStorage.setItem(${mark}, '1'); const p = ${JSON.stringify(pairs)}; for (const k of Object.keys(p)) localStorage.setItem(k, p[k]); } catch (e) {} })();`
+        });
+        pendingSeeds.push(identifier);
         row.keys = Object.keys(pairs);
       } else if (verb === 'clear_storage') {
         const origin = await evaluate('location.origin');
