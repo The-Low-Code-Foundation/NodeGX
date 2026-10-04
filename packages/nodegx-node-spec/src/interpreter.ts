@@ -117,6 +117,8 @@ type Inbound =
   // s29: the service's `oauthReturn` event (world.ts AUTH, THE RETURN LEG); the end of the node's initialize (spec.ts `WorldHandlers.mount`)
   | { kind: 'authReturn'; state: AuthReturnState }
   | { kind: 'mount' }
+  // NSP-016 s37: the node is placed on the page, after its params (spec.ts `WorldHandlers.place`)
+  | { kind: 'place' }
   // s31: the person answered a click on the node's file input (world.ts PICKER)
   | { kind: 'picker'; event: PickerEvent }
   // s33: a subscription the node opened told it something (world.ts REALTIME)
@@ -473,6 +475,8 @@ export function mount(spec: AnyNodeSpec, params: Record<string, unknown> = {}, w
   // s29 — the end of the node's initialize (spec.ts `WorldHandlers.mount`): after `init`, before the params
   if (spec.world?.mount) handleInbound(inst, { kind: 'mount' });
   for (const name of Object.keys(params)) set(inst, name, params[name]);
+  // NSP-016 s37 — placed on the page, its params set (spec.ts `WorldHandlers.place`)
+  if (spec.world?.place) handleInbound(inst, { kind: 'place' });
   // ROUTE (world.ts, NSP-015 s19): the params the Router hands the page this node sits in — at the build
   // (now: they land with the first settle's deliveries), then each later one at its time on the clock
   if (spec.needs?.includes('router')) {
@@ -564,6 +568,25 @@ export function signal(inst: Instance, port: string): void {
   if (typeof reducer !== 'function') throw new SpecError(`${spec.type}: signal input "${port}" has no reducer`);
   inst.trace.push({ t: 'in', port });
   observe(inst, apply(inst, port, asWriter(inst, () => (reducer as (s: unknown, i: unknown, w: WorldView) => unknown)(inst.state, inst.inputs, inst.view)), declared.outcome === true));
+  deliverChanges(inst);
+}
+
+/**
+ * The `act` step (NSP-016 s37, adapter.ts; spec.ts THE PERSON): a person did `act` to the node. The
+ * spec's reducer for the act runs at once, like a signal input's, handed the act's value as it
+ * came (no coercion); what it emits and sends lands in the next settle. An act the spec does not
+ * declare is a spec error, as an unknown port is.
+ */
+export function act(inst: Instance, name: string, value?: unknown): void {
+  const { spec, view } = inst;
+  const decl = spec.acts?.[name];
+  if (!decl) throw new SpecError(`${spec.type}: no act "${name}" — a person cannot do that to this node`);
+  const reducer = spec.person?.[name];
+  if (typeof reducer !== 'function') throw new SpecError(`${spec.type}: act "${name}" is declared and has no person reducer`);
+  markExternal(value);
+  const c = canonicalise(value);
+  inst.trace.push(c === undefined ? { t: 'act', act: name } : { t: 'act', act: name, value: c });
+  observe(inst, apply(inst, `<person.${name}>`, asWriter(inst, () => reducer(inst.state as never, inst.inputs as never, value, view)), false));
   deliverChanges(inst);
 }
 
@@ -965,6 +988,9 @@ function handleInbound(inst: Instance, item: Inbound): void {
   } else if (item.kind === 'mount') {
     name = 'world.mount';
     patch = asWriter(inst, () => spec.world!.mount!(inst.state as never, inst.inputs as never, view));
+  } else if (item.kind === 'place') {
+    name = 'world.place';
+    patch = asWriter(inst, () => spec.world!.place!(inst.state as never, inst.inputs as never, view));
   } else if (item.kind === 'auth') {
     name = 'world.auth';
     if (!spec.world?.auth) throw new SpecError(`${spec.type}: a session event reached it and the spec has no world.auth handler`);
@@ -1115,6 +1141,7 @@ export function run(spec: AnyNodeSpec, params: Record<string, unknown>, steps: r
       if (step === 'settle') settle(inst);
       else if ('signal' in step) signal(inst, step.signal);
       else if ('advance' in step) advance(inst, step.advance);
+      else if ('act' in step) act(inst, step.act, step.value);
       else set(inst, step.set, step.value);
     }
     return trace(inst);

@@ -150,7 +150,7 @@ import type { NodeInstance, NodeMetadata, OutcomeFailureOptions, OutcomeToken, R
 import type { RuntimeNode } from '../../src/internal';
 import type { BackendCall, ComponentDecl, ComponentDefinition, GraphNodeDecl, GraphTarget, Handle, LocationCall, RequestRecord, StackAnswer, TraceEvent, Wire, World } from '../../../nodegx-node-spec/src';
 import { parseEndpoint, specFor } from '../../../nodegx-node-spec/src';
-import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, type BackendDelivery } from '../../../nodegx-node-spec/src';
+import { AUTH_OPS, backendEvent, canonicalise, fileError, installWorld, isFileOp, locationEvent, OUTCOME_PORTS, SELF_REFERENCE, type BackendDelivery } from '../../../nodegx-node-spec/src';
 
 import NoodlRuntime = require('../../noodl-runtime');
 import NodeDefinition = require('../../src/nodedefinition');
@@ -164,6 +164,121 @@ import Node = require('../../src/node');
 import { globalStoreManager } from '../../src/nodes/std-library/agent/globalstore';
 import { stateHistoryManager } from '../../src/nodes/std-library/agent/statehistory';
 import { actionRegistry } from '../../src/nodes/std-library/agent/action-dispatcher';
+
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+const { FocusTracker } = require('../../../noodl-viewer-react/src/focus-tracker') as typeof import('../../../noodl-viewer-react/src/focus-tracker');
+
+// ---------------------------------------------------------------------------------------------
+// PERSON (NSP-016 s37; spec.ts THE PERSON) — a visual node on a PAGE, acted on by a person.
+//
+// The node's REAL React component is rendered (react-dom, `createRoot`, inside React's `act`) into a
+// jsdom document — the page — and an act is the DOM events a browser raises for it on the element a
+// person sees, dispatched there: a `click` is `mousedown`, `mouseup`, `click`; a `press` is a
+// `mousedown` and then the browser's default action of one, the keyboard going onto the pressed
+// `<button>` unless the handler cancelled it; a `focus` is `element.focus()`, which jsdom answers by
+// the standard's focusing steps (a disabled control is not a focusable area). The component's own
+// rules — a disabled button takes no click (React drops it), a Keeps Focus button keeps the keyboard
+// (it cancels the mousedown) — are what is graded; nothing here copies one. What the page gives the
+// app beside the component is stood in as the app gives it: the viewer's focus tracker on the
+// context (viewer.jsx :207-214) and its root's click capture (:457), and a holder for the lone node
+// — what `getVisualParentNode` reads of the root Group: the layout it lays children out in and the
+// `forceUpdate` a Mounted change asks of it (react-component-node.ts :2310-2320). An act happens on
+// a PAINTED page: the holder re-renders before the events are dispatched, as a browser paints before
+// a person can act (a value set in the same frame has reached the element). Three things jsdom
+// lacks that a browser has and no wire can see are given: `scrollIntoView` (a no-op) and nothing
+// else yet. The page's globals (`window`, `document`, …) are on the host only while a page node is
+// mounted — `installWorld` (world.ts) reads whether there is a window at `install`, before any mount,
+// and a `viewport` play must still find none — and React itself is loaded with them present, once.
+// ---------------------------------------------------------------------------------------------
+
+interface Dom {
+  window: any;
+  document: any;
+  React: any;
+  act: (cb: () => void | Promise<void>) => Promise<void>;
+  createRoot: (container: unknown) => { render(el: unknown): void; unmount(): void };
+  globals: Record<string, unknown>;
+}
+let dom: Dom | undefined;
+let domInstalled: (() => void) | undefined;
+
+/** The page, made once for the process; React loaded with its globals present (react-dom reads `window` at load), outside any play. */
+function ensureDom(): Dom {
+  if (dom) return dom;
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const { JSDOM } = require('jsdom') as { JSDOM: new (html: string, options?: unknown) => any };
+  const page = new JSDOM('<!doctype html><html><body></body></html>', { pretendToBeVisual: true });
+  const w = page.window;
+  // a browser scrolls; jsdom has no `scrollIntoView`, and nothing a trace can see follows from one
+  w.Element.prototype.scrollIntoView = () => undefined;
+  const globals: Record<string, unknown> = {
+    window: w,
+    document: w.document,
+    navigator: w.navigator,
+    HTMLElement: w.HTMLElement,
+    Element: w.Element,
+    Node: w.Node,
+    Event: w.Event,
+    MouseEvent: w.MouseEvent,
+    KeyboardEvent: w.KeyboardEvent,
+    FocusEvent: w.FocusEvent,
+    TouchEvent: w.TouchEvent,
+    requestAnimationFrame: w.requestAnimationFrame,
+    cancelAnimationFrame: w.cancelAnimationFrame
+  };
+  const restore = installGlobals(globals);
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const React = require('react');
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const client = require('react-dom/client') as { createRoot: Dom['createRoot'] };
+    dom = { window: w, document: w.document, React, act: React.act, createRoot: client.createRoot, globals };
+  } finally {
+    restore();
+  }
+  return dom;
+}
+
+/** Puts the page's globals on the host; returns what takes them off again, restoring what was there. */
+function installGlobals(globals: Record<string, unknown>): () => void {
+  const g = globalThis as Record<string, unknown>;
+  const saved = new Map<string, PropertyDescriptor | undefined>();
+  for (const [k, v] of Object.entries(globals)) {
+    saved.set(k, Object.getOwnPropertyDescriptor(g, k));
+    Object.defineProperty(g, k, { value: v, configurable: true, writable: true, enumerable: true });
+  }
+  const savedAct = g.IS_REACT_ACT_ENVIRONMENT;
+  g.IS_REACT_ACT_ENVIRONMENT = true;
+  return () => {
+    for (const [k, d] of saved) {
+      if (d) Object.defineProperty(g, k, d);
+      else delete g[k];
+    }
+    g.IS_REACT_ACT_ENVIRONMENT = savedAct;
+  };
+}
+
+/** One node on the page (PERSON above). */
+interface Page {
+  container: any;
+  root: { render(el: unknown): void; unmount(): void };
+  /** The holder's React instance — re-rendered for a paint, and by the node's Mounted (the stand-in parent's `forceUpdate`). */
+  host: { forceUpdate(): void } | null;
+}
+
+/**
+ * The element a person acts on: the control itself when the node's root IS one, else the control inside it, else the
+ * root (controls/utils.ts `_focusTarget`). A person sees the PAGE, not the node's bookkeeping: when the node has lost
+ * its root (`getDOMElement()` null while its component is on the page — Checkbox after an Enable Label change, NSP-016
+ * §7.2 C66) the face finds the control in the node's own container instead, as a person's eye would.
+ */
+function elementSeen(node: { getDOMElement(): any }, container?: any): any {
+  const control = 'button, input, select, textarea';
+  const root = node.getDOMElement();
+  if (root && root.isConnected) return root.matches(control) ? root : root.querySelector(control) ?? root;
+  if (!container) return null;
+  return container.querySelector(control) ?? container.firstElementChild ?? null;
+}
 
 /** The Push Component To Stack side of a request (navigation-handler.ts `StackNavigateArgs`), as a stand-in stack sees it. */
 interface StackArgs {
@@ -668,6 +783,9 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 /** NSP-015 s17 — the viewer's navigation nodes this phase has specced, from `src/nodes/navigation/` (s17 Navigate To Path … s20 Show / Close Popup). */
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
+/** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox'] as const;
+
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
  * registers (its :64-65 note: "HTTP node — temporarily here for debugging (normally in
@@ -689,6 +807,13 @@ export function withViewerNodes(target: RuntimeTarget): RuntimeTarget {
   for (const file of VIEWER_NODES) register(require('../../../noodl-viewer-react/src/nodes/std-library/' + file));
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   for (const file of VIEWER_NAVIGATION_NODES) register(require('../../../noodl-viewer-react/src/nodes/navigation/' + file));
+  // PERSON (above) — a visual node's module reads `Noodl.deployed` at load (node-shared-port-definitions.ts :1435,
+  // group.ts :541): the deploy bootstrap's global (static/deploy/index.js), which says the node is in a deployed app
+  // and not under the editor — what a person's app is
+  const g = globalThis as { Noodl?: { deployed?: boolean } };
+  if (!g.Noodl) g.Noodl = { deployed: true };
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  for (const file of VIEWER_VISUAL_NODES) register(require('../../../noodl-viewer-react/src/nodes/' + file));
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   for (const file of VIEWER_REGISTERED_RUNTIME_NODES) register(require('../../src/nodes/std-library/' + file));
   return target;
@@ -742,6 +867,8 @@ interface State {
    * declaration; a sent `true` is recorded as a `signal` event and no value is recorded.
    */
   signalOutputs?: Set<string>;
+  /** NSP-016 s37 — this node is on the page (PERSON above): a spec that needs `person`. */
+  page?: Page;
 }
 
 type StampedToken = OutcomeToken & { port?: string };
@@ -775,7 +902,13 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
   // project with no colour styles: `resolveColor` hands back what it is given (styles.ts :122-127).
   // node.ts :431 resolves every `color` input through it too — the identity, so Color and Color
   // Blend read exactly what they read before. Named palette colours are not graded (NSP-013 §6.4).
-  (context as unknown as { styles: { resolveColor(color: unknown): unknown } }).styles = { resolveColor: (color) => color };
+  // NSP-016 s37 — and a project with no text styles: `getTextStyle` is `{}` for any name (styles.ts :129-132), what a
+  // visual node's Text Style setter stores (node-shared-port-definitions.ts :2419)
+  (context as unknown as { styles: { resolveColor(color: unknown): unknown; getTextStyle(name: unknown): unknown } }).styles = { resolveColor: (color) => color, getTextStyle: () => ({}) };
+  // NSP-016 s37 — the viewer's focus tracker, as viewer.jsx :207-214 installs it (PERSON above); fresh per play
+  const focusTracker = new FocusTracker();
+  (context as unknown as { setNodeFocused: unknown; setNodeUnmounted: unknown }).setNodeFocused = (node: never, focused: boolean) => focusTracker.setNodeFocused(node, focused);
+  (context as unknown as { setNodeUnmounted: unknown }).setNodeUnmounted = (node: never) => focusTracker.nodeUnmounted(node);
   // NSP-015 s15 — likewise the project's variants: `importEditorData` always sets the list
   // (graphmodel.ts :171, `exportData.variants || []`), and a component built by its model reads it
   // for every node (nodescope.ts `setNodeParameters` → `variants.getVariant` → `this.variants.find`);
@@ -895,7 +1028,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     node.sendValue = (name: string, value: unknown) => {
       if (s.signalOutputs?.has(name)) {
         if (value === true) s.frame.signals.push(name);
-      } else if (value !== undefined && node.hasOutput(name)) s.frame.values.set(name, canonicalise(value));
+      } else if (value !== undefined && node.hasOutput(name)) s.frame.values.set(name, value === node ? SELF_REFERENCE : canonicalise(value));
       originalSendValue(name, value);
     };
     const originalSignal = node.sendSignalOnOutput.bind(node);
@@ -946,7 +1079,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         } catch {
           continue;
         }
-        if (v !== undefined) values.set(output.name, canonicalise(v));
+        // NSP-016 s37 — a visual node's `This` is the node itself: the self reference (trace.ts)
+        if (v !== undefined) values.set(output.name, v === s.h.node ? SELF_REFERENCE : canonicalise(v));
       }
     }
     for (const name of [...values.keys()].sort()) {
@@ -1213,6 +1347,9 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       };
     }
     const h = adopt(node, id, type, metadata, params, logs, made);
+    // PERSON (above, NSP-016 s37) — a node a person acts on is put on the page, its params already applied as a
+    // loaded project's are before the first render; its Did Mount lands in the first settle
+    if (spec?.needs?.includes('person')) putOnPage(states.get(id)!);
     // ROUTE (world.ts, NSP-015 s19) — a Page Inputs in a page a Router built: the Router hands it the page's
     // params once the page's nodes exist (router.tsx :923-927), and again on a reset onto the same page (:528-531)
     if (type === 'PageInputs' && world) {
@@ -1224,6 +1361,144 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       }
     }
     return h;
+  }
+
+  /** PERSON (above): the nodes on the page right now. */
+  const onPage = new Set<State>();
+
+  /**
+   * PERSON (above) — renders the node's real component into the page, under a holder standing for the
+   * root Group that holds a lone node. The page's globals go on the host with the first node on it and
+   * come off with the last (`takeOffPage`).
+   */
+  function putOnPage(s: State): void {
+    const d = ensureDom();
+    if (!domInstalled) domInstalled = installGlobals(d.globals);
+    const node = s.h.node as unknown as {
+      render(): unknown;
+      parent?: unknown;
+      getDOMElement(): unknown;
+    };
+    const container = d.document.createElement('div');
+    d.document.body.appendChild(container);
+    // viewer.jsx :457 — the app root's click capture feeds the focus tracker
+    container.addEventListener('click', (e: { target: unknown }) => focusTracker.onClickCapture(e.target), true);
+    const page: Page = { container, root: d.createRoot(container), host: null };
+    // what `getVisualParentNode` reads of the Group holding a lone node (react-component-node.ts :2061-2062): the
+    // layout it lays children out in (NoodlReactComponent :1070-1075) and the re-render a Mounted change asks for
+    // (:2310-2320 `parent.cachedChildren = undefined; parent.forceUpdate()`)
+    node.parent = {
+      props: { layout: 'column' },
+      // :1843 — `setStyle` reads the holder's `style.flexDirection` to place a child in it; a root Group lays out a column
+      style: { flexDirection: 'column' },
+      cachedChildren: undefined,
+      children: [],
+      innerReactComponentRef: null,
+      contains: () => false,
+      getVisualParentNode: () => undefined,
+      // a node's `forceUpdate` renders at the frame's end (react-component-node.ts :1675-1689); the holder's does the same
+      forceUpdate: () => {
+        context.eventEmitter.once('frameEnd', () => page.host?.forceUpdate());
+        context.scheduleUpdate();
+      }
+    };
+    const React = d.React;
+    class Host extends React.Component {
+      render() {
+        return node.render() ?? null;
+      }
+    }
+    void d.act(() => {
+      page.root.render(React.createElement(Host, { ref: (r: Page['host']) => (page.host = r) }));
+    });
+    s.page = page;
+    onPage.add(s);
+  }
+
+  /** PERSON (above) — the node leaves the page: its component unmounts (Will Unmount fires, as in the app), the globals come off with the last one. */
+  function takeOffPage(s: State): void {
+    const page = s.page;
+    if (!page) return;
+    const d = ensureDom();
+    void d.act(() => {
+      page.root.unmount();
+    });
+    page.container.remove();
+    (s.h.node as unknown as { parent?: unknown }).parent = undefined;
+    s.page = undefined;
+    onPage.delete(s);
+    if (onPage.size === 0 && domInstalled) {
+      domInstalled();
+      domInstalled = undefined;
+    }
+  }
+
+  /** PERSON (above) — the page paints what the node holds, as a browser does before a person can act. */
+  function paint(s: State): void {
+    const d = ensureDom();
+    void d.act(() => {
+      s.page?.host?.forceUpdate();
+    });
+  }
+
+  /**
+   * PERSON (above) — what a person doing `act` raises on the element they see, as a browser raises it. A mouse
+   * button down ends in the browser's default action — the keyboard onto a focusable target — unless a handler
+   * cancelled it; `click` is the press, the release and the click; a finger is the touch events; the keyboard
+   * acts are `focus()` / `blur()`, answered by the focusing steps. Off the page there is nothing to act on.
+   */
+  function personActs(s: State, act: string, value: unknown): void {
+    const d = ensureDom();
+    const w = d.window;
+    const el = elementSeen(s.h.node as unknown as { getDOMElement(): unknown }, s.page?.container);
+    if (!el) return;
+    const mouse = (type: string, init: Record<string, unknown> = {}) => el.dispatchEvent(new w.MouseEvent(type, { bubbles: true, cancelable: true, composed: true, button: 0, ...init }));
+    const touch = (type: string) => el.dispatchEvent(new w.TouchEvent(type, { bubbles: true, cancelable: true, composed: true }));
+    // the browser's rule, not the component's: a DISABLED form control is dispatched no click, mousedown or mouseup from
+    // a person (HTML: a disabled control's click events from the user interaction task source are not dispatched;
+    // Chromium withholds mousedown / mouseup the same way, and delivers mouseover / mouseout and the touch events). jsdom
+    // has no user interaction task source — a dispatched click would reach the control and even run a checkbox's
+    // toggle — so the face withholds them here. Hover and touch go through, to whatever handler is there.
+    const disabled = !!el.disabled;
+    const press = () => {
+      if (disabled) return;
+      const notCancelled = mouse('mousedown');
+      if (notCancelled) el.focus();
+    };
+    switch (act) {
+      case 'hover':
+        mouse('mouseover', { relatedTarget: d.document.body });
+        break;
+      case 'leave':
+        mouse('mouseout', { relatedTarget: d.document.body });
+        break;
+      case 'press':
+        press();
+        break;
+      case 'release':
+        if (!disabled) mouse('mouseup');
+        break;
+      case 'click':
+        if (disabled) break;
+        press();
+        mouse('mouseup');
+        mouse('click');
+        break;
+      case 'touch':
+        touch('touchstart');
+        break;
+      case 'lift':
+        touch('touchend');
+        break;
+      case 'focus':
+        el.focus();
+        break;
+      case 'blur':
+        el.blur();
+        break;
+      default:
+        throw new Error(`runtime: no person face for the act "${act}"${value === undefined ? '' : ` (${JSON.stringify(value)})`}`);
+    }
   }
 
   /**
@@ -1449,10 +1724,33 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     },
 
     async settle() {
-      frame();
-      await yieldToEventLoop();
-      drain();
+      if (onPage.size > 0) {
+        // PERSON (above) — a frame on a page commits what it rendered: inside React's `act`, so the holder's and
+        // the nodes' re-renders (the frame-end `setState`, react-component-node.ts :1675-1689) land in the frame
+        await ensureDom().act(async () => {
+          frame();
+          await yieldToEventLoop();
+          drain();
+        });
+      } else {
+        frame();
+        await yieldToEventLoop();
+        drain();
+      }
       for (const s of states.values()) flush(s);
+    },
+
+    // PERSON (above, NSP-016 s37) — the person's act on the painted page (adapter.ts)
+    act(h, act, value) {
+      const s = states.get(h.id);
+      if (!s) throw new Error(`runtime: ${h.id} is disposed`);
+      if (!s.page) throw new Error(`${h.type}: a person cannot act on a node that is not on the page (its spec does not need person)`);
+      const c = canonicalise(value);
+      s.trace.push(c === undefined ? { t: 'act', act } : { t: 'act', act, value: c });
+      paint(s);
+      void ensureDom().act(() => {
+        personActs(s, act, value);
+      });
     },
 
     install(w) {
@@ -1483,6 +1781,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       globalStoreManager.reset({ clearState: true });
       stateHistoryManager.reset();
       actionRegistry.reset();
+      // PERSON (above) — one play, one list of what holds the keyboard
+      focusTracker.reset();
       stateHistoryManager.setClock(() => w.clock.now());
       resetRegistry(w);
       // NSP-013 s12 — the last frame's time is the context's, so it outlived the play that ran the
@@ -1553,6 +1853,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       if (!s) return;
       states.delete(h.id);
       byNodeId.delete(h.id);
+      // PERSON (above) — off the page before the teardown, so the component's unmount runs while the node is whole
+      takeOffPage(s);
       try {
         // NSP-015 — an instance's own teardown resets its whole scope (componentinstance.ts
         // `_onNodeDeleted` → `nodeScope.reset()`), deleting the nodes inside; the runner disposes

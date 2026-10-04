@@ -243,7 +243,105 @@ const nullSuccessBody = (d: Divergence) => {
   });
 };
 
+/**
+ * NSP-016 §6 C61 / C62 / C63 — three setters every VISUAL node shares throw on a value a wire can deliver, and the
+ * runtime target dies at that `set` (or at `mount`, when it is a parameter — then the difference sits at 0):
+ * C61 Font Family's `.split` on a truthy non-string (node-shared-port-definitions.ts :2439); C62 a units-typed CSS
+ * input written `null` — `typeof null === 'object'` and `.value` is read (react-component-node.ts :2368); C63 a
+ * Placement input written `undefined` — `value.value + value.unit` (node-shared-port-definitions.ts :582, :600,
+ * :618) and the two origins' `.value`. Narrow: the throw's own message, the named ports, the value's shape, and the
+ * difference no later than the step after the bad set.
+ */
+const throwsOnSet = (ports: readonly string[] | ((port: string) => boolean), values: (v: unknown, present: boolean) => boolean, message: RegExp) => (d: Divergence) => {
+  if (d.difference.threw === undefined || !message.test(d.difference.threw)) return false;
+  const named = typeof ports === 'function' ? ports : (p: string) => ports.includes(p);
+  // the bad set is the one the throw followed — not the first such set: a null on a units port that does NOT throw
+  // (Icon Size, Icon Spacing: `inputProps`, not `inputCss`) may come earlier in the same sequence (the deep run's two)
+  // a throw inside `mount` leaves no trace (index 0): any PARAMETER set qualifies (the sets before the first other event)
+  const atMount = d.difference.index === 0;
+  return d.reference.some(
+    (e, i) =>
+      e.t === 'set' && named(e.port) && isSet(e, e.port, values) && (atMount ? d.reference.slice(0, i).every((x) => x.t === 'set') : i <= d.difference.index && d.difference.index <= i + 1)
+  );
+};
+const truthyNonString = (v: unknown, present: boolean) => present && !!v && typeof v !== 'string';
+const isUndefined = (_v: unknown, present: boolean) => !present;
+/** A units-typed `inputCss` port: the shared ones by name, with a styleTag prefix (Checkbox's `labelfontSize`), and a control's own box (`width` / `height`). */
+const UNIT_CSS_NAMES = ['fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'marginBottom', 'marginLeft', 'marginRight', 'marginTop', 'paddingBottom', 'paddingLeft', 'paddingRight', 'paddingTop', 'maxHeight', 'maxWidth', 'minHeight', 'minWidth', 'borderWidth', 'borderTopWidth', 'borderBottomWidth', 'borderLeftWidth', 'borderRightWidth', 'borderRadius', 'borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomLeftRadius', 'borderBottomRightRadius', 'iconSize', 'iconSpacing', 'labelSpacing', 'width', 'height'] as const;
+const unitCssPort = (port: string) => UNIT_CSS_NAMES.some((n) => port === n || port.endsWith(n.charAt(0).toUpperCase() + n.slice(1)) || port.endsWith(n));
+/**
+ * NSP-016 §6 C65 — a Checkbox's Label wired an object or an array is rendered as it is (Checkbox.tsx :205-207) and React
+ * throws at the next paint (a settle or an act). Narrow: React's own message, and a `set` of `label` to an object or an
+ * array somewhere in the reference before the difference (a parameter is a set at the mount).
+ */
+const objectLabel = (d: Divergence) => {
+  if (d.difference.threw === undefined || !/Objects are not valid as a React child/.test(d.difference.threw)) return false;
+  // a throw at the mount (index 0) leaves no trace: any parameter set qualifies; else a set before the paint that threw
+  const upTo = d.difference.index === 0 ? d.reference.findIndex((e) => e.t !== 'set') : d.difference.index + 1;
+  return d.reference.slice(0, upTo < 0 ? d.reference.length : upTo).some((e) => isSet(e, 'label', (v, present) => present && typeof v === 'object' && v !== null));
+};
+/**
+ * NSP-016 §6 C66 — a Checkbox whose Enable Label went from on to off has lost its root element (two elements, one ref
+ * callback: the removed one nulls it), so a Focus action reports Unchanged with the box on the page. Narrow: the
+ * difference is the Focus outcome — Unchanged on the runtime where the reference says Done — and the reference holds
+ * a truthy `useLabel` (a parameter or a set) followed by a falsy one before it.
+ */
+const lostRootAfterLabelOff = (d: Divergence) => {
+  // the frame of the difference: the runtime reports the Focus Unchanged where the reference reports Done (the value
+  // and signal lines of that frame sort before the outcome, so the first difference may be one of them)
+  const frameStart = (t: readonly TraceEvent[], i: number) => { let k = i; while (k > 0 && t[k - 1].t !== 'settle') k--; return k; };
+  const frameEnd = (t: readonly TraceEvent[], i: number) => { let k = i; while (k < t.length && t[k].t !== 'settle') k++; return k; };
+  const has = (t: readonly TraceEvent[], v: string) => t.slice(frameStart(t, d.difference.index), frameEnd(t, d.difference.index + 1)).some((e) => e.t === 'outcome' && e.port === 'focus' && e.value === v);
+  if (!has(d.actual, 'unchanged') || !has(d.reference, 'done')) return false;
+  const before = d.reference.slice(0, d.difference.index);
+  let on = false;
+  let offAfterOn = false;
+  for (const e of before) {
+    if (e.t !== 'set' || e.port !== 'useLabel') continue;
+    const v = 'value' in e ? e.value : undefined;
+    if (v) on = true;
+    else if (on) offAfterOn = true;
+  }
+  return offAfterOn;
+};
+
+/**
+ * NSP-016 §6 C67 — a Check / Uncheck that reverts a person's click in the same frame does not redraw the box: `checkedChanged`
+ * writes `props.checked` (FB-020) but React's last-rendered `props.checked` is the value before the click, so the component's
+ * `useEffect([props.checked])` sees no change and keeps its local state — the input stays drawn as the person left it, and the
+ * next click reports the opposite of what the spec reads. Narrow: an act `click`, then a `check` / `uncheck` pulse, then a
+ * `click` (or a `set` of `checked` between the clicks), all before the difference, which is on `checked` or `onChange`.
+ */
+const clickActionClick = (d: Divergence) => {
+  const ref = d.difference.reference as TraceEvent | undefined;
+  const act = d.difference.actual as TraceEvent | undefined;
+  const onTick = (e: TraceEvent | undefined) => !!e && ((e.t === 'value' && e.port === 'checked') || (e.t === 'signal' && e.port === 'onChange'));
+  if (!onTick(ref) && !onTick(act)) return false;
+  const before = d.reference.slice(0, d.difference.index);
+  let stage = 0;
+  for (const e of before) {
+    if (stage === 0 && e.t === 'act' && e.act === 'click') stage = 1;
+    else if (stage === 1 && ((e.t === 'in' && (e.port === 'check' || e.port === 'uncheck')) || (e.t === 'set' && e.port === 'checked'))) stage = 2;
+    else if (stage === 2 && e.t === 'act' && e.act === 'click') stage = 3;
+  }
+  return stage === 3;
+};
+
+const VISUAL_ROWS: KnownRow[] = [
+  { row: 'NSP-016 §6 C61 — Font Family wired a truthy value that is not text: the setter throws calling `.split` on it', matches: throwsOnSet((p) => p.endsWith('fontFamily'), truthyNonString, /family\.split is not a function/) },
+  { row: 'NSP-016 §6 C62 — a units-typed style input wired null: the generated setter reads `.value` of null and throws', matches: throwsOnSet(unitCssPort, isNull, /Cannot read properties of null \(reading 'value'\)/) },
+  { row: 'NSP-016 §6 C63 — a Placement input wired undefined: `value.value` throws', matches: throwsOnSet(['transformX', 'transformY', 'transformRotation', 'transformOriginX', 'transformOriginY'], isUndefined, /Cannot read properties of undefined \(reading 'value'\)/) }
+];
+
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
+  // NSP-016 s37 — the visual nodes share three throwing setters (VISUAL_ROWS)
+  'net.noodl.controls.button': VISUAL_ROWS,
+  'net.noodl.controls.checkbox': [
+    ...VISUAL_ROWS,
+    { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
+    { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the box on the page', matches: lostRootAfterLabelOff },
+    { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick }
+  ],
   // s32 — the one throw on the success path DEF-026 left (it made the error path total)
   // s34 — Server-Sent Events: a setter keeps a non-text value (`value || ''`) that Connect calls a string method on
   'net.noodl.SSE': [{ row: 'NSP-014 §6.41 C57 — Event Types or Method wired a value that is not text: Connect throws calling `.split` / `.toUpperCase` on it', matches: sseNonText }],

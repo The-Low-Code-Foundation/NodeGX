@@ -34,7 +34,7 @@
  * with an answer that never comes) — named in NSP-007 §5 as the runner's next hole.
  */
 
-import type { AnyNodeSpec, ErasedReducer } from '../spec';
+import type { AnyNodeSpec, ErasedReducer, WorldView } from '../spec';
 
 export type MutationKind = 'drop-emit' | 'drop-set' | 'flip-outcome' | 'swap-branch' | 'drop-request' | 'drop-backend' | 'drop-picker' | 'drop-subscribe' | 'drop-unsubscribe' | 'drop-socket' | 'drop-subscribe-first';
 
@@ -87,10 +87,14 @@ export interface PatchLike {
   socket?: ReadonlyArray<{ op: string }>;
 }
 
-export function shapeOf(patch: unknown): string {
+/** `synced` (spec.ts `NodeDecl.synced`): state keys a branch key leaves out — the page's syncs, not the reducer's work. */
+const NO_SYNCED: ReadonlySet<string> = new Set();
+const syncedOf = (spec: AnyNodeSpec): ReadonlySet<string> => new Set(spec.synced ?? []);
+
+export function shapeOf(patch: unknown, synced: ReadonlySet<string> = NO_SYNCED): string {
   const p = (patch && typeof patch === 'object' ? patch : {}) as PatchLike;
   return JSON.stringify({
-    set: p.set ? Object.keys(p.set).sort() : [],
+    set: p.set ? Object.keys(p.set).filter((k) => !synced.has(k)).sort() : [],
     // WHICH signals, not how many — the rule `outcomes` already has: an Object node pulsing
     // `changed` once per key written is one branch, not one per count (NSP-012)
     emit: [...new Set([...(p.emitDerived ?? []), ...(p.emit ?? []), ...(p.pulses ?? []).map((x) => (typeof x === 'string' ? x : x.derived))])],
@@ -133,10 +137,13 @@ export function reducerNames(spec: AnyNodeSpec): string[] {
   if (spec.world?.auth) names.push('world.auth');
   if (spec.world?.authReturn) names.push('world.authReturn');
   if (spec.world?.mount) names.push('world.mount');
+  if (spec.world?.place) names.push('world.place');
   if (spec.world?.picker) names.push('world.picker');
   if (spec.world?.realtime) names.push('world.realtime');
   if (spec.world?.socket) names.push('world.socket');
   if (spec.world?.stream) names.push('world.stream');
+  // NSP-016 s37 — the person's acts (spec.ts THE PERSON), one reducer each
+  for (const act of Object.keys(spec.person ?? {})) names.push(`person.${act}`);
   return names;
 }
 
@@ -173,6 +180,8 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     // s29 — and the return leg's two (a copy without them never hears a sign-in come back, and never applies one at its making)
     if (spec.world.authReturn) w.authReturn = wrap('world.authReturn', spec.world.authReturn as unknown as ErasedReducer) as unknown as typeof spec.world.authReturn;
     if (spec.world.mount) w.mount = wrap('world.mount', spec.world.mount as unknown as ErasedReducer) as unknown as typeof spec.world.mount;
+    // NSP-016 s37 — placed on the page (a copy without it is never drawn)
+    if (spec.world.place) w.place = wrap('world.place', spec.world.place as unknown as ErasedReducer) as unknown as typeof spec.world.place;
     // s31 — the file dialog's answer (world.ts PICKER): a copy without it never hears the person choose
     if (spec.world.picker) w.picker = wrap('world.picker', spec.world.picker as unknown as ErasedReducer) as unknown as typeof spec.world.picker;
     // s33 — what a subscription tells (world.ts REALTIME): a copy without it never hears a change
@@ -183,6 +192,12 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
     if (spec.world.stream) w.stream = wrap('world.stream', spec.world.stream as unknown as ErasedReducer) as unknown as typeof spec.world.stream;
     out.world = w;
   }
+  // NSP-016 s37 — the person's acts: a copy without one would refuse the act the original answers
+  if (spec.person) {
+    const p: Record<string, (state: never, inputs: never, value: unknown, world: WorldView) => unknown> = {};
+    for (const [name, fn] of Object.entries(spec.person)) p[name] = wrap(`person.${name}`, fn as unknown as ErasedReducer) as unknown as typeof fn;
+    out.person = p;
+  }
   return out;
 }
 
@@ -192,9 +207,10 @@ export function wrapReducers(spec: AnyNodeSpec, wrap: (name: string, original: E
  */
 export function discoverBranches(spec: AnyNodeSpec): { spec: AnyNodeSpec; branches: Map<string, Branch> } {
   const branches = new Map<string, Branch>();
+  const synced = syncedOf(spec);
   const wrapped = wrapReducers(spec, (name, original) => (...args: never[]) => {
     const patch = original(...args);
-    const shape = shapeOf(patch);
+    const shape = shapeOf(patch, synced);
     const key = `${name}|${shape}`;
     const b = branches.get(key);
     if (b) {
@@ -221,7 +237,7 @@ function flip(outcome: string | undefined): string | undefined {
   return outcome;
 }
 
-function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike): PatchLike {
+function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike, synced: ReadonlySet<string> = NO_SYNCED): PatchLike {
   switch (kind) {
     case 'drop-emit': {
       const { emit: _e, emitDerived: _d, pulses: _p, ...rest } = patch;
@@ -243,6 +259,18 @@ function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike):
     case 'swap-branch': {
       // Keep this branch's outcome obligation satisfied: an outcome input must still report one.
       const swapped: PatchLike = { ...(sibling as PatchLike) };
+      // The page's syncs (spec.ts `synced`) are not the reducer's work: a swap moves the work and keeps THIS branch's
+      // syncs — a sibling recorded with the element disabled must not disable it here (s37: that stale value made a
+      // swap on a Checkbox's blur invisible to the Blur action that would have told it apart).
+      if (synced.size > 0) {
+        const kept: Record<string, unknown> = {};
+        for (const k of Object.keys(patch.set ?? {})) if (synced.has(k)) kept[k] = (patch.set as Record<string, unknown>)[k];
+        const moved: Record<string, unknown> = {};
+        for (const k of Object.keys(swapped.set ?? {})) if (!synced.has(k)) moved[k] = (swapped.set as Record<string, unknown>)[k];
+        const set = { ...kept, ...moved };
+        if (Object.keys(set).length > 0) swapped.set = set;
+        else delete swapped.set;
+      }
       if (patch.outcome !== undefined && swapped.outcome === undefined) swapped.outcome = patch.outcome;
       if (patch.outcome === undefined) delete swapped.outcome;
       return swapped;
@@ -282,6 +310,7 @@ function mutatePatch(patch: PatchLike, kind: MutationKind, sibling?: PatchLike):
 
 /** Every mutant the discovered branches admit, each a spec with exactly one branch broken. */
 export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mutant[] {
+  const synced = syncedOf(spec);
   const out: Mutant[] = [];
   const byReducer = new Map<string, Branch[]>();
   for (const b of branches.values()) {
@@ -312,7 +341,7 @@ export function mutantsOf(spec: AnyNodeSpec, branches: Map<string, Branch>): Mut
           ? original
           : (...args: never[]) => {
               const patch = original(...args);
-              return shapeOf(patch) === b.shape ? mutatePatch(patch as PatchLike, kind, sibling?.example) : patch;
+              return shapeOf(patch, synced) === b.shape ? mutatePatch(patch as PatchLike, kind, sibling?.example, synced) : patch;
             }
       );
       out.push({ reducer: b.reducer, branch: b.shape, kind, swappedWith: sibling?.shape, spec: mutated });

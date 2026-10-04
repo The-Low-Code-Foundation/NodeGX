@@ -218,6 +218,12 @@
           },
           "required": ["t", "op"],
           "additionalProperties": false
+        },
+        {
+          "description": "stimulus (NSP-016 s37): a person did `act` to the node on the page — one of the acts its spec declares (click, press, release, hover, leave, touch, lift, focus, blur, type, choose, key) — with the value the act carries, canonical, or none.",
+          "properties": { "t": { "const": "act" }, "act": { "type": "string", "minLength": 1 }, "value": { "$ref": "#/definitions/canonical" }, "subject": { "$ref": "#/definitions/subject" } },
+          "required": ["t", "act"],
+          "additionalProperties": false
         }
       ]
     }

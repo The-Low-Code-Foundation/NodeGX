@@ -83,6 +83,8 @@ export function validateTrace(input: unknown): Validation {
     if ('subject' in e && (typeof e.subject !== 'string' || e.subject.length === 0)) return bad(`${at}.subject`, 'subject is a non-empty string');
     // a port name MAY be empty: String Format registers the empty placeholder `{}` as the port named '' (NSP-006 found the schema refusing it)
     if ('port' in e && typeof e.port !== 'string') return bad(`${at}.port`, 'port is a string');
+    // NSP-016 s37 — an act names what the person did; its value, when it carries one, is checked below with the others
+    if (t === 'act' && (typeof e.act !== 'string' || e.act.length === 0)) return bad(`${at}.act`, 'act is the name of what the person did');
     if (t === 'outcome') {
       if (!(OUTCOME_VALUES as readonly unknown[]).includes(e.value)) return bad(`${at}.value`, `an outcome is one of ${OUTCOME_VALUES.join(', ')}`);
       if ('error' in e && (typeof e.error !== 'string' || e.error.length === 0)) return bad(`${at}.error`, 'error is a non-empty error code');

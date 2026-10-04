@@ -25,7 +25,7 @@
  */
 
 import type { Step } from '../adapter';
-import type { AnyNodeSpec, InputDecl } from '../spec';
+import type { ActDecl, AnyNodeSpec, InputDecl } from '../spec';
 import { isSignalInput } from '../spec';
 import type { RegistryScript } from '../registry';
 import type { Answer, BackendScript, PickerScript, PopupScript, RouterScript, SocketScript, StackScript, ViewportScript, WorldScript } from '../world';
@@ -190,9 +190,18 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   const pool = spec.worldPool ?? {};
   const advances = needs.length > 0 ? pool.advances ?? DEFAULT_WORLD_POOL.advances : undefined;
 
+  // NSP-016 s37 — THE PERSON (spec.ts): the acts a spec declares are drawn among the steps, each with one of its
+  // values when it carries any. Only for a spec that declares acts, so every other spec draws what it drew.
+  const acts = spec.acts && Object.keys(spec.acts).length > 0 ? Object.entries(spec.acts) : undefined;
+  // NSP-016 s37 — a visual node's look and layout ports (`portability` other than `logic`) are stored and never
+  // read back by any output: drawn at a quarter of the rate of its logic ports, so a sequence spends its steps where
+  // the behaviour is. Only for a spec that classes any port, so every other spec draws what it drew.
+  const classed = steppable.some(([, d]) => (d as { portability?: string }).portability !== undefined);
+  const logicPorts = classed ? steppable.filter(([, d]) => ((d as { portability?: string }).portability ?? 'logic') === 'logic') : undefined;
+
   const n = minSteps + rng.int(maxSteps - minSteps + 1);
   const steps: Step[] = [];
-  for (let i = 0; i < n; i++) steps.push(oneStep(rng, steppable, signalPorts, settleChance, advances));
+  for (let i = 0; i < n; i++) steps.push(oneStep(rng, steppable, signalPorts, settleChance, advances, acts, logicPorts));
   if (steps[steps.length - 1] !== 'settle') steps.push('settle');
   if (needs.length === 0) return { seed, params, steps };
 
@@ -254,15 +263,32 @@ export function generateSequence(spec: AnyNodeSpec, runSeed: number, index: numb
   return { seed, params, steps, world };
 }
 
-function oneStep(rng: Rng, valuePorts: Array<[string, InputDecl]>, signalPorts: Array<[string, InputDecl]>, settleChance: number, advances?: readonly number[]): Step {
+function oneStep(
+  rng: Rng,
+  valuePorts: Array<[string, InputDecl]>,
+  signalPorts: Array<[string, InputDecl]>,
+  settleChance: number,
+  advances?: readonly number[],
+  acts?: Array<[string, ActDecl]>,
+  logicPorts?: Array<[string, InputDecl]>
+): Step {
   if (rng.chance(settleChance)) return 'settle';
   // a node with no input port (Screen Resolution) is driven by the world alone: settle or advance. Drawn
   // only for such a node, so every spec with a port draws exactly the sequence it drew before s13
   if (valuePorts.length === 0 && signalPorts.length === 0) return advances && rng.chance(0.5) ? { advance: rng.pick(advances) } : 'settle';
   if (advances && rng.chance(0.25)) return { advance: rng.pick(advances) };
+  // NSP-016 s37 — a person's act, at the rate of a signal: drawn only for a spec that declares acts
+  if (acts && rng.chance(0.4)) {
+    const [name, decl] = rng.pick(acts);
+    if (!decl.values || decl.values.length === 0) return { act: name };
+    const value = rng.pick(decl.values);
+    return value === undefined ? { act: name } : { act: name, value };
+  }
   const wantSignal = signalPorts.length > 0 && (valuePorts.length === 0 || rng.chance(0.5));
   if (wantSignal) return { signal: rng.pick(signalPorts)[0] };
-  const [name, decl] = rng.pick(valuePorts);
+  // NSP-016 s37 — a classed spec draws its logic ports three times in four (only when it has both kinds)
+  const pool = logicPorts && logicPorts.length > 0 && logicPorts.length < valuePorts.length && rng.chance(0.75) ? logicPorts : valuePorts;
+  const [name, decl] = rng.pick(pool);
   const value = rng.pick(poolFor(decl));
   return value === undefined ? { set: name } : { set: name, value };
 }

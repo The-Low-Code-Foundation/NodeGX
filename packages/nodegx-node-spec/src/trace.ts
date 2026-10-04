@@ -63,6 +63,11 @@ export type TraceEvent =
   | (Base & { t: 'outcome'; port: string; value: Outcome; error?: string })
   /** stimulus (NSP-007): the world's clock moved by `ms` milliseconds. */
   | (Base & { t: 'advance'; ms: number })
+  /**
+   * stimulus (NSP-016 s37): a person did `act` to the node on the page (spec.ts THE PERSON) — one of the acts the spec
+   * declares, with the value the act carries (`type`'s text, `choose`'s option, `key`'s key; canonical) or none.
+   */
+  | (Base & { t: 'act'; act: string; value?: unknown })
   /** observation (NSP-007): the node handed the world a request. `method` is canonical (a node may hand a non-string). */
   | (Base & { t: 'request'; method: unknown; url: string; headers: Record<string, string>; body?: unknown })
   /** observation (NSP-015): the node asked the browser to open a URL — `window.open(url, target, features)`, each canonical, as handed. */
@@ -106,6 +111,13 @@ export type TraceEvent =
    * `$bytes`) or a `close` (`code`, `reason`, each absent when not handed); each canonical. In the request group.
    */
   | (Base & { t: 'socket'; op: 'connect' | 'send' | 'close'; url?: unknown; protocols?: unknown; data?: unknown; code?: unknown; reason?: unknown });
+
+/**
+ * NSP-016 s37 — the canonical form of a node's reference to ITSELF (a visual node's `This` output,
+ * `type: 'reference'`): what a wire from it carries is the node, which no trace can hold, so both
+ * targets record the reference as this tag. A reference to another node is not yet a trace value.
+ */
+export const SELF_REFERENCE = Object.freeze({ $node: 'self' });
 
 /** Trace-format version — must match the `/v1.json` in the schema's `$id` (tests/schema.test.ts). */
 export const TRACE_FORMAT_VERSION = 1;

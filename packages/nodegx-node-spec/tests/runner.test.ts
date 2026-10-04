@@ -81,6 +81,7 @@ describe('AC2 — the seed is the only input', () => {
       for (const step of s.steps) {
         if (step === 'settle') continue;
         if ('advance' in step) throw new Error('a spec without needs never generates an advance step (NSP-007)');
+        if ('act' in step) throw new Error('a spec without acts never generates an act step (NSP-016)');
         const port = 'signal' in step ? step.signal : step.set;
         expect(Object.keys(inputs)).toContain(port);
         if ('signal' in step) expect(inputs[port].type).toBe('signal');

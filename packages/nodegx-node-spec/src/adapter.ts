@@ -89,6 +89,15 @@
  *                        target? } }` is handed as one — what an Upload File's Cloud File output or a
  *                        record's file property carries. A plain object with the same keys is NOT one, and
  *                        the nodes that take a stored file drop it (`instanceof CloudFile`).
+ *   act(h, act, value)   OPTIONAL, NSP-016 s37 — THE PERSON (spec.ts): records `{ t: 'act', act, value? }` (value
+ *                        canonical, absent when the act carries none) and does to the node what a person doing
+ *                        `act` does on this target — on the runtime, the DOM events a browser raises for it on the
+ *                        element a person sees, into the node's real component; on the interpreter, the spec's
+ *                        reducer for the act. What it caused lands in the next settle, like a signal's. A target
+ *                        without this cannot play a spec that declares `acts` (it needs `person`), and the runner
+ *                        says so. A target with one keeps the node ON A PAGE for the whole play (mounted in a
+ *                        document at `mount`, taken off it at `dispose`): a node's Did Mount lands in the first
+ *                        settle, and its Mounted input is honoured by whatever holds it.
  *
  * Why values sort by port NAME and not by the spec's declaration order (which NSP-001 §5 first
  * wrote): a stranger's target (NSP-006) must produce a comparable trace from the spec and the
@@ -121,6 +130,8 @@ export interface TargetAdapter<H extends Handle = Handle> {
   /** NSP-014 s30 — see the contract above. */
   file?(desc: FileDesc): unknown;
   cloudFile?(desc: CloudFileDesc): unknown;
+  /** NSP-016 s37 — see the contract above. */
+  act?(h: H, act: string, value?: unknown): void | Promise<void>;
 }
 
 /** NSP-014 s30 — what `{ "$file": … }` describes: a file the browser hands. */
@@ -154,8 +165,12 @@ export function isArrayRef(value: unknown): value is { $array: string } {
   return keys.length === 1 && keys[0] === '$array' && typeof (value as { $array: unknown }).$array === 'string';
 }
 
-/** One scripted step of a scenario — the JSON shape NSP-003 reads from disk. `advance` (NSP-007) moves the world's clock by `ms`. */
-export type Step = { set: string; value?: unknown } | { signal: string } | { advance: number } | 'settle';
+/**
+ * One scripted step of a scenario — the JSON shape NSP-003 reads from disk. `advance` (NSP-007) moves the world's clock by
+ * `ms`. `act` (NSP-016 s37) is what a person did to the node on the page (spec.ts THE PERSON), with the value the act
+ * carries or none.
+ */
+export type Step = { set: string; value?: unknown } | { signal: string } | { advance: number } | { act: string; value?: unknown } | 'settle';
 
 /**
  * A target threw while a scenario was being played — inside `mount`, `set`, `signal` or `settle`.
@@ -212,6 +227,9 @@ export async function play<H extends Handle>(
       else if ('advance' in step) {
         if (!adapter.advance) throw new Error(`${adapter.name} has no advance(): it cannot play a scenario that moves the clock`);
         await adapter.advance(h, step.advance);
+      } else if ('act' in step) {
+        if (!adapter.act) throw new Error(`${adapter.name} has no act(): it cannot play a scenario in which a person acts on the node`);
+        await adapter.act(h, step.act, step.value);
       } else adapter.set(h, step.set, resolve(step.value));
     }
     return adapter.trace(h);

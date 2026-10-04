@@ -302,7 +302,20 @@ export interface PortMeta {
   displayName?: string;
   group?: string;
   description?: string;
+  /**
+   * NSP-016 (R10, 2026-10-03) — how portable this setting is beyond the web, for a VISUAL node's
+   * input: the class the research gave it (dev-docs …/phase-107/visual-params.json, read by
+   * `scripts/node-spec/visual-census.js`). `logic` is the node's behaviour — graded like any T1
+   * port; the layout and look classes say whether Yoga, SwiftUI, Compose and Flutter all say it
+   * directly (`-shared`), can say it with a wrapper or spacer (`-expressible`), or at least one
+   * cannot without a custom layout (`layout-not-shared`); `web-only` is CSS or HTML with no native
+   * counterpart. Absent on a non-visual node's port. The editor may show it; no target grades it.
+   */
+  portability?: Portability;
 }
+
+/** NSP-016 — the portability classes of RESEARCH-LAYOUT-SEMANTICS.md §2, as `visual-params.json` spells them. */
+export type Portability = 'logic' | 'layout-shared' | 'layout-expressible' | 'layout-not-shared' | 'look-shared' | 'look-expressible' | 'web-only';
 
 export interface ValueInputDecl extends PortMeta {
   type: ValueType;
@@ -710,6 +723,13 @@ export interface WorldHandlers<S, I, O> {
    */
   mount?: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
   /**
+   * NSP-016 s37 — the node is PLACED on the page: once, at mount, AFTER the params (`mount` above runs before them) — the
+   * moment a loaded app renders a visual node, its parameters already set (react-component-node.ts `render` reads
+   * `wantsToBeMounted`, which a Mounted parameter wrote first). Its patch lands in the first settle. A node that is not
+   * drawn needs none.
+   */
+  place?: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
+  /**
    * NSP-014 s31 — the person answered a click on this node's file input (world.ts PICKER), at the answer's moment: a `change`
    * (with the file chosen, or none — the empty list) or a `cancel`. Handed whether or not the node still has a handler on the
    * element: whether one is there to hear it is the spec's to say, as a DOM event meets whatever handler is there then.
@@ -734,11 +754,39 @@ export interface WorldHandlers<S, I, O> {
   stream?: (state: Readonly<S>, inputs: Inputs<I>, event: StreamEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
 }
 
+/**
+ * THE PERSON (NSP-016 s37) — what a person does to a VISUAL node on the page, as a stimulus: an
+ * `act` step (adapter.ts) names one of the acts the spec declares (`NodeDecl.acts`) and hands its
+ * value, if the act carries one (the text typed, the option chosen). The reducer for that act runs
+ * at once, like a signal input's: what it emits and sends lands in the next settle. It is handed
+ * the state, the inputs and the value as the person's act carries it (no coercion: a person types
+ * text, chooses an option, presses — the act's own `values` say what shapes a sequence draws).
+ *
+ * What an act IS on a target is the target's: on the runtime it is the DOM events a browser
+ * raises for that act on the element a person sees, dispatched into the node's REAL React
+ * component (noodl-runtime/test/helpers/node-spec-target.ts PERSON) — the component's own rules
+ * (a disabled button takes no click) are what is graded, never copied. The acts themselves are
+ * target-neutral names: `click`, `press` / `release` (a mouse button down / up), `hover` / `leave`
+ * (the pointer onto / off the element), `touch` / `lift` (a finger down / up), `focus` / `blur`
+ * (the keyboard put on / taken off it, as a Tab does), `type` (text entered), `choose` (an option
+ * picked), `key` (a key pressed while it has focus) — a spec declares the ones its node answers.
+ */
+export type PersonReducers<S, I, O> = Readonly<Record<string, (state: Readonly<S>, inputs: Inputs<I>, value: unknown, world: WorldView) => Patch<S, O>>>;
+
+/** NSP-016 s37 — one act a person can do to this node (`NodeDecl.acts`): what it means, and the values a sequence draws for it. */
+export interface ActDecl {
+  description: string;
+  /** The values the GENERATOR draws for this act (generate.ts); absent, the act carries none. */
+  values?: readonly unknown[];
+}
+
 /** What `.on()` takes beside the reducers. */
 export interface Extras<S, I, O> {
   derived?: DerivedPorts<S, O>;
   afterInputs?: AfterInputs<S, I, O>;
   world?: WorldHandlers<S, I, O>;
+  /** NSP-016 s37 — a reducer per declared act (`NodeDecl.acts`); every declared act needs one, and every reducer a declared act. */
+  person?: PersonReducers<S, I, O>;
 }
 
 /**
@@ -820,6 +868,21 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
   needs?: readonly WorldNeed[];
   /** What the generator draws for the world of this node's sequences (`WorldPool`). */
   worldPool?: WorldPool;
+  /**
+   * NSP-016 s37 — the acts a person can do to this node (`PersonReducers`), by name. A spec that
+   * declares any needs `person`: a target plays it only with a person face (`TargetAdapter.act`),
+   * and the generator draws the acts among the steps. Absent on a node a person cannot touch.
+   */
+  acts?: Readonly<Record<string, ActDecl>>;
+  /**
+   * NSP-016 s37 — state keys the PAGE syncs at every paint (a visual node's `pageEnabled`: the element's disabled
+   * attribute following Enabled at the frame's end and inside every act). A reducer's BRANCH (runner/mutants.ts
+   * `shapeOf`) ignores them: a patch that sets one beside its real work is the same branch as one that does not —
+   * otherwise every act has a twin per synced key that differs in nothing a wire can read before the next paint
+   * (s37 measured 113 such twins on two nodes, each declared by exact shape before this). Dropping the set still
+   * drops the sync with the rest; only the swap between the two twins is no longer drawn.
+   */
+  synced?: readonly (keyof S & string)[];
 }
 
 /**
@@ -839,14 +902,17 @@ export interface NodeDecl<S extends object, I extends InputsDecl, O extends Outp
  * inside one (world.ts POPUP). NSP-014 s21 makes `backend` real — the node hands a backend an operation (world.ts
  * BACKEND, R9). s31 adds `picker` — the node makes a file input and clicks it (world.ts PICKER): the play has a `document`.
  * s34 adds `socket` — the node opens WebSockets (world.ts SOCKET): its sequences play with a server script from the pool.
+ * NSP-016 s37 adds `person` — a person can act on the node (`NodeDecl.acts`, `PersonReducers`): a target plays it only
+ * with a person face (`TargetAdapter.act`), and the node is on a page — a document — for the whole play.
  */
-export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker' | 'socket';
+export type WorldNeed = 'clock' | 'random' | 'network' | 'registry' | 'timezone' | 'digest' | 'viewport' | 'location' | 'project' | 'stack' | 'router' | 'popup' | 'backend' | 'picker' | 'socket' | 'person';
 
 export interface NodeSpec<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> extends NodeDecl<S, I, O> {
   on: Reducers<S, I, O>;
   derived?: DerivedPorts<S, O>;
   afterInputs?: AfterInputs<S, I, O>;
   world?: WorldHandlers<S, I, O>;
+  person?: PersonReducers<S, I, O>;
 }
 
 export interface NodeBuilder<S extends object, I extends InputsDecl, O extends OutputsDecl<S>> {
@@ -880,6 +946,7 @@ export function defineNode<S extends object, const I extends InputsDecl, const O
       if (extras?.derived) spec.derived = extras.derived;
       if (extras?.afterInputs) spec.afterInputs = extras.afterInputs;
       if (extras?.world) spec.world = extras.world;
+      if (extras?.person) spec.person = extras.person;
       return spec;
     }
   };
@@ -905,7 +972,11 @@ export interface AnyNodeSpec {
   inspect?: (state: never, world: WorldView) => string;
   needs?: readonly WorldNeed[];
   worldPool?: WorldPool;
+  acts?: Readonly<Record<string, ActDecl>>;
+  synced?: readonly string[];
   on: Record<string, ErasedReducer | undefined>;
+  /** NSP-016 s37 — the person's acts (`PersonReducers`), erased. */
+  person?: Readonly<Record<string, (state: never, inputs: never, value: unknown, world: WorldView) => unknown>>;
   derived?: {
     inputs: (params: Readonly<Record<string, unknown>>) => Record<string, InputDecl>;
     outputs?: (params: Readonly<Record<string, unknown>>) => Record<string, ErasedValueOutput | SignalOutputDecl>;
@@ -927,6 +998,7 @@ export interface AnyNodeSpec {
     auth?: (state: never, inputs: never, event: import('./world').AuthNotice, world: WorldView) => unknown;
     authReturn?: (state: never, inputs: never, ret: import('./world').AuthReturnState, world: WorldView) => unknown;
     mount?: (state: never, inputs: never, world: WorldView) => unknown;
+    place?: (state: never, inputs: never, world: WorldView) => unknown;
     picker?: (state: never, inputs: never, event: import('./world').PickerEvent, world: WorldView) => unknown;
     realtime?: (state: never, inputs: never, event: RealtimeEvent, world: WorldView) => unknown;
     socket?: (state: never, inputs: never, event: SocketEvent, world: WorldView) => unknown;

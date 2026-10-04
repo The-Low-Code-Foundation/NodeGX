@@ -18,7 +18,7 @@ import { HostFileCtor } from '../host-file';
 import type { AnyNodeSpec } from '../spec';
 import type { Handle, TargetAdapter } from '../adapter';
 import type { TraceEvent } from '../trace';
-import { advance, mount, set, signal, settle, trace, type Instance } from '../interpreter';
+import { act, advance, mount, set, signal, settle, trace, type Instance } from '../interpreter';
 import { specFor } from '../nodes';
 import { installTimeZone, StoredFile, type World } from '../world';
 
@@ -71,6 +71,10 @@ export function interpreterAdapter(options: InterpreterAdapterOptions = {}): Tar
     },
     async advance(h, ms) {
       advance(h.inst, ms);
+    },
+    // NSP-016 s37 — the person's act: the spec's reducer for it (adapter.ts)
+    act(h, name, value) {
+      act(h.inst, name, value);
     },
     // NSP-014 s25 — the installed world's registry array (adapter.ts)
     registryArray(name) {

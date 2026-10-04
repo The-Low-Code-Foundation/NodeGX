@@ -1,0 +1,1890 @@
+[
+  {
+    "name": "a fresh checkbox on the page: Did Mount in the first frame, Checked false, Enabled true, the three states false, Child Index and Children Count 0, This itself",
+    "because": "react-component-node.ts :982-990; checkbox.ts :31; utils.ts :377-378",
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "a click ticks the box: Pointer Down, Focused (the press gives the input the keyboard), Pointer Up, Changed, with Checked true; a second click unticks it: Changed again, Checked false",
+    "because": "Checkbox.tsx :173-180 the input toggles and reports; checkbox.ts :34-52 `checkedChanged` sends Checked and fires Changed on a change; utils.ts :285-311",
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Checked set from the graph: Checked sent, no Changed; set to what it already is: nothing; a truthy string ticks, 0 unticks",
+    "because": "checkbox.ts :63-71 `!!value` and the `changed` guard, no `onChange`",
+    "steps": [
+      "settle",
+      {
+        "set": "checked",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "checked",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "checked",
+        "value": "yes"
+      },
+      {
+        "set": "checked",
+        "value": 0
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Check ticks an unticked box: Checked true, Done; Check again: Unchanged; Uncheck: Checked false, Done; Uncheck again: Unchanged — never Changed",
+    "because": "checkbox.ts :160-178 `setCheckedByAction`; the ERG-001 register",
+    "steps": [
+      "settle",
+      {
+        "signal": "check"
+      },
+      "settle",
+      {
+        "signal": "check"
+      },
+      "settle",
+      {
+        "signal": "uncheck"
+      },
+      "settle",
+      {
+        "signal": "uncheck"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click on a ticked box the graph ticked unticks it with Changed: the person's toggle reads the node's state",
+    "because": "Checkbox.tsx :35-41 the component follows `props.checked`; :176-179 the toggle reports the new state",
+    "steps": [
+      "settle",
+      {
+        "signal": "check"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "two clicks in one frame: Checked ends where it began and is not sent, Changed fires twice",
+    "because": "checkbox.ts :34-52 fires on each change; the trace records the frame's last value",
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a disabled box takes no click, press, release or focus — the pointer still hovers it and a finger still lands",
+    "because": "Checkbox.tsx :57 `disabled: !props.enabled`; React drops onClick / onMouseDown / onMouseUp on a disabled control; the browser does not toggle a disabled checkbox; utils.ts :216-243, :260-275",
+    "params": {
+      "enabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "act": "leave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "with a label: a click on the box still ticks it, and the pointer events come from the wrapper the box sits in",
+    "because": "Checkbox.tsx :186-210 the wrapper carries `controlEvents`; a click on the input bubbles to it",
+    "params": {
+      "useLabel": true,
+      "label": "Agree"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "leave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Focus action puts the keyboard on the input (Focused, Done); again: Done alone; Blur: Blurred, Done; again: Done alone",
+    "because": "utils.ts :340-364; focus-tracker.ts :57-78, :88-90; the target is the input (:402-405)",
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enabled off and a Focus in the same frame: the box is still enabled on the page, so it takes the keyboard; in the next frame a Focus is Done and takes nothing",
+    "because": "utils.ts :82-89 writes the prop; the element follows at the frame's end (react-component-node.ts :1675-1689); a disabled input is not a focusable area",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then disabled: Focused stays true — a disabled element gives the keyboard up to nobody, so a Blur is Done and nothing fires; re-enabled, Blur takes it",
+    "because": "the browser's focusing steps: a disabled control is not a focusable area, so `blur()` on it does nothing (focus-tracker.ts :88 calls `_blur` regardless and reports Done)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off: Will Unmount; Checked keeps its value; a click finds nothing; Check still flips (the node, not the page); a Focus is Unchanged; Mounted on: Did Mount, Checked as left",
+    "because": "react-component-node.ts :2302-2321; checkbox.ts :160-178 reads `_internal.checked`, not the page; focus-tracker.ts :61",
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "signal": "uncheck"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle"
+    ]
+  },
+  {
+    "name": "Enabled follows its input as a boolean and is sent only on a change",
+    "because": "utils.ts :82-89",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": "no"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Scroll Into View and every look or layout input change nothing on the wire",
+    "because": "react-component-node.ts :1380-1395; the style inputs write the element's style and no output reads it",
+    "steps": [
+      "settle",
+      {
+        "signal": "scrollIntoView"
+      },
+      {
+        "set": "backgroundColor",
+        "value": "#ff0000"
+      },
+      {
+        "set": "width",
+        "value": 24
+      },
+      {
+        "set": "label",
+        "value": "Go"
+      },
+      {
+        "set": "labelSpacing",
+        "value": 4
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Mounted written off and an act in the same frame find no element (a Focus after it is Unchanged); written on, the act meets the element (a Focus after it is Done) — every act, both ways",
+    "because": "the holder re-renders before the act is dispatched (node-spec-target.ts PERSON), as a browser paints before a person can act; each pair toggles the page",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Enabled written off and an act in the same frame meet a disabled element (a Focus after it takes nothing, a Blur gives nothing up); written on, an enabled one — every act, both ways",
+    "because": "the element's disabled attribute is painted with the page (Button.tsx :145 / Checkbox.tsx :57); the Focus and Blur actions meet the painted element (utils.ts :340-364)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed disabled: a Focus before the first frame is Done and takes nothing — the element was drawn disabled",
+    "because": "the params are set before the first render (react-component-node.ts :1740-1743 reads what the params wrote); a disabled control is not a focusable area",
+    "params": {
+      "enabled": false
+    },
+    "steps": [
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press held, then disabled and re-enabled across frames, then a click: Pressed true until the click's own release ends it",
+    "because": "utils.ts :82-89 touches only `enabled`; the press is not released by disabling; the click's mouseup releases (utils.ts :265-269)",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Mounted off and on: Focused still reads true while the element that came back holds no keyboard — a Focus action takes it again and fires Focused; a Tab away then fires Blurred",
+    "because": "the element leaves with the keyboard (the browser's focus fixup fires no blur) and nothing resets `outputPropValues.focusState` (utils.ts :157-168, NoodlReactComponent :993-1003); focus-tracker.ts drops the node at unmount (`nodeUnmounted`) so the next Focus is a fresh one — NSP-016 §7.2 row D30",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enable Label turned off while the pointer is over the box: the element is rebuilt without the label, and a leave afterwards still ends the hover",
+    "because": "Checkbox.tsx :186-210 — the wrapper goes and the box becomes the root; the person's events now go to the input (:66-69)",
+    "params": {
+      "useLabel": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "check"
+      },
+      {
+        "set": "useLabel",
+        "value": ""
+      },
+      "settle",
+      {
+        "act": "leave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Enable Label turned off, then the Focus action: the box is on the page and takes the keyboard (Focused, Done)",
+    "because": "utils.ts :340-355 — a box on the page can be asked; Checkbox.tsx :167 and :199 put the SAME root ref on the box and on the wrapper, so the wrapper's removal nulls the node's element (react-component-node.ts :1934-1945) and `_focusTarget` finds nothing — the runtime reports Unchanged with the box in plain sight (NSP-016 §7.2 row C66)",
+    "params": {
+      "useLabel": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ],
+    "row": "NSP-016 §6 C66"
+  },
+  {
+    "name": "a person acts on a painted page: Enabled and Mounted both written and an act in the same frame — off together (no element; a Focus after it Unchanged), on together (Did Mount, an enabled element) — every act, both ways",
+    "because": "the paint inside the act commits the remount and the enabled attribute at once; a Focus and a Blur after it read what was painted",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "disabled and unmounted in one frame, then enabled and remounted in one frame, then a quiet frame: Did Mount once, Enabled true, and nothing more",
+    "because": "the frame's end paints the remount and the attribute together (react-component-node.ts :1675-1689); the next frame paints nothing",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a person acts on a painted page: Enabled off with Mounted on (a disabled element arrives: Did Mount, the act takes nothing, a Focus after it Done and nothing focused), then Enabled on with Mounted off (the element leaves) — every act, both ways",
+    "because": "the paint inside the act commits a remount and the attribute at once; the crossed pairs reach the branches the matched pairs cannot (a release or press on a remounted but disabled element)",
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed disabled, Mounted off then on with a press in the same frame: Did Mount and nothing else (a disabled element takes no press); a Focus after it Done and nothing focused; the same with a release",
+    "because": "the paint inside the act commits the remount; the element arrives disabled, so the press and the release meet nothing (React drops them; the browser dispatches none)",
+    "params": {
+      "enabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label turned on: the tree is rebuilt around a new input and the keyboard leaves with the old one (Focused still reads true, no Blurred); a press then takes it again and fires Focused; turned off again while focused: the same, and a Tab onto it fires Focused",
+    "because": "Checkbox.tsx :167-210 — with and without a label the input is a different element; a removed element fires no blur (the focus fixup rule) and utils.ts never resets focusState (row D30); C66 does not reach a person's act (the face finds the box on the page)",
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and a Tab away in the same frame: the keyboard already left with the rebuilt input, so nothing fires; a Blur action after it gives nothing up either",
+    "because": "Checkbox.tsx :167-210 — the rebuilt input is a new element; the paint inside the act commits it before the Tab away (D30: Focused still reads true)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "pressed and focused, then Enable Label changed and the release in the same frame: Pointer Up fires, the keyboard already left with the rebuilt input (a Blur action after it gives nothing up); a Tab onto the new input then fires Focused",
+    "because": "Checkbox.tsx :167-210 — the rebuilt input is a new element; utils.ts :265-269 the release still reaches the wrapper or the input",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off then on, and a Tab onto the box in the same frame: Did Mount and Focused together; the same with Enabled off: Did Mount alone, a Focus after it Done",
+    "because": "the act paints the page first — the remount commits (didMount) and then the Tab meets the new input; a disabled one takes nothing, but it IS on the page (focus-tracker.ts :61)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press held across a frame, then the release and a Blur action in the same frame: Pointer Up, then Blurred — the keyboard the press gave is still there to take away",
+    "because": "utils.ts :255-269 the press and the release; :356-364 the Blur action meets the focused input",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then disabled; Enable Label changed and a release in the same frame (nothing: a disabled input takes no release, but the rebuilt input holds no keyboard); re-enabled and painted, a Blur action gives nothing up — the keyboard left with the old input",
+    "because": "Checkbox.tsx :167-210 the rebuild; the browser dispatches no mouseup to a disabled control; a removed element fires no blur (D30)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "enabled",
+        "value": true
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then Enable Label changed and the pointer moving onto the box in the same frame: Hover Start, and the keyboard already left with the rebuilt input — a Blur action after it gives nothing up",
+    "because": "Checkbox.tsx :167-210 the rebuild; utils.ts :216-234 the hover reaches the new input; a removed element fires no blur (D30)",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "focused, then the pointer onto the box and a Blur action in the same frame: Hover Start, then Blurred — a hover alone moves no keyboard",
+    "because": "utils.ts :216-234 the hover; :356-364 the Blur action meets the focused input",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click, an Uncheck and a click in one frame: the box ends ticked, Changed twice — the second click meets a box the Uncheck untick-ed",
+    "because": "checkbox.ts :34-52, :160-178 — the spec reads the node; the runtime's component keeps the box drawn as the first click left it (Checkbox.tsx :35-41 keys its effect on React's last-rendered `props.checked`), so the second click unticks what the node already had false and reports nothing — NSP-016 §7.2 row C67",
+    "row": "NSP-016 §6 C67",
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "signal": "uncheck"
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Label that is an object with Enable Label on: the label is drawn as its text on the interpreter — the runtime's React throws rendering it",
+    "because": "Checkbox.tsx :205-207 renders `{props.label}` as it is (the Button renders `String(props.label)`) — NSP-016 §7.2 row C65",
+    "row": "NSP-016 §6 C65",
+    "params": {
+      "useLabel": true,
+      "label": {
+        "a": 1
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  }
+]

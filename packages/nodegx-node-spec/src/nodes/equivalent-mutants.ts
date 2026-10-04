@@ -23,7 +23,36 @@ const SSE_DEAD = 'a Connect that fails inside the call leaves a dead connection 
 const QR_CLEAR = 'a frame end with no reconnect scheduled, handed the patch of its twin that ran a quiet one: it clears two reconnect flags already clear';
 const GRAPH = (what: string, scenario: string) => `${what} is written onto the registry and no port of this node reads it back — graded by ${scenario}`;
 
+/**
+ * NSP-016 s37 — a visual node placed OFF the page (Mounted false as a parameter): its placing only syncs the page's keys
+ * (spec.ts `synced`, left out of the branch), and nothing can read a sync on an element that is not there before the
+ * frame's end syncs it again. The branch is the placing's "nothing to draw"; dropping its set drops only that sync.
+ */
+/** The same for a pointer or a finger meeting no element (these four acts do nothing only when the node is off the page): the act's set holds only the page syncs. */
+const ACT_OFF_PAGE = 'a hover, leave, touch or lift on a node off the page: its set holds only the page syncs, which nothing reads before the frame end repaints them';
+const REBUILT_WHILE_DISABLED = 'a press or release on a disabled box during an Enable Label rebuild: the rebuild unfocuses the element, which no action can read while it is disabled, and the frame end that paints Enabled paints the rebuild too';
+const PLACED_OFF_PAGE = 'a placing on a node placed off the page: its set holds only the page syncs, which nothing reads before the frame end repaints them';
+
 export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
+  'net.noodl.controls.button': [
+    { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
+    ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE }))
+  ],
+  'net.noodl.controls.checkbox': [
+    { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
+    ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
+    // a press, a release or a Tab onto a DISABLED box while Enable Label is changing: the act's paint rebuilds the input (the keyboard
+    // leaves with the old one, `elementFocused` false) and the act itself meets nothing. Dropped or swapped with the act that
+    // met nothing on a box not rebuilding, the difference is unreadable: the Focus and Blur actions read a disabled element
+    // as nothing to do until the frame's end paints Enabled — and the same paint redoes the rebuild. Measured s37: the
+    // runner's own mutant and the original trace the scenario "focused, then disabled; Enable Label changed and a release …"
+    // identically.
+    ...['press', 'release', 'focus'].flatMap((act) => [
+      { reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED },
+      { reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":["elementFocused"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: REBUILT_WHILE_DISABLED },
+      { reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":[],"emit":[]', swappedWith: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED }
+    ])
+  ],
   'Map Collection': [
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },
     { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["scheduled"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: STUCK_FLAG },
