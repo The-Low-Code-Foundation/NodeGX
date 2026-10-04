@@ -57,12 +57,16 @@ Left: 15 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-
 
 ## What s41 does
 
-**First, read §7.5's gate readings** — s40 chained the runtime at 20730, the stranger test, the package suite and the interpreter's 10,000
-(`NSP_N=10000 NSP_SEED=20729 npx jest tests/zz-ti.test.ts` was the tool; the file is deleted — `tests/batch-visual.test.ts` is the pinned gate)
-and then the runtime's 10,000 (`NSP_DEEP=10000 NSP_SEED=20729 NSP_ONLY=net.noodl.controls.textinput NODE_OPTIONS=--max-old-space-size=8192
-npx jest test/node-spec/conformance.test.ts -t deep`, ~1 h). If a reading is missing from §7.5, the chain did not finish: run it, read the
-survivors (twins across seeds are cheap on the interpreter; a survivor whose twin differs only in a synced key is a key missing from `synced`;
-a swap into a twin differing in a key already at that value is killed by a scenario reading the key later — or declared with the reason).
+**First, read §7.5's deep-run paragraph.** The Text Input at 10,000: **the runtime (day seed 20730, 3,003 s) 0 divergences** — s39's ten are
+gone — with three `afterInputs` drop-sets (a frame end that answers a press and mounts / unmounts: a second frame tells them; scenario 80); the
+interpreter (20729) 0 divergences, ten swap twins → two after scenarios 78–79 (1,645 s) → scenario 81 for the last two (a release that landed a
+Set AND a writing Insert, ordered against a Clear). Every scenario was graded at 200 on three interpreter seeds and two runtime seeds (chain E's
+line in §7.5 is the last reading). **Owed, if the number is wanted: a third interpreter 10,000** (`NSP_N=10000 NSP_SEED=20729` on a `zz` test
+calling `runConformance` — s40's file is deleted; `tests/batch-visual.test.ts` pins 200 at 13) and the runtime's 10,000 again
+(`NSP_DEEP=10000 NSP_ONLY=net.noodl.controls.textinput NODE_OPTIONS=--max-old-space-size=8192 npx jest test/node-spec/conformance.test.ts -t deep`,
+~50 min; the deep describe takes no `NSP_SEED`). A survivor whose twin differs only in a synced key is a key missing from `synced`; a swap into a
+twin differing in a key already at that value is killed by a scenario reading the key LATER in the same frame (a Clear orders outcomes, a Focus /
+Blur action reads the page) — or declared with the reason.
 
 **Then NSP-016 AC3, the next controls through the same face** (the handoff's order holds):
 - **Slider** (`net.noodl.controls.range`): act `slide` (a number; the input's `input` / `change`), `min` / `max` / `step` / `value`; the browser

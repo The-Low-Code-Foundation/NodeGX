@@ -35961,5 +35961,227 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "a frame end that answers a press AND moves the element, then a quiet frame: off the page, Value 'x' then a Set and Mounted on in one frame (Set Unchanged — the output already read it — then Did Mount); on the page, an empty Insert Text and Mounted off in one frame (Insert Unchanged, Will Unmount); Run On Value Change off, Value 'b', a Set, an empty Insert and Mounted off in one frame (Set Done with Value 'b' and Value Changed, Insert Unchanged, Will Unmount) — the quiet frame after each answers nothing again, and a Focus action reads where the element is",
+    "because": "node.ts :743-744 consumes the callback list at the frame end that runs it; the 10,000 runtime run (seed 20730, s40) left three drop-sets of these frame ends alive because its sequences ended there — a second frame tells a kept queue (the press answered twice)",
+    "params": {
+      "mounted": false,
+      "textToInsert": ""
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "startValue",
+        "value": "x"
+      },
+      "settle",
+      {
+        "signal": "set"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "insert"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "runOnChange-startValue",
+        "value": false
+      },
+      {
+        "set": "startValue",
+        "value": "b"
+      },
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "unfocused, Run On Value Change off, Text To Insert 'z': a Set and an Insert Text queued, a pointer act, then a Clear in one frame — the act's drain lands both (Set Done with the Value, Insert Done with the Value plus 'z', Value Changed twice) BEFORE the Clear's Done; an <input>'s press drains nothing, so there the Clear comes first and the two land at the frame's end — hover, leave, press, release, click, touch, lift",
+    "because": "pointerlisteners.ts :173-186 — the drain inside the handler; TextInput.tsx :204 — the <input>'s press is the component's own (C68); kills the 10,000 run's two surviving swaps of a release that landed both writes with the bare release (s40, seed 20729, 1,645 s)",
+    "params": {
+      "runOnChange-startValue": false,
+      "textToInsert": "z"
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "blur"
+      },
+      {
+        "set": "startValue",
+        "value": "v0"
+      },
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      {
+        "set": "startValue",
+        "value": "v1"
+      },
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      {
+        "set": "startValue",
+        "value": "v2"
+      },
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      {
+        "set": "startValue",
+        "value": "v3"
+      },
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      {
+        "set": "startValue",
+        "value": "v4"
+      },
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      {
+        "set": "startValue",
+        "value": "v5"
+      },
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "blur"
+      },
+      {
+        "set": "startValue",
+        "value": "v6"
+      },
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle"
+    ]
   }
 ]

@@ -456,7 +456,29 @@ with the missing-Id message) and tells them apart; a passive Id then a repeat af
 3,160) and 20730 (3,107 / 3,117); the 10,000 run below. Runtime: CONFORMS at 200 on 13 (76 / 77 + 1 known, 0 divergences, 3,074 / 3,086, 189 s)
 and on 20730 (76 / 77 + 1 known, 0 divergences, 3,107 / 3,117, 184 s). `tsc --noEmit` exit 0 in `nodegx-node-spec` and `nodegx-export`;
 stranger hashes refreshed (spec.ts is guarded) and `tests/stranger.test.ts` green (41 passed, the 17 skipped are the rounds' optional
-re-grades). Rows C72 and D35 filed (`node scripts/bugs.js check`: 221 valid). The package suite and the deep runs: see the end of this section.
+re-grades); the package suite green (20 suites, 858 passed, zz probes excluded). Rows C72 and D35 filed (`node scripts/bugs.js check`: 221 valid).
+Committed `11a831b26`.
+
+**Deep runs.** The interpreter at 10,000 (seed 20729, the matrix in, 2,296 s): 77 / 77, **0 divergences**, 4,198 / 4,217 killed — **10 swap twins**
+of s38's two families: a hover, leave, click or release whose drain answered a Set (absorbed: the field had the keyboard) and an empty Insert Text
+both Unchanged, swapped with the act that drained nothing (the frame's end would answer them — after a Clear pressed in between, where the
+drain answers them before it); and a release or an Enter on a DISABLED field whose paint remounted it, swapped with the bare act (a Focus
+action after it in the same frame finds the element on the page, Done — or, with no remount yet, Unchanged). Two scenarios written for them
+(79 now; both every act); at 200 on 20729 they reach the branches (3,555 / 3,568 killed, from 3,147 / 3,160 before them) and nothing survives;
+the 10,000 re-run (chain C, 1,645 s): 79 / 79, 0 divergences, 4,398 / 4,409 killed, **the ten down to two** — a release whose drain landed a
+Set AND a writing Insert Text (both Done), swapped with the bare release or its rebuild twin; no scenario had queued both writes with text, so
+nothing ordered them against a Clear. An 81st scenario does (every pointer act; an `<input>`'s press drains nothing, C68): at 200 with the 81
+the interpreter CONFORMS at 20729 (81 / 81, 3,946 / 3,959 killed — the two branches reached and killed), 13 (3,906 / 3,918) and 20730
+(3,945 / 3,955), and the runtime at 20730 (80 / 81 + 1 known, 3,945 / 3,955, 300 s) (chain E); the third 10,000 is owed to s41 if it wants the
+number. **The runtime at 10,000** (the day's
+seed 20730 — the deep describe takes no `NSP_SEED`; 3,003 s, heap 8192): 76 / 77 + 1 known, 10,000 run, **0 divergences** (the examples it
+prints are the known rows' — C61, C62, C63, C65 and a unit object on Value, C6), 4,365 / 4,378 killed and **three `afterInputs` drop-sets
+alive**: a frame end that answers a queued press AND mounts or unmounts the element (a Set Unchanged off the page then Did Mount; an empty
+Insert then Will Unmount; a Set Done and an empty Insert then Will Unmount) — dropped, the queue is kept and the next frame answers the press
+again, which only a second frame can read, and the generated sequences ended there. One scenario with the three segments and a quiet frame
+after each (80 now) — graded at 200: the interpreter at 13 (3,605 / 3,617) and 20730 (3,642 / 3,652) CONFORMS with the 80 (chain C); the
+runtime at 13 (80 / 81 + 1 known, 3,906 / 3,918, 286 s) and 20730 (80 / 81 + 1 known, 3,945 / 3,955, 298 s) CONFORMS with all 81 (chain D —
+scenario 81 was in by then). The ten divergences of s39's run are gone: **the Text Input conforms at 10,000 on the runtime.**
 
 **Lessons.** (1) **Measure the attribute's parse, not the runner's first explanation**: the `-0.5` divergence read as "the face refuses what the
 browser allows" until a bare jsdom printed `maxLength` 0 and HTML's parse agreed — the spec was the one wrong, and the face would have been
