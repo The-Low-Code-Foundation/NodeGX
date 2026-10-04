@@ -35586,5 +35586,380 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "focused, Text To Insert empty: a Set (absorbed — the field has the keyboard) and an Insert Text queued, a pointer act, then a Clear in one frame: both presses are answered Unchanged at the act, before the Clear's Done — hover, leave, press, release, click, touch, lift",
+    "because": "pointerlisteners.ts :173-186 — the drain inside the handler resolves both deferred presses before the Clear runs; kills the 10,000 run's swap of this drain with the act that drained nothing (s40, seed 20729)",
+    "params": {
+      "textToInsert": ""
+    },
+    "steps": [
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "xhover"
+      },
+      "settle",
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "xleave"
+      },
+      "settle",
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "xpress"
+      },
+      "settle",
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "xrelease"
+      },
+      "settle",
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "xclick"
+      },
+      "settle",
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "xtouch"
+      },
+      "settle",
+      {
+        "signal": "set"
+      },
+      {
+        "signal": "insert"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "xlift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "disabled; Mounted off with a Value written off the page, then Mounted on, an act and a Focus action in one frame: the act's paint remounts the field (Value Changed, Did Mount) and the Focus finds a disabled element on the page (Done) — every act, Enter included",
+    "because": "the act's paint (onPainted) mounts before the act meets the element; a Focus action on a disabled element on the page is Done, off the page Unchanged (text-input.ts :293-308); kills the 10,000 run's swap of a remounting act with the bare one (s40, seed 20729)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "enabled",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v0"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v1"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v2"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v3"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v4"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v5"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v6"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v7"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v8"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v9"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "type",
+        "value": "q"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "v10"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
   }
 ]
