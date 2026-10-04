@@ -226,6 +226,70 @@ describe('FLD-009 — presence controls', () => {
   });
 });
 
+/**
+ * P109 ISL-016 AC5 — the MCP door's `set_project_settings({ home })` writes `rootNodeId` into the project file
+ * (`ProjectStore.writeProjectFields`: read, merge, `modified`, write). With the editor open and its own project-level copy
+ * moved, that write is refused or kept, never silently lost.
+ */
+describe('P109 ISL-016 AC5 — the door sets the home while the editor is open', () => {
+  /** Exactly what `ProjectStore.writeProjectFields({ rootNodeId })` does: read, merge, write. */
+  function agentSetsHome(fs: MemFs, nodeId: string): void {
+    const raw = JSON.parse(fs.files.get(PROJECT_FILE)!);
+    raw.modified = new Date().toISOString();
+    raw.rootNodeId = nodeId;
+    fs.files.set(PROJECT_FILE, JSON.stringify(raw, null, 2));
+  }
+  const homeOnDisk = (fs: MemFs) => JSON.parse(fs.files.get(PROJECT_FILE)!).rootNodeId;
+  const editorRetitles = (project: unknown) => {
+    const p = project as TSFixme;
+    p.settings = { ...(p.settings ?? {}), htmlTitle: 'Typed in the editor' };
+  };
+
+  it('an editor save whose own project copy moved is refused, and the home the door wrote stays on disk', async () => {
+    const { fs, service } = setup();
+    const { project } = await service.loadProject(DIR);
+    expect(homeOnDisk(fs)).toBeUndefined();
+    agentSetsHome(fs, 'root1');
+
+    editorRetitles(project);
+    const res = await service.saveProject(DIR, project);
+
+    expect(res.refusedProjectFiles).toEqual(['nodegx.project.json']);
+    expect(homeOnDisk(fs)).toBe('root1');
+  });
+
+  it('REVERTED ARM — without the guard the same save writes the editor’s copy, which has no home: the door’s write is gone', async () => {
+    const { fs, service } = setup();
+    const { project } = await service.loadProject(DIR);
+    agentSetsHome(fs, 'root1');
+    (service as TSFixme).projectLevelFileMovedOnDisk = async () => false;
+
+    editorRetitles(project);
+    const res = await service.saveProject(DIR, project);
+
+    expect(res.refusedProjectFiles).toBeUndefined();
+    expect(homeOnDisk(fs)).toBeUndefined();
+  });
+
+  it('once the editor adopts the door’s write, its own change saves AND the home survives', async () => {
+    const { fs, service } = setup();
+    const { project } = await service.loadProject(DIR);
+    agentSetsHome(fs, 'root1');
+
+    const { slice, raw, decisions } = await service.readProjectLevelFromDisk(DIR, project);
+    expect(decisions.project.action).toBe('reload');
+    applyProjectLevelSlice(project as TSFixme, slice, 'project', (r) => r);
+    service.markProjectLevelBaseline('project', raw.project ?? null, project);
+
+    editorRetitles(project);
+    const res = await service.saveProject(DIR, project);
+
+    expect(res.refusedProjectFiles).toBeUndefined();
+    const onDisk = JSON.parse(fs.files.get(PROJECT_FILE)!);
+    expect({ home: onDisk.rootNodeId, title: onDisk.settings?.htmlTitle }).toEqual({ home: 'root1', title: 'Typed in the editor' });
+  });
+});
+
 describe('FLD-009 — the component path is unchanged', () => {
   it('still refuses a component whose file moved, and still reports it under `refused`', async () => {
     const { fs, service } = setup();
