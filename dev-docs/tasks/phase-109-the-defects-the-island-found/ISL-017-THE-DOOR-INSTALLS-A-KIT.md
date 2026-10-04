@@ -1,6 +1,6 @@
 # ISL-017 — The door installs a kit, and a project need not carry a copy
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F24 and F19](AUDIT-2026-10-01.md) ·
+**Status: 🔒✓ ruled s13 (2026-10-04): ruling 2 "Copy on install" (AC7's census first); ruling 1 (a) as the engineering default (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F24 and F19](AUDIT-2026-10-01.md) ·
 P108 s2 lane B and every merge note since (the built kit copies conflicted on each merge) · **Side:** product (MCP door,
 `noodl-mcp`; module install; template packaging)
 

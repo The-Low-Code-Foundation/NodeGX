@@ -1,6 +1,6 @@
 # ISL-021 — An agent can press and type on a rendered page
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F28](AUDIT-2026-10-01.md) · the 18
+**Status: 🔒✓ ruled s13 (2026-10-04): "One call, a step list" (`drive_page`); rulings 2–3 as recommended (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F28](AUDIT-2026-10-01.md) · the 18
 CDP drives of P105, P106 and P108 · **Side:** product (MCP door, `noodl-mcp` render harness; possibly `nodegx-observe`)
 
 `render_report` loads every page and measures it as it first draws. It cannot press a button, type a name, wait for

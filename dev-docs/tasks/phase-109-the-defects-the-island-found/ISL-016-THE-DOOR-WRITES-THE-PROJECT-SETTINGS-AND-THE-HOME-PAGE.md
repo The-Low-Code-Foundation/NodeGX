@@ -1,6 +1,6 @@
 # ISL-016 — The door writes the project settings and the home page
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F23](AUDIT-2026-10-01.md) · the
+**Status: 🔒✓ ruled s13 (2026-10-04): "Replace, say what changed"; ruling 2 (b); "home" = the editor's "Make home" (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F23](AUDIT-2026-10-01.md) · the
 home-page half is P78 register [D9](../phase-78-the-templates/DEFECTS-THE-TEMPLATES-FOUND.md) ("a generated project can ship
 with no HOME node"), fixed then in the generator, never in the door · **Side:** product (MCP door, `noodl-mcp`)
 

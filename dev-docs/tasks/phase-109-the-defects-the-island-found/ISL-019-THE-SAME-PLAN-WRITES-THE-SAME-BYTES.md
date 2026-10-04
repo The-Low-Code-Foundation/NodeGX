@@ -1,6 +1,6 @@
 # ISL-019 — The same plan writes the same bytes
 
-**Status: 🟢 built s5 (2026-10-02) on "Keep the same id" — AC1–AC5, AC7 (s12) and AC8 met; 🟡 AC6 run s12: the update route holds over the real protocol, but 2/2 agents asked to rebuild took delete + create, which stamps the component new (`P109-S12-REBUILDSTAMPS`, needs a ruling). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F26](AUDIT-2026-10-01.md) · the merge
+**Status: ✅ CLOSED s13 (2026-10-04).** Built s5 on "Keep the same id" — AC1–AC5, AC7 (s12) and AC8 met; AC6 run s12 (the update route holds over the real protocol; 2/2 agents asked to rebuild took delete + create) and **ruled s13: "Accept it" — AC6 is met by the edit route** (`P109-S12-REBUILDSTAMPS` wontfix as ruled). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F26](AUDIT-2026-10-01.md) · the merge
 recipe of P105, P106 and P108, which depends on byte-identical regeneration · **Side:** product (MCP door, `noodl-mcp`)
 
 Run the same plan through the door twice and the two projects differ in every `component.json`, in `_registry.json` and in
@@ -211,3 +211,9 @@ parameters, same wiring. Do not edit the files directly."*
 AC6's sentence is not met as written. Filed `P109-S12-REBUILDSTAMPS` (needs-ruling): restore the old bytes when a
 create at a path deleted this session differs in nothing, steer a rebuild to `set`, or accept the update route.
 
+### Session 13 (2026-10-04) — AC6 ruled, closed
+
+Asked in plain words with the three choices and their costs (README §8 round 3). **Richard: "Accept it."** AC6's
+person sentence is met by the route that exists for it: an edit that changes nothing writes nothing (s12 arm 3,
+`unchanged: true`, `git status` clean over the real protocol). A delete + create is reported as a new component, which
+is what it is. No code change. **ISL-019 ✅ CLOSED.**

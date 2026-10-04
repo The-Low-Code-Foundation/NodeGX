@@ -115,7 +115,7 @@ the work:
 | [ISL-016](ISL-016-THE-DOOR-WRITES-THE-PROJECT-SETTINGS-AND-THE-HOME-PAGE.md) | The door writes the project settings and the home page | F23 | MCP | ✓ |
 | [ISL-017](ISL-017-THE-DOOR-INSTALLS-A-KIT.md) | The door installs a kit, and a project need not carry a copy | F24, F19 | MCP, modules | ✓ |
 | [ISL-018](ISL-018-WHAT-THE-DOOR-WRITES-IS-WHAT-THE-EDITOR-SAVES.md) | What the door writes is what the editor saves — **🟡 s3: AC2 measured (the editor's own save was rewritten on reopen); ruled "format step 4→5"; built `b2ba0320a` and driven — the box survives a reopen; ⚠️ older editors refuse a format-5 project. s7: AC7 — def038 reads the same 3 rows before and after `b2ba0320a`; one is the DBT demo, a live example of the open case** | F25 | MCP | after AC2 |
-| [ISL-019](ISL-019-THE-SAME-PLAN-WRITES-THE-SAME-BYTES.md) | The same plan writes the same bytes — **🟢 s5: built on "Keep the same id": ids derived from the project and the path, one clock, `--reproducible <ns>@<epoch>`, a no-change update writes nothing; AC1–AC5, AC8 met. ✅ AC7 s12 (the garden starts the door reproducible, the three pins gone, 407 files re-baselined by their newline, 0 differ, wall-clock control 407 red). 🟡 AC6 s12: the update route answers `unchanged` over the real protocol, but 2/2 agents rebuild by delete + create (`P109-S12-REBUILDSTAMPS`, a ruling)** | F26 | MCP | ✓ ruled |
+| [ISL-019](ISL-019-THE-SAME-PLAN-WRITES-THE-SAME-BYTES.md) | The same plan writes the same bytes — **✅ s13: CLOSED — AC6 ruled "Accept it" (met by the edit route). 🟢 s5: built on "Keep the same id": ids derived from the project and the path, one clock, `--reproducible <ns>@<epoch>`, a no-change update writes nothing; AC1–AC5, AC8 met. ✅ AC7 s12 (the garden starts the door reproducible, the three pins gone, 407 files re-baselined by their newline, 0 differ, wall-clock control 407 red). 🟡 AC6 s12: the update route answers `unchanged` over the real protocol, but 2/2 agents rebuild by delete + create (`P109-S12-REBUILDSTAMPS`, a ruling)** | F26 | MCP | ✓ ruled |
 | [ISL-020](ISL-020-AN-AGENT-CHANGES-ONE-LINE-OF-A-BIG-SCRIPT.md) | An agent changes one line of a big script | F27 | MCP | ✓ |
 | [ISL-021](ISL-021-AN-AGENT-CAN-PRESS-AND-TYPE-ON-A-RENDERED-PAGE.md) | An agent can press and type on a rendered page | F28 | MCP, render | ✓ |
 | [ISL-022](ISL-022-THE-WRAPPED-ROW-WARNING-MEANS-A-ROW-WILL-OVERFLOW.md) | The wrapped-row warning means a row will overflow — **🟢 s4: built on "Yes, both": the three false alarms silent, `row-cannot-wrap` names `brTabs`; census 22 → 14 + 7 new; four pins moved, landing-pages fixed at source. ⬜ AC6 (Claude Code over the door)** | F29 | validator | ✓ |
@@ -280,6 +280,35 @@ feature has its own copy with the same bug. Should both be fixed in one commit?"
   attributes (e.g. data-testid="plot-card") that no stylesheet needs?"* Options: a data-* list (recommended) / one Test
   ID field / not now. → §5 ruling 1 (b): name/value rows, `data-*` names only, values wirable, in the server-rendered HTML.
 
+**Session 13 (2026-10-04), round 3 — four questions in one round, populations measured first, all ruled on the
+recommendation:**
+
+- **ISL-021 — ✅ Ruled: "One call, a step list."** Asked as *"Claude can build a page and look at its first picture
+  (the render report), but it can't press a button or type into a field. So proving that a game or a form actually
+  works needs a separate browser script, written by hand: the repo has 114 of these (45,773 lines), 22 of them for
+  Olive's Island. How should Claude get to press and type?"* Options: one call, a step list (recommended) / a browser
+  that stays open / reuse the observe server / not now. §5 rulings 2 (the eleven verbs, from the corpus) and 3
+  (appended to `explore`, 0 resident tokens) are taken as the engineering defaults the ruling implies.
+- **ISL-017 ruling 2 — ✅ Ruled: "Copy on install."** Asked with the census: 8 committed kit copies in `templates/`,
+  2.0 MB; 7 byte-identical to the library; the 8th, the DBT template's translation add-on, is September's build without
+  ISL-007's Oct 3 fixes. *"Should templates in the repo stop carrying the copy?"* Options: copy on install
+  (recommended) / keep the copies / reference by name. AC7's reader census comes before any build. Ruling 1 (a
+  template's own module becomes a library entry) is taken as the engineering default: no tool, no parameter.
+- **ISL-016 ruling 1 — ✅ Ruled: "Replace, say what changed"**, with a correction from Richard that changes the
+  wording, not the design: *"remember the project's 'No home set' warning is when the 'App' component hasn't been set,
+  I don't think it's about what page it opens on. … in the editor we can right click any component and click 'Set as
+  home' or something, and it turns it into the 'App' component, which I guess is the root where the main page router is
+  expected to be?"* He is right: the editor's "Make home" (`makeComponentHome`, `useComponentActions.ts`) points
+  `rootNodeId` at the component's first top-level node whose type may be an export root — the App with its Router —
+  not at a page. The question had called the home "the page it opens on". The tool mirrors "Make home". Ruling 2 (b):
+  generators keep the minimal skeleton write — `create_project` still mints a random id and a wall-clock time
+  (`createProject.ts:127`, `:157`), so (a) cannot pass a byte gate yet.
+- **ISL-019 AC6 — ✅ Ruled: "Accept it."** Asked as *"…when I asked an agent to 'rebuild the Home page exactly as it
+  is', it deleted the page and created it again, twice. The content came back the same, but the dates were new and the
+  keys reordered, so git shows Home (and App) as changed. Does this need fixing?"* Options: accept it (recommended) /
+  put the old file back / a hint in the delete tool's text (measured: 13 of the 19 free resident tokens). AC6 is met by
+  the edit route; `P109-S12-REBUILDSTAMPS` closed as ruled.
+
 Each task's §5 has the full question, the options and the trade-offs. Ask in plain words, one decision
 per question, and only when the task is next to build. This table is the index, with the recommendation in brackets.
 
@@ -339,5 +368,5 @@ job each.
 | A | **3** (ISL-001 ✅ s3, ISL-002 ✅ s3, ISL-003 ✅ s9) | 4 |
 | B | 0 (ISL-009 🟢 scroll half built s5; ISL-005 ruled "Native nodes first" s5) | 6 |
 | C | **3** (ISL-011 ✅ s4, ISL-014 ✅ s4, ISL-015 ✅ s12) | 5 |
-| D | 0 (ISL-022 🟢 built, AC6 run once — inconclusive; ISL-018 🟡 built, one case open; ISL-019 🟢 built s5, AC7 ✅ s12, AC6 needs a ruling) | 7 |
+| D | **1** (ISL-019 ✅ s13; ISL-022 🟢 built, AC6 run once — inconclusive; ISL-018 🟡 built, one case open) | 7 |
 | E | **1** (ISL-023 ✅ s10; ISL-025 🟡 W1–W3, W13, W21 removed) | 3 |
