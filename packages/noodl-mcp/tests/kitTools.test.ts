@@ -172,8 +172,8 @@ describe('CN-006 — the discovery door the placement depends on', () => {
   });
 
   it('find_tools reveals it by name, from a query a model would actually type', async () => {
-    // The tool is deferred and its group's purpose says nothing about kits, so
-    // this query is the whole path to it. Three spellings, because the point is
+    // The tool is deferred; its group's purpose names a kit scaffold since P109 s13, but a
+    // model that searches is not reading purposes. Three spellings, because the point is
     // that a model does not have to guess the tool's exact name.
     for (const query of ['kit', 'node_kit', 'create_node_kit']) {
       const s = await connect(copyFixture());
@@ -184,6 +184,19 @@ describe('CN-006 — the discovery door the placement depends on', () => {
         await s.close();
       }
     }
+  });
+
+  it('P109-S12-KITGROUPPURPOSE — a model that never calls find_tools still reads that a kit scaffold exists', async () => {
+    // ISL-015's stranger agent saw 20 resident tools, never called `find_tools`, and wrote its
+    // kit by hand. The one resident place a deferred group speaks is `find_tools`' own
+    // description, which carries each group's `purpose`, so that is the sentence read here —
+    // from the advertised list, the way the agent met it, not from the manifest.
+    const tools = (await session.client.listTools()).tools;
+    const findTools = tools.find((t) => t.name === 'find_tools');
+    expect({
+      resident: tools.some((t) => t.name === 'create_node_kit'),
+      saysNodeKit: /node kit/i.test(findTools?.description ?? '')
+    }).toEqual({ resident: false, saysNodeKit: true });
   });
 
   it('and revealing its group reveals it too', async () => {

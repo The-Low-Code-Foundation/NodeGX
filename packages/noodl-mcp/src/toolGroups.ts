@@ -357,8 +357,8 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
     id: 'project',
     title: 'Project lifecycle',
     purpose:
-      'list the NodeGX projects on this machine; create a new project elsewhere on disk; read an imported ' +
-      'project\'s conversion report.',
+      'list the NodeGX projects on this machine; create a new project elsewhere on disk; scaffold a node kit; ' +
+      'read an imported project\'s conversion report.',
     // ✅ CN-006 — `create_node_kit` is here, and the placement was measured
     // rather than chosen (2026-08-16, same fixture and normalisation as
     // `tests/toolDisclosure.test.ts`):
@@ -384,6 +384,11 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
     // door works rather than assuming it. Widening the purpose is the fix, and
     // it costs resident tokens, so it belongs in the same conversation as
     // CN-009's spend rather than being taken quietly here.
+    // ✅ P109 `P109-S12-KITGROUPPURPOSE` (s13, 2026-10-04) — taken: "scaffold a node kit" is in
+    // `purpose` now. Measured both sides with `tests/toolDisclosure.test.ts`: **8,255 → 8,261,
+    // 6 tokens; 19 free after.** Why now: ISL-015's stranger agent saw 20 tools, never called
+    // `find_tools`, and wrote its kit by hand — the name-keyword door above only opens for a model
+    // that already suspects a kit tool exists.
     // 🔴 FIX-008 D — `open_project` is here and **not named in `purpose` above**,
     // which is the same trade `create_node_kit` records and lands the opposite
     // way round for a reason worth stating. Naming a tool in `purpose` costs
