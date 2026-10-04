@@ -49,6 +49,13 @@ EN 1366×768 and FR 390×844, a CE2 player, **7/7 each**: `line0` "Maths · ever
 every stored `lastSkill` ∈ {table-5, table-8}) · `kept` after a reload · `quiet` (0 console errors). Shots in the session
 scratchpad (`p113-focus-*`).
 
+**Session 2 (2026-10-04), `--arm monster`**, EN 1366×768 and FR 390×844, a CE2 player, **7/7 each**: `line0M` (Monster
+Gate's own setup says "Maths · everything (CE2)") · `savedM` (its Change → Times tables → 5 and 8 → Practise this stores
+`{ maths, [table-5, table-8] }`) · `only58M` (six monster questions, every stored `lastSkill` ∈ {table-5, table-8}) ·
+`shared` (the race's setup then says the two tables: the focus is the player's, not the game's) · `lineListM` /
+`fromListM` (REV-002 AC2) · `quiet`. The monster game ends by itself after six right answers (three monsters, two hits
+each), so six is the whole game, not a sample of it.
+
 ## 6. Acceptance criteria
 
 | AC | clause | state |
@@ -57,7 +64,7 @@ scratchpad (`p113-focus-*`).
 | AC2 | The chooser offers nothing above the child's class | ✅ gate |
 | AC3 | The choice survives a reload and a change of page | ✅ driven (`kept`) |
 | AC4 | The setup says what is being practised, in the child's language | ✅ driven EN + FR |
-| AC5 | A Monster Gate game obeys the same focus | ✅ gate (wires); 🟡 not driven |
+| AC5 | A Monster Gate game obeys the same focus | ✅ gate + driven EN + FR (`--arm monster`, session 2) |
 | AC6 | Richard's replay, and the youngest's verdict | ⬜ |
 
 ## 7. Open

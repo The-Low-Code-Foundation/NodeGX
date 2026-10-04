@@ -25,9 +25,27 @@
  *     fromList   every question of the race came from the list (its skill id is set:<id>)
  *     learned    answering right from the list learns its items: the stored model counts them, and stars grew by more than the answers alone
  *                (eight answers: eight fluent right answers land the rocket, so a ninth question never comes)
+ *   monster (EN 1366×768, FR 390×844) — REV-001 AC5 and REV-002 AC2, Monster Gate's own setup:
+ *     line0M     Monster Gate's setup says "Maths · everything (CE2)" before anything is chosen
+ *     savedM     its Change → Times tables → 5 and 8 → Practise this stores the same focus the race's does
+ *     only58M    every question of the monster game was table-5 or table-8 (read off the stored model)
+ *     shared     the race's setup then says the two tables too (the focus is the player's, not the game's)
+ *     lineListM  a list made from Monster Gate's My lists step, chosen there, says "My list · History Monday"
+ *     fromListM  every monster question came from the list (its skill id is set:<id>)
+ *   editor (EN 1366×768) — REV-002 AC5:
+ *     filled     Edit opens the editor holding the list's name and its lines
+ *     edited     a changed line, saved, is in the SAME list (one list, four items, the old line gone)
+ *     asks       Delete asks "Delete this list?" and deletes nothing yet
+ *     keptNo     "No, keep" puts the row back with the list still stored
+ *     deleted    Delete → "Yes, delete" removes the list from the store and the row from the page
+ *   both (EN 1366×768) — REV-002 AC4:
+ *     bothSaved  a list saved with "Ask both ways" is stored both: true and its row says so
+ *     backwards  at least one question was asked from the answer side (the buttons were the question side)
+ *     forwards   and at least one the usual way (each is a coin toss: eight questions miss one side 1 time in 128)
+ *     rightBack  every answer was the list's own (a backwards one answered with the question) and graded right: eight answers stored, no item missed
  *   every cell: quiet — no console error
  *
- * Usage: node scripts/devtools/drive-p113-focus.js <deploy-dir> [--arm focus|lists] [--only 1366x768] [--shots <dir>]
+ * Usage: node scripts/devtools/drive-p113-focus.js <deploy-dir> [--arm focus|lists|monster|editor|both] [--only 1366x768] [--shots <dir>]
  * Exits 0 when every clause passed in every cell.
  */
 const fs = require('fs');
@@ -46,7 +64,7 @@ if (!DIR || DIR.startsWith('--')) {
 }
 const SHOTS = arg('--shots');
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
-const ARMS = arg('--arm') ? [arg('--arm')] : ['focus', 'lists'];
+const ARMS = arg('--arm') ? [arg('--arm')] : ['focus', 'lists', 'monster', 'editor', 'both'];
 const ONLY = arg('--only') ? arg('--only').split(',') : null;
 const VPS = {
   '1366x768': { width: 1366, height: 768, mobile: false },
@@ -58,12 +76,14 @@ const WORDS = {
   en: {
     race: 'Rocket Race', start: 'Start', next: 'Next', change: 'Change', practiseThis: 'Practise this', maths: '🔢 Maths', tables: 'Times tables', t5: '5 times table', t8: '8 times table',
     everything: 'Maths · everything (CE2)', two: 'Maths · 5 times table, 8 times table', title: 'What do you want to practise?', lists: '📚 My lists', noLists: 'No list yet.', editLists: 'Make or edit a list',
-    listsTitle: 'My revision lists', newList: 'New list', save: 'Save', count: '4 questions', home: 'Home', myList: 'My list · '
+    listsTitle: 'My revision lists', newList: 'New list', save: 'Save', count: '4 questions', home: 'Home', myList: 'My list · ',
+    monster: 'Monster Gate', edit: 'Edit', del: 'Delete', delAsk: 'Delete this list?', yes: 'Yes, delete', no: 'No, keep', both: 'Ask both ways'
   },
   fr: {
     race: 'Course de fusées', start: 'Commencer', next: 'Suivant', change: 'Changer', practiseThis: 'Réviser ça', maths: '🔢 Maths', tables: 'Tables de multiplication', t5: 'Table de 5', t8: 'Table de 8',
     everything: 'Maths · tout (CE2)', two: 'Maths · Table de 5, Table de 8', title: 'Qu’est-ce que tu veux réviser ?', lists: '📚 Mes listes', noLists: 'Pas encore de liste.', editLists: 'Créer ou modifier une liste',
-    listsTitle: 'Mes listes de révision', newList: 'Nouvelle liste', save: 'Enregistrer', count: '4 questions', home: 'Accueil', myList: 'Ma liste · '
+    listsTitle: 'Mes listes de révision', newList: 'Nouvelle liste', save: 'Enregistrer', count: '4 questions', home: 'Accueil', myList: 'Ma liste · ',
+    monster: 'La porte du monstre', edit: 'Modifier', del: 'Supprimer', delAsk: 'Supprimer cette liste ?', yes: 'Oui, supprimer', no: 'Non, garder', both: 'Dans les deux sens'
   }
 };
 
@@ -74,6 +94,16 @@ const LIST_LINES = [
   ['Lascaux is painted', 'around -20 000'],
   ['Writing is invented', 'around -3 300']
 ];
+// The editor arm changes one answer; the both arm is a vocabulary list, the kind a child asks both ways.
+const EDITED = ['Fire is mastered', 'around -500 000'];
+const VOCAB_NAME = 'English words';
+const VOCAB_LINES = [
+  ['le chien', 'the dog'],
+  ['la maison', 'the house'],
+  ['le livre', 'the book'],
+  ['la pomme', 'the apple']
+];
+const linesText = (lines) => lines.map(([q, a]) => `${q} = ${a}`).join('\n');
 
 /** Everything a clause reads, in one evaluation: the page's text, the controls, and the stored active profile. */
 const LOOK = `(() => {
@@ -93,9 +123,9 @@ const LOOK = `(() => {
       if (app) {
         const p = app.profiles.find((x) => x.id === app.activeId) || null;
         const skills = p && p.model && p.model.skills ? p.model.skills : {};
-        const listStates = Object.keys(skills).filter((k) => k.startsWith('set:')).map((k) => ({ id: k, learned: skills[k].learned || 0, items: Object.keys(skills[k].items || {}).length }));
+        const listStates = Object.keys(skills).filter((k) => k.startsWith('set:')).map((k) => { const it = skills[k].items || {}; return { id: k, learned: skills[k].learned || 0, items: Object.keys(it).length, ok: Object.keys(it).filter((x) => it[x] && it[x].ok).length, missed: Object.keys(it).filter((x) => it[x] && it[x].k !== it[x].n).length, asked: Object.keys(it).reduce((n, x) => n + ((it[x] && it[x].n) || 0), 0) }; });
         stored = {
-          sets: (app.sets || []).map((s) => ({ id: s.id, name: s.name, count: (s.items || []).length, both: s.both === true })),
+          sets: (app.sets || []).map((s) => ({ id: s.id, name: s.name, count: (s.items || []).length, both: s.both === true, lines: (s.items || []).map((it) => it.q + ' = ' + it.a) })),
           active: p && { name: p.name, level: p.level, lang: p.lang, focus: p.focus || null, answered: p.model ? p.model.answered : 0, lastSkill: p.model ? p.model.lastSkill : '', stars: p.model ? p.model.stars : 0, listStates }
         };
         break;
@@ -114,6 +144,17 @@ const LOOK = `(() => {
 })()`;
 
 const cells = [];
+/**
+ * Every clause an arm owes. A cell that stops early (a `return note(...)`) never runs the rest, so the summary counts a clause
+ * that never ran as failed: a drive that lost its way is not a pass.
+ */
+const EXPECT = {
+  focus: ['line0', 'picker', 'skills', 'saved', 'only58', 'kept', 'quiet'],
+  lists: ['noLists', 'listsPage', 'count', 'row', 'lineList', 'fromList', 'learned', 'quiet'],
+  monster: ['line0M', 'savedM', 'only58M', 'shared', 'lineListM', 'fromListM', 'quiet'],
+  editor: ['filled', 'edited', 'asks', 'keptNo', 'deleted', 'quiet'],
+  both: ['bothSaved', 'backwards', 'forwards', 'rightBack', 'quiet']
+};
 
 async function driveCell(arm, vpName, lang) {
   const vp = VPS[vpName];
@@ -177,11 +218,12 @@ async function driveCell(arm, vpName, lang) {
       return true;
     };
     /** Answer the question on screen: the option whose text is `want` when given, else the first option, else a "1" in the box. Then Next. */
-    const answerOne = async (want) => {
-      const q = await until((r) => r.options.some((o) => /^[\d\s  .,/−-]+$/.test(o.text) || o.text.startsWith('around')) || r.padBox, 6000);
+    const answerOne = async (want, texts) => {
+      const isChoice = (o) => (texts ? texts.includes(o.text) : /^[\d\s  .,/−-]+$/.test(o.text) || o.text.startsWith('around'));
+      const q = await until((r) => r.options.some(isChoice) || r.padBox, 6000);
       const before = q.stored && q.stored.active ? q.stored.active.answered : 0;
       const prompt = q.bodyFull;
-      const choices = q.options.filter((o) => /^[\d\s  .,/−-]+$/.test(o.text) || o.text.startsWith('around'));
+      const choices = q.options.filter(isChoice);
       let kind;
       if (choices.length) {
         const pick = want ? choices.find((o) => o.text === want) || choices[0] : choices[0];
@@ -199,6 +241,188 @@ async function driveCell(arm, vpName, lang) {
       await wait(400);
       return { kind, prompt, skill: graded.stored && graded.stored.active ? graded.stored.active.lastSkill : '', stored: graded.stored };
     };
+
+    /**
+     * A question from a list the drive typed, answered right. The buttons say which way it is asked: the answer side (the usual
+     * way) or the question side (backwards). The item is the one whose other side is on the page and not on a button.
+     */
+    const answerList = async (lines, shotAs) => {
+      const qs = lines.map((l) => l[0]);
+      const as = lines.map((l) => l[1]);
+      const q = await until((r) => r.options.some((o) => qs.includes(o.text) || as.includes(o.text)) || r.padBox, 6000);
+      const opts = q.options.map((o) => o.text);
+      const reverse = opts.some((t) => qs.includes(t));
+      const line = lines.find(([qq, aa]) => (reverse ? q.bodyFull.includes(aa) && !opts.includes(aa) : q.bodyFull.includes(qq) && !opts.includes(qq)));
+      // The picture is of THIS question: answerOne presses Next, so a shot after it shows the following one.
+      if (shotAs) await shoot(shotAs(reverse));
+      const a = await answerOne(line ? (reverse ? line[0] : line[1]) : undefined, reverse ? qs : as);
+      return { skill: a.skill, kind: a.kind, reverse, known: !!line };
+    };
+    /** The lists page, the way a child finds it: a game's setup → Change → My lists → Make or edit a list. */
+    const toListsPage = async (game) => {
+      if (!(await click(game))) return `no "${game}" card on Home`;
+      await until((r) => r.bodyFull.includes(w.change), 4000);
+      if (!(await click(w.change))) return 'no Change';
+      await until((r) => r.bodyFull.includes(w.title), 3000);
+      if (!(await click(w.lists))) return `no "${w.lists}" pill`;
+      await until((r) => r.bodyFull.includes(w.editLists), 3000);
+      if (!(await click(w.editLists))) return 'no Make or edit a list';
+      const page = await until((r) => r.bodyFull.includes(w.listsTitle), 4000);
+      return page.bodyFull.includes(w.listsTitle) ? null : `the lists page did not open — ${page.body}`;
+    };
+    /** New list → name → lines → (both ways) → Save. Returns the stored set, or null. */
+    const makeList = async (name, lines, both) => {
+      const before = (await look()).stored.sets.length;
+      if (!(await click(w.newList))) return null;
+      await until((r) => r.inputs.length >= 2, 3000);
+      await typeInto(0, name);
+      await typeInto(1, linesText(lines));
+      await until((r) => r.bodyFull.includes(w.count), 3000);
+      if (both) await click(w.both);
+      if (!(await click(w.save))) return null;
+      const saved = await until((r) => r.stored && r.stored.sets.length === before + 1, 4000);
+      return saved.stored.sets.find((s) => s.name === name) || null;
+    };
+    /** A game's setup → Change → My lists → the list → Practise this. Returns the look once the setup's line names the list. */
+    const chooseList = async (game, name, count) => {
+      await click(game);
+      await until((r) => r.bodyFull.includes(w.change), 4000);
+      await click(w.change);
+      await until((r) => r.bodyFull.includes(w.title), 3000);
+      await click(w.lists);
+      if (!(await click(`${name} (${count})`))) return null;
+      if (!(await click(w.practiseThis))) return null;
+      return until((r) => r.bodyFull.includes(w.myList + name), 4000);
+    };
+    /**
+     * Home, from anywhere. A reload leaves a live game for Home (the bar, and its Home, are away while a game is live), but a page
+     * with a URL of its own, like /lists, reloads as itself, so the bar's Home finishes the way.
+     */
+    const reloadHome = async () => {
+      await send('Page.reload', {});
+      await wait(3500);
+      // Home is where both game cards are: the race page's own title is "Rocket Race" too.
+      const home = (r) => r.bodyFull.includes(w.race) && r.bodyFull.includes(w.monster);
+      const at = await until(home, 5000);
+      if (home(at)) return at;
+      await click(w.home);
+      return until(home, 5000);
+    };
+
+    if (arm === 'monster') {
+      if (!(await newPlayer('Saoirse', 'CE2'))) return note('could not make the player');
+      cell.reached = true;
+      if (!(await click(w.monster))) return note(`no "${w.monster}" card on Home`);
+      const setup = await until((r) => r.bodyFull.includes(w.everything), 4000);
+      await shoot('setup');
+      clause('line0M', setup.bodyFull.includes(w.everything), setup.body);
+      if (!(await click(w.change))) return note(`no "${w.change}" on Monster Gate's setup — ${(await look()).body}`);
+      await until((r) => r.bodyFull.includes(w.title), 3000);
+      if (!(await click(w.tables))) return note(`no "${w.tables}" topic pill — ${(await look()).body}`);
+      await until((r) => r.bodyFull.includes(w.t5), 3000);
+      await click(w.t5);
+      await click(w.t8);
+      if (!(await click(w.practiseThis))) return note(`no "${w.practiseThis}" button`);
+      const saved = await until((r) => r.stored && r.stored.active && r.stored.active.focus && r.stored.active.focus.skills && r.stored.active.focus.skills.length === 2, 4000);
+      await shoot('saved');
+      const focus = saved.stored && saved.stored.active ? saved.stored.active.focus : null;
+      clause('savedM', !!focus && focus.subject === 'maths' && [...focus.skills].sort().join() === 'table-5,table-8' && saved.bodyFull.includes(w.two), JSON.stringify({ focus, body: saved.body }));
+      if (!(await click(w.start))) return note('no Start');
+      const asked = [];
+      for (let i = 0; i < 6; i++) {
+        const a = await answerOne();
+        if (a.kind === 'none') break;
+        asked.push(a.skill);
+      }
+      await shoot('played');
+      clause('only58M', asked.length === 6 && asked.every((s) => s === 'table-5' || s === 'table-8'), JSON.stringify(asked));
+      await reloadHome();
+      await click(w.race);
+      const race = await until((r) => r.bodyFull.includes(w.two), 5000);
+      clause('shared', race.bodyFull.includes(w.two), race.body);
+      // A list, made and chosen from Monster Gate's own setup.
+      await reloadHome();
+      const lost = await toListsPage(w.monster);
+      if (lost) return note(lost);
+      const set = await makeList(LIST_NAME, LIST_LINES, false);
+      if (!set) return note(`the list was not saved — ${(await look()).body}`);
+      await reloadHome();
+      const chosen = await chooseList(w.monster, LIST_NAME, 4);
+      await shoot('chosen');
+      clause('lineListM', !!chosen && chosen.bodyFull.includes(w.myList + LIST_NAME) && chosen.stored.active.focus.subject === 'set:' + set.id, chosen && JSON.stringify({ focus: chosen.stored.active.focus, body: chosen.body }));
+      if (!(await click(w.start))) return note('no Start');
+      const fromList = [];
+      for (let i = 0; i < 6; i++) {
+        const a = await answerList(LIST_LINES);
+        if (a.kind === 'none') break;
+        fromList.push(a);
+      }
+      await shoot('listplayed');
+      clause('fromListM', fromList.length === 6 && fromList.every((a) => a.skill === 'set:' + set.id && a.known), JSON.stringify(fromList));
+    }
+
+    if (arm === 'editor') {
+      if (!(await newPlayer('Ellie', '6e'))) return note('could not make the player');
+      cell.reached = true;
+      const lost = await toListsPage(w.race);
+      if (lost) return note(lost);
+      const set = await makeList(LIST_NAME, LIST_LINES, false);
+      if (!set) return note(`the list was not saved — ${(await look()).body}`);
+      if (!(await click(w.edit))) return note(`no "${w.edit}" on the row — ${(await look()).body}`);
+      const open = await until((r) => r.inputs.length >= 2 && r.inputs[0].value === LIST_NAME, 3000);
+      await shoot('filled');
+      clause('filled', open.inputs.length >= 2 && open.inputs[0].value === LIST_NAME && open.inputs[1].value === linesText(LIST_LINES), JSON.stringify(open.inputs.map((i) => i.value)));
+      const changed = LIST_LINES.map((l) => (l[0] === EDITED[0] ? EDITED : l));
+      await typeInto(1, linesText(changed));
+      if (!(await click(w.save))) return note(`no "${w.save}" in the editor — ${(await look()).body}`);
+      const after = await until((r) => r.stored.sets.length === 1 && r.stored.sets[0].lines.includes(EDITED.join(' = ')), 4000);
+      await shoot('edited');
+      const s0 = after.stored.sets[0];
+      clause('edited', after.stored.sets.length === 1 && s0.id === set.id && s0.count === 4 && s0.lines.includes(EDITED.join(' = ')) && !s0.lines.includes('Fire is mastered = around -400 000') && after.bodyFull.includes(LIST_NAME), JSON.stringify(after.stored.sets));
+      if (!(await click(w.del))) return note(`no "${w.del}" on the row`);
+      const asking = await until((r) => r.bodyFull.includes(w.delAsk), 3000);
+      await shoot('asks');
+      clause('asks', asking.bodyFull.includes(w.delAsk) && asking.stored.sets.length === 1, JSON.stringify({ sets: asking.stored.sets.length, body: asking.body }));
+      if (!(await click(w.no))) return note(`no "${w.no}"`);
+      const kept = await until((r) => !r.bodyFull.includes(w.delAsk), 3000);
+      clause('keptNo', !kept.bodyFull.includes(w.delAsk) && kept.stored.sets.length === 1 && kept.options.some((o) => o.text === w.edit), JSON.stringify({ sets: kept.stored.sets.length, body: kept.body }));
+      await click(w.del);
+      await until((r) => r.bodyFull.includes(w.delAsk), 3000);
+      if (!(await click(w.yes))) return note(`no "${w.yes}"`);
+      const gone = await until((r) => r.stored.sets.length === 0, 4000);
+      await shoot('deleted');
+      clause('deleted', gone.stored.sets.length === 0 && !gone.bodyFull.includes(LIST_NAME), JSON.stringify({ sets: gone.stored.sets, body: gone.body }));
+    }
+
+    if (arm === 'both') {
+      if (!(await newPlayer('Ellie', '6e'))) return note('could not make the player');
+      cell.reached = true;
+      const lost = await toListsPage(w.race);
+      if (lost) return note(lost);
+      const set = await makeList(VOCAB_NAME, VOCAB_LINES, true);
+      await shoot('saved');
+      const row = await look();
+      clause('bothSaved', !!set && set.both === true && row.bodyFull.includes(`${w.count} · ${w.both}`), JSON.stringify({ set, body: row.body }));
+      if (!set) return;
+      await click(w.home);
+      await until((r) => r.bodyFull.includes(w.race), 4000);
+      const chosen = await chooseList(w.race, VOCAB_NAME, 4);
+      if (!chosen) return note(`could not choose "${VOCAB_NAME}" — ${(await look()).body}`);
+      if (!(await click(w.start))) return note('no Start');
+      const asked = [];
+      for (let i = 0; i < 8; i++) {
+        const a = await answerList(VOCAB_LINES, (reverse) => `q${i}-${reverse ? 'back' : 'fwd'}`);
+        if (a.kind === 'none') break;
+        asked.push(a);
+      }
+      note(`asked: ${asked.map((a) => (a.reverse ? 'back' : 'fwd')).join(' ')}`);
+      const end = await look();
+      const state = end.stored.active.listStates.find((s) => s.id === 'set:' + set.id);
+      clause('backwards', asked.some((a) => a.reverse && a.known), JSON.stringify(asked));
+      clause('forwards', asked.some((a) => !a.reverse && a.known), JSON.stringify(asked));
+      // Graded right: no item has a miss (a miss sets its run k back to 0, so k === n is "never missed"), over all eight answers.
+      clause('rightBack', asked.length === 8 && asked.every((a) => a.known && a.skill === 'set:' + set.id) && !!state && state.asked === 8 && state.missed === 0, JSON.stringify({ asked: asked.length, state }));
+    }
 
     if (arm === 'focus') {
       if (!(await newPlayer('Saoirse', 'CE2'))) return note('could not make the player');
@@ -305,7 +529,7 @@ async function driveCell(arm, vpName, lang) {
 (async () => {
   const plan = [];
   for (const arm of ARMS) {
-    const cellsFor = arm === 'focus' ? [['1366x768', 'en'], ['390x844', 'fr']] : [['1366x768', 'en']];
+    const cellsFor = arm === 'focus' || arm === 'monster' ? [['1366x768', 'en'], ['390x844', 'fr']] : [['1366x768', 'en']];
     for (const [vpName, lang] of cellsFor) if (!ONLY || ONLY.includes(vpName)) plan.push([arm, vpName, lang]);
   }
   for (const [arm, vpName, lang] of plan) {
@@ -317,8 +541,9 @@ async function driveCell(arm, vpName, lang) {
   }
   let failed = 0;
   for (const cell of cells) {
-    const names = Object.keys(cell.clauses);
+    const names = [...new Set([...(EXPECT[cell.arm] || []), ...Object.keys(cell.clauses)])];
     const bad = names.filter((n) => !cell.clauses[n]);
+    for (const n of bad) if (!(n in cell.clauses)) cell.saw[n] = 'never ran';
     failed += bad.length + (cell.reached ? 0 : 1);
     console.log(`${cell.arm} ${cell.lang} ${cell.vp}: ${cell.reached ? 'reached' : 'NOT REACHED'} · ${names.length - bad.length}/${names.length} ${bad.length ? 'FAIL ' + bad.join(',') : 'ALL PASS'}`);
     for (const n of bad) console.log(`   ✗ ${n}: ${cell.saw[n]}`);

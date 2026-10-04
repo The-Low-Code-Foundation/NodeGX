@@ -31,8 +31,8 @@ The two children are the players named in `kids-ellie-saoirse` (memory); their n
 
 | task | the person sentence | state (session 1, 2026-10-04) |
 |---|---|---|
-| [REV-001 — choose what to practise](REV-001-CHOOSE-WHAT-TO-PRACTISE.md) | Before a race or a monster game, a child picks a subject, a topic, and ticks the skills — "the tables of 5 and 8" — and the game asks nothing else. A topic the class has not reached stays unticked. | built · gated · driven (3 cells) · Richard's replay owed |
-| [REV-002 — my revision lists](REV-002-MY-REVISION-LISTS.md) | What the teacher gave, typed one line per question, becomes a list every game asks, with the teacher's own answers. | built · gated · driven · Richard's replay owed |
+| [REV-001 — choose what to practise](REV-001-CHOOSE-WHAT-TO-PRACTISE.md) | Before a race or a monster game, a child picks a subject, a topic, and ticks the skills — "the tables of 5 and 8" — and the game asks nothing else. A topic the class has not reached stays unticked. | built · gated · driven (3 cells; Monster Gate EN + FR, session 2) · Richard's replay owed |
+| [REV-002 — my revision lists](REV-002-MY-REVISION-LISTS.md) | What the teacher gave, typed one line per question, becomes a list every game asks, with the teacher's own answers. | built · gated · driven (race, Monster Gate, Edit/Delete, both ways) · Richard's replay owed |
 | [REV-003 — French, English, history](REV-003-FRENCH-ENGLISH-HISTORY.md) | The school has more than maths: conjugation, the verb's modes/tenses/voices, word classes, homophones, agreement; English vocabulary and grammar; periods, centuries, prehistory and Antiquity. Content from the French programmes, interface EN or FR. | built (46 skills, 500 items, 10 cards) · gated · the content needs a French teacher's eye |
 | [REV-004 — what learning pays](REV-004-WHAT-LEARNING-PAYS.md) | Learning an item of a list pays, and learning the whole list pays more, so rote memorisation has a score. More prizes are owed. | stars built · gated · driven · prizes NOT built (a ruling) |
 
