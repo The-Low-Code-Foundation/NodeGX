@@ -146,7 +146,7 @@ removes. Ruling 1 (a) taken as the engineering default.
 | AC4 | ✅ `isl017LibraryProvenance.test.ts`: the record names the entry and version, holds no absolute path, and two copies of the shelf at two different paths write the same bytes. 🔴 Reverted arm (`fromProject: entry.entryDir`): both red. |
 | AC5 | ⬜ The person's door (an agent asked for the kits and the font) — not run. |
 | AC6 | ✅ `cg003Template.test.ts` with the door installs: 149/150, AC2 red naming **`noodl_modules/kit-provenance.json` only** — the expected first diff (§7) — then `npm run template:garden` (exit 0) added that one file to `templates/bot-garden` (four records, entry + version, the template epoch) and the gate read **150/150**. Control (garden-kit's install removed): the authoring refused `garden-kit.Divider` and `garden-kit.Garden` by name (`unknown-node-type`). |
-| AC7 | ⬜ Ruling 2's reader census — next. |
+| AC7 | 🔬 The census is taken (below); ruling 2 is not built. |
 
 **Gates:** `libraryTools`, `isl025Census`, `cg001GardenKit`, `gam-018`, `iwLook` with `cg003Template`: 273/273.
 `library:check` exit 1 on **`modules/nightbook-kit: missing library.json` only** — a peer's untracked pile in the
@@ -157,3 +157,37 @@ Garden 3D Kit, which were already there at HEAD; the baseline was not updated (p
 `library:check` **exit 0, 82/82 clean**; `library:build` exit 0; `library:verify-dist` **exit 0** — modules 36
 entries, 0 with problems (the editor's own install path walked against the built dist).
 
+**AC7 — the reader census for ruling 2 (s13, read-only, an Explore agent; file:line in its report, condensed):**
+
+- **No editor path copies `templates/` into a person's project.** `EmbeddedTemplateProvider` writes TypeScript
+  objects (hello-world, site-builder, landing-pages — no kits); `PlatformTemplateProvider` unpacks a community-shelf
+  bundle (`PlatformTemplateProvider.ts:181-235`). The repo's templates reach people only through
+  `publish-templates-to-shelf.sh` (`:155-165`), which walks the working-tree folder, kits included (its expected file
+  counts include them, `:103-113`). ⇒ **"Copy on install" is a PUBLISH-time step**: stage a copy, resolve the
+  referenced kits from `library/`, publish that — no network, nothing in the editor changes. (At create time in the
+  editor it would need a network fetch: the editor has no `library/` on disk, `modulelibrarymodel.ts:177`.)
+- **The reference already exists in one template:** `templates/bot-garden/noodl_modules/kit-provenance.json`
+  (this session). Its slug and version sit inside a sentence (`fromProject`), so a resolver would parse prose:
+  add machine fields (`entry`, `entryVersion`) — the editor's per-arm check ignores extra fields
+  (`isKitProvenance`). A folder name can differ from its entry (`i18next-noodl` ⊂ `i18next-translation`), so the
+  record needs both.
+- **Readers that need the kit on disk in the repo:** the generators while they author (the door refuses an unknown
+  kit type — AC6's control), `cg003Template.test.ts:299-304` (copy equals library), `tpl007Template.test.ts:146-150`,
+  `isl025Census.test.ts:131-139` (requires every census file to exist), `noodl-preview` GAM-023 (deploys a copy of
+  `templates/pixel-game`), `nodegx-kit-scaffold` `types-copy.test.js:139-165`. Every one must be re-pointed or must
+  resolve first, or it grades an empty population.
+- **Not referenceable:** `dbt-lesson` has no library entry by design (`library/modules/dbt-lesson/build.mjs:38`
+  builds straight into the template; `scripts/library/build.js:34-42` `TEMPLATE_KIT_SOURCES`). It stays copied.
+- **Population:** 8 committed kit `index.js` (1,979,503 B): bot-garden ×3 and pixel-game ×1 identical to the
+  library; rocket-school `game-kit` identical but its `types/node-kit.d.ts` stale (types-copy skips it on purpose);
+  DBT `i18next-noodl` stale (Sep 20 vs Oct 3); DBT `dbt-lesson` unreferenceable. Font modules are committed too
+  (`bot-garden-fonts`, `rocket-school-fonts`, `story-engine-fonts`, `preset-font-*`).
+- Side readings: `pruneKitProvenance` has no caller (`projectmodules.ts:708`); `tpl005Template.test.ts:551` rewrites
+  `templates/pixel-game` from inside a test; `templates/nightbook` and `library/modules/nightbook-kit` are wholly
+  untracked (the latter has no `library.json` — it is what reds `library:check` in the working tree).
+
+**Proposed build (next session):** the publish script stages each template, runs one resolver over its
+`kit-provenance.json` records (`install_prefab`'s copy, by `entry`), checks the staged tree's counts, and publishes the
+stage; the repo templates then drop their library-identical kit folders and commit the records only. The generators
+keep installing through the door while they author, and write the reference instead of keeping the folder. The six
+readers above move first.
