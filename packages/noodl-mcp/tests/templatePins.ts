@@ -101,6 +101,21 @@ export function copyTree(from: string, to: string): void {
 }
 
 /**
+ * P109 ISL-016 AC8 — the project file's `modified`, pinned to the template's epoch. The door's `set_project_settings`
+ * stamps it as the editor's own save does (`ProjectExporter.ts` `buildProjectV2File` always writes it), so a generator
+ * that sets its home through the door has a wall-clock key to pin, as `pinComponentFiles` pins the components'. Key
+ * order and the file's ending are kept; a file with no `modified` is left alone.
+ */
+export function pinProjectModified(projectDir: string, epoch: string): void {
+  const file = path.join(projectDir, 'nodegx.project.json');
+  const text = fs.readFileSync(file, 'utf-8');
+  const doc = JSON.parse(text) as Record<string, unknown>;
+  if (!('modified' in doc)) return;
+  doc.modified = epoch;
+  fs.writeFileSync(file, JSON.stringify(doc, null, 2) + (text.endsWith('\n') ? '\n' : ''));
+}
+
+/**
  * Record which node is the app's HOME, or the editor previews *"ERROR — No HOME
  * component selected"*. `rootNodeId`, not the legacy `rootComponent`, which a
  * v2 project file does not validate with. Derived from the file that was

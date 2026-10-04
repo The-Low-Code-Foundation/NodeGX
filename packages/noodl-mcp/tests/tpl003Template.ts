@@ -38,7 +38,7 @@ import { pinRunOnValueChangeDefaults } from '../../noodl-editor/src/editor/src/m
 import { createServer } from '../src/server';
 
 import { pinRunOnValueChangeDefaultsInDirectory, readAsLegacyProject } from './templateArtefact';
-import { collectEditMarkers, copyTree, pinComponentFiles, pinRegistry, pinRootNode } from './templatePins';
+import { collectEditMarkers, copyTree, pinComponentFiles, pinProjectModified, pinRegistry } from './templatePins';
 import { APP_COMPONENT, APP_NODES, APP_WIRES, EDIT, PLACEHOLDER_ADDRESS, TPL003_COMPONENTS, createPass } from './tpl003Components';
 import { TPL003_PRESET, TPL003_TOKENS } from './tpl003Theme';
 
@@ -201,6 +201,11 @@ export async function buildLandingTemplateProject(options: BuildOptions = {}): P
     if (!c.deferred?.length) continue;
     await call('update_component', { path: c.path, set: { nodes: c.nodes, connections: c.connections } }, c.path);
   }
+  // P109 ISL-016 AC8: the home through the door, as the garden's (the raw `pinRootNode` after the door closed is gone).
+  if (!options.omitApp) {
+    await call('find_tools', { group: 'project' }, 'project:reveal');
+    await call('set_project_settings', { home: APP_COMPONENT }, 'home');
+  }
 
   await client.close();
   await server.close();
@@ -228,6 +233,7 @@ export function prepareLandingArtefact(built: AuthoredTemplate, output: string):
   pinRunOnValueChangeDefaultsInDirectory(built.projectDir);
   pinComponentFiles(built.projectDir, 'tpl003', TEMPLATE_EPOCH);
   pinRegistry(built.projectDir, TEMPLATE_EPOCH);
+  pinProjectModified(built.projectDir, TEMPLATE_EPOCH);
 
   if (path.basename(output) !== TEMPLATE_ID) throw new Error(`refusing to clear ${output}`);
   fs.rmSync(output, { recursive: true, force: true });
@@ -240,7 +246,6 @@ export function prepareLandingArtefact(built: AuthoredTemplate, output: string):
   }
 
   writeStartHere(output);
-  pinRootNode(output, APP_COMPONENT);
 }
 
 /**
