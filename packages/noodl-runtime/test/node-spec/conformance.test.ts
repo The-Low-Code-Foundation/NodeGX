@@ -388,6 +388,8 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C70 — Items wired a truthy value that is not a list, or a list holding null: the render throws at the next paint', matches: itemsNotAList },
     { row: "NSP-016 §6 C71 — a Value written back to the value React last rendered, after a pick, leaves the pick selected: picking it again raises nothing", matches: pickWriteBackPick }
   ],
+  // s41 — the Slider: no label and no text style, so two of the three throwing setters (the Placement and units-typed style inputs)
+  'net.noodl.controls.range': VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
   'net.noodl.controls.checkbox': [
     ...VISUAL_ROWS,
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },

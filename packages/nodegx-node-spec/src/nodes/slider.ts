@@ -1,0 +1,454 @@
+/**
+ * Slider (`net.noodl.controls.range`) — read from `packages/noodl-viewer-react/src/nodes/controls/slider.ts`,
+ * `components/controls/Slider/Slider.tsx` (the component), `controls/utils.ts` (the control events and states, the Focus /
+ * Blur actions) and `react-component-node.ts` (`initialize` :1245-1322, `defineRegularInputProp` :729-740) on 2026-10-04
+ * (NSP-016 s41). Its person face, page model and the shared ports are the Dropdown's (dropdown.ts): what differs is the slide.
+ *
+ * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
+ *
+ * THE RULE, before the citations. A Slider is an `<input type="range">` drawn invisible (`opacity: 0`, Slider.tsx :108-111)
+ * over a track and a thumb it paints itself (:147-175), in a wrapper (:173-186); a PERSON slides it. Four things hold the
+ * value, and the spec keeps them apart because the runtime does:
+ *
+ *   - **the author's Value** (`props.value`, slider.ts :237-271 `_setInputValue`): Min at the making (:33), then what the
+ *     **Value** input writes — an empty value (`undefined`, `null`, `''`) is ignored, a value `Number` cannot make finite is
+ *     reported on the runtime channel and ignored, anything else is clamped with `Math.max(Min, Math.min(Max, n))` over the
+ *     props AS WRITTEN (a Min written `undefined` makes the clamp `NaN`) and kept when it differs (`!==`). **Min** and **Max**
+ *     (:105-126) re-clamp it after writing themselves (`onChange` → `_setInputValue(this.props.value)` — a `NaN` there is not
+ *     finite, so it stays). The component's effect keys on it (Slider.tsx :88-90).
+ *   - **the node's value** (`_internal.outputValue`, slider.ts :34, :39-54 `updateOutputValue`): 0 at the making; what the
+ *     **Value** output reads (:79-87). Whoever calls `updateOutputValue(v)` — the effect, or the `<input>`'s `onChange` — sends
+ *     it and FIRES CHANGED when `v !== outputValue` (`NaN` is never equal to itself, so a `NaN` fires every time). Value
+ *     Percent (:220-236) is recomputed on that change and, while it reads falsy (0, `NaN`, never set), on every call:
+ *     `Math.floor((v - Min) / (Max - Min) * 100)` over the props as written, sent when it differs (`!==`).
+ *   - **the shown value** (the component's `useState`, Slider.tsx :86): what the `<input>` is told to hold. A slide writes it
+ *     (:183, `Number(e.target.value)`, then `updateOutputValue`); the effect (:88-90, `[props.value]`) writes it to the
+ *     author's Value at the mount and at a render whose author's Value differs (`Object.is`) from the render before, then
+ *     calls `updateOutputValue(props.value)` — so **a Value written from the graph fires Changed** at the frame's end (row
+ *     D36: the description says it does not), and a remount after a slide takes the author's Value back with Changed.
+ *   - **what the browser holds** (the `<input>`'s own value): the shown value sanitized by the BROWSER's range rules against
+ *     the attributes as rendered (`min` / `max`, and `step` only when Step is truthy — :116-122): not a number → the middle
+ *     (or Min when Max is below it); then clamped to [Min, Max] and rounded to the nearest step from Min (a tie upwards),
+ *     stepping back inside when the rounding leaves the range. A slide to the value the browser already holds raises
+ *     nothing. Nobody on the wire reads it; the slide's no-change rule does.
+ *   - **Enabled**, **the pointer, the keyboard, a click's focus** (utils.ts :157-311 on the `<input>`, Slider.tsx :178),
+ *     **Focus** / **Blur** (utils.ts :366-440, the target is the `<input>`), **Mounted** and the look: the Dropdown's. A slide is
+ *     a keyboard slide: it puts the keyboard on the element first (the focusing steps), as a Tab does, and a disabled element
+ *     takes none. A click is a press and a release where the handle already is (the face has no geometry): it moves nothing.
+ */
+
+import { defineNode, type Patch } from '../spec';
+import { SELF_REFERENCE } from '../trace';
+
+type State = {
+  /** utils.ts :75-89 `_internal.enabled` */
+  enabled: boolean;
+  hover: boolean;
+  pressed: boolean;
+  focused: boolean;
+  /** react-component-node.ts :1267 `wantsToBeMounted` */
+  mounted: boolean;
+  /** the element's `disabled` attribute follows Enabled at each paint (Slider.tsx :182) — what the Focus and Blur actions meet */
+  pageEnabled: boolean;
+  /** the element holds the keyboard — what the PAGE knows (`focused` is what the node REPORTS, row D30) */
+  elementFocused: boolean;
+  /** the component is on the page: mounted and painted */
+  onPage: boolean;
+  /** `props.min` / `props.max` / `props.step` as written (react-component-node.ts :729-740: `undefined` deletes the prop) */
+  min: unknown;
+  max: unknown;
+  step: unknown;
+  /** slider.ts :33, :267 `props.value` — the author's Value, clamped */
+  authorValue: number;
+  /** slider.ts :34 `_internal.outputValue` — the Value output */
+  out: number;
+  /** slider.ts :234 `_internal.valuePercent` — the Value Percent output; `undefined` until first computed */
+  percent: number | undefined;
+  /** Slider.tsx :86 the component's `value` state — meaningless off the page */
+  shown: number;
+  /** `props.value` as the last render saw it (Slider.tsx :90, the effect's dependency) */
+  paintedValue: number;
+};
+
+type O = typeof Slider extends { outputs: infer X } ? X : never;
+type Send = Patch<State, O>;
+type Pulse = 'didMount' | 'willUnmount' | 'pointerDown' | 'pointerUp' | 'onFocus' | 'onBlur' | 'hoverStart' | 'hoverEnd' | 'onChange';
+type ValueOut = 'pressedState' | 'focusState' | 'hoverState' | 'value' | 'valuePercent';
+type Act = { set?: Partial<State>; send: ValueOut[]; emit?: Pulse[] };
+
+const NOTHING: Send = { send: [] };
+const NONE: Act = { send: [] };
+
+export const Slider = defineNode({
+  type: 'net.noodl.controls.range',
+  version: 1,
+  source: 'packages/noodl-viewer-react/src/nodes/controls/slider.ts',
+  needs: ['person'],
+  // the page's syncs (spec.ts `synced`): not branches — the React side of the value with them
+  synced: ['pageEnabled', 'shown', 'paintedValue'],
+
+  // react-component-node.ts :1274-1301 the defaults into props, then slider.ts :31-57 `initialize`: the author's Value is Min
+  // (0), `updateOutputValue(0)` finds the node's 0 unchanged and computes Value Percent (0)
+  state: {
+    enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, elementFocused: false, onPage: false,
+    min: 0, max: 100, step: 1, authorValue: 0, out: 0, percent: 0, shown: 0, paintedValue: 0
+  } as State,
+  // utils.ts :402-411 `outcomeOutputs({ done, unchanged })` (addFocusActions)
+  outcomes: ['done', 'unchanged'],
+
+  acts: {
+    hover: { description: 'the pointer moves onto the slider' },
+    leave: { description: 'the pointer moves off it' },
+    press: { description: 'a mouse button goes down on it' },
+    release: { description: 'the mouse button comes up on it' },
+    click: { description: 'a press and a release on it where the handle already is, and the click that follows — which moves nothing' },
+    touch: { description: 'a finger goes down on it' },
+    lift: { description: 'the finger comes up' },
+    focus: { description: 'the keyboard is put on it (a Tab reaching it)' },
+    blur: { description: 'the keyboard is taken off it (a Tab leaving it)' },
+    slide: {
+      description: 'the handle is moved to a value — a keyboard slide: the keyboard goes onto the element first; the browser clamps the value to Min and Max and rounds it to the step, and a slide to the value it already holds raises nothing',
+      values: [0, 25, 50, 50.25, 51, 99.5, 100, 150, -10, 7]
+    }
+  },
+
+  inputs: {
+    // ---- logic ----
+    // utils.ts :75-89
+    enabled: { type: 'boolean', default: true, coerce: 'none', displayName: 'Enabled', group: 'General', description: 'Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing', portability: 'logic' },
+    // slider.ts :62-77, :237-271
+    value: { type: 'number', coerce: 'none', displayName: 'Value', group: 'General', description: 'Moves the handle to this value, clamped to Min and Max; changing it from the graph does not fire Changed. An empty value leaves the handle where it is', portability: 'logic', examples: [30, 50, 0, 100, 120, -5, 33.5, '40', null, ''] },
+    // slider.ts :105-115
+    min: { type: 'number', default: 0, coerce: 'none', displayName: 'Min', group: 'General', description: 'Value at the far left of the track; the current value is clamped up to it if it is below', portability: 'logic', examples: [0, 10, -20, 40] },
+    // slider.ts :116-126
+    max: { type: 'number', default: 100, coerce: 'none', displayName: 'Max', group: 'General', description: 'Value at the far right of the track; the current value is clamped down to it if it is above', portability: 'logic', examples: [100, 60, 40, 200] },
+    // slider.ts :127-134 — on the element only (Slider.tsx :120-122)
+    step: { type: 'number', default: 1, coerce: 'none', displayName: 'Step', group: 'General', description: 'Smallest amount the handle can move by, so the value lands on multiples of it', portability: 'logic', examples: [1, 5, 0.5, 0, 25] },
+    // react-component-node.ts :2302-2321
+    mounted: { type: 'boolean', default: true, coerce: 'none', displayName: 'Mounted', group: 'General', description: 'Removes the element from the page entirely when false, unlike Visible which leaves its space behind', portability: 'logic' },
+    // utils.ts :366-398
+    focus: { type: 'signal', outcome: true, displayName: 'Focus', group: 'Actions', description: 'Puts the keyboard on this slider, so Enter, Space and the arrow keys go to it', portability: 'logic' },
+    blur: { type: 'signal', outcome: true, displayName: 'Blur', group: 'Actions', description: 'Takes the keyboard away from this slider, which is what fires Blurred', portability: 'logic' },
+    // react-component-node.ts :1380-1395
+    scrollIntoView: { type: 'signal', displayName: 'Scroll Into View', group: 'Scroll Into View', description: 'Scrolls the page, or the scrolling Group holding this element, until the element can be seen', portability: 'logic' },
+    scrollIntoViewAlign: { type: 'enum', enums: ['nearest', 'start', 'center', 'end'], default: 'nearest', coerce: 'none', displayName: 'Scroll Align', group: 'Scroll Into View', description: 'Where Scroll Into View leaves the element: Nearest edge moves only as far as needed', portability: 'logic' },
+    // utils.ts :93-120 — what reaches the nodes around it; a graph scenario's matter
+    blockTouch: { type: 'boolean', coerce: 'none', displayName: 'Block Pointer Events', group: 'Pointer Events', description: 'Stops every pointer event that lands on this control from reaching the nodes it sits inside. Blunt: it takes hover and pointer-down with it, so reach for Click Bubbling first if it is only clicks you want to keep in', portability: 'logic' },
+    clickBubbling: { type: 'enum', enums: ['auto', 'always', 'never'], default: 'auto', coerce: 'none', displayName: 'Click Bubbling', group: 'Pointer Events', description: "Whether a click on this control also fires Click on the nodes it sits inside. Automatic keeps it here as soon as this control's own Click is connected, so a Favourite button inside a clickable card runs Favourite and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not", portability: 'logic' },
+
+    // ---- look and layout (R10): stored, written to the style, read by no output; each with its class (visual-params.json) ----
+  alignX: { type: "enum", enums: ["left", "center", "right"], coerce: 'none', displayName: "Align X", group: "Alignment", description: "Horizontal alignment of this element within the space its parent gives it", portability: "layout-shared" },
+  alignY: { type: "enum", enums: ["top", "center", "bottom"], coerce: 'none', displayName: "Align Y", group: "Alignment", description: "Vertical alignment of this element within the space its parent gives it", portability: "layout-shared" },
+  boxSizing: { type: "enum", enums: ["border-box", "content-box"], default: "border-box", coerce: 'none', displayName: "Box Sizing", group: "Margin and padding", description: "Whether Width and Height include this element's padding and border, or only its content", portability: "web-only" },
+  cssClassName: { type: "string", default: "", coerce: 'none', displayName: "CSS Class", group: "Advanced HTML", description: "Extra CSS class names to put on this element, for styling from a stylesheet you supply", portability: "web-only" },
+  dataAttributes: { type: "stringlist", coerce: 'none', editOnly: true, displayName: "Data Attributes", group: "Data Attributes", description: "data-* names (data-testid) for tests and scripts to find this element by; each gets a value input", portability: "web-only" },
+  marginBottom: { type: "number", coerce: 'none', displayName: "Margin Bottom", group: "Margin and padding", description: "Space outside the element's bottom edge, between it and its neighbours", portability: "layout-expressible" },
+  marginLeft: { type: "number", coerce: 'none', displayName: "Margin Left", group: "Margin and padding", description: "Space outside the element's left edge, between it and its neighbours", portability: "layout-expressible" },
+  marginRight: { type: "number", coerce: 'none', displayName: "Margin Right", group: "Margin and padding", description: "Space outside the element's right edge, between it and its neighbours", portability: "layout-expressible" },
+  marginTop: { type: "number", coerce: 'none', displayName: "Margin Top", group: "Margin and padding", description: "Space outside the element's top edge, between it and its neighbours", portability: "layout-expressible" },
+  mixBlendMode: { type: "enum", enums: ["normal", "multiply", "screen", "overlay", "darken", "lighten", "color-dodge", "color-burn", "hard-light", "soft-light", "difference", "exclusion", "hue", "saturation", "color", "luminosity"], default: "normal", coerce: 'none', displayName: "Blend Mode", group: "Style", description: "How this element's colours blend with whatever is painted behind it", portability: "look-expressible" },
+  opacity: { type: "number", default: 1, coerce: 'none', displayName: "Opacity", group: "Style", description: "How opaque this element is, from 0 for invisible to 1 for solid", portability: "look-shared" },
+  paddingBottom: { type: "number", default: 0, coerce: 'none', displayName: "Pad Bottom", group: "Margin and padding", description: "Space inside the element's bottom edge, between it and its content", portability: "layout-shared" },
+  paddingLeft: { type: "number", default: 0, coerce: 'none', displayName: "Pad Left", group: "Margin and padding", description: "Space inside the element's left edge, between it and its content", portability: "layout-shared" },
+  paddingRight: { type: "number", default: 0, coerce: 'none', displayName: "Pad Right", group: "Margin and padding", description: "Space inside the element's right edge, between it and its content", portability: "layout-shared" },
+  paddingTop: { type: "number", default: 0, coerce: 'none', displayName: "Pad Top", group: "Margin and padding", description: "Space inside the element's top edge, between it and its content", portability: "layout-shared" },
+  position: { type: "enum", enums: ["relative", "absolute", "sticky", "fixed"], default: "relative", coerce: 'none', displayName: "Position", group: "Layout", description: "How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space", portability: "layout-expressible" },
+  styleCss: { type: "string", default: "/* background-color: red; */", coerce: 'none', editOnly: true, displayName: "CSS Style", group: "Advanced HTML", description: "Raw CSS declarations applied to this element, overriding the styling ports above", portability: "web-only" },
+  thumbBorderBottomColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Thumb Border Style", description: "Colour of the bottom edge of the handle you drag only, overriding Thumb Border Color", portability: "look-shared" },
+  thumbBorderBottomLeftRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Thumb Corner Radius", description: "How rounded the bottom left corner of the handle you drag is, overriding Thumb Corner Radius", portability: "look-shared" },
+  thumbBorderBottomRightRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Thumb Corner Radius", description: "How rounded the bottom right corner of the handle you drag is, overriding Thumb Corner Radius", portability: "look-shared" },
+  thumbBorderBottomStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Thumb Border Style", description: "Line style for the bottom edge of the handle you drag only, overriding Thumb Border Style; None hides that edge", portability: "look-shared" },
+  thumbBorderBottomWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Thumb Border Style", description: "Thickness in pixels of the bottom edge of the handle you drag, which has no effect while that edge's Border Style is None", portability: "look-shared" },
+  thumbBorderColor: { type: "color", default: "#000000", coerce: 'none', displayName: "Border Color", group: "Thumb Border Style", description: "Colour of the border around the handle you drag, which has no effect while Thumb Border Style is None", portability: "look-shared" },
+  thumbBorderLeftColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Thumb Border Style", description: "Colour of the left edge of the handle you drag only, overriding Thumb Border Color", portability: "look-shared" },
+  thumbBorderLeftStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Thumb Border Style", description: "Line style for the left edge of the handle you drag only, overriding Thumb Border Style; None hides that edge", portability: "look-shared" },
+  thumbBorderLeftWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Thumb Border Style", description: "Thickness in pixels of the left edge of the handle you drag, which has no effect while that edge's Border Style is None", portability: "look-shared" },
+  thumbBorderRadius: { type: "number", default: 0, coerce: 'none', displayName: "Corner Radius", group: "Thumb Corner Radius", description: "How rounded all four corners of the handle you drag are; half its width and height makes it a circle", portability: "look-shared" },
+  thumbBorderRightColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Thumb Border Style", description: "Colour of the right edge of the handle you drag only, overriding Thumb Border Color", portability: "look-shared" },
+  thumbBorderRightStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Thumb Border Style", description: "Line style for the right edge of the handle you drag only, overriding Thumb Border Style; None hides that edge", portability: "look-shared" },
+  thumbBorderRightWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Thumb Border Style", description: "Thickness in pixels of the right edge of the handle you drag, which has no effect while that edge's Border Style is None", portability: "look-shared" },
+  thumbBorderStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], default: "none", coerce: 'none', displayName: "Border Style", group: "Thumb Border Style", description: "Line style for all four edges of the handle you drag; None hides the border and leaves its Width and Color inactive", portability: "look-expressible" },
+  thumbBorderTopColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Thumb Border Style", description: "Colour of the top edge of the handle you drag only, overriding Thumb Border Color", portability: "look-shared" },
+  thumbBorderTopLeftRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Thumb Corner Radius", description: "How rounded the top left corner of the handle you drag is, overriding Thumb Corner Radius", portability: "look-shared" },
+  thumbBorderTopRightRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Thumb Corner Radius", description: "How rounded the top right corner of the handle you drag is, overriding Thumb Corner Radius", portability: "look-shared" },
+  thumbBorderTopStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Thumb Border Style", description: "Line style for the top edge of the handle you drag only, overriding Thumb Border Style; None hides that edge", portability: "look-shared" },
+  thumbBorderTopWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Thumb Border Style", description: "Thickness in pixels of the top edge of the handle you drag, which has no effect while that edge's Border Style is None", portability: "look-shared" },
+  thumbBorderWidth: { type: "number", default: 0, coerce: 'none', displayName: "Border Width", group: "Thumb Border Style", description: "Thickness in pixels of the border around the handle you drag, which has no effect while Thumb Border Style is None", portability: "look-shared" },
+  thumbBoxShadowBlurRadius: { type: "number", default: 5, coerce: 'none', displayName: "Blur Radius", group: "Thumb Box Shadow", description: "How soft the shadow edge is; 0 gives a hard edge", portability: "look-expressible" },
+  thumbBoxShadowColor: { type: "color", default: "#00000033", coerce: 'none', displayName: "Shadow Color", group: "Thumb Box Shadow", description: "Colour of the shadow, usually a mostly-transparent black", portability: "look-expressible" },
+  thumbBoxShadowEnabled: { type: "boolean", coerce: 'none', displayName: "Shadow Enabled", group: "Thumb Box Shadow", description: "Draws a shadow behind the handle you drag; the rest of this group does nothing while it is off", portability: "look-expressible" },
+  thumbBoxShadowInset: { type: "boolean", default: false, coerce: 'none', displayName: "Inset", group: "Thumb Box Shadow", description: "Draws the shadow inside the element instead of behind it, for a recessed look", portability: "web-only" },
+  thumbBoxShadowOffsetX: { type: "number", default: 0, coerce: 'none', displayName: "Offset X", group: "Thumb Box Shadow", description: "How far right the shadow sits from the element; negative values move it left", portability: "look-expressible" },
+  thumbBoxShadowOffsetY: { type: "number", default: 0, coerce: 'none', displayName: "Offset Y", group: "Thumb Box Shadow", description: "How far down the shadow sits from the element; negative values move it up", portability: "look-expressible" },
+  thumbBoxShadowSpreadRadius: { type: "number", default: 2, coerce: 'none', displayName: "Spread Radius", group: "Thumb Box Shadow", description: "Grows the shadow outwards before it is blurred; negative values shrink it", portability: "look-expressible" },
+  thumbColor: { type: "color", default: "#000000", coerce: 'none', displayName: "Color", group: "Thumb Style", description: "Fill colour of the handle", portability: "look-shared" },
+  thumbHeight: { type: "number", default: 16, coerce: 'none', displayName: "Height", group: "Thumb Style", description: "Height of the handle the user drags", portability: "look-shared" },
+  thumbWidth: { type: "number", default: 16, coerce: 'none', displayName: "Width", group: "Thumb Style", description: "Width of the handle the user drags", portability: "look-shared" },
+  trackActiveColor: { type: "color", default: "#f0f0f0", coerce: 'none', displayName: "Active Color", group: "Track Style", description: "Colour of the part of the track between Min and the handle", portability: "look-shared" },
+  trackBorderBottomColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Track Border Style", description: "Colour of the bottom edge of the bar the handle slides along only, overriding Track Border Color", portability: "look-shared" },
+  trackBorderBottomLeftRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Track Corner Radius", description: "How rounded the bottom left corner of the bar the handle slides along is, overriding Track Corner Radius", portability: "look-shared" },
+  trackBorderBottomRightRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Track Corner Radius", description: "How rounded the bottom right corner of the bar the handle slides along is, overriding Track Corner Radius", portability: "look-shared" },
+  trackBorderBottomStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Track Border Style", description: "Line style for the bottom edge of the bar the handle slides along only, overriding Track Border Style; None hides that edge", portability: "look-shared" },
+  trackBorderBottomWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Track Border Style", description: "Thickness in pixels of the bottom edge of the bar the handle slides along, which has no effect while that edge's Border Style is None", portability: "look-shared" },
+  trackBorderColor: { type: "color", default: "#000000", coerce: 'none', displayName: "Border Color", group: "Track Border Style", description: "Colour of the border around the bar the handle slides along, which has no effect while Track Border Style is None", portability: "look-shared" },
+  trackBorderLeftColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Track Border Style", description: "Colour of the left edge of the bar the handle slides along only, overriding Track Border Color", portability: "look-shared" },
+  trackBorderLeftStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Track Border Style", description: "Line style for the left edge of the bar the handle slides along only, overriding Track Border Style; None hides that edge", portability: "look-shared" },
+  trackBorderLeftWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Track Border Style", description: "Thickness in pixels of the left edge of the bar the handle slides along, which has no effect while that edge's Border Style is None", portability: "look-shared" },
+  trackBorderRadius: { type: "number", default: 0, coerce: 'none', displayName: "Corner Radius", group: "Track Corner Radius", description: "How rounded all four corners of the bar the handle slides along are; half its width and height makes it a circle", portability: "look-shared" },
+  trackBorderRightColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Track Border Style", description: "Colour of the right edge of the bar the handle slides along only, overriding Track Border Color", portability: "look-shared" },
+  trackBorderRightStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Track Border Style", description: "Line style for the right edge of the bar the handle slides along only, overriding Track Border Style; None hides that edge", portability: "look-shared" },
+  trackBorderRightWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Track Border Style", description: "Thickness in pixels of the right edge of the bar the handle slides along, which has no effect while that edge's Border Style is None", portability: "look-shared" },
+  trackBorderStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], default: "none", coerce: 'none', displayName: "Border Style", group: "Track Border Style", description: "Line style for all four edges of the bar the handle slides along; None hides the border and leaves its Width and Color inactive", portability: "look-expressible" },
+  trackBorderTopColor: { type: "color", coerce: 'none', displayName: "Border Color", group: "Track Border Style", description: "Colour of the top edge of the bar the handle slides along only, overriding Track Border Color", portability: "look-shared" },
+  trackBorderTopLeftRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Track Corner Radius", description: "How rounded the top left corner of the bar the handle slides along is, overriding Track Corner Radius", portability: "look-shared" },
+  trackBorderTopRightRadius: { type: "number", coerce: 'none', displayName: "Corner Radius", group: "Track Corner Radius", description: "How rounded the top right corner of the bar the handle slides along is, overriding Track Corner Radius", portability: "look-shared" },
+  trackBorderTopStyle: { type: "enum", enums: ["none", "solid", "dotted", "dashed"], coerce: 'none', displayName: "Border Style", group: "Track Border Style", description: "Line style for the top edge of the bar the handle slides along only, overriding Track Border Style; None hides that edge", portability: "look-shared" },
+  trackBorderTopWidth: { type: "number", coerce: 'none', displayName: "Border Width", group: "Track Border Style", description: "Thickness in pixels of the top edge of the bar the handle slides along, which has no effect while that edge's Border Style is None", portability: "look-shared" },
+  trackBorderWidth: { type: "number", default: 0, coerce: 'none', displayName: "Border Width", group: "Track Border Style", description: "Thickness in pixels of the border around the bar the handle slides along, which has no effect while Track Border Style is None", portability: "look-shared" },
+  trackBoxShadowBlurRadius: { type: "number", default: 5, coerce: 'none', displayName: "Blur Radius", group: "Track Box Shadow", description: "How soft the shadow edge is; 0 gives a hard edge", portability: "look-expressible" },
+  trackBoxShadowColor: { type: "color", default: "#00000033", coerce: 'none', displayName: "Shadow Color", group: "Track Box Shadow", description: "Colour of the shadow, usually a mostly-transparent black", portability: "look-expressible" },
+  trackBoxShadowEnabled: { type: "boolean", coerce: 'none', displayName: "Shadow Enabled", group: "Track Box Shadow", description: "Draws a shadow behind the bar the handle slides along; the rest of this group does nothing while it is off", portability: "look-expressible" },
+  trackBoxShadowInset: { type: "boolean", default: false, coerce: 'none', displayName: "Inset", group: "Track Box Shadow", description: "Draws the shadow inside the element instead of behind it, for a recessed look", portability: "web-only" },
+  trackBoxShadowOffsetX: { type: "number", default: 0, coerce: 'none', displayName: "Offset X", group: "Track Box Shadow", description: "How far right the shadow sits from the element; negative values move it left", portability: "look-expressible" },
+  trackBoxShadowOffsetY: { type: "number", default: 0, coerce: 'none', displayName: "Offset Y", group: "Track Box Shadow", description: "How far down the shadow sits from the element; negative values move it up", portability: "look-expressible" },
+  trackBoxShadowSpreadRadius: { type: "number", default: 2, coerce: 'none', displayName: "Spread Radius", group: "Track Box Shadow", description: "Grows the shadow outwards before it is blurred; negative values shrink it", portability: "look-expressible" },
+  trackColor: { type: "color", default: "#f0f0f0", coerce: 'none', displayName: "Inactive Color", group: "Track Style", description: "Colour of the part of the track the handle has not reached yet", portability: "look-shared" },
+  trackHeight: { type: "number", default: 6, coerce: 'none', displayName: "Height", group: "Track Style", description: "Thickness of the bar the handle slides along", portability: "look-shared" },
+  transformOriginX: { type: "number", default: "50", coerce: 'none', displayName: "Transform Origin X", group: "Placement", description: "Horizontal point the element rotates and scales around, as a fraction of its width", portability: "layout-shared" },
+  transformOriginY: { type: "number", default: "50", coerce: 'none', displayName: "Transform Origin Y", group: "Placement", description: "Vertical point the element rotates and scales around, as a fraction of its height", portability: "layout-shared" },
+  transformRotation: { type: "number", default: 0, coerce: 'none', displayName: "Rotation", group: "Placement", description: "Rotates the element clockwise in degrees, without affecting the layout", portability: "layout-shared" },
+  transformScale: { type: "number", default: 1, coerce: 'none', displayName: "Scale", group: "Placement", description: "Scales the element about its transform origin; 1 leaves it unscaled", portability: "layout-shared" },
+  transformX: { type: "number", default: 0, coerce: 'none', displayName: "Pos X", group: "Placement", description: "Moves the element right after layout, without moving its siblings", portability: "layout-shared" },
+  transformY: { type: "number", default: 0, coerce: 'none', displayName: "Pos Y", group: "Placement", description: "Moves the element down after layout, without moving its siblings", portability: "layout-shared" },
+  variant: { type: "string", coerce: 'none', displayName: "Variant", group: "General", description: "Name of a saved variant of this node type to apply, replacing the styling set here", portability: "look-shared" },
+  visible: { type: "boolean", default: true, coerce: 'none', displayName: "Visible", group: "Style", description: "Hides the element while keeping the space it occupies in the layout", portability: "look-shared" },
+  width: { type: "number", default: 100, coerce: 'none', displayName: "Width", group: "Dimensions", description: "Overall width of the slider, which is the length of the track plus the handle", portability: "layout-shared" },
+  zIndex: { type: "number", coerce: 'none', displayName: "zIndex", group: "Style", description: "Paint order among overlapping siblings; higher numbers paint on top", portability: "look-shared" },
+  },
+
+  outputs: {
+    // slider.ts :79-87
+    value: { type: 'number', from: (s) => s.out, displayName: 'Value', group: 'States', description: 'The value the handle is currently at, between Min and Max, as a number' },
+    // slider.ts :88-96
+    valuePercent: { type: 'number', from: (s) => s.percent, displayName: 'Value Percent', group: 'States', description: 'Where the handle sits as a whole number from 0 to 100, regardless of Min and Max' },
+    // slider.ts :97-102
+    onChange: { type: 'signal', displayName: 'Changed', group: 'Events', description: 'Fires when the user moves the handle; a value arriving on the Value input does not fire it' },
+    // utils.ts :157-195
+    focusState: { type: 'boolean', from: (s) => s.focused, displayName: 'Focused', group: 'States', description: 'True while this control holds keyboard focus, so typing and Enter go to it' },
+    onFocus: { type: 'signal', displayName: 'Focused', group: 'Focus Events', description: 'Fires the moment this control takes keyboard focus, whether from a click, a tab or a Focus action' },
+    onBlur: { type: 'signal', displayName: 'Blurred', group: 'Focus Events', description: 'Fires when keyboard focus leaves this control, which is the usual place to validate what was entered' },
+    // utils.ts :204-243
+    hoverState: { type: 'boolean', from: (s) => s.hover, displayName: 'Hover', group: 'States', description: 'True while the pointer is over this control; stays false on touch devices with no pointer' },
+    hoverStart: { type: 'signal', displayName: 'Hover Start', group: 'Pointer Events', description: 'Fires when the pointer moves onto this control' },
+    hoverEnd: { type: 'signal', displayName: 'Hover End', group: 'Pointer Events', description: 'Fires when the pointer leaves this control, including when it leaves while a button is still held' },
+    // utils.ts :246-311
+    pressedState: { type: 'boolean', from: (s) => s.pressed, displayName: 'Pressed', group: 'States', description: 'True while a mouse button or finger is held down on this control, and false again the moment it is released or slides off' },
+    pointerDown: { type: 'signal', displayName: 'Pointer Down', group: 'Pointer Events', description: 'Fires as a mouse button or finger goes down on this control, before any click has completed' },
+    pointerUp: { type: 'signal', displayName: 'Pointer Up', group: 'Pointer Events', description: 'Fires when the mouse button or finger is lifted, and also when a touch is cancelled by the system' },
+    // utils.ts :314-325
+    enabled: { type: 'boolean', from: (s) => s.enabled, displayName: 'Enabled', group: 'States', description: 'Reports back whether this control is currently accepting interaction, following the Enabled input' },
+    // react-component-node.ts :982-990, :993-1003
+    didMount: { type: 'signal', displayName: 'Did Mount', group: 'Mounted', description: 'Fires once this element has been added to the page and can be measured' },
+    willUnmount: { type: 'signal', displayName: 'Will Unmount', group: 'Mounted', description: 'Fires just before this element is removed from the page, while it still exists' },
+    // react-component-node.ts :1428-1444 — no Children Count: `allowChildren` is false (slider.ts :14)
+    childIndex: { type: 'number', from: () => 0, displayName: 'Child Index', group: 'Advanced', description: "This element's position among its parent's children, counting from 0" },
+    this: { type: 'reference', from: () => SELF_REFERENCE, displayName: 'This', group: 'Advanced', description: 'A reference to this node itself, for ports that take a node rather than a value' },
+    // react-component-node.ts :1446-1500 — never measured here
+    screenPositionX: { type: 'number', from: () => undefined, displayName: 'Screen Position X', group: 'Bounding Box', description: "Distance in pixels from the left edge of the window to this element's left edge" },
+    screenPositionY: { type: 'number', from: () => undefined, displayName: 'Screen Position Y', group: 'Bounding Box', description: "Distance in pixels from the top edge of the window to this element's top edge" },
+    boundingWidth: { type: 'number', from: () => undefined, displayName: 'Width', group: 'Bounding Box', description: 'Width this element actually ended up with after layout, in pixels' },
+    boundingHeight: { type: 'number', from: () => undefined, displayName: 'Height', group: 'Bounding Box', description: 'Height this element actually ended up with after layout, in pixels' }
+  }
+}).on(
+  {
+    // utils.ts :82-89
+    enabled: (s, v) => {
+      const enabled = !!v;
+      if (enabled === s.enabled) return NOTHING;
+      return { set: { enabled }, send: ['enabled'] };
+    },
+    // slider.ts :73-75 → :237-271 `_setInputValue`; the frame's end renders, and the effect reports it (`painted`)
+    value: (s, v) => clampIn(s, v),
+    // slider.ts :105-115 — the prop first (`undefined` deletes it), then the author's Value re-clamped against it
+    min: (s, v) => clampIn({ ...s, min: v }, s.authorValue, { min: v }),
+    // slider.ts :116-126
+    max: (s, v) => clampIn({ ...s, max: v }, s.authorValue, { max: v }),
+    // slider.ts :127-134 — on the element only: what the browser rounds a slide to
+    step: (_s, v) => ({ set: { step: v }, send: [] }),
+    // react-component-node.ts :2310-2320
+    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    // utils.ts :370-384 — on the `<input>` (utils.ts :419-423 `_focusTarget`), as the Dropdown's
+    focus: (s) => {
+      if (!s.onPage) return { send: [], outcome: 'unchanged' };
+      if (s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
+      return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
+    },
+    // utils.ts :385-395 — a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless
+    blur: (s) => {
+      if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
+      return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
+    },
+    // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
+    scrollIntoView: () => NOTHING
+  },
+  {
+    // placed on the page with its params set — the first render: Did Mount, and the mount's effect (Slider.tsx :88-90)
+    world: { place: (s) => painted(s) },
+    afterInputs: (s) => painted(s),
+    person: {
+      hover: (s) => onPainted(s, () => ({ set: { hover: true }, send: ['hoverState'], emit: ['hoverStart'] })),
+      leave: (s) => onPainted(s, () => ({ set: { hover: false, pressed: false }, send: ['hoverState', 'pressedState'], emit: ['hoverEnd'] })),
+      press: (s) => onPainted(s, (p) => (p.pageEnabled ? pressed(p) : NONE)),
+      release: (s) => onPainted(s, (p) => (p.pageEnabled ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
+      // the press, the release and the click (utils.ts :285-311) — where the handle already is: the value stays
+      click: (s) =>
+        onPainted(s, (p) => {
+          if (!p.pageEnabled) return NONE;
+          const d = pressed(p);
+          return { set: { ...d.set, pressed: false }, send: d.send, emit: [...(d.emit ?? []), 'pointerUp'] };
+        }),
+      touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
+      lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
+      focus: (s) => onPainted(s, (p) => (p.pageEnabled && !p.elementFocused ? focusTaken() : NONE)),
+      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.pageEnabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE)),
+      // the slide (Slider.tsx :183 the `<input>`'s `onChange`: `Number(e.target.value)` into the shown value, then
+      // `updateOutputValue`, slider.ts :39-54). The browser's rules first: a disabled element takes none; the keyboard goes
+      // onto the element (the focusing steps); the value lands sanitized (clamped, rounded to the step); a slide to the value
+      // the browser already holds raises no `input`, so nothing moves
+      slide: (s, _inputs, v) =>
+        onPainted(s, (p) => {
+          if (!p.pageEnabled) return NONE;
+          const focus = p.elementFocused ? NONE : focusTaken();
+          const held = rangeValue(p, p.shown);
+          const to = rangeValue(p, v);
+          if (held === to) return focus;
+          const n = Number(to);
+          return join(focus, join({ set: { shown: n }, send: [] }, reported({ ...p, shown: n }, n)));
+        })
+    }
+  }
+);
+
+/**
+ * slider.ts :237-271 `_setInputValue(v)`: an empty value abstains; one `Number` cannot make finite abstains (reported on the
+ * runtime channel, :254-260); else `Math.max(Min, Math.min(Max, n))` over the props as written, kept when it differs (`!==`).
+ * `extra`: the prop the caller wrote first (Min / Max).
+ */
+function clampIn(s: Readonly<State>, v: unknown, extra: Partial<State> = {}): Send {
+  if (v === undefined || v === null || v === '') return { set: extra, send: [] };
+  const n = Number(v);
+  if (!Number.isFinite(n)) return { set: extra, send: [] };
+  const value = Math.max(s.min as number, Math.min(s.max as number, n));
+  if (value === s.authorValue) return { set: extra, send: [] };
+  return { set: { ...extra, authorValue: value }, send: [] };
+}
+
+/** slider.ts :220-236 — `Math.floor((v - Min) / (Max - Min) * 100)` over the props as written */
+const percentOf = (s: Readonly<State>, v: number): number => Math.floor(((v - (s.min as number)) / ((s.max as number) - (s.min as number))) * 100);
+
+/**
+ * slider.ts :39-54 `updateOutputValue(v)`: a different value (`!==`, so `NaN` always) is kept, sent, Value Percent recomputed
+ * and Changed fires; then, while Value Percent reads falsy, it is recomputed again. A recomputed percent is kept whatever it
+ * is (a -0 replaces a 0 unsent) and sent when it differs (`!==`).
+ */
+function reported(s: Readonly<State>, v: number): Act {
+  const set: Partial<State> = {};
+  const send: ValueOut[] = [];
+  const emit: Pulse[] = [];
+  let percent = s.percent;
+  // :232-235 the percent is STORED whatever the comparison says (`0 !== -0` is false, so a -0 is kept unsent, and read by the
+  // next send of the output), and flagged when it differs by `!==` (a NaN every time)
+  const recompute = () => {
+    const p = percentOf(s, v);
+    if (!Object.is(p, percent)) set.percent = p;
+    if (p !== percent && !send.includes('valuePercent')) send.push('valuePercent');
+    percent = p;
+  };
+  if (s.out !== v) {
+    set.out = v;
+    send.push('value');
+    recompute();
+    emit.push('onChange');
+  }
+  if (!percent) recompute();
+  return { set, send, emit };
+}
+
+/** HTML's rules for parsing a floating-point number attribute, as `<input type=range>` converts `min` / `max` / `step`: a number written as text, else none */
+function attrNumber(v: unknown): number | undefined {
+  if (v === undefined || v === null || typeof v === 'boolean') return undefined;
+  const t = String(v);
+  if (!/^-?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][-+]?\d+)?$/.test(t)) return undefined;
+  const n = Number(t);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+/**
+ * The BROWSER's value of a range input holding `v` (HTML: the range state's value sanitization, its underflow / overflow and
+ * step mismatch rules; Chromium `StepRange::ClampValue`), against the attributes as rendered: `min` (default 0), `max`
+ * (default 100), and `step` only when Step is truthy (Slider.tsx :120-122; default 1, a step that is not a positive number is
+ * the default; the step base is `min`, else the `value` attribute, else 0). Not a number → the middle (Min when Max is below
+ * it); clamped; rounded to base + n × step, a tie upwards; a rounding past Max steps back one, below Min forward one; still
+ * outside → the clamped value. Returned as the text the element holds.
+ */
+function rangeValue(s: Readonly<State>, v: unknown): string {
+  const minAttr = attrNumber(s.min);
+  const min = minAttr ?? 0;
+  const maxAttr = attrNumber(s.max) ?? 100;
+  const max = maxAttr < min ? min : maxAttr;
+  const stepAttr = s.step ? attrNumber(s.step) : undefined;
+  const step = stepAttr !== undefined && stepAttr > 0 ? stepAttr : 1;
+  const parsed = attrNumber(typeof v === 'number' ? (Number.isFinite(v) ? v : undefined) : v);
+  const proposed = parsed === undefined ? (maxAttr < min ? min : min + (max - min) / 2) : parsed;
+  const inRange = Math.max(min, Math.min(proposed, max));
+  // the step base: `min`, else the `value` attribute React keeps in step with the shown value (ReactDOMInput `defaultValue`), else 0
+  const base = minAttr ?? attrNumber(Number.isFinite(s.shown) ? s.shown : undefined) ?? 0;
+  const rounded = base + Math.round((inRange - base) / step) * step;
+  const clamped = rounded > max ? rounded - step : rounded < min ? rounded + step : rounded;
+  return String(clamped < min || clamped > max ? inRange : clamped);
+}
+
+/**
+ * The page follows what the node wants (dropdown.ts `painted`), and the component's effect with it.
+ *   - Enabled is painted onto the element.
+ *   - Mounted off: the element leaves with the keyboard it held; Mounted on: Did Mount, a fresh component (`useState(props.value)`).
+ *   - the effect (Slider.tsx :88-90): at the mount, and at a render that saw another author's Value than the render before
+ *     (`Object.is`), the shown value becomes the author's Value and `updateOutputValue(props.value)` runs — Value sent and Changed
+ *     fired when the node's value differs (row D36).
+ */
+function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
+  const set: Partial<State> = s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled };
+  if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false }, send: [], emit: ['willUnmount'] };
+  if (!s.mounted) return { set, send: [], emit: [] };
+  const mounting = !s.onPage;
+  const emit: Pulse[] = [];
+  if (mounting) {
+    set.onPage = true;
+    emit.push('didMount');
+  }
+  if (!mounting && Object.is(s.authorValue, s.paintedValue)) return { set, send: [], emit };
+  const r = reported({ ...s, ...set }, s.authorValue);
+  return { set: { ...set, shown: s.authorValue, paintedValue: s.authorValue, ...r.set }, send: r.send, emit: [...emit, ...(r.emit ?? [])] };
+}
+
+/** The act on the painted page (dropdown.ts `onPainted`). */
+function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act): Act {
+  const p = painted(s);
+  const after: State = { ...s, ...p.set };
+  const a = after.onPage ? then(after) : NONE;
+  return { set: { ...p.set, ...a.set }, send: [...p.send, ...a.send], emit: [...p.emit, ...(a.emit ?? [])] };
+}
+
+/** The keyboard onto the element (utils.ts :163-166, :181-183): Focused true and sent, Focused fires. */
+function focusTaken(): Act {
+  return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'] };
+}
+
+/** A mouse button down on an enabled element (utils.ts :255-259, :285-293), then the keyboard onto it — the browser's `mousedown` default — if it is not there already. */
+function pressed(s: Readonly<State>): Act {
+  return s.elementFocused ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] } : join({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] }, focusTaken());
+}
+
+function join(a: Act, b: Act): Act {
+  return { set: { ...a.set, ...b.set }, send: [...a.send, ...b.send], emit: [...(a.emit ?? []), ...(b.emit ?? [])] };
+}
