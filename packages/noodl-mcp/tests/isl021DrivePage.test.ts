@@ -229,4 +229,54 @@ describeOrSkip('P109 ISL-021 — drive_page on Olive’s Island, rendered from d
       boot: { hits: 0, body: null }
     });
   }, 120_000);
+  /**
+   * AC3, ruled s15 ("build the cheap 9"): what the run has seen so far, as a `read`, and reduced motion as a verb.
+   * Each absence is read beside a step that makes the same signal fire, on the same run.
+   */
+  it('AC3 s15 — console, network and other-origin reads are empty on a clean boot and name what a later step causes', async () => {
+    const { headline, result } = await drive(session, {
+      steps: [
+        { read: { console_errors: true }, expect: [] },
+        { read: { network_errors: true }, expect: [] },
+        { read: { other_origins: true }, expect: [] },
+        { read: { expression: "fetch('https://isl021.invalid/x').then(() => 'loaded', () => 'failed')" }, expect: 'failed' },
+        { read: { expression: "(console.error('isl021 boom'), true)" } },
+        { read: { console_errors: true }, expect: ['isl021 boom'] },
+        { read: { network_errors: true }, expect: ['net::ERR_NAME_NOT_RESOLVED https://isl021.invalid/x'] },
+        { read: { other_origins: true }, expect: ['https://isl021.invalid'] }
+      ]
+    });
+    expect({ verdict: result.verdict, failed: result.steps.find((r) => !r.ok)?.error ?? null }).toEqual({ verdict: 'passed', failed: null });
+    expect({ networkErrors: result.networkErrors, otherOrigins: result.otherOrigins }).toEqual({
+      networkErrors: ['net::ERR_NAME_NOT_RESOLVED https://isl021.invalid/x'],
+      otherOrigins: ['https://isl021.invalid']
+    });
+    expect(headline).toMatch(/1 failed request\(s\)/);
+  }, 120_000);
+
+  it('AC3 s15 — reduced_motion stops an animation that honours it, and false starts it again', async () => {
+    const running =
+      "[...document.querySelectorAll('#isl021-spin')].filter((e) => getComputedStyle(e).animationName !== 'none').length";
+    const { result } = await drive(session, {
+      steps: [
+        {
+          read: {
+            expression:
+              "(() => { const st = document.createElement('style'); st.textContent = '@keyframes isl021 { to { transform: rotate(1turn) } } #isl021-spin { animation: isl021 1s linear infinite } @media (prefers-reduced-motion: reduce) { #isl021-spin { animation: none } }'; document.head.appendChild(st); const d = document.createElement('div'); d.id = 'isl021-spin'; d.style.cssText = 'width:20px;height:20px'; document.body.appendChild(d); return true; })()"
+          }
+        },
+        { read: { expression: running }, expect: 1 },
+        { reduced_motion: true },
+        { read: { expression: running }, expect: 0 },
+        { reduced_motion: false },
+        { read: { expression: running }, expect: 1 }
+      ]
+    });
+    expect({ verdict: result.verdict, failed: result.steps.find((r) => !r.ok)?.error ?? null, on: result.steps[2].value, off: result.steps[4].value }).toEqual({
+      verdict: 'passed',
+      failed: null,
+      on: true,
+      off: false
+    });
+  }, 120_000);
 });

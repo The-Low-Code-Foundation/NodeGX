@@ -170,11 +170,12 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
         'browser: nothing carries over from the last call. Steps (each an object with one verb): {tap: T}, ' +
         '{type: "text", into?: T, replace?: true} (appends to what the field holds unless replace), {key: "Enter"}, ' +
         '{wait_for: {text|testid|selector|url|expression}, timeout_ms?}, {read: {text: T}|{variable: name}|' +
-        '{storage: key}|{url: true}|{stub: path}|{expression}, expect?: value|{contains}}, {navigate: "/route"}, ' +
+        '{storage: key}|{url: true}|{stub: path}|{expression}, expect?: value|{contains}} — or, as lists so far, ' +
+        '{console_errors: true}|{network_errors: true}|{other_origins: true} (expect [] = none yet), {navigate: "/route"}, ' +
         '{viewport: "phone"|"390x844"}, {screenshot: name}, {seed_storage: {key: value}} or {seed_storage: "key", ' +
         'edit: "js changing v"} (applied again on the next load, before the app can overwrite it), ' +
         '{clear_storage: true}, {stub_route: "/api/x", json?, body?, status?} (answers that path itself; put it ' +
-        'first to meet a fetch made at boot). A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
+        'first to meet a fetch made at boot), {reduced_motion: true|false}. A target T is {text: "exact label"} or {text_contains} (a field\'s ' +
         'placeholder counts), {testid} (a data-testid set in the node\'s Data Attributes list — NOT its node id) ' +
         'or {selector}; a bare string is exact text. A tap is a real pointer press at the element\'s centre and is ' +
         'REFUSED when something else covers it, naming what a finger would hit. The first failing step stops the run.',
@@ -215,7 +216,8 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
         const caveats = [
           result.page.visibilityState !== 'visible' ? `the page was ${result.page.visibilityState} (timers throttle)` : '',
           !result.page.webgl2 ? 'no WebGL2 in this browser (a 3D kit falls back to 2D here)' : '',
-          result.consoleErrors.length ? `${result.consoleErrors.length} console error(s)` : ''
+          result.consoleErrors.length ? `${result.consoleErrors.length} console error(s)` : '',
+          result.networkErrors?.length ? `${result.networkErrors.length} failed request(s)` : ''
         ].filter(Boolean);
         return {
           content: [

@@ -509,6 +509,10 @@ export interface DrivePagePayload {
   /** Every `stub_route` the run set, and how many requests each answered. Absent when none was set. */
   stubs?: Array<{ route: string; status: number; hits: number }>;
   consoleErrors: string[];
+  /** Requests that failed to load or answered 400+ (not a cancelled one, not Chrome's own favicon), with the URL. */
+  networkErrors: string[];
+  /** Every origin other than the page's own that the run asked for anything. */
+  otherOrigins: string[];
 }
 
 export interface DriveOptions {

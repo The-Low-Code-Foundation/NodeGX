@@ -11,7 +11,7 @@
  *   --out-dir <dir>        where `screenshot` steps write their PNGs (default: none are written)
  *   --backend-port <n>     proxy /__backend to this port
  *
- * Prints ONE JSON object on stdout: `{ verdict, steps: [...], consoleErrors, page: {...} }`, or
+ * Prints ONE JSON object on stdout: `{ verdict, steps: [...], consoleErrors, networkErrors, otherOrigins, page: {...} }`, or
  * `{ error: { message, problems, actionable } }`. Exit 0 either way when a run happened — a failed step
  * is a verdict, not a crash (the render harness's rule); exit 2 is a usage error.
  *
@@ -60,7 +60,12 @@
  *   { "read": R, "expect": V? }          R is { "text": T } (its innerText), { "variable": "name" } (an app
  *                                        Variable), { "storage": "key" } (localStorage), { "url": true },
  *                                        { "stub": "/path" } or { "expression": "js" }; with `expect` the step passes only when the
- *                                        value equals V, or contains V.contains
+ *                                        value equals V, or contains V.contains. What the run has seen SO FAR:
+ *                                        { "console_errors": true } (the page's errors and throws), { "network_errors":
+ *                                        true } (a request that failed to load, or answered 400 or above, with its
+ *                                        URL) and { "other_origins": true } (every origin other than the page's own
+ *                                        that was asked for anything — a font CDN, an API); each a list, so
+ *                                        `"expect": []` is "none yet" at that step
  *   { "navigate": "/island" }            go to a route. On a path-routed project this LOADS THE DOCUMENT again,
  *                                        even for the route it is on (measured s14 on the garden, 4 of 4) — the
  *                                        way to prove what survives a reload; on a hash-routed one it is a
@@ -87,6 +92,8 @@
  *                                        that step on. `{ "read": { "stub": "/path" } }` reads
  *                                        `{ hits, body }` — how many requests it answered, and the last body
  *                                        one sent (parsed when it is JSON)
+ *   { "reduced_motion": true }           the page's `prefers-reduced-motion` reads `reduce` from here on (false: no
+ *                                        preference), across later navigations too
  *
  *   T (a target) is { "text": "New player" } (exact, after trimming; a field's placeholder or aria-label counts), { "text_contains": "player" } (the
  *   opt-in substring form), { "testid": "plot-card" } (a `data-testid`, ISL-009) or { "selector": "css" };
@@ -110,7 +117,8 @@ const VERBS = [
   'screenshot',
   'seed_storage',
   'clear_storage',
-  'stub_route'
+  'stub_route',
+  'reduced_motion'
 ];
 
 /** The keys `key` understands, as CDP wants them. */
@@ -310,8 +318,49 @@ function routeStubs(tab) {
   };
 }
 
+/**
+ * What the page asked the network for, from before its first load: the failures and the origins. ISL-021 AC3
+ * (ruled 2026-10-04, "build the cheap 9"): the drives read `page.networkErrors` (`Network.loadingFailed`) and a
+ * `Network.requestWillBeSent` list, and four of their clauses had no step to say it with.
+ *
+ * A failure is a request that did not load, or one answered 400 or above. A CANCELLED one is not: a reload
+ * cancels whatever the page had in flight, and that is the step's own doing, not the app's. Nor is a 404 for
+ * `/favicon.ico`: Chrome asks for it itself on every load (measured s15: the garden's only failure, every run).
+ */
+function networkLog(tab) {
+  const urls = new Map();
+  const errors = [];
+  const origins = new Set();
+  tab.onEvent((msg) => {
+    if (msg.method === 'Network.requestWillBeSent') {
+      const { requestId, request, documentURL } = msg.params;
+      urls.set(requestId, request.url);
+      try {
+        const u = new URL(request.url);
+        const home = new URL(documentURL || request.url).origin;
+        if (/^https?:$/.test(u.protocol) && u.origin !== home) origins.add(u.origin);
+      } catch {
+        /* a URL Chrome sends is a URL; nothing to record otherwise */
+      }
+    } else if (msg.method === 'Network.loadingFailed' && !msg.params.canceled) {
+      errors.push(`${msg.params.errorText} ${urls.get(msg.params.requestId) ?? `(${msg.params.type})`}`);
+    } else if (msg.method === 'Network.responseReceived' && msg.params.response.status >= 400 && !/\/favicon\.ico$/.test(new URL(msg.params.response.url).pathname)) {
+      errors.push(`${msg.params.response.status} ${msg.params.response.url}`);
+    }
+  });
+  return {
+    start: () => tab.client.send('Network.enable', {}),
+    errors: () => errors.slice(),
+    otherOrigins: () => [...origins].sort()
+  };
+}
+
+/** The `read` forms answered from what the run itself recorded, not from the page. */
+const RUN_READS = ['stub', 'console_errors', 'network_errors', 'other_origins'];
+const READ_FORMS = 'text | variable | storage | url | stub | console_errors | network_errors | other_origins | expression';
+
 function readExpression(r) {
-  if (!r || typeof r !== 'object') throw new UsageError(`read takes { text | variable | storage | url | stub | expression }; got ${JSON.stringify(r)}.`);
+  if (!r || typeof r !== 'object') throw new UsageError(`read takes { ${READ_FORMS} }; got ${JSON.stringify(r)}.`);
   if (r.text !== undefined) {
     return `(() => { const { all } = ${finder(r.text)}; const e = all[0]; return e ? (e.value !== undefined && e.value !== null && e.value !== '' ? e.value : (e.innerText || '').trim()) : null; })()`;
   }
@@ -321,7 +370,7 @@ function readExpression(r) {
   if (typeof r.storage === 'string') return `localStorage.getItem(${JSON.stringify(r.storage)})`;
   if (r.url) return `location.pathname + location.hash`;
   if (typeof r.expression === 'string') return `(async () => { const v = await (${r.expression}); return v === undefined ? null : JSON.parse(JSON.stringify(v)); })()`;
-  throw new UsageError(`read takes { text | variable | storage | url | stub | expression }; got ${JSON.stringify(r)}.`);
+  throw new UsageError(`read takes { ${READ_FORMS} }; got ${JSON.stringify(r)}.`);
 }
 
 /** A `seed_storage` step as the `{ key: text }` pairs to write — the edit form computed on the page, now. */
@@ -349,7 +398,7 @@ function matches(value, expected) {
 }
 
 /** Run every step until one fails. Returns the rows. */
-async function runSteps(page, steps, { outDir, stubs = routeStubs(page), beforeBoot = 0 }) {
+async function runSteps(page, steps, { outDir, stubs = routeStubs(page), network, beforeBoot = 0 }) {
   const rows = [];
   const pendingSeeds = [];
   const { client, evaluate } = page;
@@ -426,10 +475,19 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), beforeB
         }
         if (!ok) throw new Error(`not true within ${timeout} ms: ${JSON.stringify(step.wait_for)}`);
       } else if (verb === 'read') {
+        const r = step.read && typeof step.read === 'object' ? step.read : {};
+        const own = RUN_READS.find((k) => r[k] !== undefined);
+        if (own && own !== 'stub' && !network) throw new Error(`read ${own} needs the run's network log, which this runner was not given`);
         row.value =
-          step.read && typeof step.read === 'object' && typeof step.read.stub === 'string'
-            ? stubs.read(step.read.stub)
-            : await evaluate(readExpression(step.read));
+          own === 'stub'
+            ? stubs.read(String(r.stub))
+            : own === 'console_errors'
+              ? page.consoleErrors.slice()
+              : own === 'network_errors'
+                ? network.errors()
+                : own === 'other_origins'
+                  ? network.otherOrigins()
+                  : await evaluate(readExpression(step.read));
         if ('expect' in step && !matches(row.value, step.expect)) {
           row.ok = false;
           row.error = `read ${JSON.stringify(row.value)}, expected ${JSON.stringify(step.expect)}`;
@@ -473,6 +531,13 @@ async function runSteps(page, steps, { outDir, stubs = routeStubs(page), beforeB
         // A leading stub was installed before the page first loaded (main's beforeBoot); say so.
         if (i < beforeBoot) row.before_boot = true;
         else await stubs.add(stub);
+      } else if (verb === 'reduced_motion') {
+        if (typeof step.reduced_motion !== 'boolean') throw new UsageError(`Step ${i + 1}: reduced_motion takes true or false.`);
+        await client.send('Emulation.setEmulatedMedia', {
+          features: [{ name: 'prefers-reduced-motion', value: step.reduced_motion ? 'reduce' : '' }]
+        });
+        await frames();
+        row.value = await evaluate(`matchMedia('(prefers-reduced-motion: reduce)').matches`);
       }
     } catch (error) {
       if (error.usage) throw error;
@@ -536,7 +601,10 @@ async function main() {
   let leading = 0;
   while (leading < steps.length && verbOf(steps[leading], leading + 1) === 'stub_route') leading++;
   let stubs;
+  let network;
   const beforeBoot = async (tab) => {
+    network = networkLog(tab);
+    await network.start();
     stubs = routeStubs(tab);
     for (let i = 0; i < leading; i++) await stubs.add(parseStub(steps[i], i + 1));
   };
@@ -545,7 +613,7 @@ async function main() {
     const result = await withRenderedPage({ projectDir, backendPort, beforeBoot }, async (page) => {
       await page.setViewport(viewport);
       if (start && !start.isStart) await page.navigate(start.url);
-      const rows = await runSteps(page, steps, { outDir, stubs, beforeBoot: leading });
+      const rows = await runSteps(page, steps, { outDir, stubs, network, beforeBoot: leading });
       const pageState = await page.evaluate(`(() => {
         let webgl2 = false;
         try { webgl2 = !!document.createElement('canvas').getContext('webgl2'); } catch (e) {}
@@ -559,7 +627,9 @@ async function main() {
         viewport: `${viewport.width}x${viewport.height}`,
         page: pageState,
         ...(stubs.report().length ? { stubs: stubs.report() } : {}),
-        consoleErrors: page.consoleErrors.slice(0, 20)
+        consoleErrors: page.consoleErrors.slice(0, 20),
+        networkErrors: network.errors().slice(0, 20),
+        otherOrigins: network.otherOrigins()
       };
     });
     process.stdout.write(JSON.stringify(result));
@@ -572,4 +642,4 @@ async function main() {
 
 if (require.main === module) main();
 
-module.exports = { runSteps, locateExpression, routeStubs, parseStub, VERBS };
+module.exports = { runSteps, locateExpression, routeStubs, networkLog, parseStub, VERBS };
