@@ -143,7 +143,11 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
             ...screenshots.flatMap((shot) => [
               { type: 'text' as const, text: `Screenshot — ${shot.name} (${report.viewports[shot.name]?.requested.width}px wide, full page)` },
               { type: 'image' as const, data: shot.base64, mimeType: shot.mimeType }
-            ])
+            ]),
+            // P109 ISL-021 AC6 (s14) — the agent built a form, read this answer four times, then went looking
+            // for a browser to script: `drive_page` is deferred, so nothing it could see named it. This answer
+            // is where it looks after building, and response text costs no resident tokens.
+            { type: 'text' as const, text: FIRST_FRAME_NOTE }
           ]
         };
       }
@@ -253,6 +257,12 @@ function screenshotManifest(report: RenderReportPayload, outDir: string): string
     lines.join('\n')
   );
 }
+
+/** What `render_report` cannot prove, and the tool that can — appended to every report. */
+export const FIRST_FRAME_NOTE =
+  'This report is the FIRST FRAME only: nothing was pressed, typed or waited for. To prove a button, form or game ' +
+  'WORKS (tap, type, wait, read a Variable or what was saved), call find_tools({ query: "press" }) to reveal ' +
+  'drive_page and send it a list of steps — no browser script needed.';
 
 /** The verdict as the one line a caller reads first. */
 function verdictHeadline(verdict: { done: boolean; reason: string }): string {
