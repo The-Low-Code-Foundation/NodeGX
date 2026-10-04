@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "90b2f88f-c187-521d-8707-cd7dab95ccb8",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "lrIn",
+      "fromProperty": "name",
+      "toId": "lrName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lrIn",
+      "fromProperty": "line",
+      "toId": "lrLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lrIn",
+      "fromProperty": "editWord",
+      "toId": "lrEdit",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lrIn",
+      "fromProperty": "deleteWord",
+      "toId": "lrDelete",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lrIn",
+      "fromProperty": "askWord",
+      "toId": "lrAskText",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "lrIn",
+      "fromProperty": "yesWord",
+      "toId": "lrYes",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lrIn",
+      "fromProperty": "noWord",
+      "toId": "lrNo",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "lrAskState",
+      "fromProperty": "asking",
+      "toId": "lrAsk",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lrAskState",
+      "fromProperty": "idle",
+      "toId": "lrButtons",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "lrDelete",
+      "fromProperty": "onClick",
+      "toId": "lrAskState",
+      "toProperty": "to-asking"
+    },
+    {
+      "fromId": "lrNo",
+      "fromProperty": "onClick",
+      "toId": "lrAskState",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "lrYes",
+      "fromProperty": "onClick",
+      "toId": "lrAskState",
+      "toProperty": "to-idle"
+    },
+    {
+      "fromId": "lrYes",
+      "fromProperty": "onClick",
+      "toId": "lrOut",
+      "toProperty": "delete"
+    },
+    {
+      "fromId": "lrEdit",
+      "fromProperty": "onClick",
+      "toId": "lrOut",
+      "toProperty": "edit"
+    },
+    {
+      "fromId": "lrIn",
+      "fromProperty": "id",
+      "toId": "lrOut",
+      "toProperty": "id"
+    }
+  ]
+}

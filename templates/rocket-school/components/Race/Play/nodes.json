@@ -222,10 +222,40 @@
           "name": "chargingWord",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "armedWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "armedHintWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "focus",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "customSet",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "customSetId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "customSetBoth",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 410,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "rpWrap",
@@ -455,7 +485,7 @@
         "name": "raceProgressA"
       },
       "x": 410,
-      "y": 4240
+      "y": 4360
     },
     {
       "id": "rpSetB",
@@ -465,7 +495,7 @@
         "name": "raceProgressB"
       },
       "x": 410,
-      "y": 4360
+      "y": 4480
     },
     {
       "id": "rpResetA",
@@ -475,7 +505,7 @@
         "name": "raceProgressA"
       },
       "x": 410,
-      "y": 3520
+      "y": 3640
     },
     {
       "id": "rpResetB",
@@ -485,7 +515,7 @@
         "name": "raceProgressB"
       },
       "x": 410,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "rpZero",
@@ -495,7 +525,7 @@
         "expression": "0"
       },
       "x": 410,
-      "y": 4480
+      "y": 4600
     },
     {
       "id": "rpRounds",
@@ -505,7 +535,7 @@
         "startValue": 0
       },
       "x": 410,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "rpTurnIsB",
@@ -515,7 +545,7 @@
         "expression": "players === 2 && rounds % 2 === 1"
       },
       "x": 410,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "rpMineAt",
@@ -525,7 +555,7 @@
         "expression": "isB ? b : a"
       },
       "x": 410,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "rpTheirsAt",
@@ -535,7 +565,7 @@
         "expression": "isB ? a : b"
       },
       "x": 410,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "rpTurnText",
@@ -545,7 +575,7 @@
         "expression": "players === 2 ? (isB ? nameB : nameA) + ' — ' + word : ''"
       },
       "x": 410,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "rpNextA",
@@ -555,7 +585,7 @@
         "expression": "min(1, a + gain)"
       },
       "x": 410,
-      "y": 2440
+      "y": 2560
     },
     {
       "id": "rpNextB",
@@ -565,7 +595,7 @@
         "expression": "min(1, b + (players === 2 ? gain : cpu))"
       },
       "x": 410,
-      "y": 2560
+      "y": 2680
     },
     {
       "id": "rpAMoves",
@@ -575,7 +605,7 @@
         "expression": "!isB"
       },
       "x": 410,
-      "y": 4600
+      "y": 4720
     },
     {
       "id": "rpBMoves",
@@ -585,7 +615,7 @@
         "expression": "players === 1 || isB"
       },
       "x": 410,
-      "y": 4720
+      "y": 4840
     },
     {
       "id": "rpGateA",
@@ -595,7 +625,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2680
+      "y": 2800
     },
     {
       "id": "rpGateB",
@@ -605,7 +635,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2800
+      "y": 2920
     },
     {
       "id": "rpOver",
@@ -615,7 +645,7 @@
         "expression": "a >= 1 || b >= 1"
       },
       "x": 410,
-      "y": 4840
+      "y": 4960
     },
     {
       "id": "rpGoOn",
@@ -625,7 +655,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2920
+      "y": 3040
     },
     {
       "id": "rpWinner",
@@ -635,7 +665,7 @@
         "name": "raceWinner"
       },
       "x": 410,
-      "y": 4960
+      "y": 5080
     },
     {
       "id": "rpSetWinA",
@@ -665,7 +695,7 @@
         "expression": "'A'"
       },
       "x": 410,
-      "y": 5080
+      "y": 5200
     },
     {
       "id": "rpNameBExpr",
@@ -675,7 +705,7 @@
         "expression": "'B'"
       },
       "x": 410,
-      "y": 5200
+      "y": 5320
     },
     {
       "id": "rpIsTwo",
@@ -685,7 +715,7 @@
         "expression": "players === 2"
       },
       "x": 410,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "rpShown",
@@ -733,14 +763,14 @@
         "value-teaching-controls": true
       },
       "x": 410,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "rpTeachPick",
       "type": "/Logic/Teach card",
       "label": "The card for the skill just missed",
       "x": 410,
-      "y": 3400
+      "y": 3520
     },
     {
       "id": "rpStep",
@@ -750,7 +780,7 @@
         "expression": "min(2, max(0, misses - 1))"
       },
       "x": 410,
-      "y": 3040
+      "y": 3160
     },
     {
       "id": "rpBoostsA",
@@ -760,7 +790,7 @@
         "startValue": 0
       },
       "x": 410,
-      "y": 5320
+      "y": 5440
     },
     {
       "id": "rpBoostA",
@@ -780,7 +810,7 @@
         "expression": "players === 2 && correct === true"
       },
       "x": 410,
-      "y": 3160
+      "y": 3280
     },
     {
       "id": "rpBoostB",
@@ -800,7 +830,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 5440
+      "y": 5560
     },
     {
       "id": "rpWon",
@@ -810,7 +840,7 @@
         "expression": "players === 2 || winner === 'A'"
       },
       "x": 410,
-      "y": 3640
+      "y": 3760
     },
     {
       "id": "rpResultText",
@@ -820,7 +850,7 @@
         "expression": "players === 2 ? (winner === 'A' ? nameA : nameB) + ' ' + winsWord : winner === 'A' ? youWin : computerWins"
       },
       "x": 410,
-      "y": 3760
+      "y": 3880
     },
     {
       "id": "rpResultLine",
@@ -830,7 +860,7 @@
         "expression": "players === 2 ? '' : right + ' / ' + rounds + ' ' + word"
       },
       "x": 410,
-      "y": 3880
+      "y": 4000
     },
     {
       "id": "rpMint",
@@ -840,7 +870,7 @@
         "functionScript": "Outputs.raceId = 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1000000).toString(36);"
       },
       "x": 410,
-      "y": 3280,
+      "y": 3400,
       "ports": [
         {
           "name": "out-raceId",
@@ -852,11 +882,37 @@
       ]
     },
     {
+      "id": "rpFaceB",
+      "type": "JavaScriptFunction",
+      "label": "A face for the other rocket",
+      "parameters": {
+        "functionScript": "var LOOKS = [\"pixel-art\",\"big-smile\",\"adventurer\"];\nvar ABC = 'abcdefghijklmnopqrstuvwxyz0123456789';\nvar seed = '';\nfor (var i = 0; i < 8; i++) seed += ABC.charAt(Math.floor(Math.random() * ABC.length));\nOutputs.look = LOOKS[Math.floor(Math.random() * LOOKS.length)];\nOutputs.seed = seed;"
+      },
+      "x": 410,
+      "y": 1360,
+      "ports": [
+        {
+          "name": "out-look",
+          "displayName": "look",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-seed",
+          "displayName": "seed",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
       "id": "rpFinish",
       "type": "/Logic/Finish race",
       "label": "Pay the landing, and a new best",
       "x": 410,
-      "y": 4000
+      "y": 4120
     },
     {
       "id": "rpOut",
@@ -940,7 +996,7 @@
         }
       ],
       "x": 410,
-      "y": 4120
+      "y": 4240
     }
   ],
   "visualRoots": [

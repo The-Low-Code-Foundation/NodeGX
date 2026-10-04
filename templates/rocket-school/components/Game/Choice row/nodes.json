@@ -22,6 +22,11 @@
           "name": "label",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 410,
@@ -45,6 +50,16 @@
         "rowGap": "var(--space-2)"
       },
       "x": 40,
+      "y": 40
+    },
+    {
+      "id": "crShown",
+      "type": "Expression",
+      "label": "Shown unless told not to",
+      "parameters": {
+        "expression": "m !== false"
+      },
+      "x": 410,
       "y": 40
     },
     {

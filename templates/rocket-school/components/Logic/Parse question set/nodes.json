@@ -27,7 +27,7 @@
       "type": "JavaScriptFunction",
       "label": "Parse question set",
       "parameters": {
-        "functionScript": "\n// Accepts the editor's rows OR pasted JSON: [{ \"q\": \"...\", \"a\": \"...\", \"opts\": [...] }] — or [[\"q\",\"a\"], ...].\nvar raw = Inputs.json;\nvar rows = Inputs.rows;\nvar items = [], error = '';\nfunction push(q, a, opts) { q = String(q === undefined ? '' : q).trim(); a = String(a === undefined ? '' : a).trim(); if (q && a) items.push(opts && opts.length ? { q: q, a: a, opts: opts.map(String) } : { q: q, a: a }); }\nif (Array.isArray(rows) && rows.length) { for (var i = 0; i < rows.length; i++) push(rows[i].q, rows[i].a, rows[i].opts); }\nelse if (typeof raw === 'string' && raw.trim()) {\n  try {\n    var parsed = JSON.parse(raw);\n    if (!Array.isArray(parsed)) throw new Error('not a list');\n    for (var j = 0; j < parsed.length; j++) { var it = parsed[j]; if (Array.isArray(it)) push(it[0], it[1], it[2]); else if (it && typeof it === 'object') push(it.q || it.question, it.a || it.answer, it.opts || it.options); }\n  } catch (e) { error = 'That is not a list of questions. Expected [{\"q\": \"...\", \"a\": \"...\"}].'; }\n}\nOutputs.items = items;\nOutputs.count = items.length;\nOutputs.error = error;\nOutputs.valid = items.length > 0 && !error;\n"
+        "functionScript": "\n// Accepts the editor's rows, pasted JSON ([{ \"q\": \"...\", \"a\": \"...\", \"opts\": [...] }] or [[\"q\",\"a\"], ...]), or — P113 REV-002,\n// what a parent actually types — plain text, one line per question: \"question = answer\". The separator is the first of a tab,\n// \" = \", \" → \", \" -> \", \" : \", \" - \", then a bare \"=\" or \":\". A line with no separator is skipped and counted.\nvar raw = Inputs.json;\nvar rows = Inputs.rows;\nvar items = [], error = '', skipped = 0;\nfunction push(q, a, opts) { q = String(q === undefined ? '' : q).trim(); a = String(a === undefined ? '' : a).trim(); if (q && a) items.push(opts && opts.length ? { q: q, a: a, opts: opts.map(String) } : { q: q, a: a }); }\nif (Array.isArray(rows) && rows.length) { for (var i = 0; i < rows.length; i++) push(rows[i].q, rows[i].a, rows[i].opts); }\nelse if (typeof raw === 'string' && raw.trim()) {\n  var text = raw.trim();\n  if (text.charAt(0) === '[') {\n    try {\n      var parsed = JSON.parse(text);\n      if (!Array.isArray(parsed)) throw new Error('not a list');\n      for (var j = 0; j < parsed.length; j++) { var it = parsed[j]; if (Array.isArray(it)) push(it[0], it[1], it[2]); else if (it && typeof it === 'object') push(it.q || it.question, it.a || it.answer, it.opts || it.options); }\n    } catch (e) { error = 'That is not a list of questions. Expected [{\"q\": \"...\", \"a\": \"...\"}].'; }\n  } else {\n    var lines = text.split(/\\r?\\n/);\n    var seps = ['\\t', ' = ', ' → ', ' -> ', ' : ', ' - ', '=', ':'];\n    for (var l = 0; l < lines.length; l++) {\n      var line = lines[l].trim();\n      if (!line) continue;\n      var at = -1, sep = '';\n      // An equals sign splits at its LAST occurrence (a question can hold one: \"2 + 2 = ? = 4\"); the others at their first.\n      for (var s2 = 0; s2 < seps.length && at === -1; s2++) { var k2 = seps[s2] === ' = ' || seps[s2] === '=' ? line.lastIndexOf(seps[s2]) : line.indexOf(seps[s2]); if (k2 > 0) { at = k2; sep = seps[s2]; } }\n      if (at === -1) { skipped++; continue; }\n      push(line.slice(0, at), line.slice(at + sep.length));\n    }\n  }\n}\nOutputs.items = items;\nOutputs.count = items.length;\nOutputs.skipped = skipped;\nOutputs.error = error;\nOutputs.valid = items.length > 0 && !error;\n"
       },
       "x": 40,
       "y": 160,
@@ -56,6 +56,13 @@
         {
           "name": "out-count",
           "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-skipped",
+          "displayName": "skipped",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
@@ -100,6 +107,11 @@
           "name": "valid",
           "plug": "input",
           "type": "boolean"
+        },
+        {
+          "name": "skipped",
+          "plug": "input",
+          "type": "number"
         },
         {
           "name": "done",

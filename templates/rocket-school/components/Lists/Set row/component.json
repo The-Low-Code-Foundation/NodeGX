@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "90b2f88f-c187-521d-8707-cd7dab95ccb8",
+  "name": "Set row",
+  "path": "/Lists/Set row",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One revision list: its name and how many questions, Edit, and Delete (which asks first). The words come in the row, since a repeated row cannot translate. Publishes Edit and Delete with the list’s Id."
+}

@@ -147,10 +147,40 @@
           "name": "chargingWord",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "armedWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "armedHintWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "focus",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "customSet",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "customSetId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "customSetBoth",
+          "plug": "output",
+          "type": "boolean"
         }
       ],
       "x": 410,
-      "y": 520
+      "y": 880
     },
     {
       "id": "rdWrap",
@@ -208,7 +238,8 @@
         "sizeMode": "contentHeight",
         "fontSize": "var(--text-sm)",
         "color": "var(--muted-foreground)",
-        "fontWeight": "var(--font-semibold)"
+        "fontWeight": "var(--font-semibold)",
+        "textAlignX": "center"
       },
       "x": 160,
       "y": 400
@@ -293,21 +324,21 @@
         "startValue": 0
       },
       "x": 410,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "rdPick",
       "type": "/Logic/Pick next question",
       "label": "Pick the next question",
       "x": 410,
-      "y": 880
+      "y": 1000
     },
     {
       "id": "rdGrade",
       "type": "/Logic/Grade answer",
       "label": "Grade the answer",
       "x": 410,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "rdArmed",
@@ -315,11 +346,24 @@
       "label": "Is the turbo armed?",
       "parameters": {
         "states": "idle,armed",
-        "values": "on",
+        "values": "on,bg",
         "useTransitions": false,
         "type-on": "boolean",
         "value-idle-on": false,
-        "value-armed-on": true
+        "value-armed-on": true,
+        "type-bg": "color",
+        "value-idle-bg": "var(--primary)",
+        "value-armed-bg": "var(--accent)"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "rdTurboLabel",
+      "type": "Expression",
+      "label": "What the turbo button says",
+      "parameters": {
+        "expression": "armed === true ? armedWord : word"
       },
       "x": 410,
       "y": 640
@@ -339,7 +383,7 @@
       "type": "JavaScriptFunction",
       "label": "The chain, in words",
       "parameters": {
-        "functionScript": "var n = Math.max(0, Math.floor(Number(Inputs.n) || 0));\nvar of = Math.max(1, Math.floor(Number(Inputs.of) || 3));\n// Nothing to say before the first right answer of a run, or once it is charged (the button speaks then).\nOutputs.line = n > 0 && Inputs.ready !== true ? String(Inputs.word || '').replace('{n}', n).replace('{of}', of) : '';"
+        "functionScript": "var n = Math.max(0, Math.floor(Number(Inputs.n) || 0));\nvar of = Math.max(1, Math.floor(Number(Inputs.of) || 3));\n// Armed, this line is the one that says what happens next: the turbo is spent by the NEXT right answer, and\n// nothing on the old screen said so (Richard, 2026-09-20).\nif (Inputs.armed === true) { Outputs.line = String(Inputs.hint || ''); }\n// Nothing to say before the first right answer of a run, or once it is charged (the button speaks then).\nelse Outputs.line = n > 0 && Inputs.ready !== true ? String(Inputs.word || '').replace('{n}', n).replace('{of}', of) : '';"
       },
       "x": 410,
       "y": 400,
@@ -354,6 +398,20 @@
         {
           "name": "in-of",
           "displayName": "of",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-armed",
+          "displayName": "armed",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hint",
+          "displayName": "hint",
           "plug": "input",
           "type": "*",
           "group": "Inputs"
@@ -386,7 +444,7 @@
       "type": "/Logic/Play sounds",
       "label": "The sounds",
       "x": 410,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "rdNextKey",
@@ -396,7 +454,7 @@
         "expression": "((answer || '') + '').charAt(((typed || '') + '').length)"
       },
       "x": 410,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "rdExpected",
@@ -406,7 +464,7 @@
         "expression": "isTyping === true ? ((answer || '') + '') : ''"
       },
       "x": 410,
-      "y": 1000
+      "y": 1120
     },
     {
       "id": "rdShowKeys",
@@ -416,7 +474,7 @@
         "expression": "isTyping === true && !open"
       },
       "x": 410,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "rdBoxOn",
@@ -426,7 +484,7 @@
         "expression": "!open"
       },
       "x": 410,
-      "y": 1120
+      "y": 1240
     },
     {
       "id": "rdCanTeach",
@@ -436,7 +494,7 @@
         "expression": "correct !== true && ((teach || '') + '').length > 0"
       },
       "x": 410,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "rdRight",
@@ -446,7 +504,7 @@
         "runOnChange-condition": false
       },
       "x": 410,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "rdOut",
@@ -580,7 +638,7 @@
         }
       ],
       "x": 410,
-      "y": 1240
+      "y": 1360
     }
   ],
   "visualRoots": [

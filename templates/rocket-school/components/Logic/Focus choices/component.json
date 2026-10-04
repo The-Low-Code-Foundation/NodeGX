@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2ff1cb99-b107-59c4-8634-1ce6b82cc45a",
+  "name": "Focus choices",
+  "path": "/Logic/Focus choices",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "P113 REV-001: the chooser’s three steps as rows — the subjects with anything at this level (and My lists), the subject’s topics (a list’s are the sets), the topic’s skills with their ticks. Nothing above the child’s level."
+}

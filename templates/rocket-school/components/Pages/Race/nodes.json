@@ -135,7 +135,7 @@
       "type": "/Data/Words",
       "label": "The words",
       "x": 470,
-      "y": 2560
+      "y": 2680
     },
     {
       "id": "rcT",
@@ -149,35 +149,35 @@
       "type": "/Data/Curriculum",
       "label": "The skills",
       "x": 470,
-      "y": 1360
+      "y": 1480
     },
     {
       "id": "rcWordLists",
       "type": "/Data/Word lists",
       "label": "The typing words",
       "x": 470,
-      "y": 1480
+      "y": 1600
     },
     {
       "id": "rcSave",
       "type": "/Logic/Save model",
       "label": "Remember what was learned",
       "x": 470,
-      "y": 1600
+      "y": 1720
     },
     {
       "id": "rcKeys",
       "type": "/Logic/Update settings",
       "label": "Keep the keyboard a key press reports",
       "x": 470,
-      "y": 1720
+      "y": 1840
     },
     {
       "id": "rcPick",
       "type": "/Logic/Update settings",
       "label": "Keep the keyboard picked beside the map",
       "x": 470,
-      "y": 1840
+      "y": 1960
     },
     {
       "id": "rcNoOne",
@@ -187,7 +187,7 @@
         "expression": "has === false"
       },
       "x": 470,
-      "y": 2680
+      "y": 2800
     },
     {
       "id": "rcGuard",
@@ -250,7 +250,7 @@
         "name": "racePlaying"
       },
       "x": 470,
-      "y": 1960
+      "y": 2080
     },
     {
       "id": "rcSetDone",
@@ -260,7 +260,7 @@
         "name": "racePlaying"
       },
       "x": 470,
-      "y": 2080
+      "y": 2200
     },
     {
       "id": "rcInitDone",
@@ -280,7 +280,7 @@
         "expression": "true"
       },
       "x": 470,
-      "y": 2800
+      "y": 2920
     },
     {
       "id": "rcFalse",
@@ -290,7 +290,7 @@
         "expression": "false"
       },
       "x": 470,
-      "y": 2920
+      "y": 3040
     },
     {
       "id": "rcNotPlaying",
@@ -310,21 +310,32 @@
         "expression": "players === 2 && ((nameB || '') + '').trim() ? nameB : 'CPU'"
       },
       "x": 470,
-      "y": 2200
+      "y": 2320
     },
     {
       "id": "rcSoundsEnd",
       "type": "/Logic/Play sounds",
       "label": "The fanfare",
       "x": 470,
-      "y": 2320
+      "y": 2440
     },
     {
       "id": "rcTeachCards",
       "type": "/Data/Teach cards",
       "label": "The Teach cards",
       "x": 470,
-      "y": 2440
+      "y": 2560
+    },
+    {
+      "id": "rcGoLists",
+      "type": "RouterNavigate",
+      "label": "To the revision lists",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Lists"
+      },
+      "x": 470,
+      "y": 1360
     }
   ],
   "visualRoots": [

@@ -137,6 +137,18 @@
     },
     {
       "fromId": "gradeanswerIn",
+      "fromProperty": "itemKey",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-itemKey"
+    },
+    {
+      "fromId": "gradeanswerIn",
+      "fromProperty": "itemCount",
+      "toId": "gradeanswerFn",
+      "toProperty": "in-itemCount"
+    },
+    {
+      "fromId": "gradeanswerIn",
       "fromProperty": "run",
       "toId": "gradeanswerFn",
       "toProperty": "run"
@@ -290,6 +302,24 @@
       "fromProperty": "out-chainOf",
       "toId": "gradeanswerOut",
       "toProperty": "chainOf"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-itemLearned",
+      "toId": "gradeanswerOut",
+      "toProperty": "itemLearned"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-listDone",
+      "toId": "gradeanswerOut",
+      "toProperty": "listDone"
+    },
+    {
+      "fromId": "gradeanswerFn",
+      "fromProperty": "out-learned",
+      "toId": "gradeanswerOut",
+      "toProperty": "learned"
     },
     {
       "fromId": "gradeanswerFn",

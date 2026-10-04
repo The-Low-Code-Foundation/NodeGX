@@ -7,5 +7,5 @@
   "created": "2026-09-12T00:00:00.000Z",
   "modified": "2026-09-12T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "The question sets, and the chosen one with its items."
+  "description": "The question sets as rows (with the words a row shows, since a repeated row cannot translate), and the chosen one with its items as JSON and as text."
 }

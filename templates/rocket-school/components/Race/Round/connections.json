@@ -90,8 +90,44 @@
     {
       "fromId": "rdIn",
       "fromProperty": "turboWord",
+      "toId": "rdTurboLabel",
+      "toProperty": "word"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "armedWord",
+      "toId": "rdTurboLabel",
+      "toProperty": "armedWord"
+    },
+    {
+      "fromId": "rdArmed",
+      "fromProperty": "on",
+      "toId": "rdTurboLabel",
+      "toProperty": "armed"
+    },
+    {
+      "fromId": "rdTurboLabel",
+      "fromProperty": "result",
       "toId": "rdTurbo",
       "toProperty": "label"
+    },
+    {
+      "fromId": "rdArmed",
+      "fromProperty": "bg",
+      "toId": "rdTurbo",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "rdArmed",
+      "fromProperty": "on",
+      "toId": "rdChainLine",
+      "toProperty": "in-armed"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "armedHintWord",
+      "toId": "rdChainLine",
+      "toProperty": "in-hint"
     },
     {
       "fromId": "rdGrade",
@@ -188,6 +224,42 @@
       "fromProperty": "limitScale",
       "toId": "rdPick",
       "toProperty": "limitScale"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "focus",
+      "toId": "rdPick",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "customSet",
+      "toId": "rdPick",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "customSetId",
+      "toId": "rdPick",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "rdIn",
+      "fromProperty": "customSetBoth",
+      "toId": "rdPick",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "itemKey",
+      "toId": "rdGrade",
+      "toProperty": "itemKey"
+    },
+    {
+      "fromId": "rdPick",
+      "fromProperty": "itemCount",
+      "toId": "rdGrade",
+      "toProperty": "itemCount"
     },
     {
       "fromId": "rdPick",

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c56f1054-3913-5b28-8046-3211e6bf3f48",
+  "name": "Focus picker",
+  "path": "/Game/Focus picker",
+  "type": "visual",
+  "created": "2026-09-12T00:00:00.000Z",
+  "modified": "2026-09-12T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "What to practise, in three steps: a subject, a topic in it, and the skills of that topic ticked or not (none ticked is the whole topic). Under My lists the topics are the person’s revision lists. Open loads the draft from Subject0 and Skills0; Practise this publishes Save with Subject and Skills; Cancel and Edit Lists are signals for the page."
+}

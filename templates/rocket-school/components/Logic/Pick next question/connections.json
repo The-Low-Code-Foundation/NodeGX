@@ -70,6 +70,24 @@
       "toProperty": "in-limitScale"
     },
     {
+      "fromId": "picknextquesIn",
+      "fromProperty": "focus",
+      "toId": "picknextquesFn",
+      "toProperty": "in-focus"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "customSetId",
+      "toId": "picknextquesFn",
+      "toProperty": "in-customSetId"
+    },
+    {
+      "fromId": "picknextquesIn",
+      "fromProperty": "customSetBoth",
+      "toId": "picknextquesFn",
+      "toProperty": "in-customSetBoth"
+    },
+    {
       "fromId": "picknextquesFn",
       "fromProperty": "out-skillId",
       "toId": "picknextquesOut",
@@ -188,6 +206,36 @@
       "fromProperty": "out-padNumeric",
       "toId": "picknextquesOut",
       "toProperty": "padNumeric"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-itemKey",
+      "toId": "picknextquesOut",
+      "toProperty": "itemKey"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-itemCount",
+      "toId": "picknextquesOut",
+      "toProperty": "itemCount"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-learned",
+      "toId": "picknextquesOut",
+      "toProperty": "learned"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-subject",
+      "toId": "picknextquesOut",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "picknextquesFn",
+      "fromProperty": "out-topic",
+      "toId": "picknextquesOut",
+      "toProperty": "topic"
     },
     {
       "fromId": "picknextquesFn",

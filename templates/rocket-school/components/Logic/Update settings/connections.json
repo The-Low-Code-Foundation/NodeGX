@@ -83,6 +83,18 @@
     },
     {
       "fromId": "updatesettinIn",
+      "fromProperty": "focusSubject",
+      "toId": "updatesettinFn",
+      "toProperty": "in-focusSubject"
+    },
+    {
+      "fromId": "updatesettinIn",
+      "fromProperty": "focusSkills",
+      "toId": "updatesettinFn",
+      "toProperty": "in-focusSkills"
+    },
+    {
+      "fromId": "updatesettinIn",
       "fromProperty": "run",
       "toId": "updatesettinFn",
       "toProperty": "run"

@@ -1,0 +1,711 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c56f1054-3913-5b28-8046-3211e6bf3f48",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "fpIn",
+      "type": "Component Inputs",
+      "label": "The school, the player and the words",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "curriculum",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "sets",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "level",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "lang",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "subject0",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "skills0",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "open",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "titleWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "subjectWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "topicWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "skillsHint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "allWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "noneWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "saveWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cancelWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "listsWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "editListsWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "noListsWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "fpCard",
+      "type": "Group",
+      "label": "What to practise",
+      "children": [
+        "fpTitle",
+        "fpSubject",
+        "fpTopic",
+        "fpHint",
+        "fpSkills",
+        "fpAllRow",
+        "fpNoLists",
+        "fpEditLists",
+        "fpActions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-4)"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "fpTitle",
+      "type": "Text",
+      "label": "What do you want to practise?",
+      "parent": "fpCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-snug)",
+        "color": "var(--foreground)",
+        "as": "h3",
+        "fontFamily": "Grandstander"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "fpSubject",
+      "type": "/Game/Choice row",
+      "label": "The subject",
+      "parent": "fpCard",
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "fpTopic",
+      "type": "/Game/Choice row",
+      "label": "The topic",
+      "parent": "fpCard",
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "fpHint",
+      "type": "Text",
+      "label": "Tick what to practise",
+      "parent": "fpCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "fpSkills",
+      "type": "Group",
+      "label": "The skills, ticked or not",
+      "parent": "fpCard",
+      "children": [
+        "fpEach"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-3)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "fpEach",
+      "type": "For Each",
+      "label": "One pill per skill",
+      "parameters": {
+        "template": "/Game/Choice",
+        "templateType": "explicit"
+      },
+      "parent": "fpSkills",
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "fpAllRow",
+      "type": "Group",
+      "label": "All of the topic, or none of it",
+      "parent": "fpCard",
+      "children": [
+        "fpAll",
+        "fpNone"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "fpAll",
+      "type": "net.noodl.controls.button",
+      "label": "All of this topic",
+      "parent": "fpAllRow",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "All"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "fpNone",
+      "type": "net.noodl.controls.button",
+      "label": "Clear",
+      "parent": "fpAllRow",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Clear"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "fpNoLists",
+      "type": "Text",
+      "label": "No list yet",
+      "parent": "fpCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 1240
+    },
+    {
+      "id": "fpEditLists",
+      "type": "net.noodl.controls.button",
+      "label": "Make or edit a list",
+      "parent": "fpCard",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Make or edit a list"
+      },
+      "x": 100,
+      "y": 1360
+    },
+    {
+      "id": "fpActions",
+      "type": "Group",
+      "label": "Practise this, or cancel",
+      "parent": "fpCard",
+      "children": [
+        "fpSave",
+        "fpCancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 1480
+    },
+    {
+      "id": "fpSave",
+      "type": "net.noodl.controls.button",
+      "label": "Practise this",
+      "parent": "fpActions",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Practise this"
+      },
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "fpCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "fpActions",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 1720
+    },
+    {
+      "id": "fpSubjectVar",
+      "type": "Variable2",
+      "label": "The subject being chosen",
+      "parameters": {
+        "name": "focusDraftSubject"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: one chooser on screen at a time (a race’s setup or a monster game’s, never both), and Open rewrites the draft each time it opens."
+      },
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "fpTopicVar",
+      "type": "Variable2",
+      "label": "The topic being looked at",
+      "parameters": {
+        "name": "focusDraftTopic"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: one chooser on screen at a time (a race’s setup or a monster game’s, never both), and Open rewrites the draft each time it opens."
+      },
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "fpSkillsVar",
+      "type": "Variable2",
+      "label": "The skills ticked so far",
+      "parameters": {
+        "name": "focusDraftSkills"
+      },
+      "metadata": {
+        "comment": "Shared on purpose: one chooser on screen at a time (a race’s setup or a monster game’s, never both), and Open rewrites the draft each time it opens."
+      },
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "fpSetSubject",
+      "type": "Set Variable",
+      "label": "Choose a subject",
+      "parameters": {
+        "name": "focusDraftSubject"
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "fpSetTopic",
+      "type": "Set Variable",
+      "label": "Choose a topic",
+      "parameters": {
+        "name": "focusDraftTopic"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "fpSetSkills",
+      "type": "Set Variable",
+      "label": "Tick or untick one",
+      "parameters": {
+        "name": "focusDraftSkills"
+      },
+      "x": 410,
+      "y": 2080
+    },
+    {
+      "id": "fpSetAll",
+      "type": "Set Variable",
+      "label": "Tick the whole topic",
+      "parameters": {
+        "name": "focusDraftSkills"
+      },
+      "x": 410,
+      "y": 2200
+    },
+    {
+      "id": "fpSetNone",
+      "type": "Set Variable",
+      "label": "Untick the whole topic",
+      "parameters": {
+        "name": "focusDraftSkills"
+      },
+      "x": 410,
+      "y": 2320
+    },
+    {
+      "id": "fpLoadSubject",
+      "type": "Set Variable",
+      "label": "Start from the saved subject",
+      "parameters": {
+        "name": "focusDraftSubject"
+      },
+      "x": 410,
+      "y": 2440
+    },
+    {
+      "id": "fpLoadTopic",
+      "type": "Set Variable",
+      "label": "Start on the first topic",
+      "parameters": {
+        "name": "focusDraftTopic"
+      },
+      "x": 410,
+      "y": 2560
+    },
+    {
+      "id": "fpLoadSkills",
+      "type": "Set Variable",
+      "label": "Start from the saved ticks",
+      "parameters": {
+        "name": "focusDraftSkills"
+      },
+      "x": 410,
+      "y": 2680
+    },
+    {
+      "id": "fpNoTopic",
+      "type": "Expression",
+      "label": "No topic yet",
+      "parameters": {
+        "expression": "''"
+      },
+      "x": 410,
+      "y": 2800
+    },
+    {
+      "id": "fpChoices",
+      "type": "/Logic/Focus choices",
+      "label": "The three steps, as rows",
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "fpToggle",
+      "type": "/Logic/Toggle id",
+      "label": "Tick or untick one",
+      "parameters": {
+        "action": "toggle"
+      },
+      "x": 410,
+      "y": 760
+    },
+    {
+      "id": "fpTickAll",
+      "type": "/Logic/Toggle id",
+      "label": "Tick the whole topic",
+      "parameters": {
+        "action": "all"
+      },
+      "x": 410,
+      "y": 1000
+    },
+    {
+      "id": "fpTickNone",
+      "type": "/Logic/Toggle id",
+      "label": "Untick the whole topic",
+      "parameters": {
+        "action": "none"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "fpSubjectPill",
+      "type": "Expression",
+      "label": "Which subject pill is on",
+      "parameters": {
+        "expression": "isLists === true ? 'lists' : subject"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "fpNoListsShown",
+      "type": "Expression",
+      "label": "My lists, and none made yet",
+      "parameters": {
+        "expression": "isLists === true && hasSets !== true"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "fpShown",
+      "type": "Expression",
+      "label": "Shown unless told not to",
+      "parameters": {
+        "expression": "m !== false"
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "fpOut",
+      "type": "Component Outputs",
+      "label": "What was chosen",
+      "ports": [
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "subject",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "skills",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "editLists",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 1600
+    }
+  ],
+  "visualRoots": [
+    "fpCard"
+  ]
+}

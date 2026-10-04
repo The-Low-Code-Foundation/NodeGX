@@ -29,6 +29,12 @@
     },
     {
       "fromId": "savequestionIn",
+      "fromProperty": "both",
+      "toId": "savequestionFn",
+      "toProperty": "in-both"
+    },
+    {
+      "fromId": "savequestionIn",
       "fromProperty": "run",
       "toId": "savequestionFn",
       "toProperty": "run"

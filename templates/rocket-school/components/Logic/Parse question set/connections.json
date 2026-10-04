@@ -41,6 +41,12 @@
     },
     {
       "fromId": "parsequestioFn",
+      "fromProperty": "out-skipped",
+      "toId": "parsequestioOut",
+      "toProperty": "skipped"
+    },
+    {
+      "fromId": "parsequestioFn",
       "fromProperty": "success",
       "toId": "parsequestioOut",
       "toProperty": "done"

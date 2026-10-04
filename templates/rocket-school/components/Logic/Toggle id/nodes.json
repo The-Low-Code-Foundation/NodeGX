@@ -1,0 +1,123 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "f6973aab-04f9-5bc3-8b61-917414757064",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "toggleidIn",
+      "type": "Component Inputs",
+      "label": "What the caller gives",
+      "ports": [
+        {
+          "name": "run",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "list",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "action",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "ids",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "toggleidFn",
+      "type": "JavaScriptFunction",
+      "label": "Toggle id",
+      "parameters": {
+        "functionScript": "\nvar list = Array.isArray(Inputs.list) ? Inputs.list.map(String) : [];\nvar id = String(Inputs.id || '');\nvar action = String(Inputs.action || 'toggle');\nvar ids = Array.isArray(Inputs.ids) ? Inputs.ids.map(String) : [];\nif (action === 'toggle') { if (id) { var at = list.indexOf(id); if (at === -1) list.push(id); else list.splice(at, 1); } }\nelse if (action === 'all') { for (var i = 0; i < ids.length; i++) if (list.indexOf(ids[i]) === -1) list.push(ids[i]); }\nelse if (action === 'none') { list = list.filter(function (x) { return ids.indexOf(x) === -1; }); }\nelse if (action === 'set') { list = ids.slice(); }\nelse if (action === 'clear') { list = []; }\nOutputs.list = list;\nOutputs.count = list.length;\n",
+        "runOnChange-in-list": false,
+        "runOnChange-in-id": false,
+        "runOnChange-in-action": false,
+        "runOnChange-in-ids": false
+      },
+      "x": 40,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-list",
+          "displayName": "list",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-action",
+          "displayName": "action",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-ids",
+          "displayName": "ids",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-list",
+          "displayName": "list",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-count",
+          "displayName": "count",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "toggleidOut",
+      "type": "Component Outputs",
+      "label": "What it answers",
+      "ports": [
+        {
+          "name": "list",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "count",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    }
+  ]
+}

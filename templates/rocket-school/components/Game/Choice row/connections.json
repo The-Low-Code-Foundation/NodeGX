@@ -5,6 +5,18 @@
   "connections": [
     {
       "fromId": "crIn",
+      "fromProperty": "mounted",
+      "toId": "crShown",
+      "toProperty": "m"
+    },
+    {
+      "fromId": "crShown",
+      "fromProperty": "result",
+      "toId": "crWrap",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "crIn",
       "fromProperty": "label",
       "toId": "crLabel",
       "toProperty": "text"

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "f6973aab-04f9-5bc3-8b61-917414757064",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "toggleidIn",
+      "fromProperty": "list",
+      "toId": "toggleidFn",
+      "toProperty": "in-list"
+    },
+    {
+      "fromId": "toggleidIn",
+      "fromProperty": "id",
+      "toId": "toggleidFn",
+      "toProperty": "in-id"
+    },
+    {
+      "fromId": "toggleidIn",
+      "fromProperty": "action",
+      "toId": "toggleidFn",
+      "toProperty": "in-action"
+    },
+    {
+      "fromId": "toggleidIn",
+      "fromProperty": "ids",
+      "toId": "toggleidFn",
+      "toProperty": "in-ids"
+    },
+    {
+      "fromId": "toggleidIn",
+      "fromProperty": "run",
+      "toId": "toggleidFn",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "toggleidFn",
+      "fromProperty": "out-list",
+      "toId": "toggleidOut",
+      "toProperty": "list"
+    },
+    {
+      "fromId": "toggleidFn",
+      "fromProperty": "out-count",
+      "toId": "toggleidOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "toggleidFn",
+      "fromProperty": "success",
+      "toId": "toggleidOut",
+      "toProperty": "done"
+    }
+  ]
+}

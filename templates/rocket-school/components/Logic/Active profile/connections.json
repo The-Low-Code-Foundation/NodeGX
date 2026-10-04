@@ -167,6 +167,18 @@
     },
     {
       "fromId": "activeprofilFn",
+      "fromProperty": "out-focusSubject",
+      "toId": "activeprofilOut",
+      "toProperty": "focusSubject"
+    },
+    {
+      "fromId": "activeprofilFn",
+      "fromProperty": "out-focusSkills",
+      "toId": "activeprofilOut",
+      "toProperty": "focusSkills"
+    },
+    {
+      "fromId": "activeprofilFn",
       "fromProperty": "success",
       "toId": "activeprofilOut",
       "toProperty": "done"

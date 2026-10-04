@@ -1,0 +1,654 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "eb14f3c5-054d-5487-8add-25a296394a5b",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "leIn",
+      "type": "Component Inputs",
+      "label": "The lists and the words",
+      "ports": [
+        {
+          "name": "mounted",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "sets",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "setId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "fill",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "nameWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "nameHint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "linesWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "linesHint",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "countWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "emptyWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "bothWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "oneWayWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "saveWord",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "cancelWord",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "leCard",
+      "type": "Group",
+      "label": "The editor",
+      "children": [
+        "leNameLabel",
+        "leName",
+        "leLinesLabel",
+        "leText",
+        "leCount",
+        "leBoth",
+        "leActions"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "backgroundColor": "var(--surface)",
+        "borderRadius": "var(--radius-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border)",
+        "clip": true,
+        "flexDirection": "column",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-6)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "maxWidth": {
+          "value": 640,
+          "unit": "px"
+        }
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "leNameLabel",
+      "type": "Text",
+      "label": "Name of the list",
+      "parent": "leCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "leName",
+      "type": "net.noodl.controls.textinput",
+      "label": "The name box",
+      "parent": "leCard",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-xl)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)"
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "leLinesLabel",
+      "type": "Text",
+      "label": "One line per question",
+      "parent": "leCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "fontWeight": "var(--font-semibold)"
+      },
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "leText",
+      "type": "net.noodl.controls.textinput",
+      "label": "The questions, one line each",
+      "parent": "leCard",
+      "parameters": {
+        "runOnChange-startValue": true,
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "textArea",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "height": {
+          "value": 220,
+          "unit": "px"
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "leCount",
+      "type": "Text",
+      "label": "How many will be saved",
+      "parent": "leCard",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)"
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "leBoth",
+      "type": "/Game/Choice row",
+      "label": "Both ways, or one",
+      "parent": "leCard",
+      "x": 100,
+      "y": 760
+    },
+    {
+      "id": "leActions",
+      "type": "Group",
+      "label": "Save or cancel",
+      "parent": "leCard",
+      "children": [
+        "leSave",
+        "leCancel"
+      ],
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "flexDirection": "row",
+        "alignItems": "center",
+        "flexWrap": "wrap",
+        "columnGap": "var(--space-2)",
+        "rowGap": "var(--space-3)",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 880
+    },
+    {
+      "id": "leSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "leActions",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Save"
+      },
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "leCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "leActions",
+      "parameters": {
+        "backgroundColor": "var(--surface)",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "Cancel"
+      },
+      "x": 160,
+      "y": 1120
+    },
+    {
+      "id": "leNameVar",
+      "type": "Variable2",
+      "label": "The name so far",
+      "parameters": {
+        "name": "listDraftName"
+      },
+      "metadata": {
+        "comment": "One editor on screen at a time: Fill rewrites the draft every time it opens."
+      },
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "leTextVar",
+      "type": "Variable2",
+      "label": "The lines so far",
+      "parameters": {
+        "name": "listDraftText"
+      },
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "leBothVar",
+      "type": "Variable2",
+      "label": "Both ways?",
+      "parameters": {
+        "name": "listDraftBoth"
+      },
+      "x": 410,
+      "y": 1600
+    },
+    {
+      "id": "leIdVar",
+      "type": "Variable2",
+      "label": "Which list is being edited",
+      "parameters": {
+        "name": "listDraftId"
+      },
+      "x": 410,
+      "y": 1720
+    },
+    {
+      "id": "leSetName",
+      "type": "Set Variable",
+      "label": "Fill the name",
+      "parameters": {
+        "name": "listDraftName"
+      },
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "leSetText",
+      "type": "Set Variable",
+      "label": "Fill the lines",
+      "parameters": {
+        "name": "listDraftText"
+      },
+      "x": 410,
+      "y": 640
+    },
+    {
+      "id": "leSetBoth",
+      "type": "Set Variable",
+      "label": "Fill both ways",
+      "parameters": {
+        "name": "listDraftBoth"
+      },
+      "x": 410,
+      "y": 1840
+    },
+    {
+      "id": "leSetId",
+      "type": "Set Variable",
+      "label": "Fill the id",
+      "parameters": {
+        "name": "listDraftId"
+      },
+      "x": 410,
+      "y": 1960
+    },
+    {
+      "id": "leSetBothPick",
+      "type": "Set Variable",
+      "label": "Choose both ways or one",
+      "parameters": {
+        "name": "listDraftBoth"
+      },
+      "x": 410,
+      "y": 880
+    },
+    {
+      "id": "leFill",
+      "type": "JavaScriptFunction",
+      "label": "The list to edit, or an empty one",
+      "parameters": {
+        "functionScript": "var sets = Array.isArray(Inputs.sets) ? Inputs.sets : [];\nvar id = String(Inputs.setId || '');\nvar set = null;\nfor (var i = 0; i < sets.length; i++) if (sets[i] && sets[i].id === id) set = sets[i];\nOutputs.name = set ? String(set.name || '') : '';\nOutputs.text = set ? (set.items || []).map(function (it) { return it.q + ' = ' + it.a; }).join('\\n') : '';\nOutputs.both = !!(set && set.both === true);\nOutputs.id = set ? String(set.id) : '';",
+        "runOnChange-in-sets": false,
+        "runOnChange-in-setId": false
+      },
+      "x": 410,
+      "y": 2080,
+      "ports": [
+        {
+          "name": "in-sets",
+          "displayName": "sets",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-setId",
+          "displayName": "setId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-both",
+          "displayName": "both",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-id",
+          "displayName": "id",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "leParse",
+      "type": "/Logic/Parse question set",
+      "label": "The lines, read",
+      "x": 410,
+      "y": 1360
+    },
+    {
+      "id": "leCountLine",
+      "type": "JavaScriptFunction",
+      "label": "How many, in words",
+      "parameters": {
+        "functionScript": "var n = Math.max(0, Math.floor(Number(Inputs.n) || 0));\nOutputs.line = n ? String(Inputs.word || '{n}').replace('{n}', n) : String(Inputs.empty || '');"
+      },
+      "x": 410,
+      "y": 760,
+      "ports": [
+        {
+          "name": "in-n",
+          "displayName": "n",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-word",
+          "displayName": "word",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-empty",
+          "displayName": "empty",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-line",
+          "displayName": "line",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "leBothItems",
+      "type": "JavaScriptFunction",
+      "label": "Both ways or one, in words",
+      "parameters": {
+        "functionScript": "Outputs.items = [{ label: Inputs.both, value: 'both' }, { label: Inputs.one, value: 'one' }];"
+      },
+      "x": 410,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "in-both",
+          "displayName": "both",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-one",
+          "displayName": "one",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-items",
+          "displayName": "items",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "leBothVal",
+      "type": "Expression",
+      "label": "Which pill is on",
+      "parameters": {
+        "expression": "both === true ? 'both' : 'one'"
+      },
+      "x": 410,
+      "y": 1120
+    },
+    {
+      "id": "leIsBoth",
+      "type": "Expression",
+      "label": "Both ways chosen?",
+      "parameters": {
+        "expression": "v === 'both'"
+      },
+      "x": 410,
+      "y": 1240
+    },
+    {
+      "id": "leShown",
+      "type": "Expression",
+      "label": "Shown unless told not to",
+      "parameters": {
+        "expression": "m !== false"
+      },
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "leOut",
+      "type": "Component Outputs",
+      "label": "The list to save",
+      "ports": [
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "cancel",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "name",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "items",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "both",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "setId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 1480
+    }
+  ],
+  "visualRoots": [
+    "leCard"
+  ]
+}

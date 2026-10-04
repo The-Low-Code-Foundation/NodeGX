@@ -43,6 +43,8 @@
  * @module noodl-mcp/tests/tpl007Curriculum
  */
 
+import { SUBJECT_SKILLS, SUBJECT_TEACH_CARDS, TOPIC_OF, type Subject } from './tpl007Subjects';
+
 export type Lang = 'en' | 'fr';
 export type Level = 'CE2' | 'CM1' | 'CM2' | '6e';
 export const LEVELS: ReadonlyArray<Level> = ['CE2', 'CM1', 'CM2', '6e'];
@@ -63,8 +65,12 @@ export interface Bi {
 export interface Skill {
   id: string;
   level: Level;
-  /** `calc` (mental arithmetic), `number` (place value, decimals, fractions), `typing`. */
-  strand: 'calc' | 'number' | 'typing';
+  /** `calc` (mental arithmetic), `number` (place value, decimals, fractions), `typing`; P113: `conjugation`, `facts` (a list bank), `vocab`. */
+  strand: 'calc' | 'number' | 'typing' | 'conjugation' | 'facts' | 'vocab';
+  /** P113 REV-001: the subject the chooser files it under. Absent on the maths and typing skills: `withTopics` fills it from the strand. */
+  subject?: Subject;
+  /** P113 REV-001: the topic (a group of skills) the chooser's second step shows. Absent here: `TOPIC_OF` names it. */
+  topic?: string;
   generator: string;
   params: Record<string, unknown>;
   answer: 'typed' | 'options' | 'either';
@@ -84,7 +90,8 @@ const s = (en: string, fr: string): Bi => ({ en, fr });
 
 // ── The skills ──────────────────────────────────────────────────────────────
 
-export const CURRICULUM: ReadonlyArray<Skill> = [
+/** The maths and typing skills, as TPL-007 shipped them. `CURRICULUM` below adds the subject, the topic, and the other subjects. */
+const MATHS_AND_TYPING: ReadonlyArray<Skill> = [
   // ═══ CE2 ═══
   {
     id: 'add-to-20', level: 'CE2', strand: 'calc', generator: 'add', params: { min: 2, max: 20, sumMax: 20 }, answer: 'typed', fluentMs: 3000, diff: 0.05,
@@ -433,6 +440,21 @@ export const CURRICULUM: ReadonlyArray<Skill> = [
   }
 ];
 
+/**
+ * P113 REV-001: every skill carries its subject and its topic, so the chooser can file it. A maths or typing skill
+ * is filed by `TOPIC_OF`; a skill it does not name is a build error, not a skill that quietly disappears from the menu.
+ */
+function withTopics(skills: ReadonlyArray<Skill>): ReadonlyArray<Skill> {
+  return skills.map((skill) => {
+    const topic = skill.topic ?? TOPIC_OF[skill.id];
+    if (!topic) throw new Error(`skill ${skill.id} has no topic: add it to TOPIC_OF in tpl007Subjects.ts`);
+    return { ...skill, subject: skill.subject ?? (skill.strand === 'typing' ? 'typing' : 'maths'), topic };
+  });
+}
+
+/** Every skill the game can ask: maths and typing (TPL-007), French, English and history (P113 REV-003). */
+export const CURRICULUM: ReadonlyArray<Skill> = [...withTopics(MATHS_AND_TYPING), ...withTopics(SUBJECT_SKILLS)];
+
 // ── The Teach cards ─────────────────────────────────────────────────────────
 
 /**
@@ -448,7 +470,7 @@ export interface TeachCard {
   example: Bi;
 }
 
-export const TEACH_CARDS: ReadonlyArray<TeachCard> = [
+const MATHS_TEACH_CARDS: ReadonlyArray<TeachCard> = [
   {
     id: 'bonds',
     title: s('Pairs that make ten', 'Les compléments à 10'),
@@ -611,6 +633,8 @@ export const TEACH_CARDS: ReadonlyArray<TeachCard> = [
   }
 ];
 
+export const TEACH_CARDS: ReadonlyArray<TeachCard> = [...MATHS_TEACH_CARDS, ...SUBJECT_TEACH_CARDS];
+
 // ── The typing word lists ───────────────────────────────────────────────────
 
 /** Common words a child of 8-12 can spell, by language. Kept short on purpose; add your own. */
@@ -732,6 +756,12 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   // P95 PLY-006: the chain, and the turbo it charges. The child fires it — that choice is the point.
   turboReady: s('⚡ Fire the turbo!', '⚡ Lance le turbo !'),
   turboCharging: s('⚡ {n}/{of} right in a row', '⚡ {n}/{of} bonnes de suite'),
+  // 🔴 Richard, 2026-09-20, playing a challenge race: *"clicking 'lancer le turbo !' does nothing right now … there's no
+  // visual feedback that the turbo has been 'activated'."* Firing only armed a States node the child could not see, so the
+  // button said the same words after the tap as before it. Armed, it says so, turns gold, and the line above says what to
+  // do next — the turbo is spent by the next right answer, which is the one thing the old screen never told anybody.
+  turboArmed: s('⚡ Turbo on!', '⚡ Turbo activé !'),
+  turboArmedHint: s('Answer right and you blast off!', 'Réponds juste et tu décolles !'),
   hangarBlurb: s('Dress up your face and paint your rocket.', 'Habille ta tête et peins ta fusée.'),
   faceTab: s('Face', 'Visage'),
   rocketTab: s('Rocket', 'Fusée'),
@@ -781,7 +811,43 @@ export const WORDS: Readonly<Record<string, Bi>> = {
   teach: s('How it works', 'Comment ça marche'),
   lessOnNext: s('Next time this card will say less. That is on purpose.', 'La prochaine fois, cette fiche en dira moins. C’est voulu.'),
   soundOn: s('Sound', 'Son'),
-  credits: s('Faces by DiceBear (MIT / CC BY 4.0). Built with NodeGX.', 'Têtes par DiceBear (MIT / CC BY 4.0). Fait avec NodeGX.')
+  credits: s('Faces by DiceBear (MIT / CC BY 4.0). Built with NodeGX.', 'Têtes par DiceBear (MIT / CC BY 4.0). Fait avec NodeGX.'),
+  // P113 REV-001: the chooser — what to practise.
+  practising: s('Practising', 'Je révise'),
+  changeFocus: s('Change', 'Changer'),
+  whatToPractise: s('What do you want to practise?', 'Qu’est-ce que tu veux réviser ?'),
+  pickSubject: s('Subject', 'Matière'),
+  pickTopic: s('Topic', 'Chapitre'),
+  pickSkills: s('Tick what to practise. Nothing ticked means everything in this topic.', 'Coche ce que tu veux réviser. Rien de coché, c’est tout le chapitre.'),
+  tickAll: s('All of this topic', 'Tout le chapitre'),
+  tickNone: s('Clear', 'Tout décocher'),
+  everythingAtLevel: s('everything', 'tout'),
+  skillsCount: s('{n} skills', '{n} notions'),
+  saveFocus: s('Practise this', 'Réviser ça'),
+  myLists: s('My lists', 'Mes listes'),
+  myList: s('My list', 'Ma liste'),
+  editLists: s('Make or edit a list', 'Créer ou modifier une liste'),
+  noListsYet: s('No list yet. Make one from what the teacher gave you.', 'Pas encore de liste. Crée-la à partir de ce que la maîtresse ou le prof a donné.'),
+  // P113 REV-002: the revision lists page.
+  listsTitle: s('My revision lists', 'Mes listes de révision'),
+  listsBlurb: s('Type what you have to learn, one line per question, and every game can ask it.', 'Tape ce que tu dois apprendre, une ligne par question, et chaque jeu peut te le demander.'),
+  newList: s('New list', 'Nouvelle liste'),
+  listName: s('Name of the list', 'Nom de la liste'),
+  listNameHint: s('History test Monday', 'Contrôle d’histoire lundi'),
+  listLines: s('One line per question: question = answer', 'Une ligne par question : question = réponse'),
+  listLinesHint: s('Neanderthals disappear = around -40 000\nqu’il vienne = subjonctif', 'Disparition de Néandertal = vers -40 000\nqu’il vienne = subjonctif'),
+  listCount: s('{n} questions', '{n} questions'),
+  listEmpty: s('Nothing to save yet: each line needs a question, then =, then the answer.', 'Rien à enregistrer : chaque ligne a besoin d’une question, puis =, puis la réponse.'),
+  listSaved: s('Saved. Choose it from "My lists" before a race.', 'Enregistrée. Choisis-la dans « Mes listes » avant une course.'),
+  listEdit: s('Edit', 'Modifier'),
+  listDelete: s('Delete', 'Supprimer'),
+  listDeleteAsk: s('Delete this list?', 'Supprimer cette liste ?'),
+  listBothWays: s('Ask both ways', 'Dans les deux sens'),
+  listOneWay: s('Question → answer only', 'Question → réponse seulement'),
+  backToGames: s('Back to the games', 'Retour aux jeux'),
+  // P113 REV-004: what learning pays.
+  learnedItem: s('learned', 'appris'),
+  learnedList: s('whole list learned', 'liste entière apprise')
 };
 
 /**

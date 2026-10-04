@@ -1,0 +1,381 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "0813c475-b837-5144-8461-3770030d7c77",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "lsPage",
+      "type": "Page",
+      "label": "Lists",
+      "children": [
+        "lsOuter"
+      ],
+      "parameters": {
+        "title": "My lists",
+        "urlPath": "lists"
+      },
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "lsOuter",
+      "type": "Group",
+      "label": "The ground",
+      "parent": "lsPage",
+      "children": [
+        "lsWrap"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "center"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "lsWrap",
+      "type": "Group",
+      "label": "The screen",
+      "parent": "lsOuter",
+      "children": [
+        "lsHeader",
+        "lsTitle",
+        "lsBlurb",
+        "lsList",
+        "lsNew",
+        "lsEditor"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "alignItems": "stretch",
+        "rowGap": "var(--space-4)",
+        "paddingTop": "var(--space-4)",
+        "paddingBottom": "var(--space-6)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "maxWidth": {
+          "value": 960,
+          "unit": "px"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "lsHeader",
+      "type": "/Game/Header",
+      "label": "The bar",
+      "parent": "lsWrap",
+      "parameters": {
+        "showHome": true,
+        "showHangar": true
+      },
+      "x": 220,
+      "y": 400
+    },
+    {
+      "id": "lsTitle",
+      "type": "Text",
+      "label": "My revision lists",
+      "parent": "lsWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-3xl)",
+        "fontWeight": "var(--font-extrabold)",
+        "lineHeight": "var(--leading-tight)",
+        "letterSpacing": "var(--tracking-tight)",
+        "color": "var(--foreground)",
+        "as": "h2",
+        "fontFamily": "Grandstander"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "lsBlurb",
+      "type": "Text",
+      "label": "What this page is for",
+      "parent": "lsWrap",
+      "parameters": {
+        "text": "",
+        "sizeMode": "contentHeight",
+        "fontSize": "var(--text-lg)",
+        "lineHeight": "var(--leading-relaxed)",
+        "color": "var(--muted-foreground)",
+        "maxWidth": {
+          "value": 560,
+          "unit": "px"
+        }
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "lsList",
+      "type": "Group",
+      "label": "The lists",
+      "parent": "lsWrap",
+      "children": [
+        "lsEach"
+      ],
+      "parameters": {
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "sizeMode": "contentHeight",
+        "flexDirection": "column",
+        "rowGap": "var(--space-3)"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "lsEach",
+      "type": "For Each",
+      "label": "One row per list",
+      "parameters": {
+        "template": "/Lists/Set row",
+        "templateType": "explicit"
+      },
+      "parent": "lsList",
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "lsNew",
+      "type": "net.noodl.controls.button",
+      "label": "New list",
+      "parent": "lsWrap",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-lg)",
+        "borderStyle": "solid",
+        "paddingLeft": "var(--space-6)",
+        "paddingRight": "var(--space-6)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-extrabold)",
+        "sizeMode": "contentSize",
+        "fontFamily": "Grandstander",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--foreground)",
+        "boxShadowEnabled": true,
+        "boxShadowOffsetX": {
+          "value": 4,
+          "unit": "px"
+        },
+        "boxShadowOffsetY": {
+          "value": 5,
+          "unit": "px"
+        },
+        "boxShadowBlurRadius": {
+          "value": 0,
+          "unit": "px"
+        },
+        "boxShadowColor": "var(--foreground)",
+        "label": "New list"
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "lsEditor",
+      "type": "/Lists/Editor",
+      "label": "The editor",
+      "parent": "lsWrap",
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "lsStore",
+      "type": "/Logic/App store",
+      "label": "The store",
+      "x": 530,
+      "y": 400
+    },
+    {
+      "id": "lsMe",
+      "type": "/Logic/Active profile",
+      "label": "Who is playing",
+      "x": 530,
+      "y": 520
+    },
+    {
+      "id": "lsWords",
+      "type": "/Data/Words",
+      "label": "The words",
+      "x": 530,
+      "y": 1960
+    },
+    {
+      "id": "lsT",
+      "type": "/Logic/Translate words",
+      "label": "In their language",
+      "x": 530,
+      "y": 1000
+    },
+    {
+      "id": "lsCurriculum",
+      "type": "/Data/Curriculum",
+      "label": "The skills",
+      "x": 530,
+      "y": 2080
+    },
+    {
+      "id": "lsWordLists",
+      "type": "/Data/Word lists",
+      "label": "The typing words",
+      "x": 530,
+      "y": 2200
+    },
+    {
+      "id": "lsNoOne",
+      "type": "Expression",
+      "label": "Nobody signed in?",
+      "parameters": {
+        "expression": "has === false"
+      },
+      "x": 530,
+      "y": 2320
+    },
+    {
+      "id": "lsGuard",
+      "type": "Condition",
+      "label": "Send them to the profiles?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 530,
+      "y": 40
+    },
+    {
+      "id": "lsGoProfiles",
+      "type": "RouterNavigate",
+      "label": "To the profiles",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Profiles"
+      },
+      "x": 530,
+      "y": 640
+    },
+    {
+      "id": "lsGoHome",
+      "type": "RouterNavigate",
+      "label": "Home",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Home"
+      },
+      "x": 530,
+      "y": 760
+    },
+    {
+      "id": "lsGoHangar",
+      "type": "RouterNavigate",
+      "label": "To the hangar",
+      "parameters": {
+        "router": "Main",
+        "target": "/Pages/Hangar"
+      },
+      "x": 530,
+      "y": 880
+    },
+    {
+      "id": "lsSets",
+      "type": "/Logic/List question sets",
+      "label": "The lists, as rows",
+      "x": 530,
+      "y": 1240
+    },
+    {
+      "id": "lsSave",
+      "type": "/Logic/Save question set",
+      "label": "Save the list",
+      "x": 530,
+      "y": 1480
+    },
+    {
+      "id": "lsDelete",
+      "type": "/Logic/Delete question set",
+      "label": "Delete a list",
+      "x": 530,
+      "y": 1360
+    },
+    {
+      "id": "lsEditId",
+      "type": "Variable2",
+      "label": "Which list is being edited",
+      "parameters": {
+        "name": "listEditId"
+      },
+      "x": 530,
+      "y": 1600
+    },
+    {
+      "id": "lsSetEditId",
+      "type": "Set Variable",
+      "label": "Edit this one",
+      "parameters": {
+        "name": "listEditId"
+      },
+      "x": 530,
+      "y": 1720
+    },
+    {
+      "id": "lsClearId",
+      "type": "Set Variable",
+      "label": "A new one",
+      "parameters": {
+        "name": "listEditId"
+      },
+      "x": 530,
+      "y": 1840
+    },
+    {
+      "id": "lsEmpty",
+      "type": "Expression",
+      "label": "No list",
+      "parameters": {
+        "expression": "''"
+      },
+      "x": 530,
+      "y": 2440
+    },
+    {
+      "id": "lsPanel",
+      "type": "States",
+      "label": "The rows, or the editor",
+      "parameters": {
+        "states": "closed,editing",
+        "values": "closed,open",
+        "useTransitions": false,
+        "type-closed": "boolean",
+        "value-closed-closed": true,
+        "value-editing-closed": false,
+        "type-open": "boolean",
+        "value-closed-open": false,
+        "value-editing-open": true
+      },
+      "x": 530,
+      "y": 1120
+    }
+  ],
+  "visualRoots": [
+    "lsPage"
+  ]
+}

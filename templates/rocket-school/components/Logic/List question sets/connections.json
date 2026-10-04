@@ -16,6 +16,48 @@
       "toProperty": "in-setId"
     },
     {
+      "fromId": "listquestionIn",
+      "fromProperty": "countWord",
+      "toId": "listquestionFn",
+      "toProperty": "in-countWord"
+    },
+    {
+      "fromId": "listquestionIn",
+      "fromProperty": "editWord",
+      "toId": "listquestionFn",
+      "toProperty": "in-editWord"
+    },
+    {
+      "fromId": "listquestionIn",
+      "fromProperty": "deleteWord",
+      "toId": "listquestionFn",
+      "toProperty": "in-deleteWord"
+    },
+    {
+      "fromId": "listquestionIn",
+      "fromProperty": "askWord",
+      "toId": "listquestionFn",
+      "toProperty": "in-askWord"
+    },
+    {
+      "fromId": "listquestionIn",
+      "fromProperty": "yesWord",
+      "toId": "listquestionFn",
+      "toProperty": "in-yesWord"
+    },
+    {
+      "fromId": "listquestionIn",
+      "fromProperty": "noWord",
+      "toId": "listquestionFn",
+      "toProperty": "in-noWord"
+    },
+    {
+      "fromId": "listquestionIn",
+      "fromProperty": "bothWord",
+      "toId": "listquestionFn",
+      "toProperty": "in-bothWord"
+    },
+    {
       "fromId": "listquestionFn",
       "fromProperty": "out-sets",
       "toId": "listquestionOut",
@@ -56,6 +98,18 @@
       "fromProperty": "out-chosenJson",
       "toId": "listquestionOut",
       "toProperty": "chosenJson"
+    },
+    {
+      "fromId": "listquestionFn",
+      "fromProperty": "out-chosenText",
+      "toId": "listquestionOut",
+      "toProperty": "chosenText"
+    },
+    {
+      "fromId": "listquestionFn",
+      "fromProperty": "out-chosenBoth",
+      "toId": "listquestionOut",
+      "toProperty": "chosenBoth"
     },
     {
       "fromId": "listquestionFn",

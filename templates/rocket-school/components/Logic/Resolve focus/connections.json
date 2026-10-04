@@ -1,0 +1,133 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "160e32ef-c811-5b6f-843f-c49b54f84a11",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "resolvefocusIn",
+      "fromProperty": "curriculum",
+      "toId": "resolvefocusFn",
+      "toProperty": "in-curriculum"
+    },
+    {
+      "fromId": "resolvefocusIn",
+      "fromProperty": "sets",
+      "toId": "resolvefocusFn",
+      "toProperty": "in-sets"
+    },
+    {
+      "fromId": "resolvefocusIn",
+      "fromProperty": "level",
+      "toId": "resolvefocusFn",
+      "toProperty": "in-level"
+    },
+    {
+      "fromId": "resolvefocusIn",
+      "fromProperty": "lang",
+      "toId": "resolvefocusFn",
+      "toProperty": "in-lang"
+    },
+    {
+      "fromId": "resolvefocusIn",
+      "fromProperty": "subject",
+      "toId": "resolvefocusFn",
+      "toProperty": "in-subject"
+    },
+    {
+      "fromId": "resolvefocusIn",
+      "fromProperty": "skills",
+      "toId": "resolvefocusFn",
+      "toProperty": "in-skills"
+    },
+    {
+      "fromId": "resolvefocusIn",
+      "fromProperty": "everythingWord",
+      "toId": "resolvefocusFn",
+      "toProperty": "in-everythingWord"
+    },
+    {
+      "fromId": "resolvefocusIn",
+      "fromProperty": "countWord",
+      "toId": "resolvefocusFn",
+      "toProperty": "in-countWord"
+    },
+    {
+      "fromId": "resolvefocusIn",
+      "fromProperty": "listWord",
+      "toId": "resolvefocusFn",
+      "toProperty": "in-listWord"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-mode",
+      "toId": "resolvefocusOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-focus",
+      "toId": "resolvefocusOut",
+      "toProperty": "focus"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-customSet",
+      "toId": "resolvefocusOut",
+      "toProperty": "customSet"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-customSetId",
+      "toId": "resolvefocusOut",
+      "toProperty": "customSetId"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-customSetBoth",
+      "toId": "resolvefocusOut",
+      "toProperty": "customSetBoth"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-line",
+      "toId": "resolvefocusOut",
+      "toProperty": "line"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-subject",
+      "toId": "resolvefocusOut",
+      "toProperty": "subject"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-subjectName",
+      "toId": "resolvefocusOut",
+      "toProperty": "subjectName"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-count",
+      "toId": "resolvefocusOut",
+      "toProperty": "count"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-isList",
+      "toId": "resolvefocusOut",
+      "toProperty": "isList"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "out-hasFocus",
+      "toId": "resolvefocusOut",
+      "toProperty": "hasFocus"
+    },
+    {
+      "fromId": "resolvefocusFn",
+      "fromProperty": "success",
+      "toId": "resolvefocusOut",
+      "toProperty": "done"
+    }
+  ]
+}
