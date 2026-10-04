@@ -22,7 +22,7 @@
 | NSP-013 the time batch | 🟡 24 / 24 conform. Left: AC2, the deep run for s11–s14 | s16 |
 | NSP-014 records, users, files, HTTP, streams | 🟡 24 of 24 conform; s36 D29 fixed. Left: AC2's export half (P18) | s8, s21 … s35, `4763f5a00` |
 | NSP-015 navigation + components | 🟡 14 of 14 conform. Left: AC2 (export, P18) | s15 … s20 |
-| **NSP-016 the visual nodes** | **🟡 s37: AC3 begun — Button and Checkbox conform (2 of 19). AC4 waits for NSP-017** | s37 |
+| **NSP-016 the visual nodes** | **🟡 s37: AC3 begun — Button and Checkbox conform (2 of 19). AC4 waits for NSP-017** | `aa8abb06f` |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 opened s21 (needs a second runtime target, `noodl-viewer-cloud`) | s21 |
 | NSP-009, NSP-017 … NSP-019, NSP-021 | — | — |
