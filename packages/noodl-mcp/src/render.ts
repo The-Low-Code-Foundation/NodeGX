@@ -492,6 +492,9 @@ export interface DriveStepRow {
   viewport?: string;
   file?: string;
   keys?: string[];
+  /** `stub_route`: the route it answers, and whether it was installed before the page first loaded. */
+  route?: string;
+  before_boot?: boolean;
   ms: number;
 }
 
@@ -503,6 +506,8 @@ export interface DrivePagePayload {
   viewport: string;
   /** Where the page ended, and whether it was visible and had WebGL2 — a throttled or 2D run says so. */
   page: { url: string; visibilityState: string; focused: boolean; webgl2: boolean };
+  /** Every `stub_route` the run set, and how many requests each answered. Absent when none was set. */
+  stubs?: Array<{ route: string; status: number; hits: number }>;
   consoleErrors: string[];
 }
 

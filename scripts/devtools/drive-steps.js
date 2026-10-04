@@ -54,14 +54,26 @@
  *                                        { "text": "…" } on the page, { "testid" | "selector": "…" } visible,
  *                                        { "url": "…" } in the path or hash, { "expression": "js" } truthy
  *   { "read": R, "expect": V? }          R is { "text": T } (its innerText), { "variable": "name" } (an app
- *                                        Variable), { "storage": "key" } (localStorage), { "url": true } or
- *                                        { "expression": "js" }; with `expect` the step passes only when the
+ *                                        Variable), { "storage": "key" } (localStorage), { "url": true },
+ *                                        { "stub": "/path" } or { "expression": "js" }; with `expect` the step passes only when the
  *                                        value equals V, or contains V.contains
- *   { "navigate": "/island" }            go to a route, as the router would
+ *   { "navigate": "/island" }            go to a route. On a path-routed project this LOADS THE DOCUMENT again,
+ *                                        even for the route it is on (measured s14 on the garden, 4 of 4) — the
+ *                                        way to prove what survives a reload; on a hash-routed one it is a
+ *                                        fragment change and nothing reloads
  *   { "viewport": "phone" | "390x844" }  resize
  *   { "screenshot": "name" }             a PNG of the viewport into --out-dir
  *   { "seed_storage": { "key": "value" } } write localStorage (navigate afterwards to load it)
  *   { "clear_storage": true }            clear this origin's storage
+ *   { "stub_route": "/__garden/status", "json": V?, "body": "text"?, "status": 200?, "content_type"? }
+ *                                        answer every later request for that path with V (or the text), and
+ *                                        never let it reach the server. A route ending in `*` is a prefix; a
+ *                                        full `https://…` URL stubs another origin. Stubs at the START of the
+ *                                        list are installed before the page first loads, so a fetch the app
+ *                                        makes as it boots meets them; a stub later in the list answers from
+ *                                        that step on. `{ "read": { "stub": "/path" } }` reads
+ *                                        `{ hits, body }` — how many requests it answered, and the last body
+ *                                        one sent (parsed when it is JSON)
  *
  *   T (a target) is { "text": "New player" } (exact, after trimming), { "text_contains": "player" } (the
  *   opt-in substring form), { "testid": "plot-card" } (a `data-testid`, ISL-009) or { "selector": "css" };
@@ -84,7 +96,8 @@ const VERBS = [
   'viewport',
   'screenshot',
   'seed_storage',
-  'clear_storage'
+  'clear_storage',
+  'stub_route'
 ];
 
 /** The keys `key` understands, as CDP wants them. */
@@ -185,8 +198,105 @@ function waitExpression(c) {
   throw new UsageError(`wait_for takes { text | testid | selector | url | expression }; got ${JSON.stringify(c)}.`);
 }
 
+/** A `stub_route` step as `{ route, prefix, status, body, contentType }`, or a usage error. */
+function parseStub(step, n) {
+  const route = step.stub_route;
+  if (typeof route !== 'string' || !(route.startsWith('/') || /^https?:\/\//.test(route))) {
+    throw new UsageError(`Step ${n}: stub_route takes a path ("/__garden/status") or a full http(s) URL; got ${JSON.stringify(route)}.`);
+  }
+  if ('json' in step && 'body' in step) throw new UsageError(`Step ${n}: stub_route takes json OR body, not both.`);
+  if ('body' in step && typeof step.body !== 'string') throw new UsageError(`Step ${n}: stub_route's body is text; use json for a value.`);
+  const status = Number(step.status ?? 200);
+  if (!Number.isInteger(status) || status < 100 || status > 599) throw new UsageError(`Step ${n}: stub_route's status ${JSON.stringify(step.status)} is not an HTTP status.`);
+  const isJson = !('body' in step);
+  return {
+    route: route.endsWith('*') ? route.slice(0, -1) : route,
+    prefix: route.endsWith('*'),
+    status,
+    body: isJson ? JSON.stringify(step.json ?? {}) : step.body,
+    contentType: String(step.content_type ?? (isJson ? 'application/json' : 'text/plain'))
+  };
+}
+
+/**
+ * The routes this run answers itself, on one tab, through CDP's `Fetch` domain — the shape 22 of the drives
+ * hand-wrote (`Fetch.requestPaused` → `Fetch.fulfillRequest`). Newest stub first, so a later step can change
+ * an answer. A paused request no stub claims is let through: the patterns are a glob, the match is exact.
+ */
+function routeStubs(tab) {
+  const stubs = [];
+  let listening = false;
+  const where = (url) => {
+    try {
+      const u = new URL(url);
+      return { path: u.pathname, full: u.origin + u.pathname };
+    } catch {
+      return null;
+    }
+  };
+  const claim = (url) => {
+    const at = where(url);
+    if (!at) return undefined;
+    return stubs.find((s) => {
+      const subject = /^https?:/.test(s.route) ? at.full : at.path;
+      return s.prefix ? subject.startsWith(s.route) : subject === s.route;
+    });
+  };
+  const onPaused = (msg) => {
+    if (msg.method !== 'Fetch.requestPaused') return;
+    const { requestId, request } = msg.params;
+    const stub = claim(request.url);
+    if (!stub) {
+      tab.client.send('Fetch.continueRequest', { requestId }).catch(() => {});
+      return;
+    }
+    stub.hits += 1;
+    if (request.postData !== undefined) stub.lastBody = request.postData;
+    tab.client
+      .send('Fetch.fulfillRequest', {
+        requestId,
+        responseCode: stub.status,
+        responseHeaders: [{ name: 'content-type', value: stub.contentType }],
+        body: Buffer.from(stub.body).toString('base64')
+      })
+      .catch(() => {});
+  };
+  // CDP's urlPattern treats `*` and `?` as wildcards and `\` as their escape.
+  const glob = (route) => route.replace(/[*?\\]/g, (c) => `\\${c}`);
+  return {
+    async add(stub) {
+      stubs.unshift({ ...stub, hits: 0 });
+      if (!listening) {
+        tab.onEvent(onPaused);
+        listening = true;
+      }
+      const routes = [...new Set(stubs.map((s) => s.route))];
+      await tab.client.send('Fetch.enable', {
+        patterns: routes.map((r) => ({ urlPattern: `${/^https?:/.test(r) ? '' : '*'}${glob(r)}*`, requestStage: 'Request' }))
+      });
+    },
+    /** `{ hits, body }` for the newest stub on this route, summed over every stub that named it. */
+    read(route) {
+      const key = route.endsWith('*') ? route.slice(0, -1) : route;
+      const named = stubs.filter((s) => s.route === key);
+      if (!named.length) throw new Error(`no stub_route for ${JSON.stringify(route)} was set before this read`);
+      const last = named.find((s) => s.lastBody !== undefined)?.lastBody;
+      let body = last ?? null;
+      try {
+        if (typeof body === 'string') body = JSON.parse(body);
+      } catch {
+        /* text stays text */
+      }
+      return { hits: named.reduce((n, s) => n + s.hits, 0), body };
+    },
+    report() {
+      return stubs.map((s) => ({ route: s.prefix ? `${s.route}*` : s.route, status: s.status, hits: s.hits }));
+    }
+  };
+}
+
 function readExpression(r) {
-  if (!r || typeof r !== 'object') throw new UsageError(`read takes { text | variable | storage | url | expression }; got ${JSON.stringify(r)}.`);
+  if (!r || typeof r !== 'object') throw new UsageError(`read takes { text | variable | storage | url | stub | expression }; got ${JSON.stringify(r)}.`);
   if (r.text !== undefined) {
     return `(() => { const { all } = ${finder(r.text)}; const e = all[0]; return e ? (e.value !== undefined && e.value !== null && e.value !== '' ? e.value : (e.innerText || '').trim()) : null; })()`;
   }
@@ -196,7 +306,7 @@ function readExpression(r) {
   if (typeof r.storage === 'string') return `localStorage.getItem(${JSON.stringify(r.storage)})`;
   if (r.url) return `location.pathname + location.hash`;
   if (typeof r.expression === 'string') return `(async () => { const v = await (${r.expression}); return v === undefined ? null : JSON.parse(JSON.stringify(v)); })()`;
-  throw new UsageError(`read takes { text | variable | storage | url | expression }; got ${JSON.stringify(r)}.`);
+  throw new UsageError(`read takes { text | variable | storage | url | stub | expression }; got ${JSON.stringify(r)}.`);
 }
 
 function matches(value, expected) {
@@ -208,7 +318,7 @@ function matches(value, expected) {
 }
 
 /** Run every step until one fails. Returns the rows. */
-async function runSteps(page, steps, { outDir }) {
+async function runSteps(page, steps, { outDir, stubs = routeStubs(page), beforeBoot = 0 }) {
   const rows = [];
   const { client, evaluate } = page;
   // After an input, let the app answer before the next step looks: two animation frames is a condition
@@ -269,7 +379,10 @@ async function runSteps(page, steps, { outDir }) {
         }
         if (!ok) throw new Error(`not true within ${timeout} ms: ${JSON.stringify(step.wait_for)}`);
       } else if (verb === 'read') {
-        row.value = await evaluate(readExpression(step.read));
+        row.value =
+          step.read && typeof step.read === 'object' && typeof step.read.stub === 'string'
+            ? stubs.read(step.read.stub)
+            : await evaluate(readExpression(step.read));
         if ('expect' in step && !matches(row.value, step.expect)) {
           row.ok = false;
           row.error = `read ${JSON.stringify(row.value)}, expected ${JSON.stringify(step.expect)}`;
@@ -300,6 +413,12 @@ async function runSteps(page, steps, { outDir }) {
       } else if (verb === 'clear_storage') {
         const origin = await evaluate('location.origin');
         await client.send('Storage.clearDataForOrigin', { origin, storageTypes: 'local_storage,indexeddb,cache_storage,service_workers' });
+      } else if (verb === 'stub_route') {
+        const stub = parseStub(step, i + 1);
+        row.route = step.stub_route;
+        // A leading stub was installed before the page first loaded (main's beforeBoot); say so.
+        if (i < beforeBoot) row.before_boot = true;
+        else await stubs.add(stub);
       }
     } catch (error) {
       if (error.usage) throw error;
@@ -325,7 +444,7 @@ async function main() {
     process.stdout.write(JSON.stringify({ error: { message, problems: [message], actionable: true } }));
     process.exit(2);
   };
-  if (!projectDir) usage('drive-page.js <project-dir> --steps <json|@file> [--page p] [--viewport v] [--out-dir d]');
+  if (!projectDir) usage('drive-steps.js <project-dir> --steps <json|@file> [--page p] [--viewport v] [--out-dir d]');
 
   let steps;
   try {
@@ -333,7 +452,9 @@ async function main() {
     if (!raw) throw new UsageError('--steps is required: a JSON array of steps.');
     steps = JSON.parse(raw.startsWith('@') ? fs.readFileSync(raw.slice(1), 'utf8') : raw);
     if (!Array.isArray(steps) || steps.length === 0) throw new UsageError('--steps must be a non-empty JSON array.');
-    steps.forEach((s, i) => verbOf(s, i + 1));
+    steps.forEach((s, i) => {
+      if (verbOf(s, i + 1) === 'stub_route') parseStub(s, i + 1);
+    });
   } catch (error) {
     usage(error.message);
   }
@@ -357,11 +478,20 @@ async function main() {
   const backendPort = flag('--backend-port') ? Number(flag('--backend-port')) : undefined;
   const outDir = flag('--out-dir');
 
+  // The stubs at the head of the list meet the page's first load (see stub_route above).
+  let leading = 0;
+  while (leading < steps.length && verbOf(steps[leading], leading + 1) === 'stub_route') leading++;
+  let stubs;
+  const beforeBoot = async (tab) => {
+    stubs = routeStubs(tab);
+    for (let i = 0; i < leading; i++) await stubs.add(parseStub(steps[i], i + 1));
+  };
+
   try {
-    const result = await withRenderedPage({ projectDir, backendPort }, async (page) => {
+    const result = await withRenderedPage({ projectDir, backendPort, beforeBoot }, async (page) => {
       await page.setViewport(viewport);
       if (start && !start.isStart) await page.navigate(start.url);
-      const rows = await runSteps(page, steps, { outDir });
+      const rows = await runSteps(page, steps, { outDir, stubs, beforeBoot: leading });
       const pageState = await page.evaluate(`(() => {
         let webgl2 = false;
         try { webgl2 = !!document.createElement('canvas').getContext('webgl2'); } catch (e) {}
@@ -374,6 +504,7 @@ async function main() {
         of: steps.length,
         viewport: `${viewport.width}x${viewport.height}`,
         page: pageState,
+        ...(stubs.report().length ? { stubs: stubs.report() } : {}),
         consoleErrors: page.consoleErrors.slice(0, 20)
       };
     });
@@ -387,4 +518,4 @@ async function main() {
 
 if (require.main === module) main();
 
-module.exports = { runSteps, locateExpression, VERBS };
+module.exports = { runSteps, locateExpression, routeStubs, parseStub, VERBS };

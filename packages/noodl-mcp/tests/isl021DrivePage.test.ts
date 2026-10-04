@@ -59,6 +59,20 @@ describe('P109 ISL-021 — drive_page, the door (no browser)', () => {
       await s.close();
     }
   });
+
+  it('a stub_route that names no path is refused by number before any browser starts', async () => {
+    const s = await connect(copyFixture());
+    try {
+      await call(s, 'find_tools', { group: 'explore' });
+      const res = await call<ToolErrorPayload>(s, 'drive_page', { steps: [{ read: { url: true } }, { stub_route: 'api/x' }] });
+      expect({ isError: res.isError, named: /Step 2: stub_route takes a path/.test(res.data.error.message) }).toEqual({
+        isError: true,
+        named: true
+      });
+    } finally {
+      await s.close();
+    }
+  });
 });
 
 const ready = fs.existsSync(GARDEN) && harness.checkPrerequisites(GARDEN).ok === true;
@@ -150,5 +164,50 @@ describeOrSkip('P109 ISL-021 — drive_page on Olive’s Island, rendered from d
     });
     expect(result.steps[1].error).toMatch(/a finger at its centre would press div#isl021-cover/);
     expect(headline).toMatch(/^FAILED at step 2 \(tap\)/);
+  }, 120_000);
+
+  /**
+   * Slice 2 — `stub_route`, the eleventh verb (22 of the drives hand-wrote `Fetch.requestPaused`). The stylesheet
+   * is a request the garden's FIRST load makes and can lose harmlessly (the font falls back), so it is what a
+   * leading stub must meet; the same stub after a step is the control that must read 0.
+   */
+  const BOOT_SHEET = '/noodl_modules/preset-font-nunito/styles.css';
+
+  it('stub_route — a leading stub meets the first load, a later one answers from its step on, and an unstubbed path still reaches the server', async () => {
+    const { result } = await drive(session, {
+      steps: [
+        { stub_route: BOOT_SHEET, body: '', content_type: 'text/css' },
+        { read: { stub: BOOT_SHEET } },
+        { stub_route: '/__isl021/save', status: 201 },
+        {
+          read: { expression: "fetch('/__isl021/save', { method: 'POST', body: JSON.stringify({ name: 'Ada' }) }).then((r) => r.status)" },
+          expect: 201
+        },
+        { read: { stub: '/__isl021/save' }, expect: { hits: 1, body: { name: 'Ada' } } },
+        // Known-firing control: a path no stub claims is answered by the render server (its index fallback).
+        { read: { expression: "fetch('/__isl021/other').then((r) => r.text()).then((t) => t.startsWith('<!DOCTYPE'))" }, expect: true }
+      ]
+    });
+    expect({ verdict: result.verdict, beforeBoot: result.steps[0].before_boot, boot: result.steps[1].value, later: result.steps[2].before_boot }).toEqual({
+      verdict: 'passed',
+      beforeBoot: true,
+      boot: { hits: 1, body: null },
+      later: undefined
+    });
+    expect(result.stubs).toEqual([
+      { route: '/__isl021/save', status: 201, hits: 1 },
+      { route: BOOT_SHEET, status: 200, hits: 1 }
+    ]);
+  }, 120_000);
+
+  it('stub_route — control: the same stub after a step was not there for the first load, and reads 0', async () => {
+    const { result } = await drive(session, {
+      steps: [{ read: { url: true } }, { stub_route: BOOT_SHEET, body: '', content_type: 'text/css' }, { read: { stub: BOOT_SHEET } }]
+    });
+    expect({ verdict: result.verdict, beforeBoot: result.steps[1].before_boot, boot: result.steps[2].value }).toEqual({
+      verdict: 'passed',
+      beforeBoot: undefined,
+      boot: { hits: 0, body: null }
+    });
   }, 120_000);
 });

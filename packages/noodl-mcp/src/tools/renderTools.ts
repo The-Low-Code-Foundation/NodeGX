@@ -164,9 +164,11 @@ export function registerRenderTools(server: McpServer, binding: ProjectBinding, 
         'Render this project from disk in a headless browser, run a list of steps on it, and report one row per ' +
         'step — so you can prove a button, a form or a game WORKS, not just that it draws. Steps (each an object ' +
         'with one verb): {tap: T}, {type: "text", into?: T}, {key: "Enter"}, {wait_for: {text|testid|selector|url|' +
-        'expression}, timeout_ms?}, {read: {text: T}|{variable: name}|{storage: key}|{url: true}|{expression}, ' +
-        'expect?: value|{contains}}, {navigate: "/route"}, {viewport: "phone"|"390x844"}, {screenshot: name}, ' +
-        '{seed_storage: {key: value}}, {clear_storage: true}. A target T is {text: "exact label"}, ' +
+        'expression}, timeout_ms?}, {read: {text: T}|{variable: name}|{storage: key}|{url: true}|{stub: path}|' +
+        '{expression}, expect?: value|{contains}}, {navigate: "/route"}, {viewport: "phone"|"390x844"}, ' +
+        '{screenshot: name}, {seed_storage: {key: value}}, {clear_storage: true}, {stub_route: "/api/x", json?, ' +
+        'body?, status?} (answers that path itself; put it first to meet a fetch made at boot). A target T is ' +
+        '{text: "exact label"}, ' +
         '{text_contains}, {testid} (a data-testid) or {selector}; a bare string is exact text. A tap is a real ' +
         'pointer press at the element\'s centre and is REFUSED when something else covers it, naming what a ' +
         'finger would hit. The first failing step stops the run.',
