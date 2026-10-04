@@ -160,3 +160,21 @@ assertion now reads `missing`.
 | AC7 | ✅ `cg003Template.ts` drops `pinRootNode` and calls `set_project_settings({ home })` through its in-process client right after `apply_plan`. `cg003Template.test.ts` **150/150** (CG-003 AC2: two builds agree and equal the checked-in tree). Control (the call removed): AC2 red, the diff names **`nodegx.project.json` only**. The two hand-typed settings stay in `writeSkeleton`: moving them reorders keys (§7's first trap), and ruling 2 is (b). |
 | AC8 | The other seven: `tpl001`, `tpl003`, `tpl005`, `tpl006`, `tpl007` (clean at HEAD) still call `pinRootNode`; `tpl008` and `tpl010` are peer-dirty and were not touched. `templatePins.pinRootNode` stays until none calls it. |
 
+### Session 14 (2026-10-04) — AC8 measured: not a mechanical swap
+
+- `tpl007Template.ts` is clean, but its components, curriculum and gate (`tpl007Components.ts`, `tpl007Curriculum.ts`,
+  `tpl007Template.test.ts`) are **peer-dirty** today, so a regeneration would bake a peer's work in progress into
+  `templates/rocket-school`. Left, with `tpl008`/`tpl010`.
+- The other four (`tpl001` members-area, `tpl003` landing-pages, `tpl005` pixel-game, `tpl006` story-engine) call
+  `pinRootNode(output, APP_COMPONENT)` on the COPIED artefact after the server closed, and run **without** ISL-019's
+  reproducible mode. Their shipped `nodegx.project.json` has **no `modified` key** (all four, read s14). The door's
+  `writeProjectFields` stamps `modified: this.now()` on any change, so the swap would add a wall-clock key and the
+  two-builds-agree gate would go red.
+- **The door is right, the templates are not:** the editor's own save always writes `modified`
+  (`buildProjectV2File`, `ProjectExporter.ts:424-431`), so a template without it is not what the editor saves
+  (ISL-018's sentence). Not leaving the key out, then.
+- **The build, for a session of its own:** each of the four calls `set_project_settings({ home })` inside its session,
+  and its pin step pins the project file's `modified` to `TEMPLATE_EPOCH` as `pinComponentFiles` does the
+  components' — one added line per template, then regenerate and re-baseline each, gate by gate (four `template:*`
+  runs, four gates). Or move each generator to reproducible mode (ISL-019), which re-derives every id: larger.
+

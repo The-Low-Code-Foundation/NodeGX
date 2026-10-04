@@ -191,3 +191,28 @@ entries, 0 with problems (the editor's own install path walked against the built
 stage; the repo templates then drop their library-identical kit folders and commit the records only. The generators
 keep installing through the door while they author, and write the reference instead of keeping the folder. The six
 readers above move first.
+
+### Session 14 (2026-10-04) — ruling 2, first half: the record names its entry as data; the resolver
+
+**Built** (`db2ff78ae`):
+
+1. **`entry` / `entryVersion` on the `imported` arm** (optional; `KitProvenance` in the editor's
+   `projectmodules.ts`, whose per-arm check already ignored extra fields), written by `install_prefab` beside the
+   `fromProject` sentence. `templates/bot-garden/noodl_modules/kit-provenance.json` regenerated
+   (`npm run template:garden` exit 0; the one file moved); `cg003Template` + `libraryTools` **165/165**.
+   `isl017LibraryProvenance` 2/2; 🔴 reverted arm (the two fields removed from the write): AC4's record test red.
+2. **`scripts/library/resolve-template-kits.js <project> [--library] [--write]`** — per record with `entry`:
+   `resolved` / `missing` / `identical` / `differs` (files named) / `unresolvable` (no entry, no folder, or the
+   library holds another version — named both); records without `entry` (`dbt-lesson`, a kit made in the project)
+   are `notReferenced` and never touched. Read-only without `--write`; exit 1 on unresolvable, or on missing without
+   `--write`, so a publish that forgot to resolve stops. On `templates/bot-garden`: **all four `identical`**.
+   `isl017ResolveKits` 4/4: the round trip (drop the four folders → `missing` ×4, nothing written → `--write` →
+   the copy equals the template byte for byte), a drifted `game-kit/index.js` named in `differs`, a `0.9.0` record
+   `unresolvable` and not copied, a record without `entry` left alone.
+
+**Not built — and why:** the call in `publish-templates-to-shelf.sh`. That script carries a **peer's uncommitted
+P78 edit** (Sep 23: counts, the planner → planning rename, `--unpublish`); a pathspec commit would take it. The hook
+is one stage-then-resolve step; do it through a temporary index (memory "tmp-idx: CAS") or once the pile is
+committed. Then the six readers (§8 s13), then drop the four library-identical folders from `templates/bot-garden`
+and commit the record only.
+
