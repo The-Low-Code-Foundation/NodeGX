@@ -1,6 +1,6 @@
 # ISL-017 — The door installs a kit, and a project need not carry a copy
 
-**Status: 🔒✓ ruled s13 (2026-10-04): ruling 2 "Copy on install" (AC7's census first); ruling 1 (a) as the engineering default (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F24 and F19](AUDIT-2026-10-01.md) ·
+**Status: 🟢 s13 (2026-10-04): AC1, AC4, AC6 met — the fonts are a library entry, provenance names the entry not the path, the garden installs through the door. Ruled s13: ruling 2 "Copy on install" (AC7's census next); ruling 1 (a) as the engineering default (README §8 round 3). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F24 and F19](AUDIT-2026-10-01.md) ·
 P108 s2 lane B and every merge note since (the built kit copies conflicted on each merge) · **Side:** product (MCP door,
 `noodl-mcp`; module install; template packaging)
 
@@ -111,4 +111,46 @@ Constraints:
 
 ## 8. Record
 
-None yet.
+### Session 13 (2026-10-04) — ruled; ruling 1 and §5 item 3 built; AC1, AC4, AC6 met
+
+**Ruled** (README §8 round 3): ruling 2 *"Copy on install"*, asked with the census — 8 committed kit copies under
+`templates/`, 1,979,503 B of `index.js`; 7 byte-identical to the library build; the DBT template's
+`i18next-noodl` is the Sep 20 build (58,445 B) against the library's Oct 3 1.1.0 (59,137 B) — the drift the ruling
+removes. Ruling 1 (a) taken as the engineering default.
+
+**AC1 (measured before building, in-process, a fresh skeleton, reproducible mode):** `install_prefab` installed
+`garden-kit`, `game-kit`, `garden-3d-kit` (`modulesInstalled` each, no `kitLoadFailures`), and
+`get_node_type("garden-kit.Garden")` answered with its ports in the same session; `bot-garden-fonts` was
+**refused** (no such entry). `diff -rq` against `installModules`' hand copy: `bot-garden-fonts` only in the hand copy,
+`noodl_modules/kit-provenance.json` only in the door's — and the provenance held **absolute paths into this checkout**
+(`fromProject: "/Users/…/library/modules/garden-kit"`). No `nodegx.styles.json` change.
+
+**Built:**
+
+1. **Ruling 1 (a):** `library/modules/bot-garden-fonts` — the font module moved there with `git mv` from
+   `packages/noodl-mcp/tests/cg007Assets/` (history kept; OFL licence beside it), a `library.json` (1.0.0), a
+   0-component `project.json` as the kits have, a monogram icon. `library:check`: `OK modules/bot-garden-fonts`.
+2. **§5 item 3, on the existing mechanism:** no new `origin: 'library'` arm. The editor's own local record carries
+   no path (`moduleGate.ts`: `fromProject: 'a project on this computer'`), and its Kits panel prints `imported` as
+   *"Copied in from {fromProject} on {date}"* (`describeKitOrigin`). So `install_prefab` keeps the `imported` arm and
+   writes `fromProject: 'the NodeGX library entry "garden-kit" 1.0.0'`, `importedAt` = the store's clock (the epoch in
+   reproducible mode). No editor change, no new vocabulary.
+3. **AC6, the generator:** `cg003Template.ts` drops `installModules` (`fs.cpSync` before the server started) and
+   installs `GARDEN_MODULE_ENTRIES` through `find_tools` → `install_prefab` on its in-process client, before the look.
+
+| AC | reading |
+|---|---|
+| AC1 | ✅ above. |
+| AC2 | 🟡 The fonts install through the door (the generator's `install_prefab bot-garden-fonts` → `modulesInstalled: ["bot-garden-fonts"]`; CG-003's font assertions green). The computed-style reading of Fredoka on a rendered page — not taken this session. |
+| AC3 | ⬜ Two install orders — not run. |
+| AC4 | ✅ `isl017LibraryProvenance.test.ts`: the record names the entry and version, holds no absolute path, and two copies of the shelf at two different paths write the same bytes. 🔴 Reverted arm (`fromProject: entry.entryDir`): both red. |
+| AC5 | ⬜ The person's door (an agent asked for the kits and the font) — not run. |
+| AC6 | ✅ `cg003Template.test.ts` with the door installs: 149/150, AC2 red naming **`noodl_modules/kit-provenance.json` only** — the expected first diff (§7) — then `npm run template:garden` (exit 0) added that one file to `templates/bot-garden` (four records, entry + version, the template epoch) and the gate read **150/150**. Control (garden-kit's install removed): the authoring refused `garden-kit.Divider` and `garden-kit.Garden` by name (`unknown-node-type`). |
+| AC7 | ⬜ Ruling 2's reader census — next. |
+
+**Gates:** `libraryTools`, `isl025Census`, `cg001GardenKit`, `gam-018`, `iwLook` with `cg003Template`: 273/273.
+`library:check` exit 1 on **`modules/nightbook-kit: missing library.json` only** — a peer's untracked pile in the
+working tree, not this change (`OK modules/bot-garden-fonts`); `library:build` stops on the same folder.
+`library:verify-origin` (a release gate) lists Bot Garden Fonts as unpublished at the origin beside Garden Kit and
+Garden 3D Kit, which were already there at HEAD; the baseline was not updated (publishing is Richard's call).
+

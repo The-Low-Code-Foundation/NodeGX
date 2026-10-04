@@ -1,0 +1,26 @@
+[
+  {
+    "module": "garden-kit",
+    "origin": "imported",
+    "fromProject": "the NodeGX library entry \"garden-kit\" 1.0.0",
+    "importedAt": "2026-09-27T00:00:00.000Z"
+  },
+  {
+    "module": "game-kit",
+    "origin": "imported",
+    "fromProject": "the NodeGX library entry \"game-kit\" 1.0.0",
+    "importedAt": "2026-09-27T00:00:00.000Z"
+  },
+  {
+    "module": "garden-3d-kit",
+    "origin": "imported",
+    "fromProject": "the NodeGX library entry \"garden-3d-kit\" 1.0.0",
+    "importedAt": "2026-09-27T00:00:00.000Z"
+  },
+  {
+    "module": "bot-garden-fonts",
+    "origin": "imported",
+    "fromProject": "the NodeGX library entry \"bot-garden-fonts\" 1.0.0",
+    "importedAt": "2026-09-27T00:00:00.000Z"
+  }
+]

@@ -37,7 +37,6 @@ export const START_HERE_FILE = 'docs/START-HERE.md';
 
 const MODULE_LIBRARY = path.join(__dirname, '..', '..', '..', 'library', 'modules');
 /** Modules only this template ships (its title face), beside the template's source. */
-export const TEMPLATE_MODULES = path.join(__dirname, 'cg007Assets', 'noodl_modules');
 
 interface ToolResult {
   isError?: boolean;
@@ -82,22 +81,18 @@ function writeSkeleton(dir: string): void {
   );
 }
 
-/** The kits from `library/modules/<name>/project/noodl_modules/`, then the template's own fonts. */
-export function installModules(projectDir: string): string[] {
-  const installed: string[] = [];
-  const copyFrom = (from: string) => {
-    for (const inner of fs.readdirSync(from).sort()) {
-      fs.cpSync(path.join(from, inner), path.join(projectDir, 'noodl_modules', inner), { recursive: true });
-      installed.push(inner);
-    }
-  };
+/**
+ * The library entries the garden installs, kits first, then its own fonts. P109 ISL-017 AC6: through the door's
+ * `install_prefab`, as an agent would ask for them — the hand copy (`fs.cpSync` before the server started) is gone.
+ */
+export const GARDEN_MODULE_ENTRIES: readonly string[] = [...REQUIRED_MODULES, 'bot-garden-fonts'];
+
+/** Refuse before the door does, with the command: a kit the library has not built would install an empty folder. */
+function requireBuiltKits(): void {
   for (const name of REQUIRED_MODULES) {
     const from = path.join(MODULE_LIBRARY, name, 'project', 'noodl_modules');
     if (!fs.existsSync(path.join(from, name, 'index.js'))) throw new Error(`library module "${name}" is not built at ${from}`);
-    copyFrom(from);
   }
-  copyFrom(TEMPLATE_MODULES);
-  return installed;
 }
 
 /** A component's plan declaration, read off its own interface nodes and the components it places (TPL-011's way). */
@@ -130,7 +125,7 @@ export async function buildGardenTemplateProject(options: BuildOptions = {}): Pr
   process.env.NODEGX_RENDER_DISABLED = '1';
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg003-garden-'));
   writeSkeleton(dir);
-  const modules = installModules(dir);
+  requireBuiltKits();
   const components = options.components ?? CG003_COMPONENTS;
 
   // P109 ISL-019 AC7: the door writes the stable bytes itself (ids from the 'cg003' namespace, every stamp the epoch),
@@ -161,6 +156,19 @@ export async function buildGardenTemplateProject(options: BuildOptions = {}): Pr
   };
 
   try {
+    // The kits and the fonts, through the door (ISL-017 AC6). Each install refreshes the kit overlay, so the
+    // authoring below knows every kit node type in this same session.
+    await call('find_tools', { group: 'explore' }, 'explore:reveal');
+    const modules: string[] = [];
+    for (const slug of GARDEN_MODULE_ENTRIES) {
+      const installed = await call('install_prefab', { slug, type: 'module' }, `install:${slug}`);
+      const names = (installed.modulesInstalled as string[] | undefined) ?? [];
+      if (names.length === 0 || installed.kitLoadFailures) {
+        throw new Error(`install_prefab ${slug} installed nothing usable: ${JSON.stringify(installed)}`);
+      }
+      modules.push(...names);
+    }
+
     // The look first.
     await call('find_tools', { group: 'theme' }, 'theme:reveal');
     await call('set_style_preset', { preset_id: GARDEN_PRESET }, 'theme:preset');

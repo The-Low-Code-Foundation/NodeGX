@@ -16,7 +16,7 @@
  * - **Sprites** — the mockup's `<symbol>`s (the islanders, the owl, the tulip, the tree, the house, the rock) as CSS
  *   background images, and its button icons as CSS masks painted in `currentColor`. A graph node cannot hold an inline
  *   `<svg>`, and an `Icon` component renders an empty span; a class can carry a picture.
- * - **Fonts** — Fredoka bundled in `cg007Assets/noodl_modules/bot-garden-fonts` (OFL, beside its licence); Nunito from
+ * - **Fonts** — Fredoka bundled in `library/modules/bot-garden-fonts` (P109 ISL-017; it was `tests/cg007Assets`) (OFL, beside its licence); Nunito from
  *   the Playful preset's own module. Nothing is fetched (the mockup's Google Fonts link is the trap AC3 names).
  *
  * 🔴 NO BACKTICKS anywhere inside {@link GARDEN_CSS}: it is a template literal, and a backtick in one of its comments

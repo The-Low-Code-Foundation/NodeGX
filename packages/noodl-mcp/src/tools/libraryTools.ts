@@ -413,12 +413,20 @@ export function registerLibraryTools(
         // CN-017 — the same record the editor's import path writes for a kit
         // copied in from this machine. Best-effort, like create_node_kit: the
         // files are already installed and correct.
+        //
+        // P109 ISL-017 §5 item 3 — the record names the library ENTRY and its version, never a path:
+        // `entry.entryDir` is an absolute path into whichever checkout ran the install, so two machines
+        // wrote two different files for the same install, and a template could not ship the record. The
+        // editor's own local-origin record has no path either (`moduleGate.ts`: "a project on this
+        // computer"). Same `imported` arm, so the Kits panel needs nothing new: it reads "Copied in from
+        // the NodeGX library entry "garden-kit" 1.0.0 on …". `now` is the epoch in reproducible mode.
+        const fromProject = `the NodeGX library entry "${entry.slug}"${entry.meta.version ? ` ${entry.meta.version}` : ''}`;
         const recorded = await recordKitProvenance(
           store.projectDir,
           modulesInstalled.map((module) => ({
             module,
             origin: 'imported' as const,
-            fromProject: entry.entryDir,
+            fromProject,
             importedAt: now
           }))
         );
