@@ -2,6 +2,7 @@
 id: P109-S12-KITGROUPPURPOSE
 title: create_node_kit is deferred in a find_tools group whose purpose line says nothing about kits
 status: fixed
+commit: e310b68a7
 severity: low
 area: mcp / toolGroups.ts ('project' group), the kit docs page
 found: P109 ISL-015 AC5 s12, 2026-10-03 (the stranger round)

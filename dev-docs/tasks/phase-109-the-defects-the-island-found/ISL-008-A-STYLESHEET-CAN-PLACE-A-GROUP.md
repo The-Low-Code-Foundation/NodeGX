@@ -100,3 +100,42 @@ keep their meaning.
 ## 8. Session log
 
 None yet.
+
+### Session 15 (2026-10-04) — the blast-radius census, taken before asking (read-only, at `c70dde72f`)
+
+Each viewer node definition bundled in memory (esbuild, React layer stubbed) and its starting inline style dumped; every
+author stylesheet on this machine crossed against the classes set on nodes.
+
+- **Three inline writers, not one.** (1) `react-component-node.ts:1184-1209` builds the start style from `defaultCss` +
+  every `inputCss` default not marked `applyDefault:false`, copied at `:1257`, written by `setStylesOnDOMNode`
+  (`:1106-1121`). 🔴 (2) **`Layout.size/align`** (`layout.ts:53-110`) writes `width`/`height` from the 100% defaults,
+  `flexShrink:0` always, and `flexGrow`/`alignSelf`/auto margins, on every render from 13 components (e.g.
+  `Group.tsx:307-309`) — the docblock at `react-component-node.ts:424-430` saying Layout "never runs" is true only of its
+  own render path. 🔴 (3) **Columns** writes nine container properties inline (`Columns.tsx:603-640`) and has no
+  `defaultCss`. Variants (`setVariant`, `:2072-2098`) go through the same inputs, so they are inline too (§2's "variants
+  unread" is wrong).
+- **Inline when the author sets nothing:** Group 10 properties (display, position, flex-direction, align-items, opacity,
+  box-sizing, width, height, flex-shrink, flex-grow); Text 6; Button 5 (incl. `background-color #000`); Image 5;
+  Columns 9. **28 distinct properties across 27 types.**
+- **`applyDefault: false`:** the task says 19; it is **40** literal uses (21 outside `nodes-deprecated`) + 4 computed
+  (`node-shared-port-definitions.ts:504-554`), the same at `27d891bf3`.
+- **Population:** 478 project folders (the 236-project method, widened: repo 218, NodeGX test projects 174, Noodl
+  projects 82, Erleah/MAU 4; copies and backups included); **121 carry author CSS** (CSS Definition `style`, `.css`
+  files incl. kits, head-code `<style>`).
+- **Rules that would START applying** (no `!important`, class on a node whose type writes that property inline, the node
+  not setting it, not a pseudo-element): **99 declarations in 21 folders; 55 equal the default (nothing visible changes);
+  44 change something, in 12 folders ≈ 7 distinct sources:** bot-garden 19 (align-items 7, flex 8, place-items 3,
+  disabled opacity 1); the DBT kit sheet 6 (`.lesson-layout`, `.dossier-segments {display:grid}` drawn as flex today;
+  chip backgrounds 3; disabled opacity 1); Erleah 4 (`inline-block`, 3 copies); landing-pages
+  `button.pressable:disabled{opacity:.45}` (3 copies); rocket-school `.rkt-clock-last{display:inline-block}` (2 copies);
+  HiveClip `flex:0 0 auto`; 🔴 riskiest: an old Noodl project's head code `.animated{opacity:0}` would hide its elements.
+- **`!important` that exists only to beat a default: 217 in 25 projects** (display 139, position 21, flex 28, height 11,
+  width 9, other 9).
+- 🔴 **AC6's "most of the 195 can go" is wrong.** The island's sheet: 196 `!important` in 267 blocks (the task: 195 in
+  280) — **44** beat a default (removable), **44** beat the node's own panel value (stay, under ruling 2), **108** beat
+  neither (50 on properties never written inline; 47 on classes no saved node carries — wired `cssClassName` or DOM built
+  by Functions, so 44 is a floor). Nightbook 7 of 180 removable; Planning 11 of 37.
+- 🔴 **Fix (a) as written** (move the `defaultCss`/`inputCss` defaults) leaves Layout's width/height/flex-shrink/flex-grow
+  and Columns' container style inline: it does not reach the island's 22 `width` and 7 `height` forces. The build must
+  cover all three writers.
+

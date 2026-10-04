@@ -6,7 +6,6 @@ severity: medium
 area: template / templates/nightbook (generator packages/noodl-mcp/tests/tpl011Template.ts — both untracked since 2026-09-27/28)
 found: P109 s13, 2026-10-04, census for ISL-016's ruling
 evidence: dev-docs/tasks/phase-109-the-defects-the-island-found/ISL-016-THE-DOOR-WRITES-THE-PROJECT-SETTINGS-AND-THE-HOME-PAGE.md
-kit: false
 ---
 
 Census of the 13 template folders under `templates/` (each `nodegx.project.json` and `_registry.json` read with

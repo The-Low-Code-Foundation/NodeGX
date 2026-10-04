@@ -2,6 +2,7 @@
 id: P109-S13-FINDTOOLSPHRASE
 title: find_tools matches a query as one phrase, so a model's multi-word search ("project settings home title") reveals nothing while each of its words would
 status: fixed
+commit: ae295e7bb
 severity: medium
 area: mcp / find_tools query matching (src/tools/disclosure.ts, the DEF-006 (b) block)
 found: P109 ISL-016 AC6 s13, 2026-10-04 (Claude Code over the stdio server)
