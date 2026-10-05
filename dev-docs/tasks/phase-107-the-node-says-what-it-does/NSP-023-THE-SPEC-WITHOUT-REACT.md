@@ -1,7 +1,7 @@
 # NSP-023 — The spec without React
 
 **Opened 2026-10-05, from ruling R12 (README §7).** **Depends on NSP-016** (the specs it converts) and the Text v3 (NSP-016 §7.9,
-the recipe). **Status: 🟡 step 1 done (s45, §8.1); the Checkbox's and the Dropdown's label rule with it.**
+the recipe). **Status: 🟡 steps 1 and 2 done (s45 §8.1, s46 §8.2); the Checkbox's and the Dropdown's label rule with step 1.**
 
 ## 1. The person sentence
 
@@ -193,3 +193,15 @@ v2 conform on the interpreter and the runtime at 200 on two seeds (321 / 322; 85
 the matrix's closing Focus action masked); at 10,000 each had 3 C80 divergences the first matcher missed (a Focus action earlier in
 the frame — its Focused prints in the settle group) and no survivor; re-run with the matcher reading the frame's steps, both CONFORM at 10,000 (0 divergences; C80 attributed 5 and 3; 321 / 326 and 852 / 857, the rest declared). The Button conforms at 10,000 (0 divergences,
 322 / 327, the rest declared). The package suite 20 suites / 878 passed; the runtime graph and target suites 102.
+
+### 8.2 s46, 2026-10-05 — step 2: `WorldHandlers.turn` out of the format (AC2)
+
+Nothing used it after s45 (a grep of `src/nodes` for a `turn` handler: none). Taken out of its four places: spec.ts `WorldHandlers`
+and the erased `AnyNodeSpec.world`, interpreter.ts (the `turn` inbound kind, `advance`'s push, `handleInbound`'s arm) and
+runner/mutants.ts (the handler name and the wrapped copy). `advance`'s first delivery of what already landed stays: it predates the
+turn (s34's clock, `23bb0a073`). spec.ts is hashed: `tests/stranger-suite-hashes.json` refreshed (one hash, spec.ts).
+
+**Readings (2026-10-05, `00cd9046a` + this change; load 2.4–4.4 with peers):** `tsc --noEmit` exit 0, no output; the package suite
+20 suites, 878 passed, 17 skipped (the stranger rounds' opt-in deep runs); the three stranger rounds green (41 passed: hashes, the
+siblings-only rule, each node conforming on the stranger's target, the schema, every mutant disagreeing); the runtime graph and
+target suites 102 passed.
