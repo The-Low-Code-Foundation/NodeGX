@@ -131,7 +131,7 @@ Richard: *"you already have permission to SSH into the nexus-1 VM"*. Built in `t
 - **Known limit (§5 holds):** an hourly bill worked out from logged hours shows its item amount.
 
 **To ship (refused here as "Production Deploy"; nothing on the box changed but a backup copy):** the build is
-`<scratchpad>/ship-pj/site` — rebuild it with the README recipe if that is gone: `templates/todo-list` + the test project's
+`~/vscode_projects/nodegx-template-crm/ship-2026-10-05-projects/todo-host` (`index-6282344e5adbbacb.js`) — rebuild it with the README recipe if that is gone: `templates/todo-list` + the test project's
 `noodl_modules`, `cloudservices` = todo.digitalbricks.io, `nodegx-deploy.cjs … --allow-development-engine`, then the
 box's production `noodl.deploy.js` (sha `57e1cb07…`, also in `nodegx-template-crm/ship-2026-09-24-drag/todo-host`),
 `rm nodegx.security.json`, `apply-pwa.js`. Against the 09-24 ship only `index.html`, the index and two bundles differ.
