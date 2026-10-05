@@ -173,7 +173,7 @@ function serveFolder(dir, port, backendPort) {
 }
 
 /**
- * Boot the deploy folder in a headless Chrome, hand the page to `fn`, tear down.
+ * Boot the deploy folder in a headless Chrome (a visible one with `visible`), hand the page to `fn`, tear down.
  *
  * @param {{dir: string, port?: number}} options
  * @param {(page: object) => Promise<any>} fn
@@ -203,10 +203,13 @@ async function withDeployedSite(options, fn) {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'nodegx-deployed-'));
   // IG-007: a WebGL drive needs a GL context. `gpu: true` drops `--disable-gpu`; `chromeArgs` appends flags such as
   // `--use-angle=swiftshader` (software GL, so the reading is about the page, not this Mac's GPU).
+  // P109 ISL-005 AC2: `visible: true` (or DRIVE_VISIBLE=1 for any drive) opens a real window, for an AC that asks
+  // to be watched. Everything else is the same session; the window closes at tear-down.
+  const visible = options.visible === true || process.env.DRIVE_VISIBLE === '1';
   const proc = spawn(
     chrome,
     [
-      '--headless=new',
+      ...(visible ? [] : ['--headless=new']),
       `--remote-debugging-port=${cdpPort}`,
       `--user-data-dir=${profile}`,
       '--no-first-run',

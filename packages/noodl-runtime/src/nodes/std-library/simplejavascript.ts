@@ -215,6 +215,9 @@ function scriptsFor(node: SimpleJavascriptNodeInstance): { scripts: Record<strin
   return { scripts };
 }
 
+/** Every code `scriptsFor` fails with; a run whose files load clears all four from the node. */
+const SCRIPT_FAILURE_CODES = ['function/script-missing', 'function/script-file-failed', 'function/script-name-clash', 'function/scripts-in-cloud'];
+
 /** The Functions in the project whose `uses` names `path` directly, as `Component / label` (or id) — for the one report. */
 function usersOf(node: SimpleJavascriptNodeInstance, path: ScriptPath): string[] {
   const graph = graphOf(node);
@@ -581,6 +584,13 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           this.sendSignalOnOutput('failure');
         }
         return;
+      }
+      // The files loaded, so nothing an earlier run said about them is still true. A raise is keyed by
+      // its code on the node, and nothing else clears these four (found driving AC4: a fixed file
+      // left "scripts/…: broken" on the Function after it had run clean).
+      const editorConnection = this.context.editorConnection;
+      if (editorConnection) {
+        for (const key of SCRIPT_FAILURE_CODES) editorConnection.clearWarning(this.nodeScope.componentOwner.name, this.id, key);
       }
 
       const inputs = this._internal.inputValues;

@@ -212,10 +212,16 @@ describe('ISL-005 — what goes wrong is named, once', () => {
       pageA: [func('f', 'Outputs.answer = Scripts.w.ok;', ['w.js'])]
     });
     expect(graph.signalsFor('f')).toContain('failure');
+    const fileWarnings = () => graph.editorConnection.warnings.filter((w) => w.key === 'function/script-file-failed');
+    // Known-firing: the broken file's one warning is on the node.
+    expect(fileWarnings()).toHaveLength(1);
     graph.graphModel.setScripts({ 'w.js': 'exports.ok = "fixed";' });
     await graph.settle(6);
     expect(fn(graph, 'f').outputValues.answer).toBe('fixed');
     expect(fn(graph, 'f').lastError).toBeUndefined();
+    // Found driving AC4 in the editor (build session 4): the file was fixed and the Function ran, and the
+    // warning stayed on the node, saying the file was broken.
+    expect(fileWarnings()).toHaveLength(0);
   });
 });
 
