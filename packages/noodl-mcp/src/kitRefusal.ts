@@ -87,13 +87,41 @@ export function explainUnknownNodeTypes(
 
     // The reader ran; some kit failed. A misspelt built-in with a near-miss is still that.
     if (!kitShaped && d.suggestion) return d;
-    const list = failures.map((f) => `${f.kitModule} (${f.dirPath}): ${f.message}`).join('; ');
+    const list = failures
+      .map((f) => {
+        const note = dependencyNote(overlay.projectDir, f.dirPath);
+        return `${f.kitModule} (${f.dirPath}): ${f.message}${note ? ` (${note})` : ''}`;
+      })
+      .join('; ');
     const head = failures.length === 1 ? 'A kit in this project failed to load' : `${failures.length} kits in this project failed to load`;
     const message =
       `Unknown node type "${type}" — not found in the node catalog. ${head}, so its node types are unknown: ${list}. ` +
       `If this node comes from that kit, the module is installed — fix the kit, and ${REBIND}`;
     return { ...d, message, suggestion: kitShaped ? undefined : d.suggestion };
   });
+}
+
+/**
+ * ISL-012 ruling 2 (s18, "No, say why instead"): the reader loads a kit's `main` alone, never its
+ * `manifest.dependencies`, which a page loads before the kit. A kit that reads its library while its
+ * file loads therefore fails here and draws in the page — and the reader's own error ("Cannot read
+ * properties of undefined (reading 'REVISION')") says nothing of that. Null for a kit that lists no
+ * dependencies, or whose manifest cannot be read.
+ */
+export function dependencyNote(projectDir: string, dirPath: string): string | null {
+  let dependencies: unknown;
+  try {
+    dependencies = JSON.parse(fs.readFileSync(path.join(projectDir, dirPath, 'manifest.json'), 'utf8')).dependencies;
+  } catch {
+    return null;
+  }
+  const files = Array.isArray(dependencies) ? dependencies.filter((d): d is string => typeof d === 'string') : [];
+  if (files.length === 0) return null;
+  return (
+    `this kit lists dependencies (${files.join(', ')}), which a page loads before the kit; this reader loads only ` +
+    "the kit's own file, so a kit that reads its library while that file loads fails here although the page draws " +
+    'it. Read the library inside the component, when a node mounts'
+  );
 }
 
 /** What to do, from the reader's own reason: build it, or fix the kit that broke it. */

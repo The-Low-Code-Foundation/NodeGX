@@ -15,6 +15,10 @@
  * A third: the rule drops the module sentence altogether when it finds a near-miss, so a kit type
  * whose name is one edit from a built-in was pointed at the built-in instead.
  *
+ * A fourth (P109 ISL-012 ruling 2, s18 "No, say why instead"): the reader loads a kit's `main` alone,
+ * never the `manifest.dependencies` a page loads before it, so a kit that reads its library while its
+ * file loads fails here and draws in the page. The refusal and `get_project_info` now say so.
+ *
  * 🔴 Never reproduce by deleting the shared `dist/`: worktrees link it. `NODEGX_KIT_EXTRACT` at a
  * path that does not exist is the "reader missing" arm; `buildKitExtractor` is the control.
  */
@@ -32,6 +36,7 @@ const KIT_APP = path.join(FIXTURES, 'kit-app');
 const THROWING_KIT = path.join(FIXTURES, 'kit-hazards', 'noodl_modules', 'throwing-kit');
 
 const MODULE_SENTENCE = 'ensure the module is installed';
+const READS_MAIN_ONLY = "this reader loads only the kit's own file";
 
 let tempDir: string;
 let builtExtractor: string;
@@ -191,6 +196,38 @@ describe('ISL-014 (D83): the refusal names the missing reader', () => {
       expect(d.message).toContain('Throwing Kit');
       expect(d.message).toContain('this kit is deliberately broken');
       expect(d.message).not.toContain(MODULE_SENTENCE);
+      // Its manifest lists no dependencies, so the dependency sentence below is not said for it.
+      expect(d.message).not.toContain(READS_MAIN_ONLY);
+      expect(info.data.kits?.failures?.[0]).not.toHaveProperty('note');
+    } finally {
+      await session.close();
+    }
+  });
+
+  test('ISL-012 ruling 2 — a kit that reads its listed library while its file loads: both answers say the reader loads the kit file only', async () => {
+    // The page loads `lib.js` before `index.js`, so this kit draws in a browser; the reader loads `index.js` alone.
+    const kit = path.join(tempDir, 'library-kit');
+    fs.mkdirSync(kit, { recursive: true });
+    fs.writeFileSync(path.join(kit, 'manifest.json'), JSON.stringify({ name: 'Library Kit', main: 'index.js', dependencies: ['lib.js'] }));
+    fs.writeFileSync(path.join(kit, 'lib.js'), 'window.LIB = { version: 7 };\n');
+    fs.writeFileSync(
+      path.join(kit, 'index.js'),
+      "var VERSION = window.LIB.version;\nNoodl.defineModule({ reactNodes: [{ name: 'library.kit.Thing', getReactComponent: function () { return function () { return null; }; } }] });\n"
+    );
+    const session = await bind(builtExtractor, [{ name: 'library-kit', from: kit }]);
+    try {
+      const info = await call<ProjectInfoResponse>(session, 'get_project_info');
+      const failure = info.data.kits?.failures?.find((f) => f.kitModule === 'Library Kit');
+      expect(failure?.message).toContain("reading 'version'");
+      expect(failure?.note).toContain('this kit lists dependencies (lib.js)');
+      expect(failure?.note).toContain(READS_MAIN_ONLY);
+
+      const res = await placeType(session, 'library.kit.Thing');
+      expect(res.isError).toBe(true);
+      const d = unknownTypeError(res);
+      expect(d.message).toContain("reading 'version'");
+      expect(d.message).toContain(READS_MAIN_ONLY);
+      expect(d.message).toContain('Read the library inside the component, when a node mounts');
     } finally {
       await session.close();
     }

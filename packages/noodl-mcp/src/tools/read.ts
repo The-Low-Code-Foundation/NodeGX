@@ -30,6 +30,7 @@ import type {
   SearchProjectResponse
 } from './responses';
 import { currentKitOverlay } from '../kitOverlay';
+import { dependencyNote } from '../kitRefusal';
 import type { KitHealthDiagnostic } from '@nodegx/kit-catalog';
 import { userProfileForPrompt } from '../userProfile';
 import { guarded, jsonResult } from './util';
@@ -114,7 +115,12 @@ export function kitsReport(): ProjectKitsReport | undefined {
     })),
     ...(overlay.collisions.length > 0 ? { collisions: overlay.collisions } : {}),
     ...(overlay.failures.length > 0
-      ? { failures: overlay.failures.map((f) => ({ kitModule: f.kitModule, message: f.message })) }
+      ? {
+          failures: overlay.failures.map((f) => {
+            const note = dependencyNote(overlay.projectDir, f.dirPath);
+            return { kitModule: f.kitModule, message: f.message, ...(note ? { note } : {}) };
+          })
+        }
       : {}),
     ...(registeredNothing.length > 0 ? { registeredNothing } : {}),
     ...(overlay.warnings.length > 0 ? { warnings: overlay.warnings } : {}),

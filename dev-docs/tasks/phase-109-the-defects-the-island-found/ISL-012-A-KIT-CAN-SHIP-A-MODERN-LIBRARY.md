@@ -1,6 +1,6 @@
 # ISL-012 — A kit can ship a library as it is published today
 
-**Status: 🟡 s17 (2026-10-05): ruled "Recipe now, loader later"; AC2 (the recipe), AC1's browser half and AC3 met on deployed pages, AC6 recorded (the export does not load dependencies: P109-S17-EXPORTKITDEPS, P18); owed: AC1's reader arm, AC3's full server render + hydration, AC4 (ruling 2) — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: 🟡 s18 (2026-10-05): AC1's reader arm read (one definition-time read fails the whole kit in the reader); ruling 2 ruled "No, say why instead" and AC4 built (the refusal and `get_project_info` say the reader loads the kit file only; spec + sabotage); AC5 read (the 3 kits with dependencies register in full). Owed: AC3's full server render with hydration.** **Earlier status: 🟡 s17 (2026-10-05): ruled "Recipe now, loader later"; AC2 (the recipe), AC1's browser half and AC3 met on deployed pages, AC6 recorded (the export does not load dependencies: P109-S17-EXPORTKITDEPS, P18); owed: AC1's reader arm, AC3's full server render + hydration, AC4 (ruling 2) — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F16** · found by P106 [IG-007](../phase-106-the-island-grows/IG-007-GARDEN-3D.md) session 1 and P108
 [IW-004](../phase-108-the-island-works/IW-004-REAL-BLOCKS.md), 2026-09-28 → 09-30 · **Side:** product (module
 injector, SSR kit loader, kit catalog extractor, kit docs; the export is read, not owned)
@@ -198,3 +198,29 @@ three projects, each `nodegx deploy` exit 0, differing only in `dependencies`:
   `dependencies` register what they registered; not re-read.
 - **Owed:** AC1's reader arm (a node touching `THREE` at definition: `get_project_info` and a `create_component` refusal),
   AC3's full server render with hydration, AC4 (ruling 2, not asked).
+
+### Session 18 (2026-10-05) — AC1's reader arm read; ruling 2 asked and ruled: "No, say why instead"
+
+**AC1's reader arm** (a scratch script binding the server in process over a fresh v2 project; the kit = `isl012-cube-kit/index.js`
+plus a second node, `cube-kit.Spinner`; `dependencies: ["three-global.min.js"]`, s17's recipe bundle):
+
+| arm | the second node reads `THREE` | `get_project_info` → `kits` | `create_component` placing Cube · Spinner |
+|---|---|---|---|
+| definition | at the top of the file (`var REV = window.THREE.REVISION`) | `modules: []`, `failures: [cube-kit: "Cannot read properties of undefined (reading 'REVISION')"]` | **both refused** (`unknown-node-type`, *"A kit in this project failed to load … fix the kit, and restart or re-bind"*) |
+| mount (control) | inside the component | `cube-kit`: Cube, Spinner | Cube written (0 errors) · Spinner registered |
+
+One node reading its library while the file loads takes the WHOLE kit in the agent's reader, the well-behaved Cube too, and
+nothing says the reader never loaded the dependency the page loads first. **Census:** the 3 shipped kits with dependencies
+(garden-kit 4 nodes, maplibre 1, garden-3d-kit 1), each in a fresh v2 project of its own, register in full with no failure:
+all read their library at mount.
+
+**Ruled (README §8 round 6):** **"No, say why instead"** — option (b), not §5's recommended (a): the measurement came first.
+
+**AC4 built ((b)):** `kitRefusal.ts` `dependencyNote(projectDir, dirPath)` reads the failing kit's manifest; when it lists
+`dependencies`, the `unknown-node-type` refusal appends, and `get_project_info.kits.failures[].note` carries, *"this kit lists
+dependencies (three-global.min.js), which a page loads before the kit; this reader loads only the kit's own file, so a kit that
+reads its library while that file loads fails here although the page draws it. Read the library inside the component, when a
+node mounts"*. Server-side on purpose: the reader bundle (`kitExtract/entry.js`) is untouched, so the shared
+`dist/kit-extract.cjs` does not go stale. Re-run of the reader arm: the note in both answers; the mount control has none.
+Spec: a new row in `isl014KitRefusal.test.ts` (a `Library Kit` whose `index.js` reads `window.LIB` at the top, `lib.js`
+listed) grades both answers; the throwing kit beside it (`dependencies: []`) is the no-note control.

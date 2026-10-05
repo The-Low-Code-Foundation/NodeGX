@@ -194,8 +194,11 @@ export interface ProjectKitsReport {
    * `@nodegx/kit-catalog` is the wording that states both halves.
    */
   collisions?: Array<{ typeName: string; kitModule: string }>;
-  /** Kits that threw at import or failed to register. Their nodes are absent. */
-  failures?: Array<{ kitModule: string; message: string }>;
+  /**
+   * Kits that threw at import or failed to register. Their nodes are absent. `note` (P109 ISL-012
+   * ruling 2): said when the failing kit lists `dependencies`, which this reader never loads.
+   */
+  failures?: Array<{ kitModule: string; message: string; note?: string }>;
   /**
    * GAM-018 AC6 — kits whose script ran without throwing and registered no nodes. A kit whose
    * guard returns early throws nothing, so it is absent from `failures` and reads as an empty
