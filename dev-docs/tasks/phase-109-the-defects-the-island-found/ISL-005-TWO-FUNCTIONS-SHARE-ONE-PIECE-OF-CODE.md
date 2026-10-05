@@ -379,3 +379,22 @@ runtime names the file only for those; the line comes from the editor and the do
   `WarningsModel` → `NodeLibrary.instance.on`, undefined in plain Node). Mocked like its neighbours; the snapshot gains
   `JavaScriptFunction.uses → ScriptUsesType`. Its one remaining diff in this working tree is Page `keepWhenLeaving`, a
   peer's uncommitted ISL-004 catalog port, left for them. Code commit: `68b881b53`.
+
+**Slices 5 + 5b, driven in the real editor** (`dev:debug` on a throwaway profile, `NOODL_USER_DATA_DIR`; a scratch project
+with two Functions on Home: `greet Olive` uses `engine/greet.js`, `greet Robot` uses it and `engine/words.js`; `greet.js`
+`use()`s `engine/words`). Read by screenshot and `cdp eval`, compared with the mockup's boards:
+- **Preview:** "one: Hello, Olive!" / "two: Hello, Robot! !", what the two files compute.
+- **An outside write** to `scripts/engine/words.js` (`hi` → `'Hi there'`, from the shell, as an agent would) reached the open
+  editor with no reload: "one: Hi there, Olive!" / "two: Hi there, Robot! !". The changed file is one neither Function lists
+  directly; greet.js reaches it with `use()`.
+- **Components panel:** a SCRIPTS section (count 2) below Cloud Functions, an `engine` folder, `greet.js` 2 and `words.js` 1
+  (Functions that list each under Uses), "+ New script". As the mockup.
+- **The script tab** (greet.js): "JAVASCRIPT ✓ Valid" (the `'scriptfile'` mode: `use` and `exports` not flagged), and the
+  column: In a Function `Scripts.greet` · Gives `hello` · Uses `engine/words.js` · Used by 2 Functions (Pages/Home, greet
+  Olive / greet Robot) · Runs in Browser Yes, Server render Yes, Cloud functions Not yet. As the mockup.
+- **Cards:** "Function · greet" and "Function · greet, words" (the second wraps to a third line at the card's width).
+- **Panel:** the Uses group with one chip per file (path, `Scripts.<name>`, ×), "+ Use a script…", and the sentence under it.
+- **Code popout** of `greet Robot`: no lint mark on the existing `Scripts.` line; typing `Outputs.n = totl + Scripts.` offered
+  **greet, words**, then `greet.` offered **hello**; with the line finished the popout read **1 warning, on `totl`** (the
+  known-firing control), none on any `Scripts`.
+- `.logs/dev.log`: no `renderer:exception` during the drive. Stack stopped with `dev:stop` (26 processes).
