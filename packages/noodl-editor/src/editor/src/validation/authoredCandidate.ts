@@ -65,6 +65,7 @@ import {
 import { DiagnosticCode, type Diagnostic } from './diagnostics';
 import { checkImageSources } from './imageSource';
 import { checkReservedRowFields } from './reservedRowField';
+import { checkFunctionScriptUses } from './functionScriptUses';
 import { checkUnrealisedMeasure } from './unrealisedMeasure';
 import { checkPageScroll } from './pageScroll';
 import { checkFunctionNodePorts, checkScriptNodeRunnable, type FunctionWireLike } from './functionPorts';
@@ -512,6 +513,12 @@ export interface AuthoredPreconditionOptions {
    * the rule switched off.
    */
   security?: FunctionSecurityPolicy | null;
+  /**
+   * P109 ISL-005 — every script file in the project (`engine/world.js`), for a Function's `uses`.
+   * **Omitted means "do not check"**, the convention every option above follows: a caller that cannot
+   * read the project's `scripts/` folder cannot tell a missing file from one it has not listed.
+   */
+  scripts?: readonly string[];
 }
 
 /**
@@ -571,9 +578,12 @@ export function authoredPreconditionDiagnostics(options: AuthoredPreconditionOpt
     derived,
     security,
     bodyScroll,
-    views
+    views,
+    scripts
   } = options;
   return [
+    // P109 ISL-005 — a Function's `uses` against the project's script files. Omitted → not checked.
+    ...(scripts ? checkFunctionScriptUses(nodes, { component, scripts }) : []),
     ...checkParameterValues(nodes, catalog, { component }),
     ...(backend ? checkBackendRequirements(nodes, { ...backend, component }) : []),
     ...checkNavigation(nodes, { component, components, urlPaths }),

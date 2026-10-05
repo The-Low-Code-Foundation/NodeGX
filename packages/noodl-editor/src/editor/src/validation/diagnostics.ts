@@ -1268,7 +1268,17 @@ export enum DiagnosticCode {
    * `Collection.set` raises `collection/reserved-field-name` for the same rows at
    * runtime. The list is pinned to the runtime (`reservedRowField.ts`).
    */
-  ReservedRowField = 'reserved-row-field'
+  ReservedRowField = 'reserved-row-field',
+  /**
+   * P109 ISL-005: a Function's `uses` names a script file the project does not have. The runtime
+   * refuses the run (`function/script-missing`) before any of the body runs.
+   */
+  FunctionUsesMissingScript = 'function-uses-missing-script',
+  /**
+   * P109 ISL-005: a Function's `uses` names two script files with one file name, which would both be
+   * `Scripts.<name>`. The runtime refuses the run (`function/script-name-clash`).
+   */
+  FunctionUsesScriptNameClash = 'function-uses-script-name-clash'
 }
 
 // ─── Location ─────────────────────────────────────────────────────────────────

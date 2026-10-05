@@ -257,7 +257,7 @@ runtime names the file only for those; the line comes from the editor and the do
    Also `noodl-preview`'s `readV2`, `render-from-disk.js` (the door's `render_report`), and `scripts/` added to
    `V2_SOURCE_IGNORE_ENTRIES` so the raw files do not ship beside the bundle. The format's home is the editor's `ProjectStructure`
    today; it moves with the rest when P112 OWN-001 lifts the format into `@nodegx/project-contract`.
-3. **The door (AC8):** `list_script_files` / `get_script_file` / `write_script_file` (+ ISL-020's find-and-replace with a count)
+3. ✅ **The door (AC8)** (built, slice 3 — see below): `list_script_files` / `get_script_file` / `write_script_file` (+ ISL-020's find-and-replace with a count)
    in a DEFERRED group (8,280-token resident budget, 0 cost deferred), copied from `docsTools.ts`; `validate_component` refuses a
    `uses` entry naming no file, and a script that does not parse, by line.
 4. **Export (AC7):** `ProjectIR.scripts` read in `parseProject.ts`, emitted once next to kits from `emitApp.ts` under a root that is
@@ -293,3 +293,26 @@ runtime names the file only for those; the line comes from the editor and the do
 - Not yet: the file watcher for outside edits to `scripts/` (`ProjectFileWatcher/decide.ts` handles components and project
   files only) — slice 5, with the editor screens. The cloud bundle (`exporter/cloudFunctions.ts`) carries no `scripts` — by
   ruling; the Function refuses by name there.
+
+**Slice 3, built — the door (AC8 ✅) and the write gate:**
+- `noodl-mcp/src/tools/scriptTools.ts` (new), five tools appended to the deferred `project` group: `list_script_files`
+  (each file's `Scripts.<name>`, what it gives, what it `use()`s, which Functions use it), `get_script_file` (whole or
+  `from_line`/`to_line`), `write_script_file` (whole), `edit_script_file` (**ISL-020's recommended shape**: find-and-replace
+  with the count the agent expects, default 1; a wrong count changes nothing and says what it found), `delete_script_file`
+  (refused while a Function uses it, naming them). Every write: path inside `scripts/` by the runtime's own
+  `normalizeScriptPath`; compiled with `new Function` exactly as the runtime compiles it (so a text that closes the wrapper
+  early is refused as the runtime refuses it), and a `vm.Script` asked only for the syntax error's line; atomic.
+  **Resident surface measured: 8,261 → 8,261 (0 tokens)**; `find_tools` reaches all five from "script", "shared code" and
+  "engine" (keywords are matched server-side, never sent).
+- **The write gate:** `validation/functionScriptUses.ts` (new, pure) in the shared `authoredPreconditionDiagnostics`:
+  `function-uses-missing-script` (error; the suggestion lists the files there are) and `function-uses-script-name-clash`
+  (error). Option `scripts` — omitted means "do not check". The door passes `listScriptPaths(projectDir)`; the editor's two
+  authoring panels pass `ProjectModel.getScriptPaths()`, so the two gates judge alike (AAQ-005's parity).
+- `scriptUsesOf` moved into `scriptfiles.ts`: the runtime, the validator and the door read `uses` with one function (a
+  comma string, as the editor's string list stores it, or an array, as an agent may write it).
+- `tests/isl005ScriptFiles.test.ts`: **12 / 12** in-process through `createServer()` — find_tools by three words; AC8's
+  pass (file + Function, `validate_component` clean) and AC8's refusal (named, with the files there are); array form both
+  ways; name clash; not-compiled with line, nothing written; the early-close text refused; paths outside `scripts/`; ISL-020
+  edit (wrong count, right count, an edit that breaks the syntax refused); ranged read; list rows; delete refused then
+  allowed. Neighbouring MCP suites (disclosure, vocabulary parity, bootstrap, open_project, find-tools phrase, docs, ISL-016):
+  **8 suites, 111 / 111**. Editor: typecheck 0 errors; the 16 suites reading the shared checks + slice 2's: **17, 247 / 247**.

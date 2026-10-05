@@ -57,6 +57,7 @@ import {
 } from './editor-deps';
 import type { ComponentFiles } from './graph';
 import type { ProjectStore } from './project/ProjectStore';
+import { listScriptPaths } from './tools/scriptTools';
 
 let semanticValidator: SemanticValidator | undefined;
 let validatorGeneration = -1;
@@ -238,6 +239,8 @@ export function preconditionDiagnostics(
     // the source port by the time it arrives, and a Function node's outputs are
     // half of what this checks.
     wires: candidate.connections.connections,
+    // P109 ISL-005 — a Function's `uses` against the files in scripts/, read from disk now.
+    scripts: listScriptPaths(store.projectDir),
     catalog: catalogIndex()
   });
 }

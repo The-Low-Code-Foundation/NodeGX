@@ -471,7 +471,15 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       'make home',
       'root',
       'rename',
-      'app name'
+      'app name',
+      // P109 ISL-005 — the script-file tools below. Their names carry "script", which `find_tools`
+      // matches by name; these are the other words somebody asking for them would use.
+      'script',
+      'shared code',
+      'module',
+      'engine',
+      'helper',
+      'uses'
     ],
     tools: [
       'list_projects',
@@ -485,7 +493,15 @@ export const TOOL_GROUPS: readonly ToolGroup[] = Object.freeze([
       // P109 ISL-016 — appended on the arithmetic the notes above record: 0 resident tokens ("8
       // tools" and "9 tools" are the same length). `tests/isl016ProjectSettings.test.ts` measures
       // that and reaches it through `find_tools` by keyword.
-      'set_project_settings'
+      'set_project_settings',
+      // P109 ISL-005 — the project's script files (scripts/**.js). Appended on the same arithmetic: a
+      // deferred group's only resident trace is `find_tools`' "(N tools)", and "9 tools" and "14 tools"
+      // differ by one character. Measured in `tests/isl005ScriptFiles.test.ts`.
+      'list_script_files',
+      'get_script_file',
+      'write_script_file',
+      'edit_script_file',
+      'delete_script_file'
     ],
     resident: false
   },
@@ -591,7 +607,11 @@ export const WRITE_ONLY_TOOLS: ReadonlySet<string> = new Set<string>([
   // P109 ISL-016 — writes `nodegx.project.json`.
   'set_project_settings',
   'set_project_tokens',
-  'set_style_preset'
+  'set_style_preset',
+  // P109 ISL-005.
+  'write_script_file',
+  'edit_script_file',
+  'delete_script_file'
 ]);
 
 /**

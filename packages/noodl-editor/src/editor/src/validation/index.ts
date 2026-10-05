@@ -130,6 +130,8 @@ export { checkPageScroll } from './pageScroll';
 export type { CheckImageSourcesOptions, ImageSourceNode } from './imageSource';
 // GAM-007 — a Static Data row field the runtime answers with a Noodl Object member.
 export { checkReservedRowFields, csvHeaderCells, RESERVED_ROW_FIELD_NAMES } from './reservedRowField';
+export { checkFunctionScriptUses } from './functionScriptUses';
+export type { CheckFunctionScriptUsesOptions, FunctionScriptUsesNode } from './functionScriptUses';
 export type { CheckReservedRowFieldsOptions, ReservedRowFieldNode } from './reservedRowField';
 // LAS-007 — the recipe that fixes a rejection, attached to the rejection. Lives
 // beside the checks that produce the diagnostics so both clients read one table.

@@ -82,6 +82,23 @@ export function normalizeScriptPath(path: unknown): ScriptPath | undefined {
   return p;
 }
 
+/**
+ * A Function's `uses` parameter as a list of paths. The editor's string list stores a comma-separated
+ * string; a project written by an agent may hold an array. Both are read; empty entries and repeats are
+ * dropped. An entry that is not a script path is kept as written (trimmed), so a caller can name it.
+ * The one reader of `uses`: the runtime, the validator and the door all call it.
+ */
+export function scriptUsesOf(value: unknown): string[] {
+  const raw = Array.isArray(value) ? value : typeof value === 'string' ? value.split(',') : [];
+  const out: string[] = [];
+  for (const entry of raw) {
+    if (typeof entry !== 'string' || entry.trim() === '') continue;
+    const path = normalizeScriptPath(entry) ?? entry.trim();
+    if (!out.includes(path)) out.push(path);
+  }
+  return out;
+}
+
 /** The name a Function's code reaches a file by: its file name without `.js` (`engine/world.js` → `world`). */
 export function scriptAlias(path: ScriptPath): string {
   const base = path.substring(path.lastIndexOf('/') + 1);

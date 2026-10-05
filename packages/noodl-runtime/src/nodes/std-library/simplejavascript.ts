@@ -24,7 +24,7 @@ import {
 } from './functionDiagnostics';
 
 import Node = require('../../node');
-import { ScriptFileError, normalizeScriptPath, scriptAlias, type ScriptFiles, type ScriptPath } from '../../scriptfiles';
+import { ScriptFileError, scriptAlias, scriptUsesOf, type ScriptFiles, type ScriptPath } from '../../scriptfiles';
 
 const JavascriptNodeParser = require('../../javascriptnodeparser');
 const { logJavaScriptNodeError } = require('../../utils');
@@ -134,22 +134,6 @@ interface SimpleJavascriptNodeInstance extends NodeInstance {
  *
  * Called before the signal is sent, so the value is delivered first, in the same update.
  */
-/**
- * ISL-005 — the `uses` parameter as a list of paths. The editor's string list stores a comma-separated
- * string; a project written by an agent may hold an array. Both are read; empty entries are dropped.
- * An entry that is not a script path is kept as written, so `scriptsFor` can name it.
- */
-function usesFromValue(value: unknown): ScriptPath[] {
-  const raw = Array.isArray(value) ? value : typeof value === 'string' ? value.split(',') : [];
-  const out: ScriptPath[] = [];
-  for (const entry of raw) {
-    if (typeof entry !== 'string' || entry.trim() === '') continue;
-    const path = normalizeScriptPath(entry) ?? entry.trim();
-    if (!out.includes(path)) out.push(path);
-  }
-  return out;
-}
-
 /** What this node reads from the graph model for script files; `NodeContextLike` types it `unknown`. */
 interface ScriptGraph {
   scriptFiles?: ScriptFiles;
@@ -238,7 +222,7 @@ function usersOf(node: SimpleJavascriptNodeInstance, path: ScriptPath): string[]
   const users: string[] = [];
   for (const component of graph.getAllComponents()) {
     for (const model of component.getNodesWithType('JavaScriptFunction')) {
-      if (usesFromValue(model.parameters && model.parameters.uses).includes(path)) {
+      if (scriptUsesOf(model.parameters && model.parameters.uses).includes(path)) {
         users.push(component.name + ' / ' + (model.label || model.id));
       }
     }
@@ -404,7 +388,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
       group: 'General',
       type: { name: 'stringlist', allowEditOnly: true, editorType: 'script-uses' },
       set(this: SimpleJavascriptNodeInstance, value: unknown) {
-        this._internal.uses = usesFromValue(value);
+        this._internal.uses = scriptUsesOf(value);
         this.clearRunDiagnostics();
 
         // An edited script file re-runs the Functions that use it, as an edited body does.

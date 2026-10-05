@@ -738,6 +738,8 @@ export function ProjectAuthoringView({ isConfigured, hasProject, isEmbedded }: P
         // ProjectModel; without it the editor gate reports one fewer diagnostic than the MCP one
         // on the same candidate.
         bodyScroll: typeof project.getSettings().bodyScroll === 'boolean' ? !!project.getSettings().bodyScroll : null,
+        // P109 ISL-005 — a Function's `uses` against the project's script files, as the MCP gate checks it.
+        scripts: project.getScriptPaths(),
         plannedComponents
       });
       if (!validation.ok) {
