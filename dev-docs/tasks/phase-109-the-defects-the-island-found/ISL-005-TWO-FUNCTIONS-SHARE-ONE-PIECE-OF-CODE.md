@@ -1,6 +1,6 @@
 # ISL-005 — Two Functions share one piece of code
 
-**Status:** ✅ ruled s5 (2026-10-02): **"Native nodes first"** — the island is rebuilt toward native nodes and logic components as its own template task, the four blocking product gaps are fixed first, and the shared script file is decided afterwards for what is left (README §8 round 2; [census](ISL-005-CENSUS-2026-10-02.md)). §5 is not built now. Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 BUILDING — ruled 2026-10-05 (s1 of the build, session `opennoodl-8e`): **"ship it"**, on a mockup of shape 1 (script files in the project, a Uses list on the Function). Slice 1 built: the runtime (`scriptfiles.ts`, the Function's `uses`, `Scripts`), 24 tests. Earlier: ✅ ruled s5 (2026-10-02) "Native nodes first" — the island rebuild stays its own template task (P108 IW-010); this ruling decides the shared file "afterwards" for what is left. ✅ ruled s5 (2026-10-02): **"Native nodes first"** — the island is rebuilt toward native nodes and logic components as its own template task, the four blocking product gaps are fixed first, and the shared script file is decided afterwards for what is left (README §8 round 2; [census](ISL-005-CENSUS-2026-10-02.md)). §5 is not built now. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F08](AUDIT-2026-10-01.md) (R-c as well) · first planned in [P105 CG-002 line 136](../phase-105-the-coding-garden/CG-002-THE-ENGINE.md) ("`ENGINE` is inlined into five scripts … Owner: NONE") · grown by every P106 and P108 lane since
 **Side:** product (runtime `Function` node, the editor's project files, the MCP door, `@nodegx/export`)
 
@@ -192,3 +192,79 @@ be rebuilt toward native nodes and components first (which would be a template t
 
 **Ruled the same evening: "Native nodes first"** (README §8, round 2). ISL-006 and ISL-020, which waited on this, can now be
 scoped against it: both shrink if the island's 59 non-script Functions become nodes and components.
+
+
+### Build session 1 — 2026-10-05: ruled "ship it", and the runtime half built
+
+**The ruling.** Richard read the s17 design page ("Big scripts, split into parts", README §8 round 5), asked for a mockup of its
+recommendation, and on seeing it said *"It looks damn cool, ship it please"*. The mockup is a design canvas,
+`https://claude.ai/artifact/VGLi8DLfnwmfBU5HHDHoQG`: the Components panel's new **Scripts** section, a Function card whose second
+line reads "Function · stepper, sense", the panel's **Uses** group (file → `Scripts.<name>`), the Function's own 17-line body, a
+script file open as a tab (Gives / Uses / Used by / Runs in), and the same project on disk. Taken as ruling §5's three questions on
+the page's recommendations, as the mockup showed them:
+
+| §5 | ruled |
+|---|---|
+| 1 where it lives | **(a) `scripts/**.js` in the project**, one copy on disk, listed in the editor beside components |
+| 2 how a Function says so | **(b) a `uses` parameter on the node, surfaced as `Scripts.<file name>` in the body**; inside a file, `use('engine/world')` and `exports` — no real `import` yet (no code transform ships) |
+| 3 where it runs | **browser and server render; a cloud function is refused by name** ("Script files don't run in cloud functions yet") |
+
+Two rules this session added beside the ruling, said to Richard with the mockup and not objected to: **a script file sees `use`,
+`exports` and `module` only — `Noodl`, `window` and `document` are `undefined` inside it** (so a file runs the same in the browser,
+the server render, the export and a future non-React target, and calls into the app stay in the Function); and **a script file never
+makes a port** (ISL-006). The format comes first and the editor screens last, so a second editor (P107 NSP-021, P112) needs only the
+format to carry the feature.
+
+**AC1 — red at HEAD `348c10b38`, recorded before the build:** `git show HEAD:…/simplejavascript.ts | grep "uses:\|'Scripts'"` finds
+one line, a comment (`// New code uses: Outputs.foo = 'bar'`); `git show HEAD:…/graphmodel.ts | grep -c scripts` → **0**;
+`HEAD:packages/noodl-runtime/src/scriptfiles.ts` does not exist. Known-firing beside it: `grep -c useExternalFile
+packages/noodl-viewer-react/src/nodes/std-library/javascript.ts` → **9** (the Script node's external file, the one existing route).
+
+**Slice 1, built — the runtime:**
+- `packages/noodl-runtime/src/scriptfiles.ts` (new): `ScriptFiles` — one compile per file per app run, CommonJS semantics
+  (`exports`, `module.exports`, a cycle sees the exports so far), `use()` by any spelling of the path (`engine/world`,
+  `./engine/world.js`, `scripts/engine/world.js`; `..` refused), `Noodl`/`window`/`document` passed as `undefined`, and a failure
+  remembered as ONE `ScriptFileError` (missing / not compiled / threw, with the file's own line for a throw: the stack's line minus
+  the two lines `new Function` puts in front) until the sources change. A file that `use()`s a broken one fails with the broken
+  one's error.
+- `graphmodel.ts`: `scripts` beside `components` in the project data `importEditorData` reads (before the components, so a Function
+  that runs at load finds its files); `graphModel.scriptFiles`; `setScripts()` emits `scriptsChanged`.
+- `simplejavascript.ts`: the `uses` input (`stringlist`, `editorType: 'script-uses'`; a comma string or an array); the body is
+  compiled with a fifth parameter `Scripts`; before a run, `scriptsFor()` loads each used file (`Scripts.<file name>`) or fails the
+  run without running any of the body — `function/script-missing`, `function/script-file-failed`, `function/script-name-clash` (two
+  files with one name), `function/scripts-in-cloud` (`editorConnection.runtimeType === 'cloud'`, true in a deployed cloud function
+  too). **A broken file is raised once**, by the first Function that meets it, with `detail.users` (every Function naming it); the
+  others fail with the same words and raise nothing. `scriptsChanged` re-runs the users (unless Run is wired, as for an edited body).
+- `test/isl-005-script-files.test.ts`: **24 / 24** — the person sentence across two pages with an edit that reaches both, one copy
+  (3 Functions, the file ran once), `use()`, CommonJS cycle, the pure-file rule, no-uses unchanged, missing, throw raised once with
+  line + 3 users (AC4's runtime half), not-compiled raised once, broken-inner named, name clash, fixed file clears, cloud refusal,
+  paths. Every runtime suite touching the Function: **14 suites, 190 / 190**.
+- **Found and fixed on the way — the catalog generator credited `uses` with the Function's output ports.** `parameter-encoding.js`
+  seeds list inputs from two token pools; a third list input (`uses`, after `scriptInputs`/`scriptOutputs`) shared the second pool,
+  so `catalog:generate` wrote `out-<use>` / "one of the comma-separated entries in the `uses` parameter" over `out-<scriptOutput>` —
+  the catalog telling agents a Function's outputs come from its files. A third list input now gets its own tokens; nodes with ≤ 2
+  lists are unchanged; `catalog:check` green.
+
+**A syntax error carries no line from `new Function`** (measured: `SyntaxError: Unexpected end of input` with no position), so the
+runtime names the file only for those; the line comes from the editor and the door, which parse (`@babel/parser` is in the editor).
+
+**The plan, in order (each slice its own commit):**
+1. ✅ Runtime (above).
+2. **Format + pipes:** `scripts/**.js` read by `ProjectStructureService.loadProject` → `ProjectImporter` (`ImportInput.scripts`,
+   `LegacyProject.scripts`) → `ProjectModel` (constructor / `toJSON` / a setter emitting `scriptsChanged`) → saved per file
+   (atomic, a disk baseline per file as FLD-009, removed files deleted) → `exportToJSON` adds `scripts` (one line carries preview,
+   deploy, SSR, SSG) → `ViewerConnection` sends a `scriptsChanged` modelUpdate → `editormodeleventshandler` calls `setScripts`.
+   Also `noodl-preview`'s `readV2`, `render-from-disk.js` (the door's `render_report`), and `scripts/` added to
+   `V2_SOURCE_IGNORE_ENTRIES` so the raw files do not ship beside the bundle. The format's home is the editor's `ProjectStructure`
+   today; it moves with the rest when P112 OWN-001 lifts the format into `@nodegx/project-contract`.
+3. **The door (AC8):** `list_script_files` / `get_script_file` / `write_script_file` (+ ISL-020's find-and-replace with a count)
+   in a DEFERRED group (8,280-token resident budget, 0 cost deferred), copied from `docsTools.ts`; `validate_component` refuses a
+   `uses` entry naming no file, and a script that does not parse, by line.
+4. **Export (AC7):** `ProjectIR.scripts` read in `parseProject.ts`, emitted once next to kits from `emitApp.ts` under a root that is
+   NOT `src/scripts/` (taken by Script-node files, `plan.ts:3067`); the wrapper takes `Scripts` and imports each used file;
+   a ledger note.
+5. **Editor screens (the mockup):** the Scripts section (`componentSections.ts` + a row kind not backed by `ComponentModel`),
+   a script file opening as a code tab (`ProjectCodeFileModel` / `CodeFileDocument`), the `script-uses` picker, the card's
+   second line, the file watcher for outside edits, autocomplete from `exports`.
+6. **The island (AC3, AC6, AC2, AC5):** the garden's engine as script files; byte count; time to interactive; the two-page drive.
+7. **Docs and catalog (AC9).**

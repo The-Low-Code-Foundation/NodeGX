@@ -183,12 +183,16 @@ function seedRunFor(typeName, metadata, seedIndex) {
       return Object.prototype.hasOwnProperty.call(LIST_PORT_SEEDS, typeName2);
     });
 
-  // The first list input takes the primary tokens, the rest the secondary ones. Two distinct
+  // The first list input takes the primary tokens, the second the secondary ones. Two distinct
   // pools is what makes a two-variable formula like `value-<state>-<value>` separable at all.
+  // ⚠️ P109 ISL-005: a THIRD list input gets the secondary tokens marked with its position, never
+  // the second's own. The Function grew `uses` (script files, which make no port) beside
+  // `scriptInputs`/`scriptOutputs`; sharing the second pool credited `uses` with every output port
+  // `scriptOutputs` makes, and the catalog told agents a Function's outputs come from its files.
   listInputs.forEach((name, i) => {
     const type = inputs[name].type;
     const spec = LIST_PORT_SEEDS[typeof type === 'string' ? type : type.name];
-    const pool = i === 0 ? tokens.primary : tokens.secondary;
+    const pool = i === 0 ? tokens.primary : i === 1 ? tokens.secondary : tokens.secondary.map((t) => t + 'L' + i);
     parameters[name] = spec.write(pool);
     seededBy.push(name);
     claim(pool, name, singularize(name), spec.describe, spec.tokensOf);

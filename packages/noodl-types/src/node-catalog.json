@@ -16541,6 +16541,19 @@
           },
           "isSignal": false,
           "description": "Names of the values the script writes to Outputs, each becoming an output port"
+        },
+        {
+          "name": "uses",
+          "displayName": "Uses",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true,
+            "editorType": "script-uses"
+          },
+          "isSignal": false,
+          "description": "The project's script files this Function uses. Each one is ready in the code as Scripts.<file name>, so engine/world.js is Scripts.world"
         }
       ],
       "outputs": [
@@ -16622,6 +16635,7 @@
         "seededBy": [
           "scriptInputs",
           "scriptOutputs",
+          "uses",
           "functionScript"
         ],
         "patterns": [

@@ -23,6 +23,9 @@ import {
   userPositionForError
 } from './functionDiagnostics';
 
+import Node = require('../../node');
+import { ScriptFileError, normalizeScriptPath, scriptAlias, type ScriptFiles, type ScriptPath } from '../../scriptfiles';
+
 const JavascriptNodeParser = require('../../javascriptnodeparser');
 const { logJavaScriptNodeError } = require('../../utils');
 
@@ -75,6 +78,10 @@ interface SimpleJavascriptNodeInstance extends NodeInstance {
      * Published after all if the same run fires a signal: see `publishHeldWrites`.
      */
     heldWrites: Set<string>;
+    /** ISL-005 — the script files this Function uses, as the project names them (`engine/world.js`). */
+    uses?: ScriptPath[];
+    /** ISL-005 — listening for `scriptsChanged` on the graph model, so an edited file re-runs its users. */
+    listeningForScripts?: boolean;
     /** The receiver user code sees as `this`; persists across runs. */
     _this: Record<string, unknown>;
     func?: (...args: unknown[]) => Promise<unknown>;
@@ -127,6 +134,118 @@ interface SimpleJavascriptNodeInstance extends NodeInstance {
  *
  * Called before the signal is sent, so the value is delivered first, in the same update.
  */
+/**
+ * ISL-005 — the `uses` parameter as a list of paths. The editor's string list stores a comma-separated
+ * string; a project written by an agent may hold an array. Both are read; empty entries are dropped.
+ * An entry that is not a script path is kept as written, so `scriptsFor` can name it.
+ */
+function usesFromValue(value: unknown): ScriptPath[] {
+  const raw = Array.isArray(value) ? value : typeof value === 'string' ? value.split(',') : [];
+  const out: ScriptPath[] = [];
+  for (const entry of raw) {
+    if (typeof entry !== 'string' || entry.trim() === '') continue;
+    const path = normalizeScriptPath(entry) ?? entry.trim();
+    if (!out.includes(path)) out.push(path);
+  }
+  return out;
+}
+
+/** What this node reads from the graph model for script files; `NodeContextLike` types it `unknown`. */
+interface ScriptGraph {
+  scriptFiles?: ScriptFiles;
+  on(event: string, callback: () => void, ref: unknown): void;
+  removeListenersWithRef(ref: unknown): void;
+  getAllComponents?(): Array<{
+    name: string;
+    getNodesWithType(type: string): Array<{ id: string; label?: string; parameters?: Record<string, unknown> }>;
+  }>;
+}
+
+function graphOf(node: SimpleJavascriptNodeInstance): ScriptGraph | undefined {
+  return node.context ? (node.context.graphModel as ScriptGraph | undefined) : undefined;
+}
+
+interface ScriptsFailure {
+  code: string;
+  message: string;
+  detail: Record<string, unknown>;
+  /** Present when the failure is a script file's own, so it is raised once across its users. */
+  error?: ScriptFileError;
+}
+
+/**
+ * ISL-005 — what this Function's code sees as `Scripts`: one entry per file in `uses`, by its file
+ * name. Or why it cannot run.
+ */
+function scriptsFor(node: SimpleJavascriptNodeInstance): { scripts: Record<string, unknown> } | { failure: ScriptsFailure } {
+  const uses = node._internal.uses || [];
+  const scripts: Record<string, unknown> = {};
+  if (uses.length === 0) return { scripts };
+
+  // Ruled 2026-10-05: browser and server render; a cloud function is refused by name until a task
+  // carries script files to the cloud runtime.
+  const editorConnection = node.context && node.context.editorConnection;
+  if (editorConnection && editorConnection.runtimeType === 'cloud') {
+    return {
+      failure: {
+        code: 'function/scripts-in-cloud',
+        message: "Script files don't run in cloud functions yet. This Function uses " + uses.map((p) => 'scripts/' + p).join(', '),
+        detail: { uses }
+      }
+    };
+  }
+
+  const graph = graphOf(node);
+  const files = graph && graph.scriptFiles;
+  const byAlias: Record<string, ScriptPath> = {};
+  for (const path of uses) {
+    const alias = scriptAlias(path);
+    if (byAlias[alias] !== undefined) {
+      return {
+        failure: {
+          code: 'function/script-name-clash',
+          message:
+            'scripts/' + byAlias[alias] + ' and scripts/' + path + ' would both be Scripts.' + alias + '. Rename one of the files',
+          detail: { alias, paths: [byAlias[alias], path] }
+        }
+      };
+    }
+    byAlias[alias] = path;
+
+    try {
+      if (!files) throw new ScriptFileError('script/missing', path, 'There is no script file scripts/' + path);
+      scripts[alias] = files.load(path);
+    } catch (e) {
+      const error =
+        e instanceof ScriptFileError ? e : new ScriptFileError('script/threw', path, e && (e as Error).message ? (e as Error).message : String(e));
+      return {
+        failure: {
+          code: error.code === 'script/missing' ? 'function/script-missing' : 'function/script-file-failed',
+          message: error.describe(),
+          detail: { path: error.path, line: error.line, column: error.column, uses, users: usersOf(node, error.path) },
+          error
+        }
+      };
+    }
+  }
+  return { scripts };
+}
+
+/** The Functions in the project whose `uses` names `path` directly, as `Component / label` (or id) — for the one report. */
+function usersOf(node: SimpleJavascriptNodeInstance, path: ScriptPath): string[] {
+  const graph = graphOf(node);
+  if (!graph || typeof graph.getAllComponents !== 'function') return [];
+  const users: string[] = [];
+  for (const component of graph.getAllComponents()) {
+    for (const model of component.getNodesWithType('JavaScriptFunction')) {
+      if (usesFromValue(model.parameters && model.parameters.uses).includes(path)) {
+        users.push(component.name + ' / ' + (model.label || model.id));
+      }
+    }
+  }
+  return users;
+}
+
 function publishHeldWrites(node: SimpleJavascriptNodeInstance): void {
   for (const prop of node._internal.heldWrites) {
     node.registerOutputIfNeeded('out-' + prop);
@@ -278,6 +397,34 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
         if (!this.isInputConnected('run')) this.scheduleRun();
       }
     },
+    uses: {
+      displayName: 'Uses',
+      description:
+        "The project's script files this Function uses. Each one is ready in the code as Scripts.<file name>, so engine/world.js is Scripts.world",
+      group: 'General',
+      type: { name: 'stringlist', allowEditOnly: true, editorType: 'script-uses' },
+      set(this: SimpleJavascriptNodeInstance, value: unknown) {
+        this._internal.uses = usesFromValue(value);
+        this.clearRunDiagnostics();
+
+        // An edited script file re-runs the Functions that use it, as an edited body does.
+        const graph = graphOf(this);
+        if (!this._internal.listeningForScripts && graph) {
+          this._internal.listeningForScripts = true;
+          graph.on(
+            'scriptsChanged',
+            () => {
+              if (this._deleted || !this._internal.uses || this._internal.uses.length === 0) return;
+              this.clearRunDiagnostics();
+              if (!this.isInputConnected('run')) this.scheduleRun();
+            },
+            this
+          );
+        }
+
+        if (this._internal.func && !this.isInputConnected('run')) this.scheduleRun();
+      }
+    },
     run: {
       type: 'signal',
       displayName: 'Run',
@@ -346,6 +493,14 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
     }
   },
   methods: {
+    _onNodeDeleted: function (this: SimpleJavascriptNodeInstance) {
+      const graph = graphOf(this);
+      if (this._internal.listeningForScripts && graph) {
+        graph.removeListenersWithRef(this);
+        this._internal.listeningForScripts = false;
+      }
+      Node.prototype._onNodeDeleted.call(this);
+    },
     scheduleRun: function (this: SimpleJavascriptNodeInstance, token?: OutcomeToken) {
       if (token) {
         if (!this._internal.pendingRunOutcomes) this._internal.pendingRunOutcomes = [];
@@ -423,6 +578,26 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
         return;
       }
 
+      // ISL-005. Before anything else is prepared: a Function whose script files cannot be
+      // loaded does not run at all, so it never half-runs against a missing engine.
+      const scripts = scriptsFor(this);
+      if ('failure' in scripts) {
+        const { code, message, detail, error } = scripts.failure;
+        this._internal.lastError = message;
+        this.flagOutputDirty('error');
+        // A broken file is raised once, by the first Function that meets it; every other user
+        // fails with the same words and stays quiet (ISL-005 §5: "an error is named once").
+        const raise = !error || !error.reported;
+        if (error) error.reported = true;
+        if (tokens.length > 0) {
+          reportOutcomes(this, tokens, 'failure', { code, message, detail, raise });
+        } else {
+          if (raise) this.raiseRuntimeError(code, message, detail);
+          this.sendSignalOnOutput('failure');
+        }
+        return;
+      }
+
       const inputs = this._internal.inputValues;
       const outputs = this._internal.outputValuesProxy;
 
@@ -464,7 +639,8 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           inputs,
           outputs,
           noodlAPI,
-          JavascriptNodeParser.getComponentScopeForNode(this)
+          JavascriptNodeParser.getComponentScopeForNode(this),
+          scripts.scripts
         ]);
 
         // `await`ed, so an `async` script signals when it has actually finished rather than
@@ -652,6 +828,7 @@ const SimpleJavascriptNode: NodeDefinitionOptions = {
           'Outputs',
           'Noodl',
           'Component',
+          'Scripts',
           JavascriptNodeParser.getCodePrefix() + script
         );
         this._internal.parseError = undefined;
