@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "469e0463-26b7-5203-8d9b-8031dd474847",
+  "name": "Kind group",
+  "path": "/Projects/Kind group",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One kind of project under its name, in your own order: drag a project by its grip and the order is saved (Changed). Hidden when there are none (Has). Passes on whatever a row says."
+}

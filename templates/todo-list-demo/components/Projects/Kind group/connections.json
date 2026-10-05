@@ -1,0 +1,223 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "428bf6f3-4665-5506-89ea-749c3cb22816",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "kgIn",
+      "fromProperty": "has",
+      "toId": "kgRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "kgIn",
+      "fromProperty": "heading",
+      "toId": "kgName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "kgIn",
+      "fromProperty": "rows",
+      "toId": "kgList",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "kgIn",
+      "fromProperty": "rows",
+      "toId": "kgOrder",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "moveId",
+      "toId": "kgOrder",
+      "toProperty": "rowId"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "moveTo",
+      "toId": "kgOrder",
+      "toProperty": "toIndex"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "moved",
+      "toId": "kgOrder",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "kgOrder",
+      "fromProperty": "done",
+      "toId": "kgOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "toggle",
+      "toId": "kgOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "save",
+      "toId": "kgOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "tick",
+      "toId": "kgOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "sent",
+      "toId": "kgOut",
+      "toProperty": "sent"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "projectId",
+      "toId": "kgOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "projectName",
+      "toId": "kgOut",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "taskId",
+      "toId": "kgOut",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "mode",
+      "toId": "kgOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "title",
+      "toId": "kgOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "waitingOn",
+      "toId": "kgOut",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "deadline",
+      "toId": "kgOut",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "billKey",
+      "toId": "kgOut",
+      "toProperty": "billKey"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "sendKey",
+      "toId": "kgOut",
+      "toProperty": "sendKey"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "openTask",
+      "toId": "kgOut",
+      "toProperty": "openTask"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "openTaskId",
+      "toId": "kgOut",
+      "toProperty": "openTaskId"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "editMoney",
+      "toId": "kgOut",
+      "toProperty": "editMoney"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "moneyKey",
+      "toId": "kgOut",
+      "toProperty": "moneyKey"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "addMoney",
+      "toId": "kgOut",
+      "toProperty": "addMoney"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "saveProject",
+      "toId": "kgOut",
+      "toProperty": "saveProject"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "pName",
+      "toId": "kgOut",
+      "toProperty": "pName"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "pSub",
+      "toId": "kgOut",
+      "toProperty": "pSub"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "pKind",
+      "toId": "kgOut",
+      "toProperty": "pKind"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "pBilling",
+      "toId": "kgOut",
+      "toProperty": "pBilling"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "pTerms",
+      "toId": "kgOut",
+      "toProperty": "pTerms"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "pRate",
+      "toId": "kgOut",
+      "toProperty": "pRate"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "pSay",
+      "toId": "kgOut",
+      "toProperty": "pSay"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "linkTask",
+      "toId": "kgOut",
+      "toProperty": "linkTask"
+    },
+    {
+      "fromId": "kgList",
+      "fromProperty": "linkTaskId",
+      "toId": "kgOut",
+      "toProperty": "linkTaskId"
+    }
+  ]
+}

@@ -202,6 +202,54 @@
       "toProperty": "rows"
     },
     {
+      "fromId": "pjRows",
+      "fromProperty": "out-payingRows",
+      "toId": "pjOut",
+      "toProperty": "payingRows"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hasPaying",
+      "toId": "pjOut",
+      "toProperty": "hasPaying"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-buildingRows",
+      "toId": "pjOut",
+      "toProperty": "buildingRows"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hasBuilding",
+      "toId": "pjOut",
+      "toProperty": "hasBuilding"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hobbyRows",
+      "toId": "pjOut",
+      "toProperty": "hobbyRows"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hasHobby",
+      "toId": "pjOut",
+      "toProperty": "hasHobby"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-quietRows",
+      "toId": "pjOut",
+      "toProperty": "quietRows"
+    },
+    {
+      "fromId": "pjRows",
+      "fromProperty": "out-hasQuiet",
+      "toId": "pjOut",
+      "toProperty": "hasQuiet"
+    },
+    {
       "fromId": "pjLoad",
       "fromProperty": "out-projects",
       "toId": "pjMoney",

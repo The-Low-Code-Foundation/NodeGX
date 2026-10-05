@@ -196,3 +196,25 @@ the new bundle carries *Money in and out*. The deploy's wire check reports 3 wir
 **Owed:** Richard — which device *Change the move* would not edit on (not reproduced in Chrome on the box's viewer), and
 his mornings (AC8). Still from s1: Planning off the shelf and the homepage, `planning.digitalbricks.io` → the todo list.
 
+### s3 — 2026-10-05: your own order, by kind; a task's project
+
+Richard, on s2: *"It would be nice to order the projects, and split them into hobby, paying, building in the list
+visually by default. Also I can't define the project a task is related to, or add an existing task to a project, which
+is sad"*.
+
+- **By kind, the default**: Paying · Building · Hobby · Quiet (dormant), each its own list (`Projects/Kind group`) **in
+  your own order** — a project is dragged by its grip, the grip and drag script the List uses; the kind's own places
+  are handed out again in the new order (`Projects/Move project`). **Most urgent first** (s1's Your move / Waiting on
+  someone / Quiet) is one press away, and the device remembers which (`todo-projects-order`, written only on a press).
+  A kind row's id is `pg-`, never the `pj-` row's (two lists sharing a model would share its fields).
+- **A task's project**: the task's pane has a *Project* dropdown (No project, or any project) with *Open the project*;
+  an opened project has **Add an existing task** (every open task not already its own; one in another project says
+  which). Both write `Task.projectId` and a history line (*Now part of X* / *No longer part of X*) through
+  `Projects/Set task project`, which writes nothing when it is already so (an older viewer's Dropdown can say Changed
+  when first drawn).
+- Decided while building (Richard to undo): the kinds' order (Paying, Building, Hobby, Quiet); moving a project to
+  another kind is Edit project's kind.
+
+Gates: tpl008 **102/102** (+5); `tpl008-projects-drive` **17/17 on both viewers** (+§2 default and remembered, +§9 by
+kind, a drag, Add an existing task, the pane's dropdown); the other tpl008 drives **50/50**.
+

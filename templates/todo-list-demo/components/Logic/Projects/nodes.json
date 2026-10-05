@@ -113,6 +113,46 @@
           "type": "array"
         },
         {
+          "name": "payingRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasPaying",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "buildingRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasBuilding",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "hobbyRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasHobby",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
+          "name": "quietRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "hasQuiet",
+          "plug": "input",
+          "type": "boolean"
+        },
+        {
           "name": "upRows",
           "plug": "input",
           "type": "array"
@@ -166,7 +206,7 @@
       "type": "JavaScriptFunction",
       "label": "No projects in the demo",
       "parameters": {
-        "functionScript": "Outputs.projectNames = {};\nOutputs.showTab = false;\nOutputs.showTurnOn = false;\nOutputs.noProjects = true;\nOutputs.projectPosition = 1;\nOutputs.nextPosition = 1;\nOutputs.balanceText = '';\nOutputs.balanceWhen = '';\nOutputs.bars = [];\nOutputs.lowText = '';\nOutputs.lowColor = '';\nOutputs.incomeRows = [];\nOutputs.hasIncome = false;\nOutputs.rows = [];\nOutputs.projects = [];\nOutputs.items = [];\nOutputs.marks = [];\nOutputs.readings = [];\nOutputs.upRows = [];\nOutputs.recRows = [];\nOutputs.pastRows = [];\nOutputs.projectOptions = [];"
+        "functionScript": "Outputs.projectNames = {};\nOutputs.showTab = false;\nOutputs.showTurnOn = false;\nOutputs.noProjects = true;\nOutputs.projectPosition = 1;\nOutputs.nextPosition = 1;\nOutputs.balanceText = '';\nOutputs.balanceWhen = '';\nOutputs.bars = [];\nOutputs.lowText = '';\nOutputs.lowColor = '';\nOutputs.incomeRows = [];\nOutputs.hasIncome = false;\nOutputs.rows = [];\nOutputs.projects = [];\nOutputs.items = [];\nOutputs.marks = [];\nOutputs.readings = [];\nOutputs.upRows = [];\nOutputs.recRows = [];\nOutputs.pastRows = [];\nOutputs.projectOptions = [];\nOutputs.payingRows = [];\nOutputs.buildingRows = [];\nOutputs.hobbyRows = [];\nOutputs.quietRows = [];\nOutputs.hasPaying = false;\nOutputs.hasBuilding = false;\nOutputs.hasHobby = false;\nOutputs.hasQuiet = false;"
       },
       "x": 40,
       "y": 280,
@@ -321,6 +361,62 @@
         {
           "name": "out-projectOptions",
           "displayName": "projectOptions",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-payingRows",
+          "displayName": "payingRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-buildingRows",
+          "displayName": "buildingRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hobbyRows",
+          "displayName": "hobbyRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-quietRows",
+          "displayName": "quietRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasPaying",
+          "displayName": "hasPaying",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasBuilding",
+          "displayName": "hasBuilding",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasHobby",
+          "displayName": "hasHobby",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasQuiet",
+          "displayName": "hasQuiet",
           "plug": "output",
           "type": "*",
           "group": "Outputs"

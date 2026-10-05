@@ -60,6 +60,14 @@ import {
   SAVE_PROJECT_SCRIPT,
   SHEET_BACK_SCRIPT,
   TASK_PROJECT_SCRIPT,
+  // TPL-008-PJ s3
+  LINK_FORM_SCRIPT,
+  MOVE_PROJECT_SCRIPT,
+  PROJECT_KIND_ROW_PREFIX,
+  PROJECTS_ORDER_KEY,
+  PROJECTS_ORDER_READ_SCRIPT,
+  SET_TASK_PROJECT_SCRIPT,
+  projectsOrderKeepScript,
   SELECTED_SCRIPT,
   TASK_ROWS_SCRIPT,
   TOGGLE_PROJECT_SCRIPT,
@@ -874,14 +882,14 @@ describe('§7 Projects (TPL-008-PJ)', () => {
   it('s2 which form a project draws: one row while it is open, none when it is not, never a record’s id', () => {
     const base = { name: 'Clarion', projectId: 'p2', hasMove: true, moveTitle: 'Call Ade', waitingRaw: 'Ade', deadlineRaw: '2026-10-20', pName: 'Clarion', pKind: 'earning', pBilling: 'fixed', pTerms: '30', pRate: '', pSub: '', pSay: '' };
     const forms = (mode: string, extra: Rec = {}) => run(ROW_FORMS_SCRIPT, { ...base, mode, ...extra }).outputs;
-    expect(forms('none')).toEqual({ formRows: [], editRows: [] });
+    expect(forms('none')).toEqual({ formRows: [], linkRows: [], editRows: [] });
     expect(forms('change').formRows).toEqual([
       { id: 'mf-change-p2', heading: 'Change the move for Clarion', help: '', title: 'Call Ade', who: 'Ade', deadline: '2026-10-20', saveLabel: 'Save', cancelLabel: 'Cancel', titleOptional: false }
     ]);
     expect(forms('done').formRows).toMatchObject([{ id: 'mf-done-p2', heading: 'Done. What is the next move for Clarion?', title: '', who: '', titleOptional: true }]);
     expect(forms('done', { hasMove: false }).formRows).toMatchObject([{ heading: 'What is the next move for Clarion?', titleOptional: false }]);
     expect(forms('add').formRows).toMatchObject([{ id: 'mf-add-p2', heading: 'Add a task for Clarion', titleOptional: false }]);
-    expect(forms('edit')).toEqual({ formRows: [], editRows: [{ id: 'pe-p2', name: 'Clarion', sub: '', kind: 'earning', billing: 'fixed', termsDays: '30', rate: '', say: '' }] });
+    expect(forms('edit')).toEqual({ formRows: [], linkRows: [], editRows: [{ id: 'pe-p2', name: 'Clarion', sub: '', kind: 'earning', billing: 'fixed', termsDays: '30', rate: '', say: '' }] });
     const next = run(NEXT_PROMPT_FORM_SCRIPT, { open: true, projectId: 'p2', name: 'Clarion' }).outputs.formRows as Rec[];
     expect(next).toMatchObject([{ id: 'np-p2', heading: 'Closed. What is the next move for Clarion?', cancelLabel: 'Nothing next for now', titleOptional: false }]);
     expect(run(NEXT_PROMPT_FORM_SCRIPT, { open: false, projectId: 'p2' }).outputs.formRows).toEqual([]);
@@ -1090,9 +1098,9 @@ describe('§7 Projects (TPL-008-PJ)', () => {
 
   it('s2 both ways: a project’s task opens in the List, and a task’s pane says its project and opens it — wired on the page', () => {
     const names = { p2: 'Bramble & Co' };
-    expect(run(TASK_PROJECT_SCRIPT, { selectedId: 't2', tasks, projectNames: names, showTab: true }).outputs).toEqual({ projectId: 'p2', hasProject: true, projectLabel: 'Part of Bramble & Co' });
-    expect(run(TASK_PROJECT_SCRIPT, { selectedId: 't2', tasks, projectNames: names, showTab: false }).outputs.hasProject).toBe(false);
-    expect(run(TASK_PROJECT_SCRIPT, { selectedId: 't4', tasks, projectNames: names, showTab: true }).outputs).toEqual({ projectId: '', hasProject: false, projectLabel: '' });
+    expect(run(TASK_PROJECT_SCRIPT, { selectedId: 't2', tasks, projectNames: names, showTab: true }).outputs).toEqual({ projectId: 'p2', projectValue: 'p2', showProject: true, hasProject: true });
+    expect(run(TASK_PROJECT_SCRIPT, { selectedId: 't2', tasks, projectNames: names, showTab: false }).outputs).toMatchObject({ showProject: false, hasProject: false });
+    expect(run(TASK_PROJECT_SCRIPT, { selectedId: 't4', tasks, projectNames: names, showTab: true }).outputs).toEqual({ projectId: '', projectValue: 'none', showProject: true, hasProject: false });
     const page = componentsOf().find((c) => c.name === C.pageTodo) as LegacyComponent;
     const wires = (page.graph?.connections ?? []) as unknown as Array<Record<string, string>>;
     const has = (f: string, fp: string, t: string, tp: string) => wires.some((w) => w.fromId === f && w.fromProperty === fp && w.toId === t && w.toProperty === tp);
@@ -1105,5 +1113,82 @@ describe('§7 Projects (TPL-008-PJ)', () => {
     ]).toEqual([true, true, true, true, true]);
     const script = (id: string) => (nodesOf(page).find((n) => n.id === id)?.parameters as { functionScript?: string })?.functionScript;
     expect(script('tdTaskProject')).toBe(TASK_PROJECT_SCRIPT);
+  });
+
+  // ── s3 — your own order, by kind; and a task's project (Richard, 2026-10-05) ──
+
+  it('s3 by kind: Paying, Building, Hobby, Quiet, each in your own order, its rows draggable and never the urgent list’s models', () => {
+    const shuffled = projects.map((p) => (p.id === 'p1' ? { ...p, position: 9 } : p));
+    const out = run(PROJECT_ROWS_SCRIPT, { tasks, projects: shuffled, items, marks: [], readings, openId: '', flag: '' }).outputs;
+    expect((out.payingRows as Rec[]).map((r) => [r.id, r.name, r.canMove])).toEqual([
+      [`${PROJECT_KIND_ROW_PREFIX}p2`, 'Bramble & Co', true],
+      [`${PROJECT_KIND_ROW_PREFIX}p3`, 'Founder A', true],
+      [`${PROJECT_KIND_ROW_PREFIX}p1`, 'Salon Collective', true]
+    ]);
+    expect((out.buildingRows as Rec[]).map((r) => r.name)).toEqual(['Own course']);
+    expect([out.hobbyRows, out.hasHobby, out.hasQuiet]).toEqual([[], false, true]);
+    expect((out.quietRows as Rec[]).map((r) => r.name)).toEqual(['Old thing']);
+    // The urgent list keeps its own ids and no grip.
+    expect((out.rows as Rec[]).filter((r) => !r.isHeading).every((r) => String(r.id).startsWith(PROJECT_ROW_PREFIX) && r.canMove === false)).toBe(true);
+    const recordIds = new Set([...projects, ...tasks, ...items].map((r) => r.id));
+    const kindIds = ['payingRows', 'buildingRows', 'hobbyRows', 'quietRows'].flatMap((k) => (out[k] as Rec[]).map((r) => r.id as string));
+    expect(kindIds.filter((id) => recordIds.has(id) || id.startsWith(PROJECT_ROW_PREFIX))).toEqual([]);
+  });
+
+  it('s3 a project offers every open task that is not its own, saying which project one is in now', () => {
+    const rows = rowsOf().rows as Rec[];
+    const salon = rows.find((r) => r.name === 'Salon Collective') as Rec;
+    expect(salon.otherTasks).toEqual([
+      { Label: 'Call the bank', Value: 't4' },
+      { Label: 'Send the revised quote (now Bramble & Co)', Value: 't2' },
+      { Label: 'Sam sends the data access (now Founder A)', Value: 't3' }
+    ]);
+    expect(salon.hasOtherTasks).toBe(true);
+    const run2 = (mode: string) => run(ROW_FORMS_SCRIPT, { mode, name: 'Salon', projectId: 'p1', otherTasks: salon.otherTasks }).outputs;
+    expect(run2('link').linkRows).toEqual([{ id: 'lf-p1', heading: 'Add an existing task to Salon', options: salon.otherTasks }]);
+    expect(run2('none').linkRows).toEqual([]);
+    expect(run(LINK_FORM_SCRIPT, { picked: 't4' })).toEqual({ outputs: { error: '', hasError: false, taskId: 't4' }, signals: ['go'] });
+    expect(run(LINK_FORM_SCRIPT, { picked: '' })).toEqual({ outputs: { error: 'Pick a task first.', hasError: true }, signals: [] });
+  });
+
+  it('s3 dragging a project hands its kind’s own places out again in the new order, saving only what moved', async () => {
+    const f = fakeRecords({ Project: [{ objectId: 'a', position: 2 }, { objectId: 'b', position: 5 }, { objectId: 'c', position: 7 }] });
+    const rows = [{ id: 'pg-a', projectId: 'a', position: 2 }, { id: 'pg-b', projectId: 'b', position: 5 }, { id: 'pg-c', projectId: 'c', position: 7 }];
+    expect((await runWrites(MOVE_PROJECT_SCRIPT, { rows, rowId: 'pg-c', toIndex: 0 }, f.Noodl)).signals).toEqual(['done']);
+    expect(f.db.Project.map((p) => [p.objectId, p.position])).toEqual([['a', 5], ['b', 7], ['c', 2]]);
+    expect(f.writes).toEqual(['save Project', 'save Project', 'save Project']);
+    // Places that collide (Planning left some the same) are spread out rather than tied.
+    const g = fakeRecords({ Project: [{ objectId: 'a', position: 1 }, { objectId: 'b', position: 1 }] });
+    await runWrites(MOVE_PROJECT_SCRIPT, { rows: [{ id: 'pg-a', projectId: 'a', position: 1 }, { id: 'pg-b', projectId: 'b', position: 1 }], rowId: 'pg-b', toIndex: 0 }, g.Noodl);
+    expect(g.db.Project.map((p) => [p.objectId, p.position])).toEqual([['a', 2], ['b', 1]]);
+    expect((await runWrites(MOVE_PROJECT_SCRIPT, { rows, rowId: 'pg-a', toIndex: 0 }, f.Noodl)).signals).toEqual([]);
+  });
+
+  it('s3 a task’s project: set, changed, taken out — each said in its history; the same project again writes nothing', async () => {
+    const f = fakeRecords({ Task: [{ objectId: 't4', title: 'Call the bank', projectId: null }], Event: [] });
+    const names = { p1: 'Salon', p2: 'Bramble' };
+    expect((await runWrites(SET_TASK_PROJECT_SCRIPT, { taskId: 't4', projectId: 'p1', current: 'none', projectNames: names }, f.Noodl)).signals).toEqual(['done']);
+    expect((await runWrites(SET_TASK_PROJECT_SCRIPT, { taskId: 't4', projectId: 'p1', current: 'p1', projectNames: names }, f.Noodl)).signals).toEqual([]);
+    await runWrites(SET_TASK_PROJECT_SCRIPT, { taskId: 't4', projectId: 'none', current: 'p1', projectNames: names }, f.Noodl);
+    expect(f.db.Task[0].projectId).toBeNull();
+    expect(f.db.Event.map((e) => [e.taskId, e.kind, e.summary])).toEqual([['t4', 'note', 'Now part of Salon'], ['t4', 'note', 'No longer part of Salon']]);
+  });
+
+  it('s3 By kind is the default, Most urgent first is remembered on the device — and only a press writes it', () => {
+    const store: Record<string, string> = {};
+    const win = { localStorage: { getItem: (k: string) => store[k] ?? null, setItem: (k: string, v: string) => { store[k] = v; } } };
+    // eslint-disable-next-line no-new-func
+    const go = (script: string) => { const sig: string[] = []; new Function('Inputs', 'Outputs', 'window', script)({}, new Proxy({}, { get: (_t, k: string) => () => sig.push(k) }), win); return sig; };
+    expect(go(PROJECTS_ORDER_READ_SCRIPT)).toEqual(['kind']);
+    go(projectsOrderKeepScript('urgent'));
+    expect([store[PROJECTS_ORDER_KEY], go(PROJECTS_ORDER_READ_SCRIPT)]).toEqual(['urgent', ['urgent']]);
+    const view = componentsOf().find((c) => c.name === C.projectsView) as LegacyComponent;
+    const wires = (view.graph?.connections ?? []) as unknown as Array<Record<string, string>>;
+    // Nothing but the two buttons runs a keep script (the switch's first state is not a choice).
+    expect(wires.filter((w) => w.toId === 'pvKeepKind' || w.toId === 'pvKeepUrgent').map((w) => `${w.fromId}.${w.fromProperty}`).sort()).toEqual(['pvByKindBtn.onClick', 'pvByUrgentBtn.onClick']);
+    const page = componentsOf().find((c) => c.name === C.pageTodo) as LegacyComponent;
+    const pw = (page.graph?.connections ?? []) as unknown as Array<Record<string, string>>;
+    const has = (f: string, fp: string, t: string, tp: string) => pw.some((w) => w.fromId === f && w.fromProperty === fp && w.toId === t && w.toProperty === tp);
+    expect([has('tdSummary', 'setProject', 'tdSetTaskProject', 'do'), has('tdTaskProject', 'out-projectId', 'tdSetTaskProject', 'current'), has('tdSetTaskProject', 'done', 'tdData', 'refresh')]).toEqual([true, true, true]);
   });
 });

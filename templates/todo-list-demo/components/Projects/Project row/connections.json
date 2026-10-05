@@ -178,6 +178,60 @@
       "toProperty": "label"
     },
     {
+      "fromId": "prIn",
+      "fromProperty": "canMove",
+      "toId": "prGrip",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hasOtherTasks",
+      "toId": "prLink",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prLink",
+      "fromProperty": "onClick",
+      "toId": "prMode",
+      "toProperty": "to-link"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "otherTasks",
+      "toId": "prForms",
+      "toProperty": "in-otherTasks"
+    },
+    {
+      "fromId": "prForms",
+      "fromProperty": "out-linkRows",
+      "toId": "prLinkEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "prLinkEach",
+      "fromProperty": "itemOutput-taskId",
+      "toId": "prOut",
+      "toProperty": "linkTaskId"
+    },
+    {
+      "fromId": "prLinkEach",
+      "fromProperty": "itemOutputSignal-save",
+      "toId": "prOut",
+      "toProperty": "linkTask"
+    },
+    {
+      "fromId": "prLinkEach",
+      "fromProperty": "itemOutputSignal-save",
+      "toId": "prMode",
+      "toProperty": "to-none"
+    },
+    {
+      "fromId": "prLinkEach",
+      "fromProperty": "itemOutputSignal-cancel",
+      "toId": "prMode",
+      "toProperty": "to-none"
+    },
+    {
       "fromId": "prHead",
       "fromProperty": "onClick",
       "toId": "prOut",

@@ -17,14 +17,38 @@
     },
     {
       "fromId": "tsIn",
-      "fromProperty": "projectLabel",
-      "toId": "tsProjectLine",
-      "toProperty": "text"
+      "fromProperty": "showProject",
+      "toId": "tsProject",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "projectOptions",
+      "toId": "tsProjectPick",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "projectValue",
+      "toId": "tsProjectPick",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "tsProjectPick",
+      "fromProperty": "value",
+      "toId": "tsOut",
+      "toProperty": "pickedProject"
+    },
+    {
+      "fromId": "tsProjectPick",
+      "fromProperty": "onChange",
+      "toId": "tsOut",
+      "toProperty": "setProject"
     },
     {
       "fromId": "tsIn",
       "fromProperty": "hasProject",
-      "toId": "tsProject",
+      "toId": "tsOpenProject",
       "toProperty": "mounted"
     },
     {

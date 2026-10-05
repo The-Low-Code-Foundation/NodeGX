@@ -1,0 +1,128 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "73ec15d9-8315-5061-8959-f4616f195383",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "SettaskproIn",
+      "type": "Component Inputs",
+      "label": "What to write",
+      "ports": [
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "current",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectNames",
+          "plug": "output",
+          "type": "object"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "SettaskproOut",
+      "type": "Component Outputs",
+      "label": "Written",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "SettaskproWrite",
+      "type": "JavaScriptFunction",
+      "label": "Write it",
+      "parameters": {
+        "functionScript": "var taskId = String(Inputs.taskId || ''), pid = String(Inputs.projectId || '');\nif (pid === 'none') pid = '';\nvar current = String(Inputs.current || '');\nif (current === 'none') current = '';\nif (taskId === '' || pid === current) return;\nvar names = Inputs.projectNames || {};\nvar R = Noodl.Records;\nvar summary = pid ? 'Now part of ' + String(names[pid] || 'a project') : 'No longer part of ' + String(names[current] || 'a project');\nR.save(taskId, { projectId: pid || null }, { className: 'Task' })\n  .then(function () { return R.create('Event', { taskId: taskId, kind: 'note', summary: summary, body: '', at: new Date().toISOString() }); })\n  .then(function () { Outputs.done(); }, function () { Outputs.failed(); });",
+        "runOnChange-in-taskId": false,
+        "runOnChange-in-projectId": false,
+        "runOnChange-in-current": false,
+        "runOnChange-in-projectNames": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-taskId",
+          "displayName": "taskId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-current",
+          "displayName": "current",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectNames",
+          "displayName": "projectNames",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "SettaskproProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

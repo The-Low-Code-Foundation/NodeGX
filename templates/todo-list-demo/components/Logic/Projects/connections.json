@@ -89,6 +89,54 @@
     },
     {
       "fromId": "pjNone",
+      "fromProperty": "out-payingRows",
+      "toId": "pjOut",
+      "toProperty": "payingRows"
+    },
+    {
+      "fromId": "pjNone",
+      "fromProperty": "out-hasPaying",
+      "toId": "pjOut",
+      "toProperty": "hasPaying"
+    },
+    {
+      "fromId": "pjNone",
+      "fromProperty": "out-buildingRows",
+      "toId": "pjOut",
+      "toProperty": "buildingRows"
+    },
+    {
+      "fromId": "pjNone",
+      "fromProperty": "out-hasBuilding",
+      "toId": "pjOut",
+      "toProperty": "hasBuilding"
+    },
+    {
+      "fromId": "pjNone",
+      "fromProperty": "out-hobbyRows",
+      "toId": "pjOut",
+      "toProperty": "hobbyRows"
+    },
+    {
+      "fromId": "pjNone",
+      "fromProperty": "out-hasHobby",
+      "toId": "pjOut",
+      "toProperty": "hasHobby"
+    },
+    {
+      "fromId": "pjNone",
+      "fromProperty": "out-quietRows",
+      "toId": "pjOut",
+      "toProperty": "quietRows"
+    },
+    {
+      "fromId": "pjNone",
+      "fromProperty": "out-hasQuiet",
+      "toId": "pjOut",
+      "toProperty": "hasQuiet"
+    },
+    {
+      "fromId": "pjNone",
       "fromProperty": "out-upRows",
       "toId": "pjOut",
       "toProperty": "upRows"

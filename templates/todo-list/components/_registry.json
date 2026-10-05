@@ -227,11 +227,27 @@
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
+    "Projects/Move project": {
+      "path": "Projects/Move project",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 6,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Projects/Set task project": {
+      "path": "Projects/Set task project",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 7,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
     "Logic/Projects": {
       "path": "Logic/Projects",
       "type": "visual",
       "nodeCount": 7,
-      "connectionCount": 41,
+      "connectionCount": 49,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -374,8 +390,8 @@
     "Todo/Task summary": {
       "path": "Todo/Task summary",
       "type": "visual",
-      "nodeCount": 23,
-      "connectionCount": 25,
+      "nodeCount": 24,
+      "connectionCount": 29,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -491,6 +507,14 @@
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
+    "Projects/Link task form": {
+      "path": "Projects/Link task form",
+      "type": "visual",
+      "nodeCount": 10,
+      "connectionCount": 9,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
     "Projects/Project task": {
       "path": "Projects/Project task",
       "type": "visual",
@@ -518,16 +542,24 @@
     "Projects/Project row": {
       "path": "Projects/Project row",
       "type": "visual",
-      "nodeCount": 35,
-      "connectionCount": 82,
+      "nodeCount": 39,
+      "connectionCount": 91,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
     "Projects/Project list": {
       "path": "Projects/Project list",
       "type": "visual",
-      "nodeCount": 4,
-      "connectionCount": 27,
+      "nodeCount": 6,
+      "connectionCount": 36,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Projects/Kind group": {
+      "path": "Projects/Kind group",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 36,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -582,8 +614,8 @@
     "Projects/View": {
       "path": "Projects/View",
       "type": "visual",
-      "nodeCount": 36,
-      "connectionCount": 99,
+      "nodeCount": 51,
+      "connectionCount": 258,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -598,8 +630,8 @@
     "Pages/Todo": {
       "path": "Pages/Todo",
       "type": "page",
-      "nodeCount": 103,
-      "connectionCount": 374,
+      "nodeCount": 104,
+      "connectionCount": 392,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -613,8 +645,8 @@
     }
   },
   "stats": {
-    "totalComponents": 76,
-    "totalNodes": 835,
-    "totalConnections": 1765
+    "totalComponents": 80,
+    "totalNodes": 883,
+    "totalConnections": 2030
   }
 }

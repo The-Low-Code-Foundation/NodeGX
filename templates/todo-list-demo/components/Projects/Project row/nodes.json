@@ -217,9 +217,34 @@
           "name": "pSay",
           "plug": "output",
           "type": "string"
+        },
+        {
+          "name": "otherTasks",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "hasOtherTasks",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canMove",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "position",
+          "plug": "output",
+          "type": "number"
         }
       ],
-      "x": 530,
+      "x": 590,
       "y": 280
     },
     {
@@ -356,10 +381,20 @@
           "name": "pSay",
           "plug": "input",
           "type": "string"
+        },
+        {
+          "name": "linkTask",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "linkTaskId",
+          "plug": "input",
+          "type": "string"
         }
       ],
-      "x": 530,
-      "y": 520
+      "x": 590,
+      "y": 3880
     },
     {
       "id": "prWrap",
@@ -447,20 +482,65 @@
           "value": 3,
           "unit": "px"
         },
-        "borderLeftColor": "transparent"
+        "borderLeftColor": "transparent",
+        "cssClassName": "todo-drag-row"
       },
       "children": [
-        "prHead",
+        "prLine",
         "prDetail"
       ],
       "x": 100,
       "y": 400
     },
     {
+      "id": "prLine",
+      "type": "Group",
+      "label": "Grip, then the project",
+      "parent": "prRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "flex-start",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-0)"
+      },
+      "children": [
+        "prGrip",
+        "prHead"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "prGrip",
+      "type": "Group",
+      "label": "Drag to change the order",
+      "parent": "prLine",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 24,
+          "unit": "px"
+        },
+        "height": {
+          "value": 32,
+          "unit": "px"
+        },
+        "cssClassName": "todo-drag-handle",
+        "marginTop": "var(--space-2)",
+        "mounted": false
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
       "id": "prHead",
       "type": "Group",
       "label": "Name, money and next move",
-      "parent": "prRoot",
+      "parent": "prLine",
       "parameters": {
         "flexDirection": "column",
         "sizeMode": "contentHeight",
@@ -473,15 +553,15 @@
         "paddingRight": "var(--space-2)",
         "paddingTop": "var(--space-3)",
         "paddingBottom": "var(--space-3)",
-        "styleCss": "cursor: pointer;"
+        "styleCss": "cursor: pointer; flex: 1 1 auto; min-width: 0;"
       },
       "children": [
         "prTop",
         "prMove",
         "prMeta"
       ],
-      "x": 160,
-      "y": 520
+      "x": 220,
+      "y": 760
     },
     {
       "id": "prTop",
@@ -504,8 +584,8 @@
         "prName",
         "prMoney"
       ],
-      "x": 220,
-      "y": 640
+      "x": 280,
+      "y": 880
     },
     {
       "id": "prName",
@@ -519,8 +599,8 @@
         "fontWeight": "var(--font-semibold)",
         "sizeMode": "contentSize"
       },
-      "x": 280,
-      "y": 760
+      "x": 340,
+      "y": 1000
     },
     {
       "id": "prMoney",
@@ -533,8 +613,8 @@
         "color": "var(--muted-foreground)",
         "sizeMode": "contentSize"
       },
-      "x": 280,
-      "y": 880
+      "x": 340,
+      "y": 1120
     },
     {
       "id": "prMove",
@@ -551,8 +631,8 @@
           "unit": "%"
         }
       },
-      "x": 220,
-      "y": 1000
+      "x": 280,
+      "y": 1240
     },
     {
       "id": "prMeta",
@@ -569,8 +649,8 @@
           "unit": "%"
         }
       },
-      "x": 220,
-      "y": 1120
+      "x": 280,
+      "y": 1360
     },
     {
       "id": "prDetail",
@@ -597,10 +677,11 @@
         "prMoneyList",
         "prButtons",
         "prFormEach",
-        "prEditEach"
+        "prEditEach",
+        "prLinkEach"
       ],
       "x": 160,
-      "y": 1240
+      "y": 1480
     },
     {
       "id": "prFacts",
@@ -618,7 +699,7 @@
         }
       },
       "x": 220,
-      "y": 1360
+      "y": 1600
     },
     {
       "id": "prHistory",
@@ -636,7 +717,7 @@
         }
       },
       "x": 220,
-      "y": 1480
+      "y": 1720
     },
     {
       "id": "prTasks",
@@ -658,7 +739,7 @@
         "prTaskEach"
       ],
       "x": 220,
-      "y": 1600
+      "y": 1840
     },
     {
       "id": "prTasksHead",
@@ -678,7 +759,7 @@
         "marginBottom": "var(--space-1)"
       },
       "x": 280,
-      "y": 1720
+      "y": 1960
     },
     {
       "id": "prTaskEach",
@@ -690,7 +771,7 @@
         "templateType": "explicit"
       },
       "x": 280,
-      "y": 1840
+      "y": 2080
     },
     {
       "id": "prMoneyList",
@@ -712,7 +793,7 @@
         "prMoneyEach"
       ],
       "x": 220,
-      "y": 1960
+      "y": 2200
     },
     {
       "id": "prMoneyHead",
@@ -732,7 +813,7 @@
         "marginBottom": "var(--space-1)"
       },
       "x": 280,
-      "y": 2080
+      "y": 2320
     },
     {
       "id": "prMoneyEach",
@@ -744,7 +825,7 @@
         "templateType": "explicit"
       },
       "x": 280,
-      "y": 2200
+      "y": 2440
     },
     {
       "id": "prButtons",
@@ -768,12 +849,13 @@
         "prChange",
         "prAdd",
         "prAddMoney",
+        "prLink",
         "prEdit",
         "prTick",
         "prSend"
       ],
       "x": 220,
-      "y": 2320
+      "y": 2560
     },
     {
       "id": "prDone",
@@ -795,7 +877,7 @@
         "label": "Done"
       },
       "x": 280,
-      "y": 2440
+      "y": 2680
     },
     {
       "id": "prChange",
@@ -820,7 +902,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 2560
+      "y": 2800
     },
     {
       "id": "prAdd",
@@ -844,7 +926,7 @@
         "label": "Add a task"
       },
       "x": 280,
-      "y": 2680
+      "y": 2920
     },
     {
       "id": "prAddMoney",
@@ -868,7 +950,32 @@
         "label": "Add money"
       },
       "x": 280,
-      "y": 2800
+      "y": 3040
+    },
+    {
+      "id": "prLink",
+      "type": "net.noodl.controls.button",
+      "label": "Add an existing task",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add an existing task",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 3160
     },
     {
       "id": "prEdit",
@@ -892,7 +999,7 @@
         "label": "Edit project"
       },
       "x": 280,
-      "y": 2920
+      "y": 3280
     },
     {
       "id": "prTick",
@@ -917,7 +1024,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 3040
+      "y": 3400
     },
     {
       "id": "prSend",
@@ -942,7 +1049,7 @@
         "mounted": false
       },
       "x": 280,
-      "y": 3160
+      "y": 3520
     },
     {
       "id": "prFormEach",
@@ -954,7 +1061,7 @@
         "templateType": "explicit"
       },
       "x": 220,
-      "y": 3280
+      "y": 3640
     },
     {
       "id": "prEditEach",
@@ -966,19 +1073,31 @@
         "templateType": "explicit"
       },
       "x": 220,
-      "y": 3400
+      "y": 3760
+    },
+    {
+      "id": "prLinkEach",
+      "type": "For Each",
+      "label": "The task picker, when it is open",
+      "parent": "prDetail",
+      "parameters": {
+        "template": "/Projects/Link task form",
+        "templateType": "explicit"
+      },
+      "x": 220,
+      "y": 3880
     },
     {
       "id": "prMode",
       "type": "States",
       "label": "Which form is open",
       "parameters": {
-        "states": "none,done,change,add,edit",
+        "states": "none,done,change,add,edit,link",
         "currentState": "none",
         "useTransitions": false
       },
-      "x": 530,
-      "y": 2440
+      "x": 590,
+      "y": 3160
     },
     {
       "id": "prLook",
@@ -987,7 +1106,7 @@
       "parameters": {
         "functionScript": "var h = !!Inputs.isHeading;\nOutputs.showHeading = h;\nOutputs.showProject = !h;"
       },
-      "x": 530,
+      "x": 590,
       "y": 160,
       "ports": [
         {
@@ -1018,10 +1137,10 @@
       "type": "JavaScriptFunction",
       "label": "Which form to draw",
       "parameters": {
-        "functionScript": "var mode = String(Inputs.mode || 'none'), n = String(Inputs.name || ''), pid = String(Inputs.projectId || '');\nvar forms = [];\nif (mode === 'done' || mode === 'add' || mode === 'change') {\n  var change = mode === 'change';\n  forms.push({\n    id: 'mf-' + mode + '-' + pid,\n    heading: mode === 'add' ? 'Add a task for ' + n : change ? 'Change the move for ' + n : Inputs.hasMove ? 'Done. What is the next move for ' + n + '?' : 'What is the next move for ' + n + '?',\n    help: mode === 'done' && Inputs.hasMove ? 'Leave it empty if nothing is next for now.' : mode === 'add' ? 'It goes at the end of your list, under ' + n + '.' : '',\n    title: change ? String(Inputs.moveTitle || '') : '',\n    who: change ? String(Inputs.waitingRaw || '') : '',\n    deadline: change ? String(Inputs.deadlineRaw || '') : '',\n    saveLabel: 'Save',\n    cancelLabel: 'Cancel',\n    titleOptional: mode === 'done' && !!Inputs.hasMove\n  });\n}\nOutputs.formRows = forms;\nOutputs.editRows = mode === 'edit'\n  ? [{ id: 'pe-' + pid, name: String(Inputs.pName || ''), sub: String(Inputs.pSub || ''), kind: String(Inputs.pKind || 'earning'), billing: String(Inputs.pBilling || 'hourly'), termsDays: String(Inputs.pTerms || ''), rate: String(Inputs.pRate || ''), say: String(Inputs.pSay || '') }]\n  : [];"
+        "functionScript": "var mode = String(Inputs.mode || 'none'), n = String(Inputs.name || ''), pid = String(Inputs.projectId || '');\nvar forms = [];\nif (mode === 'done' || mode === 'add' || mode === 'change') {\n  var change = mode === 'change';\n  forms.push({\n    id: 'mf-' + mode + '-' + pid,\n    heading: mode === 'add' ? 'Add a task for ' + n : change ? 'Change the move for ' + n : Inputs.hasMove ? 'Done. What is the next move for ' + n + '?' : 'What is the next move for ' + n + '?',\n    help: mode === 'done' && Inputs.hasMove ? 'Leave it empty if nothing is next for now.' : mode === 'add' ? 'It goes at the end of your list, under ' + n + '.' : '',\n    title: change ? String(Inputs.moveTitle || '') : '',\n    who: change ? String(Inputs.waitingRaw || '') : '',\n    deadline: change ? String(Inputs.deadlineRaw || '') : '',\n    saveLabel: 'Save',\n    cancelLabel: 'Cancel',\n    titleOptional: mode === 'done' && !!Inputs.hasMove\n  });\n}\nOutputs.formRows = forms;\nOutputs.linkRows = mode === 'link' ? [{ id: 'lf-' + pid, heading: 'Add an existing task to ' + n, options: Inputs.otherTasks || [] }] : [];\nOutputs.editRows = mode === 'edit'\n  ? [{ id: 'pe-' + pid, name: String(Inputs.pName || ''), sub: String(Inputs.pSub || ''), kind: String(Inputs.pKind || 'earning'), billing: String(Inputs.pBilling || 'hourly'), termsDays: String(Inputs.pTerms || ''), rate: String(Inputs.pRate || ''), say: String(Inputs.pSay || '') }]\n  : [];"
       },
-      "x": 530,
-      "y": 3280,
+      "x": 590,
+      "y": 4000,
       "ports": [
         {
           "name": "in-mode",
@@ -1068,6 +1187,13 @@
         {
           "name": "in-deadlineRaw",
           "displayName": "deadlineRaw",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-otherTasks",
+          "displayName": "otherTasks",
           "plug": "input",
           "type": "*",
           "group": "Inputs"
@@ -1129,6 +1255,13 @@
           "group": "Outputs"
         },
         {
+          "name": "out-linkRows",
+          "displayName": "linkRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
           "name": "out-editRows",
           "displayName": "editRows",
           "plug": "output",
@@ -1146,8 +1279,8 @@
         "runOnChange-in-mode": false,
         "runOnChange-in-taskId": false
       },
-      "x": 530,
-      "y": 3400,
+      "x": 590,
+      "y": 3640,
       "ports": [
         {
           "name": "in-mode",

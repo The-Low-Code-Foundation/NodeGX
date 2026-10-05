@@ -97,6 +97,51 @@
           "name": "projectOptions",
           "plug": "output",
           "type": "array"
+        },
+        {
+          "name": "payingRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasPaying",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "buildingRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasBuilding",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "hobbyRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasHobby",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "quietRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "hasQuiet",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "projectNames",
+          "plug": "output",
+          "type": "object"
         }
       ],
       "x": 470,
@@ -192,7 +237,9 @@
       },
       "children": [
         "pvEmpty",
-        "pvList"
+        "pvOrderRow",
+        "pvByKind",
+        "pvUrgent"
       ],
       "x": 100,
       "y": 280
@@ -217,12 +264,184 @@
       "y": 400
     },
     {
-      "id": "pvList",
-      "type": "/Projects/Project list",
-      "label": "The projects",
+      "id": "pvOrderRow",
+      "type": "Group",
+      "label": "How the projects are shown",
       "parent": "pvProjects",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-1)",
+        "flexWrap": "wrap",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "pvOrderLabel",
+        "pvByKindBtn",
+        "pvByUrgentBtn"
+      ],
       "x": 160,
       "y": 520
+    },
+    {
+      "id": "pvOrderLabel",
+      "type": "Text",
+      "label": "Show",
+      "parent": "pvOrderRow",
+      "parameters": {
+        "text": "Show",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize",
+        "marginRight": "var(--space-1)"
+      },
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "pvByKindBtn",
+      "type": "net.noodl.controls.button",
+      "label": "By kind",
+      "parent": "pvOrderRow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "By kind"
+      },
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "pvByUrgentBtn",
+      "type": "net.noodl.controls.button",
+      "label": "Most urgent first",
+      "parent": "pvOrderRow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Most urgent first"
+      },
+      "x": 220,
+      "y": 880
+    },
+    {
+      "id": "pvByKind",
+      "type": "Group",
+      "label": "By kind, in your own order",
+      "parent": "pvProjects",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "pvKpaying",
+        "pvKbuilding",
+        "pvKhobby",
+        "pvKquiet"
+      ],
+      "x": 160,
+      "y": 1000
+    },
+    {
+      "id": "pvKpaying",
+      "type": "/Projects/Kind group",
+      "label": "Paying",
+      "parent": "pvByKind",
+      "parameters": {
+        "heading": "Paying"
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "pvKbuilding",
+      "type": "/Projects/Kind group",
+      "label": "Building",
+      "parent": "pvByKind",
+      "parameters": {
+        "heading": "Building"
+      },
+      "x": 220,
+      "y": 1240
+    },
+    {
+      "id": "pvKhobby",
+      "type": "/Projects/Kind group",
+      "label": "Hobby",
+      "parent": "pvByKind",
+      "parameters": {
+        "heading": "Hobby"
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "pvKquiet",
+      "type": "/Projects/Kind group",
+      "label": "Quiet",
+      "parent": "pvByKind",
+      "parameters": {
+        "heading": "Quiet"
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "pvUrgent",
+      "type": "Group",
+      "label": "Most urgent first",
+      "parent": "pvProjects",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "pvList"
+      ],
+      "x": 160,
+      "y": 1600
+    },
+    {
+      "id": "pvList",
+      "type": "/Projects/Project list",
+      "label": "The projects, by whose move it is",
+      "parent": "pvUrgent",
+      "x": 220,
+      "y": 1720
     },
     {
       "id": "pvAdd",
@@ -246,7 +465,7 @@
         "pvAddError"
       ],
       "x": 100,
-      "y": 640
+      "y": 1840
     },
     {
       "id": "pvAddHeading",
@@ -265,7 +484,7 @@
         }
       },
       "x": 160,
-      "y": 760
+      "y": 1960
     },
     {
       "id": "pvName",
@@ -293,7 +512,7 @@
         "placeholder": "A client, or something of your own"
       },
       "x": 160,
-      "y": 880
+      "y": 2080
     },
     {
       "id": "pvAddRow",
@@ -316,7 +535,7 @@
         "pvWhen"
       ],
       "x": 160,
-      "y": 1000
+      "y": 2200
     },
     {
       "id": "pvAmount",
@@ -345,7 +564,7 @@
         "styleCss": "flex: 1 1 180px; min-width: 0;"
       },
       "x": 220,
-      "y": 1120
+      "y": 2320
     },
     {
       "id": "pvWhen",
@@ -374,7 +593,7 @@
         "styleCss": "flex: 1 1 180px; min-width: 0;"
       },
       "x": 220,
-      "y": 1240
+      "y": 2440
     },
     {
       "id": "pvOften",
@@ -398,7 +617,7 @@
         "pvAddButton"
       ],
       "x": 160,
-      "y": 1360
+      "y": 2560
     },
     {
       "id": "pvMonthly",
@@ -420,7 +639,7 @@
         "label": "Every month"
       },
       "x": 220,
-      "y": 1480
+      "y": 2680
     },
     {
       "id": "pvOnce",
@@ -442,7 +661,7 @@
         "label": "Just once"
       },
       "x": 220,
-      "y": 1600
+      "y": 2800
     },
     {
       "id": "pvAddButton",
@@ -465,7 +684,7 @@
         "marginLeft": "var(--space-2)"
       },
       "x": 220,
-      "y": 1720
+      "y": 2920
     },
     {
       "id": "pvAddError",
@@ -485,7 +704,7 @@
         "mounted": false
       },
       "x": 160,
-      "y": 1840
+      "y": 3040
     },
     {
       "id": "pvHide",
@@ -507,7 +726,7 @@
         "label": "Hide this tab"
       },
       "x": 100,
-      "y": 1960
+      "y": 3160
     },
     {
       "id": "pvSheet",
@@ -515,7 +734,7 @@
       "label": "The money popup",
       "parent": "pvRoot",
       "x": 100,
-      "y": 2080
+      "y": 3280
     },
     {
       "id": "pvRepeat",
@@ -534,7 +753,7 @@
         "useTransitions": false
       },
       "x": 470,
-      "y": 1480
+      "y": 2680
     },
     {
       "id": "pvSheetState",
@@ -556,7 +775,7 @@
         "functionScript": "var s = String(Inputs.state || 'closed');\nOutputs.open = s !== 'closed';\nOutputs.editing = s === 'edit' || s === 'editOnly';"
       },
       "x": 470,
-      "y": 2080,
+      "y": 3280,
       "ports": [
         {
           "name": "in-state",
@@ -590,7 +809,7 @@
         "runOnChange-in-state": false
       },
       "x": 470,
-      "y": 2200,
+      "y": 3400,
       "ports": [
         {
           "name": "in-state",
@@ -623,7 +842,7 @@
         "name": "todoMoneyEdit"
       },
       "x": 470,
-      "y": 2320
+      "y": 3520
     },
     {
       "id": "pvEditNew",
@@ -647,7 +866,7 @@
         "value": "new"
       },
       "x": 470,
-      "y": 2440
+      "y": 3640
     },
     {
       "id": "pvEditLine",
@@ -658,7 +877,7 @@
         "setWith": "string"
       },
       "x": 470,
-      "y": 2560
+      "y": 3760
     },
     {
       "id": "pvEditRowItem",
@@ -669,7 +888,7 @@
         "setWith": "string"
       },
       "x": 470,
-      "y": 640
+      "y": 1720
     },
     {
       "id": "pvNewFor",
@@ -680,7 +899,7 @@
         "runOnChange-in-projectId": false
       },
       "x": 470,
-      "y": 760,
+      "y": 1840,
       "ports": [
         {
           "name": "in-projectId",
@@ -714,14 +933,14 @@
         "setWith": "string"
       },
       "x": 470,
-      "y": 2680
+      "y": 3880
     },
     {
       "id": "cmdMove",
       "type": "/Projects/Save next move",
       "label": "Save next move",
       "x": 470,
-      "y": 880
+      "y": 1960
     },
     {
       "id": "cmdTick",
@@ -731,7 +950,7 @@
         "action": "tick"
       },
       "x": 470,
-      "y": 1000
+      "y": 2080
     },
     {
       "id": "cmdSent",
@@ -741,21 +960,96 @@
         "action": "sent"
       },
       "x": 470,
-      "y": 1120
+      "y": 2200
     },
     {
       "id": "cmdAddProject",
       "type": "/Projects/Add project",
       "label": "Add project",
       "x": 470,
-      "y": 1840
+      "y": 3040
     },
     {
       "id": "cmdSaveProject",
       "type": "/Projects/Save project",
       "label": "Save project",
       "x": 470,
-      "y": 1240
+      "y": 2320
+    },
+    {
+      "id": "pvOrder",
+      "type": "States",
+      "label": "By kind or most urgent first",
+      "parameters": {
+        "states": "kind,urgent",
+        "currentState": "kind",
+        "values": "kindBg,urgentBg",
+        "type-kindBg": "color",
+        "type-urgentBg": "color",
+        "value-kind-kindBg": "var(--muted)",
+        "value-kind-urgentBg": "transparent",
+        "value-urgent-kindBg": "transparent",
+        "value-urgent-urgentBg": "var(--muted)",
+        "useTransitions": false
+      },
+      "x": 470,
+      "y": 760
+    },
+    {
+      "id": "pvOrderRead",
+      "type": "JavaScriptFunction",
+      "label": "What this device chose",
+      "parameters": {
+        "functionScript": "var v = '';\ntry { v = window.localStorage.getItem(\"todo-projects-order\") || ''; } catch (e) {}\nif (v === 'urgent') Outputs.urgent(); else Outputs.kind();"
+      },
+      "ports": [
+        {
+          "name": "out-kind",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "kind",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-urgent",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "urgent",
+          "group": "Outputs"
+        }
+      ],
+      "x": 470,
+      "y": 4000
+    },
+    {
+      "id": "pvKeepKind",
+      "type": "JavaScriptFunction",
+      "label": "Remember By kind on this device",
+      "parameters": {
+        "functionScript": "try { window.localStorage.setItem(\"todo-projects-order\", \"kind\"); } catch (e) {}"
+      },
+      "x": 470,
+      "y": 880
+    },
+    {
+      "id": "pvKeepUrgent",
+      "type": "JavaScriptFunction",
+      "label": "Remember Most urgent first on this device",
+      "parameters": {
+        "functionScript": "try { window.localStorage.setItem(\"todo-projects-order\", \"urgent\"); } catch (e) {}"
+      },
+      "x": 470,
+      "y": 1000
+    },
+    {
+      "id": "cmdLink",
+      "type": "/Projects/Set task project",
+      "label": "Put a task in the project",
+      "parameters": {
+        "current": "none"
+      },
+      "x": 470,
+      "y": 2440
     }
   ],
   "visualRoots": [

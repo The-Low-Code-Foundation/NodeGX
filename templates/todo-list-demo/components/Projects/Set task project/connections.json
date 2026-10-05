@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "73ec15d9-8315-5061-8959-f4616f195383",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SettaskproIn",
+      "fromProperty": "taskId",
+      "toId": "SettaskproWrite",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "SettaskproIn",
+      "fromProperty": "projectId",
+      "toId": "SettaskproWrite",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "SettaskproIn",
+      "fromProperty": "current",
+      "toId": "SettaskproWrite",
+      "toProperty": "in-current"
+    },
+    {
+      "fromId": "SettaskproIn",
+      "fromProperty": "projectNames",
+      "toId": "SettaskproWrite",
+      "toProperty": "in-projectNames"
+    },
+    {
+      "fromId": "SettaskproIn",
+      "fromProperty": "do",
+      "toId": "SettaskproWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SettaskproWrite",
+      "fromProperty": "out-done",
+      "toId": "SettaskproOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SettaskproWrite",
+      "fromProperty": "out-failed",
+      "toId": "SettaskproProblem",
+      "toProperty": "do"
+    }
+  ]
+}

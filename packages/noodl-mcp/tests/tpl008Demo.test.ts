@@ -85,7 +85,7 @@ beforeAll(async () => {
 
 const COMMANDS = TPL008_COMPONENTS.filter((c) => c.path.startsWith('Commands/')).map((c) => `/${c.path}`);
 /** TPL-008-PJ — the Projects tab's writes: in the demo they say its own "did not save" sentence, and are never reached. */
-const PROJECT_WRITES = [C.saveMove, C.addProject, C.recordBalance, C.markMoney, C.saveMoneyItem, C.endMoneyItem, C.saveProject];
+const PROJECT_WRITES = [C.saveMove, C.addProject, C.recordBalance, C.markMoney, C.saveMoneyItem, C.endMoneyItem, C.saveProject, C.moveProject, C.setTaskProject];
 
 // ── §1 ─────────────────────────────────────────────────────────────────────
 

@@ -26,7 +26,7 @@ import { request } from './helpers/http';
 import { placeStarterAssets } from './helpers/judge';
 import { clickAt, clickButton, currentSession, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
-import { clickButtonBeside, clickWords, text, until, wait } from './helpers/todo-drive';
+import { clickButtonBeside, clickWords, dragRow, text, until, wait } from './helpers/todo-drive';
 
 jest.setTimeout(600_000);
 
@@ -173,6 +173,25 @@ async function clickLastButtonBeside(page: RenderedPage, label: string, button: 
   await clickAt(page, xy.x, xy.y);
 }
 
+/** Pick an option the way the browser reports a person's pick: the select's value, then a change event. */
+async function pickOption(page: RenderedPage, startsWith: string): Promise<void> {
+  const ok = String(
+    await page.evaluate(`(function () {
+      var sels = Array.prototype.slice.call(document.querySelectorAll('select'));
+      for (var i = 0; i < sels.length; i++) {
+        var o = Array.prototype.filter.call(sels[i].options, function (x) { return x.text.indexOf(${JSON.stringify(startsWith)}) === 0; })[0];
+        if (!o) continue;
+        sels[i].value = o.value;
+        sels[i].dispatchEvent(new Event('change', { bubbles: true }));
+        return 'ok';
+      }
+      return 'absent';
+    })()`)
+  );
+  if (ok !== 'ok') throw new Error(`no option starting "${startsWith}"`);
+  await wait(400);
+}
+
 interface Row {
   objectId: string;
   [field: string]: unknown;
@@ -250,7 +269,7 @@ describe('TPL-008-PJ — Projects, driven', () => {
         step('§1 seed');
         const joss = await make('Project', tk, { name: 'Linguaid', kind: 'earning', move: '→ → Find out from Joss', moveDue: iso(6), position: 1 });
         const ade = await make('Project', tk, { name: 'Clarion', kind: 'earning', move: '✓ Wed 30 · ✓ Wed 30 · Call Ade', moveDue: null, position: 2 });
-        await make('Project', tk, { name: 'Own course', kind: 'building', move: '', position: 3 });
+        const course = await make('Project', tk, { name: 'Own course', kind: 'building', move: '', position: 3 });
         await make('Project', tk, { name: 'Admin and asks', kind: 'admin', move: '', position: 4 });
         const sent = await make('Task', tk, { title: '→ Find out from Joss', status: 'open', position: 1, deadline: '', closingNote: '', closedAt: '' });
         const retainer = await make('MoneyItem', tk, { label: 'Clarion', amount: 1200, repeat: 'monthly', date: iso(-9), until: null, monthEnd: false, projectId: ade, billDate: null, billLeadDays: null, likelihood: 100, note: '', position: 1 });
@@ -273,7 +292,17 @@ describe('TPL-008-PJ — Projects, driven', () => {
         // ── §2 The tab ────────────────────────────────────────────────────────────
         step('§2 the tab');
         await clickButton(page, 'Projects');
-        await until('tab drawn', () => text(page), (s) => s.includes('Your move') && s.includes('Money'));
+        // s3 — by kind is the default; most urgent first is one press, and this device remembers it.
+        await until('tab drawn by kind', () => text(page), (s) => s.includes('Paying') && s.includes('Money'));
+        const byKind = await text(page);
+        R.kindDefault = [byKind.includes('Paying'), byKind.includes('Building'), byKind.includes('Your move')];
+        await clickButton(page, 'Most urgent first');
+        await until('most urgent first', () => text(page), (s) => s.includes('Your move'));
+        await page.navigate('/');
+        await until('reloaded', () => text(page), (s) => s.includes('Call Ade'));
+        await clickButton(page, 'Projects');
+        await until('tab drawn, remembered', () => text(page), (s) => s.includes('Your move') && s.includes('Money'));
+        R.urgentRemembered = true;
         await wait(800);
         const tab = await text(page);
         R.tabText = tab;
@@ -351,7 +380,8 @@ describe('TPL-008-PJ — Projects, driven', () => {
         await clickWords(page, 'Send Joss the invoice');
         await until('the List, on that task', async () => String(await page.evaluate(`Array.prototype.map.call(document.querySelectorAll('input'), function (i) { return i.value; }).join('|')`)), (v) => v.split('|').includes('Send Joss the invoice'));
         const paneText = await text(page);
-        R.taskPane = [paneText.includes('Part of Linguaid Ltd'), paneText.includes('Your move')];
+        const picked = String(await page.evaluate(`(function () { var s = document.querySelector('select'); return s && s.options[s.selectedIndex] ? s.options[s.selectedIndex].text : ''; })()`));
+        R.taskPane = [picked, paneText.includes('Open the project'), paneText.includes('Your move')];
         await shot('pj-3e-task');
         step('§3e task to project');
         await clickButton(page, 'Open the project');
@@ -477,11 +507,59 @@ describe('TPL-008-PJ — Projects, driven', () => {
         await clickButton(page, 'Cancel');
         await until('popup shut a third time', () => text(page), (s) => !s.includes('Change: Clarion'));
 
+        // ── §9 By kind, in your own order; a task put in a project (Richard: "I can't define the project a task is related to") ──
+        step('§9 by kind');
+        await clickView(page, 'Projects');
+        await until('the tab', () => text(page), (s) => s.includes('By kind'));
+        await clickButton(page, 'By kind');
+        await until('by kind', () => text(page), (s) => s.includes('Paying') && !s.includes('Your move'));
+        const kinds = await text(page);
+        R.kindOrder = ['Paying', 'Linguaid Ltd', 'Clarion', 'Building', 'Own course'].map((w) => kinds.indexOf(w, kinds.indexOf('Paying') - 1));
+        await shot('pj-9-by-kind');
+        step('§9 drag');
+        await dragRow(page, 'Linguaid Ltd', 'Own course');
+        const pos = async () => {
+          const ps = await rows('Project', tk);
+          return [Number(ps.find((x) => x.objectId === ade)?.position), Number(ps.find((x) => x.objectId === joss)?.position)];
+        };
+        await until('order saved', pos, ([a, j]) => a < j);
+        await until('drawn in the new order', () => text(page), (s) => s.indexOf('Clarion', s.indexOf('Paying')) < s.indexOf('Linguaid Ltd', s.indexOf('Paying')));
+        R.dragged = true;
+        await shot('pj-9-dragged');
+
+        step('§9 add an existing task');
+        await clickWords(page, 'Own course');
+        await until('Own course open', () => text(page), (s) => s.includes('Add an existing task'));
+        await clickButton(page, 'Add an existing task');
+        await until('picker', () => text(page), (s) => s.includes('Add an existing task to Own course'));
+        await pickOption(page, 'Send Joss the invoice');
+        await shot('pj-9-link');
+        await clickButton(page, 'Add to project');
+        await until('linked', async () => (await rows('Task', tk)).find((t) => t.title === 'Send Joss the invoice')?.projectId, (pid) => pid === course);
+        await until('drawn under Own course', () => text(page), (s) => s.includes('In your list') && s.includes('Send Joss the invoice'));
+        R.linkHistory = (await rows('Event', tk)).filter((e) => e.summary === 'Now part of Own course').length;
+
+        step('§9 a task’s project, from its pane');
+        await clickView(page, 'List');
+        await until('the List', () => text(page), (s) => s.includes('Send Ade the plan') && !s.includes('Hide this tab'));
+        await fill(page, 'Add a task', 'Book the dentist');
+        await clickButton(page, 'Add');
+        await until('task added', async () => (await rows('Task', tk)).find((t) => t.title === 'Book the dentist'), (t) => !!t);
+        await until('in the list', () => text(page), (s) => s.includes('Book the dentist'));
+        await clickWords(page, 'Book the dentist');
+        await until('its pane', () => text(page), (s) => s.includes('Project') && s.includes('Close task'));
+        await pickOption(page, 'Clarion');
+        await until('put in Clarion', async () => (await rows('Task', tk)).find((t) => t.title === 'Book the dentist')?.projectId, (pid) => pid === ade);
+        await until('the way to it', () => text(page), (s) => s.includes('Open the project'));
+        await shot('pj-9-pane');
+        R.paneHistory = (await rows('Event', tk)).filter((e) => e.summary === 'Now part of Clarion').length;
+        await clickView(page, 'Projects');
+
         // ── §7 Phone width ───────────────────────────────────────────────────────
         step('§7 phone');
         await page.setViewport({ width: 390, height: 844, mobile: true });
         await clickButton(page, 'Projects');
-        await until('tab at 390', () => text(page), (s) => s.includes('Your move'));
+        await until('tab at 390', () => text(page), (s) => s.includes('Hide this tab'));
         await wait(800);
         R.phoneScrollWidth = await page.evaluate('document.documentElement.scrollWidth');
         await shot('pj-7-phone');
@@ -557,7 +635,7 @@ describe('TPL-008-PJ — Projects, driven', () => {
   });
 
   it('§3e s2 — both ways: a project’s task opens in the List with its project named, and Open the project goes back', () => {
-    expect(R.taskPane).toEqual([true, false]);
+    expect(R.taskPane).toEqual(['Linguaid Ltd', true, false]);
     expect(R.backOnProject).toBe(true);
   });
 
@@ -571,6 +649,18 @@ describe('TPL-008-PJ — Projects, driven', () => {
     // The dropdown's own empty first option comes before the list.
     expect(R.projectChoices).toEqual([['', 'No project', 'Clarion', 'Linguaid Ltd', 'Own course'], 'Clarion']);
     expect(R.lineOpensOn).toEqual([['How much (€)', '500']]);
+  });
+
+  it('§2 s3 — by kind is the default, and most urgent first is remembered on the device', () => {
+    expect(R.kindDefault).toEqual([true, true, false]);
+    expect(R.urgentRemembered).toBe(true);
+  });
+
+  it('§9 s3 — by kind in your own order: a drag saves it; an existing task added to a project; a task put in one from its pane', () => {
+    const [paying, linguaid, clarion, building, course] = R.kindOrder as number[];
+    expect(paying < linguaid && linguaid < clarion && clarion < building && building < course).toBe(true);
+    expect(R.dragged).toBe(true);
+    expect([R.linkHistory, R.paneHistory]).toEqual([1, 1]);
   });
 
   it('§4 AC4 — a new balance is today’s reading, and the money sentence follows it', () => {

@@ -164,6 +164,60 @@
       "fromProperty": "itemOutput-pSay",
       "toId": "plOut",
       "toProperty": "pSay"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-linkTask",
+      "toId": "plOut",
+      "toProperty": "linkTask"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-linkTaskId",
+      "toId": "plOut",
+      "toProperty": "linkTaskId"
+    },
+    {
+      "fromId": "plRoot",
+      "fromProperty": "this",
+      "toId": "plDrag",
+      "toProperty": "in-host"
+    },
+    {
+      "fromId": "plRoot",
+      "fromProperty": "didMount",
+      "toId": "plMounts",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "plMounts",
+      "fromProperty": "out-mounts",
+      "toId": "plDrag",
+      "toProperty": "in-mounted"
+    },
+    {
+      "fromId": "plIn",
+      "fromProperty": "rows",
+      "toId": "plDrag",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "plDrag",
+      "fromProperty": "out-itemId",
+      "toId": "plOut",
+      "toProperty": "moveId"
+    },
+    {
+      "fromId": "plDrag",
+      "fromProperty": "out-toIndex",
+      "toId": "plOut",
+      "toProperty": "moveTo"
+    },
+    {
+      "fromId": "plDrag",
+      "fromProperty": "out-moved",
+      "toId": "plOut",
+      "toProperty": "moved"
     }
   ]
 }

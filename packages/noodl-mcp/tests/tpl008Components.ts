@@ -147,6 +147,11 @@ export const C = {
   moneySheet: '/Projects/Money sheet',
   saveProject: '/Projects/Save project',
   saveMoneyItem: '/Projects/Save money item',
+  // TPL-008-PJ s3 — your own order, and a task's project
+  moveProject: '/Projects/Move project',
+  setTaskProject: '/Projects/Set task project',
+  linkForm: '/Projects/Link task form',
+  kindGroup: '/Projects/Kind group',
   endMoneyItem: '/Projects/End money item',
   pageTodo: '/Pages/Todo',
   pageSignIn: '/Pages/Sign in'
@@ -173,6 +178,15 @@ export const VAR = {
   /** PJ s2 — what the money form is showing: `item:<id>`, `new`, or `new:<project id>` (one producer per Set Variable). */
   moneyEdit: 'todoMoneyEdit'
 } as const;
+
+/** s3 — the projects by kind, each in your own order. */
+const KIND_LISTS: Array<{ key: string; rows: string; has: string; heading: string }> = [
+  { key: 'paying', rows: 'payingRows', has: 'hasPaying', heading: 'Paying' },
+  { key: 'building', rows: 'buildingRows', has: 'hasBuilding', heading: 'Building' },
+  { key: 'hobby', rows: 'hobbyRows', has: 'hasHobby', heading: 'Hobby' },
+  { key: 'quiet', rows: 'quietRows', has: 'hasQuiet', heading: 'Quiet' }
+];
+const KIND_OUTS: Array<[string, string]> = KIND_LISTS.flatMap((k): Array<[string, string]> => [[k.rows, 'array'], [k.has, 'boolean']]);
 
 /** The one sentence a failed write shows. */
 export const PROBLEM_TEXT = 'That change did not save. Check your connection, then try again.';
@@ -1300,8 +1314,10 @@ const SUMMARY_INS: Array<[string, string]> = [
   ['canMakeNext', 'boolean'],
   ['closingNote', 'string'],
   ['narrow', 'boolean'],
-  // TPL-008-PJ s2 — the project a task belongs to, and the way to it.
-  ['projectLabel', 'string'],
+  // TPL-008-PJ s2/s3 — the project a task belongs to, picked here, and the way to it.
+  ['projectOptions', '*'],
+  ['projectValue', 'string'],
+  ['showProject', 'boolean'],
   ['hasProject', 'boolean']
 ];
 const SUMMARY_OUTS: Array<[string, string]> = [
@@ -1313,7 +1329,9 @@ const SUMMARY_OUTS: Array<[string, string]> = [
   ['back', 'signal'],
   ['newTitle', 'string'],
   ['deadlineText', 'string'],
-  ['openProject', 'signal']
+  ['openProject', 'signal'],
+  ['setProject', 'signal'],
+  ['pickedProject', 'string']
 ];
 
 const TASK_SUMMARY: Tpl008Component = {
@@ -1347,8 +1365,9 @@ const TASK_SUMMARY: Tpl008Component = {
     }),
     text('tsMeta', 'Where it is', 'tsRoot', '', wide(T_META)),
     group('tsProject', 'Its project', 'tsRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap', mounted: false }),
-    text('tsProjectLine', 'Which project', 'tsProject', '', { ...T_META, sizeMode: 'contentSize' }),
-    place('tsOpenProject', BUTTON, 'Open the project', 'tsProject', { ...BTN_GHOST, label: 'Open the project', color: 'var(--primary)', paddingLeft: 'var(--space-1)', paddingRight: 'var(--space-1)', paddingTop: 'var(--space-0-5)', paddingBottom: 'var(--space-0-5)' }),
+    text('tsProjectLine', 'Project', 'tsProject', 'Project', { ...T_META, sizeMode: 'contentSize' }),
+    place('tsProjectPick', 'net.noodl.controls.options', 'Which project', 'tsProject', { ...SELECT_FIELD, styleCss: 'flex: 1 1 200px; min-width: 0; max-width: 320px;' }),
+    place('tsOpenProject', BUTTON, 'Open the project', 'tsProject', { ...BTN_GHOST, label: 'Open the project', color: 'var(--primary)', paddingLeft: 'var(--space-1)', paddingRight: 'var(--space-1)', paddingTop: 'var(--space-0-5)', paddingBottom: 'var(--space-0-5)', mounted: false }),
     group('tsBar', 'Deadline and buttons', 'tsRoot', { ...COLUMN('var(--space-3)'), ...RULE_BELOW, paddingBottom: 'var(--space-4)' }),
     group('tsDeadline', 'Deadline', 'tsBar', COLUMN('var(--space-1)')),
     text('tsDeadlineLabel', 'Deadline label', 'tsDeadline', 'Deadline', { ...T_META, sizeMode: 'contentSize' }),
@@ -1367,8 +1386,12 @@ const TASK_SUMMARY: Tpl008Component = {
   connections: [
     wire('tsIn', 'title', 'tsTitle', 'startValue'),
     wire('tsIn', 'rankLine', 'tsMeta', 'text'),
-    wire('tsIn', 'projectLabel', 'tsProjectLine', 'text'),
-    wire('tsIn', 'hasProject', 'tsProject', 'mounted'),
+    wire('tsIn', 'showProject', 'tsProject', 'mounted'),
+    wire('tsIn', 'projectOptions', 'tsProjectPick', 'items'),
+    wire('tsIn', 'projectValue', 'tsProjectPick', 'value'),
+    wire('tsProjectPick', 'value', 'tsOut', 'pickedProject'),
+    wire('tsProjectPick', 'onChange', 'tsOut', 'setProject'),
+    wire('tsIn', 'hasProject', 'tsOpenProject', 'mounted'),
     wire('tsOpenProject', 'onClick', 'tsOut', 'openProject'),
     wire('tsIn', 'deadline', 'tsDeadlineField', 'Value'),
     wire('tsIn', 'dueText', 'tsDue', 'text'),
@@ -4073,8 +4096,9 @@ export const TASK_PROJECT_SCRIPT = `var sel = String(Inputs.selectedId || ''), t
 var pid = '';
 for (var i = 0; i < tasks.length; i++) if (tasks[i] && tasks[i].id === sel && tasks[i].projectId && names[tasks[i].projectId]) pid = String(tasks[i].projectId);
 Outputs.projectId = pid;
-Outputs.hasProject = pid !== '' && Inputs.showTab === true;
-Outputs.projectLabel = pid ? 'Part of ' + String(names[pid]) : '';`;
+Outputs.projectValue = pid || 'none';
+Outputs.showProject = Inputs.showTab === true;
+Outputs.hasProject = pid !== '' && Inputs.showTab === true;`;
 
 const PAGE_TODO: Tpl008Component = {
   path: 'Pages/Todo',
@@ -4084,7 +4108,7 @@ const PAGE_TODO: Tpl008Component = {
     C.header, C.problem, C.taskList, C.doneList, C.logList, C.summary, C.nextActions, C.history, C.dialogFlow,
     C.todoData, C.taskRows, C.selected, C.logRows,
     C.todayList, C.routineList, C.routineSummary, C.todayRows, C.selectedRoutine,
-    C.projectsLogic, C.projectsView, C.nextPrompt,
+    C.projectsLogic, C.projectsView, C.nextPrompt, C.setTaskProject,
     ...new Set(PAGE_COMMANDS.map(([, c]) => c))
   ],
   nodes: [
@@ -4221,6 +4245,7 @@ const PAGE_TODO: Tpl008Component = {
     logic('tdSelectFromProject', SET_VARIABLE, 'Select a project’s task', { name: VAR.selected, setWith: 'string' }),
     derive('tdTaskProject', 'Which project is the selected task part of?', TASK_PROJECT_SCRIPT),
     logic('tdOpenFromTask', SET_VARIABLE, 'Open the task’s project', { name: VAR.openProject, setWith: 'string' }),
+    logic('tdSetTaskProject', C.setTaskProject, 'Put the task in a project'),
     // RC5 — a reminder's link opens Today.
     {
       ...(script('tdViewOpen', 'Did the link ask for Today?', VIEW_LINK_SCRIPT, []) as object),
@@ -4580,7 +4605,7 @@ const PAGE_TODO: Tpl008Component = {
     wire('tdPrompt', 'done', 'tdPromptState', 'to-hidden'),
     wire('tdPrompt', 'skip', 'tdPromptState', 'to-hidden'),
     wire('tdPrompt', 'done', 'tdData', 'refresh'),
-    ...['upRows', 'recRows', 'pastRows', 'projectOptions'].map((n) => wire('tdProjects', n, 'tdProjectsPane', n)),
+    ...['upRows', 'recRows', 'pastRows', 'projectOptions', 'projectNames', ...KIND_OUTS.map(([n]) => n)].map((n) => wire('tdProjects', n, 'tdProjectsPane', n)),
     wire('tdProjectsPane', 'openTaskId', 'tdSelectFromProject', 'value'),
     wire('tdProjectsPane', 'openTask', 'tdSelectFromProject', 'do'),
     wire('tdProjectsPane', 'openTask', 'tdTab', 'to-list'),
@@ -4588,8 +4613,18 @@ const PAGE_TODO: Tpl008Component = {
     wire('tdSelected', 'value', 'tdTaskProject', 'in-selectedId'),
     wire('tdProjects', 'projectNames', 'tdTaskProject', 'in-projectNames'),
     wire('tdProjects', 'showTab', 'tdTaskProject', 'in-showTab'),
-    wire('tdTaskProject', 'out-projectLabel', 'tdSummary', 'projectLabel'),
+    wire('tdTaskProject', 'out-projectValue', 'tdSummary', 'projectValue'),
+    wire('tdTaskProject', 'out-showProject', 'tdSummary', 'showProject'),
     wire('tdTaskProject', 'out-hasProject', 'tdSummary', 'hasProject'),
+    wire('tdProjects', 'projectOptions', 'tdSummary', 'projectOptions'),
+    // s3 — a task put in a project, or taken out, from its pane.
+    wire('tdSelected', 'value', 'tdSetTaskProject', 'taskId'),
+    wire('tdSummary', 'pickedProject', 'tdSetTaskProject', 'projectId'),
+    wire('tdTaskProject', 'out-projectId', 'tdSetTaskProject', 'current'),
+    wire('tdProjects', 'projectNames', 'tdSetTaskProject', 'projectNames'),
+    wire('tdSummary', 'setProject', 'tdSetTaskProject', 'do'),
+    wire('tdSetTaskProject', 'done', 'tdData', 'refresh'),
+    wire('tdSetTaskProject', 'done', 'tdData', 'loadHistory'),
     wire('tdTaskProject', 'out-projectId', 'tdOpenFromTask', 'value'),
     wire('tdSummary', 'openProject', 'tdOpenFromTask', 'do'),
     wire('tdSummary', 'openProject', 'tdTab', 'to-projects'),
@@ -4621,6 +4656,8 @@ const PAGE_TODO: Tpl008Component = {
 
 export const PROJECT_COLLECTIONS = ['Project', 'MoneyItem', 'MoneyMark', 'BalanceReading'] as const;
 export const PROJECT_ROW_PREFIX = 'pj-';
+/** s3 — a project's row in its kind's list (Paying, Building, Hobby, Quiet): never the same model as its `pj-` row. */
+export const PROJECT_KIND_ROW_PREFIX = 'pg-';
 /** What Planning's cards wrote in front of a move (the arrow bug) — taken off on the way in. */
 export const MOVE_PREFIX_SOURCE = String.raw`^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2} · )+`;
 export const PROJECTS_PROBLEM_TEXT = 'Your projects could not be loaded. Check your connection, then reload.';
@@ -5006,7 +5043,23 @@ function taskRowsOf(list) {
   return out;
 }
 
+// s3 — the open tasks a project could take in (Add an existing task): every open task not already its own.
+var openAll = [];
+for (var oa = 0; oa < tasks.length; oa++) if (tasks[oa] && tasks[oa].status !== 'done') openAll.push(tasks[oa]);
+openAll.sort(byPosition);
+function otherTasksOf(pid) {
+  var out = [];
+  for (var i = 0; i < openAll.length; i++) {
+    var x = openAll[i];
+    if (x.projectId === pid) continue;
+    var elsewhere = x.projectId && names[x.projectId] ? ' (now ' + names[x.projectId] + ')' : '';
+    out.push({ Label: String(x.title || 'Untitled task') + elsewhere, Value: String(x.id) });
+  }
+  return out;
+}
+
 var yours = [], waiting = [], quiet = [];
+var byKind = { earning: [], building: [], hobby: [], dormant: [] };
 for (var r = 0; r < live.length; r++) {
   var pj = live[r];
   var openTasks = (openBy[pj.id] || []).slice().sort(byPosition);
@@ -5079,10 +5132,30 @@ for (var r = 0; r < live.length; r++) {
     hobby: pj.kind === 'hobby' ? 1 : 0,
     position: num(pj.position, 0)
   };
+  var others = otherTasksOf(pj.id);
+  row.otherTasks = others;
+  row.hasOtherTasks = others.length > 0;
+  row.title = row.name;
+  row.canMove = false;
+  // s3 — the same project in its kind's list, in your own order: its own row id (pg-), so the two lists never share a model.
+  var kindRow = {};
+  for (var kr in row) if (Object.prototype.hasOwnProperty.call(row, kr)) kindRow[kr] = row[kr];
+  kindRow.id = ${JSON.stringify(PROJECT_KIND_ROW_PREFIX)} + pj.id;
+  kindRow.canMove = true;
+  (byKind[byKind[pj.kind] ? pj.kind : 'earning']).push(kindRow);
   if (pj.kind === 'dormant' && !move) quiet.push(row);
   else if (who) waiting.push(row);
   else yours.push(row);
 }
+function yourOrder(x, y) { return x.position - y.position || x.name.localeCompare(y.name); }
+Outputs.payingRows = byKind.earning.sort(yourOrder);
+Outputs.buildingRows = byKind.building.sort(yourOrder);
+Outputs.hobbyRows = byKind.hobby.sort(yourOrder);
+Outputs.quietRows = byKind.dormant.sort(yourOrder);
+Outputs.hasPaying = byKind.earning.length > 0;
+Outputs.hasBuilding = byKind.building.length > 0;
+Outputs.hasHobby = byKind.hobby.length > 0;
+Outputs.hasQuiet = byKind.dormant.length > 0;
 function urgency(x, y) {
   return x.hobby - y.hobby || x.rank - y.rank || y.lateBy - x.lateBy || x.deadline.localeCompare(y.deadline) || x.position - y.position || x.name.localeCompare(y.name);
 }
@@ -5090,7 +5163,10 @@ yours.sort(urgency);
 waiting.sort(function (x, y) { return x.rank - y.rank || y.lateBy - x.lateBy || x.name.localeCompare(y.name); });
 quiet.sort(function (x, y) { return x.name.localeCompare(y.name); });
 function heading(id, text) {
-  return { id: 'h-' + id, isHeading: true, heading: text, open: false, hasMeta: false, hasFacts: false, hasHistory: false, hasMove: false, hasBill: false, hasSend: false, hasTasks: false, hasMoneyRows: false, taskRows: [], moneyRows: [] };
+  return {
+    id: 'h-' + id, isHeading: true, heading: text, title: text, canMove: false, open: false, hasMeta: false, hasFacts: false, hasHistory: false, hasMove: false,
+    hasBill: false, hasSend: false, hasTasks: false, hasMoneyRows: false, hasOtherTasks: false, taskRows: [], moneyRows: [], otherTasks: []
+  };
 }
 var rows = [];
 function section(id, text, list) {
@@ -5191,7 +5267,7 @@ const PROJECTS_OUTS: Array<[string, string]> = [
   ['projectNames', 'object'], ['showTab', 'boolean'], ['showTurnOn', 'boolean'], ['noProjects', 'boolean'],
   ['projectPosition', 'number'], ['nextPosition', 'number'],
   ['balanceText', 'string'], ['balanceWhen', 'string'], ['bars', 'array'], ['lowText', 'string'], ['lowColor', 'string'],
-  ['incomeRows', 'array'], ['hasIncome', 'boolean'], ['rows', 'array']
+  ['incomeRows', 'array'], ['hasIncome', 'boolean'], ['rows', 'array'], ...KIND_OUTS
 ];
 const PROJECTS_RECORDS: Array<[string, string]> = [['projects', 'array'], ['items', 'array'], ['marks', 'array'], ['readings', 'array']];
 const PROJECTS_INS: Array<[string, string]> = [['tasks', 'array'], ['openId', 'string'], ['flag', 'string'], ['now', 'number'], ['refresh', 'signal']];
@@ -5564,6 +5640,59 @@ const SAVE_PROJECT = recordWrite(
   [['error', 'string'], ['hasError', 'boolean']]
 );
 
+/**
+ * s3 — **your own order** (Richard: *"It would be nice to order the projects"*). A project dragged within
+ * its kind's list: the list's own positions, sorted, are handed out again in the new order, so a
+ * project never jumps into another kind's places. Only the projects whose place changes are saved.
+ */
+export const MOVE_PROJECT_SCRIPT = String.raw`var rows = Inputs.rows || [], id = String(Inputs.rowId || ''), to = Number(Inputs.toIndex);
+var from = -1;
+for (var i = 0; i < rows.length; i++) if (rows[i] && rows[i].id === id) from = i;
+if (from < 0 || !isFinite(to) || to < 0 || to >= rows.length || to === from) return;
+var order = rows.slice();
+var moved = order.splice(from, 1)[0];
+order.splice(to, 0, moved);
+var slots = rows.map(function (r) { var n = Number(r.position); return isFinite(n) ? n : 0; }).sort(function (a, b) { return a - b; });
+for (var s = 1; s < slots.length; s++) if (slots[s] <= slots[s - 1]) slots[s] = slots[s - 1] + 1;
+var steps = Promise.resolve(), R = Noodl.Records;
+order.forEach(function (r, k) {
+  if (Number(r.position) === slots[k]) return;
+  steps = steps.then(function () { return R.save(String(r.projectId), { position: slots[k] }, { className: 'Project' }); });
+});
+steps.then(function () { Outputs.done(); }, function () { Outputs.failed(); });`;
+
+const MOVE_PROJECT = recordWrite(
+  'Projects/Move project',
+  'Moves a project within its kind’s list (Rows, the list as drawn; Row Id, the row dragged; To Index, where it was dropped, from 0), saving the new places.',
+  [['rows', 'array'], ['rowId', 'string'], ['toIndex', 'number']],
+  MOVE_PROJECT_SCRIPT
+);
+
+/**
+ * s3 — **which project a task belongs to** (Richard: *"I can't define the project a task is related to, or
+ * add an existing task to a project"*). From the task's pane (a dropdown) or a project's Add an existing
+ * task. `none` takes it out of any project. The task's history says so. Nothing is written when it is
+ * already there — a Dropdown on an older viewer can say Changed when it is first drawn.
+ */
+export const SET_TASK_PROJECT_SCRIPT = String.raw`var taskId = String(Inputs.taskId || ''), pid = String(Inputs.projectId || '');
+if (pid === 'none') pid = '';
+var current = String(Inputs.current || '');
+if (current === 'none') current = '';
+if (taskId === '' || pid === current) return;
+var names = Inputs.projectNames || {};
+var R = Noodl.Records;
+var summary = pid ? 'Now part of ' + String(names[pid] || 'a project') : 'No longer part of ' + String(names[current] || 'a project');
+R.save(taskId, { projectId: pid || null }, { className: 'Task' })
+  .then(function () { return R.create('Event', { taskId: taskId, kind: 'note', summary: summary, body: '', at: new Date().toISOString() }); })
+  .then(function () { Outputs.done(); }, function () { Outputs.failed(); });`;
+
+const SET_TASK_PROJECT = recordWrite(
+  'Projects/Set task project',
+  'Puts a task in a project (Project Id), or takes it out of any (none), and says so in its history. Current is the project it is in now; nothing is written when they are the same.',
+  [['taskId', 'string'], ['projectId', 'string'], ['current', 'string'], ['projectNames', 'object']],
+  SET_TASK_PROJECT_SCRIPT
+);
+
 // ── What the tab draws ──
 
 const BOX = {
@@ -5876,9 +6005,44 @@ if (mode === 'done' || mode === 'add' || mode === 'change') {
   });
 }
 Outputs.formRows = forms;
+Outputs.linkRows = mode === 'link' ? [{ id: 'lf-' + pid, heading: 'Add an existing task to ' + n, options: Inputs.otherTasks || [] }] : [];
 Outputs.editRows = mode === 'edit'
   ? [{ id: 'pe-' + pid, name: String(Inputs.pName || ''), sub: String(Inputs.pSub || ''), kind: String(Inputs.pKind || 'earning'), billing: String(Inputs.pBilling || 'hourly'), termsDays: String(Inputs.pTerms || ''), rate: String(Inputs.pRate || ''), say: String(Inputs.pSay || '') }]
   : [];`;
+
+export const LINK_FORM_SCRIPT = "var id = String(Inputs.picked || '');\nOutputs.error = id === '' ? 'Pick a task first.' : '';\nOutputs.hasError = id === '';\nif (id === '') return;\nOutputs.taskId = id;\nOutputs.go();";
+const LINK_FORM_FIELDS: Array<[string, string]> = [['id', 'string'], ['heading', 'string'], ['options', '*']];
+const LINK_FORM_OUTS: Array<[string, string]> = [['save', 'signal'], ['cancel', 'signal'], ['taskId', 'string']];
+
+/** s3 — **Add an existing task**: one of your open tasks, picked from a list, becomes this project's. */
+const LINK_FORM: Tpl008Component = {
+  path: 'Projects/Link task form',
+  description: 'Picks one of your open tasks to put in a project: a list of them (a task in another project says which), Add to project, Cancel.',
+  ...iface(LINK_FORM_FIELDS, LINK_FORM_OUTS),
+  nodes: [
+    inputs('lkIn', 'Which tasks', LINK_FORM_FIELDS),
+    outputs('lkOut', 'The one picked', LINK_FORM_OUTS),
+    group('lkRoot', 'Add an existing task', undefined, { ...BOX, mounted: true }),
+    text('lkHead', 'What this is', 'lkRoot', '', wide({ ...T_BODY, fontWeight: 'var(--font-semibold)' })),
+    place('lkPick', 'net.noodl.controls.options', 'Which task', 'lkRoot', { ...SELECT_FIELD, placeholder: 'Pick a task', value: '' }),
+    text('lkError', 'Why nothing was added', 'lkRoot', '', { ...wide(T_ERROR), mounted: false }),
+    group('lkBtns', 'Add or cancel', 'lkRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('lkSave', BUTTON, 'Add to project', 'lkBtns', { ...BTN_PRIMARY, label: 'Add to project' }),
+    place('lkCancel', BUTTON, 'Cancel', 'lkBtns', { ...BTN_GHOST, label: 'Cancel' }),
+    script('lkCheck', 'Was one picked?', LINK_FORM_SCRIPT, ['picked'])
+  ],
+  connections: [
+    wire('lkIn', 'heading', 'lkHead', 'text'),
+    wire('lkIn', 'options', 'lkPick', 'items'),
+    wire('lkPick', 'value', 'lkCheck', 'in-picked'),
+    wire('lkSave', 'onClick', 'lkCheck', 'run'),
+    wire('lkCheck', 'out-error', 'lkError', 'text'),
+    wire('lkCheck', 'out-hasError', 'lkError', 'mounted'),
+    wire('lkCheck', 'out-taskId', 'lkOut', 'taskId'),
+    wire('lkCheck', 'out-go', 'lkOut', 'save'),
+    wire('lkCancel', 'onClick', 'lkOut', 'cancel')
+  ]
+};
 
 const PROJECT_ROW_FIELDS: Array<[string, string]> = [
   ['id', 'string'], ['projectId', 'string'], ['name', 'string'], ['moneyText', 'string'], ['moneyColor', 'string'],
@@ -5888,7 +6052,9 @@ const PROJECT_ROW_FIELDS: Array<[string, string]> = [
   ['doneLabel', 'string'], ['billKey', 'string'], ['hasBill', 'boolean'], ['billLabel', 'string'],
   ['sendKey', 'string'], ['hasSend', 'boolean'], ['sendLabel', 'string'], ['isHeading', 'boolean'], ['heading', 'string'],
   ['taskRows', 'array'], ['hasTasks', 'boolean'], ['tasksHeading', 'string'], ['moneyRows', 'array'], ['hasMoneyRows', 'boolean'],
-  ['pName', 'string'], ['pSub', 'string'], ['pKind', 'string'], ['pBilling', 'string'], ['pTerms', 'string'], ['pRate', 'string'], ['pSay', 'string']
+  ['pName', 'string'], ['pSub', 'string'], ['pKind', 'string'], ['pBilling', 'string'], ['pTerms', 'string'], ['pRate', 'string'], ['pSay', 'string'],
+  // s3
+  ['otherTasks', '*'], ['hasOtherTasks', 'boolean'], ['title', 'string'], ['canMove', 'boolean'], ['position', 'number']
 ];
 const PROJECT_FIELD_OUTS: Array<[string, string]> = [
   ['pName', 'string'], ['pSub', 'string'], ['pKind', 'string'], ['pBilling', 'string'], ['pTerms', 'string'], ['pRate', 'string'], ['pSay', 'string']
@@ -5899,7 +6065,9 @@ const PROJECT_ROW_OUTS: Array<[string, string]> = [
   ['waitingOn', 'string'], ['deadline', 'string'], ['billKey', 'string'], ['sendKey', 'string'],
   // s2
   ['openTask', 'signal'], ['openTaskId', 'string'], ['editMoney', 'signal'], ['moneyKey', 'string'], ['addMoney', 'signal'],
-  ['saveProject', 'signal'], ...PROJECT_FIELD_OUTS
+  ['saveProject', 'signal'], ...PROJECT_FIELD_OUTS,
+  // s3
+  ['linkTask', 'signal'], ['linkTaskId', 'string']
 ];
 
 /** The editor's value port for each of the row's project fields. */
@@ -5918,7 +6086,7 @@ const PROJECT_ROW: Tpl008Component = {
   description:
     'One project on the Projects tab: its name, its money in a few words, its next move and whose it is. Pressed, it opens to its money, its history, its tasks (each opens in the List) and its money items (each opens the money form), with Done, Change the move, Add a task, Add money, Edit project, and Been paid? / Sent? when a bill is due. With Is Heading it is a group’s name instead.',
   ...iface(PROJECT_ROW_FIELDS, PROJECT_ROW_OUTS),
-  instantiates: [C.moveForm, C.projectTask, C.projectMoney, C.projectEditor],
+  instantiates: [C.moveForm, C.projectTask, C.projectMoney, C.projectEditor, C.linkForm],
   nodes: [
     inputs('prIn', 'The project', PROJECT_ROW_FIELDS),
     outputs('prOut', 'What you did', PROJECT_ROW_OUTS),
@@ -5930,15 +6098,22 @@ const PROJECT_ROW: Tpl008Component = {
       ...RULE_BELOW,
       borderLeftStyle: 'solid',
       borderLeftWidth: px(3),
-      borderLeftColor: 'transparent'
+      borderLeftColor: 'transparent',
+      // s3 — what the drag script moves, in a kind's list (Projects/Project list).
+      cssClassName: DRAG_ROW_CLASS
     }),
-    group('prHead', 'Name, money and next move', 'prRoot', {
+    // s3 — the grip sits beside the part that opens the project, never inside it (a press on it must not open it).
+    group('prLine', 'Grip, then the project', 'prRoot', { ...ROW('var(--space-0)'), alignItems: 'flex-start' }),
+    group('prGrip', 'Drag to change the order', 'prLine', {
+      sizeMode: 'explicit', width: px(24), height: px(32), cssClassName: DRAG_HANDLE_CLASS, marginTop: 'var(--space-2)', mounted: false
+    }),
+    group('prHead', 'Name, money and next move', 'prLine', {
       ...COLUMN('var(--space-0-5)'),
       paddingLeft: 'var(--space-3)',
       paddingRight: 'var(--space-2)',
       paddingTop: 'var(--space-3)',
       paddingBottom: 'var(--space-3)',
-      styleCss: 'cursor: pointer;'
+      styleCss: 'cursor: pointer; flex: 1 1 auto; min-width: 0;'
     }),
     group('prTop', 'Name and money', 'prHead', { ...ROW('var(--space-3)'), justifyContent: 'space-between', flexWrap: 'wrap' }),
     text('prName', 'Project', 'prTop', '', { ...T_BODY, fontWeight: 'var(--font-semibold)', sizeMode: 'contentSize' }),
@@ -5965,12 +6140,14 @@ const PROJECT_ROW: Tpl008Component = {
     place('prChange', BUTTON, 'Change the move', 'prButtons', { ...BTN_OUTLINE, label: 'Change the move', mounted: false }),
     place('prAdd', BUTTON, 'Add a task', 'prButtons', { ...BTN_OUTLINE, label: 'Add a task' }),
     place('prAddMoney', BUTTON, 'Add money', 'prButtons', { ...BTN_OUTLINE, label: 'Add money' }),
+    place('prLink', BUTTON, 'Add an existing task', 'prButtons', { ...BTN_OUTLINE, label: 'Add an existing task', mounted: false }),
     place('prEdit', BUTTON, 'Edit project', 'prButtons', { ...BTN_OUTLINE, label: 'Edit project' }),
     place('prTick', BUTTON, 'Been paid? Tick it', 'prButtons', { ...BTN_OUTLINE, label: 'Been paid? Tick it', mounted: false }),
     place('prSend', BUTTON, 'Sent the invoice? Mark it', 'prButtons', { ...BTN_OUTLINE, label: 'Sent the invoice? Mark it', mounted: false }),
     place('prFormEach', FOR_EACH, 'The move form, when one is open', 'prDetail', { template: C.moveForm, templateType: 'explicit' }),
     place('prEditEach', FOR_EACH, 'The project form, when it is open', 'prDetail', { template: C.projectEditor, templateType: 'explicit' }),
-    logic('prMode', STATES, 'Which form is open', { states: 'none,done,change,add,edit', currentState: 'none', useTransitions: false }),
+    place('prLinkEach', FOR_EACH, 'The task picker, when it is open', 'prDetail', { template: C.linkForm, templateType: 'explicit' }),
+    logic('prMode', STATES, 'Which form is open', { states: 'none,done,change,add,edit,link', currentState: 'none', useTransitions: false }),
     derive(
       'prLook',
       'Heading or project',
@@ -6009,6 +6186,15 @@ const PROJECT_ROW: Tpl008Component = {
     wire('prIn', 'billLabel', 'prTick', 'label'),
     wire('prIn', 'hasSend', 'prSend', 'mounted'),
     wire('prIn', 'sendLabel', 'prSend', 'label'),
+    wire('prIn', 'canMove', 'prGrip', 'mounted'),
+    wire('prIn', 'hasOtherTasks', 'prLink', 'mounted'),
+    wire('prLink', 'onClick', 'prMode', 'to-link'),
+    wire('prIn', 'otherTasks', 'prForms', 'in-otherTasks'),
+    wire('prForms', 'out-linkRows', 'prLinkEach', 'items'),
+    wire('prLinkEach', 'itemOutput-taskId', 'prOut', 'linkTaskId'),
+    wire('prLinkEach', 'itemOutputSignal-save', 'prOut', 'linkTask'),
+    wire('prLinkEach', 'itemOutputSignal-save', 'prMode', 'to-none'),
+    wire('prLinkEach', 'itemOutputSignal-cancel', 'prMode', 'to-none'),
     wire('prHead', 'onClick', 'prOut', 'toggle'),
     // The forms: one open at a time, each drawn fresh.
     wire('prDone', 'onClick', 'prMode', 'to-done'),
@@ -6053,21 +6239,63 @@ const PROJECT_ROW: Tpl008Component = {
   ]
 };
 
+const PROJECT_LIST_OUTS: Array<[string, string]> = [...PROJECT_ROW_OUTS, ['moved', 'signal'], ['moveId', 'string'], ['moveTo', 'number']];
+
+/**
+ * The projects, one Project row each — grouped by whose move it is (rows with headings), or one kind
+ * in your own order (s3), where a row is dragged by its grip: Moved says which (Move Id) and where
+ * (Move To, from 0). A row that cannot move (Can Move off) has no grip and the drag script leaves it.
+ */
 const PROJECT_LIST: Tpl008Component = {
   path: 'Projects/Project list',
-  description: 'The projects, grouped (Your move, Waiting on someone, Quiet), one Project row each. Passes on whatever a row says.',
-  ...iface([['rows', 'array']], PROJECT_ROW_OUTS),
+  description:
+    'The projects, one Project row each: grouped by whose move it is, or one kind in your own order, dragged by the grip (Moved, with Move Id and Move To). Passes on whatever a row says.',
+  ...iface([['rows', 'array']], PROJECT_LIST_OUTS),
   repeats: { source: 'array', rowFields: PROJECT_ROW_FIELDS.map(([n]) => n) },
   instantiates: [C.projectRow],
   nodes: [
     inputs('plIn', 'The rows', [['rows', 'array']]),
-    outputs('plOut', 'What a row said', PROJECT_ROW_OUTS),
+    outputs('plOut', 'What a row said', PROJECT_LIST_OUTS),
     group('plRoot', 'Projects', undefined, COLUMN('var(--space-0)')),
-    place('plEach', FOR_EACH, 'One row per project', 'plRoot', { template: C.projectRow, templateType: 'explicit' })
+    place('plEach', FOR_EACH, 'One row per project', 'plRoot', { template: C.projectRow, templateType: 'explicit' }),
+    ...dragSort('pl', 'plRoot', ['plIn', 'rows'], 'plOut').nodes
   ],
   connections: [
     wire('plIn', 'rows', 'plEach', 'items'),
-    ...PROJECT_ROW_OUTS.map(([n, t]) => wire('plEach', t === 'signal' ? `itemOutputSignal-${n}` : `itemOutput-${n}`, 'plOut', n))
+    ...PROJECT_ROW_OUTS.map(([n, t]) => wire('plEach', t === 'signal' ? `itemOutputSignal-${n}` : `itemOutput-${n}`, 'plOut', n)),
+    ...dragSort('pl', 'plRoot', ['plIn', 'rows'], 'plOut').connections
+  ]
+};
+
+const KIND_GROUP_INS: Array<[string, string]> = [['heading', 'string'], ['rows', 'array'], ['has', 'boolean']];
+const KIND_GROUP_OUTS: Array<[string, string]> = [...PROJECT_ROW_OUTS, ['changed', 'signal']];
+
+/** s3 — one kind of project (Paying, Building, Hobby, Quiet) under its name, in your own order: drag a row by its grip and the new order is saved. */
+const KIND_GROUP: Tpl008Component = {
+  path: 'Projects/Kind group',
+  description:
+    'One kind of project under its name, in your own order: drag a project by its grip and the order is saved (Changed). Hidden when there are none (Has). Passes on whatever a row says.',
+  ...iface(KIND_GROUP_INS, KIND_GROUP_OUTS),
+  instantiates: [C.projectList, C.moveProject],
+  nodes: [
+    inputs('kgIn', 'The kind', KIND_GROUP_INS),
+    outputs('kgOut', 'What a row said', KIND_GROUP_OUTS),
+    group('kgRoot', 'The kind', undefined, { ...COLUMN('var(--space-0)'), mounted: false }),
+    group('kgHead', 'Its name', 'kgRoot', { ...COLUMN('var(--space-0)'), ...RULE_BELOW, paddingTop: 'var(--space-5)', paddingBottom: 'var(--space-2)' }),
+    text('kgName', 'Its name', 'kgHead', '', wide(T_HEADING)),
+    place('kgList', C.projectList, 'Its projects', 'kgRoot'),
+    logic('kgOrder', C.moveProject, 'Save the new order')
+  ],
+  connections: [
+    wire('kgIn', 'has', 'kgRoot', 'mounted'),
+    wire('kgIn', 'heading', 'kgName', 'text'),
+    wire('kgIn', 'rows', 'kgList', 'rows'),
+    wire('kgIn', 'rows', 'kgOrder', 'rows'),
+    wire('kgList', 'moveId', 'kgOrder', 'rowId'),
+    wire('kgList', 'moveTo', 'kgOrder', 'toIndex'),
+    wire('kgList', 'moved', 'kgOrder', 'do'),
+    wire('kgOrder', 'done', 'kgOut', 'changed'),
+    ...PROJECT_ROW_OUTS.map(([n]) => wire('kgList', n, 'kgOut', n))
   ]
 };
 
@@ -6540,7 +6768,9 @@ const VIEW_INS: Array<[string, string]> = [
   ['balanceText', 'string'], ['balanceWhen', 'string'], ['bars', 'array'], ['lowText', 'string'], ['lowColor', 'string'],
   ['incomeRows', 'array'], ['hasIncome', 'boolean'], ['rows', 'array'], ['noProjects', 'boolean'],
   ['projectPosition', 'number'], ['nextPosition', 'number'], ['items', 'array'], ['marks', 'array'], ['projects', 'array'],
-  ['upRows', 'array'], ['recRows', 'array'], ['pastRows', 'array'], ['projectOptions', 'array']
+  ['upRows', 'array'], ['recRows', 'array'], ['pastRows', 'array'], ['projectOptions', 'array'],
+  // s3
+  ...KIND_OUTS, ['projectNames', 'object']
 ];
 const VIEW_OUTS: Array<[string, string]> = [
   ['changed', 'signal'], ['toggle', 'signal'], ['projectId', 'string'], ['hide', 'signal'], ['openTask', 'signal'], ['openTaskId', 'string']
@@ -6551,12 +6781,25 @@ export const SHEET_BACK_SCRIPT = "if (String(Inputs.state || '') === 'edit') Out
 /** s2 — Add money from a project: the form opens for that project. */
 export const NEW_FOR_PROJECT_SCRIPT = "var id = String(Inputs.projectId || '');\nif (id === '') return;\nOutputs.value = 'new:' + id;\nOutputs.go();";
 
+/** s3 — every list on the tab says the same things; each is wired to the one command. */
+const PROJECT_LIST_IDS = ['pvList', ...KIND_LISTS.map((k) => `pvK${k.key}`)];
+const fromLists = (port: string, to: string, toPort: string) => PROJECT_LIST_IDS.map((l) => wire(l, port, to, toPort));
+
+/** s3 — By kind (the default) or Most urgent first, remembered on this device. */
+export const PROJECTS_ORDER_KEY = 'todo-projects-order';
+export const PROJECTS_ORDER_READ_SCRIPT = `var v = '';
+try { v = window.localStorage.getItem(${JSON.stringify(PROJECTS_ORDER_KEY)}) || ''; } catch (e) {}
+if (v === 'urgent') Outputs.urgent(); else Outputs.kind();`;
+/** Written only when a person presses one: the switch's own first state is never a choice (it would overwrite the saved one). */
+export const projectsOrderKeepScript = (v: 'kind' | 'urgent') =>
+  `try { window.localStorage.setItem(${JSON.stringify(PROJECTS_ORDER_KEY)}, ${JSON.stringify(v)}); } catch (e) {}`;
+
 const PROJECTS_VIEW: Tpl008Component = {
   path: 'Projects/View',
   description:
     'The Projects tab: the money, then every project with its next move (Your move, Waiting on someone, Quiet), a box to add a project, Hide this tab, and the money popup. Toggle (with Project Id) says a project was pressed; Open Task (with Open Task Id) says one of its tasks was; Changed says something was written.',
   ...iface(VIEW_INS, VIEW_OUTS),
-  instantiates: [C.money, C.projectList, C.moneySheet, C.saveMove, C.addProject, C.markMoney, C.saveProject],
+  instantiates: [C.money, C.projectList, C.kindGroup, C.moneySheet, C.saveMove, C.addProject, C.markMoney, C.saveProject, C.setTaskProject],
   nodes: [
     inputs('pvIn', 'What to draw', VIEW_INS),
     outputs('pvOut', 'What you did', VIEW_OUTS),
@@ -6564,7 +6807,14 @@ const PROJECTS_VIEW: Tpl008Component = {
     place('pvMoney', C.money, 'Money', 'pvRoot'),
     group('pvProjects', 'The projects', 'pvRoot', COLUMN('var(--space-0)')),
     text('pvEmpty', 'No projects yet', 'pvProjects', 'No projects yet. Add the first one below: who it is, and what they pay if they do.', { ...wide(T_META), mounted: false }),
-    place('pvList', C.projectList, 'The projects', 'pvProjects'),
+    group('pvOrderRow', 'How the projects are shown', 'pvProjects', { ...ROW('var(--space-1)'), flexWrap: 'wrap', paddingBottom: 'var(--space-2)' }),
+    text('pvOrderLabel', 'Show', 'pvOrderRow', 'Show', { ...T_META, sizeMode: 'contentSize', marginRight: 'var(--space-1)' }),
+    place('pvByKindBtn', BUTTON, 'By kind', 'pvOrderRow', { ...BTN_GHOST, label: 'By kind' }),
+    place('pvByUrgentBtn', BUTTON, 'Most urgent first', 'pvOrderRow', { ...BTN_GHOST, label: 'Most urgent first' }),
+    group('pvByKind', 'By kind, in your own order', 'pvProjects', COLUMN('var(--space-0)')),
+    ...KIND_LISTS.map((k) => place(`pvK${k.key}`, C.kindGroup, k.heading, 'pvByKind', { heading: k.heading })),
+    group('pvUrgent', 'Most urgent first', 'pvProjects', { ...COLUMN('var(--space-0)'), mounted: false }),
+    place('pvList', C.projectList, 'The projects, by whose move it is', 'pvUrgent'),
     group('pvAdd', 'Add a project', 'pvRoot', COLUMN('var(--space-2)')),
     text('pvAddHeading', 'Add a project', 'pvAdd', 'Add a project', wide(T_HEADING)),
     place('pvName', TEXT_INPUT, 'Who or what', 'pvAdd', { ...FIELD, placeholder: 'A client, or something of your own' }),
@@ -6605,38 +6855,66 @@ const PROJECTS_VIEW: Tpl008Component = {
     logic('cmdTick', C.markMoney, 'Been paid', { action: 'tick' }),
     logic('cmdSent', C.markMoney, 'Sent', { action: 'sent' }),
     logic('cmdAddProject', C.addProject, 'Add project'),
-    logic('cmdSaveProject', C.saveProject, 'Save project')
+    logic('cmdSaveProject', C.saveProject, 'Save project'),
+    // s3
+    choiceStates('pvOrder', 'By kind or most urgent first', ['kind', 'urgent'], 'kind'),
+    {
+      ...(logic('pvOrderRead', FUNCTION, 'What this device chose', { functionScript: PROJECTS_ORDER_READ_SCRIPT }) as object),
+      ports: fnPorts([['kind', 'signal'], ['urgent', 'signal']])
+    },
+    script('pvKeepKind', 'Remember By kind on this device', projectsOrderKeepScript('kind'), []),
+    script('pvKeepUrgent', 'Remember Most urgent first on this device', projectsOrderKeepScript('urgent'), []),
+    logic('cmdLink', C.setTaskProject, 'Put a task in the project', { current: 'none' })
   ],
   connections: [
     ...['balanceText', 'balanceWhen', 'bars', 'lowText', 'lowColor', 'incomeRows', 'hasIncome', 'items', 'marks', 'projects'].map((n) => wire('pvIn', n, 'pvMoney', n)),
     wire('pvMoney', 'changed', 'pvOut', 'changed'),
     wire('pvIn', 'rows', 'pvList', 'rows'),
+    // s3 — by kind, in your own order (the default), or by whose move it is; this device remembers which.
+    ...KIND_LISTS.flatMap((k) => [
+      wire('pvIn', k.rows, `pvK${k.key}`, 'rows'),
+      wire('pvIn', k.has, `pvK${k.key}`, 'has'),
+      wire(`pvK${k.key}`, 'changed', 'pvOut', 'changed')
+    ]),
+    ...choiceWires('pvOrder', [['kind', 'pvByKindBtn'], ['urgent', 'pvByUrgentBtn']]),
+    wire('pvOrder', 'at-kind', 'pvByKind', 'mounted'),
+    wire('pvOrder', 'at-urgent', 'pvUrgent', 'mounted'),
+    wire('pvOrderRead', 'out-kind', 'pvOrder', 'to-kind'),
+    wire('pvOrderRead', 'out-urgent', 'pvOrder', 'to-urgent'),
+    wire('pvByKindBtn', 'onClick', 'pvKeepKind', 'run'),
+    wire('pvByUrgentBtn', 'onClick', 'pvKeepUrgent', 'run'),
+    // s3 — an existing task put in a project
+    ...fromLists('linkTaskId', 'cmdLink', 'taskId'),
+    ...fromLists('projectId', 'cmdLink', 'projectId'),
+    wire('pvIn', 'projectNames', 'cmdLink', 'projectNames'),
+    ...fromLists('linkTask', 'cmdLink', 'do'),
+    wire('cmdLink', 'done', 'pvOut', 'changed'),
     wire('pvIn', 'noProjects', 'pvEmpty', 'mounted'),
-    wire('pvList', 'projectId', 'pvOut', 'projectId'),
-    wire('pvList', 'toggle', 'pvOut', 'toggle'),
+    ...fromLists('projectId', 'pvOut', 'projectId'),
+    ...fromLists('toggle', 'pvOut', 'toggle'),
     // The next move
-    ...(['projectId', 'projectName', 'taskId', 'mode', 'title', 'waitingOn', 'deadline'] as const).map((n) => wire('pvList', n, 'cmdMove', n)),
+    ...(['projectId', 'projectName', 'taskId', 'mode', 'title', 'waitingOn', 'deadline'] as const).flatMap((n) => fromLists(n, 'cmdMove', n)),
     wire('pvIn', 'nextPosition', 'cmdMove', 'position'),
-    wire('pvList', 'save', 'cmdMove', 'do'),
+    ...fromLists('save', 'cmdMove', 'do'),
     wire('cmdMove', 'done', 'pvOut', 'changed'),
     // Money from a project
     ...(['items', 'marks', 'projects'] as const).flatMap((n) => [wire('pvIn', n, 'cmdTick', n), wire('pvIn', n, 'cmdSent', n)]),
-    wire('pvList', 'billKey', 'cmdTick', 'key'),
-    wire('pvList', 'tick', 'cmdTick', 'do'),
+    ...fromLists('billKey', 'cmdTick', 'key'),
+    ...fromLists('tick', 'cmdTick', 'do'),
     wire('cmdTick', 'done', 'pvOut', 'changed'),
-    wire('pvList', 'sendKey', 'cmdSent', 'key'),
-    wire('pvList', 'sent', 'cmdSent', 'do'),
+    ...fromLists('sendKey', 'cmdSent', 'key'),
+    ...fromLists('sent', 'cmdSent', 'do'),
     wire('cmdSent', 'done', 'pvOut', 'changed'),
     // s2 — the project itself
-    wire('pvList', 'projectId', 'cmdSaveProject', 'projectId'),
+    ...fromLists('projectId', 'cmdSaveProject', 'projectId'),
     ...([['pName', 'name'], ['pSub', 'sub'], ['pKind', 'kind'], ['pBilling', 'billing'], ['pTerms', 'termsDays'], ['pRate', 'rate'], ['pSay', 'say']] as const).map(([from, to]) =>
-      wire('pvList', from, 'cmdSaveProject', to)
-    ),
-    wire('pvList', 'saveProject', 'cmdSaveProject', 'do'),
+      fromLists(from, 'cmdSaveProject', to)
+    ).flat(),
+    ...fromLists('saveProject', 'cmdSaveProject', 'do'),
     wire('cmdSaveProject', 'done', 'pvOut', 'changed'),
     // s2 — a project's task opens in the List
-    wire('pvList', 'openTaskId', 'pvOut', 'openTaskId'),
-    wire('pvList', 'openTask', 'pvOut', 'openTask'),
+    ...fromLists('openTaskId', 'pvOut', 'openTaskId'),
+    ...fromLists('openTask', 'pvOut', 'openTask'),
     // s2 — the money popup
     wire('pvSheetState', 'currentState', 'pvSheetLook', 'in-state'),
     wire('pvSheetState', 'currentState', 'pvSheetBack', 'in-state'),
@@ -6652,11 +6930,11 @@ const PROJECTS_VIEW: Tpl008Component = {
     wire('pvSheet', 'itemKey', 'pvEditLine', 'value'),
     wire('pvSheet', 'edit', 'pvEditLine', 'do'),
     wire('pvSheet', 'edit', 'pvSheetState', 'to-edit'),
-    wire('pvList', 'moneyKey', 'pvEditRowItem', 'value'),
-    wire('pvList', 'editMoney', 'pvEditRowItem', 'do'),
-    wire('pvList', 'editMoney', 'pvSheetState', 'to-editOnly'),
-    wire('pvList', 'projectId', 'pvNewFor', 'in-projectId'),
-    wire('pvList', 'addMoney', 'pvNewFor', 'run'),
+    ...fromLists('moneyKey', 'pvEditRowItem', 'value'),
+    ...fromLists('editMoney', 'pvEditRowItem', 'do'),
+    ...fromLists('editMoney', 'pvSheetState', 'to-editOnly'),
+    ...fromLists('projectId', 'pvNewFor', 'in-projectId'),
+    ...fromLists('addMoney', 'pvNewFor', 'run'),
     wire('pvNewFor', 'out-value', 'pvEditRowNew', 'value'),
     wire('pvNewFor', 'out-go', 'pvEditRowNew', 'do'),
     wire('pvNewFor', 'out-go', 'pvSheetState', 'to-editOnly'),
@@ -6789,6 +7067,8 @@ export const TPL008_COMPONENTS: ReadonlyArray<Tpl008Component> = [
   SAVE_MONEY_ITEM,
   END_MONEY_ITEM,
   SAVE_PROJECT,
+  MOVE_PROJECT,
+  SET_TASK_PROJECT,
   PROJECTS_LOGIC,
   TASK_ROWS,
   SELECTED_TASK,
@@ -6822,11 +7102,13 @@ export const TPL008_COMPONENTS: ReadonlyArray<Tpl008Component> = [
   NOTE_DIALOG,
   DIALOG_FLOW,
   MOVE_FORM,
+  LINK_FORM,
   PROJECT_TASK,
   PROJECT_MONEY,
   PROJECT_EDITOR,
   PROJECT_ROW,
   PROJECT_LIST,
+  KIND_GROUP,
   MONEY_BAR,
   INCOME_ROW,
   MONEY,

@@ -524,7 +524,7 @@
       "type": "/Logic/Selected routine",
       "label": "The selected thing that repeats",
       "x": 650,
-      "y": 4600
+      "y": 4720
     },
     {
       "id": "tdClock",
@@ -550,14 +550,14 @@
         }
       ],
       "x": 650,
-      "y": 6760
+      "y": 6880
     },
     {
       "id": "tdScreen",
       "type": "Screen Resolution",
       "label": "How wide the screen is",
       "x": 650,
-      "y": 6880
+      "y": 7000
     },
     {
       "id": "tdLayout",
@@ -661,7 +661,7 @@
         "name": "todoOpenProject"
       },
       "x": 650,
-      "y": 7000
+      "y": 7120
     },
     {
       "id": "tdToggleProject",
@@ -714,7 +714,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 7120
+      "y": 7240
     },
     {
       "id": "tdFlag",
@@ -724,7 +724,7 @@
         "name": "todoProjectsFlag"
       },
       "x": 650,
-      "y": 7240
+      "y": 7360
     },
     {
       "id": "tdFlagRead",
@@ -750,7 +750,7 @@
         }
       ],
       "x": 650,
-      "y": 7360
+      "y": 7480
     },
     {
       "id": "tdFlagLoad",
@@ -761,7 +761,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 7480
+      "y": 7600
     },
     {
       "id": "tdFlagOn",
@@ -795,7 +795,7 @@
         "functionScript": "var v = String(Inputs.flag || '');\nif (v !== 'on' && v !== 'off') return;\ntry { window.localStorage.setItem(\"todo-projects-tab\", v); } catch (e) {}"
       },
       "x": 650,
-      "y": 7600,
+      "y": 7720,
       "ports": [
         {
           "name": "in-flag",
@@ -891,7 +891,7 @@
       "type": "JavaScriptFunction",
       "label": "Which project is the selected task part of?",
       "parameters": {
-        "functionScript": "var sel = String(Inputs.selectedId || ''), tasks = Inputs.tasks || [], names = Inputs.projectNames || {};\nvar pid = '';\nfor (var i = 0; i < tasks.length; i++) if (tasks[i] && tasks[i].id === sel && tasks[i].projectId && names[tasks[i].projectId]) pid = String(tasks[i].projectId);\nOutputs.projectId = pid;\nOutputs.hasProject = pid !== '' && Inputs.showTab === true;\nOutputs.projectLabel = pid ? 'Part of ' + String(names[pid]) : '';"
+        "functionScript": "var sel = String(Inputs.selectedId || ''), tasks = Inputs.tasks || [], names = Inputs.projectNames || {};\nvar pid = '';\nfor (var i = 0; i < tasks.length; i++) if (tasks[i] && tasks[i].id === sel && tasks[i].projectId && names[tasks[i].projectId]) pid = String(tasks[i].projectId);\nOutputs.projectId = pid;\nOutputs.projectValue = pid || 'none';\nOutputs.showProject = Inputs.showTab === true;\nOutputs.hasProject = pid !== '' && Inputs.showTab === true;"
       },
       "x": 650,
       "y": 3040,
@@ -932,15 +932,22 @@
           "group": "Outputs"
         },
         {
-          "name": "out-hasProject",
-          "displayName": "hasProject",
+          "name": "out-projectValue",
+          "displayName": "projectValue",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
         },
         {
-          "name": "out-projectLabel",
-          "displayName": "projectLabel",
+          "name": "out-showProject",
+          "displayName": "showProject",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasProject",
+          "displayName": "hasProject",
           "plug": "output",
           "type": "*",
           "group": "Outputs"
@@ -957,6 +964,13 @@
       },
       "x": 650,
       "y": 3160
+    },
+    {
+      "id": "tdSetTaskProject",
+      "type": "/Projects/Set task project",
+      "label": "Put the task in a project",
+      "x": 650,
+      "y": 3280
     },
     {
       "id": "tdViewOpen",
@@ -985,7 +999,7 @@
         "name": "todoSelected"
       },
       "x": 650,
-      "y": 5920
+      "y": 6040
     },
     {
       "id": "tdSelectFromList",
@@ -1029,7 +1043,7 @@
         "setWith": "emptyString"
       },
       "x": 650,
-      "y": 3280
+      "y": 3400
     },
     {
       "id": "tdLinkOpen",
@@ -1066,7 +1080,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 7720
+      "y": 7840
     },
     {
       "id": "tdSelectFromToday",
@@ -1099,7 +1113,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 7840
+      "y": 7960
     },
     {
       "id": "tdDays",
@@ -1109,7 +1123,7 @@
         "name": "todoSlotDays"
       },
       "x": 650,
-      "y": 7960
+      "y": 8080
     },
     {
       "id": "tdPickDay",
@@ -1121,7 +1135,7 @@
         "runOnChange-in-days": false
       },
       "x": 650,
-      "y": 4720,
+      "y": 4840,
       "ports": [
         {
           "name": "in-key",
@@ -1162,7 +1176,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 8080
+      "y": 8200
     },
     {
       "id": "tdClearDays",
@@ -1173,7 +1187,7 @@
         "setWith": "emptyString"
       },
       "x": 650,
-      "y": 8200
+      "y": 8320
     },
     {
       "id": "tdOpenAction",
@@ -1183,7 +1197,7 @@
         "name": "todoOpenAction"
       },
       "x": 650,
-      "y": 8320
+      "y": 8440
     },
     {
       "id": "tdOpenDesc",
@@ -1194,7 +1208,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 3760
+      "y": 3880
     },
     {
       "id": "tdCloseDesc",
@@ -1205,7 +1219,7 @@
         "setWith": "emptyString"
       },
       "x": 650,
-      "y": 3880
+      "y": 4000
     },
     {
       "id": "cmdAdd",
@@ -1232,56 +1246,56 @@
         "direction": "top"
       },
       "x": 650,
-      "y": 3400
+      "y": 3520
     },
     {
       "id": "cmdClose",
       "type": "/Commands/Close task",
       "label": "Close",
       "x": 650,
-      "y": 6040
+      "y": 6160
     },
     {
       "id": "cmdReopen",
       "type": "/Commands/Reopen task",
       "label": "Reopen",
       "x": 650,
-      "y": 6160
+      "y": 6280
     },
     {
       "id": "cmdRename",
       "type": "/Commands/Rename task",
       "label": "Rename",
       "x": 650,
-      "y": 3520
+      "y": 3640
     },
     {
       "id": "cmdDeadline",
       "type": "/Commands/Set deadline",
       "label": "Deadline",
       "x": 650,
-      "y": 3640
+      "y": 3760
     },
     {
       "id": "cmdAddAction",
       "type": "/Commands/Add action",
       "label": "AddAction",
       "x": 650,
-      "y": 4000
+      "y": 4120
     },
     {
       "id": "cmdTick-2",
       "type": "/Commands/Tick action",
       "label": "Tick",
       "x": 650,
-      "y": 6280
+      "y": 6400
     },
     {
       "id": "cmdUntick",
       "type": "/Commands/Untick action",
       "label": "Untick",
       "x": 650,
-      "y": 6400
+      "y": 6520
     },
     {
       "id": "cmdActDrag",
@@ -1291,28 +1305,28 @@
         "direction": "to"
       },
       "x": 650,
-      "y": 4120
+      "y": 4240
     },
     {
       "id": "cmdRenameAct",
       "type": "/Commands/Rename action",
       "label": "RenameAct",
       "x": 650,
-      "y": 4240
+      "y": 4360
     },
     {
       "id": "cmdDescribe",
       "type": "/Commands/Describe action",
       "label": "Describe",
       "x": 650,
-      "y": 4360
+      "y": 4480
     },
     {
       "id": "cmdNote",
       "type": "/Commands/Add note",
       "label": "Note",
       "x": 650,
-      "y": 4480
+      "y": 4600
     },
     {
       "id": "cmdAddRoutine",
@@ -1326,7 +1340,7 @@
       "type": "/Commands/Rename routine",
       "label": "RenameRoutine",
       "x": 650,
-      "y": 4840
+      "y": 4960
     },
     {
       "id": "cmdDaily",
@@ -1336,7 +1350,7 @@
         "change": "daily"
       },
       "x": 650,
-      "y": 4960
+      "y": 5080
     },
     {
       "id": "cmdWeekly",
@@ -1346,7 +1360,7 @@
         "change": "weekly"
       },
       "x": 650,
-      "y": 5080
+      "y": 5200
     },
     {
       "id": "cmdMonthly",
@@ -1356,7 +1370,7 @@
         "change": "monthly"
       },
       "x": 650,
-      "y": 5200
+      "y": 5320
     },
     {
       "id": "cmdAddTime",
@@ -1366,7 +1380,7 @@
         "change": "add"
       },
       "x": 650,
-      "y": 5320
+      "y": 5440
     },
     {
       "id": "cmdRemoveSlot",
@@ -1376,7 +1390,7 @@
         "change": "remove"
       },
       "x": 650,
-      "y": 5440
+      "y": 5560
     },
     {
       "id": "cmdStart",
@@ -1386,7 +1400,7 @@
         "which": "start"
       },
       "x": 650,
-      "y": 5560
+      "y": 5680
     },
     {
       "id": "cmdEnd",
@@ -1396,28 +1410,28 @@
         "which": "end"
       },
       "x": 650,
-      "y": 5680
+      "y": 5800
     },
     {
       "id": "cmdCheck",
       "type": "/Commands/Tick routine",
       "label": "Check",
       "x": 650,
-      "y": 6520
+      "y": 6640
     },
     {
       "id": "cmdStop",
       "type": "/Commands/Stop routine",
       "label": "Stop",
       "x": 650,
-      "y": 6640
+      "y": 6760
     },
     {
       "id": "cmdRoutineNote",
       "type": "/Commands/Add note",
       "label": "RoutineNote",
       "x": 650,
-      "y": 5800
+      "y": 5920
     }
   ],
   "visualRoots": [

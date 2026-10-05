@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2b358db2-c66c-5a5b-868c-d1d75f8c05ed",
+  "name": "Link task form",
+  "path": "/Projects/Link task form",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Picks one of your open tasks to put in a project: a list of them (a task in another project says which), Add to project, Cancel."
+}

@@ -502,7 +502,15 @@ Outputs.readings = [];
 Outputs.upRows = [];
 Outputs.recRows = [];
 Outputs.pastRows = [];
-Outputs.projectOptions = [];`;
+Outputs.projectOptions = [];
+Outputs.payingRows = [];
+Outputs.buildingRows = [];
+Outputs.hobbyRows = [];
+Outputs.quietRows = [];
+Outputs.hasPaying = false;
+Outputs.hasBuilding = false;
+Outputs.hasHobby = false;
+Outputs.hasQuiet = false;`;
 
 function demoProjects(): Tpl008Component {
   const backend = source(C.projectsLogic);
