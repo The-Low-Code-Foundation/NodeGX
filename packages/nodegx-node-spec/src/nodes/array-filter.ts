@@ -39,24 +39,41 @@ import { errorOutput, runOnChange } from './data-base';
 type Filter = Record<string, Record<string, unknown>>;
 type SortSpec = Record<string, 1 | -1>;
 
+/**
+ * P109-S8-ARRAYFILTERPATH (ruled 2026-10-05, "Yes, exact name first"): the value a filter key names in a row. A row that
+ * HAS a field with that exact name gives it, dots and all; otherwise a dotted key is a path into nested objects
+ * (`owner.id` → `item.owner.id`), and a step that is not an object ends it as `undefined` (absent, as for any missing
+ * field). Measured before the ruling: 0 of 253 filter keys in 55 projects contain a dot, so no list reads differently.
+ */
+function fieldOf(item: Record<string, unknown>, key: string): unknown {
+  if (Object.prototype.hasOwnProperty.call(item, key) || !key.includes('.')) return item[key];
+  let at: unknown = item;
+  for (const step of key.split('.')) {
+    if (at === null || typeof at !== 'object') return undefined;
+    at = (at as Record<string, unknown>)[step];
+  }
+  return at;
+}
+
 /** :44-72 — loose comparisons on purpose; `$neq` and `$nin` alone tolerate a missing key. */
 export function applyFilter(item: Record<string, unknown>, filter: Filter, isRecord: (v: unknown) => v is RecordRef, isCollection: (v: unknown) => v is CollectionRef): boolean {
   const listOf = (v: unknown) => listOfValues(v, isRecord, isCollection);
   for (const key in filter) {
     const op = filter[key];
+    const got = fieldOf(item, key);
     if (op['$neq'] !== undefined) {
-      if (!(item[key] != op['$neq'])) return false;
+      if (!(got != op['$neq'])) return false;
     } else if (op['$nin'] !== undefined) {
-      if (listOf(op['$nin']).some((v) => item[key] == v)) return false; // :51-53
-    } else if (item[key] === undefined) return false;
-    else if (op['$eq'] !== undefined && !(item[key] == op['$eq'])) return false;
-    else if (op['$gt'] !== undefined && !((item[key] as any) > (op['$gt'] as any))) return false;
-    else if (op['$lt'] !== undefined && !((item[key] as any) < (op['$lt'] as any))) return false;
-    else if (op['$gte'] !== undefined && !((item[key] as any) >= (op['$gte'] as any))) return false;
-    else if (op['$lte'] !== undefined && !((item[key] as any) <= (op['$lte'] as any))) return false;
-    else if (op['$in'] !== undefined && !listOf(op['$in']).some((v) => item[key] == v)) return false; // :61
+      if (listOf(op['$nin']).some((m) => got == m)) return false; // :51-53
+    } else if (got === undefined) return false;
+    else if (op['$eq'] !== undefined && !(got == op['$eq'])) return false;
+    else if (op['$gt'] !== undefined && !((got as any) > (op['$gt'] as any))) return false;
+    else if (op['$lt'] !== undefined && !((got as any) < (op['$lt'] as any))) return false;
+    else if (op['$gte'] !== undefined && !((got as any) >= (op['$gte'] as any))) return false;
+    else if (op['$lte'] !== undefined && !((got as any) <= (op['$lte'] as any))) return false;
+    else if (op['$in'] !== undefined && !listOf(op['$in']).some((m) => got == m)) return false; // :61
     else if (op['$regex'] !== undefined) {
-      const a = item[key] + '';
+      const a = got + '';
       const regex = new RegExp(op['$regex'] as string, op['$case'] !== true ? 'i' : undefined);
       if (!regex.test(a)) return false;
     }

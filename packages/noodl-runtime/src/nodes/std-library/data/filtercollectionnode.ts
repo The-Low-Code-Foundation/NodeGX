@@ -34,6 +34,22 @@ type Filter = Record<string, PropertyFilter>;
 type SortSpec = Record<string, 1 | -1>;
 
 /**
+ * P109-S8-ARRAYFILTERPATH (ruled 2026-10-05, "Yes, exact name first"): the value a filter key names in a row. A row that
+ * HAS a field with that exact name gives it, dots and all; otherwise a dotted key is a path into nested objects
+ * (`owner.id` → `item.owner.id`), and a step that is not an object ends it as `undefined` (absent, as for any missing
+ * field). Measured before the ruling: 0 of 253 filter keys in 55 projects contain a dot, so no list reads differently.
+ */
+function fieldOf(item: Record<string, unknown>, key: string): unknown {
+  if (Object.prototype.hasOwnProperty.call(item, key) || !key.includes('.')) return item[key];
+  let at: unknown = item;
+  for (const step of key.split('.')) {
+    if (at === null || typeof at !== 'object') return undefined;
+    at = (at as Record<string, unknown>)[step];
+  }
+  return at;
+}
+
+/**
  * Tests one record's raw `data` against `filter`.
  *
  * `$neq` is checked first and is the only operator that tolerates a missing property —
@@ -44,24 +60,25 @@ type SortSpec = Record<string, 1 | -1>;
 function applyFilter(item: Record<string, unknown>, filter: Filter): boolean {
   for (const key in filter) {
     const op = filter[key];
+    const got = fieldOf(item, key);
 
     //check neq first, it's the only operation where the key can be undefined
     if (op['$neq'] !== undefined) {
-      if (!(item[key] != op['$neq'])) return false;
+      if (!(got != op['$neq'])) return false;
     } else if (op['$nin'] !== undefined) {
       // P109 (IW-010's "is in this list" gap): like `$neq`, a row without the property is not in the list.
-      if (listOf(op['$nin']).some((v) => item[key] == v)) return false;
-    } else if (item[key] === undefined) return false;
+      if (listOf(op['$nin']).some((m) => got == m)) return false;
+    } else if (got === undefined) return false;
     // The key does not exist, always return false
-    else if (op['$eq'] !== undefined && !(item[key] == op['$eq'])) return false;
-    else if (op['$gt'] !== undefined && !(item[key] > op['$gt'])) return false;
-    else if (op['$lt'] !== undefined && !(item[key] < op['$lt'])) return false;
-    else if (op['$gte'] !== undefined && !(item[key] >= op['$gte'])) return false;
-    else if (op['$lte'] !== undefined && !(item[key] <= op['$lte'])) return false;
-    else if (op['$in'] !== undefined && !listOf(op['$in']).some((v) => item[key] == v)) return false;
+    else if (op['$eq'] !== undefined && !(got == op['$eq'])) return false;
+    else if (op['$gt'] !== undefined && !(got > op['$gt'])) return false;
+    else if (op['$lt'] !== undefined && !(got < op['$lt'])) return false;
+    else if (op['$gte'] !== undefined && !(got >= op['$gte'])) return false;
+    else if (op['$lte'] !== undefined && !(got <= op['$lte'])) return false;
+    else if (op['$in'] !== undefined && !listOf(op['$in']).some((m) => got == m)) return false;
     else if (op['$regex'] !== undefined) {
       // Test if string matches regex
-      const a = item[key] + ''; // Convert to string
+      const a = got + ''; // Convert to string
       const regex = new RegExp(op['$regex'] as string, op['$case'] !== true ? 'i' : undefined);
 
       if (!regex.test(a)) return false;

@@ -72,7 +72,7 @@ Some ports are discovered at runtime from user code, parameters or connected com
 
 ## Ports at runtime
 
-The filter/sort/limit configuration creates its own input ports, pushed to the editor per instance: `filterFilter` (a stringlist of property names) generates, per property &lt;p>, `filterFilterType-<p>` (string/number/boolean), `filterFilterOp-<p>` (eq, neq, regex, in, nin for strings; eq, neq, lt, gt, gte, lte, in, nin for numbers), `filterFilterValue-<p>` (a connectable value — wire a text input here for live search) and, for regex, `filterFilterOption-case-<p>`. `filterSort` (stringlist) generates `filterSort-<p>` (ascending/descending) per property. `filterEnableLimit` (boolean) reveals `filterLimit` (default 10) and `filterSkip` (default 0). An authoring tool must set `filterFilter`/`filterSort` first and use exactly these generated names.
+The filter/sort/limit configuration creates its own input ports, pushed to the editor per instance: `filterFilter` (a stringlist of property names — a dotted name such as `owner.id` reads the field inside a field, unless a row has a field with that exact name) generates, per property &lt;p>, `filterFilterType-<p>` (string/number/boolean), `filterFilterOp-<p>` (eq, neq, regex, in, nin for strings; eq, neq, lt, gt, gte, lte, in, nin for numbers), `filterFilterValue-<p>` (a connectable value — wire a text input here for live search) and, for regex, `filterFilterOption-case-<p>`. `filterSort` (stringlist) generates `filterSort-<p>` (ascending/descending) per property. `filterEnableLimit` (boolean) reveals `filterLimit` (default 10) and `filterSkip` (default 0). An authoring tool must set `filterFilter`/`filterSort` first and use exactly these generated names.
 
 ## Patterns
 
