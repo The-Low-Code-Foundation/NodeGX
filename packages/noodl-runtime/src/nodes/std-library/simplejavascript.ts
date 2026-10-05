@@ -25,6 +25,7 @@ import {
 
 import Node = require('../../node');
 import { ScriptFileError, scriptAlias, scriptUsesOf, type ScriptFiles, type ScriptPath } from '../../scriptfiles';
+import { functionScriptPortNames } from '@nodegx/project-contract/function-ports';
 
 const JavascriptNodeParser = require('../../javascriptnodeparser');
 const { logJavaScriptNodeError } = require('../../utils');
@@ -942,10 +943,22 @@ function _parseScriptForErrorsAndPorts(
     });
   }
 
-  JavascriptNodeParser.parseAndAddPortsFromScript(script, ports, {
-    inputPrefix: 'in-',
-    outputPrefix: 'out-'
-  });
+  // P109 ISL-006: the Function reads its code with `@nodegx/project-contract/function-ports`, the one reader the
+  // editor, the door and the exporter import too (underscore signals, `Inputs["x"]` as an input, comments skipped).
+  // The Script node and the filters still use `JavascriptNodeParser.parseAndAddPortsFromScript`.
+  addFunctionScriptPorts(script, ports);
+}
+
+/** The ports a Function's code names, after the written lists: a name already there keeps the list's port. */
+function addFunctionScriptPorts(script: string, ports: Record<string, unknown>[]) {
+  const names = functionScriptPortNames(script);
+  const add = (name: string, plug: 'input' | 'output', type: string) => {
+    if (ports.some((p) => p.name === name && p.plug === plug)) return;
+    ports.push({ name, displayName: name.slice(name.indexOf('-') + 1), plug, type, group: plug === 'input' ? 'Inputs' : 'Outputs' });
+  };
+  for (const n of names.inputs) add('in-' + n, 'input', '*');
+  for (const n of names.signals) add('out-' + n, 'output', 'signal');
+  for (const n of names.outputs) add('out-' + n, 'output', '*');
 }
 
 const inputTypeEnums = [

@@ -29,8 +29,16 @@
  * this offers is a port that will exist, and a name it declines is one that
  * would silently not become a port.
  *
+ * 🔴 **P109 ISL-006: a Function no longer reads its code this way.** Ruling 3 fixed three quirks of this
+ * grammar for the Function node only (an `_` in a signal name, `Inputs["x"]` as an input, a name inside
+ * a comment), in `@nodegx/project-contract/function-ports`, which the runtime's Function node imports.
+ * {@link minePorts} reads a `JavaScriptFunction` with that module and everything else (the Script node)
+ * with the six patterns below, which still match `javascriptnodeparser.js`.
+ *
  * @module code-editor/utils
  */
+
+import { functionScriptPortNames } from '@nodegx/project-contract/function-ports';
 
 /** Names mined from a script, in first-appearance order. */
 export interface ScriptPorts {
@@ -79,17 +87,24 @@ function collect(source: string, pattern: RegExp, into: string[]): void {
 /**
  * Mine a script for the ports it declares by using them.
  *
- * Text-only, like the runtime's own parser: a name inside a string or a comment
- * is mined here exactly as the runtime mines it, and therefore exactly as it
- * becomes a port. Being *more* correct than the runtime would mean offering a
- * different set than the node actually grows.
+ * Text-only, like the runtime's own parser: a name is mined here exactly as the
+ * runtime mines it, and therefore exactly as it becomes a port. Being *more*
+ * correct than the runtime would mean offering a different set than the node
+ * actually grows. So `typeName` matters: a Function (`JavaScriptFunction`)
+ * skips comments and takes `_` in a signal name; a Script node does neither.
  */
-export function minePorts(code: string): ScriptPorts {
+export function minePorts(code: string, typeName?: string): ScriptPorts {
   const inputs: string[] = [];
   const outputs: string[] = [];
   const signals = new Set<string>();
 
   if (!code) return { inputs, outputs, signals };
+
+  if (typeName === 'JavaScriptFunction') {
+    const names = functionScriptPortNames(code);
+    for (const name of names.signals) signals.add(name);
+    return { inputs: names.inputs, outputs: [...names.signals, ...names.outputs], signals };
+  }
 
   collect(code, INPUT_DOT, inputs);
   collect(code, INPUT_BRACKET, inputs);

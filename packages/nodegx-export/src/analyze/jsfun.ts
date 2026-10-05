@@ -4,10 +4,12 @@
  * (input sourcing, output landing, run-model fit) lives in plan.ts; this module only ever
  * looks at the script text, exactly the way the runtime's own parsers do.
  *
- * The mining regexes are verbatim clones of the runtime's (javascriptnodeparser.js
- * `parseAndAddPortsFromScript`, expression.ts `parsePorts`) — the port set the runtime mints
- * is the port set this gate reasons about, so the two must not drift.
+ * A Function's ports are read with `@nodegx/project-contract/function-ports`, the reader the runtime's
+ * Function node imports (P109 ISL-006), and an Expression's with `expression-ports.ts`, a copy of
+ * the runtime's — the port set the runtime mints is the port set this gate reasons about.
  */
+
+import { functionScriptPortNames, stripScriptComments } from '@nodegx/project-contract/function-ports';
 
 import { NodeIR } from '../ir/types';
 import { EXPRESSION_MATH_ALIASES as RUNTIME_MATH_ALIASES, expressionPorts, expressionReferences } from './expression-ports';
@@ -82,29 +84,20 @@ export interface FunctionMinedPorts {
   signals: string[];
 }
 
-/** javascriptnodeparser.js `parseAndAddPortsFromScript`, as data. Signals win over values. */
+/**
+ * The Function's ports as data, from `@nodegx/project-contract/function-ports`. Signals win over values.
+ *
+ * One addition the runtime's reader does not make: `Outputs.x.send()` is a signal here. It is the documented second
+ * spelling (simplejavascript.ts attaches `.send` to every signal value), so it is seeded and cannot throw.
+ */
 export function functionMinedPortsOf(body: string): FunctionMinedPorts {
-  const collect = (patterns: RegExp[]): string[] => {
-    const names: string[] = [];
-    for (const pattern of patterns) {
-      for (const match of body.matchAll(pattern)) {
-        if (match[1] !== undefined && !names.includes(match[1])) names.push(match[1]);
-      }
-    }
-    return names;
-  };
-  const signals = collect([
-    /Outputs\.([A-Za-z0-9]+)\s*\(\s*\)/g,
-    /Outputs\s*\[\s*(?:'|")(.*)(?:'|")\s*\]\(\s*\)/g,
-    // Not in the runtime's miner, but `Outputs.x.send()` is the documented second spelling
-    // (simplejavascript.ts attaches `.send` to every signal value) — seeded so it cannot throw.
-    /Outputs\.([A-Za-z0-9_]+)\.send\s*\(/g
-  ]);
-  const outputs = collect([/Outputs\.([A-Za-z0-9_]+)/g, /Outputs\s*\[\s*\"([^\"]*)\"\s*\]/g]).filter(
-    (name) => !signals.includes(name) && name !== 'send'
-  );
-  const inputs = collect([/Inputs\.([A-Za-z0-9_]+)/g, /Inputs\s*\[\s*(?:'|")(.*)(?:'|")\s*\]/g]);
-  return { inputs, outputs, signals };
+  const names = functionScriptPortNames(body);
+  const signals = [...names.signals];
+  for (const match of stripScriptComments(body).matchAll(/Outputs\.([A-Za-z0-9_]+)\.send\s*\(/g)) {
+    if (!signals.includes(match[1])) signals.push(match[1]);
+  }
+  const outputs = names.outputs.filter((name) => !signals.includes(name) && name !== 'send');
+  return { inputs: [...names.inputs], outputs, signals };
 }
 
 /**

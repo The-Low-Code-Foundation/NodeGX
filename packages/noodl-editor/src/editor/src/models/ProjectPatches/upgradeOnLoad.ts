@@ -15,6 +15,12 @@
  */
 
 import {
+  applyFunctionPortFixUp,
+  describeFunctionPortFixUp,
+  type FunctionPortProjectLike
+} from '@nodegx/project-contract/function-ports';
+
+import {
   convertTextStylesToTokens,
   describeTextStyleConversion,
   FONT_MODULE_DIR,
@@ -61,6 +67,15 @@ const UPGRADES: { title: string; run: (content: TextStyleProjectLike) => { lines
                 ]
         };
       }
+    },
+    {
+      // P109 ISL-006 AC10 (ruled "Fix it, fix up old projects", 2026-10-05). A Function's code reader no longer
+      // makes a port from a name inside a comment; a port an old project wired that way goes onto the list instead.
+      title: 'Wired Function ports kept',
+      run: (content) => ({
+        lines: describeFunctionPortFixUp(applyFunctionPortFixUp(content as FunctionPortProjectLike)),
+        files: []
+      })
     }
   ];
 

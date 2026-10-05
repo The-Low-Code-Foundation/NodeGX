@@ -1,6 +1,6 @@
 # ISL-006 — A Function says what its ports are
 
-**Status: 🟡 s19 (2026-10-05): slice 1 built — AC1, AC3, AC4 (D80 closed), AC6, AC7 met; AC2 met on the door and a deployed page (the editor-panel half owed); all three rulings in (1 "List adds, code still mines"; 2 "Not now"; 3 "Fix all three", re-asked once with corrected numbers, plus "fix up old projects"). Slice 2 (AC9, AC10: the reader's three fixes in six copies and the on-open fix-up) not built; AC8 handed to P108 IW-010.** **s18 status:** 🟢 ruled, not built — ruling 1 "List adds, code still mines"; census 1,210 Functions, 35 with a list, 4 by variable. **Earlier status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
+**Status: 🟡 s19 (2026-10-05): slices 1 and 2 built — AC1, AC3, AC4 (D80 closed), AC5, AC6, AC7, AC9 met; AC10 met in its logic (real-project copy) and its `upgradeOnLoad` entry; AC2 met on the door and a deployed page. Owed, one editor session: AC2's panel half and AC10 opened live in the editor (the toast, the save). All three rulings in (1 "List adds, code still mines"; 2 "Not now"; 3 "Fix all three", re-asked once with corrected numbers, plus "fix up old projects"). AC8 handed to P108 IW-010.** **s18 status:** 🟢 ruled, not built — ruling 1 "List adds, code still mines"; census 1,210 Functions, 35 with a list, 4 by variable. **Earlier status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
 **Re-scoped s8 (2026-10-03), against "Native nodes first" and ISL-007:** its largest consumer goes. `Translate words`
 (696 outputs) is replaced by the i18next add-on (ISL-007, built s8) and deleted in [IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md)
 AC4. What is left is the general case: a Function whose outputs come from a list (`Outputs[key] = …`) mints none, and a
@@ -205,5 +205,45 @@ read in Chrome; 8/8, no console errors). One Function, four outputs: `declared` 
   projects"** (recommended this time). Quirks 1 and 2 unchanged by the correction: 0 underscore signals anywhere; `Inputs["x"]`
   0 in our corpus and 8 in old projects, where the fix only makes the port a real input.
 
-**Next (slice 2):** AC9 in the six copies with one shared row set in every agreement spec (URL `//`, regex literal ending `\//`,
-nested template literal, block comment), then AC10's on-open fix-up, then the editor-panel half of AC2.
+**Slice 2, built the same session (AC9, AC10):**
+
+- **One reader, in `@nodegx/project-contract/function-ports.ts`** (new): `stripScriptComments` (strings, nested template
+  literals and regular expressions kept: a `/` starts a regex after an operator, a bracket or a keyword), the Function's
+  `functionScriptPortNames` with ruling 3's fixes, the old reader frozen as `legacyFunctionScriptPortNames`, and the fix-up
+  (`plan` / `apply` / `describe`). Imported by the runtime's Function node (`simplejavascript.ts`), the door
+  (`cloudDynamicPorts.ts`, and through it `functionPorts.ts`), the exporter (`jsfun.ts`, keeping its `.send()` extra) and the
+  code editor's completion for a `JavaScriptFunction` (`scriptPorts.ts` via `unionPorts`, by the open node's `typeName`).
+  🔴 **The Function only.** The Script node, Query Records' JavaScript filter, the cloud Aggregate node and the deprecated
+  collection node call the same old `parseAndAddPortsFromScript`; none was censused or ruled, so it is unchanged for them.
+  `notation.ts` needs nothing: it writes an underscored signal as `Outputs["Done_1"]()`, which both readers mine as a signal.
+  `scripts/library/render-check.js` (a render harness's guess at exported signal ports, Function and Script nodes) is left:
+  0 underscore signals in the library.
+- **Bracket name order:** splitting `'…'` and `"…"` into two patterns first returned `Inputs["a"] + Inputs['b']` as b, a; one
+  alternation per bracket form keeps the old order (dot forms first, then brackets as they appear).
+- **The fix-up (AC10)** is an entry in the editor's `upgradeOnLoad` (P100 UPG-002's mechanism: backup, toast, saved on open)
+  titled "Wired Function ports kept", and runs in memory in the exporter's `parseProject` beside the run-on-value-change settle,
+  so an export keeps the wire the editor keeps. A wired `in-`/`out-` name the old reader made and the new one does not, on
+  no list and saved on no node, becomes a list row; a signal keeps `outtype-<name>: signal`. Idempotent; v2 `children` id
+  strings are skipped.
+- **Graded on copies of real projects:** SuntappedX: 2,140 wired Function ends alive under the old reader; the new reader alone
+  would lose 21; the fix-up writes 21 names on 12 Functions (3 signals); after it 2,140 alive, 0 lost; a second pass writes 0.
+  Control hsseq-test-main (it holds 7 of the `Inputs["x"]` Functions): 492 alive, 0 lost, 0 writes.
+- **Specs:** `tests-unit/isl-006/function-ports.test.ts` 30 (the stripper's nine cases and never-throws, the three fixes, the
+  frozen reader against the runtime's real parser, the fix-up incl. v2 shape, suffixed ids, sentences, and `upgradeOnLoad`
+  with its no-section control). FIX-007 now pins the mapping and that the old and new readers differ on exactly the three
+  ruled rows (24). sb-017's row reads the ruling off the runtime's own Function module: `out-do_it:output:signal`,
+  `in-first name:input:*`, no `in-commented`, `in-id` past a URL. core-ui `scriptPorts` +4 (a Function vs a Script node).
+  The exporter spec compares `functionMinedPortsOf` with the shared reader, `.send()` apart. **Sabotage:** the comment strip
+  removed → 8 red across isl-006, fix-007 and sb-017; restored by `cp`, `cmp` clean.
+- **Blast radius:** runtime 14 Function suites 181/181; core-ui code-editor 21 suites 392/392 (+4); editor tests-unit sets
+  green; `noodl-mcp` 13 suites: the same 5 reds as slice 1 (DEF-038 ×2 pre-existing, TPL-011 ×3 on `in-id`).
+  `nodegx-export` full suite: 5 red in 3 suites (`hls006-every-listener`, `hls001-corpus-identity` 52→53 projects and every
+  README, `sse` §F ledger floor), the same 5 with my two exporter files reverted to HEAD: not this change. `tsc --noEmit`:
+  editor 0, runtime 0, exporter 0, project-contract 0, `noodl-mcp` the same 10, core-ui 45, all in editor files its tsc also
+  compiles.
+- **Catalog:** `catalog:check` went red on slice 2. `node-catalog.json` now has the bracket input as `plug: "input"` and the
+  Run On Value Change port every real input gets. Regenerated (mine, by that diff); the catalog text says the reader skips
+  comments. `catalog:check`, `catalog:merge:check`, `docs:nodes:check` exit 0.
+
+**Next:** one editor session: AC2's panel half (three typed outputs declared in the panel, the node shows them) and AC10
+opened live on a copy of SuntappedX (the toast reads "Wired Function ports kept", the project saves, the 21 wires stay solid).

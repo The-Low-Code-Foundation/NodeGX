@@ -16641,7 +16641,7 @@
         "patterns": [
           {
             "pattern": "in-<functionScript>",
-            "plug": "inputs",
+            "plug": "input",
             "variables": {
               "functionScript": "a name read as `Inputs.<name>` or assigned as `Outputs.<name>` in the `functionScript` parameter"
             },
@@ -16686,6 +16686,16 @@
             },
             "valueType": "enum",
             "example": "outtype-Vb sp"
+          },
+          {
+            "pattern": "runOnChange-in-<functionScript>",
+            "plug": "input",
+            "variables": {
+              "functionScript": "a name read as `Inputs.<name>` or assigned as `Outputs.<name>` in the `functionScript` parameter"
+            },
+            "group": "Run On Value Change",
+            "valueType": "boolean",
+            "example": "runOnChange-in-Ta1"
           },
           {
             "pattern": "runOnChange-in-<scriptInput>",

@@ -29,6 +29,11 @@ import {
   type RunOnChangeWrite
 } from '@nodegx/project-contract/run-on-value-change-migration';
 import {
+  applyFunctionPortFixUp,
+  type FunctionPortConnectionLike,
+  type FunctionPortNodeLike
+} from '@nodegx/project-contract/function-ports';
+import {
   Catalog,
   CatalogIndex,
   EXECUTION_REVEALED_TYPES,
@@ -358,6 +363,16 @@ function parseComponent(
   settled?.push(
     ...settleComponent(String(meta.path ?? meta.name ?? ''), rawNodes, connectionsFile.connections ?? [])
   );
+  // P109 ISL-006 AC10: the editor's on-open fix-up, in memory like the settle above. A Function's reader no longer
+  // makes a port from a name in a comment; a wired one goes onto the list, so the export keeps the wire the editor keeps.
+  applyFunctionPortFixUp({
+    components: [
+      {
+        name: String(meta.path ?? meta.name ?? ''),
+        graph: { roots: rawNodes as unknown as FunctionPortNodeLike[], connections: (connectionsFile.connections ?? []) as FunctionPortConnectionLike[] }
+      }
+    ]
+  });
 
   const nodes = rawNodes.map((raw) => parseNode(raw, catalog, styles));
   const nodeById = new Map(rawNodes.map((raw) => [raw.id, raw]));

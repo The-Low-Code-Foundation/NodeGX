@@ -195,7 +195,7 @@ function mergeDirection(
  * and is why the parameter is nullable rather than defaulted.
  */
 export function unionPorts(node: OpenNodeFact | null | undefined, code: string): UnionPorts {
-  const mined = minePorts(code);
+  const mined = minePorts(code, node?.typeName);
 
   return {
     inputs: mergeDirection(node ? node.declaredInputs : [], mined.inputs, () => MINED_TYPE),
