@@ -1,6 +1,6 @@
 # TPL-008-PJ — Planning folds into the todo list as a Projects tab
 
-**Opened 2026-10-05.** Status: 🟢 **s1 live (`index-6282344e…`); s2 (Planning's editing, back) built, gated and driven on both viewers — see §8 s2.** Mockup approved:
+**Opened 2026-10-05.** Status: 🟢 **s2 live on todo.digitalbricks.io (`index-57f08dc7…`, 2026-10-05) — Planning's editing back: the money popup, change the move, add a task, edit the project, tasks ↔ projects. AC8 (Richard's mornings) and the Change-the-move device question are his.** Mockup approved:
 <https://claude.ai/artifact/UkHvQfFKeybQTojKVQEQm3> (Richard: *"Yeah I like it, let's do that redesign of the todo app and
 push it, and retire the planning template for now (not delete, just set it aside)"*).
 
@@ -185,4 +185,14 @@ Built (all in `tpl008Components.ts`, § *TPL-008-PJ*):
 Gates: tpl008 Template/Demo/Recurring **97/97** (+11); `tpl008-projects-drive` **15/15 on the repo viewer and 15/15 on
 the box's viewer** (+5 sections: §3b change by hand + calendar, §3c add a task, §3d edit project, §3e both ways, §8 the
 money popup; the popup at 390 wide with no sideways scroll), 0 console errors; the other tpl008 drives **50/50**.
+
+**Shipped (s2).** Built as §8 s1 says (box's viewer sha `57e1cb07…`, `nodegx.security.json` out, `apply-pwa.js`) into
+`~/vscode_projects/nodegx-template-crm/ship-2026-10-05-projects-s2/todo-host`; backup on the box
+`/srv/todo/site.before-pj-s2-2026-10-05`; rsynced with `--exclude nodegx.security.json --exclude pwa/vapid-public-key.txt`.
+Read back: the site serves `index-57f08dc7a5e88f5e.js`, the viewer's sha is unchanged, the reminders key answers 200, and
+the new bundle carries *Money in and out*. The deploy's wire check reports 3 wires, all false
+(`P78-TPL008PJ-NESTEDSIGNAL`; the drive runs all three). Commits `609030d83`, `cbaa01eca`.
+
+**Owed:** Richard — which device *Change the move* would not edit on (not reproduced in Chrome on the box's viewer), and
+his mornings (AC8). Still from s1: Planning off the shelf and the homepage, `planning.digitalbricks.io` → the todo list.
 
