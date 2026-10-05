@@ -1,0 +1,49 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2ae6febc-f841-5951-8e75-58a6b965c81e",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mbIn",
+      "type": "Component Inputs",
+      "label": "The day",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "height",
+          "plug": "output",
+          "type": "*"
+        },
+        {
+          "name": "mark",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 290,
+      "y": 40
+    },
+    {
+      "id": "mbBar",
+      "type": "Group",
+      "label": "The bar",
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "borderRadius": "var(--radius-sm)"
+      },
+      "x": 40,
+      "y": 40
+    }
+  ],
+  "visualRoots": [
+    "mbBar"
+  ]
+}

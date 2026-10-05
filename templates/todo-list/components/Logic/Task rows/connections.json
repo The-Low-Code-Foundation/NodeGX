@@ -22,6 +22,12 @@
       "toProperty": "in-selectedId"
     },
     {
+      "fromId": "rwIn",
+      "fromProperty": "projectNames",
+      "toId": "rwBuild",
+      "toProperty": "in-projectNames"
+    },
+    {
       "fromId": "rwBuild",
       "fromProperty": "out-openRows",
       "toId": "rwOut",

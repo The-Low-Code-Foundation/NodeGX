@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ce5b5055-de6f-5f12-8e8b-a3a018113b2a",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "npIn",
+      "fromProperty": "open",
+      "toId": "npRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "projectName",
+      "toId": "npLook",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "npLook",
+      "fromProperty": "out-head",
+      "toId": "npHead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "npTitle",
+      "fromProperty": "onTextChanged",
+      "toId": "npCheck",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "npDue",
+      "fromProperty": "onTextChanged",
+      "toId": "npCheck",
+      "toProperty": "in-due"
+    },
+    {
+      "fromId": "npSave",
+      "fromProperty": "onClick",
+      "toId": "npCheck",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npTitle",
+      "fromProperty": "onEnter",
+      "toId": "npCheck",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "npCheck",
+      "fromProperty": "out-error",
+      "toId": "npError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "npCheck",
+      "fromProperty": "out-hasError",
+      "toId": "npError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "projectId",
+      "toId": "npSaveMove",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "projectName",
+      "toId": "npSaveMove",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "position",
+      "toId": "npSaveMove",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "npTitle",
+      "fromProperty": "onTextChanged",
+      "toId": "npSaveMove",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "npWho",
+      "fromProperty": "onTextChanged",
+      "toId": "npSaveMove",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "npCheck",
+      "fromProperty": "out-deadline",
+      "toId": "npSaveMove",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "npCheck",
+      "fromProperty": "out-go",
+      "toId": "npSaveMove",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "npSaveMove",
+      "fromProperty": "done",
+      "toId": "npTitle",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "npSkip",
+      "fromProperty": "onClick",
+      "toId": "npTitle",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "npSaveMove",
+      "fromProperty": "done",
+      "toId": "npWho",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "npSkip",
+      "fromProperty": "onClick",
+      "toId": "npWho",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "npSaveMove",
+      "fromProperty": "done",
+      "toId": "npDue",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "npSkip",
+      "fromProperty": "onClick",
+      "toId": "npDue",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "npSaveMove",
+      "fromProperty": "done",
+      "toId": "npOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "npSkip",
+      "fromProperty": "onClick",
+      "toId": "npOut",
+      "toProperty": "skip"
+    }
+  ]
+}

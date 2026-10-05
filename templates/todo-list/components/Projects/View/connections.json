@@ -1,0 +1,331 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b4fdc018-1660-5eb4-831b-f283a33285c6",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pvIn",
+      "fromProperty": "balanceText",
+      "toId": "pvMoney",
+      "toProperty": "balanceText"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "balanceWhen",
+      "toId": "pvMoney",
+      "toProperty": "balanceWhen"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "bars",
+      "toId": "pvMoney",
+      "toProperty": "bars"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "lowText",
+      "toId": "pvMoney",
+      "toProperty": "lowText"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "lowColor",
+      "toId": "pvMoney",
+      "toProperty": "lowColor"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "incomeRows",
+      "toId": "pvMoney",
+      "toProperty": "incomeRows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "hasIncome",
+      "toId": "pvMoney",
+      "toProperty": "hasIncome"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "items",
+      "toId": "pvMoney",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "marks",
+      "toId": "pvMoney",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projects",
+      "toId": "pvMoney",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pvMoney",
+      "fromProperty": "changed",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "rows",
+      "toId": "pvList",
+      "toProperty": "rows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "noProjects",
+      "toId": "pvEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "projectId",
+      "toId": "pvOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "toggle",
+      "toId": "pvOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "projectId",
+      "toId": "cmdMove",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "projectName",
+      "toId": "cmdMove",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "taskId",
+      "toId": "cmdMove",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "mode",
+      "toId": "cmdMove",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "title",
+      "toId": "cmdMove",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "waitingOn",
+      "toId": "cmdMove",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "deadline",
+      "toId": "cmdMove",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "nextPosition",
+      "toId": "cmdMove",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "save",
+      "toId": "cmdMove",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdMove",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "items",
+      "toId": "cmdTick",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "items",
+      "toId": "cmdSent",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "marks",
+      "toId": "cmdTick",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "marks",
+      "toId": "cmdSent",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projects",
+      "toId": "cmdTick",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projects",
+      "toId": "cmdSent",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "billKey",
+      "toId": "cmdTick",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "tick",
+      "toId": "cmdTick",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdTick",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "sendKey",
+      "toId": "cmdSent",
+      "toProperty": "key"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "sent",
+      "toId": "cmdSent",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdSent",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvMonthly",
+      "fromProperty": "onClick",
+      "toId": "pvRepeat",
+      "toProperty": "to-monthly"
+    },
+    {
+      "fromId": "pvOnce",
+      "fromProperty": "onClick",
+      "toId": "pvRepeat",
+      "toProperty": "to-once"
+    },
+    {
+      "fromId": "pvRepeat",
+      "fromProperty": "monthlyBg",
+      "toId": "pvMonthly",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pvRepeat",
+      "fromProperty": "onceBg",
+      "toId": "pvOnce",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "pvName",
+      "fromProperty": "onTextChanged",
+      "toId": "cmdAddProject",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pvAmount",
+      "fromProperty": "onTextChanged",
+      "toId": "cmdAddProject",
+      "toProperty": "amount"
+    },
+    {
+      "fromId": "pvWhen",
+      "fromProperty": "onTextChanged",
+      "toId": "cmdAddProject",
+      "toProperty": "date"
+    },
+    {
+      "fromId": "pvRepeat",
+      "fromProperty": "currentState",
+      "toId": "cmdAddProject",
+      "toProperty": "repeat"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projectPosition",
+      "toId": "cmdAddProject",
+      "toProperty": "position"
+    },
+    {
+      "fromId": "pvAddButton",
+      "fromProperty": "onClick",
+      "toId": "cmdAddProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "error",
+      "toId": "pvAddError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "hasError",
+      "toId": "pvAddError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "done",
+      "toId": "pvName",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "done",
+      "toId": "pvAmount",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "done",
+      "toId": "pvWhen",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "cmdAddProject",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvHide",
+      "fromProperty": "onClick",
+      "toId": "pvOut",
+      "toProperty": "hide"
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "84640d79-7159-5a6f-8f2b-d4f780d083c7",
+  "name": "View",
+  "path": "/Projects/View",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The Projects tab: the money, then every project with its next move (Your move, Waiting on someone, Quiet), a box to add a project, and Hide this tab. Toggle (with Project Id) says a project was pressed; Changed says something was written."
+}

@@ -469,8 +469,51 @@ function demoHeader(): Tpl008Component {
 
 /** The page's sign-in machinery, which the demo has no use for. Named, so drift throws. */
 const PAGE_AUTH_NODES = ['tdUser', 'tdAuth', 'tdToSignIn', 'tdLogOut'];
-/** s1–s9: 7. TPL-008-RC: + the link to Today (read once signed in) and the clock's wake (check who you are, then load). */
-const PAGE_AUTH_WIRES = 9;
+/**
+ * s1–s9: 7. TPL-008-RC: + the link to Today (read once signed in) and the clock's wake (check who you are, then load).
+ * TPL-008-PJ: + the projects, read once signed in.
+ */
+const PAGE_AUTH_WIRES = 10;
+
+/**
+ * TPL-008-PJ — **the demo has no projects.** `Logic/Projects` reads four backend collections
+ * through the records API; here it keeps its interface and says, once, that there is nothing:
+ * no tab, no way in, no names on tasks. The tab's own components stay the template's — with no
+ * tab they are never drawn, so nothing in them ever runs.
+ */
+export const DEMO_PROJECTS_SCRIPT = `Outputs.projectNames = {};
+Outputs.showTab = false;
+Outputs.showTurnOn = false;
+Outputs.noProjects = true;
+Outputs.projectPosition = 1;
+Outputs.nextPosition = 1;
+Outputs.balanceText = '';
+Outputs.balanceWhen = '';
+Outputs.bars = [];
+Outputs.lowText = '';
+Outputs.lowColor = '';
+Outputs.incomeRows = [];
+Outputs.hasIncome = false;
+Outputs.rows = [];
+Outputs.projects = [];
+Outputs.items = [];
+Outputs.marks = [];
+Outputs.readings = [];`;
+
+function demoProjects(): Tpl008Component {
+  const backend = source(C.projectsLogic);
+  const nodes = backend.nodes as Node[];
+  const ins = nodes.find((n) => n.type === 'Component Inputs');
+  const outs = nodes.find((n) => n.type === 'Component Outputs');
+  if (!ins || !outs) throw new Error('tpl008Demo: Logic/Projects has no interface nodes');
+  const values = (outs.ports ?? []).filter((p) => p.type !== 'signal').map((p) => p.name);
+  return {
+    ...backend,
+    description: 'The demo has no projects: the same interface as the template’s, saying once that there is nothing — no tab, no way in.',
+    nodes: [ins, outs, { id: 'pjNone', type: FUNCTION, label: 'No projects in the demo', parameters: { functionScript: DEMO_PROJECTS_SCRIPT } }],
+    connections: values.map((n) => ({ fromId: 'pjNone', fromProperty: `out-${n}`, toId: outs.id, toProperty: n }))
+  };
+}
 
 function demoPage(): Tpl008Component {
   const backend = withBrowserWrites(source(C.pageTodo));
@@ -528,6 +571,7 @@ export const TPL008_DEMO_COMPONENTS: ReadonlyArray<Tpl008Component> = TPL008_COM
     const name = `/${c.path}`;
     let out: Tpl008Component;
     if (name === C.todoData) out = demoTodoData();
+    else if (name === C.projectsLogic) out = demoProjects();
     else if (name === C.header) out = demoHeader();
     else if (name === C.pageTodo) out = demoPage();
     else out = withBrowserWrites(c);

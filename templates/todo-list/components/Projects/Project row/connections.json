@@ -1,0 +1,403 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8480223d-a86f-5ece-8967-2d50e10b6e83",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "prIn",
+      "fromProperty": "isHeading",
+      "toId": "prLook",
+      "toProperty": "in-isHeading"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "name",
+      "toId": "prLook",
+      "toProperty": "in-name"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hasMove",
+      "toId": "prLook",
+      "toProperty": "in-hasMove"
+    },
+    {
+      "fromId": "prLook",
+      "fromProperty": "out-showHeading",
+      "toId": "prHeadingBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prLook",
+      "fromProperty": "out-showProject",
+      "toId": "prRoot",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prLook",
+      "fromProperty": "out-doneHead",
+      "toId": "prDoneHead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prLook",
+      "fromProperty": "out-changeHead",
+      "toId": "prChHead",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "heading",
+      "toId": "prHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "name",
+      "toId": "prName",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "moneyText",
+      "toId": "prMoney",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "moneyColor",
+      "toId": "prMoney",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "moveText",
+      "toId": "prMove",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "moveColor",
+      "toId": "prMove",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "metaText",
+      "toId": "prMeta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hasMeta",
+      "toId": "prMeta",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "metaColor",
+      "toId": "prMeta",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "edge",
+      "toId": "prRoot",
+      "toProperty": "borderLeftColor"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "open",
+      "toId": "prDetail",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "facts",
+      "toId": "prFacts",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hasFacts",
+      "toId": "prFacts",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "history",
+      "toId": "prHistory",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hasHistory",
+      "toId": "prHistory",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "doneLabel",
+      "toId": "prDone",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hasMove",
+      "toId": "prChange",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hasBill",
+      "toId": "prTick",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "billLabel",
+      "toId": "prTick",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "hasSend",
+      "toId": "prSend",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "sendLabel",
+      "toId": "prSend",
+      "toProperty": "label"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "moveTitle",
+      "toId": "prChTitle",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "waitingRaw",
+      "toId": "prChWho",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "deadlineRaw",
+      "toId": "prChDue",
+      "toProperty": "startValue"
+    },
+    {
+      "fromId": "prHead",
+      "fromProperty": "onClick",
+      "toId": "prOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "prDone",
+      "fromProperty": "onClick",
+      "toId": "prMode",
+      "toProperty": "to-done"
+    },
+    {
+      "fromId": "prChange",
+      "fromProperty": "onClick",
+      "toId": "prMode",
+      "toProperty": "to-change"
+    },
+    {
+      "fromId": "prDoneCancel",
+      "fromProperty": "onClick",
+      "toId": "prMode",
+      "toProperty": "to-none"
+    },
+    {
+      "fromId": "prChCancel",
+      "fromProperty": "onClick",
+      "toId": "prMode",
+      "toProperty": "to-none"
+    },
+    {
+      "fromId": "prMode",
+      "fromProperty": "at-done",
+      "toId": "prDoneBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prMode",
+      "fromProperty": "at-change",
+      "toId": "prChBox",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prMode",
+      "fromProperty": "currentState",
+      "toId": "prSubmit",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "taskId",
+      "toId": "prSubmit",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "prDoneTitle",
+      "fromProperty": "onTextChanged",
+      "toId": "prSubmit",
+      "toProperty": "in-doneTitle"
+    },
+    {
+      "fromId": "prDoneWho",
+      "fromProperty": "onTextChanged",
+      "toId": "prSubmit",
+      "toProperty": "in-doneWho"
+    },
+    {
+      "fromId": "prDoneDue",
+      "fromProperty": "onTextChanged",
+      "toId": "prSubmit",
+      "toProperty": "in-doneDue"
+    },
+    {
+      "fromId": "prChTitle",
+      "fromProperty": "onTextChanged",
+      "toId": "prSubmit",
+      "toProperty": "in-chTitle"
+    },
+    {
+      "fromId": "prChWho",
+      "fromProperty": "onTextChanged",
+      "toId": "prSubmit",
+      "toProperty": "in-chWho"
+    },
+    {
+      "fromId": "prChDue",
+      "fromProperty": "onTextChanged",
+      "toId": "prSubmit",
+      "toProperty": "in-chDue"
+    },
+    {
+      "fromId": "prDoneSave",
+      "fromProperty": "onClick",
+      "toId": "prSubmit",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "prChSave",
+      "fromProperty": "onClick",
+      "toId": "prSubmit",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-error",
+      "toId": "prError",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-hasError",
+      "toId": "prError",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-mode",
+      "toId": "prOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-title",
+      "toId": "prOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-waitingOn",
+      "toId": "prOut",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-deadline",
+      "toId": "prOut",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-go",
+      "toId": "prOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-go",
+      "toId": "prMode",
+      "toProperty": "to-none"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-go",
+      "toId": "prDoneTitle",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-go",
+      "toId": "prDoneWho",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "prSubmit",
+      "fromProperty": "out-go",
+      "toId": "prDoneDue",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "projectId",
+      "toId": "prOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "name",
+      "toId": "prOut",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "taskId",
+      "toId": "prOut",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "billKey",
+      "toId": "prOut",
+      "toProperty": "billKey"
+    },
+    {
+      "fromId": "prIn",
+      "fromProperty": "sendKey",
+      "toId": "prOut",
+      "toProperty": "sendKey"
+    },
+    {
+      "fromId": "prTick",
+      "fromProperty": "onClick",
+      "toId": "prOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "prSend",
+      "fromProperty": "onClick",
+      "toId": "prOut",
+      "toProperty": "sent"
+    }
+  ]
+}

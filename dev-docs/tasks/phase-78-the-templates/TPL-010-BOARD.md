@@ -9,6 +9,14 @@ household cost or a real rate. The template ships with the mockup's invented dat
 Founder A, The Jazz Room …). Real numbers exist only in the hosted app's database, which is private to its creator and never
 leaves nexus-1.
 
+> ### ⏸ 2026-10-05 — PLANNING IS SET ASIDE, NOT DELETED
+>
+> Richard: *"I don't really like the planning app and I'm not using it … retire the planning template for now (not
+> delete, just set it aside)"*. Its projects, next moves and money became the todo list's **Projects tab**
+> ([TPL-008-PJ](TPL-008-PJ-THE-PROJECTS-TAB.md)); the week of hour blocks and the budgets did not move. The source is
+> committed (`9b9d1e90c`) and the data stays in the backend. Every row below stops here; TPL-010-MCP is not started.
+> Still to do on the box: the shelf row, the homepage card, the planning.digitalbricks.io redirect (TPL-008-PJ §6).
+
 ## The board
 
 | Task | What a person can check when it is done | Status |

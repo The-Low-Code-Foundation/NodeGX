@@ -1,0 +1,91 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e2478e40-dc18-5053-8329-460a4feb9350",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "plIn",
+      "fromProperty": "rows",
+      "toId": "plEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-toggle",
+      "toId": "plOut",
+      "toProperty": "toggle"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-save",
+      "toId": "plOut",
+      "toProperty": "save"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-tick",
+      "toId": "plOut",
+      "toProperty": "tick"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-sent",
+      "toId": "plOut",
+      "toProperty": "sent"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-projectId",
+      "toId": "plOut",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-projectName",
+      "toId": "plOut",
+      "toProperty": "projectName"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-taskId",
+      "toId": "plOut",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-mode",
+      "toId": "plOut",
+      "toProperty": "mode"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-title",
+      "toId": "plOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-waitingOn",
+      "toId": "plOut",
+      "toProperty": "waitingOn"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-deadline",
+      "toId": "plOut",
+      "toProperty": "deadline"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-billKey",
+      "toId": "plOut",
+      "toProperty": "billKey"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-sendKey",
+      "toId": "plOut",
+      "toProperty": "sendKey"
+    }
+  ]
+}

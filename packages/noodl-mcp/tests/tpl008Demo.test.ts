@@ -84,6 +84,8 @@ beforeAll(async () => {
 });
 
 const COMMANDS = TPL008_COMPONENTS.filter((c) => c.path.startsWith('Commands/')).map((c) => `/${c.path}`);
+/** TPL-008-PJ — the Projects tab's writes: in the demo they say its own "did not save" sentence, and are never reached. */
+const PROJECT_WRITES = [C.saveMove, C.addProject, C.recordBalance, C.markMoney];
 
 // ── §1 ─────────────────────────────────────────────────────────────────────
 
@@ -129,7 +131,7 @@ describe('§2 nothing in it talks to a backend', () => {
 
 describe('§3 it is in step with the template', () => {
   it('changes exactly the components that write, read or sign in', () => {
-    expect([...DEMO_CHANGED].sort()).toEqual([C.header, C.todoData, C.pageTodo, C.writeHistory, ...COMMANDS].sort());
+    expect([...DEMO_CHANGED].sort()).toEqual([C.header, C.todoData, C.projectsLogic, C.pageTodo, C.writeHistory, ...COMMANDS, ...PROJECT_WRITES].sort());
   });
 
   it('every interface is the template’s, except Reset demo and the reset it sends', () => {
@@ -190,6 +192,11 @@ describe('§3 it is in step with the template', () => {
     }
     expect(missing.sort()).toEqual(
       [
+        // TPL-008-PJ — the demo has no projects: Logic/Projects is one Function saying so.
+        '/Logic/Projects pjCarry',
+        '/Logic/Projects pjLoad',
+        '/Logic/Projects pjProblem',
+        '/Logic/Projects pjRows',
         '/Logic/Todo data dtActions',
         '/Logic/Todo data dtChecks',
         '/Logic/Todo data dtEvents',

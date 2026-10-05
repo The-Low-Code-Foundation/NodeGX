@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "b63c7fef-0c73-543b-81a7-63bfdf9f115c",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SavenextmoIn",
+      "fromProperty": "projectId",
+      "toId": "SavenextmoWrite",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "SavenextmoIn",
+      "fromProperty": "projectName",
+      "toId": "SavenextmoWrite",
+      "toProperty": "in-projectName"
+    },
+    {
+      "fromId": "SavenextmoIn",
+      "fromProperty": "taskId",
+      "toId": "SavenextmoWrite",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "SavenextmoIn",
+      "fromProperty": "mode",
+      "toId": "SavenextmoWrite",
+      "toProperty": "in-mode"
+    },
+    {
+      "fromId": "SavenextmoIn",
+      "fromProperty": "title",
+      "toId": "SavenextmoWrite",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "SavenextmoIn",
+      "fromProperty": "waitingOn",
+      "toId": "SavenextmoWrite",
+      "toProperty": "in-waitingOn"
+    },
+    {
+      "fromId": "SavenextmoIn",
+      "fromProperty": "deadline",
+      "toId": "SavenextmoWrite",
+      "toProperty": "in-deadline"
+    },
+    {
+      "fromId": "SavenextmoIn",
+      "fromProperty": "position",
+      "toId": "SavenextmoWrite",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "SavenextmoIn",
+      "fromProperty": "do",
+      "toId": "SavenextmoWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SavenextmoWrite",
+      "fromProperty": "out-done",
+      "toId": "SavenextmoOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SavenextmoWrite",
+      "fromProperty": "out-failed",
+      "toId": "SavenextmoProblem",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -64,6 +64,8 @@
       "children": [
         "tdHeader",
         "tdProblem",
+        "tdPrompt",
+        "tdProjectsView",
         "tdMain"
       ],
       "x": 160,
@@ -84,6 +86,43 @@
       "parent": "tdShell",
       "x": 220,
       "y": 520
+    },
+    {
+      "id": "tdPrompt",
+      "type": "/Projects/Next move prompt",
+      "label": "What next for the project",
+      "parent": "tdShell",
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "tdProjectsView",
+      "type": "Group",
+      "label": "Projects view",
+      "parent": "tdShell",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "mounted": false
+      },
+      "children": [
+        "tdProjectsPane"
+      ],
+      "x": 220,
+      "y": 760
+    },
+    {
+      "id": "tdProjectsPane",
+      "type": "/Projects/View",
+      "label": "Projects",
+      "parent": "tdProjectsView",
+      "x": 280,
+      "y": 880
     },
     {
       "id": "tdMain",
@@ -107,7 +146,7 @@
         "tdRight"
       ],
       "x": 220,
-      "y": 640
+      "y": 1000
     },
     {
       "id": "tdLeft",
@@ -131,7 +170,7 @@
         "tdLogView"
       ],
       "x": 280,
-      "y": 760
+      "y": 1120
     },
     {
       "id": "tdListView",
@@ -148,10 +187,11 @@
         "rowGap": "var(--space-0)"
       },
       "children": [
-        "tdList"
+        "tdList",
+        "tdProjectsOn"
       ],
       "x": 340,
-      "y": 880
+      "y": 1240
     },
     {
       "id": "tdList",
@@ -159,7 +199,31 @@
       "label": "Open tasks",
       "parent": "tdListView",
       "x": 400,
-      "y": 1000
+      "y": 1360
+    },
+    {
+      "id": "tdProjectsOn",
+      "type": "net.noodl.controls.button",
+      "label": "Projects and money",
+      "parent": "tdListView",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Also keep track of projects and money",
+        "marginTop": "var(--space-6)",
+        "mounted": false
+      },
+      "x": 400,
+      "y": 1480
     },
     {
       "id": "tdTodayView",
@@ -181,7 +245,7 @@
         "tdRoutines"
       ],
       "x": 340,
-      "y": 1120
+      "y": 1600
     },
     {
       "id": "tdToday",
@@ -189,7 +253,7 @@
       "label": "Today",
       "parent": "tdTodayView",
       "x": 400,
-      "y": 1240
+      "y": 1720
     },
     {
       "id": "tdRoutines",
@@ -197,7 +261,7 @@
       "label": "Things that repeat",
       "parent": "tdTodayView",
       "x": 400,
-      "y": 1360
+      "y": 1840
     },
     {
       "id": "tdDoneView",
@@ -218,7 +282,7 @@
         "tdDone"
       ],
       "x": 340,
-      "y": 1480
+      "y": 1960
     },
     {
       "id": "tdDone",
@@ -226,7 +290,7 @@
       "label": "Closed tasks",
       "parent": "tdDoneView",
       "x": 400,
-      "y": 1600
+      "y": 2080
     },
     {
       "id": "tdLogView",
@@ -247,7 +311,7 @@
         "tdLog"
       ],
       "x": 340,
-      "y": 1720
+      "y": 2200
     },
     {
       "id": "tdLog",
@@ -255,7 +319,7 @@
       "label": "Everything that happened",
       "parent": "tdLogView",
       "x": 400,
-      "y": 1840
+      "y": 2320
     },
     {
       "id": "tdRight",
@@ -287,7 +351,7 @@
         "tdRoutineDetail"
       ],
       "x": 280,
-      "y": 1960
+      "y": 2440
     },
     {
       "id": "tdEmpty",
@@ -306,7 +370,7 @@
         "textAlignX": "center"
       },
       "x": 340,
-      "y": 2080
+      "y": 2560
     },
     {
       "id": "tdDetail",
@@ -329,7 +393,7 @@
         "tdHistory"
       ],
       "x": 340,
-      "y": 2200
+      "y": 2680
     },
     {
       "id": "tdSummary",
@@ -337,7 +401,7 @@
       "label": "Summary",
       "parent": "tdDetail",
       "x": 400,
-      "y": 2320
+      "y": 2800
     },
     {
       "id": "tdNext",
@@ -345,7 +409,7 @@
       "label": "Next actions",
       "parent": "tdDetail",
       "x": 400,
-      "y": 2440
+      "y": 2920
     },
     {
       "id": "tdHistory",
@@ -353,7 +417,7 @@
       "label": "History",
       "parent": "tdDetail",
       "x": 400,
-      "y": 2560
+      "y": 3040
     },
     {
       "id": "tdRoutineDetail",
@@ -375,7 +439,7 @@
         "tdRoutineHistory"
       ],
       "x": 340,
-      "y": 2680
+      "y": 3160
     },
     {
       "id": "tdRoutineSummary",
@@ -383,7 +447,7 @@
       "label": "Summary",
       "parent": "tdRoutineDetail",
       "x": 400,
-      "y": 2800
+      "y": 3280
     },
     {
       "id": "tdRoutineHistory",
@@ -391,7 +455,7 @@
       "label": "Its history",
       "parent": "tdRoutineDetail",
       "x": 400,
-      "y": 2920
+      "y": 3400
     },
     {
       "id": "tdDialog",
@@ -399,14 +463,14 @@
       "label": "What happened?",
       "parent": "tdRoot",
       "x": 160,
-      "y": 3040
+      "y": 3520
     },
     {
       "id": "tdUser",
       "type": "net.noodl.user.User",
       "label": "Who is signed in",
       "x": 650,
-      "y": 5800
+      "y": 6520
     },
     {
       "id": "tdAuth",
@@ -427,7 +491,7 @@
         "target": "/Pages/Sign in"
       },
       "x": 650,
-      "y": 5920
+      "y": 6640
     },
     {
       "id": "tdLogOut",
@@ -441,7 +505,7 @@
       "type": "/Logic/Todo data",
       "label": "Your list, from the backend",
       "x": 650,
-      "y": 6040
+      "y": 1240
     },
     {
       "id": "tdRows",
@@ -455,14 +519,14 @@
       "type": "/Logic/Selected task",
       "label": "The selected task",
       "x": 650,
-      "y": 2200
+      "y": 2920
     },
     {
       "id": "tdLogRows",
       "type": "/Logic/Log rows",
       "label": "The log lines",
       "x": 650,
-      "y": 1840
+      "y": 2680
     },
     {
       "id": "tdTodayRows",
@@ -476,7 +540,7 @@
       "type": "/Logic/Selected routine",
       "label": "The selected thing that repeats",
       "x": 650,
-      "y": 3640
+      "y": 4360
     },
     {
       "id": "tdClock",
@@ -502,14 +566,14 @@
         }
       ],
       "x": 650,
-      "y": 6160
+      "y": 6760
     },
     {
       "id": "tdScreen",
       "type": "Screen Resolution",
       "label": "How wide the screen is",
       "x": 650,
-      "y": 6280
+      "y": 6880
     },
     {
       "id": "tdLayout",
@@ -519,7 +583,7 @@
         "functionScript": "var narrow = (Inputs.width || 1200) < 820;\nvar found = !!Inputs.found || !!Inputs.routineFound;\nOutputs.narrow = narrow;\nOutputs.found = found;\nOutputs.nothing = !found;\nOutputs.showLeft = !(narrow && found);\nOutputs.showRight = !narrow || found;"
       },
       "x": 650,
-      "y": 880,
+      "y": 1600,
       "ports": [
         {
           "name": "in-width",
@@ -584,12 +648,248 @@
       "type": "States",
       "label": "Which view",
       "parameters": {
-        "states": "list,today,done,log",
+        "states": "list,today,done,log,projects",
         "currentState": "list",
+        "values": "main",
+        "type-main": "boolean",
+        "value-list-main": true,
+        "value-today-main": true,
+        "value-done-main": true,
+        "value-log-main": true,
+        "value-projects-main": false,
         "useTransitions": false
       },
       "x": 650,
       "y": 760
+    },
+    {
+      "id": "tdProjects",
+      "type": "/Logic/Projects",
+      "label": "Your projects and money, from the backend",
+      "x": 650,
+      "y": 880
+    },
+    {
+      "id": "tdOpenProject",
+      "type": "Variable2",
+      "label": "Which project is open",
+      "parameters": {
+        "name": "todoOpenProject"
+      },
+      "x": 650,
+      "y": 7000
+    },
+    {
+      "id": "tdToggleProject",
+      "type": "JavaScriptFunction",
+      "label": "Open it, or close it again",
+      "parameters": {
+        "functionScript": "var id = String(Inputs.id || '');\nOutputs.value = id !== '' && id === String(Inputs.current || '') ? '' : id;\nOutputs.go();",
+        "runOnChange-in-id": false,
+        "runOnChange-in-current": false
+      },
+      "x": 650,
+      "y": 1360,
+      "ports": [
+        {
+          "name": "in-id",
+          "displayName": "id",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-current",
+          "displayName": "current",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-value",
+          "displayName": "value",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tdSetOpenProject",
+      "type": "Set Variable",
+      "label": "Open a project",
+      "parameters": {
+        "name": "todoOpenProject",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 7120
+    },
+    {
+      "id": "tdFlag",
+      "type": "Variable2",
+      "label": "Is the Projects tab on?",
+      "parameters": {
+        "name": "todoProjectsFlag"
+      },
+      "x": 650,
+      "y": 7240
+    },
+    {
+      "id": "tdFlagRead",
+      "type": "JavaScriptFunction",
+      "label": "What this device chose",
+      "parameters": {
+        "functionScript": "var v = '';\ntry { v = window.localStorage.getItem(\"todo-projects-tab\") || ''; } catch (e) {}\nOutputs.flag = v === 'on' || v === 'off' ? v : '';\nOutputs.go();"
+      },
+      "ports": [
+        {
+          "name": "out-flag",
+          "plug": "output",
+          "type": "string",
+          "displayName": "flag",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-go",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "go",
+          "group": "Outputs"
+        }
+      ],
+      "x": 650,
+      "y": 7360
+    },
+    {
+      "id": "tdFlagLoad",
+      "type": "Set Variable",
+      "label": "Put the choice back",
+      "parameters": {
+        "name": "todoProjectsFlag",
+        "setWith": "string"
+      },
+      "x": 650,
+      "y": 7480
+    },
+    {
+      "id": "tdFlagOn",
+      "type": "Set Variable",
+      "label": "Switch the tab on",
+      "parameters": {
+        "name": "todoProjectsFlag",
+        "setWith": "string",
+        "value": "on"
+      },
+      "x": 650,
+      "y": 2080
+    },
+    {
+      "id": "tdFlagOff",
+      "type": "Set Variable",
+      "label": "Hide the tab",
+      "parameters": {
+        "name": "todoProjectsFlag",
+        "setWith": "string",
+        "value": "off"
+      },
+      "x": 650,
+      "y": 1480
+    },
+    {
+      "id": "tdFlagKeep",
+      "type": "JavaScriptFunction",
+      "label": "Remember the choice on this device",
+      "parameters": {
+        "functionScript": "var v = String(Inputs.flag || '');\nif (v !== 'on' && v !== 'off') return;\ntry { window.localStorage.setItem(\"todo-projects-tab\", v); } catch (e) {}"
+      },
+      "x": 650,
+      "y": 7600,
+      "ports": [
+        {
+          "name": "in-flag",
+          "displayName": "flag",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ]
+    },
+    {
+      "id": "tdNextFor",
+      "type": "JavaScriptFunction",
+      "label": "Was it a project’s task?",
+      "parameters": {
+        "functionScript": "var id = String(Inputs.taskId || '');\nvar tasks = Inputs.tasks || [];\nvar names = Inputs.projectNames || {};\nfor (var i = 0; i < tasks.length; i++) {\n  var t = tasks[i];\n  if (!t || t.id !== id || !t.projectId || !names[t.projectId]) continue;\n  Outputs.projectId = String(t.projectId);\n  Outputs.projectName = String(names[t.projectId]);\n  Outputs.show();\n  return;\n}",
+        "runOnChange-in-taskId": false,
+        "runOnChange-in-tasks": false,
+        "runOnChange-in-projectNames": false
+      },
+      "x": 650,
+      "y": 1000,
+      "ports": [
+        {
+          "name": "in-taskId",
+          "displayName": "taskId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-tasks",
+          "displayName": "tasks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectNames",
+          "displayName": "projectNames",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-show",
+          "displayName": "show",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectId",
+          "displayName": "projectId",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectName",
+          "displayName": "projectName",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "tdPromptState",
+      "type": "States",
+      "label": "Is the next-move question showing?",
+      "parameters": {
+        "states": "hidden,shown",
+        "currentState": "hidden",
+        "useTransitions": false
+      },
+      "x": 650,
+      "y": 1120
     },
     {
       "id": "tdViewOpen",
@@ -608,7 +908,7 @@
         }
       ],
       "x": 650,
-      "y": 6400
+      "y": 7720
     },
     {
       "id": "tdSelected",
@@ -618,7 +918,7 @@
         "name": "todoSelected"
       },
       "x": 650,
-      "y": 4960
+      "y": 5680
     },
     {
       "id": "tdSelectFromList",
@@ -629,7 +929,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 1000
+      "y": 1720
     },
     {
       "id": "tdSelectFromDone",
@@ -640,7 +940,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 1720
+      "y": 2560
     },
     {
       "id": "tdSelectFromLog",
@@ -651,7 +951,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 1960
+      "y": 2800
     },
     {
       "id": "tdDeselect",
@@ -662,7 +962,7 @@
         "setWith": "emptyString"
       },
       "x": 650,
-      "y": 2320
+      "y": 3040
     },
     {
       "id": "tdLinkOpen",
@@ -672,7 +972,7 @@
         "functionScript": "var id = '';\ntry {\n  id = window.sessionStorage.getItem(\"todo-open-task\") || '';\n  window.sessionStorage.removeItem(\"todo-open-task\");\n} catch (e) {}\nif (!id) {\n  var m = /[?&]task=([^&#]*)/.exec(window.location.search || '');\n  if (m) { try { id = decodeURIComponent(m[1]); } catch (e) { id = ''; } }\n}\nif (!id) return;\nOutputs.taskId = id;\nOutputs.open();"
       },
       "x": 650,
-      "y": 6520,
+      "y": 7840,
       "ports": [
         {
           "name": "out-open",
@@ -699,7 +999,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 6640
+      "y": 7960
     },
     {
       "id": "tdSelectFromToday",
@@ -710,7 +1010,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 1360
+      "y": 2200
     },
     {
       "id": "tdSelectFromRoutines",
@@ -721,7 +1021,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 1480
+      "y": 2320
     },
     {
       "id": "tdSelectNewRoutine",
@@ -732,7 +1032,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 6760
+      "y": 8080
     },
     {
       "id": "tdDays",
@@ -742,7 +1042,7 @@
         "name": "todoSlotDays"
       },
       "x": 650,
-      "y": 6880
+      "y": 8200
     },
     {
       "id": "tdPickDay",
@@ -754,7 +1054,7 @@
         "runOnChange-in-days": false
       },
       "x": 650,
-      "y": 3760,
+      "y": 4480,
       "ports": [
         {
           "name": "in-key",
@@ -795,7 +1095,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 7000
+      "y": 8320
     },
     {
       "id": "tdClearDays",
@@ -806,7 +1106,7 @@
         "setWith": "emptyString"
       },
       "x": 650,
-      "y": 7120
+      "y": 8440
     },
     {
       "id": "tdOpenAction",
@@ -816,7 +1116,7 @@
         "name": "todoOpenAction"
       },
       "x": 650,
-      "y": 7240
+      "y": 8560
     },
     {
       "id": "tdOpenDesc",
@@ -827,7 +1127,7 @@
         "setWith": "string"
       },
       "x": 650,
-      "y": 2800
+      "y": 3520
     },
     {
       "id": "tdCloseDesc",
@@ -838,14 +1138,14 @@
         "setWith": "emptyString"
       },
       "x": 650,
-      "y": 2920
+      "y": 3640
     },
     {
       "id": "cmdAdd",
       "type": "/Commands/Add task",
       "label": "Add",
       "x": 650,
-      "y": 1120
+      "y": 1840
     },
     {
       "id": "cmdDrag",
@@ -855,7 +1155,7 @@
         "direction": "to"
       },
       "x": 650,
-      "y": 1240
+      "y": 1960
     },
     {
       "id": "cmdTop",
@@ -865,56 +1165,56 @@
         "direction": "top"
       },
       "x": 650,
-      "y": 2440
+      "y": 3160
     },
     {
       "id": "cmdClose",
       "type": "/Commands/Close task",
       "label": "Close",
       "x": 650,
-      "y": 5080
+      "y": 5800
     },
     {
       "id": "cmdReopen",
       "type": "/Commands/Reopen task",
       "label": "Reopen",
       "x": 650,
-      "y": 5200
+      "y": 5920
     },
     {
       "id": "cmdRename",
       "type": "/Commands/Rename task",
       "label": "Rename",
       "x": 650,
-      "y": 2560
+      "y": 3280
     },
     {
       "id": "cmdDeadline",
       "type": "/Commands/Set deadline",
       "label": "Deadline",
       "x": 650,
-      "y": 2680
+      "y": 3400
     },
     {
       "id": "cmdAddAction",
       "type": "/Commands/Add action",
       "label": "AddAction",
       "x": 650,
-      "y": 3040
+      "y": 3760
     },
     {
-      "id": "cmdTick",
+      "id": "cmdTick-2",
       "type": "/Commands/Tick action",
       "label": "Tick",
       "x": 650,
-      "y": 5320
+      "y": 6040
     },
     {
       "id": "cmdUntick",
       "type": "/Commands/Untick action",
       "label": "Untick",
       "x": 650,
-      "y": 5440
+      "y": 6160
     },
     {
       "id": "cmdActDrag",
@@ -924,42 +1224,42 @@
         "direction": "to"
       },
       "x": 650,
-      "y": 3160
+      "y": 3880
     },
     {
       "id": "cmdRenameAct",
       "type": "/Commands/Rename action",
       "label": "RenameAct",
       "x": 650,
-      "y": 3280
+      "y": 4000
     },
     {
       "id": "cmdDescribe",
       "type": "/Commands/Describe action",
       "label": "Describe",
       "x": 650,
-      "y": 3400
+      "y": 4120
     },
     {
       "id": "cmdNote",
       "type": "/Commands/Add note",
       "label": "Note",
       "x": 650,
-      "y": 3520
+      "y": 4240
     },
     {
       "id": "cmdAddRoutine",
       "type": "/Commands/Add routine",
       "label": "AddRoutine",
       "x": 650,
-      "y": 1600
+      "y": 2440
     },
     {
       "id": "cmdRenameRoutine",
       "type": "/Commands/Rename routine",
       "label": "RenameRoutine",
       "x": 650,
-      "y": 3880
+      "y": 4600
     },
     {
       "id": "cmdDaily",
@@ -969,7 +1269,7 @@
         "change": "daily"
       },
       "x": 650,
-      "y": 4000
+      "y": 4720
     },
     {
       "id": "cmdWeekly",
@@ -979,7 +1279,7 @@
         "change": "weekly"
       },
       "x": 650,
-      "y": 4120
+      "y": 4840
     },
     {
       "id": "cmdMonthly",
@@ -989,7 +1289,7 @@
         "change": "monthly"
       },
       "x": 650,
-      "y": 4240
+      "y": 4960
     },
     {
       "id": "cmdAddTime",
@@ -999,7 +1299,7 @@
         "change": "add"
       },
       "x": 650,
-      "y": 4360
+      "y": 5080
     },
     {
       "id": "cmdRemoveSlot",
@@ -1009,7 +1309,7 @@
         "change": "remove"
       },
       "x": 650,
-      "y": 4480
+      "y": 5200
     },
     {
       "id": "cmdStart",
@@ -1019,7 +1319,7 @@
         "which": "start"
       },
       "x": 650,
-      "y": 4600
+      "y": 5320
     },
     {
       "id": "cmdEnd",
@@ -1029,28 +1329,28 @@
         "which": "end"
       },
       "x": 650,
-      "y": 4720
+      "y": 5440
     },
     {
       "id": "cmdCheck",
       "type": "/Commands/Tick routine",
       "label": "Check",
       "x": 650,
-      "y": 5560
+      "y": 6280
     },
     {
       "id": "cmdStop",
       "type": "/Commands/Stop routine",
       "label": "Stop",
       "x": 650,
-      "y": 5680
+      "y": 6400
     },
     {
       "id": "cmdRoutineNote",
       "type": "/Commands/Add note",
       "label": "RoutineNote",
       "x": 650,
-      "y": 4840
+      "y": 5560
     }
   ],
   "visualRoots": [

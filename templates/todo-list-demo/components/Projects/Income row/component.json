@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "dbeb79da-ed6d-54cf-83e4-96466ce71649",
+  "name": "Income row",
+  "path": "/Projects/Income row",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Money due in soon (or late): who, when, how much, and Paid."
+}

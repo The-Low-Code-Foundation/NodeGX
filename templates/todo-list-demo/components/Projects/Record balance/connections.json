@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "0ef9ade0-4e1d-5a6b-84ee-78c6803b8ab5",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "RecordbalaIn",
+      "fromProperty": "amount",
+      "toId": "RecordbalaWrite",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "RecordbalaIn",
+      "fromProperty": "items",
+      "toId": "RecordbalaWrite",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "RecordbalaIn",
+      "fromProperty": "marks",
+      "toId": "RecordbalaWrite",
+      "toProperty": "in-marks"
+    },
+    {
+      "fromId": "RecordbalaIn",
+      "fromProperty": "projects",
+      "toId": "RecordbalaWrite",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "RecordbalaIn",
+      "fromProperty": "do",
+      "toId": "RecordbalaWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "RecordbalaWrite",
+      "fromProperty": "out-done",
+      "toId": "RecordbalaOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "RecordbalaWrite",
+      "fromProperty": "out-error",
+      "toId": "RecordbalaOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "RecordbalaWrite",
+      "fromProperty": "out-hasError",
+      "toId": "RecordbalaOut",
+      "toProperty": "hasError"
+    },
+    {
+      "fromId": "RecordbalaWrite",
+      "fromProperty": "out-failed",
+      "toId": "RecordbalaProblem",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -1,0 +1,1259 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "8480223d-a86f-5ece-8967-2d50e10b6e83",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "prIn",
+      "type": "Component Inputs",
+      "label": "The project",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "name",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moneyText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moneyColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moveText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "moveColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "metaText",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasMeta",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "metaColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "edge",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "open",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "facts",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasFacts",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "history",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasHistory",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasMove",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "moveTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "waitingRaw",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "deadlineRaw",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "doneLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "billKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasBill",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "billLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "sendKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "hasSend",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "sendLabel",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "isHeading",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "heading",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 590,
+      "y": 280
+    },
+    {
+      "id": "prOut",
+      "type": "Component Outputs",
+      "label": "What you did",
+      "ports": [
+        {
+          "name": "toggle",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "tick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "sent",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "projectName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "taskId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "waitingOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "deadline",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "billKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sendKey",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 590,
+      "y": 520
+    },
+    {
+      "id": "prWrap",
+      "type": "Group",
+      "label": "Row",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "prHeadingBox",
+        "prRoot"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "prHeadingBox",
+      "type": "Group",
+      "label": "Group name",
+      "parent": "prWrap",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-5)",
+        "paddingBottom": "var(--space-2)",
+        "mounted": false
+      },
+      "children": [
+        "prHeading"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "prHeading",
+      "type": "Text",
+      "label": "Group name",
+      "parent": "prHeadingBox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "prRoot",
+      "type": "Group",
+      "label": "Project",
+      "parent": "prWrap",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "borderLeftStyle": "solid",
+        "borderLeftWidth": {
+          "value": 3,
+          "unit": "px"
+        },
+        "borderLeftColor": "transparent"
+      },
+      "children": [
+        "prHead",
+        "prDetail"
+      ],
+      "x": 100,
+      "y": 400
+    },
+    {
+      "id": "prHead",
+      "type": "Group",
+      "label": "Name, money and next move",
+      "parent": "prRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-2)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "styleCss": "cursor: pointer;"
+      },
+      "children": [
+        "prTop",
+        "prMove",
+        "prMeta"
+      ],
+      "x": 160,
+      "y": 520
+    },
+    {
+      "id": "prTop",
+      "type": "Group",
+      "label": "Name and money",
+      "parent": "prHead",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "justifyContent": "space-between",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "prName",
+        "prMoney"
+      ],
+      "x": 220,
+      "y": 640
+    },
+    {
+      "id": "prName",
+      "type": "Text",
+      "label": "Project",
+      "parent": "prTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 760
+    },
+    {
+      "id": "prMoney",
+      "type": "Text",
+      "label": "Its money",
+      "parent": "prTop",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentSize"
+      },
+      "x": 280,
+      "y": 880
+    },
+    {
+      "id": "prMove",
+      "type": "Text",
+      "label": "Its next move",
+      "parent": "prHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1000
+    },
+    {
+      "id": "prMeta",
+      "type": "Text",
+      "label": "Deadline, or who it waits on",
+      "parent": "prHead",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1120
+    },
+    {
+      "id": "prDetail",
+      "type": "Group",
+      "label": "Opened",
+      "parent": "prRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-2)",
+        "paddingBottom": "var(--space-4)",
+        "mounted": false
+      },
+      "children": [
+        "prFacts",
+        "prHistory",
+        "prButtons",
+        "prDoneBox",
+        "prChBox",
+        "prError"
+      ],
+      "x": 160,
+      "y": 1240
+    },
+    {
+      "id": "prFacts",
+      "type": "Text",
+      "label": "Its money, in full",
+      "parent": "prDetail",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1360
+    },
+    {
+      "id": "prHistory",
+      "type": "Text",
+      "label": "What was done",
+      "parent": "prDetail",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 220,
+      "y": 1480
+    },
+    {
+      "id": "prButtons",
+      "type": "Group",
+      "label": "What you can do",
+      "parent": "prDetail",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "prDone",
+        "prChange",
+        "prTick",
+        "prSend"
+      ],
+      "x": 220,
+      "y": 1600
+    },
+    {
+      "id": "prDone",
+      "type": "net.noodl.controls.button",
+      "label": "Done",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Done"
+      },
+      "x": 280,
+      "y": 1720
+    },
+    {
+      "id": "prChange",
+      "type": "net.noodl.controls.button",
+      "label": "Change the move",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Change the move",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1840
+    },
+    {
+      "id": "prTick",
+      "type": "net.noodl.controls.button",
+      "label": "Been paid? Tick it",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Been paid? Tick it",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 1960
+    },
+    {
+      "id": "prSend",
+      "type": "net.noodl.controls.button",
+      "label": "Sent the invoice? Mark it",
+      "parent": "prButtons",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Sent the invoice? Mark it",
+        "mounted": false
+      },
+      "x": 280,
+      "y": 2080
+    },
+    {
+      "id": "prDoneBox",
+      "type": "Group",
+      "label": "The next move",
+      "parent": "prDetail",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--background)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "prDoneHead",
+        "prDoneTitle",
+        "prDoneWho",
+        "prDoneDue",
+        "prDoneBtns"
+      ],
+      "x": 220,
+      "y": 2200
+    },
+    {
+      "id": "prDoneHead",
+      "type": "Text",
+      "label": "The question",
+      "parent": "prDoneBox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 2320
+    },
+    {
+      "id": "prDoneTitle",
+      "type": "net.noodl.controls.textinput",
+      "label": "The next move",
+      "parent": "prDoneBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "The next move, in a few words"
+      },
+      "x": 280,
+      "y": 2440
+    },
+    {
+      "id": "prDoneWho",
+      "type": "net.noodl.controls.textinput",
+      "label": "Who it waits on",
+      "parent": "prDoneBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Waiting on someone? Their name. Empty if it is your move."
+      },
+      "x": 280,
+      "y": 2560
+    },
+    {
+      "id": "prDoneDue",
+      "type": "net.noodl.controls.textinput",
+      "label": "Its deadline",
+      "parent": "prDoneBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Deadline, if there is one: 2026-10-12, today, tomorrow"
+      },
+      "x": 280,
+      "y": 2680
+    },
+    {
+      "id": "prDoneBtns",
+      "type": "Group",
+      "label": "Save or cancel",
+      "parent": "prDoneBox",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "prDoneSave",
+        "prDoneCancel"
+      ],
+      "x": 280,
+      "y": 2800
+    },
+    {
+      "id": "prDoneSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "prDoneBtns",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save"
+      },
+      "x": 340,
+      "y": 2920
+    },
+    {
+      "id": "prDoneCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "prDoneBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Cancel"
+      },
+      "x": 340,
+      "y": 3040
+    },
+    {
+      "id": "prChBox",
+      "type": "Group",
+      "label": "Change the move",
+      "parent": "prDetail",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-2)",
+        "backgroundColor": "var(--background)",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-3)",
+        "paddingBottom": "var(--space-3)",
+        "mounted": false
+      },
+      "children": [
+        "prChHead",
+        "prChTitle",
+        "prChWho",
+        "prChDue",
+        "prChBtns"
+      ],
+      "x": 220,
+      "y": 3160
+    },
+    {
+      "id": "prChHead",
+      "type": "Text",
+      "label": "What it says",
+      "parent": "prChBox",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 280,
+      "y": 3280
+    },
+    {
+      "id": "prChTitle",
+      "type": "net.noodl.controls.textinput",
+      "label": "The move",
+      "parent": "prChBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "The next move, in a few words"
+      },
+      "x": 280,
+      "y": 3400
+    },
+    {
+      "id": "prChWho",
+      "type": "net.noodl.controls.textinput",
+      "label": "Who it waits on",
+      "parent": "prChBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Waiting on someone? Their name. Empty if it is your move."
+      },
+      "x": 280,
+      "y": 3520
+    },
+    {
+      "id": "prChDue",
+      "type": "net.noodl.controls.textinput",
+      "label": "Its deadline",
+      "parent": "prChBox",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Deadline, if there is one: 2026-10-12, today, tomorrow"
+      },
+      "x": 280,
+      "y": 3640
+    },
+    {
+      "id": "prChBtns",
+      "type": "Group",
+      "label": "Save or cancel",
+      "parent": "prChBox",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "prChSave",
+        "prChCancel"
+      ],
+      "x": 280,
+      "y": 3760
+    },
+    {
+      "id": "prChSave",
+      "type": "net.noodl.controls.button",
+      "label": "Save",
+      "parent": "prChBtns",
+      "parameters": {
+        "backgroundColor": "var(--primary)",
+        "color": "var(--primary-foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "none",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Save"
+      },
+      "x": 340,
+      "y": 3880
+    },
+    {
+      "id": "prChCancel",
+      "type": "net.noodl.controls.button",
+      "label": "Cancel",
+      "parent": "prChBtns",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Cancel"
+      },
+      "x": 340,
+      "y": 4000
+    },
+    {
+      "id": "prError",
+      "type": "Text",
+      "label": "Why it was not saved",
+      "parent": "prDetail",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--destructive)",
+        "lineHeight": "var(--leading-snug)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "mounted": false
+      },
+      "x": 220,
+      "y": 4120
+    },
+    {
+      "id": "prMode",
+      "type": "States",
+      "label": "Which box is open",
+      "parameters": {
+        "states": "none,done,change",
+        "currentState": "none",
+        "useTransitions": false
+      },
+      "x": 590,
+      "y": 2200
+    },
+    {
+      "id": "prLook",
+      "type": "JavaScriptFunction",
+      "label": "Heading or project, and the two questions",
+      "parameters": {
+        "functionScript": "var h = !!Inputs.isHeading;\nvar n = String(Inputs.name || '');\nOutputs.showHeading = h;\nOutputs.showProject = !h;\nOutputs.doneHead = Inputs.hasMove ? 'Done. What is the next move for ' + n + '?' : 'What is the next move for ' + n + '?';\nOutputs.changeHead = 'Change the move for ' + n;"
+      },
+      "x": 590,
+      "y": 160,
+      "ports": [
+        {
+          "name": "in-isHeading",
+          "displayName": "isHeading",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-name",
+          "displayName": "name",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-hasMove",
+          "displayName": "hasMove",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-showHeading",
+          "displayName": "showHeading",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-showProject",
+          "displayName": "showProject",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-doneHead",
+          "displayName": "doneHead",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-changeHead",
+          "displayName": "changeHead",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "prSubmit",
+      "type": "JavaScriptFunction",
+      "label": "What the open box says",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar PJ_PREFIX = new RegExp(\"^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\\\d{1,2} · )+\");\nfunction pjClean(s) { return String(s === undefined || s === null ? '' : s).replace(PJ_PREFIX, '').trim(); }\nfunction pjId(r) { return r ? String(r.objectId || r.id || '') : ''; }\n/**\n * A row as plain fields with its 'id'. 🔴 A viewer built before 2026-09-23 (HLT-022) ignores\n * 'plain: true' and hands back the record itself — todo.digitalbricks.io runs one — so both shapes\n * are read, and never mutated: a record's own fields are the shared copy every view draws.\n */\nfunction pjPlain(r) {\n  var model = !!r && typeof r.getId === 'function';\n  var src = model ? r.data || {} : r || {}, o = {};\n  for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];\n  o.id = model ? String(r.getId()) : pjId(r);\n  if (!o.objectId) o.objectId = o.id;\n  return o;\n}\nfunction pjIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction pjToday() { return pjIso(new Date()); }\n/** '' stays '', \"today\" and \"tomorrow\" are days, YYYY-MM-DD must be a real day; anything else is null. */\nfunction pjDate(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).trim().toLowerCase();\n  if (s === '') return '';\n  if (s === 'today' || s === 'tomorrow') {\n    var d = new Date();\n    if (s === 'tomorrow') d.setDate(d.getDate() + 1);\n    return pjIso(d);\n  }\n  var m = /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/.exec(s);\n  if (!m) return null;\n  var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);\n  var dt = new Date(y, mo - 1, da);\n  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === da ? pjIso(dt) : null;\n}\n/** \"2,140\", \"€ 2140\", \"−380\" → a number; anything else NaN. */\nfunction pjAmount(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).replace(/[€\\s,]/g, '').replace('−', '-');\n  if (s === '') return NaN;\n  var n = Number(s);\n  return isFinite(n) ? n : NaN;\n}\nvar mode = String(Inputs.mode || '');\nif (mode !== 'done' && mode !== 'change') return;\nfunction val(v) { return String(v === undefined || v === null ? '' : v).trim(); }\nvar title = val(mode === 'done' ? Inputs.doneTitle : Inputs.chTitle);\nvar who = val(mode === 'done' ? Inputs.doneWho : Inputs.chWho);\nvar deadline = pjDate(mode === 'done' ? Inputs.doneDue : Inputs.chDue);\nvar taskId = String(Inputs.taskId || '');\nvar resolved = mode === 'done' && taskId === '' ? 'new' : mode;\nvar error = '';\nif (deadline === null) error = 'Use a date like 2026-10-12, or today or tomorrow, or leave the deadline empty.';\nelse if (resolved !== 'done' && title === '') error = 'The move needs a few words.';\nOutputs.error = error;\nOutputs.hasError = error !== '';\nif (error) return;\nOutputs.mode = resolved;\nOutputs.title = title;\nOutputs.waitingOn = who;\nOutputs.deadline = deadline;\nOutputs.go();",
+        "runOnChange-in-mode": false,
+        "runOnChange-in-taskId": false,
+        "runOnChange-in-doneTitle": false,
+        "runOnChange-in-doneWho": false,
+        "runOnChange-in-doneDue": false,
+        "runOnChange-in-chTitle": false,
+        "runOnChange-in-chWho": false,
+        "runOnChange-in-chDue": false
+      },
+      "x": 590,
+      "y": 4120,
+      "ports": [
+        {
+          "name": "in-mode",
+          "displayName": "mode",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-doneTitle",
+          "displayName": "doneTitle",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-chTitle",
+          "displayName": "chTitle",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-doneWho",
+          "displayName": "doneWho",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-chWho",
+          "displayName": "chWho",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-doneDue",
+          "displayName": "doneDue",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-chDue",
+          "displayName": "chDue",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-taskId",
+          "displayName": "taskId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "displayName": "error",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasError",
+          "displayName": "hasError",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-mode",
+          "displayName": "mode",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-title",
+          "displayName": "title",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-waitingOn",
+          "displayName": "waitingOn",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-deadline",
+          "displayName": "deadline",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "prWrap"
+  ]
+}

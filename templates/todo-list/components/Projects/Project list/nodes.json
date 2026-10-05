@@ -1,0 +1,129 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "e2478e40-dc18-5053-8329-460a4feb9350",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "plIn",
+      "type": "Component Inputs",
+      "label": "The rows",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "plOut",
+      "type": "Component Outputs",
+      "label": "What a row said",
+      "ports": [
+        {
+          "name": "toggle",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "save",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "tick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "sent",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "projectId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "projectName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "taskId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "mode",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "waitingOn",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "deadline",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "billKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "sendKey",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "plRoot",
+      "type": "Group",
+      "label": "Projects",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "plEach"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "plEach",
+      "type": "For Each",
+      "label": "One row per project",
+      "parent": "plRoot",
+      "parameters": {
+        "template": "/Projects/Project row",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 160
+    }
+  ],
+  "visualRoots": [
+    "plRoot"
+  ]
+}

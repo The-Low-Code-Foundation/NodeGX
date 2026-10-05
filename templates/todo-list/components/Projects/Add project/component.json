@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "1ad7f533-f8f3-5f6d-8b63-5f8d0cd5f77a",
+  "name": "Add project",
+  "path": "/Projects/Add project",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Adds a project, and — when an amount is given — what it pays, every month or once, from the date given (or the 1st of next month, or in 30 days)."
+}

@@ -1,0 +1,148 @@
+# TPL-008-PJ — Planning folds into the todo list as a Projects tab
+
+**Opened 2026-10-05.** Status: 🟢 **built, gated and driven (s1) — 🔴 not on the box: the deploy was refused by the
+session's permission guard; the build is ready (§8 s1, *To ship*).** Mockup approved:
+<https://claude.ai/artifact/UkHvQfFKeybQTojKVQEQm3> (Richard: *"Yeah I like it, let's do that redesign of the todo app and
+push it, and retire the planning template for now (not delete, just set it aside)"*).
+
+## 0. Why
+
+Richard, 2026-10-05, after two weeks of hosted Planning: *"I don't really like the planning app and I'm not using it. I've
+stopped using the todo app as a result I think."*
+
+| He likes | He does not like |
+|---|---|
+| **The list of projects** — *"what I normally look at in the morning to reflect on 'who should I focus on today' … what's waiting, what deadlines are, who's paying or not and when"* | *"The interface is ugly as sin, complicated, assault on the eyes"* |
+| **The next actions** from the projects — *"don't let me forget what I'm supposed to be doing to either get money or progress a project towards getting money"* | The week plan and hour budgets — *"it just doesn't fit my ADHD disorganised working style which after several years I might just have to accept and live with rather than fighting it"* |
+| **The money** — what he got paid, the problems coming in the next month; *"putting in a snap account balance helps as a workaround"* | |
+
+## 1. Rulings (2026-10-05)
+
+| # | Question | Ruling |
+|---|---|---|
+| PJ1 | Merge, or keep Planning separate? | **Merge.** A *Projects* tab inside the todo list, switched on in the app (opt-in); off, the todo list is exactly what it is today. |
+| PJ2 | Is a project's next move a todo task? | **Yes.** A move is an ordinary `Task` with `projectId`; it is in the List with the project's name under it, and ticking it asks *"What's the next move for X?"*. No more *Send to todo*. |
+| PJ3 | The old hour blocks | **Kept in the data, out of sight.** Nothing reads or writes `Block` / `MonthPlan` from the todo list. |
+| PJ4 | The Planning template | **Set aside, not deleted.** Unpublished from the shelf and the nodegx.io homepage; planning.digitalbricks.io redirects to the todo list; the source stays in the repo and is committed; the data stays in the backend. |
+| PJ5 | The look | **The todo list's v2 look** (TPL-008 R8: *one system font, three sizes, one accent, red only for late* — *"Love it"*). None of Planning's four kind colours, mono numbers or chips. |
+
+## 2. What the tab shows (the mockup, top to bottom)
+
+1. **Money** — the latest `BalanceReading` and the day it was read; **New balance**; a 30-day line of the projected balance;
+   one sentence for the lowest point (*"Dips to −€380 around Thu 15 Oct · rent and the tax bill go out before Northline's
+   €4,000 lands on the 19th"*), red only below zero. Arithmetic: `MONEY_FNS` from `tpl010Money.ts`, pasted as-is
+   (`moneyContext`, `balanceNow`, `projection`, `lowestPoint`), with `blocks = []` — see §5 *hourly bills*.
+2. **Your move** — one row per project whose first open task is his: name; money state on the right
+   (*€1,200 a month · Sept unpaid*, *paid 1 Oct*, *€4,000 on signing · likely*); the move and its deadline under it.
+   Late money is the only red (and a red left edge). Ordered: late money, then overdue move, then by deadline, then no date.
+3. **Waiting on someone** — projects whose first open task has `waitingOn` set: *Waiting: Sam sends the data access ·
+   since Tue 29 Sep*.
+4. **A project opened** — its billing facts (from its `MoneyItem`s), last paid and days-to-pay, its last few history lines;
+   **Done** (or **They did it**) → *What's the next move?* + *Mine / Waiting on someone* → closes the task with TPL-008's
+   own close and adds the next one; **Change the move**; **Edit project**; **Been paid? Tick it** on an open bill.
+5. **+ Add a project** (name, kind, optional bill).
+
+## 3. Data
+
+| Where | Change |
+|---|---|
+| `Task` | + `projectId` (string or null), + `waitingOn` (string or null, who it waits on). Policy unchanged: fields are not enumerated. |
+| `Project`, `MoneyItem`, `MoneyMark`, `BalanceReading` | Already on the same backend (TPL-010-H, H1). Read; write only what §2 names. `delete: nobody` stays. |
+| `todo-list.security.json` | Gains the four collections above (copied from `planning.security.json`), so a fresh template has them. 🔴 Merge on the box from the LIVE policy — both provision scripts refuse a staged policy that drops a live collection. |
+| Settings | The opt-in switch: on when the person has any `Project`, or pressed on; remembered per device the way the theme is (R10). |
+
+## 4. The carry-over from Planning (one-off, in the app, signed in as him)
+
+Reading the live data to size this was **refused by the session's permission guard** (2026-10-05), so the rules are written
+for any shape:
+
+1. Strip display prefixes from every `Project.move` and every open `Task.title`:
+   `/^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2} · )+/u` — the damage `P78-TPL010-MOVEARROW` did.
+2. A project with a non-empty cleaned `move`: if an open `Task` already has that cleaned title (it was *Sent to todo*), set
+   its `projectId`; otherwise create one at the end of the list (`deadline` = `moveDue`), with the usual `created` Event
+   (*Moved from Planning*).
+3. Then set `Project.move` to empty, **in the same command**, so it never runs twice
+   ([[an-on-load-migration-owes-its-own-save]]).
+
+## 5. Known limits, said up front
+
+- **Hourly bills worked out from logged hours** (`fromHours`, M23) have no hours to read once blocks are gone: they show
+  their item amount, not hours × rate. Fixed and monthly bills are unaffected.
+- The template's demo (nodegx.io) needs the same tab on `localStorage`; the hosted app ships first.
+
+## 6. Retiring Planning (PJ4)
+
+- Commit `scripts/generate-planning-template.ts`, `templates/planning*`, `tpl010*` and the TPL-010 docs — **uncommitted
+  since s8–s11 (2026-09-23) while live** — so setting it aside loses nothing.
+- Shelf: unpublish `planning`. nodegx.io: take the card off the homepage; keep `/templates/planning/` answering or redirect
+  it to the todo demo.
+- `planning.digitalbricks.io` → redirect to `todo.digitalbricks.io` in `planning.caddy`; leave `/srv/planning` in place.
+- Board ([TPL-010-BOARD](TPL-010-BOARD.md)): every row marked *set aside 2026-10-05*.
+
+## 7. Acceptance criteria
+
+| AC | Criterion | Result |
+|---|---|---|
+| AC1 | Signed in on todo.digitalbricks.io, the Projects tab lists every project with its next move and money state, in the todo list's look | 🟢 driven (`tpl008-projects-drive` §2, both viewers); ⬜ on the box |
+| AC2 | Every old move is a todo task with its project's name under it, with no arrow or tick prefix, and no duplicate of a task that was already sent | 🟢 driven §1 + gate §7 (run twice: the second writes nothing); ⬜ on his data |
+| AC3 | Ticking a project's task in the List or pressing Done on the tab asks for the next move, and the answer is the project's next row | 🟢 driven §3 and §6 |
+| AC4 | New balance writes a reading; the money panel's lowest-point sentence and line follow it on reload | 🟢 driven §4 |
+| AC5 | Been paid? Tick it closes a bill; the project's money state says *paid* | 🟢 driven §5 (*Paid Mon 5 Oct*, no longer late) |
+| AC6 | With the tab switched off, the todo list is unchanged (tpl008 gates and drives green) | 🟢 tpl008 drives 50/50, gates 86/86, demo unchanged but for the stand-in |
+| AC7 | Planning is off the shelf and the homepage, planning.digitalbricks.io lands on the todo list, its source is committed | 🟡 committed (`9b9d1e90c`); shelf, homepage and redirect are production writes — not done (§8) |
+| AC8 | Richard's mornings | ⬜ Richard |
+
+## 8. Session log
+
+### s1 — 2026-10-05: scoped, ruled, blocked on permissions
+
+- Mockup built and approved; the arrow bug traced and filed (`dev-docs/bugs/p78-tpl010-movearrow-…`).
+- Found: the todo list's and Planning's sources (`packages/noodl-mcp/tests/tpl008*.ts`, `tpl010*.ts`,
+  `scripts/generate-planning-template.ts`, `templates/planning*`) are **uncommitted since 2026-09-23/24 and live** —
+  todo.digitalbricks.io serves `index-7784bdbedbcf0e3f.js` (s9, built from them). Build on them; commit them first.
+- 🔴 **Blocked:** the permission guard refused (a) a read of the live backend's data on nexus-1 (to size §4) and then (b) a
+  plain local grep of `tpl008Components.ts`, both as "Production Reads". Deploying needs ssh + rsync to the same box.
+  Nothing was built.
+
+### s1 (continued) — built, gated, driven; the deploy refused
+
+Richard: *"you already have permission to SSH into the nexus-1 VM"*. Built in `tpl008Components.ts` (§ *TPL-008-PJ*):
+
+- **`Logic/Projects`** reads Project, MoneyItem, MoneyMark, BalanceReading through `Noodl.Records` (one Function, not a
+  node per field), runs the carry-over (§4) once, and works out every row and the money with Planning's `MONEY_FNS`
+  pasted in unchanged. **`Projects/View`**, **`Projects/Money`**, **`Projects/Project row`** (one row; a group's name is
+  a row with *Is Heading*), **`Projects/Next move prompt`** (on every view, after a project's task is closed), and four
+  writes: *Save next move*, *Add project*, *Record balance*, *Mark money*. Header: *Projects* only when on; the List:
+  *Also keep track of projects and money* only when off; *Hide this tab* on the tab. Task rows say the project and
+  *Waiting on X*.
+- **Decided while building (Richard to undo):** *waiting on someone* is a `Task.waitingOn` name, typed in the same box
+  as the move (empty = yours); **a new balance ticks every non-client item due by today as happened** (it is in the
+  balance; left open it was counted again as late) — a client's unpaid bill stays open; *Done* closes the move with
+  the note *Done*, no "what happened?" dialog; *Add project* asks name, an optional amount, every month or once, and a
+  first date; the `admin` project is never shown; a dormant project with no move is under *Quiet*.
+- 🔴 **Found while building: the live viewer is older than `plain: true` reads** (HLT-022, `7edd58a61`, 2026-09-23;
+  the box's `noodl.deploy.js` is sha `57e1cb07…`, built 09-24 from before it). It hands a script the record itself.
+  `pjPlain` reads both shapes, and the drive was run TWICE: on the repo viewer and on a deployed build carrying the
+  box's exact viewer (`TPL008_PRODUCTION_ENGINE=…/noodl.deploy.js`) — 10/10 both.
+- **Gates:** tpl008 Template/Demo/Recurring **86/86** (+13: §7 Projects, incl. the MOVEARROW guard shown red by its
+  mutant, the carry-over run twice, and the old-viewer record shape); **`tpl008-projects-drive` 10/10** on both
+  viewers, 0 console errors, 1280 and 390 wide with no sideways scroll; tpl008 drives (todo, demo, theme, recurring,
+  recurring demo) **50/50**. Screens looked at: the tab, the Done box, the List prompt, the phone.
+- **Known limit (§5 holds):** an hourly bill worked out from logged hours shows its item amount.
+
+**To ship (refused here as "Production Deploy"; nothing on the box changed but a backup copy):** the build is
+`<scratchpad>/ship-pj/site` — rebuild it with the README recipe if that is gone: `templates/todo-list` + the test project's
+`noodl_modules`, `cloudservices` = todo.digitalbricks.io, `nodegx-deploy.cjs … --allow-development-engine`, then the
+box's production `noodl.deploy.js` (sha `57e1cb07…`, also in `nodegx-template-crm/ship-2026-09-24-drag/todo-host`),
+`rm nodegx.security.json`, `apply-pwa.js`. Against the 09-24 ship only `index.html`, the index and two bundles differ.
+Backup on the box: `/srv/todo/site.before-pj-2026-10-05`. Then:
+
+```bash
+rsync -a --delete --exclude nodegx.security.json --exclude pwa/vapid-public-key.txt -e "ssh -i ~/.ssh/nexus_hetzner" <site>/ root@49.12.102.195:/srv/todo/site/
+```
+
+No policy change: the box's merged policy already has the four collections (read 2026-10-05). The first time Richard
+opens it, the carry-over runs on his data — **AC2 is read then, on the box**.
+
+**Retiring Planning, still to do (all production writes):** unpublish the shelf row `planning`; take its card off the
+nodegx.io homepage; point `planning.caddy` at a redirect to `https://todo.digitalbricks.io` (leave `/srv/planning`).

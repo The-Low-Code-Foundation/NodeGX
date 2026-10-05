@@ -49,6 +49,7 @@ import {
   themeCss
 } from './tpl008Theme';
 import { DATE_PICKER_DESCRIPTION, DATE_PICKER_INPUTS, DATE_PICKER_OUTPUTS, datePickerGraph } from './datePicker';
+import { MONEY_FNS } from './tpl010Money';
 
 export const ROUTER = 'Main';
 export const APP_COMPONENT = 'App';
@@ -123,6 +124,19 @@ export const C = {
   setRoutineDates: '/Commands/Set routine dates',
   tickRoutine: '/Commands/Tick routine',
   stopRoutine: '/Commands/Stop routine',
+  // TPL-008-PJ — Projects (Planning, folded in)
+  projectsLogic: '/Logic/Projects',
+  projectRow: '/Projects/Project row',
+  projectList: '/Projects/Project list',
+  moneyBar: '/Projects/Money bar',
+  incomeRow: '/Projects/Income row',
+  money: '/Projects/Money',
+  projectsView: '/Projects/View',
+  nextPrompt: '/Projects/Next move prompt',
+  saveMove: '/Projects/Save next move',
+  addProject: '/Projects/Add project',
+  recordBalance: '/Projects/Record balance',
+  markMoney: '/Projects/Mark money',
   pageTodo: '/Pages/Todo',
   pageSignIn: '/Pages/Sign in'
 } as const;
@@ -140,7 +154,11 @@ export const VAR = {
   /** RC — which Today row (one occurrence of a routine) the dialog is ticking off. */
   dialogOccurrence: 'todoDialogOccurrence',
   /** RC — the days picked for the next time added to a weekly or monthly schedule, e.g. `"tue,thu"`. */
-  slotDays: 'todoSlotDays'
+  slotDays: 'todoSlotDays',
+  /** PJ — which project is opened on the Projects tab. One at a time. */
+  openProject: 'todoOpenProject',
+  /** PJ — the Projects tab switched on (`on`), off (`off`), or never chosen (`''`: on when there are projects). */
+  projectsFlag: 'todoProjectsFlag'
 } as const;
 
 /** The one sentence a failed write shows. */
@@ -932,16 +950,16 @@ const DATE_PICKER: Tpl008Component = {
 const HEADER: Tpl008Component = {
   path: 'Todo/Header',
   description:
-    'The app name, the four views (List, Today, Done, Log), Sign out, the reminders bell and the theme switch. Tab is the view that is showing.',
+    'The app name, the views (List, Today, Done, Log, and Projects when it is switched on), Sign out, the reminders bell and the theme switch. Tab is the view that is showing.',
   instantiates: [C.remindersSwitch, C.themeSwitch],
   ...iface(
-    [['tab', 'string'], ['listLabel', 'string'], ['todayLabel', 'string'], ['doneLabel', 'string']],
-    [['pickList', 'signal'], ['pickToday', 'signal'], ['pickDone', 'signal'], ['pickLog', 'signal'], ['signOut', 'signal']]
+    [['tab', 'string'], ['listLabel', 'string'], ['todayLabel', 'string'], ['doneLabel', 'string'], ['projectsOn', 'boolean']],
+    [['pickList', 'signal'], ['pickToday', 'signal'], ['pickDone', 'signal'], ['pickLog', 'signal'], ['pickProjects', 'signal'], ['signOut', 'signal']]
   ),
   nodes: [
-    inputs('hdIn', 'The view', [['tab', 'string'], ['listLabel', 'string'], ['todayLabel', 'string'], ['doneLabel', 'string']]),
+    inputs('hdIn', 'The view', [['tab', 'string'], ['listLabel', 'string'], ['todayLabel', 'string'], ['doneLabel', 'string'], ['projectsOn', 'boolean']]),
     outputs('hdOut', 'What was picked', [
-      ['pickList', 'signal'], ['pickToday', 'signal'], ['pickDone', 'signal'], ['pickLog', 'signal'], ['signOut', 'signal']
+      ['pickList', 'signal'], ['pickToday', 'signal'], ['pickDone', 'signal'], ['pickLog', 'signal'], ['pickProjects', 'signal'], ['signOut', 'signal']
     ]),
     group('hdRoot', 'Header', undefined, { ...ROW('var(--space-4)'), justifyContent: 'space-between', flexWrap: 'wrap' }),
     text('hdTitle', 'App name', 'hdRoot', 'Todo list', { ...T_TITLE, as: 'h1', sizeMode: 'contentSize' }),
@@ -959,20 +977,23 @@ const HEADER: Tpl008Component = {
     place('hdToday', BUTTON, 'Today', 'hdNav', { ...BTN_GHOST, label: 'Today' }),
     place('hdDone', BUTTON, 'Done', 'hdNav', { ...BTN_GHOST, label: 'Done' }),
     place('hdLog', BUTTON, 'Log', 'hdNav', { ...BTN_GHOST, label: 'Log' }),
+    // TPL-008-PJ — only for someone who uses it (PJ1): off, the header is what it always was.
+    place('hdProjects', BUTTON, 'Projects', 'hdNav', { ...BTN_GHOST, label: 'Projects', mounted: false }),
     place('hdSignOut', BUTTON, 'Sign out', 'hdNav', { ...BTN_GHOST, label: 'Sign out', color: 'var(--muted-foreground)' }),
     place('hdReminders', C.remindersSwitch, 'Deadline reminders', 'hdNav'),
     place('hdTheme', C.themeSwitch, 'Light or dark', 'hdNav'),
     logic('hdLook', STATES, 'Which view is showing', {
-      states: 'list,today,done,log',
+      states: 'list,today,done,log,projects',
       currentState: 'list',
-      values: 'listBg,todayBg,doneBg,logBg',
+      values: 'listBg,todayBg,doneBg,logBg,projectsBg',
       'type-listBg': 'color',
       'type-todayBg': 'color',
       'type-doneBg': 'color',
       'type-logBg': 'color',
+      'type-projectsBg': 'color',
       ...Object.fromEntries(
-        ['list', 'today', 'done', 'log'].flatMap((state) =>
-          ['list', 'today', 'done', 'log'].map((v) => [`value-${state}-${v}Bg`, state === v ? 'var(--muted)' : 'transparent'])
+        ['list', 'today', 'done', 'log', 'projects'].flatMap((state) =>
+          ['list', 'today', 'done', 'log', 'projects'].map((v) => [`value-${state}-${v}Bg`, state === v ? 'var(--muted)' : 'transparent'])
         )
       ),
       useTransitions: false
@@ -980,6 +1001,9 @@ const HEADER: Tpl008Component = {
   ],
   connections: [
     wire('hdIn', 'tab', 'hdLook', 'currentState'),
+    wire('hdIn', 'projectsOn', 'hdProjects', 'mounted'),
+    wire('hdLook', 'projectsBg', 'hdProjects', 'backgroundColor'),
+    wire('hdProjects', 'onClick', 'hdOut', 'pickProjects'),
     wire('hdIn', 'listLabel', 'hdList', 'label'),
     wire('hdIn', 'doneLabel', 'hdDone', 'label'),
     wire('hdIn', 'todayLabel', 'hdToday', 'label'),
@@ -2096,6 +2120,8 @@ export const TASK_ROWS_SCRIPT =
   String.raw`var tasks = Inputs.tasks || [];
 var actions = Inputs.actions || [];
 var sel = String(Inputs.selectedId || '');
+// TPL-008-PJ — a project's next move is a task: it says whose it is, and who it waits on.
+var projectNames = Inputs.projectNames || {};
 var open = [], done = [], maxPos = 0;
 for (var i = 0; i < tasks.length; i++) {
   var t = tasks[i];
@@ -2119,6 +2145,8 @@ for (var r = 0; r < open.length; r++) {
   var task = open[r];
   var d = due(task.deadline);
   var parts = [];
+  if (task.projectId && projectNames[task.projectId]) parts.push(String(projectNames[task.projectId]));
+  if (String(task.waitingOn || '').trim() !== '') parts.push('Waiting on ' + String(task.waitingOn).trim());
   if (d.text) parts.push(d.text);
   if (nextOf[task.id]) parts.push('Next: ' + nextOf[task.id]);
   rows.push({
@@ -2160,16 +2188,16 @@ Outputs.nextRank = open.length + 1;`;
 const TASK_ROWS: Tpl008Component = {
   path: 'Logic/Task rows',
   description:
-    'Turns the Task and Action queries into the open list (in order, with deadline and next action), the Done list (newest first), the tab labels, and where a new task goes.',
+    'Turns the Task and Action queries into the open list (in order, with its project, deadline and next action), the Done list (newest first), the tab labels, and where a new task goes.',
   ...iface(
-    [['tasks', 'array'], ['actions', 'array'], ['selectedId', 'string']],
+    [['tasks', 'array'], ['actions', 'array'], ['selectedId', 'string'], ['projectNames', 'object']],
     [
       ['openRows', 'array'], ['doneRows', 'array'], ['listLabel', 'string'], ['doneLabel', 'string'],
       ['addPlaceholder', 'string'], ['addSummary', 'string'], ['nextPosition', 'number'], ['nextRank', 'number']
     ]
   ),
   nodes: [
-    inputs('rwIn', 'The records', [['tasks', 'array'], ['actions', 'array'], ['selectedId', 'string']]),
+    inputs('rwIn', 'The records', [['tasks', 'array'], ['actions', 'array'], ['selectedId', 'string'], ['projectNames', 'object']]),
     outputs('rwOut', 'The rows', [
       ['openRows', 'array'], ['doneRows', 'array'], ['listLabel', 'string'], ['doneLabel', 'string'],
       ['addPlaceholder', 'string'], ['addSummary', 'string'], ['nextPosition', 'number'], ['nextRank', 'number']
@@ -2180,6 +2208,7 @@ const TASK_ROWS: Tpl008Component = {
     wire('rwIn', 'tasks', 'rwBuild', 'in-tasks'),
     wire('rwIn', 'actions', 'rwBuild', 'in-actions'),
     wire('rwIn', 'selectedId', 'rwBuild', 'in-selectedId'),
+    wire('rwIn', 'projectNames', 'rwBuild', 'in-projectNames'),
     ...['openRows', 'doneRows', 'listLabel', 'doneLabel', 'addPlaceholder', 'addSummary', 'nextPosition', 'nextRank'].map((n) =>
       wire('rwBuild', `out-${n}`, 'rwOut', n)
     )
@@ -3958,6 +3987,34 @@ const TODO_DATA: Tpl008Component = {
   ]
 };
 
+/** PJ1 — where this device remembers whether the Projects tab is on. */
+export const PROJECTS_FLAG_KEY = 'todo-projects-tab';
+
+/** PJ — which project a closed task belonged to, if any: the List's tick asks for its next move. */
+export const NEXT_FOR_SCRIPT = `var id = String(Inputs.taskId || '');
+var tasks = Inputs.tasks || [];
+var names = Inputs.projectNames || {};
+for (var i = 0; i < tasks.length; i++) {
+  var t = tasks[i];
+  if (!t || t.id !== id || !t.projectId || !names[t.projectId]) continue;
+  Outputs.projectId = String(t.projectId);
+  Outputs.projectName = String(names[t.projectId]);
+  Outputs.show();
+  return;
+}`;
+
+/** PJ — open a project, or close it when it is pressed again. */
+export const TOGGLE_PROJECT_SCRIPT = "var id = String(Inputs.id || '');\nOutputs.value = id !== '' && id === String(Inputs.current || '') ? '' : id;\nOutputs.go();";
+
+/** PJ1 — the switch, remembered on this device. Read once at load; written whenever it changes. */
+export const PROJECTS_FLAG_READ_SCRIPT = `var v = '';
+try { v = window.localStorage.getItem(${JSON.stringify(PROJECTS_FLAG_KEY)}) || ''; } catch (e) {}
+Outputs.flag = v === 'on' || v === 'off' ? v : '';
+Outputs.go();`;
+export const PROJECTS_FLAG_KEEP_SCRIPT = `var v = String(Inputs.flag || '');
+if (v !== 'on' && v !== 'off') return;
+try { window.localStorage.setItem(${JSON.stringify(PROJECTS_FLAG_KEY)}, v); } catch (e) {}`;
+
 /**
  * TPL-010-L L5 — **`?task=<id>` opens that task.** Planning links a block to its task this way.
  * The one change the link needed in this template: two small scripts and one Set Variable, and
@@ -3990,6 +4047,7 @@ const PAGE_TODO: Tpl008Component = {
     C.header, C.problem, C.taskList, C.doneList, C.logList, C.summary, C.nextActions, C.history, C.dialogFlow,
     C.todoData, C.taskRows, C.selected, C.logRows,
     C.todayList, C.routineList, C.routineSummary, C.todayRows, C.selectedRoutine,
+    C.projectsLogic, C.projectsView, C.nextPrompt,
     ...new Set(PAGE_COMMANDS.map(([, c]) => c))
   ],
   nodes: [
@@ -4005,6 +4063,11 @@ const PAGE_TODO: Tpl008Component = {
     group('tdShell', 'Shell', 'tdRoot', { ...COLUMN('var(--space-5)'), maxWidth: px(1080) }),
     place('tdHeader', C.header, 'Header', 'tdShell'),
     place('tdProblem', C.problem, 'Problem', 'tdShell'),
+    // PJ2 — a project's task closed from any view asks for that project's next move, here.
+    place('tdPrompt', C.nextPrompt, 'What next for the project', 'tdShell'),
+    // PJ — the Projects tab takes the whole width: no list beside it, no task pane.
+    group('tdProjectsView', 'Projects view', 'tdShell', { ...COLUMN('var(--space-0)'), mounted: false }),
+    place('tdProjectsPane', C.projectsView, 'Projects', 'tdProjectsView'),
     // Two panes that sit side by side when there is room for both at 380px, and
     // stack when there is not.
     group('tdMain', 'List and task', 'tdShell', {
@@ -4021,6 +4084,14 @@ const PAGE_TODO: Tpl008Component = {
     // declare — so each view is gated on a Group around it.
     group('tdListView', 'List view', 'tdLeft', COLUMN('var(--space-0)')),
     place('tdList', C.taskList, 'Open tasks', 'tdListView'),
+    // PJ1 — the one way in for someone with no projects yet. Gone once the tab is on.
+    place('tdProjectsOn', BUTTON, 'Projects and money', 'tdListView', {
+      ...BTN_GHOST,
+      label: 'Also keep track of projects and money',
+      color: 'var(--muted-foreground)',
+      marginTop: 'var(--space-6)',
+      mounted: false
+    }),
     group('tdTodayView', 'Today view', 'tdLeft', { ...COLUMN('var(--space-0)'), mounted: false }),
     place('tdToday', C.todayList, 'Today', 'tdTodayView'),
     place('tdRoutines', C.routineList, 'Things that repeat', 'tdTodayView'),
@@ -4080,7 +4151,35 @@ const PAGE_TODO: Tpl008Component = {
       'One pane or two?',
       'var narrow = (Inputs.width || 1200) < 820;\nvar found = !!Inputs.found || !!Inputs.routineFound;\nOutputs.narrow = narrow;\nOutputs.found = found;\nOutputs.nothing = !found;\nOutputs.showLeft = !(narrow && found);\nOutputs.showRight = !narrow || found;'
     ),
-    logic('tdTab', STATES, 'Which view', { states: 'list,today,done,log', currentState: 'list', useTransitions: false }),
+    logic('tdTab', STATES, 'Which view', {
+      states: 'list,today,done,log,projects',
+      currentState: 'list',
+      values: 'main',
+      'type-main': 'boolean',
+      ...Object.fromEntries(['list', 'today', 'done', 'log', 'projects'].map((s) => [`value-${s}-main`, s !== 'projects'])),
+      useTransitions: false
+    }),
+
+    // TPL-008-PJ — the projects and the money
+    logic('tdProjects', C.projectsLogic, 'Your projects and money, from the backend'),
+    logic('tdOpenProject', VARIABLE, 'Which project is open', { name: VAR.openProject }),
+    script('tdToggleProject', 'Open it, or close it again', TOGGLE_PROJECT_SCRIPT, ['id', 'current']),
+    logic('tdSetOpenProject', SET_VARIABLE, 'Open a project', { name: VAR.openProject, setWith: 'string' }),
+    logic('tdFlag', VARIABLE, 'Is the Projects tab on?', { name: VAR.projectsFlag }),
+    // Nothing wired into it, so it runs once when the page loads.
+    {
+      ...(logic('tdFlagRead', FUNCTION, 'What this device chose', { functionScript: PROJECTS_FLAG_READ_SCRIPT }) as object),
+      ports: [
+        { name: 'out-flag', displayName: 'flag', plug: 'output', type: 'string', group: 'Outputs' },
+        { name: 'out-go', displayName: 'go', plug: 'output', type: 'signal', group: 'Outputs' }
+      ]
+    },
+    logic('tdFlagLoad', SET_VARIABLE, 'Put the choice back', { name: VAR.projectsFlag, setWith: 'string' }),
+    logic('tdFlagOn', SET_VARIABLE, 'Switch the tab on', { name: VAR.projectsFlag, setWith: 'string', value: 'on' }),
+    logic('tdFlagOff', SET_VARIABLE, 'Hide the tab', { name: VAR.projectsFlag, setWith: 'string', value: 'off' }),
+    derive('tdFlagKeep', 'Remember the choice on this device', PROJECTS_FLAG_KEEP_SCRIPT),
+    script('tdNextFor', 'Was it a project’s task?', NEXT_FOR_SCRIPT, ['taskId', 'tasks', 'projectNames']),
+    logic('tdPromptState', STATES, 'Is the next-move question showing?', { states: 'hidden,shown', currentState: 'hidden', useTransitions: false }),
     // RC5 — a reminder's link opens Today.
     {
       ...(script('tdViewOpen', 'Did the link ask for Today?', VIEW_LINK_SCRIPT, []) as object),
@@ -4395,8 +4494,1209 @@ const PAGE_TODO: Tpl008Component = {
     wire('tdRoutineHistory', 'addNote', 'cmdRoutineNote', 'do'),
     wire('cmdRoutineNote', 'done', 'tdRoutineHistory', 'clearNote'),
 
+    // TPL-008-PJ — the projects and the money
+    wire('tdAuth', 'ontrue', 'tdProjects', 'refresh'),
+    wire('tdData', 'tasks', 'tdProjects', 'tasks'),
+    wire('tdOpenProject', 'value', 'tdProjects', 'openId'),
+    wire('tdFlag', 'value', 'tdProjects', 'flag'),
+    wire('tdClock', 'out-now', 'tdProjects', 'now'),
+    wire('tdProjects', 'projectNames', 'tdRows', 'projectNames'),
+    wire('tdProjects', 'changed', 'tdData', 'refresh'),
+    wire('tdProjects', 'showTab', 'tdHeader', 'projectsOn'),
+    wire('tdProjects', 'showTurnOn', 'tdProjectsOn', 'mounted'),
+    wire('tdHeader', 'pickProjects', 'tdTab', 'to-projects'),
+    wire('tdTab', 'main', 'tdMain', 'mounted'),
+    wire('tdTab', 'at-projects', 'tdProjectsView', 'mounted'),
+    ...[
+      'balanceText', 'balanceWhen', 'bars', 'lowText', 'lowColor', 'incomeRows', 'hasIncome', 'rows', 'noProjects',
+      'projectPosition', 'nextPosition', 'items', 'marks', 'projects'
+    ].map((n) => wire('tdProjects', n, 'tdProjectsPane', n)),
+    wire('tdProjectsPane', 'changed', 'tdData', 'refresh'),
+    wire('tdProjectsPane', 'changed', 'tdProjects', 'refresh'),
+    wire('tdProjectsPane', 'projectId', 'tdToggleProject', 'in-id'),
+    wire('tdOpenProject', 'value', 'tdToggleProject', 'in-current'),
+    wire('tdProjectsPane', 'toggle', 'tdToggleProject', 'run'),
+    wire('tdToggleProject', 'out-value', 'tdSetOpenProject', 'value'),
+    wire('tdToggleProject', 'out-go', 'tdSetOpenProject', 'do'),
+    // The switch: on from the list, off from the tab, remembered on this device.
+    wire('tdFlagRead', 'out-flag', 'tdFlagLoad', 'value'),
+    wire('tdFlagRead', 'out-go', 'tdFlagLoad', 'do'),
+    wire('tdFlag', 'value', 'tdFlagKeep', 'in-flag'),
+    wire('tdProjectsOn', 'onClick', 'tdFlagOn', 'do'),
+    wire('tdProjectsOn', 'onClick', 'tdTab', 'to-projects'),
+    wire('tdProjectsPane', 'hide', 'tdFlagOff', 'do'),
+    wire('tdProjectsPane', 'hide', 'tdTab', 'to-list'),
+    // PJ2 — a project's task closed: ask for its next move.
+    wire('tdDialog', 'dialogTaskId', 'tdNextFor', 'in-taskId'),
+    wire('tdData', 'tasks', 'tdNextFor', 'in-tasks'),
+    wire('tdProjects', 'projectNames', 'tdNextFor', 'in-projectNames'),
+    wire('cmdClose', 'done', 'tdNextFor', 'run'),
+    wire('tdNextFor', 'out-show', 'tdPromptState', 'to-shown'),
+    wire('tdNextFor', 'out-projectId', 'tdPrompt', 'projectId'),
+    wire('tdNextFor', 'out-projectName', 'tdPrompt', 'projectName'),
+    wire('tdRows', 'nextPosition', 'tdPrompt', 'position'),
+    wire('tdPromptState', 'at-shown', 'tdPrompt', 'open'),
+    wire('tdPrompt', 'done', 'tdPromptState', 'to-hidden'),
+    wire('tdPrompt', 'skip', 'tdPromptState', 'to-hidden'),
+    wire('tdPrompt', 'done', 'tdData', 'refresh'),
+
     // After any change, load everything again
     ...PAGE_COMMANDS.map(([id]) => wire(id, 'done', 'tdData', 'refresh'))
+  ]
+};
+
+// ════════════════════════════════════════════════════════════════════════════
+// TPL-008-PJ — Projects: who to focus on, what is next for each, and the money
+// ════════════════════════════════════════════════════════════════════════════
+//
+// Richard, 2026-10-05: Planning was *"ugly as sin"* and its week of hour blocks did not fit how
+// he works, but he kept looking at three things — the projects, each one's next move, and the
+// money. Ruled (TPL-008-PJ §1): those three become a Projects tab in this list, switched on by
+// the person who wants it; **a project's next move is an ordinary Task** (`projectId`, and
+// `waitingOn` when the ball is in someone else's court); the look is this list's own.
+//
+// 🔴 **How it reads and writes.** `Logic/Projects` and the `Projects/` commands use the records
+// API from a `Function` (`Noodl.Records.query` / `create` / `save`), not one node per field:
+// a project row needs its money worked out from four collections, and that arithmetic is
+// Planning's `MONEY_FNS`, pasted in unchanged. Every row it reads is PLAIN (`plain: true`).
+//
+// 🔴 **A row the screen draws never carries a record's id** (`P78-TPL010-MOVEARROW`): a For Each
+// turns each row into the model with that id, so Planning's project card, built with
+// `id: proj.id` and a decorated `move`, wrote "→ " into the real Project every time it drew.
+// Project rows here are `pj-<id>`; the record's id travels as `projectId`.
+
+export const PROJECT_COLLECTIONS = ['Project', 'MoneyItem', 'MoneyMark', 'BalanceReading'] as const;
+export const PROJECT_ROW_PREFIX = 'pj-';
+/** What Planning's cards wrote in front of a move (the arrow bug) — taken off on the way in. */
+export const MOVE_PREFIX_SOURCE = String.raw`^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \d{1,2} · )+`;
+export const PROJECTS_PROBLEM_TEXT = 'Your projects could not be loaded. Check your connection, then reload.';
+/** How far ahead the money looks, and how soon money due shows a Paid button. */
+export const MONEY_DAYS = 30;
+export const PAID_SOON_DAYS = 14;
+
+export const PJ_FNS = String.raw`var PJ_PREFIX = new RegExp(${JSON.stringify(MOVE_PREFIX_SOURCE)});
+function pjClean(s) { return String(s === undefined || s === null ? '' : s).replace(PJ_PREFIX, '').trim(); }
+function pjId(r) { return r ? String(r.objectId || r.id || '') : ''; }
+/**
+ * A row as plain fields with its 'id'. 🔴 A viewer built before 2026-09-23 (HLT-022) ignores
+ * 'plain: true' and hands back the record itself — todo.digitalbricks.io runs one — so both shapes
+ * are read, and never mutated: a record's own fields are the shared copy every view draws.
+ */
+function pjPlain(r) {
+  var model = !!r && typeof r.getId === 'function';
+  var src = model ? r.data || {} : r || {}, o = {};
+  for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];
+  o.id = model ? String(r.getId()) : pjId(r);
+  if (!o.objectId) o.objectId = o.id;
+  return o;
+}
+function pjIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }
+function pjToday() { return pjIso(new Date()); }
+/** '' stays '', "today" and "tomorrow" are days, YYYY-MM-DD must be a real day; anything else is null. */
+function pjDate(raw) {
+  var s = String(raw === undefined || raw === null ? '' : raw).trim().toLowerCase();
+  if (s === '') return '';
+  if (s === 'today' || s === 'tomorrow') {
+    var d = new Date();
+    if (s === 'tomorrow') d.setDate(d.getDate() + 1);
+    return pjIso(d);
+  }
+  var m = /^(\d{4})-(\d{1,2})-(\d{1,2})$/.exec(s);
+  if (!m) return null;
+  var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);
+  var dt = new Date(y, mo - 1, da);
+  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === da ? pjIso(dt) : null;
+}
+/** "2,140", "€ 2140", "−380" → a number; anything else NaN. */
+function pjAmount(raw) {
+  var s = String(raw === undefined || raw === null ? '' : raw).replace(/[€\s,]/g, '').replace('−', '-');
+  if (s === '') return NaN;
+  var n = Number(s);
+  return isFinite(n) ? n : NaN;
+}
+`;
+
+/** Planning's money arithmetic, with the two week helpers it leans on: no hours are logged here. */
+export const PJ_MONEY_FNS =
+  DATE_FNS +
+  PJ_FNS +
+  String.raw`function q(n) { return Math.round(num(n, 0) * 4) / 4; }
+function spentOf(b) { return 0; }
+` +
+  MONEY_FNS;
+
+/**
+ * One repeat's mark after a payment (or after being sent), in the shape Planning's `Logic/Mark`
+ * writes: a tick is a payment `{ day, amount }` signed as its item, with `doneOn` / `doneAmount`
+ * kept in step. A repeat with a mark is saved; one without gets a new mark.
+ */
+export const PJ_MARK_FNS = String.raw`function pjWriteMark(o, pay, sentOn) {
+  var R = Noodl.Records;
+  var pays = paymentsOf(o.m || {});
+  if (pay) pays.push({ day: pay.day, amount: Math.round(pay.amount * 100) / 100 });
+  var total = 0, last = '';
+  for (var i = 0; i < pays.length; i++) { total += pays[i].amount; if (pays[i].day > last) last = pays[i].day; }
+  var data = { itemId: String(o.itemId), occurs: o.occurs, payments: pays, doneOn: last, doneAmount: pays.length ? Math.round(total * 100) / 100 : '' };
+  if (sentOn) data.sentOn = sentOn;
+  if (o.markId) return R.save(o.markId, data, { className: 'MoneyMark' });
+  data.amount = '';
+  data.date = '';
+  data.skip = false;
+  data.lostOn = '';
+  data.note = '';
+  if (!sentOn) data.sentOn = '';
+  return R.create('MoneyMark', data);
+}
+`;
+
+/** `Logic/Projects` — read the four collections, every row plain and with its `id`. */
+export const PROJECTS_LOAD_SCRIPT =
+  DATE_FNS +
+  PJ_FNS +
+  String.raw`function all(cls) { return Noodl.Records.query(cls, {}, { limit: 1000, plain: true }); }
+function withIds(list) {
+  var out = [];
+  for (var i = 0; i < (list || []).length; i++) out.push(pjPlain(list[i]));
+  return out;
+}
+Promise.all([all('Project'), all('MoneyItem'), all('MoneyMark'), all('BalanceReading')]).then(
+  function (res) {
+    Outputs.projects = withIds(res[0]);
+    Outputs.items = withIds(res[1]);
+    Outputs.marks = withIds(res[2]);
+    Outputs.readings = withIds(res[3]);
+    Outputs.loaded();
+  },
+  function () {
+    Outputs.failed();
+  }
+);`;
+
+/**
+ * TPL-008-PJ §4 — **Planning's moves come over once, and the arrows come off.** Every write is
+ * what makes it not run again: a carried move empties `Project.move` in the same pass. A move
+ * that was already *Sent to todo* is linked, never copied; a task already closed with that
+ * title is linked and stays closed (the move was done).
+ */
+export const PROJECTS_CARRY_SCRIPT =
+  DATE_FNS +
+  PJ_FNS +
+  String.raw`if (this.carrying) return;
+var projects = Inputs.projects || [];
+var self = this;
+self.carrying = true;
+var R = Noodl.Records;
+function line(id, kind, summary, body) {
+  return R.create('Event', { taskId: id, kind: kind, summary: summary, body: body || '', at: new Date().toISOString() });
+}
+var changed = false;
+R.query('Task', {}, { limit: 1000, plain: true })
+  .then(function (found) {
+    var steps = Promise.resolve(), maxPos = 0;
+    var tasks = (found || []).map(pjPlain);
+    tasks.forEach(function (t) { if (Number(t.position) > maxPos) maxPos = Number(t.position); });
+    // 1. The arrow Planning wrote in front of a task it sent.
+    tasks.forEach(function (t) {
+      var was = String(t.title || ''), clean = pjClean(was);
+      if (t.status === 'done' || clean === was || clean === '') return;
+      t.title = clean;
+      changed = true;
+      steps = steps
+        .then(function () { return R.save(t.id, { title: clean }, { className: 'Task' }); })
+        .then(function () { return line(t.id, 'renamed', 'Renamed from “' + was + '”', 'Planning had written the arrow into the title.'); });
+    });
+    // 2. Each project's move: linked to its task, or made one.
+    projects.forEach(function (p) {
+      var move = pjClean(p.move);
+      if (!p.id || move === '') return;
+      var key = move.toLowerCase(), open = null, closed = null;
+      tasks.forEach(function (t) {
+        if (pjClean(t.title).toLowerCase() !== key || (t.projectId && t.projectId !== p.id)) return;
+        if (t.status === 'done') closed = closed || t; else open = open || t;
+      });
+      var hit = open || closed;
+      var name = String(p.name || 'the project');
+      var dueRaw = String(p.moveDue || '').slice(0, 10);
+      var dueDay = /^\d{4}-\d{2}-\d{2}$/.test(dueRaw) ? dueRaw : '';
+      changed = true;
+      if (hit) {
+        // Linked, and given the move's day if it has none of its own.
+        var patch = {}, linking = hit.projectId !== p.id;
+        if (linking) patch.projectId = p.id;
+        if (dueDay && !hit.deadline && hit.status !== 'done') patch.deadline = dueDay;
+        hit.projectId = p.id;
+        if (linking || patch.deadline) {
+          steps = steps.then(function () { return R.save(hit.id, patch, { className: 'Task' }); });
+          if (linking) steps = steps.then(function () { return line(hit.id, 'note', 'Now the next move for ' + name, 'Carried over from Planning.'); });
+        }
+      } else {
+        maxPos += 1;
+        var at = maxPos;
+        steps = steps
+          .then(function () {
+            return R.create('Task', { title: move, position: at, status: 'open', deadline: dueDay, closingNote: '', closedAt: '', projectId: p.id, waitingOn: '' });
+          })
+          .then(function (t) { return line(t.getId(), 'created', 'Carried over from Planning: the next move for ' + name, ''); });
+      }
+      steps = steps.then(function () { return R.save(p.id, { move: '', moveDue: null }, { className: 'Project' }); });
+    });
+    return steps;
+  })
+  .then(
+    function () {
+      self.carrying = false;
+      if (changed) Outputs.changed();
+    },
+    function () {
+      self.carrying = false;
+      Outputs.failed();
+    }
+  );`;
+
+/**
+ * Everything the Projects tab draws, worked out in one place: the money (balance, the next
+ * {@link MONEY_DAYS} days, what is due in), and one row per project — its next move (its first
+ * open task in list order), whose move it is, and its money in a few words. Ordered for the
+ * morning question, *"who should I focus on today"*: late money, then a late or due-today move,
+ * then by deadline, then the rest.
+ */
+export const PROJECT_ROWS_SCRIPT =
+  PJ_MONEY_FNS +
+  String.raw`var tasks = Inputs.tasks || [];
+var projects = Inputs.projects || [];
+var items = Inputs.items || [], marks = Inputs.marks || [], readings = Inputs.readings || [];
+var openId = String(Inputs.openId || '');
+var flag = String(Inputs.flag || '');
+var today = pjToday();
+var PRE = ${JSON.stringify(PROJECT_ROW_PREFIX)};
+
+var names = {}, live = [], maxProjectPos = 0;
+for (var i = 0; i < projects.length; i++) {
+  var p = projects[i];
+  if (!p || !p.id) continue;
+  names[p.id] = String(p.name || 'Untitled project');
+  if (num(p.position, 0) > maxProjectPos) maxProjectPos = num(p.position, 0);
+  if (p.kind !== 'admin') live.push(p);
+}
+var on = flag === 'on' || (flag !== 'off' && live.length > 0);
+Outputs.projectNames = names;
+Outputs.showTab = on;
+Outputs.showTurnOn = !on;
+Outputs.noProjects = live.length === 0;
+Outputs.projectPosition = maxProjectPos + 1;
+
+var maxPos = 0, openBy = {}, doneBy = {};
+for (var t = 0; t < tasks.length; t++) {
+  var task = tasks[t];
+  if (!task) continue;
+  if (num(task.position, 0) > maxPos) maxPos = num(task.position, 0);
+  if (!task.projectId) continue;
+  var bucket = task.status === 'done' ? doneBy : openBy;
+  (bucket[task.projectId] = bucket[task.projectId] || []).push(task);
+}
+Outputs.nextPosition = maxPos + 1;
+
+// ── The money ──
+var ctx = moneyContext(items, marks, projects, [], today, mAddMonths(today, -13, false));
+var horizon = mAddDays(today, ${MONEY_DAYS});
+var pr = projection(ctx, readings, horizon);
+var now = pr.now;
+Outputs.balanceText = mEur(now.balance);
+Outputs.balanceWhen = now.hasReading
+  ? 'in the bank when you last looked, ' + mDay(now.readOn) + (now.since ? ' · ' + now.since + (now.since === 1 ? ' payment' : ' payments') + ' ticked since' : '')
+  : 'Type what is in the bank below, and the next ${MONEY_DAYS} days are worked out from it.';
+var start = now.balance, byDay = {};
+for (var l = 0; l < pr.late.length; l++) start += pr.late[l].remaining;
+for (var f = 0; f < pr.future.length; f++) byDay[pr.future[f].date] = (byDay[pr.future[f].date] || 0) + pr.future[f].remaining;
+var run = start, series = [];
+for (var k = 0; k <= ${MONEY_DAYS}; k++) {
+  var day = mAddDays(today, k);
+  run += byDay[day] || 0;
+  series.push({ d: day, v: Math.round(run * 100) / 100 });
+}
+var lo = series[0], hi = series[0];
+for (var s = 0; s < series.length; s++) { if (series[s].v < lo.v) lo = series[s]; if (series[s].v > hi.v) hi = series[s]; }
+var floor = Math.min(0, lo.v), span = Math.max(0, hi.v) - floor || 1;
+var bars = [];
+for (var b = 0; b < series.length; b++) {
+  bars.push({
+    id: 'bar-' + series[b].d,
+    height: { value: Math.max(4, Math.round(((series[b].v - floor) / span) * 100)), unit: '%' },
+    mark: series[b].v < 0 ? 'var(--destructive)' : 'var(--primary)'
+  });
+}
+Outputs.bars = bars;
+var lowText;
+if (lo.v < 0) {
+  var after = null;
+  for (var a = 0; a < pr.future.length; a++) if (pr.future[a].date > lo.d && pr.future[a].remaining > 0) { after = pr.future[a]; break; }
+  lowText = 'Dips to ' + mEur(lo.v) + ' around ' + mDay(lo.d) +
+    (after ? ', then ' + mEur(after.remaining) + ' from ' + (projectName(after) || String(after.it.label || 'money in')) + ' on ' + mShort(after.date) : '') + '.';
+} else lowText = 'Lowest in the next ${MONEY_DAYS} days: ' + mEur(lo.v) + ', ' + mDay(lo.d) + '.';
+var hopedSum = 0;
+for (var h = 0; h < pr.hoped.length; h++) if (pr.hoped[h].amount > 0) hopedSum += pr.hoped[h].amount;
+if (hopedSum > 0) lowText += ' Not counting ' + mEur(hopedSum) + ' hoped for.';
+Outputs.lowText = lowText;
+Outputs.lowColor = lo.v < 0 ? 'var(--destructive)' : 'var(--muted-foreground)';
+
+var soon = mAddDays(today, ${PAID_SOON_DAYS}), incomeRows = [];
+var open = pr.late.concat(pr.future);
+for (var u = 0; u < open.length; u++) {
+  var o = open[u];
+  if (o.remaining <= 0 || o.date > soon) continue;
+  var lateBy = o.date < today ? mBetween(o.date, today) : 0;
+  incomeRows.push({
+    id: 'in-' + o.key,
+    key: o.key,
+    label: projectName(o) || String(o.it.label || 'Money in'),
+    meta: mDay(o.date) + (lateBy ? ' · ' + lateBy + (lateBy === 1 ? ' day' : ' days') + ' late' : ''),
+    metaColor: lateBy ? 'var(--destructive)' : 'var(--muted-foreground)',
+    amount: mEur(o.remaining)
+  });
+}
+Outputs.incomeRows = incomeRows;
+Outputs.hasIncome = incomeRows.length > 0;
+
+// ── The projects ──
+var os = allOccs(ctx, mAddDays(today, 400));
+var occBy = {};
+for (var c = 0; c < os.length; c++) if (os[c].client && os[c].it.projectId) (occBy[os[c].it.projectId] = occBy[os[c].it.projectId] || []).push(os[c]);
+
+function moneyOf(proj) {
+  var occs = (occBy[proj.id] || []).slice().sort(byDate);
+  var late = null, next = null, paid = null;
+  for (var i = 0; i < occs.length; i++) {
+    var o = occs[i];
+    if (o.payments.length && (!paid || o.lastOn > paid.lastOn)) paid = o;
+    if (o.closed) continue;
+    if (o.date < today && !o.hoped) { if (!late) late = o; }
+    else if (o.date >= today && !next) next = o;
+  }
+  var text = '', color = 'var(--muted-foreground)';
+  if (late) {
+    var n = mBetween(late.date, today);
+    text = mEur(late.remaining) + ' · ' + n + (n === 1 ? ' day' : ' days') + ' late';
+    color = 'var(--destructive)';
+  } else if (next) {
+    var rep = repeatWord(next.it);
+    text = mEur(next.remaining) + (rep ? ' ' + (rep === 'monthly' ? 'a month' : rep) : '') + ' · ' + (next.hoped ? next.likelihood + '% likely, ' : '') + mShort(next.date);
+  } else if (paid) text = 'Paid ' + mDay(paid.lastOn);
+  else if (proj.kind === 'building') text = 'Building';
+  else if (proj.kind === 'hobby') text = 'Hobby';
+  else if (proj.kind === 'dormant') text = 'Quiet';
+  var tick = late || (next && !next.hoped && next.date <= soon ? next : null);
+  var send = null;
+  for (var j = 0; j < occs.length; j++) {
+    var x = occs[j];
+    if (!x.closed && x.billOut && !x.sentOn && x.billOut <= mAddDays(today, 3)) { send = x; break; }
+  }
+  var facts = [];
+  if (String(proj.sub || '').trim()) facts.push(String(proj.sub).trim());
+  var seen = {};
+  for (var q2 = 0; q2 < occs.length; q2++) {
+    var it = occs[q2].it;
+    if (seen[it.id] || !activeOn(it, today)) continue;
+    seen[it.id] = true;
+    facts.push(mEur(Math.abs(num(it.amount, 0))) + ' ' + scheduleWords(it, today) + (num(it.likelihood, 100) < 100 ? ', ' + Math.round(num(it.likelihood, 100)) + '% likely' : ''));
+  }
+  if (paid) {
+    var after2 = mBetween(paid.date, paid.lastOn);
+    facts.push('Last paid ' + mDay(paid.lastOn) + (after2 > 0 ? ', ' + after2 + (after2 === 1 ? ' day' : ' days') + ' after it was due' : ''));
+  }
+  if (String(proj.moveWorth || '').trim()) facts.push('Worth: ' + String(proj.moveWorth).trim());
+  if (String(proj.say || '').trim()) facts.push(String(proj.say).trim());
+  return { text: text, color: color, late: late, tick: tick, send: send, facts: facts };
+}
+
+var yours = [], waiting = [], quiet = [];
+for (var r = 0; r < live.length; r++) {
+  var pj = live[r];
+  var openTasks = (openBy[pj.id] || []).slice().sort(byPosition);
+  var move = openTasks[0] || null;
+  var who = move ? String(move.waitingOn || '').trim() : '';
+  var dd = move ? due(move.deadline) : { text: '', late: false };
+  var money = moneyOf(pj);
+  var meta = '', metaColor = 'var(--muted-foreground)';
+  if (who) {
+    var made = when(move.createdAt);
+    meta = 'Waiting on ' + who + (made ? ' · since ' + fmtDay(made) : '');
+  } else if (dd.text) {
+    meta = dd.text;
+    metaColor = dd.late ? 'var(--destructive)' : 'var(--muted-foreground)';
+  }
+  if (openTasks.length > 1) meta += (meta ? ' · ' : '') + (openTasks.length - 1) + ' more in your list';
+  var closedTasks = (doneBy[pj.id] || []).slice().sort(function (x, y) { return String(y.closedAt || '').localeCompare(String(x.closedAt || '')); });
+  var hist = [];
+  for (var z = 0; z < closedTasks.length && z < 4; z++) {
+    var ct = closedTasks[z], cd = when(ct.closedAt), note = String(ct.closingNote || '').trim();
+    hist.push((cd ? fmtDay(cd) + ' · ' : '') + 'Done: ' + String(ct.title || '') + (note && note !== 'Done' ? ' (' + note + ')' : ''));
+  }
+  var row = {
+    id: PRE + pj.id,
+    projectId: pj.id,
+    name: names[pj.id],
+    moneyText: money.text,
+    moneyColor: money.color,
+    moveText: move ? String(move.title || '') : 'No next move yet. Open it to add one.',
+    moveColor: move ? 'var(--foreground)' : 'var(--muted-foreground)',
+    metaText: meta,
+    hasMeta: meta !== '',
+    metaColor: metaColor,
+    edge: money.late ? 'var(--destructive)' : 'transparent',
+    open: pj.id === openId,
+    facts: money.facts.join('\n'),
+    hasFacts: money.facts.length > 0,
+    history: hist.join('\n'),
+    hasHistory: hist.length > 0,
+    taskId: move ? String(move.id) : '',
+    hasMove: !!move,
+    moveTitle: move ? String(move.title || '') : '',
+    waitingRaw: who,
+    deadlineRaw: move ? String(move.deadline || '') : '',
+    doneLabel: !move ? 'Add the next move' : who ? 'They did it' : 'Done',
+    billKey: money.tick ? money.tick.key : '',
+    hasBill: !!money.tick,
+    billLabel: money.tick ? 'Been paid ' + mEur(money.tick.remaining) + '? Tick it' : '',
+    sendKey: money.send ? money.send.key : '',
+    hasSend: !!money.send,
+    sendLabel: 'Sent the invoice? Mark it',
+    isHeading: false,
+    heading: '',
+    rank: money.late ? 0 : move && dd.late && !who ? 1 : move && move.deadline && !who ? 2 : move ? 3 : 4,
+    lateBy: money.late ? mBetween(money.late.date, today) : 0,
+    deadline: move ? String(move.deadline || '') : '',
+    hobby: pj.kind === 'hobby' ? 1 : 0,
+    position: num(pj.position, 0)
+  };
+  if (pj.kind === 'dormant' && !move) quiet.push(row);
+  else if (who) waiting.push(row);
+  else yours.push(row);
+}
+function urgency(x, y) {
+  return x.hobby - y.hobby || x.rank - y.rank || y.lateBy - x.lateBy || x.deadline.localeCompare(y.deadline) || x.position - y.position || x.name.localeCompare(y.name);
+}
+yours.sort(urgency);
+waiting.sort(function (x, y) { return x.rank - y.rank || y.lateBy - x.lateBy || x.name.localeCompare(y.name); });
+quiet.sort(function (x, y) { return x.name.localeCompare(y.name); });
+function heading(id, text) { return { id: 'h-' + id, isHeading: true, heading: text, open: false, hasMeta: false, hasFacts: false, hasHistory: false, hasMove: false, hasBill: false, hasSend: false }; }
+var rows = [];
+function section(id, text, list) {
+  if (!list.length) return;
+  rows.push(heading(id, text));
+  for (var i = 0; i < list.length; i++) rows.push(list[i]);
+}
+section('yours', 'Your move', yours);
+section('waiting', 'Waiting on someone', waiting);
+section('quiet', 'Quiet', quiet);
+Outputs.rows = rows;`;
+
+const PROJECTS_OUTS: Array<[string, string]> = [
+  ['projectNames', 'object'], ['showTab', 'boolean'], ['showTurnOn', 'boolean'], ['noProjects', 'boolean'],
+  ['projectPosition', 'number'], ['nextPosition', 'number'],
+  ['balanceText', 'string'], ['balanceWhen', 'string'], ['bars', 'array'], ['lowText', 'string'], ['lowColor', 'string'],
+  ['incomeRows', 'array'], ['hasIncome', 'boolean'], ['rows', 'array']
+];
+const PROJECTS_RECORDS: Array<[string, string]> = [['projects', 'array'], ['items', 'array'], ['marks', 'array'], ['readings', 'array']];
+const PROJECTS_INS: Array<[string, string]> = [['tasks', 'array'], ['openId', 'string'], ['flag', 'string'], ['now', 'number'], ['refresh', 'signal']];
+
+/** A Function's own output ports, declared so a signal fired from a promise is callable (see `CLOCK_SCRIPT`). */
+function fnPorts(outs: Array<[string, string]>): Array<Record<string, unknown>> {
+  return outs.map(([name, type]) => ({ name: `out-${name}`, displayName: name, plug: 'output', type, group: 'Outputs' }));
+}
+
+const PROJECTS_LOGIC: Tpl008Component = {
+  path: 'Logic/Projects',
+  description:
+    'The projects and the money: reads Project, MoneyItem, MoneyMark and BalanceReading, brings Planning’s moves over once (as tasks), and works out everything the Projects tab draws and the name a project task carries in the list. Refresh reads them again; Changed says tasks were written.',
+  ...iface(PROJECTS_INS, [...PROJECTS_OUTS, ...PROJECTS_RECORDS, ['changed', 'signal']]),
+  nodes: [
+    inputs('pjIn', 'What it needs', PROJECTS_INS),
+    outputs('pjOut', 'The projects', [...PROJECTS_OUTS, ...PROJECTS_RECORDS, ['changed', 'signal']]),
+    {
+      ...(script('pjLoad', 'Read the projects and the money', PROJECTS_LOAD_SCRIPT, []) as object),
+      ports: fnPorts([...PROJECTS_RECORDS, ['loaded', 'signal'], ['failed', 'signal']])
+    },
+    {
+      ...(script('pjCarry', 'Bring Planning’s moves over, once', PROJECTS_CARRY_SCRIPT, ['projects']) as object),
+      ports: fnPorts([['changed', 'signal'], ['failed', 'signal']])
+    },
+    derive('pjRows', 'Work out what the tab draws', PROJECT_ROWS_SCRIPT),
+    logic('pjProblem', SET_VARIABLE, 'Say the projects did not load', { name: VAR.problem, setWith: 'string', value: PROJECTS_PROBLEM_TEXT })
+  ],
+  connections: [
+    wire('pjIn', 'refresh', 'pjLoad', 'run'),
+    wire('pjLoad', 'out-projects', 'pjCarry', 'in-projects'),
+    wire('pjLoad', 'out-loaded', 'pjCarry', 'run'),
+    // A carry wrote: read again (the moves are now empty, so it does not run twice) and say so.
+    wire('pjCarry', 'out-changed', 'pjLoad', 'run'),
+    wire('pjCarry', 'out-changed', 'pjOut', 'changed'),
+    wire('pjLoad', 'out-failed', 'pjProblem', 'do'),
+    wire('pjCarry', 'out-failed', 'pjProblem', 'do'),
+    wire('pjIn', 'tasks', 'pjRows', 'in-tasks'),
+    wire('pjIn', 'openId', 'pjRows', 'in-openId'),
+    wire('pjIn', 'flag', 'pjRows', 'in-flag'),
+    wire('pjIn', 'now', 'pjRows', 'in-now'),
+    ...PROJECTS_RECORDS.flatMap(([n]) => [wire('pjLoad', `out-${n}`, 'pjRows', `in-${n}`), wire('pjLoad', `out-${n}`, 'pjOut', n)]),
+    ...PROJECTS_OUTS.map(([n]) => wire('pjRows', `out-${n}`, 'pjOut', n))
+  ]
+};
+
+// ── The writes. One component each, like Commands/, but through the records API ──
+
+/** A write from a Function: Do runs it; Done or Failed when the backend has answered. */
+function recordWrite(path: string, description: string, ins: Array<[string, string]>, source: string, extraOuts: Array<[string, string]> = []): Tpl008Component {
+  const p = path.split('/')[1].replace(/[^A-Za-z]/g, '').slice(0, 10);
+  const outs: Array<[string, string]> = [['done', 'signal'], ...extraOuts];
+  return {
+    path,
+    description,
+    ...iface([...ins, ['do', 'signal']], outs),
+    nodes: [
+      inputs(`${p}In`, 'What to write', [...ins, ['do', 'signal']]),
+      outputs(`${p}Out`, 'Written', outs),
+      { ...(script(`${p}Write`, 'Write it', source, ins.map(([n]) => n)) as object), ports: fnPorts([...outs, ['failed', 'signal']]) },
+      { ...(logic(`${p}Problem`, SET_VARIABLE, 'Say it did not save', { name: VAR.problem, setWith: 'string', value: PROBLEM_TEXT }) as object), comment: SHARED_PROBLEM }
+    ],
+    connections: [
+      ...ins.map(([n]) => wire(`${p}In`, n, `${p}Write`, `in-${n}`)),
+      wire(`${p}In`, 'do', `${p}Write`, 'run'),
+      ...outs.map(([n]) => wire(`${p}Write`, `out-${n}`, `${p}Out`, n)),
+      wire(`${p}Write`, 'out-failed', `${p}Problem`, 'do')
+    ]
+  };
+}
+
+/** `mode`: `done` closes the move first, `change` rewrites it, `new` adds one. Each writes its history line. */
+export const SAVE_MOVE_SCRIPT =
+  DATE_FNS +
+  PJ_FNS +
+  String.raw`var pid = String(Inputs.projectId || ''), taskId = String(Inputs.taskId || ''), mode = String(Inputs.mode || 'new');
+var title = pjClean(Inputs.title), who = String(Inputs.waitingOn || '').trim();
+var deadline = pjDate(Inputs.deadline);
+var name = String(Inputs.projectName || 'the project');
+if (pid === '' || deadline === null) return;
+if (mode === 'change' && (taskId === '' || title === '')) return;
+if (mode !== 'done' && mode !== 'change' && title === '') return;
+var R = Noodl.Records;
+function line(id, kind, summary, body) {
+  return R.create('Event', { taskId: id, kind: kind, summary: summary, body: body || '', at: new Date().toISOString() });
+}
+var steps = Promise.resolve();
+if (mode === 'done' && taskId !== '') {
+  steps = steps
+    .then(function () { return R.save(taskId, { status: 'done', closingNote: 'Done', closedAt: new Date().toISOString() }, { className: 'Task' }); })
+    .then(function () { return line(taskId, 'closed', 'Closed from Projects', 'Done'); });
+}
+if (mode === 'change') {
+  steps = steps
+    .then(function () { return R.save(taskId, { title: title, waitingOn: who, deadline: deadline }, { className: 'Task' }); })
+    .then(function () { return line(taskId, 'renamed', 'Move changed in Projects' + (who ? ': waiting on ' + who : ''), ''); });
+} else if (title !== '') {
+  steps = steps
+    .then(function () {
+      return R.create('Task', { title: title, position: Number(Inputs.position) || 1, status: 'open', deadline: deadline, closingNote: '', closedAt: '', projectId: pid, waitingOn: who });
+    })
+    .then(function (t) { return line(t.getId(), 'created', 'The next move for ' + name + (who ? ', waiting on ' + who : ''), ''); });
+}
+steps.then(function () { Outputs.done(); }, function () { Outputs.failed(); });`;
+
+const SAVE_MOVE = recordWrite(
+  'Projects/Save next move',
+  'Saves a project’s next move as a task: Mode done closes the current one (Task Id) and adds the next, change rewrites it, new adds one. Waiting On names who it waits on; empty means it is your move.',
+  [['projectId', 'string'], ['projectName', 'string'], ['taskId', 'string'], ['mode', 'string'], ['title', 'string'], ['waitingOn', 'string'], ['deadline', 'string'], ['position', 'number']],
+  SAVE_MOVE_SCRIPT
+);
+
+export const ADD_PROJECT_SCRIPT =
+  DATE_FNS +
+  PJ_FNS +
+  String.raw`var name = String(Inputs.name || '').trim();
+if (name === '') return;
+var amt = pjAmount(Inputs.amount), repeat = Inputs.repeat === 'once' ? 'once' : 'monthly';
+var date = pjDate(Inputs.date);
+if (date === null || (String(Inputs.amount || '').trim() !== '' && !(amt > 0))) {
+  Outputs.error = date === null ? 'Use a date like 2026-11-01 for when it is paid, or leave it empty.' : 'Type what they pay as a number, like 1200, or leave it empty.';
+  Outputs.hasError = true;
+  return;
+}
+Outputs.error = '';
+Outputs.hasError = false;
+if (date === '') {
+  var d = new Date();
+  d = repeat === 'monthly' ? new Date(d.getFullYear(), d.getMonth() + 1, 1) : new Date(d.getFullYear(), d.getMonth(), d.getDate() + 30);
+  date = pjIso(d);
+}
+var R = Noodl.Records;
+R.create('Project', { name: name, sub: '', kind: 'earning', move: '', moveDue: null, position: Number(Inputs.position) || 1 })
+  .then(function (p) {
+    if (!(amt > 0)) return;
+    return R.create('MoneyItem', {
+      label: name, amount: Math.round(amt * 100) / 100, repeat: repeat, date: date, until: null, monthEnd: false, projectId: p.getId(),
+      billDate: repeat === 'once' ? date : null, billLeadDays: null, likelihood: 100, note: '', position: 1
+    });
+  })
+  .then(function () { Outputs.done(); }, function () { Outputs.failed(); });`;
+
+const ADD_PROJECT = recordWrite(
+  'Projects/Add project',
+  'Adds a project, and — when an amount is given — what it pays, every month or once, from the date given (or the 1st of next month, or in 30 days).',
+  [['name', 'string'], ['amount', 'string'], ['repeat', 'string'], ['date', 'string'], ['position', 'number']],
+  ADD_PROJECT_SCRIPT,
+  [['error', 'string'], ['hasError', 'boolean']]
+);
+
+/**
+ * A new bank balance. 🔴 Everything else that was due by today and is not a client's bill is
+ * taken as having happened, on its own day (Planning's *Happened*, done for you): it is in the
+ * balance already, and left open it would be counted again as late. A client's unpaid bill stays
+ * open — it is money owed, and the reason to look.
+ */
+export const RECORD_BALANCE_SCRIPT =
+  PJ_MONEY_FNS +
+  PJ_MARK_FNS +
+  String.raw`var amt = pjAmount(Inputs.amount);
+if (!isFinite(amt)) {
+  Outputs.error = 'Type what is in the bank as a number, like 2140 or −380.';
+  Outputs.hasError = true;
+  return;
+}
+Outputs.error = '';
+Outputs.hasError = false;
+var today = pjToday();
+var ctx = moneyContext(Inputs.items || [], Inputs.marks || [], Inputs.projects || [], [], today, mAddMonths(today, -13, false));
+var os = allOccs(ctx, today);
+var steps = Noodl.Records.create('BalanceReading', { date: today, amount: Math.round(amt * 100) / 100, note: '' });
+os.forEach(function (o) {
+  if (o.closed || o.hoped || o.client || o.date > today || Math.abs(o.remaining) < 0.005) return;
+  steps = steps.then(function () { return pjWriteMark(o, { day: o.date, amount: o.remaining }); });
+});
+steps.then(function () { Outputs.done(); }, function () { Outputs.failed(); });`;
+
+const RECORD_BALANCE = recordWrite(
+  'Projects/Record balance',
+  'Writes the bank balance as of today, and ticks off what was due by today that is not a client’s bill (it is in the balance already).',
+  [['amount', 'string'], ['items', 'array'], ['marks', 'array'], ['projects', 'array']],
+  RECORD_BALANCE_SCRIPT,
+  [['error', 'string'], ['hasError', 'boolean']]
+);
+
+export const MARK_MONEY_SCRIPT =
+  PJ_MONEY_FNS +
+  PJ_MARK_FNS +
+  String.raw`var parts = String(Inputs.key || '').split('|');
+if (parts.length !== 2 || !mOk(parts[1])) return;
+var today = pjToday();
+var ctx = moneyContext(Inputs.items || [], Inputs.marks || [], Inputs.projects || [], [], today, mAddMonths(today, -13, false));
+var it = null;
+for (var i = 0; i < ctx.items.length; i++) if (ctx.items[i].id === parts[0]) it = ctx.items[i];
+if (!it) return;
+var o = occOf(ctx, it, parts[1]);
+var write;
+if (String(Inputs.action || '') === 'sent') {
+  if (o.sentOn || o.closed) return;
+  write = pjWriteMark(o, null, today);
+} else {
+  if (o.closed || Math.abs(o.remaining) < 0.005) return;
+  write = pjWriteMark(o, { day: today, amount: o.remaining });
+}
+write.then(function () { Outputs.done(); }, function () { Outputs.failed(); });`;
+
+const MARK_MONEY = recordWrite(
+  'Projects/Mark money',
+  'Ticks one repeat of a money item as paid today in full (Action tick), or marks its bill sent today (Action sent). Key is "<item id>|<the day it was due>".',
+  [['key', 'string'], ['action', 'string'], ['items', 'array'], ['marks', 'array'], ['projects', 'array']],
+  MARK_MONEY_SCRIPT
+);
+
+// ── What the tab draws ──
+
+const BOX = {
+  ...COLUMN('var(--space-2)'),
+  backgroundColor: 'var(--background)',
+  borderRadius: 'var(--radius-md)',
+  paddingLeft: 'var(--space-3)',
+  paddingRight: 'var(--space-3)',
+  paddingTop: 'var(--space-3)',
+  paddingBottom: 'var(--space-3)',
+  mounted: false
+};
+
+export const ROW_SUBMIT_SCRIPT =
+  DATE_FNS +
+  PJ_FNS +
+  String.raw`var mode = String(Inputs.mode || '');
+if (mode !== 'done' && mode !== 'change') return;
+function val(v) { return String(v === undefined || v === null ? '' : v).trim(); }
+var title = val(mode === 'done' ? Inputs.doneTitle : Inputs.chTitle);
+var who = val(mode === 'done' ? Inputs.doneWho : Inputs.chWho);
+var deadline = pjDate(mode === 'done' ? Inputs.doneDue : Inputs.chDue);
+var taskId = String(Inputs.taskId || '');
+var resolved = mode === 'done' && taskId === '' ? 'new' : mode;
+var error = '';
+if (deadline === null) error = 'Use a date like 2026-10-12, or today or tomorrow, or leave the deadline empty.';
+else if (resolved !== 'done' && title === '') error = 'The move needs a few words.';
+Outputs.error = error;
+Outputs.hasError = error !== '';
+if (error) return;
+Outputs.mode = resolved;
+Outputs.title = title;
+Outputs.waitingOn = who;
+Outputs.deadline = deadline;
+Outputs.go();`;
+
+const PROJECT_ROW_FIELDS: Array<[string, string]> = [
+  ['id', 'string'], ['projectId', 'string'], ['name', 'string'], ['moneyText', 'string'], ['moneyColor', 'string'],
+  ['moveText', 'string'], ['moveColor', 'string'], ['metaText', 'string'], ['hasMeta', 'boolean'], ['metaColor', 'string'],
+  ['edge', 'string'], ['open', 'boolean'], ['facts', 'string'], ['hasFacts', 'boolean'], ['history', 'string'], ['hasHistory', 'boolean'],
+  ['taskId', 'string'], ['hasMove', 'boolean'], ['moveTitle', 'string'], ['waitingRaw', 'string'], ['deadlineRaw', 'string'],
+  ['doneLabel', 'string'], ['billKey', 'string'], ['hasBill', 'boolean'], ['billLabel', 'string'],
+  ['sendKey', 'string'], ['hasSend', 'boolean'], ['sendLabel', 'string'], ['isHeading', 'boolean'], ['heading', 'string']
+];
+const PROJECT_ROW_OUTS: Array<[string, string]> = [
+  ['toggle', 'signal'], ['save', 'signal'], ['tick', 'signal'], ['sent', 'signal'],
+  ['projectId', 'string'], ['projectName', 'string'], ['taskId', 'string'], ['mode', 'string'], ['title', 'string'],
+  ['waitingOn', 'string'], ['deadline', 'string'], ['billKey', 'string'], ['sendKey', 'string']
+];
+const MOVE_PLACEHOLDER = 'The next move, in a few words';
+const WHO_PLACEHOLDER = 'Waiting on someone? Their name. Empty if it is your move.';
+const DUE_PLACEHOLDER = 'Deadline, if there is one: 2026-10-12, today, tomorrow';
+
+/**
+ * One project — or, with Is Heading, the name of a group of them. Pressed, it opens: its money
+ * and history, and what can be done next. Done and Change each open their own box, so what a
+ * box sends is always what it shows (a field's value only moves when its text does).
+ */
+const PROJECT_ROW: Tpl008Component = {
+  path: 'Projects/Project row',
+  description:
+    'One project on the Projects tab: its name, its money in a few words, its next move and whose it is. Pressed, it opens to its money, its history, Done (which asks for the next move), Change the move, and Been paid? / Sent? when a bill is due. With Is Heading it is a group’s name instead.',
+  ...iface(PROJECT_ROW_FIELDS, PROJECT_ROW_OUTS),
+  nodes: [
+    inputs('prIn', 'The project', PROJECT_ROW_FIELDS),
+    outputs('prOut', 'What you did', PROJECT_ROW_OUTS),
+    group('prWrap', 'Row', undefined, COLUMN('var(--space-0)')),
+    group('prHeadingBox', 'Group name', 'prWrap', { ...COLUMN('var(--space-0)'), ...RULE_BELOW, paddingTop: 'var(--space-5)', paddingBottom: 'var(--space-2)', mounted: false }),
+    text('prHeading', 'Group name', 'prHeadingBox', '', wide(T_HEADING)),
+    group('prRoot', 'Project', 'prWrap', {
+      ...COLUMN('var(--space-0)'),
+      ...RULE_BELOW,
+      borderLeftStyle: 'solid',
+      borderLeftWidth: px(3),
+      borderLeftColor: 'transparent'
+    }),
+    group('prHead', 'Name, money and next move', 'prRoot', {
+      ...COLUMN('var(--space-0-5)'),
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-2)',
+      paddingTop: 'var(--space-3)',
+      paddingBottom: 'var(--space-3)',
+      styleCss: 'cursor: pointer;'
+    }),
+    group('prTop', 'Name and money', 'prHead', { ...ROW('var(--space-3)'), justifyContent: 'space-between', flexWrap: 'wrap' }),
+    text('prName', 'Project', 'prTop', '', { ...T_BODY, fontWeight: 'var(--font-semibold)', sizeMode: 'contentSize' }),
+    text('prMoney', 'Its money', 'prTop', '', { ...T_META, sizeMode: 'contentSize' }),
+    text('prMove', 'Its next move', 'prHead', '', wide(T_META)),
+    text('prMeta', 'Deadline, or who it waits on', 'prHead', '', wide(T_META)),
+    group('prDetail', 'Opened', 'prRoot', {
+      ...COLUMN('var(--space-3)'),
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-2)',
+      paddingBottom: 'var(--space-4)',
+      mounted: false
+    }),
+    text('prFacts', 'Its money, in full', 'prDetail', '', wide(T_META)),
+    text('prHistory', 'What was done', 'prDetail', '', wide(T_META)),
+    group('prButtons', 'What you can do', 'prDetail', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('prDone', BUTTON, 'Done', 'prButtons', { ...BTN_PRIMARY, label: 'Done' }),
+    place('prChange', BUTTON, 'Change the move', 'prButtons', { ...BTN_OUTLINE, label: 'Change the move', mounted: false }),
+    place('prTick', BUTTON, 'Been paid? Tick it', 'prButtons', { ...BTN_OUTLINE, label: 'Been paid? Tick it', mounted: false }),
+    place('prSend', BUTTON, 'Sent the invoice? Mark it', 'prButtons', { ...BTN_OUTLINE, label: 'Sent the invoice? Mark it', mounted: false }),
+    group('prDoneBox', 'The next move', 'prDetail', BOX),
+    text('prDoneHead', 'The question', 'prDoneBox', '', wide({ ...T_BODY, fontWeight: 'var(--font-semibold)' })),
+    place('prDoneTitle', TEXT_INPUT, 'The next move', 'prDoneBox', { ...FIELD, placeholder: MOVE_PLACEHOLDER }),
+    place('prDoneWho', TEXT_INPUT, 'Who it waits on', 'prDoneBox', { ...FIELD, placeholder: WHO_PLACEHOLDER }),
+    place('prDoneDue', TEXT_INPUT, 'Its deadline', 'prDoneBox', { ...FIELD, placeholder: DUE_PLACEHOLDER }),
+    group('prDoneBtns', 'Save or cancel', 'prDoneBox', ROW('var(--space-2)')),
+    place('prDoneSave', BUTTON, 'Save', 'prDoneBtns', { ...BTN_PRIMARY, label: 'Save' }),
+    place('prDoneCancel', BUTTON, 'Cancel', 'prDoneBtns', { ...BTN_GHOST, label: 'Cancel' }),
+    group('prChBox', 'Change the move', 'prDetail', BOX),
+    text('prChHead', 'What it says', 'prChBox', '', wide({ ...T_BODY, fontWeight: 'var(--font-semibold)' })),
+    place('prChTitle', TEXT_INPUT, 'The move', 'prChBox', { ...FIELD, placeholder: MOVE_PLACEHOLDER }),
+    place('prChWho', TEXT_INPUT, 'Who it waits on', 'prChBox', { ...FIELD, placeholder: WHO_PLACEHOLDER }),
+    place('prChDue', TEXT_INPUT, 'Its deadline', 'prChBox', { ...FIELD, placeholder: DUE_PLACEHOLDER }),
+    group('prChBtns', 'Save or cancel', 'prChBox', ROW('var(--space-2)')),
+    place('prChSave', BUTTON, 'Save', 'prChBtns', { ...BTN_PRIMARY, label: 'Save' }),
+    place('prChCancel', BUTTON, 'Cancel', 'prChBtns', { ...BTN_GHOST, label: 'Cancel' }),
+    text('prError', 'Why it was not saved', 'prDetail', '', { ...wide(T_ERROR), mounted: false }),
+    logic('prMode', STATES, 'Which box is open', { states: 'none,done,change', currentState: 'none', useTransitions: false }),
+    derive(
+      'prLook',
+      'Heading or project, and the two questions',
+      "var h = !!Inputs.isHeading;\nvar n = String(Inputs.name || '');\nOutputs.showHeading = h;\nOutputs.showProject = !h;\nOutputs.doneHead = Inputs.hasMove ? 'Done. What is the next move for ' + n + '?' : 'What is the next move for ' + n + '?';\nOutputs.changeHead = 'Change the move for ' + n;"
+    ),
+    script('prSubmit', 'What the open box says', ROW_SUBMIT_SCRIPT, ['mode', 'taskId', 'doneTitle', 'doneWho', 'doneDue', 'chTitle', 'chWho', 'chDue'])
+  ],
+  connections: [
+    wire('prIn', 'isHeading', 'prLook', 'in-isHeading'),
+    wire('prIn', 'name', 'prLook', 'in-name'),
+    wire('prIn', 'hasMove', 'prLook', 'in-hasMove'),
+    wire('prLook', 'out-showHeading', 'prHeadingBox', 'mounted'),
+    wire('prLook', 'out-showProject', 'prRoot', 'mounted'),
+    wire('prLook', 'out-doneHead', 'prDoneHead', 'text'),
+    wire('prLook', 'out-changeHead', 'prChHead', 'text'),
+    wire('prIn', 'heading', 'prHeading', 'text'),
+    wire('prIn', 'name', 'prName', 'text'),
+    wire('prIn', 'moneyText', 'prMoney', 'text'),
+    wire('prIn', 'moneyColor', 'prMoney', 'color'),
+    wire('prIn', 'moveText', 'prMove', 'text'),
+    wire('prIn', 'moveColor', 'prMove', 'color'),
+    wire('prIn', 'metaText', 'prMeta', 'text'),
+    wire('prIn', 'hasMeta', 'prMeta', 'mounted'),
+    wire('prIn', 'metaColor', 'prMeta', 'color'),
+    wire('prIn', 'edge', 'prRoot', 'borderLeftColor'),
+    wire('prIn', 'open', 'prDetail', 'mounted'),
+    wire('prIn', 'facts', 'prFacts', 'text'),
+    wire('prIn', 'hasFacts', 'prFacts', 'mounted'),
+    wire('prIn', 'history', 'prHistory', 'text'),
+    wire('prIn', 'hasHistory', 'prHistory', 'mounted'),
+    wire('prIn', 'doneLabel', 'prDone', 'label'),
+    wire('prIn', 'hasMove', 'prChange', 'mounted'),
+    wire('prIn', 'hasBill', 'prTick', 'mounted'),
+    wire('prIn', 'billLabel', 'prTick', 'label'),
+    wire('prIn', 'hasSend', 'prSend', 'mounted'),
+    wire('prIn', 'sendLabel', 'prSend', 'label'),
+    // Change opens on what the move says now.
+    wire('prIn', 'moveTitle', 'prChTitle', 'startValue'),
+    wire('prIn', 'waitingRaw', 'prChWho', 'startValue'),
+    wire('prIn', 'deadlineRaw', 'prChDue', 'startValue'),
+    wire('prHead', 'onClick', 'prOut', 'toggle'),
+    wire('prDone', 'onClick', 'prMode', 'to-done'),
+    wire('prChange', 'onClick', 'prMode', 'to-change'),
+    wire('prDoneCancel', 'onClick', 'prMode', 'to-none'),
+    wire('prChCancel', 'onClick', 'prMode', 'to-none'),
+    wire('prMode', 'at-done', 'prDoneBox', 'mounted'),
+    wire('prMode', 'at-change', 'prChBox', 'mounted'),
+    wire('prMode', 'currentState', 'prSubmit', 'in-mode'),
+    wire('prIn', 'taskId', 'prSubmit', 'in-taskId'),
+    wire('prDoneTitle', 'onTextChanged', 'prSubmit', 'in-doneTitle'),
+    wire('prDoneWho', 'onTextChanged', 'prSubmit', 'in-doneWho'),
+    wire('prDoneDue', 'onTextChanged', 'prSubmit', 'in-doneDue'),
+    wire('prChTitle', 'onTextChanged', 'prSubmit', 'in-chTitle'),
+    wire('prChWho', 'onTextChanged', 'prSubmit', 'in-chWho'),
+    wire('prChDue', 'onTextChanged', 'prSubmit', 'in-chDue'),
+    wire('prDoneSave', 'onClick', 'prSubmit', 'run'),
+    wire('prChSave', 'onClick', 'prSubmit', 'run'),
+    wire('prSubmit', 'out-error', 'prError', 'text'),
+    wire('prSubmit', 'out-hasError', 'prError', 'mounted'),
+    wire('prSubmit', 'out-mode', 'prOut', 'mode'),
+    wire('prSubmit', 'out-title', 'prOut', 'title'),
+    wire('prSubmit', 'out-waitingOn', 'prOut', 'waitingOn'),
+    wire('prSubmit', 'out-deadline', 'prOut', 'deadline'),
+    wire('prSubmit', 'out-go', 'prOut', 'save'),
+    wire('prSubmit', 'out-go', 'prMode', 'to-none'),
+    // The Done box starts empty next time; Change starts from what the move then says.
+    wire('prSubmit', 'out-go', 'prDoneTitle', 'clear'),
+    wire('prSubmit', 'out-go', 'prDoneWho', 'clear'),
+    wire('prSubmit', 'out-go', 'prDoneDue', 'clear'),
+    wire('prIn', 'projectId', 'prOut', 'projectId'),
+    wire('prIn', 'name', 'prOut', 'projectName'),
+    wire('prIn', 'taskId', 'prOut', 'taskId'),
+    wire('prIn', 'billKey', 'prOut', 'billKey'),
+    wire('prIn', 'sendKey', 'prOut', 'sendKey'),
+    wire('prTick', 'onClick', 'prOut', 'tick'),
+    wire('prSend', 'onClick', 'prOut', 'sent')
+  ]
+};
+
+const PROJECT_LIST: Tpl008Component = {
+  path: 'Projects/Project list',
+  description: 'The projects, grouped (Your move, Waiting on someone, Quiet), one Project row each. Passes on whatever a row says.',
+  ...iface([['rows', 'array']], PROJECT_ROW_OUTS),
+  repeats: { source: 'array', rowFields: PROJECT_ROW_FIELDS.map(([n]) => n) },
+  instantiates: [C.projectRow],
+  nodes: [
+    inputs('plIn', 'The rows', [['rows', 'array']]),
+    outputs('plOut', 'What a row said', PROJECT_ROW_OUTS),
+    group('plRoot', 'Projects', undefined, COLUMN('var(--space-0)')),
+    place('plEach', FOR_EACH, 'One row per project', 'plRoot', { template: C.projectRow, templateType: 'explicit' })
+  ],
+  connections: [
+    wire('plIn', 'rows', 'plEach', 'items'),
+    ...PROJECT_ROW_OUTS.map(([n, t]) => wire('plEach', t === 'signal' ? `itemOutputSignal-${n}` : `itemOutput-${n}`, 'plOut', n))
+  ]
+};
+
+const MONEY_BAR_FIELDS: Array<[string, string]> = [['id', 'string'], ['height', '*'], ['mark', 'string']];
+const MONEY_BAR: Tpl008Component = {
+  path: 'Projects/Money bar',
+  description: 'One day of the money line: as tall as the balance that day, red below nothing.',
+  ...iface(MONEY_BAR_FIELDS, []),
+  nodes: [
+    inputs('mbIn', 'The day', MONEY_BAR_FIELDS),
+    group('mbBar', 'The bar', undefined, { sizeMode: 'explicit', width: pct(100), borderRadius: 'var(--radius-sm)' })
+  ],
+  connections: [wire('mbIn', 'height', 'mbBar', 'height'), wire('mbIn', 'mark', 'mbBar', 'backgroundColor')]
+};
+
+const INCOME_ROW_FIELDS: Array<[string, string]> = [['id', 'string'], ['key', 'string'], ['label', 'string'], ['meta', 'string'], ['metaColor', 'string'], ['amount', 'string']];
+const INCOME_ROW: Tpl008Component = {
+  path: 'Projects/Income row',
+  description: 'Money due in soon (or late): who, when, how much, and Paid.',
+  ...iface(INCOME_ROW_FIELDS, [['paid', 'signal'], ['key', 'string']]),
+  nodes: [
+    inputs('irIn', 'The money', INCOME_ROW_FIELDS),
+    outputs('irOut', 'Paid', [['paid', 'signal'], ['key', 'string']]),
+    group('irRow', 'Row', undefined, { ...ROW('var(--space-3)'), ...RULE_BELOW, paddingTop: 'var(--space-2)', paddingBottom: 'var(--space-2)' }),
+    group('irText', 'Who and when', 'irRow', { ...COLUMN('var(--space-0-5)'), styleCss: 'flex: 1 1 auto; min-width: 0;' }),
+    text('irLabel', 'Who', 'irText', '', wide(T_BODY)),
+    text('irMeta', 'When', 'irText', '', wide(T_META)),
+    text('irAmount', 'How much', 'irRow', '', { ...T_BODY, sizeMode: 'contentSize', fontVariantNumeric: 'tabular-nums' }),
+    place('irPaid', BUTTON, 'Paid', 'irRow', { ...BTN_OUTLINE, label: 'Paid' })
+  ],
+  connections: [
+    wire('irIn', 'label', 'irLabel', 'text'),
+    wire('irIn', 'meta', 'irMeta', 'text'),
+    wire('irIn', 'metaColor', 'irMeta', 'color'),
+    wire('irIn', 'amount', 'irAmount', 'text'),
+    wire('irIn', 'key', 'irOut', 'key'),
+    wire('irPaid', 'onClick', 'irOut', 'paid')
+  ]
+};
+
+const MONEY_INS: Array<[string, string]> = [
+  ['balanceText', 'string'], ['balanceWhen', 'string'], ['bars', 'array'], ['lowText', 'string'], ['lowColor', 'string'],
+  ['incomeRows', 'array'], ['hasIncome', 'boolean'], ['items', 'array'], ['marks', 'array'], ['projects', 'array']
+];
+
+const MONEY: Tpl008Component = {
+  path: 'Projects/Money',
+  description:
+    'The money at the top of the Projects tab: the bank balance and when it was read, the next 30 days as a line, the lowest point, money due in soon with Paid, and a box for a new balance. Changed says something was written.',
+  ...iface(MONEY_INS, [['changed', 'signal']]),
+  instantiates: [C.moneyBar, C.incomeRow, C.recordBalance, C.markMoney],
+  nodes: [
+    inputs('mnIn', 'The money', MONEY_INS),
+    outputs('mnOut', 'Written', [['changed', 'signal']]),
+    group('mnRoot', 'Money', undefined, COLUMN('var(--space-2)')),
+    text('mnHeading', 'Money', 'mnRoot', 'Money', wide(T_HEADING)),
+    group('mnCard', 'Balance and the month ahead', 'mnRoot', {
+      ...COLUMN('var(--space-3)'),
+      backgroundColor: 'var(--surface)',
+      borderStyle: 'solid',
+      borderWidth: 'var(--border-1)',
+      borderColor: 'var(--border)',
+      borderRadius: 'var(--radius-lg)',
+      paddingLeft: 'var(--space-4)',
+      paddingRight: 'var(--space-4)',
+      paddingTop: 'var(--space-4)',
+      paddingBottom: 'var(--space-4)'
+    }),
+    group('mnTop', 'The balance', 'mnCard', { ...ROW('var(--space-3)'), flexWrap: 'wrap' }),
+    text('mnBalance', 'In the bank', 'mnTop', '', { ...T_TITLE, sizeMode: 'contentSize', fontVariantNumeric: 'tabular-nums' }),
+    text('mnWhen', 'When it was read', 'mnTop', '', { ...T_META, sizeMode: 'contentHeight', styleCss: 'flex: 1 1 200px; min-width: 0;' }),
+    group('mnBars', 'The next 30 days', 'mnCard', {
+      flexDirection: 'row',
+      alignItems: 'flex-end',
+      columnGap: 'var(--space-0-5)',
+      sizeMode: 'explicit',
+      width: pct(100),
+      height: px(48)
+    }),
+    place('mnEach', FOR_EACH, 'One bar per day', 'mnBars', { template: C.moneyBar, templateType: 'explicit' }),
+    text('mnLow', 'The lowest point', 'mnCard', '', wide(T_META)),
+    group('mnIncome', 'Due in soon', 'mnCard', { ...COLUMN('var(--space-0)'), mounted: false }),
+    place('mnIncomeEach', FOR_EACH, 'One row per payment due', 'mnIncome', { template: C.incomeRow, templateType: 'explicit' }),
+    group('mnNew', 'A new balance', 'mnCard', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('mnField', TEXT_INPUT, 'New balance', 'mnNew', { ...FIELD, placeholder: 'What is in the bank now, e.g. 2140', styleCss: 'flex: 1 1 220px; min-width: 0;' }),
+    place('mnSave', BUTTON, 'Save balance', 'mnNew', { ...BTN_OUTLINE, label: 'Save balance' }),
+    text('mnError', 'Why it was not saved', 'mnCard', '', { ...wide(T_ERROR), mounted: false }),
+    logic('cmdBalance', C.recordBalance, 'Record balance'),
+    logic('cmdPaid', C.markMoney, 'Paid', { action: 'tick' })
+  ],
+  connections: [
+    wire('mnIn', 'balanceText', 'mnBalance', 'text'),
+    wire('mnIn', 'balanceWhen', 'mnWhen', 'text'),
+    wire('mnIn', 'bars', 'mnEach', 'items'),
+    wire('mnIn', 'lowText', 'mnLow', 'text'),
+    wire('mnIn', 'lowColor', 'mnLow', 'color'),
+    wire('mnIn', 'incomeRows', 'mnIncomeEach', 'items'),
+    wire('mnIn', 'hasIncome', 'mnIncome', 'mounted'),
+    ...(['items', 'marks', 'projects'] as const).flatMap((n) => [wire('mnIn', n, 'cmdBalance', n), wire('mnIn', n, 'cmdPaid', n)]),
+    wire('mnField', 'onTextChanged', 'cmdBalance', 'amount'),
+    wire('mnSave', 'onClick', 'cmdBalance', 'do'),
+    wire('mnField', 'onEnter', 'cmdBalance', 'do'),
+    wire('cmdBalance', 'error', 'mnError', 'text'),
+    wire('cmdBalance', 'hasError', 'mnError', 'mounted'),
+    wire('cmdBalance', 'done', 'mnField', 'clear'),
+    wire('cmdBalance', 'done', 'mnOut', 'changed'),
+    wire('mnIncomeEach', 'itemOutput-key', 'cmdPaid', 'key'),
+    wire('mnIncomeEach', 'itemOutputSignal-paid', 'cmdPaid', 'do'),
+    wire('cmdPaid', 'done', 'mnOut', 'changed')
+  ]
+};
+
+const VIEW_INS: Array<[string, string]> = [
+  ['balanceText', 'string'], ['balanceWhen', 'string'], ['bars', 'array'], ['lowText', 'string'], ['lowColor', 'string'],
+  ['incomeRows', 'array'], ['hasIncome', 'boolean'], ['rows', 'array'], ['noProjects', 'boolean'],
+  ['projectPosition', 'number'], ['nextPosition', 'number'], ['items', 'array'], ['marks', 'array'], ['projects', 'array']
+];
+const VIEW_OUTS: Array<[string, string]> = [['changed', 'signal'], ['toggle', 'signal'], ['projectId', 'string'], ['hide', 'signal']];
+
+const PROJECTS_VIEW: Tpl008Component = {
+  path: 'Projects/View',
+  description:
+    'The Projects tab: the money, then every project with its next move (Your move, Waiting on someone, Quiet), a box to add a project, and Hide this tab. Toggle (with Project Id) says a project was pressed; Changed says something was written.',
+  ...iface(VIEW_INS, VIEW_OUTS),
+  instantiates: [C.money, C.projectList, C.saveMove, C.addProject, C.markMoney],
+  nodes: [
+    inputs('pvIn', 'What to draw', VIEW_INS),
+    outputs('pvOut', 'What you did', VIEW_OUTS),
+    group('pvRoot', 'Projects', undefined, { ...COLUMN('var(--space-6)'), maxWidth: px(760) }),
+    place('pvMoney', C.money, 'Money', 'pvRoot'),
+    group('pvProjects', 'The projects', 'pvRoot', COLUMN('var(--space-0)')),
+    text('pvEmpty', 'No projects yet', 'pvProjects', 'No projects yet. Add the first one below: who it is, and what they pay if they do.', { ...wide(T_META), mounted: false }),
+    place('pvList', C.projectList, 'The projects', 'pvProjects'),
+    group('pvAdd', 'Add a project', 'pvRoot', COLUMN('var(--space-2)')),
+    text('pvAddHeading', 'Add a project', 'pvAdd', 'Add a project', wide(T_HEADING)),
+    place('pvName', TEXT_INPUT, 'Who or what', 'pvAdd', { ...FIELD, placeholder: 'A client, or something of your own' }),
+    group('pvAddRow', 'What they pay', 'pvAdd', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('pvAmount', TEXT_INPUT, 'What they pay', 'pvAddRow', { ...FIELD, placeholder: 'What they pay (€), if they do', styleCss: 'flex: 1 1 180px; min-width: 0;' }),
+    place('pvWhen', TEXT_INPUT, 'When', 'pvAddRow', { ...FIELD, placeholder: 'First paid on: 2026-11-01', styleCss: 'flex: 1 1 180px; min-width: 0;' }),
+    group('pvOften', 'How often', 'pvAdd', { ...ROW('var(--space-1)'), flexWrap: 'wrap' }),
+    place('pvMonthly', BUTTON, 'Every month', 'pvOften', { ...BTN_GHOST, label: 'Every month' }),
+    place('pvOnce', BUTTON, 'Just once', 'pvOften', { ...BTN_GHOST, label: 'Just once' }),
+    place('pvAddButton', BUTTON, 'Add', 'pvOften', { ...BTN_PRIMARY, label: 'Add project', marginLeft: 'var(--space-2)' }),
+    text('pvAddError', 'Why it was not added', 'pvAdd', '', { ...wide(T_ERROR), mounted: false }),
+    place('pvHide', BUTTON, 'Hide this tab', 'pvRoot', { ...BTN_GHOST, label: 'Hide this tab', color: 'var(--muted-foreground)' }),
+    logic('pvRepeat', STATES, 'Every month or once', {
+      states: 'monthly,once',
+      currentState: 'monthly',
+      values: 'monthlyBg,onceBg',
+      'type-monthlyBg': 'color',
+      'type-onceBg': 'color',
+      'value-monthly-monthlyBg': 'var(--muted)',
+      'value-monthly-onceBg': 'transparent',
+      'value-once-monthlyBg': 'transparent',
+      'value-once-onceBg': 'var(--muted)',
+      useTransitions: false
+    }),
+    logic('cmdMove', C.saveMove, 'Save next move'),
+    logic('cmdTick', C.markMoney, 'Been paid', { action: 'tick' }),
+    logic('cmdSent', C.markMoney, 'Sent', { action: 'sent' }),
+    logic('cmdAddProject', C.addProject, 'Add project')
+  ],
+  connections: [
+    ...['balanceText', 'balanceWhen', 'bars', 'lowText', 'lowColor', 'incomeRows', 'hasIncome', 'items', 'marks', 'projects'].map((n) => wire('pvIn', n, 'pvMoney', n)),
+    wire('pvMoney', 'changed', 'pvOut', 'changed'),
+    wire('pvIn', 'rows', 'pvList', 'rows'),
+    wire('pvIn', 'noProjects', 'pvEmpty', 'mounted'),
+    wire('pvList', 'projectId', 'pvOut', 'projectId'),
+    wire('pvList', 'toggle', 'pvOut', 'toggle'),
+    // The next move
+    ...(['projectId', 'projectName', 'taskId', 'mode', 'title', 'waitingOn', 'deadline'] as const).map((n) => wire('pvList', n, 'cmdMove', n)),
+    wire('pvIn', 'nextPosition', 'cmdMove', 'position'),
+    wire('pvList', 'save', 'cmdMove', 'do'),
+    wire('cmdMove', 'done', 'pvOut', 'changed'),
+    // Money from a project
+    ...(['items', 'marks', 'projects'] as const).flatMap((n) => [wire('pvIn', n, 'cmdTick', n), wire('pvIn', n, 'cmdSent', n)]),
+    wire('pvList', 'billKey', 'cmdTick', 'key'),
+    wire('pvList', 'tick', 'cmdTick', 'do'),
+    wire('cmdTick', 'done', 'pvOut', 'changed'),
+    wire('pvList', 'sendKey', 'cmdSent', 'key'),
+    wire('pvList', 'sent', 'cmdSent', 'do'),
+    wire('cmdSent', 'done', 'pvOut', 'changed'),
+    // A new project
+    wire('pvMonthly', 'onClick', 'pvRepeat', 'to-monthly'),
+    wire('pvOnce', 'onClick', 'pvRepeat', 'to-once'),
+    wire('pvRepeat', 'monthlyBg', 'pvMonthly', 'backgroundColor'),
+    wire('pvRepeat', 'onceBg', 'pvOnce', 'backgroundColor'),
+    wire('pvName', 'onTextChanged', 'cmdAddProject', 'name'),
+    wire('pvAmount', 'onTextChanged', 'cmdAddProject', 'amount'),
+    wire('pvWhen', 'onTextChanged', 'cmdAddProject', 'date'),
+    wire('pvRepeat', 'currentState', 'cmdAddProject', 'repeat'),
+    wire('pvIn', 'projectPosition', 'cmdAddProject', 'position'),
+    wire('pvAddButton', 'onClick', 'cmdAddProject', 'do'),
+    wire('cmdAddProject', 'error', 'pvAddError', 'text'),
+    wire('cmdAddProject', 'hasError', 'pvAddError', 'mounted'),
+    wire('cmdAddProject', 'done', 'pvName', 'clear'),
+    wire('cmdAddProject', 'done', 'pvAmount', 'clear'),
+    wire('cmdAddProject', 'done', 'pvWhen', 'clear'),
+    wire('cmdAddProject', 'done', 'pvOut', 'changed'),
+    wire('pvHide', 'onClick', 'pvOut', 'hide')
+  ]
+};
+
+const NEXT_PROMPT_INS: Array<[string, string]> = [['open', 'boolean'], ['projectId', 'string'], ['projectName', 'string'], ['position', 'number']];
+
+/**
+ * PJ2 — a project's task ticked off in the List asks the same question Done does, at the top of
+ * whatever view is showing: *"What is the next move for X?"*. Nothing next is an answer too.
+ */
+const NEXT_PROMPT: Tpl008Component = {
+  path: 'Projects/Next move prompt',
+  description: 'After a project’s task is closed: asks for that project’s next move, and saves it as a task. Nothing next for now puts it away.',
+  ...iface(NEXT_PROMPT_INS, [['done', 'signal'], ['skip', 'signal']]),
+  instantiates: [C.saveMove],
+  nodes: [
+    inputs('npIn', 'Which project', NEXT_PROMPT_INS),
+    outputs('npOut', 'Answered', [['done', 'signal'], ['skip', 'signal']]),
+    group('npRoot', 'The next move', undefined, {
+      ...COLUMN('var(--space-2)'),
+      mounted: false,
+      backgroundColor: 'var(--surface)',
+      borderStyle: 'solid',
+      borderWidth: 'var(--border-1)',
+      borderColor: 'var(--primary)',
+      borderRadius: 'var(--radius-lg)',
+      paddingLeft: 'var(--space-4)',
+      paddingRight: 'var(--space-4)',
+      paddingTop: 'var(--space-3)',
+      paddingBottom: 'var(--space-3)'
+    }),
+    text('npHead', 'The question', 'npRoot', '', wide({ ...T_BODY, fontWeight: 'var(--font-semibold)' })),
+    place('npTitle', TEXT_INPUT, 'The next move', 'npRoot', { ...FIELD, placeholder: MOVE_PLACEHOLDER }),
+    place('npWho', TEXT_INPUT, 'Who it waits on', 'npRoot', { ...FIELD, placeholder: WHO_PLACEHOLDER }),
+    place('npDue', TEXT_INPUT, 'Its deadline', 'npRoot', { ...FIELD, placeholder: DUE_PLACEHOLDER }),
+    text('npError', 'Why it was not saved', 'npRoot', '', { ...wide(T_ERROR), mounted: false }),
+    group('npBtns', 'Save, or nothing next', 'npRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('npSave', BUTTON, 'Save', 'npBtns', { ...BTN_PRIMARY, label: 'Save' }),
+    place('npSkip', BUTTON, 'Nothing next for now', 'npBtns', { ...BTN_GHOST, label: 'Nothing next for now' }),
+    derive('npLook', 'The question', "Outputs.head = 'Closed. What is the next move for ' + String(Inputs.name || 'the project') + '?';"),
+    script(
+      'npCheck',
+      'Is it a date?',
+      `${DATE_FNS}${PJ_FNS}var t = String(Inputs.title || '').trim();
+var d = pjDate(Inputs.due);
+var error = d === null ? 'Use a date like 2026-10-12, or today or tomorrow, or leave the deadline empty.' : t === '' ? 'Type the next move, or press Nothing next for now.' : '';
+Outputs.error = error;
+Outputs.hasError = error !== '';
+if (error) return;
+Outputs.deadline = d;
+Outputs.go();`,
+      ['title', 'due']
+    ),
+    logic('npSaveMove', C.saveMove, 'Save the next move', { mode: 'new' })
+  ],
+  connections: [
+    wire('npIn', 'open', 'npRoot', 'mounted'),
+    wire('npIn', 'projectName', 'npLook', 'in-name'),
+    wire('npLook', 'out-head', 'npHead', 'text'),
+    wire('npTitle', 'onTextChanged', 'npCheck', 'in-title'),
+    wire('npDue', 'onTextChanged', 'npCheck', 'in-due'),
+    wire('npSave', 'onClick', 'npCheck', 'run'),
+    wire('npTitle', 'onEnter', 'npCheck', 'run'),
+    wire('npCheck', 'out-error', 'npError', 'text'),
+    wire('npCheck', 'out-hasError', 'npError', 'mounted'),
+    wire('npIn', 'projectId', 'npSaveMove', 'projectId'),
+    wire('npIn', 'projectName', 'npSaveMove', 'projectName'),
+    wire('npIn', 'position', 'npSaveMove', 'position'),
+    wire('npTitle', 'onTextChanged', 'npSaveMove', 'title'),
+    wire('npWho', 'onTextChanged', 'npSaveMove', 'waitingOn'),
+    wire('npCheck', 'out-deadline', 'npSaveMove', 'deadline'),
+    wire('npCheck', 'out-go', 'npSaveMove', 'do'),
+    ...['npTitle', 'npWho', 'npDue'].flatMap((f) => [wire('npSaveMove', 'done', f, 'clear'), wire('npSkip', 'onClick', f, 'clear')]),
+    wire('npSaveMove', 'done', 'npOut', 'done'),
+    wire('npSkip', 'onClick', 'npOut', 'skip')
   ]
 };
 
@@ -4446,6 +5746,11 @@ export const TPL008_COMPONENTS: ReadonlyArray<Tpl008Component> = [
   SET_ROUTINE_DATES,
   TICK_ROUTINE,
   STOP_ROUTINE,
+  SAVE_MOVE,
+  ADD_PROJECT,
+  RECORD_BALANCE,
+  MARK_MONEY,
+  PROJECTS_LOGIC,
   TASK_ROWS,
   SELECTED_TASK,
   LOG_ROWS,
@@ -4477,6 +5782,13 @@ export const TPL008_COMPONENTS: ReadonlyArray<Tpl008Component> = [
   ROUTINE_SUMMARY,
   NOTE_DIALOG,
   DIALOG_FLOW,
+  PROJECT_ROW,
+  PROJECT_LIST,
+  MONEY_BAR,
+  INCOME_ROW,
+  MONEY,
+  PROJECTS_VIEW,
+  NEXT_PROMPT,
   PAGE_TODO,
   PAGE_SIGN_IN
 ];
