@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2f88ea6a-2588-57aa-8122-b0a68ac69aeb",
+  "name": "Slot chip",
+  "path": "/Todo/Slot chip",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One time in the schedule, such as \"08:00\", \"Tue 09:00\" or \"Last day 17:00\", with a ✕ that takes it out."
+}

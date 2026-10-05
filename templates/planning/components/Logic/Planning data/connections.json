@@ -1,0 +1,313 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "554e283c-e5ab-51b1-8683-61c6b6e3bf97",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pnThisWeek",
+      "fromProperty": "out-monday",
+      "toId": "pnStart",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pnIn",
+      "fromProperty": "thisWeek",
+      "toId": "pnStart",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pnIn",
+      "fromProperty": "previousWeek",
+      "toId": "pnCount",
+      "toProperty": "decrease"
+    },
+    {
+      "fromId": "pnIn",
+      "fromProperty": "nextWeek",
+      "toId": "pnCount",
+      "toProperty": "increase"
+    },
+    {
+      "fromId": "pnIn",
+      "fromProperty": "thisWeek",
+      "toId": "pnCount",
+      "toProperty": "reset"
+    },
+    {
+      "fromId": "pnCount",
+      "fromProperty": "currentCount",
+      "toId": "pnStep",
+      "toProperty": "in-offset"
+    },
+    {
+      "fromId": "pnStep",
+      "fromProperty": "out-monday",
+      "toId": "pnStart",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pnStep",
+      "fromProperty": "out-moved",
+      "toId": "pnStart",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pnWeek",
+      "fromProperty": "value",
+      "toId": "pnWindow",
+      "toProperty": "in-weekStart"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-weekStart",
+      "toId": "pnOut",
+      "toProperty": "weekStart"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-weekLabel",
+      "toId": "pnOut",
+      "toProperty": "weekLabel"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-month",
+      "toId": "pnOut",
+      "toProperty": "month"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-ready",
+      "toId": "pnReady",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "pnIn",
+      "fromProperty": "refresh",
+      "toId": "pnReady",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-fetch",
+      "toId": "pnReady",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-from",
+      "toId": "pnBlocks",
+      "toProperty": "qp-from"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-to",
+      "toId": "pnBlocks",
+      "toProperty": "qp-to"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-month",
+      "toId": "pnMonth",
+      "toProperty": "qp-month"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-moveSince",
+      "toId": "pnMoveBlocks",
+      "toProperty": "qp-moveSince"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-marksSince",
+      "toId": "pnMarks",
+      "toProperty": "qp-marksSince"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-marksSince",
+      "toId": "pnOut",
+      "toProperty": "marksSince"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-openStatus",
+      "toId": "pnTasks",
+      "toProperty": "qp-openStatus"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnProjects",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnBlocks",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnMoveBlocks",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnMonth",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnItems",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnMarks",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnReadings",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnSettings",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnReady",
+      "fromProperty": "ontrue",
+      "toId": "pnHistory",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnSettings",
+      "fromProperty": "items",
+      "toId": "pnTodoGate",
+      "toProperty": "in-settings"
+    },
+    {
+      "fromId": "pnSettings",
+      "fromProperty": "fetched",
+      "toId": "pnTodoGate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pnTodoGate",
+      "fromProperty": "out-fetch",
+      "toId": "pnTasks",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnWindow",
+      "fromProperty": "out-sentSummary",
+      "toId": "pnSent",
+      "toProperty": "qp-sentSummary"
+    },
+    {
+      "fromId": "pnTodoGate",
+      "fromProperty": "out-fetch",
+      "toId": "pnSent",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnTodoGate",
+      "fromProperty": "out-fetch",
+      "toId": "pnActions",
+      "toProperty": "storageFetch"
+    },
+    {
+      "fromId": "pnProjects",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pnBlocks",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "pnMoveBlocks",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "moveBlocks"
+    },
+    {
+      "fromId": "pnMonth",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "monthPlans"
+    },
+    {
+      "fromId": "pnItems",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "moneyItems"
+    },
+    {
+      "fromId": "pnMarks",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "moneyMarks"
+    },
+    {
+      "fromId": "pnReadings",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "balanceReadings"
+    },
+    {
+      "fromId": "pnSettings",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "settings"
+    },
+    {
+      "fromId": "pnTasks",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "tasks"
+    },
+    {
+      "fromId": "pnSent",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "sent"
+    },
+    {
+      "fromId": "pnActions",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "actions"
+    },
+    {
+      "fromId": "pnHistory",
+      "fromProperty": "items",
+      "toId": "pnOut",
+      "toProperty": "history"
+    },
+    {
+      "fromId": "pnBlocks",
+      "fromProperty": "fetched",
+      "toId": "pnOut",
+      "toProperty": "loaded"
+    },
+    {
+      "fromId": "pnProjects",
+      "fromProperty": "failure",
+      "toId": "pnLoadProblem",
+      "toProperty": "do"
+    }
+  ]
+}

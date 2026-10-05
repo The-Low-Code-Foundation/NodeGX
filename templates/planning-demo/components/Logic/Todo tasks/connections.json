@@ -1,0 +1,61 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1602bba6-3f76-52d4-82c6-376b20364bad",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ttIn",
+      "fromProperty": "tasks",
+      "toId": "ttWork",
+      "toProperty": "in-tasks"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "sent",
+      "toId": "ttWork",
+      "toProperty": "in-sent"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "blocks",
+      "toId": "ttWork",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "moveBlocks",
+      "toId": "ttWork",
+      "toProperty": "in-moveBlocks"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "todoUrl",
+      "toId": "ttWork",
+      "toProperty": "in-todoUrl"
+    },
+    {
+      "fromId": "ttIn",
+      "fromProperty": "actions",
+      "toId": "ttWork",
+      "toProperty": "in-actions"
+    },
+    {
+      "fromId": "ttWork",
+      "fromProperty": "out-blocks",
+      "toId": "ttOut",
+      "toProperty": "blocks"
+    },
+    {
+      "fromId": "ttWork",
+      "fromProperty": "out-lateMoney",
+      "toId": "ttOut",
+      "toProperty": "lateMoney"
+    },
+    {
+      "fromId": "ttWork",
+      "fromProperty": "out-lateMoneyTitle",
+      "toId": "ttOut",
+      "toProperty": "lateMoneyTitle"
+    }
+  ]
+}

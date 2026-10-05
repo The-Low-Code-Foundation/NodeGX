@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "41ff3687-8c26-5feb-838c-59791e203b5e",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "AddroutineIn",
+      "fromProperty": "title",
+      "toId": "AddroutineGuard",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "AddroutineIn",
+      "fromProperty": "do",
+      "toId": "AddroutineGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "AddroutineGuard",
+      "fromProperty": "out-title",
+      "toId": "AddroutineCreate",
+      "toProperty": "prop-title"
+    },
+    {
+      "fromId": "AddroutineGuard",
+      "fromProperty": "out-cadence",
+      "toId": "AddroutineCreate",
+      "toProperty": "prop-cadence"
+    },
+    {
+      "fromId": "AddroutineGuard",
+      "fromProperty": "out-slots",
+      "toId": "AddroutineCreate",
+      "toProperty": "prop-slots"
+    },
+    {
+      "fromId": "AddroutineGuard",
+      "fromProperty": "out-startDate",
+      "toId": "AddroutineCreate",
+      "toProperty": "prop-startDate"
+    },
+    {
+      "fromId": "AddroutineGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddroutineCreate",
+      "toProperty": "prop-endDate"
+    },
+    {
+      "fromId": "AddroutineGuard",
+      "fromProperty": "out-status",
+      "toId": "AddroutineCreate",
+      "toProperty": "prop-status"
+    },
+    {
+      "fromId": "AddroutineGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddroutineCreate",
+      "toProperty": "prop-stoppedAt"
+    },
+    {
+      "fromId": "AddroutineGuard",
+      "fromProperty": "out-empty",
+      "toId": "AddroutineCreate",
+      "toProperty": "prop-stopNote"
+    },
+    {
+      "fromId": "AddroutineGuard",
+      "fromProperty": "out-go",
+      "toId": "AddroutineCreate",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "AddroutineCreate",
+      "fromProperty": "id",
+      "toId": "AddroutineHistory",
+      "toProperty": "taskId"
+    },
+    {
+      "fromId": "AddroutineGuard",
+      "fromProperty": "out-summary",
+      "toId": "AddroutineHistory",
+      "toProperty": "summary"
+    },
+    {
+      "fromId": "AddroutineCreate",
+      "fromProperty": "done",
+      "toId": "AddroutineHistory",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "AddroutineHistory",
+      "fromProperty": "done",
+      "toId": "AddroutineOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "AddroutineCreate",
+      "fromProperty": "failure",
+      "toId": "AddroutineProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "AddroutineCreate",
+      "fromProperty": "id",
+      "toId": "AddroutineOut",
+      "toProperty": "id"
+    }
+  ]
+}

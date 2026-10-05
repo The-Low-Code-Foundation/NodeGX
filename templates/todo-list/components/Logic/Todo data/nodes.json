@@ -51,6 +51,16 @@
           "name": "recent",
           "plug": "input",
           "type": "array"
+        },
+        {
+          "name": "routines",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "checks",
+          "plug": "input",
+          "type": "array"
         }
       ],
       "x": 40,
@@ -166,6 +176,50 @@
       "y": 760
     },
     {
+      "id": "dtRoutines",
+      "type": "DbCollection2",
+      "label": "The things that repeat",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "Routine",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "storageLimit": 1000,
+        "visualSort": [
+          {
+            "property": "title",
+            "order": "ascending"
+          }
+        ]
+      },
+      "x": 40,
+      "y": 880
+    },
+    {
+      "id": "dtChecks",
+      "type": "DbCollection2",
+      "label": "The times they were ticked off",
+      "parameters": {
+        "runOnChange-records": true,
+        "runOnChange-search": true,
+        "collectionName": "RoutineCheck",
+        "runOnChange-collectionName": false,
+        "runOnChange-querySettings": false,
+        "storageEnableLimit": true,
+        "storageLimit": 1000,
+        "visualSort": [
+          {
+            "property": "date",
+            "order": "descending"
+          }
+        ]
+      },
+      "x": 40,
+      "y": 1000
+    },
+    {
       "id": "dtHasTask",
       "type": "Condition",
       "label": "Is a task selected?",
@@ -173,7 +227,7 @@
         "runOnChange-condition": false
       },
       "x": 40,
-      "y": 880
+      "y": 1120
     },
     {
       "id": "dtLoadProblem",
@@ -185,7 +239,7 @@
         "value": "Your list could not be loaded. Check that the backend is running, then sign in again."
       },
       "x": 40,
-      "y": 1000
+      "y": 1240
     }
   ]
 }

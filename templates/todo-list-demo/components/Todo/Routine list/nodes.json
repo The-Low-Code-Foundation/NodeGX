@@ -1,0 +1,288 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "dec9351a-8169-5093-82d6-31043771fc93",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "rlIn",
+      "type": "Component Inputs",
+      "label": "The rows",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "clearNew",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 410,
+      "y": 400
+    },
+    {
+      "id": "rlOut",
+      "type": "Component Outputs",
+      "label": "What happened in the list",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "add",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "routineId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "newTitle",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 520
+    },
+    {
+      "id": "rlRoot",
+      "type": "Group",
+      "label": "Things that repeat",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-3)",
+        "marginTop": "var(--space-6)"
+      },
+      "children": [
+        "rlHeading",
+        "rlRows",
+        "rlEmpty",
+        "rlAdd"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "rlHeading",
+      "type": "Text",
+      "label": "Heading",
+      "parent": "rlRoot",
+      "parameters": {
+        "text": "Things that repeat",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "as": "h2"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "rlRows",
+      "type": "Group",
+      "label": "The rows",
+      "parent": "rlRoot",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)",
+        "borderTopStyle": "solid",
+        "borderTopWidth": "var(--border-1)",
+        "borderTopColor": "var(--border-subtle)"
+      },
+      "children": [
+        "rlEach"
+      ],
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "rlEach",
+      "type": "For Each",
+      "label": "One row per thing that repeats",
+      "parent": "rlRows",
+      "parameters": {
+        "template": "/Todo/Routine row",
+        "templateType": "explicit"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "rlEmpty",
+      "type": "Text",
+      "label": "When nothing repeats",
+      "parent": "rlRoot",
+      "parameters": {
+        "text": "Nothing repeats yet. A tablet every morning, a call every Friday: add it here and it shows up in Today on the days it is due.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "rlAdd",
+      "type": "Group",
+      "label": "Add one",
+      "parent": "rlRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)"
+      },
+      "children": [
+        "rlField",
+        "rlButton"
+      ],
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "rlField",
+      "type": "net.noodl.controls.textinput",
+      "label": "New thing that repeats",
+      "parent": "rlAdd",
+      "parameters": {
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "type": "text",
+        "backgroundColor": "var(--background)",
+        "color": "var(--foreground)",
+        "fontSize": "var(--text-base)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "placeholder": "Add something that repeats"
+      },
+      "x": 160,
+      "y": 760
+    },
+    {
+      "id": "rlButton",
+      "type": "net.noodl.controls.button",
+      "label": "Add",
+      "parent": "rlAdd",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Add"
+      },
+      "x": 160,
+      "y": 880
+    },
+    {
+      "id": "rlCount",
+      "type": "JavaScriptFunction",
+      "label": "Is it empty?",
+      "parameters": {
+        "functionScript": "Outputs.empty = (Inputs.rows || []).length === 0;"
+      },
+      "x": 410,
+      "y": 640,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "rlSubmit",
+      "type": "JavaScriptFunction",
+      "label": "The title, if one was typed",
+      "parameters": {
+        "functionScript": "var t = String(Inputs.text || '').trim();\nif (t === '') return;\nOutputs.text = t;\nOutputs.go();",
+        "runOnChange-in-text": false
+      },
+      "x": 410,
+      "y": 760,
+      "ports": [
+        {
+          "name": "in-text",
+          "displayName": "text",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-text",
+          "displayName": "text",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "rlRoot"
+  ]
+}

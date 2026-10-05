@@ -1,0 +1,127 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "ad356c02-2737-598d-8ffb-70dc807d6244",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "DropblockIn",
+      "fromProperty": "blockId",
+      "toId": "DropblockGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "DropblockIn",
+      "fromProperty": "blocks",
+      "toId": "DropblockGuard",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "DropblockIn",
+      "fromProperty": "do",
+      "toId": "DropblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "DropblockIn",
+      "fromProperty": "blockId",
+      "toId": "DropblockWrite",
+      "toProperty": "in-modelId"
+    },
+    {
+      "fromId": "DropblockGuard",
+      "fromProperty": "out-go",
+      "toId": "DropblockWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "DropblockIn",
+      "fromProperty": "blockId",
+      "toId": "DropblockLog",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "DropblockGuard",
+      "fromProperty": "out-hProjectId",
+      "toId": "DropblockLog",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "DropblockGuard",
+      "fromProperty": "out-hKind",
+      "toId": "DropblockLog",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "DropblockGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "DropblockLog",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "DropblockGuard",
+      "fromProperty": "out-hBody",
+      "toId": "DropblockLog",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "DropblockGuard",
+      "fromProperty": "out-hWhat",
+      "toId": "DropblockLog",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "DropblockGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "DropblockLogGate",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "DropblockLogGate",
+      "fromProperty": "out-at",
+      "toId": "DropblockLog",
+      "toProperty": "in-at"
+    },
+    {
+      "fromId": "DropblockWrite",
+      "fromProperty": "out-done",
+      "toId": "DropblockLogGate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "DropblockLogGate",
+      "fromProperty": "out-log",
+      "toId": "DropblockLog",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "DropblockLogGate",
+      "fromProperty": "out-skip",
+      "toId": "DropblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "DropblockLog",
+      "fromProperty": "out-done",
+      "toId": "DropblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "DropblockLog",
+      "fromProperty": "out-failure",
+      "toId": "DropblockProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "DropblockLog",
+      "fromProperty": "out-failure",
+      "toId": "DropblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "DropblockWrite",
+      "fromProperty": "out-failure",
+      "toId": "DropblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "84a102ff-dc45-5f50-898b-2d0619e798b2",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "rlIn",
+      "fromProperty": "rows",
+      "toId": "rlEach",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "rlIn",
+      "fromProperty": "rows",
+      "toId": "rlCount",
+      "toProperty": "in-rows"
+    },
+    {
+      "fromId": "rlCount",
+      "fromProperty": "out-empty",
+      "toId": "rlEmpty",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "rlIn",
+      "fromProperty": "clearNew",
+      "toId": "rlField",
+      "toProperty": "clear"
+    },
+    {
+      "fromId": "rlField",
+      "fromProperty": "onTextChanged",
+      "toId": "rlSubmit",
+      "toProperty": "in-text"
+    },
+    {
+      "fromId": "rlField",
+      "fromProperty": "onEnter",
+      "toId": "rlSubmit",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rlButton",
+      "fromProperty": "onClick",
+      "toId": "rlSubmit",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "rlSubmit",
+      "fromProperty": "out-text",
+      "toId": "rlOut",
+      "toProperty": "newTitle"
+    },
+    {
+      "fromId": "rlSubmit",
+      "fromProperty": "out-go",
+      "toId": "rlOut",
+      "toProperty": "add"
+    },
+    {
+      "fromId": "rlEach",
+      "fromProperty": "itemOutputSignal-open",
+      "toId": "rlOut",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "rlEach",
+      "fromProperty": "itemOutput-id",
+      "toId": "rlOut",
+      "toProperty": "routineId"
+    }
+  ]
+}

@@ -62,10 +62,50 @@
           "name": "untick",
           "plug": "output",
           "type": "signal"
+        },
+        {
+          "name": "todayTaskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "todayTaskTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "todayClose",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "occurrenceId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "occurrenceTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "check",
+          "plug": "output",
+          "type": "signal"
+        },
+        {
+          "name": "routineTitle",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "detailStop",
+          "plug": "output",
+          "type": "signal"
         }
       ],
       "x": 350,
-      "y": 1000
+      "y": 1240
     },
     {
       "id": "dfOut",
@@ -79,6 +119,11 @@
         },
         {
           "name": "dialogActionId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "dialogOccurrenceId",
           "plug": "input",
           "type": "string"
         },
@@ -104,6 +149,16 @@
         },
         {
           "name": "confirmUntick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "confirmCheck",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "confirmStop",
           "plug": "input",
           "type": "signal"
         }
@@ -143,30 +198,46 @@
       "type": "States",
       "label": "What the dialog is asking",
       "parameters": {
-        "states": "none,close,reopen,tick,untick",
+        "states": "none,close,reopen,tick,untick,check,stop",
         "currentState": "none",
-        "values": "open,heading,help,ok",
+        "values": "open,heading,help,ok,optional",
         "type-open": "boolean",
         "type-heading": "string",
         "type-help": "string",
         "type-ok": "string",
+        "type-optional": "boolean",
         "value-none-open": false,
+        "value-none-optional": false,
         "value-close-open": true,
+        "value-close-optional": false,
         "value-close-heading": "What happened?",
         "value-close-help": "Every task keeps a record. One line is enough, even “not needed, dropping it”.",
         "value-close-ok": "Close task",
         "value-reopen-open": true,
+        "value-reopen-optional": false,
         "value-reopen-heading": "Why is it back?",
         "value-reopen-help": "It goes back in at the bottom of the list.",
         "value-reopen-ok": "Reopen",
         "value-tick-open": true,
+        "value-tick-optional": false,
         "value-tick-heading": "What happened?",
         "value-tick-help": "A line is enough.",
         "value-tick-ok": "Tick off",
         "value-untick-open": true,
+        "value-untick-optional": false,
         "value-untick-heading": "Why is it back?",
         "value-untick-help": "It goes back in at the bottom of the next actions.",
         "value-untick-ok": "Untick",
+        "value-check-open": true,
+        "value-check-heading": "Done. Anything to add?",
+        "value-check-help": "Optional. It is logged either way, and comes back the next time it is due.",
+        "value-check-ok": "Done",
+        "value-check-optional": true,
+        "value-stop-open": true,
+        "value-stop-optional": false,
+        "value-stop-heading": "Why is it stopping?",
+        "value-stop-help": "It stops repeating from today. Everything it logged is kept.",
+        "value-stop-ok": "Stop it",
         "useTransitions": false
       },
       "x": 350,
@@ -180,7 +251,7 @@
         "name": "todoDialogTask"
       },
       "x": 350,
-      "y": 1120
+      "y": 1360
     },
     {
       "id": "dfTaskFromList",
@@ -191,7 +262,7 @@
         "setWith": "string"
       },
       "x": 350,
-      "y": 1240
+      "y": 1480
     },
     {
       "id": "dfTaskFromDetail",
@@ -202,7 +273,7 @@
         "setWith": "string"
       },
       "x": 350,
-      "y": 1360
+      "y": 1600
     },
     {
       "id": "dfAction",
@@ -212,7 +283,7 @@
         "name": "todoDialogAction"
       },
       "x": 350,
-      "y": 1480
+      "y": 1720
     },
     {
       "id": "dfActionSet",
@@ -223,7 +294,7 @@
         "setWith": "string"
       },
       "x": 350,
-      "y": 1600
+      "y": 1840
     },
     {
       "id": "dfSubject",
@@ -244,7 +315,7 @@
         "setWith": "string"
       },
       "x": 350,
-      "y": 1720
+      "y": 1960
     },
     {
       "id": "dfSubjectFromDetail",
@@ -255,7 +326,7 @@
         "setWith": "string"
       },
       "x": 350,
-      "y": 1840
+      "y": 2080
     },
     {
       "id": "dfSubjectFromAction",
@@ -266,7 +337,72 @@
         "setWith": "string"
       },
       "x": 350,
-      "y": 1960
+      "y": 2200
+    },
+    {
+      "id": "dfTaskFromToday",
+      "type": "Set Variable",
+      "label": "From Today",
+      "parameters": {
+        "name": "todoDialogTask",
+        "setWith": "string"
+      },
+      "x": 350,
+      "y": 2320
+    },
+    {
+      "id": "dfSubjectFromToday",
+      "type": "Set Variable",
+      "label": "Name it from Today",
+      "parameters": {
+        "name": "todoDialogSubject",
+        "setWith": "string"
+      },
+      "x": 350,
+      "y": 2440
+    },
+    {
+      "id": "dfOccurrence",
+      "type": "Variable2",
+      "label": "Which occurrence",
+      "parameters": {
+        "name": "todoDialogOccurrence"
+      },
+      "x": 350,
+      "y": 2560
+    },
+    {
+      "id": "dfOccurrenceSet",
+      "type": "Set Variable",
+      "label": "From Today’s recurring rows",
+      "parameters": {
+        "name": "todoDialogOccurrence",
+        "setWith": "string"
+      },
+      "x": 350,
+      "y": 2680
+    },
+    {
+      "id": "dfSubjectFromOccurrence",
+      "type": "Set Variable",
+      "label": "Name the occurrence",
+      "parameters": {
+        "name": "todoDialogSubject",
+        "setWith": "string"
+      },
+      "x": 350,
+      "y": 2800
+    },
+    {
+      "id": "dfSubjectFromRoutine",
+      "type": "Set Variable",
+      "label": "Name the routine",
+      "parameters": {
+        "name": "todoDialogSubject",
+        "setWith": "string"
+      },
+      "x": 350,
+      "y": 2920
     },
     {
       "id": "dfIfClose",
@@ -307,6 +443,26 @@
       },
       "x": 350,
       "y": 880
+    },
+    {
+      "id": "dfIfCheck",
+      "type": "Condition",
+      "label": "Was it ticking off a recurring item?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 350,
+      "y": 1000
+    },
+    {
+      "id": "dfIfStop",
+      "type": "Condition",
+      "label": "Was it stopping one?",
+      "parameters": {
+        "runOnChange-condition": false
+      },
+      "x": 350,
+      "y": 1120
     }
   ],
   "visualRoots": [

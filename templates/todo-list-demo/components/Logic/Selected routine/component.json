@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "13ec44ce-8723-58f5-8780-8ded2d66aa67",
+  "name": "Selected routine",
+  "path": "/Logic/Selected routine",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Everything the detail pane shows about the selected thing that repeats: title, how often, its times, the days to pick, its dates, whether it can be stopped, and its history — with every occurrence of the last 30 days nobody ticked, read Missed."
+}

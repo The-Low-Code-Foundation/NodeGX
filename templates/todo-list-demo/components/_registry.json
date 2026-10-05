@@ -6,7 +6,7 @@
     "App": {
       "path": "App",
       "type": "visual",
-      "nodeCount": 4,
+      "nodeCount": 5,
       "connectionCount": 0,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
@@ -31,7 +31,7 @@
       "path": "Commands/Move task",
       "type": "visual",
       "nodeCount": 8,
-      "connectionCount": 20,
+      "connectionCount": 21,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -95,7 +95,7 @@
       "path": "Commands/Move action",
       "type": "visual",
       "nodeCount": 8,
-      "connectionCount": 19,
+      "connectionCount": 20,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -123,6 +123,54 @@
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
+    "Commands/Add routine": {
+      "path": "Commands/Add routine",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 17,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Commands/Rename routine": {
+      "path": "Commands/Rename routine",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 12,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Commands/Set schedule": {
+      "path": "Commands/Set schedule",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 19,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Commands/Set routine dates": {
+      "path": "Commands/Set routine dates",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 17,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Commands/Tick routine": {
+      "path": "Commands/Tick routine",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 16,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Commands/Stop routine": {
+      "path": "Commands/Stop routine",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 14,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
     "Logic/Task rows": {
       "path": "Logic/Task rows",
       "type": "visual",
@@ -143,7 +191,23 @@
       "path": "Logic/Log rows",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 3,
+      "connectionCount": 4,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Logic/Today rows": {
+      "path": "Logic/Today rows",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 9,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Logic/Selected routine": {
+      "path": "Logic/Selected routine",
+      "type": "visual",
+      "nodeCount": 3,
+      "connectionCount": 23,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -151,7 +215,7 @@
       "path": "Logic/Todo data",
       "type": "visual",
       "nodeCount": 7,
-      "connectionCount": 11,
+      "connectionCount": 13,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -182,8 +246,8 @@
     "Todo/Header": {
       "path": "Todo/Header",
       "type": "visual",
-      "nodeCount": 12,
-      "connectionCount": 10,
+      "nodeCount": 13,
+      "connectionCount": 13,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -198,16 +262,16 @@
     "Todo/Task row": {
       "path": "Todo/Task row",
       "type": "visual",
-      "nodeCount": 10,
-      "connectionCount": 15,
+      "nodeCount": 9,
+      "connectionCount": 11,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
     "Todo/Task list": {
       "path": "Todo/Task list",
       "type": "visual",
-      "nodeCount": 11,
-      "connectionCount": 16,
+      "nodeCount": 13,
+      "connectionCount": 21,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -254,16 +318,16 @@
     "Todo/Action row": {
       "path": "Todo/Action row",
       "type": "visual",
-      "nodeCount": 18,
-      "connectionCount": 30,
+      "nodeCount": 17,
+      "connectionCount": 26,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
     "Todo/Next actions": {
       "path": "Todo/Next actions",
       "type": "visual",
-      "nodeCount": 10,
-      "connectionCount": 19,
+      "nodeCount": 12,
+      "connectionCount": 24,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -283,34 +347,90 @@
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
+    "Todo/Today row": {
+      "path": "Todo/Today row",
+      "type": "visual",
+      "nodeCount": 11,
+      "connectionCount": 17,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Todo/Today list": {
+      "path": "Todo/Today list",
+      "type": "visual",
+      "nodeCount": 6,
+      "connectionCount": 9,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Todo/Routine row": {
+      "path": "Todo/Routine row",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 6,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Todo/Routine list": {
+      "path": "Todo/Routine list",
+      "type": "visual",
+      "nodeCount": 12,
+      "connectionCount": 11,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Todo/Day chip": {
+      "path": "Todo/Day chip",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 6,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Todo/Slot chip": {
+      "path": "Todo/Slot chip",
+      "type": "visual",
+      "nodeCount": 5,
+      "connectionCount": 3,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Todo/Routine summary": {
+      "path": "Todo/Routine summary",
+      "type": "visual",
+      "nodeCount": 42,
+      "connectionCount": 45,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
     "Todo/Note dialog": {
       "path": "Todo/Note dialog",
       "type": "visual",
       "nodeCount": 12,
-      "connectionCount": 12,
+      "connectionCount": 13,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
     "Todo/Dialog flow": {
       "path": "Todo/Dialog flow",
       "type": "visual",
-      "nodeCount": 18,
-      "connectionCount": 46,
+      "nodeCount": 26,
+      "connectionCount": 70,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
     "Pages/Todo": {
       "path": "Pages/Todo",
       "type": "page",
-      "nodeCount": 52,
-      "connectionCount": 161,
+      "nodeCount": 81,
+      "connectionCount": 300,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     }
   },
   "stats": {
-    "totalComponents": 38,
-    "totalNodes": 336,
-    "totalConnections": 661
+    "totalComponents": 53,
+    "totalNodes": 504,
+    "totalConnections": 1059
   }
 }

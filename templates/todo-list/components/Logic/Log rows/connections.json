@@ -16,6 +16,12 @@
       "toProperty": "in-tasks"
     },
     {
+      "fromId": "lrIn",
+      "fromProperty": "routines",
+      "toId": "lrBuild",
+      "toProperty": "in-routines"
+    },
+    {
       "fromId": "lrBuild",
       "fromProperty": "out-rows",
       "toId": "lrOut",

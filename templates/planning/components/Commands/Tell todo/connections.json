@@ -1,0 +1,151 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "8852edc6-fc82-5208-8130-55966e8d5c68",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "ttdIn",
+      "fromProperty": "taskId",
+      "toId": "ttdGuard",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "ttdIn",
+      "fromProperty": "actionId",
+      "toId": "ttdGuard",
+      "toProperty": "in-actionId"
+    },
+    {
+      "fromId": "ttdIn",
+      "fromProperty": "actions",
+      "toId": "ttdGuard",
+      "toProperty": "in-actions"
+    },
+    {
+      "fromId": "ttdIn",
+      "fromProperty": "becameDone",
+      "toId": "ttdGuard",
+      "toProperty": "in-becameDone"
+    },
+    {
+      "fromId": "ttdIn",
+      "fromProperty": "note",
+      "toId": "ttdGuard",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "ttdIn",
+      "fromProperty": "hours",
+      "toId": "ttdGuard",
+      "toProperty": "in-hours"
+    },
+    {
+      "fromId": "ttdIn",
+      "fromProperty": "do",
+      "toId": "ttdGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-actionId",
+      "toId": "ttdAction",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-done",
+      "toId": "ttdAction",
+      "toProperty": "prop-done"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-actionNote",
+      "toId": "ttdAction",
+      "toProperty": "prop-note"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-tick",
+      "toId": "ttdAction",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-taskId",
+      "toId": "ttdEvent",
+      "toProperty": "prop-taskId"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-kind",
+      "toId": "ttdEvent",
+      "toProperty": "prop-kind"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-summary",
+      "toId": "ttdEvent",
+      "toProperty": "prop-summary"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-body",
+      "toId": "ttdEvent",
+      "toProperty": "prop-body"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-at",
+      "toId": "ttdEvent",
+      "toProperty": "prop-at"
+    },
+    {
+      "fromId": "ttdAction",
+      "fromProperty": "done",
+      "toId": "ttdEvent",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-line",
+      "toId": "ttdEvent",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "ttdEvent",
+      "fromProperty": "done",
+      "toId": "ttdOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "ttdGuard",
+      "fromProperty": "out-skip",
+      "toId": "ttdOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "ttdAction",
+      "fromProperty": "failure",
+      "toId": "ttdProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ttdAction",
+      "fromProperty": "failure",
+      "toId": "ttdOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "ttdEvent",
+      "fromProperty": "failure",
+      "toId": "ttdProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "ttdEvent",
+      "fromProperty": "failure",
+      "toId": "ttdOut",
+      "toProperty": "done"
+    }
+  ]
+}

@@ -1,5 +1,5 @@
 /**
- * TPL-010 — the planner as a project a person can start from.
+ * TPL-010 — Planning, as a project a person can start from.
  *
  * `tpl010Components.ts` is what the door is given; this file is the composition. It authors
  * the template into an empty project through the real MCP server — the App shell with
@@ -19,7 +19,7 @@
  *   balance reading and the settings are not deletable by anything in this app, and the backend
  *   would refuse. Ending a money item keeps it (TPL-010-M, M10).
  *
- * The policy is hand-authored at `templates/planner.security.json` and copied in last,
+ * The policy is hand-authored at `templates/planning.security.json` and copied in last,
  * because this module clears the output directory.
  *
  * ## Render off, deliberately
@@ -46,11 +46,11 @@ import { APP_COMPONENT, APP_NODES, APP_WIRES, COLLECTIONS, TPL010_COMPONENTS, Tp
 import { DEMO_STORAGE_KEY, TPL010_DEMO_COMPONENTS } from './tpl010Demo';
 import { TPL010_PRESET, TPL010_TOKENS } from './tpl010Theme';
 
-export const TEMPLATE_ID = 'planner';
-export const TEMPLATE_PROJECT_NAME = 'Planner';
+export const TEMPLATE_ID = 'planning';
+export const TEMPLATE_PROJECT_NAME = 'Planning';
 /** AC9 — the browser-only demo nodegx.io serves, generated from the same sources (R9). */
-export const DEMO_ID = 'planner-demo';
-export const DEMO_PROJECT_NAME = 'Planner demo';
+export const DEMO_ID = 'planning-demo';
+export const DEMO_PROJECT_NAME = 'Planning demo';
 export const TEMPLATE_EPOCH = '2026-09-20T00:00:00.000Z';
 export const START_HERE_FILE = 'docs/START-HERE.md';
 export const POLICY_FILE = 'nodegx.security.json';
@@ -162,10 +162,10 @@ export async function buildPlannerTemplateProject(options: BuildOptions = {}): P
       'create_plan',
       {
         request: demo
-          ? 'A demo of a week planner for a freelancer, in hours rather than project prices. Four envelopes — billable, building, ' +
+          ? 'A demo of Planning, a week planner for a freelancer, in hours rather than project prices. Four budgets — billable, building, ' +
             'admin and hobby — budgeted once a month, six day columns of blocks, one line of next moves sorted by urgency, and the ' +
             'next six weeks of cash. An invented week, kept in this browser, with no sign in and no backend.'
-          : 'A week planner for a freelancer, in hours rather than project prices. Four envelopes — billable, building, admin and hobby — ' +
+          : 'Planning: a week planner for a freelancer, in hours rather than project prices. Four budgets — billable, building, admin and hobby — ' +
             'budgeted once a month, six day columns of blocks, one line of next moves sorted by urgency, and the next six weeks of cash. ' +
             `Stored in the NodeGX backend (${COLLECTIONS.join(', ')}), private to whoever signed in.`,
         // R5b — the page scrolls when the week does not fit (`bodyScroll: true` above).
@@ -268,7 +268,7 @@ function writeStartHere(output: string): void {
     'One screen that says what this week is for. It is a planner for someone who sells their hours,',
     'and its unit is **hours**, not project prices.',
     '',
-    '- **Four envelopes**, budgeted once a month: Billable, Building, Admin and asks, Hobby. Every hour',
+    '- **Four budgets**, set once a month: Billable, Building, Admin and asks, Hobby. Every hour',
     '  gets a job before the month starts.',
     '- **Billable** does not tell you how far behind you are. It tells you how many hours a day the rest',
     '  of the month needs. That is the only kind of sentence this app makes.',
@@ -315,15 +315,15 @@ function writeStartHere(output: string): void {
     `- **\`Commands/\`** — one component for each thing a person can do: ${commands.join(', ')}.`,
     '  Each one is a guard that decides whether there is anything to write, one record write, and one',
     '  sentence when it fails. Read one and you have read the pattern.',
-    '- **`Logic/`** — the only places a number or a sentence is decided. `Planner data` is the only',
-    '  thing that reads the backend; `Envelopes` works out the four tiles; `Day columns` the six days;',
+    '- **`Logic/`** — the only places a number or a sentence is decided. `Planning data` is the only',
+    '  thing that reads the backend; `Budgets` works out the four tiles; `Day columns` the six days;',
     '  `Moves` the strip; `Money` the money and `Money pane` its right-hand side; `Mark` what a tick writes;',
     '  `Shutdown` the evening; `Card rows` the projects card.',
     '- **`Week/`** — everything you can see. **`Pages/Week`** places it all and holds no arithmetic of',
     '  its own, so "where does this number come from?" always has one answer.',
     '- **Light and dark.** The page follows your system until you press the moon or sun in the app bar.',
     '  Both palettes are in `App`’s CSS Definition; `App` also puts your choice back when the app opens.',
-    '- **The envelope colours carry data**, so they are held to a categorical palette’s standard in both',
+    '- **The budget colours carry data**, so they are held to a categorical palette’s standard in both',
     '  palettes: blue is Billable wherever it appears, violet Building, grey Admin, amber Hobby.',
     '',
     '## Getting started',
@@ -340,7 +340,7 @@ function writeStartHere(output: string): void {
     '4. Back in Settings, **the split**: building, admin and hobby hours for the month, each with the',
     '   recommendation beside it — admin is a tenth of your capacity, building is what is left once',
     '   billable and admin are paid for, hobby is nothing. *Use the recommendation* takes all three.',
-    '   Then press **Plan this month**: the envelopes start from what the split says, and nothing is',
+    '   Then press **Plan this month**: the budgets start from what the split says, and nothing is',
     '   written for you on the 1st, because a budget nobody agreed to is not a budget.',
     '5. **Guardrails**, last: hours of hobby and of building a week, and the least of the week that',
     '   should be billable. Crossing one is a sentence on that tile and one line in the evening. Never a',
@@ -368,21 +368,21 @@ function writeDemoStartHere(output: string): void {
   const lines = [
     `# ${DEMO_PROJECT_NAME}`,
     '',
-    'The planner with the backend taken out, which is what nodegx.io serves. It is the same app as',
-    '`templates/planner/` — the same envelopes, the same week, the same evening drawer — reading and',
+    'Planning with the backend taken out, which is what nodegx.io serves. It is the same app as',
+    '`templates/planning/` — the same budgets, the same week, the same evening drawer — reading and',
     'writing an invented week in the browser instead of a database.',
     '',
     '🔴 **Do not start a project from this one.** It cannot keep anything: close the tab on another',
-    'machine and the week is not there. Start from **Planner**, which stores your week in the NodeGX',
+    'machine and the week is not there. Start from **Planning**, which stores your week in the NodeGX',
     'backend, and read `docs/START-HERE.md` there.',
     '',
     '## What is different, and nothing else is',
     '',
-    'Every component here is *computed* from the template when `npm run template:planner` runs, so the',
+    'Every component here is *computed* from the template when `npm run template:planning` runs, so the',
     'demo can never be older than the template. The transform lives in',
     '`packages/noodl-mcp/tests/tpl010Demo.ts` and changes exactly this:',
     '',
-    `- **\`Logic/Planner data\`** reads the week from this browser's local storage (\`${DEMO_STORAGE_KEY}\`),`,
+    `- **\`Logic/Planning data\`** reads the week from this browser's local storage (\`${DEMO_STORAGE_KEY}\`),`,
     '  and puts the example week there the first time it finds none. It keeps the template’s own week',
     '  window and arrows, so `‹ ›` moves through the weeks the way the app does.',
     '- **Every command writes to that same store.** Each record node became one Function with the same',

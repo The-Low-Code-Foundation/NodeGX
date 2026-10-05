@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "2608a19f-d12d-5c29-8a23-020c4bbd86f9",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ylIn",
+      "type": "Component Inputs",
+      "label": "The rows",
+      "ports": [
+        {
+          "name": "rows",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "ylOut",
+      "type": "Component Outputs",
+      "label": "What happened in Today",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "close",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "check",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "rowId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "targetId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "ylRoot",
+      "type": "Group",
+      "label": "Today",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0)"
+      },
+      "children": [
+        "ylEach",
+        "ylEmpty"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ylEach",
+      "type": "For Each",
+      "label": "One line per thing today",
+      "parent": "ylRoot",
+      "parameters": {
+        "template": "/Todo/Today row",
+        "templateType": "explicit"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "ylEmpty",
+      "type": "Text",
+      "label": "When there is nothing today",
+      "parent": "ylRoot",
+      "parameters": {
+        "text": "Nothing due today. Give a task a deadline, or add something that repeats below.",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 100,
+      "y": 280
+    },
+    {
+      "id": "ylCount",
+      "type": "JavaScriptFunction",
+      "label": "Is it empty?",
+      "parameters": {
+        "functionScript": "Outputs.empty = (Inputs.rows || []).length === 0;"
+      },
+      "x": 350,
+      "y": 400,
+      "ports": [
+        {
+          "name": "in-rows",
+          "displayName": "rows",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-empty",
+          "displayName": "empty",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ],
+  "visualRoots": [
+    "ylRoot"
+  ]
+}

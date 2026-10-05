@@ -7,5 +7,5 @@
   "created": "2026-09-14T00:00:00.000Z",
   "modified": "2026-09-14T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "The app: the list (or Done, or the Log) beside the selected task. Holds the selection, places the data and the dialog flow, and wires every button to its command. Signed-out visitors are sent to Sign in."
+  "description": "The app: the list (or Today, Done, or the Log) beside the selected task or thing that repeats. Holds the selection, places the data and the dialog flow, and wires every button to its command. Signed-out visitors are sent to Sign in."
 }

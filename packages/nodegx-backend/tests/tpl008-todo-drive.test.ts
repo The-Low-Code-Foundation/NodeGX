@@ -36,7 +36,7 @@ import { placeStarterAssets } from './helpers/judge';
 import { clickButton, currentSession, fill } from './helpers/members-drive';
 import { bindProjectToBackend, RenderedPage, withRenderedPage } from './helpers/site-drive';
 import {
-  blur, buttonDisabled, clickButtonBeside, clickButtonBesideField, clickButtonByField, clickWords, pathname, pickDate,
+  blur, buttonDisabled, clickButtonBeside, clickButtonBesideField, clickButtonByField, clickWords, dragRow, pathname, pickDate,
   retypeField, text, themeSwitches, until
 } from './helpers/todo-drive';
 
@@ -117,22 +117,6 @@ describe('TPL-008 — the todo list, driven', () => {
       .filter((n) => !n.ignored && n.role?.value === 'button')
       .map((n) => String(n.name?.value ?? '').replace(/[-]/g, '').trim());
   };
-  /** How the first "Move up" button looks: its words take no room, and its icon does. */
-  const ICON_BUTTON_LOOK = `(function () {
-    var b = Array.prototype.filter.call(document.querySelectorAll('button'), function (x) {
-      return (x.textContent || '').trim() === 'Move up';
-    })[0];
-    if (!b) return 'absent';
-    var glyph = b.querySelector('span');
-    var words = Array.prototype.filter.call(b.childNodes, function (n) { return n.nodeType === 3; })[0];
-    var range = document.createRange();
-    if (words) range.selectNodeContents(words);
-    return JSON.stringify({
-      fontSize: getComputedStyle(b).fontSize,
-      iconDrawn: !!glyph && glyph.getBoundingClientRect().width > 0,
-      wordsWidth: words ? Math.round(range.getBoundingClientRect().width) : -1
-    });
-  })()`;
 
   beforeAll(async () => {
     const projectDir = fs.mkdtempSync(path.join(os.tmpdir(), 'tpl008-drive-project-'));
@@ -222,23 +206,23 @@ describe('TPL-008 — the todo list, driven', () => {
         })()`);
 
         // ── §2 Move #3 up twice ────────────────────────────────────────────────
+        // 2026-09-24: by its grip — once with a mouse, once with a finger (the phone's path).
         step('§2 first move');
-        await clickButtonBeside(page, NOTES, 3, 0);
+        await dragRow(page, NOTES, VAT, 'mouse');
         await until('first move written', () => openTitles(tk), (t) => t[1] === NOTES);
         await until('first move drawn', () => text(page), (s) => s.indexOf(NOTES) < s.indexOf(VAT));
         await wait(800);
         step('§2 second move');
-        await clickButtonBeside(page, NOTES, 3, 0);
+        await dragRow(page, NOTES, MOT, 'touch');
         R.titlesAfterMoves = await until('second move written', () => openTitles(tk), (t) => t[0] === NOTES);
         await wait(1500);
         R.moveLines = (await eventsFor(tk, NOTES)).filter((e) => e.kind === 'moved').map((e) => String(e.summary));
         await shot('1-list');
         R.listButtonNames = await buttonNames(page);
-        R.iconButtonLook = await page.evaluate(ICON_BUTTON_LOOK);
 
         // ── §3 Close one, with a note ──────────────────────────────────────────
         step('§3 close');
-        await clickButtonBeside(page, MOT, 3, 2);
+        await clickButtonBeside(page, MOT, 1, 0);
         await until('dialog open', () => text(page), (s) => s.includes('What happened?'));
         await shot('2-close-dialog');
         R.okDisabledBeforeNote = await buttonDisabled(page, 'Close task');
@@ -272,9 +256,9 @@ describe('TPL-008 — the todo list, driven', () => {
         await until('action drawn', () => text(page), (s) => s.includes(ACTION));
         R.actionNamesBefore = await buttonNames(page);
         step('§4 tick action');
-        // s8: an open next action's line holds four buttons (tick, description, up, down),
-        // and its title is a field, so the row is found by what the field holds.
-        await clickButtonBesideField(page, ACTION, 4, 0);
+        // s8: its title is a field, so the row is found by what the field holds. Since the grip
+        // (2026-09-24) an open line holds two buttons, tick and description, like a ticked one.
+        await clickButtonBesideField(page, ACTION, 2, 0);
         await until('tick dialog', () => text(page), (s) => s.includes('A line is enough.'));
         await fill(page, 'what happened', TICK_NOTE);
         await clickButton(page, 'Tick off');
@@ -297,7 +281,7 @@ describe('TPL-008 — the todo list, driven', () => {
         // input field."* The box is opened by its own button now, and pressing Save has to do
         // BOTH: write the text and close the box. Both are read below.
         step('§4 describe action');
-        await clickButtonBesideField(page, ACTION, 4, 1);
+        await clickButtonBesideField(page, ACTION, 2, 1);
         await until('description open', () => boxes(page), (n) => n === 1);
         await fill(page, 'add a description', DESCRIPTION);
         await clickButton(page, 'Save');
@@ -472,22 +456,19 @@ describe('TPL-008 — the todo list, driven', () => {
     expect(R.reopenLines).toEqual([`Reopened at #3 | ${REOPEN_NOTE}`]);
   });
 
-  it('🔴 D72 — every button on the list has a name a screen reader says; the icon still shows and the words do not', () => {
+  /**
+   * 🔴 D72 — rewritten 2026-09-24. Since D77 (`a04263d35`) the ▲ ▼ ✓ buttons were named by their
+   * glyph, and this row, which counted *Move up* / *Mark done*, was red on purpose-made names. The
+   * grip replaced ▲ ▼, and **it** is named in words: a screen reader hears *Move "…"* for each open
+   * task. The tick box is still named ✓ (D72's door, owner NONE).
+   */
+  it('🔴 D72 — every open task has a grip a screen reader names in words, and no button is nameless', () => {
     const names = (R.listButtonNames as string[]) ?? [];
-    const count = (name: string) => names.filter((x) => x === name).length;
-    // Three open tasks, each with up, down and close — the known-firing half beside "no nameless button".
-    expect({ nameless: count(''), up: count('Move up'), down: count('Move down'), close: count('Close this task') }).toEqual({
+    const grips = names.filter((n) => /^Move \u201c.+\u201d$/.test(n)).sort();
+    expect({ nameless: names.filter((x) => x === '').length, grips }).toEqual({
       nameless: 0,
-      up: 3,
-      down: 3,
-      close: 3
+      grips: [MOT, NOTES, VAT].map((t) => `Move \u201c${t}\u201d`).sort()
     });
-    expect(JSON.parse(String(R.iconButtonLook ?? '"unread"'))).toEqual({ fontSize: '0px', iconDrawn: true, wordsWidth: 0 });
-    // The tick box's name follows its state, both ways.
-    expect([(R.actionNamesBefore as string[]) ?? [], (R.actionNamesAfter as string[]) ?? []].map((ns) => ns.filter((n) => n.startsWith('Mark ')))).toEqual([
-      ['Mark done'],
-      ['Mark not done']
-    ]);
   });
 
   it('§5 a note, a rename and a deadline each leave a line; the deadline is picked from a calendar', () => {

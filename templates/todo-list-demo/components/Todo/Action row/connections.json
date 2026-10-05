@@ -60,20 +60,8 @@
     {
       "fromId": "arIn",
       "fromProperty": "canMove",
-      "toId": "arMove",
+      "toId": "arGrip",
       "toProperty": "mounted"
-    },
-    {
-      "fromId": "arIn",
-      "fromProperty": "canUp",
-      "toId": "arUp",
-      "toProperty": "enabled"
-    },
-    {
-      "fromId": "arIn",
-      "fromProperty": "canDown",
-      "toId": "arDown",
-      "toProperty": "enabled"
     },
     {
       "fromId": "arIn",
@@ -128,18 +116,6 @@
       "fromProperty": "onfalse",
       "toId": "arOut",
       "toProperty": "tick"
-    },
-    {
-      "fromId": "arUp",
-      "fromProperty": "onClick",
-      "toId": "arOut",
-      "toProperty": "up"
-    },
-    {
-      "fromId": "arDown",
-      "fromProperty": "onClick",
-      "toId": "arOut",
-      "toProperty": "down"
     },
     {
       "fromId": "arTitle",

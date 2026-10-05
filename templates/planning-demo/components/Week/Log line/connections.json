@@ -1,0 +1,25 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "56d34c8f-d320-5ca7-8973-f704c0382158",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "llIn",
+      "fromProperty": "line",
+      "toId": "llLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "llIn",
+      "fromProperty": "body",
+      "toId": "llBody",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "llIn",
+      "fromProperty": "hasBody",
+      "toId": "llBody",
+      "toProperty": "mounted"
+    }
+  ]
+}

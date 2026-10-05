@@ -1,0 +1,139 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "e02b661d-4250-5ed1-8094-435f24d582a7",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "CarryblockIn",
+      "fromProperty": "blockId",
+      "toId": "CarryblockGuard",
+      "toProperty": "in-blockId"
+    },
+    {
+      "fromId": "CarryblockIn",
+      "fromProperty": "date",
+      "toId": "CarryblockGuard",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "CarryblockIn",
+      "fromProperty": "blocks",
+      "toId": "CarryblockGuard",
+      "toProperty": "in-blocks"
+    },
+    {
+      "fromId": "CarryblockIn",
+      "fromProperty": "do",
+      "toId": "CarryblockGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "CarryblockGuard",
+      "fromProperty": "out-date",
+      "toId": "CarryblockWrite",
+      "toProperty": "prop-date"
+    },
+    {
+      "fromId": "CarryblockIn",
+      "fromProperty": "blockId",
+      "toId": "CarryblockWrite",
+      "toProperty": "modelId"
+    },
+    {
+      "fromId": "CarryblockGuard",
+      "fromProperty": "out-go",
+      "toId": "CarryblockWrite",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "CarryblockIn",
+      "fromProperty": "blockId",
+      "toId": "CarryblockLog",
+      "toProperty": "prop-blockId"
+    },
+    {
+      "fromId": "CarryblockGuard",
+      "fromProperty": "out-hProjectId",
+      "toId": "CarryblockLog",
+      "toProperty": "prop-projectId"
+    },
+    {
+      "fromId": "CarryblockGuard",
+      "fromProperty": "out-hKind",
+      "toId": "CarryblockLog",
+      "toProperty": "prop-kind"
+    },
+    {
+      "fromId": "CarryblockGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "CarryblockLog",
+      "toProperty": "prop-summary"
+    },
+    {
+      "fromId": "CarryblockGuard",
+      "fromProperty": "out-hBody",
+      "toId": "CarryblockLog",
+      "toProperty": "prop-body"
+    },
+    {
+      "fromId": "CarryblockGuard",
+      "fromProperty": "out-hWhat",
+      "toId": "CarryblockLog",
+      "toProperty": "prop-what"
+    },
+    {
+      "fromId": "CarryblockGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "CarryblockLogGate",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "CarryblockLogGate",
+      "fromProperty": "out-at",
+      "toId": "CarryblockLog",
+      "toProperty": "prop-at"
+    },
+    {
+      "fromId": "CarryblockWrite",
+      "fromProperty": "done",
+      "toId": "CarryblockLogGate",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "CarryblockLogGate",
+      "fromProperty": "out-log",
+      "toId": "CarryblockLog",
+      "toProperty": "store"
+    },
+    {
+      "fromId": "CarryblockLogGate",
+      "fromProperty": "out-skip",
+      "toId": "CarryblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "CarryblockLog",
+      "fromProperty": "done",
+      "toId": "CarryblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "CarryblockLog",
+      "fromProperty": "failure",
+      "toId": "CarryblockProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "CarryblockLog",
+      "fromProperty": "failure",
+      "toId": "CarryblockOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "CarryblockWrite",
+      "fromProperty": "failure",
+      "toId": "CarryblockProblem",
+      "toProperty": "do"
+    }
+  ]
+}

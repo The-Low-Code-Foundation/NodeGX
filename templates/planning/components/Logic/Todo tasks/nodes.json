@@ -1,0 +1,145 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "a98a03f2-f74b-50d5-87fe-966850e2c524",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "ttIn",
+      "type": "Component Inputs",
+      "label": "The tasks and the blocks",
+      "ports": [
+        {
+          "name": "tasks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "sent",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "blocks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "moveBlocks",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "todoUrl",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "actions",
+          "plug": "output",
+          "type": "array"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "ttOut",
+      "type": "Component Outputs",
+      "label": "The blocks, with the tasks in",
+      "ports": [
+        {
+          "name": "blocks",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "lateMoney",
+          "plug": "input",
+          "type": "number"
+        },
+        {
+          "name": "lateMoneyTitle",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "ttWork",
+      "type": "JavaScriptFunction",
+      "label": "Put each task on its day",
+      "parameters": {
+        "functionScript": "function num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction hoursOf(b) {\n  if (!b) return 0;\n  // 🔴 \"It took as long as it was meant to\" is an EMPTY actual, and the commands write that\n  // emptiness as '' — which Number() reads as 0. Testing only for null and undefined, every\n  // logged block counted as nought and the envelopes stayed empty however much work went in.\n  if (b.done) {\n    var a = b.actual;\n    if (a === null || a === undefined || a === '') return num(b.planned, 0);\n    return num(a, num(b.planned, 0));\n  }\n  return num(b.planned, 0);\n}\n/**\n * R22 — the time logged against a block, one entry per sitting: { day, hours, note }.\n * 🔴 Not \"on\", which the task file wrote: \"on\" is a Noodl Object's own method, and an entry\n * read back as an Object would answer entry.on with a function.\n */\nfunction entriesOf(b) {\n  var list = (b && b.entries) || [];\n  var out = [];\n  for (var i = 0; i < list.length; i++) if (list[i] && num(list[i].hours, 0) > 0) out.push(list[i]);\n  return out;\n}\nfunction loggedOf(b) {\n  var list = entriesOf(b), t = 0;\n  for (var i = 0; i < list.length; i++) t += num(list[i].hours, 0);\n  return t;\n}\n/**\n * What a block has SPENT, which is not what it counts for in its day. A done block spent what\n * hoursOf says; an open block has spent its entries so far — half an hour of a planned hour is\n * half an hour out of the envelope, while the day still holds the whole hour for it (R22).\n */\nfunction spentOf(b) {\n  if (!b) return 0;\n  if (b.done) return hoursOf(b);\n  return loggedOf(b);\n}\n/** Quarter of an hour is the unit a person plans in; nothing is ever shown finer. */\nfunction q(n) { return Math.round(num(n, 0) * 4) / 4; }\nfunction hText(n) { var v = q(n); return (Math.round(v * 100) / 100).toString(); }\n/** R4 — an ask to a dormant client is Admin, so dormant projects spend the Admin envelope. */\nfunction envelopeOf(p) {\n  if (!p) return 'admin';\n  var k = String(p.kind || '');\n  if (k === 'earning') return 'billable';\n  if (k === 'building') return 'building';\n  if (k === 'hobby') return 'hobby';\n  return 'admin';\n}\n/**\n * R24 — the days a person says they work, as a lookup keyed the way getDay() counts.\n * Accepts the array Settings.workingDays holds and the comma-separated string somebody\n * (or the coach) might type instead. **Empty or unreadable means Monday to Saturday**, which\n * is what the planner counted before the ticks existed.\n */\nfunction workDaySet(value) {\n  var list = value;\n  if (typeof list === 'string') list = list.split(',');\n  var set = {}, any = false;\n  if (list && typeof list.length === 'number') {\n    for (var i = 0; i < list.length; i++) {\n      var d = Number(list[i]);\n      if (isFinite(d) && d >= 0 && d <= 6) { set[d] = true; any = true; }\n    }\n  }\n  if (!any) return { 1: true, 2: true, 3: true, 4: true, 5: true, 6: true };\n  return set;\n}\nfunction workDayList(value) {\n  var set = workDaySet(value), out = [];\n  var order = [1, 2, 3, 4, 5, 6, 0];\n  for (var i = 0; i < order.length; i++) if (set[order[i]]) out.push(order[i]);\n  return out;\n}\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction dayKey(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction parseDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  if (!m) return null;\n  var d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]));\n  d.setHours(0, 0, 0, 0);\n  return d;\n}\nfunction addDays(d, n) { var x = new Date(d.getTime()); x.setDate(x.getDate() + n); x.setHours(0, 0, 0, 0); return x; }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d; }\n/** Monday of the week a day falls in. The week runs Mon–Sat (R5, Q4). */\nfunction mondayOf(d) {\n  var x = new Date(d.getTime());\n  var dow = (x.getDay() + 6) % 7;\n  return addDays(x, -dow);\n}\nvar DOW = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];\nvar DOW_LONG = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction money(n, symbol) {\n  var v = Math.round(num(n, 0));\n  var sign = v < 0 ? '-' : '';\n  var s = Math.abs(v).toString().replace(/\\B(?=(\\d{3})+(?!\\d))/g, ',');\n  return sign + (symbol || '€') + s;\n}\n/**\n * R7c — where a project's move stands. 'live' is the earliest move block on or after today that\n * is not done, wherever the week on screen is: that, and only that, is \"placed\". 'last' is the\n * latest move block of any kind, so a move whose block was done can say so (R2.3-4).\n */\nfunction moveOf(projectId, moveBlocks, today) {\n  var live = null, last = null;\n  var list = moveBlocks || [];\n  for (var i = 0; i < list.length; i++) {\n    var b = list[i];\n    if (!b || !b.isMove || b.projectId !== projectId || !parseDay(b.date)) continue;\n    if (!last || String(b.date) > String(last.date)) last = b;\n    if (b.done || parseDay(b.date).getTime() < today.getTime()) continue;\n    if (!live || String(b.date) < String(live.date)) live = b;\n  }\n  return { live: live, last: last };\n}\n/** \"Thu 24\" — the day a move went to, short enough for a chip. */\nfunction shortDay(s) { var d = parseDay(s); return d ? DOW[(d.getDay() + 6) % 7] + ' ' + d.getDate() : ''; }\nvar tasks = Inputs.tasks || [];\nvar blocks = Inputs.blocks || [];\nvar base = String(Inputs.todoUrl || '').trim();\nvar todayKey = dayKey(startOfToday());\nvar out = [];\nvar planned = {};\nvar plannedAction = {};\nfunction mark(b) {\n  if (!b) return;\n  if (b.todoTaskId) planned[b.todoTaskId] = true;\n  if (b.todoActionId) plannedAction[b.todoActionId] = true;\n}\nfor (var i = 0; i < blocks.length; i++) {\n  out.push(blocks[i]);\n  mark(blocks[i]);\n}\nvar earlier = Inputs.moveBlocks || [];\nfor (var e = 0; e < earlier.length; e++) mark(earlier[e]);\n// T1 — each task's open next actions with no block yet, in the todo list's order.\nvar open = {};\nvar acts = Inputs.actions || [];\nfor (var a = 0; a < acts.length; a++) {\n  var act = acts[a];\n  if (!act || act.done === true || !act.taskId || plannedAction[act.id]) continue;\n  (open[act.taskId] = open[act.taskId] || []).push({ id: String(act.id), title: String(act.title || '').trim() || 'A next action with no words', position: num(act.position, 0) });\n}\nfor (var k in open) open[k].sort(function (x, y) { return x.position - y.position; });\nvar sentList = Inputs.sent || [];\nvar sent = {};\nfor (var s = 0; s < sentList.length; s++) if (sentList[s] && sentList[s].taskId) sent[sentList[s].taskId] = true;\nvar lateMoney = 0, lateMoneyTitle = '';\nfor (var t = 0; t < tasks.length; t++) {\n  var task = tasks[t];\n  if (!task || String(task.status || '') !== 'open') continue;\n  var left = open[task.id] || [];\n  // T1c — nothing left to plan: it has a block, and no open action is without one.\n  if (planned[task.id] && left.length === 0) continue;\n  var due = parseDay(String(task.deadline || ''));\n  if (!due) continue;\n  var dueKey = dayKey(due);\n  var late = dueKey < todayKey;\n  var title = String(task.title || '').trim();\n  var isMoney = /^(€|invoice)/i.test(title) || !!sent[task.id];\n  if (late && isMoney) { lateMoney++; if (!lateMoneyTitle) lateMoneyTitle = title; }\n  out.push({\n    id: 'todo-' + task.id,\n    projectId: '',\n    date: late ? todayKey : dueKey,\n    what: title || 'A task with no title',\n    planned: 0.25,\n    actual: '',\n    entries: [],\n    done: false,\n    isMove: false,\n    todoTaskId: task.id,\n    todoProjected: true,\n    todoLate: late,\n    todoDue: dueKey,\n    todoMoney: isMoney,\n    todoHref: base ? base + (base.indexOf('?') >= 0 ? '&' : '?') + 'task=' + encodeURIComponent(task.id) : '',\n    todoActions: left,\n    // Above every block of the day, the late ones highest.\n    position: (late ? -2000 : -1000) + t\n  });\n}\nOutputs.blocks = out;\nOutputs.lateMoney = lateMoney;\nOutputs.lateMoneyTitle = lateMoneyTitle;"
+      },
+      "x": 40,
+      "y": 280,
+      "ports": [
+        {
+          "name": "in-tasks",
+          "displayName": "tasks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-blocks",
+          "displayName": "blocks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-todoUrl",
+          "displayName": "todoUrl",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-moveBlocks",
+          "displayName": "moveBlocks",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-actions",
+          "displayName": "actions",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-sent",
+          "displayName": "sent",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-blocks",
+          "displayName": "blocks",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lateMoney",
+          "displayName": "lateMoney",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-lateMoneyTitle",
+          "displayName": "lateMoneyTitle",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    }
+  ]
+}

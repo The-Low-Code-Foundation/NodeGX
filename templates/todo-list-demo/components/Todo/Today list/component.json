@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "2608a19f-d12d-5c29-8a23-020c4bbd86f9",
+  "name": "Today list",
+  "path": "/Todo/Today list",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Today, in time order: overdue tasks, what repeats today (by its time), tasks due today, then deadlines in the next 7 days. Something that repeats leaves the list once it is ticked off, until it is next due."
+}

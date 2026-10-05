@@ -7,8 +7,8 @@
  * the browser's store. The demo is dated from the visit, so every date here is worked out from today.
  *
  * Usage:
- *   node packages/noodl-preview/dist/nodegx-deploy.cjs templates/planner-demo <site>/templates/planner --base-url /templates/planner/ --allow-development-engine
- *   node scripts/devtools/drive-tpl010-money.js <site> --path /templates/planner/ [--shots <dir>]
+ *   node packages/noodl-preview/dist/nodegx-deploy.cjs templates/planning-demo <site>/templates/planning --base-url /templates/planning/ --allow-development-engine
+ *   node scripts/devtools/drive-tpl010-money.js <site> --path /templates/planning/ [--shots <dir>]
  *
  * Exits 0 when every clause passed, 1 when any did not.
  */
@@ -23,7 +23,7 @@ const flag = (name) => {
 const SHOTS = flag('--shots');
 const BASE = (flag('--path') || '/').replace(/\/?$/, '/');
 if (!DIR) {
-  console.error('usage: drive-tpl010-money.js <site-dir|https://origin> [--path /templates/planner/] [--shots <dir>]');
+  console.error('usage: drive-tpl010-money.js <site-dir|https://origin> [--path /templates/planning/] [--shots <dir>]');
   process.exit(2);
 }
 
@@ -144,7 +144,7 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   await page.navigate(BASE);
 
   // ── Arrival: the bottom of the week (M14) ──
-  const boot = await until(text, (s) => s.includes('Planner') && s.includes('Break-even'));
+  const boot = await until(text, (s) => s.includes('Planning') && s.includes('Break-even'));
   check('M-10 — the week ends with the month, might earn and the lowest point', /Break-even €3,308 · target €3,808/.test(boot) && boot.includes('€1,320 more, weighted (€3,800 if all come through):') && boot.includes('Lowest in six weeks:'), boot.slice(-900));
   check('M-6 — the first box is the late Salon bill', /Due \w{3} \d+ · late\s*\+€640/.test(boot), boot.slice(-700));
   check('M-16 — the Billable tile is budgeted at 46 h (fixed bills first)', boot.includes('This month is planned: 46 h billable'), boot.slice(0, 400));

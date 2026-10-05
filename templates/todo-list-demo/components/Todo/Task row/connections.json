@@ -47,18 +47,6 @@
     },
     {
       "fromId": "trIn",
-      "fromProperty": "canUp",
-      "toId": "trUp",
-      "toProperty": "enabled"
-    },
-    {
-      "fromId": "trIn",
-      "fromProperty": "canDown",
-      "toId": "trDown",
-      "toProperty": "enabled"
-    },
-    {
-      "fromId": "trIn",
       "fromProperty": "id",
       "toId": "trOut",
       "toProperty": "id"
@@ -74,18 +62,6 @@
       "fromProperty": "onClick",
       "toId": "trOut",
       "toProperty": "open"
-    },
-    {
-      "fromId": "trUp",
-      "fromProperty": "onClick",
-      "toId": "trOut",
-      "toProperty": "up"
-    },
-    {
-      "fromId": "trDown",
-      "fromProperty": "onClick",
-      "toId": "trOut",
-      "toProperty": "down"
     },
     {
       "fromId": "trClose",

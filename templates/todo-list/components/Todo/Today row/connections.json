@@ -1,0 +1,109 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "72d4f3fd-f28a-5b3f-8ecf-3cbce1e39bc1",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "yrIn",
+      "fromProperty": "heading",
+      "toId": "yrHeading",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "showHeading",
+      "toId": "yrHeading",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "time",
+      "toId": "yrTime",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "hasTime",
+      "toId": "yrTime",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "title",
+      "toId": "yrTitle",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "meta",
+      "toId": "yrMeta",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "hasMeta",
+      "toId": "yrMeta",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "metaColor",
+      "toId": "yrMeta",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "bg",
+      "toId": "yrRow",
+      "toProperty": "backgroundColor"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "isRoutine",
+      "toId": "yrWhich",
+      "toProperty": "condition"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "id",
+      "toId": "yrOut",
+      "toProperty": "id"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "targetId",
+      "toId": "yrOut",
+      "toProperty": "targetId"
+    },
+    {
+      "fromId": "yrIn",
+      "fromProperty": "title",
+      "toId": "yrOut",
+      "toProperty": "title"
+    },
+    {
+      "fromId": "yrMain",
+      "fromProperty": "onClick",
+      "toId": "yrOut",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "yrTick",
+      "fromProperty": "onClick",
+      "toId": "yrWhich",
+      "toProperty": "eval"
+    },
+    {
+      "fromId": "yrWhich",
+      "fromProperty": "ontrue",
+      "toId": "yrOut",
+      "toProperty": "check"
+    },
+    {
+      "fromId": "yrWhich",
+      "fromProperty": "onfalse",
+      "toId": "yrOut",
+      "toProperty": "close"
+    }
+  ]
+}

@@ -1,0 +1,181 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "73c408b0-189a-5ec9-88d6-a74f594d0116",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "tqIn",
+      "fromProperty": "title",
+      "toId": "tqGuard",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "tqIn",
+      "fromProperty": "deadline",
+      "toId": "tqGuard",
+      "toProperty": "in-deadline"
+    },
+    {
+      "fromId": "tqIn",
+      "fromProperty": "tasks",
+      "toId": "tqGuard",
+      "toProperty": "in-tasks"
+    },
+    {
+      "fromId": "tqIn",
+      "fromProperty": "do",
+      "toId": "tqGuard",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-title",
+      "toId": "tqTask",
+      "toProperty": "in-title"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-position",
+      "toId": "tqTask",
+      "toProperty": "in-position"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-status",
+      "toId": "tqTask",
+      "toProperty": "in-status"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-deadline",
+      "toId": "tqTask",
+      "toProperty": "in-deadline"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-empty",
+      "toId": "tqTask",
+      "toProperty": "in-closingNote"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-empty",
+      "toId": "tqTask",
+      "toProperty": "in-closedAt"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-go",
+      "toId": "tqTask",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tqTask",
+      "fromProperty": "out-id",
+      "toId": "tqEvent",
+      "toProperty": "in-taskId"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-kind",
+      "toId": "tqEvent",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-summary",
+      "toId": "tqEvent",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-empty",
+      "toId": "tqEvent",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-at",
+      "toId": "tqEvent",
+      "toProperty": "in-at"
+    },
+    {
+      "fromId": "tqTask",
+      "fromProperty": "out-done",
+      "toId": "tqEvent",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tqIn",
+      "fromProperty": "projectId",
+      "toId": "tqLog",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-hKind",
+      "toId": "tqLog",
+      "toProperty": "in-kind"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-hSummary",
+      "toId": "tqLog",
+      "toProperty": "in-summary"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-empty",
+      "toId": "tqLog",
+      "toProperty": "in-body"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-title",
+      "toId": "tqLog",
+      "toProperty": "in-what"
+    },
+    {
+      "fromId": "tqGuard",
+      "fromProperty": "out-at",
+      "toId": "tqLog",
+      "toProperty": "in-at"
+    },
+    {
+      "fromId": "tqEvent",
+      "fromProperty": "out-done",
+      "toId": "tqLog",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "tqLog",
+      "fromProperty": "out-done",
+      "toId": "tqOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "tqTask",
+      "fromProperty": "out-failure",
+      "toId": "tqProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tqEvent",
+      "fromProperty": "out-failure",
+      "toId": "tqProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tqLog",
+      "fromProperty": "out-failure",
+      "toId": "tqProblem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "tqLog",
+      "fromProperty": "out-failure",
+      "toId": "tqOut",
+      "toProperty": "done"
+    }
+  ]
+}

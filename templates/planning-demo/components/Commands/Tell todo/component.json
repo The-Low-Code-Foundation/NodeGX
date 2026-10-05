@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "5bf325e1-60af-5f65-8879-321171ab7de0",
+  "name": "Tell todo",
+  "path": "/Commands/Tell todo",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "When a block made from a todo task is done: ticks its next action in the todo list with the block’s note, or says in the task’s history that the time was logged in Planning."
+}

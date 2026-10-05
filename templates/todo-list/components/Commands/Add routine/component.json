@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "41ff3687-8c26-5feb-838c-59791e203b5e",
+  "name": "Add routine",
+  "path": "/Commands/Add routine",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Adds something that repeats — every day at 09:00 from today until it is given its own times — and writes \"Added\" to its history. Id is the new one, so the page can open it."
+}

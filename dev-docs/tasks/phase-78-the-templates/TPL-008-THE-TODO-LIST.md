@@ -16,6 +16,7 @@
 (gates 43/43, template drive 14/14, demo drive 10/10, theme drive 9/9; the public URL driven 19/19).
 **s8 (2026-09-20) answered Richard's two reports on a next action — an editable title and a description that saves and
 closes — and republished BOTH sites.**
+**2026-09-23: [TPL-008-RC](TPL-008-RC-TODAY-AND-RECURRING.md) adds a Today tab and things that repeat** (every day, week or month, at their times; a push at each) — built, gated and driven; not on the box yet.
 **AC8 is Richard's week of use. R11: the backend stays on his computer; sign-in from other devices and hosting are a later phase.**
 
 ---
@@ -38,6 +39,7 @@ The mockups are Artifacts: v1, then v2 — the one he approved.
 | R4a | A note on every tick (s2) | **"Try it first, decide after use"** — unchanged until Richard has used it |
 | R10 | Light and dark (s4) | *"dark and light mode, matching system by default but with a little icon at the top right for changing"* — built s4 (§3b) |
 | R11 | Phone, sign-in, hosting (s4) | *"Just let it run locally for now, only on the computer, and we'll do logging in and cloud hosting in a later phase"* — **the backend stays on localhost; the phone half is a later phase, not a TPL-008 gap** |
+| R12 | Reordering (2026-09-24) | *"any chance of a little drag and drop handle instead of the up down arrows that works on desktop and mobile?"* — **a grip (six dots) replaces ▲ ▼** on tasks and open next actions: drag it with a mouse, a finger or a pen; a finger elsewhere on the row still scrolls; the grip is a button to a keyboard (arrow keys) and a screen reader (*Move "…"*). One write per drop (between the new neighbours); a burst of drags is one history line (R5). *Move to #1* stays in the detail pane. Built s9 (§7 below). |
 
 ### 1a. Storage — decided by me, at Richard's request (*"you decide, my head hurts"*)
 
@@ -544,3 +546,24 @@ both jobs from it. Filed in `DEFECTS-THE-TEMPLATES-FOUND.md`, owner `NONE`.
 ⚠️ **Not done:** todo.digitalbricks.io was **not driven signed in** — that needs an account on Richard's list, as in s7; the
 behaviour itself is graded by the template drive against a real enforcing backend. · Richard's local working copy
 (`NodeGX test projects/Todo list`) still has the old Action row. · `test:ci` / `test:main` not run. · sign-up is still `public`.
+
+### s9 — 2026-09-24: the grip replaces ▲ ▼ (R12)
+
+`DRAG_SORT_SCRIPT` in `tpl008Components.ts`, placed once per list (`Todo/Task list`, `Todo/Next actions`) the Date picker's
+way: a `Function` handed the rows Group (`this` → `getDOMElement()`), pointer events by delegation, the grip drawn in CSS
+(no font — D77). `Commands/Move task` and `Move action` gained Direction `to` + To Index; the page places them once each
+(`cmdDrag`, `cmdActDrag`) where ▲ ▼ were four placements.
+
+**Found by driving, fixed before shipping:** (1) the rows are drawn by the For Each AFTER the script runs, so the grips were
+never named or focusable — the host is now watched (MutationObserver), which also settles a drop before the next paint;
+(2) the lifted row was see-through — a row paints its background inline, so the class needs `!important`; (3) on a phone a
+row as tall as the first could not take first place — the drop now reads the dragged row's LEADING edge, not its middle.
+**Drive-side:** touch emulation left on turned the next clause's calendar into the phone's own picker (now switched off
+after a finger drag); `drive-tpl008-demo.js` cannot reload after its theme + s8 steps (empty `#root`, every script 200,
+no error) — **the same on the build from before the grip**, so it is that drive's page state; its drag clauses run before it.
+
+**Readings:** tpl008Template/Demo/Recurring **73/73**; drives: todo **14/14** (its D72 row rewritten to grade the grips' names —
+green for the first time since D77), demo **10/10**, theme 9/9, recurring demo 9/9, recurring backend 8/8. **Shipped 2026-09-24**
+(Richard asked): todo.digitalbricks.io `index-7784bdbedbcf0e3f.js`; nodegx.io/templates/todo-list `index-1435179cb2cd1b2e.js`,
+driven LIVE — `drive-tpl008-demo.js` **22/22** (mouse drag, next action drag, finger drag at 390px), `drive-tpl008-rc.js` **10/10**.
+No policy or sender change. Build: `~/vscode_projects/nodegx-template-crm/ship-2026-09-24-drag/todo-host`.

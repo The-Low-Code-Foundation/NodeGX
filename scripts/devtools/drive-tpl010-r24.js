@@ -5,8 +5,8 @@
  * presses, in the build a visitor gets, and reads the result back out of the browser's store.
  *
  * Usage:
- *   node packages/noodl-preview/dist/nodegx-deploy.cjs templates/planner-demo <site>/templates/planner --base-url /templates/planner/
- *   node scripts/devtools/drive-tpl010-r24.js <site> --path /templates/planner/ [--shots <dir>]
+ *   node packages/noodl-preview/dist/nodegx-deploy.cjs templates/planning-demo <site>/templates/planning --base-url /templates/planning/
+ *   node scripts/devtools/drive-tpl010-r24.js <site> --path /templates/planning/ [--shots <dir>]
  *
  * Point the directory at the SITE ROOT and `--path` at the demo (see drive-tpl008-demo.js).
  * Exits 0 when every clause passed, 1 when any did not.
@@ -22,7 +22,7 @@ const flag = (name) => {
 const SHOTS = flag('--shots');
 const BASE = (flag('--path') || '/').replace(/\/?$/, '/');
 if (!DIR) {
-  console.error('usage: drive-tpl010-r24.js <site-dir|https://origin> [--path /templates/planner/] [--shots <dir>]');
+  console.error('usage: drive-tpl010-r24.js <site-dir|https://origin> [--path /templates/planning/] [--shots <dir>]');
   process.exit(2);
 }
 
@@ -180,7 +180,7 @@ withDeployedSite(LIVE ? { origin: DIR } : { dir: DIR, port: 0 }, async (page) =>
   await page.navigate(BASE);
 
   // ── Arrival (work item 8) ────────────────────────────────────────────────
-  const boot = await until(text, (s) => s.includes('Planner') && s.includes('of 2 h'));
+  const boot = await until(text, (s) => s.includes('Planning') && s.includes('of 2 h'));
   check('arrives with two blocks half logged: “1.75 of 2 h” and “1 of 1.5 h”', boot.includes('1.75 of 2 h') && boot.includes('1 of 1.5 h'), boot.slice(0, 400));
   await shot('0-arrival');
 

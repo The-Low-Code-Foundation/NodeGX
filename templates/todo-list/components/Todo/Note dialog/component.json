@@ -7,5 +7,5 @@
   "created": "2026-09-14T00:00:00.000Z",
   "modified": "2026-09-14T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "The \"what happened?\" dialog every close, reopen, tick and untick goes through. The OK button stays disabled until something is written, so there is always a note."
+  "description": "The \"what happened?\" dialog every close, reopen, tick and untick goes through. The OK button stays disabled until something is written, so there is always a note — except where Optional is on (a recurring item ticked off, TPL-008-RC RC3)."
 }

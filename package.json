@@ -151,7 +151,7 @@
     "template:story": "node scripts/template-gate.js ./scripts/generate-story-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-story-template.ts",
     "template:rocket": "node scripts/template-gate.js ./scripts/generate-rocket-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-rocket-template.ts",
     "template:todo": "node scripts/template-gate.js ./scripts/generate-todo-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-todo-template.ts",
-    "template:planner": "node scripts/template-gate.js ./scripts/generate-planner-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-planner-template.ts",
+    "template:planning": "node scripts/template-gate.js ./scripts/generate-planning-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-planning-template.ts",
     "template:garden": "node scripts/template-gate.js ./scripts/generate-garden-template.ts && ts-node -T -P ./scripts/tsconfig.json ./scripts/generate-garden-template.ts",
     "template:gate": "node scripts/template-gate.js"
   },

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "6cc758cb-77d9-53ac-8f95-3ef1d659bc59",
+  "name": "Rename routine",
+  "path": "/Commands/Rename routine",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Renames something that repeats, if the new title is different and not empty."
+}

@@ -7,5 +7,5 @@
   "created": "2026-09-14T00:00:00.000Z",
   "modified": "2026-09-14T00:00:00.000Z",
   "modifiedBy": "noodl-mcp",
-  "description": "One open task: its place in the list, its title, its deadline and next action, and buttons to move it up, move it down or close it."
+  "description": "One open task: the grip it is dragged by (Todo/Task list moves it), its place in the list, its title, its deadline and next action, and the tick that closes it."
 }

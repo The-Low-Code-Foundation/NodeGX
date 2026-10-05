@@ -191,9 +191,11 @@ describe('§3 it is in step with the template', () => {
     expect(missing.sort()).toEqual(
       [
         '/Logic/Todo data dtActions',
+        '/Logic/Todo data dtChecks',
         '/Logic/Todo data dtEvents',
         '/Logic/Todo data dtHasTask',
         '/Logic/Todo data dtRecent',
+        '/Logic/Todo data dtRoutines',
         '/Logic/Todo data dtTasks',
         '/Pages/Todo tdAuth',
         '/Pages/Todo tdLogOut',
@@ -246,7 +248,10 @@ describe('§4 the store', () => {
       { output: 'tasks', collection: 'Task', sort: { property: 'position', order: 'ascending' }, limit: 1000 },
       { output: 'actions', collection: 'Action', sort: { property: 'position', order: 'ascending' }, limit: 1000 },
       { output: 'events', collection: 'Event', sort: { property: 'at', order: 'descending' }, limit: 1000, filter: { property: 'taskId', input: 'taskId' } },
-      { output: 'recent', collection: 'Event', sort: { property: 'at', order: 'descending' }, limit: 300 }
+      { output: 'recent', collection: 'Event', sort: { property: 'at', order: 'descending' }, limit: 300 },
+      // TPL-008-RC
+      { output: 'routines', collection: 'Routine', sort: { property: 'title', order: 'ascending' }, limit: 1000 },
+      { output: 'checks', collection: 'RoutineCheck', sort: { property: 'date', order: 'descending' }, limit: 1000 }
     ]);
   });
 
@@ -256,7 +261,11 @@ describe('§4 the store', () => {
     expect(first.signals).toEqual([]);
     expect((first.outputs.tasks as Row[]).map((t) => t.title)).toEqual(SEED_TITLES);
     expect(first.outputs.events).toEqual([]);
-    expect((first.outputs.recent as Row[]).length).toBe(13);
+    // The thirteen task lines, and the routines' own (TPL-008-RC) — how many of those there are
+    // depends on how many Fridays the last ten days held, so they are counted, not typed.
+    const recent = first.outputs.recent as Row[];
+    expect(recent.filter((e) => !String(e.taskId).startsWith('seed-routine-')).length).toBe(13);
+    expect(recent.length).toBeGreaterThan(13);
     expect(b.map.has(DEMO_STORAGE_KEY)).toBe(true);
 
     const created = run(demoWriteScript('create', 'Task', ['title', 'position', 'status']), { title: 'Order a chair', position: 9, status: 'open' }, b.win);

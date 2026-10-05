@@ -26,6 +26,9 @@ import {
   COLLECTIONS,
   DECIDE_HISTORY_SCRIPT,
   DEADLINE_SCRIPT,
+  LINK_BOOT_SCRIPT,
+  LINK_KEY,
+  LINK_OPEN_SCRIPT,
   LOG_ROWS_SCRIPT,
   MERGE_WINDOW_MS,
   MOVE_SCRIPT,
@@ -245,15 +248,14 @@ describe('§4 the look Richard approved', () => {
     const GLYPH_BUTTONS = [
       '/Todo/Action row arCheck',
       '/Todo/Action row arDescOpen',
-      '/Todo/Action row arDown',
-      '/Todo/Action row arUp',
       '/Todo/Task row trClose',
-      '/Todo/Task row trDown',
-      '/Todo/Task row trUp',
       '/Todo/Reminders switch rmTurnOff',
       '/Todo/Reminders switch rmTurnOn',
       '/Todo/Theme switch thToDark',
-      '/Todo/Theme switch thToLight'
+      '/Todo/Theme switch thToLight',
+      // TPL-008-RC: Today's tick box, and the ✕ on a time in a schedule.
+      '/Todo/Today row yrTick',
+      '/Todo/Slot chip scRemove'
     ].sort();
 
     const drawn: string[] = [];
@@ -483,7 +485,6 @@ describe('§5 the scripts', () => {
     expect(rows[1].meta).toBe('Overdue by 1 day');
     expect(rows[1].metaColor).toBe('var(--destructive)');
     expect(rows[1].bg).toBe('var(--surface)');
-    expect([rows[0].canUp, rows[2].canDown]).toEqual([false, false]);
     expect(outputs.nextPosition).toBe(8);
     expect([outputs.listLabel, outputs.doneLabel, outputs.addSummary]).toEqual(['List (3)', 'Done (1)', 'Added at #4']);
   });
@@ -531,6 +532,17 @@ describe('§5 the scripts', () => {
     expect(run(MOVE_SCRIPT, { rows, itemId: 'c', direction: 'down' }).signals).toEqual([]);
   });
 
+  it('Move to (a drag): one write, between the new neighbours — to the top, the bottom, up or down the middle', () => {
+    const rows = [{ id: 'a', position: 1 }, { id: 'b', position: 2 }, { id: 'c', position: 5 }, { id: 'd', position: 6 }];
+    const to = (itemId: string, toIndex: unknown) => run(MOVE_SCRIPT, { rows, itemId, direction: 'to', toIndex });
+    expect(to('d', 0).outputs).toMatchObject({ firstId: 'd', firstPosition: 0, hasSecond: false, from: 4, to: 1 });
+    expect(to('a', 3).outputs).toMatchObject({ firstPosition: 7, from: 1, to: 4 });
+    expect(to('d', 1).outputs).toMatchObject({ firstPosition: 1.5, from: 4, to: 2 }); // up: between a and b
+    expect(to('a', 2).outputs).toMatchObject({ firstPosition: 5.5, from: 1, to: 3 }); // down: between c and d
+    // Where it already is, off either end, or not a number: nothing is written.
+    expect([to('b', 1), to('b', 4), to('b', -1), to('b', 'x'), to('b', undefined)].map((r) => r.signals)).toEqual([[], [], [], [], []]);
+  });
+
   it('Write history: a second move of the same task within the window EXTENDS the line, keeping where it started', () => {
     const first = run(DECIDE_HISTORY_SCRIPT, { taskId: 't', kind: 'moved', from: 3, to: 2, last: {} });
     expect(first.signals).toEqual(['create']);
@@ -554,5 +566,61 @@ describe('§5 the scripts', () => {
     const bad = run(DEADLINE_SCRIPT, { taskId: 't', text: '2026-02-30', current: '' });
     expect([bad.outputs.hasError, bad.signals]).toEqual([true, []]);
     expect(run(DEADLINE_SCRIPT, { taskId: 't', text: '2026-09-03', current: '2026-09-03' }).signals).toEqual([]);
+  });
+});
+
+describe('§6 a link to one task (TPL-010-L L5)', () => {
+  const browser = (search: string, stored: Record<string, string> = {}) => {
+    const store = { ...stored };
+    return {
+      store,
+      window: {
+        location: { search },
+        sessionStorage: {
+          getItem: (k: string) => (k in store ? store[k] : null),
+          setItem: (k: string, v: string) => {
+            store[k] = v;
+          },
+          removeItem: (k: string) => {
+            delete store[k];
+          }
+        }
+      }
+    };
+  };
+  const runOpen = (win: unknown) => {
+    const signals: string[] = [];
+    const outputs = new Proxy({} as Record<string, unknown>, { get: (t, k: string) => (k in t ? t[k] : () => signals.push(k)) });
+    // eslint-disable-next-line no-new-func
+    new Function('Inputs', 'Outputs', 'window', LINK_OPEN_SCRIPT).call({}, {}, outputs, win);
+    return { outputs: { ...outputs }, signals };
+  };
+
+  it('?task= is kept at load, and read — once — when the list loads', () => {
+    const b = browser('?task=abc%20123');
+    // eslint-disable-next-line no-new-func
+    new Function('window', LINK_BOOT_SCRIPT)(b.window);
+    expect(b.store[LINK_KEY]).toBe('abc 123');
+    // After the sign-in detour the query is gone; the kept id still opens the task.
+    const after = browser('', b.store);
+    expect(runOpen(after.window)).toEqual({ outputs: { taskId: 'abc 123' }, signals: ['open'] });
+    expect(after.store[LINK_KEY]).toBeUndefined();
+    expect(runOpen(browser('').window).signals).toEqual([]);
+    expect(runOpen(browser('?task=xyz').window).outputs.taskId).toBe('xyz');
+  });
+
+  it('the page selects it through its own Set Variable, and loads its history', () => {
+    const page = componentsOf().find((c) => c.name === C.pageTodo) as LegacyComponent;
+    const wires = (page.graph?.connections ?? []) as unknown as Array<Record<string, string>>;
+    const has = (f: string, fp: string, t: string, tp: string) => wires.some((w) => w.fromId === f && w.fromProperty === fp && w.toId === t && w.toProperty === tp);
+    expect(has('tdAuth', 'ontrue', 'tdLinkOpen', 'run')).toBe(true);
+    expect(has('tdLinkOpen', 'out-taskId', 'tdSelectFromLink', 'value')).toBe(true);
+    expect(has('tdLinkOpen', 'out-open', 'tdSelectFromLink', 'do')).toBe(true);
+    expect(has('tdSelectFromLink', 'done', 'tdData', 'loadHistory')).toBe(true);
+    // 🔴 The script that shipped, not undefined: declared below the page, it was built empty.
+    const open = nodesOf(page).find((n) => n.id === 'tdLinkOpen');
+    expect((open?.parameters as { functionScript?: string })?.functionScript).toBe(LINK_OPEN_SCRIPT);
+    const app = componentsOf().find((c) => c.name === '/App') as LegacyComponent;
+    expect((nodesOf(app).find((n) => n.id === 'app_link')?.parameters as { functionScript?: string })?.functionScript).toBe(LINK_BOOT_SCRIPT);
   });
 });

@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "8fe638e5-f0df-5905-889e-28ac274835ec",
+  "name": "Send to todo",
+  "path": "/Commands/Send to todo",
+  "type": "visual",
+  "created": "2026-09-20T00:00:00.000Z",
+  "modified": "2026-09-20T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "Puts a project’s move at the bottom of the todo list, with its day as the deadline, and writes “Sent from Planning” in the task’s history. Once: not while an open task has the same words."
+}

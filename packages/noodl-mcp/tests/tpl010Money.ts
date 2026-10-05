@@ -4,7 +4,7 @@
  * One list of what comes in and goes out (`MoneyItem`), the repeats changed or ticked by hand
  * (`MoneyMark`), and the bank balance as read on a day (`BalanceReading`). Nothing here reads
  * the backend and nothing writes; `Logic/Money` and `Logic/Money pane` run it over the rows
- * `Logic/Planner data` hands them, and the gates run it with the clock held.
+ * `Logic/Planning data` hands them, and the gates run it with the clock held.
  *
  * ## The rules it carries (TPL-010-MONEY.md §3)
  *

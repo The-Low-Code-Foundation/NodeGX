@@ -1,0 +1,105 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "58166f1e-fa20-5252-837f-4ca7c9633041",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "scIn",
+      "type": "Component Inputs",
+      "label": "The time",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 160
+    },
+    {
+      "id": "scOut",
+      "type": "Component Outputs",
+      "label": "Taken out",
+      "ports": [
+        {
+          "name": "remove",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "id",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 350,
+      "y": 280
+    },
+    {
+      "id": "scRoot",
+      "type": "Group",
+      "label": "Time",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentSize",
+        "columnGap": "var(--space-1)",
+        "backgroundColor": "var(--muted)",
+        "borderRadius": "var(--radius-full)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-1)"
+      },
+      "children": [
+        "scLabel",
+        "scRemove"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "scLabel",
+      "type": "Text",
+      "label": "When",
+      "parent": "scRoot",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "scRemove",
+      "type": "net.noodl.controls.button",
+      "label": "Take this time out",
+      "parent": "scRoot",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--muted-foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingTop": "var(--space-1)",
+        "paddingBottom": "var(--space-1)",
+        "sizeMode": "contentSize",
+        "label": "✕",
+        "fontSize": "var(--text-base)",
+        "paddingLeft": "var(--space-2)",
+        "paddingRight": "var(--space-2)"
+      },
+      "x": 100,
+      "y": 280
+    }
+  ],
+  "visualRoots": [
+    "scRoot"
+  ]
+}

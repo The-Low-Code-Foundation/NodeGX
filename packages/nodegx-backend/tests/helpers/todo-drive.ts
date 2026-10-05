@@ -112,20 +112,32 @@ export async function blur(page: RenderedPage): Promise<void> {
  * on top at their own centre. The stylesheet hides one of the pair, so `inDom: 2` is the
  * known-firing half beside "only one shows".
  */
+/**
+ * 🔴 D77 (2026-09-21) made the two buttons a character each — ☾ and ☼ — so they no longer read "Use dark
+ * theme" / "Use light theme", and this found none: every theme reading went red with "no theme switch is
+ * drawn" (measured 2026-09-23, TPL-008-RC). Both spellings are matched, and a glyph is REPORTED by the name
+ * it stands for, so the assertions keep saying which one shows.
+ */
+const THEME_BUTTON = `function themeName(b) {
+  var t = (b.textContent || '').trim();
+  return t === '\u263e' ? 'Use dark theme' : t === '\u263c' ? 'Use light theme' : /^Use (dark|light) theme$/.test(t) ? t : '';
+}`;
+
 export async function themeSwitches(page: RenderedPage): Promise<{ inDom: number; shown: string[] }> {
   return JSON.parse(
     String(
       await page.evaluate(`(function () {
+        ${THEME_BUTTON}
         window.scrollTo(0, 0);
         var all = Array.prototype.filter.call(document.querySelectorAll('button'), function (b) {
-          return /^Use (dark|light) theme$/.test((b.textContent || '').trim());
+          return themeName(b) !== '';
         });
         var shown = all.filter(function (b) {
           var r = b.getBoundingClientRect();
           if (r.width === 0 || r.height === 0) return false;
           var hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
           return !!hit && (hit === b || b.contains(hit));
-        }).map(function (b) { return (b.textContent || '').trim(); });
+        }).map(themeName);
         return JSON.stringify({ inDom: all.length, shown: shown });
       })()`)
     )
@@ -136,9 +148,10 @@ export async function themeSwitches(page: RenderedPage): Promise<{ inDom: number
 export async function clickThemeSwitch(page: RenderedPage): Promise<void> {
   const found = String(
     await page.evaluate(`(function () {
+      ${THEME_BUTTON}
       window.scrollTo(0, 0);
       var b = Array.prototype.filter.call(document.querySelectorAll('button'), function (x) {
-        return /^Use (dark|light) theme$/.test((x.textContent || '').trim()) && x.getBoundingClientRect().width > 0;
+        return themeName(x) !== '' && x.getBoundingClientRect().width > 0;
       })[0];
       if (!b) return 'absent';
       var r = b.getBoundingClientRect();
@@ -247,4 +260,88 @@ export async function retypeField(page: RenderedPage, value: string, next: strin
   if (ok !== 'ok') throw new Error(`retypeField: no field holds "${value}"`);
   await client.send('Input.insertText', { text: next });
   await wait(400);
+}
+
+// ── 2026-09-24: the grip replaced ▲ ▼ ────────────────────────────────────────
+
+/** Where a row's grip is, and the middle of another row — each row found by its words, or by the field holding them. */
+async function gripAndTarget(page: RenderedPage, title: string, onto: string): Promise<{ from: { x: number; y: number }; to: { x: number; y: number }; down: boolean }> {
+  const found = String(
+    await page.evaluate(`(function () {
+      function rowOf(want) {
+        var el = Array.prototype.filter.call(document.querySelectorAll('body *'), function (e) {
+          return e.children.length === 0 && (e.textContent || '').trim() === want;
+        })[0] || Array.prototype.filter.call(document.querySelectorAll('input, textarea'), function (i) { return i.value === want; })[0];
+        return el ? el.closest('.todo-drag-row') : null;
+      }
+      var a = rowOf(${JSON.stringify(title)}), b = rowOf(${JSON.stringify(onto)});
+      if (!a || !b) return 'absent:' + !!a + ':' + !!b;
+      var grip = a.querySelector('.todo-drag-handle');
+      if (!grip) return 'no grip';
+      a.scrollIntoView({ block: 'center', behavior: 'instant' });
+      var g = grip.getBoundingClientRect(), t = b.getBoundingClientRect(), s = a.getBoundingClientRect();
+      var down = t.top > s.top;
+      // Past the target's middle, so the drop lands on its side of it.
+      return JSON.stringify({ from: { x: g.left + g.width / 2, y: g.top + g.height / 2 }, to: { x: g.left + g.width / 2, y: t.top + t.height / 2 + (down ? 6 : -6) }, down: down });
+    })()`)
+  );
+  if (!found.startsWith('{')) throw new Error(`drag "${title}" onto "${onto}": ${found}`);
+  return JSON.parse(found);
+}
+
+/**
+ * Drag the row reading `title` by its grip until it is over the row reading `onto`, then let go — as a
+ * mouse does, or as a finger does (`touch`: CDP touch events, which Chrome turns into pointer events of
+ * type `touch`, the phone's path). Twelve steps, so the rows it passes have time to slide.
+ */
+export async function dragRow(page: RenderedPage, title: string, onto: string, how: 'mouse' | 'touch' = 'mouse'): Promise<void> {
+  const client = (page as unknown as { client: { send(m: string, p?: unknown): Promise<unknown> } }).client;
+  const { from, to } = await gripAndTarget(page, title, onto);
+  const steps = 12;
+  const at = (k: number) => ({ x: Math.round(from.x), y: Math.round(from.y + ((to.y - from.y) * k) / steps) });
+  if (how === 'mouse') {
+    await client.send('Input.dispatchMouseEvent', { type: 'mousePressed', x: at(0).x, y: at(0).y, button: 'left', buttons: 1, clickCount: 1 });
+    for (let k = 1; k <= steps; k++) {
+      await client.send('Input.dispatchMouseEvent', { type: 'mouseMoved', ...at(k), button: 'left', buttons: 1 });
+      await wait(30);
+    }
+    await wait(150);
+    await client.send('Input.dispatchMouseEvent', { type: 'mouseReleased', ...at(steps), button: 'left', buttons: 0, clickCount: 1 });
+  } else {
+    await client.send('Emulation.setTouchEmulationEnabled', { enabled: true, maxTouchPoints: 1 });
+    await client.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [at(0)] });
+    for (let k = 1; k <= steps; k++) {
+      await client.send('Input.dispatchTouchEvent', { type: 'touchMove', touchPoints: [at(k)] });
+      await wait(30);
+    }
+    await wait(150);
+    await client.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+    // Off again, or the page stays a touch screen and the Date picker hands out the phone's own picker.
+    await client.send('Emulation.setTouchEmulationEnabled', { enabled: false });
+  }
+  await wait(1200);
+}
+
+/** Focus the grip of the row reading `title` and press an arrow key on it — the keyboard's way to move. */
+export async function arrowOnGrip(page: RenderedPage, title: string, key: 'ArrowUp' | 'ArrowDown'): Promise<void> {
+  const client = (page as unknown as { client: { send(m: string, p?: unknown): Promise<unknown> } }).client;
+  const ok = String(
+    await page.evaluate(`(function () {
+      var el = Array.prototype.filter.call(document.querySelectorAll('body *'), function (e) {
+        return e.children.length === 0 && (e.textContent || '').trim() === ${JSON.stringify(title)};
+      })[0];
+      var grip = el && el.closest('.todo-drag-row') && el.closest('.todo-drag-row').querySelector('.todo-drag-handle');
+      if (!grip) return 'absent';
+      grip.focus();
+      return document.activeElement === grip ? 'ok' : 'not focused';
+    })()`)
+  );
+  if (ok !== 'ok') throw new Error(`arrowOnGrip "${title}": ${ok}`);
+  // Headless Chrome drops key events on an unfocused page unless focus is emulated, on this connection.
+  await client.send('Emulation.setFocusEmulationEnabled', { enabled: true });
+  const code = key;
+  const keyCode = key === 'ArrowUp' ? 38 : 40;
+  await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key, code, windowsVirtualKeyCode: keyCode });
+  await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key, code, windowsVirtualKeyCode: keyCode });
+  await wait(1200);
 }
