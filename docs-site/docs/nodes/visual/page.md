@@ -33,6 +33,7 @@ Do not add Page from the node picker or use it outside a Router page component �
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
 | `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `description` | String | — | Summary search engines show under the page title in results, usually kept under about 160 characters |
+| `keepWhenLeaving` | Boolean | `false` | Keeps this page as it was when someone leaves it through its Router, so coming back shows it as they left it, its components' state included. A kept page stays in memory while hidden, and its Repeat and Delay clocks pause until it shows again. Off: the page is built fresh on every visit |
 | `og:description` | String | — | Summary shown beneath the title when this page is shared |
 | `og:image` | String | — | Image shown in the share preview; it must be an absolute URL, not a project path |
 | `og:image:height` | String | — | Height of the share image in pixels |

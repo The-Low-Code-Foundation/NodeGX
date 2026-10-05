@@ -1,0 +1,75 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "de48f7ab-a28e-574a-8a81-f6bf58fad313",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pb_page",
+      "type": "Page",
+      "label": "B",
+      "parameters": {
+        "title": "Page B",
+        "urlPath": "b"
+      },
+      "children": [
+        "pb_root"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pb_root",
+      "type": "Group",
+      "label": "Root",
+      "parent": "pb_page",
+      "parameters": {
+        "flexDirection": "column"
+      },
+      "children": [
+        "pb_text",
+        "pb_back"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pb_text",
+      "type": "Text",
+      "label": "Here",
+      "parent": "pb_root",
+      "parameters": {
+        "text": "Page B",
+        "dataAttributes": "data-testid",
+        "data-testid": "page-b"
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pb_back",
+      "type": "Button",
+      "label": "Back",
+      "parent": "pb_root",
+      "parameters": {
+        "label": "back to A",
+        "dataAttributes": "data-testid",
+        "data-testid": "to-a"
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pb_nav",
+      "type": "RouterNavigate",
+      "label": "Go A",
+      "parameters": {
+        "target": "/Pages/A"
+      },
+      "x": 410,
+      "y": 400
+    }
+  ],
+  "visualRoots": [
+    "pb_page"
+  ]
+}

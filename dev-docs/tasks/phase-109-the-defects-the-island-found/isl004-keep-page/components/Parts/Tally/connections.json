@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "aa95b96c-e275-5548-89cb-f33071ee0d4d",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "t_plus",
+      "fromProperty": "onClick",
+      "toId": "t_add",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "t_obj",
+      "fromProperty": "value-count",
+      "toId": "t_count",
+      "toProperty": "text"
+    }
+  ]
+}

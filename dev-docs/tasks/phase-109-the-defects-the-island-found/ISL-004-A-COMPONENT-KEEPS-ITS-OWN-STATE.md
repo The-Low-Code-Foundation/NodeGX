@@ -1,6 +1,6 @@
 # ISL-004 — A component keeps its own state, and a page you come back to still has it
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F04, with F05 as
+**Status: 🟡 s17 (2026-10-05): ruling 1 ruled "Yes, if ticked" and built — AC1 and AC2 met in a browser (§8 s17); owed: rulings 2 and 3 (AC3, AC5), the census (AC4), the workaround read (AC6). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F04, with F05 as
 evidence · P108 [IW-002](../phase-108-the-island-works/IW-002-THE-JOB-MODEL.md) AC3 (lane M, s3, lines 322-329) ·
 P106 [IG-004](../phase-106-the-island-grows/IG-004-THE-ISLAND-AS-A-WORLD.md) §6 line 77 and §7.6 item 13 (lines
 328-332) · P108 [IW-006](../phase-108-the-island-works/IW-006-SHELLS-AND-THE-SHOP.md) deviation 2 (lines 219-221) ·
@@ -128,3 +128,77 @@ Design constraints (after the rulings):
 ## 8. Session log
 
 None yet.
+
+### Session 17 (2026-10-05) — ruling 1 asked and ruled: "Yes, if ticked"
+
+Re-measured at `8a89300b3` (read-only agent; 242 commits after scoping) before asking:
+- **Why a page forgets:** the Router deletes the old page and builds the new one on every navigation (`router.tsx:545-552`
+  reset, `:906-916` `_buildPage`); each new component instance takes a new counter id (`componentinstance.ts:10, :84, :92`),
+  and Component Object's storage is keyed by that id (`componentobject.ts:83-85`).
+- **The island's workaround is 5 pieces, not 3:** the `kept` quiet input (`cg003Components.ts:368-371`, wired `:1855`), the
+  build hash (`ig004Island.ts:450`), live jobs left out of it (`iw6Unlive`), a land key (`:452-453`), the land-lift patch
+  (`:461`, `c25fb8ee5`). No other of the 13 templates uses the pattern. `garden*` Variables: 24 (22 at scoping).
+- 🔴 **"Page Stack does the same" is half true:** replace (`navigation-stack.tsx:848`) and reset (`:510`) delete, but a push
+  only detaches the page beneath (`:1020`) and back re-attaches the same page (`:1056`) — a keep-alive path already exists,
+  and a Repeat on the hidden page keeps ticking (`repeat.ts:79-82` stops only on delete): the F05 clock hazard, live today.
+- **A template that wants forgetting:** `digital-bricks-training` `Pages/Course` clears `dbtDossierOpen` because "the Variable
+  outlives the page"; its `Logic/Feed filter`: "Which rows are open is page state, NEVER saved". Supports opt-in.
+- 13 of 13 templates have exactly 1 Router and 0 Page Stacks; 69 page components. Component Object: 0 templates, 10 of 48
+  library prefabs (option (c)'s reach).
+
+**Ruled (README §8 round 5, verbatim there): "Yes, if ticked"** — ruling 1 (b): an opt-in "Keep this page when leaving", off by
+default. Rulings 2 and 3 not asked. 🔴 The build owes the clock rule: a Repeat (and any timer) on a kept page stops while the
+page is hidden and resumes on return — and the same rule fixes Page Stack's push today.
+
+**Built s17, in source (the browser half owed):**
+- **Page** gains `keepWhenLeaving` ("Keep When Leaving", General, boolean, default off; its description names the
+  memory cost and the clock rule) — `page.ts`.
+- **Router** (`router.tsx`): both builders (`resetAsync`, `_buildPage`) now `_leaveCurrentPage()` — a page whose Page
+  node asks to be kept is detached and held, one copy per page component, instead of deleted — and `_takeKeptPage(key,
+  params)` reattaches the SAME group on the next visit with equal parameters (other parameters: the kept copy is deleted
+  and the page built fresh). Hidden and shown, every node of the page (`getAllNodesRecursive`) with `_onPageHidden` /
+  `_onPageShown` is told. The Router deletes what it kept when it is deleted (a delete listener: detached groups are
+  out of reach of its own deletion). 🔴 Met building: viewer-react compiles to **ES5 without downlevel iteration**, so
+  a `for…of` over a Map's `.values()` ran ZERO times — the delete-listener row was red for that; `Map.forEach` now.
+- **Repeat** pauses its beat (`pausedLeft` = when the next tick was due) and resumes it on show; a Stop while hidden is
+  not undone by the show. **Delay** pauses its countdown, resumes with what was left, no second Started, one Finished,
+  its own Duration and Start Delay restored after.
+- 🔴 **Page Stack unchanged on purpose:** a push still leaves the page underneath ticking (read from code,
+  `navigation-stack.tsx:1020` + `repeat.ts`, not run). Pausing it there would change existing projects, which the
+  ruling's option did not ask for; not filed as a ledger bug until measured.
+- Spec `noodl-viewer-react/tests/isl-004-keep-page.test.ts` **7/7** (kept page comes back, nothing deleted or rebuilt,
+  the clock told both times; control: no option → deleted and rebuilt; other parameters → fresh; the Router's deletion
+  reaches what it kept; Repeat paused 300 ms before a tick is due 300 ms after showing; a stopped Repeat stays stopped;
+  Delay carries on). **Reverted arm:** the keep branch off → the first row red (restored by `cp`, `cmp` clean).
+  viewer-react `tsc --noEmit` 0.
+- **Fixture + drive written, not yet run:** `isl004-keep-page/` (built through the door by
+  `noodl-mcp/tests/isl004KeepPage.ts`, 0 errors/warnings — two Tallies with a Component Object count, an app Variable
+  counter as the known-firing control, a Repeat at 200 ms started on Page A's `didMount`, a Router to B and back) and
+  `scripts/devtools/drive-isl004-keep-page.js` (three round trips). Owed: AC1 RED on the shared (HEAD) bundle, then the
+  same with `keep` on a bundle built in a worktree (AC2, and the sabotage arm = the option off).
+
+**Driven s17 (later the same day), `scripts/devtools/drive-isl004-keep-page.js`, 390 px, three round trips A → B → A
+through the app's own Router, 1.66 s on B each time** (each deploy by `nodegx deploy`, exit 0):
+
+| site | before leaving | after trips 1, 2, 3 | Repeat ticks leaving → back | app counter |
+|---|---|---|---|---|
+| keep ticked, the runtime BEFORE ISL-004 (AC1 red) | 3 · 1 | 0 · 0, 0 · 0, 0 · 0 | 22 → 0, 0 → 0, 0 → 0 (rebuilt) | 2, 2, 2 |
+| keep ticked, ISL-004 (AC2) | 3 · 1 | **3 · 1** each time | 22 → 23, 23 → 24, 24 → 25 | 2, 2, 2 |
+| keep off (AC2 sabotage arm) | 3 · 1 | 0 · 0 each time | 22 → 0 (rebuilt) | 2, 2, 2 |
+
+- **AC1 met, read after the change:** the "before" runtime is the deploy bundle of the 13:31 island deploy (ISL-008 in,
+  ISL-004 not: `keepWhenLeaving` 0 hits), copied over the keep-ticked site's `noodl.deploy.js`. 🔴 The shared
+  `src/external` viewer, deploy and ssr bundles were rebuilt at 15:47 by a dev stack's watcher and carry this
+  UNCOMMITTED source, so they could not be the HEAD reading. The app-wide Variable counter is the known-firing control
+  (2 after every trip). **Not built:** AC1's second control (a Variable-based Tally placed twice reading 4 and 4).
+- **AC2 met:** 3 and 1 after three round trips; the option off reads 0 and 0. **The clock rule, counted:** a 200 ms Repeat
+  gains ONE tick per round trip (the time on A between the return and the next tap) where 1.66 s away would be about 8;
+  with the option off it restarts at 0. No console errors on any site.
+- **The fixture needed one fix:** the door registers pages in write order and names the first one written the start page
+  while none is set, and says so in its reply (`registeredPages.startPage`), which the generator ignored, so the app opened
+  on B. `isl004KeepPage.ts` now sets the Router's `pages` to start on A. Not a defect (designed, and reported).
+- **Gates:** the spec 7/7, run in the worktree `p109-s17-isl004` (same four sources, `cmp` clean). In this checkout it
+  cannot run since ISL-005's `noodl-runtime/src/scriptfiles.ts` (TS2802 under viewer-react's ES5 ts-jest; fixed on the
+  ISL-005 branch `b63d5bfec`, landing with Richard). CHR-007 23/23 (the Page row's snapshot line);
+  `catalog:check`, `catalog:merge:check`, `docs:nodes:check` exit 0 with the Page port in `node-catalog.json`,
+  `node-catalog-enriched.json` and `docs-site/docs/nodes/visual/page.md`.

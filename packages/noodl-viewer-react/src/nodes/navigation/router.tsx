@@ -176,6 +176,9 @@ const RouterNode = {
     };
 
     this.props.layout = 'column';
+
+    // ISL-004: kept pages are detached, so the router's own deletion would not reach them.
+    this.addDeleteListener(() => this._deleteKeptPages());
   },
   getInspectInfo() {
     return this._internal.currentUrl;
@@ -412,6 +415,53 @@ const RouterNode = {
 
       for (const token of outcomes) this.reportOutcome(token, outcome, options);
     },
+    /**
+     * P109 ISL-004 — ruled 2026-10-05 "Yes, if ticked": a page whose Page node has Keep When Leaving set is hidden
+     * when its Router leaves it, not deleted, and the next visit with the same parameters shows that same page — every
+     * node in it, Component Objects included, is simply still there. Off (the default), a page is deleted on leaving
+     * and built fresh, as before.
+     *
+     * One kept copy per page component. A visit with different parameters deletes it and builds fresh (`/product/{id}`
+     * with another id is another page). While hidden, the page is not rendered (detached, as Page Stack detaches the
+     * page under a push), and its clocks pause: every node in it that has `_onPageHidden` / `_onPageShown` (Repeat,
+     * Delay) gets them, so a hidden page does not tick unseen (the ruling's condition).
+     */
+    _leaveCurrentPage() {
+      const children = this.getChildren();
+      for (const i in children) {
+        const c = children[i];
+        this.removeChild(c);
+        const page = c._isl004Page;
+        if (page && _keepsWhenLeaving(page.content)) {
+          if (!this._internal.keptPages) this._internal.keptPages = new Map();
+          const previous = this._internal.keptPages.get(page.key);
+          if (previous && previous !== c) this.nodeScope.deleteNode(previous);
+          _eachNodeOf(page.content, (n) => n._onPageHidden && n._onPageHidden());
+          this._internal.keptPages.set(page.key, c);
+        } else {
+          this.nodeScope.deleteNode(c);
+        }
+      }
+    },
+    _takeKeptPage(key, params) {
+      const kept = this._internal.keptPages && this._internal.keptPages.get(key);
+      if (!kept) return undefined;
+      this._internal.keptPages.delete(key);
+      if (!shallowObjectsEqual(kept._isl004Page.params, params)) {
+        this.nodeScope.deleteNode(kept);
+        return undefined;
+      }
+      return kept;
+    },
+    _showKeptPage(content) {
+      _eachNodeOf(content, (n) => n._onPageShown && n._onPageShown());
+    },
+    _deleteKeptPages() {
+      if (!this._internal.keptPages) return;
+      // forEach, not for…of: this file compiles without downlevel iteration, and a for…of over a Map runs zero times.
+      this._internal.keptPages.forEach((group) => this.nodeScope.deleteNode(group));
+      this._internal.keptPages.clear();
+    },
     createPageContainer() {
       const group = this.nodeScope.createPrimitiveNode('Group');
       group.setStyle({ flex: '1 0 100%' });
@@ -540,16 +590,11 @@ const RouterNode = {
 
       this.scrollToTop();
 
-      // Reset the current page for this router
-      // First remove all children
-      const children = this.getChildren();
-      for (const i in children) {
-        const c = children[i];
-        this.removeChild(c);
-        this.nodeScope.deleteNode(c);
-      }
+      // Reset the current page for this router: leave what is showing (deleted, or kept — ISL-004).
+      this._leaveCurrentPage();
 
-      const content = await this.nodeScope.createNode(component, guid());
+      const kept = this._takeKeptPage(component, params);
+      const content = kept ? kept._isl004Page.content : await this.nodeScope.createNode(component, guid());
 
       // Find the root page node
       const pageNodes = content.nodeScope.getNodesWithType('Page');
@@ -588,10 +633,14 @@ const RouterNode = {
 
       this._updatePageInputs(this._internal.currentPageComponent.nodeScope, params);
 
-      const group = this.createPageContainer();
-      group.addChild(content);
+      const group = kept || this.createPageContainer();
+      if (!kept) {
+        group.addChild(content);
+        group._isl004Page = { key: component, params, content };
+      }
 
       this.addChild(group);
+      if (kept) this._showKeptPage(content);
 
       /*	this.setPageOutputs({
 				currentUrl: pageInfo.path,
@@ -902,18 +951,14 @@ const RouterNode = {
     async _buildPage(newPage: ComponentPageInfo, args: NavigateArgs) {
       this.scrollToTop();
 
-      // Remove all current pages in the stack
-      const children = this.getChildren();
-      for (const i in children) {
-        const c = children[i];
-        this.removeChild(c);
-        this.nodeScope.deleteNode(c);
-      }
+      // Leave the page that is showing: deleted, or kept for the way back (ISL-004).
+      this._leaveCurrentPage();
 
-      const group = this.createPageContainer();
+      const kept = this._takeKeptPage(args.target, args.params);
+      const group = kept || this.createPageContainer();
 
-      // Create the page content
-      const content = await this.nodeScope.createNode(args.target, guid());
+      // Create the page content, unless it was kept
+      const content = kept ? kept._isl004Page.content : await this.nodeScope.createNode(args.target, guid());
 
       this._internal.currentPage = newPage;
       this._internal.currentPageSnapshot = _snapshotPageInfo(newPage);
@@ -930,8 +975,12 @@ const RouterNode = {
         });
       }
 
-      group.addChild(content);
+      if (!kept) {
+        group.addChild(content);
+        group._isl004Page = { key: args.target, params: args.params, content };
+      }
       this.addChild(group);
+      if (kept) this._showKeptPage(content);
 
       this._updateUrlWithTopPage();
 
@@ -945,6 +994,18 @@ const RouterNode = {
     }
   }
 };
+
+/** ISL-004 — whether a page component's Page node asks to be kept when its Router leaves it. */
+function _keepsWhenLeaving(content) {
+  const pages = content && content.nodeScope ? content.nodeScope.getNodesWithType('Page') : undefined;
+  return !!(pages && pages.length === 1 && pages[0]._internal && pages[0]._internal.keepWhenLeaving);
+}
+
+/** ISL-004 — every node of a page component, its child components' nodes included. */
+function _eachNodeOf(content, visit) {
+  if (!content || !content.nodeScope) return;
+  for (const n of content.nodeScope.getAllNodesRecursive()) visit(n);
+}
 
 function shallowObjectsEqual(object1, object2) {
   const keys1 = Object.keys(object1 || {});

@@ -21877,6 +21877,19 @@
           "index": 80000
         },
         {
+          "name": "keepWhenLeaving",
+          "displayName": "Keep When Leaving",
+          "group": "General",
+          "plug": "input",
+          "type": {
+            "name": "boolean"
+          },
+          "isSignal": false,
+          "default": false,
+          "description": "Keeps this page as it was when someone leaves it through its Router, so coming back shows it as they left it, its components' state included. A kept page stays in memory while hidden, and its Repeat and Delay clocks pause until it shows again. Off: the page is built fresh on every visit",
+          "index": 3
+        },
+        {
           "name": "og:description",
           "displayName": "Description",
           "editorName": "OG Description",

@@ -9,6 +9,7 @@ interface PageNodeInstance extends ReactNodeInstance {
   _internal: {
     title?: string;
     urlPath?: string;
+    keepWhenLeaving?: boolean;
   };
 }
 
@@ -122,6 +123,19 @@ const PageNode = {
       type: 'string',
       set: function (this: PageNodeInstance, value: string) {
         this._internal.urlPath = value;
+      }
+    },
+    // P109 ISL-004 — ruled 2026-10-05 "Yes, if ticked". Read by the Router when it leaves this page (router.tsx).
+    keepWhenLeaving: {
+      index: 3,
+      displayName: 'Keep When Leaving',
+      description:
+        "Keeps this page as it was when someone leaves it through its Router, so coming back shows it as they left it, its components' state included. A kept page stays in memory while hidden, and its Repeat and Delay clocks pause until it shows again. Off: the page is built fresh on every visit",
+      group: 'General',
+      type: 'boolean',
+      default: false,
+      set: function (this: PageNodeInstance, value: boolean) {
+        this._internal.keepWhenLeaving = !!value;
       }
     },
     // SSR readiness handshake. When this signal is connected, `initialize`

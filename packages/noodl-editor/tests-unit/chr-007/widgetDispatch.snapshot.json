@@ -863,6 +863,7 @@
       "cssClassName": "BasicType",
       "dataAttributes": "StringListType",
       "description": "BasicType",
+      "keepWhenLeaving": "BooleanType",
       "og:description": "BasicType",
       "og:image": "BasicType",
       "og:image:height": "BasicType",
