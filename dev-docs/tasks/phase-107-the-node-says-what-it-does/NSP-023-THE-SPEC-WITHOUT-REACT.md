@@ -248,8 +248,8 @@ painted page" scenarios slide to 0 before 30 (their last remount no longer follo
 unordered in the settle group, so the first run left 75 survivors, all one family: an act's paint that draws the graph's word,
 dropped or swapped, leaves the drawing to the frame's end and the trace cannot tell. The kill: a Max (or Min) write after the act in
 the same frame — the act's paint computed Value Percent against the old one, a frame-end draw against the new (C74's stale percent
-makes it visible). An act-paint row matrix (176 segments: Value 40 or 0.5, every act, enabled or not, the keyboard on or off,
-remounting or not) and a runtime-graded twin for words that move nothing (Value 0 at 0, every act, Min -100 in the act's frame).
+makes it visible). An act-paint row matrix (176 segments at first — Value 40 or 0.5, every act, enabled or not, the keyboard on or off,
+remounting or not; 528 after §8.4) and a runtime-graded twin for words that move nothing (Value 0 at 0, every act, Min -100 in the act's frame).
 **Thirteen declared equivalent** (`NO_WORD_WAITING`): an act's paint or a mount on the page that found no word waiting, handed its
 twin's patch — `pending: false` where it is false already, and the handle kept (a swap keeps the page's syncs). Two more kills came
 from recorded examples: a slide whose Value Percent does not move was recorded only at 30.5 → 30, where its twin's example agreed
@@ -266,5 +266,29 @@ Unchanged). Ten more equivalents of `NO_WORD_WAITING`'s shape (the act paints th
 13, 20730 and 20731 (0 divergences, 2,926 / 2,950, the rest declared) and on the runtime at 200 on seeds 13 and 20730 (0
 divergences outside the rows; D36 attributed 82 and 61, C73 by its scenarios; 2,926 / 2,950; both tests green). The package suite
 20 suites, 878 passed (batch-visual 709 s — the Slider file is larger); the runtime graph and target suites 102. The 10,000 runs:
-§8.4 when they land.
+§8.4.
+
+### 8.4 s46, 2026-10-05/06 — the Slider v2 at 10,000
+
+**The first runtime 10,000 (seed 20731, the commit `a19b5600d`) did NOT conform:** 2 divergences no row took, 37 survivors.
+- The two divergences: (1) a first-paint Changed (D36) in a sequence where a Placement setter throws LATER (C63) — the divergence
+  carries `threw`, and the D36 matcher bailed on any throw; it now takes the runtime's Changed when that IS the difference. (2) The
+  author's Value 0 → 40 → 0 inside one frame (a Value write, then a Max of -2 clamping it back): v2 draws the word and recomputes
+  Value Percent to -0, the runtime's effect sees the 0 it last drew (0) — C73's shape with the SAME port on both sides; the C73
+  matcher takes a same-port, other-value difference now. Read the unshrunk sequence (`generateSequence(spec, 20731, i)` → the
+  index whose seed matches): the shrunk replay ended in a plain D36 Changed and named neither.
+- The survivors: the act-paint family again, in states the first kill matrix never had — a HIDDEN slider (an act that reaches nothing
+  still paints first and draws), the remount frame with a disabled or hidden slider (only a Focus action after the act reads whether
+  the paint put it back), and a word that moves Value Percent alone. The matrix became 528 segments: every act × enabled / disabled /
+  hidden × the keyboard off / on × remounting or not × four words (Value 40; 0.5; 0 at 0; 0 after Min -100), then a Focus action
+  (after an act that cannot take the keyboard itself — after one that can, it masks the act's own focusing), Min -50 and Max 150.
+  **Two traps in my own matrix:** Max 50 left 0 at the middle of both ranges (the original and a frame-end draw computed the same
+  50 — a coincidence, not an equivalence); and the segment reset left Value Percent truthy, so the "percent alone" word never
+  recomputed it (C74's stale percent, in the reset) — the reset now slides to 50 and back to 0. Five more `NO_WORD_WAITING`
+  equivalents (a remounting slider the act does not reach, no word waiting): 33 declared in all.
+
+**Readings (2026-10-06, `615bfa049` + this change; load 2–3 with peers):** the Slider v2 **CONFORMS at 10,000 on the interpreter**
+(seed 20731: 0 divergences, 5,443 / 5,476, the rest declared, 1,629 s) and **on the runtime** (seed 20731: 0 divergences; D36
+attributed 3,796, C73 3, C62 / C63 as before; 5,443 / 5,476; 2,094 s); on the runtime at 200 on seeds 13 and 20730 (both tests
+green; 5,379 / 5,408). The package suite 20 suites, 878 passed (1,463 s — batch-visual plays the 68 scenarios).
 

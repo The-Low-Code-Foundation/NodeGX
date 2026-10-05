@@ -140,7 +140,13 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["elementFocused","focused","onPage","pressed"],"emit":["didMount","pointerDown","onFocus","pointerUp"]', swappedWith: '"set":["elementFocused","focused","onPage","pending","pressed"],"emit":["didMount","pointerDown","onFocus","pointerUp"]', why: NO_WORD_WAITING },
     { reducer: 'person.touch', kind: 'swap-branch', branch: '"set":["onPage","pressed"],"emit":["didMount","pointerDown"]', swappedWith: '"set":["onPage","pending","pressed"],"emit":["didMount","pointerDown"]', why: NO_WORD_WAITING },
     { reducer: 'person.lift', kind: 'swap-branch', branch: '"set":["onPage","pressed"],"emit":["didMount","pointerUp"]', swappedWith: '"set":["onPage","pending","pressed"],"emit":["didMount","pointerUp"]', why: NO_WORD_WAITING },
-    { reducer: 'person.blur', kind: 'swap-branch', branch: '"set":["onPage"],"emit":["didMount"]', swappedWith: '"set":["onPage","pending"],"emit":["didMount"]', why: NO_WORD_WAITING }
+    { reducer: 'person.blur', kind: 'swap-branch', branch: '"set":["onPage"],"emit":["didMount"]', swappedWith: '"set":["onPage","pending"],"emit":["didMount"]', why: NO_WORD_WAITING },
+    // the s46 interpreter 10,000 (20731): an act that reaches nothing on a remounting slider with no word waiting
+    { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["onPage"],"emit":["didMount"]', swappedWith: '"set":["onPage","pending"],"emit":["didMount"]', why: NO_WORD_WAITING },
+    { reducer: 'person.focus', kind: 'swap-branch', branch: '"set":["onPage"],"emit":["didMount"]', swappedWith: '"set":["onPage","pending"],"emit":["didMount"]', why: NO_WORD_WAITING },
+    { reducer: 'person.press', kind: 'swap-branch', branch: '"set":["onPage"],"emit":["didMount"]', swappedWith: '"set":["onPage","pending"],"emit":["didMount"]', why: NO_WORD_WAITING },
+    { reducer: 'person.release', kind: 'swap-branch', branch: '"set":["onPage"],"emit":["didMount"]', swappedWith: '"set":["onPage","pending"],"emit":["didMount"]', why: NO_WORD_WAITING },
+    { reducer: 'person.slide', kind: 'swap-branch', branch: '"set":["onPage"],"emit":["didMount"]', swappedWith: '"set":["onPage","pending"],"emit":["didMount"]', why: NO_WORD_WAITING }
   ],
   'Map Collection': [
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },

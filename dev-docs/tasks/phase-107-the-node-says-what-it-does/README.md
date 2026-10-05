@@ -13,6 +13,9 @@ NodeGX.
 
 ## 1. The person sentences
 
+*2026-10-05: [DIRECTION.md](../../DIRECTION.md) names this phase's specs and conformance suite as the testing
+reason NodeGX leads with, and the base of its restraint reason. Nothing in this phase's plan changes.*
+
 > **Whatever NodeGX says a node does — in the picker, in the docs, to an agent over MCP, in the
 > running app, in an exported repo — says the same thing, and a machine checks that on every
 > change.**
@@ -144,7 +147,7 @@ Full detail in NSP-001 to NSP-003. The shape:
 | [NSP-020](NSP-020-PORTS-WITHOUT-A-RUNNING-VIEWER.md) | 🔴 **Ports without a running viewer** — `ports(params)` for every node; the 50 `runtime-discovered` nodes first (R6) | 004, each batch | all |
 | [NSP-021](NSP-021-THE-SECOND-EDITOR.md) | 🔴 **The second editor** — the MCP server and the Electron editor answer every node question from the spec; the round trip (R6) | 018, 020 | — |
 | [NSP-022](NSP-022-BATCH-CLOUD-ONLY.md) | Batch — the cloud-only nodes (**17**, split from NSP-014 s21): they run in `noodl-viewer-cloud`, a second runtime target | 014 | T3 |
-| [NSP-023](NSP-023-THE-SPEC-WITHOUT-REACT.md) 🟡 | **The spec without React** (R12) — the Text v3 treatment for Text Input, Slider, Dropdown, Radio Button Group and Radio Button (the spec says the intent; React-made behaviour becomes a known row on the runtime only); `WorldHandlers.turn` out of the format; a measured guard; a stranger builds one control without React | 016 | T5 |
+| [NSP-023](NSP-023-THE-SPEC-WITHOUT-REACT.md) 🟡 | **s46: steps 2 and 3 — `turn` out of the format; the Slider v2 (R14: the last word wins, a remount keeps the handle; rows D36, C73; 68 scenarios) conforms on both targets at 200 on two seeds and at 10,000 — §8.2–§8.4. s45: step 1, the Text Input v2.** **The spec without React** (R12) — the Text v3 treatment for Text Input, Slider, Dropdown, Radio Button Group and Radio Button (the spec says the intent; React-made behaviour becomes a known row on the runtime only); `WorldHandlers.turn` out of the format; a measured guard; a stranger builds one control without React | 016 | T5 |
 
 Batch sizes are the census's ([CENSUS.md](CENSUS.md)); the lists in each batch file are spliced from `census.json`, never typed.
 
@@ -559,7 +562,8 @@ narrow to T1 only, or stop and keep the infrastructure as a test tool.
 - **WebMCP / agent-callable apps** (component interfaces exposed as agent tools). A separate idea
   from the same conversation; it would read the specs, but it is not this phase.
 - **Importing code into a graph** ("take your vibe-coded app and migrate it into a node canvas").
-  Discussed 2026-09-29 as a possible future product; not this phase. This phase keeps **three
+  Discussed 2026-09-29 as a possible future product; not this phase. Phase 111 now scopes it
+  (SEE-005, SEE-006). This phase keeps **three
   doors open** for it, cheaply, so the idea is not closed off by accident:
   1. **Traces can name a subject other than a node** ([NSP-002](NSP-002-TRACES-AND-THE-RUNTIME-ADAPTER.md)) —
      so the same format could record a whole running app, and the original app and its imported

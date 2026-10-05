@@ -1,68 +1,63 @@
 # P107 — next session
 
-**Written 2026-10-05 (s45).** Read the [README](README.md) §2–§7 (R12 and R13 are the newest rulings). s45's record is
-[NSP-023 §8.1](NSP-023-THE-SPEC-WITHOUT-REACT.md) (the Text Input v2; the label rule on the Checkbox and the Dropdown; the Button's and the
-Checkbox's 10,000 runs); NSP-016 §7.10 points there. s44's is NSP-016 §7.9 (the Text v3), s43's §7.8 and RESEARCH-DRAG-DROP.md, s37's
-§7.2 (THE PERSON face).
+**Written 2026-10-05 (s46).** Read the [README](README.md) §2–§7 (R14 is the newest ruling). s46's record is
+[NSP-023 §8.2–§8.4](NSP-023-THE-SPEC-WITHOUT-REACT.md) (`turn` out of the format; the Slider v2; its 10,000 runs). s45's is §8.1 (the
+Text Input v2); NSP-016 §7.10 points there. s44's is NSP-016 §7.9 (the Text v3), s43's §7.8 and RESEARCH-DRAG-DROP.md, s37's §7.2.
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
-| **NSP-016 the visual nodes** | 🟡 9 of 19 conform (Button, Checkbox, Text Input, Dropdown, Slider, Icon, Radio Button Group, Radio Button, Text). The other 10 need infrastructure (NSP-016 §7.6). AC4 waits for NSP-017 | `aa8abb06f` … s45 |
-| **NSP-023 the spec without React** | **🟡 step 1 done (s45): Text Input v2; the Checkbox v2 and Dropdown v2 (label rule only). Steps 2–8 left** | s45 |
+| **NSP-016 the visual nodes** | 🟡 9 of 19 conform. The other 10 need infrastructure (NSP-016 §7.6). AC4 waits for NSP-017 | `aa8abb06f` … s45 |
+| **NSP-023 the spec without React** | **🟡 steps 1, 2, 3 done (s45 Text Input v2; s46 `turn` out, Slider v2). Steps 4–8 left; 4 and 5's intents ruled (R14)** | `00cd9046a`, `8203644c3`, `a19b5600d` |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
-| NSP-009, NSP-017 … NSP-019, NSP-021 | — | — |
 
-**115 of 147 conform on the runtime (78.2%)** — unchanged by s45 (a conversion keeps a node conforming; AC3).
-Left: 10 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-017).
+**115 of 147 conform on the runtime (78.2%)** — unchanged (a conversion keeps a node conforming; AC3).
 
-## What s45 settled
+## What s46 settled
 
-1. **The handoff was wrong in one place:** its "earlier React-shaped state is NOT to be rewritten unasked" was overtaken by R12 the
-   same morning (`2f94cc7f0`, NSP-023). s45 did NSP-023 step 1.
-2. **R13 (Richard, plain words, one batch):** each write sees the last (C69, C72); Pointer Down fires on a mouse press (C68); Enable
-   Label keeps the keyboard (new row **C80**); a field's resting cursor is at the end, both kinds (D35). Then **"Yes, all three"**:
-   the label rule for the Checkbox and the Dropdown too.
-3. **Text Input v2:** no `pending` / `editCaret` / `shownType` / `shownMaxLength` / `labelOn`, no `turn` handler; `pageType` (the
-   element's type, a page sync). Five runtime rows (`mousePressOnOneLine`, `staleProps`, `staleEdit`, `labelTakesKeyboard`,
-   `textAreaRestsAtStart`). Scenarios 87 → 103, 27 rows; the matrix split three ways (NSP-023 §8.1). **Trap met: an act's outputs
-   print in its frame's SETTLE group** — a matcher keyed on "the act is the last step before the difference" matches nothing.
-   **Joined segments are not lone segments:** a matrix segment that agrees alone can diverge after its neighbour leaves text behind.
-4. **Checkbox v2 / Dropdown v2:** the label rebuild out, C80 rows, scenarios rewritten, rebuild equivalents pruned (all three
-   specs). **The Radio Button still models the rebuild** (NSP-023 step 5).
-5. **The hit test's debt, part one:** Button and Checkbox at 10,000 (seed 20731) — survivors on "an act's paint remounts a HIDDEN
-   element", one scenario each kills them at 200; the Checkbox's one divergence is C66 met by a Blur action (matcher widened).
-6. **A runtime rule v1 never modelled, found by the 10,000 run:** with Block Pointer Events on, a press / release / click / touch / lift
-   drains the frame BEFORE its own report (the blocker on the `pointerdown` / `pointerup` a browser raises first; a disabled field
-   too). Modelled (`blockerFirst`), two scenarios. **Read a probe's call order before reading a trace's** — the first theory
-   ("first frame only") was wrong; a 4-variant side-by-side settled it in 15 s.
-7. **Two v1 scenario names graded nothing** (the Tab + Set "Value 'x' wins"; "Set then writes the empty value (Done)") — renamed.
+1. **Step 2:** `WorldHandlers.turn` gone from its four places; stranger hashes refreshed, the three rounds green (`8203644c3`).
+2. **R14 (Richard, plain words; README §7):** a Slider or Dropdown hidden with Mounted and shown again is **where the person left
+   it**; a Dropdown handed its Items again **keeps the pick**; **the last word wins** — asked as a concrete case ("two writes in one
+   frame after a slide"), it came back "huh?"; re-asked with a volume-slider story, Richard answered with the PRINCIPLE ("show
+   whatever the last value … it received was, whether from the user or not"), which also rules C73's intent; the Radio Button takes
+   R13's label rule. **Lesson: one concrete case per question; expect a principle back and apply it to the neighbours.**
+3. **Step 3, the Slider v2** (`a19b5600d`): `paintedValue` (the effect's dependency) → `pending` (the graph's word, drawn at the next
+   paint, reported without Changed); every Value write is a word (R14); a remount leaves the handle; Min / Max / C74 / C75 stay the
+   node's own. Rows on the runtime: `changedWithNobodySliding` (D36), `graphValueDropped` (C73). 48 → 68 scenarios (32 rows); the
+   matrix's segment reset is now a slide to 0 + Value 0 before the remount (both targets agree), split 264 plain / 440 D36 rows.
+4. **The mutant trap v2 met:** with no Changed from the paint, an act's paint drawing the word vs the frame end drawing it prints the
+   same (values are unordered in the settle group) — v1 killed these by Changed's ORDER. **Kill: a Max or Min write after the act in
+   the same frame** (the act's paint computed Value Percent against the old one). 75 → 0 survivors at 200; at 10,000, 37 more (§8.4) → 0; 33 declared `NO_WORD_WAITING`; the act-paint row matrix is 528 segments.
+   The runtime batch's seed (20730) reached 5 branches no interpreter seed did — run the runtime batch before calling a spec done.
+5. **v1 named a Value nobody sent** ("Max [1, 2] … a slide to 150 lands on 1: Value 1 with Changed" — the browser already held 1).
+6. **A commit accident, repaired:** my temp-index commit was split across two Bash calls; two P109 commits landed between and
+   `a19b5600d` reverted four P109 files; `615bfa049` restores them (`git diff --name-only 57a902a8c HEAD` = only P107's ten files).
+   Memory `commit-your-delta-through-a-temporary-index` item 13.
 
-**Readings (2026-10-05, seeds as named; load 3–8 with peers):** the Text Input v2 conforms on the interpreter at 200 on seeds 13,
-20729, 20730, 20731 (3,379 / 3,382 at 13; 3,700 / 3,702 at 20731 after the last scenarios, the rest declared) and on the runtime at
-200 on 13 and 20730 (0 divergences outside the rows; 3,379 / 3,382, 3,372 / 3,373). Its runtime 10,000 runs at 20731: the first, 6
-unattributed (Block Pointer Events, above); the second, 0 unattributed, C68 372 · C72 15 · C69 9 · D35 5 · C80 1 attributed, 3 mutant
-survivors (a disabled, unfocused field's blocker drain) — one scenario, killed at 200; the third, after it, CONFORMS (0 divergences, 4,119 / 4,125, the rest declared). The Checkbox v2 and the Dropdown
-v2 conform on the interpreter and the runtime at 200 on two seeds (321 / 322; 852 / 854, the Dropdown after one scenario for a press
-the matrix's closing Focus action masked); at 10,000 each had 3 C80 divergences the first matcher missed (a Focus action earlier in
-the frame — its Focused prints in the settle group) and no survivor; re-run with the matcher reading the frame's steps, both CONFORM at 10,000 (0 divergences; C80 attributed 5 and 3; 321 / 326 and 852 / 857, the rest declared). The Button conforms at 10,000 (0 divergences,
-322 / 327, the rest declared). The package suite 20 suites / 878 passed; the runtime graph and target suites 102.
+**Readings (2026-10-05, seeds as named; load 2–4 with peers):** the Slider v2 conforms on the interpreter at 200 on 13, 20730, 20731
+(0 divergences, 2,926 / 2,950, the rest declared) and on the runtime at 200 on 13 and 20730 (0 divergences outside the rows; D36
+attributed 82 and 61; C73 by its four scenarios). Package suite 20 suites / 878 passed (batch-visual 709 s); runtime graph and
+target suites 102; `tsc --noEmit` clean. **10,000 (2026-10-06, seed 20731): the
+Slider v2 CONFORMS on both targets** (0 divergences; the runtime attributes D36 3,796, C73 3; 5,443 / 5,476, 33 declared) — after a
+first run that did not (2 matcher gaps, 37 survivors in states the kill matrix lacked: hidden, remount + disabled / hidden, a word
+that moves Value Percent alone — NSP-023 §8.4). **Two traps in my own kill matrix: a detector value that sits at the middle of both
+ranges (a coincidence that reads as equivalence), and a reset that leaves the state the next segment needs stale.**
 
-## What s46 does
+## What s47 does
 
-1. **NSP-023 step 2: take `WorldHandlers.turn` out of the format** (spec.ts `WorldHandlers` and the erased `AnyNodeSpec.world`,
-   interpreter.ts `handleInbound` / `advance`, runner/mutants.ts — the four places a world-handler kind lives). Nothing uses it since
-   s45. spec.ts is hashed: refresh `tests/stranger-suite-hashes.json` and re-grade the three stranger rounds, same commit.
-2. **NSP-023 step 3: the Slider** — sort (§3), then ONE plain-words batch to Richard (D36's intent is in the description already:
-   a Value from the graph does not fire Changed; C73 / C74 / C75 sort as the node's own unless React-made). Then step 4 (the Dropdown's
-   remaining React state: D34, C71, the items-identity rule) and step 5 (the radio pair, C76, D37, effect order, AND the label rebuild
-   under R13's "all three" — confirm with Richard that the Radio Button is the same answer, one line).
-3. **The 10,000 runs still owed** (one at a time, `uptime` first): Slider, Radio Button, Radio Button Group (the hit test's debt from
-   s43) — each after its NSP-023 step if that step is near, since a conversion re-grades anyway. Button, Checkbox, Dropdown and Text
-   Input ran in s45 (readings above).
+1. **NSP-023 step 4: the Dropdown v2.** The intents are ruled (R14: a remount keeps the pick; a fresh Items array keeps the pick;
+   C71 was already the spec's intent; C70 stays a crash row). Sort its React state (`paintedItems`, the effect's `[props.value,
+   props.items]`, the shown value) by §3 — the Slider v2 is the template: a `pending` word, drawn at the paint, no Changed; rows
+   for D34 (and C71's existing matcher). **Expect the same mutant trap** (§8.3): plan the Max/Min-style kill — for the Dropdown, a
+   write after the act that changes what the paint's draw would read (an Items write that drops the shown option?). Run the RUNTIME
+   batch at two seeds before declaring done.
+2. **Step 5: the radio pair** (C76, D37, effect order, the label rebuild — R14 "same rule").
+3. **The 10,000 runs still owed** (one at a time, `uptime` first; the Slider's took 35 min on the runtime): Radio Button, Radio Button
+   Group (the hit test's debt from s43) — after step 5; the Dropdown v2 after step 4. **Run the 10,000 BEFORE calling a conversion
+   done** — s46's 200-sequence greens on five seeds hid 39 findings.
 4. Then NSP-016: the Text's step (b) (RESEARCH-DRAG-DROP.md §8), Group, Image, Circle (each carries C79 as a known row; R11 from line
    one — do the §3 sort before modelling any divergence).
 
@@ -75,9 +70,10 @@ the frame — its Focused prints in the settle group) and no survivor; re-run wi
   selected under a Value naming another — the group should render the selection from its Value, not keep a copy), D37 (a Radio Button
   fires Changed for any change of Checked while the group's last selection was a person's — a sibling with the same Value picked, its
   own Value written in the pick's frame, a remount in C76's state — fire Changed from the click, not the effect).
-- **New (s41, the Slider):** D36 (Changed fires with nobody sliding — a graph Value, a clamping Min or Max, a remount; the effect should sync
-  without announcing, the Dropdown's D34 the same), C73 (a Reset to the author's last Value after a slide does nothing — compare with the
-  output, not `props.value`), C74 (the output keeps a slid value past a lowered Max and a graph value off the step; Value Percent goes stale —
+- **s46 — R14 ruled the INTENT of D36, C73, D34 (and C80 on the Radio Button); the APP FIX is the question left** (the spec says the
+  intent, the runtime keeps a known row until the app is fixed). P109's ISL-031 ("a control shows and reports what the person did")
+  now carries these bugs (`phase: P109`, `task: ISL-031` in their headers) — ask there, not twice.
+- **New (s41, the Slider):** D36 / C73 (intent ruled s46, above), C74 (the output keeps a slid value past a lowered Max and a graph value off the step; Value Percent goes stale —
   re-sanitize the shown value as the browser does), C75 (Min equal to Max: Value Percent NaN — make it 0).
 - **s39:** C70 (Items wired a string crashes the page; normalise in the setter), C71 (the component's effect misses a Value written back to
   the last-rendered value after a pick), D34 (a remount or a new Items array after a pick fires Changed with nobody picking).
@@ -122,6 +118,11 @@ browser turns its event loop between frames; a finger lifted off an UNMOUNTED el
   same session. The play sinks `console.*` — print with `process.stdout.write`. The runtime's `zz-ti.test.ts` shape (s40): `play(...)` on
   `interpreterAdapter({ resolve: () => Spec })` and on `withViewerNodes(runtimeTarget())`, each with `new World({})`, the two traces printed
   by index with `!!` on a difference — fourteen cases in 3 s. **A jest run that must not include the probes: `--testPathIgnorePatterns 'zz-'`.**
+- **s46's probes** (deleted; rebuild in a minute): `noodl-runtime/test/node-spec/zz-side.test.ts` (every scenario of `NSP_TYPE`
+  on both targets, compact traces, `!!` on a difference; `ZZ_ONLY` indices, `ZZ_PRINT=1`); `nodegx-node-spec/tests/zz-conf.test.ts`
+  (`NSP_SEEDS` comma list, `NSP_N`); `zz-branches.test.ts` (`ZZ_BRANCH` substring → each branch's recorded example). **Commit with
+  `BASE` pinned in the SAME Bash call as `read-tree`** (s46 reverted four P109 files by re-reading HEAD in a second call), and
+  commit a bug file P109 has re-headed (`phase: P109` / `task: ISL-0xx`, uncommitted) as HEAD + your paragraph only.
 - **s45's probes** (deleted; rebuild in a minute): `noodl-runtime/test/node-spec/zz-side.test.ts` (s43's, plus `ZZ_ONLY` — comma list of
   indices — and `ZZ_FULL=1`, the whole interpreter trace on a difference); `nodegx-node-spec/tests/zz-conf.test.ts` (`specs[type]` is a
   RECORD, not an array); `zz-branches.test.ts` (each branch matching `ZZ_BRANCH` with its recorded example and the scenarios that hit
@@ -159,7 +160,7 @@ browser turns its event loop between frames; a finger lifted off an UNMOUNTED el
 - An ABSENCE scenario needs a firing control beside it. JSON has no `undefined` (`{ "set": "<port>" }`). An `object` port
   parses a JSON string (`coerce: 'object-literal'`). A world FACE reports a throw and goes on.
 - A new patch EFFECT needs the mutants' shape and a drop kind; a new world-handler kind goes in FOUR places (spec.ts
-  `WorldHandlers` AND the erased `AnyNodeSpec.world`, interpreter.ts `handleInbound`, runner/mutants.ts — `turn` is the latest, follow it); a
+  `WorldHandlers` AND the erased `AnyNodeSpec.world`, interpreter.ts `handleInbound`, runner/mutants.ts ); a
   new ACT kind goes in the face (`personActs`) and the spec's `acts`; a person patch may carry `outcomes` (`PersonPatch`).
 - Catalog parity compares descriptions VERBATIM, and defaults. Deep-run every new spec before its handoff; print two
   runtime traces before trusting a first-run green; measure REACH; plant defects in a COPY of the runtime node when a first run is clean.

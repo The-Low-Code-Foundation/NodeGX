@@ -523,10 +523,11 @@ const isChanged = (e: TraceEvent | undefined) => !!e && e.t === 'signal' && port
  * Did Mount after an earlier Will Unmount, the runtime reports Value, Value Percent or Changed where the spec has something else.
  */
 const changedWithNobodySliding = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
   const ref = d.difference.reference;
   const act = d.difference.actual;
+  // s46 (the 10,000 at 20731) — the runtime's Changed IS the difference even when a setter throws later in the sequence (C63)
   if (isChanged(act) && !isChanged(ref)) return true;
+  if (d.difference.threw !== undefined) return false;
   if (!(onSliderValue(act) || isChanged(act))) return false;
   const f = settledFrame(d.reference, d.difference.index);
   if (!f) return false;
@@ -543,7 +544,10 @@ const changedWithNobodySliding = (d: Divergence) => {
  * handle that recomputes a falsy percent).
  */
 const graphValueDropped = (d: Divergence) => {
-  if (d.difference.threw !== undefined || !onSliderValue(d.difference.reference) || onSliderValue(d.difference.actual)) return false;
+  const ref = d.difference.reference;
+  const act = d.difference.actual;
+  // s46 (the 10,000 at 20731) — the runtime may print the same output with the value it kept (a Value Percent of 0 where the drawing made -0)
+  if (d.difference.threw !== undefined || !onSliderValue(ref) || (onSliderValue(act) && portOf(act!) !== portOf(ref!))) return false;
   const f = settledFrame(d.reference, d.difference.index);
   if (!f || !d.reference.slice(f[0], f[1]).some((e) => e.t === 'set' && portOf(e) === 'value')) return false;
   const slid = d.reference.slice(0, f[1]).some((e) => e.t === 'act' && (e as { act?: string }).act === 'slide');
