@@ -48,6 +48,7 @@
 const fs = require('fs');
 const path = require('path');
 const { withDeployedSite } = require('./drive-deployed.js');
+const { functionText } = require('./garden-functions.js'); // P109 ISL-005: shared code lives in scripts/
 
 const arg = (flag) => {
   const i = process.argv.indexOf(flag);
@@ -87,16 +88,12 @@ const REQ = (id) => REQUESTS.find((r) => r.id === id);
 const titleOf = (lang, id) => w(lang, REQ(id).copyKeys.title);
 /** A program as the pad presses that record it: a repeat laid out n times. */
 const layOut = (blocks) => blocks.flatMap((b) => (b.t === 'repeat' ? Array.from({ length: Number(b.n) || 0 }, () => layOut(b.body || [])).flat() : [b.t]));
-const WORLD_SCRIPT = (() => {
-  const fn = nodesOfComponent('Logic/Island world').find((n) => n.type === 'JavaScriptFunction');
-  return String(fn.parameters.functionScript);
-})();
+const WORLD_SCRIPT = functionText(PROJECT, 'Logic/Island world');
 const PLOT_W = Number(/var PW = (\d+)/.exec(WORLD_SCRIPT)[1]);
 const PLOT_H = Number(/PH = (\d+);/.exec(WORLD_SCRIPT)[1]);
 /** The wear clock, read from the deployed engine (the Step function's text). */
 const WEAR = (() => {
-  const fn = nodesOfComponent('Logic/Step').find((n) => n.type === 'JavaScriptFunction');
-  return JSON.parse(/var WEAR = (\{[^}]*\});/.exec(String(fn.parameters.functionScript))[1]);
+  return JSON.parse(/var WEAR = (\{[^}]*\});/.exec(functionText(PROJECT, 'Logic/Step'))[1]);
 })();
 const STEP_MS = 380;
 const ISLAND_TICK_MS = STEP_MS * 2;

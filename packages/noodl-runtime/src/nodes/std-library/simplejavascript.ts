@@ -231,10 +231,11 @@ function usersOf(node: SimpleJavascriptNodeInstance, path: ScriptPath): string[]
 }
 
 function publishHeldWrites(node: SimpleJavascriptNodeInstance): void {
-  for (const prop of node._internal.heldWrites) {
+  // forEach, not for…of: the viewer's ES5 test build compiles this file (P109 ISL-005 AC5's server render).
+  node._internal.heldWrites.forEach((prop) => {
     node.registerOutputIfNeeded('out-' + prop);
     node.flagOutputDirty('out-' + prop);
-  }
+  });
   node._internal.heldWrites.clear();
 }
 

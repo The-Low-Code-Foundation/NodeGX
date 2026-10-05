@@ -85,7 +85,7 @@ export const ALL_WORDS_JSON = JSON.stringify(
 );
 
 /** A word from `Inputs.words` rows, `{b}` filled. Shared by the scripts that show words. */
-const WORD_HELPER = `
+export const WORD_HELPER = `
 function wordMap(rows, lang, name) {
   var map = {};
   var list = Array.isArray(rows) ? rows : [];

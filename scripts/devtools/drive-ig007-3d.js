@@ -201,16 +201,14 @@ const ISLAND = (() => {
   return { rows };
 })();
 
-// ── P108 IW-002 AC6 (lane D): the engine, read from the template the generator wrote (the Step component's own script,
-// cut before its first line of wiring) — so the job worlds below are the world JSON the engine writes, not a hand copy.
+// ── P108 IW-002 AC6 (lane D): the engine, read from the template the generator wrote — so the job worlds below are the
+// world JSON the engine writes, not a hand copy. P109 ISL-005: the engine is the template's scripts/engine.js, the file
+// Logic/Step lists under Uses, loaded as the page loads it.
 function engineApi() {
-  const file = path.join(REPO, 'templates', 'bot-garden', 'components', 'Logic', 'Step', 'nodes.json');
-  const nodes = JSON.parse(fs.readFileSync(file, 'utf8')).nodes;
-  const script = nodes.map((n) => n.parameters && n.parameters.functionScript).find((t) => typeof t === 'string' && t.includes('function step('));
-  const cut = script.indexOf('\nvar st = step(');
-  if (cut === -1) throw new Error('the Step script changed shape: no "var st = step(" line');
-  // eslint-disable-next-line no-new-func
-  return new Function(`${script.slice(0, cut)}\nreturn { newRun: newRun, step: step, apply: apply, worldOf: worldOf, seedWorld: seedWorld };`)();
+  const project = path.join(REPO, 'templates', 'bot-garden');
+  if (!require('./garden-functions.js').functionOf(project, 'Logic/Step').uses.includes('engine.js')) throw new Error('Logic/Step no longer uses scripts/engine.js');
+  const { newRun, step, apply, worldOf, seedWorld } = require('./garden-functions.js').sourcesOf(project).load('engine.js');
+  return { newRun, step, apply, worldOf, seedWorld };
 }
 /** Run a program on a world as the page does (Step, then Apply delta) and return the world the engine wrote. */
 function engineRun(ENG, world, program) {

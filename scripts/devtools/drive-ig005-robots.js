@@ -32,6 +32,7 @@
 const fs = require('fs');
 const path = require('path');
 const { withDeployedSite } = require('./drive-deployed.js');
+const { functionText } = require('./garden-functions.js'); // P109 ISL-005: shared code lives in scripts/
 
 const arg = (flag) => {
   const i = process.argv.indexOf(flag);
@@ -50,9 +51,7 @@ if (!DIR || DIR.startsWith('--') || !PROJECT || !['2d', '3d'].includes(MODE)) {
 // P108 IW-006: the save's version, read from the page's own encoder (Logic/Encode save code) — never a literal the next
 // version has to find and bump (v4 → v5 reddened every clause that typed it).
 const SAVE_V = (() => {
-  const nodes = JSON.parse(fs.readFileSync(path.join(PROJECT, 'components', 'Logic', 'Encode save code', 'nodes.json'), 'utf8'));
-  const list = Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
-  return Number(/var SAVE_VERSION = (\d+);/.exec(String(list.find((n) => n.type === 'JavaScriptFunction').parameters.functionScript))[1]);
+  return Number(/var SAVE_VERSION = (\d+);/.exec(functionText(PROJECT, 'Logic/Encode save code'))[1]);
 })();
 if (SHOTS) fs.mkdirSync(SHOTS, { recursive: true });
 
@@ -62,7 +61,7 @@ function nodesOf(component) {
   return Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
 }
 const staticRows = (component) => JSON.parse(nodesOf(component).find((n) => n.type === 'Static Data').parameters.json);
-const functionScript = (component) => String(nodesOf(component).find((n) => n.type === 'JavaScriptFunction').parameters.functionScript);
+const functionScript = (component) => functionText(PROJECT, component);
 const WORD_ROWS = staticRows('Data/Words');
 const WORDS = { en: {}, fr: {} };
 for (const r of WORD_ROWS) {

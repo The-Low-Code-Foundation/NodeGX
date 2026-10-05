@@ -22,6 +22,9 @@ line under the Workshop title too).
   glue between it and the screen (`Logic/Record step`, `Logic/Draw world` …) — each a `Component Inputs` → one
   Function → `Component Outputs`. `Logic/Step` runs one step of a program and returns what changed;
   `Logic/Apply delta` is the only thing that ever changes the world.
+- **`scripts/` holds the code the Functions share.** The robot’s rules live in `engine.js`: the tiles, the step and
+  the sensors. A Function lists the files it needs under **Uses** and reaches each one by its name, so `engine.js` is
+  `Scripts.engine`. Change the engine there once. Every Function that uses it changes with it.
 - **`Workshop/Runner` is the loop:** one step, a Timer, the next step, until the run is done.
 - **The Teach pad drives the robot with the engine’s own step**, so what the child drives is exactly what
   Play will do. The fold is only ever offered; the child taps "Fold it".

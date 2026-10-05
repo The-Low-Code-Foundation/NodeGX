@@ -28,6 +28,7 @@ import { pinRunOnValueChangeDefaultsInDirectory, readAsLegacyProject } from './t
 import { copyTree } from './templatePins';
 import { APP_NODES, APP_WIRES, C, CG003_COMPONENTS, CgComponent, GAME_NAME, PAGES, REQUIRED_MODULES } from './cg003Components';
 import { GARDEN_PRESET, GARDEN_TOKENS } from './cg007Look';
+import { gardenScriptSources, shareScript } from './isl005GardenScripts';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { dropReferencedKits } = require('../../../scripts/library/resolve-template-kits.js') as {
@@ -125,13 +126,30 @@ export interface BuildOptions {
   wallClock?: boolean;
 }
 
+/**
+ * P109 ISL-005: a component as the artefact carries it. A Function that held a pasted shared block lists that block's
+ * file under Uses (stored as the editor's string list stores it) and reaches it through `Scripts`.
+ */
+export function withSharedScripts(c: CgComponent): CgComponent {
+  let changed = false;
+  const nodes = c.nodes.map((n) => {
+    const params = (n.parameters ?? {}) as Record<string, unknown>;
+    if (n.type !== 'JavaScriptFunction' || typeof params.functionScript !== 'string') return n;
+    const shared = shareScript(params.functionScript);
+    if (!shared.uses.length) return n;
+    changed = true;
+    return { ...n, parameters: { ...params, functionScript: shared.script, uses: shared.uses.join(',') } };
+  });
+  return changed ? { ...c, nodes } : c;
+}
+
 /** Author the whole template through the plan door and read it back. */
 export async function buildGardenTemplateProject(options: BuildOptions = {}): Promise<AuthoredGarden> {
   process.env.NODEGX_RENDER_DISABLED = '1';
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'cg003-garden-'));
   writeSkeleton(dir);
   requireBuiltKits();
-  const components = options.components ?? CG003_COMPONENTS;
+  const components = (options.components ?? CG003_COMPONENTS).map(withSharedScripts);
 
   // P109 ISL-019 AC7: the door writes the stable bytes itself (ids from the 'cg003' namespace, every stamp the epoch),
   // so the artefact needs no pins. The pins wrote a trailing newline the door and the editor both leave out (ISL-018),
@@ -178,6 +196,11 @@ export async function buildGardenTemplateProject(options: BuildOptions = {}): Pr
     await call('find_tools', { group: 'theme' }, 'theme:reveal');
     await call('set_style_preset', { preset_id: GARDEN_PRESET }, 'theme:preset');
     await call('set_project_tokens', { tokens: [...GARDEN_TOKENS] }, 'theme:tokens');
+
+    // P109 ISL-005: the shared code as script files, through the door, before any Function names one (the write gate
+    // refuses a Uses entry naming no file).
+    await call('find_tools', { group: 'project' }, 'project:reveal');
+    for (const [file, content] of Object.entries(gardenScriptSources())) await call('write_script_file', { path: file, content }, `script:${file}`);
 
     const app = await call('create_component', { path: C.app, nodes: APP_NODES, connections: APP_WIRES }, C.app);
     order.push(C.app);
@@ -260,6 +283,9 @@ function writeStartHere(output: string): void {
     '  glue between it and the screen (`Logic/Record step`, `Logic/Draw world` …) — each a `Component Inputs` → one',
     '  Function → `Component Outputs`. `Logic/Step` runs one step of a program and returns what changed;',
     '  `Logic/Apply delta` is the only thing that ever changes the world.',
+    '- **`scripts/` holds the code the Functions share.** The robot’s rules live in `engine.js`: the tiles, the step and',
+    '  the sensors. A Function lists the files it needs under **Uses** and reaches each one by its name, so `engine.js` is',
+    '  `Scripts.engine`. Change the engine there once. Every Function that uses it changes with it.',
     '- **`Workshop/Runner` is the loop:** one step, a Timer, the next step, until the run is done.',
     '- **The Teach pad drives the robot with the engine’s own step**, so what the child drives is exactly what',
     '  Play will do. The fold is only ever offered; the child taps "Fold it".',

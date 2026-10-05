@@ -36,6 +36,7 @@
 const fs = require('fs');
 const path = require('path');
 const { withDeployedSite } = require('./drive-deployed.js');
+const { functionText } = require('./garden-functions.js'); // P109 ISL-005: shared code lives in scripts/
 
 const REPO = path.join(__dirname, '..', '..');
 const TEMPLATE = path.join(REPO, 'templates', 'bot-garden');
@@ -96,17 +97,13 @@ function loadRequests(projectDir) {
 const REQUESTS = loadRequests(PROJECT);
 // IG-005: the robots' names (the catalogue the page ships, in Logic/Job robot), in both languages.
 const ROBOT_NAMES = (() => {
-  const nodes = JSON.parse(fs.readFileSync(path.join(PROJECT, 'components', 'Logic', 'Job robot', 'nodes.json'), 'utf8'));
-  const list = Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
-  const robots = JSON.parse(/var ROBOTS = (\[.*?\]);\n/.exec(String(list.find((n) => n.type === 'JavaScriptFunction').parameters.functionScript))[1]);
+  const robots = JSON.parse(/var ROBOTS = (\[.*?\]);\n/.exec(functionText(PROJECT, 'Logic/Job robot'))[1]);
   return robots.flatMap((r) => [r.defaultName.en, r.defaultName.fr]);
 })();
 // P108 IW-006: the save's version, read from the page's own encoder (Logic/Encode save code) — never a literal the next
 // version has to find and bump (v4 → v5 reddened three clauses that typed it).
 const SAVE_V = (() => {
-  const nodes = JSON.parse(fs.readFileSync(path.join(PROJECT, 'components', 'Logic', 'Encode save code', 'nodes.json'), 'utf8'));
-  const list = Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
-  return Number(/var SAVE_VERSION = (\d+);/.exec(String(list.find((n) => n.type === 'JavaScriptFunction').parameters.functionScript))[1]);
+  return Number(/var SAVE_VERSION = (\d+);/.exec(functionText(PROJECT, 'Logic/Encode save code'))[1]);
 })();
 const titleOf = (lang, id) => w(lang, (REQUESTS.find((r) => r.id === id) || { copyKeys: {} }).copyKeys.title);
 /** The hint lines, from the project's own Data/Hints (IG-002 reads "Perfect!" in both languages). */

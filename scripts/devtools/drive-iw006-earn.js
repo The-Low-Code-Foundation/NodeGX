@@ -32,6 +32,7 @@
 const fs = require('fs');
 const path = require('path');
 const { withDeployedSite } = require('./drive-deployed.js');
+const { functionText } = require('./garden-functions.js'); // P109 ISL-005: shared code lives in scripts/
 
 const arg = (flag) => {
   const i = process.argv.indexOf(flag);
@@ -52,7 +53,7 @@ const nodesOfComponent = (dir) => {
   return Array.isArray(nodes) ? nodes : nodes.nodes || Object.values(nodes);
 };
 const tableOf = (component) => JSON.parse(nodesOfComponent(`Data/${component}`).find((n) => n.type === 'Static Data').parameters.json);
-const scriptOf = (component) => String(nodesOfComponent(component).find((n) => n.type === 'JavaScriptFunction').parameters.functionScript);
+const scriptOf = (component) => functionText(PROJECT, component);
 const WORD_ROWS = tableOf('Words');
 const REQUESTS = tableOf('Requests');
 const PAY_SCRIPT = scriptOf('Logic/Win pay');

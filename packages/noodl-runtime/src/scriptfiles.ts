@@ -105,19 +105,22 @@ export function scriptUsesOf(value: unknown): string[] {
  * what the runtime does: a file that builds `exports` another way gives more than this says.
  */
 export function scriptGives(source: string): string[] {
-  const names = new Set<string>();
-  for (const m of source.matchAll(/\b(?:module\.)?exports\.([A-Za-z_$][\w$]*)\s*=/g)) names.add(m[1]);
-  return [...names];
+  // An exec loop and an array, not matchAll and a Set: the viewer's ES5 build reads this file too.
+  const names: string[] = [];
+  const re = /\b(?:module\.)?exports\.([A-Za-z_$][\w$]*)\s*=/g;
+  for (let m = re.exec(source); m; m = re.exec(source)) if (names.indexOf(m[1]) < 0) names.push(m[1]);
+  return names;
 }
 
 /** The files a script reaches with `use('…')`, as the project names them, read from its text. */
 export function scriptUses(source: string): ScriptPath[] {
-  const out = new Set<ScriptPath>();
-  for (const m of source.matchAll(/\buse\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+  const out: ScriptPath[] = [];
+  const re = /\buse\(\s*['"]([^'"]+)['"]\s*\)/g;
+  for (let m = re.exec(source); m; m = re.exec(source)) {
     const p = normalizeScriptPath(m[1]);
-    if (p !== undefined) out.add(p);
+    if (p !== undefined && out.indexOf(p) < 0) out.push(p);
   }
-  return [...out];
+  return out;
 }
 
 /** The name a Function's code reaches a file by: its file name without `.js` (`engine/world.js` → `world`). */

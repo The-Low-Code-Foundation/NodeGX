@@ -176,9 +176,10 @@ if (it && shShows(p, it)) {
     out.showFigures = true;
     out.have = shFill(W.iw6hHave, { n: bal });
     out.cost = shFill(W.iw6hCost, { n: it.price });
-    var can = bal >= it.price, blocked = false;
+    // P109 ISL-005: refused, not blocked: a hoisted var blocked replaced ENGINE's blocked() for the whole run.
+    var can = bal >= it.price, refused = false;
     if (it.kind === 'robot') {
-      if (p.island.robots.length >= CREW_CAP) { blocked = true; out.none = shFill(W.iw6hFull, { n: CREW_CAP }); }
+      if (p.island.robots.length >= CREW_CAP) { refused = true; out.none = shFill(W.iw6hFull, { n: CREW_CAP }); }
       else {
         var spec = robotSpec(it.robot), count = 1;
         for (var c = 0; c < p.island.robots.length; c++) if (robotKindOf(p.island.robots[c]) === it.robot) count++;
@@ -193,18 +194,18 @@ if (it && shShows(p, it)) {
       out.robotId = okIds.indexOf(pick) !== -1 ? pick : okIds.length === 1 ? okIds[0] : '';
       for (var o = 0; o < out.robots.length; o++) out.robots[o].selected = out.robots[o].id === SHOP_IDS.robot + out.robotId;
       out.showRobots = okIds.length > 0;
-      if (!okIds.length) { blocked = true; out.none = W.iw6hNoBrain || ''; }
-      else if (!out.robotId) blocked = true;
+      if (!okIds.length) { refused = true; out.none = W.iw6hNoBrain || ''; }
+      else if (!out.robotId) refused = true;
     } else if (it.kind === 'animal') {
       // P108 IW-007 (lane A): an animal's card has the copy's name box (an empty box takes iw7aDefaultName); a pen with no
       // free place (or no finished refuge) says so and has no Buy.
       var iw7aWhy = iw7aRefusal(p, W);
-      if (iw7aWhy) { blocked = true; out.none = iw7aWhy; }
+      if (iw7aWhy) { refused = true; out.none = iw7aWhy; }
       else { out.namePlaceholder = iw7aDefaultName(p, it.animal); out.showName = can; }
     }
     if (can) { out.left = shFill(W.iw6hLeft, { n: bal - it.price }); out.showLeft = true; }
     else { var more = it.price - bal; out.short = shFill(more === 1 ? W.iw6hShort1 : W.iw6hShort, { n: more }); out.showShort = true; }
-    out.canBuy = can && !blocked;
+    out.canBuy = can && !refused;
   }
   // What the last Buy / Use it did, on this item's card — and, the moment after, only that: never "you need N more" under
   // "It's yours!" (the drive's first look at the card just bought). A helper just bought goes on to its jobs.

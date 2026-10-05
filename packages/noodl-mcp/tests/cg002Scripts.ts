@@ -2544,19 +2544,39 @@ export const FUNCTION_SCRIPTS: ReadonlyArray<{ component: string; script: string
  * Run a Function script the way the node does, for the gate: `Inputs` in,
  * `Outputs` out. Synchronous (no script here awaits: an Olive answer arrives as
  * an input on a later tick).
+ *
+ * P109 ISL-005: as the artefact carries it. Every whole shared block is taken out
+ * and reached through `Scripts`, loaded by the runtime's own `ScriptFiles` once for
+ * the process, so a block's top-level values are one instance across every run, as
+ * on a page. A mutant that edits inside a block no longer holds that block whole,
+ * so it keeps its own copy and runs as it is written. {@link runScriptInline} is
+ * the old way, for a control.
  */
-type ScriptFn = (inputs: Record<string, unknown>, outputs: Record<string, any>) => void;
-const compiled = new Map<string, ScriptFn>();
+type ScriptFn = (inputs: Record<string, unknown>, outputs: Record<string, any>, scripts: Record<string, unknown>) => void;
+const compiled = new Map<string, { fn: ScriptFn; uses: string[] }>();
 export function runScript(script: string, inputs: Record<string, unknown>): Record<string, any> {
   const outputs: Record<string, any> = {};
-  let fn = compiled.get(script);
-  if (!fn) {
+  let entry = compiled.get(script);
+  if (!entry) {
     // Compiled once per script text, as the node compiles once; a mutant is a different text and compiles afresh.
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { shareScript } = require('./isl005GardenScripts') as typeof import('./isl005GardenScripts');
+    const shared = shareScript(script);
     // eslint-disable-next-line @typescript-eslint/no-implied-eval
-    fn = new Function('Inputs', 'Outputs', script) as ScriptFn;
-    compiled.set(script, fn);
+    entry = { fn: new Function('Inputs', 'Outputs', 'Scripts', shared.script) as ScriptFn, uses: shared.uses };
+    compiled.set(script, entry);
   }
-  fn(inputs, outputs);
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const scripts = entry.uses.length ? (require('./isl005GardenScripts') as typeof import('./isl005GardenScripts')).scriptsFor(entry.uses) : {};
+  entry.fn(inputs, outputs, scripts);
+  return outputs;
+}
+
+/** The script run whole, every block in its own scope, as before ISL-005: the control for {@link runScript}. */
+export function runScriptInline(script: string, inputs: Record<string, unknown>): Record<string, any> {
+  const outputs: Record<string, any> = {};
+  // eslint-disable-next-line @typescript-eslint/no-implied-eval
+  (new Function('Inputs', 'Outputs', script) as (i: unknown, o: unknown) => void)(inputs, outputs);
   return outputs;
 }
 

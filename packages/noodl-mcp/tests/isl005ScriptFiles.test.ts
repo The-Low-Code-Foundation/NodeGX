@@ -85,12 +85,16 @@ describe('ISL-005 — the door to script files', () => {
     expect(report.diagnostics.filter((d) => d.code.startsWith('function-uses'))).toEqual([]);
   });
 
-  it('uses written as an array (as an agent may write it) is read the same as the editor\'s comma string', async () => {
+  // Since slice 7 put `uses` in the enriched catalog, the door's stringlist rule reads it: an array is refused with the
+  // comma string to write instead, as for every stringlist (the editor's generic list paths call .split(",") on it).
+  it('uses written as an array is refused with the comma string to write instead; the comma string passes', async () => {
     await call(s, 'write_script_file', { path: 'engine/tiles.js', content: TILES });
-    const created = await call(s, 'create_component', { path: '/Logic/Step', nodes: [fn('step', ['engine/tiles.js'])] });
+    const array = await call(s, 'create_component', { path: '/Logic/Step', nodes: [fn('step', ['engine/tiles.js'])] });
+    expect(array.isError).toBe(true);
+    expect(JSON.stringify(array.data)).toContain('a stringlist is one comma-separated string, not an array');
+    expect(JSON.stringify(array.data)).toContain('engine/tiles.js');
+    const created = await call(s, 'create_component', { path: '/Logic/Step', nodes: [fn('step', 'engine/tiles.js')] });
     expect(created.isError ? JSON.stringify(created.data) : 'accepted').toBe('accepted');
-    const refused = await call(s, 'create_component', { path: '/Logic/Other', nodes: [fn('other', ['engine/gone.js'])] });
-    expect(JSON.stringify(refused.data)).toContain('function-uses-missing-script');
   });
 
   it('AC8 — a Function naming a file that does not exist is refused, with the name and the files there are', async () => {

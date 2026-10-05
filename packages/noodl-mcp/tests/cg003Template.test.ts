@@ -66,6 +66,7 @@ import { PAD_ANSWER_SCRIPT, RUN_CAP_SCRIPT } from './cg003Scripts';
 // P108 IW-003 (lane M): the job card.
 import { JOB_CARD_SCRIPT } from './cg003Scripts';
 import { DECODE_SAVE_SCRIPT, ENCODE_SAVE_SCRIPT, MAX_TICKS, RUN_CAP } from './cg002Scripts';
+import { shareScript } from './isl005GardenScripts';
 import { AuthoredGarden, buildGardenTemplateProject, prepareGardenArtefact, START_HERE_FILE, TEMPLATE_ID } from './cg003Template';
 import { ROBOT_NAME_MAX } from './cg002Scripts';
 import { DARKENED_FILLS, GARDEN_CSS, GARDEN_PRESET, GARDEN_TOKENS, tokenValue } from './cg007Look';
@@ -367,6 +368,12 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       }
     });
 
+    // P109 ISL-005: byte for byte as the artefact carries it — each shared block out, a Uses entry for its file.
+    const asShipped = (fn: Record<string, unknown>, script: string) => {
+      const shared = shareScript(script);
+      return String(params(fn).functionScript) === shared.script && String(params(fn).uses ?? '') === shared.uses.join(',');
+    };
+
     it('every script CG-002 ships is a Logic/* here, byte for byte (Translate words: the same script over more words)', () => {
       for (const f of FUNCTION_SCRIPTS) {
         const fn = nodesOf(built, '/' + f.component).find((n) => n.type === 'JavaScriptFunction')!;
@@ -377,13 +384,13 @@ describe('CG-003 — Bot Garden, the artefact', () => {
           const ours = portsOf(TRANSLATE_ALL_SCRIPT);
           expect(engine.outputs.filter((o) => !ours.outputs.includes(o))).toEqual([]);
           expect(ours.inputs).toEqual(engine.inputs);
-        } else expect({ c: f.component, same: script === f.script }).toEqual({ c: f.component, same: true });
+        } else expect({ c: f.component, same: asShipped(fn, f.script) }).toEqual({ c: f.component, same: true });
       }
       for (const g of GLUE_SCRIPTS) expect(LOGIC_SPECS.find((s) => s.path === g.component)?.script).toBe(g.script);
       // CG-005: every Olive script is a Logic/* too, byte for byte.
       for (const o of OLIVE_SCRIPTS) {
         const fn = nodesOf(built, '/' + o.component).find((n) => n.type === 'JavaScriptFunction')!;
-        expect({ c: o.component, same: String(params(fn).functionScript) === o.script }).toEqual({ c: o.component, same: true });
+        expect({ c: o.component, same: asShipped(fn, o.script) }).toEqual({ c: o.component, same: true });
       }
     });
 

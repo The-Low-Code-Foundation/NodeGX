@@ -395,7 +395,7 @@ describe('arms: each rule mutated, and the row that kills it', () => {
     expect(bare(m, { model: b.model, words: WORDS, lang: 'en', requests: REQUESTS, itemId: 'robot:pip', bought: 'robot:pip' }).showShort).toBe(true);
   });
   it('the card forgets the short price → the short row’s Buy shows', () => {
-    const m = mutate(SHOP_CARD_SCRIPT, 'out.canBuy = can && !blocked;', 'out.canBuy = !blocked;');
+    const m = mutate(SHOP_CARD_SCRIPT, 'out.canBuy = can && !refused;', 'out.canBuy = !refused;');
     expect(bare(m, { model: funded(kid(), COPY - 8), words: WORDS, lang: 'en', requests: REQUESTS, itemId: 'robot:pip' }).canBuy).toBe(true);
   });
   it('the shop shows every upgrade at once → the upgrades row fails', () => {

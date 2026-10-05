@@ -141,8 +141,8 @@ function isSet(v) { return v !== undefined && v !== null && v !== ''; }
  * Inputs: `requests` (the catalogue's), `land` (Read family's). Outputs: `requests`.
  */
 // P108 s7: ENGINE first too — landJob's rest tiles ask which tiles a robot can reach (worldOf, blocked), as the card does.
+// P109 ISL-005: no isSet of its own: ENGINE's is the same rule, and a second declaration over a shared file's is refused.
 export const LAND_REQUEST_SCRIPT = `${ENGINE}${SAVE_HELPERS}${LAND_HELPERS}
-function isSet(v) { return v !== undefined && v !== null && v !== ''; }
 ${LAND_REQUEST_FN}
 var reqs = Array.isArray(Inputs.requests) ? Inputs.requests.slice() : [];
 var out = [];

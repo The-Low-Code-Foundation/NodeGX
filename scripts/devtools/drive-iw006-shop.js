@@ -36,6 +36,7 @@
 const fs = require('fs');
 const path = require('path');
 const { withDeployedSite } = require('./drive-deployed.js');
+const { functionText } = require('./garden-functions.js'); // P109 ISL-005: shared code lives in scripts/
 
 const arg = (flag) => {
   const i = process.argv.indexOf(flag);
@@ -61,7 +62,7 @@ const WORD_ROWS = tableOf('Words');
 const REQUESTS = tableOf('Requests');
 const REQ = (id) => REQUESTS.find((r) => r.id === id);
 /** The shop's catalogue as the page ships it (Shop rows' script carries it). */
-const fnScript = (comp) => nodesOfComponent(comp).find((n) => n.type === 'JavaScriptFunction').parameters.functionScript;
+const fnScript = (comp) => functionText(PROJECT, comp);
 const SHOP = JSON.parse(/var SHOP = (\[.*?\]);\n/.exec(fnScript('Logic/Shop rows'))[1]);
 const TABS = JSON.parse(/var SHOP_TABS_LIST = (\[.*?\]);\n/.exec(fnScript('Logic/Shop rows'))[1]);
 const w = (lang, key, vars = {}) => {

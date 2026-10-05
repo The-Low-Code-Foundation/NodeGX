@@ -52,8 +52,16 @@ const WORDS = ready
       Record<string, string>
     >)
   : [];
-const SHOP_SCRIPT = ready
-  ? String(nodesOf(GARDEN, 'Logic/Shop rows').find((n) => n.type === 'JavaScriptFunction')?.parameters?.functionScript)
+// P109 ISL-005: the Function's own text plus the script files it lists under Uses (the shop table sits in save.js).
+const SHOP_FN = ready ? nodesOf(GARDEN, 'Logic/Shop rows').find((n) => n.type === 'JavaScriptFunction') : undefined;
+const SHOP_SCRIPT = SHOP_FN
+  ? [
+      ...String(SHOP_FN.parameters?.uses ?? '')
+        .split(',')
+        .filter(Boolean)
+        .map((file) => fs.readFileSync(path.join(GARDEN, 'scripts', file.trim()), 'utf8')),
+      String(SHOP_FN.parameters?.functionScript)
+    ].join('\n')
   : '';
 const REQUESTS = ready
   ? (JSON.parse(String(nodesOf(GARDEN, 'Data/Requests').find((n) => n.type === 'Static Data')?.parameters?.json)) as Array<{
