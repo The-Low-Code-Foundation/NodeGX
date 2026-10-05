@@ -1068,6 +1068,19 @@ export enum DiagnosticCode {
    */
   UnprefixedFunctionPort = 'unprefixed-function-port',
   /**
+   * P109 ISL-006 AC4 (closes P78 D80) — a connection naming a Function's `in-…` / `out-…` port that
+   * neither its written list (`scriptInputs` / `scriptOutputs`), nor its code (`Inputs.x` / `Outputs.y`),
+   * nor a port saved on the node makes.
+   *
+   * Those three are exactly what the editor's port list holds (`NodeGraphNode.getPorts`), so the canvas
+   * paints the wire "Target port doesn't exist" at `level: 'error'` and `exportComponent` deletes it from
+   * the build (DEF-034). Measured s19: the runtime alone would have kept it (an unread input still re-runs
+   * the Function; `Outputs[k]` reaches `out-<k>`), which is why the fix this names is the list, not the code.
+   *
+   * Error severity: every hit is a wire the built app does not have.
+   */
+  UnknownFunctionPort = 'unknown-function-port',
+  /**
    * DEF-002 §1(b)/§1(c) — a connection naming an `in-…`, `out-…` or `pm-…` port
    * that **no adapter would mint**.
    *

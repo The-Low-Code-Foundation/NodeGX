@@ -1,6 +1,6 @@
 # ISL-006 — A Function says what its ports are
 
-**Status: 🟢 ruled s18 (2026-10-05), not built — ruling 1 "List adds, code still mines" (the written list carries types and adds ports; `Outputs.x` in the code still mints); rulings 2–3 not asked. Census: 1,210 Functions, 35 with a list, 4 by variable.** **Earlier status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
+**Status: 🟡 s19 (2026-10-05): slice 1 built — AC1, AC3, AC4 (D80 closed), AC6, AC7 met; AC2 met on the door and a deployed page (the editor-panel half owed); all three rulings in (1 "List adds, code still mines"; 2 "Not now"; 3 "Fix all three", re-asked once with corrected numbers, plus "fix up old projects"). Slice 2 (AC9, AC10: the reader's three fixes in six copies and the on-open fix-up) not built; AC8 handed to P108 IW-010.** **s18 status:** 🟢 ruled, not built — ruling 1 "List adds, code still mines"; census 1,210 Functions, 35 with a list, 4 by variable. **Earlier status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
 **Re-scoped s8 (2026-10-03), against "Native nodes first" and ISL-007:** its largest consumer goes. `Translate words`
 (696 outputs) is replaced by the i18next add-on (ISL-007, built s8) and deleted in [IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md)
 AC4. What is left is the general case: a Function whose outputs come from a list (`Outputs[key] = …`) mints none, and a
@@ -85,6 +85,24 @@ Constraints: one grammar, shared by the runtime, the door and the exporter (toda
 
 ## 6. Acceptance criteria (apply after the rulings are recorded in §8)
 
+🔴 **Rewritten s19 for the rulings** (§8 s19 has them verbatim). Ruling 1 is (a), so the node's ports are its written list
+plus what its code names plus any port saved on it; AC1's "`b` is minted as `*`" stays true by design, and AC4 refuses a
+wire to a name in none of the three. Ruling 3 "Fix all three" adds AC9 and AC10. The table below is the original; where a
+row and this note disagree, the note wins:
+
+- **AC1** stands as written (the RED reading at HEAD), with an input arm beside the output one.
+- **AC2** "a wire to a fourth name is refused at write time" = AC4's refusal, read on the door. "The node shows exactly three
+  outputs" holds only when the code names nothing else: under (a) the code still adds its own.
+- **AC4** refuses (error), not warns: every name it refuses is one the editor's build deletes (§8 s19, measured).
+- **AC6** "one grammar": the copies were six, not three (§8 s19). Slice 1 removes one and pins the rest by name, plug and type.
+- **AC8** is handed to P108 IW-010, which deletes `Translate words` and rewrites the generator that holds `TYPE` and `portsOf`.
+- **AC9 (new, ruling 3).** The reader's three quirks are fixed in every copy: `Outputs.do_it()` is a signal; `Inputs["x"]` is an
+  input (and the bracket name stops at its own quote); a name inside a comment makes no port, with a string-, template- and
+  regex-aware stripper. The agreement specs gain rows for each, including a `//` inside a URL string.
+- **AC10 (new, ruling 3's fix-up).** A project opened in the editor keeps every wired port the old reader made: a wired
+  `in-`/`out-` name the old reader mints and the new one does not is written onto that Function's list, once, and saved.
+  Graded on a copy of a project that has one (SuntappedX has 12 such Functions), with a control project that has none.
+
 | AC | Clause |
 |---|---|
 | AC1 | **RED at HEAD, recorded in §8.** A spec writes, through the door, a Function with a declared output list `{ a: number }` whose script also writes `Outputs.b`, plus a wire from `out-c`. At HEAD it records: `b` is minted as `*`, the wire to `c` is accepted, and the catalog calls the list "not authored directly". Known-firing beside it: a wire to `out-a` is accepted and typed `number` (the proplist route works). |
@@ -120,3 +138,72 @@ None yet.
 - 🔴 The s8 re-scope's *"`Translate words` is deleted in IW-010 AC4"* has not happened yet: it is still in the garden, 31,745
   characters of literal `Outputs.word = …` lines (literal, so the census above does not count it).
 - Rulings 1–3 not asked; ask them with these numbers.
+
+### Session 19 (2026-10-05) — slice 1 built; rulings 2 and 3 asked
+
+**What the runtime does with a wire to a port neither the list nor the code makes (D80 said "not measured").** A scratch
+runtime probe (graph harness, real `simplejavascript`): the runtime keeps it. `registerInputIfNeeded` /
+`registerOutputIfNeeded` register any `in-` / `out-` name when a wire arrives. An unread input still re-runs the Function
+(runs 1→3, the same as a read one), and `Outputs[k] = 5` with `k = 'c'` reached a wire from `out-c`. 🔴 So D45's "the port
+never existed; the wire targeted nothing" is true of the editor, not of the runtime. The editor's port list is the written
+list plus the code's names plus the node's saved `ports` (`NodeGraphNode.getPorts`). Any other wire is painted "Target port
+doesn't exist" at `level: 'error'`, and `exportComponent` deletes every error-level wire (DEF-034). The app the editor
+builds never has it.
+
+**Corpus** ([`isl006-census.js`](isl006-census.js), the runtime's own `parseAndAddPortsFromScript` sliced from source
+and evaluated, both project formats): templates, library and catalog examples hold 205 projects, 1,214 Functions and 9,669
+prefixed endpoints. 22 wires name a port neither the list nor the code makes. 17 of them survive through a saved port
+(`in-mounted` ×6 in todo-list and its demo, `in-callerId` ×6 and two more in digital-bricks-training, and others in the
+training demo). 5 are deleted by the editor's build: `in-conceptId` ×2, `in-field` and `in-value` on the training demo's
+stubs (`tools/build-demo.mjs` keeps the wires of the scripts it stubs), and `in-id` on Nightbook's `openEnvelope`.
+
+**Built (AC4, closes P78 D80):** `unknown-function-port` (error) in `functionPorts.ts`. The door refuses a wire to a Function's
+`in-` / `out-` name that is on neither list, nowhere in the code (as the runtime mines it) and not saved on the node. The
+message names the port, says what the node has, and says the editor leaves the wire out of the build. The suggestion is the
+list row and its type parameter, and notes the list is the route for `Outputs[key]` and for an input the code never reads.
+`packages/noodl-mcp/tests/isl006FunctionPortList.test.ts`: 6/6. AC1 RED at HEAD (before the branch): both dead wires
+accepted, `isError: false`. Known-firing: `out-a` on the list saved `number`, `out-b` from the code `*`. Controls: the input
+on the list, the port saved by hand (SB-004), and `Outputs[k]` with `c` on the list all accepted. Sabotage (the check
+returns early): exactly the two AC4 rows red; restored by `cp`, `cmp` clean.
+
+**Blast radius, attributed with the check switched off and on:** editor `fix-006`, `fix-007`, `oneWayGate`, `queryBeforeFilter`,
+`sb-017` 86/86. `noodl-mcp`: `tpl008`, `tpl010`, `tpl005`, `tpl001`, `tpl003`, `cg003`, `isl005GardenScripts`,
+`validateOnDiskPreconditions` and `def011` green. `def038SettledTemplates` has 2 red (DBT demo, Nightbook), red with the check
+off too (not this change). **One new red:** P78's uncommitted TPL-011 pile (`tpl011Template.test.ts`, untracked since 09-27),
+35/35 → 32/35 on exactly the `openEnvelope` `in-id` wire. A true positive; filed for its owner, generator not touched.
+`tsc --noEmit`: editor 0 errors; `noodl-mcp` 10, the same island spec files as s18.
+
+**AC6, one grammar:** the copies were **six**, not three: the runtime, the door's `cloudDynamicPorts.ts`, `functionPorts.ts`
+(the check above, missed by §2), the exporter's `jsfun.ts`, the code editor's `noodl-core-ui/.../scriptPorts.ts` (plus its
+`notation.ts` hints), and `scripts/library/render-check.js`. `functionPorts.ts` now reads `scriptPortsFromSource` and holds no
+copy. 🔴 The two agreement specs compared names only: drifting the door's signal pattern to accept `_` stayed **36/36 green**.
+`sb-017` gained a row of the quirk shapes compared by name, plug and type; the same drift now reddens exactly that row.
+`nodegx-export/tests/isl-006-mined-ports-agree.test.ts` (new) compares the exporter's `functionMinedPortsOf` with the
+runtime's own function, read from source: 12/12, with the `.send()` difference asserted on its own. The exporter's signal
+pattern drifted the same way reddens exactly the `do_it` row. `noodl-core-ui` and `render-check.js` are not pinned yet (slice 2).
+
+**AC7:** `javascriptfunction.json` describes the written lists as the way to give a port a type, gives the row shape and the
+type parameters, and says when a name belongs on the list (`Outputs[key]`, an input read by nobody that should still
+re-run). It also drops two sentences stale since FIX-007 ("accepted by every write path", "survives every validator").
+`catalog:merge`, `docs:nodes` regenerated (one page changed, `java-script-function.md`). `catalog:check`, `catalog:merge:check`
+and `docs:nodes:check` all exit 0. The copy passed `written.py` after one split (a chained sentence).
+
+**AC2 and AC3 on a deployed page** (`scripts/devtools/isl006-typed-ports.ts`: built through the door, `nodegx deploy` exit 0,
+read in Chrome; 8/8, no console errors). One Function, four outputs: `declared` (object, on the list) shows
+`{"kind":"declared","n":1}`; **the same object not on the list shows `[object Object]`** (the HEAD behaviour, recorded); `num`
+(number) shows 42; `fromKey`, which the code reaches only as `Outputs[k]`, shows "by key" through the list. A wire from
+`out-ghost` is refused at write time by name. The editor-panel half of AC2 is not driven (no editor launched this session).
+
+**Rulings asked (one AskUserQuestion, then one correction):**
+- **Ruling 2 — ✅ "Not now"** (as recommended): one row per port; a JSON parameter only if a second consumer appears.
+- **Ruling 3 — ✅ "Fix all three"** (NOT the recommended "fix 1 and 2, keep comments"). 🔴 **I asked it on a wrong number.** The
+  census stripped comments with `//.*`, which eats the rest of a line after a `//` inside a URL string (Stripe's
+  `"https://api.stripe.com/v1/subscriptions/" + Inputs.SubscriptionId`). It reported 6 comment-only uses, 5 wired, in Stripe
+  and MailGun. With a string-, template- and regex-aware stripper: **1** in our corpus (file-upload `out-Accept`, unwired), and
+  in the 252 test and old projects on this machine 147 Functions, **18 with wires on those ports (34 wires) in 3 projects**
+  (SuntappedX 12 Functions, a client project 5, Erleah-2 1). Re-asked with the corrected numbers → **"Fix it, fix up old
+  projects"** (recommended this time). Quirks 1 and 2 unchanged by the correction: 0 underscore signals anywhere; `Inputs["x"]`
+  0 in our corpus and 8 in old projects, where the fix only makes the port a real input.
+
+**Next (slice 2):** AC9 in the six copies with one shared row set in every agreement spec (URL `//`, regex literal ending `\//`,
+nested template literal, block comment), then AC10's on-open fix-up, then the editor-panel half of AC2.

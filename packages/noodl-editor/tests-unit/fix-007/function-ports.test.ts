@@ -40,7 +40,10 @@ const CORPUS: string[] = [
   'await fetch(Inputs.url).then((r) => r.json()).then((j) => { Outputs.body = j; Outputs.Success(); });',
   'Outputs.done();', // a signal whose display name is also a declared port
   '', // no script
-  'const nothing = 1;' // no ports at all
+  'const nothing = 1;', // no ports at all
+  // P109 ISL-006 AC5 — the miner's quirks, so a copy that "fixes" one goes red here first.
+  'Outputs.do_it();', // no `_` in the signal family: the runtime mints a `*` port `do_it`, not a signal
+  "const k = 'c';\nOutputs[k] = 1;\nconst v = Inputs[k];" // a computed key mints nothing
 ];
 
 describe('FIX-007 — the mined port set agrees with the runtime parser', () => {

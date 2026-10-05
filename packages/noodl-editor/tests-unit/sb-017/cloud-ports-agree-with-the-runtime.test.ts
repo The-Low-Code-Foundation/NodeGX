@@ -237,6 +237,36 @@ describe('SB-017: the editor derives the ports the runtime declares', () => {
     }
   });
 
+  /**
+   * P109 ISL-006 AC5/AC6 — the miner's quirks, by name, plug AND type. The template above has none of them, so a copy
+   * that "fixed" one (a `_` in the signal family, comments stripped) agreed with the runtime there and passed.
+   */
+  it('agrees on the shapes ISL-006 counted — underscore signal, Inputs["x"], a comment, a computed key, list over code', () => {
+    const scripts: Record<string, unknown>[] = [
+      { functionScript: 'Outputs.do_it();' },
+      { functionScript: 'const a = Inputs["first name"];\nOutputs.a = a;' },
+      { functionScript: '// Inputs.commented\nOutputs.x = 1;' },
+      { functionScript: "const k = 'c';\nOutputs[k] = 1;\nconst v = Inputs[k];" },
+      {
+        functionScript: 'Outputs.total = Inputs.n * 2;',
+        scriptOutputs: [{ id: 'total', label: 'total' }],
+        'outtype-total': 'number',
+        scriptInputs: [{ id: 'trigger', label: 'trigger' }],
+        'intype-trigger': 'boolean'
+      }
+    ];
+    const announced: string[][] = [];
+    for (const [i, parameters] of scripts.entries()) {
+      const node = { id: `isl006-${i}`, type: 'JavaScriptFunction', parameters } as TemplateNode;
+      const runtime = signature(runtimePortsFor(`${RUNTIME}/simplejavascript`, node));
+      announced.push(runtime);
+      expect(signature(scriptPortsForNode(node))).toEqual(runtime);
+    }
+    // Not vacuous: the runtime types `do_it` as a value, and a computed key mints nothing.
+    expect(announced[0]).toContain('out-do_it:output:*');
+    expect(announced[3]).toEqual([]);
+  });
+
   it('agrees on every Query Records node — `qp-*` and the dynamic `Do`', () => {
     const nodes = cloudNodesOfType('DbCollection2');
 
