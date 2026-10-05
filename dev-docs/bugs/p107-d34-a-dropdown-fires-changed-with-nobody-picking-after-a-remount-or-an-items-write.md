@@ -30,3 +30,7 @@ component and the node silently (as the Value input does), or key the reset on a
 and leave a new Items array to re-render the options around the current value. Either way Changed means the person
 did it, as the description says. The spec models today's behaviour (the mount's and the array's announce), as the
 Text Input's D31 does for Set.
+
+**s46 (2026-10-05): the INTENT is ruled (R14), for NSP-023 step 4.** A Dropdown hidden with Mounted and shown again keeps the
+person's pick and fires nothing ("Where the person left it"); handed its Items again — a fresh list still holding the pick — it
+keeps the pick and fires nothing ("The pick stays"). The Dropdown v2 (step 4) states it; this becomes a runtime-only row then.

@@ -36,6 +36,10 @@ const SILENT_NEGATIVE_ZERO = 'a Value Percent of -0 stored where 0 was, unsent (
 const PLACED_OFF_PAGE = 'a placing on a node placed off the page: its set holds only the page syncs, which nothing reads before the frame end repaints them';
 
 /** NSP-016 s43 — the Text: a patch handed a twin's example that writes only what the state already holds. */
+// NSP-023 s46 — the Slider v2: an act's paint on the page, or a mount, that found no word of the graph's waiting (`pending` false —
+// a word waiting is drawn by that paint, and the branch would set it), handed its twin's example, which clears the word: it writes
+// `pending: false` where it is false already, and keeps this branch's handle (a swap keeps the page's syncs)
+const NO_WORD_WAITING = "an act's paint or a mount on the page that found no graph's word waiting, handed the patch of its twin that drew one: it clears a word that is already clear, and the handle is this branch's (a swap keeps the page's syncs)";
 const ALREADY_HELD = (what: string) => `${what}: the twin's example writes a value this branch's state already holds, so the state is the same after either`;
 
 export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
@@ -111,7 +115,32 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
     // the runtime's 10,000 (20730): the sibling's recorded example stores Value Percent -0 where this branch keeps 0, unsent
-    { reducer: 'person.release', kind: 'swap-branch', branch: '{"set":["onPage","pressed"],"emit":["didMount","pointerUp"],"outcome":null,"outcomes":[],"request":false}', swappedWith: '{"set":["onPage","percent","pressed"],"emit":["didMount","pointerUp"],"outcome":null,"outcomes":[],"request":false}', why: SILENT_NEGATIVE_ZERO }
+    { reducer: 'person.release', kind: 'swap-branch', branch: '{"set":["onPage","pressed"],"emit":["didMount","pointerUp"],"outcome":null,"outcomes":[],"request":false}', swappedWith: '{"set":["onPage","percent","pressed"],"emit":["didMount","pointerUp"],"outcome":null,"outcomes":[],"request":false}', why: SILENT_NEGATIVE_ZERO },
+    // NSP-023 s46 (v2) — the s46 mutant run at seed 13: the thirteen on-page twins of a drawn word
+    { reducer: 'person.slide', kind: 'swap-branch', branch: '"set":["elementFocused","focused"],"emit":["onFocus"]', swappedWith: '"set":["elementFocused","focused","pending"],"emit":["onFocus"]', why: NO_WORD_WAITING },
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["onPage"],"emit":["didMount"]', swappedWith: '"set":["onPage","pending"],"emit":["didMount"]', why: NO_WORD_WAITING },
+    { reducer: 'person.hover', kind: 'swap-branch', branch: '"set":["hover"],"emit":["hoverStart"]', swappedWith: '"set":["hover","pending"],"emit":["hoverStart"]', why: NO_WORD_WAITING },
+    { reducer: 'person.touch', kind: 'swap-branch', branch: '"set":["pressed"],"emit":["pointerDown"]', swappedWith: '"set":["pending","pressed"],"emit":["pointerDown"]', why: NO_WORD_WAITING },
+    { reducer: 'person.lift', kind: 'swap-branch', branch: '"set":["pressed"],"emit":["pointerUp"]', swappedWith: '"set":["pending","pressed"],"emit":["pointerUp"]', why: NO_WORD_WAITING },
+    { reducer: 'person.leave', kind: 'swap-branch', branch: '"set":["hover","pressed"],"emit":["hoverEnd"]', swappedWith: '"set":["hover","pending","pressed"],"emit":["hoverEnd"]', why: NO_WORD_WAITING },
+    { reducer: 'person.blur', kind: 'swap-branch', branch: '"set":["elementFocused","focused"],"emit":["onBlur"]', swappedWith: '"set":["elementFocused","focused","pending"],"emit":["onBlur"]', why: NO_WORD_WAITING },
+    { reducer: 'person.release', kind: 'swap-branch', branch: '"set":["pressed"],"emit":["pointerUp"]', swappedWith: '"set":["pending","pressed"],"emit":["pointerUp"]', why: NO_WORD_WAITING },
+    { reducer: 'person.press', kind: 'swap-branch', branch: '"set":["elementFocused","focused","pressed"],"emit":["pointerDown","onFocus"]', swappedWith: '"set":["elementFocused","focused","pending","pressed"],"emit":["pointerDown","onFocus"]', why: NO_WORD_WAITING },
+    { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["elementFocused","focused","pressed"],"emit":["pointerDown","onFocus","pointerUp"]', swappedWith: '"set":["elementFocused","focused","pending","pressed"],"emit":["pointerDown","onFocus","pointerUp"]', why: NO_WORD_WAITING },
+    { reducer: 'person.focus', kind: 'swap-branch', branch: '"set":["elementFocused","focused"],"emit":["onFocus"]', swappedWith: '"set":["elementFocused","focused","pending"],"emit":["onFocus"]', why: NO_WORD_WAITING },
+    { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["pressed"],"emit":["pointerDown","pointerUp"]', swappedWith: '"set":["pending","pressed"],"emit":["pointerDown","pointerUp"]', why: NO_WORD_WAITING },
+    { reducer: 'person.press', kind: 'swap-branch', branch: '"set":["pressed"],"emit":["pointerDown"]', swappedWith: '"set":["pending","pressed"],"emit":["pointerDown"]', why: NO_WORD_WAITING },
+    // the s46 runtime batch (seeds 13, 20730): the ten act-paint twins that bring the slider back with no word waiting
+    { reducer: 'person.focus', kind: 'swap-branch', branch: '"set":["elementFocused","focused","onPage"],"emit":["didMount","onFocus"]', swappedWith: '"set":["elementFocused","focused","onPage","pending"],"emit":["didMount","onFocus"]', why: NO_WORD_WAITING },
+    { reducer: 'person.slide', kind: 'swap-branch', branch: '"set":["elementFocused","focused","onPage"],"emit":["didMount","onFocus"]', swappedWith: '"set":["elementFocused","focused","onPage","pending"],"emit":["didMount","onFocus"]', why: NO_WORD_WAITING },
+    { reducer: 'person.hover', kind: 'swap-branch', branch: '"set":["hover","onPage"],"emit":["didMount","hoverStart"]', swappedWith: '"set":["hover","onPage","pending"],"emit":["didMount","hoverStart"]', why: NO_WORD_WAITING },
+    { reducer: 'person.leave', kind: 'swap-branch', branch: '"set":["hover","onPage","pressed"],"emit":["didMount","hoverEnd"]', swappedWith: '"set":["hover","onPage","pending","pressed"],"emit":["didMount","hoverEnd"]', why: NO_WORD_WAITING },
+    { reducer: 'person.press', kind: 'swap-branch', branch: '"set":["elementFocused","focused","onPage","pressed"],"emit":["didMount","pointerDown","onFocus"]', swappedWith: '"set":["elementFocused","focused","onPage","pending","pressed"],"emit":["didMount","pointerDown","onFocus"]', why: NO_WORD_WAITING },
+    { reducer: 'person.release', kind: 'swap-branch', branch: '"set":["onPage","pressed"],"emit":["didMount","pointerUp"]', swappedWith: '"set":["onPage","pending","pressed"],"emit":["didMount","pointerUp"]', why: NO_WORD_WAITING },
+    { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["elementFocused","focused","onPage","pressed"],"emit":["didMount","pointerDown","onFocus","pointerUp"]', swappedWith: '"set":["elementFocused","focused","onPage","pending","pressed"],"emit":["didMount","pointerDown","onFocus","pointerUp"]', why: NO_WORD_WAITING },
+    { reducer: 'person.touch', kind: 'swap-branch', branch: '"set":["onPage","pressed"],"emit":["didMount","pointerDown"]', swappedWith: '"set":["onPage","pending","pressed"],"emit":["didMount","pointerDown"]', why: NO_WORD_WAITING },
+    { reducer: 'person.lift', kind: 'swap-branch', branch: '"set":["onPage","pressed"],"emit":["didMount","pointerUp"]', swappedWith: '"set":["onPage","pending","pressed"],"emit":["didMount","pointerUp"]', why: NO_WORD_WAITING },
+    { reducer: 'person.blur', kind: 'swap-branch', branch: '"set":["onPage"],"emit":["didMount"]', swappedWith: '"set":["onPage","pending"],"emit":["didMount"]', why: NO_WORD_WAITING }
   ],
   'Map Collection': [
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG },

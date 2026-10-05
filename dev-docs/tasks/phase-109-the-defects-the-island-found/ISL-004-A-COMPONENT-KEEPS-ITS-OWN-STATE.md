@@ -1,6 +1,6 @@
 # ISL-004 — A component keeps its own state, and a page you come back to still has it
 
-**Status: ✅ CLOSED s18 (2026-10-05) — every AC met: AC1/AC2/AC6 (s17, Keep When Leaving), AC3 (the doctrine says how long a Component Object lasts, measured in a browser), AC4 (the census: no live defect), AC5 (F05 recorded as a spec under "No, it's app logic"). Filed P109-S18-REFRESHROWSTATE.** **Earlier status: 🟡 s18 (2026-10-05): rulings 2 ("Component Object") and 3 ("No, it's app logic") ruled; Component Object's lifetime measured in a browser (kept when hidden and shown or when its row id stays; lost on a For Each Refresh, a row leaving and returning, a page left); AC3 built (the doctrine says it, spec + sabotage). Owed: AC4 (the census), AC5 (F05 as a spec, a record). Filed P109-S18-REFRESHROWSTATE.** **Earlier status: 🟡 s17 (2026-10-05): ruling 1 ruled "Yes, if ticked" and built — AC1 and AC2 met in a browser (§8 s17); owed: rulings 2 and 3 (AC3, AC5), the census (AC4). AC6 (the workaround read) written s17. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F04, with F05 as
+**Status: 🟡 s18 (2026-10-05): rulings 2 ("Component Object") and 3 ("No, it's app logic") ruled; Component Object's lifetime measured in a browser (kept when hidden and shown or when its row id stays; lost on a For Each Refresh, a row leaving and returning, a page left); AC3 built (the doctrine says it, spec + sabotage). Owed: AC4 (the census), AC5 (F05 as a spec, a record). Filed P109-S18-REFRESHROWSTATE.** **Earlier status: 🟡 s17 (2026-10-05): ruling 1 ruled "Yes, if ticked" and built — AC1 and AC2 met in a browser (§8 s17); owed: rulings 2 and 3 (AC3, AC5), the census (AC4). AC6 (the workaround read) written s17. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F04, with F05 as
 evidence · P108 [IW-002](../phase-108-the-island-works/IW-002-THE-JOB-MODEL.md) AC3 (lane M, s3, lines 322-329) ·
 P106 [IG-004](../phase-106-the-island-grows/IG-004-THE-ISLAND-AS-A-WORLD.md) §6 line 77 and §7.6 item 13 (lines
 328-332) · P108 [IW-006](../phase-108-the-island-works/IW-006-SHELLS-AND-THE-SHOP.md) deviation 2 (lines 219-221) ·
@@ -265,18 +265,3 @@ names it there, or any script or expression there mentions `Variables.<name>`:
   with `/`, and both lookups hit it), caught by reading the rows, fixed before recording.
 - **The `kept` shape** (a page feeding app state back into itself to survive a reopen): bot-garden's Island page only, as s17
   measured (no other template has the quiet input).
-
-**AC5, F05 recorded (s18)** — [`isl-004-a-stale-writer-lands-last.test.ts`](../../../packages/noodl-runtime/test/isl-004-a-stale-writer-lands-last.test.ts),
-the runtime's graph harness, one Variable, the steps tick, tick, rebuild (Set Variable 100), tick: **3/3**.
-
-| the tick | Variable after each step | |
-|---|---|---|
-| holds its own copy (Component Object), as the island's did | 1, 2, 100, **3** | 🔴 the record: the older state put back, where a person expects 101 |
-| reads the Variable each run (control) | 1, 2, 100, **101** | the harness sees a fresh write |
-| the taught idiom: the rebuild stamps a build, a copy from another build is dropped | 1, 2, 100, **101** | |
-
-Under ruling 3 ("No, it's app logic") the record row stays green while the runtime leaves competing writers unordered, and
-goes red if it ever starts refusing a stale write. 🔴 First run read `[1,1,100,100]` in every arm: I had wired the tick's number
-into Set Variable's `do`, which fires only when its input turns truthy (1 → 2 is not a change to true); `success → do` now.
-
-**ISL-004 closed:** AC1, AC2 (s17), AC3, AC4, AC5 (s18), AC6 (s17).

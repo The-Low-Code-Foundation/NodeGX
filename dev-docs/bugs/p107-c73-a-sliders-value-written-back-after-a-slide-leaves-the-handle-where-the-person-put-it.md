@@ -27,3 +27,11 @@ effect keys on `props.value`).
 **Proposed fix (for a ruling):** compare the arriving value with the node's output (`_internal.outputValue`) rather than
 `props.value`, or write `props.value` on a slide too, so the next graph write is measured against what is on the
 screen. The spec models today's behaviour (nothing moves).
+
+**s46 (2026-10-05, NSP-023 step 3): the INTENT is ruled (R14) — the last word wins.** Richard: *"Why would I not let the node
+show whatever the last value or signal it received was? Whether it comes from the user or not."* The Slider v2 spec treats every
+Value from the graph as a word for the handle, the same value as the last one included, so the Reset above moves the handle to 0
+(Value 0, no Changed — D36). The runtime's behaviour is a known row on the runtime target (`graphValueDropped`: the spec reports a
+Value the runtime drops, after a slide or with the author's Value NaN — the effect's `Object.is` drops a second NaN too). Row
+scenarios: "a slide to 70, then Value written 0 …", "… Value written 40 and 0 in one frame …", "a slide to 80, then Max lowered to
+60 and Value written 0 …". The proposed fix (compare with the node's output) matches the ruling; whether to apply it is still to ask.

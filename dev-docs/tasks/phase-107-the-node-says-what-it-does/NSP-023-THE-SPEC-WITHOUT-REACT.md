@@ -1,7 +1,7 @@
 # NSP-023 — The spec without React
 
 **Opened 2026-10-05, from ruling R12 (README §7).** **Depends on NSP-016** (the specs it converts) and the Text v3 (NSP-016 §7.9,
-the recipe). **Status: 🟡 steps 1 and 2 done (s45 §8.1, s46 §8.2); the Checkbox's and the Dropdown's label rule with step 1.**
+the recipe). **Status: 🟡 steps 1, 2 and 3 done (s45 §8.1, s46 §8.2, §8.3); the Checkbox's and the Dropdown's label rule with step 1; the Dropdown's and the Radio Button's intents ruled (R14) for steps 4 and 5.**
 
 ## 1. The person sentence
 
@@ -205,3 +205,66 @@ turn (s34's clock, `23bb0a073`). spec.ts is hashed: `tests/stranger-suite-hashes
 20 suites, 878 passed, 17 skipped (the stranger rounds' opt-in deep runs); the three stranger rounds green (41 passed: hashes, the
 siblings-only rule, each node conforming on the stranger's target, the schema, every mutant disagreeing); the runtime graph and
 target suites 102 passed.
+
+### 8.3 s46, 2026-10-05 — step 3: the Slider v2
+
+**Rulings (R14, README §7)** — one batch of four in plain words, one re-asked when its first wording read as "huh?": a Slider
+or a Dropdown hidden with Mounted and shown again is **where the person left it**; a Dropdown handed its Items again **keeps the
+pick**; **the last word wins** (*"Why would I not let the node show whatever the last value or signal it received was? Whether it
+comes from the user or not"*); the Radio Button takes R13's label rule (**"Yes, same rule"**). The first wording of the third
+question ("the graph writes 40 then 0 in one frame after a slide") was too abstract — Richard answered with the principle instead,
+and it decides C73's intent too: a lone Reset to the author's last Value after a slide moves the handle.
+
+**The sort (AC1)** — the Slider, v1 state and rules:
+
+| v1 | pile | evidence | v2 |
+|---|---|---|---|
+| `paintedValue`: `props.value` as the last render saw it (the effect's dependency) | React-made | D36, s41 | gone; `pending` — the graph gave the handle a word the page has not drawn yet — drawn at the next paint (a frame's end, or the paint an act makes first) |
+| the effect reports the graph's Value through `updateOutputValue`, firing Changed | React-made (the component's effect, Slider.tsx :88-95) | D36 | the paint reports it without Changed (the descriptions of Value and Changed); row D36 |
+| a remount takes the author's Value back (`useState(props.value)`) and announces it | React-made | D36 | the handle stays where it was (R14); row D36 |
+| a Value equal to the author's last write is dropped (slider.ts :265), and the effect drops a second NaN (`Object.is`) | the node's own (the setter) and React's (the effect) | C73 | every Value write is a word (R14); row C73 |
+| `shown`: the component's `useState` | the element's value — renderer-neutral | | stays, kept off the page too |
+| Min / Max re-clamp the author's Value only, a word only when it moves it (`!==`) | the node's own | C74 | stays |
+| Value Percent `NaN` at Min = Max; the falsy-percent recompute | the node's own | C75 | stays |
+| the browser's range sanitization and step rule; a reversed range not played | HTML / the face | | stays |
+
+**The runtime's rows** (`packages/noodl-runtime/test/node-spec/conformance.test.ts`): `changedWithNobodySliding` (D36 — the runtime
+fires a Changed the spec does not, or re-reports the author's Value at a remount: a reference frame with Did Mount after an earlier
+Will Unmount) and `graphValueDropped` (C73 — the spec reports Value or Value Percent in a frame with a Value write, the runtime
+does not, after a slide or with the author's Value NaN).
+
+**Scenarios: 48 → 68**, 32 of them row scenarios (D36 26, C73 4, C62 1, C63 1). Rewritten by a script from the v1 copy (every
+hand addition lived in the script, `slider_v2_scenarios.py`, the session's scratchpad); from this commit on the JSON is the source
+— edit it by hand. Eighteen v1 scenarios became row scenarios under v2 names; runtime twins sit beside them where the row would have hidden a grade (the
+empty values on a fresh slider; a single Value 120, a single '60' — each graded up to its Changed). **The matrix** (704 segments)
+reset each segment by a remount, which under v2 keeps the handle and on the runtime takes Value 0 back with Changed: each segment
+now starts with a slide to 0 and Value 0 before the remount, which both targets agree on, and it split — 264 segments with no
+Value write and no remount after the slide (graded on the runtime) and a D36 row matrix of 440. The two "a person acts on a
+painted page" scenarios slide to 0 before 30 (their last remount no longer follows a moved handle), so both stay runtime-graded.
+**v1 named one thing nobody sent:** "Max wired [1, 2] … a slide to 150 lands on 1: Value 1 with Changed" — the handle is already
+1 there (a NaN is the middle, 0.5, stepped to 1), and neither target ever sent a Value; renamed.
+
+**The mutants.** v1's act-paint branches were killed by WHERE the paint's Changed printed; v2's paint fires none and values print
+unordered in the settle group, so the first run left 75 survivors, all one family: an act's paint that draws the graph's word,
+dropped or swapped, leaves the drawing to the frame's end and the trace cannot tell. The kill: a Max (or Min) write after the act in
+the same frame — the act's paint computed Value Percent against the old one, a frame-end draw against the new (C74's stale percent
+makes it visible). An act-paint row matrix (176 segments: Value 40 or 0.5, every act, enabled or not, the keyboard on or off,
+remounting or not) and a runtime-graded twin for words that move nothing (Value 0 at 0, every act, Min -100 in the act's frame).
+**Thirteen declared equivalent** (`NO_WORD_WAITING`): an act's paint or a mount on the page that found no word waiting, handed its
+twin's patch — `pending: false` where it is false already, and the handle kept (a swap keeps the page's syncs). Two more kills came
+from recorded examples: a slide whose Value Percent does not move was recorded only at 30.5 → 30, where its twin's example agreed
+(a scenario at 40.5 → 40); and at seed 20731 the placing's draw swapped with an off-page placing (placed with Min 10, Min 0 before
+the first frame: the placing's Value Percent 0 stands).
+
+**The runtime batch found five more branches** (seed 20730, interpreter-side mutants): a word that moves no Value but redraws a
+falsy Value Percent against a Min moved since (a C73 row scenario; the C73 matcher reads a Value Percent alone too), the same word
+drawn at a remount (the runtime agrees), every act in a remount frame with such a word and Min -100 after it, the same disabled
+and hidden, and a Blur act whose paint puts the slider back — a Focus action after it, same frame, reads the page (Done, not
+Unchanged). Ten more equivalents of `NO_WORD_WAITING`'s shape (the act paints that bring the slider back): 23 declared in all.
+
+**Readings (2026-10-05, `8203644c3` + this change; load 2–4 with peers):** the Slider v2 conforms on the interpreter at 200 on seeds
+13, 20730 and 20731 (0 divergences, 2,926 / 2,950, the rest declared) and on the runtime at 200 on seeds 13 and 20730 (0
+divergences outside the rows; D36 attributed 82 and 61, C73 by its scenarios; 2,926 / 2,950; both tests green). The package suite
+20 suites, 878 passed (batch-visual 709 s — the Slider file is larger); the runtime graph and target suites 102. The 10,000 runs:
+§8.4 when they land.
+

@@ -31,3 +31,6 @@ step 5 takes it. C66 (label on then off loses the Checkbox's and the Dropdown's 
 
 **Fix.** Render the same tree either way, so the input keeps its place: always the outer `<div>`, the `<label>` only when on (or a keyed
 wrapper). Small, once per component (Text Input, Checkbox, Dropdown, Radio Button).
+
+**s46 (2026-10-05): the Radio Button too** — Richard: "Yes, same rule" (R14). Its spec still models the rebuild; NSP-023 step 5
+takes it out and adds the C80 row to the Radio Button's runtime list.

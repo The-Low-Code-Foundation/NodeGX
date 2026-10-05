@@ -35,3 +35,13 @@ difference, slide or not).
 (`syncOutputValue`) that sends Value and Value Percent but never Changed, called from the effect; the `<input>`'s
 `onChange` keeps `updateOutputValue`. The Dropdown's D34 is the same shape and wants the same fix. The spec models
 today's behaviour.
+
+**s46 (2026-10-05, NSP-023 step 3 — the Slider v2): the INTENT is ruled; the app fix is still to ask.** The description already
+said a Value from the graph does not fire Changed; Richard ruled the remount (R14, "Where the person left it"): a Slider hidden
+with Mounted and shown again is where the person left it and fires nothing. The spec (v2) now says both — the graph's word reaches
+the handle at the next paint and is reported without Changed; a remount leaves the handle alone — and this is a known row on the
+runtime target (`changedWithNobodySliding` in `packages/noodl-runtime/test/node-spec/conformance.test.ts`: the runtime fires a
+Changed the spec does not, or re-reports the author's Value at a remount). Row scenarios: "Value from the graph …", "a slide to 30,
+then Mounted off and on …", the D36 matrix (440 segments) and the act-paint matrix in the scenario file. The proposed fix above
+(a second entry point that syncs without announcing, called from the effect; the remount keeping `_internal.outputValue`) is the
+question left.
