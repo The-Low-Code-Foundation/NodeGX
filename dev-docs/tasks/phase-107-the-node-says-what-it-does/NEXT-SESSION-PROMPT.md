@@ -1,8 +1,8 @@
 # P107 — next session
 
-**Written 2026-10-05 (s43).** Read the [README](README.md) §2–§7. s43's record is [NSP-016 §7.8](NSP-016-VISUAL-NODES.md) and
-[RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md) (what a drag and a file drop are, what jsdom can play, what a spec grades); s42's is §7.7
-(the visual tree, per node); s41's §7.6; s40's §7.5; s39's §7.4; s38's §7.3; s37's §7.2 (THE PERSON face).
+**Written 2026-10-05 (s44).** Read the [README](README.md) §2–§7. s44's record is [NSP-016 §7.9](NSP-016-VISUAL-NODES.md) (the Text v2:
+row C79 modelled, s43's deep-run survivors killed); s43's is §7.8 and [RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md); s42's §7.7; s41's
+§7.6; s40's §7.5; s39's §7.4; s38's §7.3; s37's §7.2 (THE PERSON face).
 
 ## Board (from the task files)
 
@@ -22,7 +22,7 @@
 | NSP-013 the time batch | 🟡 24 / 24 conform. Left: AC2, the deep run for s11–s14 | s16 |
 | NSP-014 records, users, files, HTTP, streams | 🟡 24 of 24 conform; s36 D29 fixed; **s40 DbModel2's seed-dependent twins pinned**. Left: AC2's export half (P18) | s8, s21 … s40 |
 | NSP-015 navigation + components | 🟡 14 of 14 conform; **s40 NavigationClosePopup's seed-dependent survivor pinned**. Left: AC2 (export, P18) | s15 … s40 |
-| **NSP-016 the visual nodes** | **🟡 9 of 19 conform (Button, Checkbox, Text Input, Dropdown, Slider, Icon, Radio Button Group, Radio Button, Text — s43, §7.8; the 7 the hit test moved re-graded). Drag and drop researched (RESEARCH-DRAG-DROP.md). The other 10 need infrastructure (below). AC4 waits for NSP-017** | `aa8abb06f` … s42, `803f6cccf`, s43 |
+| **NSP-016 the visual nodes** | **🟡 9 of 19 conform (Button, Checkbox, Text Input, Dropdown, Slider, Icon, Radio Button Group, Radio Button, Text). s44: the Text v2 conforms at 10,000 on both targets (row C79 modelled; 203 scenarios; §7.9). Drag and drop researched (RESEARCH-DRAG-DROP.md). The other 10 need infrastructure (below). AC4 waits for NSP-017** | `aa8abb06f` … s42, `803f6cccf`, s43, s44 |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 opened s21 (needs a second runtime target, `noodl-viewer-cloud`) | s21 |
 | NSP-009, NSP-017 … NSP-019, NSP-021 | — | — |
@@ -30,45 +30,45 @@
 **115 of 147 conform on the runtime (78.2%)** (T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 9/19; 0 exempt). Graph 76 / 76.
 Left: 10 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-017).
 
-## What s43 settled
+## What s44 settled
 
-1. **Drag and drop, researched** (RESEARCH-DRAG-DROP.md). Reach first: the 13 shelf templates hold 1,153 Text and 1,653 Group nodes,
-   and none of them sets a drag port; one catalog example (the kanban) and one Site Builder file drop do. The keyboard drag plays with
-   no geometry; a pointer drag needs `elementFromPoint` (the face now stands it in); Drop Index from a pointer is geometry (NSP-017).
-2. **The Text conforms** (54 scenarios), step (a): the pointer outputs, the hit test, the drag SOURCE on a lone node (keyboard lift and
-   its endings, the hold timer as `after: hold`, a drop over nothing, the click swallow as `after: unswallow`). No format change.
-3. **Rows C77** (a Draggable element loses its keyboard pickup when its element is replaced — remount, new Tag, a mount after 60 frames)
-   and **C78** (a keyboard drag drops an element on itself) — filed, both modelled, both in the Text's scenarios.
-4. **The face learned the browser's hit test** — a hidden or `pointer-events: none` element takes no pointer; `focus()` refuses a
-   hidden element — and **seven conforming specs were wrong about it** (graded on a page where a hidden button could be clicked).
-   Each now says what a browser does; version 1 each (the runtime did not change — the s40 / s41 precedent).
-5. **Cross-play state is the face's to take down**: the shared window kept a drop's click swallow and ate a Click in a LATER play
-   (now: every window listener a play adds comes off with its page); a gesture outlived its play (the globals now come off after the
-   node's teardown); jsdom's wall-clock `requestAnimationFrame` made one probe answer differently run to run (now the world's frame clock).
-6. **Inside React's `act`, the frame end's render commits when the settle closes** — after both frame starts (frame and drain). A
-   "next frame start after the paint" is the NEXT settle. Measured at the 60-frame edge.
+1. **Row C79 is modelled (Text v2).** Measured first: 22 hand cases side by side, and every Text input set on a page with its
+   `forceUpdate` calls counted. Two writers set the element's `pointer-events`: the Pointer Events inputs PATCH it, and a render writes
+   Text.tsx :88-90's value only when React's own last-rendered value changed. A frame end renders only when an input ASKED (the list
+   is in §7.9: Mounted only on a change, Position only when set, Opacity only when it crosses zero against the element's STORED
+   opacity, and the first frame end always). An act's paint is a render (a face choice, written down).
+2. **C79 is wider than s43 wrote.** Once React has rendered `none`, a Pointer Events write in ANY later frame catches clicks while
+   invisible; only the same frame is safe. The bug file says so. Its reach is Text, Group, Image, Circle and Video: the Text Input
+   has the opacity rule but no Pointer Events inputs.
+3. **s43's 47 deep-run survivors are killed** by scenarios the runtime also plays. An act's paint that makes the element is read by a
+   Draggable write in the same frame; a replacing act during a keyboard drag is read by Escape; the hold timer; a cancel that does or
+   does not take the keyboard is read by hiding and pressing Space; the `whenMounted` chain read two ways. Four more are declared
+   equivalent (already-held twins).
+4. **The handoff was wrong in one place**: the Text's "known rows are still open" test was RED since s43 (the Text carried no
+   C61–C63 scenario). Fixed: three scenarios, as the other visuals carry.
+5. **Readings (2026-10-05, HEAD `d126f5399` + this session's commit):** the Text CONFORMS on the runtime at 200 (seeds 13, 20730) and
+   at 10,000 (seed 20731, 0 divergences, 1,255 / 1,265 mutants, the rest declared); the interpreter at 200 on six seeds and at 10,000;
+   the package suite 20 suites / 878 passed; the runtime graph and target suites 102; `tsc --noEmit` 0; bugs check 232 valid.
 
-## What s44 does
+## What s45 does
 
-1. **The Text at 10,000** ([TEXT-DEEP-RUN-2026-10-05.md](TEXT-DEEP-RUN-2026-10-05.md)): 1 divergence = row **C79** (a Text drawn at
-   Opacity 0, then given Pointer Events Enabled / Mode, catches clicks: `setStyle` patches the DOM, React never re-writes `none`). Model
-   the element's own `pointer-events` beside React's last render; first MEASURE which of the Text's inputs force a render (a frame end
-   renders only on request; an act's paint always does). Then the 47 survivors (families listed in the file), scenarios the runtime also
-   plays, and the 10,000 re-run on both targets. Readings so far: all 9 visuals CONFORM at 200 on seeds 13 and 20730 (0 divergences);
-   the package suite green (878), graph + target suites green (102).
-2. **The 10,000 runs the hit test owes**: the seven re-graded specs ran at 200 only (seeds below). Run each at 10,000 on the runtime
-   (the Text Input's matrix is ~20 min; one at a time, `uptime` first) and the Text at 10,000 on both targets — expect the matrix
-   segments to cross Visible with an act in ways 200 never did.
-3. **NSP-016 AC3, the Text's step (b)** (RESEARCH-DRAG-DROP.md §8): a `move` act (pointer past the slop, over an element the act names)
+1. **The 10,000 runs the hit test owes** (s43 item 2, not done in s44): the seven specs s43 re-graded ran at 200 only. Run each at
+   10,000 on the runtime (Button, Checkbox, Text Input (~20 min), Dropdown, Slider, Radio Button, Radio Button Group), one at a time,
+   `uptime` first: `NSP_DEEP=10000 NSP_ONLY=<type> NSP_REPLAY_DIR=<scratch> npx jest test/node-spec/conformance.test.ts -t deep`
+   in `packages/noodl-runtime`. Expect the matrix segments to cross Visible with an act in ways 200 never did. A divergence: replay
+   the shrunk sequence on both targets (the s44 side-by-side probe, below) before theorising.
+2. **NSP-016 AC3, the Text's step (b)** (RESEARCH-DRAG-DROP.md §8): a `move` act (pointer past the slop, over an element the act names)
    for the mouse lift; file acts `fileEnter` / `fileLeave` / `fileDrop` (plain events with a `dataTransfer` stand-in made from `$file`
    values) for the file drop's own logic (the type filter, the depth count, Files Dropped / Rejected, five values); a Draggable
-   SIBLING on the Text's page (the s42 page pattern) for the zone side — Drag Over, Dropped, Landed, Drop Index 0 (a Text has no slots).
-4. **Then Group** (its children are slots: Drop Index from the keyboard; the s42 page pattern), **then Image and Circle** (the Text with
-   another look). Video waits for media; Columns for NSP-017; Repeater / Component Children / stacks for definitions on the page.
+   SIBLING on the Text's page (the s42 page pattern) for the zone side (Drag Over, Dropped, Landed, Drop Index 0).
+3. **Then Group** (its children are slots: Drop Index from the keyboard; the s42 page pattern), **then Image and Circle** (the Text with
+   another look). **Each carries C79**: copy the Text's v2 model (`domPe` / `renderedPe` / `domOpacityZero` / `renderedOpacity` /
+   `asked`, `synced`, and the ASK list measured on THAT node — rebuild the `forceUpdate` counting probe, it is ~60 lines). Video waits
+   for media; Columns for NSP-017; Repeater / Component Children / stacks for definitions on the page.
 
 **Human decisions outstanding** — rows to ask, in plain words (README §7 has the earlier ones written):
-- **New (s43, drag and drop):** C79 (an invisible Text catches clicks after a Pointer Events write — the setters should ask for a render,
-  not patch the DOM; Group, Image, Circle, Text Input and Video share the rule), C77 (a card picked up with the keyboard stops responding to Tab and Space after it is re-shown —
+- **New (s43, drag and drop):** C79 (an invisible Text catches clicks after a Pointer Events write in any frame after it was drawn
+  invisible — the setters should ask for a render, not patch the DOM; Group, Image, Circle and Video share it — s44 measured the reach), C77 (a card picked up with the keyboard stops responding to Tab and Space after it is re-shown —
   a remount, a new Tag, a late mount; the fix adds the attributes where the node learns its element), C78 (a draggable column that
   also takes drops, moved with the keyboard, drops into itself — leave the source's own zone out, as the pointer does).
 - **New (s42, the radio buttons):** C76 (a group's Value written back in the same frame as a person's pick leaves the picked button
@@ -101,6 +101,9 @@ keyboard keeps it. A Number field's sign / point / exponent mid-entry is not typ
 Slider's `slide` is a keyboard slide (no geometry for a drag); a range input's attributes are read as jsdom reads them (HTML's lenient parse —
 Chromium is strict); a REVERSED range (Max below Min) takes no slide (jsdom's sanitization of it does not settle; HTML clamps no overflow there,
 Chromium raises Max to Min).
+**s44:** an act paints the node first, and in the face that paint is a React RENDER (a browser does not render before an event) — it
+heals a patched `pointer-events` whose computed value moved since React's last render, hiding some C79 sequences, never adding one;
+the element's opacity is stored as jsdom stores it (a number clamped into 0–1; Chromium keeps an out-of-range number as written).
 **s43:** an act's pointer has no position — only a `move` (step (b)) carries one past a slop; a hover or a leave raises no
 `pointermove`; an element that becomes hidden under the pointer raises no leave; a mouse press on non-focusable content does not
 blur the element that holds the keyboard; the click swallow expires at the world's clock (a settle does not turn it), where a
@@ -119,6 +122,14 @@ browser turns its event loop between frames; a finger lifted off an UNMOUNTED el
   same session. The play sinks `console.*` — print with `process.stdout.write`. The runtime's `zz-ti.test.ts` shape (s40): `play(...)` on
   `interpreterAdapter({ resolve: () => Spec })` and on `withViewerNodes(runtimeTarget())`, each with `new World({})`, the two traces printed
   by index with `!!` on a difference — fourteen cases in 3 s. **A jest run that must not include the probes: `--testPathIgnorePatterns 'zz-'`.**
+- **s44's probes** (deleted; rebuild in a minute): `noodl-runtime/test/node-spec/zz-side.test.ts` (s43's, unchanged: every scenario of `NSP_TYPE`
+  or `ZZ_FILE` on both targets, `!!` on a difference, `ZZ_NAME` / `ZZ_PRINT=1` prints agreeing traces — READ them against the names);
+  `zz-fu.test.ts` — wrap `Node.prototype.setInputValue` to wrap each instance's `forceUpdate` once, then for each input of the spec play
+  `settle, set, settle` and count the calls made inside the setter (signals skipped; a throwing setter caught); `nodegx-node-spec/tests/
+  zz-conf.test.ts` (`ZZ_FULL=1` prints the report with each survivor's `↔` sibling); `zz-branches.test.ts` — `discoverBranches(spec)`,
+  play the scenarios and `generateRun(spec, NSP_SEED, 200)` through it, print each branch matching `ZZ_BRANCH` with its recorded example.
+  **A swap hands the twin's RECORDED EXAMPLE: print it before writing the kill scenario, and write the scenario at a value the example
+  does not hold.**
 - **s43's probes** (deleted; rebuild in a minute): `noodl-runtime/test/node-spec/zz-side.test.ts` — every scenario of `NSP_TYPE`
   (or of the JSON file `ZZ_FILE`) on `interpreterAdapter` and on `withViewerNodes(runtimeTarget())`, compact traces, `!!` on a difference;
   `ZZ_NAME` (a name prefix) or `ZZ_PRINT=1` prints the agreeing traces too — READ THEM, a name is graded by nothing. `nodegx-node-spec/

@@ -2037,5 +2037,4767 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "row C79 — drawn at Opacity 0 a press meets nothing; Pointer Events Enabled written on: the element keeps the patched auto and a press is Pointer Down while invisible",
+    "because": "node-shared-port-definitions.ts :787-793 → react-component-node.ts :1886-1890 patches the element; Text.tsx :88-90 writes none only in a render, and React re-writes a style key only when its own value changes",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Pointer Events Mode Explicit on an element drawn at Opacity 0 patches auto: Pointer Down; Inherit removes it (empty, not none): Pointer Down again",
+    "because": "node-shared-port-definitions.ts :772-781 — setStyle / removeStyle; react-component-node.ts :1914-1921 patches '' onto the element",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsMode",
+        "value": "explicit"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "pointerEventsMode",
+        "value": "inherit"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Opacity 0 written later renders none; Enabled written in a LATER frame patches auto over it, and React, having rendered none already, never writes it back: Pointer Down",
+    "because": "react-component-node.ts :1824-1832 — crossing zero asks for a render; :1886-1890 the later write is a patch",
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — the control: Opacity 0 and Enabled in the SAME frame: the frame end's render writes none over the patch — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the render asked for by the opacity comes after the patch",
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Enabled off then on with no render between: React last rendered none, so Opacity 0's render writes nothing over the patched auto — Pointer Down",
+    "because": "Pointer Events writes ask for no render (measured); React compares with its own last render",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Text asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Block Pointer Events asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "blockTouch",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Click Bubbling asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "clickBubbling",
+        "value": "always"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Align X asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "alignX",
+        "value": "center"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Align Y asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "alignY",
+        "value": "center"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Class Name asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "cssClassName",
+        "value": "c"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Height asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "height",
+        "value": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Width asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "width",
+        "value": {
+          "value": 10,
+          "unit": "px"
+        }
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Margin Bottom asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "marginBottom",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Margin Left asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "marginLeft",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Margin Right asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "marginRight",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Margin Top asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "marginTop",
+        "value": 5
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Size Mode asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "sizeMode",
+        "value": "contentWidth"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Text Style asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "textStyle",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Tag (the same element type) asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Mounted written on while it is on asks for nothing (a change asks its parent): Opacity 0's render writes nothing over the patched auto — Pointer Down",
+    "because": "react-component-node.ts :2285 `if (this.wantsToBeMounted !== value)`",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — Position asks for a render: it writes the patched auto as React's own, so Opacity 0's render then writes none — a press meets nothing",
+    "because": "react-component-node.ts :1675-1689 — the setter calls forceUpdate (measured one by one, s44)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "position",
+        "value": "absolute"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a Position written empty asks for nothing: Opacity 0's render writes nothing over the patched auto — Pointer Down",
+    "because": "react-component-node.ts :1861 `newStyles.position ||` — an empty value is falsy",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "position",
+        "value": ""
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — an Opacity the element stores as 0 (-1, clamped) is not crossed by a later 0: no render is asked; Enabled patches auto and the act's paint writes none over it — a press meets nothing",
+    "because": "react-component-node.ts :1824-1832 compares the ELEMENT's opacity, '0' after -1 (the browser clamps; jsdom does); Text.tsx :88-90 compares the style with the number 0",
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ],
+    "params": {
+      "opacity": -1
+    }
+  },
+  {
+    "name": "row C79 — the control: from 0.5 a later 0 crosses and the frame end renders none; Enabled then patches auto, which React never writes back — Pointer Down",
+    "because": "react-component-node.ts :1824-1832, :1675-1689",
+    "params": {
+      "opacity": 0.5
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a hover that meets nothing still renders first: React's own value becomes none, so after Enabled's patch an asked-for render writes nothing — Pointer Down",
+    "because": "adapter.ts `act` — a person acts on a painted page; React compares with its own last render (C79)",
+    "params": {
+      "opacity": -1,
+      "pointerEventsEnabled": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a hover on an element patched to auto renders it first: React's own value becomes auto, so Opacity 0's render writes none — a press meets nothing",
+    "because": "adapter.ts `act`; react-component-node.ts :1824-1832 (C79)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a hover right after Mounted on makes the element (Did Mount at the act): Enabled then patches that element, and the frame end, having rendered none already, writes nothing — Pointer Down",
+    "because": "adapter.ts `act` paints first; react-component-node.ts :1886-1890 (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a hover right after a new Tag makes the new element: Enabled then patches it, and the frame end writes nothing over the patch — Pointer Down",
+    "because": "Text.tsx :50 — React makes a new element for a new type, at the act's paint (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a leave that meets nothing still renders first: React's own value becomes none, so after Enabled's patch an asked-for render writes nothing — Pointer Down",
+    "because": "adapter.ts `act` — a person acts on a painted page; React compares with its own last render (C79)",
+    "params": {
+      "opacity": -1,
+      "pointerEventsEnabled": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a leave on an element patched to auto renders it first: React's own value becomes auto, so Opacity 0's render writes none — a press meets nothing",
+    "because": "adapter.ts `act`; react-component-node.ts :1824-1832 (C79)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a leave right after Mounted on makes the element (Did Mount at the act): Enabled then patches that element, and the frame end, having rendered none already, writes nothing — Pointer Down",
+    "because": "adapter.ts `act` paints first; react-component-node.ts :1886-1890 (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a leave right after a new Tag makes the new element: Enabled then patches it, and the frame end writes nothing over the patch — Pointer Down",
+    "because": "Text.tsx :50 — React makes a new element for a new type, at the act's paint (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a press that meets nothing still renders first: React's own value becomes none, so after Enabled's patch an asked-for render writes nothing — Pointer Down",
+    "because": "adapter.ts `act` — a person acts on a painted page; React compares with its own last render (C79)",
+    "params": {
+      "opacity": -1,
+      "pointerEventsEnabled": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a press on an element patched to auto renders it first: React's own value becomes auto, so Opacity 0's render writes none — a press meets nothing",
+    "because": "adapter.ts `act`; react-component-node.ts :1824-1832 (C79)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a press right after Mounted on makes the element (Did Mount at the act): Enabled then patches that element, and the frame end, having rendered none already, writes nothing — Pointer Down",
+    "because": "adapter.ts `act` paints first; react-component-node.ts :1886-1890 (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a press right after a new Tag makes the new element: Enabled then patches it, and the frame end writes nothing over the patch — Pointer Down",
+    "because": "Text.tsx :50 — React makes a new element for a new type, at the act's paint (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a release that meets nothing still renders first: React's own value becomes none, so after Enabled's patch an asked-for render writes nothing — Pointer Down",
+    "because": "adapter.ts `act` — a person acts on a painted page; React compares with its own last render (C79)",
+    "params": {
+      "opacity": -1,
+      "pointerEventsEnabled": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a release on an element patched to auto renders it first: React's own value becomes auto, so Opacity 0's render writes none — a press meets nothing",
+    "because": "adapter.ts `act`; react-component-node.ts :1824-1832 (C79)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a release right after Mounted on makes the element (Did Mount at the act): Enabled then patches that element, and the frame end, having rendered none already, writes nothing — Pointer Down",
+    "because": "adapter.ts `act` paints first; react-component-node.ts :1886-1890 (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a release right after a new Tag makes the new element: Enabled then patches it, and the frame end writes nothing over the patch — Pointer Down",
+    "because": "Text.tsx :50 — React makes a new element for a new type, at the act's paint (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a click that meets nothing still renders first: React's own value becomes none, so after Enabled's patch an asked-for render writes nothing — Pointer Down",
+    "because": "adapter.ts `act` — a person acts on a painted page; React compares with its own last render (C79)",
+    "params": {
+      "opacity": -1,
+      "pointerEventsEnabled": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a click on an element patched to auto renders it first: React's own value becomes auto, so Opacity 0's render writes none — a press meets nothing",
+    "because": "adapter.ts `act`; react-component-node.ts :1824-1832 (C79)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a click right after Mounted on makes the element (Did Mount at the act): Enabled then patches that element, and the frame end, having rendered none already, writes nothing — Pointer Down",
+    "because": "adapter.ts `act` paints first; react-component-node.ts :1886-1890 (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a click right after a new Tag makes the new element: Enabled then patches it, and the frame end writes nothing over the patch — Pointer Down",
+    "because": "Text.tsx :50 — React makes a new element for a new type, at the act's paint (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a touch that meets nothing still renders first: React's own value becomes none, so after Enabled's patch an asked-for render writes nothing — Pointer Down",
+    "because": "adapter.ts `act` — a person acts on a painted page; React compares with its own last render (C79)",
+    "params": {
+      "opacity": -1,
+      "pointerEventsEnabled": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a touch on an element patched to auto renders it first: React's own value becomes auto, so Opacity 0's render writes none — a press meets nothing",
+    "because": "adapter.ts `act`; react-component-node.ts :1824-1832 (C79)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a touch right after Mounted on makes the element (Did Mount at the act): Enabled then patches that element, and the frame end, having rendered none already, writes nothing — Pointer Down",
+    "because": "adapter.ts `act` paints first; react-component-node.ts :1886-1890 (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a touch right after a new Tag makes the new element: Enabled then patches it, and the frame end writes nothing over the patch — Pointer Down",
+    "because": "Text.tsx :50 — React makes a new element for a new type, at the act's paint (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a lift that meets nothing still renders first: React's own value becomes none, so after Enabled's patch an asked-for render writes nothing — Pointer Down",
+    "because": "adapter.ts `act` — a person acts on a painted page; React compares with its own last render (C79)",
+    "params": {
+      "opacity": -1,
+      "pointerEventsEnabled": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a lift on an element patched to auto renders it first: React's own value becomes auto, so Opacity 0's render writes none — a press meets nothing",
+    "because": "adapter.ts `act`; react-component-node.ts :1824-1832 (C79)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a lift right after Mounted on makes the element (Did Mount at the act): Enabled then patches that element, and the frame end, having rendered none already, writes nothing — Pointer Down",
+    "because": "adapter.ts `act` paints first; react-component-node.ts :1886-1890 (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a lift right after a new Tag makes the new element: Enabled then patches it, and the frame end writes nothing over the patch — Pointer Down",
+    "because": "Text.tsx :50 — React makes a new element for a new type, at the act's paint (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a focus that meets nothing still renders first: React's own value becomes none, so after Enabled's patch an asked-for render writes nothing — Pointer Down",
+    "because": "adapter.ts `act` — a person acts on a painted page; React compares with its own last render (C79)",
+    "params": {
+      "opacity": -1,
+      "pointerEventsEnabled": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a focus on an element patched to auto renders it first: React's own value becomes auto, so Opacity 0's render writes none — a press meets nothing",
+    "because": "adapter.ts `act`; react-component-node.ts :1824-1832 (C79)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a focus right after Mounted on makes the element (Did Mount at the act): Enabled then patches that element, and the frame end, having rendered none already, writes nothing — Pointer Down",
+    "because": "adapter.ts `act` paints first; react-component-node.ts :1886-1890 (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a focus right after a new Tag makes the new element: Enabled then patches it, and the frame end writes nothing over the patch — Pointer Down",
+    "because": "Text.tsx :50 — React makes a new element for a new type, at the act's paint (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a blur that meets nothing still renders first: React's own value becomes none, so after Enabled's patch an asked-for render writes nothing — Pointer Down",
+    "because": "adapter.ts `act` — a person acts on a painted page; React compares with its own last render (C79)",
+    "params": {
+      "opacity": -1,
+      "pointerEventsEnabled": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a blur on an element patched to auto renders it first: React's own value becomes auto, so Opacity 0's render writes none — a press meets nothing",
+    "because": "adapter.ts `act`; react-component-node.ts :1824-1832 (C79)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a blur right after Mounted on makes the element (Did Mount at the act): Enabled then patches that element, and the frame end, having rendered none already, writes nothing — Pointer Down",
+    "because": "adapter.ts `act` paints first; react-component-node.ts :1886-1890 (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a blur right after a new Tag makes the new element: Enabled then patches it, and the frame end writes nothing over the patch — Pointer Down",
+    "because": "Text.tsx :50 — React makes a new element for a new type, at the act's paint (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a Space that meets nothing still renders first: React's own value becomes none, so after Enabled's patch an asked-for render writes nothing — Pointer Down",
+    "because": "adapter.ts `act` — a person acts on a painted page; React compares with its own last render (C79)",
+    "params": {
+      "opacity": -1,
+      "pointerEventsEnabled": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a Space on an element patched to auto renders it first: React's own value becomes auto, so Opacity 0's render writes none — a press meets nothing",
+    "because": "adapter.ts `act`; react-component-node.ts :1824-1832 (C79)",
+    "params": {
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a Space right after Mounted on makes the element (Did Mount at the act): Enabled then patches that element, and the frame end, having rendered none already, writes nothing — Pointer Down",
+    "because": "adapter.ts `act` paints first; react-component-node.ts :1886-1890 (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a Space right after a new Tag makes the new element: Enabled then patches it, and the frame end writes nothing over the patch — Pointer Down",
+    "because": "Text.tsx :50 — React makes a new element for a new type, at the act's paint (C79)",
+    "params": {
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable on its element, then off the page: a frame end with a render asked while it is off spends no frame start of the chain (there is none) — remounted, Space raises nothing",
+    "because": "drag-drop.ts :87-100 — the attributes stayed on the element that left; no chain was started",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — placed unmounted with Draggable, mounted, and unmounted at the next frame: the chain's frame start finds the element before it leaves, so the remounted one has no tabindex — Space raises nothing",
+    "because": "drag-drop.ts :136-145 — the frame start comes before the frame end's unmount",
+    "params": {
+      "draggable": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable written while off the page starts the chain: the SECOND element, mounted later, takes the tabindex at the next frame start — Space lifts it",
+    "because": "drag-drop.ts :136-145 `whenMounted`",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a render asked in the frame the chain finds the element: Enabled's patched auto becomes React's own, so Opacity 0's render writes none — a press meets nothing",
+    "because": "drag-drop.ts :136-145 and react-component-node.ts :1675-1689 in one frame",
+    "params": {
+      "draggable": true,
+      "mounted": false,
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — five remounts in a row: none of the new elements has a tabindex — Space raises nothing each time",
+    "because": "drag-drop.ts :87-100 — the attributes were put on the first element only",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a render asked in the frame the chain finds the element is done there: Enabled's patch in the NEXT frame is asked for nothing, so Opacity 0's render writes nothing over it — Pointer Down",
+    "because": "react-component-node.ts :1675-1689 — a request is spent at the frame end it was made for",
+    "params": {
+      "draggable": true,
+      "mounted": false,
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "text",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a hover right after a new Tag meets the new element: Draggable written after it in the same frame puts the tabindex there — Space lifts",
+    "because": "adapter.ts `act` paints first (Text.tsx :50, a new element); drag-drop.ts :87-100 on the element that is there",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a hover right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a hover right after a new Tag meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "drag-drop.ts :87-100 — Draggable on, written again, adds the attributes to the element that is there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a leave right after a new Tag meets the new element: Draggable written after it in the same frame puts the tabindex there — Space lifts",
+    "because": "adapter.ts `act` paints first (Text.tsx :50, a new element); drag-drop.ts :87-100 on the element that is there",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a leave right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a leave right after a new Tag meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "drag-drop.ts :87-100 — Draggable on, written again, adds the attributes to the element that is there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a press right after a new Tag meets the new element: Draggable written after it in the same frame puts the tabindex there — Space lifts",
+    "because": "adapter.ts `act` paints first (Text.tsx :50, a new element); drag-drop.ts :87-100 on the element that is there",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a press right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a press right after a new Tag meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "drag-drop.ts :87-100 — Draggable on, written again, adds the attributes to the element that is there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a release right after a new Tag meets the new element: Draggable written after it in the same frame puts the tabindex there — Space lifts",
+    "because": "adapter.ts `act` paints first (Text.tsx :50, a new element); drag-drop.ts :87-100 on the element that is there",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a release right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a release right after a new Tag meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "drag-drop.ts :87-100 — Draggable on, written again, adds the attributes to the element that is there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a click right after a new Tag meets the new element: Draggable written after it in the same frame puts the tabindex there — Space lifts",
+    "because": "adapter.ts `act` paints first (Text.tsx :50, a new element); drag-drop.ts :87-100 on the element that is there",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a click right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a click right after a new Tag meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "drag-drop.ts :87-100 — Draggable on, written again, adds the attributes to the element that is there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a touch right after a new Tag meets the new element: Draggable written after it in the same frame puts the tabindex there — Space lifts",
+    "because": "adapter.ts `act` paints first (Text.tsx :50, a new element); drag-drop.ts :87-100 on the element that is there",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a touch right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a touch right after a new Tag meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "drag-drop.ts :87-100 — Draggable on, written again, adds the attributes to the element that is there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a lift right after a new Tag meets the new element: Draggable written after it in the same frame puts the tabindex there — Space lifts",
+    "because": "adapter.ts `act` paints first (Text.tsx :50, a new element); drag-drop.ts :87-100 on the element that is there",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a lift right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a lift right after a new Tag meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "drag-drop.ts :87-100 — Draggable on, written again, adds the attributes to the element that is there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a focus right after a new Tag meets the new element: Draggable written after it in the same frame puts the tabindex there — Space lifts",
+    "because": "adapter.ts `act` paints first (Text.tsx :50, a new element); drag-drop.ts :87-100 on the element that is there",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a focus right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a focus right after a new Tag meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "drag-drop.ts :87-100 — Draggable on, written again, adds the attributes to the element that is there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a blur right after a new Tag meets the new element: Draggable written after it in the same frame puts the tabindex there — Space lifts",
+    "because": "adapter.ts `act` paints first (Text.tsx :50, a new element); drag-drop.ts :87-100 on the element that is there",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a blur right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a blur right after a new Tag meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "drag-drop.ts :87-100 — Draggable on, written again, adds the attributes to the element that is there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a key right after a new Tag meets the new element: Draggable written after it in the same frame puts the tabindex there — Space lifts",
+    "because": "adapter.ts `act` paints first (Text.tsx :50, a new element); drag-drop.ts :87-100 on the element that is there",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a key right after Mounted on makes the element: Draggable written after it in the same frame puts the tabindex on it at once — Space lifts before the next frame start",
+    "because": "adapter.ts `act` paints first; drag-drop.ts :87-100 (an element is there, so no chain)",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a key right after a new Tag meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "drag-drop.ts :87-100 — Draggable on, written again, adds the attributes to the element that is there",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — a keyboard drag, the keyboard taken away, then Escape: the key puts the keyboard back on the element and cancels; hidden, Space still lifts again (it holds the keyboard)",
+    "because": "drag-drop.ts :768-839; a hidden element keeps the keyboard it holds (the face's written choice)",
+    "params": {
+      "draggable": true,
+      "dragValue": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — the same over its own zone: Escape after a blur takes the keyboard back, leaves the zone (Drag Over false) and cancels; hidden, Space lifts into the zone again",
+    "because": "drag-drop.ts :768-839, :862-866",
+    "params": {
+      "draggable": true,
+      "acceptDrops": true,
+      "dragValue": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — a keyboard drag, the keyboard taken away, then Tab: the key puts the keyboard back on the element and cancels; hidden, Space still lifts again (it holds the keyboard)",
+    "because": "drag-drop.ts :768-839; a hidden element keeps the keyboard it holds (the face's written choice)",
+    "params": {
+      "draggable": true,
+      "dragValue": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "key",
+        "value": "Tab"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — the same over its own zone: Tab after a blur takes the keyboard back, leaves the zone (Drag Over false) and cancels; hidden, Space lifts into the zone again",
+    "because": "drag-drop.ts :768-839, :862-866",
+    "params": {
+      "draggable": true,
+      "acceptDrops": true,
+      "dragValue": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "key",
+        "value": "Tab"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — Space after a blur takes the keyboard back and lifts into its own zone; hidden, Escape cancels and Space lifts again",
+    "because": "drag-drop.ts :841-878",
+    "params": {
+      "draggable": true,
+      "acceptDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a press right after a new Tag starts no gesture (not Draggable): Draggable written after it puts the tabindex on the new element — Space lifts at once",
+    "because": "drag-drop.ts :232-271 (no gesture on an element that is not Draggable); :87-100",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a press right after Mounted on starts no gesture (not Draggable): Draggable written after it puts the tabindex on the new element — Space lifts at once",
+    "because": "drag-drop.ts :232-271; :87-100",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a press on an element that is not Draggable leaves the element as it is: Draggable written after it puts the tabindex there — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — a keyboard drag, then a new Tag and a press: the press starts no gesture (one is under way), and Escape cancels the keyboard drag",
+    "because": "drag-drop.ts :232-271 `if (gesture) return`; :768-839",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a touch right after a new Tag starts no gesture (not Draggable): Draggable written after it puts the tabindex on the new element — Space lifts at once",
+    "because": "drag-drop.ts :232-271 (no gesture on an element that is not Draggable); :87-100",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a touch right after Mounted on starts no gesture (not Draggable): Draggable written after it puts the tabindex on the new element — Space lifts at once",
+    "because": "drag-drop.ts :232-271; :87-100",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a touch on an element that is not Draggable leaves the element as it is: Draggable written after it puts the tabindex there — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — a keyboard drag, then a new Tag and a touch: the press starts no gesture (one is under way), and Escape cancels the keyboard drag",
+    "because": "drag-drop.ts :232-271 `if (gesture) return`; :768-839",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a click right after a new Tag starts no gesture (not Draggable): Draggable written after it puts the tabindex on the new element — Space lifts at once",
+    "because": "drag-drop.ts :232-271 (no gesture on an element that is not Draggable); :87-100",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a click right after Mounted on starts no gesture (not Draggable): Draggable written after it puts the tabindex on the new element — Space lifts at once",
+    "because": "drag-drop.ts :232-271; :87-100",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a click on an element that is not Draggable leaves the element as it is: Draggable written after it puts the tabindex there — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — a keyboard drag, then a new Tag and a click: the press starts no gesture (one is under way), and Escape cancels the keyboard drag",
+    "because": "drag-drop.ts :232-271 `if (gesture) return`; :768-839",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Hold To Drag always: a press right after a new Tag holds the new element; the hold timer lifts it",
+    "because": "drag-drop.ts :173-183, :267-269",
+    "params": {
+      "draggable": true,
+      "holdToDrag": "always"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Hold To Drag always: a press right after Mounted on holds the new element; the hold timer lifts it",
+    "because": "drag-drop.ts :173-183, :267-269",
+    "params": {
+      "draggable": true,
+      "holdToDrag": "always"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Hold To Drag always: a touch right after a new Tag holds the new element; the hold timer lifts it",
+    "because": "drag-drop.ts :173-183, :267-269",
+    "params": {
+      "draggable": true,
+      "holdToDrag": "always"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Hold To Drag always: a touch right after Mounted on holds the new element; the hold timer lifts it",
+    "because": "drag-drop.ts :173-183, :267-269",
+    "params": {
+      "draggable": true,
+      "holdToDrag": "always"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a click starts and ends a pending gesture on the element as it is; Space lifts it",
+    "because": "drag-drop.ts :232-271, :308-323",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — during a keyboard drag a press takes the keyboard back (no gesture: one is under way); hidden, Escape cancels, and Space lifts again — it holds the keyboard",
+    "because": "drag-drop.ts :232-271; a hidden element keeps the keyboard it holds (the face's written choice)",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — a keyboard drag, the keyboard taken away and the element hidden: Escape cancels without taking the keyboard back, so Space raises nothing",
+    "because": "drag-drop.ts :768-839 — the key reaches the document; a hidden element takes no keyboard",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — a keyboard drag over its own zone, the keyboard taken away and the element hidden: Escape cancels without taking the keyboard back, so Space raises nothing",
+    "because": "drag-drop.ts :768-839 — the key reaches the document; a hidden element takes no keyboard",
+    "params": {
+      "draggable": true,
+      "acceptDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — placed unmounted with Draggable: the frame that finds the element ALSO replaces it (a new Tag) — the attributes go on the one leaving, Space raises nothing even settles later",
+    "because": "drag-drop.ts :136-145 at the frame start, then the paint makes a new element",
+    "params": {
+      "draggable": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      "settle",
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the same frame, then Draggable written again: the tabindex goes on the new element — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "params": {
+      "draggable": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable, holding the keyboard: a click starts and ends a pending gesture on the element as it is, which keeps the keyboard — Space lifts",
+    "because": "drag-drop.ts :232-271, :308-323; the element is not replaced",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a hover on an element that is not Draggable leaves the element as it is: Draggable written after it puts the tabindex there — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "steps": [
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a leave on an element that is not Draggable leaves the element as it is: Draggable written after it puts the tabindex there — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "steps": [
+      "settle",
+      {
+        "act": "leave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a release on an element that is not Draggable leaves the element as it is: Draggable written after it puts the tabindex there — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "steps": [
+      "settle",
+      {
+        "act": "release"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a lift on an element that is not Draggable leaves the element as it is: Draggable written after it puts the tabindex there — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "steps": [
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a focus on an element that is not Draggable leaves the element as it is: Draggable written after it puts the tabindex there — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a blur on an element that is not Draggable leaves the element as it is: Draggable written after it puts the tabindex there — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "steps": [
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a key on an element that is not Draggable leaves the element as it is: Draggable written after it puts the tabindex there — Space lifts",
+    "because": "drag-drop.ts :87-100",
+    "steps": [
+      "settle",
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a hover right after Tag h1 meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87-100",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a leave right after Tag h1 meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87-100",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a press right after Tag h1 meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87-100",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a release right after Tag h1 meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87-100",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a click right after Tag h1 meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87-100",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a touch right after Tag h1 meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87-100",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a lift right after Tag h1 meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87-100",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a focus right after Tag h1 meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87-100",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a blur right after Tag h1 meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87-100",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Draggable: a key right after Tag h1 meets the new element; Draggable written again puts the tabindex there — after the gesture ends, Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87-100",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Font Family wired a number: the interpreter stores it and nothing moves on the wire — the runtime's setter throws calling `.split` on it",
+    "because": "node-shared-port-definitions.ts :2437-2442 `family.split('.')` on whatever arrived; every node with a text style — NSP-016 §7.2 row C61",
+    "row": "NSP-016 §6 C61",
+    "steps": [
+      "settle",
+      {
+        "set": "fontFamily",
+        "value": 12
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Margin Top wired null: the interpreter stores it and nothing moves on the wire — the runtime's generated setter reads `.value` of null and throws",
+    "because": "react-component-node.ts the `inputCss` units setter (`typeof value !== 'object'` lets null through, then `value.value`); every node with margins — NSP-016 §7.2 row C62",
+    "row": "NSP-016 §6 C62",
+    "steps": [
+      "settle",
+      {
+        "set": "marginTop",
+        "value": null
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Pos X wired undefined: the interpreter stores it and nothing moves on the wire — the runtime's setter reads `.value` of undefined and throws",
+    "because": "node-shared-port-definitions.ts the Placement setters read `value.value`; every node with Placement inputs — NSP-016 §7.2 row C63",
+    "row": "NSP-016 §6 C63",
+    "steps": [
+      "settle",
+      {
+        "set": "transformX"
+      },
+      "settle"
+    ]
   }
 ]

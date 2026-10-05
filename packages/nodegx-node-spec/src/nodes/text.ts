@@ -19,6 +19,19 @@
  *     Events Enabled off (:784-793; Pointer Events Mode `inherit` removes the style again, :772-781, any other value writes it
  *     from the last Enabled, `auto` when never written) leave the act to what is behind it. **Block Pointer Events** and **Click
  *     Bubbling** change what reaches the nodes AROUND it (pointerlisteners.ts) — nothing its own outputs show.
+ *     **The hit test reads the ELEMENT, and two writers set its `pointer-events`** (row **C79**): the two Pointer Events
+ *     inputs patch it straight onto the element on the page (`setStyle` / `removeStyle`, react-component-node.ts :1886-1890,
+ *     :1914-1921), and a RENDER writes `none` at Opacity exactly 0, else the style's value — but React writes a style key only
+ *     when ITS OWN rendered value changes (an element it makes takes the whole style). So an element drawn at Opacity 0 and
+ *     then given Pointer Events Enabled or Mode keeps the patched `auto` and catches clicks while invisible. **A render is
+ *     asked for** (`forceUpdate`, done at the frame's end :1675-1689): by Text, Tag, Class Name, Data Attributes, Text Style,
+ *     Width, Height, the four margins, Size Mode, Align X / Y, Block Pointer Events, Click Bubbling (their setters, measured
+ *     one by one), by a Mounted that changes (its parent's render, :2283-2294), by a Position that is set (:1861), by an Opacity write that
+ *     crosses zero against the ELEMENT's opacity (:1824-1832 — then the element is not patched), and at the first frame end
+ *     (every wired output-prop handler asks, :563; the target wires them all). Any other Opacity write is patched onto the
+ *     element as the browser stores it (jsdom clamps a number into 0–1 and keeps the old value for one it cannot read — a face
+ *     choice: Chromium keeps an out-of-range number as written). An act paints the node first (adapter.ts `act`), which is a
+ *     render too.
  *   - **the keyboard**: a `<div>` takes none — until **Draggable** gives its ELEMENT `tabindex="0"` (drag-drop.ts :83-110):
  *     at once when the node has an element, else at the start of each of the next 60 frames until it has one (`whenMounted`
  *     :136-145; a settle is TWO frame starts here — its frame and its drain — and both come before the settle's paint commits). An element React makes later (a remount, a new Tag) has none: row **C77**. Draggable off takes them off
@@ -63,9 +76,18 @@ type State = {
   elementFocused: boolean;
   /** the hit test (Text.tsx :88-90, :366-375, :772-793) */
   visible: boolean;
-  opacityZero: boolean;
+  /** the style's opacity as written (:320-328, default 1; `undefined` when removed) — Text.tsx :88-90 compares it with the number 0 */
+  opacity: unknown;
   /** the style's `pointerEvents` as the two Pointer Events inputs left it — `undefined` when removed */
   peStyle: 'auto' | 'none' | undefined;
+  /** C79 — the element's OWN `pointer-events` (what the hit test reads), and what React last rendered there */
+  domPe: 'auto' | 'none' | undefined;
+  renderedPe: 'auto' | 'none' | undefined;
+  /** the element's `style.opacity` reads `'0'` (what :1824-1832 compares with), and the opacity React last rendered */
+  domOpacityZero: boolean;
+  renderedOpacity: unknown;
+  /** a render is asked for: the frame's end does it (`forceUpdate`, :1675-1689) */
+  asked: boolean;
   /** `_internal.pointerEventsEnabled` — `undefined` until written */
   peEnabled: boolean | undefined;
   /** the drag inputs (`_internal`) */
@@ -97,6 +119,7 @@ type Val = 'isLifted' | 'isDropTarget' | 'droppedValue' | 'dropIndex';
 type Act = { set: Partial<State>; send: Val[]; emit: Pulse[]; after?: Array<{ ms: unknown; tag: string }>; cancel?: string[] };
 
 const NOTHING: Send = { send: [] };
+const ASK: Send = { set: { asked: true }, send: [] };
 const NONE: Act = { set: {}, send: [], emit: [] };
 /** drag-drop.ts :136 — `whenMounted`'s budget */
 const FRAMES = 60;
@@ -104,11 +127,16 @@ const KEYS = [' ', 'Enter', 'Escape', 'Tab', 'ArrowRight', 'ArrowDown', 'x'] as 
 
 export const Text = defineNode({
   type: 'Text',
-  version: 1,
+  // v2 (NSP-016 s44): the hit test reads the element's own `pointer-events` (row C79) — a Pointer Events write patches the
+  // element, a render writes Text.tsx :88-90's value only when React's own changes, and a frame end renders only when asked.
+  // v1 read the style (an element at Opacity 0 never took a pointer) and rendered at every frame end.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/visual/text.ts',
   needs: ['person', 'clock'],
   // the hold timer: the default half second, either side of it, a second (Hold Time 1), and the turn that unswallows a click
   worldPool: { advances: [0, 1, 499, 500, 1000] },
+  // the page's syncs (spec.ts `synced`): not branches — what a render writes on the element (C79), at every paint an act makes
+  synced: ['domPe', 'renderedPe', 'domOpacityZero', 'renderedOpacity'],
 
   state: {
     mounted: true,
@@ -120,8 +148,13 @@ export const Text = defineNode({
     chain: 0,
     elementFocused: false,
     visible: true,
-    opacityZero: false,
+    opacity: 1,
     peStyle: undefined,
+    domPe: undefined,
+    renderedPe: undefined,
+    domOpacityZero: false,
+    renderedOpacity: undefined,
+    asked: false,
     peEnabled: undefined,
     draggable: false,
     dragValue: undefined,
@@ -267,20 +300,53 @@ export const Text = defineNode({
   }
 }).on(
   {
-    // react-component-node.ts :2310-2320 — what the node wants; the page follows at the next paint
-    mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
+    // react-component-node.ts :2283-2294 — what the node wants; the page follows at the next paint. A change asks its parent for a
+    // render, which renders this node too; the same value asks nothing
+    mounted: (s, v) => (!!v !== s.mounted ? { set: { mounted: !!v, asked: true }, send: [] } : NOTHING),
+    // the setters measured to ask for a render (C79 above): a prop each, nothing on the wire
+    text: () => ASK,
+    blockTouch: () => ASK,
+    clickBubbling: () => ASK,
+    alignX: () => ASK,
+    alignY: () => ASK,
+    cssClassName: () => ASK,
+    // (Data Attributes asks too, but it is edit-only: a parameter, set before the element exists — nothing a render could show)
+    height: () => ASK,
+    width: () => ASK,
+    marginBottom: () => ASK,
+    marginLeft: () => ASK,
+    marginRight: () => ASK,
+    marginTop: () => ASK,
+    sizeMode: () => ASK,
+    textStyle: () => ASK,
+    // :1861 — a Position that is set asks, on an element that is there (:1820); `undefined` removes it (:1893-1910)
+    position: (s, v) => (s.onPage && v ? ASK : NOTHING),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
     scrollIntoView: () => NOTHING,
     // Text.tsx :50 — the element type the next paint renders
-    as: (_s, v) => ({ set: { tag: v || 'div' }, send: [] }),
+    as: (_s, v) => ({ set: { tag: v || 'div', asked: true }, send: [] }),
     // :366-375
     visible: (_s, v) => ({ set: { visible: !!v }, send: [] }),
-    // :320-328 — the style holds the value as written; Text.tsx :88-90 compares it with the number 0
-    opacity: (_s, v) => ({ set: { opacityZero: v === 0 }, send: [] }),
-    // :772-781 — `inherit` removes the style; anything else writes it from the last Enabled (`auto` before one)
-    pointerEventsMode: (s, v) => ({ set: { peStyle: v === 'inherit' ? undefined : s.peEnabled === false ? 'none' : 'auto' }, send: [] }),
-    // :787-793 — written whatever the mode
-    pointerEventsEnabled: (_s, v) => ({ set: { peEnabled: !!v, peStyle: v ? 'auto' : 'none' }, send: [] }),
+    // :320-328 / :2383-2392 — the style holds the value as written (`undefined` removes it: the element's opacity emptied). On an
+    // element that is there (:1820), a write crossing zero against the ELEMENT's opacity asks for a render and is not patched
+    // (:1824-1832, :1886-1890 — `> 0` is JavaScript's); any other is patched onto the element as the browser stores it
+    opacity: (s, v) => {
+      if (!s.onPage) return { set: { opacity: v }, send: [] };
+      if (v === undefined) return { set: { opacity: v, domOpacityZero: false }, send: [] };
+      const crosses = (s.domOpacityZero && (v as number) > 0) || (!s.domOpacityZero && v === 0);
+      return crosses ? { set: { opacity: v, asked: true }, send: [] } : { set: { opacity: v, domOpacityZero: storedOpacityZero(v, s.domOpacityZero) }, send: [] };
+    },
+    // :772-781 — `inherit` removes the style; anything else writes it from the last Enabled (`auto` before one) — patched onto the
+    // element that is there (C79)
+    pointerEventsMode: (s, v) => {
+      const peStyle = v === 'inherit' ? undefined : s.peEnabled === false ? 'none' : 'auto';
+      return { set: { peStyle, ...(s.onPage ? { domPe: peStyle } : {}) }, send: [] };
+    },
+    // :787-793 — written whatever the mode, and patched onto the element that is there (C79)
+    pointerEventsEnabled: (s, v) => {
+      const peStyle = v ? 'auto' : 'none';
+      return { set: { peEnabled: !!v, peStyle, ...(s.onPage ? { domPe: peStyle } : {}) }, send: [] };
+    },
     // drag-drop.ts :83-110 — on: the attributes on the element now, or at the start of each of the next 60 frames; off: taken
     // off the element they were added to, when it is the one on the page
     draggable: (s, v) => {
@@ -301,8 +367,12 @@ export const Text = defineNode({
   },
   {
     world: {
-      // placed on the page with its params set — the first render: Did Mount, unless a Mounted parameter said no
-      place: (s) => ({ ...painted(s), send: [] }),
+      // placed on the page with its params set — the first render: Did Mount, unless a Mounted parameter said no. The first frame
+      // end renders again: every wired output-prop handler asks (react-component-node.ts :563) — of an element that is there
+      place: (s) => {
+        const p = painted(s);
+        return { set: { ...p.set, ...(s.mounted ? { asked: true } : {}) }, emit: p.emit, send: [] };
+      },
       // drag-drop.ts :267-269 — the hold timer lifts a gesture still held; :920-927 — the turn that unswallows a click
       timer: (s, _i, tag) => {
         if (tag === 'unswallow') return { set: { swallow: false }, send: [] };
@@ -310,15 +380,16 @@ export const Text = defineNode({
         return NOTHING;
       }
     },
-    // every frame's end is a paint (react-component-node.ts :1675-1689). `whenMounted` checks at each frame START — two in a
-    // settle of the runtime target (its frame and its drain), and both before the paint: the frame end's render commits when
-    // the settle's React `act` closes, after the drain (measured: an element mounted by a Mounted write is found at the NEXT
-    // settle's first frame start)
+    // a frame's end renders when a render was asked for (react-component-node.ts :1675-1689; C79 above). `whenMounted` checks at
+    // each frame START — two in a settle of the runtime target (its frame and its drain), and both before the paint: the frame
+    // end's render commits when the settle's React `act` closes, after the drain (measured: an element mounted by a Mounted write
+    // is found at the NEXT settle's first frame start)
     afterInputs: (s) => {
       const a = chainCheck(s);
       const b = chainCheck({ ...s, ...a });
+      if (!s.asked) return { set: { ...a, ...b }, send: [] };
       const p = painted({ ...s, ...a, ...b });
-      return { set: { ...a, ...b, ...p.set }, send: [], emit: p.emit };
+      return { set: { ...a, ...b, ...p.set, asked: false }, send: [], emit: p.emit };
     },
     // a person acts on a PAINTED page (adapter.ts `act`): the page follows first, then the act meets what is there
     person: {
@@ -376,9 +447,9 @@ function join(a: Act, b: Act): Act {
   };
 }
 
-/** The element is under the pointer: on the page, not hidden, not `pointer-events: none` (Text.tsx :88-90 beats the style). */
+/** The element is under the pointer: on the page, not hidden, its own `pointer-events` not `none` (C79 — the element's, not the style's). */
 function hits(s: Readonly<State>): boolean {
-  return s.onPage && s.visible && !s.opacityZero && s.peStyle !== 'none';
+  return s.onPage && s.visible && s.domPe !== 'none';
 }
 
 /** `el.focus()` — the element takes the keyboard when it has the module's tabindex and can be seen; it keeps it once it has it. */
@@ -392,10 +463,51 @@ function takesKeyboard(s: Readonly<State>): Partial<State> {
  * that renders another type (`shownTag`) — with no attributes on it and not holding the keyboard.
  */
 function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[] } {
-  if (s.mounted && !s.onPage) return { set: { onPage: true, elem: s.elem + 1, shownTag: s.tag, elementFocused: false }, emit: ['didMount'] };
+  if (s.mounted && !s.onPage) return { set: { onPage: true, elem: s.elem + 1, shownTag: s.tag, elementFocused: false, ...made(s) }, emit: ['didMount'] };
   if (!s.mounted && s.onPage) return { set: { onPage: false, elementFocused: false }, emit: ['willUnmount'] };
-  if (s.onPage && s.tag !== s.shownTag) return { set: { elem: s.elem + 1, shownTag: s.tag, elementFocused: false }, emit: [] };
-  return { set: {}, emit: [] };
+  if (s.onPage && s.tag !== s.shownTag) return { set: { elem: s.elem + 1, shownTag: s.tag, elementFocused: false, ...made(s) }, emit: [] };
+  return { set: s.onPage ? rendered(s) : {}, emit: [] };
+}
+
+/** Text.tsx :88-90 — the `pointer-events` a render gives the element: `none` at Opacity exactly the number 0, else the style's. */
+function renderPe(s: Readonly<State>): State['peStyle'] {
+  return s.opacity === 0 ? 'none' : s.peStyle;
+}
+
+/** C79 — an element React makes takes the whole style. */
+function made(s: Readonly<State>): Partial<State> {
+  const pe = renderPe(s);
+  return { domPe: pe, renderedPe: pe, domOpacityZero: renderedOpacityZero(s.opacity, false), renderedOpacity: s.opacity };
+}
+
+/** C79 — a render of the element that is there: React writes a style key only when its own rendered value changed (`!==`). */
+function rendered(s: Readonly<State>): Partial<State> {
+  const pe = renderPe(s);
+  return {
+    ...(pe !== s.renderedPe ? { domPe: pe, renderedPe: pe } : {}),
+    ...(s.opacity !== s.renderedOpacity ? { domOpacityZero: renderedOpacityZero(s.opacity, s.domOpacityZero), renderedOpacity: s.opacity } : {})
+  };
+}
+
+/** A CSS number as the browser reads one (jsdom's `parseNumber`) — anything else is not a number. */
+const CSS_NUMBER = /^[+-]?(\d+(\.\d*)?|\.\d+)(e[+-]?\d+)?$/i;
+
+/** The element's opacity reads `'0'` after `element.style.opacity = v` (:1103-1105): a number it stores clamped into 0–1, `null` / '' / an empty list clear it, anything it cannot read leaves it as it was. */
+function storedOpacityZero(v: unknown, was: boolean): boolean {
+  if (v === null) return false;
+  if (typeof v === 'number') return Number.isFinite(v) ? v <= 0 : was;
+  if (typeof v === 'string' || Array.isArray(v)) {
+    const text = String(v);
+    if (text === '') return false;
+    return CSS_NUMBER.test(text) ? parseFloat(text) <= 0 : was;
+  }
+  return was;
+}
+
+/** The same when React writes it (react-dom's style value): `null`, `undefined`, a boolean or '' clear it; anything else as its trimmed text. */
+function renderedOpacityZero(v: unknown, was: boolean): boolean {
+  if (v === null || v === undefined || typeof v === 'boolean' || v === '') return false;
+  return storedOpacityZero(String(v).trim(), was);
 }
 
 /** The act on the painted page: nothing to act on when the element is not there; else `then` on the painted state, after the paint's own pulses. */

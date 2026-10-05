@@ -2,6 +2,10 @@
 
 **Not conforming yet: 1 divergence, 47 mutant survivors** (780 / 833 killed, the rest declared). s44 starts here.
 
+> **Settled in s44 (NSP-016 §7.9).** The divergence is row C79, now modelled: Text v2 keeps the element's own `pointer-events`
+> beside React's last render, and a frame end renders only when an input asked for it. The 47 survivors were the families below;
+> each now has scenarios the runtime also plays (203 in all), and five more are declared equivalent. The readings are in §7.9.
+
 ## The divergence → row C79
 
 Shrunk to three steps: params `{"opacity": 0}`, steps `[{"set": "pointerEventsEnabled", "value": []}, {"act": "press"}, "settle"]`.
