@@ -295,7 +295,16 @@ const lostRootAfterLabelOff = (d: Divergence) => {
   const frameStart = (t: readonly TraceEvent[], i: number) => { let k = i; while (k > 0 && t[k - 1].t !== 'settle') k--; return k; };
   const frameEnd = (t: readonly TraceEvent[], i: number) => { let k = i; while (k < t.length && t[k].t !== 'settle') k++; return k; };
   const has = (t: readonly TraceEvent[], v: string) => t.slice(frameStart(t, d.difference.index), frameEnd(t, d.difference.index + 1)).some((e) => e.t === 'outcome' && e.port === 'focus' && e.value === v);
-  if (!has(d.actual, 'unchanged') || !has(d.reference, 'done')) return false;
+  // s45 (the Checkbox's 10,000 run, seed 970083277): the same lost root met by a Blur action — Done on both sides, but the keyboard stays
+  // on the runtime's element, so the reference's Focused false / Blurred is the difference
+  const ref = d.difference.reference as TraceEvent | undefined;
+  const frame = settledFrame(d.reference, d.difference.index);
+  const blurLost =
+    !!ref &&
+    !!frame &&
+    ((ref.t === 'value' && ref.port === 'focusState' && ref.value === false) || (ref.t === 'signal' && ref.port === 'onBlur')) &&
+    d.reference.slice(frame[0], frame[1]).some((e) => e.t === 'in' && e.port === 'blur');
+  if (!blurLost && (!has(d.actual, 'unchanged') || !has(d.reference, 'done'))) return false;
   const before = d.reference.slice(0, d.difference.index);
   let on = false;
   let offAfterOn = false;
@@ -383,6 +392,124 @@ const invisibleTakesPointer = (d: Divergence) => {
   return before.some((e) => e.t === 'set' && (e.port === 'pointerEventsEnabled' || e.port === 'pointerEventsMode'));
 };
 
+/**
+ * NSP-023 (R12, ruled 2026-10-05) — the Text Input v2 states the intent; what the runtime does instead only because of how React
+ * draws is these known rows. Shared shape: a frame (the steps since the last settle) and the group of events that settle prints.
+ */
+const isStep = (e: TraceEvent) => e.t === 'set' || e.t === 'in' || e.t === 'act' || e.t === 'settle' || e.t === 'advance';
+const portOf = (e: TraceEvent) => (e as { port?: string }).port;
+const valueOf = (e: TraceEvent) => (e as { value?: unknown }).value;
+/** The frame the difference is printed for: [first step of the frame, the settle that closed it], or undefined when the difference is not in a settle's group. */
+function settledFrame(t: readonly TraceEvent[], index: number): [number, number] | undefined {
+  let k = index - 1;
+  while (k >= 0 && !isStep(t[k])) k--;
+  if (k < 0 || t[k].t !== 'settle') return undefined;
+  let start = k - 1;
+  while (start >= 0 && t[start].t !== 'settle') start--;
+  return [start + 1, k];
+}
+const TEXT_WRITES = ['clear', 'backspace', 'set', 'insert'];
+const isTextWrite = (e: TraceEvent) => (e.t === 'in' && TEXT_WRITES.includes(portOf(e) ?? '')) || (e.t === 'set' && portOf(e) === 'startValue');
+/** The difference is on the text: the Value output, Value Changed, or a write's outcome. */
+const onText = (e: TraceEvent | undefined) =>
+  !!e && ((e.t === 'value' && portOf(e) === 'onTextChanged') || (e.t === 'signal' && portOf(e) === 'textChanged') || (e.t === 'outcome' && TEXT_WRITES.includes(portOf(e) ?? '')));
+/** The Type the reference last wrote before `index` (params arrive as sets first); `'text'` when none. */
+const typeBefore = (t: readonly TraceEvent[], index: number) => {
+  for (let k = index - 1; k >= 0; k--) if (t[k].t === 'set' && portOf(t[k]) === 'type') return valueOf(t[k]);
+  return 'text';
+};
+
+/**
+ * NSP-016 §6 C69 — TextInput.tsx :331 `edit` reads the text React last drew: an Insert Text or Backspace in a frame with another write
+ * to the text works on the text before it, and React's last write wins. Narrow: a frame holding an Insert Text or Backspace and at least
+ * one other write to the text (a Value, Set, Clear, Insert Text or Backspace), and the difference on the text in that frame's settle group.
+ */
+const staleEdit = (d: Divergence) => {
+  if (d.difference.threw !== undefined || !(onText(d.difference.reference) || onText(d.difference.actual))) return false;
+  const f = settledFrame(d.reference, d.difference.index);
+  if (!f) return false;
+  const writes = d.reference.slice(f[0], f[1]).filter(isTextWrite);
+  return writes.length >= 2 && writes.some((e) => e.t === 'in' && (portOf(e) === 'insert' || portOf(e) === 'backspace'));
+};
+
+/**
+ * NSP-016 §6 C72 — TextInput.tsx :94 / :346 convert with the Type, and measure an Insert Text's room with the Max length, React last
+ * drew: a write in the frame a Type or Max length change arrives uses the old one. Narrow: a frame holding a Type or Max length write
+ * and a write to the text, and the difference on the text in that frame's settle group.
+ */
+const staleProps = (d: Divergence) => {
+  if (d.difference.threw !== undefined || !(onText(d.difference.reference) || onText(d.difference.actual))) return false;
+  const f = settledFrame(d.reference, d.difference.index);
+  if (!f) return false;
+  const frame = d.reference.slice(f[0], f[1]);
+  return frame.some((e) => e.t === 'set' && (portOf(e) === 'type' || portOf(e) === 'maxLength')) && frame.some(isTextWrite);
+};
+
+/**
+ * NSP-016 §6 C68 — TextInput.tsx :202-204: the one-line field's own `onMouseDown` replaces the control's, so a mouse press fires no
+ * Pointer Down, sets no Pressed and runs no drain. Narrow: the difference is in the settle group of a frame holding a `press` or
+ * `click` act (an act's outputs print with its frame's settle) on a field that was not a Text Area at that act.
+ */
+const mousePressOnOneLine = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  const f = settledFrame(d.reference, d.difference.index);
+  if (!f) return false;
+  for (let k = f[0]; k < f[1]; k++) {
+    const a = d.reference[k] as { t: string; act?: string };
+    if (a.t === 'act' && (a.act === 'press' || a.act === 'click') && typeBefore(d.reference, k) !== 'textArea') return true;
+  }
+  return false;
+};
+
+/**
+ * NSP-016 §6 C80 — TextInput.tsx :248-281: the field sits in a different tree with a label, so React builds a new element when Enable
+ * Label changes, and the keyboard leaves with the old one, silently (row D30's silence). Narrow: the label's truthiness changed at a
+ * paint (a settle or an act) while the reference's field held the keyboard (a Focused signal, or a Focus action or focusing act earlier
+ * in that frame), and no Blurred or Will Unmount in the reference from that paint to the difference.
+ */
+const labelTakesKeyboard = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  // s45 (the Checkbox's 10,000 run): a Focus action or a focusing act earlier in the SAME frame holds the keyboard when the label's
+  // paint comes, though its Focused prints only in the frame's settle group — so the frame's steps are read for it, in order
+  const FOCUSING = new Set(['focus', 'press', 'click', 'type', 'key', 'choose']);
+  let written = false;
+  let painted = false;
+  let holds = false;
+  let lost = false;
+  for (let k = 0; k < d.difference.index; k++) {
+    const e = d.reference[k] as TraceEvent & { act?: string };
+    if (e.t === 'set' && portOf(e) === 'useLabel') written = !!valueOf(e);
+    else if (e.t === 'in' && portOf(e) === 'focus') holds = true;
+    else if (e.t === 'in' && portOf(e) === 'blur') holds = false;
+    else if (e.t === 'settle' || e.t === 'act') {
+      if (written !== painted && holds) lost = true;
+      painted = written;
+      if (e.t === 'act' && FOCUSING.has(e.act ?? '')) holds = true;
+      if (e.t === 'act' && e.act === 'blur') holds = false;
+    } else if (e.t === 'signal' && portOf(e) === 'onFocus') holds = true;
+    else if (e.t === 'signal' && (portOf(e) === 'onBlur' || portOf(e) === 'willUnmount')) { holds = false; lost = false; }
+  }
+  return lost;
+};
+
+/**
+ * NSP-016 §6 D35 — a `<textarea>` React puts on the page holds its text as default content, so its cursor rests at the START, where the
+ * spec rests a field's cursor at the end: an Insert Text, a typed key or an Enter goes in at the start, a Backspace finds nothing
+ * before it. Narrow: the field is a Text Area, and the difference is the Value holding the same characters in another order, or a
+ * Backspace the runtime answers Unchanged where the reference says Done.
+ */
+const textAreaRestsAtStart = (d: Divergence) => {
+  if (d.difference.threw !== undefined || typeBefore(d.reference, d.difference.index) !== 'textArea') return false;
+  const r = d.difference.reference;
+  const a = d.difference.actual;
+  if (!r || !a) return false;
+  if (r.t === 'outcome' && a.t === 'outcome' && portOf(r) === 'backspace' && portOf(a) === 'backspace') return valueOf(r) === 'done' && valueOf(a) === 'unchanged';
+  if (r.t !== 'value' || a.t !== 'value' || portOf(r) !== 'onTextChanged' || portOf(a) !== 'onTextChanged') return false;
+  const rv = valueOf(r);
+  const av = valueOf(a);
+  return typeof rv === 'string' && typeof av === 'string' && rv !== av && [...rv].sort().join('') === [...av].sort().join('');
+};
+
 const VISUAL_ROWS: KnownRow[] = [
   { row: 'NSP-016 §6 C61 — Font Family wired a truthy value that is not text: the setter throws calling `.split` on it', matches: throwsOnSet((p) => p.endsWith('fontFamily'), truthyNonString, /family\.split is not a function/) },
   { row: 'NSP-016 §6 C62 — a units-typed style input wired null: the generated setter reads `.value` of null and throws', matches: throwsOnSet(unitCssPort, isNull, /Cannot read properties of null \(reading 'value'\)/) },
@@ -397,7 +524,13 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   'net.noodl.controls.textinput': [
     ...VISUAL_ROWS,
     // s38 — C65's second instance: TextInput.tsx :274 renders `{props.label}` raw too
-    { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel }
+    { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
+    // NSP-023 (R12) — the Text Input v2 states the intent; what React's drawing makes the runtime do instead
+    { row: 'NSP-016 §6 C68 — a mouse press on a one-line field fires no Pointer Down, sets no Pressed and runs no drain (its own onMouseDown replaces the control\'s)', matches: mousePressOnOneLine },
+    { row: 'NSP-016 §6 C72 — a write in the frame a Type or Max length change arrives converts / measures with the old one (the props React last drew)', matches: staleProps },
+    { row: 'NSP-016 §6 C69 — an Insert Text or Backspace in a frame with another write to the text works on the text React last drew', matches: staleEdit },
+    { row: 'NSP-016 §6 C80 — Enable Label changed while the field holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
+    { row: 'NSP-016 §6 D35 — a Text Area React puts on the page rests its cursor at the start: an insert, a key or an Enter goes in before the text', matches: textAreaRestsAtStart }
   ],
   // s39 — the Dropdown: C65's third instance (Select.tsx :245 renders `{props.label}` raw), and two of its own
   'net.noodl.controls.options': [
@@ -405,6 +538,7 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
     { row: 'NSP-016 §6 C65 — a Placeholder wired an object or an array, with nothing selected: React throws rendering it at the next paint', matches: objectPlaceholder },
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the dropdown on the page', matches: lostRootAfterLabelOff },
+    { row: 'NSP-016 §6 C80 — Enable Label changed while the dropdown holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
     { row: 'NSP-016 §6 C70 — Items wired a truthy value that is not a list, or a list holding null: the render throws at the next paint', matches: itemsNotAList },
     { row: "NSP-016 §6 C71 — a Value written back to the value React last rendered, after a pick, leaves the pick selected: picking it again raises nothing", matches: pickWriteBackPick }
   ],
@@ -426,7 +560,8 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     ...VISUAL_ROWS,
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the box on the page', matches: lostRootAfterLabelOff },
-    { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick }
+    { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick },
+    { row: 'NSP-016 §6 C80 — Enable Label changed while the box holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard }
   ],
   // s32 — the one throw on the success path DEF-026 left (it made the error path total)
   // s34 — Server-Sent Events: a setter keeps a non-text value (`value || ''`) that Connect calls a string method on

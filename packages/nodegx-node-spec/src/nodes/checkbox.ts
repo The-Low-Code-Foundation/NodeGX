@@ -20,7 +20,9 @@
  *     and a finger still lands.
  *   - **the pointer, the keyboard, a click's focus** (utils.ts :157-311; Checkbox.tsx :66-69, :202):
  *     the Button's rules, on the `<input>` when there is no label and on the wrapper when there is
- *     (a click on the input bubbles to it either way). A press puts the keyboard on the input (the
+ *     (a click on the input bubbles to it either way). **Enable Label** shows the label and leaves the box,
+ *     and the keyboard on it, where they are (ruled 2026-10-05; the runtime builds a new input when the
+ *     label changes and the keyboard leaves with the old one, silently — row C80, known on the runtime). A press puts the keyboard on the input (the
  *     browser's `mousedown` default; there is no Keeps Focus here), so a click on an unfocused box is
  *     `pointerDown`, `onFocus`, `pointerUp`, then the tick: `checked`, `onChange`.
  *   - **Focus** / **Blur** (utils.ts :340-364): the Button's — the target is the input (:402-405).
@@ -42,10 +44,6 @@ type State = {
   focused: boolean;
   /** react-component-node.ts :1267 `wantsToBeMounted` */
   mounted: boolean;
-  /** `!!useLabel` as written (Checkbox.tsx :186 decides the tree by it) */
-  wantsLabel: boolean;
-  /** `!!useLabel` as PAINTED: a change rebuilds the tree (:167-210 — the input is a new element either way), and the keyboard leaves with the old one, silently */
-  labelOn: boolean;
   /** the element's `disabled` attribute follows Enabled at each paint (Button.tsx :145 / Checkbox.tsx :57 render it; react-component-node.ts :1675-1689 at the frame's end) — what the Focus and Blur actions meet */
   pageEnabled: boolean;
   /** NSP-016 s43 — Visible as written (node-shared-port-definitions.ts :366-375 `visibility: hidden`) */
@@ -76,13 +74,15 @@ const NONE: Act = { send: [] };
 
 export const Checkbox = defineNode({
   type: 'net.noodl.controls.checkbox',
-  version: 1,
+  // v2 (NSP-023, 2026-10-05): Enable Label shows a label and leaves the box and the keyboard on it where they are (Richard ruled the
+  // Text Input's C80 for all three controls); v1 rebuilt the box when the label changed, as React does — row C80, known on the runtime.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/controls/checkbox.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches
-  synced: ['pageEnabled', 'pageVisible', 'labelOn'],
+  synced: ['pageEnabled', 'pageVisible'],
 
-  state: { enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, wantsLabel: false, labelOn: false, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false } as State,
+  state: { enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false } as State,
   // checkbox.ts :132-137 `outcomeOutputs({ done, unchanged })`
   outcomes: ['done', 'unchanged'],
 
@@ -251,8 +251,8 @@ export const Checkbox = defineNode({
     uncheck: (s) => (s.checked ? { set: { checked: false }, send: ['checked'], outcome: 'done' } : { send: [], outcome: 'unchanged' }),
     // react-component-node.ts :2310-2320
     mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
-    // node-shared-port-definitions.ts `addLabelInputs` — stored; Checkbox.tsx :186 reads its truthiness at each render
-    useLabel: (_s, v) => ({ set: { wantsLabel: !!v }, send: [] }),
+    // node-shared-port-definitions.ts `addLabelInputs` — a label beside the box; the box and its keyboard stay (v2, row C80)
+    useLabel: () => NOTHING,
     // utils.ts :340-364 — on the element, as the Button's
     focus: (s) => {
       if (!s.onPage) return { send: [], outcome: 'unchanged' };
@@ -294,11 +294,6 @@ export const Checkbox = defineNode({
 /** The page follows what the node wants (button.ts `painted`). */
 function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[] } {
   const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
-  // Enable Label changed: the tree is rebuilt around a NEW input (Checkbox.tsx :167-210); the old one took the keyboard with it, no blur fires
-  if (s.wantsLabel !== s.labelOn) {
-    set.labelOn = s.wantsLabel;
-    if (s.onPage && s.mounted) set.elementFocused = false;
-  }
   if (s.mounted && !s.onPage) return { set: { ...set, onPage: true }, emit: ['didMount'] };
   // the element leaves with the keyboard it held; the node's Focused is not told (row D30)
   if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false }, emit: ['willUnmount'] };

@@ -1,7 +1,7 @@
 ---
 id: P107-C69
 title: Insert Text and Backspace read the field as React last drew it — one arriving in the same frame as a Value, Set, Clear or another edit works on stale text, and a Clear then a Backspace in one frame puts text back
-status: needs-ruling
+status: open
 severity: high
 area: runtime / Text Input (components/controls/TextInput/TextInput.tsx `edit`)
 found: P107 NSP-016 s38, 2026-10-04
@@ -30,3 +30,12 @@ graph's writes do. Two Sets in one frame are fine (`setText` reads nothing from 
 **Proposed fix:** keep the field's text in an instance field the component writes synchronously (and mirrors into
 state for the render), or read `props.startValue` (text-input.ts keeps it current on every path, `_typed` included) in
 `edit` instead of `this.state.value`. Small. The spec models today's behaviour (`field` / `pending`).
+
+
+## Ruled 2026-10-05 (R12, NSP-023): each write sees the last
+
+Asked in plain words, Richard chose **"each sees the last"**: every write from the graph acts on the field as the write before it left
+it. The Text Input spec v2 states it (no `field` / `pending` any more); the runtime's stale read is a **known row on the runtime target
+only** (`staleEdit`, conformance.test.ts), carried by four row scenarios (Max length 3 with a Backspace and an Insert in one frame; two
+Sets and an Insert; one write after another with and without a turn; the matrix's writing Insert queued behind a Clear). The proposed
+fix above stands.

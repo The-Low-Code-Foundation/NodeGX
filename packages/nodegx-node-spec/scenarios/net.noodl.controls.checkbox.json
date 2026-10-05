@@ -1630,8 +1630,8 @@
     ]
   },
   {
-    "name": "focused, then Enable Label turned on: the tree is rebuilt around a new input and the keyboard leaves with the old one (Focused still reads true, no Blurred); a press then takes it again and fires Focused; turned off again while focused: the same, and a Tab onto it fires Focused",
-    "because": "Checkbox.tsx :167-210 — with and without a label the input is a different element; a removed element fires no blur (the focus fixup rule) and utils.ts never resets focusState (row D30); C66 does not reach a person's act (the face finds the box on the page)",
+    "name": "focused, then Enable Label turned on and a press in the same frame: the box keeps the keyboard — the press fires Pointer Down with Pressed and no Focused; turned off again, a Tab onto it finds the keyboard there already — the runtime rebuilds the input and the keyboard leaves with the old one, silently (the press fires Focused again: row C80)",
+    "because": "ruled 2026-10-05 (C80, all three controls): showing or hiding the label does not touch the box; Checkbox.tsx :167-210 the tree differs with a label, so React makes the input anew (row C80)",
     "steps": [
       "settle",
       {
@@ -1659,66 +1659,8 @@
         "act": "focus"
       },
       "settle"
-    ]
-  },
-  {
-    "name": "focused, then Enable Label changed and a Tab away in the same frame: the keyboard already left with the rebuilt input, so nothing fires; a Blur action after it gives nothing up either",
-    "because": "Checkbox.tsx :167-210 — the rebuilt input is a new element; the paint inside the act commits it before the Tab away (D30: Focused still reads true)",
-    "steps": [
-      "settle",
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "set": "useLabel",
-        "value": true
-      },
-      {
-        "act": "blur"
-      },
-      {
-        "signal": "blur"
-      },
-      "settle",
-      {
-        "set": "useLabel",
-        "value": false
-      },
-      {
-        "act": "blur"
-      },
-      {
-        "signal": "blur"
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "pressed and focused, then Enable Label changed and the release in the same frame: Pointer Up fires, the keyboard already left with the rebuilt input (a Blur action after it gives nothing up); a Tab onto the new input then fires Focused",
-    "because": "Checkbox.tsx :167-210 — the rebuilt input is a new element; utils.ts :265-269 the release still reaches the wrapper or the input",
-    "steps": [
-      "settle",
-      {
-        "act": "press"
-      },
-      "settle",
-      {
-        "set": "useLabel",
-        "value": true
-      },
-      {
-        "act": "release"
-      },
-      {
-        "signal": "blur"
-      },
-      "settle",
-      {
-        "act": "focus"
-      },
-      "settle"
-    ]
+    ],
+    "row": "NSP-016 §6 C80"
   },
   {
     "name": "Mounted off then on, and a Tab onto the box in the same frame: Did Mount and Focused together; the same with Enabled off: Did Mount alone, a Focus after it Done",
@@ -1771,61 +1713,6 @@
       "settle",
       {
         "act": "release"
-      },
-      {
-        "signal": "blur"
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "focused, then disabled; Enable Label changed and a release in the same frame (nothing: a disabled input takes no release, but the rebuilt input holds no keyboard); re-enabled and painted, a Blur action gives nothing up — the keyboard left with the old input",
-    "because": "Checkbox.tsx :167-210 the rebuild; the browser dispatches no mouseup to a disabled control; a removed element fires no blur (D30)",
-    "steps": [
-      "settle",
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "set": "enabled",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "useLabel",
-        "value": true
-      },
-      {
-        "act": "release"
-      },
-      "settle",
-      {
-        "set": "enabled",
-        "value": true
-      },
-      "settle",
-      {
-        "signal": "blur"
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "focused, then Enable Label changed and the pointer moving onto the box in the same frame: Hover Start, and the keyboard already left with the rebuilt input — a Blur action after it gives nothing up",
-    "because": "Checkbox.tsx :167-210 the rebuild; utils.ts :216-234 the hover reaches the new input; a removed element fires no blur (D30)",
-    "steps": [
-      "settle",
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "set": "useLabel",
-        "value": true
-      },
-      {
-        "act": "hover"
       },
       {
         "signal": "blur"
@@ -2107,169 +1994,157 @@
     ]
   },
   {
-    "name": "hidden, holding the keyboard, Enable Label changed: every pointer act's paint rebuilds the box and the keyboard leaves with the old element — the Blur action after each finds nothing to blur (Done only)",
-    "because": "the Enable Label rebuild makes a new element (row D30's silence); the act meets nothing hidden",
+    "name": "hidden and off the page: Mounted on and an act in the same frame — the act's paint puts the hidden box back (Did Mount) and the act meets nothing (a hidden element is under no pointer and takes no keyboard); a Focus action after it finds the box on the page (Done, takes nothing) — every act",
+    "because": "NSP-016 s43's hit test with s37's paint-before-the-act: the 10,000 runs (s45, seed 20731) left the act's remount branch alive (a swap with the branch that mounts nothing) — only a read of the page between the act and the frame's end tells them apart",
     "steps": [
       "settle",
-      {
-        "set": "visible",
-        "value": true
-      },
-      {
-        "act": "focus"
-      },
       {
         "set": "visible",
         "value": false
       },
       "settle",
       {
-        "set": "useLabel",
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
         "value": true
       },
       {
         "act": "hover"
       },
       {
-        "signal": "blur"
+        "signal": "focus"
       },
       "settle",
       {
-        "set": "visible",
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
         "value": true
-      },
-      {
-        "act": "focus"
-      },
-      {
-        "set": "visible",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "useLabel",
-        "value": false
       },
       {
         "act": "leave"
       },
       {
-        "signal": "blur"
+        "signal": "focus"
       },
       "settle",
       {
-        "set": "visible",
-        "value": true
-      },
-      {
-        "act": "focus"
-      },
-      {
-        "set": "visible",
+        "set": "mounted",
         "value": false
       },
       "settle",
       {
-        "set": "useLabel",
+        "set": "mounted",
         "value": true
       },
       {
         "act": "press"
       },
       {
-        "signal": "blur"
+        "signal": "focus"
       },
       "settle",
       {
-        "set": "visible",
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
         "value": true
-      },
-      {
-        "act": "focus"
-      },
-      {
-        "set": "visible",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "useLabel",
-        "value": false
       },
       {
         "act": "release"
       },
       {
-        "signal": "blur"
+        "signal": "focus"
       },
       "settle",
       {
-        "set": "visible",
-        "value": true
-      },
-      {
-        "act": "focus"
-      },
-      {
-        "set": "visible",
+        "set": "mounted",
         "value": false
       },
       "settle",
       {
-        "set": "useLabel",
+        "set": "mounted",
         "value": true
       },
       {
         "act": "click"
       },
       {
-        "signal": "blur"
+        "signal": "focus"
       },
       "settle",
       {
-        "set": "visible",
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
         "value": true
-      },
-      {
-        "act": "focus"
-      },
-      {
-        "set": "visible",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "useLabel",
-        "value": false
       },
       {
         "act": "touch"
       },
       {
-        "signal": "blur"
+        "signal": "focus"
       },
       "settle",
       {
-        "set": "visible",
-        "value": true
-      },
-      {
-        "act": "focus"
-      },
-      {
-        "set": "visible",
+        "set": "mounted",
         "value": false
       },
       "settle",
       {
-        "set": "useLabel",
+        "set": "mounted",
         "value": true
       },
       {
         "act": "lift"
       },
       {
-        "signal": "blur"
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
       },
       "settle"
     ]

@@ -1,71 +1,70 @@
 # P107 — next session
 
-**Written 2026-10-05 (s44).** Read the [README](README.md) §2–§7. s44's record is [NSP-016 §7.9](NSP-016-VISUAL-NODES.md) (the Text v3:
-row C79 measured and kept out of the spec under R11, s43's deep-run survivors killed); s43's is §7.8 and [RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md); s42's §7.7; s41's
-§7.6; s40's §7.5; s39's §7.4; s38's §7.3; s37's §7.2 (THE PERSON face).
+**Written 2026-10-05 (s45).** Read the [README](README.md) §2–§7 (R12 and R13 are the newest rulings). s45's record is
+[NSP-023 §8.1](NSP-023-THE-SPEC-WITHOUT-REACT.md) (the Text Input v2; the label rule on the Checkbox and the Dropdown; the Button's and the
+Checkbox's 10,000 runs); NSP-016 §7.10 points there. s44's is NSP-016 §7.9 (the Text v3), s43's §7.8 and RESEARCH-DRAG-DROP.md, s37's
+§7.2 (THE PERSON face).
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
-| NSP-000 the census | ✅ s1; s21; s36 `scripts/node-spec/visual-census.js`; s38 `scripts/node-spec/gen-ports.js` | `3bd71e837`, s21, `bf90b170d`, s39 |
-| NSP-001 the spec + interpreter | ✅ s1 … s42 (`act`, `acts` / `person`, `place`, `portability`, `PersonPatch`, s40 `WorldHandlers.turn`, s42 `WorldHandlers.group` + `WorldView.group()`; s43 no format change) | s1 … s42 |
-| NSP-002 traces + adapter + runtime target | ✅ s37 the PERSON face; s38 `type` / `key`; s39 `choose`; s40 `typeKey` writes at the cursor; s41 `slide`; s42 `pick`, page children, a real group; **s43 the browser's HIT TEST (`underPointer`; `focus()` refuses a hidden element), pointer events before the compatibility events, `elementFromPoint` (`pointerAt`), `getComputedStyle` / `DOMRect` globals, the page installed before a person node's params, the world's frame clock on jsdom's `window`, globals off after the teardown, the play's window listeners removed (`installPage` / `releasePage`)** | s2 … s42 |
-| NSP-003 the runner | ✅ (s39 last: an `optionslist` pool in `generate.ts`) | s2 … s39 |
-| NSP-004 the pilot five | ✅ s3 | `ef6f3b6e1` |
-| NSP-005 the export adapter | ✅ (s13); plays the latch nodes only | s13, s15 |
-| NSP-006 the stranger | ✅ rounds 1, 2, 3, 3b (hashes refreshed s42: spec.ts, world.ts) | `fec895706`, s21 … s40 |
-| NSP-007 the world | ✅ (s42: GROUP, the seventeenth seam); AC1's export half ✗ | s13, s16 … s34 |
-| NSP-008 the graph | ✅ — 76 / 76 | s15, s20, s23 … s29 |
-| NSP-010 a change is a version | rows only (two holes, §4) | — |
-| NSP-011 / NSP-012 | as s15; s35 Array Filter v2; s36 C59 + C60 fixed | s15, s35, `a6f629a2e` |
-| NSP-013 the time batch | 🟡 24 / 24 conform. Left: AC2, the deep run for s11–s14 | s16 |
-| NSP-014 records, users, files, HTTP, streams | 🟡 24 of 24 conform; s36 D29 fixed; **s40 DbModel2's seed-dependent twins pinned**. Left: AC2's export half (P18) | s8, s21 … s40 |
-| NSP-015 navigation + components | 🟡 14 of 14 conform; **s40 NavigationClosePopup's seed-dependent survivor pinned**. Left: AC2 (export, P18) | s15 … s40 |
-| **NSP-016 the visual nodes** | **🟡 9 of 19 conform (Button, Checkbox, Text Input, Dropdown, Slider, Icon, Radio Button Group, Radio Button, Text). s44: the Text v3 (R11 — C79 a known row, the spec says the intent; 162 scenarios; §7.9). Drag and drop researched (RESEARCH-DRAG-DROP.md). The other 10 need infrastructure (below). AC4 waits for NSP-017** | `aa8abb06f` … s42, `803f6cccf`, s43, s44 |
+| NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
+| **NSP-016 the visual nodes** | 🟡 9 of 19 conform (Button, Checkbox, Text Input, Dropdown, Slider, Icon, Radio Button Group, Radio Button, Text). The other 10 need infrastructure (NSP-016 §7.6). AC4 waits for NSP-017 | `aa8abb06f` … s45 |
+| **NSP-023 the spec without React** | **🟡 step 1 done (s45): Text Input v2; the Checkbox v2 and Dropdown v2 (label rule only). Steps 2–8 left** | s45 |
 | NSP-020 ports without a viewer | rows only | s20 |
-| NSP-022 the cloud-only nodes | 📋 opened s21 (needs a second runtime target, `noodl-viewer-cloud`) | s21 |
+| NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 | NSP-009, NSP-017 … NSP-019, NSP-021 | — | — |
 
-**115 of 147 conform on the runtime (78.2%)** (T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 9/19; 0 exempt). Graph 76 / 76.
+**115 of 147 conform on the runtime (78.2%)** — unchanged by s45 (a conversion keeps a node conforming; AC3).
 Left: 10 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-017).
 
-## What s44 settled
+## What s45 settled
 
-1. **Row C79 measured.** 22 hand cases side by side, and every Text input set on a page with its redraw requests counted. The Pointer
-   Events inputs write `pointer-events` straight onto the element; a redraw writes the opacity rule's `none` only when it differs from
-   what the previous redraw wrote; a frame end redraws only when an input asked. So **once a Text has been drawn at Opacity 0, a
-   Pointer Events write in ANY later frame lets it take the pointer** (only the same frame is safe). Reach: Text, Group, Image,
-   Circle, Video; not the Text Input (no Pointer Events inputs). The bug file has it all.
-2. **R11 (Richard): keep React out of the spec where we can.** v2 (`b4c997ed9`) had modelled C79 with the redraw rules. Asked, Richard
-   chose **"say the intent"**: **Text v3** states that an element at Opacity 0, hidden, or with Pointer Events off takes no pointer, and
-   C79 is a **known row on the runtime target** (`invisibleTakesPointer`, conformance.test.ts; four `row` scenarios).
-3. **s43's 47 deep-run survivors are killed** by scenarios the runtime also plays (all in §7.9). Three more are declared equivalent
-   (already-held twins).
-4. **The handoff was wrong in one place**: the Text's "known rows are still open" test was RED since s43 (the Text carried no
-   C61–C63 scenario). Fixed: three scenarios, as the other visuals carry.
-5. **Readings:** (2026-10-05) Text v3 conforms on the runtime at 200 (seeds 13, 20730) and at 10,000 (seed 20731: 0 divergences, C79
-   attributed once, 1,156 / 1,165 mutants, the rest declared); the interpreter at 200 on seven seeds and at 10,000; the package suite
-   20 suites / 878; the runtime graph and target suites 102; bugs check 233 valid. One chained 10,000 attempt failed in 852 ms with an
-   empty message and did not reproduce run alone — if it recurs, read the jest output whole.
+1. **The handoff was wrong in one place:** its "earlier React-shaped state is NOT to be rewritten unasked" was overtaken by R12 the
+   same morning (`2f94cc7f0`, NSP-023). s45 did NSP-023 step 1.
+2. **R13 (Richard, plain words, one batch):** each write sees the last (C69, C72); Pointer Down fires on a mouse press (C68); Enable
+   Label keeps the keyboard (new row **C80**); a field's resting cursor is at the end, both kinds (D35). Then **"Yes, all three"**:
+   the label rule for the Checkbox and the Dropdown too.
+3. **Text Input v2:** no `pending` / `editCaret` / `shownType` / `shownMaxLength` / `labelOn`, no `turn` handler; `pageType` (the
+   element's type, a page sync). Five runtime rows (`mousePressOnOneLine`, `staleProps`, `staleEdit`, `labelTakesKeyboard`,
+   `textAreaRestsAtStart`). Scenarios 87 → 103, 27 rows; the matrix split three ways (NSP-023 §8.1). **Trap met: an act's outputs
+   print in its frame's SETTLE group** — a matcher keyed on "the act is the last step before the difference" matches nothing.
+   **Joined segments are not lone segments:** a matrix segment that agrees alone can diverge after its neighbour leaves text behind.
+4. **Checkbox v2 / Dropdown v2:** the label rebuild out, C80 rows, scenarios rewritten, rebuild equivalents pruned (all three
+   specs). **The Radio Button still models the rebuild** (NSP-023 step 5).
+5. **The hit test's debt, part one:** Button and Checkbox at 10,000 (seed 20731) — survivors on "an act's paint remounts a HIDDEN
+   element", one scenario each kills them at 200; the Checkbox's one divergence is C66 met by a Blur action (matcher widened).
+6. **A runtime rule v1 never modelled, found by the 10,000 run:** with Block Pointer Events on, a press / release / click / touch / lift
+   drains the frame BEFORE its own report (the blocker on the `pointerdown` / `pointerup` a browser raises first; a disabled field
+   too). Modelled (`blockerFirst`), two scenarios. **Read a probe's call order before reading a trace's** — the first theory
+   ("first frame only") was wrong; a 4-variant side-by-side settled it in 15 s.
+7. **Two v1 scenario names graded nothing** (the Tab + Set "Value 'x' wins"; "Set then writes the empty value (Done)") — renamed.
 
-## What s45 does
+**Readings (2026-10-05, seeds as named; load 3–8 with peers):** the Text Input v2 conforms on the interpreter at 200 on seeds 13,
+20729, 20730, 20731 (3,379 / 3,382 at 13; 3,700 / 3,702 at 20731 after the last scenarios, the rest declared) and on the runtime at
+200 on 13 and 20730 (0 divergences outside the rows; 3,379 / 3,382, 3,372 / 3,373). Its runtime 10,000 runs at 20731: the first, 6
+unattributed (Block Pointer Events, above); the second, 0 unattributed, C68 372 · C72 15 · C69 9 · D35 5 · C80 1 attributed, 3 mutant
+survivors (a disabled, unfocused field's blocker drain) — one scenario, killed at 200; the third, after it, CONFORMS (0 divergences, 4,119 / 4,125, the rest declared). The Checkbox v2 and the Dropdown
+v2 conform on the interpreter and the runtime at 200 on two seeds (321 / 322; 852 / 854, the Dropdown after one scenario for a press
+the matrix's closing Focus action masked); at 10,000 each had 3 C80 divergences the first matcher missed (a Focus action earlier in
+the frame — its Focused prints in the settle group) and no survivor; re-run with the matcher reading the frame's steps, both CONFORM at 10,000 (0 divergences; C80 attributed 5 and 3; 321 / 326 and 852 / 857, the rest declared). The Button conforms at 10,000 (0 divergences,
+322 / 327, the rest declared). The package suite 20 suites / 878 passed; the runtime graph and target suites 102.
 
-1. **The 10,000 runs the hit test owes** (s43 item 2, not done in s44): the seven specs s43 re-graded ran at 200 only. Run each at
-   10,000 on the runtime (Button, Checkbox, Text Input (~20 min), Dropdown, Slider, Radio Button, Radio Button Group), one at a time,
-   `uptime` first: `NSP_DEEP=10000 NSP_ONLY=<type> NSP_REPLAY_DIR=<scratch> npx jest test/node-spec/conformance.test.ts -t deep`
-   in `packages/noodl-runtime`. Expect the matrix segments to cross Visible with an act in ways 200 never did. A divergence: replay
-   the shrunk sequence on both targets (the side-by-side probe, below) before theorising.
-2. **NSP-016 AC3, the Text's step (b)** (RESEARCH-DRAG-DROP.md §8): a `move` act (pointer past the slop, over an element the act names)
-   for the mouse lift; file acts `fileEnter` / `fileLeave` / `fileDrop` (plain events with a `dataTransfer` stand-in made from `$file`
-   values) for the file drop's own logic (the type filter, the depth count, Files Dropped / Rejected, five values); a Draggable
-   SIBLING on the Text's page (the s42 page pattern) for the zone side (Drag Over, Dropped, Landed, Drop Index 0).
-3. **Then Group** (its children are slots: Drop Index from the keyboard; the s42 page pattern), **then Image and Circle** (the Text with
-   another look). Each carries C79: under R11 the spec states the intent (no pointer at Opacity 0) and C79 joins that node's KNOWN_ROWS
-   with the Text's matcher. Video waits for media; Columns for NSP-017; Repeater / Component Children / stacks for definitions on the page.
-4. **R11 applies from here**: write new spec state and rules in renderer-neutral words. The earlier React-shaped state (Text Input
-   `field` / `pending`, Dropdown's shown value) is NOT to be rewritten unasked; if a session finds one making a target copy a
-   React-only behaviour, ask Richard in plain words.
+## What s46 does
+
+1. **NSP-023 step 2: take `WorldHandlers.turn` out of the format** (spec.ts `WorldHandlers` and the erased `AnyNodeSpec.world`,
+   interpreter.ts `handleInbound` / `advance`, runner/mutants.ts — the four places a world-handler kind lives). Nothing uses it since
+   s45. spec.ts is hashed: refresh `tests/stranger-suite-hashes.json` and re-grade the three stranger rounds, same commit.
+2. **NSP-023 step 3: the Slider** — sort (§3), then ONE plain-words batch to Richard (D36's intent is in the description already:
+   a Value from the graph does not fire Changed; C73 / C74 / C75 sort as the node's own unless React-made). Then step 4 (the Dropdown's
+   remaining React state: D34, C71, the items-identity rule) and step 5 (the radio pair, C76, D37, effect order, AND the label rebuild
+   under R13's "all three" — confirm with Richard that the Radio Button is the same answer, one line).
+3. **The 10,000 runs still owed** (one at a time, `uptime` first): Slider, Radio Button, Radio Button Group (the hit test's debt from
+   s43) — each after its NSP-023 step if that step is near, since a conversion re-grades anyway. Button, Checkbox, Dropdown and Text
+   Input ran in s45 (readings above).
+4. Then NSP-016: the Text's step (b) (RESEARCH-DRAG-DROP.md §8), Group, Image, Circle (each carries C79 as a known row; R11 from line
+   one — do the §3 sort before modelling any divergence).
 
 **Human decisions outstanding** — rows to ask, in plain words (README §7 has the earlier ones written):
 - **New (s43, drag and drop):** C79 (an invisible Text catches clicks after a Pointer Events write in any frame after it was drawn
@@ -80,13 +79,10 @@ Left: 10 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-
   without announcing, the Dropdown's D34 the same), C73 (a Reset to the author's last Value after a slide does nothing — compare with the
   output, not `props.value`), C74 (the output keeps a slid value past a lowered Max and a graph value off the step; Value Percent goes stale —
   re-sanitize the shown value as the browser does), C75 (Min equal to Max: Value Percent NaN — make it 0).
-- **New (s40):** C72 (a Clear, Backspace or frame-end write in the frame a Type or Max length change arrives converts / measures with the old
-  value — read the node's live props, or convert in the node), D35 (a Focus action sets `hadCaret`: on a Text Area an Insert Text then writes
-  at the START; three rulings offered in the file).
 - **s39:** C70 (Items wired a string crashes the page; normalise in the setter), C71 (the component's effect misses a Value written back to
   the last-rendered value after a pick), D34 (a remount or a new Items array after a pick fires Changed with nobody picking).
-- **s38:** C69 (Insert Text / Backspace read React's last committed text — Clear then Backspace in one frame puts text back), C68 (a mouse
-  press on a Text Input fires no Pointer Down), D31 / D32 / D33 together.
+- **s38:** C69 and C68 — the SPEC's intent is ruled (R13); still to ask: fix the app? (both one-line fixes in their bug files). D31 / D32 / D33 together.
+- **s45:** C80 (fix the label tree in four components? the bug file), and with it C72 and D35 (intent ruled; the fix to ask).
 - **s37:** C65 (a Label — a Placeholder too — wired an object crashes the render), C61 / C62 / C63 together, C66 (two elements share one root
   ref), C67 (an action reverting a click in the same frame does not redraw the box), C64 + D30 together.
 - Then C27 + C29 together ("hand a copy"), C30, C26, C24, C31, C32, C28, C25, D20, D21; C22, D19 (second half), C11 with C37, C12, C15,
@@ -126,6 +122,13 @@ browser turns its event loop between frames; a finger lifted off an UNMOUNTED el
   same session. The play sinks `console.*` — print with `process.stdout.write`. The runtime's `zz-ti.test.ts` shape (s40): `play(...)` on
   `interpreterAdapter({ resolve: () => Spec })` and on `withViewerNodes(runtimeTarget())`, each with `new World({})`, the two traces printed
   by index with `!!` on a difference — fourteen cases in 3 s. **A jest run that must not include the probes: `--testPathIgnorePatterns 'zz-'`.**
+- **s45's probes** (deleted; rebuild in a minute): `noodl-runtime/test/node-spec/zz-side.test.ts` (s43's, plus `ZZ_ONLY` — comma list of
+  indices — and `ZZ_FULL=1`, the whole interpreter trace on a difference); `nodegx-node-spec/tests/zz-conf.test.ts` (`specs[type]` is a
+  RECORD, not an array); `zz-branches.test.ts` (each branch matching `ZZ_BRANCH` with its recorded example and the scenarios that hit
+  it — that is how the Dropdown's masked press was found). A call-order probe: wrap `Node.prototype.sendSignalOnOutput` /
+  `scheduleAfterInputsHaveUpdated` / `update` and log them beside the play's trace. **Scenario files rewritten by a script: re-run the
+  script from its source copy and every hand addition since is GONE** (s45 lost the Checkbox's hidden-remount scenario that way —
+  the script now re-applies it); the rewrite scripts lived in the scratchpad.
 - **s44's probes** (deleted; rebuild in a minute): `noodl-runtime/test/node-spec/zz-side.test.ts` (s43's, unchanged: every scenario of `NSP_TYPE`
   or `ZZ_FILE` on both targets, `!!` on a difference, `ZZ_NAME` / `ZZ_PRINT=1` prints agreeing traces — READ them against the names);
   `zz-fu.test.ts` — wrap `Node.prototype.setInputValue` to wrap each instance's `forceUpdate` once, then for each input of the spec play

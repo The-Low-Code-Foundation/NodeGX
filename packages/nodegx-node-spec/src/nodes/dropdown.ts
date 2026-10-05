@@ -37,8 +37,9 @@
  *     :118; row C70) — here it offers no options. An option's value is its `Value` as text (`<option value>`, :119), or
  *     its Label's text when it has none (HTML's fallback); an option with `Disabled` true or `'true'` cannot be picked.
  *   - **Enabled**, **the pointer, the keyboard, a click's focus** (utils.ts :157-311 on the `<select>`, Select.tsx
- *     :211), **Focus** / **Blur** (utils.ts :366-440, the target is the `<select>`), **Mounted**, **Enable Label** (a
- *     rebuild around a NEW `<select>`, Select.tsx :223-252: the keyboard leaves with the old one, silently), **Label**
+ *     :211), **Focus** / **Blur** (utils.ts :366-440, the target is the `<select>`), **Mounted**, **Enable Label** (it
+ *     leaves the `<select>`, its keyboard and its selection where they are — ruled 2026-10-05; the runtime builds a NEW
+ *     `<select>`, Select.tsx :223-252, and the keyboard leaves with the old one, silently: row C80), **Label**
  *     (drawn raw, :245 — row C65's third instance), **Placeholder** (drawn, never on the wire) and the look: the
  *     Checkbox's. A pick is a keyboard pick: it puts the keyboard on the element first (the focusing steps), as a Tab
  *     does, and a disabled element takes no pick.
@@ -56,10 +57,6 @@ type State = {
   focused: boolean;
   /** react-component-node.ts :1267 `wantsToBeMounted` */
   mounted: boolean;
-  /** `!!useLabel` as written (Select.tsx :223 decides the tree by it) */
-  wantsLabel: boolean;
-  /** `!!useLabel` as PAINTED: a change rebuilds the tree around a new `<select>` (:223-252), and the keyboard leaves with the old one, silently */
-  labelOn: boolean;
   /** the element's `disabled` attribute follows Enabled at each paint (Select.tsx :209) — what the Focus and Blur actions meet */
   pageEnabled: boolean;
   /** NSP-016 s43 — Visible as written (node-shared-port-definitions.ts :366-375 `visibility: hidden`) */
@@ -101,14 +98,17 @@ const DEFAULT_ITEMS: readonly unknown[] = [
 
 export const Dropdown = defineNode({
   type: 'net.noodl.controls.options',
-  version: 1,
+  // v2 (NSP-023, 2026-10-05): Enable Label shows a label and leaves the <select> and the keyboard on it where they are, its selection too
+  // (Richard ruled the Text Input's C80 for all three controls); v1 rebuilt the <select> when the label changed, as React does — row
+  // C80, known on the runtime.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the React side of the choice with them
-  synced: ['pageEnabled', 'pageVisible', 'labelOn', 'shown', 'domSelected', 'paintedItems'],
+  synced: ['pageEnabled', 'pageVisible', 'shown', 'domSelected', 'paintedItems'],
 
   state: {
-    enabled: true, hover: false, pressed: false, focused: false, mounted: true, wantsLabel: false, labelOn: false, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
+    enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
     value: 'Option 1', authorValue: 'Option 1', items: DEFAULT_ITEMS, shown: undefined, domSelected: '', paintedItems: undefined
   } as State,
   // utils.ts :402-411 `outcomeOutputs({ done, unchanged })` (addFocusActions)
@@ -316,8 +316,8 @@ export const Dropdown = defineNode({
     },
     // react-component-node.ts :2310-2320
     mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
-    // node-shared-port-definitions.ts `addLabelInputs` — stored; Select.tsx :223 reads its truthiness at each render
-    useLabel: (_s, v) => ({ set: { wantsLabel: !!v }, send: [] }),
+    // node-shared-port-definitions.ts `addLabelInputs` — a label beside the `<select>`; the element, its keyboard and its selection stay (v2, row C80)
+    useLabel: () => NOTHING,
     // utils.ts :370-384 — on the `<select>` (utils.ts :419-423 `_focusTarget`), as the Checkbox's
     focus: (s) => {
       if (!s.onPage) return { send: [], outcome: 'unchanged' };
@@ -401,8 +401,7 @@ function optionsOf(items: unknown): Option[] {
 
 /**
  * The page follows what the node wants (checkbox.ts `painted`), and the component's effect and the `<select>`'s selection with it.
- *   - Enabled is painted onto the element; Enable Label changing rebuilds the tree around a NEW `<select>` (Select.tsx :223-252):
- *     the keyboard leaves with the old one, no blur fires (row D30), and the new element selects afresh.
+ *   - Enabled is painted onto the element; Enable Label changes nothing here (v2; the runtime's rebuild is row C80).
  *   - Mounted off: the element leaves with the keyboard it held; Mounted on: Did Mount, a fresh component (`useState(props.value)`).
  *   - the effect (Select.tsx :44-47): at the mount, and at a render that saw another Items array than the render before, the shown
  *     value becomes the author's Value and `valueChanged(props.value)` runs — a node holding a person's pick takes the author's
@@ -414,13 +413,6 @@ function optionsOf(items: unknown): Option[] {
 function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
   const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
   let fresh = false;
-  if (s.wantsLabel !== s.labelOn) {
-    set.labelOn = s.wantsLabel;
-    if (s.onPage && s.mounted) {
-      set.elementFocused = false;
-      fresh = true;
-    }
-  }
   if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false }, send: [], emit: ['willUnmount'] };
   if (!s.mounted) return { set, send: [], emit: [] };
   const send: ValueOut[] = [];

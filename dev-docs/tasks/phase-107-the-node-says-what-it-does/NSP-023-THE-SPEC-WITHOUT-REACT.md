@@ -1,7 +1,7 @@
 # NSP-023 — The spec without React
 
 **Opened 2026-10-05, from ruling R12 (README §7).** **Depends on NSP-016** (the specs it converts) and the Text v3 (NSP-016 §7.9,
-the recipe). **Status: 📋 not started.**
+the recipe). **Status: 🟡 step 1 done (s45, §8.1); the Checkbox's and the Dropdown's label rule with it.**
 
 ## 1. The person sentence
 
@@ -116,4 +116,80 @@ They are written under R11 from the first line, so this task never has to visit 
 
 ## 8. Built
 
-Nothing yet.
+### 8.1 s45, 2026-10-05 — step 1: the Text Input v2; the label rule (C80) on the Checkbox and the Dropdown too
+
+**Rulings** (Richard, plain words, one batch of four, then one more; README §7 R12): for the Text Input, **each write sees the
+last** (C69, C72), **Pointer Down fires** on a mouse press (C68), **Enable Label keeps the keyboard** (a new row, C80), **the
+resting cursor is at the end, both kinds of field** (D35). Then, asked because the Checkbox's 10,000 run surfaced the same shape:
+the label rule for the Checkbox and the Dropdown too — **"Yes, all three"**.
+
+**The sort (AC1)** — the Text Input, v1 state and rules:
+
+| v1 | pile | evidence | v2 |
+|---|---|---|---|
+| `field` / `pending`: what React has committed; a graph write waits for the frame's end | React-made | C69, measured s38 | the field takes each write at once; row C69 |
+| `shownType` / `shownMaxLength`: the props as React last drew them | React-made | C72, s40 | conversion and an Insert's room read Type and Max length as they stand; the element's own type follows at the paint (`pageType`, a page sync like `pageEnabled`); row C72 |
+| `editCaret`: an edit's cursor callback waiting for React's commit | React-made | s40 | the cursor moves at the write |
+| `world.turn`: React commits at a turn of the event loop | React-made | s40 | gone from the spec (from the format: step 2) |
+| `wantsLabel` / `labelOn`: a label change rebuilds the input | React-made (React reconciles a different tree, TextInput.tsx :233-281) | s38 | gone; row C80 (new) |
+| a one-line `<input>`'s press: no Pointer Down, no Pressed, no drain | React-made (one handler per event prop, TextInput.tsx :202-204) | C68, s38 | a press is a press on both kinds; row C68 |
+| a fresh `<textarea>`'s cursor at the start | React-made (React writes default content) | D35, s40 | at the end, both kinds; row D35 |
+| a type change from Email / Number to Text puts the cursor at the start | HTML's type change steps | jsdom form-controls | stays |
+| a value write moves the cursor to the end when what the element shows changed | HTML's value setter | | stays |
+| a pointer act drains the frame | the runtime's own (pointerlisteners.ts :173-186) | s38 | stays |
+| Will Unmount leaves Focused true (D30) | the browser (no blur for a removed element) and the node | | stays |
+| off the page the Value keeps its type (D32); the mount's announcement | the node's own | | stays |
+| a Label object crashes the render (C65) | a crash, React's | | stays a row |
+| typing: sanitization, the `maxlength` parse | HTML | | stays |
+
+**Scenarios: 87 → 103**, 27 of them row scenarios (C68 15, C69 4, D35 3, C72 2, C80 2, C61 1). Each row scenario still fires on
+the runtime; where the runtime would have lost a scenario's grading, a twin it passes sits beside it (14 Text Area twins for C68 —
+a Text Area's press was always a press; a frame apart for C69; truncated for D35). Five label-rebuild scenarios went: without the
+rebuild they duplicate four that were already there. The 704-segment matrix became three: the one-line field's 276 segments (no
+label axis; no enabled press or click; no writing Insert queued behind a Clear on an act that does not drain), the Text Area's 56
+press and click segments, and a C69 row matrix of 44. **Two v1 names graded nothing** (read against the traces): "after a Tab or a
+key … the Set lands at the frame's end (Value 'x' wins)" — the Set is Unchanged, the Tab put the keyboard on the field; "Set then
+writes the empty value (Done)" — Unchanged, the Clear had emptied the output. Both renamed. One new scenario: a Set landing off the
+page at the frame's end, then a quiet frame (the interpreter's seed 20731 left that drop alive).
+
+**The runtime's rows** (`packages/noodl-runtime/test/node-spec/conformance.test.ts`): `mousePressOnOneLine` (C68), `staleProps`
+(C72), `staleEdit` (C69), `labelTakesKeyboard` (C80), `textAreaRestsAtStart` (D35). **An act's outputs print in its frame's settle
+group**: the first C68 matcher looked for the press as the last step before the difference and matched none of the 4 + 8 generated
+divergences at 200; it reads the frame now.
+
+**The Checkbox v2 and the Dropdown v2:** the label rebuild out of both (`wantsLabel` / `labelOn`, the Dropdown's fresh selection
+with it), C80 in both runtime row lists. Checkbox 39 → 35 scenarios (the five rebuild scenarios to one C80 row scenario, plus a
+new one below); Dropdown 55 → 49 (two C80 rows; the matrix 704 → 352 segments without its label axis; "Items or the label or both"
+21 → 7). The rebuild equivalents declared in s37 / s38 / s39 are pruned for all three; the deep runs say whether any comes back.
+**The Radio Button carries the same rebuild** (it shares the Checkbox's page model): left for step 5, under the same ruling.
+
+**The hit test's 10,000 runs** (s43's debt, the handoff's item 1) — Button and Checkbox at seed 20731, before the above: the
+Button 0 divergences, 300 / 307 mutants; the Checkbox 1 divergence, 450 / 463. The survivors: an act whose paint puts a HIDDEN
+element back on the page (Mounted on in the act's frame) swapped with the act that mounts nothing — only a read of the page between
+the act and the frame's end tells them apart. One scenario each ("hidden and off the page: Mounted on and an act in the same frame
+… a Focus action after it", every act): Button 308 / 309 and Checkbox 321 / 322 at 200 on seeds 13 and 20731, every new mutant
+killed. The Checkbox's divergence was C66 met by a Blur action (Enable Label on at mount, then off; the Blur cannot take the
+keyboard off the lost root): `lostRootAfterLabelOff` reads that too now. The other Checkbox survivors were the rebuild's, gone
+with v2.
+
+**The Text Input's first 10,000 run (runtime, seed 20731)** attributed C68 372, C72 15, C69 9, D35 5, C80 1 and left **6
+divergences no row took**, all one shape: Block Pointer Events on (any truthy value) and a Set or Insert Text queued, then a release,
+touch or lift: the runtime answers the queued write BEFORE the act's own Pointer Up / Pointer Down. Not first-frame, not React:
+measured side by side in any frame, and a call-order probe showed the node's own handler still runs first in the PLAIN case. The cause
+is the runtime's own (pointerlisteners.ts :113-133): Block Pointer Events gives every pointer event a handler (a blocker where
+nothing listened), each wrapped with the drain, and the browser raises `pointerdown` / `pointerup` before the `mousedown` /
+`touchstart` / `mouseup` / `touchend` the control listens to — on a disabled control too. R3 (a): the spec models it (`blocksPointer`,
+`blockerFirst`; v1 had the same gap — the seed reached it, not the conversion). Two scenarios (release / touch / lift on a one-line
+field, press / click on a Text Area; enabled and disabled). The interpreter's own 10,000 left 6 mutant survivors on branches only
+10,000 reached (a remounting frame end with an empty Insert; an off-page Set with an empty Insert; a Text Area swap at a release, a
+lift or a frame end while the field held the keyboard): four scenarios, each read by a later frame or a Blur action.
+
+**Readings (2026-10-05, seeds as named; load 3–8 with peers):** the Text Input v2 conforms on the interpreter at 200 on seeds 13,
+20729, 20730, 20731 (3,379 / 3,382 at 13; 3,700 / 3,702 at 20731 after the last scenarios, the rest declared) and on the runtime at
+200 on 13 and 20730 (0 divergences outside the rows; 3,379 / 3,382, 3,372 / 3,373). Its runtime 10,000 runs at 20731: the first, 6
+unattributed (Block Pointer Events, above); the second, 0 unattributed, C68 372 · C72 15 · C69 9 · D35 5 · C80 1 attributed, 3 mutant
+survivors (a disabled, unfocused field's blocker drain) — one scenario, killed at 200; the third, after it, CONFORMS (0 divergences, 4,119 / 4,125, the rest declared). The Checkbox v2 and the Dropdown
+v2 conform on the interpreter and the runtime at 200 on two seeds (321 / 322; 852 / 854, the Dropdown after one scenario for a press
+the matrix's closing Focus action masked); at 10,000 each had 3 C80 divergences the first matcher missed (a Focus action earlier in
+the frame — its Focused prints in the settle group) and no survivor; re-run with the matcher reading the frame's steps, both CONFORM at 10,000 (0 divergences; C80 attributed 5 and 3; 321 / 326 and 852 / 857, the rest declared). The Button conforms at 10,000 (0 divergences,
+322 / 327, the rest declared). The package suite 20 suites / 878 passed; the runtime graph and target suites 102.

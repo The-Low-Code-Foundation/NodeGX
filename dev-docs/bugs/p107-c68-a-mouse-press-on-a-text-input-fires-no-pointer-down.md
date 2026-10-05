@@ -1,7 +1,7 @@
 ---
 id: P107-C68
 title: A mouse press on a Text Input fires no Pointer Down and never sets Pressed — the component's own onMouseDown replaces the control's; a Text Area, a finger and the release still report
-status: needs-ruling
+status: open
 severity: medium
 area: runtime / Text Input (components/controls/TextInput/TextInput.tsx)
 found: P107 NSP-016 s38, 2026-10-04
@@ -26,3 +26,13 @@ the same frame while every other control's does.
 
 **Proposed fix:** compose — `onMouseDown={(e) => { inputProps.onMouseDown?.(e); window.addEventListener(...) }}` — one
 line. The spec models today's behaviour (press on an `<input>`: the keyboard moves, nothing else).
+
+
+## Ruled 2026-10-05 (R12, NSP-023): Pointer Down fires
+
+Asked in plain words, Richard chose **"Pointer Down fires"**: the Pointer Down description ("fires as a mouse button or finger goes
+down on this control") is the intent. The Text Input spec v2 (`packages/nodegx-node-spec/src/nodes/text-input.ts`) states it: a mouse
+press on a one-line field fires Pointer Down, sets Pressed and drains the frame, as a Text Area's and a finger's do. The runtime's
+behaviour is now a **known row on the runtime target only** (`mousePressOnOneLine`, `packages/noodl-runtime/test/node-spec/conformance.test.ts`),
+carried by 15 row scenarios in `scenarios/net.noodl.controls.textinput.json` (14 beside a Text Area twin the runtime passes; the first beside the Text Area press scenario that was already there). The
+proposed fix above stands: compose the two handlers (one line).

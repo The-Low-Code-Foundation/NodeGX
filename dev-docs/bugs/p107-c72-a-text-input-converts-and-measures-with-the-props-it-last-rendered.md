@@ -1,7 +1,7 @@
 ---
 id: P107-C72
 title: A Text Input's Clear, Backspace and frame-end writes convert with the Type, and measure room with the Max length, the component LAST RENDERED — a Type turned Number with a Clear in the same frame publishes '' where the next frame says null
-status: needs-ruling
+status: open
 severity: low
 area: runtime / Text Input (components/controls/TextInput/TextInput.tsx `setText` :94, `edit` :346)
 found: P107 NSP-016 s40, 2026-10-04
@@ -33,3 +33,10 @@ is converted after the act's paint, so only the graph's same-frame writes see th
 (and `.maxLength`) in `setText` / `edit` / `componentDidMount` — or convert in the node (`onTextChanged`'s callback) with
 the node's `props.type`, which is current. Small; the C69 family (the component reads React's last commit, here its
 props rather than its state).
+
+
+## Ruled 2026-10-05 (R12, NSP-023): the Type and Max length as they stand
+
+Ruled with C69 ("each sees the last"): a write converts with the Type, and measures an Insert Text's room with the Max length, as they
+stand when it runs. The Text Input spec v2 states it (no `shownType` / `shownMaxLength`); the runtime's behaviour is a **known row on the
+runtime target only** (`staleProps`, conformance.test.ts), carried by two row scenarios. The proposed fix above stands.

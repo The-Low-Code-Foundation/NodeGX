@@ -875,3 +875,11 @@ what a person gets. (2) **A name is graded by nothing**: the first "control from
 the traces against the names caught it, as in s35. (3) **A twin's recorded example can be the play's own values.** The swapped-in
 example held element 2 with Tag `span`, so every scenario sitting on element 2 with `span` let the swap through, and which ones did
 depended on the seed. A scenario written at a value the example does not hold (Tag `h1`) kills it on every seed.
+
+### 7.10 s45, 2026-10-05 — the Text Input, the Checkbox and the Dropdown move to v2 (NSP-023)
+
+Recorded in [NSP-023 §8.1](NSP-023-THE-SPEC-WITHOUT-REACT.md). What §7.2–§7.5 describe as the Text Input's `field` / `pending`, the
+props as last rendered, the `turn`, the `<input>`'s missing Pointer Down and a fresh `<textarea>`'s cursor at the start is v1: v2 states
+the intent Richard ruled and each of those is a known row on the runtime (C69, C72, C68, D35). The label rebuild (§7.2's Checkbox,
+§7.3, §7.4's Dropdown) is gone from all three specs: row C80. The Button's and the Checkbox's 10,000 runs (the hit test's debt from
+§7.8) are there too.

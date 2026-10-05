@@ -1782,5 +1782,161 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "hidden and off the page: Mounted on and an act in the same frame — the act's paint puts the hidden button back (Did Mount) and the act meets nothing (a hidden element is under no pointer and takes no keyboard); a Focus action after it finds the button on the page (Done, takes nothing) — every act",
+    "because": "NSP-016 s43's hit test with s37's paint-before-the-act: the 10,000 runs (s45, seed 20731) left the act's remount branch alive (a swap with the branch that mounts nothing) — only a read of the page between the act and the frame's end tells them apart",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
   }
 ]

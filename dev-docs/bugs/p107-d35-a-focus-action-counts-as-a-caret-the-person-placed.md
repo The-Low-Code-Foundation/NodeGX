@@ -1,7 +1,7 @@
 ---
 id: P107-D35
 title: A Focus action counts as "a caret someone placed" — on a Text Area an Insert Text then writes at the START of the text, where the browser's resting cursor is, and a field whose Type moved from Email or Number to Text inserts at the start too
-status: needs-ruling
+status: open
 severity: low
 area: runtime / Text Input (components/controls/TextInput/TextInput.tsx `caret` :304-316, `hadCaret` :177-180)
 found: P107 NSP-016 s40, 2026-10-04
@@ -30,3 +30,13 @@ as leaving the cursor where the browser rests it; (b) set `hadCaret` only from a
 with `e.isTrusted`, or a pointer / keyboard flag), so an Insert Text after a Focus action appends as it does before any
 focus; (c) have the Focus action move the cursor to the end (`setSelectionRange(len, len)` in `_focus`), which is what a
 click past the text does. The spec models today's behaviour (`caret`, `hadCaret`).
+
+
+## Ruled 2026-10-05 (R12, NSP-023): the cursor rests at the end
+
+Asked in plain words ("where does the cursor sit in a field nobody has clicked in?"), Richard chose **"at the end, both"**: a one-line
+field and a Text Area alike. A keypad wired to Focus + Insert Text appends. The Text Input spec v2 states it; the runtime's Text Area,
+whose cursor rests at the start, is a **known row on the runtime target only** (`textAreaRestsAtStart`, conformance.test.ts), carried by
+three row scenarios. The second case above (a Type moved from Email or Number to Text puts the cursor at the start) is HTML's type
+change steps and stays in the spec: it was not part of the question. Fix: put the cursor at the end when the component mounts a
+`<textarea>` (or when a Focus action meets a field with no caret placed — ruling (c) above).

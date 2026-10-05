@@ -69,20 +69,10 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   ],
   'net.noodl.controls.checkbox': [
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
-    ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
-    // a press, a release or a Tab onto a DISABLED box while Enable Label is changing: the act's paint rebuilds the input (the keyboard
-    // leaves with the old one, `elementFocused` false) and the act itself meets nothing. Dropped or swapped with the act that
-    // met nothing on a box not rebuilding, the difference is unreadable: the Focus and Blur actions read a disabled element
-    // as nothing to do until the frame's end paints Enabled — and the same paint redoes the rebuild. Measured s37: the
-    // runner's own mutant and the original trace the scenario "focused, then disabled; Enable Label changed and a release …"
-    // identically.
-    ...['press', 'release', 'focus'].flatMap((act) => [
-      { reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED },
-      { reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":["elementFocused"],"emit":[]', swappedWith: '"set":[],"emit":[]', why: REBUILT_WHILE_DISABLED },
-      { reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":[],"emit":[]', swappedWith: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED }
-    ])
+    ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE }))
+    // (v2, NSP-023 s45: Enable Label rebuilds nothing — the rebuild family declared here in s37 is gone with it)
   ],
-  // NSP-016 s42 — the Radio Button: the Checkbox's page model, so the Checkbox's three — and a click joins the rebuild family: a
+  // NSP-016 s42 — the Radio Button: the Checkbox's page model, so the Checkbox's v1 rebuild family (until NSP-023 step 5) — and a click joins it: a
   // click on a disabled button meets nothing as a press does (the Checkbox's click toggles the box, so its click never had this shape)
   'net.noodl.controls.radiobutton': [
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
@@ -104,32 +94,15 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":[],"emit":[]', why: 'a frame end with nothing scheduled and nothing to paint: its set is empty, there is nothing to drop' },
     // Clear off the page with the author's Value and the output already empty: every writer of the output writes the start value with
     // it, so the start value is empty too — the three keys it writes already hold the value (text-input.ts :490-497)
-    { reducer: 'clear', kind: 'drop-set', branch: '"set":["out","startValue","text","wire"],"emit":[],"outcome":"unchanged"', why: "a Clear off the page that finds the author's Value, the start value and the output already empty writes what is there (s40: the wire's copy too)" },
-    // a press, release, click, Tab or key on a DISABLED field while Enable Label or Type is changing: the act itself meets nothing and
-    // its paint rebuilds the element (`elementFocused` false); dropped, the paint's sync (`labelOn` / `shownType`) is dropped with it,
-    // so the frame's end rebuilds again and resets the same key — nothing reads it in between (the Focus and Blur actions read a
-    // disabled element as nothing to do). Measured s38 on the interpreter: the swaps of these branches are killed, the drops not.
-    ...['press', 'release', 'click', 'focus', 'type', 'key'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED })),
-    // a pointer act whose drain LANDED a Set (Done: the field had no keyboard — `setText` abstains while it has one) has a twin that
-    // also rebuilt the element (Enable Label / Type changed in the frame) and reset `elementFocused` — to the false it already was.
-    // Swapped either way, the branches write the same keys to the same values. Found by the 10,000 deep run (s38).
-    ...['hover', 'leave', 'press', 'release', 'click', 'touch', 'lift'].flatMap((act) =>
-      ['"outcomes":["insert:unchanged","set:done"]', '"outcomes":["set:done"]', '"outcomes":["insert:done","set:done"]'].map((o) => ({
-        reducer: `person.${act}`,
-        kind: 'swap-branch' as const,
-        branch: o,
-        swappedWith: o,
-        why: "a drain that landed a Set found no keyboard on the field; its rebuild twin resets elementFocused to the false it already was"
-      }))
-    )
+    { reducer: 'clear', kind: 'drop-set', branch: '"set":["out","startValue","text","wire"],"emit":[],"outcome":"unchanged"', why: "a Clear off the page that finds the author's Value, the start value and the output already empty writes what is there (s40: the wire's copy too)" }
+    // (v2, NSP-023 s45: no label rebuild; the s38 rebuild family and the drain's rebuild twins are gone with it — the Type swap
+    // between Text Area and a one-line field still replaces the element, and the deep run says whether it needs any of them back)
   ],
-  // NSP-016 s39 — the Dropdown: the placing off the page and the four acts that meet no element (the Button's); a press, release,
-  // click, Tab or pick on a DISABLED element while Enable Label is changing (the Checkbox's REBUILT_WHILE_DISABLED: the act meets
-  // nothing, the paint rebuilds the `<select>` and resets `elementFocused`, which no action reads while disabled)
+  // NSP-016 s39 — the Dropdown: the placing off the page and the four acts that meet no element (the Button's)
   'net.noodl.controls.options': [
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
-    ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),
-    ...['press', 'release', 'click', 'focus', 'choose'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED }))
+    ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE }))
+    // (v2, NSP-023 s45: Enable Label rebuilds nothing — the rebuild family declared here in s39 is gone with it)
   ],
   // NSP-016 s41 — the Slider: the placing off the page and the four acts that meet no element (the Button's; the 10,000 run)
   // NSP-016 s43 — Visible is a page sync now: a group placed OFF the page carries only it, as the Button's placing does
