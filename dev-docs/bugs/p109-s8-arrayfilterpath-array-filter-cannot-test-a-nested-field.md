@@ -1,7 +1,8 @@
 ---
 id: P109-S8-ARRAYFILTERPATH
 title: Array Filter cannot test a nested field (`owner.id`) or a computed value
-status: open
+status: fixed
+commit: 7c4bcbf38
 severity: low
 area: `noodl-runtime/src/nodes/std-library/data/filtercollectionnode.ts` (`applyFilter` reads `item[key]` only)
 found: P109 s5 (ISL-005's census, finding 3); split from P109-S5-ARRAYFILTERIN in s8, 2026-10-03
@@ -20,3 +21,7 @@ unless a row has a field literally named `owner.id`. Measured before asking: 320
 filter keys, **0 containing a dot** (filter or sort lists); 0 dotted keys in Static Data; 4 hand-written nested lookups in 3
 apps. The filter list is one comma-separated `filterFilter` (`filtercollectionnode.ts:621`, split `:373-374`); `applyFilter`
 reads `item[key]` (`:44-69`).
+
+**Fixed 2026-10-05 (`7c4bcbf38`)** in the runtime and P107's node-spec model: `fieldOf` — exact name first, else the path.
+Spec `noodl-runtime/test/p109-array-filter-nested-field.test.ts` 6/6 with two reverted arms red; conformance CONFORMS,
+98/98 mutants. The export's own copy is NOT changed — [P109-S15-ARRAYFILTERPATHEXPORT](p109-s15-arrayfilterpathexport-the-export-filters-a-dotted-key-as-one-field-name.md).
