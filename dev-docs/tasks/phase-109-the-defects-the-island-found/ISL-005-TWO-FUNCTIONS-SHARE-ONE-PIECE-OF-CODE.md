@@ -1,6 +1,6 @@
 # ISL-005 — Two Functions share one piece of code
 
-**Status:** 🟡 BUILDING — ruled 2026-10-05 (s1 of the build, session `opennoodl-8e`): **"ship it"**, on a mockup of shape 1 (script files in the project, a Uses list on the Function). **Built and committed: slices 1 (runtime), 2 (format + pipes), 3 (the door, AC8 ✅), 5 + 5b (the editor screens and the code editor, driven live in the editor 2026-10-05), 7 (docs + catalog, AC9 ✅), 6 (the island, build session 3: AC3 ✅ one copy, 3,678,351 → 385,837 bytes; AC5 ✅ server first paint; AC2 ✅ two pages through a deploy, headless; AC6 measured).** Owed: slice 4 (export, AC7: P18's uncommitted pile holds `component.ts` / `emitApp.ts` / the ledger). See "Next" at the end of §8. Earlier: ✅ ruled s5 (2026-10-02) "Native nodes first" — the island rebuild stays its own template task (P108 IW-010); this ruling decides the shared file "afterwards" for what is left. ✅ ruled s5 (2026-10-02): **"Native nodes first"** — the island is rebuilt toward native nodes and logic components as its own template task, the four blocking product gaps are fixed first, and the shared script file is decided afterwards for what is left (README §8 round 2; [census](ISL-005-CENSUS-2026-10-02.md)). §5 is not built now. Scoped 2026-10-01 at `27d891bf3`
+**Status:** ✅ CLOSED 2026-10-05 (build session 4) — every AC met: AC1 red recorded; AC2 two pages through a deploy, in a visible window (13/13); AC3 one copy (3,678,351 → 385,837 bytes); AC4 one warning naming file, line and users, cleared when the file is fixed (driven in the editor); AC5 server first paint; AC6 not slower; AC7 export (slice 4); AC8 the door; AC9 docs + catalog. Ruled 2026-10-05 (s1 of the build, session `opennoodl-8e`): **"ship it"**, on a mockup of shape 1 (script files in the project, a Uses list on the Function). Slices 1 (runtime), 2 (format + pipes), 3 (the door), 5 + 5b (editor screens, code editor), 7 (docs), 6 (the island, landed on `cline-dev` in build session 4 as `948b92acd`), 4 (export, `a6193856c`). Next for the phase: ISL-020, ISL-006, ISL-013 re-scope against shape 1 (§8 "Build session 4"). Earlier: ✅ ruled s5 (2026-10-02) "Native nodes first" — the island rebuild stays its own template task (P108 IW-010); this ruling decides the shared file "afterwards" for what is left. ✅ ruled s5 (2026-10-02): **"Native nodes first"** — the island is rebuilt toward native nodes and logic components as its own template task, the four blocking product gaps are fixed first, and the shared script file is decided afterwards for what is left (README §8 round 2; [census](ISL-005-CENSUS-2026-10-02.md)). §5 is not built now. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F08](AUDIT-2026-10-01.md) (R-c as well) · first planned in [P105 CG-002 line 136](../phase-105-the-coding-garden/CG-002-THE-ENGINE.md) ("`ENGINE` is inlined into five scripts … Owner: NONE") · grown by every P106 and P108 lane since
 **Side:** product (runtime `Function` node, the editor's project files, the MCP door, `@nodegx/export`)
 
@@ -513,7 +513,7 @@ AC2 (START-HERE edited after the build; regenerated, 1 run serially green); `isl
 after the fixes: `cg003Template` + `ig004Island` + `iw008Crew` + `isl005GardenScripts` **224/224**; `isl021ShopParity` (drives
 the template's Shop page through `drive_page`) green.
 
-**Not landed.** The work is two commits on the branch `p109-isl005-island` (worktree
+**Not landed** *(→ landed in build session 4: rebased onto `3802a1476`, regenerated with no change, fast-forwarded as `948b92acd`…`eac14b783`)*. The work is two commits on the branch `p109-isl005-island` (worktree
 `../OpenNoodl-worktrees/p109-isl005-island`), rebased onto `cline-dev` at `350054fbc`; the garden regenerated there changes
 nothing. Moving `cline-dev` to the branch (a fast-forward plus bringing primary's working files up to date, with the peer's
 uncommitted `cg003Template.test.ts` kept) was refused by the session's permission check, so it is Richard's to run or allow.
@@ -530,3 +530,77 @@ uncommitted `cg003Template.test.ts` kept) was refused by the session's permissio
    → nothing).
 3. AC2 in a visible window, once `drive-deployed.js` has a visible mode (its owner's pile).
 4. Close ISL-005 when AC7 is met.
+
+### Build session 4 — 2026-10-05: landed, export (AC7), AC4 in the editor, AC2 in a window → closed
+
+**Landed slice 6.** `cline-dev` had moved six commits past the branch's base (`350054fbc` → `3802a1476`); two files
+overlapped: the folder's handoff prompt (kept `cline-dev`'s; the branch's block was a "how to land" note) and
+`cg003Template.test.ts` (ISL-008 AC6's hunks, now committed; auto-merged). In the worktree after the rebase,
+`npm run template:garden` changed **nothing** (engine gate 259/259), so slice 6 and ISL-008's stylesheet compose
+byte for byte; `isl005GardenScripts` + `cg003Template` + `isl005ScriptFiles` + `isl025Census` + `isl018DoorPins` 204/204.
+The ES5 fix, measured: `noodl-viewer-react`'s `isl-004-keep-page` on `cline-dev` → "Test suite failed to run" (TS2802 in
+`scriptfiles.ts`); on the branch 9/9 with `isl-005/server-render`. None of the 114 landing paths was dirty in primary,
+so the landing was a plain `git merge --ff-only` (allowed this time; s3's update-ref + checkout route was refused).
+
+**Slice 4, export (AC7) ✅** (`a6193856c`, `b9a17871a`). Red first, on a new fixture `scripts-desk` (two pages, a Function
+each; Home's uses `engine/greet.js`, About's `greet.js` + `words.js`; greet `use()`s words): the typecheck of the export read
+`TS2304 Cannot find name 'Scripts'` on Home and About, and the report said nothing
+([P109-S19-SCRIPTSUNBOUND](../../bugs/p109-s19-scriptsunbound-an-exported-function-that-uses-a-script-file-does-not-build.md)).
+The purity gate compiled the body with `Inputs, Outputs, Noodl, Component`, so `Scripts` was just a free name.
+- parse: `ProjectIR.scripts` (`scripts/**.js` verbatim, path order; absent without the folder, so 51 projects' IR is
+  unchanged). `src/scriptFiles.ts` mirrors the runtime's four readers (the package installs alone, HLS-001); the spec
+  runs both over one table.
+- plan: `scriptUsesPlan` — refused by name, never inlined: a Uses entry naming no file, two files with one name, a
+  `use()` of a file not there, a file that does not compile or compiles only sloppy (the emitted file is an ES module),
+  and a file that reads the clock / random / network / timers / is async (the body's own marker gates; the body-only
+  ones — `this`, `arguments`, `window`, `Component`, `Script` — are not applied to a file, where they are ordinary or
+  `undefined` in the runtime too).
+- emit: `src/lib/projectScripts.ts` (the runtime's `ScriptFiles`, transcribed), ONE registry
+  `src/lib/projectScriptFiles.ts` holding every file (so top-level state is shared and an unscannable `use()` resolves),
+  each file once at `src/project-scripts/<path>.ts` (`// @ts-nocheck`, verbatim, inside the function the runtime compiles
+  it as — the Script node's precedent). The wrapper binds `const Scripts = { greet: projectScripts.load("engine/greet.js") }`
+  inside its try: a file that fails runs none of the body, as the runtime fails the run. Recorded divergence: the
+  export logs a broken file from each wrapper that meets it; the runtime raises it once.
+- Ledger note on `JavaScriptFunction`. HLS-001 corpus 51 → 52, hashed in a clean worktree at HEAD + this slice:
+  23 golden lines added, none changed.
+- `tests/isl-005-script-files.test.ts` **29/29**, the emitted code RUN (transpiled, the wrapper cut out of the page):
+  "Hello, Olive!" / "Hello, Robot! (Hello)"; `words.js` alone changed → both pages "Hi there"; changed back → both revert;
+  one instance per app; a throw runs none of the body; five refusals by name; the loader matches the runtime's on a
+  cycle, a remembered failure, the inner file named and `Noodl`/`window`/`document` undefined. **Sabotage:** binding
+  removed → 6 red; refusals ignored → 5 red.
+- 🔴 Caught before any `test:ci`: the editor's TypeScript compiles this package (via `CodeExportModal`) and did not narrow
+  `usesValue` across a `return` (TS2339) where the package's own tsc did — fixed in one expression (`b9a17871a`).
+- Whole package at 2 workers beside a peer's jest: 3,826 passed, 5 red in 3 suites, all attributed in the clean worktree:
+  `hls001-corpus-identity` (P18's uncommitted ledger moves every README + their untracked `pattern-desk`; mine was the
+  literal, fixed), `sse` floor 122 → 123 (P18's pile; green on HEAD + this slice), `hls006-every-listener` (red on HEAD:
+  the gate reads P107's `world.listen('resize')` as a socket — filed
+  [P109-S19-LISTENERREGEX](../../bugs/p109-s19-listenerregex-the-every-listener-gate-reads-an-event-subscription-as-a-socket.md)).
+
+**AC4 ✅ — the editor half** (`b40a61839`, `a301c9260`). Traced first: the runtime raises a broken file once, but
+`createEditorWarningSubscriber` forwards the message only, so the editor's one warning named the file (no line for a
+syntax error: `new Function` gives none) and no other user. `models/ScriptFiles/scriptFileWarning.ts` completes it where
+it arrives (`ViewerConnection` `showwarning`): the line from parsing the project's copy as a function body
+(`@babel/parser`), and every Function whose Uses REACHES the file, through `use()` too. Unit 6/6 on messages made by the
+runtime's own `ScriptFiles`; reverted arm (direct users only) → 2 red. **Driven in the editor** (`dev:debug`, throwaway
+profile `NOODL_USER_DATA_DIR`, a copy of the AC2 project), reading each Function's `getHealth()` through
+`window.__nodeGraphEditor`: `words.js` broken from the shell → ONE warning, on the Olive Function:
+`scripts/engine/words.js:3: Unexpected token ';' — breaks 2 Functions: /Pages/Olive / Function, /Pages/Robot / Function`;
+the Robot Function healthy. **Then fixed → the page re-ran ("Hi there, Olive!") and the warning STAYED**
+([P109-S19-STALESCRIPTWARNING](../../bugs/p109-s19-stalescriptwarning-a-fixed-script-file-leaves-its-warning-on-the-function.md)):
+nothing cleared the four script-file codes. Fixed in the runtime (a run whose files load clears them); its test had
+asserted `lastError` only and now asserts the warning, beside "one warning while broken". Driven again on the rebuilt
+viewer bundle: broken → the one warning; fixed → "Hello, Olive!", no warning on either. No `renderer:exception`.
+Stack stopped with `dev:stop` (26).
+
+**AC2 ✅ in a visible window.** `drive-deployed.js` gained `visible` / `DRIVE_VISIBLE=1` (drops `--headless=new`;
+measured: the UA reads `HeadlessChrome` without it, `Chrome` with it). `DRIVE_VISIBLE=1 isl005-two-pages.ts`: **13/13,
+DRIVE_EXIT 0**, no console error in any round, on the deploy bundle built 15:47 (carries the script-file runtime).
+
+**Gates this session:** export spec 29/29 + jsfun + typecheck-emitted + corpus identity 133/133 (worktree); runtime
+Function suites 14, 190/190; runtime, export and editor `tsc --noEmit` 0; viewer ES5 9/9; editor `tests-unit/isl-005`
+scriptFileWarning 6/6; `export-ledger:check` OK.
+
+**Closed.** What it unblocks: ISL-020 (an agent changing one line of a big script is now `edit_script_file` on a small
+file), ISL-006 (ports from a Function's own text only — a file never makes one, already the rule) and ISL-013 (kits
+sharing code) re-scope against shape 1.
+

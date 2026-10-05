@@ -2,7 +2,7 @@
 id: P109-S18-SHOPBLOCKED
 title: "`Logic/Shop card` sets `var blocked = false`, which replaces the engine's `blocked()` for the rest of each run"
 status: fixed
-commit: b63d5bfec (branch p109-isl005-island, not yet on cline-dev)
+commit: 948b92acd (landed on cline-dev 2026-10-05; b63d5bfec before the rebase)
 severity: low
 area: templates / bot-garden (`packages/noodl-mcp/tests/iw006Shop.ts` SHOP_CARD_SCRIPT)
 found: P109 ISL-005 build session 3, 2026-10-05 (the sharing census, `gardenSharingHazards`)
