@@ -32,3 +32,8 @@ outer one mints it as a value port.
 
 **Open question.** Whether the editor itself draws these three wires as broken when the template is opened (the same
 model). Not looked at.
+
+**s3 (same day): a fourth.** `plEach.itemOutputSignal-linkTask -> plOut.linkTask` (Add an existing task, fed from the
+row's `prLinkEach`) — the same shape, flagged the same way, and driven working in `tpl008-projects-drive` §9 on both
+viewers.
+

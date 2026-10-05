@@ -1,6 +1,6 @@
 # TPL-008-PJ — Planning folds into the todo list as a Projects tab
 
-**Opened 2026-10-05.** Status: 🟢 **s2 live on todo.digitalbricks.io (`index-57f08dc7…`, 2026-10-05) — Planning's editing back: the money popup, change the move, add a task, edit the project, tasks ↔ projects. AC8 (Richard's mornings) and the Change-the-move device question are his.** Mockup approved:
+**Opened 2026-10-05.** Status: 🟢 **s3 live on todo.digitalbricks.io (`index-57f134c7…`, 2026-10-05) — s2 Planning's editing back (the money popup, change the move, add a task, edit the project, tasks ↔ projects); s3 by kind in your own order, a task's project from its pane or the project. AC8 (Richard's mornings) and the Change-the-move device question are his.** Mockup approved:
 <https://claude.ai/artifact/UkHvQfFKeybQTojKVQEQm3> (Richard: *"Yeah I like it, let's do that redesign of the todo app and
 push it, and retire the planning template for now (not delete, just set it aside)"*).
 
@@ -217,4 +217,8 @@ is sad"*.
 
 Gates: tpl008 **102/102** (+5); `tpl008-projects-drive` **17/17 on both viewers** (+§2 default and remembered, +§9 by
 kind, a drag, Add an existing task, the pane's dropdown); the other tpl008 drives **50/50**.
+
+**Shipped (s3)** as s2 was: `~/vscode_projects/nodegx-template-crm/ship-2026-10-05-projects-s3/todo-host`, backup
+`/srv/todo/site.before-pj-s3-2026-10-05`; read back `index-57f134c71b805396.js`, viewer sha unchanged, reminders key 200,
+the bundle carries *Add an existing task* and *Most urgent first*. Wire check: 4, all `P78-TPL008PJ-NESTEDSIGNAL`.
 
