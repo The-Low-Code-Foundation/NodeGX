@@ -251,3 +251,17 @@ on screen after it.
 row whose id stays keeps it, a Refresh, a row leaving and returning and a page left each build a new copy that starts empty,
 and Keep When Leaving keeps the page. Graded on the text a real server SENDS (`get_project_info.interfaceDoctrine`) by a new
 row in `cmp001InterfaceDoctrine.test.ts`. The catalog example exists (`comp-wizard-component-object.json`).
+
+**AC4, the census (s18)** — [`isl004-census.py`](isl004-census.py), both project formats (v2 `nodes.json`, legacy
+`project.json` graph roots) over the 13 templates, library prefabs, modules and examples, and the catalog examples (where
+COM-003 landed P86's corpus: its own `corpus/` is markdown). A name is used in a component when a `Variable2` / `Set Variable`
+names it there, or any script or expression there mentions `Variables.<name>`:
+- **17 projects use 214 app-wide Variable names; 178 are used inside ONE component only** — each a candidate for that
+  component's own state. Most in nightbook (43), rocket-school (37), bot-garden (18), planning (16) and its demo (15).
+- **10 of the 178 sit in a component placed twice or more:** 9 in rocket-school (`Game/Focus picker` on Monster/Setup and
+  Race/Setup; `Profiles/New player form` in Game/Header and Pages/Profiles), each Variable node commented *"shared on purpose"*
+  (GAM-005's escape); 1 in todo-list (`todoLastHistory`, a scratch value in `Logic/Write history`, a stateless write helper
+  placed in five commands). **No live defect.** 🔴 My first run read 70: one placement counted twice (a v2 name already starts
+  with `/`, and both lookups hit it), caught by reading the rows, fixed before recording.
+- **The `kept` shape** (a page feeding app state back into itself to survive a reopen): bot-garden's Island page only, as s17
+  measured (no other template has the quiet input).
