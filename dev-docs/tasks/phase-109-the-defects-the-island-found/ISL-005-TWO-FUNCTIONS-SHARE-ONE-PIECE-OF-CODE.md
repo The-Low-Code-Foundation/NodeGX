@@ -481,6 +481,12 @@ slice 6, both deployed the same way, run in both orders:
 | HEAD (pasted engine) | 354 ms, 349 ms | 1,145 ms, 1,072 ms |
 | slice 6 (scripts/) | 323 ms, 328 ms | 982 ms, 1,007 ms |
 
+⚠️ **Which runtime these deploys ran.** A peer (opennoodl-1e, ISL-004) reported that since 15:47 the shared
+`src/external` viewer, deploy and SSR bundles carry their UNCOMMITTED ISL-004 changes (the router's leave/keep path, Repeat
+and Delay pause hooks), rebuilt by a watcher. Every deploy in this entry was made after 16:00, so before and after ran the
+same runtime and the comparisons are like for like. But "HEAD's garden" means HEAD's template on that runtime, not HEAD's
+runtime. With Page "Keep When Leaving" off (the garden never sets it) that runtime should behave as HEAD's.
+
 **The garden drives (AC3's "every drive still green"), on the deployed slice-6 garden:** 20 drives, **18 green first
 time**: cg003-pages 330/330, ig005-robots 60, ig003-modes 90, iw001-workshop 38, iw-look 143, iw003-biscuit 24, iw003-stones 32,
 iw003-mamie 34, iw004-blocks 23, iw003-post 17, iw006-shop 60, iw006-earn 15, iw006-owed 19, iw008-crew 39, iw007-animals 16,
@@ -507,9 +513,14 @@ AC2 (START-HERE edited after the build; regenerated, 1 run serially green); `isl
 after the fixes: `cg003Template` + `ig004Island` + `iw008Crew` + `isl005GardenScripts` **224/224**; `isl021ShopParity` (drives
 the template's Shop page through `drive_page`) green.
 
+**Not landed.** The work is two commits on the branch `p109-isl005-island` (worktree
+`../OpenNoodl-worktrees/p109-isl005-island`), rebased onto `cline-dev` at `350054fbc`; the garden regenerated there changes
+nothing. Moving `cline-dev` to the branch (a fast-forward plus bringing primary's working files up to date, with the peer's
+uncommitted `cg003Template.test.ts` kept) was refused by the session's permission check, so it is Richard's to run or allow.
+
 **Next (build session 4), in order:**
-1. **Land the island in primary** if this session could not (see the handoff): the commit touches
-   `cg003Template.test.ts`, which carries a peer's uncommitted ISL-008 AC6 hunks; the temporary-index recipe takes only ours.
+1. **Land the branch** (the commands are in the handoff). Re-check first that `cline-dev` has not moved past `350054fbc`;
+   if it has, rebase the branch and re-run `npm run template:garden` (it must change nothing).
 2. **Slice 4, export (AC7)** when P18's pile on `component.ts` / `emitApp.ts` / `coverage-ledger.json` lands, or with the
    temporary-index recipe if their hunks do not border ours. The garden is no worse for export meanwhile: `nodegx export
    --dry-run` of the slice-6 garden (exit 4, refusals) emits **no file at all** for every `Logic/*` component, Uses or not
