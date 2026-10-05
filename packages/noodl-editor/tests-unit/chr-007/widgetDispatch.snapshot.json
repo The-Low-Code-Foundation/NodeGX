@@ -645,7 +645,8 @@
       "functionScript": "CodeEditorType",
       "run": null,
       "scriptInputs": "PropListType",
-      "scriptOutputs": "PropListType"
+      "scriptOutputs": "PropListType",
+      "uses": "ScriptUsesType"
     },
     "Javascript2": {
       "code": "CodeEditorType",

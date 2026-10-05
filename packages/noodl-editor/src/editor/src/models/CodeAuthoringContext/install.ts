@@ -21,7 +21,8 @@
  * @module CodeAuthoringContext
  */
 
-import { setCodeAuthoringContext } from '@noodl-core-ui/components/code-editor';
+import { setCodeAuthoringContext, type AuthoringScript } from '@noodl-core-ui/components/code-editor';
+import { scriptAlias, scriptGives } from '@noodl/runtime/src/scriptfiles';
 
 import { EventDispatcher } from '../../../../shared/utils/EventDispatcher';
 import { listRegisteredLibraries } from '../../../../shared/utils/projectmodules';
@@ -40,6 +41,8 @@ import { collectProjectNames } from './collect';
 const REFRESH_DEBOUNCE_MS = 400;
 
 let installed = false;
+/** The project whose `scriptsChanged` is wired to a refresh (P109 ISL-005). */
+let scriptsBoundTo: ProjectModel | undefined;
 let pending: ReturnType<typeof setTimeout> | undefined;
 /** Guards against an in-flight disk read landing after a newer one. */
 let generation = 0;
@@ -54,11 +57,12 @@ async function refresh(): Promise<void> {
   }
 
   const names = collectProjectNames(project);
+  const scripts = collectScripts(project);
 
   // Publish the graph half immediately. The names are what most completions
   // need, and making them wait on a directory scan would mean an editor opened
   // in the first moments of a project completing nothing.
-  setCodeAuthoringContext({ libraries: [], ...names });
+  setCodeAuthoringContext({ libraries: [], ...names, scripts });
 
   let libraries: { name: string; global: string }[] = [];
   try {
@@ -75,7 +79,25 @@ async function refresh(): Promise<void> {
 
   if (mine !== generation) return;
 
-  setCodeAuthoringContext({ libraries, ...names });
+  setCodeAuthoringContext({ libraries, ...names, scripts });
+}
+
+/**
+ * P109 ISL-005 — what `Scripts.` completes from: every script file, by the name a Function reaches it
+ * by, with what it gives. A file is edited without any graph event, so the project's own
+ * `scriptsChanged` schedules the refresh, bound here once per project.
+ */
+function collectScripts(project: ProjectModel): AuthoringScript[] {
+  if (scriptsBoundTo !== project) {
+    scriptsBoundTo?.off('code-authoring-context');
+    project.on('scriptsChanged', scheduleRefresh, 'code-authoring-context');
+    scriptsBoundTo = project;
+  }
+  return project.getScriptPaths().map((path) => ({
+    path,
+    alias: scriptAlias(path),
+    gives: scriptGives(project.getScript(path) ?? '')
+  }));
 }
 
 function scheduleRefresh(): void {

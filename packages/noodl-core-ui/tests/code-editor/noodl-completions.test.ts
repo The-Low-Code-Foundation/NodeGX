@@ -249,7 +249,7 @@ describe('noodlCompletionSource', () => {
      */
     describe('on a fresh line, where the user has nothing to type yet', () => {
       it('offers the Function globals in an empty body, with no keystroke', () => {
-        expect(labelsFor('')).toEqual(['Inputs', 'Outputs', 'Noodl', 'Component', 'Script']);
+        expect(labelsFor('')).toEqual(['Inputs', 'Outputs', 'Noodl', 'Component', 'Script', 'Scripts']);
       });
 
       it('offers the Expression globals too — both modes, per the criterion', () => {
@@ -289,13 +289,13 @@ describe('noodlCompletionSource', () => {
         // beside them, so this is now the only thing keeping the empty-body
         // menu to the five names the criterion asks for.
         openFunctionNode(['Input_1'], []);
-        expect(labelsFor('', true)).toEqual(['Inputs', 'Outputs', 'Noodl', 'Component', 'Script']);
+        expect(labelsFor('', true)).toEqual(['Inputs', 'Outputs', 'Noodl', 'Component', 'Script', 'Scripts']);
       });
     });
 
     it('offers what a Function node is compiled with when asked explicitly', () => {
-      // `new AsyncFunction('Inputs', 'Outputs', 'Noodl', 'Component', …)`.
-      expect(labelsFor('const x = ', true)).toEqual(['Inputs', 'Outputs', 'Noodl', 'Component', 'Script']);
+      // `new AsyncFunction('Inputs', 'Outputs', 'Noodl', 'Component', 'Scripts', …)` (P109 ISL-005 added the fifth).
+      expect(labelsFor('const x = ', true)).toEqual(['Inputs', 'Outputs', 'Noodl', 'Component', 'Script', 'Scripts']);
     });
 
     it('offers the maths helpers in an Expression, where they are parameters', () => {

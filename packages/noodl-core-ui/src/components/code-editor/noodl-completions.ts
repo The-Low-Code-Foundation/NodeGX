@@ -134,6 +134,31 @@ function scriptPortCompletions(context: CompletionContext, path: string): Comple
 }
 
 /**
+ * P109 ISL-005 — `Scripts.` and `Scripts.<name>.` in a Function.
+ *
+ * `Scripts` holds only the files in the node's Uses when it runs, so the first
+ * level is those files (that exist), by the name the code reaches each by, and
+ * never the whole project's list. The second level is what that file gives.
+ */
+function scriptMemberCompletions(path: string): Completion[] | null {
+  const segments = path.split('.');
+  if (segments[0] !== 'Scripts' || segments.length > 2) return null;
+
+  const context = getCodeAuthoringContext();
+  const uses = context.openNode?.uses ?? [];
+  const files = (context.scripts ?? []).filter((file) => uses.includes(file.path));
+
+  if (segments.length === 1) {
+    return files.map((file) => ({ label: file.alias, type: 'namespace' as const, info: `scripts/${file.path}` }));
+  }
+
+  const file = files.find((candidate) => candidate.alias === segments[1]);
+  if (!file) return null;
+
+  return file.gives.map((name) => ({ label: name, type: 'property' as const, info: `Given by scripts/${file.path}` }));
+}
+
+/**
  * Members of whatever is before the cursor's dot, or `null` if this source does
  * not know that object — in which case the language's own sources answer, which
  * is why offering nothing here is the right behaviour and not a gap.
@@ -165,6 +190,11 @@ function memberCompletions(
   // lands on exactly the list that branch returned.
   const apiMembers = apiMembersAtPath(path, validationType);
   if (apiMembers) return asCompletions(apiMembers);
+
+  if (validationType === 'function') {
+    const scripts = scriptMemberCompletions(path);
+    if (scripts) return scripts;
+  }
 
   /*
    * FIX-016 — `'expression'` used to be the only mode excluded here, which let

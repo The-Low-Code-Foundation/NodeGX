@@ -275,7 +275,20 @@ const FUNCTION_GLOBALS: readonly ApiMember[] = [
   { label: 'Outputs', type: 'property', info: "This node's outputs. Assigning `Outputs.y` creates the port" },
   { label: 'Noodl', type: 'namespace', info: 'The Noodl API' },
   { label: 'Component', type: 'property', info: 'The scope of the component this node sits in' },
-  { label: 'Script', type: 'property', info: 'The script node itself, when there is one' }
+  { label: 'Script', type: 'property', info: 'The script node itself, when there is one' },
+  { label: 'Scripts', type: 'namespace', info: "The project's script files this Function uses, by file name (Uses in the panel)" }
+];
+
+/**
+ * The names a project **script file** (`scripts/**.js`) is compiled with:
+ * `new Function('use', 'exports', 'module', 'Noodl', 'window', 'document', …)`,
+ * the last three passed as `undefined` (`noodl-runtime/src/scriptfiles.ts`).
+ * P109 ISL-005.
+ */
+const SCRIPT_FILE_GLOBALS: readonly ApiMember[] = [
+  { label: 'use', type: 'function', info: "Another script file: `use('engine/world')` gives you what it exports" },
+  { label: 'exports', type: 'variable', info: 'What this file gives: `exports.name = …` is `Scripts.<file>.name` in a Function' },
+  { label: 'module', type: 'variable', info: '`module.exports = …` replaces everything this file gives' }
 ];
 
 /**
@@ -316,6 +329,7 @@ export function noodlMembersFor(validationType: ValidationType): readonly ApiMem
 export function globalsFor(validationType: ValidationType): readonly ApiMember[] {
   if (validationType === 'expression') return EXPRESSION_GLOBALS;
   if (validationType === 'script') return SCRIPT_NODE_GLOBALS;
+  if (validationType === 'scriptfile') return SCRIPT_FILE_GLOBALS;
   return FUNCTION_GLOBALS;
 }
 
@@ -340,6 +354,8 @@ export function globalsFor(validationType: ValidationType): readonly ApiMember[]
 export function apiMembersAtPath(path: string, validationType: ValidationType): readonly ApiMember[] | null {
   const segments = path.split('.');
   if (segments[0] !== 'Noodl') return null;
+  // A script file is given `Noodl` as `undefined`.
+  if (validationType === 'scriptfile') return null;
 
   let members = noodlMembersFor(validationType);
 

@@ -173,6 +173,9 @@ jest.mock('../../src/editor/src/views/panels/propertyeditor/DataTypes/SizeModeTy
 jest.mock('../../src/editor/src/views/panels/propertyeditor/DataTypes/StringList/StringListType', () =>
   mockStubClasses('StringListType')
 );
+jest.mock('../../src/editor/src/views/panels/propertyeditor/DataTypes/ScriptUses/ScriptUsesType', () =>
+  mockStubClasses('ScriptUsesType')
+);
 jest.mock('../../src/editor/src/views/panels/propertyeditor/DataTypes/TabGroup', () => mockStubClasses('TabGroup'));
 jest.mock('../../src/editor/src/views/panels/propertyeditor/DataTypes/TextAreaType', () =>
   mockStubClasses('TextAreaType')

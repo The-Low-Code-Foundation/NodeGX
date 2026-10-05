@@ -193,7 +193,7 @@ export function ScriptFileDocument({ path }: ScriptFileDocumentProps) {
             value={text}
             onChange={setDraft}
             onSave={(value) => save(value)}
-            validationType="script"
+            validationType="scriptfile"
             subject="file"
             width="100%"
             height="100%"
