@@ -1,6 +1,6 @@
 # ISL-010 — A running app can ask a local model
 
-**Status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
+**Status:** 🔓 ruled s15 (2026-10-05) — rulings 1 "From the app's backend" and 2 "Only for other computers"; buildable. Not started — scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F13](AUDIT-2026-10-01.md) · [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md) line 217 ("Either implement it, or this template proves the loopback route and files the gap") · [tpl-012 research briefing](../phase-78-the-templates/tpl-012-research-briefing.md) lines 221-225 · [P96 FED-003](../phase-96-the-backend-carries-a-feed/FED-003-A-FUNCTION-CALLS-A-MODEL.md) R2 and AC7
 **Side:** product (the cloud `Model Request` node; possibly a browser-side request; the desktop shell's model service, which is P91's)
 
@@ -109,3 +109,24 @@ or grammar option. Which servers accept which form is **not measured**; AC4 meas
 ## 8. Session log
 
 None yet.
+
+### Session 15 (2026-10-04/05) — measured, then ruled 1 and 2
+
+**Measured (read-only, HEAD `c70dde72f`):** `noodl-viewer-cloud/src/nodes/cloud/modelrequest.ts` (829 lines) — providers
+`anthropic` + `openai-compatible` "(not yet implemented)" (:207-225), refused with `not_implemented` before the secret is read
+(:522-533); cloud-only (`nodes/index.ts:28`); the key always required (`unavailable` :537-547, `secret_missing` :549-571);
+Anthropic-shaped (`/v1/messages` :659, `x-api-key` :686-690); ≤3 attempts, backoff from 500 ms, one 120 s deadline (:93,
+:103, :655-657). 🔴 §5's failure-code summary is off: `bad_json` is only an Output-Schema miss (:775); a non-JSON 2xx is
+`network` (:731-736); 429/5xx after retries is `rate_limited` (:720); the set is `not_implemented, secret_missing, refusal,
+bad_json, http_error, rate_limited, timeout, network, unavailable` (:66-80). 🔴 **A leak the header denies:** `http_error`'s
+message embeds up to 400 characters of the provider's error body (:722) and reaches `raiseRuntimeError` and the failure
+outcome (:487-495) — a local server's error can echo the prompt (§7 trap 3); the no-leak AC must cover that line.
+Users: no template uses the node (one catalog example, one backend fixture); the island's four Olive Functions fetch
+`/__garden/olive` **same-origin** (the shell serves page and route on one origin — why CORS never arose). The owl is
+node-llama-cpp in Electron main (`owl.js`), no HTTP endpoint; the garden shell already runs `nodegx-backend serve` on
+127.0.0.1 with the app's functions (`main.js:141-161`), so ruling 1 (a) has a backend to run in. Nothing listens on
+11434/8080/8000 here: AC2 needs a model server installed first. CORS: not measured.
+
+**Ruled (README §8 round 4, verbatim there):** ruling 1 **"From the app's backend"** (a), ruling 2 **"Only for other
+computers"** (b). Rulings 3 (the fence lives in the graph, plus a documented pattern and prefab) and 4 (the author runs
+Ollama / llama.cpp for acceptance; a loopback endpoint in the shell handed to P91) taken as recommended.

@@ -139,3 +139,10 @@ author stylesheet on this machine crossed against the classes set on nodes.
   and Columns' container style inline: it does not reach the island's 22 `width` and 7 `height` forces. The build must
   cover all three writers.
 
+**Ruled s15 (2026-10-05) — "Stylesheet beats defaults" (ruling 1 (a)), with Richard's addition** (README §8 round 4,
+verbatim there): *"…maybe we can make a way to warn someone visually in the node props when a style value is being overridden
+by a stylesheet and where it lives if it's a custom CSS node or some custom CSS in a visual node?"* Rulings 2 and 3 taken as
+recommended (an author-set panel value stays inline and wins; the 44 rules that start applying are the bug being fixed, listed
+in the release notes). **New AC, from the request:** the property panel marks a value that a stylesheet rule overrides and
+names where the rule lives (the CSS Definition node, a visual node's own custom CSS, a kit sheet or head code). 🔴 The build
+covers all three inline writers (the start style, `Layout.size/align`, Columns), or the island's width/height forces stay.

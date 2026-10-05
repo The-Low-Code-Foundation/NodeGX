@@ -318,6 +318,49 @@ recommendation:**
   before replying, or depend on what the app sent. What should I do?"* Options: build the cheap 9, drop 8
   (recommended) / build all 17 / accept the count as is. Built the same session; ISL-021 closed (§8 s15).
 
+**Session 15 (2026-10-04/05), round 4 — five questions, populations measured first (read-only agents; numbers in each task's §8 s15):**
+
+- **ISL-008 — ✅ Ruled: "Stylesheet beats defaults", plus a request.** Asked as *"When you give a box (a Group) a CSS class and
+  write ordinary CSS for it — say "centre everything" or "display: grid" — nothing happens. Every box quietly writes its own
+  starting layout onto itself …, and those built-in starting values always beat a class; today the only way through is
+  `!important`. Measured across 478 projects …: 217 `!important`s exist only to beat a built-in starting value. If a stylesheet
+  beat the starting values, 44 rules in about 7 projects would start working … — and one old Noodl project's `.animated
+  { opacity: 0 }` would hide its elements. What should win?"* Options: stylesheet beats defaults (recommended; the panel still
+  beats the stylesheet) / a per-box switch / keep it, teach `!important`. **Richard: "Stylesheet beats defaults, but maybe we
+  can make a way to warn someone visually in the node props when a style value is being overridden by a stylesheet and where
+  it lives if it's a custom CSS node or some custom CSS in a visual node?"** → a new AC (ISL-008 §8 s15).
+- **ISL-010 ruling 1 — ✅ Ruled: "From the app's backend."** Asked as *"…To make this a normal thing any app can do, where
+  should the question be sent from? (A NodeGX app's 'backend' is its server side, where cloud functions run; a desktop app
+  already runs its backend on the same computer.) The existing 'Model Request' cloud node only talks to Anthropic today; no
+  template uses it yet."* Options: from the app's backend (recommended) / straight from the page / both, backend first.
+- **ISL-010 ruling 2 — ✅ Ruled: "Only for other computers."** Asked as *"…When a model request points at this computer,
+  should it still require a key?"* Options: only for other computers (recommended; a look-alike address is not local) /
+  always / never.
+- **ISL-020 — 🔁 Not ruled as asked: Richard re-scoped it.** Asked as *"…To change one line in it, an agent today must read
+  the whole script and send the whole script back. In our templates, 73 scripts are over 20,000 characters; the biggest (the
+  island's world) is 183,000 — about 45,000 tokens to read and the same again to write, for a one-line change. What should
+  the agent get?"* Options: find-and-replace + short reads (recommended) / find-and-replace only / leave it. **Richard: "This
+  needs its own fix task. It's a shame that Function and Script nodes are just one big monstrous JS doc. In theory the fix
+  would be to use multiple Function or Script nodes chained together, but you can't declare variables inside the function that
+  are shared between the nodes like if they were one script or could 'import' from each other. We need a better way. Think
+  about how a regular coded project would handle this kind of problem. … a sort of core JS file that calls the other JS files
+  in child folders into action when needed, so a 20K character JS file would be split up into separate bits that talk to each
+  other. … maybe a custom logic component where the Function and Script nodes can 'import' each other with new connector
+  types?? Maybe a sort of 'global function' bit in the app settings where you can write functions and scripts in a place where
+  they can reference each other, then add them as kind of template Function nodes on the node canvas where if you edit one of
+  the Function nodes it edits all of them? Maybe place the functions and scripts for this kind of code at the 'App' level so
+  they always run on app load? Maybe a whole new system of visually building JS systems with multiple functions and code files
+  that I haven't even thought of yet? Let's think about it."** → a design task, not a tool (ISL-020 §8 s15; it is ISL-005's
+  open half, "shared code", grown).
+- **P109-S8-ARRAYFILTERPATH — ✅ Ruled: "Yes, exact name first."** Asked as *"…Of the 320 Array Filters in 55 projects on this
+  machine, none uses a field name with a dot in it, and none of the Static Data rows has one; 4 scripts in 3 apps do this kind
+  of nested lookup by hand. Should `owner.id` in the filter list mean 'the id inside owner'?"* Options: yes, exact name first
+  (recommended) / yes, always the inner field / leave it.
+- **Not asked: ISL-018's open case.** Measured (s15): 239 of 242 folder-format projects are still format 4 (all 13 templates);
+  20 would be changed by the one-time clean-up, all created after the checkbox shipped — the site-builder theme page would stop
+  loading its theme until Save. The drafted recommendation (the door runs the clean-up itself first) would apply the same wrong
+  guess earlier, so it is not a fix for that case; re-derive the options before asking (ISL-018 §8 s15).
+
 Each task's §5 has the full question, the options and the trade-offs. Ask in plain words, one decision
 per question, and only when the task is next to build. This table is the index, with the recommendation in brackets.
 

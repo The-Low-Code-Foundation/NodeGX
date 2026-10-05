@@ -1,6 +1,6 @@
 # ISL-020 — An agent changes one line of a big script
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Re-scoped s8 (2026-10-03), against "Native nodes first":** the ruled rebuild ([IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md))
+**Status: 🔁 re-scoped s15 (2026-10-05) by Richard to a design question — how big scripts split into parts that share code (§8 s15); not started — scoped 2026-10-01 at `27d891bf3`.** **Re-scoped s8 (2026-10-03), against "Native nodes first":** the ruled rebuild ([IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md))
 takes the engine from 20 copies to about 7 (census estimate), so the "17 times over" case shrinks but does not vanish:
 the 29 script rows stay script, and any template with a big Function meets the read-all/send-all cost. The tool is
 still worth building; its fixture should be a big Function that survives the rebuild, not the engine copies. **Source:** [AUDIT F27](AUDIT-2026-10-01.md) · sized by
@@ -108,3 +108,19 @@ Constraints:
 ## 8. Record
 
 None yet.
+
+### Session 15 (2026-10-05) — asked; Richard re-scoped it to a design task
+
+Measured before asking: 961 Function/Script scripts in `templates/`, **219 over 4,000 characters, 73 over 20,000**; the biggest
+`bot-garden/Logic/Island world` 182,819 (2,544 lines), DBT 118,772, Rocket School 47,014, Planning 42,042. Asked with the
+find-and-replace + short-reads recommendation (README §8 round 4, verbatim). **Richard did not pick an option: "This needs its
+own fix task"** — the real problem is that a Function is one monolithic document, and pieces cannot share variables or import
+each other. His sketches: Function/Script nodes that import each other through new connector types inside a logic component; a
+"global functions" place in the app's settings whose functions are placed as linked template nodes (edit one, all change);
+code that lives at the App level and runs on load; or a new visual system for multi-file JS. **"Let's think about it."**
+
+**What this means for the task:** the edit tool is not built until the shape of shared code is decided — a script split into
+modules is also the thing that makes a one-line edit cheap. It is ISL-005's open half ("shared script file later", README §8
+s5) grown into its own design question. Next: a design page that lays out how a coded project does this (modules, imports,
+one entry), what NodeGX already has that could carry it (the existing mechanism first), and 2–3 shapes with their cost, for
+Richard to think through — not a build.

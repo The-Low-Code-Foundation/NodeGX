@@ -179,3 +179,19 @@ dbt-template workstream). **AC7: this change keeps the gate where it was; the ga
 
 🔴 That row is ISL-018's **open case** in the wild: a format-4 project nobody's editor has opened yet. Its first open
 writes `false` on the six inputs once and saves it at 5. It belongs in the question to Richard below, as an example.
+
+### Session 15 (2026-10-05) — the open case measured; the question NOT asked
+
+(read-only census of 525 projects on this machine: 242 folder-format, 283 single-file.) The one-time clean-up
+(`run-on-value-change-migration.ts:414-475`, called `applypatches.js:96-97`; the editor then marks format 5,
+`projectmodel.ts:112-117`) writes `false` on every unanswered input of a node whose Run is wired. **239 of the 242
+folder-format projects are still format 4, all 13 templates included**; **20 would change, all created after the checkbox
+shipped (2026-08-01, `213cf3377`)**: `digital-bricks-training-demo` 6 Function inputs (invisible — each fed by the node that
+sends Run), 3 repo fixtures (log-a-thing 4 database fetches, variable-dial 1, page-desk 2), 15 test projects (89 changes; 8
+site-builder drive projects with 8 typed Function inputs each — 🔴 **the theme page stops loading its theme until Save is
+pressed**, a regression), and the untracked nightbook (37). The 107 classic single-file projects (12,365 changes) predate the
+checkbox: there the clean-up is the intended repair.
+🔴 **Why not asked:** the drafted recommendation ("the door runs the clean-up on first write and marks format 5") applies the
+same wrong guess, only earlier — it does not save the theme page. The options to put next: tell a post-checkbox format-4
+project from an old one (a date it carries; templates have none until ISL-016 AC8's `modified`), save generated templates at
+5 from now on, or accept the 20.
