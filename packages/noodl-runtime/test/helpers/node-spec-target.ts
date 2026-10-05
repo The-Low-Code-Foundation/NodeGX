@@ -258,6 +258,27 @@ function installGlobals(globals: Record<string, unknown>): () => void {
   };
 }
 
+/**
+ * Puts the page on the host (`installGlobals`) for a play. NSP-016 s43 — a play with a world has a FRAME clock: the world's
+ * `requestAnimationFrame` (`installPopups`: the next frame's start). The page keeps it, on the host AND on jsdom's `window` —
+ * jsdom's own (`pretendToBeVisual`) fires on WALL-CLOCK time, so a callback a node asked for "next frame" (drag-drop.ts
+ * `whenMounted`, which calls `window.requestAnimationFrame`) ran whenever the event loop got there: before the next settle in
+ * one play, not in another.
+ */
+function installPage(): () => void {
+  const d = ensureDom();
+  const g = globalThis as { requestAnimationFrame?: unknown };
+  const frame = g.requestAnimationFrame;
+  if (!frame) return installGlobals(d.globals);
+  const own = d.window.requestAnimationFrame;
+  d.window.requestAnimationFrame = frame;
+  const restore = installGlobals({ ...d.globals, requestAnimationFrame: frame });
+  return () => {
+    restore();
+    d.window.requestAnimationFrame = own;
+  };
+}
+
 /** One node on the page (PERSON above). */
 interface Page {
   container: any;
@@ -1319,6 +1340,10 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // POPUP (world.ts, NSP-015 s20) — a lone Close Popup inside the script's popups
     if (!scope && type === 'NavigationClosePopup' && world && world.popup.inside.length > 0) insidePopups(nodeScope.componentOwner as { parentNodeScope?: unknown }, world.popup.inside);
     const metadata = context.nodeRegister.getNodeMetadata(type);
+    // PERSON (above, NSP-016 s43) — a node a person acts on is made in a page that has a window: the app's params are set with
+    // `window` and `document` present, as a loaded project sets them. A setter that reads the page at once (drag-drop.ts
+    // `setDraggable` → `install`, `whenMounted`) found none here and did nothing — Draggable set at the placing never armed.
+    if (specFor(type)?.needs?.includes('person') && !domInstalled) domInstalled = installPage();
     const { node, made } = createHooked(type, id, nodeScope, metadata, logs);
     if (!node.nodeScope) node.nodeScope = nodeScope as never;
     // a node in a component's scope is one of the scope's nodes — what `getNodesWithType` reads
@@ -1384,7 +1409,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
    */
   function putOnPage(s: State): void {
     const d = ensureDom();
-    if (!domInstalled) domInstalled = installGlobals(d.globals);
+    if (!domInstalled) domInstalled = installPage();
     const node = s.h.node as unknown as {
       render(): unknown;
       parent?: unknown;
@@ -1461,7 +1486,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     onPage.add(s);
   }
 
-  /** PERSON (above) — the node leaves the page: its component unmounts (Will Unmount fires, as in the app), the globals come off with the last one. */
+  /** PERSON (above) — the node leaves the page: its component unmounts (Will Unmount fires, as in the app); the globals come off after its teardown (`releasePage`). */
   function takeOffPage(s: State): void {
     const page = s.page;
     if (!page) return;
@@ -1482,6 +1507,15 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     (s.h.node as unknown as { parent?: unknown }).parent = undefined;
     s.page = undefined;
     onPage.delete(s);
+  }
+
+  /**
+   * PERSON (above) — the page's globals come off the host with the last node on it. NSP-016 s43: AFTER the node's own teardown
+   * (`dispose`), not with its page — a node deleted in an app is deleted in a page that still has a `document`, and a delete
+   * listener that reaches it (drag-drop.ts `forget` → `cancel` → `finish`, for a gesture the play left lifted) threw part-way
+   * here, so the module's gesture outlived the play and the NEXT play's keys went to it.
+   */
+  function releasePage(): void {
     if (onPage.size === 0 && domInstalled) {
       domInstalled();
       domInstalled = undefined;
@@ -2086,6 +2120,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       } catch {
         // a node whose teardown assumes a scope it never had; the instance is unreachable anyway
       }
+      releasePage();
       // NSP-013 s12 (T7) — the play is over, so is its work. A disposed node left in the context's
       // dirty list or after-update callbacks ran in the NEXT play's first frame and drew from THAT
       // play's random stream (Filter Collection minted other ids: a divergence that vanished on a
