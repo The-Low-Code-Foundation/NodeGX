@@ -102,6 +102,21 @@ if (typeof window !== 'undefined' && window.NoodlEditor) {
       if (this.highlighter) {
         this.highlighter.setTransformOriginFocus(enabled);
       }
+    },
+    /**
+     * P109 ISL-008 — the property panel's question: for the selected node (an id or a selection path), which panel
+     * values does an author's CSS decide on this canvas, and where does each rule live? Answers plain data (the
+     * editor reads it through `executeJavaScript`); `[]` when there is nothing to say or nothing to ask.
+     */
+    explainStyle(nodeIdOrPath) {
+      if (!this.highlighter) return [];
+      const path = Array.isArray(nodeIdOrPath) ? nodeIdOrPath : nodeIdOrPath ? [nodeIdOrPath] : [];
+      if (!path.length) return [];
+      try {
+        return JSON.parse(JSON.stringify(this.highlighter.explainStyleAtPath(path)));
+      } catch (e) {
+        return [];
+      }
     }
   };
 }

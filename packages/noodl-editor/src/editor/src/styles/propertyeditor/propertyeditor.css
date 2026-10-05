@@ -919,6 +919,19 @@
   opacity: 0.85;
 }
 
+/* P109 ISL-008 — the author's CSS, not this row, decides what the canvas draws. Same shape as the structural hint,
+   in the accent colour: it is not a problem, it is where the value really comes from. */
+.property-style-source {
+  margin: 2px 8px 8px 8px;
+  padding-left: 6px;
+  border-left: 2px solid var(--theme-color-primary);
+  color: var(--theme-color-fg-default);
+  font-size: var(--font-size-xs);
+  line-height: 1.35;
+  opacity: 0.85;
+  overflow-wrap: anywhere;
+}
+
 /* FB-021 — a port a `dynamicports` condition has switched off.
 
    Same shape as `.property-capability-gated` above, and that is deliberate: an author who has

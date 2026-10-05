@@ -27,8 +27,15 @@ import type {
 
 import { iconSourceProblem } from './components/visual/Icon/iconSourceProblem';
 import DOMBoundingBoxObserver from './dom-boundingbox-oberver';
-import { DEFAULT_LAYER, type DefaultLayerInfo, type LayerableStyle } from './default-style-layer';
+import {
+  cssPropertyName,
+  DEFAULT_LAYER,
+  defaultDeclarationsOf,
+  type DefaultLayerInfo,
+  type LayerableStyle
+} from './default-style-layer';
 import Layout, { type ParentLayout } from './layout';
+import { explainStyleSources, type StyleSourceFinding } from './style-sources';
 import mergeDeep from './mergedeep';
 import NodeSharedPortDefinitions from './node-shared-port-definitions';
 import transitionParameter from './node-transitions';
@@ -2434,6 +2441,33 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
 
   for (const name in methods) {
     ReactComponentNode.methods[name] = methods[name];
+  }
+
+  // P109 ISL-008 — each port that writes a CSS property on the root element, by the property it writes. The panel's
+  // "your stylesheet decides this" note asks the canvas about exactly these (`style-sources.ts`). Tagged ports are
+  // an inner element's, which no author class reaches.
+  const styleTargets: Record<string, string> = {};
+  for (const name in inputCss) {
+    const input = inputCss[name];
+    if (input.styleTag) continue;
+    styleTargets[name] = cssPropertyName(input.targetStyleProperty || name);
+  }
+  for (const name of ['width', 'height']) {
+    if (inputProps && inputProps[name]) styleTargets[name] = name;
+  }
+  if (!ReactComponentNode.methods.explainStyleSources) {
+    ReactComponentNode.methods.explainStyleSources = function (this: ReactNodeInstance): StyleSourceFinding[] {
+      const element = this.getDOMElement();
+      if (!element) return [];
+      const customCss: Record<string, string> = {};
+      for (const key in this.customCssStyles || {}) customCss[cssPropertyName(key)] = String(this.customCssStyles![key]);
+      return explainStyleSources({
+        element,
+        styleTargets,
+        defaults: defaultDeclarationsOf(element),
+        customCss
+      });
+    };
   }
 
   // P109 ISL-008 — a setter that runs is the author speaking: a parameter stored in the project, a connection, a
