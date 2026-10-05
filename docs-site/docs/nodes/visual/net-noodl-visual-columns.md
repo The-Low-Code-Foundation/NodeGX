@@ -26,6 +26,7 @@ Card grids, dashboards, magazine-style layouts — anywhere content should reflo
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `direction` | Enum (`row`, `column`) | `row` | Whether items fill across rows or down columns |
 | `justifyContent` | Enum (`flex-start`, `flex-end`, `center`) | `flex-start` | Where the columns sit as a group when they do not fill the container |
 | `layoutString` | String | `1 2 1` | Column widths as space-separated proportions, so "1 2 1" makes the middle column twice as wide |
@@ -36,11 +37,18 @@ Card grids, dashboards, magazine-style layouts — anywhere content should reflo
 | `minWidth` | Number | `0` | Columns are dropped from the end rather than shrink below this; with Auto Fit it decides how many there are |
 | `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
 | `packing` | Enum (`rows`, `masonry`) | `rows` | Rows makes every item in a row as tall as the tallest; Masonry lets each column pack independently |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sizing` | Enum (`layoutString`, `autoFit`) | `layoutString` | Layout String sets the columns explicitly; Auto Fit derives them from Min Column Width and the space available |
 | `smallBreakpoint` | Number | — | Container width below which Small Layout replaces the others; it wins over Medium Below |
 | `smallLayout` | String | — | Layout String to use below Small Below; leaving it blank makes the breakpoint inert. For more bands than these two, install the Advanced Columns prefab from the library — it drives these same inputs from a States node, so each band can set its own layout and gaps |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `variant` | String | — | Name of a saved variant of this node type to apply, replacing the styling set here |
+
+### Signals
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
 ## Outputs
 
@@ -65,6 +73,20 @@ Card grids, dashboards, magazine-style layouts — anywhere content should reflo
 | `onAtMedium` | Signal | — | Fires when the container narrows or widens into the Medium band, once per crossing |
 | `onAtSmall` | Signal | — | Fires when the container narrows or widens into the Small band, once per crossing |
 | `willUnmount` | Signal | — | Fires just before this element is removed from the page, while it still exists |
+
+## Dynamic ports
+
+_This node's port list changes at runtime (declared-port-groups); the tables above may be incomplete for a given instance._
+
+Declares conditional/expandable port groups whose visibility depends on parameter values (see declaredPortGroups).
+
+| Condition | Inputs shown | Outputs shown |
+|---|---|---|
+| — | — | — |
+
+## Ports at runtime
+
+Its only dynamic ports are its Data Attributes list: each data-* name listed in `dataAttributes` becomes a string input of that name, written on the element (declared-port-groups). Every other port is static.
 
 ## Patterns
 

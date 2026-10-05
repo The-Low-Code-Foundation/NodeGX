@@ -75,6 +75,7 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | `clip` | Boolean | `false` | Hides any child that overflows the group instead of letting it spill out |
 | `columnGap` | Number | `0` | Space between children on the horizontal axis |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `dragKind` | String | — | Optional name for what this is — "card", "task". A zone with an Accept Kind only takes sources whose Drag Kind matches |
 | `dragValue` | * | — | What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value |
 | `draggable` | Boolean | `false` | Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it |
@@ -108,6 +109,7 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | `rowGap` | Number | `0` | Space between children on the vertical axis |
 | `scrollBounceEnabled` | Boolean | `true` | Lets the content overscroll and spring back at the ends |
 | `scrollEnabled` | Boolean | `false` | Lets the user scroll the children when they do not all fit |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `scrollSnapEnabled` | Boolean | `false` | Makes scrolling settle on item boundaries rather than anywhere |
 | `scrollSnapToEveryItem` | Boolean | `false` | Snaps to each item in turn instead of allowing a fast flick past several |
 | `scrollToElement.duration` | Number | `500` | How long the scroll animation takes, in milliseconds; 0 jumps |
@@ -133,6 +135,7 @@ Reach for Group whenever you need structure: rows, columns, cards, overlays, scr
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `focus` | Signal | — | Gives this group keyboard focus, so key events reach it |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 | `scrollToElement.do` | Signal | — | Scrolls to the element on Element; fired in the same frame the Group mounts, it is held until the Group exists rather than dropped |
 | `scrollToIndex.do` | Signal | — | Scrolls to the child at Index, then fires Done — or Failure with the reason it could not |
 
@@ -222,6 +225,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | boxShadowEnabled = true | `boxShadowSource` | — |
 | boxShadowEnabled = true AND boxShadowSource = token | `boxShadowToken` | — |
 | boxShadowEnabled = true AND boxShadowSource != token | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
+| — | — | — |
 
 ## Ports at runtime
 

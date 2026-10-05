@@ -18,7 +18,7 @@
  *  4. The browser case: no `_noodl_get_secret` at all, which the backend by definition cannot be.
  */
 
-import { node as ModelRequestNode } from '../src/nodes/cloud/modelrequest';
+import { isThisComputer, node as ModelRequestNode } from '../src/nodes/cloud/modelrequest';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type AnyRecord = Record<string, any>;
@@ -271,6 +271,93 @@ describe('Model Request (FED-003)', () => {
       expect(probe.internal.errorCode).toBe('unavailable');
       expect(probe.internal.error).toContain('browser viewer');
       expect(probe.signals).toContain('failure');
+    });
+  });
+
+  /**
+   * ISL-010 ruling 2 — "only for other computers". A key is optional only when Base URL's PARSED
+   * host is this computer. The fetch stub records a call to ANY host, which is what makes "zero
+   * requests" a measurement for a look-alike host no real server could answer.
+   */
+  describe('ISL-010 — a key is optional only for this computer', () => {
+    const CHAT_ANSWER = {
+      choices: [{ index: 0, message: { role: 'assistant', content: 'owl' }, finish_reason: 'stop' }],
+      usage: { prompt_tokens: 9, completion_tokens: 1 }
+    };
+
+    const run = async (baseUrl: string, secret: unknown = { found: false }) => {
+      (globalThis as any)._noodl_get_secret = () => secret;
+      const calls = stubFetch(200, CHAT_ANSWER);
+      const probe = makeProbe({ provider: 'openai-compatible', model: 'qwen3.5:0.8b', baseUrl, input: 'go' });
+      press(probe);
+      probe.flush();
+      await new Promise((resolve) => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
+      return { calls, probe };
+    };
+
+    it.each([
+      ['http://127.0.0.1:11434', true],
+      ['http://localhost:8080/v1', true],
+      ['http://LOCALHOST:8080', true],
+      ['http://[::1]:8000', true],
+      ['http://[0:0:0:0:0:0:0:1]:8000', true],
+      ['http://127.1:11434', true],
+      ['http://127.0.0.1.evil.example', false],
+      ['http://localhost.evil.example', false],
+      ['http://127.0.0.1@evil.example', false],
+      ['http://evil.example/127.0.0.1', false],
+      ['https://api.openai.com', false],
+      ['not a url', false]
+    ])('%s is this computer: %s', (url, expected) => {
+      expect(isThisComputer(url)).toBe(expected);
+    });
+
+    it('calls a server on this computer with no key, and sends no authorization header', async () => {
+      const { calls, probe } = await run('http://127.0.0.1:11434');
+      expect(calls).toHaveLength(1);
+      expect(calls[0].url).toBe('http://127.0.0.1:11434/v1/chat/completions');
+      expect(Object.keys(calls[0].init.headers).map((h) => h.toLowerCase())).not.toContain('authorization');
+      expect(probe.internal.text).toBe('owl');
+      expect(probe.signals).toContain('done');
+    });
+
+    it('refuses a look-alike host with secret_missing, and makes ZERO requests', async () => {
+      const { calls, probe } = await run('http://127.0.0.1.evil.example:11434');
+      expect(calls).toHaveLength(0);
+      expect(probe.internal.errorCode).toBe('secret_missing');
+      expect(probe.internal.error).toContain('only when Base URL is this computer');
+      expect(probe.signals).toContain('failure');
+    });
+
+    it('refuses another computer with no key too', async () => {
+      const { calls, probe } = await run('https://api.openai.com');
+      expect(calls).toHaveLength(0);
+      expect(probe.internal.errorCode).toBe('secret_missing');
+    });
+
+    it('sends a provisioned key as a bearer token, on this computer as anywhere', async () => {
+      const { calls } = await run('http://127.0.0.1:11434', { found: true, value: 'local-key' });
+      expect(calls).toHaveLength(1);
+      expect(calls[0].init.headers.authorization).toBe('Bearer local-key');
+    });
+
+    it('keeps the rule to OpenAI-compatible: Anthropic on this computer still needs its key', async () => {
+      (globalThis as any)._noodl_get_secret = () => ({ found: false });
+      const calls = stubFetch();
+      const probe = makeProbe({ provider: 'anthropic', baseUrl: 'http://127.0.0.1:9', input: 'go' });
+      press(probe);
+      probe.flush();
+      await new Promise((resolve) => setImmediate(resolve));
+      expect(calls).toHaveLength(0);
+      expect(probe.internal.errorCode).toBe('secret_missing');
+    });
+
+    it('takes a base ending in /v1 or the full URL as given', async () => {
+      expect((await run('http://localhost:8080/v1/')).calls[0].url).toBe('http://localhost:8080/v1/chat/completions');
+      expect((await run('http://localhost:8080/v1/chat/completions')).calls[0].url).toBe(
+        'http://localhost:8080/v1/chat/completions'
+      );
     });
   });
 });

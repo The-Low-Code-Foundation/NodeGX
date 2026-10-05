@@ -32,6 +32,7 @@ Sliders, swipeable cards, drawers — any direct-manipulation gesture where you 
 | `inputPositionY` | Number | — | Sets the Y position the element starts at, before any dragging |
 | `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
 | `scale` | Number | `1` | Divides pointer movement before it becomes element movement, so 2 makes the element move half as far as the pointer |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `snapToPositionX.duration` | Number | `300` | How long the X snap animation takes, in milliseconds |
 | `snapToPositionX.value` | Number | `0` | X position the element animates to when Snap To Position X — Do fires. An empty value leaves the current position alone |
 | `snapToPositionY.duration` | Number | `300` | How long the Y snap animation takes, in milliseconds |
@@ -44,6 +45,7 @@ Sliders, swipeable cards, drawers — any direct-manipulation gesture where you 
 
 | Name | Type | Default | Description |
 |---|---|---|---|
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 | `snapToPositionX.do` | Signal | — | Animates the element to Value on the X axis; does nothing if it is already there |
 | `snapToPositionY.do` | Signal | — | Animates the element to Value on the Y axis; does nothing if it is already there |
 

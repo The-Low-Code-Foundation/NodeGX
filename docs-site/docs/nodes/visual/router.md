@@ -28,9 +28,11 @@ The standard top-level navigation of an app: distinct pages with URLs, deep-link
 | `backgroundColor` | Color | `transparent` | Fill colour behind whichever page is showing |
 | `clip` | Enum (`contentHeight`, `scroll`, `clip`) | `contentHeight` | What happens when a page is taller than the router: grow to fit it, scroll it, or clip it |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
 | `name` | String | — | Name the Navigate nodes address this router by; leave it blank if there is only one |
 | `pages` | Pages | — | The components this router can show, and which of them is the start page |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `urlPath` | String | — | Path segment prefixed to every page of this router, for nesting one router inside another |
 
@@ -39,6 +41,7 @@ The standard top-level navigation of an app: distinct pages with URLs, deep-link
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `reset` | Signal | — | Re-reads the URL and rebuilds the current page from scratch |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
 ## Outputs
 
@@ -74,9 +77,13 @@ The standard top-level navigation of an app: distinct pages with URLs, deep-link
 
 ## Dynamic ports
 
-_This node's port list changes at runtime (runtime-discovered, editor-adapter); the tables above may be incomplete for a given instance._
+_This node's port list changes at runtime (declared-port-groups, runtime-discovered, editor-adapter); the tables above may be incomplete for a given instance._
 
 The "pages" parameter determines which pages exist; the editor (RouterAdapter) derives ports and navigation metadata from the page components.
+
+| Condition | Inputs shown | Outputs shown |
+|---|---|---|
+| — | — | — |
 
 ## Ports at runtime
 

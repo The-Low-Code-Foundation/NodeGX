@@ -1,6 +1,6 @@
 # ISL-010 — A running app can ask a local model
 
-**Status:** 🔓 ruled s15 (2026-10-05) — rulings 1 "From the app's backend" and 2 "Only for other computers"; buildable. Not started — scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 built s16 (2026-10-05) — AC1–AC3, AC5–AC7 met; AC4 half met (Ollama measured; llama.cpp's server is not installed here, Richard's call). Ruled s15: "From the app's backend", "Only for other computers"; rulings 3–4 as recommended. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F13](AUDIT-2026-10-01.md) · [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md) line 217 ("Either implement it, or this template proves the loopback route and files the gap") · [tpl-012 research briefing](../phase-78-the-templates/tpl-012-research-briefing.md) lines 221-225 · [P96 FED-003](../phase-96-the-backend-carries-a-feed/FED-003-A-FUNCTION-CALLS-A-MODEL.md) R2 and AC7
 **Side:** product (the cloud `Model Request` node; possibly a browser-side request; the desktop shell's model service, which is P91's)
 
@@ -130,3 +130,119 @@ node-llama-cpp in Electron main (`owl.js`), no HTTP endpoint; the garden shell a
 **Ruled (README §8 round 4, verbatim there):** ruling 1 **"From the app's backend"** (a), ruling 2 **"Only for other
 computers"** (b). Rulings 3 (the fence lives in the graph, plus a documented pattern and prefab) and 4 (the author runs
 Ollama / llama.cpp for acceptance; a loopback endpoint in the shell handed to P91) taken as recommended.
+
+### Session 16 (2026-10-05) — built; AC1–AC3 and AC5–AC7 met, AC4 half met
+
+**Built** (`noodl-viewer-cloud/src/nodes/cloud/modelrequest.ts`): `openai-compatible` posts to
+`<base>/v1/chat/completions` (a base ending in `/v1` or the full URL is taken as given), Instructions and Per-Call
+Instructions as ONE system message, `max_tokens`, the Output Schema as `response_format: { type: 'json_schema',
+json_schema: { name: 'answer', strict: true, schema } }`. Answers are read onto the ports' existing vocabulary:
+`finish_reason` stop/length/tool_calls → `end_turn`/`max_tokens`/`tool_use`; `message.refusal` or `content_filter` →
+Failure `refusal` (the model's refusal WORDS are not put in the recorded sentence); `prompt_tokens` minus
+`cached_tokens` → Input Tokens, so the number means the same uncached count on either provider; a 200 with no
+`choices` → `network` "not a chat completion. Check Base URL." An unknown provider value still refuses
+`not_implemented` before the secret is read. Retries, deadline and codes are the node's own.
+
+- **Ruling 2, read from the parsed host** (`isThisComputer`): `127.0.0.1`, `[::1]`, `localhost` after the URL parser
+  (which folds `127.1`, `[0:0::1]`, `LOCALHOST`). Not resolved through DNS: `localhost` is reserved (RFC 6761), and
+  the rule only decides whether a MISSING key is a mistake — with no key nothing secret is sent. A provisioned key is
+  sent as `Authorization: Bearer`, on this computer as anywhere. The rule is **OpenAI-compatible only**: an
+  Anthropic-shaped Base URL on this computer is a proxy or a test double, and FED-003's AC4 refusal is graded
+  against exactly such a double, so it keeps needing its key.
+- **The leak §8 s15 found is closed for both providers.** A failed call's recorded sentence carries the status and
+  the error's `type`/`code` only when each is an identifier (`[A-Za-z0-9_.:-]{1,64}`); the provider's own words
+  (≤400 characters) go on the `Error` PORT only (`setError`'s `portDetail`). The port is the author's graph, like
+  Text; the runtime error and the outcome are the record.
+- **Effort gained `None (no thinking)`**, measured into being (AC4 below): on OpenAI-compatible only `none` is sent,
+  as `reasoning_effort: 'none'`; every other value is not sent. On Anthropic `none` is sent as `low`, the lowest that
+  API takes. Not asked as a ruling: it is the existing port's own meaning, and nothing changes for any graph that
+  does not pick it. Richard can overrule it.
+
+**AC1 ✅** — red at HEAD `39bd1c534`: `nodegx-backend/tests/fed-003-model-request.test.ts` 20/20 green with
+`openai-compatible` → `not_implemented` and `seen.length` unchanged (zero requests), beside the Anthropic control that
+reached the double. After: `isl-010-local-model.test.ts` drives the real service against an OpenAI-shaped double on
+127.0.0.1 — the request (URL, no authorization header, one system message, no `output_config`), the schema form,
+`reasoning_effort` only for None, bad_json on prose, refusal, truncation, not-a-chat-completion, a closed port
+(`network`, 3 attempts) and a 300 ms budget against a 1.5 s server (`timeout`, < 1.5 s). 14/14.
+
+**AC2 ✅** — `nodegx-backend/tests/isl010-ask-the-owl-drive.test.ts`, the project
+[`isl010-ask-the-owl`](isl010-ask-the-owl/) (a page whose button calls `askOlive` with a CHOICE; the function's
+Function checks it against a list, writes the question and hands Model Request an enum schema; Base URL
+`http://127.0.0.1:11434`, no key, Effort None). The function bundle is built from the project's own files
+(`bundleAuthoredComponents`), served by an in-process `BackendService`, the page rendered by `withRenderedPage` in
+headless Chrome, the button pressed where `elementFromPoint` finds it. Arm A against **Ollama 0.34.4 with the island's
+own owl** `hf.co/unsloth/Qwen3.5-0.8B-GGUF:Q4_K_M`: the page read **"Olive says: blue"**, the record a success with
+exactly one `modelCalls` entry by model id (Ollama's log: one `POST /v1/chat/completions`, 200, 2.8 s). Arm B against
+a closed loopback port: "Olive is asleep, so the game carries on (network)", the record names
+`model-request/network`. Arm B taken literally too, with Ollama stopped (`ISL010_STOPPED_URL=http://127.0.0.1:11434`):
+2 passed, arm A **skipped** (a skip, not a pass: the describe is chosen at collection by a synchronous probe;
+`ISL010_REQUIRE_MODEL=1` makes a missing server red). 🔴 s15's "nothing listens on 11434" was right and incomplete:
+Ollama has been installed since 2026-09-27 with `qwen3:0.6b`, `qwen3:1.7b`, `llama3.2` and the owl pulled. It was
+not running; this session started `ollama serve` for the readings and stopped it after.
+
+**AC3 ✅** — `noodl-viewer-cloud/tests/fed-003-model-request.test.ts` "ISL-010": 12 hosts by parsed host, a keyless
+call to this computer with no authorization header, a look-alike (`127.0.0.1.evil.example`) refused `secret_missing`
+with **zero** fetch calls (the stub records a call to any host, so zero is a measurement), another computer refused,
+a provisioned key sent as bearer, Anthropic on loopback still needing its key, the two URL forms. 26/26. **Reverted
+arm:** `isThisComputer` replaced by a prefix test → **5 red** (`127.1`, the three look-alikes, the zero-requests
+clause); restored by `cp`, byte-compared.
+
+**AC4 🟡 Ollama measured, llama.cpp not** (no `llama-server` on this machine; installing it is Richard's call). Ollama
+0.34.4, `/v1/chat/completions`, `max_tokens: 64`, an enum schema `{word: red|blue|green}`:
+
+| model | schema honoured | without `reasoning_effort` | `reasoning_effort` |
+|---|---|---|---|
+| `llama3.2` (3.2B) | ✅ `{"word" : "blue"}` (26.7 s cold, 0.1 s warm without a schema) | answers | `none` ✅ accepted; **`high` → 400 "does not support thinking"** |
+| `qwen3:0.6b` | ✅ with `none` | **empty content, `finish: length`** — 64 tokens of hidden reasoning | `none` ✅; `low` still thinks (empty) |
+| the owl, Qwen3.5-0.8B Q4_K_M | ✅ with `none` (`{"word": "blue"}`) | **empty content, `finish: length`** | `none` ✅; `low`, `high` empty |
+
+`think: false` and a `/no_think` prompt suffix do **not** switch thinking off through this endpoint;
+`reasoning: {effort: none}` worked on one Qwen and ran out of tokens on the other. Ollama's error body is
+OpenAI-shaped (`{"error":{"message","type":"not_found_error","code":null}}`), so the record keeps `not_found_error`.
+What the node does when a server ignores the schema: prose → `bad_json` with the prose on Text (spec'd); JSON that
+parses but names a word outside the schema → passes as Json, **not re-checked by the node** (no validator in a
+dependency-free bundle) — which is why the prefab checks the answer again.
+
+**AC5 ✅** — `isl-010-local-model.test.ts` AC5: the success path (the double received the prompt, the page received
+the answer, the record carries `modelCalls` and the model id) and two failure shapes whose body QUOTES the prompt
+(OpenAI's `{error:{message,type}}` 400, a bare-sentence 404). The Error port carries the echo; the execution list,
+the detail and the log carry neither prompt nor answer. **Reverted arm:** HEAD's line (400 characters of the body in
+the recorded sentence) → **2 red**, both failure shapes; restored by `cp`. 🔴 **A record property found on the way:**
+the execution record keeps the function's REQUEST BODY (`triggerData.body`). A prompt the page sends is on the record
+whatever this node does — the first version of the spec sent the prompt from the page and went red for that reason.
+The fence shape (the page sends a choice, the function writes the question) is also what keeps prompts off the record.
+The spec now composes the prompt inside the function (`localFenced`). Stated in the prefab README and the node's
+catalog pattern, not filed: it is the record working as designed.
+
+**AC6 ✅** — ruling 3 as recommended: the fence lives in the graph, documented, and shipped as the library prefab
+[`library/prefabs/ask-a-local-model`](../../../library/prefabs/ask-a-local-model/) (`/#__cloud__/Local Model/Ask`:
+Choice, Choices, Question with `{choice}`, Answers, Instructions, Base URL, Model, Do → Answer, Done, Failure, Error
+Code). It refuses `not_on_the_list` before asking, `not_configured`, and `answer_not_allowed` AFTER a JSON answer
+outside Answers. `isl010-local-model-prefab.test.ts` loads the prefab's own `project.json` into a function an app
+writes: 4/4 (the asked question and enum; a choice off the list asks nothing; an off-list answer refused; a closed
+port → `network`). `library:check`: the entry passes (the run's only red is a peer's untracked `library/modules/
+nightbook-kit`, no `library.json`). 🔴 **First run 1/4:** the fence Function ran when the instance's parameters
+arrived at creation (a Function runs on input change by default), refused an empty choice, answered the request, and
+the real answer then hit "already answered". Every `runOnChange-in-*` is now `false`, as SendGrid's prefab does it; the
+AC2 project's fence got the same, and arm A now asserts exactly ONE model call. **Does the island move?** Not yet, and
+not onto the prefab whole: the owl is node-llama-cpp inside the Electron main process with no HTTP endpoint (ruling 4
+hands an OpenAI-compatible loopback endpoint in the shell to **P91** as a DSK requirement — owed, P91's README is
+peer-dirty this session, so it is written in the P109 handoff instead), and the island's rungs include a "list of
+three" shape the prefab's one-word Answers does not cover (one-word and yes/no it does). The island's rebuild
+(P108 IW-010, "Native nodes first") can express each rung as Model Request + its own fence Function, as the AC2
+project does.
+
+**AC7 ✅** — FED-003's AC7 is rewritten in its task file and its spec (`askOtherProvider` now `gemini`; FED-003 backend
+spec 20/20); the provider label lost "(not yet implemented)"; `catalog:generate`, `catalog:merge`,
+`cloud-library:generate` and `docs:nodes` re-run AFTER the last port change (the first pass ran before Effort gained
+None, and `library:check` caught it: the validator reads the generated enum) — all four `--check`s exit 0. The
+enrichment says what the provider is, the key rule, and the fence pattern. `docs:nodes` also rewrote 27 visual-node
+pages that were stale against HEAD's own committed catalog (ISL-009's `dataAttributes` and Scroll Into View from s6
+among them, plus dynamic-port sections); they are what `docs:nodes:check` asks for, so they are kept.
+Export: `coverage-ledger.json` keeps `backend-only` — the exported page calls the function and the backend runs the
+node, so there is nothing to translate or refuse in the frontend.
+
+**Gates:** `noodl-mcp` `fld013ExportReach`, `nodeDocBudget`, `toolDisclosure`, `tools` — 66/67; the one red is
+FLD-013 reading `Parse CSV` as `translated`, from P18's uncommitted `coverage-ledger.json` (dirty since 2026-09-26),
+not this change. The listing ratchet (66,000 wire bytes) is green. `tsc --noEmit` clean on `noodl-viewer-cloud` and on
+the four backend specs.

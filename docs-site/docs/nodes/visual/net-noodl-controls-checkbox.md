@@ -62,6 +62,7 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | `checked` | Boolean | `false` | Sets whether the box is ticked; setting it from the graph does not fire Changed |
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click on this control also fires Click on the nodes it sits inside. Automatic keeps it here as soon as this control's own Click is connected, so a Favourite button inside a clickable card runs Favourite and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `enabled` | Boolean | `true` | Lets the user interact with this control; when off it still renders and occupies its space but ignores clicks, touches and typing |
 | `height` | Number | `32` | Height of the box |
 | `iconColor` | Color | `#000000` | Colour of the icon |
@@ -93,6 +94,7 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | `paddingRight` | Number | `0` | Space inside the element's right edge, between it and its content |
 | `paddingTop` | Number | `0` | Space inside the element's top edge, between it and its content |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `transformOriginX` | Number | `50` | Horizontal point the element rotates and scales around, as a fraction of its width |
 | `transformOriginY` | Number | `50` | Vertical point the element rotates and scales around, as a fraction of its height |
@@ -114,6 +116,7 @@ Boolean choices the user flips directly: settings, consent, done flags. For one-
 | `blur` | Signal | — | Takes the keyboard away from this checkbox, which is what fires Blurred |
 | `check` | Signal | — | Ticks the box if it is not already ticked, then fires Done — or Unchanged if it already was. Does not fire Changed |
 | `focus` | Signal | — | Puts the keyboard on this checkbox, so Enter, Space and the arrow keys go to it |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 | `uncheck` | Signal | — | Unticks the box if it is ticked, then fires Done — or Unchanged if it already was. Does not fire Changed |
 
 ## Outputs
@@ -171,6 +174,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | boxShadowEnabled = true | `boxShadowSource` | — |
 | boxShadowEnabled = true AND boxShadowSource = token | `boxShadowToken` | — |
 | boxShadowEnabled = true AND boxShadowSource != token | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
+| — | — | — |
 
 ## Ports at runtime
 

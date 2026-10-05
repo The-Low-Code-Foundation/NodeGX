@@ -1,0 +1,15 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/project-v2.json",
+  "name": "ISL-010 Ask the Owl",
+  "id": "isl010-ask-the-owl-0001",
+  "version": "4",
+  "nodegxVersion": "1.1.0",
+  "settings": {
+    "htmlTitle": "ISL-010 Ask the Owl",
+    "navigationPathType": "path"
+  },
+  "structure": {
+    "componentsDir": "components",
+    "assetsDir": "assets"
+  }
+}

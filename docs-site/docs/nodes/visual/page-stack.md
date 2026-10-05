@@ -28,9 +28,11 @@ Flows with a natural back relationship: wizards, mobile-style master→detail dr
 | `backgroundColor` | Color | `transparent` | Fill colour behind whichever component is showing |
 | `clip` | Boolean | `true` | Clips a pushed component that is bigger than the stack |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `mounted` | Boolean | `true` | Removes the element from the page entirely when false, unlike Visible which leaves its space behind |
 | `name` | String (PackStack id) | `Main` | Name the Push and Pop nodes address this stack by; leave it as Main if there is only one |
 | `pages` | Proplist | — | The components this stack can show, and which of them it starts on |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `useRoutes` | Boolean | `false` | Puts the top component in the browser URL, so back and forward move through the stack |
 
@@ -39,6 +41,7 @@ Flows with a natural back relationship: wizards, mobile-style master→detail dr
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `reset` | Signal | — | Empties the stack and rebuilds the start component |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
 ## Outputs
 
@@ -73,9 +76,13 @@ Flows with a natural back relationship: wizards, mobile-style master→detail dr
 
 ## Dynamic ports
 
-_This node's port list changes at runtime (runtime-discovered); the tables above may be incomplete for a given instance._
+_This node's port list changes at runtime (declared-port-groups, runtime-discovered); the tables above may be incomplete for a given instance._
 
 Per-page signal outputs and transition parameters are generated from the "pages" parameter.
+
+| Condition | Inputs shown | Outputs shown |
+|---|---|---|
+| — | — | — |
 
 ## Ports at runtime
 

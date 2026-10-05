@@ -56,6 +56,7 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | Whether a click here also fires Click on the nodes this one sits inside. Automatic keeps it here as soon as this node's own Click is connected, so a button inside a clickable card runs the button and not the card; Always is the older behaviour where both run; Never keeps every click here, wired or not. Note that an element at zero opacity takes no pointer events at all |
 | `controls` | Boolean | — | Shows the browser's own play, seek and volume controls |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `dragKind` | String | — | Optional name for what this is — "card", "task". A zone with an Accept Kind only takes sources whose Drag Kind matches |
 | `dragValue` | * | — | What this element carries — usually the id of the item it shows. A drop zone reports it as Dropped Value |
 | `draggable` | Boolean | `false` | Lets a person pick this element up and drop it on an element with Accept Drops on. A see-through copy follows the pointer; the element itself stays put until the graph moves it |
@@ -85,6 +86,7 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `pointerEventsMode` | Enum (`inherit`, `explicit`) | `inherit` | Whether pointer handling is inherited from the parent or set explicitly on this element |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
 | `poster` | Image | — | Still image shown until the video has enough data to play; leave blank to show nothing |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sizeMode` | Enum (`explicit`, `contentWidth`, `contentHeight`, `contentSize`) | `contentSize` | Whether Width and Height are used as given, or the element sizes itself to fit its contents |
 | `src` | String | — | What to play: an mp4, webm or ogg URL, a file in your project, or a YouTube or Vimeo link. A YouTube or Vimeo link is recognised automatically and plays in an embedded player, where Play, Pause, Reset and the failure outputs do not apply. Leave blank to load nothing rather than fail on a missing source |
 | `srcObject` | Mediastream | `null` | A live MediaStream to play, from a camera or screen capture, instead of a URL |
@@ -110,6 +112,7 @@ Embedded video content, background/hero loops, and camera previews (wire a media
 | `play` | Signal | — | Starts or resumes playback; fired before the element exists, it is held until the element exists rather than dropped |
 | `reset` | Signal | — | Stops playback and seeks to the beginning |
 | `restart` | Signal | — | Seeks to the beginning and plays, then fires Done |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
 ## Outputs
 
@@ -189,6 +192,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | borderTopStyle = solid OR borderTopStyle = dashed OR borderTopStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderTopWidth`, `borderTopColor` | — |
 | borderRightStyle = solid OR borderRightStyle = dashed OR borderRightStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderRightWidth`, `borderRightColor` | — |
 | borderBottomStyle = solid OR borderBottomStyle = dashed OR borderBottomStyle = dotted OR borderStyle = solid OR borderStyle = dashed OR borderStyle = dotted  | `borderBottomWidth`, `borderBottomColor` | — |
+| — | — | — |
 
 ## Ports at runtime
 

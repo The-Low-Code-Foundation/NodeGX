@@ -1,0 +1,7 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "c_askolive",
+  "name": "askOlive",
+  "path": "/#__cloud__/askOlive",
+  "type": "cloud"
+}

@@ -46,6 +46,7 @@ Do not use in new graphs — use net.noodl.controls.textinput instead.
 | `clickBubbling` | Enum (`auto`, `always`, `never`) | `auto` | — |
 | `color` | Color | — | — |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `enabled` | Boolean | `true` | — |
 | `fontFamily` | Font | — | — |
 | `fontSize` | Number | — | — |
@@ -67,6 +68,7 @@ Do not use in new graphs — use net.noodl.controls.textinput instead.
 | `paddingTop` | Number | `0` | Space inside the element's top edge, between it and its content |
 | `placeholder` | String | `` | — |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `sizeMode` | Enum (`explicit`, `contentWidth`, `contentHeight`, `contentSize`) | `contentSize` | Whether Width and Height are used as given, or the element sizes itself to fit its contents |
 | `startValue` | String | — | — |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
@@ -90,6 +92,7 @@ Do not use in new graphs — use net.noodl.controls.textinput instead.
 | `blur` | Signal | — | — |
 | `clear` | Signal | — | — |
 | `focus` | Signal | — | — |
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 | `set` | Signal | — | — |
 
 ## Outputs
@@ -136,6 +139,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | boxShadowEnabled = true | `boxShadowOffsetX`, `boxShadowOffsetY`, `boxShadowInset`, `boxShadowBlurRadius`, `boxShadowSpreadRadius`, `boxShadowColor` | — |
 | sizeMode = explicit OR sizeMode = contentHeight | `width` | — |
 | sizeMode = explicit OR sizeMode = contentWidth | `height` | — |
+| — | — | — |
 
 ## Ports at runtime
 

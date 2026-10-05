@@ -1,0 +1,73 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "c_askolive",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "req",
+      "fromProperty": "pm-thing",
+      "toId": "fence",
+      "toProperty": "in-thing"
+    },
+    {
+      "fromId": "req",
+      "fromProperty": "receive",
+      "toId": "fence",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "fence",
+      "fromProperty": "out-prompt",
+      "toId": "model",
+      "toProperty": "input"
+    },
+    {
+      "fromId": "fence",
+      "fromProperty": "out-schema",
+      "toId": "model",
+      "toProperty": "outputSchema"
+    },
+    {
+      "fromId": "fence",
+      "fromProperty": "out-ask",
+      "toId": "model",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "fence",
+      "fromProperty": "out-code",
+      "toId": "resErr",
+      "toProperty": "pm-errorCode"
+    },
+    {
+      "fromId": "fence",
+      "fromProperty": "out-refused",
+      "toId": "resErr",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "model",
+      "fromProperty": "json",
+      "toId": "res",
+      "toProperty": "pm-answer"
+    },
+    {
+      "fromId": "model",
+      "fromProperty": "done",
+      "toId": "res",
+      "toProperty": "send"
+    },
+    {
+      "fromId": "model",
+      "fromProperty": "errorCode",
+      "toId": "resErr",
+      "toProperty": "pm-errorCode"
+    },
+    {
+      "fromId": "model",
+      "fromProperty": "failure",
+      "toId": "resErr",
+      "toProperty": "send"
+    }
+  ]
+}

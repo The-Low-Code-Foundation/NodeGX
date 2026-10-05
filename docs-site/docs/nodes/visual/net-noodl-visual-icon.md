@@ -29,6 +29,7 @@ Decorative or informative glyphs next to text, in cards, headers and list rows. 
 | `alignY` | Enum (`top`, `center`, `bottom`) | — | Vertical alignment of this element within the space its parent gives it |
 | `boxSizing` | Enum (`border-box`, `content-box`) | `border-box` | Whether Width and Height include this element's padding and border, or only its content |
 | `cssClassName` | String | `` | Extra CSS class names to put on this element, for styling from a stylesheet you supply |
+| `dataAttributes` | Stringlist | — | data-* names (data-testid) for tests and scripts to find this element by; each gets a value input |
 | `iconColor` | Color | `#000000` | Colour of the icon |
 | `iconIconSource` | Icon | — | Which glyph to show, picked from an installed icon set |
 | `iconImageSource` | Image | — | Image file to show instead of an icon-set glyph |
@@ -46,6 +47,7 @@ Decorative or informative glyphs next to text, in cards, headers and list rows. 
 | `paddingRight` | Number | `0` | Space inside the element's right edge, between it and its content |
 | `paddingTop` | Number | `0` | Space inside the element's top edge, between it and its content |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
+| `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `styleCss` | String | `/* background-color: red; */` | Raw CSS declarations applied to this element, overriding the styling ports above |
 | `transformOriginX` | Number | `50` | Horizontal point the element rotates and scales around, as a fraction of its width |
 | `transformOriginY` | Number | `50` | Vertical point the element rotates and scales around, as a fraction of its height |
@@ -56,6 +58,12 @@ Decorative or informative glyphs next to text, in cards, headers and list rows. 
 | `variant` | String | — | Name of a saved variant of this node type to apply, replacing the styling set here |
 | `visible` | Boolean | `true` | Hides the element while keeping the space it occupies in the layout |
 | `zIndex` | Number | — | Paint order among overlapping siblings; higher numbers paint on top |
+
+### Signals
+
+| Name | Type | Default | Description |
+|---|---|---|---|
+| `scrollIntoView` | Signal | — | Scrolls the page, or the scrolling Group holding this element, until the element can be seen |
 
 ## Outputs
 
@@ -88,6 +96,7 @@ Declares conditional/expandable port groups whose visibility depends on paramete
 | useIcon = true OR useIcon NOT SET | `iconSourceType`, `iconSize` | — |
 | #js (params.useIcon===true \|\| params.useIcon===undefined) && params.iconSourceType === 'image' | `iconImageSource` | — |
 | #js (params.useIcon===true \|\| params.useIcon===undefined) && params.iconSourceType === 'icon' | `iconIconSource`, `iconColor` | — |
+| — | — | — |
 
 ## Ports at runtime
 
