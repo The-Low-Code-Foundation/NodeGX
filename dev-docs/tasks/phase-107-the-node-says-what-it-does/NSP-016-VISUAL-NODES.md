@@ -789,3 +789,23 @@ targets agreed on. (2) **A play's page is shared state.** The window, the module
 play unless the face takes them down. The symptom was a Click lost in one scenario out of fifty, and only when the whole file ran in
 one process. (3) **Inside React's `act`, a render commits when the act closes.** "The frame start after the paint" is therefore the
 next settle, not the drain.
+
+**Gate readings (2026-10-05, load 2–4).** The side-by-side probe: every scenario of all 9 visuals identical on both targets (rows
+excepted), each file run whole in one process. Interpreter, the Text: CONFORMS at 200 on 13, 20729 and 20730 (538–539 / 544, the rest
+declared). Runtime at 200 on seed 13 (all 9, one run, 13 min): **every one CONFORMS with 0 divergences** — Button 31/32 + known,
+268/269; Checkbox 36/39 + known, 397/398; Text Input 86/87 + known, 4,071/4,087; Dropdown 52/55 + known, 1,362/1,366; Slider 46/48 +
+known, 1,613/1,614; Icon 8/10 + known, 105/105; **Text 54/54, 539/544**; Radio Button Group 20/22 + known, 49/50; Radio Button 148/152
++ known, 818/822 (unkilled ones all declared). The package suite green (20 suites, 878 passed, the visual batch now 9 nodes with
+every mutant killed or declared at seed 13); the runtime's graph and target suites green (102); `tsc --noEmit` exit 0; `node
+scripts/bugs.js check` 230 headers valid. No stranger-hashed file changed. Committed `803f6cccf` (research, C77, three face fixes)
+and `05368548f` (the rest).
+
+**The second seed and the deep run.** Runtime at 200 on seed 20730 (all 9, one run): **every one CONFORMS, 0 divergences** (Text
+538/544; the others as at 13). **The Text at 10,000 on the runtime (seed 20731, 806 s) does NOT conform yet**: 1 divergence and 47
+survivors, written up in [TEXT-DEEP-RUN-2026-10-05.md](TEXT-DEEP-RUN-2026-10-05.md). The divergence is a product defect, **row C79**
+(medium, [the ledger](../../bugs/p107-c79-an-invisible-element-catches-clicks-after-a-pointer-events-write.md)): `setStyle` writes Pointer
+Events straight onto the DOM and React re-writes a style key only when its own rendered value changes, so a Text DRAWN at Opacity 0 that
+is then given Pointer Events Enabled (or Mode) catches clicks while invisible. The same rule sits in Group, Image, Circle, Text Input
+and Video. Modelling it needs the element's own `pointer-events` beside React's last render, and an account of which inputs force a
+render. That is s44's first job. The 115 count stands on the 200-sequence gates (the s39 precedent: the Text Input counted at 200, and
+its 10,000 findings were s40's).

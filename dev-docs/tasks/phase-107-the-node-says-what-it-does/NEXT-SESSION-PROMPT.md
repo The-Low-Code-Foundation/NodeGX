@@ -50,7 +50,12 @@ Left: 10 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-
 
 ## What s44 does
 
-1. **Finish s43's gates if the handoff's readings below say any is open**, then commit.
+1. **The Text at 10,000** ([TEXT-DEEP-RUN-2026-10-05.md](TEXT-DEEP-RUN-2026-10-05.md)): 1 divergence = row **C79** (a Text drawn at
+   Opacity 0, then given Pointer Events Enabled / Mode, catches clicks: `setStyle` patches the DOM, React never re-writes `none`). Model
+   the element's own `pointer-events` beside React's last render; first MEASURE which of the Text's inputs force a render (a frame end
+   renders only on request; an act's paint always does). Then the 47 survivors (families listed in the file), scenarios the runtime also
+   plays, and the 10,000 re-run on both targets. Readings so far: all 9 visuals CONFORM at 200 on seeds 13 and 20730 (0 divergences);
+   the package suite green (878), graph + target suites green (102).
 2. **The 10,000 runs the hit test owes**: the seven re-graded specs ran at 200 only (seeds below). Run each at 10,000 on the runtime
    (the Text Input's matrix is ~20 min; one at a time, `uptime` first) and the Text at 10,000 on both targets — expect the matrix
    segments to cross Visible with an act in ways 200 never did.
@@ -62,7 +67,8 @@ Left: 10 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-
    another look). Video waits for media; Columns for NSP-017; Repeater / Component Children / stacks for definitions on the page.
 
 **Human decisions outstanding** — rows to ask, in plain words (README §7 has the earlier ones written):
-- **New (s43, drag and drop):** C77 (a card picked up with the keyboard stops responding to Tab and Space after it is re-shown —
+- **New (s43, drag and drop):** C79 (an invisible Text catches clicks after a Pointer Events write — the setters should ask for a render,
+  not patch the DOM; Group, Image, Circle, Text Input and Video share the rule), C77 (a card picked up with the keyboard stops responding to Tab and Space after it is re-shown —
   a remount, a new Tag, a late mount; the fix adds the attributes where the node learns its element), C78 (a draggable column that
   also takes drops, moved with the keyboard, drops into itself — leave the source's own zone out, as the pointer does).
 - **New (s42, the radio buttons):** C76 (a group's Value written back in the same frame as a person's pick leaves the picked button
