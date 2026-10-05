@@ -341,3 +341,41 @@ runtime names the file only for those; the line comes from the editor and the do
 - Tests: `tests-unit/isl-005` **24 / 24** (+ the watcher's routing and four reload decisions with a known-firing
   control); the suites touching the panel, card, watcher and project model **18, 268 / 268**; the widget table
   (FB-018 both directions) **127 / 127**; editor typecheck **0 errors**.
+
+**Slice 7, built — the node's documentation and catalog (AC9):**
+- `docs/node-catalog/enrichment/javascriptfunction.json`: how to share code (description), the `uses` port, what a script
+  file sees and what happens when one fails (runtimeBehavior), one pattern ("Shared helper") and two anti-patterns (pasting a
+  helper into several Functions; reading `Noodl`/`window`/`document` inside a file). The new sentences passed the
+  content-authoring `written.py` check (5 flags on the first draft → 0).
+- Regenerated `node-catalog-enriched.json` and the docs page `docs-site/docs/nodes/custom-code/java-script-function.md` in a
+  scratch copy built from `git archive HEAD` with only the enrichment file changed, because a peer's uncommitted ISL-004 hunk
+  (Page "Keep When Leaving") sits in `node-catalog.json` and the merge reads that file. Running it in place would have baked
+  their unlanded port into our generated files. In the scratch copy, `catalog:merge:check --require-coverage` and
+  `docs:nodes:check` both exit 0.
+- **Found on the way: both generated files were stale at HEAD since slice 1.** Slice 1 ran `catalog:generate`, which added
+  `uses` to `node-catalog.json`, but never ran `catalog:merge` or `docs:nodes`, so `catalog:merge:check` and
+  `docs:nodes:check` were red at `53e89d2f2`…`5fa4e1c70` (the enriched catalog and the docs page had no `uses` row).
+
+**Slice 5b — the code editor knows about script files (found reading slice 5 before driving it):**
+- **Defect 1: a Function body's `Scripts.greet.hello(…)` was linted `'Scripts' is not defined`.** `Scripts` is the body's
+  fifth argument since slice 1, but the lint globals (`esLintDiagnostics.ts` `FUNCTION_NODE_GLOBALS`) and the completion
+  list (`noodl-api-surface.ts` `FUNCTION_GLOBALS`) were never told. Both now carry it.
+- **Defect 2: the script tab opened in the Script node's mode (`'script'`).** That linted every `use(…)`, `exports.x` and
+  `module.exports` as undefined, and completed `define` and `Noodl`, which are `undefined` in a file at run time. A new
+  mode, `'scriptfile'`, matches what `scriptfiles.ts` passes: `use`, `exports`, `module` (plus `console`), no browser
+  globals, no registered library's `window` global, `Noodl.` completes nothing, and `Noodl` / `window` / `document` are
+  reported as not defined. Toolbar: "Script file" over a node, "JavaScript" over a file.
+- **Completion, the plan's "autocomplete from exports":** `Scripts.` lists the files in the open Function's Uses (never the
+  whole project: `Scripts` holds only those at run time) by the name the code reaches each by; `Scripts.<name>.` lists what
+  that file gives. Plumbed through the existing seam (`authoringContext.ts`): the project half gains `scripts`
+  (path, alias, gives; republished on the project's `scriptsChanged`), the node half gains `uses`
+  (`CodeEditorType` republishes when Uses changes, not only the ports).
+- `noodl-core-ui/tests/code-editor/isl005ScriptsInTheEditor.test.ts` **11 / 11**, each absence beside a known-firing control
+  (a typo still reported; `Noodl.` still completes on the same open node; the old `'script'` mode still reports `use` as
+  the defect's own control). **Reverted arm:** `Scripts` out of the lint globals → test 1 red (1 failed / 10 passed), file
+  restored by `cmp`. `noodl-completions.test.ts` pinned the Function's names at five; three literals now read six.
+- **Found on the way: `tests-unit/chr-007/widgetDispatch.test.ts` could not load since slice 5 (`5fa4e1c70`).** `Ports.ts`
+  gained the `ScriptUsesType` import, and that spec mocks every `Ports.ts` import (the real chain reaches `projectmodel` →
+  `WarningsModel` → `NodeLibrary.instance.on`, undefined in plain Node). Mocked like its neighbours; the snapshot gains
+  `JavaScriptFunction.uses → ScriptUsesType`. Its one remaining diff in this working tree is Page `keepWhenLeaving`, a
+  peer's uncommitted ISL-004 catalog port, left for them. Code commit: `68b881b53`.
