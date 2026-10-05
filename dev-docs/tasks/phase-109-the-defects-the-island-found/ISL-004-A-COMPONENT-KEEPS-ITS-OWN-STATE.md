@@ -1,6 +1,6 @@
 # ISL-004 — A component keeps its own state, and a page you come back to still has it
 
-**Status: 🟡 s17 (2026-10-05): ruling 1 ruled "Yes, if ticked" and built — AC1 and AC2 met in a browser (§8 s17); owed: rulings 2 and 3 (AC3, AC5), the census (AC4), the workaround read (AC6). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F04, with F05 as
+**Status: 🟡 s17 (2026-10-05): ruling 1 ruled "Yes, if ticked" and built — AC1 and AC2 met in a browser (§8 s17); owed: rulings 2 and 3 (AC3, AC5), the census (AC4). AC6 (the workaround read) written s17. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F04, with F05 as
 evidence · P108 [IW-002](../phase-108-the-island-works/IW-002-THE-JOB-MODEL.md) AC3 (lane M, s3, lines 322-329) ·
 P106 [IG-004](../phase-106-the-island-grows/IG-004-THE-ISLAND-AS-A-WORLD.md) §6 line 77 and §7.6 item 13 (lines
 328-332) · P108 [IW-006](../phase-108-the-island-works/IW-006-SHELLS-AND-THE-SHOP.md) deviation 2 (lines 219-221) ·
@@ -202,3 +202,8 @@ through the app's own Router, 1.66 s on B each time** (each deploy by `nodegx de
   ISL-005 branch `b63d5bfec`, landing with Richard). CHR-007 23/23 (the Page row's snapshot line);
   `catalog:check`, `catalog:merge:check`, `docs:nodes:check` exit 0 with the Page port in `node-catalog.json`,
   `node-catalog-enriched.json` and `docs-site/docs/nodes/visual/page.md`.
+- **AC6, the workaround read** (from the source, no change made): with *Keep When Leaving* ticked on the Island page, the
+  `kept` quiet input is no longer needed for a return through the Router; the build hash, `iw6Unlive`, the land key and
+  the land-lift stay (they answer "did her save change while she was away", which a kept page still asks); the 24
+  `garden*` Variables are ruling 2's, not ruling 1's. The kept page's Repeat pausing while hidden matches the island today
+  (`kept.tick` resumes the count). The sentence is in README §6 for P108 (IW-010).

@@ -158,6 +158,15 @@ session:
   `0`). Olive's Island's `plMode.record` can go back to a boolean (`false` in Drive, `true` in Teach): its reader
   `Inputs.record !== false && String(Inputs.record) !== 'no'` (`cg003Scripts.ts:365`) then reads Drive as "do not record".
   It is ISL-025's row for the `'yes'`/`'no'` strings; change it only with a drive that presses Drive and counts zero blocks.
+- **ISL-004 AC6 (2026-10-05):** since `f01ad4f8f` a Page can be ticked *Keep When Leaving*. Ticked on the Island page, the
+  Router brings the same page back with its live state, so the **`kept` quiet input** on `Logic/Island world` (fed by the
+  `gardenIsland` Variable, `cg003Components.ts:1789, :1855`) is no longer needed for a return through the tabs. The **build
+  hash** stays, and with it `iw6Unlive` and the **land key**: they decide whether a save changed while she was away
+  (the Workshop, the shop), which a kept page still has to answer. The **land-lift** stays for the same reason (a part
+  delivered while the page is hidden). The **24 `garden*` Variables** are app state other pages read: ruling 1 does not
+  touch them (ruling 2, component state, would). One behaviour to keep in mind: a kept page's Repeat **pauses** while hidden,
+  which matches the island today (`kept.tick` resumes the count, so time away is not counted). Change any of it in IW-010,
+  with the IW drives.
 
 ## 7. The rule this phase adds: a finding gets a row the day it is met
 
