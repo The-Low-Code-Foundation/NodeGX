@@ -32,7 +32,7 @@ import * as vm from 'vm';
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 
-import { normalizeScriptPath, scriptUsesOf } from '@noodl/runtime/src/scriptfiles';
+import { normalizeScriptPath, scriptGives, scriptUses, scriptUsesOf } from '@noodl/runtime/src/scriptfiles';
 
 import { ToolError } from '../errors';
 import type { ProjectBinding } from '../project/ProjectBinding';
@@ -111,23 +111,6 @@ export function scriptSyntaxError(source: string, rel: string): { message: strin
 
 function escapeRegExp(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
-/** `exports.x = …` names, in order. A file that assigns `module.exports` whole gives what that object holds. */
-function exportedNames(source: string): string[] {
-  const names = new Set<string>();
-  for (const m of source.matchAll(/\b(?:module\.)?exports\.([A-Za-z_$][\w$]*)\s*=/g)) names.add(m[1]);
-  return [...names];
-}
-
-/** The files a script reaches with `use('…')`, as the project names them. */
-function usedPaths(source: string): string[] {
-  const out = new Set<string>();
-  for (const m of source.matchAll(/\buse\(\s*['"]([^'"]+)['"]\s*\)/g)) {
-    const p = normalizeScriptPath(m[1]);
-    if (p !== undefined) out.add(p);
-  }
-  return [...out];
 }
 
 /** Every Function in the project, by component, with the script files its `uses` names. */
@@ -212,8 +195,8 @@ export function registerScriptReadTools(server: McpServer, binding: ProjectBindi
           name: 'Scripts.' + rel.substring(rel.lastIndexOf('/') + 1).replace(/\.js$/, ''),
           bytes: Buffer.byteLength(source, 'utf8'),
           lines: source.split('\n').length,
-          gives: exportedNames(source),
-          uses: usedPaths(source),
+          gives: scriptGives(source),
+          uses: scriptUses(source),
           usedBy: users
             .filter((u) => u.uses.includes(rel))
             .map((u) => u.component + ' / ' + (u.label ?? u.nodeId))

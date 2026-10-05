@@ -78,6 +78,7 @@ import { QuerySortingType } from './QuerySortingType';
 import { ResizingType } from './ResizingType';
 import { SizeModeType } from './SizeModeType';
 import { StringListType } from './StringList/StringListType';
+import { ScriptUsesType } from './ScriptUses/ScriptUsesType';
 import { TabGroup } from './TabGroup';
 import { TextAreaType } from './TextAreaType';
 import { TextStyleType } from './TextStyleType';
@@ -1354,6 +1355,7 @@ export class Ports extends View {
     component: ComponentType,
     sourceCode: SourceCodeType,
     stringList: StringListType,
+    scriptUses: ScriptUsesType,
     resizing: ResizingType,
     variable: VariableType,
     curve: CurveType,

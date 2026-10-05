@@ -13,6 +13,7 @@ import { eyebrowExtraHeight, titleAllowanceFor } from './canvas/instanceEyebrow'
 import { nodeShouldAttach } from './nodeAttachment';
 import { NodeGraphEditorConnection } from './NodeGraphEditorConnection';
 import { eyebrowReserveWidth, measureTextHeight, paintNode } from './NodeGraphEditorNodePainter';
+import { scriptAlias, scriptUsesOf } from '@noodl/runtime/src/scriptfiles';
 
 export class NodeGraphEditorNode {
   public static readonly size = { width: 150, height: 36 };
@@ -418,7 +419,14 @@ export class NodeGraphEditorNode {
    * ever set on nodes that resolve something implicitly, and only while a preview is running.
    */
   typeDisplayName() {
-    return this.model.runtimeSubLabel || this.model.metadata?.typeLabelOverride || this.model.type.displayName;
+    const base = this.model.runtimeSubLabel || this.model.metadata?.typeLabelOverride || this.model.type.displayName;
+    // P109 ISL-005 — a Function that uses script files says which, on this same line ("Function · stepper,
+    // sense"): the dependency is visible on the canvas without a new part on the card.
+    if (!this.model.runtimeSubLabel && this.model.type?.name === 'JavaScriptFunction') {
+      const uses = scriptUsesOf(this.model.parameters?.uses);
+      if (uses.length > 0) return `${base} · ${uses.map(scriptAlias).join(', ')}`;
+    }
+    return base;
   }
 
   paint(ctx: CanvasRenderingContext2D, paintRect, options?) {

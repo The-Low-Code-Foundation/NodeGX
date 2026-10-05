@@ -23,6 +23,7 @@ import { EventDispatcher } from '../../../../../shared/utils/EventDispatcher';
 import { benchTargetLabel } from '../../VisualCanvas/previewScope';
 import { showContextMenuInPopup } from '../../ShowContextMenuInPopup';
 import { ComponentTree } from './components/ComponentTree';
+import { ScriptsSection } from './components/ScriptsSection';
 import { LayersTree } from './components/LayersTree';
 import { useLayersDrag, type PlacedFromHeader } from './hooks/useLayersDrag';
 import { useLayersTree } from './hooks/useLayersTree';
@@ -605,6 +606,8 @@ export function ComponentsPanel() {
             <span>Use + in the panel header to create one.</span>
           </div>
         )}
+        {/* P109 ISL-005 — the project's script files, below every component section. */}
+        <ScriptsSection filterQuery={filterQuery} />
       </div>
         </>
       )}

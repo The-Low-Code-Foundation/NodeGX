@@ -298,6 +298,12 @@ export function EditorPage({ route }: EditorPageProps) {
         void ProjectModel.instance?.reloadProjectLevelFromDisk(files).catch((error) => {
           console.warn('[FLD-009] could not reload project-level files from disk', error);
         });
+      },
+      (scriptPaths) => {
+        // P109 ISL-005. An agent's `write_script_file` reaches the open editor and its preview.
+        void ProjectModel.instance?.reloadScriptsFromDisk(scriptPaths).catch((error) => {
+          console.warn('[ISL-005] could not reload script files from disk', error);
+        });
       });
     }
 

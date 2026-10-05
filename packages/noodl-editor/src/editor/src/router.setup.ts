@@ -21,6 +21,8 @@ import { ChangeReviewDocumentProvider } from './views/documents/ChangeReviewDocu
 // file-backed code surface; every other CodeMirror here is bound to a node
 // parameter.
 import { CodeFileDocumentProvider } from './views/documents/CodeFileDocument';
+// P109 ISL-005 — a project script file (scripts/**.js), bound to the project rather than the disk.
+import { ScriptFileDocumentProvider } from './views/documents/ScriptFileDocument';
 // BLD-009 — the Build panel's second host. A shell: it publishes a box and the
 // panel portals into it, so there is exactly one thread instance in the editor.
 import { ExpandedBuildDocumentProvider } from './views/documents/ExpandedBuildDocument';
@@ -538,6 +540,7 @@ export function installDocuments() {
   appRegistry.registerDocumentProvider(AuthoringPreviewDocumentProvider.ID, new AuthoringPreviewDocumentProvider());
   appRegistry.registerDocumentProvider(ExpandedBuildDocumentProvider.ID, new ExpandedBuildDocumentProvider());
   appRegistry.registerDocumentProvider(CodeFileDocumentProvider.ID, new CodeFileDocumentProvider());
+  appRegistry.registerDocumentProvider(ScriptFileDocumentProvider.ID, new ScriptFileDocumentProvider());
 
   if (import.meta.webpackHot) {
     import.meta.webpackHot.accept('./views/documents/EditorDocument', () => {

@@ -987,6 +987,54 @@ export class ProjectModel extends Model {
   }
 
   /**
+   * P109 ISL-005 — REL-009b for script files: an agent (or a text editor) wrote `scripts/**.js` while
+   * this editor holds the project. Each file is adopted unless the person has an unsaved change to it;
+   * then it is refused and its baseline left alone, so the next save sees the file moved and does not
+   * write over it. Adopting fires `scriptsChanged`, which the preview hears and re-runs the Functions.
+   */
+  async reloadScriptsFromDisk(paths: string[]): Promise<Record<string, ReloadFromDiskOutcome>> {
+    const outcomes: Record<string, ReloadFromDiskOutcome> = {};
+    if (this._projectFormat !== 'v2' || !this._retainedProjectDirectory) {
+      for (const p of paths) outcomes[p] = 'not-applicable';
+      return outcomes;
+    }
+    const decisions = await projectStructureService.decideScriptReloads(this._retainedProjectDirectory, paths, this.scripts);
+    const next = { ...this.scripts };
+    const reloaded: string[] = [];
+    const refused: string[] = [];
+    for (const p of paths) {
+      const decision = decisions[p];
+      if (decision.action === 'skip-unchanged') {
+        outcomes[p] = 'unchanged';
+      } else if (decision.action === 'refuse-dirty') {
+        outcomes[p] = 'refused-dirty';
+        refused.push(p);
+      } else {
+        if (decision.text === null) delete next[p];
+        else next[p] = decision.text;
+        projectStructureService.markScriptBaseline(p, decision.text);
+        outcomes[p] = 'reloaded';
+        reloaded.push(p);
+      }
+    }
+    if (reloaded.length > 0) {
+      // Disarmed for the same reason as the project-level reload: what is adopted is already on disk.
+      const wasSaving = saveOnModelChange;
+      ProjectModel.setSaveOnModelChange(false);
+      try {
+        this.scripts = next;
+        this.notifyListeners('scriptsChanged', { paths: reloaded, fromDisk: true });
+      } finally {
+        ProjectModel.setSaveOnModelChange(wasSaving);
+      }
+    }
+    if (refused.length > 0) {
+      this.notifyListeners('scriptsReloadRefused', { paths: refused });
+    }
+    return outcomes;
+  }
+
+  /**
    * FLD-009 — the same seam for the project-level files.
    *
    * `reloadComponentFromDisk` gave an agent's component write a way into the

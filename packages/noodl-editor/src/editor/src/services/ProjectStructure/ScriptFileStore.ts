@@ -29,6 +29,15 @@ export interface ScriptSaveResult {
   refused: string[];
 }
 
+/** What a watcher event for one script should do (REL-009b's three answers). */
+export type ScriptReloadDecision =
+  /** Adopt the disk copy (`text`; `null` = the file was deleted). */
+  | { action: 'reload'; text: string | null }
+  /** The disk matches our baseline — our own write coming back, or nothing changed. */
+  | { action: 'skip-unchanged' }
+  /** The person has an unsaved change to this script; adopting the disk would lose it. */
+  | { action: 'refuse-dirty' };
+
 export class ScriptFileStore {
   /** path → the text this editor last read from or wrote to disk. */
   private baselines = new Map<string, string>();
@@ -114,6 +123,36 @@ export class ScriptFileStore {
     }
 
     return result;
+  }
+
+  /**
+   * REL-009b for scripts: someone wrote `scripts/<path>` while the editor holds the project. `memory` is
+   * the editor's copy now (`undefined` = it has no such script). Reads the disk once.
+   */
+  async decideReload(projectDir: string, path: string, memory: string | undefined): Promise<ScriptReloadDecision> {
+    const file = this.fileFor(projectDir, path);
+    let disk: string | null;
+    if (!this.fs.exists(file)) disk = null;
+    else {
+      try {
+        disk = await this.fs.readFile!(file);
+      } catch {
+        return { action: 'skip-unchanged' }; // mid-write: the next event finds it settled
+      }
+    }
+    const baseline = this.baselines.has(path) ? this.baselines.get(path)! : null;
+    if (disk === baseline) return { action: 'skip-unchanged' };
+    // The editor's copy has moved off what it last read or wrote: an unsaved change. Keep the
+    // baseline, so the next save still sees the file moved and refuses to write over it.
+    const memoryAsDisk = memory === undefined ? null : memory;
+    if (memoryAsDisk !== baseline && memoryAsDisk !== disk) return { action: 'refuse-dirty' };
+    return { action: 'reload', text: disk };
+  }
+
+  /** Records that the editor now holds exactly what is on disk for `path` (`null`: no file). */
+  markBaseline(path: string, text: string | null): void {
+    if (text === null) this.baselines.delete(path);
+    else this.baselines.set(path, text);
   }
 
   private fileFor(projectDir: string, path: string): string {

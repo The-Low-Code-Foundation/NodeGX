@@ -45,7 +45,7 @@ import { ComponentLoader } from './ComponentLoader';
 import { ComponentSaver, hashComponent } from './ComponentSaver';
 import type { ComponentChangeSet } from './ComponentSaver';
 import { ProjectMigrator, type MigratorFilesystem } from './ProjectMigrator';
-import { ScriptFileStore } from './ScriptFileStore';
+import { ScriptFileStore, type ScriptReloadDecision } from './ScriptFileStore';
 
 export interface LoadResult {
   project: LegacyProject;
@@ -174,6 +174,22 @@ export class ProjectStructureService {
 
   /** P109 ISL-005 — `scripts/**.js`. */
   private readonly scriptStore: ScriptFileStore;
+
+  /** P109 ISL-005 — what a watcher event for each script should do; see `ScriptFileStore.decideReload`. */
+  async decideScriptReloads(
+    projectDir: string,
+    paths: string[],
+    memory: Record<string, string>
+  ): Promise<Record<string, ScriptReloadDecision>> {
+    const out: Record<string, ScriptReloadDecision> = {};
+    for (const path of paths) out[path] = await this.scriptStore.decideReload(projectDir, path, memory[path]);
+    return out;
+  }
+
+  /** P109 ISL-005 — the editor adopted the disk copy of `path` (`null`: the file is gone). */
+  markScriptBaseline(path: string, text: string | null): void {
+    this.scriptStore.markBaseline(path, text);
+  }
 
   constructor(private readonly fs: ProjectStructureFilesystem) {
     this.loader = new ComponentLoader(fs);

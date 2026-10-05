@@ -316,3 +316,28 @@ runtime names the file only for those; the line comes from the editor and the do
   edit (wrong count, right count, an edit that breaks the syntax refused); ranged read; list rows; delete refused then
   allowed. Neighbouring MCP suites (disclosure, vocabulary parity, bootstrap, open_project, find-tools phrase, docs, ISL-016):
   **8 suites, 111 / 111**. Editor: typecheck 0 errors; the 16 suites reading the shared checks + slice 2's: **17, 247 / 247**.
+
+**Slice 5, built — the editor screens (the mockup), and outside edits reaching the open editor:**
+- **The watcher:** `scriptPathFromRelativePath` + a third `ProjectFileWatcher` channel (`onScriptsChanged`);
+  `ProjectModel.reloadScriptsFromDisk` adopts an agent's write (autosave disarmed while adopting), skips our own write
+  coming back, and **refuses** when the person has an unsaved change to that file (baseline kept, so the save still
+  refuses to write over the agent). Adopting fires `scriptsChanged` → the preview re-runs. `EditorPage` wires it.
+- **The Scripts section** (`ComponentsPanelNew/components/ScriptsSection.tsx`): below the component sections, the
+  `scripts/` folder tree in the tree's own row classes, each file's user count, "New script" (a name prompt; `engine/x`
+  makes the folder). The panel filter reaches it. Its own list, not a fourth `TreeNode` kind (a script cannot be dragged,
+  made home or placed; the tree's machinery is about components).
+- **The script view** (`views/documents/ScriptFileDocument`): code + a column saying `Scripts.<name>`, Gives, Uses (each
+  opens), Used by (each jumps to the Function on the canvas), Runs in. Bound to the PROJECT, not the disk — the saver
+  is the one writer; Cmd-S puts the text on the project (the preview re-runs, autosave writes the file); an outside
+  write while unsaved is reported, never taken over the person's text.
+- **The Uses row** (`DataTypes/ScriptUses`, `editorType: 'script-uses'` routed before `stringList`): one chip per file
+  (path, `Scripts.<name>`, remove; a missing file marked), "+ Use a script…" (a native select over the link, so the
+  keyboard has a real control) with "New script…". Stored as the `stringlist` comma string. Connected-row policy:
+  exception (edit-only, no wire).
+- **The card:** a Function with Uses reads "Function · stepper, sense" on its existing second line
+  (`typeDisplayName`); a `uses` change relayouts (`ModelBindings`). No new card part, so `@nodegx/canvas-look` and
+  every other editor are unchanged.
+- `scriptGives` / `scriptUses` moved into `scriptfiles.ts` (the door and the editor read a file the same way).
+- Tests: `tests-unit/isl-005` **24 / 24** (+ the watcher's routing and four reload decisions with a known-firing
+  control); the suites touching the panel, card, watcher and project model **18, 268 / 268**; the widget table
+  (FB-018 both directions) **127 / 127**; editor typecheck **0 errors**.

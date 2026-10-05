@@ -99,6 +99,27 @@ export function scriptUsesOf(value: unknown): string[] {
   return out;
 }
 
+/**
+ * What a script file offers, read from its text: the `exports.name = …` (or `module.exports.name = …`)
+ * names, in order. A reading for people and agents (the door's list, the editor's file panel), not
+ * what the runtime does: a file that builds `exports` another way gives more than this says.
+ */
+export function scriptGives(source: string): string[] {
+  const names = new Set<string>();
+  for (const m of source.matchAll(/\b(?:module\.)?exports\.([A-Za-z_$][\w$]*)\s*=/g)) names.add(m[1]);
+  return [...names];
+}
+
+/** The files a script reaches with `use('…')`, as the project names them, read from its text. */
+export function scriptUses(source: string): ScriptPath[] {
+  const out = new Set<ScriptPath>();
+  for (const m of source.matchAll(/\buse\(\s*['"]([^'"]+)['"]\s*\)/g)) {
+    const p = normalizeScriptPath(m[1]);
+    if (p !== undefined) out.add(p);
+  }
+  return [...out];
+}
+
 /** The name a Function's code reaches a file by: its file name without `.js` (`engine/world.js` → `world`). */
 export function scriptAlias(path: ScriptPath): string {
   const base = path.substring(path.lastIndexOf('/') + 1);
