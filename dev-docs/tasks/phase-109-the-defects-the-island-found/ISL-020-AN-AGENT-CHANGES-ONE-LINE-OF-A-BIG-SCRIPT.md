@@ -124,3 +124,22 @@ modules is also the thing that makes a one-line edit cheap. It is ISL-005's open
 s5) grown into its own design question. Next: a design page that lays out how a coded project does this (modules, imports,
 one entry), what NodeGX already has that could carry it (the existing mechanism first), and 2–3 shapes with their cost, for
 Richard to think through — not a build.
+
+### Session 17 (2026-10-05) — the design page, for Richard
+
+Published as a doc he can comment on: **"Big scripts, split into parts"**
+(`https://claude.ai/code/artifact/68dd5dcd-bed7-4784-8bae-4e86f58a2d9b`), copy through the content-authoring skill
+(`written.py`: 9 flags, all fixed). It carries: what a person hits (re-measured today: 995 scripts in the 13 templates, 240 over
+4,000 characters, 78 over 20,000 — 44 of them the island's; the engine in **23** Functions at HEAD, not 17/20); how a coded
+project does it; a drawing (the engine today vs as files); the six existing mechanisms and what stops each (read-only agent,
+spot-checked: a Function compiles as `new AsyncFunction('Inputs','Outputs','Noodl','Component', …)`,
+`simplejavascript.ts:646-668`; head code sits before `window.Noodl` is assigned, `static/viewer/index.html:14, :93`, and never
+runs in a server render or reaches the export; the export refuses any Function touching `window`/`Noodl`,
+`nodegx-export/src/analyze/jsfun.ts:145-168`); three shapes, one per sketch (1 script files in the project with a Uses list;
+2 Module nodes wired on the canvas — 🔴 a wire cannot leave its component, and the engine is used from 23 components; 3 App
+code run on load); a cost table; the recommendation (shape 1, `use('tiles')` first, real `import` later — no JS transform ships
+in the editor or runtime today); three questions (which shape; `use()` or `import`; where it runs). Richard's "template
+Functions, edit one and all change" is already a component placed many times — the page says so.
+
+**✅ Ruled the same day: "ship shape 1"** (Richard, on a mockup, in session `opennoodl-8e`, which is building it as ISL-005; README §8 round 5). ISL-020's own edit tool is then a small-file edit — re-scope it once ISL-005 lands. ISL-005 (shared file, decided after native nodes), ISL-006 (ports from a shared file must not mint)
+and ISL-013 (a kit naming the kits it needs) hang on the same answer.

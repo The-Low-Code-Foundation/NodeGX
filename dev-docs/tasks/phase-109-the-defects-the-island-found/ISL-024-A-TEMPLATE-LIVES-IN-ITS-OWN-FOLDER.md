@@ -1,6 +1,6 @@
 # ISL-024 — A template lives in its own folder
 
-**Status: ⬜ not started — scoped 2026-10-01 at 27d891bf3.** **Source:** [AUDIT](AUDIT-2026-10-01.md) F34 (with F36 and
+**Status: 🟢 R1 ruled s17 (2026-10-05): "Own package + a note" (§8 s17); not built, waits for a gap with no P108 lane open — scoped 2026-10-01 at 27d891bf3.** **Source:** [AUDIT](AUDIT-2026-10-01.md) F34 (with F36 and
 F37 as template-side notes, §3) · **Side:** repo layout and tooling. No product code. 🔒 **Ruling-heavy:** nothing moves
 before R1–R3 are answered.
 
@@ -149,3 +149,34 @@ None yet.
 `packages/noodl-mcp/tests/cg003Components.ts:26`, *"6. A kit React node is never a component's root (D53)."* GAM-014
 fixed that on 09-17, and the docs page now says a kit node can be a component's only visual node. The wraps in the
 shipped templates stay (P88 R28) unless ISL-025 re-rules them.
+
+### Session 17 (2026-10-05) — R1 asked and ruled: "Own package + a note"
+
+Re-measured at `8a89300b3` (read-only agent) before asking. The garden is rebuilt by `npm run template:garden`
+(`scripts/template-gate.js`, then `ts-node scripts/generate-garden-template.ts`, which runs `cg002Engine.test.ts` first and then
+`buildGardenTemplateProject` / `prepareGardenArtefact`, writing 414 files). Of 13 `templates/*/docs/START-HERE.md`, only
+planning-demo and todo-list-demo name their `npm run template:*`; bot-garden names nothing.
+
+| reading | task file | `8a89300b3` |
+|---|---|---|
+| garden source | 13 / 12,827 lines + `cg007Assets/` | 18 / 14,456 (`cg007Assets` gone, ISL-017 `79ed6ce0f`) |
+| garden specs | 15 / 13,543 | 24 / 17,228 |
+| garden drives | 18 / 10,209 | 24 / 13,198 |
+| all generator source / specs | ~71,800 / ~35,200 | 78,016 / 40,039 (6,788 / 1,026 untracked nightbook) |
+
+- **What moves:** about 84 files (18 source, 24 specs, 24 drives, `fixtures/garden-app` + `garden-3d-app`, two save fixtures).
+- **What it rewrites:** 1 line outside the garden (`scripts/generate-garden-template.ts:15`, plus its jest `cwd`); 7 imports of
+  shared files that stay (`dryTulipLook` ×2, `reducedMotion` ×2, `helpers`, `templateArtefact`, `templatePins` — Rocket uses
+  two of them); 15 `../` imports in 8 files (`../src/server`, `../src/kitOverlay`, `../src/editor-deps` — the last two are not
+  exported by `index.ts`; `ProjectExporter` ×2, `validation`; `garden-desktop/shell/*.js` ×6; `resolve-template-kits.js` ×2);
+  25 `__dirname` uses in 18 files + 2 drive fixture paths. 🔴 Not "only their import line".
+- 🔴 (b)'s shelf argument is wrong for the garden (it has no shelf row); its risk is the desktop build, which packages
+  `templates/bot-garden` whole (`garden-desktop/build-app.js:66`, `garden-desktop.yml:117,155`).
+- Collisions at measuring: no garden file dirty; `scripts/devtools/drive-deployed.js` (all 24 garden drives require it) carries
+  THIS session's opt-in census hook; `package-lock.json` peer-modified; `test:packages` (`package.json:66`) must gain the scope.
+
+**Ruled (README §8 round 5, verbatim there): "Own package + a note"** — R1 (c) with (a)'s generated pointer file in the output
+folder. R2 as recommended: the shared files (`templatePins`, `templateArtefact`, `dryTulipLook`, `reducedMotion`, `helpers`,
+`cdp.js`, `drive-deployed.js`) stay; the garden shells stay in `garden-desktop/` (P91) and are required across. R3: the move runs
+in a gap with no P108 lane open (P108 is at session 10 next, not 5) — check `drive-deployed.js` and `package-lock.json` for peer
+edits right before. Not built.

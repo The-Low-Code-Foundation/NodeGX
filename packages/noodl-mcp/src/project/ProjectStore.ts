@@ -28,6 +28,7 @@ import { ToolError } from '../errors';
 import type { ComponentFiles } from '../graph';
 import { toPathForm } from '../paths';
 import { WriteClock, type ReproducibleOutput } from './writeClock';
+import { pinAuthoredRunOnChange, projectWillBeCleanedUp } from './runOnChangePins';
 
 const COMPONENT_FILES = ['component.json', 'nodes.json', 'connections.json'] as const;
 
@@ -608,9 +609,15 @@ export class ProjectStore {
     const entryPath = existing?.path ?? key;
     const dir = path.join(this.componentsDir, entryPath);
 
+    // P109 ISL-018 — in a project the editor will still clean up (format < 5), say "ticked" on the
+    // run-on-value-change boxes of the nodes this write authors, before the no-op check (so a rewrite of a
+    // pinned node is still a no-op).
+    const willBeCleanedUp = projectWillBeCleanedUp(this.readProjectFile()?.version);
+
     if (existing) {
       this.assertNoDrift(key, dir, options.ifRevision);
       const onDisk = this.readFilesIfPresent(dir);
+      if (willBeCleanedUp) pinAuthoredRunOnChange(key, files, onDisk ?? null);
       if (onDisk && sameComponentContent(onDisk, files)) {
         return { revision: this.takeSnapshot(key, dir, onDisk), dir, unchanged: true };
       }
@@ -619,6 +626,8 @@ export class ProjectStore {
         'conflict',
         `Directory components/${entryPath} already holds component files but is not in the registry. Refusing to overwrite.`
       );
+    } else if (willBeCleanedUp) {
+      pinAuthoredRunOnChange(key, files, null);
     }
 
     fs.mkdirSync(dir, { recursive: true });

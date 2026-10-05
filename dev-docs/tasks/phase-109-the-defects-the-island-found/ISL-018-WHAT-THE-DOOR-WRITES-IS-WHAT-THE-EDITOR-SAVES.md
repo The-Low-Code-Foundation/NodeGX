@@ -1,6 +1,6 @@
 # ISL-018 — What the door writes is what the editor saves
 
-**Status: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. `test:ci` 2,998 / 0 failures at `9a2972ec2`. Owed: the door writing into a project still at 4 (below). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
+**Status: 🟢 s17 (2026-10-05): the open case ruled ("Agent writes 'ticked'") and built — the door pins its own nodes, 12 test projects settled; three repo projects left with their owners (§8 s17).** Was: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. `test:ci` 2,998 / 0 failures at `9a2972ec2`. Owed: the door writing into a project still at 4 (below). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
 [DEF-038](../phase-80-the-defects-the-templates-found/DEF-038-THE-OTHER-GENERATOR-DISAGREES.md) (✅ built 2026-09-03, in
 the generators only) · **Side:** product (MCP door, `noodl-mcp`; the load-time migration in `@nodegx/project-contract`)
 
@@ -195,3 +195,40 @@ checkbox: there the clean-up is the intended repair.
 same wrong guess, only earlier — it does not save the theme page. The options to put next: tell a post-checkbox format-4
 project from an old one (a date it carries; templates have none until ISL-016 AC8's `modified`), save generated templates at
 5 from now on, or accept the 20.
+
+### Session 17 (2026-10-05) — the open case re-derived and ruled: "Agent writes 'ticked'"
+
+Re-derived before asking: the editor's own post-§2 save leaves a ticked box as an ABSENT key
+(`run-on-value-change-migration.ts:441-449`), so "the project carries some `runOnChange-*` key" cannot tell a post-checkbox
+project from an old one — only a date or the author's own statement can. The door writes no key at all (`grep runOnChange
+packages/noodl-mcp/src` → only a comment in `createProject.ts:180`). So the case splits in two: (1) the door's OWN nodes in a
+pre-5 project, where the door is the author and knows the answer (DEF-007's reasoning for the generators,
+`pinRunOnValueChangeDefaults`, `:517`); (2) s15's 20 existing post-checkbox format-4 projects, which no rule can tell apart.
+
+**Ruled (README §8 round 5, verbatim there): "Agent writes 'ticked'"** — when the door writes into a project that predates
+format 5 (`projectPredatesRunOnValueChange`), it pins `true` on the governed inputs of the nodes IT writes (pin, never the
+migration's `false`; nodes it does not touch are left for the editor's one-time step, which still repairs the genuinely old
+ones); and the 20 known projects are settled once by a script.
+
+**Built (s17):**
+- [`runOnChangePins.ts`](../../../packages/noodl-mcp/src/project/runOnChangePins.ts), called from
+  `ProjectStore.writeComponent` — the ONE write every door tool goes through (create, update, plans, prefab install, page
+  registration). When the project predates format 5 it runs the editor's own planner over the whole component and pins
+  `true`, first in the bag, on the boxes of the nodes this write authors: new, different from disk, or with a different
+  set of wires into them (a Run wire the agent adds makes a node signal-driven). It runs BEFORE the no-op check, so a
+  rewrite that leaves the pinned key out is still `unchanged` (ISL-019).
+- Spec [`isl018DoorPins.test.ts`](../../../packages/noodl-mcp/tests/isl018DoorPins.test.ts) 4/4: format 4 → the created
+  Function carries `runOnChange-in-name: true` first and the planner over the disk copy writes nothing; **known-firing
+  control** at format 5 → no key, and the planner names the box; a node the call did not write keeps no key (the clean-up
+  still repairs it) while one the call wired to Run is pinned; the no-op rewrite. **Reverted arms** (each restored by `cp`,
+  `cmp` clean): no hook → 2 red; every node counted as authored → the "did not write" row red. `noodl-mcp` `tsc --noEmit`:
+  8 errors = the floor, none in these files.
+- **The settle** — [`scripts/isl018-settle-format4.ts`](../../../scripts/isl018-settle-format4.ts) (dry run by default,
+  `--write`, `--root`). Re-measured today: 231 folder-format projects under the repo, NodeGX test projects, Noodl projects
+  and the two react19 apps; 225 below format 5; **16 would change (123 boxes), not s15's 20.** Settled with a backup in the
+  scratchpad: **the 12 in `NodeGX test projects`** (the 8 SBR site-builder drives 8 each — the theme-page case —,
+  exp011-variables 1, phase55-s8-kimi-k3-rerun 2, phase58-backend-deferred 6, tut003-log-a-thing-solution 4): 81 boxes,
+  the planner now writes 0 in each; the version stays 4. **Not settled, each with its owner:** `templates/nightbook` (37,
+  a peer's untracked template — its generator should pin, as DEF-038's do), `templates/digital-bricks-training-demo` (6,
+  its row `P109-S6-DEF038` is the dbt workstream's), and the two `nodegx-export` fixtures `page-desk` 2 / `variable-dial` 1
+  (never opened by an editor; P18's package).

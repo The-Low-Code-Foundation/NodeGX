@@ -361,6 +361,40 @@ recommendation:**
   loading its theme until Save. The drafted recommendation (the door runs the clean-up itself first) would apply the same wrong
   guess earlier, so it is not a fix for that case; re-derive the options before asking (ISL-018 §8 s15).
 
+**Session 17 (2026-10-05), round 5 — four questions, populations re-measured first at `8a89300b3` (read-only agents; numbers in each task's §8 s17):**
+
+- **ISL-004 — ✅ Ruled: "Yes, if ticked"** (ruling 1 (b), as recommended). Asked as *"When someone leaves a page and comes back
+  through the app's menu, NodeGX rebuilds the page from scratch, so a count, an open panel or a game in progress is gone. Olive's
+  Island works round it with 5 hand-built pieces; no other template does, and the training template wants its pages to forget.
+  Should a page be able to come back as it was left?"* Options: yes, if ticked (an opt-in "Keep this page when leaving", off by
+  default; a Repeat on a kept page must stop while hidden) / no, as today / yes, per component (a stable id per placement; 10 of 48
+  prefabs change). Rulings 2 and 3 not asked.
+- **ISL-012 — ✅ Ruled: "Recipe now, loader later"** (ruling 1 (c), NOT the recommended (b)). Asked as *"A kit loads each library
+  it lists as a plain old-style script. Current three.js ships only in the modern format, so the 3D island kit pins an old release
+  and hand-writes its camera controls. I bundled current three.js with its real controls into one plain script with one command:
+  it loads in the app and the server render, no warning, 111 KB bigger. 14 shipped kits already bundle their libraries this way.
+  What should a kit author get?"* Options: a written recipe (recommended) / load modern files / recipe now, loader later (the
+  loader only when a second kit needs it). Rulings 2 and 3 not asked.
+- **ISL-024 — ✅ Ruled: "Own package + a note"** (R1 (c) + (a)'s pointer, as recommended). Asked as *"The Bot Garden template
+  folder is written by a program kept in the MCP package's test folder. Nothing in the template says so, so a hand edit is wiped
+  at the next rebuild. Should the garden's source move to a package of its own?"* Options: own package + a note (about 84 files
+  move; 1 line outside imports it; done in a gap with no lane open) / just the note / source in the template (the desktop build
+  ships the folder to families). R2/R3 taken as the task's recommendation, restated in ISL-024 §8 s17.
+- **ISL-018 — ✅ Ruled: "Agent writes 'ticked'"** (the open case). Asked as *"Since 1 August, a node driven by its Run signal has
+  a ticked-by-default 'run when a value changes' box per input. Older projects are fixed once on opening (the boxes are unticked,
+  as they behaved), and the only way to tell old from new is a format number. An agent writing into a project still at the old
+  number writes no answer for its new nodes, so the next open unticks them. 20 projects on this machine made after 1 August are
+  still at the old number; opening them would untick boxes wrongly — on 8 site-builder test projects the theme page stops loading
+  its theme until Save is pressed. What should happen?"* Options: agent writes 'ticked' (recommended: the door pins `true` on the
+  governed inputs of the nodes IT writes into a pre-5 project, as the generators do; and the 20 known projects are settled once by
+  a script) / agent runs the fix first / leave it.
+- **ISL-020 + ISL-005's shared code (+ ISL-006, ISL-013) — 📄 a design page, not a question:** *"Big scripts, split into parts"*
+  (claude.ai Docs, 2026-10-05, `https://claude.ai/code/artifact/68dd5dcd-bed7-4784-8bae-4e86f58a2d9b`) — three shapes from Richard's sketches (script files in the project; Module nodes wired on the
+  canvas; App code run on load), a cost table, the recommendation (shape 1, `use('tiles')` before real `import`), three questions.
+  **✅ Ruled: "ship shape 1", 2026-10-05** — in session `opennoodl-8e`, on a mockup of shape 1 (script files in `scripts/`,
+  a `uses` list on the Function, `use()`/`exports`, browser + server render, cloud refused); **built by ISL-005** in that
+  session, which records the ruling in ISL-005 §8.
+
 Each task's §5 has the full question, the options and the trade-offs. Ask in plain words, one decision
 per question, and only when the task is next to build. This table is the index, with the recommendation in brackets.
 
