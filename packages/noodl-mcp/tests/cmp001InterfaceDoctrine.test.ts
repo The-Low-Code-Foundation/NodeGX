@@ -193,6 +193,16 @@ describe('CMP-001 AC2 — the playbook reaches the agent', () => {
     expect(received).toMatch(/From repeater/);
   });
 
+  it('P109 ISL-004 AC3: names Component Object as a component\'s own state, and says what a copy survives', () => {
+    // Ruled 2026-10-05 "Component Object" (ruling 2 (b)); the lifetime is the s18 browser reading
+    // (`scripts/devtools/drive-isl004-remount.js`): hidden and shown keeps it, a Refresh, a row leaving
+    // the list and a page left each start a new copy at 0.
+    expect(received).toMatch(/A component's own state is a `States` node, a `Component Object` \(every instance\s+has its own\)/);
+    expect(received).toMatch(/hidden and shown again\s+\(`mounted` off, then on\) it keeps its value/);
+    expect(received).toMatch(/A `For Each` Refresh, a row that leaves the list and comes back, and a page left and\s+returned to each build a NEW copy that starts empty/);
+    expect(received).toMatch(/`Keep When Leaving`/);
+  });
+
   it('states the floors nowhere — a graded build must not be able to count its way to a pass', () => {
     // CMP-001 AC3's three floors (50% / 20% / 0.15) grade the CMP-002 build, which reads this field.
     // 🔴 An absence is only evidence beside a signal known to fire: on a blank field every

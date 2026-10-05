@@ -110,9 +110,13 @@ node, one input, every property it implies.
 placed. Keep an open flag, a selected tab, a pick or a draft in one, place the component twice, and
 every copy opens, selects, picks and drafts together. It looks fine with one copy on the page, which
 is why it ships. A component's own state is a \`States\` node, a \`Component Object\` (every instance
-has its own), or a \`Counter\` or \`Switch\`. When every copy really should share the value, like a
-row of filter pills writing one filter, write "shared on purpose" in that node's comment: the
-validator warns about a Variable in a component drawn twice until it says so.
+has its own), or a \`Counter\` or \`Switch\`. It lasts as long as that copy: hidden and shown again
+(\`mounted\` off, then on) it keeps its value, and so does a \`For Each\` row whose id is still in the
+new list. A \`For Each\` Refresh, a row that leaves the list and comes back, and a page left and
+returned to each build a NEW copy that starts empty; tick the page's \`Keep When Leaving\` to keep
+the page. When every copy really should share the value, like a row of filter pills writing one
+filter, write "shared on purpose" in that node's comment: the validator warns about a Variable in a
+component drawn twice until it says so.
 
 ### 5. A component can be a parameter
 \`Multi Select/Dropdown\` exposes \`Option Template\` and \`Pill Template\` and wires them straight

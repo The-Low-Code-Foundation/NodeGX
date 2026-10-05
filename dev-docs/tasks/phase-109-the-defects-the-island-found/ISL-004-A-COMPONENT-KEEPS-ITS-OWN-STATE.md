@@ -1,6 +1,6 @@
 # ISL-004 — A component keeps its own state, and a page you come back to still has it
 
-**Status: 🟡 s17 (2026-10-05): ruling 1 ruled "Yes, if ticked" and built — AC1 and AC2 met in a browser (§8 s17); owed: rulings 2 and 3 (AC3, AC5), the census (AC4). AC6 (the workaround read) written s17. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F04, with F05 as
+**Status: 🟡 s18 (2026-10-05): rulings 2 ("Component Object") and 3 ("No, it's app logic") ruled; Component Object's lifetime measured in a browser (kept when hidden and shown or when its row id stays; lost on a For Each Refresh, a row leaving and returning, a page left); AC3 built (the doctrine says it, spec + sabotage). Owed: AC4 (the census), AC5 (F05 as a spec, a record). Filed P109-S18-REFRESHROWSTATE.** **Earlier status: 🟡 s17 (2026-10-05): ruling 1 ruled "Yes, if ticked" and built — AC1 and AC2 met in a browser (§8 s17); owed: rulings 2 and 3 (AC3, AC5), the census (AC4). AC6 (the workaround read) written s17. Scoped 2026-10-01 at `27d891bf3`.** **Source:** [audit](AUDIT-2026-10-01.md) F04, with F05 as
 evidence · P108 [IW-002](../phase-108-the-island-works/IW-002-THE-JOB-MODEL.md) AC3 (lane M, s3, lines 322-329) ·
 P106 [IG-004](../phase-106-the-island-grows/IG-004-THE-ISLAND-AS-A-WORLD.md) §6 line 77 and §7.6 item 13 (lines
 328-332) · P108 [IW-006](../phase-108-the-island-works/IW-006-SHELLS-AND-THE-SHOP.md) deviation 2 (lines 219-221) ·
@@ -207,3 +207,47 @@ through the app's own Router, 1.66 s on B each time** (each deploy by `nodegx de
   the land-lift stay (they answer "did her save change while she was away", which a kept page still asks); the 24
   `garden*` Variables are ruling 2's, not ruling 1's. The kept page's Repeat pausing while hidden matches the island today
   (`kept.tick` resumes the count). The sentence is in README §6 for P108 (IW-010).
+
+### Session 18 (2026-10-05) — rulings 2 and 3 asked and ruled; Component Object's lifetime measured
+
+**Measured before asking:** the doctrine an agent receives already names Component Object as a component's own state
+(`interfaces.ts`, GAM-005's paragraph: *"a `States` node, a `Component Object` (every instance has its own), or a `Counter`
+or `Switch`"*); one catalog example uses it (`comp-wizard-component-object.json`, of 109); 10 of 48 prefabs; 0 of 13
+templates.
+
+**Ruled (README §8 round 6, verbatim there):** ruling 2 **"Component Object"**, with Richard's own words: *"from memory I'm
+not sure it stores the value when unmounted and mounted again, so worth investigating"* (and the Parent Component Object's
+new ancestor pick makes it much better). Ruling 3 **"No, it's app logic"**: AC5 stays a record.
+
+**The investigation, driven** — [`isl004Remount.ts`](../../../packages/noodl-mcp/tests/isl004Remount.ts) builds the page
+through the door (0 errors, 0 warnings; the door refused my first wire to a Function's `items` and named `out-items`), `nodegx
+deploy` exit 0 (shared deploy bundle 20:10, ISL-004's keep committed), [`drive-isl004-remount.js`](../../../scripts/devtools/drive-isl004-remount.js)
+at 390 px, every press a CDP mouse event after `elementFromPoint`. "same" = the DOM element marked before the step is the one
+on screen after it.
+
+| step | the hideable Tally | For Each row 1 | row 2 | app Variable (control) |
+|---|---|---|---|---|
+| before (3 taps, 2, 1, 2) | 3 | 2 | 1 | 2 |
+| Hide, Show (`mounted` off then on; the wrapper absent while hidden) | **3, a new element** | 2 same | 1 same | 2 |
+| Rewrite: a fresh array of the same two ids | 3 same | **2 same** | **1 same** | 2 |
+| Refresh | 3 | **0, new** | **0, new** | 2 |
+| (row 1 tapped once more) | 3 | 1 | 0 | 2 |
+| Filter (row 1 out), then Rewrite (row 1 back) | 3 | **0, new** | 0 same | 2 |
+| Round trip A → B → A (Keep When Leaving off) | **0, new** | 0, new | 0, new | 2 |
+
+- **What a Component Object survives:** its component hidden and shown (the DOM goes and comes back; the component instance,
+  and so its record `componentState<instance id>`, stays), and a For Each items write that keeps the row's id (rows are
+  diffed by id). **What loses it:** anything that deletes the component instance and builds a new one — a For Each Refresh
+  (a full teardown, `foreach.tsx`, deliberate per NDA-013's comment), a row that leaves the list and comes back, a page left
+  and returned to (s17: unless the page ticks Keep When Leaving). No console errors.
+- Richard's memory was half right. Filed **`P109-S18-REFRESHROWSTATE`** (needs-ruling, low): Refresh empties the state of
+  rows whose records did not change. The filtered row is not filed: a removed row starting empty is what every UI framework
+  does.
+- **Not measured, so not written into the doctrine:** where state that must outlive a rebuilt row should live. A Parent
+  Component Object is ONE record for the parent, so rows would share it; per-row state outliving a Refresh would need the row's
+  own record (by id), not drafted.
+
+**AC3 built ((b)):** the interface doctrine's paragraph now says how long a copy's state lasts — hidden and shown keeps it, a
+row whose id stays keeps it, a Refresh, a row leaving and returning and a page left each build a new copy that starts empty,
+and Keep When Leaving keeps the page. Graded on the text a real server SENDS (`get_project_info.interfaceDoctrine`) by a new
+row in `cmp001InterfaceDoctrine.test.ts`. The catalog example exists (`comp-wizard-component-object.json`).
