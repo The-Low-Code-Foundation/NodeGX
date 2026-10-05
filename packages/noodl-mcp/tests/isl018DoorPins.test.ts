@@ -171,4 +171,18 @@ describe('ISL-018 — the door says "ticked" on the Run-driven nodes it writes i
       await session.close();
     }
   });
+
+  it('an explicit "false" the caller sends is kept: the door answers only the boxes nobody answered', async () => {
+    const dir = fixtureAt('4');
+    const session = await open(dir);
+    const nodes = NODES.map((n) => (n.id === 'fn' ? { ...n, parameters: { ...n.parameters, 'runOnChange-in-name': false } } : n));
+    try {
+      await must(session, 'create_component', { path: PATH, nodes, connections: CONNECTIONS });
+    } finally {
+      await session.close();
+    }
+    const fn = onDisk(dir, PATH).nodes.find((n) => n.id === 'fn')!;
+    expect(fn.parameters?.['runOnChange-in-name']).toBe(false);
+    expect(cleanUpWrites(dir, PATH)).toEqual({});
+  });
 });

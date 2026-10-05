@@ -1,6 +1,6 @@
 # ISL-018 — What the door writes is what the editor saves
 
-**Status: 🟢 s17 (2026-10-05): the open case ruled ("Agent writes 'ticked'") and built — the door pins its own nodes, 12 test projects settled; three repo projects left with their owners (§8 s17).** Was: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. `test:ci` 2,998 / 0 failures at `9a2972ec2`. Owed: the door writing into a project still at 4 (below). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
+**Status: 🟢 s17 (2026-10-05): the open case ruled ("Agent writes 'ticked'") and built — the door pins its own nodes, 12 test projects settled, the `noodl-mcp` suite read and attributed (§8 s17); owed: AC5 (an agent round, then the editor's clean-up log), AC7 on the DBT demo (its owner's, `P109-S6-DEF038`); three repo projects left with their owners.** Was: 🟡 s3 (2026-10-02): AC2 measured, ruled ("a format step, 4→5" — neither of §5's options) and built (`b2ba0320a`); driven in the editor. `test:ci` 2,998 / 0 failures at `9a2972ec2`. Owed: the door writing into a project still at 4 (below). Scoped 2026-10-01 at `27d891bf3`.** **Source:** [AUDIT F25](AUDIT-2026-10-01.md) · P80
 [DEF-038](../phase-80-the-defects-the-templates-found/DEF-038-THE-OTHER-GENERATOR-DISAGREES.md) (✅ built 2026-09-03, in
 the generators only) · **Side:** product (MCP door, `noodl-mcp`; the load-time migration in `@nodegx/project-contract`)
 
@@ -232,3 +232,16 @@ ones); and the 20 known projects are settled once by a script.
   a peer's untracked template — its generator should pin, as DEF-038's do), `templates/digital-bricks-training-demo` (6,
   its row `P109-S6-DEF038` is the dbt workstream's), and the two `nodegx-export` fixtures `page-desk` 2 / `variable-dial` 1
   (never opened by an editor; P18's package).
+- **The `noodl-mcp` suite, whole (`f01ad4f8f` + this checkout's peer files):** 3,775 / 3,790, 15 red in 10 suites, exit 1.
+  **Attributed by a pair in a clean worktree at HEAD** (`make-worktree.sh`, absolute parent path — a relative one leaves
+  every `@nodegx/*` link dangling and the suites fail to load): the 10 suites with the hook removed → 12 red; with it →
+  14, the difference exactly **SB-006's two migration rows** (SBR-004 AC2 and §9.2). The other 12 are red without this
+  change (CMP-001 ×2, CMP-004 ×4, CN-004, D54, DEF-038 on the DBT demo, FLD-013, ISL-005's array `uses`, node id
+  allocation); DEF-038 on `templates/nightbook` is the 13th, red only where that untracked template exists.
+- **SB-006 updated, not loosened:** its two rows used "the migration fires in bulk on this template" as the known-firing
+  signal; the door now pins every node it writes, so the real artefact plans **no** write (`plan.writes` is `[]`, now
+  asserted — it reddens if the hook goes). The known-firing signal moved to the same planner over a copy with every
+  `runOnChange-*` key stripped (fires in bulk); the literal `true` on the nav link's and the slug resolver's boxes stays.
+  67/67.
+- The spec gained AC3's other clause: an explicit `runOnChange-in-name: false` from the caller is kept (the planner only
+  answers absent boxes). 5/5.
