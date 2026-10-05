@@ -99,6 +99,80 @@ async function clickLastWords(page: RenderedPage, words: string): Promise<void> 
   await clickAt(page, xy.x, xy.y);
 }
 
+/** As a person does it: a pointer press at the end of the field holding these words, then keys, one at a time. */
+async function typeAtEnd(page: RenderedPage, holding: string, keys: string): Promise<void> {
+  const at = String(
+    await page.evaluate(`(function () {
+      var i = Array.prototype.filter.call(document.querySelectorAll('input'), function (x) { return x.value === ${JSON.stringify(holding)}; })[0];
+      if (!i) return 'absent';
+      var r = i.getBoundingClientRect();
+      return JSON.stringify({ x: r.right - 8, y: r.top + r.height / 2 });
+    })()`)
+  );
+  if (at === 'absent') throw new Error(`no field holds "${holding}"`);
+  const xy = JSON.parse(at) as { x: number; y: number };
+  await clickAt(page, xy.x, xy.y);
+  await wait(200);
+  const client = (page as unknown as { client: { send(m: string, p?: unknown): Promise<unknown> } }).client;
+  await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: 'End', code: 'End', windowsVirtualKeyCode: 35 });
+  await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: 'End', code: 'End', windowsVirtualKeyCode: 35 });
+  for (const ch of keys) {
+    await client.send('Input.dispatchKeyEvent', { type: 'keyDown', key: ch, text: ch });
+    await client.send('Input.dispatchKeyEvent', { type: 'keyUp', key: ch });
+    await wait(40);
+  }
+  await wait(300);
+}
+
+/** The Nth date picker on the page, its calendar opened and the day pressed (as `tpl008-recurring-demo-drive` does). */
+async function pickDateIn(page: RenderedPage, nth: number, day: string): Promise<void> {
+  const press = async (expr: string): Promise<boolean> => {
+    const at = String(
+      await page.evaluate(`(function () {
+        var e = ${expr};
+        if (!e) return 'absent';
+        e.scrollIntoView({ block: 'center', behavior: 'instant' });
+        var r = e.getBoundingClientRect();
+        return JSON.stringify({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      })()`)
+    );
+    if (at === 'absent') return false;
+    const { x, y } = JSON.parse(at) as { x: number; y: number };
+    await clickAt(page, x, y);
+    return true;
+  };
+  if (!(await press(`document.querySelectorAll('.ndg-dp-input')[${nth}]`))) throw new Error(`no date picker ${nth}`);
+  await until('calendar open', () => page.evaluate(`!!document.querySelector('.ndg-dp-pop')`), (v) => v === true, 5_000);
+  for (let i = 0; i < 24; i++) {
+    if (await press(`document.querySelector('.ndg-dp-pop [data-day="${day}"]')`)) return;
+    if (!(await press(`document.querySelector('.ndg-dp-pop [data-nav="1"]')`))) break;
+  }
+  throw new Error(`${day} never appeared in the calendar`);
+}
+
+/** The button with this label in the smallest element around the LAST text reading `label` — the popup's line, over the card's. */
+async function clickLastButtonBeside(page: RenderedPage, label: string, button: string): Promise<void> {
+  const at = String(
+    await page.evaluate(`(function () {
+      var leaves = Array.prototype.filter.call(document.querySelectorAll('body *'), function (e) {
+        return e.children.length === 0 && (e.textContent || '').trim() === ${JSON.stringify(label)};
+      });
+      var leaf = leaves[leaves.length - 1];
+      for (var el = leaf && leaf.parentElement; el; el = el.parentElement) {
+        var b = Array.prototype.filter.call(el.querySelectorAll('button'), function (x) { return (x.innerText || '').trim() === ${JSON.stringify(button)}; })[0];
+        if (!b) continue;
+        b.scrollIntoView({ block: 'center', behavior: 'instant' });
+        var r = b.getBoundingClientRect();
+        return JSON.stringify({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
+      }
+      return 'absent:' + leaves.length;
+    })()`)
+  );
+  if (at.startsWith('absent')) throw new Error(`no "${button}" beside the last "${label}" (${at})`);
+  const xy = JSON.parse(at) as { x: number; y: number };
+  await clickAt(page, xy.x, xy.y);
+}
+
 interface Row {
   objectId: string;
   [field: string]: unknown;
@@ -226,6 +300,64 @@ describe('TPL-008-PJ — Projects, driven', () => {
         R.jossTasks = jossTasks.map((t) => [t.title, t.status, t.waitingOn || '']).sort();
         await shot('pj-3-after');
 
+        // ── §3b Change the move, as a person does it (Richard, 2026-10-05: "when I hit 'change the move' I can't edit it") ──
+        step('§3b change');
+        const fields = async () =>
+          JSON.parse(String(await page.evaluate(`JSON.stringify(Array.prototype.filter.call(document.querySelectorAll('input'), function (i) {
+            var r = i.getBoundingClientRect();
+            return r.width > 0 && r.height > 0 && i.type !== 'date';
+          }).map(function (i) { return [i.getAttribute('placeholder') || '', i.value]; }))`))) as Array<[string, string]>;
+        if (!(await text(page)).includes('Change the move')) await clickWords(page, 'Linguaid');
+        await until('Linguaid open again', () => text(page), (s) => s.includes('Change the move'));
+        await clickButton(page, 'Change the move');
+        await until('change form', () => text(page), (s) => s.includes('Change the move for Linguaid'));
+        await wait(600);
+        R.changeOpensOn = (await fields()).filter(([ph]) => ph.startsWith('The next move') || ph.startsWith('Waiting on someone'));
+        await typeAtEnd(page, 'Joss replies with the list of OFs', ' now');
+        await pickDateIn(page, 0, iso(9));
+        await shot('pj-3b-change');
+        await clickButton(page, 'Save');
+        await until('change written', async () => (await rows('Task', tk)).filter((t) => t.projectId === joss && t.status === 'open').map((t) => [t.title, t.waitingOn, t.deadline]), (t) => t.length === 1 && t[0][0] === 'Joss replies with the list of OFs now');
+        R.changed = (await rows('Task', tk)).filter((t) => t.projectId === joss && t.status === 'open').map((t) => [t.title, t.waitingOn || '', t.deadline || '']);
+
+        // ── §3c Add a task for the project ────────────────────────────────────────
+        step('§3c add a task');
+        await until('still open', () => text(page), (s) => s.includes('Add a task'));
+        await clickButton(page, 'Add a task');
+        await until('add form', () => text(page), (s) => s.includes('Add a task for Linguaid'));
+        await fill(page, 'The next move', 'Send Joss the invoice');
+        await clickButton(page, 'Save');
+        await until('task added', async () => (await rows('Task', tk)).filter((t) => t.projectId === joss && t.status === 'open').length, (n) => n === 2);
+        await until('drawn in the project', () => text(page), (s) => s.includes('In your list (2)') && s.includes('Send Joss the invoice'));
+        R.added = (await rows('Task', tk)).filter((t) => t.projectId === joss && t.status === 'open').map((t) => [t.title, Number(t.position)]).sort((x, y) => (x[1] as number) - (y[1] as number)).map((x) => x[0]);
+
+        // ── §3d Edit the project ──────────────────────────────────────────────────
+        step('§3d edit project');
+        await clickButton(page, 'Edit project');
+        await until('project form', () => text(page), (s) => s.includes('Edit the project'));
+        R.editOpensOn = (await fields()).filter(([ph]) => ph === 'Its name');
+        await fill(page, 'Its name', 'Linguaid Ltd');
+        await clickButton(page, 'A fixed price');
+        await fill(page, 'Pays within', '30');
+        await shot('pj-3d-edit');
+        await clickButton(page, 'Save project');
+        await until('project written', async () => (await rows('Project', tk)).find((p) => p.objectId === joss)?.name, (n) => n === 'Linguaid Ltd');
+        const lp = (await rows('Project', tk)).find((p) => p.objectId === joss) as Row;
+        R.edited = [lp.name, lp.kind, lp.billing, lp.termsDays];
+        await until('renamed on the tab', () => text(page), (s) => s.includes('Linguaid Ltd'));
+
+        // ── §3e Both ways: the project's task opens in the List, and back ────────
+        step('§3e project to task');
+        await clickWords(page, 'Send Joss the invoice');
+        await until('the List, on that task', async () => String(await page.evaluate(`Array.prototype.map.call(document.querySelectorAll('input'), function (i) { return i.value; }).join('|')`)), (v) => v.split('|').includes('Send Joss the invoice'));
+        const paneText = await text(page);
+        R.taskPane = [paneText.includes('Part of Linguaid Ltd'), paneText.includes('Your move')];
+        await shot('pj-3e-task');
+        step('§3e task to project');
+        await clickButton(page, 'Open the project');
+        await until('back on the project', () => text(page), (s) => s.includes('Your move') && s.includes('Edit project') && s.includes('Send Joss the invoice'));
+        R.backOnProject = true;
+
         // ── §4 A new balance ─────────────────────────────────────────────────────
         step('§4 balance');
         R.lowBefore = (await text(page)).split('\n').find((l) => l.startsWith('Dips to') || l.startsWith('Lowest')) ?? '';
@@ -263,6 +395,67 @@ describe('TPL-008-PJ — Projects, driven', () => {
         await until('prompt gone', () => text(page), (s) => !s.includes('Closed. What is the next move for Clarion?'));
         R.listAfterPrompt = (await text(page)).includes('Send Ade the plan');
 
+        // ── §8 The money popup (Richard: "I can't add expenses and upcoming payments like in the planning template") ──
+        step('§8 add money');
+        await clickView(page, 'Projects');
+        await until('tab', () => text(page), (s) => s.includes('All money in and out'));
+        await clickButton(page, '+ Add money');
+        await until('money form', () => text(page), (s) => s.includes('Add money') && s.includes('How often'));
+        await fill(page, 'What it is', 'Tax bill');
+        await fill(page, 'How much', '1,240');
+        await pickDateIn(page, 0, iso(12));
+        await shot('pj-8-add-money');
+        await clickButton(page, 'Save');
+        await until('item written', async () => (await rows('MoneyItem', tk)).find((m) => m.label === 'Tax bill'), (m) => !!m);
+        const tax = (await rows('MoneyItem', tk)).find((m) => m.label === 'Tax bill') as Row;
+        R.taxItem = [tax.amount, tax.repeat, tax.date, tax.projectId ?? null, tax.likelihood];
+        await until('popup closed', () => text(page), (s) => !s.includes('How often'));
+
+        step('§8 the lists');
+        await clickButton(page, 'All money in and out');
+        await until('popup list', () => text(page), (s) => s.includes('Money in and out') && s.includes('Tax bill'));
+        R.upcoming = (await text(page)).includes('−€1,240');
+        await shot('pj-8-upcoming');
+        await clickButton(page, 'Recurring');
+        await until('recurring', () => text(page), (s) => s.includes('Every month on the'));
+        await clickLastWords(page, 'Rent');
+        await until('rent form', () => text(page), (s) => s.includes('Change: Rent'));
+        R.rentOpensOn = (await fields()).filter(([ph]) => ph === 'How much (€)');
+        await fill(page, 'How much', '950');
+        await clickButton(page, 'Save');
+        await until('rent written', async () => (await rows('MoneyItem', tk)).find((m) => m.label === 'Rent')?.amount, (a) => a === -950);
+        await until('back to the list', () => text(page), (s) => s.includes('Recurring') && !s.includes('Change: Rent'));
+        step('§8 end it');
+        await clickLastWords(page, 'Rent');
+        await until('rent form again', () => text(page), (s) => s.includes('Change: Rent') && s.includes('End it'));
+        await clickButton(page, 'End it');
+        await until('rent ended', async () => (await rows('MoneyItem', tk)).find((m) => m.label === 'Rent')?.until, (u) => !!u);
+        R.rentUntil = (await rows('MoneyItem', tk)).find((m) => m.label === 'Rent')?.until;
+        step('§8 paid and untick');
+        await clickButton(page, 'Upcoming');
+        await until('upcoming again', () => text(page), (s) => s.includes('Tax bill'));
+        await clickLastButtonBeside(page, 'Tax bill', 'Paid');
+        await until('tax ticked', async () => (await rows('MoneyMark', tk)).filter((m) => m.itemId === tax.objectId && Array.isArray(m.payments) && (m.payments as unknown[]).length === 1).length, (n) => n === 1);
+        await clickButton(page, 'Past');
+        await until('past', () => text(page), (s) => s.includes('Tax bill') && s.includes('Untick'));
+        await shot('pj-8-past');
+        await clickLastButtonBeside(page, 'Tax bill', 'Untick');
+        await until('tax unticked', async () => (await rows('MoneyMark', tk)).filter((m) => m.itemId === tax.objectId && Array.isArray(m.payments) && (m.payments as unknown[]).length === 0).length, (n) => n === 1);
+        await clickButton(page, '✕');
+        await until('popup shut', () => text(page), (s) => !s.includes('Money in and out'));
+
+        step('§8 add money for a project');
+        // §5 left Clarion open; open it only if it is not.
+        if (!(await text(page)).includes('Its money')) await clickWords(page, 'Clarion');
+        await until('Clarion open', () => text(page), (s) => s.includes('Add money') && s.includes('Its money'));
+        await clickButton(page, 'Add money');
+        await until('form for Clarion', () => text(page), (s) => s.includes('Add money for Clarion'));
+        await fill(page, 'How much', '500');
+        await clickButton(page, 'Save');
+        await until('Clarion item', async () => (await rows('MoneyItem', tk)).filter((m) => m.projectId === ade).length, (n) => n === 2);
+        R.clarionItems = (await rows('MoneyItem', tk)).filter((m) => m.projectId === ade).map((m) => [m.label, m.amount]).sort();
+        await until('popup shut again', () => text(page), (s) => !s.includes('Add money for Clarion'));
+
         // ── §7 Phone width ───────────────────────────────────────────────────────
         step('§7 phone');
         await page.setViewport({ width: 390, height: 844, mobile: true });
@@ -271,6 +464,11 @@ describe('TPL-008-PJ — Projects, driven', () => {
         await wait(800);
         R.phoneScrollWidth = await page.evaluate('document.documentElement.scrollWidth');
         await shot('pj-7-phone');
+        await clickButton(page, 'All money in and out');
+        await until('popup at 390', () => text(page), (s) => s.includes('Money in and out'));
+        await wait(500);
+        R.phonePopupScrollWidth = await page.evaluate('document.documentElement.scrollWidth');
+        await shot('pj-7-phone-popup');
         step('done');
       } catch (e) {
         driveError = `${stoppedAt}: ${(e as Error).message}`;
@@ -320,6 +518,37 @@ describe('TPL-008-PJ — Projects, driven', () => {
     ]);
   });
 
+  it('§3b s2 — Change the move opens on the move, takes typing and a day from the calendar, and keeps who it waits on', () => {
+    expect(R.changeOpensOn).toEqual([
+      ['The next move, in a few words', 'Joss replies with the list of OFs'],
+      ['Waiting on someone? Their name. Empty if it is your move.', 'Joss']
+    ]);
+    expect(R.changed).toEqual([['Joss replies with the list of OFs now', 'Joss', iso(9)]]);
+  });
+
+  it('§3c s2 — Add a task puts it at the end of the list, under the project', () => {
+    expect(R.added).toEqual(['Joss replies with the list of OFs now', 'Send Joss the invoice']);
+  });
+
+  it('§3d s2 — Edit project opens on the project and saves its name, billing and terms', () => {
+    expect(R.editOpensOn).toEqual([['Its name', 'Linguaid']]);
+    expect(R.edited).toEqual(['Linguaid Ltd', 'earning', 'fixed', 30]);
+  });
+
+  it('§3e s2 — both ways: a project’s task opens in the List with its project named, and Open the project goes back', () => {
+    expect(R.taskPane).toEqual([true, false]);
+    expect(R.backOnProject).toBe(true);
+  });
+
+  it('§8 s2 — the money popup: add an expense, change and end an item, tick and untick, add money for a project', () => {
+    expect(R.taxItem).toEqual([-1240, 'once', iso(12), null, 100]);
+    expect(R.upcoming).toBe(true);
+    expect(R.rentOpensOn).toEqual([['How much (€)', '900']]);
+    // Rent had not begun (its first day is in four days), so ending it means it never happens.
+    expect(R.rentUntil).toBe(iso(3));
+    expect(R.clarionItems).toEqual([['Clarion', 1200], ['Clarion', 500]]);
+  });
+
   it('§4 AC4 — a new balance is today’s reading, and the money sentence follows it', () => {
     expect(R.readings).toEqual([[iso(-2), 300], [iso(0), 2140]].sort());
     expect(String(R.lowBefore)).toMatch(/^(Dips to|Lowest)/);
@@ -336,6 +565,7 @@ describe('TPL-008-PJ — Projects, driven', () => {
 
   it('§7 the phone: no sideways scroll', () => {
     expect(R.phoneScrollWidth).toBe(390);
+    expect(R.phonePopupScrollWidth).toBe(390);
   });
 
   it('no console errors on the way', () => {

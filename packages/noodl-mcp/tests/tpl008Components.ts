@@ -137,6 +137,17 @@ export const C = {
   addProject: '/Projects/Add project',
   recordBalance: '/Projects/Record balance',
   markMoney: '/Projects/Mark money',
+  // TPL-008-PJ s2 — Planning's editing, back (Richard, 2026-10-05: "you've taken out a lot of the basic CRUD")
+  moveForm: '/Projects/Move form',
+  projectTask: '/Projects/Project task',
+  projectMoney: '/Projects/Project money',
+  projectEditor: '/Projects/Project editor',
+  moneyLine: '/Projects/Money line',
+  moneyEditor: '/Projects/Money editor',
+  moneySheet: '/Projects/Money sheet',
+  saveProject: '/Projects/Save project',
+  saveMoneyItem: '/Projects/Save money item',
+  endMoneyItem: '/Projects/End money item',
   pageTodo: '/Pages/Todo',
   pageSignIn: '/Pages/Sign in'
 } as const;
@@ -158,7 +169,9 @@ export const VAR = {
   /** PJ — which project is opened on the Projects tab. One at a time. */
   openProject: 'todoOpenProject',
   /** PJ — the Projects tab switched on (`on`), off (`off`), or never chosen (`''`: on when there are projects). */
-  projectsFlag: 'todoProjectsFlag'
+  projectsFlag: 'todoProjectsFlag',
+  /** PJ s2 — what the money form is showing: `item:<id>`, `new`, or `new:<project id>` (one producer per Set Variable). */
+  moneyEdit: 'todoMoneyEdit'
 } as const;
 
 /** The one sentence a failed write shows. */
@@ -373,6 +386,8 @@ const FIELD = {
   paddingTop: 'var(--space-2)',
   paddingBottom: 'var(--space-2)'
 };
+/** The text field's look on a dropdown, which has no `type`. */
+const SELECT_FIELD = (({ type: _type, ...rest }: Record<string, unknown>) => rest)(FIELD as Record<string, unknown>);
 const COLUMN = (gap: string) => ({ flexDirection: 'column', sizeMode: 'contentHeight', width: pct(100), rowGap: gap });
 const ROW = (gap: string) => ({ flexDirection: 'row', alignItems: 'center', sizeMode: 'contentHeight', width: pct(100), columnGap: gap });
 const RULE_BELOW = { borderBottomStyle: 'solid', borderBottomWidth: 'var(--border-1)', borderBottomColor: 'var(--border-subtle)' };
@@ -1284,7 +1299,10 @@ const SUMMARY_INS: Array<[string, string]> = [
   ['isClosed', 'boolean'],
   ['canMakeNext', 'boolean'],
   ['closingNote', 'string'],
-  ['narrow', 'boolean']
+  ['narrow', 'boolean'],
+  // TPL-008-PJ s2 — the project a task belongs to, and the way to it.
+  ['projectLabel', 'string'],
+  ['hasProject', 'boolean']
 ];
 const SUMMARY_OUTS: Array<[string, string]> = [
   ['rename', 'signal'],
@@ -1294,7 +1312,8 @@ const SUMMARY_OUTS: Array<[string, string]> = [
   ['reopen', 'signal'],
   ['back', 'signal'],
   ['newTitle', 'string'],
-  ['deadlineText', 'string']
+  ['deadlineText', 'string'],
+  ['openProject', 'signal']
 ];
 
 const TASK_SUMMARY: Tpl008Component = {
@@ -1327,6 +1346,9 @@ const TASK_SUMMARY: Tpl008Component = {
       paddingBottom: 'var(--space-1)'
     }),
     text('tsMeta', 'Where it is', 'tsRoot', '', wide(T_META)),
+    group('tsProject', 'Its project', 'tsRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap', mounted: false }),
+    text('tsProjectLine', 'Which project', 'tsProject', '', { ...T_META, sizeMode: 'contentSize' }),
+    place('tsOpenProject', BUTTON, 'Open the project', 'tsProject', { ...BTN_GHOST, label: 'Open the project', color: 'var(--primary)', paddingLeft: 'var(--space-1)', paddingRight: 'var(--space-1)', paddingTop: 'var(--space-0-5)', paddingBottom: 'var(--space-0-5)' }),
     group('tsBar', 'Deadline and buttons', 'tsRoot', { ...COLUMN('var(--space-3)'), ...RULE_BELOW, paddingBottom: 'var(--space-4)' }),
     group('tsDeadline', 'Deadline', 'tsBar', COLUMN('var(--space-1)')),
     text('tsDeadlineLabel', 'Deadline label', 'tsDeadline', 'Deadline', { ...T_META, sizeMode: 'contentSize' }),
@@ -1345,6 +1367,9 @@ const TASK_SUMMARY: Tpl008Component = {
   connections: [
     wire('tsIn', 'title', 'tsTitle', 'startValue'),
     wire('tsIn', 'rankLine', 'tsMeta', 'text'),
+    wire('tsIn', 'projectLabel', 'tsProjectLine', 'text'),
+    wire('tsIn', 'hasProject', 'tsProject', 'mounted'),
+    wire('tsOpenProject', 'onClick', 'tsOut', 'openProject'),
     wire('tsIn', 'deadline', 'tsDeadlineField', 'Value'),
     wire('tsIn', 'dueText', 'tsDue', 'text'),
     wire('tsIn', 'dueColor', 'tsDue', 'color'),
@@ -3801,7 +3826,11 @@ const PAGE_COMMANDS: Array<[string, string, Record<string, unknown>?]> = [
 ];
 
 /** The page's selection producers — one Set Variable each (see the module header). */
-const SELECTORS = ['tdSelectFromList', 'tdSelectFromDone', 'tdSelectFromLog', 'tdSelectFromLink', 'tdSelectFromToday', 'tdSelectFromRoutines', 'tdSelectNewRoutine'];
+const SELECTORS = [
+  'tdSelectFromList', 'tdSelectFromDone', 'tdSelectFromLog', 'tdSelectFromLink', 'tdSelectFromToday', 'tdSelectFromRoutines', 'tdSelectNewRoutine',
+  // TPL-008-PJ s2 — a project's task, pressed on the Projects tab.
+  'tdSelectFromProject'
+];
 
 const QUERY_OFF = { 'runOnChange-collectionName': false, 'runOnChange-querySettings': false, storageEnableLimit: true };
 
@@ -4039,6 +4068,14 @@ if (!id) return;
 Outputs.taskId = id;
 Outputs.open();`;
 
+/** PJ s2 — the selected task's project, for its pane: *"Part of Linguaid"* and the way back to it. */
+export const TASK_PROJECT_SCRIPT = `var sel = String(Inputs.selectedId || ''), tasks = Inputs.tasks || [], names = Inputs.projectNames || {};
+var pid = '';
+for (var i = 0; i < tasks.length; i++) if (tasks[i] && tasks[i].id === sel && tasks[i].projectId && names[tasks[i].projectId]) pid = String(tasks[i].projectId);
+Outputs.projectId = pid;
+Outputs.hasProject = pid !== '' && Inputs.showTab === true;
+Outputs.projectLabel = pid ? 'Part of ' + String(names[pid]) : '';`;
+
 const PAGE_TODO: Tpl008Component = {
   path: 'Pages/Todo',
   description:
@@ -4180,6 +4217,10 @@ const PAGE_TODO: Tpl008Component = {
     derive('tdFlagKeep', 'Remember the choice on this device', PROJECTS_FLAG_KEEP_SCRIPT),
     script('tdNextFor', 'Was it a project’s task?', NEXT_FOR_SCRIPT, ['taskId', 'tasks', 'projectNames']),
     logic('tdPromptState', STATES, 'Is the next-move question showing?', { states: 'hidden,shown', currentState: 'hidden', useTransitions: false }),
+    // s2 — both ways between a task and its project: the tab opens a task in the List, the task's pane opens its project.
+    logic('tdSelectFromProject', SET_VARIABLE, 'Select a project’s task', { name: VAR.selected, setWith: 'string' }),
+    derive('tdTaskProject', 'Which project is the selected task part of?', TASK_PROJECT_SCRIPT),
+    logic('tdOpenFromTask', SET_VARIABLE, 'Open the task’s project', { name: VAR.openProject, setWith: 'string' }),
     // RC5 — a reminder's link opens Today.
     {
       ...(script('tdViewOpen', 'Did the link ask for Today?', VIEW_LINK_SCRIPT, []) as object),
@@ -4539,6 +4580,19 @@ const PAGE_TODO: Tpl008Component = {
     wire('tdPrompt', 'done', 'tdPromptState', 'to-hidden'),
     wire('tdPrompt', 'skip', 'tdPromptState', 'to-hidden'),
     wire('tdPrompt', 'done', 'tdData', 'refresh'),
+    ...['upRows', 'recRows', 'pastRows', 'projectOptions'].map((n) => wire('tdProjects', n, 'tdProjectsPane', n)),
+    wire('tdProjectsPane', 'openTaskId', 'tdSelectFromProject', 'value'),
+    wire('tdProjectsPane', 'openTask', 'tdSelectFromProject', 'do'),
+    wire('tdProjectsPane', 'openTask', 'tdTab', 'to-list'),
+    wire('tdData', 'tasks', 'tdTaskProject', 'in-tasks'),
+    wire('tdSelected', 'value', 'tdTaskProject', 'in-selectedId'),
+    wire('tdProjects', 'projectNames', 'tdTaskProject', 'in-projectNames'),
+    wire('tdProjects', 'showTab', 'tdTaskProject', 'in-showTab'),
+    wire('tdTaskProject', 'out-projectLabel', 'tdSummary', 'projectLabel'),
+    wire('tdTaskProject', 'out-hasProject', 'tdSummary', 'hasProject'),
+    wire('tdTaskProject', 'out-projectId', 'tdOpenFromTask', 'value'),
+    wire('tdSummary', 'openProject', 'tdOpenFromTask', 'do'),
+    wire('tdSummary', 'openProject', 'tdTab', 'to-projects'),
 
     // After any change, load everything again
     ...PAGE_COMMANDS.map(([id]) => wire(id, 'done', 'tdData', 'refresh'))
@@ -4890,15 +4944,9 @@ function moneyOf(proj) {
     var x = occs[j];
     if (!x.closed && x.billOut && !x.sentOn && x.billOut <= mAddDays(today, 3)) { send = x; break; }
   }
+  // s2 — its money items are their own pressable lines now (moneyRows), so they are not repeated here.
   var facts = [];
   if (String(proj.sub || '').trim()) facts.push(String(proj.sub).trim());
-  var seen = {};
-  for (var q2 = 0; q2 < occs.length; q2++) {
-    var it = occs[q2].it;
-    if (seen[it.id] || !activeOn(it, today)) continue;
-    seen[it.id] = true;
-    facts.push(mEur(Math.abs(num(it.amount, 0))) + ' ' + scheduleWords(it, today) + (num(it.likelihood, 100) < 100 ? ', ' + Math.round(num(it.likelihood, 100)) + '% likely' : ''));
-  }
   if (paid) {
     var after2 = mBetween(paid.date, paid.lastOn);
     facts.push('Last paid ' + mDay(paid.lastOn) + (after2 > 0 ? ', ' + after2 + (after2 === 1 ? ' day' : ' days') + ' after it was due' : ''));
@@ -4906,6 +4954,54 @@ function moneyOf(proj) {
   if (String(proj.moveWorth || '').trim()) facts.push('Worth: ' + String(proj.moveWorth).trim());
   if (String(proj.say || '').trim()) facts.push(String(proj.say).trim());
   return { text: text, color: color, late: late, tick: tick, send: send, facts: facts };
+}
+
+// s2 — every money item of a project, as a line that opens the money form.
+var itemsBy = {};
+for (var ib = 0; ib < ctx.items.length; ib++) {
+  var itm = ctx.items[ib];
+  if (!itm.projectId || !mOk(itm.date)) continue;
+  // An item removed with Remove (its last day before its first) is never counted, and never shown.
+  if (mOk(itm.until) && String(itm.until) < String(itm.date)) continue;
+  (itemsBy[itm.projectId] = itemsBy[itm.projectId] || []).push(itm);
+}
+function itemLine(it) {
+  var a = num(it.amount, 0), like = Math.round(num(it.likelihood, 100));
+  return (it.fromHours === true && a === 0 ? 'From the hours' : mEur(a, true)) + ' ' + scheduleWords(it, today) + (like < 100 ? ', ' + like + '% likely' : '');
+}
+function moneyRowsOf(pid) {
+  var list = (itemsBy[pid] || []).slice();
+  function ended(it) { return mOk(it.until) && String(it.until) < today; }
+  list.sort(function (x, y) { return (ended(x) ? 1 : 0) - (ended(y) ? 1 : 0) || String(x.date).localeCompare(String(y.date)); });
+  var out = [];
+  for (var i = 0; i < list.length; i++) {
+    out.push({
+      id: 'pm-' + list[i].id,
+      itemKey: 'item:' + list[i].id,
+      label: String(list[i].label || 'Money'),
+      line: itemLine(list[i]),
+      color: ended(list[i]) ? 'var(--muted-foreground)' : 'var(--foreground)'
+    });
+  }
+  return out;
+}
+/** A project's open tasks, its next move first: each opens in the List. */
+function taskRowsOf(list) {
+  var out = [];
+  for (var i = 0; i < list.length; i++) {
+    var x = list[i], whoX = String(x.waitingOn || '').trim(), dX = due(x.deadline), bits = [];
+    if (i === 0) bits.push('The next move');
+    if (whoX) bits.push('Waiting on ' + whoX);
+    if (dX.text) bits.push(dX.text);
+    out.push({
+      id: 'pt-' + x.id,
+      taskId: String(x.id),
+      title: String(x.title || ''),
+      meta: bits.join(' · '),
+      metaColor: dX.late && !whoX ? 'var(--destructive)' : 'var(--muted-foreground)'
+    });
+  }
+  return out;
 }
 
 var yours = [], waiting = [], quiet = [];
@@ -4962,6 +5058,19 @@ for (var r = 0; r < live.length; r++) {
     sendLabel: 'Sent the invoice? Mark it',
     isHeading: false,
     heading: '',
+    // s2 — its tasks (each opens in the List), its money (each opens the money form), and itself as a form.
+    taskRows: taskRowsOf(openTasks),
+    hasTasks: openTasks.length > 0,
+    tasksHeading: openTasks.length === 1 ? 'In your list' : 'In your list (' + openTasks.length + ')',
+    moneyRows: moneyRowsOf(pj.id),
+    hasMoneyRows: (itemsBy[pj.id] || []).length > 0,
+    pName: names[pj.id],
+    pSub: String(pj.sub || ''),
+    pKind: ['earning', 'building', 'hobby', 'dormant'].indexOf(String(pj.kind)) >= 0 ? String(pj.kind) : 'earning',
+    pBilling: pj.billing === 'fixed' ? 'fixed' : 'hourly',
+    pTerms: pj.termsDays === undefined || pj.termsDays === null || pj.termsDays === '' ? '' : String(pj.termsDays),
+    pRate: num(pj.rate, 0) > 0 ? String(pj.rate) : '',
+    pSay: String(pj.say || ''),
     rank: money.late ? 0 : move && dd.late && !who ? 1 : move && move.deadline && !who ? 2 : move ? 3 : 4,
     lateBy: money.late ? mBetween(money.late.date, today) : 0,
     deadline: move ? String(move.deadline || '') : '',
@@ -4978,7 +5087,9 @@ function urgency(x, y) {
 yours.sort(urgency);
 waiting.sort(function (x, y) { return x.rank - y.rank || y.lateBy - x.lateBy || x.name.localeCompare(y.name); });
 quiet.sort(function (x, y) { return x.name.localeCompare(y.name); });
-function heading(id, text) { return { id: 'h-' + id, isHeading: true, heading: text, open: false, hasMeta: false, hasFacts: false, hasHistory: false, hasMove: false, hasBill: false, hasSend: false }; }
+function heading(id, text) {
+  return { id: 'h-' + id, isHeading: true, heading: text, open: false, hasMeta: false, hasFacts: false, hasHistory: false, hasMove: false, hasBill: false, hasSend: false, hasTasks: false, hasMoneyRows: false, taskRows: [], moneyRows: [] };
+}
 var rows = [];
 function section(id, text, list) {
   if (!list.length) return;
@@ -4989,6 +5100,88 @@ section('yours', 'Your move', yours);
 section('waiting', 'Waiting on someone', waiting);
 section('quiet', 'Quiet', quiet);
 Outputs.rows = rows;`;
+
+/** How far ahead the money popup's Upcoming list looks, and how far back Past does. */
+export const UPCOMING_DAYS = 92;
+export const PAST_DAYS = 92;
+
+/**
+ * s2 — **the money popup's three lists** (Planning's Money modal, which Richard missed: *"that popup
+ * was actually pretty good"*): Upcoming — every open repeat in the next {@link UPCOMING_DAYS} days,
+ * and the late ones, each with Paid; Recurring — every item, each opening the form; Past — what was
+ * ticked in the last {@link PAST_DAYS} days, each with Untick. Rows are `mu-` / `mr-` / `mp-`, never a
+ * record's id (`P78-TPL010-MOVEARROW`).
+ */
+export const MONEY_LIST_SCRIPT =
+  PJ_MONEY_FNS +
+  String.raw`var items = Inputs.items || [], marks = Inputs.marks || [], projects = Inputs.projects || [];
+var today = pjToday();
+var ctx = moneyContext(items, marks, projects, [], today, mAddMonths(today, -13, false));
+var removed = {};
+for (var ri = 0; ri < ctx.items.length; ri++) {
+  var rit = ctx.items[ri];
+  if (mOk(rit.until) && mOk(rit.date) && String(rit.until) < String(rit.date)) removed[rit.id] = true;
+}
+function whoOf(it, proj) {
+  var l = String(it.label || '').trim(), p = proj ? String(proj.name || '').trim() : '';
+  return p && p !== l ? (l ? l + ' · ' + p : p) : l || p || 'Money';
+}
+function likely(it) { var n = Math.round(num(it.likelihood, 100)); return n < 100 ? n + '% likely' : ''; }
+var os = allOccs(ctx, mAddDays(today, ${UPCOMING_DAYS})).sort(byDate);
+var up = [], past = [], pastFrom = mAddDays(today, -${PAST_DAYS});
+for (var i = 0; i < os.length; i++) {
+  var o = os[i];
+  if (removed[o.itemId]) continue;
+  var label = whoOf(o.it, o.project);
+  if (!o.closed && Math.abs(o.remaining) >= 0.005) {
+    var late = o.date < today;
+    if (late && o.hoped) continue;
+    var bits = [mDay(o.date)];
+    if (late) { var n = mBetween(o.date, today); bits.push(n + (n === 1 ? ' day' : ' days') + ' late'); }
+    if (o.hoped) bits.push(o.likelihood + '% likely');
+    if (o.client && o.billOut && !o.sentOn) bits.push('the bill goes out ' + mShort(o.billOut));
+    if (o.paid) bits.push(mEur(o.paid) + ' of it ticked');
+    up.push({
+      id: 'mu-' + o.key, key: o.key, itemKey: 'item:' + o.itemId, label: label, meta: bits.join(' · '),
+      metaColor: late ? 'var(--destructive)' : 'var(--muted-foreground)', amount: mEur(o.remaining, true),
+      canTick: !o.hoped, canUntick: false
+    });
+  } else if (o.payments.length && o.lastOn >= pastFrom) {
+    past.push({
+      id: 'mp-' + o.key, key: o.key, itemKey: 'item:' + o.itemId, label: label,
+      meta: 'Was due ' + mDay(o.date) + ' · ticked ' + mDay(o.lastOn), metaColor: 'var(--muted-foreground)',
+      amount: mEur(o.paid, true), canTick: false, canUntick: true, lastOn: o.lastOn
+    });
+  }
+}
+past.sort(function (x, y) { return String(y.lastOn).localeCompare(String(x.lastOn)); });
+var rec = [];
+for (var j = 0; j < ctx.items.length; j++) {
+  var it = ctx.items[j];
+  if (removed[it.id] || !mOk(it.date)) continue;
+  var proj = it.projectId ? ctx.projects[it.projectId] : null;
+  var ended = mOk(it.until) && String(it.until) < today;
+  var words = scheduleWords(it, today), lk = likely(it);
+  rec.push({
+    id: 'mr-' + it.id, key: '', itemKey: 'item:' + it.id, label: whoOf(it, proj),
+    meta: words.charAt(0).toUpperCase() + words.slice(1) + (lk ? ' · ' + lk : ''),
+    metaColor: 'var(--muted-foreground)', amount: it.fromHours === true && num(it.amount, 0) === 0 ? 'From the hours' : mEur(num(it.amount, 0), true),
+    canTick: false, canUntick: false, ended: ended ? 1 : 0, sortLabel: whoOf(it, proj).toLowerCase()
+  });
+}
+rec.sort(function (x, y) { return x.ended - y.ended || x.sortLabel.localeCompare(y.sortLabel); });
+Outputs.upRows = up;
+Outputs.recRows = rec;
+Outputs.pastRows = past;
+var options = [{ Label: 'No project', Value: 'none' }], named = [];
+for (var k = 0; k < projects.length; k++) {
+  var pp = projects[k];
+  if (pp && pp.id && pp.kind !== 'admin') named.push({ Label: String(pp.name || 'Untitled project'), Value: String(pp.id) });
+}
+named.sort(function (x, y) { return x.Label.localeCompare(y.Label); });
+Outputs.projectOptions = options.concat(named);`;
+
+const MONEY_LIST_OUTS: Array<[string, string]> = [['upRows', 'array'], ['recRows', 'array'], ['pastRows', 'array'], ['projectOptions', 'array']];
 
 const PROJECTS_OUTS: Array<[string, string]> = [
   ['projectNames', 'object'], ['showTab', 'boolean'], ['showTurnOn', 'boolean'], ['noProjects', 'boolean'],
@@ -5008,10 +5201,10 @@ const PROJECTS_LOGIC: Tpl008Component = {
   path: 'Logic/Projects',
   description:
     'The projects and the money: reads Project, MoneyItem, MoneyMark and BalanceReading, brings Planning’s moves over once (as tasks), and works out everything the Projects tab draws and the name a project task carries in the list. Refresh reads them again; Changed says tasks were written.',
-  ...iface(PROJECTS_INS, [...PROJECTS_OUTS, ...PROJECTS_RECORDS, ['changed', 'signal']]),
+  ...iface(PROJECTS_INS, [...PROJECTS_OUTS, ...MONEY_LIST_OUTS, ...PROJECTS_RECORDS, ['changed', 'signal']]),
   nodes: [
     inputs('pjIn', 'What it needs', PROJECTS_INS),
-    outputs('pjOut', 'The projects', [...PROJECTS_OUTS, ...PROJECTS_RECORDS, ['changed', 'signal']]),
+    outputs('pjOut', 'The projects', [...PROJECTS_OUTS, ...MONEY_LIST_OUTS, ...PROJECTS_RECORDS, ['changed', 'signal']]),
     {
       ...(script('pjLoad', 'Read the projects and the money', PROJECTS_LOAD_SCRIPT, []) as object),
       ports: fnPorts([...PROJECTS_RECORDS, ['loaded', 'signal'], ['failed', 'signal']])
@@ -5021,6 +5214,7 @@ const PROJECTS_LOGIC: Tpl008Component = {
       ports: fnPorts([['changed', 'signal'], ['failed', 'signal']])
     },
     derive('pjRows', 'Work out what the tab draws', PROJECT_ROWS_SCRIPT),
+    derive('pjMoney', 'Work out the money popup’s three lists', MONEY_LIST_SCRIPT),
     logic('pjProblem', SET_VARIABLE, 'Say the projects did not load', { name: VAR.problem, setWith: 'string', value: PROJECTS_PROBLEM_TEXT })
   ],
   connections: [
@@ -5037,7 +5231,10 @@ const PROJECTS_LOGIC: Tpl008Component = {
     wire('pjIn', 'flag', 'pjRows', 'in-flag'),
     wire('pjIn', 'now', 'pjRows', 'in-now'),
     ...PROJECTS_RECORDS.flatMap(([n]) => [wire('pjLoad', `out-${n}`, 'pjRows', `in-${n}`), wire('pjLoad', `out-${n}`, 'pjOut', n)]),
-    ...PROJECTS_OUTS.map(([n]) => wire('pjRows', `out-${n}`, 'pjOut', n))
+    ...PROJECTS_OUTS.map(([n]) => wire('pjRows', `out-${n}`, 'pjOut', n)),
+    ...(['projects', 'items', 'marks'] as const).map((n) => wire('pjLoad', `out-${n}`, 'pjMoney', `in-${n}`)),
+    wire('pjIn', 'now', 'pjMoney', 'in-now'),
+    ...MONEY_LIST_OUTS.map(([n]) => wire('pjMoney', `out-${n}`, 'pjOut', n))
   ]
 };
 
@@ -5192,7 +5389,11 @@ for (var i = 0; i < ctx.items.length; i++) if (ctx.items[i].id === parts[0]) it 
 if (!it) return;
 var o = occOf(ctx, it, parts[1]);
 var write;
-if (String(Inputs.action || '') === 'sent') {
+if (String(Inputs.action || '') === 'untick') {
+  // s2 — Past's Untick: the repeat is open again, as if nothing had been paid. The mark is kept.
+  if (!o.markId || !o.payments.length) return;
+  write = Noodl.Records.save(o.markId, { payments: [], doneOn: '', doneAmount: '' }, { className: 'MoneyMark' });
+} else if (String(Inputs.action || '') === 'sent') {
   if (o.sentOn || o.closed) return;
   write = pjWriteMark(o, null, today);
 } else {
@@ -5203,9 +5404,160 @@ write.then(function () { Outputs.done(); }, function () { Outputs.failed(); });`
 
 const MARK_MONEY = recordWrite(
   'Projects/Mark money',
-  'Ticks one repeat of a money item as paid today in full (Action tick), or marks its bill sent today (Action sent). Key is "<item id>|<the day it was due>".',
+  'Ticks one repeat of a money item as paid today in full (Action tick), marks its bill sent today (Action sent), or takes its payments off again (Action untick). Key is "<item id>|<the day it was due>".',
   [['key', 'string'], ['action', 'string'], ['items', 'array'], ['marks', 'array'], ['projects', 'array']],
   MARK_MONEY_SCRIPT
+);
+
+/** One value from a form: what was typed or picked if anything was, else what it opened with. */
+const PICK_FN = `function pick(typed, start) {
+  if (typed !== undefined && typed !== null) return String(typed);
+  return start === undefined || start === null ? '' : String(start);
+}
+`;
+
+/** The rules a money item is held to, in the form (so the error shows in it) and again in the write. */
+export const MONEY_ITEM_CHECK_FNS = String.raw`function moneyItemProblem(v) {
+  var amt = Math.abs(pjAmount(v.amount));
+  var date = pjDate(v.date), until = pjDate(v.until);
+  var likeRaw = String(v.likelihood === undefined || v.likelihood === null ? '' : v.likelihood).replace('%', '').trim();
+  var like = likeRaw === '' ? 100 : Number(likeRaw);
+  if (String(v.label || '').trim() === '') return 'Say what it is, like Rent or the Clarion retainer.';
+  if (!(amt > 0)) return 'Type how much as a number, like 900.';
+  if (!date) return 'Pick the day it happens.';
+  if (until === null) return 'Pick the last day, or leave it empty.';
+  if (String(v.repeat) !== 'once' && until !== '' && until < date) return 'The last day is before the first.';
+  if (!isFinite(like) || like < 0 || like > 100) return 'How likely is a number from 0 to 100, or empty when it is certain.';
+  return '';
+}
+`;
+
+/** The rules a project's details are held to, in the form and again in the write. */
+export const PROJECT_CHECK_FNS = String.raw`function projectProblem(v) {
+  var rate = String(v.rate === undefined || v.rate === null ? '' : v.rate).replace(/[€\s,]/g, '');
+  var terms = String(v.termsDays === undefined || v.termsDays === null ? '' : v.termsDays).trim();
+  if (String(v.name || '').trim() === '') return 'The project needs a name.';
+  if (rate !== '' && !(Number(rate) >= 0)) return 'Type the rate as a number, like 85, or leave it empty.';
+  if (terms !== '' && !(Number(terms) >= 0 && Number(terms) <= 120 && Math.round(Number(terms)) === Number(terms))) return 'Payment terms are a number of days, like 30.';
+  return '';
+}
+`;
+
+export const MONEY_REPEAT_CHOICES = ['once', 'weekly', 'monthly', 'quarterly', 'yearly'] as const;
+
+/**
+ * s2 — **a money item, added or changed** (Planning's item editor, M2–M4 and M7, in this list's
+ * words). Key `item:<id>` changes that item; anything else adds one. Only what the form shows is
+ * written: a client's bill day, its lead days, *fill from the hours* and *last day of the month*
+ * are Planning's and are left as they are.
+ */
+export const SAVE_MONEY_ITEM_SCRIPT =
+  DATE_FNS +
+  PJ_FNS +
+  MONEY_ITEM_CHECK_FNS +
+  String.raw`var key = String(Inputs.key || '');
+var itemId = key.indexOf('item:') === 0 ? key.slice(5) : '';
+var repeat = ${JSON.stringify(MONEY_REPEAT_CHOICES)}.indexOf(String(Inputs.repeat)) >= 0 ? String(Inputs.repeat) : 'once';
+var v = { label: Inputs.label, amount: Inputs.amount, repeat: repeat, date: Inputs.date, until: repeat === 'once' ? '' : Inputs.until, likelihood: Inputs.likelihood };
+var error = moneyItemProblem(v);
+Outputs.error = error;
+Outputs.hasError = error !== '';
+if (error) return;
+var until = pjDate(v.until);
+var likeRaw = String(Inputs.likelihood === undefined || Inputs.likelihood === null ? '' : Inputs.likelihood).replace('%', '').trim();
+var pid = String(Inputs.projectId || '');
+if (pid === 'none') pid = '';
+var data = {
+  label: String(Inputs.label).trim(),
+  amount: (String(Inputs.dir) === 'out' ? -1 : 1) * Math.round(Math.abs(pjAmount(Inputs.amount)) * 100) / 100,
+  repeat: repeat,
+  date: pjDate(Inputs.date),
+  until: repeat === 'once' || until === '' ? null : until,
+  projectId: pid || null,
+  likelihood: likeRaw === '' ? 100 : Math.round(Number(likeRaw)),
+  note: String(Inputs.note || '').trim()
+};
+var R = Noodl.Records;
+var write;
+if (itemId) write = R.save(itemId, data, { className: 'MoneyItem' });
+else {
+  data.monthEnd = false;
+  data.billDate = null;
+  data.billLeadDays = null;
+  data.position = Date.now();
+  write = R.create('MoneyItem', data);
+}
+write.then(function () { Outputs.done(); }, function () { Outputs.failed(); });`;
+
+const SAVE_MONEY_ITEM = recordWrite(
+  'Projects/Save money item',
+  'Adds a money item, or changes one (Key item:<id>): what it is, in or out, how much, how often from which day until which, whose it is, how likely, and a note. Error says what is missing.',
+  [
+    ['key', 'string'], ['label', 'string'], ['dir', 'string'], ['amount', 'string'], ['repeat', 'string'], ['date', 'string'],
+    ['until', 'string'], ['projectId', 'string'], ['likelihood', 'string'], ['note', 'string']
+  ],
+  SAVE_MONEY_ITEM_SCRIPT,
+  [['error', 'string'], ['hasError', 'boolean']]
+);
+
+/**
+ * s2 — **End it / Remove it.** Nothing is deleted (the policy deletes nobody's rows): a repeating
+ * item stops after today; a one-off gets a last day before its first, so it is never counted and
+ * never shown. What was ticked stays ticked.
+ */
+export const END_MONEY_ITEM_SCRIPT =
+  PJ_MONEY_FNS +
+  String.raw`var key = String(Inputs.key || '');
+if (key.indexOf('item:') !== 0) return;
+var id = key.slice(5), it = null, items = Inputs.items || [];
+for (var i = 0; i < items.length; i++) if (items[i] && String(items[i].id) === id) it = items[i];
+if (!it || !mOk(it.date)) return;
+var today = pjToday();
+var until = String(it.repeat || 'once') === 'once' || String(it.date) > today ? mAddDays(String(it.date), -1) : today;
+Noodl.Records.save(id, { until: until }, { className: 'MoneyItem' }).then(function () { Outputs.done(); }, function () { Outputs.failed(); });`;
+
+const END_MONEY_ITEM = recordWrite(
+  'Projects/End money item',
+  'Ends a money item (Key item:<id>): a repeating one has nothing after today; a one-off, or one not started yet, is never counted. Nothing is deleted.',
+  [['key', 'string'], ['items', 'array']],
+  END_MONEY_ITEM_SCRIPT
+);
+
+export const PROJECT_KINDS = ['earning', 'building', 'hobby', 'dormant'] as const;
+
+/** s2 — **Edit project** (Planning's project editor, without the hours and the week). */
+export const SAVE_PROJECT_SCRIPT =
+  DATE_FNS +
+  PJ_FNS +
+  PROJECT_CHECK_FNS +
+  String.raw`var id = String(Inputs.projectId || '');
+if (id === '') return;
+var error = projectProblem(Inputs);
+Outputs.error = error;
+Outputs.hasError = error !== '';
+if (error) return;
+var rateRaw = String(Inputs.rate === undefined || Inputs.rate === null ? '' : Inputs.rate).trim();
+var termsRaw = String(Inputs.termsDays === undefined || Inputs.termsDays === null ? '' : Inputs.termsDays).trim();
+var kind = ${JSON.stringify(PROJECT_KINDS)}.indexOf(String(Inputs.kind)) >= 0 ? String(Inputs.kind) : 'earning';
+Noodl.Records.save(id, {
+  name: String(Inputs.name).trim(),
+  sub: String(Inputs.sub || '').trim(),
+  kind: kind,
+  billing: Inputs.billing === 'fixed' ? 'fixed' : 'hourly',
+  rate: rateRaw === '' ? 0 : Math.round(pjAmount(rateRaw) * 100) / 100,
+  termsDays: termsRaw === '' ? 14 : Number(termsRaw),
+  say: String(Inputs.say || '').trim()
+}, { className: 'Project' }).then(function () { Outputs.done(); }, function () { Outputs.failed(); });`;
+
+const SAVE_PROJECT = recordWrite(
+  'Projects/Save project',
+  'Saves a project’s details: its name, one line about it, what kind it is (a client who pays, building, hobby, quiet), how it bills (hourly or fixed, the rate, the payment terms) and what to remember about it.',
+  [
+    ['projectId', 'string'], ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['billing', 'string'],
+    ['rate', 'string'], ['termsDays', 'string'], ['say', 'string']
+  ],
+  SAVE_PROJECT_SCRIPT,
+  [['error', 'string'], ['hasError', 'boolean']]
 );
 
 // ── What the tab draws ──
@@ -5221,28 +5573,302 @@ const BOX = {
   mounted: false
 };
 
-export const ROW_SUBMIT_SCRIPT =
-  DATE_FNS +
-  PJ_FNS +
-  String.raw`var mode = String(Inputs.mode || '');
-if (mode !== 'done' && mode !== 'change') return;
-function val(v) { return String(v === undefined || v === null ? '' : v).trim(); }
-var title = val(mode === 'done' ? Inputs.doneTitle : Inputs.chTitle);
-var who = val(mode === 'done' ? Inputs.doneWho : Inputs.chWho);
-var deadline = pjDate(mode === 'done' ? Inputs.doneDue : Inputs.chDue);
+/**
+ * s2 — **what a project's open box sends** (the Move form decides the words and the day; this
+ * decides what kind of write it is). Change rewrites the move; Add a task adds one at the end of
+ * the list; Done closes the move and adds what is next — or, with no move, adds the first one.
+ */
+export const ROW_SUBMIT_SCRIPT = String.raw`var mode = String(Inputs.mode || '');
+if (mode !== 'done' && mode !== 'change' && mode !== 'add') return;
 var taskId = String(Inputs.taskId || '');
-var resolved = mode === 'done' && taskId === '' ? 'new' : mode;
-var error = '';
-if (deadline === null) error = 'Use a date like 2026-10-12, or today or tomorrow, or leave the deadline empty.';
-else if (resolved !== 'done' && title === '') error = 'The move needs a few words.';
+if (mode === 'change' && taskId === '') return;
+Outputs.mode = mode === 'add' ? 'new' : mode === 'done' && taskId === '' ? 'new' : mode;
+Outputs.go();`;
+
+const MOVE_PLACEHOLDER = 'The next move, in a few words';
+const WHO_PLACEHOLDER = 'Waiting on someone? Their name. Empty if it is your move.';
+
+/**
+ * s2 — the next move as a form: the words, who it waits on, and a deadline from the calendar
+ * (Richard, 2026-09-16: *"the date field … doesn't have a date picker"*). Every box that asks for a
+ * move is this one — Done, Change the move, Add a task, and the question after a project's task is
+ * closed — and each is drawn fresh when it opens (a one-row For Each keyed by what it is for), so
+ * it never shows what was typed into it last time.
+ */
+export const MOVE_FORM_SCRIPT =
+  PICK_FN +
+  String.raw`var title = pick(Inputs.typedTitle, Inputs.title).trim();
+var who = pick(Inputs.typedWho, Inputs.who).trim();
+var deadline = pick(Inputs.pickedDeadline, Inputs.deadline).trim();
+if (!/^\d{4}-\d{2}-\d{2}$/.test(deadline)) deadline = '';
+var error = title === '' && Inputs.titleOptional !== true ? 'The move needs a few words.' : '';
 Outputs.error = error;
 Outputs.hasError = error !== '';
 if (error) return;
-Outputs.mode = resolved;
 Outputs.title = title;
 Outputs.waitingOn = who;
 Outputs.deadline = deadline;
 Outputs.go();`;
+
+const MOVE_FORM_FIELDS: Array<[string, string]> = [
+  ['id', 'string'], ['heading', 'string'], ['help', 'string'], ['title', 'string'], ['who', 'string'], ['deadline', 'string'],
+  ['saveLabel', 'string'], ['cancelLabel', 'string'], ['titleOptional', 'boolean']
+];
+const MOVE_FORM_OUTS: Array<[string, string]> = [['save', 'signal'], ['cancel', 'signal'], ['title', 'string'], ['waitingOn', 'string'], ['deadline', 'string']];
+
+const MOVE_FORM: Tpl008Component = {
+  path: 'Projects/Move form',
+  description:
+    'A project’s move as a form: what it is, who it waits on (empty when it is yours), and a deadline from the calendar. Save says the three; Cancel puts it away. Used for Done, Change the move, Add a task and the question after a project’s task is closed.',
+  ...iface(MOVE_FORM_FIELDS, MOVE_FORM_OUTS),
+  instantiates: [C.datePicker],
+  nodes: [
+    inputs('mfIn', 'The move as it is', MOVE_FORM_FIELDS),
+    outputs('mfOut', 'The move as it should be', MOVE_FORM_OUTS),
+    group('mfRoot', 'The move', undefined, { ...BOX, mounted: true }),
+    text('mfHead', 'The question', 'mfRoot', '', wide({ ...T_BODY, fontWeight: 'var(--font-semibold)' })),
+    text('mfHelp', 'What an empty answer means', 'mfRoot', '', { ...wide(T_META), mounted: false }),
+    place('mfTitle', TEXT_INPUT, 'The move', 'mfRoot', { ...FIELD, placeholder: MOVE_PLACEHOLDER }),
+    place('mfWho', TEXT_INPUT, 'Who it waits on', 'mfRoot', { ...FIELD, placeholder: WHO_PLACEHOLDER }),
+    place('mfDue', C.datePicker, 'Its deadline', 'mfRoot', { Label: 'Deadline (optional)', 'Show Label': true, Width: px(240) }),
+    text('mfError', 'Why it was not saved', 'mfRoot', '', { ...wide(T_ERROR), mounted: false }),
+    group('mfBtns', 'Save or cancel', 'mfRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('mfSave', BUTTON, 'Save', 'mfBtns', { ...BTN_PRIMARY, label: 'Save' }),
+    place('mfCancel', BUTTON, 'Cancel', 'mfBtns', { ...BTN_GHOST, label: 'Cancel' }),
+    derive('mfLook', 'Is there help to show?', "Outputs.hasHelp = String(Inputs.help || '') !== '';"),
+    script('mfCheck', 'What the form says', MOVE_FORM_SCRIPT, ['title', 'who', 'deadline', 'titleOptional', 'typedTitle', 'typedWho', 'pickedDeadline'])
+  ],
+  connections: [
+    wire('mfIn', 'heading', 'mfHead', 'text'),
+    wire('mfIn', 'help', 'mfHelp', 'text'),
+    wire('mfIn', 'help', 'mfLook', 'in-help'),
+    wire('mfLook', 'out-hasHelp', 'mfHelp', 'mounted'),
+    wire('mfIn', 'title', 'mfTitle', 'startValue'),
+    wire('mfIn', 'who', 'mfWho', 'startValue'),
+    wire('mfIn', 'deadline', 'mfDue', 'Value'),
+    wire('mfIn', 'saveLabel', 'mfSave', 'label'),
+    wire('mfIn', 'cancelLabel', 'mfCancel', 'label'),
+    ...(['title', 'who', 'deadline', 'titleOptional'] as const).map((n) => wire('mfIn', n, 'mfCheck', `in-${n}`)),
+    wire('mfTitle', 'onTextChanged', 'mfCheck', 'in-typedTitle'),
+    wire('mfWho', 'onTextChanged', 'mfCheck', 'in-typedWho'),
+    wire('mfDue', 'Value', 'mfCheck', 'in-pickedDeadline'),
+    // The cursor is in the words when it opens; Enter there saves.
+    wire('mfTitle', 'didMount', 'mfTitle', 'focus'),
+    wire('mfTitle', 'onEnter', 'mfCheck', 'run'),
+    wire('mfSave', 'onClick', 'mfCheck', 'run'),
+    wire('mfCheck', 'out-error', 'mfError', 'text'),
+    wire('mfCheck', 'out-hasError', 'mfError', 'mounted'),
+    wire('mfCheck', 'out-title', 'mfOut', 'title'),
+    wire('mfCheck', 'out-waitingOn', 'mfOut', 'waitingOn'),
+    wire('mfCheck', 'out-deadline', 'mfOut', 'deadline'),
+    wire('mfCheck', 'out-go', 'mfOut', 'save'),
+    wire('mfCancel', 'onClick', 'mfOut', 'cancel')
+  ]
+};
+
+const PROJECT_TASK_FIELDS: Array<[string, string]> = [['id', 'string'], ['taskId', 'string'], ['title', 'string'], ['meta', 'string'], ['metaColor', 'string']];
+
+/** s2 — one of a project's tasks, in its open box. Pressed, the List opens on it (Richard: *"a link to the todo tasks … both ways"*). */
+const PROJECT_TASK: Tpl008Component = {
+  path: 'Projects/Project task',
+  description: 'One open task of a project: its words, and whose it is or when it is due. Pressed, it opens in the List.',
+  ...iface(PROJECT_TASK_FIELDS, [['open', 'signal'], ['taskId', 'string']]),
+  nodes: [
+    inputs('pkIn', 'The task', PROJECT_TASK_FIELDS),
+    outputs('pkOut', 'Open it', [['open', 'signal'], ['taskId', 'string']]),
+    group('pkRow', 'The task', undefined, {
+      ...ROW('var(--space-3)'),
+      ...RULE_BELOW,
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-2)',
+      styleCss: 'cursor: pointer;'
+    }),
+    group('pkText', 'Words and when', 'pkRow', { ...COLUMN('var(--space-0-5)'), styleCss: 'flex: 1 1 auto; min-width: 0;' }),
+    text('pkTitle', 'The task', 'pkText', '', wide(T_BODY)),
+    text('pkMeta', 'Whose, and when', 'pkText', '', wide(T_META)),
+    text('pkGo', 'Where pressing it goes', 'pkRow', 'Open in the list', { ...T_META, sizeMode: 'contentSize', color: 'var(--primary)' })
+  ],
+  connections: [
+    wire('pkIn', 'title', 'pkTitle', 'text'),
+    wire('pkIn', 'meta', 'pkMeta', 'text'),
+    wire('pkIn', 'metaColor', 'pkMeta', 'color'),
+    wire('pkIn', 'taskId', 'pkOut', 'taskId'),
+    wire('pkRow', 'onClick', 'pkOut', 'open')
+  ]
+};
+
+const PROJECT_MONEY_FIELDS: Array<[string, string]> = [['id', 'string'], ['itemKey', 'string'], ['label', 'string'], ['line', 'string'], ['color', 'string']];
+
+/** s2 — one money item of a project, in its open box. Pressed, the money form opens on it. */
+const PROJECT_MONEY: Tpl008Component = {
+  path: 'Projects/Project money',
+  description: 'One money item of a project: what it is, how much and how often. Pressed, the money form opens on it.',
+  ...iface(PROJECT_MONEY_FIELDS, [['edit', 'signal'], ['itemKey', 'string']]),
+  nodes: [
+    inputs('pmIn', 'The item', PROJECT_MONEY_FIELDS),
+    outputs('pmOut', 'Change it', [['edit', 'signal'], ['itemKey', 'string']]),
+    group('pmRow', 'The item', undefined, {
+      ...ROW('var(--space-3)'),
+      ...RULE_BELOW,
+      paddingTop: 'var(--space-2)',
+      paddingBottom: 'var(--space-2)',
+      styleCss: 'cursor: pointer;'
+    }),
+    group('pmText', 'What and how much', 'pmRow', { ...COLUMN('var(--space-0-5)'), styleCss: 'flex: 1 1 auto; min-width: 0;' }),
+    text('pmLabel', 'What it is', 'pmText', '', wide(T_BODY)),
+    text('pmLine', 'How much and how often', 'pmText', '', wide(T_META)),
+    text('pmGo', 'What pressing it does', 'pmRow', 'Change', { ...T_META, sizeMode: 'contentSize', color: 'var(--primary)' })
+  ],
+  connections: [
+    wire('pmIn', 'label', 'pmLabel', 'text'),
+    wire('pmIn', 'color', 'pmLabel', 'color'),
+    wire('pmIn', 'line', 'pmLine', 'text'),
+    wire('pmIn', 'itemKey', 'pmOut', 'itemKey'),
+    wire('pmRow', 'onClick', 'pmOut', 'edit')
+  ]
+};
+
+export const PROJECT_EDITOR_SCRIPT =
+  PICK_FN +
+  PROJECT_CHECK_FNS +
+  String.raw`var v = {
+  name: pick(Inputs.typedName, Inputs.name).trim(),
+  sub: pick(Inputs.typedSub, Inputs.sub).trim(),
+  kind: pick(Inputs.pickedKind, Inputs.kind),
+  billing: pick(Inputs.pickedBilling, Inputs.billing),
+  rate: pick(Inputs.typedRate, Inputs.rate).trim(),
+  termsDays: pick(Inputs.typedTerms, Inputs.termsDays).trim(),
+  say: pick(Inputs.typedSay, Inputs.say).trim()
+};
+var error = projectProblem(v);
+Outputs.error = error;
+Outputs.hasError = error !== '';
+if (error) return;
+for (var k in v) Outputs[k] = v[k];
+Outputs.go();`;
+
+const PROJECT_EDITOR_FIELDS: Array<[string, string]> = [
+  ['id', 'string'], ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['billing', 'string'], ['termsDays', 'string'], ['rate', 'string'], ['say', 'string']
+];
+const PROJECT_EDITOR_VALUES: Array<[string, string]> = [
+  ['name', 'string'], ['sub', 'string'], ['kind', 'string'], ['billing', 'string'], ['termsDays', 'string'], ['rate', 'string'], ['say', 'string']
+];
+const PROJECT_EDITOR_OUTS: Array<[string, string]> = [['save', 'signal'], ['cancel', 'signal'], ...PROJECT_EDITOR_VALUES];
+
+/** A row of choices, one picked: a ghost button each, the picked one filled (the way Every month / Just once are). */
+function choiceStates(id: string, label: string, states: readonly string[], initial: string): unknown {
+  return logic(id, STATES, label, {
+    states: states.join(','),
+    currentState: initial,
+    values: states.map((s) => `${s}Bg`).join(','),
+    ...Object.fromEntries(states.map((s) => [`type-${s}Bg`, 'color'])),
+    ...Object.fromEntries(states.flatMap((st) => states.map((v) => [`value-${st}-${v}Bg`, st === v ? 'var(--muted)' : 'transparent']))),
+    useTransitions: false
+  });
+}
+const choiceWires = (statesId: string, buttons: Array<[string, string]>) =>
+  buttons.flatMap(([state, button]) => [wire(button, 'onClick', statesId, `to-${state}`), wire(statesId, `${state}Bg`, button, 'backgroundColor')]);
+
+/** s2 — **Edit project**: Planning's project editor, without the hours, the week and the move (a move is a task now). */
+const PROJECT_EDITOR: Tpl008Component = {
+  path: 'Projects/Project editor',
+  description:
+    'A project’s details as a form: its name, one line about it, what kind it is (a client who pays, building, hobby, or quiet), how a client bills (hourly with a rate, or a fixed price) and its payment terms, and what to remember about it.',
+  ...iface(PROJECT_EDITOR_FIELDS, PROJECT_EDITOR_OUTS),
+  nodes: [
+    inputs('peIn', 'The project as it is', PROJECT_EDITOR_FIELDS),
+    outputs('peOut', 'The project as it should be', PROJECT_EDITOR_OUTS),
+    group('peRoot', 'Edit the project', undefined, { ...BOX, mounted: true }),
+    text('peHead', 'What this is', 'peRoot', 'Edit the project', wide({ ...T_BODY, fontWeight: 'var(--font-semibold)' })),
+    place('peName', TEXT_INPUT, 'Its name', 'peRoot', { ...FIELD, placeholder: 'Its name' }),
+    place('peSub', TEXT_INPUT, 'One line about it', 'peRoot', { ...FIELD, placeholder: 'One line about it (optional)' }),
+    text('peKindLabel', 'What kind', 'peRoot', 'What kind of project', wide(T_META)),
+    group('peKinds', 'The kinds', 'peRoot', { ...ROW('var(--space-1)'), flexWrap: 'wrap' }),
+    place('peEarning', BUTTON, 'A client who pays', 'peKinds', { ...BTN_GHOST, label: 'A client who pays' }),
+    place('peBuilding', BUTTON, 'Building', 'peKinds', { ...BTN_GHOST, label: 'Building' }),
+    place('peHobby', BUTTON, 'Hobby', 'peKinds', { ...BTN_GHOST, label: 'Hobby' }),
+    place('peDormant', BUTTON, 'Quiet', 'peKinds', { ...BTN_GHOST, label: 'Quiet' }),
+    group('peBill', 'How it bills', 'peRoot', { ...COLUMN('var(--space-2)'), mounted: false }),
+    text('peBillLabel', 'How it bills', 'peBill', 'How it bills', wide(T_META)),
+    group('peBillings', 'Hourly or fixed', 'peBill', { ...ROW('var(--space-1)'), flexWrap: 'wrap' }),
+    place('peHourly', BUTTON, 'Hourly', 'peBillings', { ...BTN_GHOST, label: 'Hourly' }),
+    place('peFixed', BUTTON, 'A fixed price', 'peBillings', { ...BTN_GHOST, label: 'A fixed price' }),
+    group('peNums', 'Rate and terms', 'peBill', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    group('peRateBox', 'The rate', 'peNums', { ...COLUMN('var(--space-0)'), styleCss: 'flex: 1 1 180px; min-width: 0;' }),
+    place('peRate', TEXT_INPUT, 'Rate per hour', 'peRateBox', { ...FIELD, placeholder: 'Rate per hour (€)' }),
+    place('peTerms', TEXT_INPUT, 'Payment terms', 'peNums', { ...FIELD, placeholder: 'Pays within how many days (14 if empty)', styleCss: 'flex: 1 1 220px; min-width: 0;' }),
+    place('peSay', TEXT_INPUT, 'What to remember', 'peRoot', { ...FIELD, placeholder: 'What to remember about it (optional)' }),
+    text('peError', 'Why it was not saved', 'peRoot', '', { ...wide(T_ERROR), mounted: false }),
+    group('peBtns', 'Save or cancel', 'peRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('peSave', BUTTON, 'Save project', 'peBtns', { ...BTN_PRIMARY, label: 'Save project' }),
+    place('peCancel', BUTTON, 'Cancel', 'peBtns', { ...BTN_GHOST, label: 'Cancel' }),
+    choiceStates('peKind', 'What kind', PROJECT_KINDS, 'earning'),
+    choiceStates('peBilling', 'Hourly or fixed', ['hourly', 'fixed'], 'hourly'),
+    derive(
+      'peShape',
+      'Which billing fields it needs',
+      "var earning = String(Inputs.kind || 'earning') === 'earning';\nOutputs.billShown = earning;\nOutputs.rateShown = earning && String(Inputs.billing || 'hourly') !== 'fixed';"
+    ),
+    script('peCheck', 'What the form says', PROJECT_EDITOR_SCRIPT, [
+      ...PROJECT_EDITOR_VALUES.map(([n]) => n),
+      'typedName', 'typedSub', 'pickedKind', 'pickedBilling', 'typedRate', 'typedTerms', 'typedSay'
+    ])
+  ],
+  connections: [
+    wire('peIn', 'name', 'peName', 'startValue'),
+    wire('peIn', 'sub', 'peSub', 'startValue'),
+    wire('peIn', 'rate', 'peRate', 'startValue'),
+    wire('peIn', 'termsDays', 'peTerms', 'startValue'),
+    wire('peIn', 'say', 'peSay', 'startValue'),
+    wire('peIn', 'kind', 'peKind', 'currentState'),
+    wire('peIn', 'billing', 'peBilling', 'currentState'),
+    ...choiceWires('peKind', [['earning', 'peEarning'], ['building', 'peBuilding'], ['hobby', 'peHobby'], ['dormant', 'peDormant']]),
+    ...choiceWires('peBilling', [['hourly', 'peHourly'], ['fixed', 'peFixed']]),
+    wire('peKind', 'currentState', 'peShape', 'in-kind'),
+    wire('peBilling', 'currentState', 'peShape', 'in-billing'),
+    wire('peShape', 'out-billShown', 'peBill', 'mounted'),
+    wire('peShape', 'out-rateShown', 'peRateBox', 'mounted'),
+    ...PROJECT_EDITOR_VALUES.map(([n]) => wire('peIn', n, 'peCheck', `in-${n}`)),
+    wire('peName', 'onTextChanged', 'peCheck', 'in-typedName'),
+    wire('peSub', 'onTextChanged', 'peCheck', 'in-typedSub'),
+    wire('peKind', 'currentState', 'peCheck', 'in-pickedKind'),
+    wire('peBilling', 'currentState', 'peCheck', 'in-pickedBilling'),
+    wire('peRate', 'onTextChanged', 'peCheck', 'in-typedRate'),
+    wire('peTerms', 'onTextChanged', 'peCheck', 'in-typedTerms'),
+    wire('peSay', 'onTextChanged', 'peCheck', 'in-typedSay'),
+    wire('peSave', 'onClick', 'peCheck', 'run'),
+    wire('peCheck', 'out-error', 'peError', 'text'),
+    wire('peCheck', 'out-hasError', 'peError', 'mounted'),
+    ...PROJECT_EDITOR_VALUES.map(([n]) => wire('peCheck', `out-${n}`, 'peOut', n)),
+    wire('peCheck', 'out-go', 'peOut', 'save'),
+    wire('peCancel', 'onClick', 'peOut', 'cancel')
+  ]
+};
+
+/**
+ * s2 — which form a project's open box draws, as a one-row list (or none), so each is new when it
+ * opens. Ids are `mf-` / `pe-`, never a record's (`P78-TPL010-MOVEARROW`).
+ */
+export const ROW_FORMS_SCRIPT = String.raw`var mode = String(Inputs.mode || 'none'), n = String(Inputs.name || ''), pid = String(Inputs.projectId || '');
+var forms = [];
+if (mode === 'done' || mode === 'add' || mode === 'change') {
+  var change = mode === 'change';
+  forms.push({
+    id: 'mf-' + mode + '-' + pid,
+    heading: mode === 'add' ? 'Add a task for ' + n : change ? 'Change the move for ' + n : Inputs.hasMove ? 'Done. What is the next move for ' + n + '?' : 'What is the next move for ' + n + '?',
+    help: mode === 'done' && Inputs.hasMove ? 'Leave it empty if nothing is next for now.' : mode === 'add' ? 'It goes at the end of your list, under ' + n + '.' : '',
+    title: change ? String(Inputs.moveTitle || '') : '',
+    who: change ? String(Inputs.waitingRaw || '') : '',
+    deadline: change ? String(Inputs.deadlineRaw || '') : '',
+    saveLabel: 'Save',
+    cancelLabel: 'Cancel',
+    titleOptional: mode === 'done' && !!Inputs.hasMove
+  });
+}
+Outputs.formRows = forms;
+Outputs.editRows = mode === 'edit'
+  ? [{ id: 'pe-' + pid, name: String(Inputs.pName || ''), sub: String(Inputs.pSub || ''), kind: String(Inputs.pKind || 'earning'), billing: String(Inputs.pBilling || 'hourly'), termsDays: String(Inputs.pTerms || ''), rate: String(Inputs.pRate || ''), say: String(Inputs.pSay || '') }]
+  : [];`;
 
 const PROJECT_ROW_FIELDS: Array<[string, string]> = [
   ['id', 'string'], ['projectId', 'string'], ['name', 'string'], ['moneyText', 'string'], ['moneyColor', 'string'],
@@ -5250,27 +5876,39 @@ const PROJECT_ROW_FIELDS: Array<[string, string]> = [
   ['edge', 'string'], ['open', 'boolean'], ['facts', 'string'], ['hasFacts', 'boolean'], ['history', 'string'], ['hasHistory', 'boolean'],
   ['taskId', 'string'], ['hasMove', 'boolean'], ['moveTitle', 'string'], ['waitingRaw', 'string'], ['deadlineRaw', 'string'],
   ['doneLabel', 'string'], ['billKey', 'string'], ['hasBill', 'boolean'], ['billLabel', 'string'],
-  ['sendKey', 'string'], ['hasSend', 'boolean'], ['sendLabel', 'string'], ['isHeading', 'boolean'], ['heading', 'string']
+  ['sendKey', 'string'], ['hasSend', 'boolean'], ['sendLabel', 'string'], ['isHeading', 'boolean'], ['heading', 'string'],
+  ['taskRows', 'array'], ['hasTasks', 'boolean'], ['tasksHeading', 'string'], ['moneyRows', 'array'], ['hasMoneyRows', 'boolean'],
+  ['pName', 'string'], ['pSub', 'string'], ['pKind', 'string'], ['pBilling', 'string'], ['pTerms', 'string'], ['pRate', 'string'], ['pSay', 'string']
+];
+const PROJECT_FIELD_OUTS: Array<[string, string]> = [
+  ['pName', 'string'], ['pSub', 'string'], ['pKind', 'string'], ['pBilling', 'string'], ['pTerms', 'string'], ['pRate', 'string'], ['pSay', 'string']
 ];
 const PROJECT_ROW_OUTS: Array<[string, string]> = [
   ['toggle', 'signal'], ['save', 'signal'], ['tick', 'signal'], ['sent', 'signal'],
   ['projectId', 'string'], ['projectName', 'string'], ['taskId', 'string'], ['mode', 'string'], ['title', 'string'],
-  ['waitingOn', 'string'], ['deadline', 'string'], ['billKey', 'string'], ['sendKey', 'string']
+  ['waitingOn', 'string'], ['deadline', 'string'], ['billKey', 'string'], ['sendKey', 'string'],
+  // s2
+  ['openTask', 'signal'], ['openTaskId', 'string'], ['editMoney', 'signal'], ['moneyKey', 'string'], ['addMoney', 'signal'],
+  ['saveProject', 'signal'], ...PROJECT_FIELD_OUTS
 ];
-const MOVE_PLACEHOLDER = 'The next move, in a few words';
-const WHO_PLACEHOLDER = 'Waiting on someone? Their name. Empty if it is your move.';
-const DUE_PLACEHOLDER = 'Deadline, if there is one: 2026-10-12, today, tomorrow';
+
+/** The editor's value port for each of the row's project fields. */
+const EDITOR_TO_ROW: Array<[string, string]> = [
+  ['name', 'pName'], ['sub', 'pSub'], ['kind', 'pKind'], ['billing', 'pBilling'], ['termsDays', 'pTerms'], ['rate', 'pRate'], ['say', 'pSay']
+];
 
 /**
  * One project — or, with Is Heading, the name of a group of them. Pressed, it opens: its money
- * and history, and what can be done next. Done and Change each open their own box, so what a
- * box sends is always what it shows (a field's value only moves when its text does).
+ * facts and history, its tasks (each opens in the List), its money items (each opens the money
+ * form), and what can be done next — Done, Change the move, Add a task, Add money, Edit project,
+ * and Been paid? / Sent? when a bill is due. Each of those opens a form drawn fresh for it.
  */
 const PROJECT_ROW: Tpl008Component = {
   path: 'Projects/Project row',
   description:
-    'One project on the Projects tab: its name, its money in a few words, its next move and whose it is. Pressed, it opens to its money, its history, Done (which asks for the next move), Change the move, and Been paid? / Sent? when a bill is due. With Is Heading it is a group’s name instead.',
+    'One project on the Projects tab: its name, its money in a few words, its next move and whose it is. Pressed, it opens to its money, its history, its tasks (each opens in the List) and its money items (each opens the money form), with Done, Change the move, Add a task, Add money, Edit project, and Been paid? / Sent? when a bill is due. With Is Heading it is a group’s name instead.',
   ...iface(PROJECT_ROW_FIELDS, PROJECT_ROW_OUTS),
+  instantiates: [C.moveForm, C.projectTask, C.projectMoney, C.projectEditor],
   nodes: [
     inputs('prIn', 'The project', PROJECT_ROW_FIELDS),
     outputs('prOut', 'What you did', PROJECT_ROW_OUTS),
@@ -5298,7 +5936,7 @@ const PROJECT_ROW: Tpl008Component = {
     text('prMove', 'Its next move', 'prHead', '', wide(T_META)),
     text('prMeta', 'Deadline, or who it waits on', 'prHead', '', wide(T_META)),
     group('prDetail', 'Opened', 'prRoot', {
-      ...COLUMN('var(--space-3)'),
+      ...COLUMN('var(--space-4)'),
       paddingLeft: 'var(--space-3)',
       paddingRight: 'var(--space-2)',
       paddingBottom: 'var(--space-4)',
@@ -5306,44 +5944,35 @@ const PROJECT_ROW: Tpl008Component = {
     }),
     text('prFacts', 'Its money, in full', 'prDetail', '', wide(T_META)),
     text('prHistory', 'What was done', 'prDetail', '', wide(T_META)),
-    group('prButtons', 'What you can do', 'prDetail', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    group('prTasks', 'Its tasks', 'prDetail', { ...COLUMN('var(--space-0)'), mounted: false }),
+    text('prTasksHead', 'Its tasks', 'prTasks', '', { ...wide(T_HEADING), marginBottom: 'var(--space-1)' }),
+    place('prTaskEach', FOR_EACH, 'One line per task', 'prTasks', { template: C.projectTask, templateType: 'explicit' }),
+    group('prMoneyList', 'Its money items', 'prDetail', { ...COLUMN('var(--space-0)'), mounted: false }),
+    text('prMoneyHead', 'Its money items', 'prMoneyList', 'Its money', { ...wide(T_HEADING), marginBottom: 'var(--space-1)' }),
+    place('prMoneyEach', FOR_EACH, 'One line per money item', 'prMoneyList', { template: C.projectMoney, templateType: 'explicit' }),
+    group('prButtons', 'What you can do', 'prDetail', { ...ROW('var(--space-2)'), flexWrap: 'wrap', rowGap: 'var(--space-2)' }),
     place('prDone', BUTTON, 'Done', 'prButtons', { ...BTN_PRIMARY, label: 'Done' }),
     place('prChange', BUTTON, 'Change the move', 'prButtons', { ...BTN_OUTLINE, label: 'Change the move', mounted: false }),
+    place('prAdd', BUTTON, 'Add a task', 'prButtons', { ...BTN_OUTLINE, label: 'Add a task' }),
+    place('prAddMoney', BUTTON, 'Add money', 'prButtons', { ...BTN_OUTLINE, label: 'Add money' }),
+    place('prEdit', BUTTON, 'Edit project', 'prButtons', { ...BTN_OUTLINE, label: 'Edit project' }),
     place('prTick', BUTTON, 'Been paid? Tick it', 'prButtons', { ...BTN_OUTLINE, label: 'Been paid? Tick it', mounted: false }),
     place('prSend', BUTTON, 'Sent the invoice? Mark it', 'prButtons', { ...BTN_OUTLINE, label: 'Sent the invoice? Mark it', mounted: false }),
-    group('prDoneBox', 'The next move', 'prDetail', BOX),
-    text('prDoneHead', 'The question', 'prDoneBox', '', wide({ ...T_BODY, fontWeight: 'var(--font-semibold)' })),
-    place('prDoneTitle', TEXT_INPUT, 'The next move', 'prDoneBox', { ...FIELD, placeholder: MOVE_PLACEHOLDER }),
-    place('prDoneWho', TEXT_INPUT, 'Who it waits on', 'prDoneBox', { ...FIELD, placeholder: WHO_PLACEHOLDER }),
-    place('prDoneDue', TEXT_INPUT, 'Its deadline', 'prDoneBox', { ...FIELD, placeholder: DUE_PLACEHOLDER }),
-    group('prDoneBtns', 'Save or cancel', 'prDoneBox', ROW('var(--space-2)')),
-    place('prDoneSave', BUTTON, 'Save', 'prDoneBtns', { ...BTN_PRIMARY, label: 'Save' }),
-    place('prDoneCancel', BUTTON, 'Cancel', 'prDoneBtns', { ...BTN_GHOST, label: 'Cancel' }),
-    group('prChBox', 'Change the move', 'prDetail', BOX),
-    text('prChHead', 'What it says', 'prChBox', '', wide({ ...T_BODY, fontWeight: 'var(--font-semibold)' })),
-    place('prChTitle', TEXT_INPUT, 'The move', 'prChBox', { ...FIELD, placeholder: MOVE_PLACEHOLDER }),
-    place('prChWho', TEXT_INPUT, 'Who it waits on', 'prChBox', { ...FIELD, placeholder: WHO_PLACEHOLDER }),
-    place('prChDue', TEXT_INPUT, 'Its deadline', 'prChBox', { ...FIELD, placeholder: DUE_PLACEHOLDER }),
-    group('prChBtns', 'Save or cancel', 'prChBox', ROW('var(--space-2)')),
-    place('prChSave', BUTTON, 'Save', 'prChBtns', { ...BTN_PRIMARY, label: 'Save' }),
-    place('prChCancel', BUTTON, 'Cancel', 'prChBtns', { ...BTN_GHOST, label: 'Cancel' }),
-    text('prError', 'Why it was not saved', 'prDetail', '', { ...wide(T_ERROR), mounted: false }),
-    logic('prMode', STATES, 'Which box is open', { states: 'none,done,change', currentState: 'none', useTransitions: false }),
+    place('prFormEach', FOR_EACH, 'The move form, when one is open', 'prDetail', { template: C.moveForm, templateType: 'explicit' }),
+    place('prEditEach', FOR_EACH, 'The project form, when it is open', 'prDetail', { template: C.projectEditor, templateType: 'explicit' }),
+    logic('prMode', STATES, 'Which form is open', { states: 'none,done,change,add,edit', currentState: 'none', useTransitions: false }),
     derive(
       'prLook',
-      'Heading or project, and the two questions',
-      "var h = !!Inputs.isHeading;\nvar n = String(Inputs.name || '');\nOutputs.showHeading = h;\nOutputs.showProject = !h;\nOutputs.doneHead = Inputs.hasMove ? 'Done. What is the next move for ' + n + '?' : 'What is the next move for ' + n + '?';\nOutputs.changeHead = 'Change the move for ' + n;"
+      'Heading or project',
+      "var h = !!Inputs.isHeading;\nOutputs.showHeading = h;\nOutputs.showProject = !h;"
     ),
-    script('prSubmit', 'What the open box says', ROW_SUBMIT_SCRIPT, ['mode', 'taskId', 'doneTitle', 'doneWho', 'doneDue', 'chTitle', 'chWho', 'chDue'])
+    derive('prForms', 'Which form to draw', ROW_FORMS_SCRIPT),
+    script('prSubmit', 'What kind of write it is', ROW_SUBMIT_SCRIPT, ['mode', 'taskId'])
   ],
   connections: [
     wire('prIn', 'isHeading', 'prLook', 'in-isHeading'),
-    wire('prIn', 'name', 'prLook', 'in-name'),
-    wire('prIn', 'hasMove', 'prLook', 'in-hasMove'),
     wire('prLook', 'out-showHeading', 'prHeadingBox', 'mounted'),
     wire('prLook', 'out-showProject', 'prRoot', 'mounted'),
-    wire('prLook', 'out-doneHead', 'prDoneHead', 'text'),
-    wire('prLook', 'out-changeHead', 'prChHead', 'text'),
     wire('prIn', 'heading', 'prHeading', 'text'),
     wire('prIn', 'name', 'prName', 'text'),
     wire('prIn', 'moneyText', 'prMoney', 'text'),
@@ -5359,45 +5988,51 @@ const PROJECT_ROW: Tpl008Component = {
     wire('prIn', 'hasFacts', 'prFacts', 'mounted'),
     wire('prIn', 'history', 'prHistory', 'text'),
     wire('prIn', 'hasHistory', 'prHistory', 'mounted'),
+    wire('prIn', 'hasTasks', 'prTasks', 'mounted'),
+    wire('prIn', 'tasksHeading', 'prTasksHead', 'text'),
+    wire('prIn', 'taskRows', 'prTaskEach', 'items'),
+    wire('prIn', 'hasMoneyRows', 'prMoneyList', 'mounted'),
+    wire('prIn', 'moneyRows', 'prMoneyEach', 'items'),
     wire('prIn', 'doneLabel', 'prDone', 'label'),
     wire('prIn', 'hasMove', 'prChange', 'mounted'),
     wire('prIn', 'hasBill', 'prTick', 'mounted'),
     wire('prIn', 'billLabel', 'prTick', 'label'),
     wire('prIn', 'hasSend', 'prSend', 'mounted'),
     wire('prIn', 'sendLabel', 'prSend', 'label'),
-    // Change opens on what the move says now.
-    wire('prIn', 'moveTitle', 'prChTitle', 'startValue'),
-    wire('prIn', 'waitingRaw', 'prChWho', 'startValue'),
-    wire('prIn', 'deadlineRaw', 'prChDue', 'startValue'),
     wire('prHead', 'onClick', 'prOut', 'toggle'),
+    // The forms: one open at a time, each drawn fresh.
     wire('prDone', 'onClick', 'prMode', 'to-done'),
     wire('prChange', 'onClick', 'prMode', 'to-change'),
-    wire('prDoneCancel', 'onClick', 'prMode', 'to-none'),
-    wire('prChCancel', 'onClick', 'prMode', 'to-none'),
-    wire('prMode', 'at-done', 'prDoneBox', 'mounted'),
-    wire('prMode', 'at-change', 'prChBox', 'mounted'),
+    wire('prAdd', 'onClick', 'prMode', 'to-add'),
+    wire('prEdit', 'onClick', 'prMode', 'to-edit'),
+    wire('prMode', 'currentState', 'prForms', 'in-mode'),
+    ...(['name', 'projectId', 'hasMove', 'moveTitle', 'waitingRaw', 'deadlineRaw', ...PROJECT_FIELD_OUTS.map(([n]) => n)] as const).map((n) =>
+      wire('prIn', n, 'prForms', `in-${n}`)
+    ),
+    wire('prForms', 'out-formRows', 'prFormEach', 'items'),
+    wire('prForms', 'out-editRows', 'prEditEach', 'items'),
+    // A move saved
     wire('prMode', 'currentState', 'prSubmit', 'in-mode'),
     wire('prIn', 'taskId', 'prSubmit', 'in-taskId'),
-    wire('prDoneTitle', 'onTextChanged', 'prSubmit', 'in-doneTitle'),
-    wire('prDoneWho', 'onTextChanged', 'prSubmit', 'in-doneWho'),
-    wire('prDoneDue', 'onTextChanged', 'prSubmit', 'in-doneDue'),
-    wire('prChTitle', 'onTextChanged', 'prSubmit', 'in-chTitle'),
-    wire('prChWho', 'onTextChanged', 'prSubmit', 'in-chWho'),
-    wire('prChDue', 'onTextChanged', 'prSubmit', 'in-chDue'),
-    wire('prDoneSave', 'onClick', 'prSubmit', 'run'),
-    wire('prChSave', 'onClick', 'prSubmit', 'run'),
-    wire('prSubmit', 'out-error', 'prError', 'text'),
-    wire('prSubmit', 'out-hasError', 'prError', 'mounted'),
+    wire('prFormEach', 'itemOutput-title', 'prOut', 'title'),
+    wire('prFormEach', 'itemOutput-waitingOn', 'prOut', 'waitingOn'),
+    wire('prFormEach', 'itemOutput-deadline', 'prOut', 'deadline'),
+    wire('prFormEach', 'itemOutputSignal-save', 'prSubmit', 'run'),
     wire('prSubmit', 'out-mode', 'prOut', 'mode'),
-    wire('prSubmit', 'out-title', 'prOut', 'title'),
-    wire('prSubmit', 'out-waitingOn', 'prOut', 'waitingOn'),
-    wire('prSubmit', 'out-deadline', 'prOut', 'deadline'),
     wire('prSubmit', 'out-go', 'prOut', 'save'),
     wire('prSubmit', 'out-go', 'prMode', 'to-none'),
-    // The Done box starts empty next time; Change starts from what the move then says.
-    wire('prSubmit', 'out-go', 'prDoneTitle', 'clear'),
-    wire('prSubmit', 'out-go', 'prDoneWho', 'clear'),
-    wire('prSubmit', 'out-go', 'prDoneDue', 'clear'),
+    wire('prFormEach', 'itemOutputSignal-cancel', 'prMode', 'to-none'),
+    // The project saved
+    ...EDITOR_TO_ROW.map(([from, to]) => wire('prEditEach', `itemOutput-${from}`, 'prOut', to)),
+    wire('prEditEach', 'itemOutputSignal-save', 'prOut', 'saveProject'),
+    wire('prEditEach', 'itemOutputSignal-save', 'prMode', 'to-none'),
+    wire('prEditEach', 'itemOutputSignal-cancel', 'prMode', 'to-none'),
+    // Its tasks open in the List; its money opens the money form.
+    wire('prTaskEach', 'itemOutput-taskId', 'prOut', 'openTaskId'),
+    wire('prTaskEach', 'itemOutputSignal-open', 'prOut', 'openTask'),
+    wire('prMoneyEach', 'itemOutput-itemKey', 'prOut', 'moneyKey'),
+    wire('prMoneyEach', 'itemOutputSignal-edit', 'prOut', 'editMoney'),
+    wire('prAddMoney', 'onClick', 'prOut', 'addMoney'),
     wire('prIn', 'projectId', 'prOut', 'projectId'),
     wire('prIn', 'name', 'prOut', 'projectName'),
     wire('prIn', 'taskId', 'prOut', 'taskId'),
@@ -5467,18 +6102,23 @@ const MONEY_INS: Array<[string, string]> = [
   ['balanceText', 'string'], ['balanceWhen', 'string'], ['bars', 'array'], ['lowText', 'string'], ['lowColor', 'string'],
   ['incomeRows', 'array'], ['hasIncome', 'boolean'], ['items', 'array'], ['marks', 'array'], ['projects', 'array']
 ];
+const MONEY_OUTS: Array<[string, string]> = [['changed', 'signal'], ['addMoney', 'signal'], ['allMoney', 'signal']];
 
 const MONEY: Tpl008Component = {
   path: 'Projects/Money',
   description:
-    'The money at the top of the Projects tab: the bank balance and when it was read, the next 30 days as a line, the lowest point, money due in soon with Paid, and a box for a new balance. Changed says something was written.',
-  ...iface(MONEY_INS, [['changed', 'signal']]),
+    'The money at the top of the Projects tab: the bank balance and when it was read, the next 30 days as a line, the lowest point, money due in soon with Paid, a box for a new balance, and the way into the money popup (Add money, All money in and out). Changed says something was written.',
+  ...iface(MONEY_INS, MONEY_OUTS),
   instantiates: [C.moneyBar, C.incomeRow, C.recordBalance, C.markMoney],
   nodes: [
     inputs('mnIn', 'The money', MONEY_INS),
-    outputs('mnOut', 'Written', [['changed', 'signal']]),
+    outputs('mnOut', 'Written, or opened', MONEY_OUTS),
     group('mnRoot', 'Money', undefined, COLUMN('var(--space-2)')),
-    text('mnHeading', 'Money', 'mnRoot', 'Money', wide(T_HEADING)),
+    group('mnHeadRow', 'Money, and the way into all of it', 'mnRoot', { ...ROW('var(--space-2)'), justifyContent: 'space-between', flexWrap: 'wrap' }),
+    text('mnHeading', 'Money', 'mnHeadRow', 'Money', { ...T_HEADING, sizeMode: 'contentSize' }),
+    group('mnOpen', 'Add money, or see all of it', 'mnHeadRow', { flexDirection: 'row', alignItems: 'center', columnGap: 'var(--space-1)', sizeMode: 'contentSize' }),
+    place('mnAdd', BUTTON, 'Add money', 'mnOpen', { ...BTN_GHOST, label: '+ Add money', color: 'var(--primary)' }),
+    place('mnAll', BUTTON, 'All money in and out', 'mnOpen', { ...BTN_GHOST, label: 'All money in and out', color: 'var(--primary)' }),
     group('mnCard', 'Balance and the month ahead', 'mnRoot', {
       ...COLUMN('var(--space-3)'),
       backgroundColor: 'var(--surface)',
@@ -5531,23 +6171,373 @@ const MONEY: Tpl008Component = {
     wire('cmdBalance', 'done', 'mnOut', 'changed'),
     wire('mnIncomeEach', 'itemOutput-key', 'cmdPaid', 'key'),
     wire('mnIncomeEach', 'itemOutputSignal-paid', 'cmdPaid', 'do'),
-    wire('cmdPaid', 'done', 'mnOut', 'changed')
+    wire('cmdPaid', 'done', 'mnOut', 'changed'),
+    wire('mnAdd', 'onClick', 'mnOut', 'addMoney'),
+    wire('mnAll', 'onClick', 'mnOut', 'allMoney')
+  ]
+};
+
+const MONEY_LINE_FIELDS: Array<[string, string]> = [
+  ['id', 'string'], ['key', 'string'], ['itemKey', 'string'], ['label', 'string'], ['meta', 'string'], ['metaColor', 'string'],
+  ['amount', 'string'], ['canTick', 'boolean'], ['canUntick', 'boolean']
+];
+const MONEY_LINE_OUTS: Array<[string, string]> = [['edit', 'signal'], ['tick', 'signal'], ['untick', 'signal'], ['key', 'string'], ['itemKey', 'string']];
+
+/** s2 — one line in the money popup: what, when, how much (+ in, − out); pressed, its item opens as a form; Paid or Untick beside it. */
+const MONEY_LINE: Tpl008Component = {
+  path: 'Projects/Money line',
+  description: 'One line in the money popup: what it is, when, and how much (+ in, − out). Pressed, its item opens as a form; Paid ticks a repeat off, Untick opens it again.',
+  ...iface(MONEY_LINE_FIELDS, MONEY_LINE_OUTS),
+  nodes: [
+    inputs('mlIn', 'The line', MONEY_LINE_FIELDS),
+    outputs('mlOut', 'What you did', MONEY_LINE_OUTS),
+    group('mlRow', 'The line', undefined, { ...ROW('var(--space-3)'), ...RULE_BELOW, paddingTop: 'var(--space-2)', paddingBottom: 'var(--space-2)' }),
+    group('mlText', 'What and when', 'mlRow', { ...COLUMN('var(--space-0-5)'), styleCss: 'flex: 1 1 auto; min-width: 0; cursor: pointer;' }),
+    text('mlLabel', 'What it is', 'mlText', '', wide(T_BODY)),
+    text('mlMeta', 'When', 'mlText', '', wide(T_META)),
+    text('mlAmount', 'How much', 'mlRow', '', { ...T_BODY, sizeMode: 'contentSize', fontVariantNumeric: 'tabular-nums' }),
+    place('mlTick', BUTTON, 'Paid', 'mlRow', { ...BTN_OUTLINE, label: 'Paid', mounted: false }),
+    place('mlUntick', BUTTON, 'Untick', 'mlRow', { ...BTN_GHOST, label: 'Untick', mounted: false })
+  ],
+  connections: [
+    wire('mlIn', 'label', 'mlLabel', 'text'),
+    wire('mlIn', 'meta', 'mlMeta', 'text'),
+    wire('mlIn', 'metaColor', 'mlMeta', 'color'),
+    wire('mlIn', 'amount', 'mlAmount', 'text'),
+    wire('mlIn', 'canTick', 'mlTick', 'mounted'),
+    wire('mlIn', 'canUntick', 'mlUntick', 'mounted'),
+    wire('mlIn', 'key', 'mlOut', 'key'),
+    wire('mlIn', 'itemKey', 'mlOut', 'itemKey'),
+    wire('mlText', 'onClick', 'mlOut', 'edit'),
+    wire('mlTick', 'onClick', 'mlOut', 'tick'),
+    wire('mlUntick', 'onClick', 'mlOut', 'untick')
+  ]
+};
+
+export const MONEY_EDITOR_SCRIPT =
+  DATE_FNS +
+  PJ_FNS +
+  PICK_FN +
+  MONEY_ITEM_CHECK_FNS +
+  String.raw`var v = {
+  label: pick(Inputs.typedLabel, Inputs.label).trim(),
+  dir: pick(Inputs.pickedDir, Inputs.dir) === 'out' ? 'out' : 'in',
+  amount: pick(Inputs.typedAmount, Inputs.amount).trim(),
+  repeat: pick(Inputs.pickedRepeat, Inputs.repeat) || 'once',
+  date: pick(Inputs.pickedDate, Inputs.date).trim(),
+  until: pick(Inputs.pickedUntil, Inputs.until).trim(),
+  projectId: pick(Inputs.pickedProject, Inputs.projectId) || 'none',
+  likelihood: pick(Inputs.typedLikelihood, Inputs.likelihood).trim(),
+  note: pick(Inputs.typedNote, Inputs.note).trim()
+};
+if (v.repeat === 'once') v.until = '';
+var error = moneyItemProblem(v);
+Outputs.error = error;
+Outputs.hasError = error !== '';
+if (error) return;
+for (var k in v) Outputs[k] = v[k];
+Outputs.go();`;
+
+const MONEY_EDIT_VALUES: Array<[string, string]> = [
+  ['label', 'string'], ['dir', 'string'], ['amount', 'string'], ['repeat', 'string'], ['date', 'string'], ['until', 'string'],
+  ['projectId', 'string'], ['likelihood', 'string'], ['note', 'string']
+];
+const MONEY_EDITOR_FIELDS: Array<[string, string]> = [
+  ['id', 'string'], ['key', 'string'], ['heading', 'string'], ...MONEY_EDIT_VALUES,
+  ['projectOptions', 'array'], ['isNew', 'boolean'], ['endLabel', 'string'], ['endHint', 'string']
+];
+const MONEY_EDITOR_OUTS: Array<[string, string]> = [['save', 'signal'], ['cancel', 'signal'], ['end', 'signal'], ['key', 'string'], ...MONEY_EDIT_VALUES];
+const REPEAT_BUTTONS: Array<[string, string, string]> = [
+  ['once', 'meOnce', 'Once'], ['weekly', 'meWeekly', 'Every week'], ['monthly', 'meMonthly', 'Every month'],
+  ['quarterly', 'meQuarterly', 'Every 3 months'], ['yearly', 'meYearly', 'Every year']
+];
+
+/**
+ * s2 — **the money form** (Planning's item editor, M2–M4 and M7): what it is, money in or out, how
+ * much, how often, from which day (and until which), whose it is, how likely, and a note. Changing
+ * an existing item changes every repeat not changed by hand; End it / Remove it keep the row.
+ */
+const MONEY_EDITOR: Tpl008Component = {
+  path: 'Projects/Money editor',
+  description:
+    'One money item as a form: what it is, in or out, how much, how often from which day until which, which project it belongs to, how likely it is, and a note. Save says it all; End it (or Remove it, for a one-off) stops it without deleting anything.',
+  ...iface(MONEY_EDITOR_FIELDS, MONEY_EDITOR_OUTS),
+  instantiates: [C.datePicker],
+  nodes: [
+    inputs('meIn', 'The item as it is', MONEY_EDITOR_FIELDS),
+    outputs('meOut', 'The item as it should be', MONEY_EDITOR_OUTS),
+    group('meRoot', 'The money form', undefined, COLUMN('var(--space-3)')),
+    text('meHead', 'What this form is', 'meRoot', '', { ...wide(T_TITLE), as: 'h3' }),
+    place('meLabel', TEXT_INPUT, 'What it is', 'meRoot', { ...FIELD, placeholder: 'What it is, like Rent or the Clarion retainer' }),
+    group('meDirs', 'In or out', 'meRoot', { ...ROW('var(--space-1)'), flexWrap: 'wrap' }),
+    place('meDirIn', BUTTON, 'Money in', 'meDirs', { ...BTN_GHOST, label: 'Money in' }),
+    place('meDirOut', BUTTON, 'Money out', 'meDirs', { ...BTN_GHOST, label: 'Money out' }),
+    place('meAmount', TEXT_INPUT, 'How much', 'meRoot', { ...FIELD, placeholder: 'How much (€)' }),
+    text('meOftenLabel', 'How often', 'meRoot', 'How often', wide(T_META)),
+    group('meOften', 'How often', 'meRoot', { ...ROW('var(--space-1)'), flexWrap: 'wrap' }),
+    ...REPEAT_BUTTONS.map(([, id, label]) => place(id, BUTTON, label, 'meOften', { ...BTN_GHOST, label })),
+    group('meDates', 'From when, until when', 'meRoot', { ...ROW('var(--space-3)'), flexWrap: 'wrap', alignItems: 'flex-end', rowGap: 'var(--space-2)' }),
+    group('meDateBox', 'From when', 'meDates', { flexDirection: 'column', sizeMode: 'contentSize' }),
+    place('meDate', C.datePicker, 'The day', 'meDateBox', { Label: 'On', 'Show Label': true, Width: px(220) }),
+    group('meUntilBox', 'Until when', 'meDates', { flexDirection: 'column', sizeMode: 'contentSize', mounted: false }),
+    place('meUntil', C.datePicker, 'The last day', 'meUntilBox', { Label: 'Until (optional)', 'Show Label': true, Width: px(220) }),
+    text('meProjectLabel', 'Whose', 'meRoot', 'Project (optional)', wide(T_META)),
+    place('meProject', 'net.noodl.controls.options', 'Which project, if any', 'meRoot', SELECT_FIELD),
+    place('meLikelihood', TEXT_INPUT, 'How likely', 'meRoot', { ...FIELD, placeholder: 'How likely, in % (empty when it is certain)' }),
+    place('meNote', TEXT_INPUT, 'A note', 'meRoot', { ...FIELD, placeholder: 'A note (optional)' }),
+    text('meError', 'Why it was not saved', 'meRoot', '', { ...wide(T_ERROR), mounted: false }),
+    group('meBtns', 'Save, cancel, end', 'meRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
+    place('meSave', BUTTON, 'Save', 'meBtns', { ...BTN_PRIMARY, label: 'Save' }),
+    place('meCancel', BUTTON, 'Cancel', 'meBtns', { ...BTN_GHOST, label: 'Cancel' }),
+    place('meEnd', BUTTON, 'End it', 'meBtns', { ...BTN_GHOST, label: 'End it', color: 'var(--muted-foreground)', styleCss: 'margin-left: auto;', mounted: false }),
+    text('meEndHint', 'What ending it does', 'meRoot', '', { ...wide(T_META), mounted: false }),
+    choiceStates('meDir', 'In or out', ['in', 'out'], 'out'),
+    choiceStates('meRepeat', 'How often', MONEY_REPEAT_CHOICES, 'once'),
+    derive(
+      'meShape',
+      'Which date fields it needs',
+      "var once = String(Inputs.repeat || 'once') === 'once';\nOutputs.untilShown = !once;\nOutputs.dateLabel = once ? 'On' : 'From';\nOutputs.existing = Inputs.isNew !== true;"
+    ),
+    script('meCheck', 'What the form says', MONEY_EDITOR_SCRIPT, [
+      ...MONEY_EDIT_VALUES.map(([n]) => n),
+      'typedLabel', 'pickedDir', 'typedAmount', 'pickedRepeat', 'pickedDate', 'pickedUntil', 'pickedProject', 'typedLikelihood', 'typedNote'
+    ])
+  ],
+  connections: [
+    wire('meIn', 'heading', 'meHead', 'text'),
+    wire('meIn', 'label', 'meLabel', 'startValue'),
+    wire('meIn', 'amount', 'meAmount', 'startValue'),
+    wire('meIn', 'likelihood', 'meLikelihood', 'startValue'),
+    wire('meIn', 'note', 'meNote', 'startValue'),
+    wire('meIn', 'dir', 'meDir', 'currentState'),
+    wire('meIn', 'repeat', 'meRepeat', 'currentState'),
+    wire('meIn', 'date', 'meDate', 'Value'),
+    wire('meIn', 'until', 'meUntil', 'Value'),
+    wire('meIn', 'projectOptions', 'meProject', 'items'),
+    wire('meIn', 'projectId', 'meProject', 'value'),
+    ...choiceWires('meDir', [['in', 'meDirIn'], ['out', 'meDirOut']]),
+    ...choiceWires('meRepeat', REPEAT_BUTTONS.map(([state, id]) => [state, id] as [string, string])),
+    wire('meRepeat', 'currentState', 'meShape', 'in-repeat'),
+    wire('meIn', 'isNew', 'meShape', 'in-isNew'),
+    wire('meShape', 'out-untilShown', 'meUntilBox', 'mounted'),
+    wire('meShape', 'out-dateLabel', 'meDate', 'Label'),
+    wire('meShape', 'out-existing', 'meEnd', 'mounted'),
+    wire('meShape', 'out-existing', 'meEndHint', 'mounted'),
+    wire('meIn', 'endLabel', 'meEnd', 'label'),
+    wire('meIn', 'endHint', 'meEndHint', 'text'),
+    ...MONEY_EDIT_VALUES.map(([n]) => wire('meIn', n, 'meCheck', `in-${n}`)),
+    wire('meLabel', 'onTextChanged', 'meCheck', 'in-typedLabel'),
+    wire('meDir', 'currentState', 'meCheck', 'in-pickedDir'),
+    wire('meAmount', 'onTextChanged', 'meCheck', 'in-typedAmount'),
+    wire('meRepeat', 'currentState', 'meCheck', 'in-pickedRepeat'),
+    wire('meDate', 'Value', 'meCheck', 'in-pickedDate'),
+    wire('meUntil', 'Value', 'meCheck', 'in-pickedUntil'),
+    wire('meProject', 'value', 'meCheck', 'in-pickedProject'),
+    wire('meLikelihood', 'onTextChanged', 'meCheck', 'in-typedLikelihood'),
+    wire('meNote', 'onTextChanged', 'meCheck', 'in-typedNote'),
+    wire('meLabel', 'didMount', 'meLabel', 'focus'),
+    wire('meSave', 'onClick', 'meCheck', 'run'),
+    wire('meCheck', 'out-error', 'meError', 'text'),
+    wire('meCheck', 'out-hasError', 'meError', 'mounted'),
+    ...MONEY_EDIT_VALUES.map(([n]) => wire('meCheck', `out-${n}`, 'meOut', n)),
+    wire('meIn', 'key', 'meOut', 'key'),
+    wire('meCheck', 'out-go', 'meOut', 'save'),
+    wire('meCancel', 'onClick', 'meOut', 'cancel'),
+    wire('meEnd', 'onClick', 'meOut', 'end')
+  ]
+};
+
+/**
+ * s2 — what the money popup shows: which list (and what it says about itself), and the form as a
+ * one-row list when one is open — `item:<id>` changes that item, `new` adds one, `new:<project id>`
+ * adds one for that project. Each form is drawn fresh (its row id is new each time it opens).
+ */
+export const MONEY_SHEET_SCRIPT =
+  DATE_FNS +
+  PJ_FNS +
+  String.raw`var filter = String(Inputs.filter || 'up');
+var up = Inputs.upRows || [], rec = Inputs.recRows || [], past = Inputs.pastRows || [];
+Outputs.hint = filter === 'rec'
+  ? 'Everything that comes in or goes out, and how often. Press one to change it, end it or remove it.'
+  : filter === 'past'
+    ? 'What was ticked off in the last three months. Untick one if it did not happen after all.'
+    : 'The next three months, and anything late. Paid ticks it off; press one to change it.';
+Outputs.empty = (filter === 'rec' ? rec : filter === 'past' ? past : up).length === 0;
+Outputs.emptyText = filter === 'rec' ? 'Nothing yet. Add money: rent, a retainer, a bill.' : filter === 'past' ? 'Nothing ticked in the last three months.' : 'Nothing coming in or going out in the next three months.';
+var key = String(Inputs.editKey || ''), forms = [];
+if (Inputs.editing === true) {
+  var items = Inputs.items || [], projects = Inputs.projects || [], it = null, names = {};
+  for (var p = 0; p < projects.length; p++) if (projects[p]) names[projects[p].id] = String(projects[p].name || '');
+  if (key.indexOf('item:') === 0) for (var i = 0; i < items.length; i++) if (items[i] && String(items[i].id) === key.slice(5)) it = items[i];
+  var common = { projectOptions: Inputs.projectOptions || [] };
+  if (it) {
+    var a = num(it.amount, 0), once = String(it.repeat || 'once') === 'once', like = Math.round(num(it.likelihood, 100));
+    forms.push(Object.assign({
+      id: 'me-' + it.id, key: key, heading: 'Change: ' + String(it.label || 'money'),
+      label: String(it.label || ''), dir: a < 0 ? 'out' : 'in', amount: a === 0 ? '' : String(Math.abs(a)),
+      repeat: String(it.repeat || 'once'), date: String(it.date || ''), until: it.until ? String(it.until) : '',
+      projectId: it.projectId ? String(it.projectId) : 'none', likelihood: like < 100 ? String(like) : '', note: String(it.note || ''),
+      isNew: false, endLabel: once ? 'Remove it' : 'End it',
+      endHint: once ? 'Remove it: it is kept, but never counted.' : 'End it: nothing after today. What was ticked stays ticked.'
+    }, common));
+  } else {
+    var pid = key.indexOf('new:') === 0 ? key.slice(4) : '';
+    forms.push(Object.assign({
+      id: 'me-new-' + (pid || 'none'), key: 'new', heading: pid && names[pid] ? 'Add money for ' + names[pid] : 'Add money',
+      label: pid && names[pid] ? names[pid] : '', dir: pid ? 'in' : 'out', amount: '', repeat: 'once', date: pjToday(), until: '',
+      projectId: pid || 'none', likelihood: '', note: '', isNew: true, endLabel: '', endHint: ''
+    }, common));
+  }
+}
+Outputs.formRows = forms;`;
+
+const MONEY_SHEET_INS: Array<[string, string]> = [
+  ['open', 'boolean'], ['editing', 'boolean'], ['editKey', 'string'],
+  ['upRows', 'array'], ['recRows', 'array'], ['pastRows', 'array'], ['projectOptions', 'array'],
+  ['items', 'array'], ['marks', 'array'], ['projects', 'array']
+];
+const MONEY_SHEET_OUTS: Array<[string, string]> = [['close', 'signal'], ['add', 'signal'], ['edit', 'signal'], ['itemKey', 'string'], ['back', 'signal'], ['changed', 'signal']];
+
+/**
+ * s2 — **the money popup** (Richard: *"I can't add expenses and upcoming payments like in the
+ * planning template, that popup was actually pretty good"*). Planning's Money modal in this list's
+ * look: Upcoming · Recurring · Past, + Add money, and the form in place of the list while one is
+ * open. Back says the form is done with (saved, ended, or cancelled).
+ */
+const MONEY_SHEET: Tpl008Component = {
+  path: 'Projects/Money sheet',
+  description:
+    'The money popup: everything that comes in and goes out as Upcoming (with Paid), Recurring or Past (with Untick), + Add money, and the money form in place of the list while one is open. Edit (with Item Key) asks for a form; Back says the form is done with.',
+  ...iface(MONEY_SHEET_INS, MONEY_SHEET_OUTS),
+  instantiates: [C.moneyLine, C.moneyEditor, C.saveMoneyItem, C.endMoneyItem, C.markMoney],
+  nodes: [
+    inputs('msIn', 'The money', MONEY_SHEET_INS),
+    outputs('msOut', 'What you did in it', MONEY_SHEET_OUTS),
+    group('msScrim', 'Behind the popup', undefined, {
+      position: 'fixed',
+      zIndex: 45,
+      sizeMode: 'explicit',
+      width: pct(100),
+      height: pct(100),
+      styleCss: 'top: 0; left: 0; background-color: rgba(20, 22, 24, 0.45);',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingLeft: 'var(--space-3)',
+      paddingRight: 'var(--space-3)',
+      mounted: false
+    }),
+    group('msPanel', 'The popup', 'msScrim', {
+      ...composition('card'),
+      maxWidth: px(720),
+      rowGap: 'var(--space-3)',
+      paddingLeft: 'var(--space-5)',
+      paddingRight: 'var(--space-5)',
+      paddingTop: 'var(--space-4)',
+      paddingBottom: 'var(--space-5)',
+      styleCss: 'max-height: 88vh; overflow-y: auto;'
+    }),
+    group('msTop', 'Title and close', 'msPanel', { ...ROW('var(--space-2)'), justifyContent: 'space-between' }),
+    text('msTitle', 'Money in and out', 'msTop', 'Money in and out', { ...T_TITLE, as: 'h2', sizeMode: 'contentSize' }),
+    place('msClose', BUTTON, 'Close', 'msTop', BTN_ICON('icon-x', 'Close')),
+    group('msList', 'The lists', 'msPanel', COLUMN('var(--space-3)')),
+    group('msBar', 'Which list, and add', 'msList', { ...ROW('var(--space-1)'), flexWrap: 'wrap' }),
+    place('msUp', BUTTON, 'Upcoming', 'msBar', { ...BTN_GHOST, label: 'Upcoming' }),
+    place('msRec', BUTTON, 'Recurring', 'msBar', { ...BTN_GHOST, label: 'Recurring' }),
+    place('msPast', BUTTON, 'Past', 'msBar', { ...BTN_GHOST, label: 'Past' }),
+    place('msAdd', BUTTON, 'Add money', 'msBar', { ...BTN_PRIMARY, label: '+ Add money', styleCss: 'margin-left: auto;' }),
+    text('msHint', 'What this list is', 'msList', '', wide(T_META)),
+    text('msEmpty', 'When there is nothing', 'msList', '', { ...wide(T_META), mounted: false }),
+    group('msUpBox', 'Upcoming', 'msList', COLUMN('var(--space-0)')),
+    place('msUpEach', FOR_EACH, 'One line per repeat to come', 'msUpBox', { template: C.moneyLine, templateType: 'explicit' }),
+    group('msRecBox', 'Recurring', 'msList', { ...COLUMN('var(--space-0)'), mounted: false }),
+    place('msRecEach', FOR_EACH, 'One line per item', 'msRecBox', { template: C.moneyLine, templateType: 'explicit' }),
+    group('msPastBox', 'Past', 'msList', { ...COLUMN('var(--space-0)'), mounted: false }),
+    place('msPastEach', FOR_EACH, 'One line per repeat ticked', 'msPastBox', { template: C.moneyLine, templateType: 'explicit' }),
+    group('msForm', 'The form', 'msPanel', { ...COLUMN('var(--space-0)'), mounted: false }),
+    place('msFormEach', FOR_EACH, 'The money form, when one is open', 'msForm', { template: C.moneyEditor, templateType: 'explicit' }),
+    choiceStates('msFilter', 'Which list', ['up', 'rec', 'past'], 'up'),
+    derive(
+      'msShow',
+      'List or form',
+      'var open = Inputs.open === true, editing = Inputs.editing === true;\nOutputs.showList = open && !editing;\nOutputs.showForm = open && editing;'
+    ),
+    derive('msLook', 'What the popup shows', MONEY_SHEET_SCRIPT),
+    logic('cmdSaveItem', C.saveMoneyItem, 'Save the item'),
+    logic('cmdEndItem', C.endMoneyItem, 'End the item'),
+    logic('cmdLineTick', C.markMoney, 'Paid', { action: 'tick' }),
+    logic('cmdLineUntick', C.markMoney, 'Untick', { action: 'untick' })
+  ],
+  connections: [
+    wire('msIn', 'open', 'msScrim', 'mounted'),
+    wire('msIn', 'open', 'msShow', 'in-open'),
+    wire('msIn', 'editing', 'msShow', 'in-editing'),
+    wire('msShow', 'out-showList', 'msList', 'mounted'),
+    wire('msShow', 'out-showForm', 'msForm', 'mounted'),
+    wire('msClose', 'onClick', 'msOut', 'close'),
+    ...choiceWires('msFilter', [['up', 'msUp'], ['rec', 'msRec'], ['past', 'msPast']]),
+    wire('msFilter', 'at-up', 'msUpBox', 'mounted'),
+    wire('msFilter', 'at-rec', 'msRecBox', 'mounted'),
+    wire('msFilter', 'at-past', 'msPastBox', 'mounted'),
+    wire('msFilter', 'currentState', 'msLook', 'in-filter'),
+    ...(['upRows', 'recRows', 'pastRows', 'projectOptions', 'items', 'projects', 'editKey', 'editing'] as const).map((n) => wire('msIn', n, 'msLook', `in-${n}`)),
+    wire('msLook', 'out-hint', 'msHint', 'text'),
+    wire('msLook', 'out-empty', 'msEmpty', 'mounted'),
+    wire('msLook', 'out-emptyText', 'msEmpty', 'text'),
+    wire('msLook', 'out-formRows', 'msFormEach', 'items'),
+    wire('msIn', 'upRows', 'msUpEach', 'items'),
+    wire('msIn', 'recRows', 'msRecEach', 'items'),
+    wire('msIn', 'pastRows', 'msPastEach', 'items'),
+    wire('msAdd', 'onClick', 'msOut', 'add'),
+    // A line pressed: its item, as a form.
+    ...['msUpEach', 'msRecEach', 'msPastEach'].flatMap((each) => [
+      wire(each, 'itemOutput-itemKey', 'msOut', 'itemKey'),
+      wire(each, 'itemOutputSignal-edit', 'msOut', 'edit')
+    ]),
+    // Paid and Untick
+    ...(['items', 'marks', 'projects'] as const).flatMap((n) => [wire('msIn', n, 'cmdLineTick', n), wire('msIn', n, 'cmdLineUntick', n)]),
+    wire('msUpEach', 'itemOutput-key', 'cmdLineTick', 'key'),
+    wire('msUpEach', 'itemOutputSignal-tick', 'cmdLineTick', 'do'),
+    wire('msPastEach', 'itemOutput-key', 'cmdLineUntick', 'key'),
+    wire('msPastEach', 'itemOutputSignal-untick', 'cmdLineUntick', 'do'),
+    wire('cmdLineTick', 'done', 'msOut', 'changed'),
+    wire('cmdLineUntick', 'done', 'msOut', 'changed'),
+    // The form
+    ...MONEY_EDIT_VALUES.map(([n]) => wire('msFormEach', `itemOutput-${n}`, 'cmdSaveItem', n)),
+    wire('msFormEach', 'itemOutput-key', 'cmdSaveItem', 'key'),
+    wire('msFormEach', 'itemOutputSignal-save', 'cmdSaveItem', 'do'),
+    wire('msFormEach', 'itemOutput-key', 'cmdEndItem', 'key'),
+    wire('msIn', 'items', 'cmdEndItem', 'items'),
+    wire('msFormEach', 'itemOutputSignal-end', 'cmdEndItem', 'do'),
+    wire('msFormEach', 'itemOutputSignal-cancel', 'msOut', 'back'),
+    wire('cmdSaveItem', 'done', 'msOut', 'changed'),
+    wire('cmdSaveItem', 'done', 'msOut', 'back'),
+    wire('cmdEndItem', 'done', 'msOut', 'changed'),
+    wire('cmdEndItem', 'done', 'msOut', 'back')
   ]
 };
 
 const VIEW_INS: Array<[string, string]> = [
   ['balanceText', 'string'], ['balanceWhen', 'string'], ['bars', 'array'], ['lowText', 'string'], ['lowColor', 'string'],
   ['incomeRows', 'array'], ['hasIncome', 'boolean'], ['rows', 'array'], ['noProjects', 'boolean'],
-  ['projectPosition', 'number'], ['nextPosition', 'number'], ['items', 'array'], ['marks', 'array'], ['projects', 'array']
+  ['projectPosition', 'number'], ['nextPosition', 'number'], ['items', 'array'], ['marks', 'array'], ['projects', 'array'],
+  ['upRows', 'array'], ['recRows', 'array'], ['pastRows', 'array'], ['projectOptions', 'array']
 ];
-const VIEW_OUTS: Array<[string, string]> = [['changed', 'signal'], ['toggle', 'signal'], ['projectId', 'string'], ['hide', 'signal']];
+const VIEW_OUTS: Array<[string, string]> = [
+  ['changed', 'signal'], ['toggle', 'signal'], ['projectId', 'string'], ['hide', 'signal'], ['openTask', 'signal'], ['openTaskId', 'string']
+];
+
+/** s2 — the popup's Back: to the list when the form was opened from it, closed when it was opened straight from the tab. */
+export const SHEET_BACK_SCRIPT = "if (String(Inputs.state || '') === 'edit') Outputs.toList(); else Outputs.toClosed();";
+/** s2 — Add money from a project: the form opens for that project. */
+export const NEW_FOR_PROJECT_SCRIPT = "var id = String(Inputs.projectId || '');\nif (id === '') return;\nOutputs.value = 'new:' + id;\nOutputs.go();";
 
 const PROJECTS_VIEW: Tpl008Component = {
   path: 'Projects/View',
   description:
-    'The Projects tab: the money, then every project with its next move (Your move, Waiting on someone, Quiet), a box to add a project, and Hide this tab. Toggle (with Project Id) says a project was pressed; Changed says something was written.',
+    'The Projects tab: the money, then every project with its next move (Your move, Waiting on someone, Quiet), a box to add a project, Hide this tab, and the money popup. Toggle (with Project Id) says a project was pressed; Open Task (with Open Task Id) says one of its tasks was; Changed says something was written.',
   ...iface(VIEW_INS, VIEW_OUTS),
-  instantiates: [C.money, C.projectList, C.saveMove, C.addProject, C.markMoney],
+  instantiates: [C.money, C.projectList, C.moneySheet, C.saveMove, C.addProject, C.markMoney, C.saveProject],
   nodes: [
     inputs('pvIn', 'What to draw', VIEW_INS),
     outputs('pvOut', 'What you did', VIEW_OUTS),
@@ -5568,6 +6558,7 @@ const PROJECTS_VIEW: Tpl008Component = {
     place('pvAddButton', BUTTON, 'Add', 'pvOften', { ...BTN_PRIMARY, label: 'Add project', marginLeft: 'var(--space-2)' }),
     text('pvAddError', 'Why it was not added', 'pvAdd', '', { ...wide(T_ERROR), mounted: false }),
     place('pvHide', BUTTON, 'Hide this tab', 'pvRoot', { ...BTN_GHOST, label: 'Hide this tab', color: 'var(--muted-foreground)' }),
+    place('pvSheet', C.moneySheet, 'The money popup', 'pvRoot'),
     logic('pvRepeat', STATES, 'Every month or once', {
       states: 'monthly,once',
       currentState: 'monthly',
@@ -5580,10 +6571,22 @@ const PROJECTS_VIEW: Tpl008Component = {
       'value-once-onceBg': 'var(--muted)',
       useTransitions: false
     }),
+    // s2 — the money popup: closed, its list, a form opened from the list, or a form opened straight from the tab.
+    logic('pvSheetState', STATES, 'Is the money popup open?', { states: 'closed,list,edit,editOnly', currentState: 'closed', useTransitions: false }),
+    derive('pvSheetLook', 'Open, and on a form?', "var s = String(Inputs.state || 'closed');\nOutputs.open = s !== 'closed';\nOutputs.editing = s === 'edit' || s === 'editOnly';"),
+    script('pvSheetBack', 'Back to the list, or closed', SHEET_BACK_SCRIPT, ['state']),
+    logic('pvEditKey', VARIABLE, 'What the money form shows', { name: VAR.moneyEdit }),
+    logic('pvEditNew', SET_VARIABLE, 'A new item, from the Money card', { name: VAR.moneyEdit, setWith: 'string', value: 'new' }),
+    logic('pvEditNewInSheet', SET_VARIABLE, 'A new item, from the popup', { name: VAR.moneyEdit, setWith: 'string', value: 'new' }),
+    logic('pvEditLine', SET_VARIABLE, 'An item, from a line in the popup', { name: VAR.moneyEdit, setWith: 'string' }),
+    logic('pvEditRowItem', SET_VARIABLE, 'An item, from a project', { name: VAR.moneyEdit, setWith: 'string' }),
+    script('pvNewFor', 'A new item for this project', NEW_FOR_PROJECT_SCRIPT, ['projectId']),
+    logic('pvEditRowNew', SET_VARIABLE, 'A new item, for a project', { name: VAR.moneyEdit, setWith: 'string' }),
     logic('cmdMove', C.saveMove, 'Save next move'),
     logic('cmdTick', C.markMoney, 'Been paid', { action: 'tick' }),
     logic('cmdSent', C.markMoney, 'Sent', { action: 'sent' }),
-    logic('cmdAddProject', C.addProject, 'Add project')
+    logic('cmdAddProject', C.addProject, 'Add project'),
+    logic('cmdSaveProject', C.saveProject, 'Save project')
   ],
   connections: [
     ...['balanceText', 'balanceWhen', 'bars', 'lowText', 'lowColor', 'incomeRows', 'hasIncome', 'items', 'marks', 'projects'].map((n) => wire('pvIn', n, 'pvMoney', n)),
@@ -5605,6 +6608,44 @@ const PROJECTS_VIEW: Tpl008Component = {
     wire('pvList', 'sendKey', 'cmdSent', 'key'),
     wire('pvList', 'sent', 'cmdSent', 'do'),
     wire('cmdSent', 'done', 'pvOut', 'changed'),
+    // s2 — the project itself
+    wire('pvList', 'projectId', 'cmdSaveProject', 'projectId'),
+    ...([['pName', 'name'], ['pSub', 'sub'], ['pKind', 'kind'], ['pBilling', 'billing'], ['pTerms', 'termsDays'], ['pRate', 'rate'], ['pSay', 'say']] as const).map(([from, to]) =>
+      wire('pvList', from, 'cmdSaveProject', to)
+    ),
+    wire('pvList', 'saveProject', 'cmdSaveProject', 'do'),
+    wire('cmdSaveProject', 'done', 'pvOut', 'changed'),
+    // s2 — a project's task opens in the List
+    wire('pvList', 'openTaskId', 'pvOut', 'openTaskId'),
+    wire('pvList', 'openTask', 'pvOut', 'openTask'),
+    // s2 — the money popup
+    wire('pvSheetState', 'currentState', 'pvSheetLook', 'in-state'),
+    wire('pvSheetState', 'currentState', 'pvSheetBack', 'in-state'),
+    wire('pvSheetLook', 'out-open', 'pvSheet', 'open'),
+    wire('pvSheetLook', 'out-editing', 'pvSheet', 'editing'),
+    wire('pvEditKey', 'value', 'pvSheet', 'editKey'),
+    ...['upRows', 'recRows', 'pastRows', 'projectOptions', 'items', 'marks', 'projects'].map((n) => wire('pvIn', n, 'pvSheet', n)),
+    wire('pvMoney', 'allMoney', 'pvSheetState', 'to-list'),
+    wire('pvMoney', 'addMoney', 'pvEditNew', 'do'),
+    wire('pvMoney', 'addMoney', 'pvSheetState', 'to-editOnly'),
+    wire('pvSheet', 'add', 'pvEditNewInSheet', 'do'),
+    wire('pvSheet', 'add', 'pvSheetState', 'to-edit'),
+    wire('pvSheet', 'itemKey', 'pvEditLine', 'value'),
+    wire('pvSheet', 'edit', 'pvEditLine', 'do'),
+    wire('pvSheet', 'edit', 'pvSheetState', 'to-edit'),
+    wire('pvList', 'moneyKey', 'pvEditRowItem', 'value'),
+    wire('pvList', 'editMoney', 'pvEditRowItem', 'do'),
+    wire('pvList', 'editMoney', 'pvSheetState', 'to-editOnly'),
+    wire('pvList', 'projectId', 'pvNewFor', 'in-projectId'),
+    wire('pvList', 'addMoney', 'pvNewFor', 'run'),
+    wire('pvNewFor', 'out-value', 'pvEditRowNew', 'value'),
+    wire('pvNewFor', 'out-go', 'pvEditRowNew', 'do'),
+    wire('pvNewFor', 'out-go', 'pvSheetState', 'to-editOnly'),
+    wire('pvSheet', 'back', 'pvSheetBack', 'run'),
+    wire('pvSheetBack', 'out-toList', 'pvSheetState', 'to-list'),
+    wire('pvSheetBack', 'out-toClosed', 'pvSheetState', 'to-closed'),
+    wire('pvSheet', 'close', 'pvSheetState', 'to-closed'),
+    wire('pvSheet', 'changed', 'pvOut', 'changed'),
     // A new project
     wire('pvMonthly', 'onClick', 'pvRepeat', 'to-monthly'),
     wire('pvOnce', 'onClick', 'pvRepeat', 'to-once'),
@@ -5628,6 +6669,12 @@ const PROJECTS_VIEW: Tpl008Component = {
 
 const NEXT_PROMPT_INS: Array<[string, string]> = [['open', 'boolean'], ['projectId', 'string'], ['projectName', 'string'], ['position', 'number']];
 
+/** The prompt's form as a one-row list while it is open, so each question starts empty. */
+export const NEXT_PROMPT_FORM_SCRIPT = `var open = Inputs.open === true, pid = String(Inputs.projectId || '');
+Outputs.formRows = open && pid !== ''
+  ? [{ id: 'np-' + pid, heading: 'Closed. What is the next move for ' + String(Inputs.name || 'the project') + '?', help: '', title: '', who: '', deadline: '', saveLabel: 'Save', cancelLabel: 'Nothing next for now', titleOptional: false }]
+  : [];`;
+
 /**
  * PJ2 — a project's task ticked off in the List asks the same question Done does, at the top of
  * whatever view is showing: *"What is the next move for X?"*. Nothing next is an answer too.
@@ -5636,67 +6683,37 @@ const NEXT_PROMPT: Tpl008Component = {
   path: 'Projects/Next move prompt',
   description: 'After a project’s task is closed: asks for that project’s next move, and saves it as a task. Nothing next for now puts it away.',
   ...iface(NEXT_PROMPT_INS, [['done', 'signal'], ['skip', 'signal']]),
-  instantiates: [C.saveMove],
+  instantiates: [C.moveForm, C.saveMove],
   nodes: [
     inputs('npIn', 'Which project', NEXT_PROMPT_INS),
     outputs('npOut', 'Answered', [['done', 'signal'], ['skip', 'signal']]),
     group('npRoot', 'The next move', undefined, {
-      ...COLUMN('var(--space-2)'),
+      ...COLUMN('var(--space-0)'),
       mounted: false,
-      backgroundColor: 'var(--surface)',
       borderStyle: 'solid',
       borderWidth: 'var(--border-1)',
       borderColor: 'var(--primary)',
-      borderRadius: 'var(--radius-lg)',
-      paddingLeft: 'var(--space-4)',
-      paddingRight: 'var(--space-4)',
-      paddingTop: 'var(--space-3)',
-      paddingBottom: 'var(--space-3)'
+      borderRadius: 'var(--radius-lg)'
     }),
-    text('npHead', 'The question', 'npRoot', '', wide({ ...T_BODY, fontWeight: 'var(--font-semibold)' })),
-    place('npTitle', TEXT_INPUT, 'The next move', 'npRoot', { ...FIELD, placeholder: MOVE_PLACEHOLDER }),
-    place('npWho', TEXT_INPUT, 'Who it waits on', 'npRoot', { ...FIELD, placeholder: WHO_PLACEHOLDER }),
-    place('npDue', TEXT_INPUT, 'Its deadline', 'npRoot', { ...FIELD, placeholder: DUE_PLACEHOLDER }),
-    text('npError', 'Why it was not saved', 'npRoot', '', { ...wide(T_ERROR), mounted: false }),
-    group('npBtns', 'Save, or nothing next', 'npRoot', { ...ROW('var(--space-2)'), flexWrap: 'wrap' }),
-    place('npSave', BUTTON, 'Save', 'npBtns', { ...BTN_PRIMARY, label: 'Save' }),
-    place('npSkip', BUTTON, 'Nothing next for now', 'npBtns', { ...BTN_GHOST, label: 'Nothing next for now' }),
-    derive('npLook', 'The question', "Outputs.head = 'Closed. What is the next move for ' + String(Inputs.name || 'the project') + '?';"),
-    script(
-      'npCheck',
-      'Is it a date?',
-      `${DATE_FNS}${PJ_FNS}var t = String(Inputs.title || '').trim();
-var d = pjDate(Inputs.due);
-var error = d === null ? 'Use a date like 2026-10-12, or today or tomorrow, or leave the deadline empty.' : t === '' ? 'Type the next move, or press Nothing next for now.' : '';
-Outputs.error = error;
-Outputs.hasError = error !== '';
-if (error) return;
-Outputs.deadline = d;
-Outputs.go();`,
-      ['title', 'due']
-    ),
+    place('npEach', FOR_EACH, 'The question, while it is asked', 'npRoot', { template: C.moveForm, templateType: 'explicit' }),
+    derive('npLook', 'The question', NEXT_PROMPT_FORM_SCRIPT),
     logic('npSaveMove', C.saveMove, 'Save the next move', { mode: 'new' })
   ],
   connections: [
     wire('npIn', 'open', 'npRoot', 'mounted'),
+    wire('npIn', 'open', 'npLook', 'in-open'),
+    wire('npIn', 'projectId', 'npLook', 'in-projectId'),
     wire('npIn', 'projectName', 'npLook', 'in-name'),
-    wire('npLook', 'out-head', 'npHead', 'text'),
-    wire('npTitle', 'onTextChanged', 'npCheck', 'in-title'),
-    wire('npDue', 'onTextChanged', 'npCheck', 'in-due'),
-    wire('npSave', 'onClick', 'npCheck', 'run'),
-    wire('npTitle', 'onEnter', 'npCheck', 'run'),
-    wire('npCheck', 'out-error', 'npError', 'text'),
-    wire('npCheck', 'out-hasError', 'npError', 'mounted'),
+    wire('npLook', 'out-formRows', 'npEach', 'items'),
     wire('npIn', 'projectId', 'npSaveMove', 'projectId'),
     wire('npIn', 'projectName', 'npSaveMove', 'projectName'),
     wire('npIn', 'position', 'npSaveMove', 'position'),
-    wire('npTitle', 'onTextChanged', 'npSaveMove', 'title'),
-    wire('npWho', 'onTextChanged', 'npSaveMove', 'waitingOn'),
-    wire('npCheck', 'out-deadline', 'npSaveMove', 'deadline'),
-    wire('npCheck', 'out-go', 'npSaveMove', 'do'),
-    ...['npTitle', 'npWho', 'npDue'].flatMap((f) => [wire('npSaveMove', 'done', f, 'clear'), wire('npSkip', 'onClick', f, 'clear')]),
+    wire('npEach', 'itemOutput-title', 'npSaveMove', 'title'),
+    wire('npEach', 'itemOutput-waitingOn', 'npSaveMove', 'waitingOn'),
+    wire('npEach', 'itemOutput-deadline', 'npSaveMove', 'deadline'),
+    wire('npEach', 'itemOutputSignal-save', 'npSaveMove', 'do'),
     wire('npSaveMove', 'done', 'npOut', 'done'),
-    wire('npSkip', 'onClick', 'npOut', 'skip')
+    wire('npEach', 'itemOutputSignal-cancel', 'npOut', 'skip')
   ]
 };
 
@@ -5750,6 +6767,9 @@ export const TPL008_COMPONENTS: ReadonlyArray<Tpl008Component> = [
   ADD_PROJECT,
   RECORD_BALANCE,
   MARK_MONEY,
+  SAVE_MONEY_ITEM,
+  END_MONEY_ITEM,
+  SAVE_PROJECT,
   PROJECTS_LOGIC,
   TASK_ROWS,
   SELECTED_TASK,
@@ -5782,11 +6802,18 @@ export const TPL008_COMPONENTS: ReadonlyArray<Tpl008Component> = [
   ROUTINE_SUMMARY,
   NOTE_DIALOG,
   DIALOG_FLOW,
+  MOVE_FORM,
+  PROJECT_TASK,
+  PROJECT_MONEY,
+  PROJECT_EDITOR,
   PROJECT_ROW,
   PROJECT_LIST,
   MONEY_BAR,
   INCOME_ROW,
   MONEY,
+  MONEY_LINE,
+  MONEY_EDITOR,
+  MONEY_SHEET,
   PROJECTS_VIEW,
   NEXT_PROMPT,
   PAGE_TODO,

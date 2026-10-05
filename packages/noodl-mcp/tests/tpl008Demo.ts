@@ -498,7 +498,11 @@ Outputs.rows = [];
 Outputs.projects = [];
 Outputs.items = [];
 Outputs.marks = [];
-Outputs.readings = [];`;
+Outputs.readings = [];
+Outputs.upRows = [];
+Outputs.recRows = [];
+Outputs.pastRows = [];
+Outputs.projectOptions = [];`;
 
 function demoProjects(): Tpl008Component {
   const backend = source(C.projectsLogic);

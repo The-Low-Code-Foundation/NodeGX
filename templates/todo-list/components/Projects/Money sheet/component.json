@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "03928df7-0c7b-5d11-84ff-b8758d34718f",
+  "name": "Money sheet",
+  "path": "/Projects/Money sheet",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "The money popup: everything that comes in and goes out as Upcoming (with Paid), Recurring or Past (with Untick), + Add money, and the money form in place of the list while one is open. Edit (with Item Key) asks for a form; Back says the form is done with."
+}

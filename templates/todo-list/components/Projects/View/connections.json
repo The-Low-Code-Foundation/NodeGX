@@ -226,6 +226,276 @@
       "toProperty": "changed"
     },
     {
+      "fromId": "pvList",
+      "fromProperty": "projectId",
+      "toId": "cmdSaveProject",
+      "toProperty": "projectId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pName",
+      "toId": "cmdSaveProject",
+      "toProperty": "name"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pSub",
+      "toId": "cmdSaveProject",
+      "toProperty": "sub"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pKind",
+      "toId": "cmdSaveProject",
+      "toProperty": "kind"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pBilling",
+      "toId": "cmdSaveProject",
+      "toProperty": "billing"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pTerms",
+      "toId": "cmdSaveProject",
+      "toProperty": "termsDays"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pRate",
+      "toId": "cmdSaveProject",
+      "toProperty": "rate"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "pSay",
+      "toId": "cmdSaveProject",
+      "toProperty": "say"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "saveProject",
+      "toId": "cmdSaveProject",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "cmdSaveProject",
+      "fromProperty": "done",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "openTaskId",
+      "toId": "pvOut",
+      "toProperty": "openTaskId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "openTask",
+      "toId": "pvOut",
+      "toProperty": "openTask"
+    },
+    {
+      "fromId": "pvSheetState",
+      "fromProperty": "currentState",
+      "toId": "pvSheetLook",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "pvSheetState",
+      "fromProperty": "currentState",
+      "toId": "pvSheetBack",
+      "toProperty": "in-state"
+    },
+    {
+      "fromId": "pvSheetLook",
+      "fromProperty": "out-open",
+      "toId": "pvSheet",
+      "toProperty": "open"
+    },
+    {
+      "fromId": "pvSheetLook",
+      "fromProperty": "out-editing",
+      "toId": "pvSheet",
+      "toProperty": "editing"
+    },
+    {
+      "fromId": "pvEditKey",
+      "fromProperty": "value",
+      "toId": "pvSheet",
+      "toProperty": "editKey"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "upRows",
+      "toId": "pvSheet",
+      "toProperty": "upRows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "recRows",
+      "toId": "pvSheet",
+      "toProperty": "recRows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "pastRows",
+      "toId": "pvSheet",
+      "toProperty": "pastRows"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projectOptions",
+      "toId": "pvSheet",
+      "toProperty": "projectOptions"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "items",
+      "toId": "pvSheet",
+      "toProperty": "items"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "marks",
+      "toId": "pvSheet",
+      "toProperty": "marks"
+    },
+    {
+      "fromId": "pvIn",
+      "fromProperty": "projects",
+      "toId": "pvSheet",
+      "toProperty": "projects"
+    },
+    {
+      "fromId": "pvMoney",
+      "fromProperty": "allMoney",
+      "toId": "pvSheetState",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "pvMoney",
+      "fromProperty": "addMoney",
+      "toId": "pvEditNew",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvMoney",
+      "fromProperty": "addMoney",
+      "toId": "pvSheetState",
+      "toProperty": "to-editOnly"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "add",
+      "toId": "pvEditNewInSheet",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "add",
+      "toId": "pvSheetState",
+      "toProperty": "to-edit"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "itemKey",
+      "toId": "pvEditLine",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "edit",
+      "toId": "pvEditLine",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "edit",
+      "toId": "pvSheetState",
+      "toProperty": "to-edit"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "moneyKey",
+      "toId": "pvEditRowItem",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "editMoney",
+      "toId": "pvEditRowItem",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "editMoney",
+      "toId": "pvSheetState",
+      "toProperty": "to-editOnly"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "projectId",
+      "toId": "pvNewFor",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "pvList",
+      "fromProperty": "addMoney",
+      "toId": "pvNewFor",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pvNewFor",
+      "fromProperty": "out-value",
+      "toId": "pvEditRowNew",
+      "toProperty": "value"
+    },
+    {
+      "fromId": "pvNewFor",
+      "fromProperty": "out-go",
+      "toId": "pvEditRowNew",
+      "toProperty": "do"
+    },
+    {
+      "fromId": "pvNewFor",
+      "fromProperty": "out-go",
+      "toId": "pvSheetState",
+      "toProperty": "to-editOnly"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "back",
+      "toId": "pvSheetBack",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "pvSheetBack",
+      "fromProperty": "out-toList",
+      "toId": "pvSheetState",
+      "toProperty": "to-list"
+    },
+    {
+      "fromId": "pvSheetBack",
+      "fromProperty": "out-toClosed",
+      "toId": "pvSheetState",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "close",
+      "toId": "pvSheetState",
+      "toProperty": "to-closed"
+    },
+    {
+      "fromId": "pvSheet",
+      "fromProperty": "changed",
+      "toId": "pvOut",
+      "toProperty": "changed"
+    },
+    {
       "fromId": "pvMonthly",
       "fromProperty": "onClick",
       "toId": "pvRepeat",

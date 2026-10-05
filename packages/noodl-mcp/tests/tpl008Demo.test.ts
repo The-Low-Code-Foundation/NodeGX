@@ -85,7 +85,7 @@ beforeAll(async () => {
 
 const COMMANDS = TPL008_COMPONENTS.filter((c) => c.path.startsWith('Commands/')).map((c) => `/${c.path}`);
 /** TPL-008-PJ — the Projects tab's writes: in the demo they say its own "did not save" sentence, and are never reached. */
-const PROJECT_WRITES = [C.saveMove, C.addProject, C.recordBalance, C.markMoney];
+const PROJECT_WRITES = [C.saveMove, C.addProject, C.recordBalance, C.markMoney, C.saveMoneyItem, C.endMoneyItem, C.saveProject];
 
 // ── §1 ─────────────────────────────────────────────────────────────────────
 
@@ -195,6 +195,7 @@ describe('§3 it is in step with the template', () => {
         // TPL-008-PJ — the demo has no projects: Logic/Projects is one Function saying so.
         '/Logic/Projects pjCarry',
         '/Logic/Projects pjLoad',
+        '/Logic/Projects pjMoney',
         '/Logic/Projects pjProblem',
         '/Logic/Projects pjRows',
         '/Logic/Todo data dtActions',

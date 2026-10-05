@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "12f4d5b3-cea0-53ea-88ae-fa6c3d86aa27",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "pmIn",
+      "fromProperty": "label",
+      "toId": "pmLabel",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pmIn",
+      "fromProperty": "color",
+      "toId": "pmLabel",
+      "toProperty": "color"
+    },
+    {
+      "fromId": "pmIn",
+      "fromProperty": "line",
+      "toId": "pmLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "pmIn",
+      "fromProperty": "itemKey",
+      "toId": "pmOut",
+      "toProperty": "itemKey"
+    },
+    {
+      "fromId": "pmRow",
+      "fromProperty": "onClick",
+      "toId": "pmOut",
+      "toProperty": "edit"
+    }
+  ]
+}

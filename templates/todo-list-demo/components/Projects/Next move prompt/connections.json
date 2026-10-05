@@ -11,51 +11,27 @@
     },
     {
       "fromId": "npIn",
+      "fromProperty": "open",
+      "toId": "npLook",
+      "toProperty": "in-open"
+    },
+    {
+      "fromId": "npIn",
+      "fromProperty": "projectId",
+      "toId": "npLook",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "npIn",
       "fromProperty": "projectName",
       "toId": "npLook",
       "toProperty": "in-name"
     },
     {
       "fromId": "npLook",
-      "fromProperty": "out-head",
-      "toId": "npHead",
-      "toProperty": "text"
-    },
-    {
-      "fromId": "npTitle",
-      "fromProperty": "onTextChanged",
-      "toId": "npCheck",
-      "toProperty": "in-title"
-    },
-    {
-      "fromId": "npDue",
-      "fromProperty": "onTextChanged",
-      "toId": "npCheck",
-      "toProperty": "in-due"
-    },
-    {
-      "fromId": "npSave",
-      "fromProperty": "onClick",
-      "toId": "npCheck",
-      "toProperty": "run"
-    },
-    {
-      "fromId": "npTitle",
-      "fromProperty": "onEnter",
-      "toId": "npCheck",
-      "toProperty": "run"
-    },
-    {
-      "fromId": "npCheck",
-      "fromProperty": "out-error",
-      "toId": "npError",
-      "toProperty": "text"
-    },
-    {
-      "fromId": "npCheck",
-      "fromProperty": "out-hasError",
-      "toId": "npError",
-      "toProperty": "mounted"
+      "fromProperty": "out-formRows",
+      "toId": "npEach",
+      "toProperty": "items"
     },
     {
       "fromId": "npIn",
@@ -76,64 +52,28 @@
       "toProperty": "position"
     },
     {
-      "fromId": "npTitle",
-      "fromProperty": "onTextChanged",
+      "fromId": "npEach",
+      "fromProperty": "itemOutput-title",
       "toId": "npSaveMove",
       "toProperty": "title"
     },
     {
-      "fromId": "npWho",
-      "fromProperty": "onTextChanged",
+      "fromId": "npEach",
+      "fromProperty": "itemOutput-waitingOn",
       "toId": "npSaveMove",
       "toProperty": "waitingOn"
     },
     {
-      "fromId": "npCheck",
-      "fromProperty": "out-deadline",
+      "fromId": "npEach",
+      "fromProperty": "itemOutput-deadline",
       "toId": "npSaveMove",
       "toProperty": "deadline"
     },
     {
-      "fromId": "npCheck",
-      "fromProperty": "out-go",
+      "fromId": "npEach",
+      "fromProperty": "itemOutputSignal-save",
       "toId": "npSaveMove",
       "toProperty": "do"
-    },
-    {
-      "fromId": "npSaveMove",
-      "fromProperty": "done",
-      "toId": "npTitle",
-      "toProperty": "clear"
-    },
-    {
-      "fromId": "npSkip",
-      "fromProperty": "onClick",
-      "toId": "npTitle",
-      "toProperty": "clear"
-    },
-    {
-      "fromId": "npSaveMove",
-      "fromProperty": "done",
-      "toId": "npWho",
-      "toProperty": "clear"
-    },
-    {
-      "fromId": "npSkip",
-      "fromProperty": "onClick",
-      "toId": "npWho",
-      "toProperty": "clear"
-    },
-    {
-      "fromId": "npSaveMove",
-      "fromProperty": "done",
-      "toId": "npDue",
-      "toProperty": "clear"
-    },
-    {
-      "fromId": "npSkip",
-      "fromProperty": "onClick",
-      "toId": "npDue",
-      "toProperty": "clear"
     },
     {
       "fromId": "npSaveMove",
@@ -142,8 +82,8 @@
       "toProperty": "done"
     },
     {
-      "fromId": "npSkip",
-      "fromProperty": "onClick",
+      "fromId": "npEach",
+      "fromProperty": "itemOutputSignal-cancel",
       "toId": "npOut",
       "toProperty": "skip"
     }

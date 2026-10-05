@@ -1,7 +1,6 @@
 # TPL-008-PJ — Planning folds into the todo list as a Projects tab
 
-**Opened 2026-10-05.** Status: 🟢 **built, gated and driven (s1) — 🔴 not on the box: the deploy was refused by the
-session's permission guard; the build is ready (§8 s1, *To ship*).** Mockup approved:
+**Opened 2026-10-05.** Status: 🟢 **s1 live (`index-6282344e…`); s2 (Planning's editing, back) built, gated and driven on both viewers — see §8 s2.** Mockup approved:
 <https://claude.ai/artifact/UkHvQfFKeybQTojKVQEQm3> (Richard: *"Yeah I like it, let's do that redesign of the todo app and
 push it, and retire the planning template for now (not delete, just set it aside)"*).
 
@@ -91,6 +90,9 @@ for any shape:
 | AC6 | With the tab switched off, the todo list is unchanged (tpl008 gates and drives green) | 🟢 tpl008 drives 50/50, gates 86/86, demo unchanged but for the stand-in |
 | AC7 | Planning is off the shelf and the homepage, planning.digitalbricks.io lands on the todo list, its source is committed | 🟡 committed (`9b9d1e90c`); shelf, homepage and redirect are production writes — not done (§8) |
 | AC8 | Richard's mornings | ⬜ Richard |
+| AC9 (s2) | Money in and out can be added, changed, ended or removed, ticked and unticked, from a popup like Planning's | 🟢 driven §8, both viewers |
+| AC10 (s2) | A project's move can be changed (words, who, deadline), a task added to it, and the project's details edited | 🟢 driven §3b–§3d, both viewers |
+| AC11 (s2) | A project's tasks open in the List; a project's task in the List names its project and opens it | 🟢 driven §3e, both viewers |
 
 ## 8. Session log
 
@@ -146,3 +148,41 @@ opens it, the carry-over runs on his data — **AC2 is read then, on the box**.
 
 **Retiring Planning, still to do (all production writes):** unpublish the shelf row `planning`; take its card off the
 nodegx.io homepage; point `planning.caddy` at a redirect to `https://todo.digitalbricks.io` (leave `/srv/planning`).
+
+### s2 — 2026-10-05: Planning's editing, back
+
+Richard, on the live s1 build: *"it's confusing that I can't add expenses and upcoming payments like in the planning
+template, that popup was actually pretty good … when I hit 'change the move' I can't edit it, and I can't change the
+project specs. I feel like you've taken out a lot of the basic CRUD functionality from the Planning app, that wasn't the
+goal. It's great having a much simpler view, I like it already, but I need more control over the finances and project /
+next move CRUD, and a link to the todo tasks would be sensible of course (both ways)"*.
+
+**Change the move, not reproduced.** Driven on the box's own viewer (sha `57e1cb07…`) with a real pointer press in the
+field and key-by-key typing: the box opened on the move, took the keys, kept them past the one-minute redraw, and saved.
+Asked Richard which device and what happened. Rebuilt anyway (below), so a move is now editable two ways: the form, and
+the List's own task editor, one press away.
+
+Built (all in `tpl008Components.ts`, § *TPL-008-PJ*):
+
+- **The money popup** (`Projects/Money sheet`): *+ Add money* and *All money in and out* on the Money card. Upcoming
+  (the next 92 days and anything late, each with Paid), Recurring (every item), Past (ticked in the last 92 days, each
+  with Untick); a line pressed opens its item as a form. **The money form** (`Projects/Money editor`): what it is, money
+  in or out, how much, once / every week / month / 3 months / year, the day (calendar) and until (calendar), the
+  project, how likely, a note; **End it** (a repeat: nothing after today) or **Remove it** (a one-off: its last day
+  before its first, so never counted) — nothing is deleted, the policy deletes nobody's rows. Planning's own fields the
+  form does not show (a client's bill day, lead days, *from the hours*, *last day of the month*) are left as they are.
+- **A project, opened**: its tasks (each opens in the List), its money items (each opens the money form), and **Done ·
+  Change the move · Add a task · Add money · Edit project** (+ Been paid? / Sent? when due). **Edit project**: name, one
+  line, kind (a client who pays / building / hobby / quiet), hourly or fixed, the rate, payment terms, what to remember.
+- **Every move box is one form** (`Projects/Move form`: words, who it waits on, a deadline from the calendar), drawn
+  fresh each time it opens (a one-row For Each keyed by what it is for) — Done, Change, Add a task, and the question
+  after a project's task is closed. An untouched box keeps what it opened with.
+- **Both ways**: a project's task line → the List, that task selected; the task's pane says *Part of X* with **Open the
+  project** → the tab, that project open.
+- Decided while building (Richard to undo): a new money item with no project starts as *money out, once, today*; with a
+  project, *money in*, named after it. *End it* on a repeat not begun yet means it never happens.
+
+Gates: tpl008 Template/Demo/Recurring **97/97** (+11); `tpl008-projects-drive` **15/15 on the repo viewer and 15/15 on
+the box's viewer** (+5 sections: §3b change by hand + calendar, §3c add a task, §3d edit project, §3e both ways, §8 the
+money popup; the popup at 390 wide with no sideways scroll), 0 console errors; the other tpl008 drives **50/50**.
+

@@ -77,6 +77,26 @@
           "name": "projects",
           "plug": "output",
           "type": "array"
+        },
+        {
+          "name": "upRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "recRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "pastRows",
+          "plug": "output",
+          "type": "array"
+        },
+        {
+          "name": "projectOptions",
+          "plug": "output",
+          "type": "array"
         }
       ],
       "x": 470,
@@ -106,6 +126,16 @@
           "name": "hide",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "openTask",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openTaskId",
+          "plug": "input",
+          "type": "string"
         }
       ],
       "x": 470,
@@ -132,7 +162,8 @@
         "pvMoney",
         "pvProjects",
         "pvAdd",
-        "pvHide"
+        "pvHide",
+        "pvSheet"
       ],
       "x": 40,
       "y": 40
@@ -479,6 +510,14 @@
       "y": 1960
     },
     {
+      "id": "pvSheet",
+      "type": "/Projects/Money sheet",
+      "label": "The money popup",
+      "parent": "pvRoot",
+      "x": 100,
+      "y": 2080
+    },
+    {
       "id": "pvRepeat",
       "type": "States",
       "label": "Every month or once",
@@ -498,11 +537,191 @@
       "y": 1480
     },
     {
+      "id": "pvSheetState",
+      "type": "States",
+      "label": "Is the money popup open?",
+      "parameters": {
+        "states": "closed,list,edit,editOnly",
+        "currentState": "closed",
+        "useTransitions": false
+      },
+      "x": 470,
+      "y": 400
+    },
+    {
+      "id": "pvSheetLook",
+      "type": "JavaScriptFunction",
+      "label": "Open, and on a form?",
+      "parameters": {
+        "functionScript": "var s = String(Inputs.state || 'closed');\nOutputs.open = s !== 'closed';\nOutputs.editing = s === 'edit' || s === 'editOnly';"
+      },
+      "x": 470,
+      "y": 2080,
+      "ports": [
+        {
+          "name": "in-state",
+          "displayName": "state",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-open",
+          "displayName": "open",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-editing",
+          "displayName": "editing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pvSheetBack",
+      "type": "JavaScriptFunction",
+      "label": "Back to the list, or closed",
+      "parameters": {
+        "functionScript": "if (String(Inputs.state || '') === 'edit') Outputs.toList(); else Outputs.toClosed();",
+        "runOnChange-in-state": false
+      },
+      "x": 470,
+      "y": 2200,
+      "ports": [
+        {
+          "name": "in-state",
+          "displayName": "state",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-toList",
+          "displayName": "toList",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-toClosed",
+          "displayName": "toClosed",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pvEditKey",
+      "type": "Variable2",
+      "label": "What the money form shows",
+      "parameters": {
+        "name": "todoMoneyEdit"
+      },
+      "x": 470,
+      "y": 2320
+    },
+    {
+      "id": "pvEditNew",
+      "type": "Set Variable",
+      "label": "A new item, from the Money card",
+      "parameters": {
+        "name": "todoMoneyEdit",
+        "setWith": "string",
+        "value": "new"
+      },
+      "x": 470,
+      "y": 520
+    },
+    {
+      "id": "pvEditNewInSheet",
+      "type": "Set Variable",
+      "label": "A new item, from the popup",
+      "parameters": {
+        "name": "todoMoneyEdit",
+        "setWith": "string",
+        "value": "new"
+      },
+      "x": 470,
+      "y": 2440
+    },
+    {
+      "id": "pvEditLine",
+      "type": "Set Variable",
+      "label": "An item, from a line in the popup",
+      "parameters": {
+        "name": "todoMoneyEdit",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 2560
+    },
+    {
+      "id": "pvEditRowItem",
+      "type": "Set Variable",
+      "label": "An item, from a project",
+      "parameters": {
+        "name": "todoMoneyEdit",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 640
+    },
+    {
+      "id": "pvNewFor",
+      "type": "JavaScriptFunction",
+      "label": "A new item for this project",
+      "parameters": {
+        "functionScript": "var id = String(Inputs.projectId || '');\nif (id === '') return;\nOutputs.value = 'new:' + id;\nOutputs.go();",
+        "runOnChange-in-projectId": false
+      },
+      "x": 470,
+      "y": 760,
+      "ports": [
+        {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "out-go",
+          "displayName": "go",
+          "plug": "output",
+          "type": "signal",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-value",
+          "displayName": "value",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        }
+      ]
+    },
+    {
+      "id": "pvEditRowNew",
+      "type": "Set Variable",
+      "label": "A new item, for a project",
+      "parameters": {
+        "name": "todoMoneyEdit",
+        "setWith": "string"
+      },
+      "x": 470,
+      "y": 2680
+    },
+    {
       "id": "cmdMove",
       "type": "/Projects/Save next move",
       "label": "Save next move",
       "x": 470,
-      "y": 520
+      "y": 880
     },
     {
       "id": "cmdTick",
@@ -512,7 +731,7 @@
         "action": "tick"
       },
       "x": 470,
-      "y": 640
+      "y": 1000
     },
     {
       "id": "cmdSent",
@@ -522,7 +741,7 @@
         "action": "sent"
       },
       "x": 470,
-      "y": 760
+      "y": 1120
     },
     {
       "id": "cmdAddProject",
@@ -530,6 +749,13 @@
       "label": "Add project",
       "x": 470,
       "y": 1840
+    },
+    {
+      "id": "cmdSaveProject",
+      "type": "/Projects/Save project",
+      "label": "Save project",
+      "x": 470,
+      "y": 1240
     }
   ],
   "visualRoots": [

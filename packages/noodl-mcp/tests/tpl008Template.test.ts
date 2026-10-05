@@ -46,6 +46,20 @@ import {
   REMINDER_COLLECTION,
   ROW_SUBMIT_SCRIPT,
   SAVE_MOVE_SCRIPT,
+  // TPL-008-PJ s2
+  END_MONEY_ITEM_SCRIPT,
+  MONEY_EDITOR_SCRIPT,
+  MONEY_LIST_SCRIPT,
+  MONEY_SHEET_SCRIPT,
+  MOVE_FORM_SCRIPT,
+  NEW_FOR_PROJECT_SCRIPT,
+  NEXT_PROMPT_FORM_SCRIPT,
+  PROJECT_EDITOR_SCRIPT,
+  ROW_FORMS_SCRIPT,
+  SAVE_MONEY_ITEM_SCRIPT,
+  SAVE_PROJECT_SCRIPT,
+  SHEET_BACK_SCRIPT,
+  TASK_PROJECT_SCRIPT,
   SELECTED_SCRIPT,
   TASK_ROWS_SCRIPT,
   TOGGLE_PROJECT_SCRIPT,
@@ -831,15 +845,46 @@ describe('§7 Projects (TPL-008-PJ)', () => {
     expect([f.db.Task[1].status, f.db.Task.length]).toEqual(['done', 2]);
   });
 
-  it('the row’s box: refuses a bad date or an empty change in words; Done with nothing typed and no move is a new move', () => {
+  it('the row’s box: Change rewrites, Add a task is a new one, Done with no move is the first move — and nothing open writes nothing', () => {
     const r = (i: Rec) => run(ROW_SUBMIT_SCRIPT, i);
-    expect(r({ mode: 'done', taskId: 't', doneTitle: 'Next', doneWho: ' Sam ', doneDue: 'tomorrow' }).outputs).toMatchObject({ mode: 'done', title: 'Next', waitingOn: 'Sam', deadline: dayOffset(1), hasError: false });
-    expect(r({ mode: 'done', taskId: 't', doneTitle: '' }).signals).toEqual(['go']);
-    expect(r({ mode: 'done', taskId: '', doneTitle: '' }).outputs.hasError).toBe(true);
-    expect(r({ mode: 'done', taskId: '', doneTitle: 'First move' }).outputs.mode).toBe('new');
-    expect(r({ mode: 'change', taskId: 't', chTitle: '  ' }).signals).toEqual([]);
-    expect(r({ mode: 'change', taskId: 't', chTitle: 'X', chDue: '31/10' }).outputs.error).toMatch(/^Use a date like/);
+    expect(r({ mode: 'done', taskId: 't' })).toEqual({ outputs: { mode: 'done' }, signals: ['go'] });
+    expect(r({ mode: 'done', taskId: '' }).outputs.mode).toBe('new');
+    expect(r({ mode: 'add', taskId: 't' }).outputs.mode).toBe('new');
+    expect(r({ mode: 'change', taskId: 't' }).outputs.mode).toBe('change');
+    expect(r({ mode: 'change', taskId: '' }).signals).toEqual([]);
     expect(r({ mode: 'none' }).signals).toEqual([]);
+    expect(r({ mode: 'edit', taskId: 't' }).signals).toEqual([]);
+  });
+
+  it('s2 the move form: what was typed beats what it opened with, an untouched box keeps its value, a cleared one is empty; no words is refused unless nothing next is an answer', () => {
+    const f = (i: Rec) => run(MOVE_FORM_SCRIPT, i);
+    // Change, only the deadline picked: the words and who it waits on are what the move said.
+    expect(f({ title: 'Call Ade', who: 'Ade', deadline: '', pickedDeadline: '2026-10-20' })).toEqual({
+      outputs: { error: '', hasError: false, title: 'Call Ade', waitingOn: 'Ade', deadline: '2026-10-20' },
+      signals: ['go']
+    });
+    expect(f({ title: 'Call Ade', who: 'Ade', deadline: '2026-10-20', typedTitle: ' Call Ade back ', typedWho: '', pickedDeadline: '' }).outputs).toMatchObject({
+      title: 'Call Ade back', waitingOn: '', deadline: ''
+    });
+    expect(f({ title: '', who: '', deadline: '' })).toEqual({ outputs: { error: 'The move needs a few words.', hasError: true }, signals: [] });
+    expect(f({ title: '', titleOptional: true }).signals).toEqual(['go']);
+    expect(f({ title: 'X', deadline: 'next week' }).outputs.deadline).toBe('');
+  });
+
+  it('s2 which form a project draws: one row while it is open, none when it is not, never a record’s id', () => {
+    const base = { name: 'Clarion', projectId: 'p2', hasMove: true, moveTitle: 'Call Ade', waitingRaw: 'Ade', deadlineRaw: '2026-10-20', pName: 'Clarion', pKind: 'earning', pBilling: 'fixed', pTerms: '30', pRate: '', pSub: '', pSay: '' };
+    const forms = (mode: string, extra: Rec = {}) => run(ROW_FORMS_SCRIPT, { ...base, mode, ...extra }).outputs;
+    expect(forms('none')).toEqual({ formRows: [], editRows: [] });
+    expect(forms('change').formRows).toEqual([
+      { id: 'mf-change-p2', heading: 'Change the move for Clarion', help: '', title: 'Call Ade', who: 'Ade', deadline: '2026-10-20', saveLabel: 'Save', cancelLabel: 'Cancel', titleOptional: false }
+    ]);
+    expect(forms('done').formRows).toMatchObject([{ id: 'mf-done-p2', heading: 'Done. What is the next move for Clarion?', title: '', who: '', titleOptional: true }]);
+    expect(forms('done', { hasMove: false }).formRows).toMatchObject([{ heading: 'What is the next move for Clarion?', titleOptional: false }]);
+    expect(forms('add').formRows).toMatchObject([{ id: 'mf-add-p2', heading: 'Add a task for Clarion', titleOptional: false }]);
+    expect(forms('edit')).toEqual({ formRows: [], editRows: [{ id: 'pe-p2', name: 'Clarion', sub: '', kind: 'earning', billing: 'fixed', termsDays: '30', rate: '', say: '' }] });
+    const next = run(NEXT_PROMPT_FORM_SCRIPT, { open: true, projectId: 'p2', name: 'Clarion' }).outputs.formRows as Rec[];
+    expect(next).toMatchObject([{ id: 'np-p2', heading: 'Closed. What is the next move for Clarion?', cancelLabel: 'Nothing next for now', titleOptional: false }]);
+    expect(run(NEXT_PROMPT_FORM_SCRIPT, { open: false, projectId: 'p2' }).outputs.formRows).toEqual([]);
   });
 
   it('a new balance: written as today’s, and what was due by today ticked as happened — except a client’s unpaid bill', async () => {
@@ -911,5 +956,154 @@ describe('§7 Projects (TPL-008-PJ)', () => {
     expect(has('cmdClose', 'done', 'tdNextFor', 'run')).toBe(true);
     expect(has('tdProjects', 'projectNames', 'tdRows', 'projectNames')).toBe(true);
     expect(has('tdProjects', 'changed', 'tdData', 'refresh')).toBe(true);
+  });
+
+  // ── s2 — Planning's editing, back (Richard, 2026-10-05: "you've taken out a lot of the basic CRUD") ──
+
+  it('s2 an opened project carries its tasks (move first) and its money items, as rows that are never a record', () => {
+    const rows = rowsOf().rows as Rec[];
+    const salon = rows.find((r) => r.name === 'Salon Collective') as Rec;
+    expect(salon.taskRows).toEqual([{ id: 'pt-t1', taskId: 't1', title: 'Chase the September invoice', meta: 'The next move', metaColor: 'var(--muted-foreground)' }]);
+    expect([salon.hasTasks, salon.tasksHeading, salon.hasMoneyRows]).toEqual([true, 'In your list', true]);
+    expect((salon.moneyRows as Rec[]).map((m) => [m.id, m.itemKey, m.label])).toEqual([['pm-i1', 'item:i1', 'Salon retainer']]);
+    expect(String((salon.moneyRows as Rec[])[0].line)).toMatch(/^\+€1,200 every month on the \d+(st|nd|rd|th), from /);
+    const founder = rows.find((r) => r.name === 'Founder A') as Rec;
+    expect(String((founder.moneyRows as Rec[])[0].line)).toMatch(/, 50% likely$/);
+    expect((founder.taskRows as Rec[])[0].meta).toBe('The next move · Waiting on Sam');
+    expect([salon.pName, salon.pKind, salon.pBilling, salon.pTerms, salon.pRate]).toEqual(['Salon Collective', 'earning', 'hourly', '', '']);
+    const recordIds = new Set([...projects, ...tasks, ...items].map((r) => r.id));
+    const nested = rows.flatMap((r) => [...((r.taskRows as Rec[]) ?? []), ...((r.moneyRows as Rec[]) ?? [])]);
+    expect(nested.length).toBeGreaterThan(3);
+    expect(nested.filter((r) => recordIds.has(r.id as string))).toEqual([]);
+  });
+
+  const listOf = (extra: Rec = {}) => run(MONEY_LIST_SCRIPT, { items, marks: [], projects, ...extra }).outputs;
+
+  it('s2 the money popup: Upcoming (late first, hoped not late), Recurring (every item), Past (ticked) — never a record’s id; a removed item nowhere', () => {
+    const out = listOf();
+    const up = out.upRows as Rec[];
+    expect(up[0]).toMatchObject({ key: `i1|${dayOffset(-10)}`, itemKey: 'item:i1', label: 'Salon retainer · Salon Collective', amount: '+€1,200', canTick: true, metaColor: 'var(--destructive)' });
+    expect(String(up[0].meta)).toMatch(/· 10 days late$/);
+    expect(up.find((r) => r.itemKey === 'item:i2')).toMatchObject({ label: 'Rent', amount: '−€1,500', canTick: true });
+    expect(up.find((r) => r.itemKey === 'item:i3')).toMatchObject({ canTick: false });
+    expect(String(up.find((r) => r.itemKey === 'item:i3')?.meta)).toMatch(/50% likely/);
+    expect((out.recRows as Rec[]).map((r) => [r.id, r.label, r.amount])).toEqual([
+      ['mr-i3', 'Founder A', '+€2,000'],
+      ['mr-i2', 'Rent', '−€1,500'],
+      ['mr-i1', 'Salon retainer · Salon Collective', '+€1,200']
+    ]);
+    expect(out.pastRows).toEqual([]);
+    const ids = new Set(items.map((i) => i.id));
+    for (const list of [out.upRows, out.recRows] as Rec[][]) expect(list.filter((r) => ids.has(r.id as string))).toEqual([]);
+    expect(out.projectOptions).toEqual([
+      { Label: 'No project', Value: 'none' },
+      { Label: 'Bramble & Co', Value: 'p2' }, { Label: 'Founder A', Value: 'p3' }, { Label: 'Old thing', Value: 'p4' },
+      { Label: 'Own course', Value: 'p6' }, { Label: 'Salon Collective', Value: 'p1' }
+    ]);
+    const marks = [{ id: 'k1', itemId: 'i1', occurs: dayOffset(-10), payments: [{ day: dayOffset(-1), amount: 1200 }] }];
+    const ticked = listOf({ marks });
+    expect((ticked.upRows as Rec[]).some((r) => r.key === `i1|${dayOffset(-10)}`)).toBe(false);
+    expect(ticked.pastRows).toMatchObject([{ id: `mp-i1|${dayOffset(-10)}`, amount: '+€1,200', canUntick: true }]);
+    const removed = listOf({ items: [...items, { id: 'i9', label: 'Mistake', amount: -50, repeat: 'once', date: dayOffset(3), until: dayOffset(2) }] });
+    expect([...(removed.upRows as Rec[]), ...(removed.recRows as Rec[])].some((r) => r.itemKey === 'item:i9')).toBe(false);
+  });
+
+  it('s2 the money form: an item opens with what it holds; a new one for a project opens in, for that project; none when it is shut', () => {
+    const base = { upRows: [], recRows: [], pastRows: [], projectOptions: [{ Label: 'No project', Value: 'none' }], items, projects };
+    const look = (extra: Rec) => run(MONEY_SHEET_SCRIPT, { ...base, ...extra }).outputs;
+    expect(look({ editing: false, editKey: 'item:i2' }).formRows).toEqual([]);
+    expect(look({ editing: true, editKey: 'item:i2' }).formRows).toMatchObject([
+      { id: 'me-i2', key: 'item:i2', heading: 'Change: Rent', label: 'Rent', dir: 'out', amount: '1500', repeat: 'monthly', projectId: 'none', likelihood: '', isNew: false, endLabel: 'End it' }
+    ]);
+    expect(look({ editing: true, editKey: 'item:i3' }).formRows).toMatchObject([{ dir: 'in', projectId: 'p3', likelihood: '50' }]);
+    expect(look({ editing: true, editKey: 'new:p1' }).formRows).toMatchObject([
+      { id: 'me-new-p1', key: 'new', heading: 'Add money for Salon Collective', label: 'Salon Collective', dir: 'in', projectId: 'p1', date: dayOffset(0), isNew: true }
+    ]);
+    expect(look({ editing: true, editKey: 'new' }).formRows).toMatchObject([{ id: 'me-new-none', heading: 'Add money', dir: 'out', repeat: 'once', projectId: 'none' }]);
+    expect(look({ filter: 'rec', recRows: [] })).toMatchObject({ empty: true, emptyText: 'Nothing yet. Add money: rent, a retainer, a bill.' });
+    expect(run(SHEET_BACK_SCRIPT, { state: 'edit' }).signals).toEqual(['toList']);
+    expect(run(SHEET_BACK_SCRIPT, { state: 'editOnly' }).signals).toEqual(['toClosed']);
+    expect(run(NEW_FOR_PROJECT_SCRIPT, { projectId: 'p1' })).toEqual({ outputs: { value: 'new:p1' }, signals: ['go'] });
+  });
+
+  it('s2 the money form says what is missing, and an untouched box keeps what the item held', () => {
+    const start = { label: 'Rent', dir: 'out', amount: '1500', repeat: 'monthly', date: '2026-10-01', until: '', projectId: 'none', likelihood: '', note: '' };
+    const ok = run(MONEY_EDITOR_SCRIPT, { ...start, typedAmount: '1600', pickedRepeat: 'monthly' });
+    expect(ok).toEqual({ outputs: { error: '', hasError: false, ...start, amount: '1600' }, signals: ['go'] });
+    expect(run(MONEY_EDITOR_SCRIPT, { ...start, pickedRepeat: 'once', pickedUntil: '2026-12-01' }).outputs.until).toBe('');
+    const bad = (extra: Rec) => run(MONEY_EDITOR_SCRIPT, { ...start, ...extra }).outputs.error;
+    expect(bad({ typedLabel: ' ' })).toMatch(/^Say what it is/);
+    expect(bad({ typedAmount: 'lots' })).toMatch(/^Type how much/);
+    expect(bad({ pickedDate: '' })).toBe('Pick the day it happens.');
+    expect(bad({ pickedUntil: '2026-09-01' })).toBe('The last day is before the first.');
+    expect(bad({ typedLikelihood: '150' })).toMatch(/^How likely is a number/);
+  });
+
+  it('s2 a money item: added (out is negative, no project is none), changed (only what the form shows), refused when it is wrong', async () => {
+    const f = fakeRecords({ MoneyItem: [{ objectId: 'm1', label: 'Rent', amount: -900, repeat: 'monthly', date: '2026-10-01', billDate: '2026-09-25', fromHours: false, monthEnd: true }] });
+    const add = await runWrites(SAVE_MONEY_ITEM_SCRIPT, { key: 'new', label: ' Tax bill ', dir: 'out', amount: '€ 1,240', repeat: 'once', date: '2026-11-15', until: '2027-01-01', projectId: 'none', likelihood: '', note: '' }, f.Noodl);
+    expect(add.signals).toEqual(['done']);
+    expect(f.db.MoneyItem[1]).toMatchObject({ label: 'Tax bill', amount: -1240, repeat: 'once', date: '2026-11-15', until: null, projectId: null, likelihood: 100, monthEnd: false, billDate: null });
+    await runWrites(SAVE_MONEY_ITEM_SCRIPT, { key: 'item:m1', label: 'Rent', dir: 'out', amount: '950', repeat: 'monthly', date: '2026-10-01', until: '2027-06-30', projectId: 'p1', likelihood: '80', note: 'new lease' }, f.Noodl);
+    expect(f.db.MoneyItem[0]).toMatchObject({ amount: -950, until: '2027-06-30', projectId: 'p1', likelihood: 80, note: 'new lease', billDate: '2026-09-25', monthEnd: true });
+    const bad = await runWrites(SAVE_MONEY_ITEM_SCRIPT, { key: 'new', label: 'X', dir: 'in', amount: '0', repeat: 'once', date: '2026-11-15' }, f.Noodl);
+    expect([bad.signals, bad.outputs.hasError, f.db.MoneyItem.length]).toEqual([[], true, 2]);
+  });
+
+  it('s2 End it and Remove it: nothing is deleted — a running repeat stops after today, a one-off or one not yet begun is never counted', async () => {
+    const list = [
+      { id: 'a', date: dayOffset(-40), repeat: 'monthly' },
+      { id: 'b', date: dayOffset(5), repeat: 'once' },
+      { id: 'c', date: dayOffset(9), repeat: 'weekly' }
+    ];
+    const f = fakeRecords({ MoneyItem: list.map((x) => ({ objectId: x.id, ...x })) });
+    for (const id of ['a', 'b', 'c']) expect((await runWrites(END_MONEY_ITEM_SCRIPT, { key: `item:${id}`, items: list }, f.Noodl)).signals).toEqual(['done']);
+    expect(f.db.MoneyItem.map((m) => m.until)).toEqual([dayOffset(0), dayOffset(4), dayOffset(8)]);
+    expect((await runWrites(END_MONEY_ITEM_SCRIPT, { key: 'new', items: list }, f.Noodl)).signals).toEqual([]);
+  });
+
+  it('s2 Untick: the repeat is open again and the mark is kept', async () => {
+    const key = `i1|${dayOffset(-10)}`;
+    const marks = [{ id: 'k1', objectId: 'k1', itemId: 'i1', occurs: dayOffset(-10), payments: [{ day: dayOffset(-1), amount: 1200 }], doneOn: dayOffset(-1), doneAmount: 1200 }];
+    const f = fakeRecords({ MoneyMark: marks });
+    expect((await runWrites(MARK_MONEY_SCRIPT, { key, action: 'untick', items, marks, projects }, f.Noodl)).signals).toEqual(['done']);
+    expect(f.db.MoneyMark).toMatchObject([{ objectId: 'k1', payments: [], doneOn: '', doneAmount: '' }]);
+    const after = plainWithId(f.db.MoneyMark);
+    expect((await runWrites(MARK_MONEY_SCRIPT, { key, action: 'untick', items, marks: after, projects }, f.Noodl)).signals).toEqual([]);
+  });
+
+  it('s2 Edit project: saves what the form says; a project needs a name, and the rate and the terms are numbers', async () => {
+    const start = { name: 'Clarion', sub: '', kind: 'earning', billing: 'hourly', rate: '', termsDays: '', say: '' };
+    expect(run(PROJECT_EDITOR_SCRIPT, { ...start, typedRate: '85', pickedBilling: 'hourly', pickedKind: 'earning' })).toEqual({
+      outputs: { error: '', hasError: false, ...start, rate: '85' },
+      signals: ['go']
+    });
+    expect(run(PROJECT_EDITOR_SCRIPT, { ...start, typedName: '' }).outputs.error).toBe('The project needs a name.');
+    expect(run(PROJECT_EDITOR_SCRIPT, { ...start, typedTerms: '2 weeks' }).outputs.error).toMatch(/^Payment terms/);
+    const f = fakeRecords({ Project: [{ objectId: 'p1', name: 'Clarion', move: '', position: 2 }] });
+    const ok = await runWrites(SAVE_PROJECT_SCRIPT, { projectId: 'p1', name: ' Clarion Ltd ', sub: 'the retainer', kind: 'dormant', billing: 'fixed', rate: '', termsDays: '30', say: 'Ade decides' }, f.Noodl);
+    expect(ok.signals).toEqual(['done']);
+    expect(f.db.Project[0]).toMatchObject({ name: 'Clarion Ltd', sub: 'the retainer', kind: 'dormant', billing: 'fixed', rate: 0, termsDays: 30, say: 'Ade decides', position: 2 });
+    const bad = await runWrites(SAVE_PROJECT_SCRIPT, { projectId: 'p1', name: '', kind: 'earning' }, f.Noodl);
+    expect([bad.signals, bad.outputs.hasError]).toEqual([[], true]);
+  });
+
+  it('s2 both ways: a project’s task opens in the List, and a task’s pane says its project and opens it — wired on the page', () => {
+    const names = { p2: 'Bramble & Co' };
+    expect(run(TASK_PROJECT_SCRIPT, { selectedId: 't2', tasks, projectNames: names, showTab: true }).outputs).toEqual({ projectId: 'p2', hasProject: true, projectLabel: 'Part of Bramble & Co' });
+    expect(run(TASK_PROJECT_SCRIPT, { selectedId: 't2', tasks, projectNames: names, showTab: false }).outputs.hasProject).toBe(false);
+    expect(run(TASK_PROJECT_SCRIPT, { selectedId: 't4', tasks, projectNames: names, showTab: true }).outputs).toEqual({ projectId: '', hasProject: false, projectLabel: '' });
+    const page = componentsOf().find((c) => c.name === C.pageTodo) as LegacyComponent;
+    const wires = (page.graph?.connections ?? []) as unknown as Array<Record<string, string>>;
+    const has = (f: string, fp: string, t: string, tp: string) => wires.some((w) => w.fromId === f && w.fromProperty === fp && w.toId === t && w.toProperty === tp);
+    expect([
+      has('tdProjectsPane', 'openTask', 'tdSelectFromProject', 'do'),
+      has('tdProjectsPane', 'openTask', 'tdTab', 'to-list'),
+      has('tdSummary', 'openProject', 'tdOpenFromTask', 'do'),
+      has('tdSummary', 'openProject', 'tdTab', 'to-projects'),
+      has('tdSelectFromProject', 'done', 'tdData', 'loadHistory')
+    ]).toEqual([true, true, true, true, true]);
+    const script = (id: string) => (nodesOf(page).find((n) => n.id === id)?.parameters as { functionScript?: string })?.functionScript;
+    expect(script('tdTaskProject')).toBe(TASK_PROJECT_SCRIPT);
   });
 });

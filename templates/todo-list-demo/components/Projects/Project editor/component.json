@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "9466ccdf-cb58-5cfb-85d6-8f6c6f7107db",
+  "name": "Project editor",
+  "path": "/Projects/Project editor",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "A project’s details as a form: its name, one line about it, what kind it is (a client who pays, building, hobby, or quiet), how a client bills (hourly with a rate, or a fixed price) and its payment terms, and what to remember about it."
+}

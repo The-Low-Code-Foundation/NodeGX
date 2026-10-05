@@ -1,0 +1,162 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "d2e4172c-d599-55f1-8749-d337a5ef605a",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "pkIn",
+      "type": "Component Inputs",
+      "label": "The task",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "taskId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "title",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "meta",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "metaColor",
+          "plug": "output",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "pkOut",
+      "type": "Component Outputs",
+      "label": "Open it",
+      "ports": [
+        {
+          "name": "open",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "taskId",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 40
+    },
+    {
+      "id": "pkRow",
+      "type": "Group",
+      "label": "The task",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "styleCss": "cursor: pointer;"
+      },
+      "children": [
+        "pkText",
+        "pkGo"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "pkText",
+      "type": "Group",
+      "label": "Words and when",
+      "parent": "pkRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "styleCss": "flex: 1 1 auto; min-width: 0;"
+      },
+      "children": [
+        "pkTitle",
+        "pkMeta"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "pkTitle",
+      "type": "Text",
+      "label": "The task",
+      "parent": "pkText",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "pkMeta",
+      "type": "Text",
+      "label": "Whose, and when",
+      "parent": "pkText",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "pkGo",
+      "type": "Text",
+      "label": "Where pressing it goes",
+      "parent": "pkRow",
+      "parameters": {
+        "text": "Open in the list",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--primary)",
+        "sizeMode": "contentSize"
+      },
+      "x": 100,
+      "y": 520
+    }
+  ],
+  "visualRoots": [
+    "pkRow"
+  ]
+}

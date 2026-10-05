@@ -1,0 +1,11 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "72e6d9be-01e0-50fd-8bf1-a157ca88e455",
+  "name": "Money line",
+  "path": "/Projects/Money line",
+  "type": "visual",
+  "created": "2026-09-14T00:00:00.000Z",
+  "modified": "2026-09-14T00:00:00.000Z",
+  "modifiedBy": "noodl-mcp",
+  "description": "One line in the money popup: what it is, when, and how much (+ in, − out). Pressed, its item opens as a form; Paid ticks a repeat off, Untick opens it again."
+}

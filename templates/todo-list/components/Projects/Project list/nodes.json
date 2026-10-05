@@ -86,6 +86,71 @@
           "name": "sendKey",
           "plug": "input",
           "type": "string"
+        },
+        {
+          "name": "openTask",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "openTaskId",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "editMoney",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "moneyKey",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "addMoney",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "saveProject",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "pName",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pSub",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pKind",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pBilling",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pTerms",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pRate",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "pSay",
+          "plug": "input",
+          "type": "string"
         }
       ],
       "x": 350,

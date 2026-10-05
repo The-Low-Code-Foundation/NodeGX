@@ -1,0 +1,247 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "7dc0f2db-c5b6-5425-85ed-96afb6733704",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "mlIn",
+      "type": "Component Inputs",
+      "label": "The line",
+      "ports": [
+        {
+          "name": "id",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "itemKey",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "meta",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "metaColor",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "canTick",
+          "plug": "output",
+          "type": "boolean"
+        },
+        {
+          "name": "canUntick",
+          "plug": "output",
+          "type": "boolean"
+        }
+      ],
+      "x": 410,
+      "y": 280
+    },
+    {
+      "id": "mlOut",
+      "type": "Component Outputs",
+      "label": "What you did",
+      "ports": [
+        {
+          "name": "edit",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "tick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "untick",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "key",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "itemKey",
+          "plug": "input",
+          "type": "string"
+        }
+      ],
+      "x": 410,
+      "y": 160
+    },
+    {
+      "id": "mlRow",
+      "type": "Group",
+      "label": "The line",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-3)",
+        "borderBottomStyle": "solid",
+        "borderBottomWidth": "var(--border-1)",
+        "borderBottomColor": "var(--border-subtle)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)"
+      },
+      "children": [
+        "mlText",
+        "mlAmount",
+        "mlTick",
+        "mlUntick"
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "mlText",
+      "type": "Group",
+      "label": "What and when",
+      "parent": "mlRow",
+      "parameters": {
+        "flexDirection": "column",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "rowGap": "var(--space-0-5)",
+        "styleCss": "flex: 1 1 auto; min-width: 0; cursor: pointer;"
+      },
+      "children": [
+        "mlLabel",
+        "mlMeta"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
+      "id": "mlLabel",
+      "type": "Text",
+      "label": "What it is",
+      "parent": "mlText",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "mlMeta",
+      "type": "Text",
+      "label": "When",
+      "parent": "mlText",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-sm)",
+        "color": "var(--muted-foreground)",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        }
+      },
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "mlAmount",
+      "type": "Text",
+      "label": "How much",
+      "parent": "mlRow",
+      "parameters": {
+        "text": "",
+        "fontSize": "var(--text-base)",
+        "color": "var(--foreground)",
+        "sizeMode": "contentSize",
+        "fontVariantNumeric": "tabular-nums"
+      },
+      "x": 100,
+      "y": 520
+    },
+    {
+      "id": "mlTick",
+      "type": "net.noodl.controls.button",
+      "label": "Paid",
+      "parent": "mlRow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderRadius": "var(--radius-md)",
+        "borderStyle": "solid",
+        "borderWidth": "var(--border-1)",
+        "borderColor": "var(--border-control)",
+        "paddingLeft": "var(--space-4)",
+        "paddingRight": "var(--space-4)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-semibold)",
+        "sizeMode": "contentSize",
+        "label": "Paid",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 640
+    },
+    {
+      "id": "mlUntick",
+      "type": "net.noodl.controls.button",
+      "label": "Untick",
+      "parent": "mlRow",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--foreground)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "Untick",
+        "mounted": false
+      },
+      "x": 100,
+      "y": 760
+    }
+  ],
+  "visualRoots": [
+    "mlRow"
+  ]
+}

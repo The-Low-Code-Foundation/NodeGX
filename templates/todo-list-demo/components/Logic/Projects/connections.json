@@ -89,6 +89,30 @@
     },
     {
       "fromId": "pjNone",
+      "fromProperty": "out-upRows",
+      "toId": "pjOut",
+      "toProperty": "upRows"
+    },
+    {
+      "fromId": "pjNone",
+      "fromProperty": "out-recRows",
+      "toId": "pjOut",
+      "toProperty": "recRows"
+    },
+    {
+      "fromId": "pjNone",
+      "fromProperty": "out-pastRows",
+      "toId": "pjOut",
+      "toProperty": "pastRows"
+    },
+    {
+      "fromId": "pjNone",
+      "fromProperty": "out-projectOptions",
+      "toId": "pjOut",
+      "toProperty": "projectOptions"
+    },
+    {
+      "fromId": "pjNone",
       "fromProperty": "out-projects",
       "toId": "pjOut",
       "toProperty": "projects"

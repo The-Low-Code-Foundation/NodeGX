@@ -1,0 +1,230 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "5c7be948-8d8e-53a9-8166-3adb628d0ff2",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "SavemoneyiIn",
+      "type": "Component Inputs",
+      "label": "What to write",
+      "ports": [
+        {
+          "name": "key",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "label",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "dir",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "repeat",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "date",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "until",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "projectId",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "likelihood",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "note",
+          "plug": "output",
+          "type": "string"
+        },
+        {
+          "name": "do",
+          "plug": "output",
+          "type": "signal"
+        }
+      ],
+      "x": 40,
+      "y": 40
+    },
+    {
+      "id": "SavemoneyiOut",
+      "type": "Component Outputs",
+      "label": "Written",
+      "ports": [
+        {
+          "name": "done",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "error",
+          "plug": "input",
+          "type": "string"
+        },
+        {
+          "name": "hasError",
+          "plug": "input",
+          "type": "boolean"
+        }
+      ],
+      "x": 40,
+      "y": 160
+    },
+    {
+      "id": "SavemoneyiWrite",
+      "type": "JavaScriptFunction",
+      "label": "Write it",
+      "parameters": {
+        "functionScript": "function toDay(s) {\n  var m = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(s || ''));\n  return m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : null;\n}\nvar DOW = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];\nvar MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];\nfunction pad(n) { return (n < 10 ? '0' : '') + n; }\nfunction fmtDay(d) { return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; }\nfunction fmtTime(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }\nfunction startOfToday() { var d = new Date(); d.setHours(0, 0, 0, 0); return d.getTime(); }\nfunction when(v) {\n  if (v === undefined || v === null || v === '') return null;\n  var d = v instanceof Date ? v : new Date(v);\n  return isNaN(d.getTime()) ? null : d;\n}\nfunction dayLabel(d) {\n  var t = startOfToday();\n  if (d.getTime() >= t) return 'Today';\n  if (d.getTime() >= t - 86400000) return 'Yesterday';\n  return fmtDay(d);\n}\nfunction due(s) {\n  var d = toDay(s);\n  if (!d) return { text: '', late: false };\n  var n = Math.round((d.getTime() - startOfToday()) / 86400000);\n  if (n < 0) return { text: 'Overdue by ' + (-n) + (n === -1 ? ' day' : ' days'), late: true };\n  if (n === 0) return { text: 'Due today', late: true };\n  if (n === 1) return { text: 'Due tomorrow', late: false };\n  if (n <= 7) return { text: 'Due in ' + n + ' days', late: false };\n  return { text: 'Due ' + fmtDay(d), late: false };\n}\nfunction ago(d) {\n  var ms = Date.now() - d.getTime();\n  if (ms < 3600000) return 'just now';\n  if (ms < 86400000) return Math.round(ms / 3600000) + ' h ago';\n  var n = Math.round(ms / 86400000);\n  return n === 1 ? 'yesterday' : n + ' days ago';\n}\nfunction num(v, fallback) { var n = Number(v); return isFinite(n) ? n : fallback; }\nfunction byPosition(a, b) { return num(a.position, 0) - num(b.position, 0); }\nvar PJ_PREFIX = new RegExp(\"^(?:(?:→|!) |✓ (?:Mon|Tue|Wed|Thu|Fri|Sat|Sun) \\\\d{1,2} · )+\");\nfunction pjClean(s) { return String(s === undefined || s === null ? '' : s).replace(PJ_PREFIX, '').trim(); }\nfunction pjId(r) { return r ? String(r.objectId || r.id || '') : ''; }\n/**\n * A row as plain fields with its 'id'. 🔴 A viewer built before 2026-09-23 (HLT-022) ignores\n * 'plain: true' and hands back the record itself — todo.digitalbricks.io runs one — so both shapes\n * are read, and never mutated: a record's own fields are the shared copy every view draws.\n */\nfunction pjPlain(r) {\n  var model = !!r && typeof r.getId === 'function';\n  var src = model ? r.data || {} : r || {}, o = {};\n  for (var k in src) if (Object.prototype.hasOwnProperty.call(src, k)) o[k] = src[k];\n  o.id = model ? String(r.getId()) : pjId(r);\n  if (!o.objectId) o.objectId = o.id;\n  return o;\n}\nfunction pjIso(d) { return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); }\nfunction pjToday() { return pjIso(new Date()); }\n/** '' stays '', \"today\" and \"tomorrow\" are days, YYYY-MM-DD must be a real day; anything else is null. */\nfunction pjDate(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).trim().toLowerCase();\n  if (s === '') return '';\n  if (s === 'today' || s === 'tomorrow') {\n    var d = new Date();\n    if (s === 'tomorrow') d.setDate(d.getDate() + 1);\n    return pjIso(d);\n  }\n  var m = /^(\\d{4})-(\\d{1,2})-(\\d{1,2})$/.exec(s);\n  if (!m) return null;\n  var y = Number(m[1]), mo = Number(m[2]), da = Number(m[3]);\n  var dt = new Date(y, mo - 1, da);\n  return dt.getFullYear() === y && dt.getMonth() === mo - 1 && dt.getDate() === da ? pjIso(dt) : null;\n}\n/** \"2,140\", \"€ 2140\", \"−380\" → a number; anything else NaN. */\nfunction pjAmount(raw) {\n  var s = String(raw === undefined || raw === null ? '' : raw).replace(/[€\\s,]/g, '').replace('−', '-');\n  if (s === '') return NaN;\n  var n = Number(s);\n  return isFinite(n) ? n : NaN;\n}\nfunction moneyItemProblem(v) {\n  var amt = Math.abs(pjAmount(v.amount));\n  var date = pjDate(v.date), until = pjDate(v.until);\n  var likeRaw = String(v.likelihood === undefined || v.likelihood === null ? '' : v.likelihood).replace('%', '').trim();\n  var like = likeRaw === '' ? 100 : Number(likeRaw);\n  if (String(v.label || '').trim() === '') return 'Say what it is, like Rent or the Clarion retainer.';\n  if (!(amt > 0)) return 'Type how much as a number, like 900.';\n  if (!date) return 'Pick the day it happens.';\n  if (until === null) return 'Pick the last day, or leave it empty.';\n  if (String(v.repeat) !== 'once' && until !== '' && until < date) return 'The last day is before the first.';\n  if (!isFinite(like) || like < 0 || like > 100) return 'How likely is a number from 0 to 100, or empty when it is certain.';\n  return '';\n}\nvar key = String(Inputs.key || '');\nvar itemId = key.indexOf('item:') === 0 ? key.slice(5) : '';\nvar repeat = [\"once\",\"weekly\",\"monthly\",\"quarterly\",\"yearly\"].indexOf(String(Inputs.repeat)) >= 0 ? String(Inputs.repeat) : 'once';\nvar v = { label: Inputs.label, amount: Inputs.amount, repeat: repeat, date: Inputs.date, until: repeat === 'once' ? '' : Inputs.until, likelihood: Inputs.likelihood };\nvar error = moneyItemProblem(v);\nOutputs.error = error;\nOutputs.hasError = error !== '';\nif (error) return;\nvar until = pjDate(v.until);\nvar likeRaw = String(Inputs.likelihood === undefined || Inputs.likelihood === null ? '' : Inputs.likelihood).replace('%', '').trim();\nvar pid = String(Inputs.projectId || '');\nif (pid === 'none') pid = '';\nvar data = {\n  label: String(Inputs.label).trim(),\n  amount: (String(Inputs.dir) === 'out' ? -1 : 1) * Math.round(Math.abs(pjAmount(Inputs.amount)) * 100) / 100,\n  repeat: repeat,\n  date: pjDate(Inputs.date),\n  until: repeat === 'once' || until === '' ? null : until,\n  projectId: pid || null,\n  likelihood: likeRaw === '' ? 100 : Math.round(Number(likeRaw)),\n  note: String(Inputs.note || '').trim()\n};\nvar R = Noodl.Records;\nvar write;\nif (itemId) write = R.save(itemId, data, { className: 'MoneyItem' });\nelse {\n  data.monthEnd = false;\n  data.billDate = null;\n  data.billLeadDays = null;\n  data.position = Date.now();\n  write = R.create('MoneyItem', data);\n}\nwrite.then(function () { Outputs.done(); }, function () { Outputs.failed(); });",
+        "runOnChange-in-key": false,
+        "runOnChange-in-label": false,
+        "runOnChange-in-dir": false,
+        "runOnChange-in-amount": false,
+        "runOnChange-in-repeat": false,
+        "runOnChange-in-date": false,
+        "runOnChange-in-until": false,
+        "runOnChange-in-projectId": false,
+        "runOnChange-in-likelihood": false,
+        "runOnChange-in-note": false
+      },
+      "ports": [
+        {
+          "name": "out-done",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "done",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-error",
+          "plug": "output",
+          "type": "string",
+          "displayName": "error",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-hasError",
+          "plug": "output",
+          "type": "boolean",
+          "displayName": "hasError",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-failed",
+          "plug": "output",
+          "type": "signal",
+          "displayName": "failed",
+          "group": "Outputs"
+        },
+        {
+          "name": "in-key",
+          "displayName": "key",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-repeat",
+          "displayName": "repeat",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-label",
+          "displayName": "label",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-amount",
+          "displayName": "amount",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-date",
+          "displayName": "date",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-until",
+          "displayName": "until",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-likelihood",
+          "displayName": "likelihood",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-projectId",
+          "displayName": "projectId",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-dir",
+          "displayName": "dir",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        },
+        {
+          "name": "in-note",
+          "displayName": "note",
+          "plug": "input",
+          "type": "*",
+          "group": "Inputs"
+        }
+      ],
+      "x": 40,
+      "y": 280
+    },
+    {
+      "id": "SavemoneyiProblem",
+      "type": "Set Variable",
+      "label": "Say it did not save",
+      "parameters": {
+        "name": "todoProblem",
+        "setWith": "string",
+        "value": "That change did not save in this browser. Try again, or reset the demo."
+      },
+      "metadata": {
+        "comment": "Shared on purpose: this is the one sentence the Problem banner shows, whichever command failed."
+      },
+      "x": 40,
+      "y": 400
+    }
+  ]
+}

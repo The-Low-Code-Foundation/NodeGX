@@ -60,21 +60,31 @@
         }
       ],
       "x": 470,
-      "y": 520
+      "y": 1000
     },
     {
       "id": "mnOut",
       "type": "Component Outputs",
-      "label": "Written",
+      "label": "Written, or opened",
       "ports": [
         {
           "name": "changed",
           "plug": "input",
           "type": "signal"
+        },
+        {
+          "name": "addMoney",
+          "plug": "input",
+          "type": "signal"
+        },
+        {
+          "name": "allMoney",
+          "plug": "input",
+          "type": "signal"
         }
       ],
       "x": 470,
-      "y": 1840
+      "y": 520
     },
     {
       "id": "mnRoot",
@@ -90,30 +100,112 @@
         "rowGap": "var(--space-2)"
       },
       "children": [
-        "mnHeading",
+        "mnHeadRow",
         "mnCard"
       ],
       "x": 40,
       "y": 40
     },
     {
+      "id": "mnHeadRow",
+      "type": "Group",
+      "label": "Money, and the way into all of it",
+      "parent": "mnRoot",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "sizeMode": "contentHeight",
+        "width": {
+          "value": 100,
+          "unit": "%"
+        },
+        "columnGap": "var(--space-2)",
+        "justifyContent": "space-between",
+        "flexWrap": "wrap"
+      },
+      "children": [
+        "mnHeading",
+        "mnOpen"
+      ],
+      "x": 100,
+      "y": 160
+    },
+    {
       "id": "mnHeading",
       "type": "Text",
       "label": "Money",
-      "parent": "mnRoot",
+      "parent": "mnHeadRow",
       "parameters": {
         "text": "Money",
         "fontSize": "var(--text-sm)",
         "fontWeight": "var(--font-semibold)",
         "color": "var(--muted-foreground)",
-        "sizeMode": "contentHeight",
-        "width": {
-          "value": 100,
-          "unit": "%"
-        }
+        "sizeMode": "contentSize"
       },
-      "x": 100,
-      "y": 160
+      "x": 160,
+      "y": 280
+    },
+    {
+      "id": "mnOpen",
+      "type": "Group",
+      "label": "Add money, or see all of it",
+      "parent": "mnHeadRow",
+      "parameters": {
+        "flexDirection": "row",
+        "alignItems": "center",
+        "columnGap": "var(--space-1)",
+        "sizeMode": "contentSize"
+      },
+      "children": [
+        "mnAdd",
+        "mnAll"
+      ],
+      "x": 160,
+      "y": 400
+    },
+    {
+      "id": "mnAdd",
+      "type": "net.noodl.controls.button",
+      "label": "Add money",
+      "parent": "mnOpen",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "+ Add money"
+      },
+      "x": 220,
+      "y": 520
+    },
+    {
+      "id": "mnAll",
+      "type": "net.noodl.controls.button",
+      "label": "All money in and out",
+      "parent": "mnOpen",
+      "parameters": {
+        "backgroundColor": "transparent",
+        "color": "var(--primary)",
+        "borderStyle": "none",
+        "borderRadius": "var(--radius-md)",
+        "paddingLeft": "var(--space-3)",
+        "paddingRight": "var(--space-3)",
+        "paddingTop": "var(--space-2)",
+        "paddingBottom": "var(--space-2)",
+        "fontSize": "var(--text-sm)",
+        "fontWeight": "var(--font-medium)",
+        "sizeMode": "contentSize",
+        "label": "All money in and out"
+      },
+      "x": 220,
+      "y": 640
     },
     {
       "id": "mnCard",
@@ -147,7 +239,7 @@
         "mnError"
       ],
       "x": 100,
-      "y": 280
+      "y": 760
     },
     {
       "id": "mnTop",
@@ -170,7 +262,7 @@
         "mnWhen"
       ],
       "x": 160,
-      "y": 400
+      "y": 880
     },
     {
       "id": "mnBalance",
@@ -187,7 +279,7 @@
         "fontVariantNumeric": "tabular-nums"
       },
       "x": 220,
-      "y": 520
+      "y": 1000
     },
     {
       "id": "mnWhen",
@@ -202,7 +294,7 @@
         "styleCss": "flex: 1 1 200px; min-width: 0;"
       },
       "x": 220,
-      "y": 640
+      "y": 1120
     },
     {
       "id": "mnBars",
@@ -227,7 +319,7 @@
         "mnEach"
       ],
       "x": 160,
-      "y": 760
+      "y": 1240
     },
     {
       "id": "mnEach",
@@ -239,7 +331,7 @@
         "templateType": "explicit"
       },
       "x": 220,
-      "y": 880
+      "y": 1360
     },
     {
       "id": "mnLow",
@@ -257,7 +349,7 @@
         }
       },
       "x": 160,
-      "y": 1000
+      "y": 1480
     },
     {
       "id": "mnIncome",
@@ -278,7 +370,7 @@
         "mnIncomeEach"
       ],
       "x": 160,
-      "y": 1120
+      "y": 1600
     },
     {
       "id": "mnIncomeEach",
@@ -290,7 +382,7 @@
         "templateType": "explicit"
       },
       "x": 220,
-      "y": 1240
+      "y": 1720
     },
     {
       "id": "mnNew",
@@ -313,7 +405,7 @@
         "mnSave"
       ],
       "x": 160,
-      "y": 1360
+      "y": 1840
     },
     {
       "id": "mnField",
@@ -342,7 +434,7 @@
         "styleCss": "flex: 1 1 220px; min-width: 0;"
       },
       "x": 220,
-      "y": 1480
+      "y": 1960
     },
     {
       "id": "mnSave",
@@ -366,7 +458,7 @@
         "label": "Save balance"
       },
       "x": 220,
-      "y": 1600
+      "y": 2080
     },
     {
       "id": "mnError",
@@ -386,14 +478,14 @@
         "mounted": false
       },
       "x": 160,
-      "y": 1720
+      "y": 2200
     },
     {
       "id": "cmdBalance",
       "type": "/Projects/Record balance",
       "label": "Record balance",
       "x": 470,
-      "y": 1720
+      "y": 2200
     },
     {
       "id": "cmdPaid",
@@ -403,7 +495,7 @@
         "action": "tick"
       },
       "x": 470,
-      "y": 1240
+      "y": 1720
     }
   ],
   "visualRoots": [

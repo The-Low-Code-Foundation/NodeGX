@@ -1,0 +1,37 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "1c02b4b2-1783-5314-8ee1-f5f9dba69659",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "EndmoneyitIn",
+      "fromProperty": "key",
+      "toId": "EndmoneyitWrite",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "EndmoneyitIn",
+      "fromProperty": "items",
+      "toId": "EndmoneyitWrite",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "EndmoneyitIn",
+      "fromProperty": "do",
+      "toId": "EndmoneyitWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "EndmoneyitWrite",
+      "fromProperty": "out-done",
+      "toId": "EndmoneyitOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "EndmoneyitWrite",
+      "fromProperty": "out-failed",
+      "toId": "EndmoneyitProblem",
+      "toProperty": "do"
+    }
+  ]
+}

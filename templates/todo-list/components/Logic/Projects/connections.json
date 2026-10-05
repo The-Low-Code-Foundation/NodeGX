@@ -200,6 +200,54 @@
       "fromProperty": "out-rows",
       "toId": "pjOut",
       "toProperty": "rows"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-projects",
+      "toId": "pjMoney",
+      "toProperty": "in-projects"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-items",
+      "toId": "pjMoney",
+      "toProperty": "in-items"
+    },
+    {
+      "fromId": "pjLoad",
+      "fromProperty": "out-marks",
+      "toId": "pjMoney",
+      "toProperty": "in-marks"
+    },
+    {
+      "fromId": "pjIn",
+      "fromProperty": "now",
+      "toId": "pjMoney",
+      "toProperty": "in-now"
+    },
+    {
+      "fromId": "pjMoney",
+      "fromProperty": "out-upRows",
+      "toId": "pjOut",
+      "toProperty": "upRows"
+    },
+    {
+      "fromId": "pjMoney",
+      "fromProperty": "out-recRows",
+      "toId": "pjOut",
+      "toProperty": "recRows"
+    },
+    {
+      "fromId": "pjMoney",
+      "fromProperty": "out-pastRows",
+      "toId": "pjOut",
+      "toProperty": "pastRows"
+    },
+    {
+      "fromId": "pjMoney",
+      "fromProperty": "out-projectOptions",
+      "toId": "pjOut",
+      "toProperty": "projectOptions"
     }
   ]
 }

@@ -17,6 +17,24 @@
     },
     {
       "fromId": "tsIn",
+      "fromProperty": "projectLabel",
+      "toId": "tsProjectLine",
+      "toProperty": "text"
+    },
+    {
+      "fromId": "tsIn",
+      "fromProperty": "hasProject",
+      "toId": "tsProject",
+      "toProperty": "mounted"
+    },
+    {
+      "fromId": "tsOpenProject",
+      "fromProperty": "onClick",
+      "toId": "tsOut",
+      "toProperty": "openProject"
+    },
+    {
+      "fromId": "tsIn",
       "fromProperty": "deadline",
       "toId": "tsDeadlineField",
       "toProperty": "Value"

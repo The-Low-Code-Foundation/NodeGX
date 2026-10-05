@@ -1,0 +1,97 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/connections-v2.json",
+  "componentId": "5c7be948-8d8e-53a9-8166-3adb628d0ff2",
+  "version": 1,
+  "connections": [
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "key",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "in-key"
+    },
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "label",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "in-label"
+    },
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "dir",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "in-dir"
+    },
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "amount",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "in-amount"
+    },
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "repeat",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "in-repeat"
+    },
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "date",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "in-date"
+    },
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "until",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "in-until"
+    },
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "projectId",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "in-projectId"
+    },
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "likelihood",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "in-likelihood"
+    },
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "note",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "in-note"
+    },
+    {
+      "fromId": "SavemoneyiIn",
+      "fromProperty": "do",
+      "toId": "SavemoneyiWrite",
+      "toProperty": "run"
+    },
+    {
+      "fromId": "SavemoneyiWrite",
+      "fromProperty": "out-done",
+      "toId": "SavemoneyiOut",
+      "toProperty": "done"
+    },
+    {
+      "fromId": "SavemoneyiWrite",
+      "fromProperty": "out-error",
+      "toId": "SavemoneyiOut",
+      "toProperty": "error"
+    },
+    {
+      "fromId": "SavemoneyiWrite",
+      "fromProperty": "out-hasError",
+      "toId": "SavemoneyiOut",
+      "toProperty": "hasError"
+    },
+    {
+      "fromId": "SavemoneyiWrite",
+      "fromProperty": "out-failed",
+      "toId": "SavemoneyiProblem",
+      "toProperty": "do"
+    }
+  ]
+}

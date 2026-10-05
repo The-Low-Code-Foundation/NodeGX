@@ -113,6 +113,26 @@
           "type": "array"
         },
         {
+          "name": "upRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "recRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "pastRows",
+          "plug": "input",
+          "type": "array"
+        },
+        {
+          "name": "projectOptions",
+          "plug": "input",
+          "type": "array"
+        },
+        {
           "name": "projects",
           "plug": "input",
           "type": "array"
@@ -146,7 +166,7 @@
       "type": "JavaScriptFunction",
       "label": "No projects in the demo",
       "parameters": {
-        "functionScript": "Outputs.projectNames = {};\nOutputs.showTab = false;\nOutputs.showTurnOn = false;\nOutputs.noProjects = true;\nOutputs.projectPosition = 1;\nOutputs.nextPosition = 1;\nOutputs.balanceText = '';\nOutputs.balanceWhen = '';\nOutputs.bars = [];\nOutputs.lowText = '';\nOutputs.lowColor = '';\nOutputs.incomeRows = [];\nOutputs.hasIncome = false;\nOutputs.rows = [];\nOutputs.projects = [];\nOutputs.items = [];\nOutputs.marks = [];\nOutputs.readings = [];"
+        "functionScript": "Outputs.projectNames = {};\nOutputs.showTab = false;\nOutputs.showTurnOn = false;\nOutputs.noProjects = true;\nOutputs.projectPosition = 1;\nOutputs.nextPosition = 1;\nOutputs.balanceText = '';\nOutputs.balanceWhen = '';\nOutputs.bars = [];\nOutputs.lowText = '';\nOutputs.lowColor = '';\nOutputs.incomeRows = [];\nOutputs.hasIncome = false;\nOutputs.rows = [];\nOutputs.projects = [];\nOutputs.items = [];\nOutputs.marks = [];\nOutputs.readings = [];\nOutputs.upRows = [];\nOutputs.recRows = [];\nOutputs.pastRows = [];\nOutputs.projectOptions = [];"
       },
       "x": 40,
       "y": 280,
@@ -273,6 +293,34 @@
         {
           "name": "out-readings",
           "displayName": "readings",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-upRows",
+          "displayName": "upRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-recRows",
+          "displayName": "recRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-pastRows",
+          "displayName": "pastRows",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-projectOptions",
+          "displayName": "projectOptions",
           "plug": "output",
           "type": "*",
           "group": "Outputs"

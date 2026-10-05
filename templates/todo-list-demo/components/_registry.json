@@ -203,11 +203,35 @@
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
+    "Projects/Save money item": {
+      "path": "Projects/Save money item",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 15,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Projects/End money item": {
+      "path": "Projects/End money item",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 5,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Projects/Save project": {
+      "path": "Projects/Save project",
+      "type": "visual",
+      "nodeCount": 4,
+      "connectionCount": 13,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
     "Logic/Projects": {
       "path": "Logic/Projects",
       "type": "visual",
       "nodeCount": 3,
-      "connectionCount": 18,
+      "connectionCount": 22,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -350,8 +374,8 @@
     "Todo/Task summary": {
       "path": "Todo/Task summary",
       "type": "visual",
-      "nodeCount": 20,
-      "connectionCount": 22,
+      "nodeCount": 23,
+      "connectionCount": 25,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -459,11 +483,43 @@
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
+    "Projects/Move form": {
+      "path": "Projects/Move form",
+      "type": "visual",
+      "nodeCount": 14,
+      "connectionCount": 26,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Projects/Project task": {
+      "path": "Projects/Project task",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 5,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Projects/Project money": {
+      "path": "Projects/Project money",
+      "type": "visual",
+      "nodeCount": 7,
+      "connectionCount": 5,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Projects/Project editor": {
+      "path": "Projects/Project editor",
+      "type": "visual",
+      "nodeCount": 30,
+      "connectionCount": 49,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
     "Projects/Project row": {
       "path": "Projects/Project row",
       "type": "visual",
-      "nodeCount": 40,
-      "connectionCount": 66,
+      "nodeCount": 35,
+      "connectionCount": 82,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -471,7 +527,7 @@
       "path": "Projects/Project list",
       "type": "visual",
       "nodeCount": 4,
-      "connectionCount": 14,
+      "connectionCount": 27,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
@@ -494,39 +550,63 @@
     "Projects/Money": {
       "path": "Projects/Money",
       "type": "visual",
-      "nodeCount": 19,
-      "connectionCount": 23,
+      "nodeCount": 23,
+      "connectionCount": 25,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Projects/Money line": {
+      "path": "Projects/Money line",
+      "type": "visual",
+      "nodeCount": 9,
+      "connectionCount": 11,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Projects/Money editor": {
+      "path": "Projects/Money editor",
+      "type": "visual",
+      "nodeCount": 35,
+      "connectionCount": 68,
+      "modified": "2026-09-14T00:00:00.000Z",
+      "created": "2026-09-14T00:00:00.000Z"
+    },
+    "Projects/Money sheet": {
+      "path": "Projects/Money sheet",
+      "type": "visual",
+      "nodeCount": 30,
+      "connectionCount": 69,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
     "Projects/View": {
       "path": "Projects/View",
       "type": "visual",
-      "nodeCount": 24,
-      "connectionCount": 54,
+      "nodeCount": 36,
+      "connectionCount": 99,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
     "Projects/Next move prompt": {
       "path": "Projects/Next move prompt",
       "type": "visual",
-      "nodeCount": 14,
-      "connectionCount": 24,
+      "nodeCount": 6,
+      "connectionCount": 14,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     },
     "Pages/Todo": {
       "path": "Pages/Todo",
       "type": "page",
-      "nodeCount": 97,
-      "connectionCount": 351,
+      "nodeCount": 100,
+      "connectionCount": 370,
       "modified": "2026-09-14T00:00:00.000Z",
       "created": "2026-09-14T00:00:00.000Z"
     }
   },
   "stats": {
-    "totalComponents": 65,
-    "totalNodes": 651,
-    "totalConnections": 1359
+    "totalComponents": 75,
+    "totalNodes": 804,
+    "totalConnections": 1717
   }
 }

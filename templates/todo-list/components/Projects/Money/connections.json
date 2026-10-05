@@ -140,6 +140,18 @@
       "fromProperty": "done",
       "toId": "mnOut",
       "toProperty": "changed"
+    },
+    {
+      "fromId": "mnAdd",
+      "fromProperty": "onClick",
+      "toId": "mnOut",
+      "toProperty": "addMoney"
+    },
+    {
+      "fromId": "mnAll",
+      "fromProperty": "onClick",
+      "toId": "mnOut",
+      "toProperty": "allMoney"
     }
   ]
 }

@@ -86,6 +86,84 @@
       "fromProperty": "itemOutput-sendKey",
       "toId": "plOut",
       "toProperty": "sendKey"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-openTask",
+      "toId": "plOut",
+      "toProperty": "openTask"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-openTaskId",
+      "toId": "plOut",
+      "toProperty": "openTaskId"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-editMoney",
+      "toId": "plOut",
+      "toProperty": "editMoney"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-moneyKey",
+      "toId": "plOut",
+      "toProperty": "moneyKey"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-addMoney",
+      "toId": "plOut",
+      "toProperty": "addMoney"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutputSignal-saveProject",
+      "toId": "plOut",
+      "toProperty": "saveProject"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pName",
+      "toId": "plOut",
+      "toProperty": "pName"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pSub",
+      "toId": "plOut",
+      "toProperty": "pSub"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pKind",
+      "toId": "plOut",
+      "toProperty": "pKind"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pBilling",
+      "toId": "plOut",
+      "toProperty": "pBilling"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pTerms",
+      "toId": "plOut",
+      "toProperty": "pTerms"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pRate",
+      "toId": "plOut",
+      "toProperty": "pRate"
+    },
+    {
+      "fromId": "plEach",
+      "fromProperty": "itemOutput-pSay",
+      "toId": "plOut",
+      "toProperty": "pSay"
     }
   ]
 }
