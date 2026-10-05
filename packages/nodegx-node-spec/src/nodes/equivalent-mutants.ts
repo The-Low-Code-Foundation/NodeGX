@@ -35,7 +35,25 @@ const REBUILT_WHILE_DISABLED = 'a press or release on a disabled box during an E
 const SILENT_NEGATIVE_ZERO = 'a Value Percent of -0 stored where 0 was, unsent (`0 !== -0` is false): `!percent` reads both as falsy and every later send of the output follows a recompute that stores the value it sends, so the -0 is never read';
 const PLACED_OFF_PAGE = 'a placing on a node placed off the page: its set holds only the page syncs, which nothing reads before the frame end repaints them';
 
+/** NSP-016 s43 — the Text: a patch handed a twin's example that writes only what the state already holds. */
+const ALREADY_HELD = (what: string) => `${what}: the twin's example writes a value this branch's state already holds, so the state is the same after either`;
+
 export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = Object.freeze({
+  Text: [
+    // a Space that lifts an element that ALREADY holds the keyboard, handed the twin that also took it: `elementFocused` true over true
+    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["inZone","input","isLifted","phase"],"emit":["pickedUp"]', swappedWith: '"set":["elementFocused","inZone","input","isLifted","phase"],"emit":["pickedUp"]', why: ALREADY_HELD('a Space lift of an element that holds the keyboard') },
+    // a keyboard cancel outside any zone, handed the in-zone twin: Drag Over false over false, and its send meets a wire already false
+    { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["inZone","input","isLifted","phase"],"emit":["dragCancelled"]', swappedWith: '"set":["inZone","input","isDropTarget","isLifted","phase"],"emit":["dragCancelled"]', why: ALREADY_HELD('a cancel outside a zone (Drag Over is false, and was sent false)') },
+    // a click that meets nothing (hidden, no swallow waiting), handed the click a waiting swallow ate: `swallow` false over false
+    { reducer: 'person.click', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["swallow"],"emit":[]', why: ALREADY_HELD('a click that meets nothing and finds no swallow waiting') },
+    // a blur on an element that does not hold the keyboard, handed the blur that gave it up: `elementFocused` false over false
+    { reducer: 'person.blur', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["elementFocused"],"emit":[]', why: ALREADY_HELD('a blur of an element that does not hold the keyboard') },
+    // a click on a Draggable element starts a pending mouse gesture and its release ends it: phase idle → pending → idle. Dropped,
+    // or handed a twin that moves no gesture, the state after the click is the same
+    { reducer: 'person.click', kind: 'drop-set', branch: '"set":["inZone","input","phase"],"emit":["pointerDown","pointerUp","onClick"]', why: 'a click whose press starts a pending gesture and whose release ends it: the gesture is idle before and after, so a click that moves none leaves the same state' },
+    { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["inZone","input","phase"],"emit":["pointerDown","pointerUp","onClick"]', swappedWith: '"set":[],"emit":["pointerDown","pointerUp","onClick"]', why: 'as the drop-set above: the gesture is idle before and after the click' },
+    { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["elementFocused","inZone","input","phase"],"emit":["pointerDown","pointerUp","onClick"]', swappedWith: '"set":["elementFocused"],"emit":["pointerDown","pointerUp","onClick"]', why: 'a click that takes the keyboard and starts and ends a pending gesture, handed the twin that only takes the keyboard: the gesture is idle before and after' }
+  ],
   'net.noodl.controls.button': [
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE }))
@@ -105,6 +123,8 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     ...['press', 'release', 'click', 'focus', 'choose'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":["elementFocused"],"emit":[]', why: REBUILT_WHILE_DISABLED }))
   ],
   // NSP-016 s41 — the Slider: the placing off the page and the four acts that meet no element (the Button's; the 10,000 run)
+  // NSP-016 s43 — Visible is a page sync now: a group placed OFF the page carries only it, as the Button's placing does
+  'Radio Button Group': [{ reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE }],
   'net.noodl.controls.range': [
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),

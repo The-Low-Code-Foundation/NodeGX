@@ -201,6 +201,8 @@ interface Dom {
 }
 let dom: Dom | undefined;
 let domInstalled: (() => void) | undefined;
+/** NSP-016 s43 — the element the last pointer act landed on (`personActs`): what `document.elementFromPoint` answers. One play's. */
+let pointerAt: any = null;
 
 /** The page, made once for the process; React loaded with its globals present (react-dom reads `window` at load), outside any play. */
 function ensureDom(): Dom {
@@ -211,6 +213,18 @@ function ensureDom(): Dom {
   const w = page.window;
   // a browser scrolls; jsdom has no `scrollIntoView`, and nothing a trace can see follows from one
   w.Element.prototype.scrollIntoView = () => undefined;
+  // NSP-016 s43 — a browser gives the keyboard only to an element a person can see: `visibility: hidden` (inherited) is not a
+  // focusable area (Chromium `Element::IsFocusableStyle`; Firefox the same), so `focus()` on one does nothing. jsdom focuses it.
+  // The rule is the browser's, kept for every caller — a person's Tab and a node's own Focus action alike. (What jsdom still
+  // lacks is the focus FIXUP: an element that becomes hidden while it holds the keyboard keeps it, as a disabled one does.)
+  const focus = w.HTMLElement.prototype.focus;
+  w.HTMLElement.prototype.focus = function (this: any, ...args: unknown[]) {
+    if (this.isConnected && w.getComputedStyle(this).visibility !== 'visible') return;
+    return focus.apply(this, args);
+  };
+  // NSP-016 s43 — jsdom has no `elementFromPoint` (no geometry): the element under the pointer is the one the last pointer act
+  // landed on (`pointerAt`, PERSON's hit test), while it is on the page
+  w.document.elementFromPoint = () => (pointerAt && pointerAt.isConnected ? pointerAt : null);
   const globals: Record<string, unknown> = {
     window: w,
     document: w.document,
@@ -223,6 +237,9 @@ function ensureDom(): Dom {
     KeyboardEvent: w.KeyboardEvent,
     FocusEvent: w.FocusEvent,
     TouchEvent: w.TouchEvent,
+    // NSP-016 s43 — drag-drop.ts calls these bare (`axisOf`, `slots`, `currentShift`, `restingRect`); a browser has them on the global
+    getComputedStyle: w.getComputedStyle.bind(w),
+    DOMRect: w.DOMRect,
     requestAnimationFrame: w.requestAnimationFrame,
     cancelAnimationFrame: w.cancelAnimationFrame
   };
@@ -267,15 +284,36 @@ function installGlobals(globals: Record<string, unknown>): () => void {
  */
 function installPage(): () => void {
   const d = ensureDom();
+  pointerAt = null;
+  // the window outlives the play (one page per process): a listener the play's page left on it — drag-drop.ts `swallowNextClick`
+  // takes its own off with a `setTimeout(0)` on the WORLD's clock, which a play that ends first never turns — ate a click in a
+  // LATER play. What the play added comes off with its page.
+  const added: Array<[string, unknown, unknown]> = [];
+  const add = d.window.addEventListener;
+  d.window.addEventListener = function (this: unknown, type: string, fn: unknown, opts?: unknown) {
+    added.push([type, fn, opts]);
+    return add.call(this, type, fn, opts);
+  };
+  const leave = () => {
+    d.window.addEventListener = add;
+    for (const [type, fn, opts] of added) d.window.removeEventListener(type, fn, opts);
+  };
   const g = globalThis as { requestAnimationFrame?: unknown };
   const frame = g.requestAnimationFrame;
-  if (!frame) return installGlobals(d.globals);
+  if (!frame) {
+    const restoreGlobals = installGlobals(d.globals);
+    return () => {
+      restoreGlobals();
+      leave();
+    };
+  }
   const own = d.window.requestAnimationFrame;
   d.window.requestAnimationFrame = frame;
   const restore = installGlobals({ ...d.globals, requestAnimationFrame: frame });
   return () => {
     restore();
     d.window.requestAnimationFrame = own;
+    leave();
   };
 }
 
@@ -310,6 +348,19 @@ function elementSeen(node: { getDOMElement(): any }, container?: any): any {
   if (root && root.isConnected) return root.matches(control) ? root : root.querySelector(control) ?? root;
   if (!container) return null;
   return container.querySelector(control) ?? container.firstElementChild ?? null;
+}
+
+/**
+ * NSP-016 s43 — the browser's hit test, without geometry: the element a pointer act on `el` lands on. An element with
+ * `pointer-events: none` or `visibility: hidden` / `collapse` (both inherited, as jsdom computes them) is never under the
+ * pointer; the act lands on the nearest ancestor that can be (what is behind it), else the body.
+ */
+function underPointer(w: any, el: any): any {
+  for (let e = el; e; e = e.parentElement) {
+    const cs = w.getComputedStyle(e);
+    if (cs.pointerEvents !== 'none' && cs.visibility !== 'hidden' && cs.visibility !== 'collapse') return e;
+  }
+  return w.document.body;
 }
 
 /** The Push Component To Stack side of a request (navigation-handler.ts `StackNavigateArgs`), as a stand-in stack sees it. */
@@ -816,7 +867,7 @@ export const VIEWER_NODES = ['variables/color', 'valuechanged', 'colorblend', 't
 export const VIEWER_NAVIGATION_NODES = ['navigate-to-path', 'navigate', 'navigate-back', 'router-navigate', 'page-inputs', 'showpopup', 'closepopup'] as const;
 
 /** NSP-016 s37 — the viewer's VISUAL nodes this phase has specced, from `src/nodes/` (their React components come with them; PERSON above). */
-export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton'] as const;
+export const VIEWER_VISUAL_NODES = ['controls/button', 'controls/checkbox', 'controls/text-input', 'controls/options', 'controls/slider', 'visual/icon', 'controls/radiobuttongroup', 'controls/radiobutton', 'visual/text'] as const;
 
 /**
  * Picker nodes whose SOURCE is in this package but which only the viewer's `register-nodes.js`
@@ -1540,6 +1591,17 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
    * button down ends in the browser's default action — the keyboard onto a focusable target — unless a handler
    * cancelled it; `click` is the press, the release and the click; a finger is the touch events; the keyboard
    * acts are `focus()` / `blur()`, answered by the focusing steps. Off the page there is nothing to act on.
+   *
+   * NSP-016 s43 — two more of the browser's rules. (1) THE HIT TEST: a pointer act lands on the element under the pointer, and an
+   * element with `pointer-events: none` or `visibility: hidden` (both inherited; jsdom computes both) is never that element — the
+   * act lands on the nearest ancestor that is (`underPointer`), which carries none of the node's handlers. (2) POINTER EVENTS: a
+   * browser raises `pointerdown` / `pointerup` (with `pointerType` and `pointerId`) before the compatibility events — `mousedown`,
+   * `mouseup`, `click` for a mouse, `touchstart` / `touchend` for a finger; jsdom has no `PointerEvent`, so they are `MouseEvent`s
+   * carrying the three fields (a document listener reads them — drag-drop.ts). A disabled control is withheld the mouse's
+   * compatibility events, as before, not the pointer events. What the pointer is over is the element the last pointer act landed
+   * on: `document.elementFromPoint` answers it (`pointerAt`) — jsdom has none, and the face has no geometry; an act names WHAT is
+   * under the pointer, never where. Face choices, written down: an act's pointer has no position — only a `move` would carry one
+   * past a slop; a hover or a leave raises no `pointermove`; an element that becomes hidden under the pointer raises no leave.
    */
   function personActs(s: State, act: string, value: unknown): void {
     const d = ensureDom();
@@ -1548,18 +1610,34 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // inside it; a Value no child carries, or a child off the page, is nothing to act on
     const el = act === 'pick' ? pickedElement(s, value) : ownElement(s);
     if (!el) return;
-    const mouse = (type: string, init: Record<string, unknown> = {}) => el.dispatchEvent(new w.MouseEvent(type, { bubbles: true, cancelable: true, composed: true, button: 0, ...init }));
-    const touch = (type: string) => el.dispatchEvent(new w.TouchEvent(type, { bubbles: true, cancelable: true, composed: true }));
+    const KEYBOARD = new Set(['focus', 'blur', 'type', 'key', 'choose', 'slide']);
+    const hit = KEYBOARD.has(act) ? el : underPointer(w, el);
+    if (!KEYBOARD.has(act)) pointerAt = hit;
+    const mouse = (type: string, init: Record<string, unknown> = {}) => hit.dispatchEvent(new w.MouseEvent(type, { bubbles: true, cancelable: true, composed: true, button: 0, ...init }));
+    const touch = (type: string) => hit.dispatchEvent(new w.TouchEvent(type, { bubbles: true, cancelable: true, composed: true }));
+    const pointer = (type: string, pointerType: 'mouse' | 'touch') => {
+      const e = new w.MouseEvent(type, { bubbles: true, cancelable: true, composed: true, button: 0, buttons: type === 'pointerdown' ? 1 : 0 });
+      Object.defineProperty(e, 'pointerType', { value: pointerType });
+      Object.defineProperty(e, 'pointerId', { value: pointerType === 'mouse' ? 1 : 2 });
+      Object.defineProperty(e, 'isPrimary', { value: true });
+      return hit.dispatchEvent(e);
+    };
     // the browser's rule, not the component's: a DISABLED form control is dispatched no click, mousedown or mouseup from
     // a person (HTML: a disabled control's click events from the user interaction task source are not dispatched;
     // Chromium withholds mousedown / mouseup the same way, and delivers mouseover / mouseout and the touch events). jsdom
     // has no user interaction task source — a dispatched click would reach the control and even run a checkbox's
     // toggle — so the face withholds them here. Hover and touch go through, to whatever handler is there.
-    const disabled = !!el.disabled;
+    const disabled = !!hit.disabled;
     const press = () => {
+      pointer('pointerdown', 'mouse');
       if (disabled) return;
       const notCancelled = mouse('mousedown');
-      if (notCancelled) el.focus();
+      if (notCancelled) hit.focus();
+    };
+    /** The keyboard acts: the keys go to whatever holds the keyboard once the act has tried to put it on the element. */
+    const focused = () => {
+      if (d.document.activeElement !== el) el.focus();
+      return d.document.activeElement === el;
     };
     switch (act) {
       case 'hover':
@@ -1572,20 +1650,24 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         press();
         break;
       case 'release':
+        pointer('pointerup', 'mouse');
         if (!disabled) mouse('mouseup');
         break;
       case 'click':
       // NSP-016 s42 — a pick is a click on the picked child's control (`pickedElement`): the browser's rules for it are a click's
       case 'pick':
-        if (disabled) break;
         press();
+        pointer('pointerup', 'mouse');
+        if (disabled) break;
         mouse('mouseup');
         mouse('click');
         break;
       case 'touch':
+        pointer('pointerdown', 'touch');
         touch('touchstart');
         break;
       case 'lift':
+        pointer('pointerup', 'touch');
         touch('touchend');
         break;
       case 'focus':
@@ -1603,17 +1685,18 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // element's PROTOTYPE setter — past React's value tracker on the instance, as a keystroke is — so React's
       // `onChange` fires exactly when the value changed.
       case 'type':
-        if (disabled) break;
-        if (d.document.activeElement !== el) el.focus();
+        if (disabled || !focused()) break;
         for (const ch of Array.from(String(value))) typeKey(w, el, ch);
         break;
       case 'key': {
         if (disabled) break;
-        if (d.document.activeElement !== el) el.focus();
+        // NSP-016 s43 — a key goes to the element that holds the keyboard: this one when it can take it, else whatever holds it
+        // (a `<div>` with no tabindex takes none; the body then hears the key, and a document listener with it — drag-drop.ts)
+        const to = focused() ? el : (d.document.activeElement ?? d.document.body);
         const key = String(value);
-        const notCancelled = el.dispatchEvent(new w.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, composed: true }));
-        if (notCancelled && key === 'Enter' && el.tagName === 'TEXTAREA') typeKey(w, el, '\n');
-        el.dispatchEvent(new w.KeyboardEvent('keyup', { key, bubbles: true, cancelable: true, composed: true }));
+        const notCancelled = to.dispatchEvent(new w.KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, composed: true }));
+        if (notCancelled && key === 'Enter' && to === el && el.tagName === 'TEXTAREA') typeKey(w, el, '\n');
+        to.dispatchEvent(new w.KeyboardEvent('keyup', { key, bubbles: true, cancelable: true, composed: true }));
         break;
       }
       // NSP-016 s39 — a pick on a `<select>` (Dropdown). The browser's rules, not the component's: a disabled element takes no
@@ -1626,8 +1709,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         if (disabled || el.tagName !== 'SELECT') break;
         const picked = String(value);
         const option = Array.from(el.options as ArrayLike<{ value: string; disabled: boolean }>).find((o) => o.value === picked && !o.disabled);
-        if (!option) break;
-        if (d.document.activeElement !== el) el.focus();
+        if (!option || !focused()) break;
         if (el.value === picked) break;
         Object.getOwnPropertyDescriptor(w.HTMLSelectElement.prototype, 'value')!.set!.call(el, picked);
         el.dispatchEvent(new w.Event('input', { bubbles: true, composed: true }));
@@ -1645,8 +1727,7 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       // no overflow on a reversed range and Chromium raises `max` to `min`; jsdom and a browser disagree, as on a Number field's
       // sign mid-entry.
       case 'slide': {
-        if (disabled || el.type !== 'range' || rangeReversed(el)) break;
-        if (d.document.activeElement !== el) el.focus();
+        if (disabled || el.type !== 'range' || rangeReversed(el) || !focused()) break;
         const held = browserRangeValue(el, el.value);
         const to = browserRangeValue(el, value);
         if (held === to) break;

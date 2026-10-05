@@ -177,6 +177,12 @@ type State = {
   editCaret: number | null;
   /** the element's `disabled` attribute follows Enabled at each paint (TextInput.tsx :181) — what the Focus and Blur actions meet */
   pageEnabled: boolean;
+  /** NSP-016 s43 — Visible as written (node-shared-port-definitions.ts :366-375 `visibility: hidden`) and as painted */
+  visible: boolean;
+  pageVisible: boolean;
+  /** NSP-016 s43 — Opacity written as exactly the number 0 (TextInput.tsx :118-120 then sets `pointer-events: none`), and as painted */
+  opacityZero: boolean;
+  pageOpacityZero: boolean;
   /** the element holds the keyboard — what the PAGE knows; `focused` is what the node REPORTS (button.ts, row D30) */
   elementFocused: boolean;
   /** the component is on the page (`innerReactComponentRef`, text-input.ts :423, :431): follows `mounted` at each paint */
@@ -260,7 +266,7 @@ export const TextInput = defineNode({
   // the page's syncs (spec.ts `synced`): not branches. `field` / `pending` are React's commit of what the graph wrote: the
   // page following the node at each paint, like the disabled attribute
   // (s40) `caret` and `editCaret` too: the element's cursor as the paint leaves it, and the callback the paint consumes
-  synced: ['pageEnabled', 'labelOn', 'shownType', 'shownMaxLength', 'field', 'pending', 'caret', 'editCaret'],
+  synced: ['pageEnabled', 'pageVisible', 'pageOpacityZero', 'labelOn', 'shownType', 'shownMaxLength', 'field', 'pending', 'caret', 'editCaret'],
 
   state: {
     fieldType: 'text',
@@ -289,6 +295,10 @@ export const TextInput = defineNode({
     hadCaret: false,
     editCaret: null,
     pageEnabled: true,
+    visible: true,
+    pageVisible: true,
+    opacityZero: false,
+    pageOpacityZero: false,
     elementFocused: false,
     onPage: false
   } as State,
@@ -528,7 +538,7 @@ export const TextInput = defineNode({
     // element takes nothing, silently (`focus()` on it is a no-op — the focusing steps); none, Unchanged (R13)
     focus: (s) => {
       if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
       return { set: { focused: true, elementFocused: true, hadCaret: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // text-input.ts :315-319 → focus-tracker.ts :87-89: `blur()` on the element; Done either way
@@ -537,7 +547,11 @@ export const TextInput = defineNode({
       return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => NOTHING,
+    // node-shared-port-definitions.ts :366-375, :320-328 — the page follows at the next paint (TextInput.tsx :118-120 compares the
+    // Opacity the style holds with the number 0)
+    visible: (_s, v) => ({ set: { visible: !!v }, send: [] }),
+    opacity: (_s, v) => ({ set: { opacityZero: v === 0 }, send: [] })
   },
   {
     // react-component-node.ts :785-830 `DATA_ATTRIBUTES_RULE` — one string input per name the Data Attributes list names (the
@@ -586,8 +600,8 @@ export const TextInput = defineNode({
       touch: (s) => onPainted(s, (p) => thenDrained(p, { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
       lift: (s) => onPainted(s, (p) => thenDrained(p, { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
       // utils.ts :157-195 — a disabled field is not a focusable area
-      focus: (s) => onPainted(s, (p) => (p.enabled && !p.elementFocused ? focusTaken() : NONE)),
-      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE)),
+      focus: (s) => onPainted(s, (p) => (p.enabled && !p.elementFocused ? focusTaken() : NONE), 'keyboard'),
+      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE), 'blur'),
       // THE PERSON types (docblock "typing"): the keyboard onto the field first, then one key at a time
       type: (s, _i, value) =>
         onPainted(s, (p) => {
@@ -606,7 +620,7 @@ export const TextInput = defineNode({
             emit.push(...w.emit);
           }
           return { set, send, emit };
-        }),
+        }, 'keyboard'),
       // TextInput.tsx :284-288 `onKeyDown`: Enter → On Enter; the browser's default action of Enter in a <textarea> writes a newline
       key: (s, _i, value) =>
         onPainted(s, (p) => {
@@ -624,7 +638,7 @@ export const TextInput = defineNode({
             }
           }
           return { set, send, emit };
-        })
+        }, 'keyboard')
     }
   }
 );
@@ -775,7 +789,11 @@ function typed(s: Readonly<State>, ch: string): Omit<Write, 'landed'> | undefine
  * before the node's wrapper). An Enable Label or Text Area change rebuilds the element: the keyboard leaves with the old one.
  */
 function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
-  const set: Partial<State> = s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled };
+  const set: Partial<State> = {
+    ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }),
+    ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }),
+    ...(s.pageOpacityZero === s.opacityZero ? {} : { pageOpacityZero: s.opacityZero })
+  };
   const type = s.fieldType; // the holder's render hands the component the node's props: `props.type` is this from here on
   const area = elementType(type) === 'textArea';
   // a new element: the label moving the input in the tree, or <textarea> ↔ <input>; the keyboard leaves with the old one
@@ -815,11 +833,23 @@ function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; e
   return { set: { ...set, shownType: type, shownMaxLength: s.maxLength, field: value, pending: null, editCaret: null, caret }, send: [], emit: [] };
 }
 
+/**
+ * NSP-016 s43 — what reaches the field: no pointer when it is hidden (`visibility: hidden`) or at Opacity exactly 0 (`pointer-events:
+ * none`) — the browser's hit test passes it by; the keyboard when it can be seen, or when it holds it already (`focus()` refuses a
+ * hidden element — Chromium `IsFocusableStyle` — and jsdom has no focus fixup; opacity does not stop a focus); a blur always.
+ */
+type Reach = 'pointer' | 'keyboard' | 'blur';
+function reaches(p: Readonly<State>, how: Reach): boolean {
+  if (how === 'blur') return true;
+  if (how === 'keyboard') return p.pageVisible || p.elementFocused;
+  return p.pageVisible && !p.pageOpacityZero;
+}
+
 /** The act on the painted page (button.ts `onPainted`): nothing to act on when the element is not there; else `then` on the painted state, after the paint's own pulses. */
-function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act): Act {
+function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act, how: Reach = 'pointer'): Act {
   const p = painted(s);
   const after: State = { ...s, ...p.set };
-  const a = after.onPage ? then(after) : NONE;
+  const a = after.onPage && reaches(after, how) ? then(after) : NONE;
   const out: Act = { set: { ...p.set, ...a.set }, send: [...p.send, ...a.send], emit: [...p.emit, ...(a.emit ?? [])] };
   if (a.outcomes && a.outcomes.length > 0) out.outcomes = a.outcomes;
   return out;

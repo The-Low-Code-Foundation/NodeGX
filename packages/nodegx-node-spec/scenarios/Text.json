@@ -1,0 +1,2041 @@
+[
+  {
+    "name": "a fresh text on the page: Did Mount in the first frame, Child Index 0, This itself, and the three drop values false",
+    "because": "react-component-node.ts :982-990, :1428-1444; node-shared-port-definitions.ts :1292-1330 and :1121-1124 — the getters are on the definition whether or not the editor shows the ports",
+    "steps": [
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off: Will Unmount; on: Did Mount; the same value again: nothing; a truthy non-boolean is on",
+    "because": "react-component-node.ts :2302-2321 `!!value`; the frame end paints it",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": 1
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": 0
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": "yes"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed off the page: nothing in the first frame; Mounted on: Did Mount",
+    "because": "a node that does not want to be mounted renders nothing",
+    "params": {
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the pointer: hover — Hover Start and Pointer Enter; leave — Hover End; press — Pointer Down; release — Pointer Up; click — all three of a click; a finger — Pointer Down, Pointer Up",
+    "because": "node-shared-port-definitions.ts :826-848 (onMouseOver, onMouseEnter, onMouseLeave, onMouseDown, onMouseUp, onTouchStart, onTouchEnd); every visual node's onClick",
+    "steps": [
+      "settle",
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the keyboard on a plain text: a <div> takes none — focus, Space, Enter, blur raise nothing",
+    "because": "Text.tsx :92-102 renders no tabindex; drag-drop adds one only for Draggable",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      {
+        "act": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible off: no act of the pointer reaches it (the browser hit-tests past a visibility:hidden element); on again: it does",
+    "because": "node-shared-port-definitions.ts :366-375 `visibility: hidden`; the browser never puts a hidden element under the pointer",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "act": "leave"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": 0
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "visible",
+        "value": "yes"
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Opacity exactly the number 0 takes no pointer (Text.tsx :88-90 pointer-events none); the string \"0\" and 0.5 do not",
+    "because": "Text.tsx :88-90 compares style.opacity with 0 strictly",
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": "0"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0.5
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Pointer Events Enabled off: no pointer reaches it, whatever the mode; Mode inherit removes the style; any other mode writes it from the last Enabled",
+    "because": "node-shared-port-definitions.ts :772-793",
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "pointerEventsMode",
+        "value": "inherit"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "pointerEventsMode",
+        "value": "explicit"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": 1
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "pointerEventsMode",
+        "value": "not-a-declared-value"
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Pointer Events Mode explicit with Enabled never written: auto — the pointer reaches it",
+    "because": "node-shared-port-definitions.ts :776-780 `pointerEvents = 'auto'` when `_internal.pointerEventsEnabled` is undefined",
+    "params": {
+      "pointerEventsMode": "explicit"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Draggable at the placing: focus and Space pick it up (Is Lifted, Picked Up); Escape puts it back (Is Lifted false, Cancelled)",
+    "because": "drag-drop.ts :83-110 (the tabindex at the first frame start), :768-783 keyboardLift, :823-826 Escape",
+    "params": {
+      "draggable": true,
+      "dragValue": "v"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a keyboard drag with no zone: Enter drops over nothing — Cancelled; Space again lifts; Tab cancels; Space a third time lifts and Space drops",
+    "because": "drag-drop.ts :379-384 (no zone: cancel), :817-830",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Tab"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "keys a keyboard drag ignores: x, ArrowDown, ArrowRight with no zone; and a plain key with no drag",
+    "because": "drag-drop.ts :797-833",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "act": "key",
+        "value": "ArrowDown"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "act": "key",
+        "value": "ArrowDown"
+      },
+      {
+        "act": "key",
+        "value": "ArrowRight"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Draggable written after the first frame: the element has one now — Space lifts at once",
+    "because": "drag-drop.ts :87 `whenMounted` finds the element",
+    "steps": [
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — Mounted off and on: the new element has no tabindex, so Space raises nothing; Draggable off and on puts it back",
+    "because": "drag-drop.ts :87-100 — the attributes go on the element that exists when Draggable is written, once",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a new Tag makes a new element: Space raises nothing; the same Tag again changes nothing",
+    "because": "Text.tsx :50 — React makes a new element for a new type",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — the control: a Tag written to the same element type keeps the element, and its tabindex",
+    "because": "Text.tsx :50 `props.as || 'div'` — \"\" renders a div",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "div"
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": ""
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — placed unmounted with Draggable: mounted after 28 settles it is still reached (the 59th frame start, the first of the settle after the mount) — Space lifts",
+    "because": "drag-drop.ts :136-145 — 60 frame starts; a settle is two here (its frame and its drain), both before its paint commits",
+    "params": {
+      "draggable": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — placed unmounted with Draggable: mounted after 29 settles the 60 frame starts are spent before the element is committed — Space raises nothing for good",
+    "because": "drag-drop.ts :143 `framesLeft <= 0` gives up",
+    "params": {
+      "draggable": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "placed unmounted with Draggable and mounted by a person's act before the next settle: the frame start finds the element",
+    "because": "an act paints the page first (adapter.ts `act`); the next frame start sees what it painted",
+    "params": {
+      "draggable": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — Draggable and Accept Drops: a keyboard lift starts IN ITSELF (Drag Over true); Enter drops it on itself — its own Drag Value, Drop Index 0, Dropped, Landed",
+    "because": "drag-drop.ts :862-866 — `around` leaves the element out, `list[0]` does not; :386-391",
+    "params": {
+      "draggable": true,
+      "acceptDrops": true,
+      "dragValue": {
+        "id": 7
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — Accept Kind takes the Drag Kind, trimmed, from a comma list: in; another kind: not in — Enter cancels",
+    "because": "drag-drop.ts :155-171",
+    "params": {
+      "draggable": true,
+      "acceptDrops": true,
+      "acceptKind": " card , column",
+      "dragKind": " card "
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "set": "dragKind",
+        "value": "task"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — Accept Drops off mid-drag leaves the zone (Drag Over false) and Enter cancels; on again, an arrow enters it and Space drops",
+    "because": "drag-drop.ts :117-118, :804-815",
+    "params": {
+      "draggable": true,
+      "acceptDrops": true,
+      "dragValue": "a"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "acceptDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "ArrowRight"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C78 — the drop reports the Drag Value at the DROP, not at the lift; Escape from inside the zone leaves it (Drag Over false, Cancelled)",
+    "because": "drag-drop.ts :386 reads `_internal.dragValue` at the drop; :401-409",
+    "params": {
+      "draggable": true,
+      "acceptDrops": true,
+      "dragValue": "first"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      {
+        "set": "dragValue",
+        "value": "later"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a finger held for Hold Time (0.5 s by default) lifts it: Picked Up; the finger lifted over nothing that takes it: Cancelled",
+    "because": "drag-drop.ts :263-270 (touch holds), :308-323, :401-409",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "advance": 499
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a finger lifted before the hold ends: Pointer Down, Pointer Up and nothing else — the timer is cleared",
+    "because": "drag-drop.ts :311-314 (released before it lifted), :419 clearTimeout",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "advance": 300
+      },
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "advance": 1000
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Hold Time: 1 holds a second; \"abc\" and -1 the default half second; null holds 0 ms",
+    "because": "drag-drop.ts :180-183 `Number(holdTime)`, finite and ≥ 0, else 0.5",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "holdTime",
+        "value": 1
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 999
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "holdTime",
+        "value": "abc"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "holdTime",
+        "value": -1
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "holdTime",
+        "value": null
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 1
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Hold To Drag never: a finger picks nothing up (a mouse would, on a move); a mouse press with the default waits for a move — nothing lifts it",
+    "because": "drag-drop.ts :173-178 — `never`: no hold; `touch` (the default): a mouse does not hold",
+    "params": {
+      "draggable": true,
+      "holdToDrag": "never"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 1000
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "holdToDrag",
+        "value": "touch"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "advance": 1000
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Hold To Drag always: a held MOUSE lifts at Hold Time; released, Cancelled — and the ONE click that follows is swallowed (the next is a Click)",
+    "because": "drag-drop.ts :175, :319-321 swallowNextClick (`once: true`)",
+    "params": {
+      "draggable": true,
+      "holdToDrag": "always"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click on the release: the drop swallows the click of the same click act — Pointer Down, Cancelled, Pointer Up, no Click",
+    "because": "drag-drop.ts :319-322 — the swallow is installed before the click is dispatched",
+    "params": {
+      "draggable": true,
+      "holdToDrag": "always"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the swallow expires when the event loop turns past it: after an advance of 0 a click is still eaten; after 1 ms more, after another drop, a click is a Click",
+    "because": "drag-drop.ts :926 — `setTimeout(…, 0)` takes the swallow off, and a timer of 0 waits at least 1 ms (world.ts, the JavaScript timer rule)",
+    "params": {
+      "draggable": true,
+      "holdToDrag": "always"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "advance": 0
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a swallowed click is spent wherever it lands: hidden, the click is eaten; shown again, the next click is a Click",
+    "because": "drag-drop.ts :925 `once: true` on the window",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Escape cancels a lifted finger drag (a key on the page, wherever the keyboard is); Space does nothing to one",
+    "because": "drag-drop.ts :785-791",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a held finger is not interrupted by a second finger, Mounted off or Draggable off: the hold still lifts",
+    "because": "drag-drop.ts :233 one gesture at a time; :267-269 the timer reads only the phase",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "set": "draggable",
+        "value": false
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "hidden, a finger picks nothing up; a lift over a hidden element still ends a drag (the window hears every pointerup)",
+    "because": "the hit test; drag-drop.ts :903-905 listens on the window",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a hidden element takes no keyboard: focus and Space raise nothing; one that held the keyboard before it was hidden keeps it — Space lifts",
+    "because": "the browser's focusing rule (visibility); jsdom has no focus fixup",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Draggable off removes the tabindex from the element: focus and Space raise nothing — the element that held the keyboard keeps it, but nothing is Draggable",
+    "because": "drag-drop.ts :101-109",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "draggable",
+        "value": false
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press on a Draggable element puts the keyboard on it (its tabindex makes it focusable); a blur takes it off; the key act puts it back",
+    "because": "the browser's default action of mousedown",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press, a release, a click and a key on a plain text start no drag and take no keyboard: Draggable on after them, hidden, Space raises nothing; shown, a held finger lifts it",
+    "because": "a <div> with no tabindex takes no keyboard; a press on a node that is not Draggable starts no gesture (drag-drop.ts :241-242)",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "key",
+        "value": "x"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a quiet end frees the pointer: a finger lifted early, a second finger held lifts it; a mouse released early (Hold always), a second press held lifts it",
+    "because": "drag-drop.ts :311-314 → finish :434 `gesture = null`",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "set": "holdToDrag",
+        "value": "always"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pointer of another kind does not end a drag: a keyboard lift survives a mouse release, a finger lift and a click — Escape cancels it",
+    "because": "drag-drop.ts :287, :310 — `e.pointerId !== g.pointerId` (a keyboard drag has none)",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a finger drag survives a mouse click and release: the finger's lift ends it — Cancelled",
+    "because": "drag-drop.ts :310 — the mouse is another pointer",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the keyboard a key act takes is kept: a key that lifts nothing, then hidden — Space still lifts",
+    "because": "the browser keeps the keyboard on an element hidden after it took it (jsdom has no focus fixup)",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the keyboard the lifting Space took is kept: Escape, hidden, Space lifts again",
+    "because": "as above",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click on a Draggable element takes the keyboard (its tabindex): hidden after it, Space lifts",
+    "because": "the browser's default action of mousedown focuses a focusable element",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a blur gives the keyboard up: hidden after it, Space raises nothing",
+    "because": "the unfocusing steps",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C77 — a click after a remount meets an element with no tabindex: it takes no keyboard, so hidden, Space raises nothing",
+    "because": "drag-drop.ts :87-100 — the remounted element has no tabindex",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Draggable off while unmounted holds: mounted again, a held finger picks nothing up",
+    "because": "drag-drop.ts :101-102 — off takes the node out of the draggables wherever its element is",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": false
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a new Tag's element is made at the frame end: Draggable written after it puts the tabindex on the NEW element — Space lifts",
+    "because": "Text.tsx :50; drag-drop.ts :87 finds the element on the page now",
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "every act on a page about to change: Mounted off, the act, Mounted on in one frame — the act's paint takes the element off (Will Unmount), the frame end puts a new one on (Did Mount)",
+    "because": "adapter.ts `act` — a person acts on a PAINTED page; react-component-node.ts :1675-1689",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "every act on a page about to change: Mounted on, the act, Mounted off in one frame — the act's paint puts the element on (Did Mount, and what the act raises), the frame end takes it off (Will Unmount)",
+    "because": "as above",
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "release"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "blur"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "key",
+        "value": "x"
+      },
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the Space that takes the keyboard and lifts keeps it: hidden at once, Escape cancels (a key wherever the keyboard is) and Space lifts again",
+    "because": "the focusing steps at the key, then drag-drop.ts :768-783; jsdom has no focus fixup",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click during a held mouse drag (Hold always) ends it quietly — its release is the drag's pointer; a press after it holds and lifts",
+    "because": "drag-drop.ts :233 (the click's press meets a gesture), :311-314 (its release ends it before the lift)",
+    "params": {
+      "draggable": true,
+      "holdToDrag": "always"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a click during a lifted finger drag takes the keyboard (the element is Draggable, so focusable) and leaves the drag: the lift cancels it, and hidden, Space lifts",
+    "because": "drag-drop.ts :233, :310; the default action of mousedown",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a press with no release on a plain text starts nothing: Draggable on, a held finger lifts it",
+    "because": "drag-drop.ts :241-242 — no draggable under the press, no gesture",
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  }
+]

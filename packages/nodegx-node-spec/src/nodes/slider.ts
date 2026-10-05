@@ -52,6 +52,10 @@ type State = {
   mounted: boolean;
   /** the element's `disabled` attribute follows Enabled at each paint (Slider.tsx :182) — what the Focus and Blur actions meet */
   pageEnabled: boolean;
+  /** NSP-016 s43 — Visible as written (node-shared-port-definitions.ts :366-375 `visibility: hidden`) */
+  visible: boolean;
+  /** NSP-016 s43 — the element's `visibility` as painted: what reaches a hidden element (`reaches`) */
+  pageVisible: boolean;
   /** the element holds the keyboard — what the PAGE knows (`focused` is what the node REPORTS, row D30) */
   elementFocused: boolean;
   /** the component is on the page: mounted and painted */
@@ -87,12 +91,12 @@ export const Slider = defineNode({
   source: 'packages/noodl-viewer-react/src/nodes/controls/slider.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the React side of the value with them
-  synced: ['pageEnabled', 'shown', 'paintedValue'],
+  synced: ['pageEnabled', 'pageVisible', 'shown', 'paintedValue'],
 
   // react-component-node.ts :1274-1301 the defaults into props, then slider.ts :31-57 `initialize`: the author's Value is Min
   // (0), `updateOutputValue(0)` finds the node's 0 unchanged and computes Value Percent (0)
   state: {
-    enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, elementFocused: false, onPage: false,
+    enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
     min: 0, max: 100, step: 1, authorValue: 0, out: 0, percent: 0, shown: 0, paintedValue: 0
   } as State,
   // utils.ts :402-411 `outcomeOutputs({ done, unchanged })` (addFocusActions)
@@ -282,7 +286,7 @@ export const Slider = defineNode({
     // utils.ts :370-384 — on the `<input>` (utils.ts :419-423 `_focusTarget`), as the Dropdown's
     focus: (s) => {
       if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
       return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // utils.ts :385-395 — a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless
@@ -291,7 +295,9 @@ export const Slider = defineNode({
       return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => NOTHING,
+    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
+    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set — the first render: Did Mount, and the mount's effect (Slider.tsx :88-90)
@@ -312,7 +318,7 @@ export const Slider = defineNode({
       touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
       lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
       focus: (s) => onPainted(s, (p) => (p.pageEnabled && !p.elementFocused ? focusTaken() : NONE)),
-      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.pageEnabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE)),
+      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.pageEnabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE), 'blur'),
       // the slide (Slider.tsx :183 the `<input>`'s `onChange`: `Number(e.target.value)` into the shown value, then
       // `updateOutputValue`, slider.ts :39-54). The browser's rules first: a disabled element takes none; the keyboard goes
       // onto the element (the focusing steps); the value lands sanitized (clamped, rounded to the step); a slide to the value
@@ -327,7 +333,7 @@ export const Slider = defineNode({
           if (held === to) return focus;
           const n = Number(to);
           return join(focus, join({ set: { shown: n }, send: [] }, reported({ ...p, shown: n }, n)));
-        })
+        }, 'keyboard')
     }
   }
 );
@@ -438,7 +444,7 @@ function rangeValue(s: Readonly<State>, v: unknown): string {
  *     fired when the node's value differs (row D36).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
-  const set: Partial<State> = s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled };
+  const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
   if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false }, send: [], emit: ['willUnmount'] };
   if (!s.mounted) return { set, send: [], emit: [] };
   const mounting = !s.onPage;
@@ -452,11 +458,21 @@ function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; e
   return { set: { ...set, shown: s.authorValue, paintedValue: s.authorValue, ...r.set }, send: r.send, emit: [...emit, ...(r.emit ?? [])] };
 }
 
+/**
+ * NSP-016 s43 — what reaches a HIDDEN element (`visibility: hidden`): no pointer (the browser's hit test passes it by), the keyboard
+ * only when it holds it already (`focus()` refuses a hidden element — Chromium `IsFocusableStyle` — and jsdom has no focus fixup),
+ * a blur always (`blur()` works on one).
+ */
+type Reach = 'pointer' | 'keyboard' | 'blur';
+function reaches(p: Readonly<State>, how: Reach): boolean {
+  return how === 'blur' || p.pageVisible || (how === 'keyboard' && p.elementFocused);
+}
+
 /** The act on the painted page (dropdown.ts `onPainted`). */
-function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act): Act {
+function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act, how: Reach = 'pointer'): Act {
   const p = painted(s);
   const after: State = { ...s, ...p.set };
-  const a = after.onPage ? then(after) : NONE;
+  const a = after.onPage && reaches(after, how) ? then(after) : NONE;
   return { set: { ...p.set, ...a.set }, send: [...p.send, ...a.send], emit: [...p.emit, ...(a.emit ?? [])] };
 }
 

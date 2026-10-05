@@ -69,6 +69,14 @@ type State = {
   labelOn: boolean;
   /** the element's `disabled` attribute follows Enabled at each paint (the Checkbox's) */
   pageEnabled: boolean;
+  /** NSP-016 s43 — Visible as written (node-shared-port-definitions.ts :366-375 `visibility: hidden`) */
+  visible: boolean;
+  /**
+   * NSP-016 s43 — the element's `visibility` follows Visible at each paint: a hidden button is never under the pointer (the
+   * browser's hit test) and takes no keyboard (`focus()` refuses it — Chromium `IsFocusableStyle`); `blur()` still works on one.
+   * A sibling's `pick` is the sibling's click, which this button's visibility does not reach
+   */
+  pageVisible: boolean;
   /** the element holds the keyboard — what the PAGE knows (the Checkbox's; row D30) */
   elementFocused: boolean;
   /** the element is on the page */
@@ -104,10 +112,10 @@ export const RadioButton = defineNode({
   source: 'packages/noodl-viewer-react/src/nodes/controls/radiobutton.ts',
   needs: ['person', 'group'],
   // the page's syncs (spec.ts `synced`): not branches
-  synced: ['pageEnabled', 'labelOn', 'shownValue', 'gRendered', 'gSelected', 'gFromUser', 'checked'],
+  synced: ['pageEnabled', 'pageVisible', 'labelOn', 'shownValue', 'gRendered', 'gSelected', 'gFromUser', 'checked'],
 
   state: {
-    enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, wantsLabel: false, labelOn: false, pageEnabled: true, elementFocused: false, onPage: false,
+    enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, wantsLabel: false, labelOn: false, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
     value: undefined, shownValue: undefined, inGroup: false, gValue: undefined, gRendered: undefined, gSelected: undefined, gFromUser: false
   } as State,
   // utils.ts `addFocusActions` — Focus / Blur report Done / Unchanged
@@ -275,14 +283,16 @@ export const RadioButton = defineNode({
     // utils.ts :340-364 — on the element, as the Checkbox's
     focus: (s) => {
       if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
       return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     blur: (s) => {
       if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
       return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => NOTHING,
+    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
+    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
   },
   {
     world: {
@@ -319,7 +329,7 @@ export const RadioButton = defineNode({
       touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
       lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
       focus: (s) => onPainted(s, (p) => (p.enabled && !p.elementFocused ? { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'] } : NONE)),
-      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE)),
+      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE), true),
       // a sibling's click: the keyboard moves to it (ours blurs), then its activation — whether or not this button is on the page
       pick: (s, _i, v) => {
         const p = painted(s);
@@ -371,7 +381,7 @@ function select(s: Readonly<State>, v: unknown): Act {
  * Value other than its last (RadioButtonGroup.tsx :37-39): the selection is that Value, nobody's — and the button's effect again.
  */
 function painted(s: Readonly<State>): Act {
-  const set: Partial<State> = s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled };
+  const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
   const emit: Pulse[] = [];
   // Enable Label changed: the tree is rebuilt around a NEW input (the Checkbox's); the old one took the keyboard with it, no blur fires
   if (s.wantsLabel !== s.labelOn) {
@@ -405,10 +415,11 @@ function painted(s: Readonly<State>): Act {
 }
 
 /** The act on the painted page (the Checkbox's `onPainted`). */
-function onPainted(s: Readonly<State>, act: (painted: State) => Act): Act {
+function onPainted(s: Readonly<State>, act: (painted: State) => Act, evenHidden = false): Act {
   const p = painted(s);
   const after: State = { ...s, ...p.set };
-  return after.onPage ? merge(p, act(after)) : p;
+  // NSP-016 s43 — a hidden button is under no pointer and takes no keyboard; a blur still reaches one
+  return after.onPage && (after.pageVisible || evenHidden) ? merge(p, act(after)) : p;
 }
 
 /** A mouse button down on an enabled button (utils.ts :255-259, :285-293), then the keyboard onto the input if it is not there already. */

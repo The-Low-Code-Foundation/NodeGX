@@ -41114,5 +41114,117 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Visible off: a hidden slider is under no pointer and takes no keyboard — every act raises nothing; the Focus action is Done with nothing; shown again, a click is a click",
+    "because": "node-shared-port-definitions.ts :366-375 `visibility: hidden`: the browser hit-tests past a hidden element and `focus()` refuses one (Chromium `IsFocusableStyle`)",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "slide",
+        "value": 70
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible off in the frame of an act: the act's paint hides the slider first — the act raises nothing; one that held the keyboard keeps it (no focus fixup), and a blur takes it off",
+    "because": "adapter.ts `act` paints first; jsdom has no focus fixup; `blur()` works on a hidden element",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible off after the keyboard is on the slider: it keeps it (no focus fixup), so a slide still lands; blurred, a slide reaches nothing",
+    "because": "`focus()` refuses a hidden element but nothing takes the keyboard off one that has it (jsdom has no focus fixup); `blur()` works on one",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 70
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "act": "slide",
+        "value": 30
+      },
+      "settle"
+    ]
   }
 ]

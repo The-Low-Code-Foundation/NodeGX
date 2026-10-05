@@ -66,6 +66,13 @@ type State = {
   mounted: boolean;
   /** the element's `disabled` attribute follows Enabled at each paint (Button.tsx :145 / Checkbox.tsx :57 render it; react-component-node.ts :1675-1689 at the frame's end) — what the Focus and Blur actions meet */
   pageEnabled: boolean;
+  /** NSP-016 s43 — Visible as written (node-shared-port-definitions.ts :366-375 `visibility: hidden`) */
+  visible: boolean;
+  /**
+   * NSP-016 s43 — the element's `visibility` follows Visible at each paint: a hidden element is never under the pointer (the
+   * browser's hit test) and takes no keyboard (`focus()` refuses it — Chromium `IsFocusableStyle`); `blur()` still works on one
+   */
+  pageVisible: boolean;
   /**
    * the element holds the keyboard — what the PAGE knows. `focused` is what the node REPORTS: an element leaving the
    * page (Mounted off) takes the keyboard with it and the node's Focused stays as it was (utils.ts never resets
@@ -90,9 +97,9 @@ export const Button = defineNode({
   source: 'packages/noodl-viewer-react/src/nodes/controls/button.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches
-  synced: ['pageEnabled'],
+  synced: ['pageEnabled', 'pageVisible'],
 
-  state: { enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, elementFocused: false, onPage: false } as State,
+  state: { enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false } as State,
   // utils.ts :366-376 `outcomeOutputs({ done, unchanged })`
   outcomes: ['done', 'unchanged'],
 
@@ -259,7 +266,7 @@ export const Button = defineNode({
     // The ELEMENT, not the want: a Mounted written off in the same frame has not left the page yet (:1675-1689, the frame's end)
     focus: (s) => {
       if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
       return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // utils.ts :356-364 → focus-tracker.ts :88-90: the keyboard is taken off it; Done either way
@@ -269,7 +276,9 @@ export const Button = defineNode({
       return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => NOTHING,
+    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
+    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set — the first render (react-component-node.ts :1740-1743 reads `wantsToBeMounted`):
@@ -281,23 +290,23 @@ export const Button = defineNode({
     // a person acts on a PAINTED page (adapter.ts `act`): the page follows first, then the act meets what is there
     person: {
       // utils.ts :216-234 — not dropped on a disabled control
-      hover: (s) => onPainted(s, () => ({ set: { hover: true }, send: ['hoverState'], emit: ['hoverStart'] })),
+      hover: (s) => onPainted(s, (p) => (p.pageVisible ? { set: { hover: true }, send: ['hoverState'], emit: ['hoverStart'] } : NONE)),
       // utils.ts :224-227, :235-243, :276-280 — hover before the press it ends
-      leave: (s) => onPainted(s, () => ({ set: { hover: false, pressed: false }, send: ['hoverState', 'pressedState'], emit: ['hoverEnd'] })),
-      press: (s, i) => onPainted(s, (p) => (p.enabled ? pressed(p, i) : NONE)),
-      release: (s) => onPainted(s, (p) => (p.enabled ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
+      leave: (s) => onPainted(s, (p) => (p.pageVisible ? { set: { hover: false, pressed: false }, send: ['hoverState', 'pressedState'], emit: ['hoverEnd'] } : NONE)),
+      press: (s, i) => onPainted(s, (p) => (p.enabled && p.pageVisible ? pressed(p, i) : NONE)),
+      release: (s) => onPainted(s, (p) => (p.enabled && p.pageVisible ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
       // Button.tsx :141-151, button.ts :79-85: the press, the release, then Click
       click: (s, i) =>
         onPainted(s, (p) => {
-          if (!p.enabled) return NONE;
+          if (!p.enabled || !p.pageVisible) return NONE;
           const d = pressed(p, i);
           return { set: { ...d.set, pressed: false }, send: ['pressedState', 'focusState'], emit: [...d.emit, 'pointerUp', 'onClick'] };
         }),
       // utils.ts :260-264, :294-297 — a finger is not dropped on a disabled control
-      touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
-      lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
+      touch: (s) => onPainted(s, (p) => (p.pageVisible ? { set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] } : NONE)),
+      lift: (s) => onPainted(s, (p) => (p.pageVisible ? { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] } : NONE)),
       // utils.ts :157-195 — a disabled button is not a focusable area
-      focus: (s) => onPainted(s, (p) => (p.enabled && !p.elementFocused ? { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'] } : NONE)),
+      focus: (s) => onPainted(s, (p) => (p.enabled && p.pageVisible && !p.elementFocused ? { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'] } : NONE)),
       blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE))
     }
   }
@@ -312,7 +321,7 @@ type Act = { set?: Partial<State>; send: Array<'pressedState' | 'focusState' | '
  * pressed and focused states keeping what they held (:1000-1003 resets only the visual states).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[] } {
-  const set: Partial<State> = s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled };
+  const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
   if (s.mounted && !s.onPage) return { set: { ...set, onPage: true }, emit: ['didMount'] };
   // the element leaves with the keyboard it held; the node's Focused is not told (row D30)
   if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false }, emit: ['willUnmount'] };

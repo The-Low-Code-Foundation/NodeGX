@@ -58,6 +58,10 @@ type State = {
   mounted: boolean;
   /** the element is on the page: mounted and painted */
   onPage: boolean;
+  /** NSP-016 s43 — Visible as written (node-shared-port-definitions.ts :366-375 `visibility: hidden`) */
+  visible: boolean;
+  /** NSP-016 s43 — as painted: a hidden group's buttons inherit `visibility: hidden`, so a pick finds none under the pointer */
+  pageVisible: boolean;
 };
 
 type O = typeof RadioButtonGroup extends { outputs: infer X } ? X : never;
@@ -74,9 +78,9 @@ export const RadioButtonGroup = defineNode({
   source: 'packages/noodl-viewer-react/src/nodes/controls/radiobuttongroup.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the component's side of the selection, as the Slider's `shown`
-  synced: ['rendered', 'selected'],
+  synced: ['rendered', 'selected', 'pageVisible'],
 
-  state: { value: undefined, rendered: undefined, selected: undefined, mounted: true, onPage: false } as State,
+  state: { value: undefined, rendered: undefined, selected: undefined, mounted: true, onPage: false, visible: true, pageVisible: true } as State,
 
   acts: {
     pick: { description: 'a person clicks the Radio Button inside this group whose Value is the one given (none given: the button with no Value)', values: PAGE_VALUES }
@@ -160,7 +164,9 @@ export const RadioButtonGroup = defineNode({
     // react-component-node.ts :2310-2320
     mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => NOTHING,
+    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
+    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
   },
   {
     // placed on the page with its params set and its buttons added — the first render: Did Mount; the buttons' count at the frame's end
@@ -171,8 +177,8 @@ export const RadioButtonGroup = defineNode({
     person: {
       pick: (s, _i, v) =>
         onPainted(s, (p) => {
-          // a Value no button on the page carries: nothing to click
-          if (!PAGE_VALUES.includes(v)) return NONE;
+          // a Value no button on the page carries, or a hidden group (its buttons inherit the visibility): nothing to click
+          if (!PAGE_VALUES.includes(v) || !p.pageVisible) return NONE;
           // RadioButton.tsx :58 — the picked button is the selected one: a click on a selected radio changes nothing
           if (p.selected === v) return NONE;
           // RadioButton.tsx :187-189 → RadioButtonGroup.tsx :27-30 selects it (the re-render reuses the last paint's props:
@@ -200,10 +206,11 @@ export function asGroupValue(v: unknown): string | undefined {
  * effect (:37-39).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[] } {
-  if (s.mounted && !s.onPage) return { set: { onPage: true, rendered: s.value, selected: s.value }, emit: ['didMount'] };
-  if (!s.mounted && s.onPage) return { set: { onPage: false }, emit: ['willUnmount'] };
-  if (s.onPage && !Object.is(s.rendered, s.value)) return { set: { rendered: s.value, selected: s.value }, emit: [] };
-  return { set: {}, emit: [] };
+  const seen: Partial<State> = s.pageVisible === s.visible ? {} : { pageVisible: s.visible };
+  if (s.mounted && !s.onPage) return { set: { ...seen, onPage: true, rendered: s.value, selected: s.value }, emit: ['didMount'] };
+  if (!s.mounted && s.onPage) return { set: { ...seen, onPage: false }, emit: ['willUnmount'] };
+  if (s.onPage && !Object.is(s.rendered, s.value)) return { set: { ...seen, rendered: s.value, selected: s.value }, emit: [] };
+  return { set: seen, emit: [] };
 }
 
 /** The act on the painted page (button.ts `onPainted`). */

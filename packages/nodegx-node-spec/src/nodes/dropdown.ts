@@ -62,6 +62,10 @@ type State = {
   labelOn: boolean;
   /** the element's `disabled` attribute follows Enabled at each paint (Select.tsx :209) — what the Focus and Blur actions meet */
   pageEnabled: boolean;
+  /** NSP-016 s43 — Visible as written (node-shared-port-definitions.ts :366-375 `visibility: hidden`) */
+  visible: boolean;
+  /** NSP-016 s43 — the element's `visibility` as painted: what reaches a hidden element (`reaches`) */
+  pageVisible: boolean;
   /** the element holds the keyboard — what the PAGE knows (`focused` is what the node REPORTS; an element leaving the page tells nobody, row D30) */
   elementFocused: boolean;
   /** the component is on the page: mounted and painted */
@@ -101,10 +105,10 @@ export const Dropdown = defineNode({
   source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the React side of the choice with them
-  synced: ['pageEnabled', 'labelOn', 'shown', 'domSelected', 'paintedItems'],
+  synced: ['pageEnabled', 'pageVisible', 'labelOn', 'shown', 'domSelected', 'paintedItems'],
 
   state: {
-    enabled: true, hover: false, pressed: false, focused: false, mounted: true, wantsLabel: false, labelOn: false, pageEnabled: true, elementFocused: false, onPage: false,
+    enabled: true, hover: false, pressed: false, focused: false, mounted: true, wantsLabel: false, labelOn: false, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
     value: 'Option 1', authorValue: 'Option 1', items: DEFAULT_ITEMS, shown: undefined, domSelected: '', paintedItems: undefined
   } as State,
   // utils.ts :402-411 `outcomeOutputs({ done, unchanged })` (addFocusActions)
@@ -317,7 +321,7 @@ export const Dropdown = defineNode({
     // utils.ts :370-384 — on the `<select>` (utils.ts :419-423 `_focusTarget`), as the Checkbox's
     focus: (s) => {
       if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
       return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // utils.ts :385-395 — a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless
@@ -326,7 +330,9 @@ export const Dropdown = defineNode({
       return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
     // react-component-node.ts :1380-1395 — scrolls; nothing on the wire
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => NOTHING,
+    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
+    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
   },
   {
     // react-component-node.ts :785-830 `DATA_ATTRIBUTES_RULE` — one string input per name the Data Attributes list names, written
@@ -355,7 +361,7 @@ export const Dropdown = defineNode({
       touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
       lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
       focus: (s) => onPainted(s, (p) => (p.pageEnabled && !p.elementFocused ? focusTaken() : NONE)),
-      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.pageEnabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE)),
+      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.pageEnabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE), 'blur'),
       // the pick (Select.tsx :212-215 the `<select>`'s `onChange`: the shown value, then `valueChanged`, options.ts :109-116). The
       // browser's rules first: a disabled element takes no pick; only an enabled option the list offers can be picked; the keyboard
       // goes onto the element (the focusing steps); and picking the option the element already selects raises no `change`
@@ -369,7 +375,7 @@ export const Dropdown = defineNode({
           if (p.domSelected === picked) return focus;
           const changed = p.value !== picked;
           return join(focus, { set: { shown: picked, domSelected: picked, ...(changed ? { value: picked } : {}) }, send: changed ? ['value'] : [], emit: changed ? ['onChange'] : [] });
-        })
+        }, 'keyboard')
     }
   }
 );
@@ -406,7 +412,7 @@ function optionsOf(items: unknown): Option[] {
  *     to the first enabled option (HTML's reset; the hidden one is disabled).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
-  const set: Partial<State> = s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled };
+  const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
   let fresh = false;
   if (s.wantsLabel !== s.labelOn) {
     set.labelOn = s.wantsLabel;
@@ -446,11 +452,21 @@ function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; e
   return { set, send, emit };
 }
 
+/**
+ * NSP-016 s43 — what reaches a HIDDEN element (`visibility: hidden`): no pointer (the browser's hit test passes it by), the keyboard
+ * only when it holds it already (`focus()` refuses a hidden element — Chromium `IsFocusableStyle` — and jsdom has no focus fixup),
+ * a blur always (`blur()` works on one).
+ */
+type Reach = 'pointer' | 'keyboard' | 'blur';
+function reaches(p: Readonly<State>, how: Reach): boolean {
+  return how === 'blur' || p.pageVisible || (how === 'keyboard' && p.elementFocused);
+}
+
 /** The act on the painted page (checkbox.ts `onPainted`). */
-function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act): Act {
+function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act, how: Reach = 'pointer'): Act {
   const p = painted(s);
   const after: State = { ...s, ...p.set };
-  const a = after.onPage ? then(after) : NONE;
+  const a = after.onPage && reaches(after, how) ? then(after) : NONE;
   return { set: { ...p.set, ...a.set }, send: [...p.send, ...a.send], emit: [...p.emit, ...(a.emit ?? [])] };
 }
 

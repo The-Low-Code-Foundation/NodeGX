@@ -48,6 +48,13 @@ type State = {
   labelOn: boolean;
   /** the element's `disabled` attribute follows Enabled at each paint (Button.tsx :145 / Checkbox.tsx :57 render it; react-component-node.ts :1675-1689 at the frame's end) — what the Focus and Blur actions meet */
   pageEnabled: boolean;
+  /** NSP-016 s43 — Visible as written (node-shared-port-definitions.ts :366-375 `visibility: hidden`) */
+  visible: boolean;
+  /**
+   * NSP-016 s43 — the element's `visibility` follows Visible at each paint: a hidden element is never under the pointer (the
+   * browser's hit test) and takes no keyboard (`focus()` refuses it — Chromium `IsFocusableStyle`); `blur()` still works on one
+   */
+  pageVisible: boolean;
   /**
    * the element holds the keyboard — what the PAGE knows. `focused` is what the node REPORTS: an element leaving the
    * page (Mounted off) takes the keyboard with it and the node's Focused stays as it was (utils.ts never resets
@@ -73,9 +80,9 @@ export const Checkbox = defineNode({
   source: 'packages/noodl-viewer-react/src/nodes/controls/checkbox.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches
-  synced: ['pageEnabled', 'labelOn'],
+  synced: ['pageEnabled', 'pageVisible', 'labelOn'],
 
-  state: { enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, wantsLabel: false, labelOn: false, pageEnabled: true, elementFocused: false, onPage: false } as State,
+  state: { enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, wantsLabel: false, labelOn: false, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false } as State,
   // checkbox.ts :132-137 `outcomeOutputs({ done, unchanged })`
   outcomes: ['done', 'unchanged'],
 
@@ -249,7 +256,7 @@ export const Checkbox = defineNode({
     // utils.ts :340-364 — on the element, as the Button's
     focus: (s) => {
       if (!s.onPage) return { send: [], outcome: 'unchanged' };
-      if (s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
+      if (s.elementFocused || !s.pageEnabled || !s.pageVisible) return { send: [], outcome: 'done' };
       return { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'], outcome: 'done' };
     },
     // a disabled element gives the keyboard up to nobody: `blur()` on one does nothing (the focusing steps), Done regardless
@@ -257,7 +264,9 @@ export const Checkbox = defineNode({
       if (!s.onPage || !s.elementFocused || !s.pageEnabled) return { send: [], outcome: 'done' };
       return { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'], outcome: 'done' };
     },
-    scrollIntoView: () => NOTHING
+    scrollIntoView: () => NOTHING,
+    // node-shared-port-definitions.ts :366-375 — the page follows at the next paint
+    visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
   },
   {
     world: { place: (s) => ({ ...painted(s), send: [] }) },
@@ -277,14 +286,14 @@ export const Checkbox = defineNode({
       touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
       lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
       focus: (s) => onPainted(s, (p) => (p.enabled && !p.elementFocused ? { set: { focused: true, elementFocused: true }, send: ['focusState'], emit: ['onFocus'] } : NONE)),
-      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE))
+      blur: (s) => onPainted(s, (p) => (p.elementFocused && p.enabled ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE), true)
     }
   }
 );
 
 /** The page follows what the node wants (button.ts `painted`). */
 function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[] } {
-  const set: Partial<State> = s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled };
+  const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
   // Enable Label changed: the tree is rebuilt around a NEW input (Checkbox.tsx :167-210); the old one took the keyboard with it, no blur fires
   if (s.wantsLabel !== s.labelOn) {
     set.labelOn = s.wantsLabel;
@@ -297,10 +306,11 @@ function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[] } {
 }
 
 /** The act on the painted page (button.ts `onPainted`). */
-function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act): Act {
+function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act, evenHidden = false): Act {
   const p = painted(s);
   const after: State = { ...s, ...p.set };
-  const a = after.onPage ? then(after) : NONE;
+  // NSP-016 s43 — a hidden element is under no pointer and takes no keyboard; a blur still reaches one
+  const a = after.onPage && (after.pageVisible || evenHidden) ? then(after) : NONE;
   return { set: { ...p.set, ...a.set }, send: a.send, emit: [...p.emit, ...(a.emit ?? [])] };
 }
 

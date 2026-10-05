@@ -7,6 +7,7 @@ area: runtime / drag and drop (noodl-viewer-react/src/drag-drop.ts `setDraggable
 found: P107 NSP-016 s43, 2026-10-05
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/RESEARCH-DRAG-DROP.md §4 (the probe's six cases, on the real Text node in the runtime target's page)
 kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/Text.json "row C77 — Mounted off and on: the new element has no tabindex, so Space raises nothing; Draggable off and on puts it back"
 ---
 
 **What a person sees.** A card that could be picked up with Tab and Space stops responding to the keyboard. Tab
@@ -29,7 +30,8 @@ cannot take the keyboard.
 **Reproduce.** A Text with Draggable on. Settle, Mounted false, settle, Mounted true, three settles, focus it, press
 Space: nothing (the control, with no remount: Picked Up, Is Lifted true). The same for Tag `h1`, and for a Text
 placed with Mounted false and mounted after 70 settles (after 3 settles: Picked Up). The probe is recorded in the
-evidence file. The regression scenarios come with the Text spec (NSP-016).
+evidence file; seven "row C77" scenarios in the Text spec pin it, the 60-frame edge among them (a settle of the runtime
+target is two frame starts, both before its paint commits).
 
 **Proposed fix (small).** Add the attributes where the node learns its element, in `setDOMElement`
 (react-component-node.ts :1934): when `_internal.draggable` is on, add the two attributes the author has not set.

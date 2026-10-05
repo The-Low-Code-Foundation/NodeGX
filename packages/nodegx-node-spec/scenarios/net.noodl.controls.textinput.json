@@ -36183,5 +36183,474 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Visible off: a hidden field is under no pointer and takes no keyboard — every act raises nothing; the Focus action is Done with nothing; shown again, a click is a click",
+    "because": "node-shared-port-definitions.ts :366-375 `visibility: hidden`: the browser hit-tests past a hidden element and `focus()` refuses one (Chromium `IsFocusableStyle`)",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "press"
+      },
+      {
+        "act": "release"
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "type",
+        "value": "ab"
+      },
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible off in the frame of an act: the act's paint hides the field first — the act raises nothing; one that held the keyboard keeps it (no focus fixup), and a blur takes it off",
+    "because": "adapter.ts `act` paints first; jsdom has no focus fixup; `blur()` works on a hidden element",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "click"
+      },
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "signal": "focus"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible off after the keyboard is on the field: it keeps it (no focus fixup), so typing and Enter still land; blurred, typing reaches nothing",
+    "because": "`focus()` refuses a hidden element but nothing takes the keyboard off one that has it (jsdom has no focus fixup); `blur()` works on one",
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "type",
+        "value": "ab"
+      },
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      "settle",
+      {
+        "act": "type",
+        "value": "c"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Opacity exactly the number 0: the field takes no pointer (TextInput.tsx :118-120 pointer-events none) — but the keyboard reaches it: a focus and typing land; the string \"0\" takes the pointer",
+    "because": "TextInput.tsx :118-120 compares style.opacity with 0 strictly; opacity does not stop a focus",
+    "steps": [
+      "settle",
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "type",
+        "value": "x"
+      },
+      "settle",
+      {
+        "act": "blur"
+      },
+      {
+        "set": "opacity",
+        "value": "0"
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "hidden, holding the keyboard: every pointer act meets nothing and takes nothing away — the Blur action after each finds the keyboard on the field (Blurred)",
+    "because": "the browser hit-tests past a hidden element; nothing takes the keyboard off one that has it (no focus fixup); `blur()` works on a hidden element",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "hidden, holding the keyboard, Enable Label changed: every pointer act's paint rebuilds the field and the keyboard leaves with the old element — the Blur action after each finds nothing to blur (Done only)",
+    "because": "the Enable Label rebuild makes a new element (row D30's silence); the act meets nothing hidden",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle"
+    ]
   }
 ]

@@ -520,5 +520,40 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Visible off: a hidden group's buttons inherit the visibility — a pick reaches none, so nothing changes; shown again, a pick selects",
+    "because": "node-shared-port-definitions.ts :366-375 `visibility: hidden` is inherited; the browser hit-tests past a hidden element",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      {
+        "act": "pick",
+        "value": "b"
+      },
+      "settle"
+    ]
   }
 ]

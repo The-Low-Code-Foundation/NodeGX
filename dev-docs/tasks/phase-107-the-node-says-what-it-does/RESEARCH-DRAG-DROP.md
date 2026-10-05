@@ -138,21 +138,35 @@ lacks them.
    lifted survived into the **next** play, and that play's Space went to it. The globals now come off after the teardown
    (`releasePage`).
 
-Fixes 1 and 2 change when the face installs the page for all 8 visual nodes that already conform, so all 8 must be re-run
-(§8).
+Fixes 1 and 2 change when the face installs the page for all 8 visual nodes that already conform, so all 8 were re-run
+(seed 13, all CONFORMS).
+
+**Later the same session (NSP-016 §7.8), building the Text, the face gained what §6 lists, and one more fix:**
+
+4. **The browser's hit test.** A pointer act lands on the element under the pointer, and an element with `pointer-events:
+   none` or `visibility: hidden` is never that element (`underPointer`). `focus()` refuses a hidden element (Chromium
+   `IsFocusableStyle`), whether a person or a node's own Focus action calls it. jsdom had delivered both, so **all 8
+   conforming visuals had been graded on a page where a hidden control could be clicked and focused.** Seven of them
+   diverged once the rule was in, and each spec now says what the browser does (§7.8).
+5. **Pointer events**, sent before the compatibility events, with `pointerType` and `pointerId`.
+6. **`elementFromPoint`**, which returns the element the last pointer act landed on.
+7. **The window is left clean.** Every listener a play adds to the shared `window` comes off with its page. A drop's
+   `swallowNextClick` removes its own listener with a `setTimeout(0)` on the world's clock. A play that ended before that
+   timer fired left the listener on the window, and it **ate a click in a later play**. The side-by-side probe showed the
+   runtime dropping a Click that the spec fired, in 3 of 50 scenarios, and only when the whole file was played in one run.
 
 ## 6. What jsdom can play (measured, jsdom 26.1.0)
 
 | needed | jsdom | what the face does |
 |---|---|---|
-| `pointerdown` / `pointerup` / `pointermove` with `pointerType`, `pointerId`, `button`, `clientX/Y` | **no `PointerEvent`** — but a `MouseEvent` named `pointerdown` with `pointerType` defined on it reaches a capture listener with both read correctly (measured) | **to add**: the press, release, click, touch and lift acts send the browser's pointer events before the compatibility events (`pointerdown` → `mousedown`, `pointerup` → `mouseup` → `click`; for a finger `pointerdown` → `touchstart`, `pointerup` → `touchend`). The other 8 visual nodes listen to no pointer event (no component has an `onPointer*` handler), but they are re-run to prove it |
+| `pointerdown` / `pointerup` / `pointermove` with `pointerType`, `pointerId`, `button`, `clientX/Y` | **no `PointerEvent`** — but a `MouseEvent` named `pointerdown` with `pointerType` defined on it reaches a capture listener with both read correctly (measured) | **built (s43)**: the press, release, click, touch and lift acts send the browser's pointer events before the compatibility events (`pointerdown` → `mousedown`, `pointerup` → `mouseup` → `click`; for a finger `pointerdown` → `touchstart`, `pointerup` → `touchend`). No component has an `onPointer*` handler, and the 8 re-runs confirmed it |
 | a move past the slop | — | **to add**: a `move` act — `pointermove` from the press point by more than 8 px, over the element the act names |
-| `document.elementFromPoint` | **undefined** | **to add**: a stand-in that returns the element the last pointer act named (by default the node's own element: the pointer is where it went down). A face choice, like the keyboard slide and the keyboard pick: an act names *what* is under the pointer, never *where* |
+| `document.elementFromPoint` | **undefined** | **built (s43)**: returns the element the last pointer act landed on, after the hit test. A face choice, like the keyboard slide and the keyboard pick: an act names *what* is under the pointer, never *where* |
 | element rectangles | all 0×0 | none. Drop Index from a pointer is geometry and waits for NSP-017. The keyboard grades the index |
-| `getComputedStyle` (flex direction, gaps, `display`) | yes, from inline style (`flexDirection: row`, `columnGap: 8px` measured); `translate` reads `""`, which the code takes as 0 | **to add**: as a global (drag-drop calls it bare). Today a zone with any slot throws a ReferenceError in the face |
-| `new DOMRect` | yes, as `window.DOMRect` | **to add**: as a global (`restingRect`) |
+| `getComputedStyle` (flex direction, gaps, `display`) | yes, from inline style (`flexDirection: row`, `columnGap: 8px` measured); `translate` reads `""`, which the code takes as 0 | **built (s43)**: as a global (drag-drop calls it bare) |
+| `new DOMRect` | yes, as `window.DOMRect` | **built (s43)**: as a global (`restingRect`) |
 | focus on a `tabindex="0"` `<div>` | yes | — |
-| the hold timer | bare `setTimeout`, which is the world's (`installWorld` owns the timers) | expected to run on the world's clock; **measure it** once the face sends pointer events. In a spec it is `after` with the tag `hold` |
+| the hold timer | bare `setTimeout`, which is the world's (`installWorld` owns the timers) | **measured (s43)**: it runs on the world's clock (lifted at an advance of 500, not 499). In the spec it is `after` with the tag `hold` |
 | `DragEvent` / `DataTransfer` | **neither** (jsdom has `File`) | **to add**: `fileEnter`, `fileLeave` and `fileDrop` acts that dispatch plain `dragenter` / `dragover` / `dragleave` / `drop` events with a `dataTransfer` stand-in (`types: ['Files']`, `files: [File…]`) made from the act's `$file` values. React reads `dataTransfer` off the native event |
 
 ## 7. What a spec can say, per node
@@ -188,10 +202,11 @@ Fixes 1 and 2 change when the face installs the page for all 8 visual nodes that
 
 ## 9. Not measured here
 
-- The hold timer on the world's clock (§6), and what a `pointercancel` from a browser scroll looks like (the face has no
+- What a `pointercancel` from a browser scroll looks like (the face has no
   scroll).
-- `swallowNextClick` (a click in the same turn as a pointer drop is eaten; its removal is a `setTimeout(0)` on the world's
-  clock, so a click act after a drop **with no advance between them** is still eaten, and in a browser it would not be).
-  Measure this before writing a scenario that clicks right after a drop.
+- ~~`swallowNextClick`~~ — measured in s43: the swallow eats exactly ONE click, wherever it lands, and expires when the world's clock
+  passes the `setTimeout(0)` (an advance of 1, not of 0). A settle does not move the clock, so in the face a click several frames
+  after a drop is still eaten where a browser would have turned its event loop between them. A face choice, pinned by the
+  scenario "the swallow expires when the event loop turns past it".
 - The live region's words (not on the wire) and `Zone Name` (read only into them).
 - Two zones ordered by reading position (rects), and nested zones (the innermost taker): these need a page with layout.

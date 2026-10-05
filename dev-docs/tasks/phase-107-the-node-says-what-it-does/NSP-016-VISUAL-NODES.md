@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -721,3 +721,71 @@ divergences, 48 / 48; at 10,000 on 20730 again 0 divergences. The side-by-side p
 Stranger hashes refreshed (exactly spec.ts and world.ts), the three rounds green (41 passed). The package suite green (20 suites, 874
 passed); the runtime's graph and target suites green (102 passed); `tsc --noEmit` exit 0 on both packages; `node scripts/bugs.js check`
 valid.
+
+### 7.8 s43, 2026-10-05 — drag and drop researched, the Text conforms (115 of 147), and the face learns the browser's hit test
+
+**The research** ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)). It covers what a drag and a file drop are (drag-drop.ts, the two
+port groups), what jsdom can play, what the real Text node does in the runtime target's page, and what a spec can grade. The product
+surface barely uses the ports so far: the 13 shelf templates hold 1,153 Text and 1,653 Group nodes, none of which sets a drag or drop
+port, plus one catalog example (the kanban) and one Site Builder file drop. The keyboard drag can be played with no geometry. A
+pointer drag needs `elementFromPoint`, which jsdom lacks. Drop Index from a pointer is geometry and waits for NSP-017.
+
+**Two rows, both modelled and both in the Text's scenarios:**
+- **C77** (medium, [the ledger](../../bugs/p107-c77-a-draggable-element-loses-its-keyboard-pickup-when-its-element-is-replaced.md)):
+  a Draggable element can no longer be picked up from the keyboard once its element is replaced. This happens after Mounted goes off
+  and on, after a new Tag, or when it mounts more than 60 frames after Draggable was set. drag-drop.ts adds `tabindex` once, to the
+  element it finds.
+- **C78** (low, [the ledger](../../bugs/p107-c78-a-keyboard-drag-drops-an-element-on-itself.md)): an element that is both Draggable
+  and a drop zone, picked up with the keyboard, starts inside itself, and Enter drops it on itself (`keyboardLift`'s `list[0]`
+  fallback). The pointer can never do this.
+
+**The face: eight fixes, every one measured before it was made** (node-spec-target.ts; RESEARCH-DRAG-DROP.md §5):
+1. A node a person acts on is made with the page installed, so `window` and `document` exist while its params are set. Draggable set
+   at the placing had never armed.
+2. `requestAnimationFrame` is the world's frame clock, on the host and on jsdom's `window`. jsdom's own runs on wall-clock time, and
+   the first probe gave different answers from one run to the next.
+3. The page's globals come off after the node's teardown, so a gesture cannot outlive its play.
+4. **The browser's hit test.** A pointer act lands on the element under the pointer. An element with `pointer-events: none` or
+   `visibility: hidden` is never that element, and `focus()` refuses a hidden one (Chromium `IsFocusableStyle`). jsdom had
+   delivered both. **All 8 conforming visuals had been graded on a page where a hidden control could be clicked and focused.**
+5. Pointer events (`pointerdown` / `pointerup`, with `pointerType` and `pointerId`), sent before the compatibility events.
+6. `elementFromPoint`, which returns the element the last pointer act landed on.
+7. `getComputedStyle` and `DOMRect` as globals (drag-drop calls them bare).
+8. Every window listener a play adds comes off with its page. A drop's click swallow, left on the shared window because the world's
+   clock never turned past its `setTimeout(0)`, **ate a Click in a later play**.
+
+**The 7 specs the hit test moved** (Button, Checkbox, Text Input, Dropdown, Slider, Radio Button, Radio Button Group; the Icon's acts
+raise nothing, so it was unaffected). Visible is page state now, painted at each frame end like Enabled. A hidden control takes no
+pointer act and no keyboard. A control that held the keyboard before it was hidden keeps it, because jsdom has no focus fixup (the
+disabled case's written choice), so typing, choosing and sliding still land, and a blur still works. The Focus action on a hidden
+control is Done with nothing. The Text Input also takes no pointer at Opacity exactly 0 (TextInput.tsx :118-120). A hidden group's
+buttons inherit the visibility, so a pick reaches none of them. A sibling's pick still selects while the Radio Button itself is hidden.
+Each spec stays version 1: the runtime did not change, and the spec now says what a browser lets a person do (the s40 and s41
+precedent). New scenarios, all identical on both targets: two "Visible off" ones per control, one for a field kept after it is hidden,
+the Text Input's opacity, and "hidden, holding the keyboard": every pointer act, then the node's own Blur action reading whether the
+keyboard is still there, with and without an Enable Label rebuild. That last pair kills the survivors the rule made (an act that
+now meets nothing but whose paint rebuilds the control).
+
+**The Text** (`Text`, [text.ts](../../../packages/nodegx-node-spec/src/nodes/text.ts), 54 scenarios, 10 acts) is step (a) of the
+research's recommendation. Covered: the page (Mounted, Tag), the pointer outputs (Hover Start then Pointer Enter, Hover End, Pointer
+Down, Pointer Up, Click), the hit test (Visible, Opacity exactly the number 0, Pointer Events Enabled, and Mode `inherit` removing the
+style), and the drag source in full on a lone node. That means the keyboard lift and its four endings, the hold (a finger, or a mouse
+with Hold always; Hold Time read at the press), a drop over nothing (Cancelled), the click swallow (one click, until the clock turns),
+and C77 and C78. The zone side and the file drop are stored; their acts come in step (b). The spec keeps WHICH element is on the page (a
+remount or a new Tag makes a new one) and the element the module's `tabindex` is on. `whenMounted`'s 60-frame budget is spent at two
+frame starts per settle (the runtime target's frame and its drain), and **both come before the settle's paint commits**, because the
+settle runs inside React's `act`. This was measured: an element mounted by a Mounted write is found at the NEXT settle. The first
+model checked after the paint and was one frame early at the 60-frame edge.
+
+**Mutants.** The first run left 26–32 alive. Almost all were state that no scenario read later: whether the element holds the keyboard
+(read by hiding it and pressing Space), whether a gesture ended (read by a second hold), a pointer of another kind (a mouse release
+during a finger drag), and an act's paint moving the element (a Mounted write after every act, the Icon's precedent). Seven are
+declared equivalent, each a patch that writes a value the state already holds, or a click that starts and ends a pending gesture
+(idle before and after).
+
+**Lessons.** (1) **A face rule that jsdom does not apply is invisible until a node depends on it.** Eight visuals conformed with a
+hidden button clickable, because no scenario crossed Visible with an act, and the generator crossed it only as noise that both
+targets agreed on. (2) **A play's page is shared state.** The window, the module-level gesture and the click swallow all outlive a
+play unless the face takes them down. The symptom was a Click lost in one scenario out of fifty, and only when the whole file ran in
+one process. (3) **Inside React's `act`, a render commits when the act closes.** "The frame start after the paint" is therefore the
+next settle, not the drain.

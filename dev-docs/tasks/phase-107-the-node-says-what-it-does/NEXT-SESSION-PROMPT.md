@@ -1,17 +1,16 @@
 # P107 — next session
 
-**Written 2026-10-04 (s42).** Read the [README](README.md) §2–§7. s42's record is [NSP-016 §7.7](NSP-016-VISUAL-NODES.md) (the visual
-tree designed per node: a node's CHILDREN on its page, its PARENT as a world seam; the Radio Button Group and the Radio Button; the GROUP
-seam; rows C76, D37; the pick grid); s41's is §7.6 (Slider, Icon, `slide`, the remaining visuals' infrastructure map); s40's §7.5; s39's
-§7.4; s38's §7.3; s37's §7.2 (THE PERSON face).
+**Written 2026-10-05 (s43).** Read the [README](README.md) §2–§7. s43's record is [NSP-016 §7.8](NSP-016-VISUAL-NODES.md) and
+[RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md) (what a drag and a file drop are, what jsdom can play, what a spec grades); s42's is §7.7
+(the visual tree, per node); s41's §7.6; s40's §7.5; s39's §7.4; s38's §7.3; s37's §7.2 (THE PERSON face).
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 the census | ✅ s1; s21; s36 `scripts/node-spec/visual-census.js`; s38 `scripts/node-spec/gen-ports.js` | `3bd71e837`, s21, `bf90b170d`, s39 |
-| NSP-001 the spec + interpreter | ✅ s1 … s42 (`act`, `acts` / `person`, `place`, `portability`, `PersonPatch`, s40 `WorldHandlers.turn`, **s42 `WorldHandlers.group` + `WorldView.group()`**) | s1 … s42 |
-| NSP-002 traces + adapter + runtime target | ✅ s37 the PERSON face; s38 `type` / `key`; s39 `choose`; s40 `typeKey` writes at the cursor; s41 `slide`; **s42 `pick` (a click on a page child), page CHILDREN built with `addChild`, a REAL group around a `group` node, the paint dropping the group's `cachedChildren`, `ownElement`** | s2 … s42 |
+| NSP-001 the spec + interpreter | ✅ s1 … s42 (`act`, `acts` / `person`, `place`, `portability`, `PersonPatch`, s40 `WorldHandlers.turn`, s42 `WorldHandlers.group` + `WorldView.group()`; s43 no format change) | s1 … s42 |
+| NSP-002 traces + adapter + runtime target | ✅ s37 the PERSON face; s38 `type` / `key`; s39 `choose`; s40 `typeKey` writes at the cursor; s41 `slide`; s42 `pick`, page children, a real group; **s43 the browser's HIT TEST (`underPointer`; `focus()` refuses a hidden element), pointer events before the compatibility events, `elementFromPoint` (`pointerAt`), `getComputedStyle` / `DOMRect` globals, the page installed before a person node's params, the world's frame clock on jsdom's `window`, globals off after the teardown, the play's window listeners removed (`installPage` / `releasePage`)** | s2 … s42 |
 | NSP-003 the runner | ✅ (s39 last: an `optionslist` pool in `generate.ts`) | s2 … s39 |
 | NSP-004 the pilot five | ✅ s3 | `ef6f3b6e1` |
 | NSP-005 the export adapter | ✅ (s13); plays the latch nodes only | s13, s15 |
@@ -23,53 +22,49 @@ seam; rows C76, D37; the pick grid); s41's is §7.6 (Slider, Icon, `slide`, the 
 | NSP-013 the time batch | 🟡 24 / 24 conform. Left: AC2, the deep run for s11–s14 | s16 |
 | NSP-014 records, users, files, HTTP, streams | 🟡 24 of 24 conform; s36 D29 fixed; **s40 DbModel2's seed-dependent twins pinned**. Left: AC2's export half (P18) | s8, s21 … s40 |
 | NSP-015 navigation + components | 🟡 14 of 14 conform; **s40 NavigationClosePopup's seed-dependent survivor pinned**. Left: AC2 (export, P18) | s15 … s40 |
-| **NSP-016 the visual nodes** | **🟡 8 of 19 conform (Button, Checkbox, Text Input, Dropdown, Slider, Icon, Radio Button Group, Radio Button — s42, §7.7). The other 11 need infrastructure (below). AC4 waits for NSP-017** | `aa8abb06f`, s39, s40, `d7ef6a87a`, s41, `2e6be2c6f`, s42 |
+| **NSP-016 the visual nodes** | **🟡 9 of 19 conform (Button, Checkbox, Text Input, Dropdown, Slider, Icon, Radio Button Group, Radio Button, Text — s43, §7.8; the 7 the hit test moved re-graded). Drag and drop researched (RESEARCH-DRAG-DROP.md). The other 10 need infrastructure (below). AC4 waits for NSP-017** | `aa8abb06f` … s42, `803f6cccf`, s43 |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 opened s21 (needs a second runtime target, `noodl-viewer-cloud`) | s21 |
 | NSP-009, NSP-017 … NSP-019, NSP-021 | — | — |
 
-**114 of 147 conform on the runtime (77.6%)** (T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 8/19; 0 exempt). Graph 76 / 76.
-Left: 11 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-017).
+**115 of 147 conform on the runtime (78.2%)** (T1 46/46 · T2 11/11 · T3 22/39 · T4 27/27 · T5 9/19; 0 exempt). Graph 76 / 76.
+Left: 10 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-017).
 
-## What s42 settled
+## What s43 settled
 
-1. **The visual tree is per node, not a graph format.** s41 recommended parent–child edges and an `act` step in the GRAPH format; read
-   against what "conforms" counts, that would have added runtime-recorded tests, not specs (graph.ts: there is no graph interpreter).
-   A node's CHILDREN are its page (the spec declares them — `PAGE_VALUES`, `SIBLINGS`, through `acts.pick.values`; the face builds real
-   nodes with the parent's own `addChild`; a person acts on one through the parent's `pick`). A node's PARENT is its world (GROUP,
-   world.ts — the ROUTE seam's shape: present or not, a Value at load, the graph's writes on the clock). An engineering choice, recorded
-   in §7.7; not a ruling.
-2. **The Radio Button Group conforms** (21 scenarios; committed `2e6be2c6f`): both targets at 200 and 10,000, 48 / 48. The selection is
-   kept three ways (the node's Value, the Value its last paint rendered, the component's selection) — row **C76**.
-3. **The Radio Button conforms** (147 scenarios): the Checkbox's page model with the GROUP's tick; row **D37** (Changed for a change of
-   Checked nobody made to it — the flag is the group's last selection's). Interpreter CONFORMS at 200 on 13 / 20729 / 20730 and at 10,000 on 20729 and 20730; runtime CONFORMS at 200 on 13 and 20730 (143 / 147 + 4 known, 0 divergences) and 0 divergences at 10,000 (20730). Readings in §7.7.
-4. **Two face rules** (node-spec-target.ts): a paint on a group's page drops the group's `cachedChildren` (as a frame end renders the
-   node, not the element the group last built); the element a person sees of a node is its OWN control, by its input's `id` — the old
-   fallback ("the first control in the container") clicked a SIBLING when the button was unmounted.
-5. **Mutants:** an act's pre-paint does the frame end's work, so every act mints twins that differ only in WHEN Checked and the
-   selection moved — `checked`, `gSelected`, `gFromUser` are `synced` (the Slider's `shown` precedent). The 10,000 run reached every
-   pre-paint of a pick × its three selections × whether this button carries the Value: a 60-scenario GRID, mirrored ('a' and 'b'),
-   with reading actions (Focus after a mount/unmount, Blur after a rebuild). Declared: the Checkbox's three (rebuild family + `click`)
-   and one pick swap that writes `elementFocused` false over false.
-6. **Lessons (memory `name-is-ungraded`):** a person reducer is `(state, inputs, value, world)` — `(s, v)` made `pick` dead and
-   the interpreter stayed green on its own; three scenario NAMES claimed states their steps never reached — print each named trace.
+1. **Drag and drop, researched** (RESEARCH-DRAG-DROP.md). Reach first: the 13 shelf templates hold 1,153 Text and 1,653 Group nodes,
+   and none of them sets a drag port; one catalog example (the kanban) and one Site Builder file drop do. The keyboard drag plays with
+   no geometry; a pointer drag needs `elementFromPoint` (the face now stands it in); Drop Index from a pointer is geometry (NSP-017).
+2. **The Text conforms** (54 scenarios), step (a): the pointer outputs, the hit test, the drag SOURCE on a lone node (keyboard lift and
+   its endings, the hold timer as `after: hold`, a drop over nothing, the click swallow as `after: unswallow`). No format change.
+3. **Rows C77** (a Draggable element loses its keyboard pickup when its element is replaced — remount, new Tag, a mount after 60 frames)
+   and **C78** (a keyboard drag drops an element on itself) — filed, both modelled, both in the Text's scenarios.
+4. **The face learned the browser's hit test** — a hidden or `pointer-events: none` element takes no pointer; `focus()` refuses a
+   hidden element — and **seven conforming specs were wrong about it** (graded on a page where a hidden button could be clicked).
+   Each now says what a browser does; version 1 each (the runtime did not change — the s40 / s41 precedent).
+5. **Cross-play state is the face's to take down**: the shared window kept a drop's click swallow and ate a Click in a LATER play
+   (now: every window listener a play adds comes off with its page); a gesture outlived its play (the globals now come off after the
+   node's teardown); jsdom's wall-clock `requestAnimationFrame` made one probe answer differently run to run (now the world's frame clock).
+6. **Inside React's `act`, the frame end's render commits when the settle closes** — after both frame starts (frame and drain). A
+   "next frame start after the paint" is the NEXT settle. Measured at the 60-frame edge.
 
-## What s43 does
+## What s44 does
 
-**NSP-016 AC3, the next node.** 11 visuals left, by the infrastructure each needs (§7.6 "Left after s41", §7.7):
-- **DRAG AND DROP** (Text, Image, Circle, Group — and Video carries the ports too; `drag-drop.ts`, 967 lines; `addDragDropPorts` /
-  `addFileDropPorts` in `node-shared-port-definitions.ts`). **Recommended next: a RESEARCH file first** (`RESEARCH-DRAG-DROP.md`, the
-  layout research's shape): what a drag is (pointer moves past a threshold or a held press — `holdTime` is a timer), what a drop zone
-  accepts, what each port fires, which of it jsdom can play (pointer events, no geometry: `elementFromPoint` is 0×0) — then whether
-  Text (the smallest: no children) can conform with drag ports at their defaults and the drag acts as a face addition.
-- **CHILDREN WITH TEMPLATES** (Repeater / For Each, Component Children, Component Stack, Page Router): the s42 pattern (children on the
-  page) plus the graph format's DEFINITIONS (the runtime target already registers a definition's component model) — a Repeater's page is
-  its template's instances.
-- **GEOMETRY** (Columns) waits for NSP-017; **MEDIA** (Video) too.
-- **Per node** (unchanged), plus s42's: build the side-by-side probe (`zz-rbg` shape, every scenario on both targets) BEFORE any
-  conformance run, print each named scenario's trace (`zz-one`), and expect a 10,000 run to find the matrix 200 sequences did not.
+1. **Finish s43's gates if the handoff's readings below say any is open**, then commit.
+2. **The 10,000 runs the hit test owes**: the seven re-graded specs ran at 200 only (seeds below). Run each at 10,000 on the runtime
+   (the Text Input's matrix is ~20 min; one at a time, `uptime` first) and the Text at 10,000 on both targets — expect the matrix
+   segments to cross Visible with an act in ways 200 never did.
+3. **NSP-016 AC3, the Text's step (b)** (RESEARCH-DRAG-DROP.md §8): a `move` act (pointer past the slop, over an element the act names)
+   for the mouse lift; file acts `fileEnter` / `fileLeave` / `fileDrop` (plain events with a `dataTransfer` stand-in made from `$file`
+   values) for the file drop's own logic (the type filter, the depth count, Files Dropped / Rejected, five values); a Draggable
+   SIBLING on the Text's page (the s42 page pattern) for the zone side — Drag Over, Dropped, Landed, Drop Index 0 (a Text has no slots).
+4. **Then Group** (its children are slots: Drop Index from the keyboard; the s42 page pattern), **then Image and Circle** (the Text with
+   another look). Video waits for media; Columns for NSP-017; Repeater / Component Children / stacks for definitions on the page.
 
 **Human decisions outstanding** — rows to ask, in plain words (README §7 has the earlier ones written):
+- **New (s43, drag and drop):** C77 (a card picked up with the keyboard stops responding to Tab and Space after it is re-shown —
+  a remount, a new Tag, a late mount; the fix adds the attributes where the node learns its element), C78 (a draggable column that
+  also takes drops, moved with the keyboard, drops into itself — leave the source's own zone out, as the pointer does).
 - **New (s42, the radio buttons):** C76 (a group's Value written back in the same frame as a person's pick leaves the picked button
   selected under a Value naming another — the group should render the selection from its Value, not keep a copy), D37 (a Radio Button
   fires Changed for any change of Checked while the group's last selection was a person's — a sibling with the same Value picked, its
@@ -100,6 +95,10 @@ keyboard keeps it. A Number field's sign / point / exponent mid-entry is not typ
 Slider's `slide` is a keyboard slide (no geometry for a drag); a range input's attributes are read as jsdom reads them (HTML's lenient parse —
 Chromium is strict); a REVERSED range (Max below Min) takes no slide (jsdom's sanitization of it does not settle; HTML clamps no overflow there,
 Chromium raises Max to Min).
+**s43:** an act's pointer has no position — only a `move` (step (b)) carries one past a slop; a hover or a leave raises no
+`pointermove`; an element that becomes hidden under the pointer raises no leave; a mouse press on non-focusable content does not
+blur the element that holds the keyboard; the click swallow expires at the world's clock (a settle does not turn it), where a
+browser turns its event loop between frames; a finger lifted off an UNMOUNTED element is nothing to act on (the drag stays lifted).
 
 ## Before you start
 
@@ -114,6 +113,11 @@ Chromium raises Max to Min).
   same session. The play sinks `console.*` — print with `process.stdout.write`. The runtime's `zz-ti.test.ts` shape (s40): `play(...)` on
   `interpreterAdapter({ resolve: () => Spec })` and on `withViewerNodes(runtimeTarget())`, each with `new World({})`, the two traces printed
   by index with `!!` on a difference — fourteen cases in 3 s. **A jest run that must not include the probes: `--testPathIgnorePatterns 'zz-'`.**
+- **s43's probes** (deleted; rebuild in a minute): `noodl-runtime/test/node-spec/zz-side.test.ts` — every scenario of `NSP_TYPE`
+  (or of the JSON file `ZZ_FILE`) on `interpreterAdapter` and on `withViewerNodes(runtimeTarget())`, compact traces, `!!` on a difference;
+  `ZZ_NAME` (a name prefix) or `ZZ_PRINT=1` prints the agreeing traces too — READ THEM, a name is graded by nothing. `nodegx-node-spec/
+  tests/zz-conf.test.ts` — `runConformance` with mutants and `EQUIVALENT_MUTANTS` for `NSP_TYPE` at `NSP_SEEDS` (comma list), `NSP_N`.
+  **Run a scenario file WHOLE in one process before trusting it** — s43's lost Click showed only then (cross-play state).
 - **s42's probes** (deleted; rebuild in a minute): `zz-rbg` — every scenario of a type played on `interpreterAdapter` and on
   `withViewerNodes(runtimeTarget())`, traces printed with `!!` on a difference (names only: `grep '^!!'`); `zz-one` — the interpreter trace
   of each scenario whose name starts with `ZZ_NAME`, compacted to one line (`|` a settle, `!x` a pulse, `@act`); the interpreter
