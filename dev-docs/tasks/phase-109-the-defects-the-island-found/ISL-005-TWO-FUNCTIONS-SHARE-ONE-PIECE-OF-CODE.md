@@ -1,6 +1,6 @@
 # ISL-005 — Two Functions share one piece of code
 
-**Status:** 🟡 BUILDING — ruled 2026-10-05 (s1 of the build, session `opennoodl-8e`): **"ship it"**, on a mockup of shape 1 (script files in the project, a Uses list on the Function). **Built and committed: slices 1 (runtime), 2 (format + pipes), 3 (the door, AC8 ✅), 5 + 5b (the editor screens and the code editor, driven live in the editor 2026-10-05), 7 (docs + catalog, AC9 ✅).** Owed: slice 4 (export, AC7: P18's uncommitted pile holds `component.ts` / `emitApp.ts` / the ledger) and slice 6 (the island: AC2, AC3, AC5, AC6; `templates/bot-garden` and `cg007Look.ts` peer-dirty on 2026-10-05). See "Next" at the end of §8. Earlier: ✅ ruled s5 (2026-10-02) "Native nodes first" — the island rebuild stays its own template task (P108 IW-010); this ruling decides the shared file "afterwards" for what is left. ✅ ruled s5 (2026-10-02): **"Native nodes first"** — the island is rebuilt toward native nodes and logic components as its own template task, the four blocking product gaps are fixed first, and the shared script file is decided afterwards for what is left (README §8 round 2; [census](ISL-005-CENSUS-2026-10-02.md)). §5 is not built now. Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 BUILDING — ruled 2026-10-05 (s1 of the build, session `opennoodl-8e`): **"ship it"**, on a mockup of shape 1 (script files in the project, a Uses list on the Function). **Built and committed: slices 1 (runtime), 2 (format + pipes), 3 (the door, AC8 ✅), 5 + 5b (the editor screens and the code editor, driven live in the editor 2026-10-05), 7 (docs + catalog, AC9 ✅), 6 (the island, build session 3: AC3 ✅ one copy, 3,678,351 → 385,837 bytes; AC5 ✅ server first paint; AC2 ✅ two pages through a deploy, headless; AC6 measured).** Owed: slice 4 (export, AC7: P18's uncommitted pile holds `component.ts` / `emitApp.ts` / the ledger). See "Next" at the end of §8. Earlier: ✅ ruled s5 (2026-10-02) "Native nodes first" — the island rebuild stays its own template task (P108 IW-010); this ruling decides the shared file "afterwards" for what is left. ✅ ruled s5 (2026-10-02): **"Native nodes first"** — the island is rebuilt toward native nodes and logic components as its own template task, the four blocking product gaps are fixed first, and the shared script file is decided afterwards for what is left (README §8 round 2; [census](ISL-005-CENSUS-2026-10-02.md)). §5 is not built now. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F08](AUDIT-2026-10-01.md) (R-c as well) · first planned in [P105 CG-002 line 136](../phase-105-the-coding-garden/CG-002-THE-ENGINE.md) ("`ENGINE` is inlined into five scripts … Owner: NONE") · grown by every P106 and P108 lane since
 **Side:** product (runtime `Function` node, the editor's project files, the MCP door, `@nodegx/export`)
 
@@ -399,14 +399,123 @@ with two Functions on Home: `greet Olive` uses `engine/greet.js`, `greet Robot` 
   known-firing control), none on any `Scripts`.
 - `.logs/dev.log`: no `renderer:exception` during the drive. Stack stopped with `dev:stop` (26 processes).
 
-**Next (build session 3), in order:**
-1. **Slice 6, the island (AC3, AC6, then AC2, AC5)** once `templates/bot-garden` and the generator files are not peer-dirty
-   (`git status --porcelain templates/bot-garden packages/noodl-mcp/tests/cg0*.ts`, and mtimes). Measured 2026-10-05: `ENGINE`
-   (`cg002Scripts.ts`, 1,165 lines, 81 KB as extracted) never names `Noodl`, `window` or `document`, so it can be a script file
-   as it is; it holds 18 `${…}` substitutions, read them first. The cheapest shape keeps each Function body unchanged: the
-   engine file ends `Object.assign(exports, { helperA, helperB, … })`, and each body starts `var { helperA, … } = Scripts.engine;`.
-   `SAVE_HELPERS` (pasted 23×) probably reaches `Noodl`, which a file cannot; measure before planning it. Trap §7: the
-   generator's own tests compile scripts with `new Function('Inputs','Outputs', script)`; give that harness `ScriptFiles`.
+### Build session 3 — 2026-10-05: slice 6, the island shares its engine (AC3, AC5, AC2 met; AC6 measured)
+
+Session `opennoodl-8e`, in the worktree `../OpenNoodl-worktrees/p109-isl005-island` (from `99641d371`). The island's files
+were peer-dirty in primary (`cg003Template.test.ts`, `cg007Look.ts` and `templates/bot-garden/components/App/nodes.json`:
+another session's ISL-008 AC6 `!important` work, idle and uncommitted). The engine sits in 23 `Logic/*` components and none in
+`App`, so the worktree regenerated the garden from HEAD's generator plus this slice, and `App/nodes.json` came out
+byte-identical.
+
+**The census first (no product code).** 91 Functions, **3,678,351** bytes of `functionScript` (AC3's 2,452,405 was out of
+date). Seven blocks were pasted whole: `ENGINE` 96 KB ×23, `SAVE_HELPERS` 31 KB ×25, `ISLAND_ENGINE`'s own part 26 KB ×6,
+`OLIVE_HELPERS` 18 KB ×6, `FOLD_HELPERS` ×5, `WORD_HELPER` ×28, `IWL_REQUEST_HELPERS` ×2. Read by scope (`eslint-scope`), none
+of them mutates its own top-level names, and none reads `Noodl`, `window`, `document`, `Inputs` or `Outputs` (the island
+part's one `window` is in a comment). So each can be one module instance for the whole page.
+
+**Built:**
+- `packages/noodl-mcp/tests/isl005GardenScripts.ts` (new): the seven blocks become `scripts/engine.js`, `island.js`, `save.js`,
+  `fold.js`, `olive.js`, `words.js` and `requests.js`. Each file opens with `var { … } = use('<file>')` for the names it reaches
+  in another file and ends with `exports.<name> = <name>;` lines (what the editor's Gives and the door read). A Function that
+  held a block now lists the file under Uses and opens with `var { … } = Scripts.<file>;` for exactly the free names its
+  body reaches. The block texts stay where they are written, so a fix is still made once, in `cg002Scripts.ts` and its
+  neighbours.
+- `gardenSharingHazards`: every case where moving a block out of the Function's scope could change what a name means. A
+  body re-declaring a block's name, two blocks declaring one, a block reaching a name only a body declares, a cycle, a block
+  inside a block, a whole block left pasted. The gate asserts the list is empty. `shareScript` refuses to share where
+  the meaning would change: a body that re-declares a block name stays whole (a mutant that redefines an engine function
+  means exactly that), and a block stays pasted when a file it `use()`s is not also taken out (a mutant that edits the engine
+  must not have its island code call the file's unedited engine).
+- **Two hazards, both fixed at the source.** `Logic/Land request` re-declared `isSet`, identical to the engine's; that
+  duplicate is gone. `Logic/Shop card` set `var can = …, blocked = false;`, and a hoisted `var` replaced the engine's
+  `blocked()` for the rest of each run ([P109-S18-SHOPBLOCKED](../../bugs/p109-s18-shopblocked-the-shop-card-replaces-the-engine-s-blocked-for-the-rest-of-its-run.md)).
+  The flag is now `refused`.
+- **The generator** (`cg003Template.ts`): the files are written through the door (`write_script_file`) before any Function
+  names one, and each component goes to the plan through `withSharedScripts` (`uses` stored as the editor's comma string).
+  `docs/START-HERE.md` gains a bullet on `scripts/` (content-authoring `written.py`: 0 flags, beside a known-firing control).
+- **The harness (trap §7):** `runScript` (`cg002Scripts.ts`) now runs every script in its shared form through the runtime's
+  own `ScriptFiles`, so all ~20 garden suites grade what the artefact runs. `runScriptInline` is the old way, for a control.
+- **The drives:** `scripts/devtools/garden-functions.js` (new): `functionText` (a Function's text with its Uses files in
+  front, for the drives that read `SAVE_VERSION`, `ROBOTS`, `WEAR`, `PW` out of a script) and `runFunction` (run as the page
+  runs it, every name each file gives in scope, so a drive's `tail` still reaches an engine helper). 15 drives moved onto it;
+  `drive-cg001-kit` and `drive-ig007-3d` load `scripts/engine.js` instead of cutting `Logic/Step`'s text. Its loader mirrors
+  `scriptfiles.ts` (a drive is plain Node), and the gate pins the two to the same exports file by file and to the same
+  `Logic/Step` result.
+
+**AC3 ✅ — one copy.** `npm run template:garden` (template gate green, engine gate 259/259): 70 `Logic/*` components changed
+plus `scripts/` (7 files) and `docs/START-HERE.md`. `grep -rl "var BLOCKING_TILES = { W: 1" templates/bot-garden/components`
+→ **0**; `scripts/engine.js` holds it **once**. Summed `functionScript`: **3,678,351 → 385,837 bytes**, with 186,680 in the
+seven files. **Sabotage arm:** the same Functions with their files pasted back in front (behaviour kept) sum above the
+500,000 ceiling. In the deployed site the engine ships once, in the app data, where HEAD's deploy carries it 23 times across
+the component bundles (site 23 MB → 20 MB). `tests/isl005GardenScripts.test.ts` **12/12**: no hazard (beside a known-firing
+redefinition that is a hazard and stays whole), 23 engine users and 70 sharing Functions, ports mined identically from every
+shared body, every file pure and giving, one engine instance across Functions, shared = pasted on `NEW_RUN`/`STEP` (runId
+aside: drawn at random), the on-disk files are the generator's, Uses entries all resolve, the drives' loader matches.
+
+**AC5 ✅ (as narrow as ISL-008 AC7's server half).** `noodl-viewer-react/tests/isl-005/server-render.test.tsx` **2/2**: two
+Functions reaching `Scripts.greet` (which `use()`s `engine/words`) feed two Texts; `renderToString` with no `document` paints
+"Hello, Olive!" and "Hello, Robot!"; with Uses cleared neither is painted (the text arrives through the file). A full
+server-rendered deploy has no headless pipeline in the repo. **Not graded there: an edit re-running its users.** The viewer
+package compiles runtime sources at ES5, and `EventSender.emit`'s `for … of` over a Map then visits nothing, so no
+ref-registered listener fires in a viewer test (measured: a ref listener on `scriptsChanged` heard 0; a manual
+`scheduleRun()` produced the new text). The runtime's own suite grades the edit, and so does AC2. Two ES5 compile errors
+this test met were fixed in place, behaviour unchanged: `scriptGives`/`scriptUses` use an exec loop and an array, and
+`publishHeldWrites` a `forEach` (runtime Function suites **14, 190/190**; `tsc --noEmit` 0).
+
+**AC2 ✅ (headless).** `scripts/devtools/isl005-two-pages.ts` **13/13, DRIVE_EXIT 0**: a two-page project authored through
+the door (`write_script_file` ×2, a page each with a Function using `engine/greet.js`), deployed with `nodegx deploy`
+(exit 0 each round) and read in Chrome. As written: "Hello, Olive!" / "Hello, Robot!". After `scripts/engine/words.js` alone
+changed (a file neither Function lists): "Hi there, Olive!" / "Hi there, Robot!". Changed back: both revert. No console
+error in any round. AC2 asks for a visible window; `drive-deployed.js` has no visible mode and is in a peer's pile, so this
+ran headless. **Found on the way:** a Router written without a `name` is left out of the deployed router index, so every
+URL opens the start page ([P109-S18-UNNAMEDROUTER](../../bugs/p109-s18-unnamedrouter-a-router-with-no-name-answers-every-url-with-its-start-page.md);
+the named Router is the control).
+
+**AC6 ✅ — not slower (Mac, Chrome headless, 1368×912).** `scripts/devtools/isl005-island-tti.js` makes a player through the
+Profiles screen, then loads `/island` cold (cache off) 7 times per CPU rate until the grid AND her robot are drawn (the
+robot's tile comes out of `Logic/Island world`, the biggest engine user). HEAD's garden (`git archive 99641d371`) against
+slice 6, both deployed the same way, run in both orders:
+
+| | 1× median | 4× throttle median |
+|---|---|---|
+| HEAD (pasted engine) | 354 ms, 349 ms | 1,145 ms, 1,072 ms |
+| slice 6 (scripts/) | 323 ms, 328 ms | 982 ms, 1,007 ms |
+
+**The garden drives (AC3's "every drive still green"), on the deployed slice-6 garden:** 20 drives, **18 green first
+time**: cg003-pages 330/330, ig005-robots 60, ig003-modes 90, iw001-workshop 38, iw-look 143, iw003-biscuit 24, iw003-stones 32,
+iw003-mamie 34, iw004-blocks 23, iw003-post 17, iw006-shop 60, iw006-earn 15, iw006-owed 19, iw008-crew 39, iw007-animals 16,
+iw007-build 26, p108s8-feedback 28, p108s9 14. **ig004-island 69/70** once (ISL-009 AC7 390-fr: the last request's card
+3 px above the screen, `top: -3`), then **70/70** on a re-run; HEAD's drive on HEAD's garden 70/70 once. One red in three
+runs, too few to call it a flake or rule this slice out. **iw007-touch 26/29** on slice 6 twice AND on HEAD's garden with
+HEAD's drive (BUILD, PILLS, PAY at 1368-en: the robots never seen building): older than this slice, filed
+[P109-S18-TOUCHBUILD](../../bugs/p109-s18-touchbuild-the-touch-drive-never-sees-pip-and-cobble-build-on-her-land.md).
+Not run: the 3D modes, `drive-cg001-kit` / `drive-ig007-3d` (moved onto `scripts/engine.js`, `node --check` only) and
+`drive-cg005-olive`.
+
+**`isl005ScriptFiles` was red at HEAD since slice 7, and it was ours.** Slice 7 put `uses` in the enriched catalog, so the
+door's general `stringlist` rule (`parameterValues.ts`: *"a stringlist is one comma-separated string, not an array — the
+editor calls .split(",") on it"*) now reads it, and slice 3's "uses written as an array is read the same" test went red.
+Slice 7 ran the catalog checks but not this suite. Kept the existing rule: an array is refused with the comma string to
+write instead, and the test now says so (12/12). The runtime still reads an array found on disk.
+
+**Gates, this session (worktree, on `99641d371` + slice 6):** `noodl-mcp` full **174 suites, 15 failed in 12**, by name:
+`cmp004Parts` ×2, `cmp004RoundTrip` ×2, `cmp001` ×2, `cn004`, `d54ThemePresetIdentity`, `fld013ExportReach`,
+`nodeIdAllocation` (the s4 HEAD-red list; `cmp004Parts` re-run red in primary too: three exported prefabs gained an
+`icon.png` in `1fad0cad7` that a re-export does not make); `def038SettledTemplates` (a peer's template); `ig004Island` and
+`iw008Crew` p95 budgets (the run had 4 workers beside a peer's jest; serially 0.98 ms and 2.87 ms, green); `cg003Template`
+AC2 (START-HERE edited after the build; regenerated, 1 run serially green); `isl005ScriptFiles` (above, fixed). Serially
+after the fixes: `cg003Template` + `ig004Island` + `iw008Crew` + `isl005GardenScripts` **224/224**; `isl021ShopParity` (drives
+the template's Shop page through `drive_page`) green.
+
+**Next (build session 4), in order:**
+1. **Land the island in primary** if this session could not (see the handoff): the commit touches
+   `cg003Template.test.ts`, which carries a peer's uncommitted ISL-008 AC6 hunks; the temporary-index recipe takes only ours.
 2. **Slice 4, export (AC7)** when P18's pile on `component.ts` / `emitApp.ts` / `coverage-ledger.json` lands, or with the
-   temporary-index recipe if their hunks do not border ours.
-3. Not built from the slice-5 plan: nothing left; "autocomplete from exports" landed in 5b.
+   temporary-index recipe if their hunks do not border ours. The garden is no worse for export meanwhile: `nodegx export
+   --dry-run` of the slice-6 garden (exit 4, refusals) emits **no file at all** for every `Logic/*` component, Uses or not
+   ("no visual root — logic-only components defer to EXP-003"), so none of the 70 sharing Functions was exported before
+   either. A Function with Uses on a VISUAL component is the case AC7 must refuse by name until the exporter carries
+   `scripts/`: the exporter's source has no reader of `uses` (`grep -rln "scriptUsesOf\|'uses'" packages/nodegx-export/src`
+   → nothing).
+3. AC2 in a visible window, once `drive-deployed.js` has a visible mode (its owner's pile).
+4. Close ISL-005 when AC7 is met.

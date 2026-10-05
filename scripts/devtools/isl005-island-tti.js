@@ -4,7 +4,7 @@
  *
  *     node scripts/devtools/drive-cg003-pages.js assemble <project-dir>
  *     node node_modules/.bin/nodegx deploy <project-dir> <deploy-dir> --allow-development-engine
- *     node scripts/devtools/isl005-island-tti.js <deploy-dir> [--runs 7] [--json <file>]
+ *     node scripts/devtools/isl005-island-tti.js <deploy-dir> --project <project-dir> [--runs 7] [--json <file>]
  *
  * One new player is made through the Profiles screen (as `drive-ig004-island.js` does), which lands on `/island`. Then
  * `/island` is loaded cold (cache off) `--runs` times at each CPU rate (1× and 4×, `Emulation.setCPUThrottlingRate`).
@@ -23,13 +23,20 @@ const arg = (flag) => {
   return i === -1 ? null : process.argv[i + 1];
 };
 const DIR = process.argv[2];
+const PROJECT = arg('--project');
 const RUNS = Number(arg('--runs') || 7);
 const JSON_OUT = arg('--json');
-if (!DIR || DIR.startsWith('--')) {
-  console.error('usage: isl005-island-tti.js <deploy-dir> [--runs 7] [--json <file>]');
+if (!DIR || DIR.startsWith('--') || !PROJECT) {
+  console.error('usage: isl005-island-tti.js <deploy-dir> --project <project-dir> [--runs 7] [--json <file>]');
   process.exit(2);
 }
 
+/** The Profiles screen's "create" button carries the project's own word for it (Data/Words). */
+const CREATE = (() => {
+  const raw = JSON.parse(fs.readFileSync(require('path').join(PROJECT, 'components', 'Data', 'Words', 'nodes.json'), 'utf8'));
+  const nodes = Array.isArray(raw) ? raw : raw.nodes || Object.values(raw);
+  return JSON.parse(nodes.find((n) => n.type === 'Static Data').parameters.json).find((r) => r.key === 'create').en;
+})();
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const STUB = {
   status: { model: 'ready', reason: '', gpu: false, loadMs: 1, lastMs: 1, asked: 0, fallbacks: 0, busy: false, queued: 0, exam: { at: '2026-09-28T00:00:00.000Z', ms: 1, passed: 20, failed: 0, rungs: {} } },
@@ -81,7 +88,7 @@ withDeployedSite({ dir: DIR }, async (page) => {
   await evaluate(`(() => { const el = document.querySelector('input'); el.focus(); const set = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set; set.call(el, 'Ada'); el.dispatchEvent(new Event('input', { bubbles: true })); el.dispatchEvent(new Event('change', { bubbles: true })); el.blur(); })()`);
   await wait(250);
   await tap(byText('.bg-seg-btn', '10–12'));
-  await tap(`[...document.querySelectorAll('button.bg-btn')].filter((e) => e.offsetParent !== null).pop()`);
+  await tap(byText('button.bg-btn', CREATE));
   const landed = await until('location.pathname', (p) => p === '/island');
   if (landed !== '/island') throw new Error(`a new player did not land on /island (at ${landed})`);
   if (!(await until(READY, Boolean))) throw new Error('the island never drew her robot after making a player');
