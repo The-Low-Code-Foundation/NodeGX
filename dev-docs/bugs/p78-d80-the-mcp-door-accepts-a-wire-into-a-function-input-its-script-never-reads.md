@@ -1,7 +1,8 @@
 ---
 id: P78-D80
 title: The MCP door accepts a wire into a Function input its script never reads
-status: open
+status: fixed
+commit: 75e0e6cef
 severity: medium
 area: mcp / Function ports (the door's validator)
 found: P78 TPL-010-T s10, 2026-09-23
@@ -23,3 +24,10 @@ clean. The template's gate (`tpl010Template.test.ts` §3) catches it in that tem
 
 **Proposed:** in `checkFunctionNodePorts`, a wire into `in-<x>` (or out of `out-<x>`) where `<x>` is not in
 `mineFunctionScriptPorts` and not declared is a warning naming the missing `Inputs.<x>`. Small: one branch and a spec.
+
+**Fixed (75e0e6cef, P109 ISL-006 AC4, 2026-10-05):** the door refuses (`unknown-function-port`, error) a wire to a Function's
+`in-`/`out-` name that is on neither written list, nowhere in the code, and not saved on the node, and names the list row that
+would make it. 🔴 Two sentences above were measured wrong: "the port does not exist, so the value goes nowhere" holds for the
+editor, not the runtime (it registers any `in-`/`out-` name when a wire arrives; an unread input still re-runs the Function).
+The editor paints the wire missing and its build deletes it (DEF-034), which is why refusing is right. And it is refused, not
+warned. Spec: `packages/noodl-mcp/tests/isl006FunctionPortList.test.ts`.
