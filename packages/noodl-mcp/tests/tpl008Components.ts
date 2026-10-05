@@ -4819,6 +4819,8 @@ export const PROJECT_ROWS_SCRIPT =
   String.raw`var tasks = Inputs.tasks || [];
 var projects = Inputs.projects || [];
 var items = Inputs.items || [], marks = Inputs.marks || [], readings = Inputs.readings || [];
+// The minute clock: read so a day turning over (late, due today) is drawn again without a reload.
+var clock = Inputs.now;
 var openId = String(Inputs.openId || '');
 var flag = String(Inputs.flag || '');
 var today = pjToday();
@@ -5115,6 +5117,8 @@ export const PAST_DAYS = 92;
 export const MONEY_LIST_SCRIPT =
   PJ_MONEY_FNS +
   String.raw`var items = Inputs.items || [], marks = Inputs.marks || [], projects = Inputs.projects || [];
+// The minute clock, as in the rows: what is late moves on at midnight.
+var clock = Inputs.now;
 var today = pjToday();
 var ctx = moneyContext(items, marks, projects, [], today, mAddMonths(today, -13, false));
 var removed = {};
@@ -5744,7 +5748,13 @@ var error = projectProblem(v);
 Outputs.error = error;
 Outputs.hasError = error !== '';
 if (error) return;
-for (var k in v) Outputs[k] = v[k];
+Outputs.name = v.name;
+Outputs.sub = v.sub;
+Outputs.kind = v.kind;
+Outputs.billing = v.billing;
+Outputs.rate = v.rate;
+Outputs.termsDays = v.termsDays;
+Outputs.say = v.say;
 Outputs.go();`;
 
 const PROJECT_EDITOR_FIELDS: Array<[string, string]> = [
@@ -6235,7 +6245,15 @@ var error = moneyItemProblem(v);
 Outputs.error = error;
 Outputs.hasError = error !== '';
 if (error) return;
-for (var k in v) Outputs[k] = v[k];
+Outputs.label = v.label;
+Outputs.dir = v.dir;
+Outputs.amount = v.amount;
+Outputs.repeat = v.repeat;
+Outputs.date = v.date;
+Outputs.until = v.until;
+Outputs.projectId = v.projectId;
+Outputs.likelihood = v.likelihood;
+Outputs.note = v.note;
 Outputs.go();`;
 
 const MONEY_EDIT_VALUES: Array<[string, string]> = [
@@ -6244,7 +6262,8 @@ const MONEY_EDIT_VALUES: Array<[string, string]> = [
 ];
 const MONEY_EDITOR_FIELDS: Array<[string, string]> = [
   ['id', 'string'], ['key', 'string'], ['heading', 'string'], ...MONEY_EDIT_VALUES,
-  ['projectOptions', 'array'], ['isNew', 'boolean'], ['endLabel', 'string'], ['endHint', 'string']
+  // '*' — the dropdown's items are an options list, which an 'array' port may not feed.
+  ['projectOptions', '*'], ['isNew', 'boolean'], ['endLabel', 'string'], ['endHint', 'string']
 ];
 const MONEY_EDITOR_OUTS: Array<[string, string]> = [['save', 'signal'], ['cancel', 'signal'], ['end', 'signal'], ['key', 'string'], ...MONEY_EDIT_VALUES];
 const REPEAT_BUTTONS: Array<[string, string, string]> = [

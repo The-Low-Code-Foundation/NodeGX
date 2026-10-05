@@ -767,7 +767,7 @@
       "type": "JavaScriptFunction",
       "label": "What the form says",
       "parameters": {
-        "functionScript": "function pick(typed, start) {\n  if (typed !== undefined && typed !== null) return String(typed);\n  return start === undefined || start === null ? '' : String(start);\n}\nfunction projectProblem(v) {\n  var rate = String(v.rate === undefined || v.rate === null ? '' : v.rate).replace(/[€\\s,]/g, '');\n  var terms = String(v.termsDays === undefined || v.termsDays === null ? '' : v.termsDays).trim();\n  if (String(v.name || '').trim() === '') return 'The project needs a name.';\n  if (rate !== '' && !(Number(rate) >= 0)) return 'Type the rate as a number, like 85, or leave it empty.';\n  if (terms !== '' && !(Number(terms) >= 0 && Number(terms) <= 120 && Math.round(Number(terms)) === Number(terms))) return 'Payment terms are a number of days, like 30.';\n  return '';\n}\nvar v = {\n  name: pick(Inputs.typedName, Inputs.name).trim(),\n  sub: pick(Inputs.typedSub, Inputs.sub).trim(),\n  kind: pick(Inputs.pickedKind, Inputs.kind),\n  billing: pick(Inputs.pickedBilling, Inputs.billing),\n  rate: pick(Inputs.typedRate, Inputs.rate).trim(),\n  termsDays: pick(Inputs.typedTerms, Inputs.termsDays).trim(),\n  say: pick(Inputs.typedSay, Inputs.say).trim()\n};\nvar error = projectProblem(v);\nOutputs.error = error;\nOutputs.hasError = error !== '';\nif (error) return;\nfor (var k in v) Outputs[k] = v[k];\nOutputs.go();",
+        "functionScript": "function pick(typed, start) {\n  if (typed !== undefined && typed !== null) return String(typed);\n  return start === undefined || start === null ? '' : String(start);\n}\nfunction projectProblem(v) {\n  var rate = String(v.rate === undefined || v.rate === null ? '' : v.rate).replace(/[€\\s,]/g, '');\n  var terms = String(v.termsDays === undefined || v.termsDays === null ? '' : v.termsDays).trim();\n  if (String(v.name || '').trim() === '') return 'The project needs a name.';\n  if (rate !== '' && !(Number(rate) >= 0)) return 'Type the rate as a number, like 85, or leave it empty.';\n  if (terms !== '' && !(Number(terms) >= 0 && Number(terms) <= 120 && Math.round(Number(terms)) === Number(terms))) return 'Payment terms are a number of days, like 30.';\n  return '';\n}\nvar v = {\n  name: pick(Inputs.typedName, Inputs.name).trim(),\n  sub: pick(Inputs.typedSub, Inputs.sub).trim(),\n  kind: pick(Inputs.pickedKind, Inputs.kind),\n  billing: pick(Inputs.pickedBilling, Inputs.billing),\n  rate: pick(Inputs.typedRate, Inputs.rate).trim(),\n  termsDays: pick(Inputs.typedTerms, Inputs.termsDays).trim(),\n  say: pick(Inputs.typedSay, Inputs.say).trim()\n};\nvar error = projectProblem(v);\nOutputs.error = error;\nOutputs.hasError = error !== '';\nif (error) return;\nOutputs.name = v.name;\nOutputs.sub = v.sub;\nOutputs.kind = v.kind;\nOutputs.billing = v.billing;\nOutputs.rate = v.rate;\nOutputs.termsDays = v.termsDays;\nOutputs.say = v.say;\nOutputs.go();",
         "runOnChange-in-name": false,
         "runOnChange-in-sub": false,
         "runOnChange-in-kind": false,
@@ -901,6 +901,55 @@
         {
           "name": "out-hasError",
           "displayName": "hasError",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-name",
+          "displayName": "name",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-sub",
+          "displayName": "sub",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-kind",
+          "displayName": "kind",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-billing",
+          "displayName": "billing",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-rate",
+          "displayName": "rate",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-termsDays",
+          "displayName": "termsDays",
+          "plug": "output",
+          "type": "*",
+          "group": "Outputs"
+        },
+        {
+          "name": "out-say",
+          "displayName": "say",
           "plug": "output",
           "type": "*",
           "group": "Outputs"

@@ -450,11 +450,32 @@ describe('TPL-008-PJ — Projects, driven', () => {
         await until('Clarion open', () => text(page), (s) => s.includes('Add money') && s.includes('Its money'));
         await clickButton(page, 'Add money');
         await until('form for Clarion', () => text(page), (s) => s.includes('Add money for Clarion'));
+        R.projectChoices = JSON.parse(String(await page.evaluate(`JSON.stringify((function () {
+          var sel = document.querySelector('select');
+          return sel ? [Array.prototype.map.call(sel.options, function (o) { return o.text; }), sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].text : ''] : null;
+        })())`)));
         await fill(page, 'How much', '500');
         await clickButton(page, 'Save');
         await until('Clarion item', async () => (await rows('MoneyItem', tk)).filter((m) => m.projectId === ade).length, (n) => n === 2);
         R.clarionItems = (await rows('MoneyItem', tk)).filter((m) => m.projectId === ade).map((m) => [m.label, m.amount]).sort();
         await until('popup shut again', () => text(page), (s) => !s.includes('Add money for Clarion'));
+        step('§8 a project money line opens its form');
+        await until('the new line on the project', () => text(page), (s) => /\+€500 once, /.test(s));
+        const lineAt = JSON.parse(String(await page.evaluate(`(function () {
+          var el = Array.prototype.filter.call(document.querySelectorAll('body *'), function (e) {
+            return e.children.length === 0 && /^[+]€500 once, /.test((e.textContent || '').trim());
+          })[0];
+          if (!el) return 'null';
+          el.scrollIntoView({ block: 'center', behavior: 'instant' });
+          var r = el.getBoundingClientRect();
+          return JSON.stringify({ x: r.left + 20, y: r.top + r.height / 2 });
+        })()`))) as { x: number; y: number } | null;
+        if (!lineAt) throw new Error('no +€500 line on Clarion');
+        await clickAt(page, lineAt.x, lineAt.y);
+        await until('its form', () => text(page), (s) => s.includes('Change: Clarion') && s.includes('Remove it'));
+        R.lineOpensOn = (await fields()).filter(([ph]) => ph === 'How much (€)');
+        await clickButton(page, 'Cancel');
+        await until('popup shut a third time', () => text(page), (s) => !s.includes('Change: Clarion'));
 
         // ── §7 Phone width ───────────────────────────────────────────────────────
         step('§7 phone');
@@ -547,6 +568,9 @@ describe('TPL-008-PJ — Projects, driven', () => {
     // Rent had not begun (its first day is in four days), so ending it means it never happens.
     expect(R.rentUntil).toBe(iso(3));
     expect(R.clarionItems).toEqual([['Clarion', 1200], ['Clarion', 500]]);
+    // The dropdown's own empty first option comes before the list.
+    expect(R.projectChoices).toEqual([['', 'No project', 'Clarion', 'Linguaid Ltd', 'Own course'], 'Clarion']);
+    expect(R.lineOpensOn).toEqual([['How much (€)', '500']]);
   });
 
   it('§4 AC4 — a new balance is today’s reading, and the money sentence follows it', () => {
