@@ -1,0 +1,9 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/component-v2.json",
+  "id": "f2b8d4e0-5a3c-4d9f-8b2e-000000000092",
+  "name": "Home",
+  "path": "/Pages/Home",
+  "type": "page",
+  "modified": "2026-10-05T19:00:00.000Z",
+  "description": "P109 ISL-005 AC7 fixture: a Function on each of two pages uses one script file (scripts/engine/greet.js, which itself use()s engine/words). The export must emit each file once and import it into both wrappers."
+}

@@ -142,15 +142,17 @@ const EXPRESSION_PREAMBLE =
  * template literals stay, their interpolations are code). Over-deferring on a marker inside an
  * odd string is the safe direction; certifying a body that reaches the network is not.
  */
-const MARKER_GATES: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
+const MARKER_GATES: ReadonlyArray<{ pattern: RegExp; reason: string; bodyOnly?: true }> = [
   {
     pattern: /\bComponent\s*[.\[]/,
-    reason: 'reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)'
+    reason: 'reads the Component scope — the component-record tier (controlled-state slice + EXP-003 Tier B)',
+    bodyOnly: true
   },
-  { pattern: /\bScript\s*[.\[]/, reason: 'uses the Script-node DSL (Script.*) — a hand-written node, not a function' },
+  { pattern: /\bScript\s*[.\[]/, reason: 'uses the Script-node DSL (Script.*) — a hand-written node, not a function', bodyOnly: true },
   {
     pattern: /\bthis\s*[.\[]/,
-    reason: "keeps state on `this` across runs — cross-run state is EXP-003 Tier B"
+    reason: "keeps state on `this` across runs — cross-run state is EXP-003 Tier B",
+    bodyOnly: true
   },
   { pattern: /\bnew\s+Date\b|\bDate\s*[.(]/, reason: 'reads the clock (Date) — not deterministic' },
   { pattern: /\bMath\.random\b/, reason: 'draws randomness (Math.random) — not deterministic' },
@@ -158,15 +160,33 @@ const MARKER_GATES: ReadonlyArray<{ pattern: RegExp; reason: string }> = [
   { pattern: /\bsetTimeout\b|\bsetInterval\b/, reason: 'schedules timers — invocation timing is real semantics' },
   {
     pattern: /\bwindow\b|\bdocument\b|\blocalStorage\b|\bsessionStorage\b|\bnavigator\b/,
-    reason: 'touches the browser environment — not translatable in this slice'
+    reason: 'touches the browser environment — not translatable in this slice',
+    bodyOnly: true
   },
   { pattern: /\bimport\s*\(/, reason: 'loads code dynamically (import()) — not translatable in this slice' },
   {
     pattern: /\basync\b|\bawait\b|\.then\s*\(/,
     reason: 'is asynchronous — completion ordering joins the invocation tier when the trace harness exists'
   },
-  { pattern: /\barguments\b/, reason: "reads the compiled function's arguments object — a host detail this wrapper does not carry" }
+  { pattern: /\barguments\b/, reason: "reads the compiled function's arguments object — a host detail this wrapper does not carry", bodyOnly: true }
 ];
+
+/**
+ * P109 ISL-005 — the marker gates a **script file** must pass, for a Function that uses it to re-host.
+ *
+ * A file's code runs inside the Function's call, so what makes a body unfit to re-host (the clock,
+ * randomness, the network, timers, `import()`, anything asynchronous) makes a file it calls unfit
+ * too. The `bodyOnly` gates are about the body's own host and are not read here: inside a file
+ * `this` and `arguments` are ordinary JavaScript, and `Component`, `Script`, `window` and
+ * `document` are `undefined` in the runtime and in the export alike (the loader passes them so).
+ */
+export function scriptFileMarkerDefer(source: string): string | null {
+  const scanned = strippedForScan(source);
+  for (const gate of MARKER_GATES) {
+    if (!gate.bodyOnly && gate.pattern.test(scanned)) return gate.reason;
+  }
+  return null;
+}
 
 /** Comment + quoted-string stripping for the marker scan (LOGIC-TARGET's parse discipline). */
 export function strippedForScan(body: string): string {

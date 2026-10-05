@@ -286,7 +286,11 @@ describe('HLS-001 AC3 — emitApp over the corpus is byte-identical', () => {
     // in session 2 WITHOUT moving this literal or the golden — red at HEAD from then. Added in session 3,
     // hashed in a fresh worktree at HEAD (a peer's uncommitted ledger moves every README in the primary):
     // purely additive, the other 50 projects' hashes all equal the golden there.
-    expect(corpusProjects().length).toBe(51);
+    //
+    // 51 → 52 on 2026-10-05 (P109 ISL-005 AC7, slice 4): `scripts-desk`, two pages whose Functions use one script
+    // file. Hashed in a fresh worktree at HEAD with only this slice applied (P18's uncommitted ledger moves every
+    // README in the primary): the golden gained the one project's 21 files and no other line moved.
+    expect(corpusProjects().length).toBe(52);
     expect(Object.keys(golden).sort()).toEqual(corpusProjects());
   });
 

@@ -240,7 +240,8 @@
     },
     {
       "typeName": "JavaScriptFunction",
-      "status": "translated"
+      "status": "translated",
+      "note": "re-hosted verbatim (EXP-003 §4); its Uses (P109 ISL-005): each script file emitted once under src/project-scripts/, bound as Scripts from one registry; a file that cannot be carried defers the Function by name"
     },
     {
       "typeName": "Javascript2",

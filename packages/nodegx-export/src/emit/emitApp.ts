@@ -29,6 +29,14 @@ import { ANIMATE_LIB_PATH, animateLibSource } from './animateLib';
 import { STATES_LIB_PATH, statesLibSource } from './statesLib';
 import { RUN_TASKS_LIB_PATH, runTasksLibSource } from './runTasksLib';
 import { SCRIPT_LIB_PATH, scriptLibSource } from './scriptLib';
+import {
+  PROJECT_SCRIPT_FILES_PATH,
+  PROJECT_SCRIPTS_LIB_PATH,
+  projectScriptFilePath,
+  projectScriptFileSource,
+  projectScriptFilesSource,
+  projectScriptsLibSource
+} from './projectScriptsLib';
 import { ERRORS_LIB_PATH, errorsLibSource } from './errorsLib';
 import { RECORD_FILTER_LIB_PATH, recordFilterLibSource } from './recordFilterLib';
 import { STREAMING_LIB_PATH, streamingLibSource } from './streamingLib';
@@ -151,6 +159,8 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   let statesLibUsed = false;
   // EXP-011 §52. The Script host — earned by a component whose plan kept a Script node.
   let scriptLibUsed = false;
+  // P109 ISL-005. The project's script files — earned by a re-hosted Function that lists one under Uses.
+  let projectScriptsUsed = false;
   let runTasksLibUsed = false;
   // EXP-011 §54. The error channel — earned by a boundary or a raising failure arm; script.ts and runTasks.ts import it too.
   let errorsLibUsed = false;
@@ -228,6 +238,7 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
     if (emitted.animateLib) animateLibUsed = true;
     if (emitted.statesLib) statesLibUsed = true;
     if (emitted.scriptLib) scriptLibUsed = true;
+    if (emitted.projectScripts) projectScriptsUsed = true;
     if (emitted.runTasksLib) runTasksLibUsed = true;
     if (emitted.errorsLib) errorsLibUsed = true;
     if (emitted.recordFilterLib) recordFilterLibUsed = true;
@@ -296,6 +307,17 @@ export function emitApp(ir: ExportIR, catalog: Catalog): EmittedApp {
   /** `src/lib/script.ts` (EXP-011 §52) — the Script node's host, the seventh module, on the same rule. */
   if (scriptLibUsed) {
     files[SCRIPT_LIB_PATH] = GENERATED_MODULE_TS + scriptLibSource();
+  }
+  /**
+   * P109 ISL-005 AC7 — the project's script files, each **once**, with the loader and the one registry
+   * every wrapper reaches them through. Every file in the project, not only the listed ones: a file
+   * may reach another by a `use()` no text scan can follow, and the runtime would resolve it.
+   */
+  if (projectScriptsUsed) {
+    const scripts = ir.project.scripts ?? [];
+    files[PROJECT_SCRIPTS_LIB_PATH] = GENERATED_MODULE_TS + projectScriptsLibSource();
+    files[PROJECT_SCRIPT_FILES_PATH] = GENERATED_MODULE_TS + projectScriptFilesSource(scripts);
+    for (const script of scripts) files[projectScriptFilePath(script.path)] = projectScriptFileSource(script);
   }
   // EXP-011 §53.
   if (runTasksLibUsed) {

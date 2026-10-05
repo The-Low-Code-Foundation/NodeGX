@@ -48,6 +48,7 @@ import { CONTENT_PARAMS, iconSourceOf, StyleRole, WIRED_STYLE_SINKS } from '../e
 import { CONTENT_BOUND_PORTS, ROLE_OF_TYPE, STRUCTURE_PORTS } from '../structurePorts';
 import { AnimateEaseName, ANIMATE_EASE_NAMES } from '../emit/animateLib';
 import { StatesValueType, STATES_VALUE_TYPES } from '../emit/statesLib';
+import { PROJECT_SCRIPTS_SYMBOL } from '../emit/projectScriptsLib';
 import {
   expressionIdentifiersOf,
   functionMinedPortsOf,
@@ -75,6 +76,7 @@ import {
   workspaceOf,
   VISUAL_FUNCTION_LABEL
 } from './logicbuilder';
+import { ScriptUsePlan, scriptUsesPlan } from './scriptUses';
 import {
   AppStateRegistry,
   ChannelPlan,
@@ -2742,6 +2744,12 @@ export interface JsFunctionPlan {
    * minted by the block program where no `Variable` node declares it.
    */
   variables?: string[];
+  /**
+   * P109 ISL-005. Function only, present when its `uses` lists script files: each file the body
+   * reaches as `Scripts.<alias>`, in the order listed. The wrapper binds `Scripts` from the one
+   * shared registry (`src/lib/projectScriptFiles.ts`); the files are emitted once, never pasted here.
+   */
+  scripts?: ScriptUsePlan[];
   /**
    * reactive — no `run` wire: one render local per instance, recomputed per render (grade Q).
    * invoked — `run` wired: calls inline inside its own handler chain only (grade I).
@@ -5528,7 +5536,9 @@ function planComponent(
     outputInterface.valueProps.some((v) => v.prop === name) ||
     name === plan.file?.symbol ||
     name === 'Inputs' ||
-    name === 'Outputs';
+    name === 'Outputs' ||
+    // P109 ISL-005: the script-file registry's module-scope import.
+    name === PROJECT_SCRIPTS_SYMBOL;
   const allocJsFnName = (node: NodeIR, kind: JsFunctionPlan['kind']): string => {
     const cleaned = (node.authoredLabel ?? '').replace(/[^A-Za-z0-9_$]+/g, '_').replace(/^_+|_+$/g, '');
     let base = cleaned.length > 0 ? cleaned : kind === 'function' ? 'fn' : kind === 'visual' ? 'blocks' : 'expr';
@@ -5581,6 +5591,17 @@ function planComponent(
       } else {
         const purity = jsPurityDefer(kind, body);
         if (purity !== null) return { defer: `the ${word} ${purity}` };
+      }
+      // P109 ISL-005 AC7. The files a Function lists under Uses: bound as `Scripts`, or the named reason not.
+      let scriptUses: ScriptUsePlan[] = [];
+      if (kind === 'function') {
+        const usesValue = node.parameters.find((p) => p.name === 'uses')?.value;
+        if (usesValue !== undefined && usesValue.kind !== 'literal' && usesValue.kind !== 'json') {
+          return { defer: `the ${word} has a Uses list that is not written out (${usesValue.kind}) — the files it reaches cannot be read` };
+        }
+        const planned = scriptUsesPlan(usesValue?.value, ir.project.scripts);
+        if ('defer' in planned) return { defer: `the ${word} ${planned.defer}` };
+        scriptUses = planned.uses;
       }
 
       /**
@@ -5753,6 +5774,7 @@ function planComponent(
         signals,
         mathAliases: exprIds.mathAliases,
         mode,
+        ...(scriptUses.length > 0 ? { scripts: scriptUses } : {}),
         ...(kind === 'visual'
           ? {
               variables: [

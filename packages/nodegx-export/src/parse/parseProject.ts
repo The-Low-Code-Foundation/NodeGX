@@ -49,9 +49,11 @@ import {
   PortIR,
   ProjectIR,
   RouterIR,
+  ScriptFileIR,
   StylesIR,
   VariantIR
 } from '../ir/types';
+import { normalizeScriptPath } from '../scriptFiles';
 import { parseModules } from './parseModules';
 
 export const EXPORTER_VERSION = '0.0.1';
@@ -127,8 +129,35 @@ export function parseProject(projectDir: string, catalog: Catalog): ExportIR {
   if (cloudservices !== undefined) project.cloudservices = cloudservices;
 
   if (styles !== undefined) project.styles = styles;
+  // P109 ISL-005. Absent without a `scripts/` folder, so every earlier project's IR is unchanged.
+  const scripts = parseScriptFiles(projectDir);
+  if (scripts !== undefined) project.scripts = scripts;
 
   return { project, components };
+}
+
+/**
+ * P109 ISL-005 — `scripts/**.js`, read as the editor and the preview read it
+ * (`ScriptFileStore`, `noodl-preview`'s `readScriptFiles`): every `.js` file under the folder,
+ * keyed by its path relative to `scripts/`, anything else ignored. Undefined without the folder.
+ */
+function parseScriptFiles(projectDir: string): ScriptFileIR[] | undefined {
+  const root = path.join(projectDir, 'scripts');
+  if (!fs.existsSync(root) || !fs.statSync(root).isDirectory()) return undefined;
+  const found: ScriptFileIR[] = [];
+  const walk = (dir: string) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.isFile() && entry.name.endsWith('.js')) {
+        const key = normalizeScriptPath(path.relative(root, full).split(path.sep).join('/'));
+        if (key !== undefined) found.push({ path: key, source: fs.readFileSync(full, 'utf8') });
+      }
+    }
+  };
+  walk(root);
+  // D1: codepoint order.
+  return found.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
 }
 
 /**

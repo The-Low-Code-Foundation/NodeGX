@@ -57,6 +57,7 @@ import { RUN_TASKS_LIB_PATH } from './runTasksLib';
 import { ERRORS_LIB_PATH } from './errorsLib';
 import { RECORD_FILTER_LIB_PATH } from './recordFilterLib';
 import { SCRIPT_LIB_PATH } from './scriptLib';
+import { PROJECT_SCRIPT_FILES_PATH, PROJECT_SCRIPTS_SYMBOL } from './projectScriptsLib';
 import { STREAMING_LIB_PATH } from './streamingLib';
 import { SSE_LIB_PATH } from './sseLib';
 import { WEBSOCKET_LIB_PATH } from './websocketLib';
@@ -254,6 +255,8 @@ export interface EmittedComponent {
   statesLib: boolean;
   /** EXP-011 §52. Whether this component imports `src/lib/script.ts`. */
   scriptLib: boolean;
+  /** P109 ISL-005. Whether this component imports the script-file registry (`src/lib/projectScriptFiles.ts`). */
+  projectScripts: boolean;
   /** EXP-011 §53. `src/lib/runTasks.ts` is owed when any component keeps a Run Tasks node. */
   runTasksLib: boolean;
   /** EXP-011 §54. `src/lib/errors.ts` is owed when this component keeps a boundary or raises on the channel. */
@@ -6031,6 +6034,15 @@ export function emitComponent(
       if (hasInputs) lines.push(`  const Inputs = ${scopeCast(INPUTS_PARAM)};`);
       lines.push(`  const Outputs: ${outputsType} = {${seeds.length > 0 ? ` ${seeds.join(', ')} ` : ''}};`);
       lines.push('  try {');
+      /*
+       * P109 ISL-005 AC7. The files the Function lists under Uses, from the one registry — never pasted
+       * here. Inside the try, as the runtime's `scriptsFor` runs before the body: a file that fails runs
+       * none of it. Keyed by the exact aliases, so `Scripts.<typo>` is a compile error, not `undefined`.
+       */
+      if (def.scripts !== undefined && def.scripts.length > 0) {
+        const rows = def.scripts.map((u) => `${fieldKey(u.alias)}: ${PROJECT_SCRIPTS_SYMBOL}.load(${JSON.stringify(u.path)})`);
+        lines.push(`    const Scripts = { ${rows.join(', ')} };`);
+      }
       lines.push('    (() => {');
       lines.push(...def.body.split('\n'));
       lines.push('    })();');
@@ -6319,6 +6331,13 @@ export function emitComponent(
   if (usedMediaHelpers.size > 0) {
     const specifier = `${relRoot}/${MEDIA_LIB_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
     internalImports.set(specifier, `import { ${[...usedMediaHelpers].sort().join(', ')} } from '${specifier}';`);
+  }
+
+  // P109 ISL-005 AC7. The script-file registry, earned by a printed wrapper that binds `Scripts`.
+  const usesProjectScripts = Object.values(jsFunByNode).some((def) => referencedJsIds.has(def.nodeId) && (def.scripts?.length ?? 0) > 0);
+  if (usesProjectScripts) {
+    const specifier = `${relRoot}/${PROJECT_SCRIPT_FILES_PATH.replace(/^src\//, '').replace(/\.ts$/, '')}`;
+    internalImports.set(specifier, `import { ${PROJECT_SCRIPTS_SYMBOL} } from '${specifier}';`);
   }
 
   const importLines: string[] = [];
@@ -7087,6 +7106,8 @@ export function emitComponent(
     statesLib: plan.statesMachines.length > 0,
     // EXP-011 §52.
     scriptLib: plan.scripts.length > 0,
+    // P109 ISL-005.
+    projectScripts: usesProjectScripts,
     // EXP-011 §53.
     runTasksLib: plan.runTasks.length > 0,
     // EXP-011 §54.
