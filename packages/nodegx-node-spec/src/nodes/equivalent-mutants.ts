@@ -57,13 +57,11 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     // cancel outside any zone handed the twin that also took the keyboard back and left a zone (Drag Over false over false)
     { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["inZone","input","isDropTarget","isLifted","phase"],"emit":["pickedUp"]', swappedWith: '"set":["elementFocused","inZone","input","isDropTarget","isLifted","phase"],"emit":["pickedUp"]', why: ALREADY_HELD('a Space lift into its own zone of an element that holds the keyboard') },
     { reducer: 'person.key', kind: 'swap-branch', branch: '"set":["elementFocused","inZone","input","isLifted","phase"],"emit":["dragCancelled"]', swappedWith: '"set":["elementFocused","inZone","input","isDropTarget","isLifted","phase"],"emit":["dragCancelled"]', why: ALREADY_HELD('a cancel outside a zone that takes the keyboard back (Drag Over is false, and was sent false)') },
-    // s44 (C79): a frame end nobody asked to render, handed the twin that rendered nothing on an element that is not there: it clears `asked`, already clear
-    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["asked"],"emit":[]', why: ALREADY_HELD('a frame end with no render asked for (`asked` is false)') },
     // s44: a plain unmount, handed the unmount whose frame start also found the chain's element. Its example puts the attributes on
     // element 1 with the chain at 0: a plain unmount's chain is already 0 (an element on the page with a chain waiting takes it at
     // the frame start), and element 1 — the first made — is at any unmount the one leaving or one already gone; every element after
     // it is a later one. The five-remount scenario kills the swap for any later element's number.
-    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["asked","elementFocused","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["asked","attrsOn","chain","elementFocused","onPage"],"emit":["willUnmount"]', why: 'a plain unmount handed the twin that put the attributes on element 1 with the chain at 0: the chain is 0 already, and element 1 is leaving or gone — no later element is element 1' }
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["elementFocused","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["attrsOn","chain","elementFocused","onPage"],"emit":["willUnmount"]', why: 'a plain unmount handed the twin that put the attributes on element 1 with the chain at 0: the chain is 0 already, and element 1 is leaving or gone — no later element is element 1' }
   ],
   'net.noodl.controls.button': [
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },

@@ -1,7 +1,7 @@
 # NSP-016 — Visual nodes: research first, then layout semantics that are not CSS
 
 **Opened 2026-09-29.** **Depends on NSP-008.**
-**Status: 🟡 s44 (2026-10-05): the Text v2 — row C79 modelled; 203 scenarios; conforms on both targets at 200 and 10,000 (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
+**Status: 🟡 s44 (2026-10-05): the Text v3 — C79 is a known row (R11: the spec says the intent, not React's redraw rules); 162 scenarios; s43's 47 deep-run survivors killed (§7.9). s43 (2026-10-05): drag and drop researched ([RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md)) and the Text conforms (9 of 19; rows C77, C78, §7.8) — its drag SOURCE graded on a lone node; the zone side and the file drop are step (b). The face learned the browser's hit test, and the 7 conforming specs it moved say what a browser lets a person do. s42 (2026-10-04): the Radio Button Group and the Radio Button conform on both targets at 200 and 10,000 (8 of 19; rows C76, D37, §7.7) — the visual tree, per node: a node's children are on its PAGE (the spec declares them; the face builds them with the node's own `addChild`; a person `pick`s one) and a node's parent is its WORLD (the GROUP seam). s41 (2026-10-04): Slider and Icon conform on both targets at 200 and 10,000 (6 of 19; rows D36, C73, C74, C75; C63 takes null, §7.6) — the face grew `slide` (jsdom's range sanitization, which it applies to every write, plus the browser's step rule, which jsdom lacks; a reversed range is not played); the 13 left each need infrastructure first (a visual tree with context, drag and drop, geometry, media — §7.6). s39 (2026-10-04): Dropdown conforms on both targets (4 of 19; rows C70, C71, D34 and instances of C65, C66, D30, §7.4) — the face grew `choose` (a keyboard pick: an enabled option the list offers, no `change` for the one already selected); the spec keeps the node's value, the author's Value, the shown value and the browser's selection apart because the component does. s38: Text Input conforms on both targets (3 of 19; rows C68, C69, D31–D33, §7.3) — the face grew `type` and `key`, the format a person patch that resolves deferred outcomes (the viewer's pointer drain). s37: AC3 begun — THE PERSON face (the real React component in a jsdom page; an act is the browser's events) and the format's `act` / `acts` / `person` / `place` / `portability`; Button and Checkbox conform on the runtime (rows C61–C66, D30, §7.2). s36: research done, R10 ruled — build the logic for all 19 with each input's portability class in the spec; geometry grading after NSP-017.**
 
 ## 1. The person sentence
 
@@ -810,77 +810,68 @@ and Video. Modelling it needs the element's own `pointer-events` beside React's 
 render. That is s44's first job. The 115 count stands on the 200-sequence gates (the s39 precedent: the Text Input counted at 200, and
 its 10,000 findings were s40's).
 
-### 7.9 s44, 2026-10-05 — the Text at 10,000: row C79 modelled (Text v2)
+### 7.9 s44, 2026-10-05 — the Text at 10,000: row C79 measured, modelled, then withdrawn from the spec (R11) — Text v3
 
-**Measured before modelled.** s43's deep run left one divergence (row C79) and 47 survivors. A side-by-side probe played 22 hand cases on
-both targets. A second probe set each of the Text's inputs on a page and counted `forceUpdate` calls. Together they settled four rules:
-1. **Two writers set the element's `pointer-events`.** The two Pointer Events inputs patch it straight onto the element (`setStyle` /
-   `removeStyle`; Mode `inherit` patches `''`, which is not `none`). A render writes Text.tsx :88-90's value (`none` at Opacity exactly
-   the number 0, else the style's), but React writes a style key only when ITS OWN last-rendered value changed. An element React makes
-   (a mount, a new Tag) takes the whole style. So once React has rendered `none`, **a Pointer Events write in any later frame is never
-   written back**: C79 is wider than s43 wrote, as it does not need Opacity set as a parameter. Only a write in the same frame as the
-   opacity change is safe.
-2. **A frame end renders only when asked.** The inputs that ask, measured one by one: Text, Tag, Class Name, Data Attributes, Text
-   Style, Width, Height, the four margins, Size Mode, Align X / Y, Block Pointer Events, Click Bubbling. Mounted asks only on a change
-   (:2285: its parent's render). Position asks when it is set and the element is there. Opacity asks when it crosses zero against the
-   ELEMENT's stored opacity (`style.opacity === '0'`); then it is not patched. Every other untagged style write is a patch. The
-   first frame end always renders: every wired output-prop handler asks (:563), and the target wires them all.
-3. **The element's opacity is what the browser stored.** jsdom clamps a number into 0–1 (so -1 is stored as `'0'` and a later 0
-   crosses nothing), clears on `null` / `''` / an empty list, and keeps the old value for anything it cannot read. React writes
-   `String(v)` and clears on `null`, `undefined`, a boolean or `''`. Written down as a face choice: Chromium keeps an out-of-range
-   number as written.
-4. **An act's paint is a render.** The face re-renders the holder before every act, so the Text re-renders. A browser does not render
-   before an event. In the face that render heals a patched element whose computed value moved since React's last render. Written down
-   as a face choice. It hides some C79 sequences (an Opacity stored as 0 by -1, then 0 and Enabled, then a press), never adds one.
+**Measured.** s43's deep run left one divergence (row C79) and 47 survivors. A side-by-side probe played 22 hand cases on both targets,
+and a second probe set each of the Text's inputs on a page and counted the redraws each one asks for. What the runtime does, which is
+now the evidence in [C79's ledger entry](../../bugs/p107-c79-an-invisible-element-catches-clicks-after-a-pointer-events-write.md):
+1. **Two writers set the element's `pointer-events`.** The Pointer Events inputs write it straight onto the element (`setStyle` /
+   `removeStyle`; Mode `inherit` writes `''`, which is not `none`). A redraw writes Text.tsx :88-90's value (`none` at Opacity
+   exactly 0), but only when that value differs from what the previous redraw wrote. So once the element has been drawn with `none`, a
+   Pointer Events write in ANY later frame lets the invisible element take the pointer. Only a write in the same frame as the opacity
+   change is safe. **C79 is wider than s43 wrote.**
+2. **A frame end redraws only when an input asked.** The list was measured one input at a time (§7.9's first commit, `b4c997ed9`, has
+   it in the spec). Opacity asks only when it crosses zero against the element's stored opacity.
+3. **C79's reach** is the five nodes with both the opacity rule and the Pointer Events inputs: Text, Group, Image, Circle, Video. The
+   Text Input has the rule but no Pointer Events inputs.
 
-**The spec (version 2).** The state grew the element's own `domPe`, React's `renderedPe`, the element's `domOpacityZero`, React's
-`renderedOpacity`, and `asked`. The hit test reads `domPe`. The four render keys are `synced` (written at every paint an act makes:
-without that, every act's branch carried them and 56 survivors appeared). The look inputs that ask now have reducers (`ASK`). Data
-Attributes does not: it is edit-only, a parameter set before the element exists.
+**Modelled, then withdrawn (R11).** Text v2 (`b4c997ed9`) reproduced C79 by copying the renderer's redraw rules into the spec: the
+element's own value beside the last-drawn value, and which inputs ask for a redraw. It conformed at 10,000 on both targets. Richard
+then ruled R11: *"let's try to casually avoid React stuff if we can when it comes to the spec, since we're hoping to one day move the
+spec away from dependence on React."* Asked how the Text should take it, he chose **"say the intent"**. **Text v3** states v1's rule
+(an element at Opacity 0, hidden, or with Pointer Events off takes no pointer, whatever order the writes came in). C79 is a **known
+row on the runtime target** (`invisibleTakesPointer` in conformance.test.ts: the first difference is a pointer output on the runtime's
+side, the last Opacity written is the number 0, and a Pointer Events input was written before it). It is counted on every run, never
+hidden. A future target conforms by doing what a person expects, not by copying a renderer's bug. Kept from v2, as they are not React:
+Mounted written the value it holds does nothing (:2285), and the Mounted cites corrected (:2276-2295).
 
-**Scenarios: 54 → 203.** 67 are row C79's: the core case with its control, Mode `explicit` / `inherit`, Opacity 0 then a later
-Enabled, the same-frame control, one per input that asks (each kills that reducer's drop-set), Mounted written its own value, an
-empty Position, the -1 / 0.5 pair (the element's stored opacity), and four per act (an act that meets nothing renders first; an act
-on a patched element renders first; an act right after Mounted on, or a new Tag, makes the element that Enabled then patches). Most of
-the rest (79) are C77's and C78's, written to kill s43's 47 deep-run survivors:
+**Scenarios: 54 → 162.** Four are C79 `row` scenarios (Enabled after drawing at Opacity 0; Mode Explicit then Inherit; Opacity 0
+then Enabled a frame later; Enabled off and on, then Opacity 0), plus the same-frame case, which both targets agree on. The
+scenarios that only graded the redraw rules went with v2. 100 are C77's and C78's, written to kill s43's 47 deep-run survivors:
 - **An act's paint that makes the element** (a remount, a new Tag) is read by a Draggable write in the same frame, which puts the
-  tabindex on whichever element is there. Each act has a version with Draggable written after it, with and without a gesture, under
-  Tag `span` and Tag `h1`. The `h1` versions exist because a swap hands over its twin's recorded example, which holds element 2 with
-  Tag `span`, and a play sitting on exactly that cannot tell the difference.
+  tabindex on whichever element is there. Each act has a version with Draggable written after it: with and without a gesture, under
+  Tag `span` and Tag `h1`, and with Pointer Events off (an act that meets nothing still makes, keeps or replaces the element). The `h1` versions exist
+  because a swap hands over its twin's recorded example, which holds element 2 with Tag `span`, and a play sitting on exactly that
+  cannot tell the difference.
 - **A replacing act during a keyboard drag** starts no gesture: Escape after it still cancels the keyboard drag.
 - **The hold timer after a replacing press or touch** (Hold To Drag always).
 - **A cancel that does or does not take the keyboard back**, read by hiding the element and pressing Space (a hidden element keeps the
   keyboard it holds, and takes none it does not).
-- **The `whenMounted` chain**: a render asked for while off the page, an unmount in the frame the chain finds the element, Draggable
-  written while off the page, five remounts in a row, and the chain's frame also making a new element (read twice: with and without
-  Draggable written again).
+- **The `whenMounted` chain**: an unmount in the frame the chain finds the element, Draggable written while off the page, five
+  remounts in a row, and the chain's frame also making a new element (read with and without Draggable written again).
 
 The last three scenarios carry the shared known rows C61–C63. The Text had never carried them, so "the known rows are still open" had
 been red for it since s43.
 
-**Mutants.** Four more are declared equivalent (s43 declared seven), each a twin that writes what the state already holds:
-- a frame end with nothing asked, handed the twin that clears `asked` (already false);
+**Mutants.** Three more are declared equivalent (s43 declared seven), each a twin that writes what the state already holds:
 - a plain unmount, handed the twin that put the attributes on element 1 with the chain at 0 (a plain unmount's chain is already 0,
   and element 1 is always leaving or gone; the five-remount scenario kills any other element number);
 - a Space lift into its own zone by an element that already holds the keyboard;
 - a cancel outside any zone that takes the keyboard back, handed the twin that also left a zone (Drag Over false over false).
 
-**Gate readings (2026-10-05, load 2–3).** The side-by-side probe: all 203 scenarios identical on both targets in one process, the three
-known rows excepted. Interpreter at 200: CONFORMS on seeds 13, 20729, 20730, 20731, 20732 and 7 (1,255–1,256 killed, 0 survivors, 0
-unreached). Runtime at 200: **CONFORMS on seeds 13 and 20730** (0 divergences; known rows C61 52–53, C62 26–27, C63 6–11 generated
-hits). **At 10,000 (seed 20731): the interpreter CONFORMS (86 s), and the runtime CONFORMS — 10,000 / 10,000, 0 divergences, 1,255 /
-1,265 mutants, the rest declared (252 s).** The first 10,000 run on v2, before the act scenarios, had 0 divergences and 30 survivors.
-The package suite is green (20 suites, 878 passed); the runtime's graph and target suites are green (102). `tsc --noEmit` exits 0, and
-`node scripts/bugs.js check` reports 232 headers valid. No stranger-hashed file changed (text.ts and equivalent-mutants.ts are not
-guarded).
+**Gate readings, Text v3 (2026-10-05, load 3–4).** The side-by-side probe: all 162 scenarios identical on both targets in one process,
+the seven `row` scenarios excepted (C79 ×4, C61–C63). Interpreter at 200: CONFORMS on seeds 13, 20729, 20730, 20731, 20732, 20733 and 7
+(1,156–1,157 killed, 0 survivors, 0 unreached); at 10,000 (seed 20731) CONFORMS. Runtime at 200: **CONFORMS on seeds 13 and 20730**.
+Runtime at 10,000 (seed 20731): **CONFORMS — 10,000 / 10,000, 0 divergences, C79 attributed once, 1,156 / 1,165 mutants, the rest
+declared (217 s)**. One earlier attempt in the chained gate run failed in 852 ms with an empty message and did not reproduce when run
+alone. Its cause is unknown; the reading above is the solo run. The package suite is green (20 suites, 878 passed), and the runtime's
+graph and target suites are green (102). `node scripts/bugs.js check`: 233 headers valid. No stranger-hashed file changed. Withdrawing
+v2 re-opened 14 survivors that its scenarios had killed (acts that make or keep the element while meeting nothing). Each is now killed
+by a Pointer Events-off scenario that reads the element through a Draggable write.
 
-**C79's reach, corrected.** The opacity rule sits in six components (Text, Group, Image, Circle, Video, Text Input), but only the five
-that call `addPointerEventOutputs` have the inputs that patch the element. The Text Input has no Pointer Events inputs, so C79 cannot
-happen there. When Group, Image, Circle and Video are specced, they need this model.
-
-**Lessons.** (1) **A model of "React re-renders at every frame end" is a model of a different framework.** `forceUpdate` is opt-in per
-setter, and a defect that lives between a DOM patch and React's own memory needs both sides in the state. (2) **A name is graded by
-nothing**: the first "control from 0.5" played Pointer Down on BOTH targets, because React had already rendered `none`. Reading the
-traces against the names caught it, as in s35. (3) **A twin's recorded example can be the play's own values.** The swapped-in example held element 2 with Tag `span`, so every scenario
-that sat on element 2 with `span` let the swap through, and which ones did depended on the seed. A scenario written at a value the
-example does not hold (Tag `h1`) kills it on every seed.
+**Lessons.** (1) **R11: a spec that copies a renderer's mechanics makes every future target copy its bugs.** The redraw rules were
+real, and modelling them was exact; it was the wrong place for them. The measurement belongs in the row's evidence, and the spec says
+what a person gets. (2) **A name is graded by nothing**: the first "control from 0.5" played Pointer Down on BOTH targets. Reading
+the traces against the names caught it, as in s35. (3) **A twin's recorded example can be the play's own values.** The swapped-in
+example held element 2 with Tag `span`, so every scenario sitting on element 2 with `span` let the swap through, and which ones did
+depended on the seed. A scenario written at a value the example does not hold (Tag `h1`) kills it on every seed.

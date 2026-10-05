@@ -365,6 +365,24 @@ const pickWriteBackPick = (d: Divergence) => {
   return stage === 3;
 };
 
+/**
+ * NSP-016 §6 C79 — a Text (Group, Image, Circle, Video) at Opacity exactly 0 takes no pointer (Text.tsx :88-90), but a Pointer Events
+ * Enabled / Mode write after it was drawn reaches the element directly and the opacity rule is not re-applied — the runtime raises a
+ * pointer output the spec does not. Narrow: the first difference is a pointer output on the RUNTIME's side, the last Opacity written
+ * before it is the number 0, and a Pointer Events input was written before it.
+ */
+const POINTER_OUTPUTS = ['pointerDown', 'pointerUp', 'onClick', 'hoverStart', 'pointerEnter', 'hoverEnd'];
+const isZero = (v: unknown) => v === 0 || (typeof v === 'object' && v !== null && (v as { $num?: unknown }).$num === '-0');
+const invisibleTakesPointer = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  const a = d.actual[d.difference.index];
+  if (!a || a.t !== 'signal' || !POINTER_OUTPUTS.includes(a.port)) return false;
+  const before = d.reference.slice(0, d.difference.index);
+  const opacity = before.filter((e) => e.t === 'set' && e.port === 'opacity').pop() as { value?: unknown } | undefined;
+  if (!opacity || !isZero(opacity.value)) return false;
+  return before.some((e) => e.t === 'set' && (e.port === 'pointerEventsEnabled' || e.port === 'pointerEventsMode'));
+};
+
 const VISUAL_ROWS: KnownRow[] = [
   { row: 'NSP-016 §6 C61 — Font Family wired a truthy value that is not text: the setter throws calling `.split` on it', matches: throwsOnSet((p) => p.endsWith('fontFamily'), truthyNonString, /family\.split is not a function/) },
   { row: 'NSP-016 §6 C62 — a units-typed style input wired null: the generated setter reads `.value` of null and throws', matches: throwsOnSet(unitCssPort, isNull, /Cannot read properties of null \(reading 'value'\)/) },
@@ -402,8 +420,8 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   // s42 — the Radio Button Group: no text style either — the Placement and units-typed style setters
   'Radio Button Group': VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
-  // s43 — the Text: a text style (C61) and the Placement and units-typed style setters
-  Text: VISUAL_ROWS,
+  // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
+  Text: [...VISUAL_ROWS, { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }],
   'net.noodl.controls.checkbox': [
     ...VISUAL_ROWS,
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },

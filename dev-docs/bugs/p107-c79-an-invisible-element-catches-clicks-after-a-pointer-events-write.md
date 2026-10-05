@@ -38,7 +38,9 @@ sequence can go either way:
 - The opacity check compares the ELEMENT's stored opacity (`style.opacity === '0'`), not the value written: after
   Opacity -1 (stored clamped as `'0'`) a later 0 crosses nothing and asks for no render.
 
-The Text's spec models all of this (version 2, NSP-016 §7.9): 67 of its scenarios are this row, all identical on both targets.
+The Text's spec does NOT copy this (version 3, NSP-016 §7.9; R11: a spec says what a person gets, not a renderer's mechanics):
+it says an element at Opacity 0 takes no pointer. This row is a known row on the runtime target (`invisibleTakesPointer`), carried by four
+row scenarios and counted in every generated run.
 
 **Proposed fix (small).** Leave `pointerEvents` to the render. Have the two Pointer Events setters force an update (as
 the opacity transition already does) instead of patching the DOM, so the component's opacity rule always has the last

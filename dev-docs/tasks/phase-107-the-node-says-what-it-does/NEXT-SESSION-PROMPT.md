@@ -1,7 +1,7 @@
 # P107 — next session
 
-**Written 2026-10-05 (s44).** Read the [README](README.md) §2–§7. s44's record is [NSP-016 §7.9](NSP-016-VISUAL-NODES.md) (the Text v2:
-row C79 modelled, s43's deep-run survivors killed); s43's is §7.8 and [RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md); s42's §7.7; s41's
+**Written 2026-10-05 (s44).** Read the [README](README.md) §2–§7. s44's record is [NSP-016 §7.9](NSP-016-VISUAL-NODES.md) (the Text v3:
+row C79 measured and kept out of the spec under R11, s43's deep-run survivors killed); s43's is §7.8 and [RESEARCH-DRAG-DROP.md](RESEARCH-DRAG-DROP.md); s42's §7.7; s41's
 §7.6; s40's §7.5; s39's §7.4; s38's §7.3; s37's §7.2 (THE PERSON face).
 
 ## Board (from the task files)
@@ -22,7 +22,7 @@ row C79 modelled, s43's deep-run survivors killed); s43's is §7.8 and [RESEARCH
 | NSP-013 the time batch | 🟡 24 / 24 conform. Left: AC2, the deep run for s11–s14 | s16 |
 | NSP-014 records, users, files, HTTP, streams | 🟡 24 of 24 conform; s36 D29 fixed; **s40 DbModel2's seed-dependent twins pinned**. Left: AC2's export half (P18) | s8, s21 … s40 |
 | NSP-015 navigation + components | 🟡 14 of 14 conform; **s40 NavigationClosePopup's seed-dependent survivor pinned**. Left: AC2 (export, P18) | s15 … s40 |
-| **NSP-016 the visual nodes** | **🟡 9 of 19 conform (Button, Checkbox, Text Input, Dropdown, Slider, Icon, Radio Button Group, Radio Button, Text). s44: the Text v2 conforms at 10,000 on both targets (row C79 modelled; 203 scenarios; §7.9). Drag and drop researched (RESEARCH-DRAG-DROP.md). The other 10 need infrastructure (below). AC4 waits for NSP-017** | `aa8abb06f` … s42, `803f6cccf`, s43, s44 |
+| **NSP-016 the visual nodes** | **🟡 9 of 19 conform (Button, Checkbox, Text Input, Dropdown, Slider, Icon, Radio Button Group, Radio Button, Text). s44: the Text v3 (R11 — C79 a known row, the spec says the intent; 162 scenarios; §7.9). Drag and drop researched (RESEARCH-DRAG-DROP.md). The other 10 need infrastructure (below). AC4 waits for NSP-017** | `aa8abb06f` … s42, `803f6cccf`, s43, s44 |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 opened s21 (needs a second runtime target, `noodl-viewer-cloud`) | s21 |
 | NSP-009, NSP-017 … NSP-019, NSP-021 | — | — |
@@ -32,23 +32,22 @@ Left: 10 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-
 
 ## What s44 settled
 
-1. **Row C79 is modelled (Text v2).** Measured first: 22 hand cases side by side, and every Text input set on a page with its
-   `forceUpdate` calls counted. Two writers set the element's `pointer-events`: the Pointer Events inputs PATCH it, and a render writes
-   Text.tsx :88-90's value only when React's own last-rendered value changed. A frame end renders only when an input ASKED (the list
-   is in §7.9: Mounted only on a change, Position only when set, Opacity only when it crosses zero against the element's STORED
-   opacity, and the first frame end always). An act's paint is a render (a face choice, written down).
-2. **C79 is wider than s43 wrote.** Once React has rendered `none`, a Pointer Events write in ANY later frame catches clicks while
-   invisible; only the same frame is safe. The bug file says so. Its reach is Text, Group, Image, Circle and Video: the Text Input
-   has the opacity rule but no Pointer Events inputs.
-3. **s43's 47 deep-run survivors are killed** by scenarios the runtime also plays. An act's paint that makes the element is read by a
-   Draggable write in the same frame; a replacing act during a keyboard drag is read by Escape; the hold timer; a cancel that does or
-   does not take the keyboard is read by hiding and pressing Space; the `whenMounted` chain read two ways. Four more are declared
-   equivalent (already-held twins).
+1. **Row C79 measured.** 22 hand cases side by side, and every Text input set on a page with its redraw requests counted. The Pointer
+   Events inputs write `pointer-events` straight onto the element; a redraw writes the opacity rule's `none` only when it differs from
+   what the previous redraw wrote; a frame end redraws only when an input asked. So **once a Text has been drawn at Opacity 0, a
+   Pointer Events write in ANY later frame lets it take the pointer** (only the same frame is safe). Reach: Text, Group, Image,
+   Circle, Video; not the Text Input (no Pointer Events inputs). The bug file has it all.
+2. **R11 (Richard): keep React out of the spec where we can.** v2 (`b4c997ed9`) had modelled C79 with the redraw rules. Asked, Richard
+   chose **"say the intent"**: **Text v3** states that an element at Opacity 0, hidden, or with Pointer Events off takes no pointer, and
+   C79 is a **known row on the runtime target** (`invisibleTakesPointer`, conformance.test.ts; four `row` scenarios).
+3. **s43's 47 deep-run survivors are killed** by scenarios the runtime also plays (all in §7.9). Three more are declared equivalent
+   (already-held twins).
 4. **The handoff was wrong in one place**: the Text's "known rows are still open" test was RED since s43 (the Text carried no
    C61–C63 scenario). Fixed: three scenarios, as the other visuals carry.
-5. **Readings (2026-10-05, HEAD `d126f5399` + this session's commit):** the Text CONFORMS on the runtime at 200 (seeds 13, 20730) and
-   at 10,000 (seed 20731, 0 divergences, 1,255 / 1,265 mutants, the rest declared); the interpreter at 200 on six seeds and at 10,000;
-   the package suite 20 suites / 878 passed; the runtime graph and target suites 102; `tsc --noEmit` 0; bugs check 232 valid.
+5. **Readings:** (2026-10-05) Text v3 conforms on the runtime at 200 (seeds 13, 20730) and at 10,000 (seed 20731: 0 divergences, C79
+   attributed once, 1,156 / 1,165 mutants, the rest declared); the interpreter at 200 on seven seeds and at 10,000; the package suite
+   20 suites / 878; the runtime graph and target suites 102; bugs check 233 valid. One chained 10,000 attempt failed in 852 ms with an
+   empty message and did not reproduce run alone — if it recurs, read the jest output whole.
 
 ## What s45 does
 
@@ -56,19 +55,21 @@ Left: 10 visual nodes (NSP-016), 17 cloud-only (NSP-022), 5 escape hatches (NSP-
    10,000 on the runtime (Button, Checkbox, Text Input (~20 min), Dropdown, Slider, Radio Button, Radio Button Group), one at a time,
    `uptime` first: `NSP_DEEP=10000 NSP_ONLY=<type> NSP_REPLAY_DIR=<scratch> npx jest test/node-spec/conformance.test.ts -t deep`
    in `packages/noodl-runtime`. Expect the matrix segments to cross Visible with an act in ways 200 never did. A divergence: replay
-   the shrunk sequence on both targets (the s44 side-by-side probe, below) before theorising.
+   the shrunk sequence on both targets (the side-by-side probe, below) before theorising.
 2. **NSP-016 AC3, the Text's step (b)** (RESEARCH-DRAG-DROP.md §8): a `move` act (pointer past the slop, over an element the act names)
    for the mouse lift; file acts `fileEnter` / `fileLeave` / `fileDrop` (plain events with a `dataTransfer` stand-in made from `$file`
    values) for the file drop's own logic (the type filter, the depth count, Files Dropped / Rejected, five values); a Draggable
    SIBLING on the Text's page (the s42 page pattern) for the zone side (Drag Over, Dropped, Landed, Drop Index 0).
 3. **Then Group** (its children are slots: Drop Index from the keyboard; the s42 page pattern), **then Image and Circle** (the Text with
-   another look). **Each carries C79**: copy the Text's v2 model (`domPe` / `renderedPe` / `domOpacityZero` / `renderedOpacity` /
-   `asked`, `synced`, and the ASK list measured on THAT node — rebuild the `forceUpdate` counting probe, it is ~60 lines). Video waits
-   for media; Columns for NSP-017; Repeater / Component Children / stacks for definitions on the page.
+   another look). Each carries C79: under R11 the spec states the intent (no pointer at Opacity 0) and C79 joins that node's KNOWN_ROWS
+   with the Text's matcher. Video waits for media; Columns for NSP-017; Repeater / Component Children / stacks for definitions on the page.
+4. **R11 applies from here**: write new spec state and rules in renderer-neutral words. The earlier React-shaped state (Text Input
+   `field` / `pending`, Dropdown's shown value) is NOT to be rewritten unasked; if a session finds one making a target copy a
+   React-only behaviour, ask Richard in plain words.
 
 **Human decisions outstanding** — rows to ask, in plain words (README §7 has the earlier ones written):
 - **New (s43, drag and drop):** C79 (an invisible Text catches clicks after a Pointer Events write in any frame after it was drawn
-  invisible — the setters should ask for a render, not patch the DOM; Group, Image, Circle and Video share it — s44 measured the reach), C77 (a card picked up with the keyboard stops responding to Tab and Space after it is re-shown —
+  invisible — the setters should ask for a redraw, not write the element; Group, Image, Circle and Video share it — Richard, s44: "I dunno", open), C77 (a card picked up with the keyboard stops responding to Tab and Space after it is re-shown —
   a remount, a new Tag, a late mount; the fix adds the attributes where the node learns its element), C78 (a draggable column that
   also takes drops, moved with the keyboard, drops into itself — leave the source's own zone out, as the pointer does).
 - **New (s42, the radio buttons):** C76 (a group's Value written back in the same frame as a person's pick leaves the picked button
@@ -101,9 +102,8 @@ keyboard keeps it. A Number field's sign / point / exponent mid-entry is not typ
 Slider's `slide` is a keyboard slide (no geometry for a drag); a range input's attributes are read as jsdom reads them (HTML's lenient parse —
 Chromium is strict); a REVERSED range (Max below Min) takes no slide (jsdom's sanitization of it does not settle; HTML clamps no overflow there,
 Chromium raises Max to Min).
-**s44:** an act paints the node first, and in the face that paint is a React RENDER (a browser does not render before an event) — it
-heals a patched `pointer-events` whose computed value moved since React's last render, hiding some C79 sequences, never adding one;
-the element's opacity is stored as jsdom stores it (a number clamped into 0–1; Chromium keeps an out-of-range number as written).
+**s44:** an act paints the node first, and in the face that paint is a redraw (a browser does not redraw before an event) — it heals a
+written `pointer-events` whose computed value moved since the last redraw, so the runtime shows C79 in fewer sequences than a browser.
 **s43:** an act's pointer has no position — only a `move` (step (b)) carries one past a slop; a hover or a leave raises no
 `pointermove`; an element that becomes hidden under the pointer raises no leave; a mouse press on non-focusable content does not
 blur the element that holds the keyboard; the click swallow expires at the world's clock (a settle does not turn it), where a
