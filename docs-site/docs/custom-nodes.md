@@ -606,6 +606,98 @@ value does not change when the theme does (it is still `var(--primary)`), so loo
 hand colours to the library rather than once. A value CSS cannot read comes back as the colour the
 element inherits, not as an error.
 
+### A library ships only as modern modules
+
+**What you notice:** the library's guide says `import * as THREE from 'three'`. You list its file in
+`manifest.dependencies`. The page logs *Cannot use import statement outside a module*. Your node
+draws nothing.
+
+NodeGX loads each file in `dependencies` as a plain script, one after another, before your kit's own
+file. A file written with `import` and `export` cannot load that way. Many libraries now publish
+only files like that, three.js among them.
+
+Turn the library into one plain script, once, on your own machine. The tool for it is esbuild:
+
+1. In an empty folder, run `npm install three esbuild`.
+2. Write an entry file that imports what your kit needs and puts it on one global name:
+
+```js title="entry.js"
+import * as T from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+window.THREE = Object.assign({}, T, { OrbitControls });
+```
+
+3. Bundle it into your kit's folder:
+
+```bash
+npx esbuild entry.js --bundle --format=iife --minify --outfile=noodl_modules/cube-kit/three.bundle.js
+```
+
+4. List the result in `manifest.json`: `"dependencies": ["three.bundle.js"]`.
+
+Run step 3 again when you move to a new version of the library. Three.js with its camera controls
+comes out at about 760 KB. Most kits in the NodeGX library ship their libraries this way already.
+
+**Read the global when your node mounts, not when your file loads.** An AI agent working on the
+project reads your kit by loading your own file alone, without its dependencies. A server render has
+no page to draw into. In both, `THREE` is not there yet when your file runs. A line like
+`var THREE = window.THREE` at the top leaves it undefined for good. Look it up inside an effect:
+
+```js title="noodl_modules/cube-kit/index.js"
+// @ts-check
+(function () {
+  var h = React.createElement;
+
+  /** @type {import('./types/node-kit').ReactNodeDefinition} */
+  var Cube = {
+    name: 'cube-kit.Cube',
+    displayNodeName: 'Cube',
+
+    getReactComponent: function () {
+      return function CubeComponent(props) {
+        var host = React.useRef(null);
+
+        React.useEffect(function () {
+          // Here, not at the top of the file: the dependency has loaded by the time a node mounts.
+          var THREE = /** @type {any} */ (window).THREE;
+          var el = /** @type {HTMLElement} */ (host.current);
+          var renderer = new THREE.WebGLRenderer({ antialias: true });
+          renderer.setSize(el.clientWidth || 300, el.clientHeight || 300);
+          el.appendChild(renderer.domElement);
+
+          var scene = new THREE.Scene();
+          var camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+          camera.position.set(2, 2, 3);
+          var controls = new THREE.OrbitControls(camera, renderer.domElement);
+          scene.add(new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshNormalMaterial()));
+
+          var frame = 0;
+          function draw() {
+            controls.update();
+            renderer.render(scene, camera);
+            frame = requestAnimationFrame(draw);
+          }
+          draw();
+
+          return function () {
+            cancelAnimationFrame(frame);
+            controls.dispose();
+            renderer.dispose();
+            el.removeChild(renderer.domElement);
+          };
+        }, []);
+
+        return h('div', { ref: host, style: props.style });
+      };
+    }
+  };
+
+  Noodl.defineModule({ reactNodes: [Cube] });
+})();
+```
+
+NodeGX may later load modern files directly. For now, bundle them.
+
 ## Where your kit runs
 
 A kit is a `<script>` tag, so the browser is the default and needs no declaration. `manifest.json`'s

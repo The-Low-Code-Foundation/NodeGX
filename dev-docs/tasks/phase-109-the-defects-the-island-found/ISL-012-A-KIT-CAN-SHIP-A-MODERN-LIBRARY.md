@@ -1,6 +1,6 @@
 # ISL-012 — A kit can ship a library as it is published today
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: 🟢 ruling 1 ruled s17 (2026-10-05): "Recipe now, loader later" (§8 s17); the recipe written (AC2), AC1/AC3 deployed drives owed — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F16** · found by P106 [IG-007](../phase-106-the-island-grows/IG-007-GARDEN-3D.md) session 1 and P108
 [IW-004](../phase-108-the-island-works/IW-004-REAL-BLOCKS.md), 2026-09-28 → 09-30 · **Side:** product (module
 injector, SSR kit loader, kit catalog extractor, kit docs; the export is read, not owned)
@@ -119,3 +119,49 @@ skip-and-say behaviour. A kit's own code stays "no build step".
 ## 8. Record
 
 None yet.
+
+### Session 17 (2026-10-05) — ruling 1 asked and ruled: "Recipe now, loader later"
+
+Re-measured at `8a89300b3` (read-only agent) before asking:
+- Every `manifest.dependencies` entry becomes a plain `<script type="text/javascript">` (`nodegx-module-inject/src/index.js:289-296,
+  :466-475`), placed before every kit's main (`static/deploy/index.html:77,80`; `static/viewer/index.html:89,107`); the server
+  render runs each with `new Function(source)()` under a `window` stand-in (`static/ssr/kit-modules.js:195-196, :252-253`); the
+  catalog reader only `require`s `main` (`noodl-mcp/src/kitExtract/entry.js:131-140`). `three.module.js` evaluated that way:
+  *Cannot use import statement outside a module*. Editor and export refuse it by name (`projectmodules.ts:213, :369`;
+  `nodegx-export/src/parse/kitSource.ts:202`).
+- **The recipe, run:** esbuild 0.25.12 (the repo's), three@0.186.1 + its real `OrbitControls`, `--bundle --format=iife --minify`,
+  entry `window.THREE = {...T, OrbitControls}` → **762,803 B**, 111,152 B (+17%) over the vendored 0.158.0 `three.min.js`
+  (651,651 B). Under a bare `window = {}` with `new Function`: `REVISION 186`, `OrbitControls` a function, 0 `console.warn`
+  (the vendored file opens with the deprecation warning).
+- **Census:** 55 `noodl_modules/**/manifest.json` under `library/modules` and `templates`: 3 kits with non-empty
+  `dependencies` (garden-3d-kit, garden-kit 4 files, maplibre 803,086 B + 1 sheet); **14 library kits bundle their library
+  inside `main`** (chart-js 217,566 B, tiptap 403,835, turf 613,521, markdown 313,315, …) — bundling is house practice.
+  Only three.js forced a workaround on the island; Blockly still ships a plain build (vendored = `node_modules/blockly` 12.3.1).
+- Corrections to §2: the garden's dependencies are 1,691,970 B (not "about 1.6 MB"); `blockly-msg-keep.js` is 6 lines;
+  `setLocale` is now `garden-kit/src/blocks.js:2697`, the language choice `:1483-1485`.
+
+**Ruled (README §8 round 5, verbatim there): "Recipe now, loader later"** — ruling 1 (c), not the recommended (b): the recipe
+now, in `docs-site/docs/custom-nodes.md`'s "Wrapping a library" section (ISL-015, `b8dfe0571`), with T7 ("read the global at
+mount") released with it; the modern-script loader only when a SECOND kit needs it (name the trigger in the docs and on the
+board). Rulings 2 and 3 not asked; ruling 3 (the read-at-mount rule) is ISL-015's held T7 and should ship with the recipe.
+
+**Built s17 — the recipe (AC2, (b)'s half of (c)); AC1 RED and AC3 owed (deployed drives):**
+- `docs-site/docs/custom-nodes.md` "Wrapping a library" gains **"A library ships only as modern modules"**: what you
+  notice (*Cannot use import statement outside a module*), why (each `dependencies` file is a plain script), the
+  four steps (install three + esbuild; the three-line `entry.js`; `npx esbuild entry.js --bundle --format=iife --minify
+  --outfile=…`; list the file), the size (about 760 KB, s17's measurement), and **T7: read the global when the node
+  mounts** (the agent's reader loads `main` alone; a server render has no page), with a COMPLETE `cube-kit` sample
+  (three.js cube + `OrbitControls`, the global read in the effect, everything disposed). Copy linted (`written.py`,
+  3 flags fixed). "NodeGX may later load modern files directly" — the loader half of the ruling, not promised.
+- `nodegx-node-kit-types/tests/docsamples.test.js`: the cube kit compiles against the published types; fragments
+  9 → 10 (`entry.js`, named in the comment). The kit scaffold's README (`nodegx-kit-scaffold/src/index.js`, "Traps you
+  will meet") gains the two bullets. **ISL-015's T7 is live** (`isl015-kit-traps.test.js`: docs and README rows; one
+  pending row left, T6/ISL-013). **Sabotage arm:** the docs sentence cut → the T7 docs row red (restored, `cmp` clean).
+  node-kit-types 113/113, kit-scaffold 76/76.
+- **Owed:** AC1 RED (a scratch kit with three ≥ 0.170 from its ES-module files in `dependencies`, deployed: the console
+  error and a blank node; control on the vendored 0.158), AC3 (the kit rebuilt by following the page, deployed and
+  server-rendered, the cube turning on a drag, no warning, a screenshot looked at), AC5 (blast radius: the 3 kits with
+  `dependencies` register the same nodes — unchanged by a docs-only change, to be read), AC6 (garden follow-ups:
+  garden-3d-kit to current three — +111 KB measured — recorded, not built). The loader waits for a second kit; the
+  board names the trigger.
+

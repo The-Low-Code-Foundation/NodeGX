@@ -82,7 +82,14 @@ const TRAPS = [
     tokenParagraph: /Default to design tokens, not to hex[\s\S]{0,1400}?exception is a colour your component hands to anything that is not CSS/i
   },
   { id: 'T6', trap: "another kit's code, through window.__noodl_modules", pending: 'ISL-013', phrase: /__noodl_modules/ },
-  { id: 'T7', trap: "a dependency's global is not there when the catalog reads the kit", pending: 'ISL-012', phrase: /catalog reader|reads only `?main`?/i },
+  // Live since P109 ISL-012 ruled "Recipe now, loader later" (2026-10-05): the route is "read the global at mount".
+  {
+    id: 'T7',
+    trap: "a dependency's global is not there when the catalog reads the kit",
+    docs: /read the global when your node mounts[\s\S]{0,600}?loading your own file alone, without its dependencies/i,
+    readme: /global is not there when your file first runs[\s\S]{0,300}?loading `?index\.js`? alone[\s\S]{0,200}?inside an effect/i,
+    section: true
+  },
   {
     id: 'T8',
     trap: 'defaultCss is an inline style that beats the stylesheet',
@@ -92,9 +99,9 @@ const TRAPS = [
 ];
 
 describe('ISL-015 — every kit trap is written where an author reads', () => {
-  test('the table holds eight traps, six live and two pending by name (a shrinking table is a diff)', () => {
+  test('the table holds eight traps, seven live and one pending by name (a shrinking table is a diff)', () => {
     expect(TRAPS.map((t) => t.id)).toEqual(['T1', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'T8']);
-    expect(TRAPS.filter((t) => t.pending).map((t) => `${t.id} ${t.pending}`)).toEqual(['T6 ISL-013', 'T7 ISL-012']);
+    expect(TRAPS.filter((t) => t.pending).map((t) => `${t.id} ${t.pending}`)).toEqual(['T6 ISL-013']);
   });
 
   test('known-firing control: the scaffold generates a README, and the docs page carries T2 (GAM-017) and T8 (ISL-011)', () => {

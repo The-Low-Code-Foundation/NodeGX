@@ -757,6 +757,13 @@ own nodes* has the full version, with a sample, under "Wrapping a library".
   probe element's \`color\` and read \`getComputedStyle(probe).color\`.
 - **\`defaultCss\` is an inline style** (see Ports above): it beats any rule
   in your stylesheet.
+- **A library written as modern modules will not load.** Each file in
+  \`dependencies\` loads as a plain script, so one with \`import\` in it fails.
+  Bundle it once into a plain script with esbuild (\`--bundle --format=iife\`)
+  and list that file instead.
+- **A dependency's global is not there when your file first runs.** An agent
+  reads your kit by loading \`index.js\` alone, and a server render has no page.
+  Read the library's global inside an effect, never at the top of the file.
 
 ## Autocomplete
 

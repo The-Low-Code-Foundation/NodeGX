@@ -176,9 +176,14 @@ describe('CN-007 — the custom-nodes docs page', () => {
    * function an author pastes into their own file, with no module. The same
    * commit added a COMPLETE sample (`noodl_modules/note-kit/index.js`), compiled
    * here and also RUN, with a sabotage arm, by `isl015-kit-traps.test.js`.
+   *
+   * **9 → 10 on 2026-10-05** (P109 ISL-012, ruled "Recipe now, loader later"): `entry.js`, the three-line esbuild
+   * entry that turns a modern-format library into one global. It imports from npm, so it is not a kit file and
+   * cannot compile against these types. The same commit added a COMPLETE sample (`noodl_modules/cube-kit/index.js`,
+   * the global read at mount), compiled here.
    */
   it('declares how many blocks it does not compile', () => {
-    expect(fragments.length).toBe(9);
+    expect(fragments.length).toBe(10);
   });
 
   /**
