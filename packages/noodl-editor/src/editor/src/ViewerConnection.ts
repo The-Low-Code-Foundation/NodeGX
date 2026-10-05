@@ -769,6 +769,26 @@ export class ViewerConnection extends Model {
       this.modelChangesListenerGroup
     );
 
+    // P109 ISL-005. Every script at once: they are small beside a component, and the runtime
+    // recompiles from nothing on any change anyway (`ScriptFiles.setSources`).
+    EventDispatcher.instance.on(
+      'Model.scriptsChanged',
+      function (event) {
+        if (_this.watchModelChangesDisabled) return;
+
+        if (event.model instanceof ProjectModel) {
+          _this.send({
+            cmd: 'modelUpdate',
+            content: {
+              type: 'scriptsChanged',
+              scripts: event.model.scripts
+            }
+          });
+        }
+      },
+      this.modelChangesListenerGroup
+    );
+
     EventDispatcher.instance.on(
       'Model.componentRenamed',
       function (e) {

@@ -33,6 +33,7 @@ import { isV2FormatEnabled } from '../services/ProjectStructure/featureFlags';
 import { decideComponentReload } from '../services/ProjectFileWatcher/decide';
 import { resolveProjectTokenValue } from './StyleTokensModel/ProjectTokenCss';
 import { lookWearersIn } from './StylesModel.usage';
+import { normalizeScriptPath } from '@noodl/runtime/src/scriptfiles';
 
 /** Which on-disk format a loaded project uses. Set at load; drives the save path. */
 export type ProjectFormatKind = 'legacy' | 'v2';
@@ -192,11 +193,17 @@ export class ProjectModel extends Model {
   public componentAnnotations: TSFixme;
   public previews: TSFixme;
   public thumbnailURI: TSFixme;
+  /**
+   * P109 ISL-005 — the project's script files, `{ 'engine/world.js': source }`; on disk as
+   * `scripts/**.js` (`ScriptFileStore`), and handed to every runtime as `scripts` beside the components.
+   */
+  public scripts: Record<string, string>;
 
   constructor(args?: TSFixme) {
     super();
 
     this.components = [];
+    this.scripts = {};
     this.variants = [];
     this.settings = {};
     if (args) {
@@ -214,6 +221,7 @@ export class ProjectModel extends Model {
       this.version = args.version;
       this.runtimeVersion = args.runtimeVersion;
       this.metadata = args.metadata;
+      this.scripts = args.scripts ? { ...args.scripts } : {};
       // this.deviceSettings = args.deviceSettings;
     }
 
@@ -695,6 +703,44 @@ export class ProjectModel extends Model {
   setSettings(settings) {
     this.settings = settings ?? {};
     this.notifyListeners('settingsChanged');
+  }
+
+  // ── P109 ISL-005: script files ──────────────────────────────────────────────
+
+  /** Every script file's path, sorted (`engine/world.js`). */
+  getScriptPaths(): string[] {
+    return Object.keys(this.scripts).sort();
+  }
+
+  getScript(path: string): string | undefined {
+    const p = normalizeScriptPath(path);
+    return p === undefined ? undefined : this.scripts[p];
+  }
+
+  /** Creates or replaces one script file. Returns its normalised path, or `undefined` for a bad path. */
+  setScript(path: string, source: string): string | undefined {
+    const p = normalizeScriptPath(path);
+    if (p === undefined || typeof source !== 'string') return undefined;
+    if (this.scripts[p] === source) return p;
+    this.scripts = { ...this.scripts, [p]: source };
+    this.notifyListeners('scriptsChanged', { path: p });
+    return p;
+  }
+
+  removeScript(path: string): boolean {
+    const p = normalizeScriptPath(path);
+    if (p === undefined || !(p in this.scripts)) return false;
+    const next = { ...this.scripts };
+    delete next[p];
+    this.scripts = next;
+    this.notifyListeners('scriptsChanged', { path: p, removed: true });
+    return true;
+  }
+
+  /** Replaces every script at once (a reload from disk). */
+  setScripts(scripts: Record<string, string> | undefined): void {
+    this.scripts = { ...(scripts || {}) };
+    this.notifyListeners('scriptsChanged', {});
   }
 
   setSetting(name, value) {
@@ -1707,7 +1753,9 @@ export class ProjectModel extends Model {
       runtimeVersion: this.runtimeVersion,
       lesson: this.lesson ? this.lesson.toJSON() : undefined,
       metadata: this.metadata,
-      variants: this.variants.map((v) => v.toJSON())
+      variants: this.variants.map((v) => v.toJSON()),
+      // P109 ISL-005. Absent when there are none, so a project without scripts serialises as before.
+      scripts: Object.keys(this.scripts || {}).length > 0 ? this.scripts : undefined
       //   deviceSettings:this.deviceSettings,
     };
     for (const i in this.components) {
@@ -1837,6 +1885,8 @@ const projectSaveTriggers = new Set(
     // ProjectModel — the project's own shape.
     'renamed',
     'settingsChanged',
+    // P109 ISL-005 — a script file created, edited or removed.
+    'scriptsChanged',
     'runtimeVersionChanged',
     'rootNodeChanged',
     'componentAdded',

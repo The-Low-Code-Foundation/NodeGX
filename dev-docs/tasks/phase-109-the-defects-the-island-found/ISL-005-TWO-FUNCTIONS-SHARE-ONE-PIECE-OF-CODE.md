@@ -250,7 +250,7 @@ runtime names the file only for those; the line comes from the editor and the do
 
 **The plan, in order (each slice its own commit):**
 1. ✅ Runtime (above).
-2. **Format + pipes:** `scripts/**.js` read by `ProjectStructureService.loadProject` → `ProjectImporter` (`ImportInput.scripts`,
+2. ✅ **Format + pipes** (built, slice 2 — see below): `scripts/**.js` read by `ProjectStructureService.loadProject` → `ProjectImporter` (`ImportInput.scripts`,
    `LegacyProject.scripts`) → `ProjectModel` (constructor / `toJSON` / a setter emitting `scriptsChanged`) → saved per file
    (atomic, a disk baseline per file as FLD-009, removed files deleted) → `exportToJSON` adds `scripts` (one line carries preview,
    deploy, SSR, SSG) → `ViewerConnection` sends a `scriptsChanged` modelUpdate → `editormodeleventshandler` calls `setScripts`.
@@ -268,3 +268,28 @@ runtime names the file only for those; the line comes from the editor and the do
    second line, the file watcher for outside edits, autocomplete from `exports`.
 6. **The island (AC3, AC6, AC2, AC5):** the garden's engine as script files; byte count; time to interactive; the two-page drive.
 7. **Docs and catalog (AC9).**
+
+**Slice 2, built — the format and the pipes:**
+- `services/ProjectStructure/ScriptFileStore.ts` (new): reads `scripts/**.js` on load (paths normalised as the runtime does) and
+  saves file by file — only what changed, atomically (temp + rename), a removed script deleted, and a file that moved on disk
+  (neither our last read/write nor what we would write) **refused**, not written over or deleted, as FLD-009 does for the
+  project files. `SaveResult` gains `scriptsWritten` / `refusedScripts`. The service's filesystem gains optional `readFile` /
+  `listDirectoryFiles` (the platform filesystem has both; a double without them skips scripts).
+- `ProjectImporter` (`ImportInput.scripts`), `LegacyProject.scripts`, `ProjectModel` (`scripts`, `getScriptPaths` / `getScript`
+  / `setScript` / `removeScript` / `setScripts`, `toJSON` — absent when empty, so a project without scripts serialises as before;
+  `scriptsChanged` is an autosave trigger).
+- `exportToJSON` writes `scripts` (whole, not split into bundles): the one line the preview, a deploy, a server render and a
+  static build all read. `ViewerConnection` sends a `scriptsChanged` modelUpdate; the runtime's `editormodeleventshandler`
+  calls `setScripts`, so an edit re-runs the users in the open preview with no reload.
+- Other folder readers: `noodl-preview`'s `readV2` (`readScriptFiles`), `render-from-disk.js` (the door's `render_report`).
+  `scripts/` joins `V2_SOURCE_IGNORE_ENTRIES`, so a deploy does not publish the raw folder a second time.
+- `tests-unit/isl-005/scriptFilesOnDisk.test.ts`: **10 / 10** through the real `ProjectStructureService` over `MemFs`
+  (read; no folder → no key; non-`.js` ignored; importer; control: unchanged writes nothing; one edit writes one file; new
+  folder + delete; an agent's change refused; **reverted arm**: with the baseline forgotten the same save writes over it;
+  a changed file not deleted). Editor and preview typecheck: 0 errors.
+- **Measured through a real deploy** (`nodegx-deploy`, rebuilt, on a copy of the preview's hello-world fixture with
+  `scripts/engine/greeting.js`): `window.projectData.scripts` is `{"engine/greeting.js": "exports.greet = …"}`, and no
+  `scripts/` folder is in the output.
+- Not yet: the file watcher for outside edits to `scripts/` (`ProjectFileWatcher/decide.ts` handles components and project
+  files only) — slice 5, with the editor screens. The cloud bundle (`exporter/cloudFunctions.ts`) carries no `scripts` — by
+  ruling; the Function refuses by name there.

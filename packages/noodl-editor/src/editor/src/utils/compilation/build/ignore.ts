@@ -137,7 +137,10 @@ export const V2_SOURCE_IGNORE_ENTRIES: readonly DefaultIgnoreEntry[] = [
   { pattern: V2_FILES.project, reason: 'project source (v2)' },
   { pattern: V2_FILES.routes, reason: 'project source (v2)' },
   { pattern: V2_FILES.styles, reason: 'project source (v2)' },
-  { pattern: `${V2_FILES.componentsDir}/`, reason: 'project source (v2)' }
+  { pattern: `${V2_FILES.componentsDir}/`, reason: 'project source (v2)' },
+  // P109 ISL-005. The script files reach the app inside the export (`scripts` in `projectData`);
+  // the raw folder beside the site would only publish the source a second time.
+  { pattern: `${V2_FILES.scriptsDir}/`, reason: 'project source (v2)' }
 ];
 
 /** The default patterns, with the v2 source rules included only for a v2 project. */

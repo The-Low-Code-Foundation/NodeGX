@@ -209,6 +209,12 @@ export function exportToJSON(projectModel: ProjectModel, args?: ExportToJSONOpti
 
   json.variants = projectModel.variants.map((v) => exportVariant(v));
 
+  // P109 ISL-005. The one line every runtime gets the script files through: the preview's export,
+  // a deploy's `window.projectData`, a server render's and a static build's. Not split into bundles:
+  // a Function in any bundle may use any file, and each file is compiled once per app run.
+  const scripts = projectModel.scripts;
+  if (scripts && Object.keys(scripts).length > 0) json.scripts = { ...scripts };
+
   return json;
 }
 

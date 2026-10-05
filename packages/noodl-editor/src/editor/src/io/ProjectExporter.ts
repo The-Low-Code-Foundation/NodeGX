@@ -125,6 +125,8 @@ export interface LegacyProject {
   metadata?: Record<string, unknown>;
   lesson?: unknown;
   variants?: LegacyVariant[];
+  /** P109 ISL-005 — the project's script files, `{ 'engine/world.js': source }`, kept on disk as `scripts/**.js`. */
+  scripts?: Record<string, string>;
   components: LegacyComponent[];
 }
 

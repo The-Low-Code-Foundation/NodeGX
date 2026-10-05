@@ -24,6 +24,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 import { ProjectImporter, type ImportInput } from '../../noodl-editor/src/editor/src/io/ProjectImporter';
+import { normalizeScriptPath } from '../../noodl-runtime/src/scriptfiles';
 import type { LegacyProject } from '../../noodl-editor/src/editor/src/io/ProjectExporter';
 import type {
   ComponentV2File,
@@ -96,6 +97,25 @@ export function resolveTarget(target: string): { dir: string; format: ProjectFor
   );
 }
 
+/** P109 ISL-005 — `scripts/**.js` as `{ 'engine/world.js': source }`, as the editor's `ScriptFileStore` reads it. */
+export function readScriptFiles(dir: string): Record<string, string> {
+  const root = path.join(dir, 'scripts');
+  const scripts: Record<string, string> = {};
+  if (!fs.existsSync(root)) return scripts;
+  const walk = (folder: string) => {
+    for (const entry of fs.readdirSync(folder, { withFileTypes: true })) {
+      const full = path.join(folder, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name.endsWith('.js')) {
+        const p = normalizeScriptPath(path.relative(root, full).split(path.sep).join('/'));
+        if (p !== undefined) scripts[p] = fs.readFileSync(full, 'utf8');
+      }
+    }
+  };
+  walk(root);
+  return scripts;
+}
+
 /** Reads a v2 directory into the legacy project object, via the io engine. */
 function readV2(dir: string): { project: LegacyProject; warnings: string[] } {
   const registry = readJson<RegistryV2File>(path.join(dir, 'components', '_registry.json'));
@@ -121,6 +141,7 @@ function readV2(dir: string): { project: LegacyProject; warnings: string[] } {
     registry,
     routes: optional<RoutesV2File>('nodegx.routes.json'),
     styles: optional<StylesV2File>('nodegx.styles.json'),
+    scripts: readScriptFiles(dir),
     components
   });
 

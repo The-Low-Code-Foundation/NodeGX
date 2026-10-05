@@ -174,6 +174,25 @@ function liftInterface(node) {
   });
 }
 
+/**
+ * P109 ISL-005 — `scripts/**.js` as `{ 'engine/world.js': source }`, the shape the runtime's
+ * `importEditorData` reads beside the components. Same walk as noodl-preview's `readScriptFiles`.
+ */
+function readScriptFiles() {
+  const root = path.join(PROJECT, 'scripts');
+  const scripts = {};
+  if (!fs.existsSync(root)) return scripts;
+  const walk = (folder) => {
+    for (const entry of fs.readdirSync(folder, { withFileTypes: true })) {
+      const full = path.join(folder, entry.name);
+      if (entry.isDirectory()) walk(full);
+      else if (entry.name.endsWith('.js')) scripts[path.relative(root, full).split(path.sep).join('/')] = fs.readFileSync(full, 'utf8');
+    }
+  };
+  walk(root);
+  return scripts;
+}
+
 function buildProjectData() {
   const project = readJSON(path.join(PROJECT, 'nodegx.project.json'));
   const componentsDir = path.join(PROJECT, project.structure?.componentsDir || 'components');
@@ -319,7 +338,8 @@ function buildProjectData() {
     components,
     componentIndex: {},
     rootComponent,
-    routerIndex: { routers, pages }
+    routerIndex: { routers, pages },
+    scripts: readScriptFiles()
   };
 }
 

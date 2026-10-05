@@ -47,6 +47,8 @@ export interface ImportInput {
   routes?: RoutesV2File;
   /** Contents of nodegx.styles.json (optional) */
   styles?: StylesV2File;
+  /** P109 ISL-005 — `scripts/**.js`, read as `{ 'engine/world.js': source }`. */
+  scripts?: Record<string, string>;
   /** Per-component files, keyed by registry path (e.g. "Header", "Pages/Home") */
   components: Record<
     string,
@@ -393,6 +395,10 @@ export class ProjectImporter {
 
     if (variants.length > 0) {
       project.variants = variants;
+    }
+
+    if (input.scripts && Object.keys(input.scripts).length > 0) {
+      project.scripts = { ...input.scripts };
     }
 
     return { project, warnings };

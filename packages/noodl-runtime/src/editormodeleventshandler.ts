@@ -303,6 +303,10 @@ export async function handleEvent(context: EventsHandlerContext, graphModel: Gra
     settingsChanged: function (event) {
       graphModel.setSettings(event.settings);
     },
+    // P109 ISL-005 — the editor sends every script file at once; the Functions using them re-run.
+    scriptsChanged: function (event) {
+      graphModel.setScripts(event.scripts as Record<string, string> | undefined);
+    },
     metadataChanged: function (event) {
       graphModel.setMetaData(event.key, event.data);
     },
