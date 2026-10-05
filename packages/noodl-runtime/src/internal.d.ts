@@ -249,7 +249,7 @@ export interface RuntimeNode extends NodeInstance {
   /** Present only on visual nodes; see `_onNodeModelParameterUpdated`. */
   _getVisualStates?: () => string[];
   /** Present only on React-backed nodes. */
-  _resetReactVirtualDOM?: () => void;
+  _resetReactVirtualDOM?: (resetInput?: string) => void;
   /**
    * DEF-037. Present only on React-backed nodes: re-run render without remounting, so a
    * component that derives properties from a style value recomputes them. Weaker than

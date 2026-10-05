@@ -128,6 +128,28 @@ describe('a Group writes inline only what the author set (ISL-008)', () => {
     expect(root.style.position).toBeUndefined();
   });
 
+  it('a panel value the author CLEARS is a default again at once, as it is after a reload', async () => {
+    const graph = await build([
+      { id: 'set', type: 'Group', parameters: { cssClassName: 'win-set', alignItems: 'flex-end' } }
+    ]);
+    expect(rootOf(graph, 'set').style['align-items']).toBe('flex-end');
+
+    // What `node.ts` `_onNodeModelParameterUpdated` does when the editor removes a parameter: name the input to the
+    // React node, then set the port's declared default.
+    const node = graph.node('set') as unknown as {
+      _resetReactVirtualDOM(input?: string): void;
+      setInputValue(name: string, value: unknown): void;
+    };
+    node._resetReactVirtualDOM('alignItems');
+    node.setInputValue('alignItems', 'flex-start');
+    await graph.settle(4);
+
+    const root = rootOf(graph, 'set');
+    expect(root.style['align-items']).toBeUndefined();
+    const cls = root.classes.find((c) => c.startsWith('ndl-d-'))!;
+    expect(ruleFor(cls)).toContain('align-items: flex-start');
+  });
+
   it('a size the author set keeps the whole size inline; one left alone is a default', async () => {
     const graph = await build([
       {

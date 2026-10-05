@@ -226,6 +226,10 @@ export interface ReactNodeInstance extends NodeInstance {
   _authoredStyle?: Set<string>;
   /** P109 ISL-008 — input names whose setter has run on this instance. */
   _authoredInputs?: Set<string>;
+  /** P109 ISL-008 — inputs the editor has cleared; their next set is the port's default, not the author's. */
+  _inputsResetToDefault?: Set<string>;
+  /** P109 ISL-008 — true while such a set runs, so `setStyle` un-records rather than records. */
+  _settingDefault?: boolean;
   /** True when the node passes itself to its React component as a prop. */
   noodlNodeAsProp: boolean;
 
@@ -268,7 +272,7 @@ export interface ReactNodeInstance extends NodeInstance {
    */
   setLayout(layout: ParentLayout): void;
   /** Re-key the node so React rebuilds its subtree from scratch. */
-  _resetReactVirtualDOM(): void;
+  _resetReactVirtualDOM(resetInput?: string): void;
   /** SSR only: fire `didMount` without a browser lifecycle to hang it off. */
   triggerDidMount(): void;
 
@@ -1724,7 +1728,12 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
       _rerenderReactNode() {
         this.forceUpdate();
       },
-      _resetReactVirtualDOM() {
+      _resetReactVirtualDOM(resetInput?: string) {
+        // P109 ISL-008 — the runtime is about to set this input to its declared default (the author cleared it).
+        if (resetInput) {
+          if (!this._inputsResetToDefault) this._inputsResetToDefault = new Set<string>();
+          this._inputsResetToDefault.add(resetInput);
+        }
         //reset the react key to force a full re-render
         //this can be required since we're editing the DOM tree, without React knowing
         //and can confuse React in certain cases
@@ -1836,14 +1845,26 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
         //set the style directly on the dom node, or trigger a react render
         const styleObject = styleTag ? this.props.styles[styleTag] : this.style;
 
+        const settingDefault = !styleTag && this._settingDefault;
         for (const p in newStyles) {
           styleObject[p] = newStyles[p];
-          // P109 ISL-008 — anything written through here is the author's (a parameter, a wire, a variant, CSS Style).
-          if (!styleTag && this._authoredStyle) this._authoredStyle.add(p);
+          // P109 ISL-008 — anything written through here is the author's (a parameter, a wire, a variant, CSS Style),
+          // except a cleared parameter going back to its default, which is a default again.
+          if (!styleTag && this._authoredStyle) {
+            if (settingDefault) this._authoredStyle.delete(p);
+            else this._authoredStyle.add(p);
+          }
         }
 
         const domElement = this.getDOMElement();
         if (!domElement) return;
+
+        // A default is not written inline. Patching the DOM directly would leave the old inline value React no
+        // longer knows it owns; a render removes it and moves the value into the defaults class.
+        if (settingDefault) {
+          this.forceUpdate();
+          return;
+        }
 
         let forceUpdate = false;
 
@@ -2478,6 +2499,18 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
     const set = input && input.set;
     if (typeof set !== 'function' || (set as { __isl008Authored?: boolean }).__isl008Authored) continue;
     const recording = function (this: ReactNodeInstance, value: unknown) {
+      // The editor cleared this parameter and the runtime is restoring the port's default
+      // (`node.ts` `_onNodeModelParameterUpdated`): a default again, as it would be after a reload.
+      if (this._inputsResetToDefault && this._inputsResetToDefault.has(name)) {
+        this._inputsResetToDefault.delete(name);
+        if (this._authoredInputs) this._authoredInputs.delete(name);
+        this._settingDefault = true;
+        try {
+          return set.call(this, value);
+        } finally {
+          this._settingDefault = false;
+        }
+      }
       if (this._authoredInputs) this._authoredInputs.add(name);
       return set.call(this, value);
     };

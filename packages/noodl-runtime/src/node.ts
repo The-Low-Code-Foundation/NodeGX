@@ -1437,7 +1437,9 @@ Node.prototype._onNodeModelParameterUpdated = function (event: NodeModelParamete
       //React will then re-render, and should apply the values from the text style, but won't see any delta in the virtual dom,
       //even though there is a diff to the real dom.
       //to fix that, we just force React to re-render the entire node
-      this._resetReactVirtualDOM && this._resetReactVirtualDOM();
+      // P109 ISL-008: named, so the React node records this input's next value as a DEFAULT again — a cleared
+      // parameter is the weakest rule on the page, exactly as it is after a reload.
+      this._resetReactVirtualDOM && this._resetReactVirtualDOM(event.name);
     }
 
     this.queueInput(event.name, defaultValue);

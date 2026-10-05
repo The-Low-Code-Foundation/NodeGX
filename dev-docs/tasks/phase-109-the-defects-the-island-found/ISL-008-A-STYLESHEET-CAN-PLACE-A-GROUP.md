@@ -1,6 +1,6 @@
 # ISL-008 — A stylesheet can place a Group
 
-**Status:** 🟡 runtime built s16 (2026-10-05) — AC1–AC4 met, AC5 (census) s15, AC7's server half met; owed: the panel warning (Richard's AC), AC6 (the island sheds its `!important`), AC7's export half (P18's pile). Ruled s15 "Stylesheet beats defaults". Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 runtime and panel warning built s16 (2026-10-05) — AC1–AC4 met, AC5 (census) s15, AC7's server half met, Richard's panel-warning AC met in the live editor; owed: AC6 (the island sheds its `!important`), AC7's export half (P18's pile). Ruled s15 "Stylesheet beats defaults". Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F11](AUDIT-2026-10-01.md) · [P105 CG-003 §7.1 item 1](../phase-105-the-coding-garden/CG-003-THE-PAGES.md) (the win card pinned to the top) · [P95 R6](../phase-95-the-second-play-test/README.md) (the buy card) · met before by [TPL-008](../phase-78-the-templates/TPL-008-THE-TODO-LIST.md) line 559, [TPL-010](../phase-78-the-templates/TPL-010-THE-PLANNER.md) lines 268-270 and [TPL-011](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md) line 390
 **Side:** product (runtime styling in `noodl-viewer-react`; the export's style emission)
 
@@ -230,8 +230,43 @@ peers drive with was never rebuilt (still 2026-10-04 14:11).
   against the new bundle in the worktree, every geometry reading unchanged. `renderTools`, `isl021DrivePage`,
   `isl022WrappedRow` 21/21 against the new bundle.
 
+**The panel warning — Richard's AC ✅ (later in s16, commits `18d3f059d` and the next).**
+- The canvas answers ([`style-sources.ts`](../../../packages/noodl-viewer-react/src/style-sources.ts),
+  `NoodlEditorHighlightAPI.explainStyle`): every author rule matching the selected node's element; per property the
+  cascade's winner (`!important`, specificity — a Selectors-4 count with `:where` 0 and `:is/:not/:has` their best
+  argument — then order); reported when it beats the node's own value (an inline panel value only with `!important`;
+  a default at class specificity or above; a port the node never writes, like Justify Content, always) and differs
+  from it. Named from its sheet: a CSS Definition's `<style id="style_<nodeId>">`, a `<link>`, else head code; the
+  node's own CSS Style too. The defaults and token sheets are never the author's.
+- The editor ([`portStyleSource.ts`](../../../packages/noodl-editor/src/editor/src/utils/portStyleSource.ts),
+  [`styleSourceBridge.ts`](../../../packages/noodl-editor/src/editor/src/utils/styleSourceBridge.ts)): one note per
+  row, applied in place as FB-017's hints are, its own class so neither note erases the other; asked after each
+  settle, 400 ms after an edit, and when the canvas reloads (CanvasView registers the provider and says "stale" on
+  `dom-ready`).
+- Specs: viewer `style-sources.test.ts` 18/18 (reverted arms: no specificity check → the element-selector row red;
+  inline losing to any class → the panel-value row red; no equal-value check → its row red); editor
+  `portStyleSource.test.ts` 9/9, property-editor + row suites 192/192; editor `tsc` 0.
+- **Live, in the editor** (`dev:debug` on a throwaway profile in the scratchpad, a copy of `isl008-win-card` opened
+  through the launcher): selecting `plain` (class `.win`) — Position "In Layout" in the panel with *"Your CSS sets this
+  to fixed, from .win, .win-set in the CSS Definition “the author's stylesheet” (/Pages/Home)."*, Align Items "Start"
+  with the same sentence for `center`, Justify Content the same. Controls: `set` (Align Items set in the panel) —
+  Position and Justify Content noted, Align Items NOT; `bare` (no class) — no note. Live: Align Items set to End →
+  its note goes within 4 s, no reselect.
+- 🔴 **Found live, fixed:** clearing that value left the note gone and the canvas holding `align-items: flex-start`
+  INLINE. The runtime restores a cleared parameter by setting the port's declared default through the setter
+  (`node.ts` `_onNodeModelParameterUpdated`), and the setter counted as the author speaking — so a cleared value
+  outranked the stylesheet until the next reload, when it did not. Now that branch names the input to
+  `_resetReactVirtualDOM(name)`, and the next set of it is recorded as a DEFAULT (un-authored; its style write goes
+  through a render, so React removes the stale inline value). Spec row "a panel value the author CLEARS is a default
+  again at once" (reverted arm: red). Live after the fix: set End → note gone; cleared → note back, the canvas element
+  with no inline style and `align-items: center`. viewer-react 1,737/1,737; P107 graph/target 102/102.
+- Stack stopped with `dev:stop` (26 processes; 16 MCP servers survived). The shared `src/external` bundles were
+  rebuilt by the stack's watcher and now carry ISL-008 (a dev build).
+
 **Owed:**
-- **The panel warning (Richard's request, the new AC)** — mapped this session: the canvas answers through a new
+- ~~The panel warning~~ built above. What it does not name yet: head code and a kit's sheet are named by kind only
+  ("the project's head code", the `<link>` file name); a kit `<link>` lands in `<body>` and is matched like any other
+  sheet. Mapped this session for reference: the canvas answers through a new
   `NoodlEditorHighlightAPI` call (`viewer.jsx:17-104`, reached by the editor's `executeJavaScript`, as
   `CanvasView.ts` already does), resolving the node and walking `document.styleSheets` for rules that match its
   element and win. The rule's source is its `ownerNode`: a CSS Definition's `<style id="style_<nodeId>">` names the
