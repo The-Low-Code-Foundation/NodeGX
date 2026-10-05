@@ -82,6 +82,8 @@ interface Rect {
   height: number;
   css: string;
   inline: string;
+  /** Inline plus the element's defaults-class rules (P109 ISL-008). */
+  specified: string;
 }
 
 interface Reading {
@@ -112,7 +114,21 @@ const READ = `(function () {
       top: r.top,
       height: r.height,
       css: cs.height + ' | grow ' + cs.flexGrow + ' | shrink ' + cs.flexShrink + ' | ' + cs.position + ' | basis ' + cs.flexBasis,
-      inline: el.getAttribute('style') || ''
+      inline: el.getAttribute('style') || '',
+      // P109 ISL-008: a default is no longer inline — it is a rule of the element's ndl-d-… class in the
+      // defaults sheet. What the node SPECIFIED is both, inline first; that is what this file's claims are about.
+      specified: (function () {
+        var text = el.getAttribute('style') || '';
+        var sheet = document.getElementById('noodl-default-styles');
+        if (!sheet || !sheet.sheet) return text;
+        el.classList.forEach(function (c) {
+          if (c.indexOf('ndl-d-') !== 0) return;
+          for (var j = 0; j < sheet.sheet.cssRules.length; j++) {
+            if (sheet.sheet.cssRules[j].selectorText === '.' + c) text += ' ' + sheet.sheet.cssRules[j].style.cssText;
+          }
+        });
+        return text;
+      })()
     };
   });
   return JSON.stringify({ pageHeight: h, rects: out });
@@ -456,15 +472,15 @@ describe('FLD-005 (#35) — a column of Groups, measured at 1280x900', () => {
 
   it('THE MECHANISM IS REAL — every un-sizeModed Group carries height:100% and flex-grow:100', () => {
     for (const key of ['probe-col', 'probe-row-0', 'probe-row-4']) {
-      const inline = read.scroll.defect.rects[key].inline;
+      const inline = read.scroll.defect.rects[key].specified;
       expect(inline).toContain('height: 100%');
       expect(inline).toContain('flex-grow: 100');
       // 🔴 The half the issue does not account for, and the half that decides everything below.
       expect(inline).toContain('flex-shrink: 1');
     }
     // The control is the same instrument reporting the parameter working: no conversion at all.
-    expect(read.scroll.control.rects['probe-row-0'].inline).not.toContain('height: 100%');
-    expect(read.scroll.control.rects['probe-row-0'].inline).not.toContain('flex-grow');
+    expect(read.scroll.control.rects['probe-row-0'].specified).not.toContain('height: 100%');
+    expect(read.scroll.control.rects['probe-row-0'].specified).not.toContain('flex-grow');
   });
 
   it('#35 AS WRITTEN DOES NOT REPRODUCE — the five rows are at content height, not multiplied', () => {

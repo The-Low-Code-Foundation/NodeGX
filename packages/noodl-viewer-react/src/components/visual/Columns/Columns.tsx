@@ -3,6 +3,7 @@ import React, { useRef, useState, useEffect, useLayoutEffect, useCallback, isVal
 import { ForEachComponent } from '../../../nodes/std-library/data/foreach';
 import { dataAttributeProps } from '../../noodl-root-ref';
 import { Noodl, Slot } from '../../../types';
+import { layerDefaults, withDefaultsClass, type LayerableStyle } from '../../../default-style-layer';
 
 export interface ColumnsProps extends Noodl.ReactProps {
   marginX: string;
@@ -430,6 +431,25 @@ export function readColumnLayoutString(value: unknown): string | null {
   }
 }
 
+
+/**
+ * P109 ISL-008 — the Columns inputs each container key is computed from (`layerDefaults`). A key whose inputs the
+ * author never set is a default; an empty list is a constant the container always writes.
+ */
+const COLUMNS_CONTAINER_SOURCES: Readonly<Record<string, readonly string[]>> = {
+  marginTop: ['marginY'],
+  marginLeft: ['marginX'],
+  display: [],
+  flexWrap: [],
+  alignItems: ['packing'],
+  justifyContent: ['justifyContent'],
+  flexDirection: ['direction'],
+  width: ['marginX'],
+  boxSizing: [],
+  position: ['packing'],
+  height: ['packing']
+};
+
 export function Columns(props: ColumnsProps) {
   const [containerWidth, setContainerWidth] = useState(null);
 
@@ -599,47 +619,52 @@ export function Columns(props: ColumnsProps) {
   const columnLefts = masonry ? computeColumnOffsets(layout, fractionSize) : null;
   const packed = masonry && masonryOffsets !== null && masonryOffsets.tops.length === children.length;
 
+  const containerStyle: LayerableStyle = {
+    // Deliberately not `visibility: hidden until measured`. That painted blank on first
+    // render and, because a server render never gets a `ResizeObserver` callback, blank
+    // for the entire SSR/SSG output. The authored layout is right at the width the author
+    // designed for; autofold reflows it once measured.
+    marginTop: `calc(${toCssLength(props.marginY)} * -1)`,
+    marginLeft: `calc(${toCssLength(props.marginX)} * -1)`,
+    display: 'flex',
+    flexWrap: 'wrap',
+    // Masonry's items must keep their natural height, both because that is the point and
+    // because the *unpacked* pass is what gets measured — `stretch` would report every item
+    // in a wrap line as being as tall as the tallest, and the packing would be built out of
+    // heights no item actually has.
+    alignItems: masonry ? 'flex-start' : 'stretch',
+    justifyContent: props.justifyContent,
+    flexDirection: props.direction,
+    // The negative-margin gutter's other half: the container starts `marginX` to the left,
+    // so it has to be `marginX` wider for its right edge to land back on the parent's.
+    //
+    // The parenthesis here used to be unbalanced (`calc(100% + (0px)`), and it survived
+    // because the two paths that consume this style disagree about what that means. React
+    // sets each property through the CSSOM on the client, where the value is parsed in
+    // isolation and CSS's end-of-input rule closes the block for you — so `width` was fine
+    // and nothing upstream ever looked wrong. A **server** render serialises the same object
+    // into one `style` attribute, and there the unclosed block swallows the `;` and every
+    // declaration after it: `width` and `box-sizing` both vanished, the container fell back
+    // to shrink-to-fit, and every percentage-width child computed to zero. The whole of an
+    // SSR/SSG page's Columns content was a zero-width strip until hydration replaced it.
+    width: `calc(100% + ${toCssLength(props.marginX)})`,
+    boxSizing: 'border-box',
+    // Every item is out of flow once packed, so the container has no content to size itself
+    // from. `position: relative` is what the items' percentage `left` resolves against.
+    ...(masonry ? { position: 'relative' as const } : null),
+    ...(packed ? { height: masonryOffsets.height } : null),
+    ...props.style
+  };
+  // P109 ISL-008 — the container's defaults go to the defaults sheet, each named by the input it is computed from,
+  // so an author's class on the Columns node can lay the container out. What the author set stays inline.
+  const defaultsClass = layerDefaults(containerStyle, COLUMNS_CONTAINER_SOURCES);
+
   return (
     <div
-      className={['columns-container', props.className].join(' ')}
+      className={withDefaultsClass(['columns-container', props.className].join(' '), defaultsClass)}
       ref={rootRef}
       {...dataAttributeProps((props as { dom?: Record<string, unknown> }).dom)}
-      style={{
-        // Deliberately not `visibility: hidden until measured`. That painted blank on first
-        // render and, because a server render never gets a `ResizeObserver` callback, blank
-        // for the entire SSR/SSG output. The authored layout is right at the width the author
-        // designed for; autofold reflows it once measured.
-        marginTop: `calc(${toCssLength(props.marginY)} * -1)`,
-        marginLeft: `calc(${toCssLength(props.marginX)} * -1)`,
-        display: 'flex',
-        flexWrap: 'wrap',
-        // Masonry's items must keep their natural height, both because that is the point and
-        // because the *unpacked* pass is what gets measured — `stretch` would report every item
-        // in a wrap line as being as tall as the tallest, and the packing would be built out of
-        // heights no item actually has.
-        alignItems: masonry ? 'flex-start' : 'stretch',
-        justifyContent: props.justifyContent,
-        flexDirection: props.direction,
-        // The negative-margin gutter's other half: the container starts `marginX` to the left,
-        // so it has to be `marginX` wider for its right edge to land back on the parent's.
-        //
-        // The parenthesis here used to be unbalanced (`calc(100% + (0px)`), and it survived
-        // because the two paths that consume this style disagree about what that means. React
-        // sets each property through the CSSOM on the client, where the value is parsed in
-        // isolation and CSS's end-of-input rule closes the block for you — so `width` was fine
-        // and nothing upstream ever looked wrong. A **server** render serialises the same object
-        // into one `style` attribute, and there the unclosed block swallows the `;` and every
-        // declaration after it: `width` and `box-sizing` both vanished, the container fell back
-        // to shrink-to-fit, and every percentage-width child computed to zero. The whole of an
-        // SSR/SSG page's Columns content was a zero-width strip until hydration replaced it.
-        width: `calc(100% + ${toCssLength(props.marginX)})`,
-        boxSizing: 'border-box',
-        // Every item is out of flow once packed, so the container has no content to size itself
-        // from. `position: relative` is what the items' percentage `left` resolves against.
-        ...(masonry ? { position: 'relative' as const } : null),
-        ...(packed ? { height: masonryOffsets.height } : null),
-        ...props.style
-      }}
+      style={containerStyle as React.CSSProperties}
     >
       {forEachComponents}
 

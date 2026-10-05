@@ -27,6 +27,7 @@ import type {
 
 import { iconSourceProblem } from './components/visual/Icon/iconSourceProblem';
 import DOMBoundingBoxObserver from './dom-boundingbox-oberver';
+import { DEFAULT_LAYER, type DefaultLayerInfo, type LayerableStyle } from './default-style-layer';
 import Layout, { type ParentLayout } from './layout';
 import mergeDeep from './mergedeep';
 import NodeSharedPortDefinitions from './node-shared-port-definitions';
@@ -214,6 +215,10 @@ export interface ReactNodeInstance extends NodeInstance {
   outputPropValues: Record<string, unknown>;
   /** Styles parsed out of the `styleCss` input, so they can be removed on change. */
   customCssStyles?: Record<string, string>;
+  /** P109 ISL-008 — style keys the author has written on this instance (`default-style-layer.ts`). */
+  _authoredStyle?: Set<string>;
+  /** P109 ISL-008 — input names whose setter has run on this instance. */
+  _authoredInputs?: Set<string>;
   /** True when the node passes itself to its React component as a prop. */
   noodlNodeAsProp: boolean;
 
@@ -1255,6 +1260,18 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
       if (!def.noDataAttributes) claimDataAttributeInputs(this as unknown as ReactNodeInstance);
       this.outputPropValues = {};
       this.style = Object.assign({}, startStyle);
+      // P109 ISL-008 — what the author has set on THIS instance, so a render can tell a default (written to the
+      // defaults sheet, the weakest rule on the page) from a value the author chose (inline, as it always was).
+      // On the style object under a symbol, so it survives every component's `{ ...props.style }` and never
+      // reaches the DOM. See `default-style-layer.ts`.
+      this._authoredStyle = new Set<string>();
+      this._authoredInputs = new Set<string>();
+      const layer: DefaultLayerInfo = {
+        start: startStyle,
+        authoredStyle: this._authoredStyle,
+        authoredInputs: this._authoredInputs
+      };
+      (this.style as LayerableStyle)[DEFAULT_LAYER] = layer;
 
       for (const styleTag in startStyles) {
         this.props.styles[styleTag] = Object.assign({}, startStyles[styleTag]);
@@ -1814,6 +1831,8 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
 
         for (const p in newStyles) {
           styleObject[p] = newStyles[p];
+          // P109 ISL-008 — anything written through here is the author's (a parameter, a wire, a variant, CSS Style).
+          if (!styleTag && this._authoredStyle) this._authoredStyle.add(p);
         }
 
         const domElement = this.getDOMElement();
@@ -2415,6 +2434,21 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
 
   for (const name in methods) {
     ReactComponentNode.methods[name] = methods[name];
+  }
+
+  // P109 ISL-008 — a setter that runs is the author speaking: a parameter stored in the project, a connection, a
+  // variant, a visual state. A default the runtime seeds never runs one. Recorded per instance, by input name, so
+  // `layerDefaults` keeps every value derived from it inline (`default-style-layer.ts` LAYOUT_SOURCES).
+  for (const name in ReactComponentNode.inputs) {
+    const input = ReactComponentNode.inputs[name] as { set?: (this: ReactNodeInstance, value: unknown) => void };
+    const set = input && input.set;
+    if (typeof set !== 'function' || (set as { __isl008Authored?: boolean }).__isl008Authored) continue;
+    const recording = function (this: ReactNodeInstance, value: unknown) {
+      if (this._authoredInputs) this._authoredInputs.add(name);
+      return set.call(this, value);
+    };
+    (recording as { __isl008Authored?: boolean }).__isl008Authored = true;
+    input.set = recording;
   }
 
   return {

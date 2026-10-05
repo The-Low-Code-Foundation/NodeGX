@@ -3,6 +3,7 @@ import MouseWheel from '@better-scroll/mouse-wheel';
 import ScrollBar from '@better-scroll/scroll-bar';
 import React from 'react';
 
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import PointerListeners from '../../../pointerlisteners';
 import { Noodl } from '../../../types';
@@ -329,9 +330,12 @@ export class Group extends React.Component<GroupProps> {
       style.pointerEvents = 'none';
     }
 
+    // P109 ISL-008 — the defaults leave the inline style for the defaults sheet, so the author's class can place this.
+    const defaultsClass = layerDefaults(style);
+
     return (
       <Component
-        className={props.className}
+        className={withDefaultsClass(props.className, defaultsClass)}
         {...props.dom}
         {...PointerListeners(props)}
         style={style}

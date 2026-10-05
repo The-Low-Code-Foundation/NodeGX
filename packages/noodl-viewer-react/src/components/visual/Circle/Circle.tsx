@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import PointerListeners from '../../../pointerlisteners';
 import { sanitizeInlineSvg, stripRootSvgDimensions } from '../../../sanitize-inline-svg';
@@ -390,10 +391,13 @@ export class Circle extends React.Component<CircleProps> {
 
     //the SVG element lack some properties like offsetLeft, offsetTop that the drag node depends on.
     //Let's wrap it in a div to make it work properly
+// P109 ISL-008 — defaults leave the inline style for the defaults sheet, so an author's class can override them.
+const defaultsClass = layerDefaults(style);
+
     return (
       <div
         ref={noodlRootRef(this.props.noodlNode)}
-        className={this.props.className}
+        className={withDefaultsClass(this.props.className, defaultsClass)}
         {...this.props.dom}
         {...PointerListeners(this.props)}
         style={style}

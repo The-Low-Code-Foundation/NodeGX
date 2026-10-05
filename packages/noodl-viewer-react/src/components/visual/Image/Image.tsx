@@ -1,5 +1,6 @@
 import React from 'react';
 
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import PointerListeners from '../../../pointerlisteners';
 import { Noodl } from '../../../types';
@@ -60,10 +61,13 @@ export function Image(props: ImageProps) {
     }
   }
 
+// P109 ISL-008 — defaults leave the inline style for the defaults sheet, so an author's class can override them.
+const defaultsClass = layerDefaults(style);
+
   return (
     <img
       ref={noodlRootRef(props.noodlNode)}
-      className={props.className}
+      className={withDefaultsClass(props.className, defaultsClass)}
       {...props.dom}
       {...PointerListeners(props)}
       // After the `props.dom` spread, so it is this handler and not a stale forwarded one.

@@ -36,6 +36,8 @@
  * @module noodl-viewer-react/box-model-overlay
  */
 
+import { defaultDeclarationsOf } from './default-style-layer';
+
 // ─────────────────────────────────────────────────────────────────────────────────────────────
 // Types
 // ─────────────────────────────────────────────────────────────────────────────────────────────
@@ -729,7 +731,7 @@ export class BoxModelOverlay {
     const facts = describeBox({
       rect,
       computed,
-      specified: element.style,
+      specified: specifiedStyleOf(element),
       parent: parentElement
         ? { rect: parentElement.getBoundingClientRect(), computed: window.getComputedStyle(parentElement) }
         : undefined
@@ -827,4 +829,21 @@ function childRectsOf(element: HTMLElement): RectLike[] {
     rects.push(children[i].getBoundingClientRect());
   }
   return rects;
+}
+
+/**
+ * P109 ISL-008 — what the author's node SPECIFIED: its inline style, over the defaults its renderer moved into the
+ * defaults sheet (`default-style-layer.ts`). A Group left at its default `100%` width now carries that `100%` in a
+ * class rule rather than inline, and "width: 100% of the parent" is the fact this overlay exists to state. Inline
+ * wins, exactly as it does on the page.
+ */
+export function specifiedStyleOf(element: HTMLElement): ComputedReader {
+  const defaults = defaultDeclarationsOf(element);
+  if (!defaults) return element.style;
+  return {
+    getPropertyValue(name: string): string {
+      const inline = element.style.getPropertyValue(name);
+      return inline || defaults[name] || '';
+    }
+  };
 }

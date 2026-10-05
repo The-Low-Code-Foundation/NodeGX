@@ -1,6 +1,6 @@
 # ISL-008 — A stylesheet can place a Group
 
-**Status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 runtime built s16 (2026-10-05) — AC1–AC4 met, AC5 (census) s15, AC7's server half met; owed: the panel warning (Richard's AC), AC6 (the island sheds its `!important`), AC7's export half (P18's pile). Ruled s15 "Stylesheet beats defaults". Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F11](AUDIT-2026-10-01.md) · [P105 CG-003 §7.1 item 1](../phase-105-the-coding-garden/CG-003-THE-PAGES.md) (the win card pinned to the top) · [P95 R6](../phase-95-the-second-play-test/README.md) (the buy card) · met before by [TPL-008](../phase-78-the-templates/TPL-008-THE-TODO-LIST.md) line 559, [TPL-010](../phase-78-the-templates/TPL-010-THE-PLANNER.md) lines 268-270 and [TPL-011](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md) line 390
 **Side:** product (runtime styling in `noodl-viewer-react`; the export's style emission)
 
@@ -146,3 +146,99 @@ recommended (an author-set panel value stays inline and wins; the 44 rules that 
 in the release notes). **New AC, from the request:** the property panel marks a value that a stylesheet rule overrides and
 names where the rule lives (the CSS Definition node, a visual node's own custom CSS, a kit sheet or head code). 🔴 The build
 covers all three inline writers (the start style, `Layout.size/align`, Columns), or the island's width/height forces stay.
+
+### Session 16 (2026-10-05) — the runtime built: AC1–AC4 and AC7's server half met; the panel warning, AC6 and the export owed
+
+**AC1 ✅ red at HEAD `39bd1c534`, deployed** (`nodegx deploy` of [`isl008-win-card`](isl008-win-card/), driven by
+[`drive-isl008-win-card.js`](../../../scripts/devtools/drive-isl008-win-card.js) at 390×844). `.win` with no
+`!important`: computed `relative` / `flex-start`, the card at (−95, +284) from the centre. The control `.win-imp` (every
+declaration forced): `fixed` / `center`, card at (0, 0). The Group wrote 10 properties inline: `display`, `position`,
+`flex-direction`, `align-items`, `opacity`, `box-sizing`, `width`, `height`, `flex-shrink`, `flex-grow`.
+
+**Built** — [`default-style-layer.ts`](../../../packages/noodl-viewer-react/src/default-style-layer.ts) (its header is
+the design):
+- The node records what the author set on THIS instance: every input setter is wrapped at definition time
+  (`_authoredInputs`, by input name) and `setStyle` records its keys (`_authoredStyle`). A parameter stored in the
+  project, a wire, a variant, a visual state and `CSS Style` all run one of those; a seeded default runs neither.
+- The record rides on the node's style object under a `Symbol.for` key. Spread and `Object.assign` carry it through
+  every component's `{ ...props.style }`. React's style writer and the server serialiser enumerate with `for…in`, so
+  it never reaches the DOM — no new prop, so nothing leaks through a component that spreads its props (Video does).
+- After Layout, a converted renderer calls `layerDefaults(style)`. A key leaves the inline style when the author has
+  not written it AND it is either a start key still at its start value, or a `Layout`-derived key none of whose
+  inputs is authored (`LAYOUT_SOURCES`: width ← sizeMode/width/fixedWidth/margins/position, …). The keys become one
+  `.ndl-d-<cyrb53>{…}` rule (written as React writes numbers: `px` except React's unitless list), deduplicated by
+  content, in `<style id="noodl-default-styles">`, and the class goes on the same element.
+- 🔴 **The precedence model is source order, not a layer.** The sheet is the first child of `<head>` (and is put back
+  there if something prepends later). A default class and an author class tie on specificity, and the author's
+  comes later: CSS Definition, control sheets, the font loader and drag-drop all APPEND to `<head>`, head code sits
+  mid-head, kit `<link>`s are in `<body>` (census, this session). An element or universal selector still loses to a
+  default, as it lost to the inline style, so a reset sheet's `button {…}` does not undo a Button's background. A
+  cascade `@layer` would have let it through, and dropped every default on a browser older than Safari 15.4.
+- **Converted (10):** Group, Text, Image, Circle, Icon, Video (both paths), Page, Button, Radio Button Group, and
+  Columns' container (its own source map: each container key names the Columns input it is computed from). Page now
+  lays out a copy of its style — it used to run Layout on the node's own style object, a render at a time.
+- **Not converted, on purpose:** Checkbox, Radio Button, Text Input, Dropdown (Select) and Slider put the author's
+  class on an inner element and the root style on a wrapper, so no author class can place that element to begin
+  with. The deprecated controls have generated class sheets of their own that would start beating their defaults
+  (old projects would move). Kit nodes keep `defaultCss` inline (ISL-011's ruling); a kit component never calls
+  `layerDefaults`. Tagged inner styles (`props.styles[tag]`) are untouched.
+- The SSR page writes the sheet first in `<head>`
+  ([`inject-default-styles.js`](../../../packages/noodl-viewer-react/static/ssr/inject-default-styles.js), called from
+  `server-core.js`, listed in the SSR deploy manifest — whose own gate went red until it was). The box-model overlay
+  reads what a node SPECIFIED as inline over its defaults class (`specifiedStyleOf`), so "width: 100% of the parent"
+  still appears for a default-sized node.
+
+**Specs:** `tests/isl-008/defaults-layer.test.tsx` 11/11 (real Groups through the runtime: what leaves the inline
+style, the class and its rule, AC3, the size rule, dedup, the sheet first in `<head>`, the rule on its own).
+**Reverted arms, each restored by `cp` and byte-compared:** authored recording off → 2 red; layer by value alone → AC3
+red; append instead of prepend → the order row red; Group without `layerDefaults` → 6 red.
+`tests/isl-008-ssr-default-styles.test.js` 4/4; `tests/isl-008/server-render.test.tsx` 1/1. viewer-react whole suite
+**1,718/1,718**. P107's `node-spec/graph` + `runtime-target` 102/102 with the change in the tree (the face reads only
+computed `visibility` / `pointer-events`).
+
+**The browser readings — built in a worktree** (`../OpenNoodl-worktrees/p109-s16-isl008`, real copies of
+`src/external` and of the `noodl-preview` / `nodegx-export` dist, `OUT_PATH` pointed there), so the shared bundle
+peers drive with was never rebuilt (still 2026-10-04 14:11).
+
+- **AC2 ✅** deployed, 390×844: `.win` with no `!important` → `fixed` / `center` / `center`, card at (0, 0);
+  `elementFromPoint` at the screen centre lands on the plain card. The bare Group reads exactly as at HEAD (relative,
+  flex-start, card at (100, 68)); console errors 0.
+- **AC3 ✅** `.win-set` with Align Items = Start in the panel: `align-items: flex-start` stays inline and wins; the
+  class's `fixed` and `justify-content: center` apply (card at (−95, 0)).
+- **AC4 ✅** — [`isl008-template-shots.js`](../../../scripts/devtools/isl008-template-shots.js): every routed page of
+  all 13 templates (nightbook copied in from the primary, where it is uncommitted) at 1280×800 and 390×844, **132
+  pictures**. Two runs at HEAD: **5 noisy** (bot-garden Grown-ups desktop; planner Sign in and Week ×2). After the
+  change: **6 differ**, one of them noise (Grown-ups). The other five, each looked at side by side:
+  - bot-garden Island (desktop, phone) and Workshop (phone): the quest cards' badges ("Steps in order", "Repeat",
+    "If") move from the card's top edge to its vertical centre, and some cards grow a few pixels —
+    `.bg-quest { align-items: center }`, written by the author and never applied (in s15's census: bot-garden
+    align-items ×7).
+  - planner-demo Week (desktop, phone): the placed chips ("Coaching offer", "Practice group") dim —
+    `.planner-chip-placed { opacity: 0.55 }`. 🔴 **Not in s15's list of 44:** the class is wired, not saved, which is
+    the population s15 said its count could not see ("44 is a floor").
+  Every difference is a rule its author wrote that now applies: the bug being fixed (ruling 3). Release notes: the
+  44 of §8 s15, plus `.planner-chip-placed`.
+- **AC7, server half ✅ (narrower than a deploy)** — `tests/isl-008/server-render.test.tsx` renders the four overlays
+  through the runtime with `renderToString` and NO `document`, passes the page through the real
+  `injectDefaultStyles`, and the drive reads it in Chrome with no scripts at all (the first paint, before any
+  hydration): plain `.win` `fixed` / centred (0, 0), the panel-set Align Items still inline and winning, the bare Group
+  unchanged. The server's class names equal the deployed client's (`ndl-d-1d4acxlkeoy`, `ndl-d-1ghi8izvn55`): content
+  hashing, so hydration agrees. Not run: a server-rendered DEPLOY (the editor's Self Hosting flow builds one; nothing
+  in the repo runs that pipeline headless).
+- `noodl-mcp` `fld005ColumnMultipliesOut` read Groups' INLINE style for `height: 100%` / `flex-grow: 100` — green only
+  because the shared bundle is old. It now reads what the node specified (inline + its defaults-class rules): 10/10
+  against the new bundle in the worktree, every geometry reading unchanged. `renderTools`, `isl021DrivePage`,
+  `isl022WrappedRow` 21/21 against the new bundle.
+
+**Owed:**
+- **The panel warning (Richard's request, the new AC)** — mapped this session: the canvas answers through a new
+  `NoodlEditorHighlightAPI` call (`viewer.jsx:17-104`, reached by the editor's `executeJavaScript`, as
+  `CanvasView.ts` already does), resolving the node and walking `document.styleSheets` for rules that match its
+  element and win. The rule's source is its `ownerNode`: a CSS Definition's `<style id="style_<nodeId>">` names the
+  node; head code and kit sheets are anonymous today (a marker is owed, and a kit `<link>` lands in `<body>`). The row
+  is marked in place the way FB-017's hints are (`Ports.refreshHints`, `portHint.ts:157`), not as a warning, which
+  would ring the node as a problem.
+- **AC6** — the island sheds the `!important`s that only beat a default (s15: 44 of 196, a floor), through
+  `cg007Look.ts`; the CG-003/IG/IW drives stay green; the sabotage arm.
+- **AC7, export half** — `nodegx-export` must emit the same layering. Its files are in P18's uncommitted pile
+  (`plan.ts`, `component.ts`, `emitApp.ts` dirty since 2026-09-26): handed to P18.

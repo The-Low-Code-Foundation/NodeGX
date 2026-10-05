@@ -1,0 +1,228 @@
+{
+  "$schema": "https://opennoodl.dev/schemas/nodes-v2.json",
+  "componentId": "c_home",
+  "version": 1,
+  "nodes": [
+    {
+      "id": "page",
+      "type": "Page",
+      "label": "Home",
+      "children": [
+        "layout"
+      ],
+      "parameters": {
+        "title": "Home"
+      }
+    },
+    {
+      "id": "layout",
+      "type": "Group",
+      "label": "Layout",
+      "parent": "page",
+      "children": [
+        "marker",
+        "bare",
+        "forced",
+        "set",
+        "plain"
+      ]
+    },
+    {
+      "id": "marker",
+      "type": "Text",
+      "label": "Marker",
+      "parent": "layout",
+      "parameters": {
+        "text": "isl008 page drew"
+      }
+    },
+    {
+      "id": "sheet",
+      "type": "CSS Definition",
+      "label": "the author's stylesheet",
+      "parameters": {
+        "style": "/* ISL-008 AC1: ordinary CSS for an overlay. `.win` and `.win-set` carry NO !important. */\n.win, .win-set { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; }\n/* The known-firing control: the same rules forced, the way five templates had to write them. */\n.win-imp { position: fixed !important; inset: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; }\n"
+      }
+    },
+    {
+      "id": "bare",
+      "type": "Group",
+      "label": "bare: class ",
+      "parent": "layout",
+      "children": [
+        "bareCard"
+      ],
+      "parameters": {
+        "dataAttributes": "data-isl008",
+        "data-isl008": "bare"
+      }
+    },
+    {
+      "id": "bareCard",
+      "type": "Group",
+      "label": "bare card",
+      "parent": "bare",
+      "children": [
+        "bareText"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 200,
+          "unit": "px"
+        },
+        "height": {
+          "value": 100,
+          "unit": "px"
+        },
+        "backgroundColor": "#ffd54f",
+        "dataAttributes": "data-isl008-card",
+        "data-isl008-card": "bare"
+      }
+    },
+    {
+      "id": "bareText",
+      "type": "Text",
+      "parent": "bareCard",
+      "parameters": {
+        "text": "bare card"
+      }
+    },
+    {
+      "id": "forced",
+      "type": "Group",
+      "label": "forced: class win-imp",
+      "parent": "layout",
+      "children": [
+        "forcedCard"
+      ],
+      "parameters": {
+        "cssClassName": "win-imp",
+        "dataAttributes": "data-isl008",
+        "data-isl008": "forced"
+      }
+    },
+    {
+      "id": "forcedCard",
+      "type": "Group",
+      "label": "forced card",
+      "parent": "forced",
+      "children": [
+        "forcedText"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 200,
+          "unit": "px"
+        },
+        "height": {
+          "value": 100,
+          "unit": "px"
+        },
+        "backgroundColor": "#ffd54f",
+        "dataAttributes": "data-isl008-card",
+        "data-isl008-card": "forced"
+      }
+    },
+    {
+      "id": "forcedText",
+      "type": "Text",
+      "parent": "forcedCard",
+      "parameters": {
+        "text": "forced card"
+      }
+    },
+    {
+      "id": "set",
+      "type": "Group",
+      "label": "set: class win-set",
+      "parent": "layout",
+      "children": [
+        "setCard"
+      ],
+      "parameters": {
+        "cssClassName": "win-set",
+        "dataAttributes": "data-isl008",
+        "data-isl008": "set",
+        "alignItems": "flex-start"
+      }
+    },
+    {
+      "id": "setCard",
+      "type": "Group",
+      "label": "set card",
+      "parent": "set",
+      "children": [
+        "setText"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 200,
+          "unit": "px"
+        },
+        "height": {
+          "value": 100,
+          "unit": "px"
+        },
+        "backgroundColor": "#ffd54f",
+        "dataAttributes": "data-isl008-card",
+        "data-isl008-card": "set"
+      }
+    },
+    {
+      "id": "setText",
+      "type": "Text",
+      "parent": "setCard",
+      "parameters": {
+        "text": "set card"
+      }
+    },
+    {
+      "id": "plain",
+      "type": "Group",
+      "label": "plain: class win",
+      "parent": "layout",
+      "children": [
+        "plainCard"
+      ],
+      "parameters": {
+        "cssClassName": "win",
+        "dataAttributes": "data-isl008",
+        "data-isl008": "plain"
+      }
+    },
+    {
+      "id": "plainCard",
+      "type": "Group",
+      "label": "plain card",
+      "parent": "plain",
+      "children": [
+        "plainText"
+      ],
+      "parameters": {
+        "sizeMode": "explicit",
+        "width": {
+          "value": 200,
+          "unit": "px"
+        },
+        "height": {
+          "value": 100,
+          "unit": "px"
+        },
+        "backgroundColor": "#ffd54f",
+        "dataAttributes": "data-isl008-card",
+        "data-isl008-card": "plain"
+      }
+    },
+    {
+      "id": "plainText",
+      "type": "Text",
+      "parent": "plainCard",
+      "parameters": {
+        "text": "plain card"
+      }
+    }
+  ]
+}

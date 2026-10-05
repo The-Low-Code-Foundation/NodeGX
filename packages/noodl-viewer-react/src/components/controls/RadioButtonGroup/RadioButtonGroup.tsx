@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 
 import RadioButtonContext from '../../../contexts/radiobuttoncontext';
+import { layerDefaults, withDefaultsClass } from '../../../default-style-layer';
 import Layout from '../../../layout';
 import { Noodl, Slot } from '../../../types';
 import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
@@ -45,9 +46,12 @@ export function RadioButtonGroup(props: RadioButtonGroupProps) {
   let className = 'ndl-controls-radiobuttongroup';
   if (props.className) className = className + ' ' + props.className;
 
+  // P109 ISL-008 — defaults leave the inline style for the defaults sheet, so an author's class can override them.
+  const defaultsClass = layerDefaults(style);
+
   return (
     <RadioButtonContext.Provider value={context}>
-      <div ref={noodlRootRef(props.noodlNode)} {...dataAttributeProps(props.dom)} className={className} style={style}>
+      <div ref={noodlRootRef(props.noodlNode)} {...dataAttributeProps(props.dom)} className={withDefaultsClass(className, defaultsClass)} style={style}>
         {props.children}
       </div>
     </RadioButtonContext.Provider>
