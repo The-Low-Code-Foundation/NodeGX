@@ -5596,10 +5596,12 @@ function planComponent(
       let scriptUses: ScriptUsePlan[] = [];
       if (kind === 'function') {
         const usesValue = node.parameters.find((p) => p.name === 'uses')?.value;
-        if (usesValue !== undefined && usesValue.kind !== 'literal' && usesValue.kind !== 'json') {
-          return { defer: `the ${word} has a Uses list that is not written out (${usesValue.kind}) — the files it reaches cannot be read` };
+        // Read in one expression: the editor's TypeScript, which compiles this file too, does not narrow across the return.
+        const usesRaw = usesValue === undefined ? undefined : usesValue.kind === 'literal' || usesValue.kind === 'json' ? usesValue.value : null;
+        if (usesRaw === null) {
+          return { defer: `the ${word} has a Uses list that is not written out (${usesValue!.kind}) — the files it reaches cannot be read` };
         }
-        const planned = scriptUsesPlan(usesValue?.value, ir.project.scripts);
+        const planned = scriptUsesPlan(usesRaw, ir.project.scripts);
         if ('defer' in planned) return { defer: `the ${word} ${planned.defer}` };
         scriptUses = planned.uses;
       }
