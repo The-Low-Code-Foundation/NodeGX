@@ -1,6 +1,6 @@
 # ISL-008 — A stylesheet can place a Group
 
-**Status:** 🟡 runtime and panel warning built s16 (2026-10-05) — AC1–AC4 met, AC5 (census) s15, AC7's server half met, Richard's panel-warning AC met in the live editor; owed: AC6 (the island sheds its `!important`), AC7's export half (P18's pile). Ruled s15 "Stylesheet beats defaults". Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 s17 (2026-10-05): AC6 met — the island shed 29 `!important`s, measured in the page (§8 s17); AC1–AC5 and Richard's panel warning met s15–s16; owed: AC7's export half (P18's pile). Ruled s15 "Stylesheet beats defaults". Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F11](AUDIT-2026-10-01.md) · [P105 CG-003 §7.1 item 1](../phase-105-the-coding-garden/CG-003-THE-PAGES.md) (the win card pinned to the top) · [P95 R6](../phase-95-the-second-play-test/README.md) (the buy card) · met before by [TPL-008](../phase-78-the-templates/TPL-008-THE-TODO-LIST.md) line 559, [TPL-010](../phase-78-the-templates/TPL-010-THE-PLANNER.md) lines 268-270 and [TPL-011](../phase-78-the-templates/TPL-011-THE-EVENING-JOURNAL.md) line 390
 **Side:** product (runtime styling in `noodl-viewer-react`; the export's style emission)
 
@@ -277,3 +277,36 @@ peers drive with was never rebuilt (still 2026-10-04 14:11).
   `cg007Look.ts`; the CG-003/IG/IW drives stay green; the sabotage arm.
 - **AC7, export half** — `nodegx-export` must emit the same layering. Its files are in P18's uncommitted pile
   (`plan.ts`, `component.ts`, `emitApp.ts` dirty since 2026-09-26): handed to P18.
+
+### Session 17 (2026-10-05) — AC6: the island sheds the 29 `!important`s that only beat a default
+
+**The instrument** — [`scripts/devtools/isl008-important-census.js`](../../../scripts/devtools/isl008-important-census.js),
+hooked into every garden drive through `drive-deployed.js` when `ISL008_IMPORTANT_CENSUS=<json>` is set (opt-in; off, the
+drive is unchanged). Before each press, key, touch and navigation, in ONE synchronous evaluate, it takes each `!important`
+of the island's sheet whose rule matches something now and reads every longhand it sets on every element it matches, with
+that one `!important` removed: NEW (the ISL-008 runtime as it is) and OLD (each element's `.ndl-d-*` defaults copied back
+inline, as the runtime wrote them before ISL-008). removable = OLD moved and NEW never did; keep = NEW moved; neither =
+seen, never moved; unseen = no state of any drive matched it (kept, as a floor).
+
+**The census** (20 drive runs over the 19 CG-003/IG/IW drives, 3,544 states, 1,240 measured; deployed island with
+ISL-008): of **196**, **29 removable**, **41 keep**, **121 neither**, **5 unseen**. s15's static "44 removable, a floor"
+was a reading of the sheet; in the page 29 move under OLD and not under NEW. The 29: `display: grid`/`none` 18,
+`position` 8, `flex-direction` 2, `align-items` 2 (`.bg-win` and `.bg-shop`, the two overlays). The 41 kept beat a value
+the graph SETS: `font-size` 7, `background-color` 7, `width` 5, `color` 3, paddings 6, flex 5, and 8 others. The 121
+"neither" stay too: a later census can take them, but they are not ISL-008's (a property never written inline, or a
+rule that matched nothing it could beat).
+
+**The strip** — `isl008-important-census.js strip --write` on `packages/noodl-mcp/tests/cg007Look.ts`: 201 → 171
+`!important` in the file (29 declarations, and the header's rule rewritten: *"a rule says `!important` only to beat a value
+the graph SETS"*). `npm run template:garden`: only `templates/bot-garden/components/App/nodes.json` changed (the CSS
+Definition), 199 → 170 in the template. Three CG-003 rows pinned a removed `!important` (AC7's win card, the island grid,
+the pad stage); each now pins the decision with a comment. `cg003Template` 150/150; ISL-025's W10 row notes 171.
+
+**Gates:**
+- **Verify, on the ORIGINAL sheet** (the 29 removed together, both modes, every drive state): NEW moved **0** values;
+  OLD moved **28**. The 29th, the phone's `.bg-stage:has(> .bg-pad) { flex-direction: column }`, moves alone (census: `column → row`, because the unconditional `row` rule then wins) but not together: with its `row` twin also stripped, the Group's inline default is `column`, the value the rule wanted.
+- **The stripped island**, assembled and deployed with `nodegx deploy` (exit 0), the same 19 drives: **18 of 19 green**, each exit 0 (`cg003-pages` 17 min, `ig004-island` 70/70 …). The 19th, `iw007-touch`, is red on the same three 1368-en clauses (BUILD, PILLS, PAY: Cobble's planks) on the ORIGINAL sheet too (the verify run), and the ISL-005 session measured the same three red on HEAD's garden with HEAD's drive: older than this strip, not moved by it.
+- **Sabotage arm, as a drive:** a copy of the stripped site with one script added before the runtime that copies every
+  `.ndl-d-*` default back inline (the pre-ISL-008 runtime's behaviour), `drive-cg003-pages.js`: **13 red** (exit 1, 317 pass), where the stripped site reads 330/330: AC7's win card "fixed and centred after scrolling" at 1368 and 390 in both languages (it reads `position: relative`, centred at x 222 of 1368), back to the island from the win card, the island's 360 px request column, Play and the owl on screen at scroll 0. The in-page arm (verify OLD, 28 values) and the drive arm agree..
+
+**AC6 met.** Release note (with s15's list): none — removing an `!important` that only beat a default changes nothing on a runtime with ISL-008; on an older runtime the island would break (the sabotage arm), so the template needs ISL-008's runtime, which it ships with.

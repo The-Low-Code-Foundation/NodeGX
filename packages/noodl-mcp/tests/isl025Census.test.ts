@@ -245,6 +245,7 @@ describe('ISL-025 — the census of the island’s workarounds', () => {
   it('W10 counts its !important occurrences, so a later row can show the count falling', () => {
     const count = (read(t('cg007Look.ts')).match(/!important/g) ?? []).length;
     // Read 199 at HEAD 68b1549f5 (the audit's 195 and ISL-025’s 197 were earlier readings of the same stylesheet).
+    // 171 after P109 ISL-008 AC6 (2026-10-05): the 29 that only beat a node's default are gone, measured in the page.
     expect(count).toBeGreaterThan(0);
   });
 });

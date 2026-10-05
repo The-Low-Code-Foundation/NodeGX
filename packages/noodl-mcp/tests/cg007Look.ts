@@ -10,9 +10,12 @@
  *   brings Nunito). A colour the graph sets is `var(--token)`, never a hex (the template gate walks every parameter).
  *   The four block colours and the owl's violet are tokens, and the kit is fed `var(--block-*)` on its colour ports, so
  *   a token change re-skins the blocks too (AC4).
- * - **One stylesheet** ({@link GARDEN_CSS}), in App's `CSS Definition` node, reached by `cssClassName`. A node writes its
- *   own parameters INLINE, so a rule that must beat a parameter says `!important` (TPL-011's lesson), and every
- *   positioning property of an overlay is `!important` too (a Group writes `position` inline, P95 R6).
+ * - **One stylesheet** ({@link GARDEN_CSS}), in App's `CSS Definition` node, reached by `cssClassName`. A node writes
+ *   INLINE only the parameters its author set; its defaults sit in a class first in `<head>`, which any class here beats
+ *   by order (P109 ISL-008, ruled "Stylesheet beats defaults"). So a rule says `!important` only to beat a value the
+ *   graph SETS (a panel parameter, a wire, a kit's inline style). P109 ISL-008 AC6 removed the 29 that only beat a
+ *   default, measured in the page across every CG-003/IG/IW drive (`scripts/devtools/isl008-important-census.js`);
+ *   the rest stay until a census says otherwise.
  * - **Sprites** — the mockup's `<symbol>`s (the islanders, the owl, the tulip, the tree, the house, the rock) as CSS
  *   background images, and its button icons as CSS masks painted in `currentColor`. A graph node cannot hold an inline
  *   `<svg>`, and an `Icon` component renders an empty span; a class can carry a picture.
@@ -236,12 +239,12 @@ button:focus-visible, input:focus-visible, .bg-press:focus-visible { outline: 3p
  * (the task card below says what the islander wants), and the controls are a little tighter.
  */
 @media (max-width: 600px) {
-  .bg-brand { display: none !important; }
+  .bg-brand { display: none; }
   .bg-tabs { order: 5; }
   .bg-tab { padding-top: 6px !important; padding-bottom: 6px !important; padding-left: 8px !important; padding-right: 8px !important; }
   .bg-tab * { font-size: 14px !important; }
   .bg-ws-title { font-size: 26px !important; }
-  .bg-ws-sub { display: none !important; }
+  .bg-ws-sub { display: none; }
   /* P108 IW-003 look (lane L): 8px 10px and 14 px (was 9px 14px and 15 px): the French Drive · Teach · Play in one row. */
   .bg-controls .bg-btn { padding: 8px 10px !important; font-size: 14px !important; }
 }
@@ -278,7 +281,7 @@ ${owlColourRule}
    1200 px up (50vw before s8; 44vw is the narrowest measured to keep Olive's widest French blocks whole at 1368, 588 px)
    and the world takes the rest, no longer capped at 640 px but by the window's height (its 4:3 plot under the head and
    above Play). */
-.bg-ws { --bg-world-max: min(1100px, calc((100vh - 230px) * 4 / 3)); display: grid !important; grid-template-columns: minmax(0, 1fr) 16px var(--bg-steps-w, clamp(420px, 43vw, 780px)); gap: 16px 0; align-items: start; }
+.bg-ws { --bg-world-max: min(1100px, calc((100vh - 230px) * 4 / 3)); display: grid; grid-template-columns: minmax(0, 1fr) 16px var(--bg-steps-w, clamp(420px, 43vw, 780px)); gap: 16px 0; align-items: start; }
 @media (min-width: 1200px) { .bg-ws { grid-template-columns: minmax(0, 1fr) 16px var(--bg-steps-w, clamp(440px, 44vw, 780px)); } }
 @media (max-width: 980px) { .bg-ws { grid-template-columns: minmax(0, 1fr); } .bg-ws > .gd-divider { display: none !important; } }
 .bg-stage { position: relative !important; width: 100%; max-width: var(--bg-world-max, 640px); margin: 0 auto; }
@@ -289,10 +292,10 @@ ${owlColourRule}
    wrapped under the world and off it); only then does the pad wrap under it. A phone keeps the pad over the corner (the
    media rule under the pad's): there is no room beside, and under the world it would push Play off the first screen
    (CG-003 AC4). */
-.bg-stage:has(> .bg-pad) { max-width: calc(var(--bg-world-max, 640px) + 196px); display: flex !important; flex-direction: row !important; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 16px; }
+.bg-stage:has(> .bg-pad) { max-width: calc(var(--bg-world-max, 640px) + 196px); display: flex !important; flex-direction: row; flex-wrap: wrap; align-items: flex-end; justify-content: center; gap: 16px; }
 .bg-stage:has(> .bg-pad) > :not(.bg-pad):not(.bg-rec) { flex: 1 1 300px; max-width: var(--bg-world-max, 640px); min-width: 0; }
 .bg-stage .gd-world { border: 4px solid var(--world-edge); border-radius: 16px; }
-.bg-rec { position: absolute !important; left: 10px !important; top: 10px !important; z-index: 6; box-shadow: var(--shadow-soft); pointer-events: none; }
+.bg-rec { position: absolute; left: 10px !important; top: 10px !important; z-index: 6; box-shadow: var(--shadow-soft); pointer-events: none; }
 .bg-rec::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--coral); margin-right: 8px; animation: bg-blink 1s infinite; }
 @keyframes bg-blink { 50% { opacity: 0.2; } }
 /* P106 IG-003: Drive · Teach · Play. The mode on is ringed (the mockup's aria-pressed ring: ink, then white); the tag on
@@ -304,7 +307,7 @@ ${owlColourRule}
 .bg-steps-note { font-weight: 700; }
 /* The pad (the mockup's .pad), beside the world (P106 s4 (b), above), each key 56 px for a finger (AC5). On a phone it sits
    over the world's corner, as it did (the mockup's). */
-.bg-pad { position: relative !important; flex: none; z-index: 6; display: grid !important; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); grid-auto-rows: 56px; gap: 6px; }
+.bg-pad { position: relative !important; flex: none; z-index: 6; display: grid; grid-template-columns: repeat(3, 56px); grid-template-rows: repeat(2, 56px); grid-auto-rows: 56px; gap: 6px; }
 /* P108 IW-003 look (lane L): on a phone the pad sits UNDER the world, never over it (the mockup's ≤ 900 px rule: its keys
    48 px in a row, the arrows first) — measured on the s3 merge, over the world's corner it covered the right half: five
    to eight keys on the world, sami-thanks' door under the forward key. The room it takes back is Mamie's dots (the
@@ -312,7 +315,7 @@ ${owlColourRule}
    controls' spare margin; the controls a little tighter, so the French three fit two rows (CG-003 AC4: Play and the owl
    on the first screen, re-measured). */
 @media (max-width: 600px) {
-  .bg-stage:has(> .bg-pad) { display: flex !important; flex-direction: column !important; flex-wrap: nowrap; align-items: stretch; gap: 4px; max-width: 640px; }
+  .bg-stage:has(> .bg-pad) { display: flex !important; flex-direction: column; flex-wrap: nowrap; align-items: stretch; gap: 4px; max-width: 640px; }
   .bg-stage:has(> .bg-pad) > :not(.bg-pad):not(.bg-rec) { flex: none; width: 100%; max-width: 640px; }
   .bg-pad { position: relative !important; right: auto !important; bottom: auto !important; width: 100% !important; grid-template-columns: repeat(auto-fill, 48px); grid-template-rows: none; grid-auto-rows: 48px; gap: 6px; justify-content: center; }
   .bg-pad .bg-key { width: 48px !important; height: 48px !important; min-width: 48px; min-height: 48px; grid-column: auto; grid-row: auto; order: 4; }
@@ -322,7 +325,7 @@ ${owlColourRule}
   /* Seven keys or more (the go keys, free play's every step) stay ONE row that scrolls sideways, as the phone's drawer
      does: two rows pushed the owl off the first screen in free play (865 of 844, the Olive drive's P-390). */
   .bg-stage > .bg-pad:has(> .bg-key:nth-child(7)) { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 48px; grid-template-rows: 48px; overflow-x: auto; overflow-y: hidden; justify-content: start; padding-bottom: 4px; }
-  .bg-marks { display: none !important; }
+  .bg-marks { display: none; }
   .bg-controls { margin-top: 0 !important; }
 }
 .bg-key { width: 56px !important; height: 56px !important; min-width: 56px; min-height: 56px; border-radius: 14px; box-shadow: var(--shadow-key); display: grid !important; place-items: center; cursor: pointer; font-size: 0 !important; }
@@ -351,7 +354,7 @@ ${owlColourRule}
 @media (max-width: 480px) { .bg-ask-push { margin-left: 0 !important; } }
 
 /* The owl row (the mockup's .owl). */
-.bg-owl { display: grid !important; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start; }
+.bg-owl { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: start; }
 .bg-owl-pic { width: 64px; height: 64px; }
 .bg-owl-meta::before { content: ''; display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--ok); margin-right: 6px; }
 /* The owl's two tags (CG-005 s3): thinking — three dots that fill in turn, no clock — and resting, still. */
@@ -384,13 +387,13 @@ ${owlColourRule}
 
 /* The win card: fixed, centred, over whatever is scrolled (AC7; P95 R6: every positioning property !important). */
 /* A Group writes its own flex alignment INLINE: every centring property here is !important too, or the card sits at the top (s2 drive: cy 182 of 912). */
-.bg-win { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 50 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; background: color-mix(in srgb, var(--paper) 72%, transparent); backdrop-filter: blur(2px); padding: 16px; }
+.bg-win { position: fixed; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 50 !important; display: flex !important; flex-direction: column !important; align-items: center; justify-content: center !important; background: color-mix(in srgb, var(--paper) 72%, transparent); backdrop-filter: blur(2px); padding: 16px; }
 .bg-win-card { box-shadow: var(--shadow-soft); animation: bg-pop 350ms cubic-bezier(0.34, 1.56, 0.64, 1) both; max-width: 380px; }
 @keyframes bg-pop { from { transform: scale(0.2); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 .bg-reward { border-radius: 999px; }
 
 /* The island page's two columns, then .quest, .tag (P106 s4: the P105 sea with pins went with IG-004's island). */
-.bg-island { display: grid !important; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+.bg-island { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
 @media (max-width: 980px) { .bg-island { grid-template-columns: minmax(0, 1fr); } }
 /* The robot on the Profiles card: the kit draws only the robot, on no ground, and its name as its label. A drawing, not a
    board: a press on the robot is a press on its card. */
@@ -398,7 +401,7 @@ ${owlColourRule}
 .bg-profile-stage .gd-cell { background: transparent !important; cursor: default; }
 .bg-profile-stage .gd-world { pointer-events: none; }
 .bg-profile-stage .gd-name { top: 100% !important; font-size: 13px !important; padding: 3px 10px !important; box-shadow: var(--shadow-soft) !important; }
-.bg-quest { box-shadow: var(--shadow-soft); display: grid !important; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; cursor: pointer; }
+.bg-quest { box-shadow: var(--shadow-soft); display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center; cursor: pointer; }
 .bg-tag { border-radius: 999px; }
 .bg-tag-motion { background-color: var(--block-motion); }
 .bg-tag-control { background-color: var(--block-control); }
@@ -412,18 +415,18 @@ ${owlColourRule}
 .bg-isle-scroll { width: 100% !important; overflow-x: auto !important; overflow-y: hidden !important; border-radius: 16px; -webkit-overflow-scrolling: touch; }
 .bg-isle-scroll .gd-world { max-width: none !important; min-width: 736px; border: 4px solid var(--world-edge); }
 .bg-isle-scroll .gd3-world { max-width: none !important; aspect-ratio: 16 / 10 !important; }
-.bg-isle-find { position: absolute !important; top: 20px !important; right: 20px !important; z-index: 7; box-shadow: var(--shadow-soft); }
-.bg-isle-tap { position: absolute !important; left: 20px !important; top: 20px !important; z-index: 7; background: var(--card); border-radius: 999px; padding: 4px 12px; box-shadow: var(--shadow-soft); pointer-events: none; }
+.bg-isle-find { position: absolute; top: 20px !important; right: 20px !important; z-index: 7; box-shadow: var(--shadow-soft); }
+.bg-isle-tap { position: absolute; left: 20px !important; top: 20px !important; z-index: 7; background: var(--card); border-radius: 999px; padding: 4px 12px; box-shadow: var(--shadow-soft); pointer-events: none; }
 .bg-isle-found .gd-bot { animation: bg-found 700ms ease-in-out 3; }
 @keyframes bg-found { 50% { filter: drop-shadow(0 0 6px var(--sun)) drop-shadow(0 0 2px var(--ink)); } }
 .bg-plot-card { background-color: var(--violet-2) !important; }
 .bg-plot-card .bg-plot-line { color: var(--violet-ink) !important; }
-@media (max-width: 600px) { .bg-isle { padding: 8px !important; } .bg-isle-tap { display: none !important; } .bg-isle-find { position: static !important; margin-top: 8px; } }
+@media (max-width: 600px) { .bg-isle { padding: 8px !important; } .bg-isle-tap { display: none; } .bg-isle-find { position: static; margin-top: 8px; } }
 
 /* My robot (the mockup's .robo, .stage, .sw, .hats). */
-.bg-robo { display: grid !important; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.bg-robo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
 @media (max-width: 820px) { .bg-robo { grid-template-columns: minmax(0, 1fr); } }
-.bg-robo-stage { background: linear-gradient(180deg, var(--stage-top), var(--stage-bottom)); border-radius: 22px; aspect-ratio: 1 / 1; max-height: 520px; display: grid !important; place-items: center; }
+.bg-robo-stage { background: linear-gradient(180deg, var(--stage-top), var(--stage-bottom)); border-radius: 22px; aspect-ratio: 1 / 1; max-height: 520px; display: grid; place-items: center; }
 .bg-robo-stage .gd-world { width: 62% !important; background: transparent; }
 .bg-robo-stage .gd-cell { background: transparent !important; }
 .bg-swatch { width: 44px !important; height: 44px !important; min-width: 44px; border-radius: 50%; box-shadow: var(--shadow-press); cursor: pointer; }
@@ -433,7 +436,7 @@ ${owlColourRule}
 .bg-sticker { box-shadow: var(--shadow-soft); border-radius: 12px; }
 
 /* Skills (the mockup's .path, .notion). A seed sits flat on the paper — never faded (a faded card's words fall under 4.5:1). */
-.bg-path { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.bg-path { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
 .bg-notion { box-shadow: var(--shadow-soft); }
 .bg-notion-seed { background-color: var(--paper) !important; box-shadow: none; }
 .bg-blk { border-radius: 12px; box-shadow: var(--shadow-block); }
@@ -448,7 +451,7 @@ ${owlColourRule}
 .bg-caps { text-transform: uppercase; letter-spacing: 0.06em; }
 
 /* Grown-ups (the mockup's .gu, .model, .out). */
-.bg-gu { display: grid !important; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; align-items: start; }
+.bg-gu { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; align-items: start; }
 .bg-dot { width: 10px; min-width: 10px; height: 10px; border-radius: 50%; }
 .bg-li::before { content: '•'; margin-right: 8px; color: var(--ink-2); }
 .bg-code { font-family: ui-monospace, Menlo, monospace; word-break: break-all; }
@@ -457,7 +460,7 @@ ${owlColourRule}
    name and band; the new player is an empty card with a plus. */
 .bg-profiles { align-items: stretch !important; }
 .bg-profile { box-shadow: var(--shadow-soft); cursor: pointer; }
-.bg-profile-stage { background: linear-gradient(180deg, var(--stage-top), var(--stage-bottom)); display: grid !important; place-items: center; padding: 10px 0 22px; }
+.bg-profile-stage { background: linear-gradient(180deg, var(--stage-top), var(--stage-bottom)); display: grid; place-items: center; padding: 10px 0 22px; }
 .bg-profile-stage .gd-world { width: 88px !important; }
 .bg-profile-band { background: var(--paper-2); border-radius: 999px; padding: 2px 9px; align-self: flex-start; }
 .bg-profile-new { border: 2px dashed var(--line) !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 10px; cursor: pointer; box-shadow: none; }
@@ -476,7 +479,7 @@ ${owlColourRule}
 .bg-robot-card { width: 300px !important; min-width: 0 !important; box-shadow: var(--shadow-soft); }
 @media (max-width: 480px) { .bg-robot-card { width: 100% !important; } }
 .bg-robot-locked { background-color: var(--paper-2) !important; box-shadow: none; }
-.bg-robot-stage { background: linear-gradient(180deg, var(--stage-top), var(--stage-bottom)); display: grid !important; place-items: center; flex: none; }
+.bg-robot-stage { background: linear-gradient(180deg, var(--stage-top), var(--stage-bottom)); display: grid; place-items: center; flex: none; }
 .bg-robot-stage .gd-world { width: 64px !important; max-width: none !important; border: 0 !important; background: transparent !important; overflow: visible !important; border-radius: 0 !important; pointer-events: none; }
 .bg-robot-stage .gd-cell { background: transparent !important; cursor: default; }
 .bg-robot-stage .gd-name { display: none !important; }
@@ -513,8 +516,8 @@ ${Object.entries(PAD_GO.emoji).map(([k, e]) => `.bg-key-go-${k}::after { content
    win card's thanks a quiet line; on the island a chip for a moment after a lap pays, at the top between the tap line and
    Find my robots (at its foot it covered an islander's bubble, s4 drive); a phone draws it under the island. */
 .bg-win-pay { color: var(--ink-2) !important; }
-.bg-isle-pay { position: absolute !important; top: 20px !important; left: 50% !important; transform: translateX(-50%); z-index: 7; background: var(--card); border-radius: 999px; padding: 4px 12px; box-shadow: var(--shadow-soft); pointer-events: none; font-size: 15px !important; white-space: nowrap; }
-@media (max-width: 600px) { .bg-isle-pay { position: static !important; transform: none; margin-top: 8px; align-self: flex-start; } }
+.bg-isle-pay { position: absolute; top: 20px !important; left: 50% !important; transform: translateX(-50%); z-index: 7; background: var(--card); border-radius: 999px; padding: 4px 12px; box-shadow: var(--shadow-soft); pointer-events: none; font-size: 15px !important; white-space: nowrap; }
+@media (max-width: 600px) { .bg-isle-pay { position: static; transform: none; margin-top: 8px; align-self: flex-start; } }
 
 /* Reduced motion: the mockup's own rule. Every animation and transition stops; the tulip still reads by opacity and pose. */
 @media (prefers-reduced-motion: reduce) {
@@ -525,7 +528,7 @@ ${Object.entries(PAD_GO.emoji).map(([k, e]) => `.bg-key-go-${k}::after { content
    paper strip; on My robots, the brain line and the copy chips under a hairline, what a copy said in a soft pill. */
 .bg-crew { border-top: 2px dashed var(--line); padding-top: 8px; }
 .bg-crew-row, .bg-robot-copy .bg-chip { min-height: 44px; }
-.bg-crew-said:empty, .bg-robot-said:empty { display: none !important; }
+.bg-crew-said:empty, .bg-robot-said:empty { display: none; }
 .bg-crew-said, .bg-robot-said { background-color: var(--paper-2); border-radius: 14px; padding: 8px 12px; }
 .bg-robot-copy { border-top: 2px dashed var(--line); padding-top: 8px; }
 /* P108 IW-006 (lane H): the shop — its button beside the Island page's head (the balance on it), the sheet over the island
@@ -535,11 +538,11 @@ ${Object.entries(PAD_GO.emoji).map(([k, e]) => `.bg-key-go-${k}::after { content
 .bg-island-top > :first-child { flex: 1 1 auto; min-width: 0; }
 .bg-shop-root { flex: none; }
 .bg-shop-open { box-shadow: var(--shadow-soft); white-space: nowrap; }
-.bg-shop { position: fixed !important; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 40 !important; display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; overflow-y: auto !important; background: color-mix(in srgb, var(--paper) 72%, transparent); backdrop-filter: blur(2px); padding: 16px; box-sizing: border-box; }
+.bg-shop { position: fixed; left: 0 !important; right: 0 !important; top: 0 !important; bottom: 0 !important; width: 100vw !important; height: 100vh !important; z-index: 40 !important; display: flex !important; flex-direction: column !important; align-items: center; justify-content: flex-start !important; overflow-y: auto !important; background: color-mix(in srgb, var(--paper) 72%, transparent); backdrop-filter: blur(2px); padding: 16px; box-sizing: border-box; }
 .bg-shop-panel { width: 100% !important; max-width: 920px !important; box-sizing: border-box; animation: bg-pop 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both; }
 .bg-shop-bal { background-color: var(--sun); border-radius: 999px; padding: 4px 12px; white-space: nowrap; }
 .bg-shop-tabs, .bg-shop-chips { display: flex !important; flex-direction: row !important; flex-wrap: wrap !important; gap: 8px; }
-.bg-shop-items { display: grid !important; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+.bg-shop-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
 .bg-shop-item { width: 100% !important; box-sizing: border-box; cursor: pointer; border: 2px solid var(--line); box-shadow: none; }
 .bg-shop-item-yours, .bg-shop-item-held { border-color: var(--leaf-3); }
 .bg-shop-price { background-color: var(--sun); border-radius: 999px; padding: 3px 10px; white-space: nowrap; }

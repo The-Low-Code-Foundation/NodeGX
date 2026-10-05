@@ -463,10 +463,11 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       expect(GARDEN_CSS).toMatch(/\.bg-key \{ width: 56px !important; height: 56px !important;/);
     });
 
-    it('🔴 AC7: the win card is fixed and centred, every positioning property !important, and its root carries the class', () => {
+    it('🔴 AC7: the win card is fixed and centred, and its root carries the class', () => {
       const rule = GARDEN_CSS.match(/\.bg-win \{([^}]*)\}/)![1];
-      // Both axes, and !important: a Group writes its own alignment inline (s2 drive: the card sat at cy 182 of 912).
-      for (const p of ['position: fixed !important', 'left: 0 !important', 'right: 0 !important', 'top: 0 !important', 'bottom: 0 !important', 'height: 100vh !important', 'display: flex !important', 'align-items: center !important', 'justify-content: center !important']) expect(rule).toContain(p);
+      // Both axes. A Group used to write its own position and alignment inline (s2 drive: the card sat at cy 182 of 912);
+      // since P109 ISL-008 its defaults are a class this rule beats by order, so AC6 dropped those two `!important`s.
+      for (const p of ['position: fixed;', 'left: 0 !important', 'right: 0 !important', 'top: 0 !important', 'bottom: 0 !important', 'height: 100vh !important', 'display: flex !important', 'align-items: center;', 'justify-content: center !important']) expect(rule).toContain(p);
       const root = nodesOf(built, C.win).find((n) => n.id === 'wnScrim')!;
       expect(String(params(root).cssClassName)).toBe('bg-win');
     });
@@ -546,7 +547,7 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       // The look: the island on its sea, a phone scrolls the flat one sideways; the 3D one keeps a 16:10 frame.
       expect(GARDEN_CSS).toContain('.bg-isle-scroll { width: 100% !important; overflow-x: auto !important;');
       expect(GARDEN_CSS).toContain('.bg-isle-scroll .gd-world { max-width: none !important; min-width: 736px;');
-      expect(GARDEN_CSS).toContain('.bg-island { display: grid !important; grid-template-columns: minmax(0, 1fr) 360px;');
+      expect(GARDEN_CSS).toContain('.bg-island { display: grid; grid-template-columns: minmax(0, 1fr) 360px;'); // ISL-008 AC6: no `!important` to beat a default
     });
 
     it('🔴 IG-004 AC3: the Workshop’s win hands Complete request the program that won (gardenProgram), so the robot is pinned to the plot', () => {
@@ -865,10 +866,10 @@ describe('CG-003 — Bot Garden, the artefact', () => {
       const unconditional = GARDEN_CSS.split('\n').filter((l) => /^\.bg-pad \{/.test(l));
       expect(unconditional).toHaveLength(1);
       expect(unconditional[0]).not.toMatch(/position: absolute/);
-      expect(GARDEN_CSS).toMatch(/\.bg-stage:has\(> \.bg-pad\) \{[^}]*display: flex !important; flex-direction: row !important; flex-wrap: wrap;/);
+      expect(GARDEN_CSS).toMatch(/\.bg-stage:has\(> \.bg-pad\) \{[^}]*display: flex !important; flex-direction: row; flex-wrap: wrap;/); // ISL-008 AC6
       // P108 IW-003 look (lane L): the phone's pad sat absolute over the world's corner (five to eight keys on its tiles,
       // sami-thanks' door under one); now the stage is a column there, the pad under the world, and no rule lifts it out.
-      expect(GARDEN_CSS).toMatch(/@media \(max-width: 600px\) \{\n  \.bg-stage:has\(> \.bg-pad\) \{ display: flex !important; flex-direction: column !important;/);
+      expect(GARDEN_CSS).toMatch(/@media \(max-width: 600px\) \{\n  \.bg-stage:has\(> \.bg-pad\) \{ display: flex !important; flex-direction: column;/);
       expect(GARDEN_CSS).toMatch(/\n  \.bg-pad \{ position: relative !important;/);
       expect(GARDEN_CSS).not.toMatch(/\.bg-pad \{[^}]*position: absolute/);
     });

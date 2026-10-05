@@ -253,6 +253,10 @@ async function withDeployedSite(options, fn) {
     // through `client.on(fn)`. `render-report.js` has a same-named helper
     // taking `(wsUrl, handler)`. Two APIs, one name.
     client = await connect(target);
+    // P109 ISL-008 AC6: opt-in census of the island's `!important`s, run before every press (isl008-important-census.js).
+    const importantCensus = process.env.ISL008_IMPORTANT_CENSUS
+      ? require('./isl008-important-census.js').attach(client, path.resolve(process.env.ISL008_IMPORTANT_CENSUS), path.basename(process.argv[1] || 'drive'))
+      : null;
     client.on((msg) => {
       if (msg.method === 'Runtime.exceptionThrown') {
         const d = msg.params.exceptionDetails || {};
@@ -272,7 +276,7 @@ async function withDeployedSite(options, fn) {
     await client.send('Page.navigate', { url: `${base}/` });
     await wait(BOOT_MS);
 
-    return await fn({
+    const result = await fn({
       client,
       servePort,
       consoleErrors,
@@ -297,6 +301,8 @@ async function withDeployedSite(options, fn) {
         return file;
       }
     });
+    if (importantCensus) await importantCensus.run();
+    return result;
   } finally {
     cleanup();
   }
