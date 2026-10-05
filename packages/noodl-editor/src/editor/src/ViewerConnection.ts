@@ -6,6 +6,7 @@ import { EventDispatcher } from '../../shared/utils/EventDispatcher';
 import ProjectModules from '../../shared/utils/projectmodules';
 import { NodeLibrary } from './models/nodelibrary';
 import { ProjectModel } from './models/projectmodel';
+import { SCRIPT_FILE_WARNING_KEYS, scriptFileWarning } from './models/ScriptFiles/scriptFileWarning';
 import { WarningsModel } from './models/warningsmodel';
 import DebugInspector from './utils/debuginspector';
 import * as Exporter from './utils/exporter';
@@ -316,7 +317,11 @@ export class ViewerConnection extends Model {
           isFromViewer: true
         };
         if (ref.component && ref.node) {
-          WarningsModel.instance.setWarning(ref, content.warning);
+          // P109 ISL-005 AC4: a broken script file's one warning gains its line and the Functions it breaks.
+          const warning = SCRIPT_FILE_WARNING_KEYS.includes(content.key)
+            ? scriptFileWarning(content.warning, ProjectModel.instance)
+            : content.warning;
+          WarningsModel.instance.setWarning(ref, warning);
         }
       }
     } else if (request.cmd === 'clearwarnings' && request.type === 'viewer') {
