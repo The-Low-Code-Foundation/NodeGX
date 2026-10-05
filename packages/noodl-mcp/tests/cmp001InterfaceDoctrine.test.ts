@@ -361,12 +361,13 @@ describe('CMP-001 AC2 — the numbers it argues from are the numbers the artefac
     expect(received).toMatch(/\*\*33%\*\*/);
   });
 
-  it('the fifty-four components that publish a failure port are still fifty-four', () => {
+  it('the fifty-five components that publish a failure port are still fifty-five', () => {
     const failing = [...SHELF.values()]
       .map(ports)
       .filter((p) => p.outputs.some((o) => ['Success', 'Failure', 'Failed', 'Error'].includes(o)));
-    expect(failing).toHaveLength(54);
-    expect(received).toContain('**Fifty-four**');
+    // 54 until P109 ISL-010 (2026-10-05) shipped `ask-a-local-model`, which publishes Failure; counted, not bumped.
+    expect(failing).toHaveLength(55);
+    expect(received).toContain('**Fifty-five**');
   });
 });
 

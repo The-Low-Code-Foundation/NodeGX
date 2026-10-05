@@ -135,7 +135,7 @@ picture of a table.
 
 ### 8. Failure is a port
 \`Success\` / \`Failure\` on every cloud action component; \`Error\`, \`Failed\` and \`State\` on
-\`File Upload\`; \`Has Error\` on \`Form Fields/Labelled Select\`. **Fifty-four** components in the
+\`File Upload\`; \`Has Error\` on \`Form Fields/Labelled Select\`. **Fifty-five** components in the
 shipped library publish one of these. If your component can fail, its failure is an output, not a
 console message — the page cannot show what it is never told.
 

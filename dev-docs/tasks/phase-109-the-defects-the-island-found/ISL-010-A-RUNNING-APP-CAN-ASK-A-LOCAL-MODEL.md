@@ -246,3 +246,5 @@ node, so there is nothing to translate or refuse in the frontend.
 FLD-013 reading `Parse CSV` as `translated`, from P18's uncommitted `coverage-ledger.json` (dirty since 2026-09-26),
 not this change. The listing ratchet (66,000 wire bytes) is green. `tsc --noEmit` clean on `noodl-viewer-cloud` and on
 the four backend specs.
+
+- **s17 (2026-10-05):** the `ask-a-local-model` prefab publishes `Failure`, so CMP-001's shelf count moved 54 → 55 and its gate went red (unread in s16). Counted, then the interface doctrine an agent reads (`prompts/interfaces.ts` §8) and the gate both say **Fifty-five**. CMP-001's other red, the corpus publish rate (39 for a pinned 33), is older than this phase: 37 at `35e9e4ae6` (09-17), 39 from `c6c72aed6` (09-22).
