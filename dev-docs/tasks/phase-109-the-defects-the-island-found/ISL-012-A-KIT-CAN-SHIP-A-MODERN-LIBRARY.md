@@ -1,6 +1,6 @@
 # ISL-012 — A kit can ship a library as it is published today
 
-**Status: 🟢 ruling 1 ruled s17 (2026-10-05): "Recipe now, loader later" (§8 s17); the recipe written (AC2), AC1/AC3 deployed drives owed — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: 🟡 s17 (2026-10-05): ruled "Recipe now, loader later"; AC2 (the recipe), AC1's browser half and AC3 met on deployed pages, AC6 recorded (the export does not load dependencies: P109-S17-EXPORTKITDEPS, P18); owed: AC1's reader arm, AC3's full server render + hydration, AC4 (ruling 2) — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F16** · found by P106 [IG-007](../phase-106-the-island-grows/IG-007-GARDEN-3D.md) session 1 and P108
 [IW-004](../phase-108-the-island-works/IW-004-REAL-BLOCKS.md), 2026-09-28 → 09-30 · **Side:** product (module
 injector, SSR kit loader, kit catalog extractor, kit docs; the export is read, not owned)
@@ -165,3 +165,36 @@ board). Rulings 2 and 3 not asked; ruling 3 (the read-at-mount rule) is ISL-015'
   garden-3d-kit to current three — +111 KB measured — recorded, not built). The loader waits for a second kit; the
   board names the trigger.
 
+**Driven s17 (later the same day)** — [`scripts/devtools/drive-isl012-cube.js`](../../../scripts/devtools/drive-isl012-cube.js)
+(software WebGL, `--use-angle=swiftshader` as IG-007's 3D mode; the 320 px host read off a CDP screenshot with sharp, before
+and after a 120 px drag across it; console warnings collected from a reload made after the drive's own listener is on). The
+kit is the docs' `cube-kit` sample plus OrbitControls only when present and a `window.__cube` reading
+([`isl012-cube-kit/index.js`](isl012-cube-kit/index.js), the page [`Home.nodes.json`](isl012-cube-kit/Home.nodes.json));
+three projects, each `nodegx deploy` exit 0, differing only in `dependencies`:
+
+| arm | `dependencies` | page | `__cube` | ink before · changed by drag | console |
+|---|---|---|---|---|---|
+| AC1 red | three 0.186.1's `three.core.js`, `three.module.js`, `OrbitControls.js` | **blank, the page's own Text too** | — | — | *Unexpected token 'export'*, *Cannot use import statement outside a module* ×2, then `Cannot read properties of undefined (reading 'WebGLRenderer')` at mount |
+| AC1 control | the vendored 0.158 `three.min.js` | drawn | r158, no OrbitControls | 11,991 of 102,400 · 0 | the deprecation warning |
+| AC3 | the recipe's bundle (`three-global.min.js`, 762,803 B, esbuild over 0.186.1 + OrbitControls) | drawn | **r186, OrbitControls** | 11,991 · **10,232** | **none** |
+
+- **Screenshots looked at** (AC3 before/after): the cube, three faces, and after the drag the same cube turned, another
+  face forward.
+- **The server-render leg, read at the SSR loader** (`static/ssr/kit-modules.js` `loadKitModules` over each site's
+  `index.html`, in Node, as a server render runs it): AC3's bundle and kit load, `cube-kit.Cube` registers, no failure, no
+  warning, the `window` shim removed after; the red arm's three files each fail with the loader's own *"will appear only
+  after hydration"* warning; the control loads with the deprecation warning. **Not driven:** a full SSR server
+  (`Deploy → Self Hosting` with server rendering) serving the page and the browser hydrating it.
+- 🔴 **Found: one kit node that throws at mount blanks the whole page** — the red arm lost the page's own Text, and the
+  viewer has no error boundary (`componentDidCatch`/`getDerivedStateFromError`: 0 in `noodl-viewer-react/src`). Filed
+  `P109-S17-KITTHROWBLANKS` (same root as P107-C65, met from the kit side).
+- **AC6, the export reading:** `nodegx export` of the AC3 project (exit 0, dry run "Nothing" refused) copies
+  `three.bundle.js` to `public/noodl_modules/cube-kit/` and references it nowhere (`index.html` loads `/src/main.tsx`
+  only; the kit bridge imports the kit's `index.js` alone; the exporter never reads `dependencies`). Read from the emitted
+  files, not a built export. Filed `P109-S17-EXPORTKITDEPS` for P18: garden-kit, garden-3d-kit and maplibre are its reach.
+  AC6's other two rows stand as s17 measured them: moving garden-3d-kit to current three.js and its real OrbitControls costs
+  +111,152 B (+17 %) and removes the deprecation warning seen in the control; `blockly-msg-keep.js` stays.
+- **AC5:** nothing a kit runs changed (docs, a docs-sample spec, the scaffold README), so the three kits with
+  `dependencies` register what they registered; not re-read.
+- **Owed:** AC1's reader arm (a node touching `THREE` at definition: `get_project_info` and a `create_component` refusal),
+  AC3's full server render with hydration, AC4 (ruling 2, not asked).

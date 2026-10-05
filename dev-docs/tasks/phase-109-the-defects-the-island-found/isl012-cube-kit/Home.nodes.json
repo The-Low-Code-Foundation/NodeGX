@@ -1,0 +1,8 @@
+{ "$schema": "https://opennoodl.dev/schemas/nodes-v2.json", "componentId": "c_home", "version": 1,
+  "nodes": [
+    { "id": "page", "type": "Page", "label": "Home", "children": ["layout"], "parameters": { "title": "Home" } },
+    { "id": "layout", "type": "Group", "label": "Layout", "parent": "page", "children": ["marker", "cube"] },
+    { "id": "marker", "type": "Text", "label": "Marker", "parent": "layout", "parameters": { "text": "isl012 page drew" } },
+    { "id": "cube", "type": "cube-kit.Cube", "label": "Cube", "parent": "layout" }
+  ],
+  "visualRoots": ["page"] }
