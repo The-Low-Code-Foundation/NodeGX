@@ -1,6 +1,6 @@
 # ISL-013 — Two kits share code and data without a copy
 
-**Status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
+**Status: 🟢 ruled s18 (2026-10-05), not built — "A kit says what it needs": a manifest `requires`, loaded first whatever its name, read through a public call, refused by name when missing (rulings 1 (a) and 2 (a)).** **Earlier status: ⬜ not started — scoped 2026-10-01 at `27d891bf3`.** **Source:** [the island audit](AUDIT-2026-10-01.md) row
 **F17** · found by P106 [IG-007](../phase-106-the-island-grows/IG-007-GARDEN-3D.md) (the 3D kit borrows the 2D
 kit's helpers) and P108 IW-002 (the job table), 2026-09-28 → 09-30 · **Side:** product (module manifest and injector,
 the runtime's module list, kit docs and types)
@@ -108,3 +108,12 @@ unless the order is guaranteed by the ruled route.
 ## 8. Record
 
 None yet.
+
+### Session 18 (2026-10-05) — re-scoped against shape 1 (ISL-005 closed, `8292f1d55`)
+
+- Shape 1's script files belong to a PROJECT and are read by its Functions; a kit's code cannot `use()` them. Nothing here
+  changes: two kits still share code only by a copy or by walking `__noodl_modules`.
+- 🔴 **ISL-012 ruling 2 (s18, "No, say why instead") removes half of option (b):** the catalog reader will not load a kit's
+  `dependencies`, so a node-less shared module listed as a dependency is invisible to the door's reader. (b) now needs a
+  reader change Richard just declined; (a) (`requires`, the injector and the reader loading the needed kit first) does not.
+- Rulings 1–2 not asked.

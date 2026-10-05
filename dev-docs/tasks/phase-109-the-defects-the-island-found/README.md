@@ -3,7 +3,7 @@
 **Scoped:** 2026-10-01, at HEAD `27d891bf3`, from [the island audit](AUDIT-2026-10-01.md). The audit read P105, P106 and
 P108 (Olive's Island, [TPL-012](../phase-78-the-templates/TPL-012-THE-CODING-GARDEN.md)): their task files, 225 commits, 57
 session and lane transcripts, the generator, both kits, the desktop shell and the shipped template.
-**Status: 🟡 OPEN — ISL-005 build s4 (2026-10-05): 12 of 25 closed — ISL-005 ✅ (script files: slice 6 the island landed, slice 4 export built, AC4 driven in the editor, AC2 in a visible window); ISL-020, ISL-006, ISL-013 now re-scope against shape 1. s15 (2026-10-04): 11 of 25 closed — ISL-021 ✅, ISL-016 ✅ and ISL-017 ✅ (AC3 ruled "build the cheap 9, drop 8" and built: console/network/other-origin reads and `reduced_motion`); ISL-017 ruling 2 built (the garden commits its kits' record, not the kits; AC2 + AC7 met); ISL-016 AC8 (four generators through the door). s14: 8 of 25 closed; ISL-021 all eleven verbs, AC6 + AC7 met (AC3's bar not met: 17 named clauses); ISL-017 ruling 2's record + resolver; `find_tools` reads a sentence's words; `render_report` names `drive_page`. s13: ISL-019 ✅; ISL-016/017/021 built. s12 (2026-10-03): 7 of 25 closed — ISL-015 ✅ (AC5: the stranger round, run twice: the first found two MCP door defects, both fixed, and a docs gap; the second deployed and drove 5/5 with sabotage arms red by name); ISL-019 AC7 ✅ (the garden drops its pins, 407 files re-baselined by their newline, 0 differ), AC6 run twice (the update route holds; agents rebuild by delete + create: a ruling). s11: 6 of 25 closed; four rulings in one round (ISL-007 AC6 "Warn if app translates"; ISL-015's three, as recommended), both BUILT: ISL-015 (the kit traps on the docs page and in the scaffold README, gated, the reload trap's sample run; AC5's stranger round owed) and ISL-007 AC6 (the `typed-word-not-translated` warning); ISL-019 AC7's newline byte measured (no ruling needed). s10: ISL-023 ✅. s9 (2026-10-03): 5 of 25 closed — ISL-003 ✅ ruled "Each list keeps its rows", built (Repeater + Static Data; doctrine) and driven deployed (6/6, control 3/3); ISL-007 AC7's catalog half ✅ (the add-on's nodes say what they do). Session 7 (2026-10-03): 4 of 25 closed (ISL-001, ISL-002, ISL-011, ISL-014); ISL-009's two rulings built and driven, and s7's AC7: the island's plot card scrolls itself and the owl row has names; only the export half is open (P18's pile); ISL-007 AC1 read (288 of 334 texts switch, 0 braces); **s8: ISL-007 built (the i18next add-on 1.1.0), AC2/AC3/AC5 driven; Array Filter "Is one of" built (a "Native nodes first" gap); the island rebuild scoped as P108 IW-010;** DEF038 attributed (not ISL-018; the gate's control arm fixed); ISL-019 built (AC6, AC7 open); ISL-005 researched and ruled "Native nodes first"; ISL-022 built (AC6 open); ISL-018 built (one case open); ISL-025 W1–W3, W13, W21 removed (§8).** **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
+**Status: 🟡 OPEN — s18 (2026-10-05): 13 of 25 closed — ISL-020 ✅ (ruled "Close it, files are the answer": the doctrine sends long code to a script file); rounds 6 and 7 ruled six questions (ISL-004 rulings 2–3, ISL-012 ruling 2, ISL-020, ISL-006, ISL-013); ISL-004 AC3 built after measuring Component Object's lifetime in a browser; ISL-012 AC4 built (the reader's refusal says why). ISL-005 build s4 (2026-10-05): 12 of 25 closed — ISL-005 ✅ (script files: slice 6 the island landed, slice 4 export built, AC4 driven in the editor, AC2 in a visible window); ISL-020, ISL-006, ISL-013 now re-scope against shape 1. s15 (2026-10-04): 11 of 25 closed — ISL-021 ✅, ISL-016 ✅ and ISL-017 ✅ (AC3 ruled "build the cheap 9, drop 8" and built: console/network/other-origin reads and `reduced_motion`); ISL-017 ruling 2 built (the garden commits its kits' record, not the kits; AC2 + AC7 met); ISL-016 AC8 (four generators through the door). s14: 8 of 25 closed; ISL-021 all eleven verbs, AC6 + AC7 met (AC3's bar not met: 17 named clauses); ISL-017 ruling 2's record + resolver; `find_tools` reads a sentence's words; `render_report` names `drive_page`. s13: ISL-019 ✅; ISL-016/017/021 built. s12 (2026-10-03): 7 of 25 closed — ISL-015 ✅ (AC5: the stranger round, run twice: the first found two MCP door defects, both fixed, and a docs gap; the second deployed and drove 5/5 with sabotage arms red by name); ISL-019 AC7 ✅ (the garden drops its pins, 407 files re-baselined by their newline, 0 differ), AC6 run twice (the update route holds; agents rebuild by delete + create: a ruling). s11: 6 of 25 closed; four rulings in one round (ISL-007 AC6 "Warn if app translates"; ISL-015's three, as recommended), both BUILT: ISL-015 (the kit traps on the docs page and in the scaffold README, gated, the reload trap's sample run; AC5's stranger round owed) and ISL-007 AC6 (the `typed-word-not-translated` warning); ISL-019 AC7's newline byte measured (no ruling needed). s10: ISL-023 ✅. s9 (2026-10-03): 5 of 25 closed — ISL-003 ✅ ruled "Each list keeps its rows", built (Repeater + Static Data; doctrine) and driven deployed (6/6, control 3/3); ISL-007 AC7's catalog half ✅ (the add-on's nodes say what they do). Session 7 (2026-10-03): 4 of 25 closed (ISL-001, ISL-002, ISL-011, ISL-014); ISL-009's two rulings built and driven, and s7's AC7: the island's plot card scrolls itself and the owl row has names; only the export half is open (P18's pile); ISL-007 AC1 read (288 of 334 texts switch, 0 braces); **s8: ISL-007 built (the i18next add-on 1.1.0), AC2/AC3/AC5 driven; Array Filter "Is one of" built (a "Native nodes first" gap); the island rebuild scoped as P108 IW-010;** DEF038 attributed (not ISL-018; the gate's control arm fixed); ISL-019 built (AC6, AC7 open); ISL-005 researched and ruled "Native nodes first"; ISL-022 built (AC6 open); ISL-018 built (one case open); ISL-025 W1–W3, W13, W21 removed (§8).** **Prefix: `ISL`.** Start with [NEXT-SESSION-PROMPT.md](NEXT-SESSION-PROMPT.md).
 
 > "Phase 108 has been a beast. I forgot to tell the model to record learnings about NodeGX during the push. I'm sure
 > there must be a tonne of stuff we can fix and improve in NodeGX and the way the MCP works. Can you do an audit and start
@@ -404,6 +404,44 @@ recommendation:**
   a `uses` list on the Function, `use()`/`exports`, browser + server render, cloud refused); **built by ISL-005** in that
   session, which records the ruling in ISL-005 §8.
 
+**Session 18 (2026-10-05), round 6 — three questions in one ask, populations measured first (each task's §8 s18):**
+
+- **ISL-004 ruling 2 — ✅ Ruled: Component Object, and investigate** (option (b), as recommended, with Richard's words added).
+  Asked as *"When someone builds a component that should remember its own value (a counter, an open/closed flag, a picked tab),
+  what should they use? Today a Variable is one value for the whole app, so two copies of the component share it. A Component
+  Object is a small store each copy gets for itself. The doctrine agents read already says to use a Component Object (or
+  States/Counter/Switch), one catalog example shows it, and 10 of 48 prefabs use it. No template does."* Options: Component
+  Object / Variable gets a Scope / a new 'Component State' node. Richard, verbatim: *"Component Object but from memory I'm not
+  sure it stores the value when unmounted and mounted again, so worth investigating. I like using Component Objects in my
+  components, and now that we upgraded them to allow selecting which Component Object a Parent Component Object node refers to
+  it's got much better"*. The investigation is ISL-004 §8 s18.
+- **ISL-004 ruling 3 (F05) — ✅ Ruled: "No, it's app logic"** (option (a), as recommended). Asked as *"Two things can write the
+  same Variable, for example a clock ticking and a page rebuilding. If the older write lands last, it wins, and a person sees a
+  robot walk back to where it was. Should NodeGX stop an older write from landing over a newer one? Keep When Leaving already
+  removes the island's case, because the page is no longer rebuilt."* AC5 stays a record.
+- **ISL-012 ruling 2 — ✅ Ruled: "No, say why instead"** (option (b), NOT the table's "yes": re-measured first). Asked with the
+  reader arm's reading: one node reading the library while the kit's file loads fails the WHOLE kit in the agent's reader, its
+  well-behaved nodes too (*"Cannot read properties of undefined (reading 'REVISION')"*), while the browser draws both; the 3 shipped
+  kits with dependencies read their library at mount and register in full. The reader keeps loading `main` only, and the refusal
+  says why.
+
+**Session 18 (2026-10-05), round 7 — the three tasks ISL-005 unblocked, re-scoped against shape 1 and measured first:**
+
+- **ISL-020 — ✅ Ruled: "Close it, files are the answer"** (as recommended). Asked as *"Since ISL-005, the island's engine lives
+  in 7 script files, and the agent's server has edit_script_file … What's left is a Function's own code: the garden's biggest is
+  31,745 characters, only 2 are over 20,000 … Is that worth a line-edit tool for a Function's own code too?"* Options: close it
+  (the doctrine says a script big enough to want a line edit belongs in a script file) / build `edit_node_text` too.
+- **ISL-006 — ✅ Ruled: "List adds, code still mines"** (ruling 1 (a), NOT the recommended (b)). Asked as *"Today a Function's
+  ports are found by reading its code for Inputs.x and Outputs.y, so a typo quietly makes a new port. A Function can also carry a
+  written list. 1,210 Functions: 35 have a written list, 4 build port names from data. What should the written list mean?"*
+  Options: exact if it has one / the list adds (with types) and the code still mines / leave it, fix the docs. Rulings 2–3 not
+  asked (§5's recommendations: no ports from data now; census before fixing the miner's quirks).
+- **ISL-013 — ✅ Ruled: "A kit says what it needs"** (ruling 1 (a), as recommended; the option carried ruling 2's (a): installing
+  one without the other is refused by name). Asked as *"The 3D garden kit copies the 2D kit's map-reading code, and also borrows it
+  at run time by walking an internal list of loaded kits — which works only because '3' sorts before 'k'. Only this one pair does
+  it. How should one kit reach another's code?"* Options: a `requires` field (load first, a public call, refuse when missing) /
+  document `__noodl_modules` / leave the copy.
+
 Each task's §5 has the full question, the options and the trade-offs. Ask in plain words, one decision
 per question, and only when the task is next to build. This table is the index, with the recommendation in brackets.
 
@@ -419,7 +457,7 @@ per question, and only when the task is next to build. This table is the index, 
 | ISL-009 | Where do `data-*` attributes go? Should every visual node get Scroll Into View? | inside ACC-006's accessibility group; yes |
 | ISL-010 | Does the backend or the page make the model call? Is a key optional for loopback? | backend, in the cloud node; optional for loopback only |
 | ISL-011 | Keep `defaultCss` inline and document it, or make it the lowest layer? Take P40's export half? | inline and documented; yes |
-| ISL-012 | ES-module dependencies, or a documented global-bundle recipe? Should the catalog reader load dependencies? | the recipe; yes |
+| ISL-012 | ES-module dependencies, or a documented global-bundle recipe? Should the catalog reader load dependencies? | the recipe; yes (ruled s17 "recipe now, loader later"; s18 "no, say why instead") |
 | ISL-013 | A manifest `requires` field, a shared node-less module, or document `__noodl_modules`? | `requires`, refusing when the kit is missing |
 | ISL-014 | For a missing reader: say so, build it on demand, or commit the bundle? | say so now, build on demand next, never commit |
 | ISL-015 | Where does the trap list live? | the docs page plus the scaffold README |

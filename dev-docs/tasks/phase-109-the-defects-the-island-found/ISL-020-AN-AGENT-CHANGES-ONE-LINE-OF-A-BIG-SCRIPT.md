@@ -1,6 +1,6 @@
 # ISL-020 — An agent changes one line of a big script
 
-**Status: 🔁 re-scoped s15 (2026-10-05) by Richard to a design question — how big scripts split into parts that share code (§8 s15); not started — scoped 2026-10-01 at `27d891bf3`.** **Re-scoped s8 (2026-10-03), against "Native nodes first":** the ruled rebuild ([IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md))
+**Status: ✅ CLOSED s18 (2026-10-05) — ruled "Close it, files are the answer": ISL-005's `edit_script_file` is the line edit; the authoring doctrine sends long or shared code to a script file (spec `isl020ScriptFileDoctrine.test.ts` + sabotage). No `edit_node_text`.** **Earlier status: 🔁 re-scoped s15 (2026-10-05) by Richard to a design question — how big scripts split into parts that share code (§8 s15); not started — scoped 2026-10-01 at `27d891bf3`.** **Re-scoped s8 (2026-10-03), against "Native nodes first":** the ruled rebuild ([IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md))
 takes the engine from 20 copies to about 7 (census estimate), so the "17 times over" case shrinks but does not vanish:
 the 29 script rows stay script, and any template with a big Function meets the read-all/send-all cost. The tool is
 still worth building; its fixture should be a big Function that survives the rebuild, not the engine copies. **Source:** [AUDIT F27](AUDIT-2026-10-01.md) · sized by
@@ -143,3 +143,23 @@ Functions, edit one and all change" is already a component placed many times —
 
 **✅ Ruled the same day: "ship shape 1"** (Richard, on a mockup, in session `opennoodl-8e`, which is building it as ISL-005; README §8 round 5). ISL-020's own edit tool is then a small-file edit — re-scope it once ISL-005 lands. ISL-005 (shared file, decided after native nodes), ISL-006 (ports from a shared file must not mint)
 and ISL-013 (a kit naming the kits it needs) hang on the same answer.
+
+### Session 18 (2026-10-05) — re-scoped against shape 1 (ISL-005 closed, `8292f1d55`)
+
+Re-measured on the checked-in garden after ISL-005's island slice (`948b92acd`):
+- **The 17-copy case is gone.** The engine is 7 script files in `templates/bot-garden/scripts/` (187,029 B: `engine.js`,
+  `fold.js`, `island.js`, `olive.js`, `requests.js`, `save.js`, `words.js`), and ISL-005 built **`edit_script_file`** in this
+  task's ruled shape (find-and-replace with the expected count, refused on 0 or too many; `noodl-mcp/src/tools/scriptTools.ts`,
+  deferred group). A one-line engine change is one call on one file.
+- **What is left:** 91 Functions hold 385,272 characters of `functionScript`; the largest are `Translate words` 31,745 and
+  `Island world` 30,387, then six between 12,563 and 14,814; **2 over 20,000, 0 over 50,000** (AC1 assumed copies over 100,000).
+  Changing one line in those still means `update_node` with the whole script.
+- **For a ruling (round 7):** close ISL-020 on `edit_script_file` (the doctrine says: a script big enough to want a line edit
+  belongs in a script file), or still build `edit_node_text` and the read elision for a Function's own text. AC1–AC7 are written
+  for the old case and are rewritten after that answer.
+- **Ruled round 7: "Close it, files are the answer"** (README §8). **Built:** the decomposition doctrine (`authoringDoctrine`)
+  gains *"Shared or long code is a script file"* — code two Functions need, or a Function body long enough that you would
+  change one line of it, goes in `scripts/<name>.js`, listed under `uses`, called as `Scripts.<name>`; `edit_script_file`
+  changes one line; a Function's own code is replaced whole. Spec `noodl-mcp/tests/isl020ScriptFileDoctrine.test.ts` (2/2):
+  the sentence on the text a real server sends, and every tool it names registered (none edits a Function's code by line).
+  **Sabotage:** the bullet cut → the doctrine row red (restored by `cp`, `cmp` clean). **Closed.**

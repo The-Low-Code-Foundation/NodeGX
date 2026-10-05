@@ -1,6 +1,6 @@
 # ISL-006 — A Function says what its ports are
 
-**Status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
+**Status: 🟢 ruled s18 (2026-10-05), not built — ruling 1 "List adds, code still mines" (the written list carries types and adds ports; `Outputs.x` in the code still mints); rulings 2–3 not asked. Census: 1,210 Functions, 35 with a list, 4 by variable.** **Earlier status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
 **Re-scoped s8 (2026-10-03), against "Native nodes first" and ISL-007:** its largest consumer goes. `Translate words`
 (696 outputs) is replaced by the i18next add-on (ISL-007, built s8) and deleted in [IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md)
 AC4. What is left is the general case: a Function whose outputs come from a list (`Outputs[key] = …`) mints none, and a
@@ -109,3 +109,14 @@ Constraints: one grammar, shared by the runtime, the door and the exporter (toda
 ## 8. Session log
 
 None yet.
+
+### Session 18 (2026-10-05) — re-scoped against shape 1 (ISL-005 closed, `8292f1d55`)
+
+- Shape 1 does not move this task: a script file never makes a port (ISL-005's rule), so a Function's ports still come from
+  its own text, and the question in §5 stands as written.
+- **Census, re-measured** (templates, library prefabs, library examples): **1,210 Functions; 35 carry a declared
+  `scriptInputs`/`scriptOutputs` list; 4 reach a port through a variable** (`Outputs[x]` / `Inputs[x]`): 2 in `planning`
+  (*"Is there anything to write?"*, *"What the project editor is showing"*) and the same 2 in `planning-demo`.
+- 🔴 The s8 re-scope's *"`Translate words` is deleted in IW-010 AC4"* has not happened yet: it is still in the garden, 31,745
+  characters of literal `Outputs.word = …` lines (literal, so the census above does not count it).
+- Rulings 1–3 not asked; ask them with these numbers.
