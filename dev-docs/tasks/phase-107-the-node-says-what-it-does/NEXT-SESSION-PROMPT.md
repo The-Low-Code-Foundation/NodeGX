@@ -111,6 +111,10 @@ browser turns its event loop between frames; a finger lifted off an UNMOUNTED el
 
 ## Before you start
 
+- **R11 (Richard, 2026-10-05) — keep React out of the spec where we can** (README §7): the spec is meant to outlive React. React's
+  mechanics (`setState` commit timing, `forceUpdate`, React's last render, effects) go in the runtime target and its face, not in a
+  spec's state or rules. A new spec states what the node does in renderer-neutral words; a behaviour that exists only because of
+  React is not something a future target should have to copy.
 - Shared checkout: pathspec commits through a temporary index (`GIT_INDEX_FILE=…; git read-tree HEAD; git add <mine>;
   commit-tree; update-ref <branch> NEW OLD`), then `git reset -q -- <mine>`. Never `git add -A`, never `git stash`; one heavy
   job at a time — `uptime` before any deep run. The `/next` state file belongs to another workstream — do not overwrite it.
