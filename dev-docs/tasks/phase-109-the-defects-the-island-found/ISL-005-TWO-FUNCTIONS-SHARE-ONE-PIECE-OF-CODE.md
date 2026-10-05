@@ -1,6 +1,6 @@
 # ISL-005 — Two Functions share one piece of code
 
-**Status:** 🟡 BUILDING — ruled 2026-10-05 (s1 of the build, session `opennoodl-8e`): **"ship it"**, on a mockup of shape 1 (script files in the project, a Uses list on the Function). Slice 1 built: the runtime (`scriptfiles.ts`, the Function's `uses`, `Scripts`), 24 tests. Earlier: ✅ ruled s5 (2026-10-02) "Native nodes first" — the island rebuild stays its own template task (P108 IW-010); this ruling decides the shared file "afterwards" for what is left. ✅ ruled s5 (2026-10-02): **"Native nodes first"** — the island is rebuilt toward native nodes and logic components as its own template task, the four blocking product gaps are fixed first, and the shared script file is decided afterwards for what is left (README §8 round 2; [census](ISL-005-CENSUS-2026-10-02.md)). §5 is not built now. Scoped 2026-10-01 at `27d891bf3`
+**Status:** 🟡 BUILDING — ruled 2026-10-05 (s1 of the build, session `opennoodl-8e`): **"ship it"**, on a mockup of shape 1 (script files in the project, a Uses list on the Function). **Built and committed: slices 1 (runtime), 2 (format + pipes), 3 (the door, AC8 ✅), 5 + 5b (the editor screens and the code editor, driven live in the editor 2026-10-05), 7 (docs + catalog, AC9 ✅).** Owed: slice 4 (export, AC7: P18's uncommitted pile holds `component.ts` / `emitApp.ts` / the ledger) and slice 6 (the island: AC2, AC3, AC5, AC6; `templates/bot-garden` and `cg007Look.ts` peer-dirty on 2026-10-05). See "Next" at the end of §8. Earlier: ✅ ruled s5 (2026-10-02) "Native nodes first" — the island rebuild stays its own template task (P108 IW-010); this ruling decides the shared file "afterwards" for what is left. ✅ ruled s5 (2026-10-02): **"Native nodes first"** — the island is rebuilt toward native nodes and logic components as its own template task, the four blocking product gaps are fixed first, and the shared script file is decided afterwards for what is left (README §8 round 2; [census](ISL-005-CENSUS-2026-10-02.md)). §5 is not built now. Scoped 2026-10-01 at `27d891bf3`
 **Source:** [audit F08](AUDIT-2026-10-01.md) (R-c as well) · first planned in [P105 CG-002 line 136](../phase-105-the-coding-garden/CG-002-THE-ENGINE.md) ("`ENGINE` is inlined into five scripts … Owner: NONE") · grown by every P106 and P108 lane since
 **Side:** product (runtime `Function` node, the editor's project files, the MCP door, `@nodegx/export`)
 
@@ -398,3 +398,15 @@ with two Functions on Home: `greet Olive` uses `engine/greet.js`, `greet Robot` 
   **greet, words**, then `greet.` offered **hello**; with the line finished the popout read **1 warning, on `totl`** (the
   known-firing control), none on any `Scripts`.
 - `.logs/dev.log`: no `renderer:exception` during the drive. Stack stopped with `dev:stop` (26 processes).
+
+**Next (build session 3), in order:**
+1. **Slice 6, the island (AC3, AC6, then AC2, AC5)** once `templates/bot-garden` and the generator files are not peer-dirty
+   (`git status --porcelain templates/bot-garden packages/noodl-mcp/tests/cg0*.ts`, and mtimes). Measured 2026-10-05: `ENGINE`
+   (`cg002Scripts.ts`, 1,165 lines, 81 KB as extracted) never names `Noodl`, `window` or `document`, so it can be a script file
+   as it is; it holds 18 `${…}` substitutions, read them first. The cheapest shape keeps each Function body unchanged: the
+   engine file ends `Object.assign(exports, { helperA, helperB, … })`, and each body starts `var { helperA, … } = Scripts.engine;`.
+   `SAVE_HELPERS` (pasted 23×) probably reaches `Noodl`, which a file cannot; measure before planning it. Trap §7: the
+   generator's own tests compile scripts with `new Function('Inputs','Outputs', script)`; give that harness `ScriptFiles`.
+2. **Slice 4, export (AC7)** when P18's pile on `component.ts` / `emitApp.ts` / `coverage-ledger.json` lands, or with the
+   temporary-index recipe if their hunks do not border ours.
+3. Not built from the slice-5 plan: nothing left; "autocomplete from exports" landed in 5b.
