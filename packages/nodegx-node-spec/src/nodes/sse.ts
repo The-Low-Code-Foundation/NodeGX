@@ -60,9 +60,8 @@
  *   - the EventSource transport's own behaviour (conn :265-373): no play has an `EventSource` — not played yet.
  *   - `_onNodeDeleted` (sse :721-729): no play deletes a node.
  *
- * ROW C57: Event Types and Method keep a value that is not text (`value || ''`, `value || 'GET'`), and Connect then calls
- * `.split` / `.toUpperCase` on it — a TypeError out of the Connect (or out of the frame end, or a reconnect timer). The spec
- * reads either as `String(value)`; the runtime's throw is a known row.
+ * ROW C57 (fixed in P109 ISL-026, ruled "Turn them into text"): Event Types and Method are read as `String(value)` on both
+ * targets; the runtime once kept a value that was not text and threw on Connect calling `.split` / `.toUpperCase` on it.
  */
 
 import { canonicalKey } from '../canonical';

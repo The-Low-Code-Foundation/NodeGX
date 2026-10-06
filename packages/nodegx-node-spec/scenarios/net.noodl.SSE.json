@@ -950,7 +950,7 @@
     "because": "parseSseChunk — whole events only; a trailing CR waits"
   },
   {
-    "name": "Event Types wired a number: read as text (C57 — the runtime throws at Connect)",
+    "name": "Event Types wired a number: read as text (C57)",
     "params": {
       "url": "https://api.example/stream",
       "eventTypes": 5
@@ -972,11 +972,10 @@
         }
       ]
     },
-    "row": "NSP-014 §6.41 C57",
-    "because": "sse :217-219 keeps `value || ''`; :626-631 calls .split"
+    "because": "P107-C57, ruled 2026-10-05 \"Turn them into text\", fixed in P109 ISL-026: the setter keeps `String(value)`; it once kept the number and Connect threw at .split"
   },
   {
-    "name": "Method wired a number: read as text (C57 — the runtime throws at Connect)",
+    "name": "Method wired a number: read as text (C57)",
     "params": {
       "url": "https://api.example/stream",
       "method": 5
@@ -998,8 +997,7 @@
         }
       ]
     },
-    "row": "NSP-014 §6.41 C57",
-    "because": "sse :172-174 keeps `value || 'GET'`; conn :419 calls .toUpperCase"
+    "because": "P107-C57 (ISL-026): the setter keeps `String(value)`; it once kept the number and Connect threw at .toUpperCase"
   },
   {
     "name": "Auto Connect then a URL that is not the first one, written twice: the stream opens at that URL",

@@ -169,8 +169,9 @@ const SSENode: NodeDefinitionOptions = {
       displayName: 'Method',
       description: 'HTTP method for the request; anything other than GET needs the Fetch transport',
       group: 'Request',
-      set(this: SseNodeInstance, value: string) {
-        internalOf(this).method = value || 'GET';
+      // P107-C57 (ISL-026, ruled "Turn them into text"): as URL does — a number kept as it came threw at `.toUpperCase()` on Connect
+      set(this: SseNodeInstance, value: unknown) {
+        internalOf(this).method = value ? String(value) : 'GET';
       }
     },
 
@@ -214,8 +215,9 @@ const SSENode: NodeDefinitionOptions = {
       group: 'Connection',
       tooltip:
         'Comma-separated named event types to subscribe to. Only needed for the EventSource transport, which delivers a named event only to a listener registered in advance; the Fetch transport delivers every event type.',
-      set(this: SseNodeInstance, value: string) {
-        internalOf(this).eventTypes = value || '';
+      // P107-C57 (ISL-026): as text — a number kept as it came threw at `.split(',')` on Connect
+      set(this: SseNodeInstance, value: unknown) {
+        internalOf(this).eventTypes = value ? String(value) : '';
       }
     },
 
