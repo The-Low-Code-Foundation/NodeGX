@@ -2408,6 +2408,14 @@ function createNodeFromReactComponent(def: ReactNodeDefinition): ReactNodeModule
           return;
         }
 
+        // P107-C62 (ISL-026, ruled "Remove the style"): null is empty, as undefined is — `typeof null` is
+        // 'object', so `.value` was read off it and the setter threw
+        if (value === null || value === undefined) {
+          this.removeStyle([styleTargetName], input.styleTag);
+          if (input.onChange) input.onChange.call(this, value);
+          return;
+        }
+
         if (typeof value !== 'object' && type.defaultUnit) {
           value = { value, unit: type.defaultUnit };
         }

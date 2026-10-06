@@ -564,6 +564,16 @@ export default {
     });
   },
   addTransformInputs(definition: ReactNodeDefinition) {
+    /**
+     * P107-C63 (ISL-026, ruled "Use the default"): an empty Placement value — `undefined`, `null`, or a unit
+     * object holding either — stores nothing, so `updateTransform` leaves that part out (position and rotation
+     * 0) and `updateTransformOrigin` uses 50%. `value.value` on an empty value threw and the update died.
+     */
+    const placementOf = (value: { value?: unknown; unit?: string } | null | undefined): string | undefined =>
+      value === undefined || value === null || value.value === undefined || value.value === null
+        ? undefined
+        : value.value + value.unit;
+
     addInputs(definition, {
       transformX: {
         group: 'Placement',
@@ -579,7 +589,7 @@ export default {
         },
         set(value) {
           if (!this.transforms) this.transforms = {};
-          this.transforms.x = value.value + value.unit;
+          this.transforms.x = placementOf(value);
           this.updateTransform();
         }
       },
@@ -597,7 +607,7 @@ export default {
         },
         set(value) {
           if (!this.transforms) this.transforms = {};
-          this.transforms.y = value.value + value.unit;
+          this.transforms.y = placementOf(value);
           this.updateTransform();
         }
       },
@@ -615,7 +625,7 @@ export default {
         },
         set(value) {
           if (!this.transforms) this.transforms = {};
-          this.transforms.rotation = value.value + value.unit;
+          this.transforms.rotation = placementOf(value);
           this.updateTransform();
         }
       },
@@ -648,7 +658,7 @@ export default {
         },
         default: '50',
         set(value) {
-          this.transformOriginX = value.value + value.unit;
+          this.transformOriginX = placementOf(value);
           this.updateTransformOrigin();
         }
       },
@@ -665,7 +675,7 @@ export default {
         },
         default: '50',
         set(value) {
-          this.transformOriginY = value.value + value.unit;
+          this.transformOriginY = placementOf(value);
           this.updateTransformOrigin();
         }
       }
@@ -2434,7 +2444,9 @@ export default {
         description:
           'Typeface to render the text in, either a web-safe family name or a font file added to the project',
         set(value) {
-          if (value) {
+          // P107-C61 (ISL-026, ruled "Treat it as no family"): a value that is not text — a wired number, an
+          // object — falls back to the default font; `.split` on it threw and the rest of the update died
+          if (value && typeof value === 'string') {
             let family = value;
             if (family.split('.').length > 1) {
               FontLoader.instance.loadFont(family);

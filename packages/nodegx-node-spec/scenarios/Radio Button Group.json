@@ -525,9 +525,8 @@
     ]
   },
   {
-    "name": "Margin Top wired null: the interpreter stores it and nothing moves on the wire — the runtime's generated setter reads `.value` of null and throws",
-    "because": "react-component-node.ts the `inputCss` units setter (`typeof value !== 'object'` lets null through, then `value.value`); every node with margins — NSP-016 §7.2 row C62",
-    "row": "NSP-016 §6 C62",
+    "name": "Margin Top wired null: the style is removed, as for undefined — nothing moves on the wire and the node keeps working",
+    "because": "P107-C62, ruled 2026-10-05 \"Remove the style\", fixed in P109 ISL-026: the `inputCss` units setter treats null as empty; it once read `.value` of null and threw (react-component-node.ts, every node with margins)",
     "steps": [
       "settle",
       {
@@ -538,9 +537,8 @@
     ]
   },
   {
-    "name": "Pos X wired undefined: the interpreter stores it and nothing moves on the wire — the runtime's setter reads `.value` of undefined and throws",
-    "because": "node-shared-port-definitions.ts the Placement setters read `value.value`; every node with Placement inputs — NSP-016 §7.2 row C63",
-    "row": "NSP-016 §6 C63",
+    "name": "Pos X wired undefined: back to 0 — nothing moves on the wire and the node keeps working",
+    "because": "P107-C63, ruled 2026-10-05 \"Use the default\", fixed in P109 ISL-026: an empty Placement value stores nothing (position and rotation 0, origin 50%); the setters once read `.value` of it and threw (node-shared-port-definitions.ts, every node with Placement inputs)",
     "steps": [
       "settle",
       {

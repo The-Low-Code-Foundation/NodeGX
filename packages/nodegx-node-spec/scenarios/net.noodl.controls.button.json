@@ -1692,9 +1692,8 @@
     ]
   },
   {
-    "name": "Font Family wired a number: the interpreter stores it and nothing moves on the wire — the runtime's setter throws calling `.split` on it",
-    "because": "node-shared-port-definitions.ts :2437-2442 `family.split('.')` on whatever arrived; every node with a text style — NSP-016 §7.2 row C61",
-    "row": "NSP-016 §6 C61",
+    "name": "Font Family wired a number: treated as no family — nothing moves on the wire and the node keeps working",
+    "because": "P107-C61, ruled 2026-10-05 \"Treat it as no family\", fixed in P109 ISL-026: only text is a family; the setter once threw calling `.split` on anything else (node-shared-port-definitions.ts, every node with a text style)",
     "steps": [
       "settle",
       {

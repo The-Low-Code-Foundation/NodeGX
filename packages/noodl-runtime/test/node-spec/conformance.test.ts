@@ -54,8 +54,6 @@ function copyOfCounterWith(find: string, replace: string): NodeModule {
 const isSet = (e: TraceEvent, port: string, bad: (value: unknown, present: boolean) => boolean) =>
   e.t === 'set' && e.port === port && bad((e as { value?: unknown }).value, 'value' in e);
 
-const isNull = (v: unknown, present: boolean) => present && v === null;
-
 /**
  * NSP-011 §6 C6 / R7 — node.ts `setInputValue` (:410-420) merges a later value into a `{ value,
  * unit }` object the port once held. Narrow: a unit object set on the port, then a later set on
@@ -216,32 +214,6 @@ const nullSuccessBody = (d: Divergence) => {
   });
 };
 
-/**
- * NSP-016 §6 C61 / C62 / C63 — three setters every VISUAL node shares throw on a value a wire can deliver, and the
- * runtime target dies at that `set` (or at `mount`, when it is a parameter — then the difference sits at 0):
- * C61 Font Family's `.split` on a truthy non-string (node-shared-port-definitions.ts :2439); C62 a units-typed CSS
- * input written `null` — `typeof null === 'object'` and `.value` is read (react-component-node.ts :2368); C63 a
- * Placement input written `undefined` — `value.value + value.unit` (node-shared-port-definitions.ts :582, :600,
- * :618) and the two origins' `.value`. Narrow: the throw's own message, the named ports, the value's shape, and the
- * difference no later than the step after the bad set.
- */
-const throwsOnSet = (ports: readonly string[] | ((port: string) => boolean), values: (v: unknown, present: boolean) => boolean, message: RegExp) => (d: Divergence) => {
-  if (d.difference.threw === undefined || !message.test(d.difference.threw)) return false;
-  const named = typeof ports === 'function' ? ports : (p: string) => ports.includes(p);
-  // the bad set is the one the throw followed — not the first such set: a null on a units port that does NOT throw
-  // (Icon Size, Icon Spacing: `inputProps`, not `inputCss`) may come earlier in the same sequence (the deep run's two)
-  // a throw inside `mount` leaves no trace (index 0): any PARAMETER set qualifies (the sets before the first other event)
-  const atMount = d.difference.index === 0;
-  return d.reference.some(
-    (e, i) =>
-      e.t === 'set' && named(e.port) && isSet(e, e.port, values) && (atMount ? d.reference.slice(0, i).every((x) => x.t === 'set') : i <= d.difference.index && d.difference.index <= i + 1)
-  );
-};
-const truthyNonString = (v: unknown, present: boolean) => present && !!v && typeof v !== 'string';
-const isUndefinedOrNull = (v: unknown, present: boolean) => !present || v === null;
-/** A units-typed `inputCss` port: the shared ones by name, with a styleTag prefix (Checkbox's `labelfontSize`), and a control's own box (`width` / `height`). */
-const UNIT_CSS_NAMES = ['fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'marginBottom', 'marginLeft', 'marginRight', 'marginTop', 'paddingBottom', 'paddingLeft', 'paddingRight', 'paddingTop', 'maxHeight', 'maxWidth', 'minHeight', 'minWidth', 'borderWidth', 'borderTopWidth', 'borderBottomWidth', 'borderLeftWidth', 'borderRightWidth', 'borderRadius', 'borderTopLeftRadius', 'borderTopRightRadius', 'borderBottomLeftRadius', 'borderBottomRightRadius', 'iconSize', 'iconSpacing', 'labelSpacing', 'width', 'height'] as const;
-const unitCssPort = (port: string) => UNIT_CSS_NAMES.some((n) => port === n || port.endsWith(n.charAt(0).toUpperCase() + n.slice(1)) || port.endsWith(n));
 /**
  * NSP-016 §6 C65 — a Checkbox's Label wired an object or an array is rendered as it is (Checkbox.tsx :205-207) and React
  * throws at the next paint (a settle or an act). Narrow: React's own message, and a `set` of `label` to an object or an
@@ -611,19 +583,8 @@ const buttonPickWrittenBack = (d: Divergence) => {
   return false;
 };
 
-const VISUAL_ROWS: KnownRow[] = [
-  { row: 'NSP-016 §6 C61 — Font Family wired a truthy value that is not text: the setter throws calling `.split` on it', matches: throwsOnSet((p) => p.endsWith('fontFamily'), truthyNonString, /family\.split is not a function/) },
-  { row: 'NSP-016 §6 C62 — a units-typed style input wired null: the generated setter reads `.value` of null and throws', matches: throwsOnSet(unitCssPort, isNull, /Cannot read properties of null \(reading 'value'\)/) },
-  // s41 — and null: node.ts :416 merges a bare value into the held unit object only while it HAS a `unit`; after an object wired in
-  // without one (`{}`), a null reaches the setter raw (the Icon's 10,000)
-  { row: 'NSP-016 §6 C63 — a Placement input wired undefined: `value.value` throws', matches: throwsOnSet(['transformX', 'transformY', 'transformRotation', 'transformOriginX', 'transformOriginY'], isUndefinedOrNull, /Cannot read properties of (undefined|null) \(reading 'value'\)/) }
-];
-
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
-  // NSP-016 s37 — the visual nodes share three throwing setters (VISUAL_ROWS)
-  'net.noodl.controls.button': VISUAL_ROWS,
   'net.noodl.controls.textinput': [
-    ...VISUAL_ROWS,
     // s38 — C65's second instance: TextInput.tsx :274 renders `{props.label}` raw too
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
     // NSP-023 (R12) — the Text Input v2 states the intent; what React's drawing makes the runtime do instead
@@ -635,7 +596,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   // s39 — the Dropdown: C65's third instance (Select.tsx :245 renders `{props.label}` raw), and two of its own
   'net.noodl.controls.options': [
-    ...VISUAL_ROWS,
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
     { row: 'NSP-016 §6 C65 — a Placeholder wired an object or an array, with nothing selected: React throws rendering it at the next paint', matches: objectPlaceholder },
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the dropdown on the page', matches: lostRootAfterLabelOff },
@@ -647,15 +607,11 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   // s41 — the Slider: no label and no text style, so two of the three throwing setters (the Placement and units-typed style inputs)
   'net.noodl.controls.range': [
-    ...VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
     { row: 'NSP-016 §6 D36 — Changed fires with nobody sliding (a graph Value, a clamping Min or Max, the mount), and a remount takes the author\'s Value back', matches: changedWithNobodySliding },
     { row: 'NSP-016 §6 C73 — a graph Value equal to the last the author wrote, after a slide, or a second NaN, is dropped: the handle stays', matches: graphValueDropped }
   ],
-  // s41 — the Icon: no text style either — the Placement and units-typed style setters
-  'net.noodl.visual.icon': VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
   // s42 — the Radio Button: the Checkbox's label, so the Checkbox's C65 and C66 beside the three setters
   'net.noodl.controls.radiobutton': [
-    ...VISUAL_ROWS,
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the button on the page', matches: lostRootAfterLabelOff },
     // NSP-023 step 5 (v2) — what React's drawing makes the runtime do instead of what the spec says
@@ -665,14 +621,12 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   // s42 — the Radio Button Group: no text style either — the Placement and units-typed style setters
   'Radio Button Group': [
-    ...VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
     // NSP-023 step 5 (v2) — the buttons show what the Value says; what the component's copy of the selection makes the runtime do instead
     { row: 'NSP-016 §6 C76 — a Value written back in the frame of a pick leaves the picked button selected: picking it again raises nothing', matches: groupPickWrittenBack }
   ],
   // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
-  Text: [...VISUAL_ROWS, { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }],
+  Text: [{ row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }],
   'net.noodl.controls.checkbox': [
-    ...VISUAL_ROWS,
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the box on the page', matches: lostRootAfterLabelOff },
     { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick },
