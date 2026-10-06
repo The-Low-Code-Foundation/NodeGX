@@ -1,12 +1,15 @@
 ---
 id: P107-C40
 title: A live Query Records with a Limit drops the wrong record when a new one arrives, unless it is sorted descending
-status: scheduled
+status: fixed
+commit: 6593e7deb
 phase: P109
 task: ISL-029
 severity: high
 area: runtime / Query Records (`DbCollection2`) — keeping its rows live (`cloudStoreEvents`)
 found: P107 (the node says what it does) s24, 2026-10-02
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/DbCollection2.json "Limit under an ASCENDING sort drops the record that sorts LAST: a new record that sorts first stays and pushes the last out; one that sorts last is dropped again at once (v4, C40)" (and "Limit with NO sort: … asks the backend again …")
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.10 (row C40) — two hand scenarios in scenarios/DbCollection2.json, both played on the runtime
 ---
 
@@ -33,3 +36,5 @@ the next query (a re-query, as a search already does). A behaviour change; ships
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; the spec states it as it is.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Drop the last; re-query if unsorted".** Under any sort the record that sorts last is dropped, so the list matches what the backend would return. With no sort the node fetches the list again, because only the backend knows its order. A small change, plus one extra request in the unsorted case. The question as asked: *"Should a limited live list drop the record that sorts last, as the backend would?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 6593e7deb (P109 ISL-029, 2026-10-06), as ruled.**

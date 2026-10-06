@@ -1,12 +1,15 @@
 ---
 id: P107-C35
 title: An access rule set to Role with no Role named writes the ACL key `role:undefined`
-status: scheduled
+status: fixed
+commit: 8ec177377
 phase: P109
 task: ISL-029
 severity: low
 area: runtime / Record family — Create / Update Record, `addAccessControl` `_getACL`
 found: P107 (the node says what it does) s22, 2026-10-02
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/SetDbModelProperties.json "a Role rule naming no role refuses the save: the not-sendable sentence, nothing written or sent; named, the save goes out with it (v3, C35)" (and NewDbModelProperties.json "access rules: … (v3, C35)")
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.5 (row C35); scenario `NewDbModelProperties.json` "a Role rule with no Role names `role:undefined`"
 ---
 
@@ -31,3 +34,5 @@ a role literally called 'undefined' — nobody can read it."*
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Refuse the save and say why".** The node fires Failure with a sentence saying the Role rule has no role named. Nothing is saved. The author finds the slip at once. A modest change, and an app with this slip stops saving until it is fixed. The question as asked: *"What should happen when a Role access rule has no role named?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 8ec177377 (P109 ISL-029, 2026-10-06), as ruled.**

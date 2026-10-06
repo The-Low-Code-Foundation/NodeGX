@@ -1,6 +1,6 @@
 # ISL-029 — Records and queries say what really happened
 
-**Status: 🟡 s23 (2026-10-06): 6 of 12 fixed — C43 (`83908a71e`), D22 (`1b367e1fa`), C36 (`011f0a9bd`), C38 + C39 (`724db53e7`), C42 (`8d3ebc83f`); open: C40, C41, C34, C33, C35, D24 (§9). ✅ AC2: all 12 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 12 bugs from
+**Status: 🟡 s23 (2026-10-06): 11 of 12 fixed — C43 (`83908a71e`), D22 (`1b367e1fa`), C36 (`011f0a9bd`), C38 + C39 (`724db53e7`), C42 (`8d3ebc83f`), C40 + C41 (`6593e7deb`), C34 (`8a1afd591`), C33 (`5286345e8`), C35 (`8ec177377`); open: D24, whose ruling asks for a probe on a real NodeGX backend first (§9). ✅ AC2: all 12 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 12 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 4 high · 4 medium · 4 low, **12 awaiting a ruling**. **Side:** runtime (Record family, Query Records `DbCollection2`, Filter Records `FilterDBModels`), backend contract
 
 ## 1. The person sentence
@@ -96,10 +96,11 @@ ruling is still this task's work: the description changes, the node does not.
 | P107-D22 | Say 'Missing Id.' | yes | Fetch uses the same test for an empty Id that the rest of the node uses. No request goes out and the node's own sentence shows. A one-line change. |
 | P107-D24 | Ask the record's own backend | yes | The rules see the person who really logged in. On Directus and PocketBase the warning appears again. On a NodeGX backend, if the mismatch is real there, Owner rules start working. A modest change to how every access rule finds the user, and the NodeGX case should be checked on a real backend first. |
 
-## 9. Session 23 (2026-10-06) — six rows
+## 9. Session 23 (2026-10-06) — eleven rows
 
-AC1 for these six: re-measured at HEAD before each fix, and each still fired (C43 and C36 were known rows; D22's and
-C42's scenarios modelled the runtime; C38 and C39 are outside the spec and were red in a new runtime test first).
+AC1: each row re-measured at HEAD before its fix, and every one still fired (C43 and C36 were known rows; D22, C42,
+C40, C41, C34 and C35's scenarios modelled the runtime; C38, C39 and C33 sit outside the spec world and were red in new
+runtime tests first).
 
 | bug | commit | what changed | regression |
 |---|---|---|---|
@@ -108,6 +109,16 @@ C42's scenarios modelled the runtime; C38 and C39 are outside the spec and were 
 | C36 | `011f0a9bd` | Delete Record takes the record at the call; known row dropped | the C36 scenario; control red |
 | C38, C39 | `724db53e7` | no saved script runs the starter script; a parse error or a throw fails the node and asks nothing | `test/nodes/isl-029-query-records-filter-script.test.ts`; red on the 3 defect rows before |
 | C42 | `8d3ebc83f` | with no Backend written Filter Records binds the project's backend's store (creation and each run); Filter Records v3 | the C42 hand and graph scenarios + 2 new; controls red |
+| C40, C41 | `6593e7deb` | over Limit the record that sorts last goes (unsorted: query again); a saved member moves to its sorted place; Query Records v4 | 3 scenarios; control red on exactly the 3 |
+| C34 | `8a1afd591` | Update Record resolves the backend before writing, and puts the write back on ANY failure; Update Record v2 | 2 scenarios (+1 renamed); control red on the 3 |
+| C33 | `5286345e8` | the Parse wire refuses a request with no address at the moment it is made, with the ruled sentence | `test/nodes/isl-029-no-backend-configured.test.ts`; red before, control (a later endpoint) green |
+| C35 | `8ec177377` | `_aclRefusal`: a Role rule naming no role refuses Create and Update Record before anything goes; Create v3, Update v3 | 2 scenarios (1 new); control red on both |
+
+**D24 is not built.** Its ruling ("Ask the record's own backend") says the NodeGX case should be checked on a real backend
+first: does a `nodegx` entry under `backendServices` with no `cloudservices` endpoint (the Parse wire, where `data.acl` IS
+supported) keep its session where `CloudStore.instance` looks? If not, Owner rules there are silently dropped today — a
+security row. Probe that first (a local `nodegx-backend`, a Log In, a Create Record with an Owner rule, read the call's
+`acl`), then build the ruling: the access rules read the signed-in user from the record's OWN backend.
 
 **What the plan did not know.**
 - **C39 also closes FLD-008's route.** FLD-008's test rebuilds the node before FLD-008 to show the old widening; the throw
@@ -116,16 +127,20 @@ C42's scenarios modelled the runtime; C38 and C39 are outside the spec and were 
   (`{ bound: 'main', picked: true }`). With an unwritten Backend now following the project, only a box written AFTER
   Backend named the other backend, with a save on ONE backend, tells them apart. Two saves on two backends did not:
   both arms re-ran once and read the same global registry.
-- **A scenario's NAME can go false while its trace still passes:** "a filter parameter's box written with no Backend
-  held … a save is still not heard" was true only of v2; renamed to what v3 shows.
+- **A scenario's NAME can go false while its trace still passes:** three did here ("… a save is still not heard" for C42,
+  "… nothing to put back" for C34, the access-rules one for C35); each renamed to what the new version shows.
+- **Old tests pinned the defects:** `query-records-empty-sort.test.ts` (C40's unsorted guess), `cloudstore-files.test.ts`
+  (C33's `undefined/files/…` address), and two stubs lacked what a fix now reads (`nda-004`'s CloudStore without
+  `forBackend`, the routing test's record without `get`). Each updated in its fix's commit, with a comment.
+- **C34 and C33 meet:** with no backend configured, Update Record now writes nothing at all (C34 resolves the backend
+  first), and if the address is missing at the call the wire refuses (C33) and the write is put back.
 - **The conformance test file has another session's open edit** (P107's C79 predicate, s50). Both known-row removals
   (C43, C36) were committed as HEAD's file minus those lines, never the working copy.
 
-**Readings (2026-10-06):** each fix at seeds 20732 and 13 where its spec changed, 0 divergences, every mutant killed
-(Filter Records 157 / 157; Record 145 / 147 and 133 / 135, the two declared equivalents; Delete Record 34 / 34; Query
-Records 1176 / 1178 at 20732, declared equivalents). Runtime graph 87 / 87; spec records batch, catalog parity, graph,
-world (and schema) 521–556; runtime record corpus 77 / 77 and 92 / 92; Filter Records corpus 29 / 29; runtime and spec tsc 0.
+**Readings (2026-10-06):** each fix at seeds 20732 and 13 where its spec changed, 0 divergences, every mutant killed but
+the declared equivalents (Filter Records 157 / 157; Record 145 / 147 and 133 / 135; Delete Record 34 / 34; Query Records
+1176 / 1178 and 1131 / 1133; Update Record 78 / 78; Create Record 40 / 40). Runtime jest without the conformance file
+3167 passed, 0 failed (after C33); viewer 1772 / 1772 (after C33); runtime graph 87 / 87; spec records batch, catalog parity, graph,
+world, schema 556 / 556; runtime and spec tsc 0. `bugs.js check`: 5 problems, none in P109's rows.
 
-**Next here:** C40 + C41 (a live query with a Limit, and a saved record's place), then C34, C33, C35; D24 last (its ruling
-asks for the NodeGX case to be checked on a real backend first).
-
+**Owed by P18 (the export), not checked:** whether the exported app has any of these eleven.

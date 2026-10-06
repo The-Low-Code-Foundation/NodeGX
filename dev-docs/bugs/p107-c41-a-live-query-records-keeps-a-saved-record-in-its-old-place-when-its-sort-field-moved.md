@@ -1,12 +1,15 @@
 ---
 id: P107-C41
 title: A live Query Records keeps a record in its old place when another node saves it with a different sort value
-status: scheduled
+status: fixed
+commit: 6593e7deb
 phase: P109
 task: ISL-029
 severity: medium
 area: runtime / Query Records (`DbCollection2`) — keeping its rows live (`cloudStoreEvents`)
 found: P107 (the node says what it does) s24, 2026-10-02
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/DbCollection2.json "a member whose sort key moved moves to its new place: a save that still matches re-sorts Items (v4, C41)"
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.10 (row C41) — the hand scenario "a member whose sort key moved keeps its place", played on the runtime
 ---
 
@@ -29,3 +32,5 @@ list instead of moving to its new place, until the page reloads the list."*
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; the spec states it as it is.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Move it to its new place".** On a save, the record is taken out and put back where its new value sorts. A small change. People see the item jump to its right place, which is what they expect. The question as asked: *"Should a live list move a saved record to its new sorted place?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 6593e7deb (P109 ISL-029, 2026-10-06), as ruled.**
