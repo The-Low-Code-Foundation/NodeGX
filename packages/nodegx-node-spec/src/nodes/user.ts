@@ -13,9 +13,10 @@
  * record of its `objectId`, which the node hears itself when it is already bound to that record (:103-112 — written here
  * beside the write, registry.ts) — and binds that record; no session, no backend: nothing bound. BINDING (`setUserModel`
  * :353-379) moves the subscription when the record differs, then re-sends Id, Authenticated, Email, Username and Roles,
- * and every property output for a key the record holds. ⚠️ A session that ENDS binds nothing, and nothing is sent for
- * what went: Id, Email, Username and the properties read `undefined`, which is never sent (CONTRACT C3) — every wire
- * from them keeps the user who just left; only Authenticated moves (row C47).
+ * and every property output for a key the record holds. A session that ENDS binds nothing, and (v4, row C47 ruled "Blank
+ * text, empty for others") Id, Email and Username read blank text and Roles `null`, and every property the one who left
+ * had is re-sent as `null` — so no wire keeps them. v3 read `undefined`, which is never sent (CONTRACT C3): every wire kept
+ * the user who had just left, and only Authenticated moved.
  *
  * MOUNT (`initialize` :101-149): the node reaches the service (`forScope`, :114 — the first reach in a play makes it, and
  * its start-up check, world.ts AUTH), reads the session, then listens to the four session events: `loggedIn` (read, then
@@ -131,14 +132,17 @@ function currentUser(st: UserState, w: WorldView, on: boolean, r: Reaction): str
 
 /** :353-379 setUserModel — move the subscription when the record differs; re-send the five; every property the record holds. */
 function setUserModel(st: UserState, w: WorldView, id: string | undefined): void {
+  const previous = st.bound;
   if (st.bound !== id) {
     if (st.bound !== undefined) w.unwatch({ model: st.bound }); // :358-360
     st.bound = id;
     if (id !== undefined) w.watch({ model: id }); // :363
   }
   for (const port of ['id', 'authenticated', 'email', 'username', 'roles']) w.send(port, st); // :365-372
-  if (id === undefined) return; // :375
-  for (const key of Object.keys(w.registry.model(id).data)) if (isField(key)) w.send('prop-' + key, st); // :376-378
+  // :376-378 — every property the record holds; v4 (C47): when the session ENDS, the properties of the one who left, empty
+  const source = id !== undefined ? id : previous;
+  if (source === undefined) return;
+  for (const key of Object.keys(w.registry.model(source).data)) if (isField(key)) w.send('prop-' + key, st);
 }
 
 /** Read and bind — what every path that re-reads the session does (`setUserModel(this.currentUserModel())`). */
@@ -153,7 +157,7 @@ function propertyOutput(p: string): OutputDecl<UserState> {
     displayName: p,
     group: 'Properties',
     description: 'The ' + p + ' property of the signed-in user',
-    from: (s, w) => (s.bound !== undefined ? w.registry.model(s.bound).get(p) : undefined)
+    from: (s, w) => (s.bound !== undefined ? w.registry.model(s.bound).get(p) : null) // v4, C47: empty while nobody is signed in
   };
 }
 
@@ -191,7 +195,9 @@ export const UserNode = defineNode({
   // same roles pulses no Changed. v1 wrote the new array every read, and the record store's `!==` called it changed.
   // v3 (P109 ISL-030, rows C45 + C46 ruled "Stay signed in, say nothing" / "Fire it once"): the start-up check's failure is the
   // adapter's alone — a rejected session pulses Session Lost once; a backend that is down says nothing and keeps the person.
-  version: 3,
+  // v4 (P109 ISL-030, row C47 ruled "Blank text, empty for others"): nobody signed in reads blank Id / Email / Username, `null`
+  // Roles and properties — sent, so a wire lets go; v3 read `undefined`, never sent, and kept the person who left.
+  version: 4,
   source: 'packages/noodl-runtime/src/nodes/std-library/user/user.ts; noodl-viewer-react/.../user/userservice.ts; RestAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
   worldPool: { backends: BACKENDS },
@@ -233,7 +239,7 @@ export const UserNode = defineNode({
 
   outputs: {
     // :160-168
-    id: { type: 'string', displayName: 'Id', group: 'General', description: 'Id of the signed-in user record; empty while nobody is signed in', from: (s) => s.bound },
+    id: { type: 'string', displayName: 'Id', group: 'General', description: 'Id of the signed-in user record; empty while nobody is signed in', from: (s) => (s.bound !== undefined ? s.bound : '') }, // v4, C47: blank
     // :169-174
     fetched: { type: 'signal', displayName: 'Fetched', group: 'Events', description: 'Fires once the user record has been re-read and the outputs below are up to date' },
     // :175-180
@@ -249,7 +255,7 @@ export const UserNode = defineNode({
         'Roles the signed-in user is in, resolved by the server on each session read; empty while nobody is ' +
         'signed in, and not set on backends that do not track roles',
       from: (s, w) => {
-        if (s.bound === undefined) return undefined;
+        if (s.bound === undefined) return null; // v4, C47: sent, so a wire lets go — not `[]`, which is "in no roles"
         const roles = w.registry.model(s.bound).get('roles');
         return Array.isArray(roles) ? roles : undefined;
       }
@@ -260,7 +266,7 @@ export const UserNode = defineNode({
       displayName: 'Username',
       group: 'General',
       description: 'Username of the signed-in user; empty while nobody is signed in',
-      from: (s, w) => (s.bound !== undefined ? w.registry.model(s.bound).get('username') : undefined)
+      from: (s, w) => (s.bound !== undefined ? w.registry.model(s.bound).get('username') : '') // v4, C47
     },
     // :271-279
     email: {
@@ -268,7 +274,7 @@ export const UserNode = defineNode({
       displayName: 'Email',
       group: 'General',
       description: 'Email address of the signed-in user; empty while nobody is signed in',
-      from: (s, w) => (s.bound !== undefined ? w.registry.model(s.bound).get('email') : undefined)
+      from: (s, w) => (s.bound !== undefined ? w.registry.model(s.bound).get('email') : '') // v4, C47
     },
     // :280-288
     authenticated: {

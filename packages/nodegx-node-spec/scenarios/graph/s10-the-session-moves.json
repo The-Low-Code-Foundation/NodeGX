@@ -122,6 +122,42 @@
         "subject": "u"
       },
       {
+        "t": "value",
+        "port": "email",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "roles",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "",
+        "subject": "u"
+      },
+      {
         "t": "in",
         "port": "login",
         "subject": "li"
@@ -603,12 +639,12 @@
     ]
   },
   {
-    "name": "Log Out: Done, the User pulses Logged Out and Authenticated goes false — and Id, Email and the properties keep the person who left (row C47)",
+    "name": "Log Out: Done, the User pulses Logged Out and Authenticated goes false — and Id and Email go blank, the properties empty (row C47, v4)",
     "clauses": [
       "S1",
       "N"
     ],
-    "because": "NSP-014 s27. logout.ts :110-113 → RestAuthAdapter.ts :1064-1083 (clearSession, success, loggedOut); user.ts :140-143 (loggedOut: read, then Logged Out) → setUserModel(undefined) :353-375: undefined is never sent (CONTRACT C3) — C47's evidence beside the Authenticated that does move",
+    "because": "NSP-014 s27. logout.ts :110-113 → RestAuthAdapter.ts :1064-1083 (clearSession, success, loggedOut); user.ts :140-143 (loggedOut: read, then Logged Out) → setUserModel(undefined): blank Id / Email, and the properties of the one who left re-sent empty (P109 ISL-030, P107-C47 ruled \"Blank text, empty for others\"; v3 sent nothing for them)",
     "nodes": {
       "lo": {
         "type": "net.noodl.user.LogOut",
@@ -664,19 +700,19 @@
         "at": 2,
         "subject": "u",
         "port": "id",
-        "absent": true
+        "value": ""
       },
       {
         "at": 2,
         "subject": "u",
         "port": "email",
-        "absent": true
+        "value": ""
       },
       {
         "at": 2,
         "subject": "u",
         "port": "prop-nick",
-        "absent": true
+        "value": null
       }
     ],
     "world": {
@@ -781,6 +817,42 @@
         "t": "value",
         "port": "authenticated",
         "value": false,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "email",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "roles",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "",
         "subject": "u"
       },
       {
@@ -945,6 +1017,42 @@
         "t": "value",
         "port": "authenticated",
         "value": false,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "email",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "roles",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "",
         "subject": "u"
       },
       {
@@ -1121,6 +1229,42 @@
         "t": "value",
         "port": "authenticated",
         "value": false,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "email",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "",
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-n",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "prop-nick",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "roles",
+        "value": null,
+        "subject": "u"
+      },
+      {
+        "t": "value",
+        "port": "username",
+        "value": "",
         "subject": "u"
       },
       {
