@@ -27,9 +27,10 @@
  *   THE ANSWER — success: Upload File's Cloud File becomes a stored file made from the `FileRef` (`new CloudFile`, :209
  *   — name, url, and contentType / size / target when present; `id`, `filename` dropped), then Done (:212). Sign File
  *   URL's Signed URL, URL Kind, Safe To Share, Expires At and TTL take the `SignedFileUrl` (:156-164), then Done (:166).
- *   Failure: `setError` with the contract's envelope (world.ts FILES) — Error is the envelope's `error` when it HAS one
- *   (`hasOwnProperty`, :391) and THE ENVELOPE ITSELF when it has none (an object on a string port); Error Status Code is
- *   `code || status || 0` (:393 — a Parse wire's error CODE wins over the HTTP status); then Failure with the node's code
+ *   Failure: `setError` with the contract's envelope (world.ts FILES) — v2 (row C51, ruled "Send the real status",
+ *   `fileFailureOf`): Error Status Code is the envelope's HTTP `status`, 0 when it has none (never a Parse error `code`);
+ *   Error is its message, or a sentence naming the status when it has none. v1 read `code || status || 0` and put the
+ *   whole envelope on Error when it had no message. Then Failure with the node's code
  *   (:399-403 / :334-339). Error and Error Status Code keep the last failure across a later success (nothing clears them).
  *
  * PROGRESS (Upload File): Uploaded Percent is 0 until a total is known (:292); Total and Uploaded Bytes `undefined`
@@ -39,8 +40,8 @@
  * NOT GRADED HERE, named:
  *   - progress on the Parse wire's XHR upload (`onUploadProgress`, :187-195) — not a world the BACKEND seam plays.
  *   - the editor's Backend picker (`updatePorts`, `setup`) and the inspector — not ports.
- *   - a failure envelope that is `undefined` or `null` (the contract allows `error()` with nothing): `setError` reads
- *     `.hasOwnProperty` on it and throws. The world always hands an envelope.
+ *   - a failure envelope that is `undefined` or `null` (the contract allows `error()` with nothing): v2 reads it as no
+ *     message and no status (v1 threw). The world always hands an envelope.
  */
 
 import { isStoredFile, type StoredFileLike } from '../canonical';
@@ -64,12 +65,18 @@ const backendPort = (): InputDecl => ({ type: 'string', coerce: 'none', editOnly
 /** What a press does at the frame end, before any answer: a failure (Error, status 0) or a call. */
 type Settled = { error: unknown; errorStatus: unknown };
 
-/** :390-403 / signfileurl.ts :326-339 — the envelope's `error` when it has one, else the envelope; `code || status || 0` */
+/**
+ * `fileRef.ts` `fileFailureOf` (v2, row C51 ruled "Send the real status"): Error Status Code the envelope's HTTP `status`
+ * (0 when there is none — never a Parse error `code`); Error the envelope's message, or a sentence naming the status when
+ * it has none. v1 read `code || status || 0` and put the whole envelope on Error when it had no message.
+ */
 function errorOf(answer: { error: string | undefined; detail?: Record<string, unknown> }): Settled {
   const envelope = fileError(answer);
+  const status = typeof envelope.status === 'number' && envelope.status > 0 ? envelope.status : 0;
+  if (typeof envelope.error === 'string' && envelope.error !== '') return { error: envelope.error, errorStatus: status };
   return {
-    error: Object.prototype.hasOwnProperty.call(envelope, 'error') ? envelope.error : envelope,
-    errorStatus: (envelope.code as unknown) || (envelope.status as unknown) || 0
+    error: status > 0 ? `The backend refused the request with HTTP ${status} and gave no reason` : 'The request failed and the backend gave no reason',
+    errorStatus: status
   };
 }
 
@@ -85,13 +92,13 @@ type Presses = {
   errorStatus: unknown;
 };
 
-/** The backends a sequence plays with: at once and late, REST's refusal (a message only), the Parse wire's (a code and a status), none, silent, and a project with two. */
+/** The backends a sequence plays with: at once and late, REST's refusal (a message and its status — v2, C51), the Parse wire's (a code and a status), none, silent, and a project with two. */
 function pool(op: string, ok: unknown): ReadonlyArray<BackendScript> {
   return [
     { answers: [{ match: { op }, answer: { ok } }] },
     { answers: [{ match: { op }, answer: { ok } }] },
     { answers: [{ match: { op }, answer: { ok }, after: 20 }] },
-    { answers: [{ match: { op }, answer: { error: 'HTTP 403: {"errors":[{"message":"You don\'t have permission to access this."}]}' } }] },
+    { answers: [{ match: { op }, answer: { error: 'HTTP 403: {"errors":[{"message":"You don\'t have permission to access this."}]}', detail: { status: 403 } } }] },
     { answers: [{ match: { op }, answer: { error: 'Permission denied', detail: { code: 119, status: 403 } }, after: 5 }] },
     { answers: [{ match: { op }, answer: { error: null, detail: { status: 500 } } }] },
     { answers: [{ match: { op }, answer: { never: true } }] },
@@ -164,7 +171,9 @@ function fileTarget(s: Readonly<UploadState>): Record<string, unknown> | undefin
 
 export const UploadFile = defineNode({
   type: 'Upload File',
-  version: 1,
+  // v2 (P109 ISL-030, row C51 ruled "Send the real status"): Error Status Code is the HTTP status (never a Parse code) and
+  // Error always a sentence; v1 read `code || status || 0` and put a message-less envelope on Error.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/uploadfile.ts; noodl-runtime api/cloudstore.js, api/cloudfile.ts',
   needs: ['backend'],
   worldPool: { backends: [...pool('uploadFile', FILE_REFS[0]), ...pool('uploadFile', FILE_REFS[1]).slice(0, 1), ...pool('uploadFile', FILE_REFS[2]).slice(2, 3)] },
@@ -283,7 +292,8 @@ const SIGNED: readonly unknown[] = [
 
 export const SignFileUrl = defineNode({
   type: 'Sign File URL',
-  version: 1,
+  // v2 (P109 ISL-030, row C51 ruled "Send the real status"): as Upload File's v2 — the HTTP status, and always a sentence.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/signfileurl.ts; api/cloudstore.js, api/cloudfile.ts',
   needs: ['backend'],
   worldPool: { backends: [...pool('signFileUrl', SIGNED[0]), ...pool('signFileUrl', SIGNED[1]).slice(0, 1), ...pool('signFileUrl', SIGNED[2]).slice(2, 3)] },

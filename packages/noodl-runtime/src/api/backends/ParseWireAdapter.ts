@@ -137,7 +137,19 @@ interface WireRequest {
   headers?: Record<string, string>;
   onUploadProgress?: (progress: { loaded: number; total: number }) => void;
   success: (response?: WireResponse) => void;
-  error: (err?: WireError) => void;
+  /** `status` — the HTTP status the server answered with, when it answered (P107-C51: the file envelopes carry it). */
+  error: (err?: WireError, status?: number) => void;
+}
+
+/**
+ * P107-C51 (P109 ISL-030, ruled "Send the real status"): a file operation's envelope carries the HTTP status. The server's
+ * error body is `{ code, error }` — a Parse code (119 for a refusal), not the status — and Upload File and Sign File URL read
+ * the status for Error Status Code.
+ */
+function withStatus(err: WireError | undefined, status: number | undefined): WireError {
+  const envelope = Object.assign({}, err) as WireError & { status?: number };
+  if (status !== undefined && status > 0) envelope.status = status;
+  return envelope;
 }
 
 export interface ParseWireAdapterOptions {
@@ -240,7 +252,7 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
 
           if (xhr.status === 200 || xhr.status === 201) {
             options.success(json);
-          } else options.error(json || { error: xhr.responseText, status: xhr.status });
+          } else options.error(json || { error: xhr.responseText, status: xhr.status }, xhr.status);
         }
       };
 
@@ -340,11 +352,11 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
             }
           } else {
             if (options.method === 'DELETE') {
-              options.error({ error: 'Failed to delete.' });
+              options.error({ error: 'Failed to delete.' }, r.status);
             } else {
               r.json()
-                .then((json) => options.error(json))
-                .catch((e) => options.error({ error: 'Failed to fetch.' }));
+                .then((json) => options.error(json, r.status))
+                .catch((e) => options.error({ error: 'Failed to fetch.' }, r.status));
             }
           }
         })
@@ -687,7 +699,7 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
       // Upstream Parse returns `{name, url}` only and both come out absent,
       // which is the honest answer for that backend rather than a zero.
       success: (response) => options.success(normalizeFileRef(response, PARSE_FILE_FIELDS)),
-      error: (err) => options.error(err),
+      error: (err, status) => options.error(withStatus(err, status)),
       onUploadProgress: options.onUploadProgress
     });
   }
@@ -711,7 +723,7 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
     this._makeRequest(handle, '/files/' + options.name + '/sign', {
       method: 'GET',
       success: (response) => options.success(normalizeSignedFileUrl(response, 'signed')),
-      error: (err) => options.error(err)
+      error: (err, status) => options.error(withStatus(err, status))
     });
   }
 
@@ -743,7 +755,7 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
     this._makeRequest(handle, '/files/' + options.file.name, {
       method: 'DELETE',
       success: (response) => options.success(Object.assign({}, (options as { data?: unknown }).data, response)),
-      error: (err) => options.error(err)
+      error: (err, status) => options.error(withStatus(err, status))
     });
   }
 }

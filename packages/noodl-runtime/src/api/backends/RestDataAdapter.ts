@@ -500,7 +500,11 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
        */
       raw?: boolean;
     },
-    callbacks: { ok: (body: unknown, headers: { get(name: string): string | null }) => void; fail: (message: string) => void }
+    callbacks: {
+      ok: (body: unknown, headers: { get(name: string): string | null }) => void;
+      /** `status` — the HTTP status the backend refused with; absent when the request never got an answer. */
+      fail: (message: string, status?: number) => void;
+    }
   ): void {
     const url = this.url(handle, init.path, init.params ?? []);
 
@@ -526,7 +530,7 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
           if (response.status >= 200 && response.status < 300) {
             callbacks.ok(body, response.headers);
           } else {
-            callbacks.fail(errorMessage(response.status, body, text));
+            callbacks.fail(errorMessage(response.status, body, text), response.status);
           }
         })
       )
@@ -1809,7 +1813,7 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
             normalizeFileRef(file, DIRECTUS_FILE_FIELDS, (name) => (name ? `${baseOf(handle)}/assets/${name}` : undefined))
           );
         },
-        fail: (message) => options.error({ error: message })
+        fail: (message, status) => options.error(fileFailure(message, status))
       }
     );
   }
@@ -1864,7 +1868,7 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
             )
           );
         },
-        fail: (message) => options.error({ error: message })
+        fail: (message, status) => options.error(fileFailure(message, status))
       }
     );
   }
@@ -1934,7 +1938,7 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
             )
           );
         },
-        fail: (message) => options.error({ error: message })
+        fail: (message, status) => options.error(fileFailure(message, status))
       }
     );
   }
@@ -2017,7 +2021,7 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
               const expiry = jwtExpiry(tokenParam(url));
               options.success({ url, kind: 'signed', ...(expiry ?? {}) });
             },
-            fail: (message) => options.error({ error: message })
+            fail: (message, status) => options.error(fileFailure(message, status))
           }
         );
         return;
@@ -2047,7 +2051,7 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
                 ...(expiry ?? {})
               });
             },
-            fail: (message) => options.error({ error: message })
+            fail: (message, status) => options.error(fileFailure(message, status))
           }
         );
         return;
@@ -2103,7 +2107,7 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
           { method: 'DELETE', path: `/files/${encodeURIComponent(options.file.name)}`, headers: this.headers(profile, handle) },
           {
             ok: (body) => options.success((body ?? {}) as Record<string, unknown>),
-            fail: (message) => options.error({ error: message })
+            fail: (message, status) => options.error(fileFailure(message, status))
           }
         );
         return;
@@ -2123,7 +2127,7 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
           },
           {
             ok: (body) => options.success((body ?? {}) as Record<string, unknown>),
-            fail: (message) => options.error({ error: message })
+            fail: (message, status) => options.error(fileFailure(message, status))
           }
         );
         return;
@@ -2145,7 +2149,7 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
           },
           {
             ok: (body) => options.success((body ?? {}) as Record<string, unknown>),
-            fail: (message) => options.error({ error: message })
+            fail: (message, status) => options.error(fileFailure(message, status))
           }
         );
         return;
@@ -2339,6 +2343,15 @@ export function relationNotFound(handle: BackendHandle, options: RelationOptions
     'Refresh the backend schema in the Backend Services panel — relation details are only readable with ' +
     'admin credentials, so they are read when you connect and not while the app runs.'
   );
+}
+
+/**
+ * P107-C51 (P109 ISL-030, ruled "Send the real status"): a file operation's failure envelope with the HTTP status the
+ * backend refused with. It used to carry the message only, so Upload File and Sign File URL showed Error Status Code 0
+ * for a 403 and a 500 alike on Directus, Supabase and PocketBase.
+ */
+function fileFailure(message: string, status: number | undefined): FileError {
+  return status === undefined ? { error: message } : { error: message, status };
 }
 
 export function stripServerOwned(profile: RestWireProfile, data: Record<string, unknown>): Record<string, unknown> {

@@ -318,8 +318,8 @@
     }
   },
   {
-    "name": "a refusal with no message: Error is the envelope itself",
-    "because": "signfileurl.ts :327",
+    "name": "a refusal with no message and no status: Error is a sentence, Error Status Code 0 — never the Parse code (v2, C51)",
+    "because": "fileRef.ts fileFailureOf (P109 ISL-030, P107-C51 ruled \"Send the real status\"); v1 put the whole envelope on Error and showed 119",
     "params": {},
     "steps": [
       "settle",

@@ -156,6 +156,7 @@ describe('Sign File URL node', () => {
 
     expect(instance.signals).toEqual(['failure', 'completed']);
     expect(output(instance, 'error')).toBe('This file is private.');
-    expect(output(instance, 'errorStatus')).toBe(119);
+    // P107-C51 (P109 ISL-030, ruled "Send the real status"): the HTTP status, never the Parse code (it was 119)
+    expect(output(instance, 'errorStatus')).toBe(403);
   });
 });

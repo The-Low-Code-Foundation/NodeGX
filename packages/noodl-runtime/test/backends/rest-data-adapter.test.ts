@@ -1193,6 +1193,28 @@ describe('files — the wire', () => {
     });
   });
 
+  it('a refused upload hands the HTTP status in its envelope (P107-C51)', async () => {
+    // P109 ISL-030, ruled "Send the real status": the request knew the status and handed its file callers the message
+    // only, so Upload File and Sign File URL showed Error Status Code 0 for a 403 and a 500 alike.
+    const fake = new FakeFetch().reply({ status: 403, body: { errors: [{ message: 'Forbidden' }] } });
+    const error = jest.fn();
+    make(fake).uploadFile(directus, uploadArgs({ success: jest.fn(), error }));
+    await settle();
+    expect(error).toHaveBeenCalledTimes(1);
+    expect(error.mock.calls[0][0].status).toBe(403);
+    expect(typeof error.mock.calls[0][0].error).toBe('string');
+  });
+
+  it('an upload that never got an answer hands no status (P107-C51)', async () => {
+    const error = jest.fn();
+    new RestDataAdapter({ fetchImpl: () => Promise.reject(new Error('Failed to fetch')) }).uploadFile(
+      directus,
+      uploadArgs({ success: jest.fn(), error })
+    );
+    await settle();
+    expect(error.mock.calls).toEqual([[{ error: 'Failed to fetch' }]]);
+  });
+
   it('refuses a Supabase upload with no bucket rather than composing a path with `undefined` in it', async () => {
     const fake = new FakeFetch();
     const error = jest.fn();

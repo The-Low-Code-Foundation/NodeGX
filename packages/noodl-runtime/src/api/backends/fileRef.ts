@@ -315,3 +315,25 @@ export function normalizeSignedFileUrl(body: WireBody, kind: FileUrlKind): Signe
 
   return signed;
 }
+
+/**
+ * What Upload File and Sign File URL show for a failure — P107-C51 (P109 ISL-030, ruled "Send the real status").
+ *
+ * Error Status Code is the HTTP status the backend refused with (the envelope's `status`), or 0 when no request got an
+ * answer; never a Parse error code (119 for a refusal on the NodeGX backend, where 403 is what was promised). Error is
+ * always a sentence: the envelope's message, or one naming the status when the backend gave none — it used to be the
+ * whole envelope object on a string port. A string (the nodes' own "No file specified") is the message, status 0.
+ */
+export function fileFailureOf(err: unknown): { message: string; status: number } {
+  if (typeof err === 'string') return { message: err, status: 0 };
+  const envelope = (err !== null && typeof err === 'object' ? err : {}) as { error?: unknown; status?: unknown };
+  const status = typeof envelope.status === 'number' && envelope.status > 0 ? envelope.status : 0;
+  if (typeof envelope.error === 'string' && envelope.error !== '') return { message: envelope.error, status };
+  return {
+    message:
+      status > 0
+        ? `The backend refused the request with HTTP ${status} and gave no reason`
+        : 'The request failed and the backend gave no reason',
+    status
+  };
+}

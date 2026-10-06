@@ -48,6 +48,7 @@ import type {
 
 import CloudFile = require('../../../api/cloudfile');
 import CloudStore = require('../../../api/cloudstore');
+import { fileFailureOf } from '../../../api/backends/fileRef';
 import { outcomeOutputs, reportOutcomes } from '../../../outcome';
 import { recordBackendPickerPorts, recordSchemaContext } from './record-ports';
 import { sendSchemaPorts, staticPortNames } from './schema-ports';
@@ -323,8 +324,10 @@ const SignFileUrl: NodeDefinitionOptions = {
     // triggered it. Minting one here keeps that a real, complete failure rather than a special
     // case — there is no branch in which the reason reaches the channel without an outcome.
     setError(this: SignFileUrlInstance, err: SignError | string, tokens?: OutcomeToken[]) {
-      this._internal.error = err.hasOwnProperty('error') ? (err as SignError).error : err;
-      this._internal.errorStatus = (err as SignError).code || (err as SignError).status || 0;
+      // P107-C51: the HTTP status, and always a sentence (`fileFailureOf`)
+      const failure = fileFailureOf(err);
+      this._internal.error = failure.message;
+      this._internal.errorStatus = failure.status;
       this.flagOutputDirty('error');
       this.flagOutputDirty('errorStatus');
 
