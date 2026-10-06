@@ -197,7 +197,7 @@
   },
   {
     "name": "a pick of 'a', then Value written back to 'b' in the same frame: Changed for the pick, and the Value back at 'b' — the buttons show what the Value says, so picking 'a' again sends it with Changed",
-    "because": "the selection is the node's Value (Richard, 2026-10-05, on C76: \"Show what Value says\"); on the runtime the component's effect keys on the Value the last paint rendered (RadioButtonGroup.tsx :37-39 — the pick's own re-render reused that paint's props, react-component-node.ts :1076-1103), which the write-back did not change: the picked button stays selected and picking it again raises nothing (row C76)",
+    "because": "the selection is the node's Value (Richard, 2026-10-05, on C76: \"Show what Value says\"); on the runtime the component's effect keys on the Value the last paint rendered (RadioButtonGroup.tsx :37-39 — the pick's own re-render reused that paint's props, react-component-node.ts :1076-1103), which the write-back did not change: the picked button stays selected and picking it again raises nothing (was row C76, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -219,8 +219,7 @@
         "value": "a"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C76"
+    ]
   },
   {
     "name": "after a pick written back in its frame, picking the button the Value names raises nothing — it is the selected one; the next pick of 'a' fires (the runtime agrees for another reason: its screen still selects 'a', and the node already holds 'b')",

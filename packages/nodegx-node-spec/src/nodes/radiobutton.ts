@@ -14,8 +14,8 @@
  * click"; two buttons carrying the same Value both show as selected, and only the clicked one fires); **Enable Label leaves
  * the input and the keyboard where they are** (R14, R13's label rule). A button that comes back with Mounted shows its
  * group's choice and fires nothing (D37 named a remount's Changed a defect; the runtime is quiet there too unless C76's state
- * left the selection a person's). What the runtime does instead only because of React is a known row on the runtime target
- * (C76, D37, C80).
+ * left the selection a person's). What the runtime did instead only because of React were known rows on the runtime target
+ * (C76, D37, C80), all fixed in P109 ISL-031.
  *
  * THE FIRST VISUAL INSIDE A PARENT. A Radio Button reads the Radio Button Group above it through React context
  * (RadioButton.tsx :41 `useContext`) and has no port naming it. So the group is the button's WORLD (world.ts GROUP): there is
@@ -27,10 +27,11 @@
  * `<label>` beside it when Enable Label is on (:194-217).
  *   - **selected** (:58): the group's Value `===` this button's Value — a strict compare, so the number 1 is not `"1"`; with no
  *     group, never. The node's **Checked** follows it at each paint while the button is on the page, sent on a change and with
- *     no Changed. The runtime's component reads the group's COPY of the selection (RadioButtonGroup.tsx :21, :37-39 — row C76,
- *     the group's spec) and fires Changed from an effect (:78-84 → radiobutton.ts :39-55) whenever Checked moves while the
- *     group's last selection was a person's: a sibling carrying the same Value, its own Value written in the frame of a pick,
- *     a remount in C76's state (row D37).
+ *     no Changed. The runtime's component read a group copy of the selection that a write-back in a pick's frame did not
+ *     reach (row C76, the group's spec) and fired Changed from an effect whenever Checked moved while the group's last
+ *     selection was a person's: a sibling carrying the same Value, its own Value written in the frame of a pick, a remount in
+ *     C76's state (row D37). Both fixed in P109 ISL-031: the group's node counts its Value writes, and the selection carries
+ *     the click that made it, which each button reports once.
  *   - **a click** on an enabled button in a group: the Checkbox's press and release, then the browser's activation of a radio —
  *     a selected one raises no `change`; any other hands its Value to the group (:187-189 → RadioButtonGroup.tsx :27-30), whose
  *     node takes it (radiobuttongroup.ts :20-29): this button is selected — Checked sent, **Changed** fired. With no group a
@@ -350,7 +351,7 @@ function then(s: Readonly<State>, first: Act, next: (after: State) => Act): Act 
  * A click on the radio whose Value is `v` (RadioButton.tsx :187-189): a selected one raises no `change`; any other hands `v` to the
  * group, whose node takes it (RadioButtonGroup.tsx :27-30 → radiobuttongroup.ts :20-29). This button, on the page, shows it at once:
  * selected by its own click, or losing the selection to a sibling's — both a person's doing, so Checked with Changed; selected by a
- * sibling carrying its Value, Checked alone (v2, "Fire from the click"; the runtime's effect, row D37). Off the page it shows the
+ * sibling carrying its Value, Checked alone (v2, "Fire from the click"; the runtime's effect until P109 ISL-031, row D37). Off the page it shows the
  * group's choice when it comes back (`painted`).
  */
 function select(s: Readonly<State>, v: unknown, own: boolean): Act {
@@ -364,8 +365,8 @@ function select(s: Readonly<State>, v: unknown, own: boolean): Act {
 
 /**
  * The page follows what the node wants — a paint (the Checkbox's `painted`): Enabled, Visible, Mounted; on the page, Checked follows
- * the group's Value against this button's — sent on a change, never with Changed (a mount included: the runtime's effect fires one
- * when the group's last selection was a person's, row D37).
+ * the group's Value against this button's — sent on a change, never with Changed (a mount included: the runtime's effect fired one
+ * when the group's last selection was a person's, row D37, until P109 ISL-031).
  */
 function painted(s: Readonly<State>): Act {
   const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };

@@ -9,8 +9,8 @@
  *
  * v2 (NSP-023 step 5, R12, 2026-10-06): the spec states what a person gets where v1 copied how React draws. **The buttons show
  * what the group's Value says** (Richard, 2026-10-05, on C76: "Show what Value says" — every write redraws them, so the next
- * pick fires Changed). What the runtime does instead only because its component keeps a copy of the selection is a known row
- * on the runtime target (C76).
+ * pick fires Changed). What the runtime did instead only because its component kept a copy of the selection was a known row
+ * on the runtime target (C76), fixed in P109 ISL-031.
  *
  * THE FIRST VISUAL WITH CHILDREN. A group's whole behaviour is what its Radio Buttons do inside it: a person never acts
  * on the group, only on a button in it. So the group's PAGE holds its buttons — one Radio Button per value the `pick` act
@@ -25,7 +25,8 @@
  *     person's pick or the graph. The runtime's component keeps a copy instead (`useState`, RadioButtonGroup.tsx :21) and
  *     follows the node through an effect keyed on the Value its last PAINT rendered (:37-39; each paint hands React a fresh
  *     copy of the props, react-component-node.ts :1076-1103): a Value written back to that one in the frame of a pick is no
- *     change to the effect, and the picked button stays selected under a Value that says another (row C76).
+ *     change to the effect, and the picked button stayed selected under a Value that says another (row C76; fixed in P109
+ *     ISL-031 — the node counts every write of its Value and the effect is keyed on the count).
  *   - **a button is selected** when the selection `===` its Value (RadioButton.tsx :58) — a strict compare: the number 1
  *     is not the text `"1"`, and while the group's Value has never been written the button with NO Value is the selected
  *     one (`undefined === undefined`).

@@ -113,7 +113,7 @@
   },
   {
     "name": "a sibling carrying THIS button's Value picked: both are selected — Checked true and no Changed (the person clicked the other); the other sibling picked: this one loses the selection to that click — Checked false and Changed",
-    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (row D37)",
+    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (was row D37, fixed in P109 ISL-031)",
     "params": {
       "value": "a"
     },
@@ -129,8 +129,7 @@
         "value": "b"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D37"
+    ]
   },
   {
     "name": "the graph writes the group's Value to this button's Value: Checked true at the frame's end, no Changed; to another: Checked false, no Changed",
@@ -206,7 +205,7 @@
   },
   {
     "name": "a click, then this button's Value written away in the same frame: Changed for the click, then the button shows that the group no longer names it — Checked ends false, with no second Changed; its Value written back: Checked true, no Changed",
-    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (row D37)",
+    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (was row D37, fixed in P109 ISL-031)",
     "params": {
       "value": "c"
     },
@@ -225,8 +224,7 @@
         "value": "c"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D37"
+    ]
   },
   {
     "name": "this button's Value written to the group's: selected at the next paint — Checked true, no Changed; written away: Checked false, no Changed",
@@ -327,7 +325,7 @@
   },
   {
     "name": "disabled: a click takes nothing, but a sibling carrying this button's Value picked selects it too — Checked true, no Changed (a disabled radio still shows the group's selection; only a click on it fires)",
-    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (row D37)",
+    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (was row D37, fixed in P109 ISL-031)",
     "params": {
       "value": "a"
     },
@@ -347,8 +345,7 @@
         "value": "a"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D37"
+    ]
   },
   {
     "name": "a click, then a sibling pick, then a click in one frame: each moves the selection — Checked true, false, true: sent as true, Changed three times",
@@ -2063,7 +2060,7 @@
   },
   {
     "name": "a sibling carrying this button's Value picked and the group's Value written back in the same frame: the button shows what the Value says — unselected, nothing on the wire; the other sibling picked: nothing (the group names it already); a click selects this one: Checked true, Changed",
-    "because": "Richard, 2026-10-05, on C76: \"Show what Value says\" — the button reads its group's Value; the runtime's group keeps a copy of the selection that a write-back in the frame of a pick leaves on the pick (RadioButtonGroup.tsx :21, :37-39 — row C76)",
+    "because": "Richard, 2026-10-05, on C76: \"Show what Value says\" — the button reads its group's Value; the runtime's group keeps a copy of the selection that a write-back in the frame of a pick leaves on the pick (RadioButtonGroup.tsx :21, :37-39 — was row C76, fixed in P109 ISL-031)",
     "params": {
       "value": "b"
     },
@@ -2098,12 +2095,11 @@
         "act": "click"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C76"
+    ]
   },
   {
     "name": "a pick and the group's Value written back in one frame, then this button's Value written to the picked one: the group names the other, so nothing moves",
-    "because": "Richard, 2026-10-05, on C76: \"Show what Value says\" — the button reads its group's Value; the runtime's group keeps a copy of the selection that a write-back in the frame of a pick leaves on the pick (RadioButtonGroup.tsx :21, :37-39 — row C76)",
+    "because": "Richard, 2026-10-05, on C76: \"Show what Value says\" — the button reads its group's Value; the runtime's group keeps a copy of the selection that a write-back in the frame of a pick leaves on the pick (RadioButtonGroup.tsx :21, :37-39 — was row C76, fixed in P109 ISL-031)",
     "params": {
       "value": "c"
     },
@@ -2134,8 +2130,7 @@
         "value": "b"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C76"
+    ]
   },
   {
     "name": "a write the group ignores (null) or already holds between two it takes: nothing moves",
@@ -2365,7 +2360,7 @@
   },
   {
     "name": "a remount after a pick written back in its frame: Mounted off, this button's Value written to the picked one, Mounted on — Did Mount and nothing else: the group names the other",
-    "because": "Richard, 2026-10-05, on C76: \"Show what Value says\" — the button reads its group's Value; the runtime's group keeps a copy of the selection that a write-back in the frame of a pick leaves on the pick (RadioButtonGroup.tsx :21, :37-39 — row C76)",
+    "because": "Richard, 2026-10-05, on C76: \"Show what Value says\" — the button reads its group's Value; the runtime's group keeps a copy of the selection that a write-back in the frame of a pick leaves on the pick (RadioButtonGroup.tsx :21, :37-39 — was row C76, fixed in P109 ISL-031)",
     "params": {
       "value": "c"
     },
@@ -2405,8 +2400,7 @@
         "value": true
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C76"
+    ]
   },
   {
     "name": "focused, then Enable Label changed and a touch in the same frame: Pointer Down, and the keyboard is still there — a Blur action after it fires Blurred",
@@ -2614,7 +2608,7 @@
   },
   {
     "name": "Visible off: a hidden button cannot be clicked, but a sibling picked in its group still is — the pick is the sibling's click: this hidden button carries the same Value, so it is Checked too, with no Changed",
-    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (row D37)",
+    "because": "Richard, 2026-10-05, on D37: \"Fire from the click\" — Changed comes from a person's click on this button, or for the deselect when another button's click takes its selection; the runtime fires it from an effect whenever Checked moves while the group's last selection was a person's (was row D37, fixed in P109 ISL-031)",
     "world": {
       "group": {}
     },
@@ -2637,8 +2631,7 @@
         "value": "a"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D37"
+    ]
   },
   {
     "name": "hidden, holding the keyboard: every pointer act meets nothing and takes nothing away — the Blur action after each finds the keyboard on the button (Blurred)",
@@ -3353,8 +3346,7 @@
   },
   {
     "name": "the remount-frame pick grid, a button carrying 'a' or 'b' (a sibling carries it too): the same frames — a pick of the sibling carrying this button's Value selects it too, with no Changed; a pick of the other takes the selection from it (Changed while it is on the page, nothing while it is off); back on the page, a click on it fires Changed only when the group names another",
-    "because": "an act paints the page first (adapter.ts `act`): a pick in a frame with Mounted written puts the button on or off the page before the sibling is clicked — a Focus action after it reads which (Done or Unchanged); a click a frame later reads the group's Value (Changed or not). s47: the 10,000 at 20732 left six swaps of these picks unkilled; the runtime fires Changed for the same-Value sibling (row D37)",
-    "row": "NSP-016 §6 D37",
+    "because": "an act paints the page first (adapter.ts `act`): a pick in a frame with Mounted written puts the button on or off the page before the sibling is clicked — a Focus action after it reads which (Done or Unchanged); a click a frame later reads the group's Value (Changed or not). s47: the 10,000 at 20732 left six swaps of these picks unkilled; the runtime fires Changed for the same-Value sibling (was row D37, fixed in P109 ISL-031)",
     "world": {
       "group": {}
     },

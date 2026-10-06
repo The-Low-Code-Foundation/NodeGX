@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useRef } from 'react';
 
 import RadioButtonContext from '../../../contexts/radiobuttoncontext';
 import Layout from '../../../layout';
@@ -76,11 +76,20 @@ export function RadioButton(props: RadioButtonProps) {
   // Reporting to the graph is a side effect and belongs after commit. `checkedChanged` already
   // no-ops when the value has not changed, so the extra render this costs on a real change is the
   // one the old code needed anyway.
+  //
+  // P107-D37 (P109 ISL-031, ruled "Fire from the click"): `Changed` comes from a person's click — on the button clicked, and
+  // on the button that loses the selection to it. It read the group's "the last selection was a person's" flag, so any move
+  // of Checked while that held fired Changed: a sibling carrying the same Value, its own Value written in a pick's frame, a
+  // remount. Each click is reported once (`seen`), and a button that mounts after it has seen it already.
+  const click = radioButtonGroup ? radioButtonGroup.click : null;
+  const seen = useRef(click ? click.seq : 0);
   useEffect(() => {
-    // A1: the second argument is what lets the node fire `Changed` for a click and stay silent
-    // for the graph setting the group's `Value` — the same distinction `Checkbox` and
-    // `Radio Button Group` already make.
-    props.checkedChanged && props.checkedChanged(checked, radioButtonGroup ? radioButtonGroup.selectionFromUser : false);
+    let fromClick = false;
+    if (click && click.seq !== seen.current) {
+      seen.current = click.seq;
+      fromClick = checked ? click.by === props.id : click.from === props.value;
+    }
+    props.checkedChanged && props.checkedChanged(checked, fromClick);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checked, props.checkedChanged]);
 
@@ -186,7 +195,7 @@ export function RadioButton(props: RadioButtonProps) {
         {...inputProps}
         checked={checked}
         onChange={(e) => {
-          radioButtonGroup && radioButtonGroup.checkedChanged && radioButtonGroup.checkedChanged(props.value);
+          radioButtonGroup && radioButtonGroup.checkedChanged && radioButtonGroup.checkedChanged(props.value, props.id);
         }}
       />
     </div>

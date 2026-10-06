@@ -186,67 +186,11 @@ const graphValueDropped = (d: Divergence) => {
   return slid || nan || percentAlone;
 };
 
-/**
- * NSP-023 step 5 (2026-10-06, "Show what Value says") — NSP-016 §6 C76: the Radio Button Group's component keeps a copy of the
- * selection and follows the node through an effect keyed on the Value its last PAINT rendered (RadioButtonGroup.tsx :21, :37-39);
- * a Value written back to that one in the frame of a pick is no change to it, and the picked button stays selected: picking it
- * again raises nothing. Narrow: the SPEC reports Value or Changed where the runtime does not, after a frame in which a pick was
- * followed by a Value write.
- */
-const groupPickWrittenBack = (d: Divergence) => {
-  const ref = d.difference.reference;
-  if (d.difference.threw !== undefined || !ref || !((ref.t === 'value' && portOf(ref) === 'value') || isChanged(ref))) return false;
-  let pickInFrame = false;
-  for (let k = 0; k < d.difference.index; k++) {
-    const e = d.reference[k] as TraceEvent & { act?: string };
-    if (e.t === 'settle') pickInFrame = false;
-    else if (e.t === 'act' && e.act === 'pick') pickInFrame = true;
-    else if (pickInFrame && e.t === 'set' && portOf(e) === 'value') return true;
-  }
-  return false;
-};
-
-/**
- * NSP-023 step 5 (2026-10-06, "Fire from the click") — NSP-016 §6 D37: the Radio Button's component fires Changed from an effect
- * (RadioButton.tsx :78-84 → radiobutton.ts :39-55) whenever its Checked moves while the group's last selection was a person's — a
- * sibling carrying the same Value picked, its own Value written in the frame of a pick, a remount. Narrow: the RUNTIME fires a
- * Changed where the spec prints something else.
- */
-const changedWithNobodyClicking = (d: Divergence) => isChanged(d.difference.actual) && !isChanged(d.difference.reference);
-/**
- * NSP-016 §6 C76 seen from a button: the group's component keeps a copy of the selection (RadioButtonGroup.tsx :21, :37-39), and the
- * buttons read the copy; the group's Value written back in the frame of a pick (a world write, delivered at an `advance`) leaves the
- * copy on the pick. Narrow: Checked or Changed differ, after a frame in which a pick or a click was followed by an advance.
- */
-const buttonPickWrittenBack = (d: Divergence) => {
-  const on = (e: TraceEvent | undefined) => !!e && ((e.t === 'value' && portOf(e) === 'checked') || isChanged(e));
-  if (d.difference.threw !== undefined || !(on(d.difference.reference) || on(d.difference.actual))) return false;
-  let pickInFrame = false;
-  for (let k = 0; k < d.difference.index; k++) {
-    const e = d.reference[k] as TraceEvent & { act?: string };
-    if (e.t === 'settle') pickInFrame = false;
-    else if (e.t === 'act' && (e.act === 'pick' || e.act === 'click')) pickInFrame = true;
-    else if (pickInFrame && e.t === 'advance') return true;
-  }
-  return false;
-};
-
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s41 — the Slider: no label and no text style, so two of the three throwing setters (the Placement and units-typed style inputs)
   'net.noodl.controls.range': [
     { row: 'NSP-016 §6 D36 — Changed fires with nobody sliding (a graph Value, a clamping Min or Max, the mount), and a remount takes the author\'s Value back', matches: changedWithNobodySliding },
     { row: 'NSP-016 §6 C73 — a graph Value equal to the last the author wrote, after a slide, or a second NaN, is dropped: the handle stays', matches: graphValueDropped }
-  ],
-  // s42 — the Radio Button: the Checkbox's label, so the Checkbox's C65 and C66 beside the three setters
-  'net.noodl.controls.radiobutton': [
-    // NSP-023 step 5 (v2) — what React's drawing makes the runtime do instead of what the spec says
-    { row: 'NSP-016 §6 C76 — the group\'s Value written back in the frame of a pick leaves the group\'s copy of the selection on the pick: the buttons show the pick', matches: buttonPickWrittenBack },
-    { row: 'NSP-016 §6 D37 — Changed fires with nobody clicking this button: a sibling carrying its Value picked, its Value written in a pick\'s frame, a remount', matches: changedWithNobodyClicking }
-  ],
-  // s42 — the Radio Button Group: no text style either — the Placement and units-typed style setters
-  'Radio Button Group': [
-    // NSP-023 step 5 (v2) — the buttons show what the Value says; what the component's copy of the selection makes the runtime do instead
-    { row: 'NSP-016 §6 C76 — a Value written back in the frame of a pick leaves the picked button selected: picking it again raises nothing', matches: groupPickWrittenBack }
   ],
   // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
   Text: [
