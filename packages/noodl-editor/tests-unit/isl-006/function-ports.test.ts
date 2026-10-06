@@ -169,10 +169,31 @@ describe('the on-open fix-up (AC10)', () => {
     const p = project(SCRIPT, WIRES);
     const lines = describeFunctionPortFixUp(applyFunctionPortFixUp(p));
     expect(lines[0]).toBe(
-      "A name inside a code comment no longer makes a Function port. 2 wired ports made that way were added to their Function's port list, so their wires still work."
+      "A name inside a code comment no longer makes a Function port. 2 wired ports made that way were added to their Function's port list. Their wires still work."
     );
-    expect(lines.slice(1)).toEqual(['"Validate" in /Row keeps in-id.', '"Validate" in /Row keeps out-Done.']);
+    expect(lines.slice(1)).toEqual(['In /Row, "Validate" keeps the input id and the output Done.']);
     expect(describeFunctionPortFixUp([])).toEqual([]);
+  });
+
+  it('one sentence per place: two unlabelled Functions keeping the same port read as two, not as a repeated line', () => {
+    const w = (component: string, nodeId: string, list: 'scriptInputs' | 'scriptOutputs', name: string) => ({ component, nodeId, list, name });
+    const lines = describeFunctionPortFixUp([
+      w('/Offices/Office Settings', 'a', 'scriptInputs', 'reps'),
+      w('/Offices/Office Settings', 'b', 'scriptInputs', 'reps'),
+      w('/Pay', 'c', 'scriptOutputs', 'NoodlObject'),
+      w('/Pay', 'c', 'scriptOutputs', 'Done')
+    ]);
+    expect(lines.slice(1)).toEqual([
+      'In /Offices/Office Settings, 2 Functions keep the input reps.',
+      'In /Pay, a Function keeps the outputs NoodlObject and Done.'
+    ]);
+  });
+
+  it('names six places and counts the rest', () => {
+    const writes = Array.from({ length: 9 }, (_, i) => ({ component: `/C${i}`, nodeId: `n${i}`, list: 'scriptInputs' as const, name: 'x' }));
+    const lines = describeFunctionPortFixUp(writes);
+    expect(lines).toHaveLength(1 + 6 + 1);
+    expect(lines[lines.length - 1]).toBe('3 more Functions keep theirs the same way.');
   });
 });
 
@@ -190,8 +211,8 @@ describe('the editor runs the fix-up when a project opens (upgradeOnLoad)', () =
       {
         title: 'Wired Function ports kept',
         lines: [
-          "A name inside a code comment no longer makes a Function port. 1 wired port made that way was added to its Function's port list, so its wire still works.",
-          '"Validate" in /Row keeps in-id.'
+          "A name inside a code comment no longer makes a Function port. 1 wired port made that way was added to its Function's port list. Its wire still works.",
+          'In /Row, "Validate" keeps the input id.'
         ]
       }
     ]);
@@ -201,5 +222,57 @@ describe('the editor runs the fix-up when a project opens (upgradeOnLoad)', () =
 
   it('control: a project with nothing to keep opens with no section (no backup, no toast)', () => {
     expect(upgradeOnLoad(project('Outputs.ok = Inputs.id;', [WIRE])).sections).toEqual([]);
+  });
+});
+
+describe('the reader reads the same when the viewer compiles it (ES5, no downlevelIteration)', () => {
+  // s20: the viewer bundle compiles this file with its own tsconfig (`target: es5`). There `for…of` over
+  // `matchAll` becomes an index loop over `.length`, which an iterator does not have: the loop ran zero
+  // times, the editor's preview runtime made no port from any Function's code, and a 0.2 project opened
+  // with 1,769 "port doesn't exist" errors. Read the viewer's own options so this cannot drift from it.
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const ts = require('typescript');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const path = require('path');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const fs = require('fs');
+
+  function compiledAsTheViewerDoes() {
+    const viewerDir = path.join(__dirname, '../../../noodl-viewer-react');
+    const read = ts.readConfigFile(path.join(viewerDir, 'tsconfig.json'), ts.sys.readFile);
+    const { options } = ts.convertCompilerOptionsFromJson(read.config.compilerOptions, viewerDir);
+    const source = fs.readFileSync(path.join(__dirname, '../../../nodegx-project-contract/function-ports.ts'), 'utf8');
+    const { outputText } = ts.transpileModule(source, {
+      compilerOptions: { ...options, module: ts.ModuleKind.CommonJS, sourceMap: false }
+    });
+    const module = { exports: {} as Record<string, unknown> };
+    new Function('module', 'exports', 'require', outputText)(module, module.exports, require);
+    return { target: options.target, reader: module.exports.functionScriptPortNames as typeof functionScriptPortNames };
+  }
+
+  it('the viewer still compiles at ES5 (the condition this guards)', () => {
+    expect(compiledAsTheViewerDoes().target).toBe(ts.ScriptTarget.ES5);
+  });
+
+  it('nothing in the file iterates an iterator: no TS2802 under the viewer\'s options', () => {
+    // The viewer's dev log said `[tsl] TS2802` for the broken loop and still emitted it ("compiled with 1 error").
+    // TS2802 is the whole class: `for…of` or spread over a Map, a Set or `matchAll`, each of which runs zero times at ES5.
+    const viewerDir = path.join(__dirname, '../../../noodl-viewer-react');
+    const read = ts.readConfigFile(path.join(viewerDir, 'tsconfig.json'), ts.sys.readFile);
+    const { options } = ts.convertCompilerOptionsFromJson(read.config.compilerOptions, viewerDir);
+    const file = path.join(__dirname, '../../../nodegx-project-contract/function-ports.ts');
+    const program = ts.createProgram([file], { ...options, noEmit: true, types: [], skipLibCheck: true });
+    const codes = program.getSemanticDiagnostics(program.getSourceFile(file)).map((d: { code: number }) => d.code);
+    expect(codes.filter((c: number) => c === 2802 || c === 2569)).toEqual([]);
+  });
+
+  it.each([
+    ['outputs by dot', 'Outputs.Items = [1, 2];'],
+    ['inputs, a signal, a bracket input', 'if (Inputs.a) Outputs.done(); Outputs.b = Inputs["first name"];'],
+    ['a name past a URL', 'fetch("https://x.io/" + Inputs.id); Outputs.res = 1;']
+  ])('%s', (_label, script) => {
+    const viaViewer = compiledAsTheViewerDoes().reader(script);
+    expect(viaViewer).toEqual(functionScriptPortNames(script));
+    expect(viaViewer.inputs.length + viaViewer.outputs.length + viaViewer.signals.length).toBeGreaterThan(0);
   });
 });

@@ -55,7 +55,10 @@ const OUTPUT_PATTERNS: readonly RegExp[] = [/Outputs\.([A-Za-z0-9_]+)/g, /Output
 function collect(source: string, patterns: readonly RegExp[], into: string[], skip?: readonly string[]): void {
   for (const pattern of patterns) {
     // A fresh RegExp per call: `lastIndex` on a shared /g literal would make the second script a different answer.
-    for (const match of source.matchAll(new RegExp(pattern.source, pattern.flags))) {
+    // An exec loop, not `for…of matchAll`: the viewer compiles this file at ES5, where that loop reads `.length`
+    // off an iterator and runs zero times (ISL-006 s20: every Function in the editor's preview lost its ports).
+    const re = new RegExp(pattern.source, pattern.flags);
+    for (let match = re.exec(source); match; match = re.exec(source)) {
       const name = match[1] ?? match[2];
       if (!name || into.includes(name) || (skip && skip.includes(name))) continue;
       into.push(name);
@@ -313,19 +316,51 @@ export function applyFunctionPortFixUp(project: FunctionPortProjectLike): Functi
   return writes;
 }
 
-/** What a person reads when the project opens: one sentence, then each port. Empty when nothing was written. */
+/** What a person reads when the project opens: one sentence, then one per place a port was kept. Empty when nothing was written. */
 export function describeFunctionPortFixUp(writes: readonly FunctionPortFixUpWrite[]): string[] {
   if (writes.length === 0) return [];
   const one = writes.length === 1;
   const lines = [
     `A name inside a code comment no longer makes a Function port. ${writes.length} wired ${one ? 'port' : 'ports'} ` +
-      `made that way ${one ? 'was' : 'were'} added to ${one ? 'its' : 'their'} Function's port list, so ${one ? 'its wire' : 'their wires'} still ${one ? 'works' : 'work'}.`
+      `made that way ${one ? 'was' : 'were'} added to ${one ? 'its' : 'their'} Function's port list. ${one ? 'Its wire' : 'Their wires'} still ${one ? 'works' : 'work'}.`
   ];
-  const shown = writes.slice(0, 12).map((w) => {
-    const node = w.nodeLabel ? `"${w.nodeLabel}"` : 'a Function';
-    return `${node} in ${w.component || 'the project'} keeps ${w.list === 'scriptInputs' ? 'in-' : 'out-'}${w.name}.`;
-  });
-  lines.push(...shown);
-  if (writes.length > shown.length) lines.push(`And ${writes.length - shown.length} more.`);
+  // One sentence per component and set of kept ports, naming ports as the node shows them (s20: the first version
+  // wrote "a Function in /X keeps in-reps." per port, so two Functions in one component read as a duplicate line).
+  // Arrays, not a Map's iterator: the viewer compiles this file at ES5, where `for…of` over an iterator runs zero times.
+  const nodes: FunctionPortFixUpWrite[][] = [];
+  for (const w of writes) {
+    const mine = nodes.find((n) => n[0].component === w.component && n[0].nodeId === w.nodeId);
+    if (mine) mine.push(w);
+    else nodes.push([w]);
+  }
+  const sentences: { component: string; label?: string; kept: string; functions: number }[] = [];
+  for (const nodeWrites of nodes) {
+    const { component, nodeLabel } = nodeWrites[0];
+    const kept = keptPorts(nodeWrites);
+    const same = sentences.find((s) => s.component === component && s.label === nodeLabel && s.kept === kept);
+    if (same) same.functions++;
+    else sentences.push({ component, label: nodeLabel, kept, functions: 1 });
+  }
+  const shown = sentences.slice(0, 6);
+  for (const s of shown) {
+    const named = s.label ? ` called "${s.label}"` : '';
+    const who = s.functions === 1 ? (s.label ? `"${s.label}" keeps` : 'a Function keeps') : `${s.functions} Functions${named} keep`;
+    lines.push(`In ${s.component || 'the project'}, ${who} ${s.kept}.`);
+  }
+  const hidden = sentences.slice(shown.length).reduce((n, s) => n + s.functions, 0);
+  if (hidden > 0) lines.push(`${hidden} more ${hidden === 1 ? 'Function keeps its' : 'Functions keep theirs'} the same way.`);
   return lines;
+}
+
+/** "the input id and the output Done", "the outputs NoodlObject and Done": the names a person sees on the node. */
+function keptPorts(writes: readonly FunctionPortFixUpWrite[]): string {
+  const inputs = writes.filter((w) => w.list === 'scriptInputs').map((w) => w.name);
+  const outputs = writes.filter((w) => w.list === 'scriptOutputs').map((w) => w.name);
+  const phrase = (kind: string, names: string[]) =>
+    names.length === 0 ? '' : `the ${kind}${names.length === 1 ? '' : 's'} ${andList(names)}`;
+  return [phrase('input', inputs), phrase('output', outputs)].filter(Boolean).join(' and ');
+}
+
+function andList(names: readonly string[]): string {
+  return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names[names.length - 1]}`;
 }
