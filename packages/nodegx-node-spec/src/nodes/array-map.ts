@@ -25,6 +25,7 @@
 
 import type { ChangeEvent } from '../spec';
 import { defineNode } from '../spec';
+import { notAList } from './items-input';
 import type { RecordRef } from '../registry';
 import { errorOutput } from './data-base';
 
@@ -67,7 +68,9 @@ export const MapCollection = defineNode({
   // through `get` and any other row's own property; v1 failed every run over a plain array of plain objects (what a
   // Function outputs) with `array-map/map-failed` ("model.get is not a function"). A function mapping is still handed
   // the row as it is.
-  version: 2,
+  // v3 (P109 ISL-026, P107-C10 ruled "Refuse it with a Failure"): a value on Items that is not a list — a number, `true`, a plain
+  // object, a record — fails the run with `array-map/not-a-list`; v2 mapped it as a list of one (the runtime threw in the setter).
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/mapcollectionnode.ts',
   needs: ['registry', 'random'],
   // s35 — the records a generated run maps, and an empty registry
@@ -174,6 +177,8 @@ export const MapCollection = defineNode({
         if (repeat) return { ...idle, send: ['error' as const] }; // :266-267 — Error re-sent, nothing raised, nothing pulsed
         return { set: { scheduled: false, lastError: message, lastReported: message } as Partial<MapState>, send: ['error' as const], emit: ['failure' as const] }; // :278
       };
+      const refused = notAList(s.source, (v) => w.registry.isCollection(v)); // v3 — C10
+      if (refused !== undefined) return fail('array-map/not-a-list', refused);
       if (s.source === undefined) {
         if (n > 0) return fail('array-map/no-items', 'Nothing to map — no array is connected to the Items input'); // :297-302
         return idle;

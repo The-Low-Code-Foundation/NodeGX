@@ -4,6 +4,7 @@ import Node = require('../../../node');
 import Collection = require('../../../collection');
 import Model = require('../../../model');
 import { outcomeOutputs, reportOutcomes } from '../../../outcome';
+import { notAList } from './itemsinput';
 import type {
   CollectionLike,
   EditorConnectionLike,
@@ -137,6 +138,8 @@ function sorter(this: SortSpec, a: ModelLike | Record<string, unknown>, b: Model
 interface FilterCollectionInstance extends NodeInstance {
   _internal: {
     collection?: CollectionLike;
+    /** P107-C10: why the value on Items is not a list (itemsinput.ts), while it stands. */
+    notAList?: string;
     /** Rebuilt from scratch on every run — a fresh collection, never mutated in place. */
     filteredCollection?: CollectionLike;
     enabled?: boolean;
@@ -375,8 +378,10 @@ const FilterCollectionNode: NodeDefinitionOptions = {
     },
     bindCollection: function (this: FilterCollectionInstance, collection: CollectionLike) {
       this.unbindCurrentCollection();
-      this._internal.collection = collection;
-      collection && collection.on('change', this._internal.collectionChangedCallback);
+      // P107-C10: what is not a list binds nothing, and the next run says so (itemsinput.ts)
+      this._internal.notAList = notAList(collection);
+      this._internal.collection = this._internal.notAList === undefined ? collection : undefined;
+      if (this._internal.collection) this._internal.collection.on('change', this._internal.collectionChangedCallback);
     },
     _onNodeDeleted: function (this: FilterCollectionInstance) {
       Node.prototype._onNodeDeleted.call(this);
@@ -498,6 +503,12 @@ const FilterCollectionNode: NodeDefinitionOptions = {
         const tokens = this._internal.pendingFilterOutcomes || [];
         this._internal.pendingFilterOutcomes = [];
         const requested = tokens.length > 0;
+
+        if (this._internal.notAList !== undefined) {
+          // P107-C10: refused, every time a run is due — a press gets its Failure, a value-path run pulses it once
+          this.reportFailure('array-filter/not-a-list', this._internal.notAList, undefined, tokens);
+          return;
+        }
 
         if (!this._internal.collection) {
           // Silent unless an author asked. Without the `requested` test this fires while the

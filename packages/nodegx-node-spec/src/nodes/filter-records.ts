@@ -45,6 +45,7 @@
 
 import type { ChangeEvent, InputDecl, ValueInputDecl } from '../spec';
 import { defineNode } from '../spec';
+import { notAList } from './items-input';
 import type { RecordRef, RegistryScript } from '../registry';
 import type { BackendScript } from '../world';
 import { valueDidChange } from './condition';
@@ -158,7 +159,10 @@ type Outcomes = Array<{ port: 'filter'; outcome: 'done' | 'failure'; error?: str
 
 export const FilterRecords = defineNode({
   type: 'FilterDBModels',
-  version: 1,
+  // v2 (P109 ISL-026, P107-C10 ruled "Refuse it with a Failure"): a value on Items that is not a list — a number, `true`, a plain
+  // object, a record — fails the run with `filter-records/not-a-list`; v1 filtered it as a list of one (the runtime threw in
+  // the setter).
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/filterdbmodelsnode.ts; api/queryutils.ts; @noodl/backend-contract translators',
   needs: ['registry', 'random', 'backend'],
   worldPool: { registries: REGISTRIES, backends: BACKENDS },
@@ -310,6 +314,8 @@ export const FilterRecords = defineNode({
         if (repeat) return { ...idle, send: ['error' as const] }; // Error re-sent, nothing raised, nothing pulsed
         return { set: { scheduled: false, lastError: message, lastReported: message }, send: ['error' as const], emit: ['failure' as const] }; // :426 — a plain pulse, no invocation
       };
+      const refused = notAList(s.source, (v) => w.registry.isCollection(v)); // v2 — C10
+      if (refused !== undefined) return fail('filter-records/not-a-list', refused);
       if (!s.source) {
         if (requested) return fail('filter-records/no-items', 'Nothing to filter — no records are connected to the Items input'); // :443-450
         return idle;

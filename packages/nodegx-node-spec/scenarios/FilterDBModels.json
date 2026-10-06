@@ -2220,5 +2220,32 @@
         ]
       }
     }
+  },
+  {
+    "name": "A plain object on Items is not a list: a Filter press fails with filter-records/not-a-list, and an array written after it filters again (row C10)",
+    "because": "P107-C10, ruled 2026-10-05 \"Refuse it with a Failure\", fixed in P109 ISL-026 (data/itemsinput.ts); the setter once called `collection.on` on it and threw (filterdbmodelsnode.ts :319)",
+    "params": {},
+    "steps": [
+      {
+        "set": "items",
+        "value": {
+          "a": 1
+        }
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle",
+      {
+        "set": "items",
+        "value": []
+      },
+      "settle",
+      {
+        "signal": "filter"
+      },
+      "settle"
+    ]
   }
 ]

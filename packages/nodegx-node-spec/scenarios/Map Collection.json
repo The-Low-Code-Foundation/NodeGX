@@ -122,9 +122,8 @@
     ]
   },
   {
-    "name": "A number on Items: the runtime's setter throws on `collection.on` (row C10); the spec binds it and the run fails inside the try",
-    "because": ":233 `collection && collection.on(…)`; :339 `.map` on a number throws inside the try",
-    "row": "NSP-012 §6 C10",
+    "name": "A number on Items is not a list: the run fails with array-map/not-a-list (row C10)",
+    "because": "P107-C10, ruled 2026-10-05 \"Refuse it with a Failure\", fixed in P109 ISL-026 (data/itemsinput.ts); the setter once called `collection.on` on it and threw (:233)",
     "params": {},
     "steps": [
       {

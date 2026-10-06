@@ -30,6 +30,7 @@
 
 import type { ChangeEvent, ValueInputDecl } from '../spec';
 import { defineNode } from '../spec';
+import { notAList } from './items-input';
 import type { CollectionRef, RecordRef, RegistryScript } from '../registry';
 import { valueDidChange } from './condition';
 import { errorOutput, runOnChange } from './data-base';
@@ -208,7 +209,10 @@ export const FilterCollection = defineNode({
   // v3 (s36, row C59 ruled "fix both" by Richard 2026-10-03): the filter tests a RECORD's data and any other row as it
   // is — the sort's rule (:95-97). A plain array of plain objects (what a Function outputs) now filters; v2 failed every
   // filtered run on it with `array-filter/filter-failed` ("Cannot read properties of undefined"). A `null` row still fails.
-  version: 3,
+  // v4 (P109 ISL-026, P107-C10 ruled "Refuse it with a Failure"): a value on Items that is not a list — a number, `true`, a plain
+  // object, a record — fails the run with `array-filter/not-a-list` and produces no items; v3 filtered it as a list of one
+  // (the runtime threw in the setter).
+  version: 4,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/filtercollectionnode.ts',
   needs: ['registry', 'random'],
   worldPool: { registries: REGISTRIES },
@@ -362,6 +366,8 @@ export const FilterCollection = defineNode({
         if (repeat) return { ...idle, send: ['error'] }; // :453-454 — Error re-sent, nothing raised, nothing pulsed
         return { set: { scheduled: false, lastError: message, lastReported: message }, send: ['error'], emit: ['failure'] }; // :468-470 — a plain pulse, no invocation
       };
+      const refused = notAList(s.source, (v) => w.registry.isCollection(v)); // v4 — C10
+      if (refused !== undefined) return fail('array-filter/not-a-list', refused);
       if (!s.source) {
         if (requested) return fail('array-filter/no-items', 'Nothing to filter — no array is connected to the Items input'); // :490-497
         return idle; // :485-499 silent

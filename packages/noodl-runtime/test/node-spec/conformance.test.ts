@@ -94,19 +94,6 @@ const coalescedPress = (port: string) => (d: Divergence) => {
 };
 
 /**
- * NSP-012 §6 C10 — Array Filter and Array Map bind `Items` with `collection.on('change', …)`
- * (:343, :233): a value that is neither an array nor null/undefined — a number, a boolean, a plain
- * object — has no `on` and the setter THROWS. Narrow: the throw's own message, at the set.
- */
-const nonArrayOnItems = (d: Divergence) => {
-  if (d.difference.threw === undefined || !/\.on is not a function/.test(d.difference.threw)) return false;
-  // s25: a registry array's canonical form (`{ "$array": name, items }`, a `$array` step) is an array, not a plain object
-  const isRegistryArray = (v: unknown) => typeof (v as { $array?: unknown }).$array === 'string';
-  const bad = d.reference.findIndex((e) => isSet(e, 'items', (v, present) => present && v !== null && typeof v !== 'string' && !Array.isArray(v) && typeof v === 'object' && !isRegistryArray(v) ? true : present && (typeof v === 'number' || typeof v === 'boolean')));
-  return bad >= 0 && d.difference.index <= bad + 1;
-};
-
-/**
  * NSP-012 §6 C11 — the Object node's `<property> Changed` outputs are declared to the editor
  * (modelnode2.ts :517-525) and never registered: `registerOutputIfNeeded` handles `prop-` only
  * (:451-460), a wire from `<p> Changed` throws inside the connection and is dropped
@@ -559,11 +546,7 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick },
     { row: 'NSP-016 §6 C80 — Enable Label changed while the box holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard }
   ],
-  // s25 — Array Filter's twin: the same `bindCollection` (filterdbmodelsnode.ts :316-320), and a sort outside the `try`
-  FilterDBModels: [
-    { row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems },
-    { row: 'NSP-014 §6.14 C43 — a Sorting over rows that are not records throws out of the run: no Error, no Failure, the press never answered', matches: sortCannotCompare }
-  ],
+  FilterDBModels: [{ row: 'NSP-014 §6.14 C43 — a Sorting over rows that are not records throws out of the run: no Error, no Failure, the press never answered', matches: sortCannotCompare }],
   // s23 — C11's twin on the Record node: `registerOutputIfNeeded` handles `prop-` only (dbmodelnode2.ts :478-480)
   DbModel2: [{ row: 'NSP-014 §6.8 C37 — the Record\'s `<field> Changed` never fires: nothing registers the output', matches: deadPropertyChanged }],
   // s26 — C37's twin on the User node: `registerOutputIfNeeded` handles `prop-` and the three session signals only (user.ts :447-463)
@@ -578,8 +561,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   Model2: [{ row: 'NSP-012 §6 C11 — `<property> Changed` never fires: nothing registers the output', matches: deadPropertyChanged },
     { row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMergeOnAny((p) => p.startsWith('prop-')) }
   ],
-  'Filter Collection': [{ row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems }],
-  'Map Collection': [{ row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems }],
   'Value Changed': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
   'net.noodl.Log': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
   'net.noodl.HTTP': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('headers') }],

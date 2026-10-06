@@ -395,9 +395,8 @@
     }
   },
   {
-    "name": "A number on Items: the runtime's setter throws on `collection.on` (row C10); the spec binds it and a run finds no rows to read",
-    "because": ":362 `collection && collection.on(…)` on a value with no `on`",
-    "row": "NSP-012 §6 C10",
+    "name": "A number on Items is not a list: the run fails with array-filter/not-a-list, a Filter press with it (row C10)",
+    "because": "P107-C10, ruled 2026-10-05 \"Refuse it with a Failure\", fixed in P109 ISL-026 (data/itemsinput.ts); the setter once called `collection.on` on it and threw (:362)",
     "params": {},
     "steps": [
       {

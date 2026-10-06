@@ -4,6 +4,7 @@ import Node = require('../../../node');
 import Collection = require('../../../collection');
 import Model = require('../../../model');
 import { outcomeOutputs, reportOutcomes } from '../../../outcome';
+import { notAList } from './itemsinput';
 import type {
   CollectionLike,
   ModelLike,
@@ -36,6 +37,8 @@ interface MapCollectionInstance extends NodeInstance {
   _internal: {
     /** The bound source collection, or `undefined` between binds. */
     collection?: CollectionLike;
+    /** P107-C10: why the value on Items is not a list (itemsinput.ts), while it stands. */
+    notAList?: string;
     /** Result of the last run. Fresh collection each time — never mutated in place. */
     mappedCollection?: CollectionLike;
     mapCode?: string;
@@ -229,8 +232,10 @@ const MapCollectionNode: NodeDefinitionOptions = {
     },
     bindCollection: function (this: MapCollectionInstance, collection: CollectionLike) {
       this.unbindCurrentCollection();
-      this._internal.collection = collection;
-      collection && collection.on('change', this._internal.collectionChangedCallback);
+      // P107-C10: what is not a list binds nothing, and the next run says so (itemsinput.ts)
+      this._internal.notAList = notAList(collection);
+      this._internal.collection = this._internal.notAList === undefined ? collection : undefined;
+      if (this._internal.collection) this._internal.collection.on('change', this._internal.collectionChangedCallback);
     },
     _onNodeDeleted: function (this: MapCollectionInstance) {
       Node.prototype._onNodeDeleted.call(this);
@@ -288,6 +293,12 @@ const MapCollectionNode: NodeDefinitionOptions = {
         const tokens = this._internal.pendingMapOutcomes || [];
         this._internal.pendingMapOutcomes = [];
         const requested = tokens.length > 0;
+
+        if (this._internal.notAList !== undefined) {
+          // P107-C10: refused, every time a run is due — a press gets its Failure, a value-path run pulses it once
+          this.reportFailure('array-map/not-a-list', this._internal.notAList, undefined, tokens);
+          return;
+        }
 
         if (this._internal.collection === undefined) {
           // Silent unless an author asked, for the reason Array Filter states: the script and the

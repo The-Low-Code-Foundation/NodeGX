@@ -18,6 +18,7 @@ import type {
 } from '@noodl/types';
 
 import { outcomeOutputs, reportOutcomes } from '../../../outcome';
+import { notAList } from './itemsinput';
 
 import Node = require('../../../node');
 import CollectionImport = require('../../../collection');
@@ -69,6 +70,8 @@ interface FilterDbModelsInstance extends NodeInstance {
   _internal: {
     enabled?: boolean;
     collection?: CollectionLike;
+    /** P107-C10: why the value on Items is not a list (itemsinput.ts), while it stands. */
+    notAList?: string;
     collectionName?: string;
     filteredCollection?: CollectionLike;
     filterSettings: Record<string, unknown>;
@@ -317,8 +320,10 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
     },
     bindCollection: function (this: FilterDbModelsInstance, collection: CollectionLike | undefined) {
       this.unbindCurrentCollection();
-      this._internal.collection = collection;
-      collection && collection.on('change', this._internal.collectionChangedCallback);
+      // P107-C10: what is not a list binds nothing, and the next run says so (itemsinput.ts)
+      this._internal.notAList = notAList(collection);
+      this._internal.collection = this._internal.notAList === undefined ? collection : undefined;
+      if (this._internal.collection) this._internal.collection.on('change', this._internal.collectionChangedCallback);
     },
     /** Move the `save` subscription onto `store`, off whatever it was on. */
     bindStoreEvents: function (this: FilterDbModelsInstance, store: FilterStoreLike | undefined) {
@@ -438,6 +443,12 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
         const tokens = this._internal.pendingFilterOutcomes || [];
         this._internal.pendingFilterOutcomes = [];
         const requested = tokens.length > 0;
+
+        if (this._internal.notAList !== undefined) {
+          // P107-C10: refused, every time a run is due — a press gets its Failure, a value-path run pulses it once
+          this.reportFailure('filter-records/not-a-list', this._internal.notAList, undefined, tokens);
+          return;
+        }
 
         if (!this._internal.collection) {
           // Silent unless an author asked: without this test the raise fires while the graph
