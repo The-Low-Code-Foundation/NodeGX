@@ -256,7 +256,11 @@ describe('Set Record Properties against a Directus backend', () => {
 
     const model = {
       getId: () => '7',
-      data: { title: 'Grace' },
+      data: { title: 'Grace' } as Record<string, unknown>,
+      // P109 ISL-029 (P107-C34): every save keeps what its write replaces, to put back on a failure
+      get(key: string) {
+        return this.data[key];
+      },
       set() {
         /* the model is not what this test reads */
       }

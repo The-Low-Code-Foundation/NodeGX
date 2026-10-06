@@ -12,13 +12,13 @@
  *   specified` (:146-147) — and otherwise joins the frame's batch. At the frame's end ONE save answers the batch: no
  *   record bound is `Missing Record Id` (:153-156); `Only If Unchanged` names are read off the record BEFORE the write
  *   — a name the record does not hold, or holds a list or object under, fails with its sentence and writes nothing
- *   (:163-181); then every property port is written onto the record (:184-188) — AND STAYS WRITTEN whatever follows
- *   but a refused precondition (row C34) — then a Backend the project does not have is the not-configured sentence
- *   (:191-192); otherwise the node hands its backend `save({ collection: <Class>, objectId: <the record's id>, data:
+ *   (:163-181); then a Backend the project does not have is the not-configured sentence and nothing is written
+ *   (v2, row C34); then every property port is written onto the record, what it replaced kept; otherwise the node hands its backend `save({ collection: <Class>, objectId: <the record's id>, data:
  *   <the property ports, or the whole record under Properties to store = All>, acl: <the rules' ACL>, ifMatch })`
  *   (:194-199; world.ts BACKEND, R9). Success writes every key the backend hands back onto the record and is Done for
- *   each press (:200-206). A failure whose detail says `precondition-failed` puts back what the write replaced and says
- *   so (:208-216); any other is the backend's message or `Failed to save.` (:218). A press while an earlier save is
+ *   each press (:200-206). ANY failure puts back what the write replaced (v2, row C34 ruled "Put the old values back": v1
+ *   put it back only for a refused precondition, and kept a write no backend held); one whose detail says
+ *   `precondition-failed` says so (:208-216); any other is the backend's message or `Failed to save.` (:218). A press while an earlier save is
  *   out makes a second call.
  *   LOCAL (`scheduleStore`, :223-251): NO pre-flight — every press is an invocation (:227) — and one write per frame:
  *   no record bound is `Missing Record Id` (:241-244); otherwise the property ports are written onto the record and
@@ -111,7 +111,9 @@ const isScalar = (v: unknown) => v === null || typeof v === 'string' || typeof v
 
 export const UpdateRecord = defineNode({
   type: 'SetDbModelProperties',
-  version: 1,
+  // v2 (P109 ISL-029, row C34 ruled "Put the old values back"): any failed save puts back what its write replaced, and a
+  // Backend the project does not have writes nothing; v1 kept the write on every failure but a refused precondition.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/setdbmodelpropertiesnode.ts; dbmodelcrudbase.ts',
   needs: ['backend', 'registry'],
   worldPool: {
@@ -264,16 +266,16 @@ export const UpdateRecord = defineNode({
           }
         }
         if (refused) continue;
-        // :184-188 — the write, kept whatever follows (row C34)
-        const before: Record<string, unknown> = {};
-        for (const key in s.inputValues) {
-          if (ifMatch) before[key] = record.get(key);
-          record.set(key, s.inputValues[key], { resolve: true });
-        }
-        const backend = w.backendFor(s.backendId); // :191-192, dbmodelcrudbase.ts :283-301
+        const backend = w.backendFor(s.backendId); // dbmodelcrudbase.ts :283-301 — v2 (C34): before the write, which it spares
         if (backend === undefined) {
           fail(n, NO_BACKEND_MESSAGE(s.backendId));
           continue;
+        }
+        // the write, what it replaces kept for any failure (v2, C34)
+        const before: Record<string, unknown> = {};
+        for (const key in s.inputValues) {
+          before[key] = record.get(key);
+          record.set(key, s.inputValues[key], { resolve: true });
         }
         const id = 'save:' + nextCall++;
         // :194-199 — `data` is the live object on the runtime; the call is recorded canonical at the call
@@ -303,9 +305,9 @@ export const UpdateRecord = defineNode({
           if (record && response) for (const key in response) record.set(key, response[key]);
           return { send: [], outcomes: dones(n) };
         }
+        // what the write replaced, put back on ANY failure (v2, C34; v1 only for a refused precondition)
+        if (record && call) for (const key in call.before) record.set(key, call.before[key]);
         if (answer.detail && answer.detail.reason === 'precondition-failed') {
-          // :208-216 — what the write replaced, put back
-          if (record && call) for (const key in call.before) record.set(key, call.before[key]);
           return { set: { error: PRECONDITION_MESSAGE }, send: ['error'], outcomes: failures(n, RECORD_FAILURE_CODE) };
         }
         return { set: { error: answer.error || 'Failed to save.' }, send: ['error'], outcomes: failures(n, RECORD_FAILURE_CODE) };

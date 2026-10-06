@@ -320,8 +320,8 @@
     }
   },
   {
-    "name": "a Backend the project lacks: the not-configured sentence names it; no call — and the property ports stay written on the record (row C34)",
-    "because": "setdbmodelpropertiesnode.ts :184-192 — the write comes before the backend is resolved",
+    "name": "a Backend the project lacks: the not-configured sentence names it; no call — and nothing is written on the record (v2, C34)",
+    "because": "the backend is resolved before the write, which it spares (C34, fixed in P109 ISL-029 — v1 left the property ports written though nothing was sent)",
     "params": {},
     "steps": [
       "settle",
@@ -795,8 +795,8 @@
     }
   },
   {
-    "name": "a precondition refusal on a save that set no precondition: the sentence still, nothing to put back",
-    "because": "setdbmodelpropertiesnode.ts :184, :208-216",
+    "name": "a precondition refusal on a save that set no precondition: the sentence still, and the write put back (v2, C34)",
+    "because": "setdbmodelpropertiesnode.ts :184, :208-216 — and any failure puts the write back (C34, fixed in P109 ISL-029; v1 had nothing to put back without a precondition)",
     "params": {},
     "steps": [
       "settle",
@@ -852,8 +852,8 @@
     }
   },
   {
-    "name": "the backend refuses: the property ports stay written on the record (row C34)",
-    "because": "setdbmodelpropertiesnode.ts :184-188, :218 — only a refused precondition puts anything back",
+    "name": "the backend refuses: what the write replaced is put back on the record (v2, C34)",
+    "because": "any failure puts back what the write replaced, so the record shows what the backend holds (C34, fixed in P109 ISL-029 — v1 put it back only for a refused precondition)",
     "params": {},
     "steps": [
       "settle",
