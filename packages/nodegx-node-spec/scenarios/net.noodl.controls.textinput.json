@@ -305,7 +305,7 @@
   },
   {
     "name": "Max length 3: typing 'hello' stops at 'hel'; Insert Text 'xy' finds no room (Unchanged); a Backspace and an Insert 'xy' in one frame: the Insert finds the room the Backspace made and writes what fits ('hex', Done); a Value 'toolong' from the graph is not truncated — the runtime's Insert reads the text before the Backspace ('he', Unchanged: row C69)",
-    "because": "the element's maxlength refuses a key past it (the browser); TextInput.tsx :346-351 Max length bounds an Insert, kept while it fits; text-input.ts :161 'it does not truncate a value arriving on Text'",
+    "because": "the element's maxlength refuses a key past it (the browser); TextInput.tsx :346-351 Max length bounds an Insert, kept while it fits; text-input.ts :161 'it does not truncate a value arriving on Text' — was row C69, fixed in P109 ISL-031: the runtime now does this",
     "params": {
       "maxLength": 3
     },
@@ -336,8 +336,7 @@
         "value": "toolong"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C69"
+    ]
   },
   {
     "name": "Max length 3: typing 'hello' stops at 'hel'; Insert Text 'xy' finds no room (Unchanged); a Backspace, then in the next frame an Insert 'xy' writes what fits ('hex', Done); a Value 'toolong' from the graph is not truncated",
@@ -694,7 +693,7 @@
   },
   {
     "name": "two Sets and an Insert in one frame are answered in the order pressed: Done, Done (the second with nothing to change, still Done), then the Insert Done on the Sets' text ('si'); Value Changed three times — the runtime's Insert reads the field before the Sets ('i', row C69)",
-    "because": "node.ts :1276-1279 the callbacks in scheduling order; text-input.ts :195, :264 each reads the frame-end value; one write after another (ruled 2026-10-05)",
+    "because": "node.ts :1276-1279 the callbacks in scheduling order; text-input.ts :195, :264 each reads the frame-end value; one write after another (ruled 2026-10-05) — was row C69, fixed in P109 ISL-031: the runtime now does this",
     "params": {
       "runOnChange-startValue": false
     },
@@ -718,8 +717,7 @@
         "signal": "insert"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C69"
+    ]
   },
   {
     "name": "Backspace and Insert Text while the field is off the page edit the start value: Value sent at once with no Value Changed (Done); the mount then announces it",
@@ -19440,8 +19438,7 @@
   },
   {
     "name": "the matrix's writing Insert Text queued behind a Clear: an act that does not drain the frame (a Tab, a key, typing, or a disabled field's press, release or click), enabled or disabled, with the keyboard off or on the field, remounting in the act's frame or not — the Clear empties the field and the Insert at the frame's end writes into the empty field — the runtime's Insert reads the text before the Clear (row C69)",
-    "because": "one write after another (ruled 2026-10-05); TextInput.tsx :331 reads the text React last drew (row C69)",
-    "row": "NSP-016 §6 C69",
+    "because": "one write after another (ruled 2026-10-05); TextInput.tsx edit reads the text the last write left (TextInput.text), no longer the text React last drew (was row C69, fixed in P109 ISL-031)",
     "params": {
       "runOnChange-startValue": false
     },
@@ -21363,7 +21360,7 @@
   },
   {
     "name": "a write converts with the Type as it stands: Type Number and Clear in one frame publish null (the Number field's empty), Done; a Clear in the next frame is Unchanged; a Backspace on a field holding '3' in the frame Type turns Number publishes null — the runtime converts with the Type it last drew ('' twice: row C72)",
-    "because": "one write after another (ruled 2026-10-05); TextInput.tsx :94 converts with the props React last drew (row C72)",
+    "because": "one write after another (ruled 2026-10-05); TextInput.tsx setText converts with the node's Type as it stands, no longer the props React last drew (was row C72, fixed in P109 ISL-031)",
     "params": {},
     "steps": [
       "settle",
@@ -21396,12 +21393,11 @@
         "signal": "backspace"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C72"
+    ]
   },
   {
     "name": "an Insert Text's room is measured with the Max length as it stands: Max length 2 written with the Insert in one frame onto 'abcd' leaves no room (Unchanged), and the next frame's Insert none either — the runtime measures with the Max length it last drew and lets 'xy' through (row C72)",
-    "because": "one write after another (ruled 2026-10-05); TextInput.tsx :346 measures with the props React last drew (row C72)",
+    "because": "one write after another (ruled 2026-10-05); TextInput.tsx edit measures with the node's Max length as it stands, no longer the props React last drew (was row C72, fixed in P109 ISL-031)",
     "params": {
       "textToInsert": "xy"
     },
@@ -21424,12 +21420,11 @@
         "signal": "insert"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C72"
+    ]
   },
   {
     "name": "one write after another, with or without a turn of the event loop between: a Backspace then an Insert Text at the frame's end edits the shortened text ('ab0') with an advance of 0 ms between, and again without one ('ab0' from 'ab0'); a Clear then a Backspace is Unchanged, with an advance between or not — the runtime's Insert without the advance reads the text before the Backspace ('ab00') and its Backspace after a Clear puts text back (row C69)",
-    "because": "one write after another (ruled 2026-10-05); TextInput.tsx :331 reads the text React last drew (row C69)",
+    "because": "one write after another (ruled 2026-10-05); TextInput.tsx edit reads the text the last write left (TextInput.text), no longer the text React last drew (was row C69, fixed in P109 ISL-031)",
     "params": {
       "startValue": "abc",
       "textToInsert": "0"
@@ -21475,8 +21470,7 @@
         "signal": "backspace"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C69"
+    ]
   },
   {
     "name": "a Backspace, an advance of 0 ms, then an Insert Text at the frame's end edits the shortened text ('ab0'); a Clear, an advance, then a Backspace is Unchanged",

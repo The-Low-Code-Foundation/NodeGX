@@ -65,6 +65,8 @@ type State = {
 interface TextInputNodeSeam {
   _typed?: (text: string) => void;
   _announcedValueIs?: (value: string | number | null) => boolean;
+  /** P107-C72 — the node's own props, current as each input arrives; React's copy waits for the holder's render */
+  props?: { type?: unknown; maxLength?: unknown };
 }
 
 export class TextInput extends React.Component<TextInputProps, State> {
@@ -72,9 +74,24 @@ export class TextInput extends React.Component<TextInputProps, State> {
   /**
    * The text the field holds as of the last write, at once — `state.value` only catches up when
    * React draws, so a second write in the same frame would read the text before the first.
-   * Every write and keystroke goes through `setText`. Clear reads it (P107-D33).
+   * Every write and keystroke goes through `setText`. Clear reads it (P107-D33); so does `edit`,
+   * so an Insert Text or Backspace after another write in the same frame works on what that write
+   * left (P107-C69, ruled "each sees the last").
    */
   text: string;
+
+  /**
+   * P107-C69 — the cursor as the writes since React last drew left it, or `null` when none has: the
+   * element's selection only catches up at the commit. A changed value puts it at the end (HTML's
+   * value setter); an edit in a focused field puts it after what it wrote.
+   */
+  private pendingCaret: number | null = null;
+
+  /** P107-C72 — the Type or Max length as it stands on the node, not as React last drew it. */
+  private live(key: 'type' | 'maxLength') {
+    const props = (this.props.noodlNode as unknown as TextInputNodeSeam | undefined)?.props;
+    return props && key in props ? props[key] : this.props[key];
+  }
 
   constructor(props: TextInputProps) {
     super(props);
@@ -98,9 +115,11 @@ export class TextInput extends React.Component<TextInputProps, State> {
     // Inward it is always text: `startValue` may arrive as a number on a Number field, and the
     // `<input>`'s `value` has to be a string or React drops the control.
     const text = value === null || value === undefined ? '' : String(value);
+    if (text !== this.text) this.pendingCaret = text.length;
     this.text = text;
     this.setState({ value: text }, afterRender);
-    this.props.onTextChanged && this.props.onTextChanged(outwardValueForFieldType(this.props.type, text));
+    this.props.onTextChanged &&
+      this.props.onTextChanged(outwardValueForFieldType(this.live('type') as TextInputProps['type'], text));
   }
 
   componentDidMount() {
@@ -303,6 +322,13 @@ export class TextInput extends React.Component<TextInputProps, State> {
     // value through the node, and a converted value would bring a Number field's "1." back as "1".
     (this.props.noodlNode as unknown as TextInputNodeSeam | undefined)?._typed?.(value);
     this.setText(value);
+    // a keystroke is committed before the event returns, and the browser's caret is where the person typed
+    this.pendingCaret = null;
+  }
+
+  componentDidUpdate() {
+    // drawn: the element's selection is current again (an edit's own cursor is set by its callback, after this)
+    this.pendingCaret = null;
   }
 
   /**
@@ -315,6 +341,10 @@ export class TextInput extends React.Component<TextInputProps, State> {
     if (el && this.hadCaret) {
       try {
         if (el.selectionStart !== null && el.selectionEnd !== null) {
+          if (this.pendingCaret !== null) {
+            const at = Math.min(this.pendingCaret, value.length);
+            return { start: at, end: at };
+          }
           return { start: Math.min(el.selectionStart, value.length), end: Math.min(el.selectionEnd, value.length) };
         }
       } catch (e) {
@@ -337,7 +367,7 @@ export class TextInput extends React.Component<TextInputProps, State> {
    * @returns whether the field's text changed
    */
   edit(mode: 'insert' | 'backspace', replacement = ''): boolean {
-    const value = this.state.value ?? '';
+    const value = this.text ?? '';
     const { start, end } = this.caret(value);
     let from = start;
     let text = replacement;
@@ -352,7 +382,7 @@ export class TextInput extends React.Component<TextInputProps, State> {
       }
     } else {
       // 🔒 R12 — Max length holds, as it does for a typed key: what does not fit is not written.
-      const maxLength = Number(this.props.maxLength);
+      const maxLength = Number(this.live('maxLength'));
       if (maxLength > 0) {
         const room = Math.max(0, maxLength - (value.length - (end - start)));
         text = Array.from(text).reduce((kept, ch) => (kept.length + ch.length <= room ? kept + ch : kept), '');
@@ -376,6 +406,8 @@ export class TextInput extends React.Component<TextInputProps, State> {
         }
       }
     });
+    // P107-C69 — the next edit in this frame starts where this one left the cursor, as the callback will put it
+    if (this.hasFocus()) this.pendingCaret = caret;
     return true;
   }
 

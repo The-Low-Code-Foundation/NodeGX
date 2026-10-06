@@ -67,9 +67,10 @@
  *     field as the write before it left it — a Backspace after a Clear in the same frame finds the
  *     field empty, an Insert Text at the frame's end finds the Value written earlier in it — and
  *     converts with the Type, and measures an Insert Text's room with the Max length, as they stand
- *     when it runs. The runtime's component reads its text and those two inputs as it last DREW
- *     them (TextInput.tsx :331, :94, :346), so a write in the frame of another write, or of a Type
- *     or Max length change, works on what was there before: rows C69 and C72, known on the runtime.
+ *     when it runs. The runtime's component read its text and those two inputs as it last DREW
+ *     them, so a write in the frame of another write, or of a Type or Max length change, worked on
+ *     what was there before: rows C69 and C72, fixed in P109 ISL-031 (TextInput.text and the
+ *     cursor kept at each write, the node's Type and Max length read as they stand).
  *   - **Type** (`props.type`, TextInput.tsx :201): converts every write at once (above); the element
  *     follows it at the next paint — what the element shows, whether it has a cursor to read — and a
  *     change between Text Area and the rest replaces the element (`<textarea>` ↔ `<input>`,
@@ -247,7 +248,7 @@ export const TextInput = defineNode({
   // v2 (NSP-023, R12, 2026-10-05): the intent Richard ruled where v1 copied how React draws — each write sees the one before it
   // (v1 `field` / `pending`, the props as last rendered: rows C69, C72), a mouse press fires Pointer Down (C68), Enable Label
   // keeps the keyboard (C80), a field's resting cursor is at the end (D35); v1's `turn` handler is gone. Every row is known on
-  // the runtime target (conformance.test.ts), never in this spec.
+  // the runtime target (conformance.test.ts), never in this spec — C69 and C72 until P109 ISL-031 fixed the runtime.
   // v3 (P109 ISL-031, P107-D32 "Always text"): off the page the value is made text before it is published.
   // v4 (P109 ISL-031, P107-D33 "Check the field's text"): Clear is Unchanged only when the field's text was empty too.
   version: 4,
@@ -658,7 +659,7 @@ function setText(s: Readonly<State>, text: unknown): Write {
  */
 function componentSetText(s: Readonly<State>, value: unknown, edited: number | null = null): Omit<Write, 'landed'> {
   const text = str(value);
-  const out = outward(s.fieldType, text); // the Type as it stands (the runtime: as last drawn — row C72)
+  const out = outward(s.fieldType, text); // the Type as it stands (the runtime too since P109 ISL-031; it was as last drawn — row C72)
   return { set: { ...written(s, text, edited), ...sent(s, out), announced: out, hasAnnounced: true }, send: ['onTextChanged'], emit: ['textChanged'] };
 }
 
@@ -696,7 +697,7 @@ function clear(s: Readonly<State>): Write {
 
 /**
  * text-input.ts :463-483 `edit` → TextInput.tsx :330-371 on the page: on the field as the last write left it, at the caret
- * (`caretOf`), within `Number(Max length)` as it stands when above 0 (rows C69, C72 on the runtime); off the page the start
+ * (`caretOf`), within `Number(Max length)` as it stands when above 0 (rows C69, C72, fixed on the runtime in P109 ISL-031); off the page the start
  * value is appended to or trimmed.
  */
 function edit(s: Readonly<State>, mode: 'insert' | 'backspace', replacement: string): Write {

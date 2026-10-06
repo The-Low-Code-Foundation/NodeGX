@@ -217,41 +217,10 @@ function settledFrame(t: readonly TraceEvent[], index: number): [number, number]
   while (start >= 0 && t[start].t !== 'settle') start--;
   return [start + 1, k];
 }
-const TEXT_WRITES = ['clear', 'backspace', 'set', 'insert'];
-const isTextWrite = (e: TraceEvent) => (e.t === 'in' && TEXT_WRITES.includes(portOf(e) ?? '')) || (e.t === 'set' && portOf(e) === 'startValue');
-/** The difference is on the text: the Value output, Value Changed, or a write's outcome. */
-const onText = (e: TraceEvent | undefined) =>
-  !!e && ((e.t === 'value' && portOf(e) === 'onTextChanged') || (e.t === 'signal' && portOf(e) === 'textChanged') || (e.t === 'outcome' && TEXT_WRITES.includes(portOf(e) ?? '')));
 /** The Type the reference last wrote before `index` (params arrive as sets first); `'text'` when none. */
 const typeBefore = (t: readonly TraceEvent[], index: number) => {
   for (let k = index - 1; k >= 0; k--) if (t[k].t === 'set' && portOf(t[k]) === 'type') return valueOf(t[k]);
   return 'text';
-};
-
-/**
- * NSP-016 §6 C69 — TextInput.tsx :331 `edit` reads the text React last drew: an Insert Text or Backspace in a frame with another write
- * to the text works on the text before it, and React's last write wins. Narrow: a frame holding an Insert Text or Backspace and at least
- * one other write to the text (a Value, Set, Clear, Insert Text or Backspace), and the difference on the text in that frame's settle group.
- */
-const staleEdit = (d: Divergence) => {
-  if (d.difference.threw !== undefined || !(onText(d.difference.reference) || onText(d.difference.actual))) return false;
-  const f = settledFrame(d.reference, d.difference.index);
-  if (!f) return false;
-  const writes = d.reference.slice(f[0], f[1]).filter(isTextWrite);
-  return writes.length >= 2 && writes.some((e) => e.t === 'in' && (portOf(e) === 'insert' || portOf(e) === 'backspace'));
-};
-
-/**
- * NSP-016 §6 C72 — TextInput.tsx :94 / :346 convert with the Type, and measure an Insert Text's room with the Max length, React last
- * drew: a write in the frame a Type or Max length change arrives uses the old one. Narrow: a frame holding a Type or Max length write
- * and a write to the text, and the difference on the text in that frame's settle group.
- */
-const staleProps = (d: Divergence) => {
-  if (d.difference.threw !== undefined || !(onText(d.difference.reference) || onText(d.difference.actual))) return false;
-  const f = settledFrame(d.reference, d.difference.index);
-  if (!f) return false;
-  const frame = d.reference.slice(f[0], f[1]);
-  return frame.some((e) => e.t === 'set' && (portOf(e) === 'type' || portOf(e) === 'maxLength')) && frame.some(isTextWrite);
 };
 
 /**
@@ -451,8 +420,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   'net.noodl.controls.textinput': [
     // NSP-023 (R12) — the Text Input v2 states the intent; what React's drawing makes the runtime do instead
     { row: 'NSP-016 §6 C68 — a mouse press on a one-line field fires no Pointer Down, sets no Pressed and runs no drain (its own onMouseDown replaces the control\'s)', matches: mousePressOnOneLine },
-    { row: 'NSP-016 §6 C72 — a write in the frame a Type or Max length change arrives converts / measures with the old one (the props React last drew)', matches: staleProps },
-    { row: 'NSP-016 §6 C69 — an Insert Text or Backspace in a frame with another write to the text works on the text React last drew', matches: staleEdit },
     { row: 'NSP-016 §6 C80 — Enable Label changed while the field holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
     { row: 'NSP-016 §6 D35 — a Text Area React puts on the page rests its cursor at the start: an insert, a key or an Enter goes in before the text', matches: textAreaRestsAtStart }
   ],
