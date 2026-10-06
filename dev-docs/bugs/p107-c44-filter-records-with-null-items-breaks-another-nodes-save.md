@@ -1,12 +1,15 @@
 ---
 id: P107-C44
 title: A Filter Records holding null on Items crashes inside another node's save of its Class — the saving node's Error gets the message, and a Query Records listening after it misses the save
-status: scheduled
+status: fixed
+commit: 3f7c5eeb3
 phase: P109
 task: ISL-026
 severity: medium
 area: runtime / Filter Records (`FilterDBModels`) — `cloudStoreEvents`
 found: P107 (the node says what it does) s25, 2026-10-02
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/FilterDBModels.json "null on Items with a filter, a Class and a Backend holds nothing: a save to that Class is not heard here, and nothing throws in the store's event (row C44)"
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.14 (row C44); graph scenarios/graph/s09-the-filter-follows.json "C44 — …"; scenarios/FilterDBModels.json "null on Items …"
 ---
 
@@ -31,3 +34,5 @@ change."* (The throw needs: Record changes ticked, a filter, the save's class = 
 runtime's is the known row.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Treat it as holding nothing".** The save goes through cleanly and other lists update. A one-line change. The question as asked: *"Should Filter Records treat an empty Items as holding nothing, so it stops breaking other saves?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 2026-10-06 (P109 s21, ISL-026), as ruled.** The save listener stops at a null Items as at undefined. Runtime 200: Filter Records conforms, mutants 157 / 157. Control: the C44 scenario fails on HEAD's file.

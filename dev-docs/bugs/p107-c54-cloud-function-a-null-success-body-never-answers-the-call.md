@@ -1,12 +1,15 @@
 ---
 id: P107-C54
 title: Cloud Function — a success whose body is JSON null throws, and the Call is never answered
-status: scheduled
+status: fixed
+commit: 307bdc69d
 phase: P109
 task: ISL-026
 severity: medium
 area: viewer / Cloud Function (`cloudfunction2.ts` :292, :301 — `res !== undefined`, then `res.result`)
 found: P107 (the node says what it does) s32, 2026-10-03
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/CloudFunction2.json "C54: a success whose body is JSON null is no result — Done, nothing moves"
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.34–§6.36 (row C54); scenario "C54: a success whose body is JSON null …" (packages/nodegx-node-spec/scenarios/CloudFunction2.json); measured on the runtime target with the world's XMLHttpRequest — and first in a stand-in probe, where the throw escaped as `TypeError: Cannot read properties of null (reading 'result')`
 ---
 
@@ -39,3 +42,5 @@ already states that reading (spec v1); the fix closes the row with no spec chang
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Treat it as empty".** Done fires and nothing changes, the same as an empty answer today. A one-line change. The question as asked: *"Should an answer of null be treated like an empty answer, firing Done with no outputs changed?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 2026-10-06 (P109 s21, ISL-026), as ruled.** A success whose body is JSON `null` takes the empty-answer branch: Done, nothing moves. Runtime 200: conforms 18 / 18, mutants 26 / 26. Control: the C54 scenario fails on HEAD's file.

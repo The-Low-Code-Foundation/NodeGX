@@ -1,12 +1,15 @@
 ---
 id: P107-C24
 title: Navigate To Path never answers a press when Path is not text (null, a number) — the frame-end callback throws
-status: scheduled
+status: fixed
+commit: 9af85dee9
 phase: P109
 task: ISL-026
 severity: medium
 area: runtime / Navigate To Path (viewer)
 found: P107 NSP-015 s17, 2026-10-01
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/PageStackNavigateToPath.json "C24 — a Path that is not text (null) is read as no Path: Failure navigate-to-path/no-path"
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md §6.1c, §6.2
 ---
 
@@ -28,3 +31,5 @@ Proposed: read a Path that is not text as no Path — Failure `navigate-to-path/
 to navigate to" (what the spec says). One line (`typeof formattedPath !== 'string'` at :151); ships alone.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Treat it as no path".** Failure fires with 'No path to navigate to', the same as a missing Path today. A one-line change. The question as asked: *"Should a Path that is not text be treated as no path, with the existing 'No path to navigate to' Failure?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 2026-10-06 (P109 s21, ISL-026), as ruled.** A Path that is not text is no path: Failure `navigate-to-path/no-path` and Error "No path to navigate to", as a missing Path was. Runtime 200: conforms, mutants 26 / 26. Control: the C24 scenario fails on HEAD's file.

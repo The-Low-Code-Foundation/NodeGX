@@ -1,6 +1,6 @@
 # ISL-026 — A value of the wrong kind never kills a node
 
-**Status: 🟡 s21 (2026-10-06): 9 of 20 rows fixed — C3, C4, C16, D15, C61, C62, C63, C65, C70 (and AC1 re-measured: every row's known row still fired at HEAD before its fix). ✅ AC2: all 19 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 20 bugs from
+**Status: 🟡 s21 (2026-10-06): 14 of 20 rows fixed — C3, C4, C10, C16, D15, C24, C44, C54, C57, C61, C62, C63, C65, C70 (and AC1 re-measured: every row's known row still fired at HEAD before its fix). ✅ AC2: all 19 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 20 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 4 high · 13 medium · 3 low, **19 awaiting a ruling**. **Side:** runtime (node setters and frame-end callbacks), noodl-viewer-react (control render, kit nodes)
 
 ## 1. The person sentence
@@ -30,17 +30,17 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 | [P107-C4](../../bugs/p107-c4-substring-and-string-mapper-crash-in-the-setter-when-a-wire.md) | medium | ✅ fixed s21 | Substring and String Mapper crash in the setter when a wire sends null |
 | [P107-C6](../../bugs/p107-c6-a-number-arriving-on-a-port-that-once-held-a-unit-value-valu.md) | medium | needs-ruling | A number arriving on a port that once held a unit value ({ value, unit }) is merged into it |
 | [P107-C8](../../bugs/p107-c8-http-request-crashes-inside-the-fetch-on-a-non-text-url-head.md) | medium | needs-ruling | HTTP Request crashes inside the fetch on a non-text URL, Headers, Query or Body Fields, and loses the outcome |
-| [P107-C10](../../bugs/p107-c10-array-filter-and-array-map-crash-in-the-setter-when-items-ge.md) | medium | needs-ruling | Array Filter and Array Map crash in the setter when Items gets a number, boolean or plain object |
+| [P107-C10](../../bugs/p107-c10-array-filter-and-array-map-crash-in-the-setter-when-items-ge.md) | medium | ✅ fixed s21 | Array Filter and Array Map crash in the setter when Items gets a number, boolean or plain object |
 | [P107-C18](../../bugs/p107-c18-parse-xml-goes-silent-when-always-array-is-not-text.md) | medium | needs-ruling | Parse XML goes silent — no Result, no Failure — while Always Array holds anything but text |
 | [P107-C20](../../bugs/p107-c20-animate-to-value-waits-forever-on-a-text-or-disconnected-delay.md) | medium | needs-ruling | Animate To Value waits forever when Delay arrives as text or is disconnected |
-| [P107-C24](../../bugs/p107-c24-navigate-to-path-never-answers-when-path-is-not-text.md) | medium | needs-ruling | Navigate To Path never answers a press when Path is not text (null, a number) — the frame-end callback throws |
-| [P107-C44](../../bugs/p107-c44-filter-records-with-null-items-breaks-another-nodes-save.md) | medium | needs-ruling | A Filter Records holding null on Items crashes inside another node's save of its Class — the saving node's Error gets the message, and a Query Records listening after it misses the save |
-| [P107-C54](../../bugs/p107-c54-cloud-function-a-null-success-body-never-answers-the-call.md) | medium | needs-ruling | Cloud Function — a success whose body is JSON null throws, and the Call is never answered |
+| [P107-C24](../../bugs/p107-c24-navigate-to-path-never-answers-when-path-is-not-text.md) | medium | ✅ fixed s21 | Navigate To Path never answers a press when Path is not text (null, a number) — the frame-end callback throws |
+| [P107-C44](../../bugs/p107-c44-filter-records-with-null-items-breaks-another-nodes-save.md) | medium | ✅ fixed s21 | A Filter Records holding null on Items crashes inside another node's save of its Class — the saving node's Error gets the message, and a Query Records listening after it misses the save |
+| [P107-C54](../../bugs/p107-c54-cloud-function-a-null-success-body-never-answers-the-call.md) | medium | ✅ fixed s21 | Cloud Function — a success whose body is JSON null throws, and the Call is never answered |
 | [P107-C61](../../bugs/p107-c61-font-family-wired-a-non-text-value-throws-in-its-setter.md) | medium | ✅ fixed s21 | Font Family wired a truthy value that is not text throws in its setter — the node's update dies there |
 | [P107-C62](../../bugs/p107-c62-a-units-typed-style-input-wired-null-throws-in-the-generated-setter.md) | medium | ✅ fixed s21 | A units-typed style input wired null throws in the generated setter — margins, paddings, font size, min / max size, border widths and radii |
 | [P107-C63](../../bugs/p107-c63-a-placement-input-wired-undefined-throws.md) | medium | ✅ fixed s21 | A Placement input (Pos X / Pos Y / Rotation / Transform Origin X / Y) wired undefined throws in its setter |
 | [P109-S17-KITTHROWBLANKS](../../bugs/p109-s17-kitthrowblanks-a-kit-node-that-throws-at-mount-blanks-the-whole-page.md) | medium | open | A kit node that throws when it mounts blanks the whole page, not just itself |
-| [P107-C57](../../bugs/p107-c57-sse-non-text-event-types-or-method-throws-at-connect.md) | low | needs-ruling | Server-Sent Events — Event Types or Method wired a value that is not text throws when the stream connects |
+| [P107-C57](../../bugs/p107-c57-sse-non-text-event-types-or-method-throws-at-connect.md) | low | ✅ fixed s21 | Server-Sent Events — Event Types or Method wired a value that is not text throws when the stream connects |
 | [P107-D8](../../bugs/p107-d8-color-blend-renders-nannannan-for-a-non-numeric-blend-value.md) | low | needs-ruling | Color Blend renders "#NaNNaNNaN" for a non-numeric Blend Value |
 | [P107-D15](../../bugs/p107-d15-date-difference-counts-an-unknown-unit-as-years-date-add-cra.md) | low | ✅ fixed s21 | Date Difference counts an unknown Unit as years (Date Add crashes on the same value) |
 
@@ -130,6 +130,11 @@ runtime's behaviour, R3), so their re-measure is the scenario named in the ledge
 | C4 | `4851100a2` (+ `f94bc681d`) | Substring and String Mapper read null as `''`; both specs v2; Substring's description and the four generated catalog/docs files | 5 scenarios |
 | C61, C62, C63 | `ccda9ef0b` | the three shared visual setters; VISUAL_ROWS gone (Button and Icon have no known rows now) | 13 scenarios in 7 files, control red |
 | C65, C70 | `ec48e0680` | `controls/labelText.ts` for 5 renders; `options.ts` `optionItems`; Dropdown spec v4 | 5 new scenarios + 3 renamed, control red |
+| C24 | `9af85dee9` | Navigate To Path: a Path that is not text is no path | 1 scenario, control red |
+| C57 | `dc72bb806` | SSE: Event Types and Method as text | 2 scenarios, control red |
+| C54 | `307bdc69d` | Cloud Function: a null success body is the empty answer | 1 scenario, control red |
+| C44 | `3f7c5eeb3` | Filter Records: null Items holds nothing in the store listener | 1 scenario, control red |
+| C10 | `06ca94db1` | `data/itemsinput.ts` — Array Filter, Array Map, Filter Records refuse a non-list with `<node>/not-a-list`; specs v4 / v3 / v2 | 3 scenarios, control red (+ 9 / 23 / 24 generated divergences on HEAD) |
 
 Filed on the way: `P109-S21-EXPORTDATEUNITWIRED` (P18, low), `P109-S21-DROPDOWNEMPTYRESET` (P107's Dropdown spec, low).
 🔴 The full runtime conformance batch no longer fits its 30-minute `beforeAll` on a loaded box (the Slider alone took
