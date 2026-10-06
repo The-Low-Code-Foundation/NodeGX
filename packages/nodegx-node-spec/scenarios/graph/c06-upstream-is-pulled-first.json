@@ -290,8 +290,7 @@
       "C6",
       "C7"
     ],
-    "row": "NSP-008 §6 G1",
-    "because": "The clause's sentence — 'a node never computes from a half-updated upstream' — read against a node that computes in its SETTER (And, and.ts :33-49) rather than at frame end. Both of And's ports are pending in one pass (C6 held), but C7's lockstep applies one entry per port in turn, and the setter publishes after each: x AND NOT x is briefly true on the wire. The claims are written from the clause's sentence (the wire never carries true, the Counter never moves); the recorded trace says what the runtime does. It does NOT: the runtime publishes true then false inside one pass (row G1, marked `row`) — the claims stay as the clause reads, and the recorded trace is what the runtime does.",
+    "because": "C6's sentence, as corrected for P107 G1 (ruled 2026-10-05, P109 ISL-033): the nodes feeding a node update first, but a node that recomputes in its SETTER (And, and.ts :33-49) rather than at frame end takes its inputs one at a time. Both of And's ports are pending in one pass (the pull holds), C7's lockstep applies one entry per port in turn, and the setter publishes after each: x AND NOT x carries true and then false inside one pass, so the Value Changed behind it fires twice and the Counter reads 3. Was row G1, whose claims were the old sentence (the wire never carries true, the Counter never moves).",
     "nodes": {
       "s": {
         "type": "Switch"
@@ -361,13 +360,13 @@
         "at": 2,
         "subject": "v",
         "signal": "valueChanged",
-        "count": 0
+        "count": 2
       },
       {
         "at": 2,
         "subject": "c",
         "port": "currentCount",
-        "absent": true
+        "value": 3
       },
       {
         "at": 3,

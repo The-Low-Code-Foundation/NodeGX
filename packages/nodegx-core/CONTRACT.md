@@ -97,9 +97,18 @@ the turn.
 
 `update` calls `_updateDependencies` first, which calls `update()` on every node feeding an input
 ([node.ts:562-563](../noodl-runtime/src/node.ts#L562-L563),
-[node.ts:650-657](../noodl-runtime/src/node.ts#L650-L657)). A node therefore never computes from a
-half-updated upstream, regardless of the order the dirty list happened to be built in. This is what
-makes the graph glitch-free, and it is a pull, not a topological sort.
+[node.ts:650-657](../noodl-runtime/src/node.ts#L650-L657)). The nodes feeding a node have therefore
+updated before it processes its own inputs, regardless of the order the dirty list happened to be
+built in. It is a pull, not a topological sort.
+
+That is not the same as never computing from a half-updated upstream. A node that computes at the
+end of the frame (String Format) sees all of its new inputs together. A node that recomputes in each
+input's setter (And) takes them one at a time, because C7 applies one entry per port per pass, and
+it can send a passing result built from one new input and one old one: `x AND NOT x` carries `true`
+and then `false` on the wire inside one pass, and a Value Changed behind it fires twice. The export
+computes such a node from all of its inputs at once and sends no passing result; that difference
+stays on the export's list (P107 G1, ruled 2026-10-05: the sentence is corrected, the runtime does
+not change).
 
 ### C7. Multiple input ports advance in lockstep
 
