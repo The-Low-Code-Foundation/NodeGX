@@ -1,6 +1,6 @@
 # ISL-026 — A value of the wrong kind never kills a node
 
-**Status: ⬜ not started — ✅ AC2: all 19 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 20 bugs from
+**Status: 🟡 s21 (2026-10-06): 9 of 20 rows fixed — C3, C4, C16, D15, C61, C62, C63, C65, C70 (and AC1 re-measured: every row's known row still fired at HEAD before its fix). ✅ AC2: all 19 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 20 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 4 high · 13 medium · 3 low, **19 awaiting a ruling**. **Side:** runtime (node setters and frame-end callbacks), noodl-viewer-react (control render, kit nodes)
 
 ## 1. The person sentence
@@ -23,11 +23,11 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 
 | bug | severity | status | what a person sees |
 |---|---|---|---|
-| [P107-C3](../../bugs/p107-c3-string-format-dies-for-good-when-format-is-not-text-a-wired.md) | high | needs-ruling | String Format dies for good when Format is not text (a wired number, null, an object) |
-| [P107-C16](../../bugs/p107-c16-date-add-crashes-and-stays-dead-when-unit-is-a-value-it-does.md) | high | needs-ruling | Date Add crashes and stays dead when Unit is a value it does not know |
-| [P107-C65](../../bugs/p107-c65-a-checkbox-label-wired-an-object-crashes-the-render.md) | high | needs-ruling | A Checkbox whose Label is wired an object or an array crashes the page's render — "Objects are not valid as a React child" |
-| [P107-C70](../../bugs/p107-c70-a-dropdowns-items-wired-a-value-that-is-not-a-list-crashes-the-render.md) | high | needs-ruling | A Dropdown whose Items is wired a value that is not a list — the legacy string form included — or a list holding null crashes the page's render |
-| [P107-C4](../../bugs/p107-c4-substring-and-string-mapper-crash-in-the-setter-when-a-wire.md) | medium | needs-ruling | Substring and String Mapper crash in the setter when a wire sends null |
+| [P107-C3](../../bugs/p107-c3-string-format-dies-for-good-when-format-is-not-text-a-wired.md) | high | ✅ fixed s21 | String Format dies for good when Format is not text (a wired number, null, an object) |
+| [P107-C16](../../bugs/p107-c16-date-add-crashes-and-stays-dead-when-unit-is-a-value-it-does.md) | high | ✅ fixed s21 | Date Add crashes and stays dead when Unit is a value it does not know |
+| [P107-C65](../../bugs/p107-c65-a-checkbox-label-wired-an-object-crashes-the-render.md) | high | ✅ fixed s21 | A Checkbox whose Label is wired an object or an array crashes the page's render — "Objects are not valid as a React child" |
+| [P107-C70](../../bugs/p107-c70-a-dropdowns-items-wired-a-value-that-is-not-a-list-crashes-the-render.md) | high | ✅ fixed s21 | A Dropdown whose Items is wired a value that is not a list — the legacy string form included — or a list holding null crashes the page's render |
+| [P107-C4](../../bugs/p107-c4-substring-and-string-mapper-crash-in-the-setter-when-a-wire.md) | medium | ✅ fixed s21 | Substring and String Mapper crash in the setter when a wire sends null |
 | [P107-C6](../../bugs/p107-c6-a-number-arriving-on-a-port-that-once-held-a-unit-value-valu.md) | medium | needs-ruling | A number arriving on a port that once held a unit value ({ value, unit }) is merged into it |
 | [P107-C8](../../bugs/p107-c8-http-request-crashes-inside-the-fetch-on-a-non-text-url-head.md) | medium | needs-ruling | HTTP Request crashes inside the fetch on a non-text URL, Headers, Query or Body Fields, and loses the outcome |
 | [P107-C10](../../bugs/p107-c10-array-filter-and-array-map-crash-in-the-setter-when-items-ge.md) | medium | needs-ruling | Array Filter and Array Map crash in the setter when Items gets a number, boolean or plain object |
@@ -36,13 +36,13 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 | [P107-C24](../../bugs/p107-c24-navigate-to-path-never-answers-when-path-is-not-text.md) | medium | needs-ruling | Navigate To Path never answers a press when Path is not text (null, a number) — the frame-end callback throws |
 | [P107-C44](../../bugs/p107-c44-filter-records-with-null-items-breaks-another-nodes-save.md) | medium | needs-ruling | A Filter Records holding null on Items crashes inside another node's save of its Class — the saving node's Error gets the message, and a Query Records listening after it misses the save |
 | [P107-C54](../../bugs/p107-c54-cloud-function-a-null-success-body-never-answers-the-call.md) | medium | needs-ruling | Cloud Function — a success whose body is JSON null throws, and the Call is never answered |
-| [P107-C61](../../bugs/p107-c61-font-family-wired-a-non-text-value-throws-in-its-setter.md) | medium | needs-ruling | Font Family wired a truthy value that is not text throws in its setter — the node's update dies there |
-| [P107-C62](../../bugs/p107-c62-a-units-typed-style-input-wired-null-throws-in-the-generated-setter.md) | medium | needs-ruling | A units-typed style input wired null throws in the generated setter — margins, paddings, font size, min / max size, border widths and radii |
-| [P107-C63](../../bugs/p107-c63-a-placement-input-wired-undefined-throws.md) | medium | needs-ruling | A Placement input (Pos X / Pos Y / Rotation / Transform Origin X / Y) wired undefined throws in its setter |
+| [P107-C61](../../bugs/p107-c61-font-family-wired-a-non-text-value-throws-in-its-setter.md) | medium | ✅ fixed s21 | Font Family wired a truthy value that is not text throws in its setter — the node's update dies there |
+| [P107-C62](../../bugs/p107-c62-a-units-typed-style-input-wired-null-throws-in-the-generated-setter.md) | medium | ✅ fixed s21 | A units-typed style input wired null throws in the generated setter — margins, paddings, font size, min / max size, border widths and radii |
+| [P107-C63](../../bugs/p107-c63-a-placement-input-wired-undefined-throws.md) | medium | ✅ fixed s21 | A Placement input (Pos X / Pos Y / Rotation / Transform Origin X / Y) wired undefined throws in its setter |
 | [P109-S17-KITTHROWBLANKS](../../bugs/p109-s17-kitthrowblanks-a-kit-node-that-throws-at-mount-blanks-the-whole-page.md) | medium | open | A kit node that throws when it mounts blanks the whole page, not just itself |
 | [P107-C57](../../bugs/p107-c57-sse-non-text-event-types-or-method-throws-at-connect.md) | low | needs-ruling | Server-Sent Events — Event Types or Method wired a value that is not text throws when the stream connects |
 | [P107-D8](../../bugs/p107-d8-color-blend-renders-nannannan-for-a-non-numeric-blend-value.md) | low | needs-ruling | Color Blend renders "#NaNNaNNaN" for a non-numeric Blend Value |
-| [P107-D15](../../bugs/p107-d15-date-difference-counts-an-unknown-unit-as-years-date-add-cra.md) | low | needs-ruling | Date Difference counts an unknown Unit as years (Date Add crashes on the same value) |
+| [P107-D15](../../bugs/p107-d15-date-difference-counts-an-unknown-unit-as-years-date-add-cra.md) | low | ✅ fixed s21 | Date Difference counts an unknown Unit as years (Date Add crashes on the same value) |
 
 ## 4. Order of work
 
@@ -116,3 +116,21 @@ ruling is still this task's work: the description changes, the node does not.
 | P107-C57 | Turn them into text | yes | The node connects as it does for URL. A wrong value then fails as a normal connection error instead of a crash. Two one-line changes. |
 | P107-D8 | Keep last colour, warn once | yes | The screen keeps its last good colour and a one-time warning names the problem, as the colour inputs already do. A small change. |
 | P107-D15 | Use days and warn once | yes | An unknown Unit counts as days, its default, with a one-time warning on the node. Matches Date Add and the earlier ruling for an unknown animation curve. |
+
+## 9. Session 21 (2026-10-06) — what landed
+
+AC1: the runtime conformance suite for the task's 19 nodes at HEAD (`fae14dff4`, seed 20732): all 19 conform with their
+known rows, and every known row of this task still fired. C8, C18, C20, D8 have no known row (their specs model the
+runtime's behaviour, R3), so their re-measure is the scenario named in the ledger file.
+
+| bug | commit | what changed | regression |
+|---|---|---|---|
+| C3 | `350c3ec31` | String Format converts Format on arrival and clears its flag in a `finally` | 2 scenarios, control red |
+| C16, D15 | `4626b7c54` | `datemath.ts` `unitOrDays` + one warning (`setDiagnostic`); both specs v2 | 2 scenarios + 3 unit tests, control red |
+| C4 | `4851100a2` (+ `f94bc681d`) | Substring and String Mapper read null as `''`; both specs v2; Substring's description and the four generated catalog/docs files | 5 scenarios |
+| C61, C62, C63 | `ccda9ef0b` | the three shared visual setters; VISUAL_ROWS gone (Button and Icon have no known rows now) | 13 scenarios in 7 files, control red |
+| C65, C70 | `ec48e0680` | `controls/labelText.ts` for 5 renders; `options.ts` `optionItems`; Dropdown spec v4 | 5 new scenarios + 3 renamed, control red |
+
+Filed on the way: `P109-S21-EXPORTDATEUNITWIRED` (P18, low), `P109-S21-DROPDOWNEMPTYRESET` (P107's Dropdown spec, low).
+🔴 The full runtime conformance batch no longer fits its 30-minute `beforeAll` on a loaded box (the Slider alone took
+29 minutes at seed 20732): run it with `NSP_ONLY` per group, never whole.

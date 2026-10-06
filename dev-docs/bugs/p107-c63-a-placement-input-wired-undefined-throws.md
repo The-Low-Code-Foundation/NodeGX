@@ -1,7 +1,8 @@
 ---
 id: P107-C63
 title: A Placement input (Pos X / Pos Y / Rotation / Transform Origin X / Y) wired undefined throws in its setter
-status: scheduled
+status: fixed
+commit: ccda9ef0b
 phase: P109
 task: ISL-026
 severity: medium
@@ -9,7 +10,7 @@ area: runtime / every visual node with Placement (node-shared-port-definitions.t
 found: P107 NSP-016 s37, 2026-10-03
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.2 (row C63); the Button's generated run (4 of 200 sequences at seed 20729)
 kit: node-spec
-regression: packages/noodl-runtime/test/node-spec/conformance.test.ts "NSP-016 §6 C63"
+regression: packages/nodegx-node-spec/scenarios/Text.json "Pos X wired undefined: back to 0 — nothing moves on the wire and the node keeps working"
 ---
 
 A visual node's Pos X, Pos Y, Rotation, Transform Origin X or Transform Origin Y wired `undefined` — a port on the
@@ -30,3 +31,8 @@ value.unit`) and the two origins' setters.
 style is removed. One guard per setter.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Use the default".** Position and rotation go back to 0 and the origin to 50, both kinds of empty value included. One small guard in each of the five inputs. The question as asked: *"Should an empty value on these inputs fall back to the input's default (0, or 50 for an origin)?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 2026-10-06 (P109 s21, ISL-026), as ruled, with the other two shared setters (C61–C63, one commit):** an empty Placement value stores nothing: position and rotation 0, origin 50%.
+The scenarios carrying the row lost their mark (13 across seven spec files) and VISUAL_ROWS is gone. Runtime at seed 20732:
+all nine visual specs 0 failed scenarios and 0 generated divergences. Control (HEAD's viewer files): exactly the three
+C61–C63 scenarios fail on the Button and the Icon.

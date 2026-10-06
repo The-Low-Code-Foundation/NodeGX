@@ -1,12 +1,15 @@
 ---
 id: P107-C4
 title: Substring and String Mapper crash in the setter when a wire sends null
-status: scheduled
+status: fixed
+commit: 4851100a2 f94bc681d
 phase: P109
 task: ISL-026
 severity: medium
 area: runtime / Substring, String Mapper
 found: P107 (the node says what it does) s4, 2026-09-30/10-01
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/Substring.json "null on String is empty text: Result is ''"
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-011-BATCH-LOGIC-MATH-STRINGS.md §6 (row C4) — the row names how it is reproduced and pinned
 ---
 
@@ -25,3 +28,11 @@ scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/n
 dropped in the same commit. Plain-words question: README §7 of P107.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Read it as empty text".** The result becomes empty, as a person would expect from an empty input. Four small changes, plus a rewrite of Substring's description. The question as asked: *"When these nodes receive an empty value, should they treat it as empty text?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 2026-10-06 (P109 s21, ISL-026), as ruled.** Substring's String setter reads null and undefined as `''`;
+String Mapper's Input String and both numbered families read null as `''` (undefined keeps its old meaning: `''` on
+the numbered ports, "no input string" on Input String). Substring's String description now says *"an empty value
+(null) counts as empty text"*; the catalog, the enriched catalog, the docs page and the cloud node library are
+regenerated. Both specs are v2, the five C4 scenarios say the intent (two in `Substring.json`, three in
+`String Mapper.json`), and the known rows and their predicates are gone. Runtime 200: both conform, mutants 9 / 9 and
+3 / 3. (`f94bc681d` removed a duplicate `const isNull` that a65b077a8 carried and 4851100a2 kept.)

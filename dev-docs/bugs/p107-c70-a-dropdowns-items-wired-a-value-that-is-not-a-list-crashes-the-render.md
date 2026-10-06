@@ -1,7 +1,8 @@
 ---
 id: P107-C70
 title: A Dropdown whose Items is wired a value that is not a list — the legacy string form included — or a list holding null crashes the page's render
-status: scheduled
+status: fixed
+commit: ec48e0680
 phase: P109
 task: ISL-026
 severity: high
@@ -9,7 +10,7 @@ area: runtime / Dropdown (components/controls/Select/Select.tsx, nodes/controls/
 found: P107 NSP-016 s39, 2026-10-04
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.4 (row C70); the Dropdown's generated run at seed 13 (sequences 303991510, 216769170, 3369803677 — `items: "x"`)
 kit: node-spec
-regression: packages/noodl-runtime/test/node-spec/conformance.test.ts "NSP-016 §6 C70"
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.options.json "Items written as the old stored text: its options are offered, and choosing 'b' moves Value to 'b' with Changed"
 ---
 
 A Dropdown whose **Items** input receives a truthy value that is not an array — a string, a number, `true`, a
@@ -33,3 +34,12 @@ that is not an array after that treated as no options, `null` items dropped — 
 The spec models the intent (no options) and the runner knows the row.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Read old text, else no options".** Text in the old format shows its options, other wrong values show an empty Dropdown, and the page keeps drawing. A small change where Items arrives. The question as asked: *"Should the Dropdown read text on Items as the old list format, treat anything else that is not a list as no options, and skip empty entries?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 2026-10-06 (P109 s21, ISL-026), as ruled.** `options.ts` `optionItems`: text on Items is read as the editor
+reads the old stored form (`readItems`), any other value that is not a list offers no options, and an empty item is
+skipped; a plain list keeps its identity (a live Array still repaints on its own change). The spec is v4 (the same
+reading). Three new scenarios (old text, a number then a list, a list holding null); the known row and `itemsNotAList`
+are gone. Runtime at seed 20732: the Dropdown conforms (52 / 62, the rest known rows of other bugs; 0 generated
+divergences). Control: the three scenarios fail on HEAD's viewer files. Writing them found a spec gap, filed as
+`P109-S21-DROPDOWNEMPTYRESET` (after a list offering no options the browser selects the first enabled option of the
+next list; the spec does not).
