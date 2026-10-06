@@ -95,8 +95,9 @@ change). The board is **21 of 37 closed**, re-derived from the task files' statu
   cloud-library:check up to date; `bugs.js check` 5 problems, none P109 ISL-032's.
 - C14/C15, D10, D14 measured in the worktree at HEAD (graph 91 / 91, the dispatcher's unit + corpus 192, Date To String
   108, viewer timer 48, three tsc 0).
-- **Not run:** the full runtime and viewer suites after the last three commits (the primary target was unloadable under
-  the peer's Group edit); the editor; the stranger 10,000 runs.
+- **After the last commit, in the worktree (code = HEAD):** runtime jest without the conformance file 3179 passed, 1 failed —
+  the same cold-start timeout on graph.test.ts's first scenario; viewer 1775 / 1775.
+- **Not run:** the editor; the stranger 10,000 runs.
 
 ## Recipes
 
