@@ -1,7 +1,7 @@
 # NSP-023 — The spec without React
 
 **Opened 2026-10-05, from ruling R12 (README §7).** **Depends on NSP-016** (the specs it converts) and the Text v3 (NSP-016 §7.9,
-the recipe). **Status: 🟡 steps 1–7 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5 the Dropdown v3 and §8.6 the radio pair, s48 §8.7 the words and §8.8 the guard); the Checkbox's and the Dropdown's label rule with step 1. Step 8 (AC5, the stranger) left.**
+the recipe). **Status: 🟡 steps 1–7 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5 the Dropdown v3 and §8.6 the radio pair, s48 §8.7 the words and §8.8 the guard, s49 §8.9 the proof); the Checkbox's and the Dropdown's label rule with step 1. All eight steps built; AC1–AC5 met (§8.9 adds AC5 and AC1's last reading). Left: AC6's one open ruling (the radio remount, README §7 R15).**
 
 ## 1. The person sentence
 
@@ -102,7 +102,7 @@ They are written under R11 from the first line, so this task never has to visit 
    and `setState` already mean other things in clean specs (§2).
 5. **The proof:** a stranger agent (NSP-006's recipe) builds one converted control, the Slider or the Dropdown, on plain DOM
    with no React, from the spec and the suite alone, and it conforms. Anything it had to guess or ask is a finding against the
-   spec.
+   spec. ✅ s49: the Dropdown v4, at 200 and 10,000 (§8.9, NSP-006 §5.10).
 6. **Rulings** asked in plain words and recorded in README §7.
 
 ## 7. Watch for
@@ -565,3 +565,41 @@ scenario green, and a passing row scenario turns the known-rows test red (`confo
 open"). That covers behaviour with a row; this guard covers React-made state with no row, and needs no runtime.
 
 **Readings (2026-10-06):** the guard 11 / 11 (each visual spec's run 0.3–8 s); the plants 22 / 22; `tsc --noEmit` clean.
+
+### 8.9 s49, 2026-10-06 — step 8: the proof (AC5)
+
+**A stranger built the Dropdown v4 on a plain DOM page, with no React, from the spec and the suite alone, and it conforms**
+at 200 (62 / 62, 0 divergences, 386 / 386 mutants caught; green on its first run) and at 10,000 (seed 20732, 0
+divergences). The full record is NSP-006 §5.10. The round's brief is [NSP-006-BRIEF-4.md](NSP-006-BRIEF-4.md), its target
+`packages/nodegx-node-spec/stranger-4/`.
+
+**How "no React" is graded, not just claimed.** The harness owns the person (`tests/stranger-page.js`: a jsdom page and
+the acts as DOM events). The target only draws elements and listens to them. A new test deafens each act in turn, and the
+target must then disagree with the spec. A control target that answers acts from the spec's own reducers conforms at 200
+with every mutant caught, and is red on all ten acts. So conformance alone could not have told the two apart.
+
+**Why the Dropdown and not the Slider.** It is the cheaper control (no range rules, no sanitization the face has to copy),
+and its spec had the most React shapes taken out at step 4 (D34, C71).
+
+**What it found against the spec**, each now closed:
+- **Two format gaps** (a value input with no reducer sends nothing; a param's write at mount is a sample, only the initial
+  state is not). Both are invisible at 200. Now they are sentences in spec.ts rule 4 and adapter.ts, and two hand scenarios
+  (62 → 64). Each scenario catches the stranger's wrong guess put back in a copy; the runtime passes both.
+- **One React shadow in the words.** dropdown.ts called the `<select>`'s selection the browser's. That is true only for a
+  target that keeps the option elements still offered, which React's keyed list does. A plain-DOM target that rebuilds the
+  list must assign the selection itself, and the stranger did. The docblock now says the outcome is what is graded.
+- **One unstated order:** the Focus and Blur actions meet the page as last painted; a person's act paints first. Now in
+  the docblock.
+
+No behaviour moved: the Dropdown stays v4, and it conforms on the runtime as before (CONFORMS at 200, 0 divergences;
+54 / 64 scenarios pass, the other 10 its known rows). The stranger hashes now guard dropdown.ts, its scenarios,
+text-input.ts and the page, so **a change to any of them needs the hashes refreshed and round 4 re-run**
+(`node -e "require('./tests/stranger-suite-hashes.helper.js').write()"`, then `npx jest tests/stranger.test.ts`, about a
+minute).
+
+**Readings (2026-10-06):** the whole stranger file 46 passed, 18 skipped (the deep runs), exit 0, hash gate green; the
+page-model guard 11 / 11; `tsc --noEmit` clean; the runtime's Dropdown at 200 (seed 20732) CONFORMS, 385 / 387 killed.
+
+**AC1's last reading, taken here.** §8.6 records the Radio Button Group at 10,000 on the runtime, but not on the
+interpreter. Run now (seed 20732): CONFORMS, 23 / 23 scenarios, 10,000 / 10,000 with 0 divergences, 47 / 50 mutants
+killed and 3 declared; 11 s. All five converted specs now have 10,000 on both targets.

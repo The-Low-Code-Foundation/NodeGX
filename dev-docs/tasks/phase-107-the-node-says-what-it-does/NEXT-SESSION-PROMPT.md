@@ -1,8 +1,8 @@
 # P107 — next session
 
-**Written 2026-10-06 (s48).** Read the [README](README.md) §2–§7 (R15 is the newest ruling). s48's record is
-[NSP-023 §8.7](NSP-023-THE-SPEC-WITHOUT-REACT.md) (the words) and §8.8 (the guard). s47's is §8.5 (the Dropdown v3) and §8.6
-(the radio pair); s46's §8.2–§8.4; s45's §8.1; s44's NSP-016 §7.9 (the Text v3); s43's §7.8 and RESEARCH-DRAG-DROP.md.
+**Written 2026-10-06 (s49).** Read the [README](README.md) §2–§7 (R15 is the newest ruling). s49's record is
+[NSP-023 §8.9](NSP-023-THE-SPEC-WITHOUT-REACT.md) and [NSP-006 §5.10](NSP-006-A-STRANGERS-TARGET.md) (stranger round 4).
+s48's is NSP-023 §8.7 (the words) and §8.8 (the guard); s47's §8.5–§8.6; s44's NSP-016 §7.9 (the Text v3).
 
 ## Board (from the task files)
 
@@ -10,69 +10,55 @@
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
 | **NSP-016 the visual nodes** | 🟡 9 of 19 conform. The other 10 need infrastructure (NSP-016 §7.6). AC4 waits for NSP-017 | `aa8abb06f` … s45 |
-| **NSP-023 the spec without React** | **🟡 steps 1–7 done (s45 Text Input v2; s46 `turn` out, Slider v2; s47 Dropdown v3, radio pair v2; s48 the words, the guard). Step 8 left (AC5)** | `00cd9046a`, `8203644c3`, `a19b5600d`, `523ade4a4`, `a65b077a8`, `e8df669ca` (step 6), s48's step-7 commit |
+| **NSP-023 the spec without React** | **🟡 all 8 steps built; AC1–AC5 met. Only AC6 is open: one ruling for Richard (the radio remount, below)** | s45 … s48, `649e6864d` (s49 round 4) and s49's docs commit |
+| NSP-006 the stranger | ✅ rounds 1–3c; **round 4 (s49): the Dropdown on a plain DOM page** | `649e6864d` |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-**115 of 147 conform on the runtime (78.2%)**, unchanged: neither step moved a behaviour (AC3). The census was not
-regenerated: it reads the working tree, and peers' piles move its counts.
+**115 of 147 conform on the runtime (78.2%)**, unchanged: s49 moved no behaviour. The census was not regenerated: it
+reads the working tree, and peers' piles move its counts.
 
-## What s48 settled
+## What s49 settled
 
-1. **Step 6, the words** (`e8df669ca`). Every React word in `src/nodes` and the format files was read. Source citations stay,
-   and so does any sentence that credits a React mechanism to **the runtime** to explain a row. The rest now say what a person
-   or the browser sees: HTML's "a disabled form control gets no click" for "React drops `onClick`"; "on the page" for
-   "committed by React"; "the first paint" for "the first render"; spec.ts THE PERSON says "the node's REAL component, a React
-   one today". Three scenario names were renamed after their traces were read: the Checkbox's and the Dropdown's "the element
-   is rebuilt without the label" (since v2 nothing rebuilds), and the Icon's "commits". spec.ts and world.ts are hashed, so the
-   stranger hashes were refreshed and the three rounds re-run: green.
-2. **Step 7, the guard** (AC4; `tests/page-model.helper.ts`, `page-model.test.ts`, `page-model-plants.test.ts`):
-   - **The model.** Every visual spec has a hand-kept page model. It puts each state key in one class: **node**, **attr**
-     (follows a node key), **element** (which element), or **held** (the browser's, moved by a person). A held key either
-     **shows** a node value or **keeps** the keyboard, the caret or a module's attributes.
-   - **The rules.** Eight, checked on the interpreter over each spec's scenarios plus 200 sequences on two seeds:
-     - G2: the paint writes no node key outside the spec's `frameEnd` list.
-     - G3: no input, signal or world event depends on a page key, found by perturbation, outside the spec's `elementCalls`.
-     - G4: attrs follow, and what is shown shows.
-     - G5: the paint has no memory. Played with the page already drawn, it gives the same result.
-     - G6: a held key is moved by something other than a paint.
-     - G7: the paint fires only lifecycle pulses and the node's own frame-end pulses.
-     - G8: the world kinds are pinned.
-   - **The measurement.** Five shapes were planted in copies of converted specs, and they turn it red **20 of 20** times,
-     however the planted key is classified. The `shows` rule came from the one hole in the first version: a component copy
-     called "held".
-   - **The residual:** a false `keeps` claim. The guard makes it a written line, from a list of three.
-3. **Already guarding, and now written down:** on the runtime, a spec that copies React's behaviour on a row makes that row's
-   scenario pass, and the known-rows test goes red. The new guard covers the state with no row, and needs no runtime.
-4. **One more thing measured on the way:** over about 66,000 on-page paints, the Slider's handle equals its Value output, the
-   Dropdown's selection equals its Value wherever offered, and a text field's text equals its Value (Number aside). That is
-   R14's "show whatever the last value it received was", true of all three specs.
+1. **NSP-023 step 8, the proof (AC5).** A fresh agent built the Dropdown v4 on a plain DOM page, with no React, from the
+   spec and the suite alone (`stranger-4/`). It CONFORMS at 200 (green on its first run, 386 / 386 mutants caught) and at
+   10,000 (seed 20732, 0 divergences).
+   - **The harness owns the person:** `tests/stranger-page.js` is one jsdom page, with the acts as the DOM events a browser
+     raises (ported from the runtime target's face). It is the second copy of that face: a change to the runtime's
+     `personActs` for these ten acts owes the same change there.
+   - **The deaf-page test** (`stranger.test.ts`) deafens each act in turn, and the target must then disagree. A control
+     that wraps the interpreter conforms with every mutant caught, and it is red on all ten acts. Conformance alone cannot
+     tell a DOM target from a copy of the reducers.
+   - The stranger test now passes declared equivalent mutants to the runner and skips them in AC2.
+2. **Its findings, all closed:**
+   - two format gaps, both invisible at 200: a value input with no reducer sends nothing (spec.ts rule 4); a param's write
+     at mount is a sample, and only the initial state is not (adapter.ts). Two Dropdown scenarios cover them (62 → 64);
+     each catches the stranger's wrong guess put back in a copy, and the runtime passes both.
+   - one React shadow in the words: dropdown.ts called the selection the browser's, but that holds only under React's
+     keyed option list. A target that rebuilds the list must assign the selection itself. The docblock now says the outcome
+     is graded.
+   - the order of the Focus and Blur actions (they meet the page as last painted) against a person's act (paints first).
+3. **AC1's last reading:** the Radio Button Group at 10,000 on the interpreter CONFORMS (seed 20732, 0 divergences).
+4. **The stranger hashes now guard** dropdown.ts, its scenarios, text-input.ts and the page. A change to any of them
+   needs the hashes refreshed and the stranger file re-run (about a minute). P109's ISL-031 app fixes will remove `row`
+   fields from the Dropdown's scenarios, and that is such a change.
 
-**Readings (2026-10-06):**
-- Step 6: the Button, Checkbox, Text Input, Dropdown (v4 in the ledger), Icon and Text all CONFORM on the runtime at 200 on
-  seeds 13 and 20730. `tsc --noEmit` is clean. The stranger, catalog-parity, schema, types and reach suites: 378 passed.
-- Step 7: the guard 11 / 11, the plants 22 / 22.
-- The whole package suite with the guard in it (38 min; batch-visual alone 2,310 s): 21 of 22 suites, 910 passed, 17 deep runs skipped. **The one failure is `world.test.ts` › net.noodl.HTTP**, a P109 peer's open edit (`scenarios/net.noodl.HTTP.json` changed 10:10 and uncommitted, beside their C8 fix `283b46573`). P107 touched nothing on HTTP. Re-run it before trusting it either way. The guard's two files add 78 s and 90 s to that suite.
-- Load was 3–11 throughout, with peers driving.
+**Readings (2026-10-06):** the whole stranger file 46 passed, 18 skipped (the deep runs), exit 0, hash gate green; the
+page-model guard 11 / 11; `tsc --noEmit` clean; the runtime's Dropdown at 200 CONFORMS (54 / 64 scenarios pass, the other
+10 its known rows; 385 / 387 killed).
 
-## What s49 does
+## What s50 does
 
-1. **NSP-023 step 8, the proof (AC5).** A stranger agent (NSP-006's recipe, `NSP-006-BRIEF*.md`, `stranger*/`) builds the
-   Slider or the Dropdown on plain DOM with no React, from the spec and the suite alone. Anything it had to guess or ask is a
-   finding against the spec. Before briefing:
-   - Pick the control. The Dropdown is cheaper: 10,000 runtime sequences take 185 s, against the Slider's range rules.
-   - Decide what the stranger is handed. The format files plus the spec and its scenarios, as in round 3 (world.ts if the
-     control needs it). The page model is not part of the format (§8.8): say whether to hand it over.
-   - Write a `stranger-4/` round in `stranger-suite-hashes.helper.js` (`ROUNDS`) so its inputs are hashed.
-   - **Read P109's round 3c first** (NSP-006 §5.9, `NSP-006-BRIEF-3C.md`, 2026-10-06; uncommitted at s48's end). It is the
-     newest working recipe: the lab now carries a copy of `nodegx-backend-contract/src`, because the package imports its
-     types and the suite does not compile without it.
-2. Then NSP-016: the Text's step (b) (RESEARCH-DRAG-DROP.md §8), Group, Image and Circle. Each carries C79 as a known row,
-   under R11 from line one: do the §3 sort before modelling any divergence. **Each new visual spec now needs a page model**
+1. **NSP-016:** the Text's step (b) (RESEARCH-DRAG-DROP.md §8), then Group, Image and Circle. Each carries C79 as a known
+   row, under R11 from line one: do the §3 sort before modelling any divergence. **Each new visual spec needs a page model**
    (G1 fails without one). Write it while sorting; it is the same question.
+2. **Small, from round 4:** move `dataAttributeNames` / `dataAttributeInput` out of text-input.ts into their own module
+   (the stranger had to read another node's spec to find them). Count the importers first, then re-hash and re-run the
+   stranger file. text-input.ts is guarded.
+3. **Ask Richard AC6's one ruling** (below), in plain words, and record it in README §7.
 
 **Human decisions outstanding.** Each is a row to ask, in plain words (README §7 holds the earlier ones as written):
-- **New (s47), open to Richard:** a Radio Button that is off the page (Mounted off) when a sibling's click takes its
+- **NSP-023 AC6 (s47), open to Richard:** a Radio Button that is off the page (Mounted off) when a sibling's click takes its
   selection comes back showing the group's choice, with **no** Changed. The ruling "Fire from the click" does not name
   this case; s47 read it from D37's remount case and from the runtime's own quiet behaviour (README §7 R15). The plain
   question, if asked: *"A radio button is hidden with Mounted while someone clicks another button in its group. When it

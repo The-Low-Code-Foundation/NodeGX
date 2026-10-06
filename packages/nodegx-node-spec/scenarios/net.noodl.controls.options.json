@@ -23287,5 +23287,32 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "a param's write is a sample: placed with Value 0 and handed Value undefined before the first settle, the first frame sends Value '0' (only the initial state is not a sample)",
+    "because": "adapter.ts WHEN OUTPUTS ARE SAMPLED ('Mount' is the initial state only; each param is an ordinary write); options.ts :181-200 (0 is made text, undefined is kept and never sent); NSP-006 round 4, found by the stranger's 10,000",
+    "params": {
+      "value": 0
+    },
+    "steps": [
+      {
+        "set": "value"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a plain store reads nothing: zIndex written, then Value undefined, before the first settle — the first frame sends no Value (the 'Option 1' the node held is never read by the store)",
+    "because": "spec.ts rule 4 (a value input with no reducer stores and sends nothing); options.ts :181-200 (Value undefined is kept, never sent); NSP-006 round 4, found by the stranger's 10,000",
+    "steps": [
+      {
+        "set": "zIndex",
+        "value": 3
+      },
+      {
+        "set": "value"
+      },
+      "settle"
+    ]
   }
 ]

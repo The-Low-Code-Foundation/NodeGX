@@ -49,6 +49,11 @@
  *                          NOT A SAMPLE: a value an output held at mount and lost before the first
  *                          settle is never sent (Boolean To String handed `falseString: undefined`
  *                          before its first settle sends nothing, not the `''` it held at mount).
+ *                          "Mount" is the INITIAL state only: each param `mount` applies is an
+ *                          ordinary write, sampled like a `set` step (a Dropdown mounted with Value
+ *                          0 and handed Value `undefined` before its first settle sends `'0'`). A
+ *                          write that sends nothing is not read at all: a value input with no
+ *                          reducer (spec.ts rule 4), or a patch whose `send` is `[]` (NSP-006 round 4).
  *                        - AN OUTCOME'S `port` IS THE INPUT THAT WAS INVOKED (trace.ts), never an
  *                          output name; outcomes are recorded in invocation order.
  *                        - `settle()` runs the frame-end reducer on EVERY settle, steps or none.

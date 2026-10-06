@@ -291,3 +291,76 @@ earlier number, so only the generator grades that. (3) `Infinity` and negative D
 (`Number(v) || 0` keeps both). (4) Coercing on write has a side effect the note does not state: `'0'` now gets the
 t = 0 frame when the run joins. (5) Still no mutant encodes the previous version (25 / 25 again), as 3b found. (1),
 (2) and (5) are NSP-010's.
+
+### 5.10 Round 4 — P107 s49, 2026-10-06: a visual control on a plain DOM page (the Dropdown v4; NSP-023 step 8, AC5)
+
+The first round with a node a PERSON acts on. The question is NSP-023's: can a renderer that is not React build a
+converted control from the spec alone? So the stranger draws the Dropdown with the plain DOM API, and the person reaches
+it the way a browser delivers a person: as DOM events.
+
+**What the harness gained.**
+- **The page:** `tests/stranger-page.js` (hashed). One jsdom window per process, and `act(root, act, value)`: the acts as
+  the DOM events a browser raises, ported from the runtime target's person face. That covers the hit test, pointer events
+  before mouse events, a disabled control withheld its clicks, the press's default focus, and `choose` as a keyboard pick.
+  Its header is the contract. A page round's target is made as `strangerTarget(page)`. It draws into `page.document` and
+  answers a person only from listeners on its own elements.
+- **The deaf page** (`stranger.test.ts`, NSP-023 AC5). Each declared act is raised on no element in turn, and the target
+  must then disagree with the spec somewhere in the suite. **Without it, conformance cannot tell a DOM target from a copy
+  of the reducers.** Measured with a control target that wraps the interpreter: it CONFORMS at 200 with 386 / 386 mutants
+  caught, and it is red on all ten acts here (and on AC4). The stranger's target is green.
+- **Declared equivalent mutants** (`EQUIVALENT_MUTANTS`) go to the runner and are skipped in AC2. No target can disagree
+  with one; the Dropdown has five.
+- **What was not handed:** the page model (NSP-023 §8.8). It is not part of the format, and the round asked whether the
+  spec is enough without it.
+
+Brief: [NSP-006-BRIEF-4.md](NSP-006-BRIEF-4.md). Recipe: round 3c's lab (a copy with no `.git`, the package's tracked
+files plus `nodegx-backend-contract`'s `package.json` and `src`, `node_modules` linked). Fixture:
+`packages/nodegx-node-spec/stranger-4/` (`target.js` the engine, `dropdown.js` the node, `options.js`, `canonical.js`) and
+its `REPORT.md`. The agent's harness refused to let it write the report, so the parent saved the text from its refused
+Write call, verbatim.
+
+| | reading |
+|---|---|
+| at 200 (seed 20732) | **green on its first run**: CONFORMS, 62 / 62 scenarios, 0 divergences, 385 / 387 killed, **386 / 386 caught by the stranger**, deaf page green |
+| at 10,000 (seed 20732) | three deep runs to green (two sampling rules below), then CONFORMS, 0 divergences, 385 / 390 killed, 5 declared equivalent |
+| jest runs | 8 (narrowed 3, whole file 2, deep 3) |
+| cost | 25 min (11:51:50–12:16:28), about 9 of them jest; 242 k tokens; 40 tool calls |
+| its design | the node keeps only what the node knows (Enabled, Mounted, Visible, Value, Items, the reported Hover / Pressed / Focused). What the page knows is read back from the DOM: on the page, disabled, hidden, focused, what it selects. A person's act reaches the outputs only through `mouseover`, `mouseout`, `mousedown`, `mouseup`, `touchstart`, `touchend`, `focus`, `blur` and `change` listeners on the `<select>` |
+| in primary, four rounds | 46 passed, 18 skipped (the deep runs), exit 0; hash gate green |
+
+**Checked, not trusted.** All 40 tool calls were read from the transcript:
+- Every read was a listed file, plus one `Read` of the harness's saved copy of its own scenario listing (as in round 3).
+- It disclosed one breach itself: reading the two allowed helpers in `text-input.ts`, it printed lines 880–895 of the Text
+  Input's act code. It says it used none of it.
+- It wrote only under `stranger-4/`. No lab file outside it is newer than the round's hash write.
+- Its code has no global `document` or `window`, no clock, no timer and no randomness.
+
+**Its ambiguities, and what each became.**
+1. **A value input with no reducer.** The stranger guessed it sends every output, reading `Patch.send`'s "absent means all
+   of them". The 10,000-sequence deep run corrected it: a store sends nothing. Now spec.ts rule 4 says so, and a hand
+   scenario covers it ("a plain store reads nothing").
+2. **"MOUNT IS NOT A SAMPLE".** The stranger fixed the wrong rule first. The deep run then showed that a param's write at
+   mount IS a sample; only the initial state is not. adapter.ts now says so, with a hand scenario ("a param's write is a
+   sample"). **Both rules stay hidden at 200.** Each new scenario was checked against the stranger's target with its wrong
+   guess put back: each catches exactly that guess, and the final target passes both. On the runtime they pass too
+   (Dropdown 54 / 64, the other 10 the known rows, CONFORMS). The Dropdown now has 64 scenarios.
+3. **What the `<select>` selects.** dropdown.ts called the selection the browser's ("keeps what it had", "HTML's reset").
+   That holds only for a target that keeps the `<option>` elements still offered, as React's keyed ones are. The
+   stranger rebuilt the list, so it computed the spec's own `painted` rule and assigned the selection. **On this one
+   point the DOM target copies a rule instead of inheriting it, and the suite cannot tell.** The docblock now says the
+   outcome is what is graded, and that a target which rebuilds the list owes it by assigning it. This is the round's one
+   React shadow: a rule that is free under React's reconciliation was worded as free everywhere.
+4. **The placing happens inside `mount`.** Right first time; a scenario confirms it.
+5. **Which DOM event answers which act.** For example: press answers `mousedown`, because the pointer events still reach a
+   disabled control; touch answers `touchstart`. The stranger read this from the page's code. No change: the spec names
+   outcomes, and the events are the page's (its header lists them).
+6. **The Focus and Blur actions do not paint first; a person's act does.** Before, only the reducers showed this. The
+   docblock now says it.
+7. Smaller points, read right and not graded: visibility on both elements; Label and Placeholder drawn from the raw
+   inputs (no state key, by design: never on the wire); data attributes fixed at mount; `install` a no-op.
+8. **The breach (its item 11) is a finding against the layout.** `dataAttributeNames` / `dataAttributeInput` live inside
+   another node's spec. Moving them to their own module is named, not done.
+
+**What the round proves.** AC5 holds. An agent with no React and no runtime drew a converted control on a plain page,
+from the spec, the format and the suite. It conforms at 200 and 10,000, and the deaf page shows its answers come through
+the DOM. Two of its guesses were format gaps, both closed. One was a React-shaped sentence (3), now reworded.

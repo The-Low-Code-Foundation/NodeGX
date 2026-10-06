@@ -32,7 +32,10 @@
  *     an option (:210 — the element is told which); otherwise the element is told nothing (`value={undefined}`) and the
  *     browser keeps what it had — a fresh element selects the hidden empty option (:217), and an option that leaves the
  *     list hands the selection to the first enabled option (HTML's reset; the hidden one is disabled). A person picking
- *     the option already selected raises no `change` (the browser), so nothing moves.
+ *     the option already selected raises no `change` (the browser), so nothing moves. **What is graded is the outcome**
+ *     (`painted` below), not who computes it: the browser's reset gives it only to a target that keeps the `<option>`
+ *     elements still offered (React's are keyed) and makes the hidden one the fresh element's choice; a target that
+ *     rebuilds the list owes the same selection by assigning it (NSP-006 round 4, the plain-DOM stranger, did that).
  *   - **Items** (options.ts :158-171): `undefined` ignored; otherwise kept and drawn at the next paint. Text is the old
  *     stored form, read as the editor reads it (options.ts `readItems`); any other truthy value that is not a list offers
  *     no options, and an empty item in a list is skipped (v4, row C70 — v3 offered no options for text, and an empty
@@ -44,7 +47,10 @@
  *     `<select>`, Select.tsx :223-252, and the keyboard leaves with the old one, silently: row C80), **Label**
  *     (drawn raw, :245 — row C65's third instance), **Placeholder** (drawn, never on the wire) and the look: the
  *     Checkbox's. A pick is a keyboard pick: it puts the keyboard on the element first (the focusing steps), as a Tab
- *     does, and a disabled element takes no pick.
+ *     does, and a disabled element takes no pick. **A person's act meets a page painted first** (`onPainted`: what the
+ *     frame wrote so far is drawn before the act), while **the Focus and Blur actions meet the page as the last paint left
+ *     it** (they read `onPage`, `pageEnabled` and `pageVisible` as they stand: an Enabled written in the same frame has not
+ *     reached the element yet).
  */
 
 import { defineNode, type Patch } from '../spec';

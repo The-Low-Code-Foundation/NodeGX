@@ -14,7 +14,9 @@
  *   3. A reducer for an input declared `outcome: true` returns an outcome on every path
  *      (the ERG-001 contract: exactly one outcome per invocation). With `noImplicitReturns`, a
  *      branch that falls off the end is also a compile error.
- *   4. A signal input MUST have a reducer; a value input MAY (the default is "store it").
+ *   4. A signal input MUST have a reducer; a value input MAY (the default is "store it": the value
+ *      is kept and nothing else happens — no state moves, and no output is sent or read. That is
+ *      not a reducer returning a patch with no `send`, which sends every output; NSP-006 round 4).
  *
  * Rules the interpreter enforces at run time, because a spec can also arrive as data:
  *   - the same three, again, with a thrown error naming the offending key;
