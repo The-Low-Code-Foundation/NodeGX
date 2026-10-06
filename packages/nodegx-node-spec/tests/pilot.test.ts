@@ -104,10 +104,12 @@ describe('String Format — what the source does, not what it says (NSP-004 §6 
     expect(formatValue('{a}{a}', { a: 'x' })).toBe('xx');
     expect(formatValue('{a} and {a}', { a: 1 })).toBe('1 and 1');
   });
-  test('$-patterns in a value are interpreted by String.prototype.replace', () => {
-    expect(formatValue('[{v}]', { v: '$&' })).toBe('[{v}]');
-    expect(formatValue('[{v}]', { v: '$$' })).toBe('[$]');
+  test('D3 (v2, fixed in P109 ISL-032): a value goes in exactly — no $-pattern is expanded', () => {
+    expect(formatValue('[{v}]', { v: '$&' })).toBe('[$&]');
+    expect(formatValue('[{v}]', { v: '$$' })).toBe('[$$]');
     expect(formatValue('[{v}]', { v: '$5' })).toBe('[$5]');
+    expect(formatValue('[{v}]', { v: "$'" })).toBe("[$']");
+    expect(formatValue('[{v}]', { v: '$`' })).toBe('[$`]');
   });
   test('placeholders: the empty name, no hyphens, duplicates kept', () => {
     expect(placeholders('{} {a-b} {a}{a}')).toEqual(['', 'a', 'a']);

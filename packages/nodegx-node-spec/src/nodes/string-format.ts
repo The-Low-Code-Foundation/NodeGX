@@ -15,9 +15,9 @@
  *   - "a placeholder used twice fills only the first time" (:52, and the comment at :91-92). The
  *     loop at :89-94 runs once PER MATCH, and each `replace` fills the first occurrence still
  *     standing — so `{a}{a}` with `a = 'x'` gives `xx`. Every occurrence is filled.
- *   - `replace` with a string pattern still interprets `$&`, `$$`, `` $` `` and `$'` in the
- *     REPLACEMENT (:93): a value of `$&` prints the placeholder back. Kept verbatim here so the
- *     spec and the runtime agree; the row asks whether that is intended.
+ *   - v2 (row D3, ruled "Insert values exactly"): a value goes in exactly as it is. v1, as the
+ *     runtime was, replaced with a string, which interprets `$&`, `$$`, `` $` `` and `$'` in the
+ *     REPLACEMENT: a value of `$&` printed the placeholder back, `$$5` printed `$5`.
  */
 
 import { defineNode, type ValueInputDecl } from '../spec';
@@ -36,8 +36,9 @@ export function formatValue(format: string, values: Readonly<Record<string, unkn
   let formatted = format;
   for (const name of placeholders(format)) {
     const v = values[name];
-    // :93 — string pattern, so the FIRST occurrence still standing; `$`-patterns in the replacement apply
-    formatted = formatted.replace('{' + name + '}', v !== undefined ? String(v) : '');
+    // :93 — string pattern, so the FIRST occurrence still standing; a function replacement, so no `$`-pattern applies (v2, D3)
+    const text = v !== undefined ? String(v) : '';
+    formatted = formatted.replace('{' + name + '}', () => text);
   }
   return formatted;
 }
@@ -48,7 +49,8 @@ const placeholderPort = (): ValueInputDecl => ({ type: 'string', coerce: 'none' 
 
 export const StringFormat = defineNode({
   type: 'String Format',
-  version: 1,
+  // v2 (P109 ISL-032, row D3 ruled "Insert values exactly"): `$&`, `$$`, `$'` and `` $` `` in a value come out as typed.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/stringformat.ts',
 
   // initialize (:38-44): format '', cachedResult '', inputValues {}. The cache and its dirty flag

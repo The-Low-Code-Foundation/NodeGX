@@ -14,8 +14,11 @@ function fill(format, values) {
   let text = format;
   for (const name of holes(format)) {
     const v = values[name];
-    // a string pattern: the first occurrence still standing, `$`-sequences in the replacement apply
-    text = text.replace('{' + name + '}', v !== undefined ? String(v) : '');
+    // a string pattern: the first occurrence still standing. Not the stranger's line: String Format v2 (P109 ISL-032,
+    // row D3) inserts a value exactly, so the replacement became a function when the spec moved; the stranger wrote
+    // `$`-sequences applying, as v1 said.
+    const s = v !== undefined ? String(v) : '';
+    text = text.replace('{' + name + '}', () => s);
   }
   return text;
 }

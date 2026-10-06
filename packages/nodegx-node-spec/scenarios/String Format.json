@@ -54,8 +54,8 @@
     ]
   },
   {
-    "name": "$-patterns in a value are interpreted by replace: '$&' prints the placeholder back, '$$' prints one dollar (§6 row)",
-    "because": "stringformat.ts :93 — String.prototype.replace with a string pattern still expands $&, $$, $` and $' in the replacement",
+    "name": "$-patterns in a value come out as typed: '$&' prints '$&', '$$' prints '$$', '$`' and \"$'\" print themselves (v2; was row D3: replace expanded them)",
+    "because": "stringformat.ts — the value goes in through a function replacement, so no $-pattern applies; ruled 2026-10-05 (P107-D3, \"Insert values exactly\")",
     "params": {
       "format": "[{v}]"
     },
@@ -73,6 +73,16 @@
       {
         "set": "v",
         "value": "$5"
+      },
+      "settle",
+      {
+        "set": "v",
+        "value": "$`"
+      },
+      "settle",
+      {
+        "set": "v",
+        "value": "$'"
       },
       "settle"
     ]

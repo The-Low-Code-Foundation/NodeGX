@@ -141,7 +141,10 @@ function fill(text, values) {
   let out = text;
   for (const name of holes(text)) {
     const v = values[name];
-    out = out.replace('{' + name + '}', v !== undefined ? String(v) : '');
+    // Not the stranger's line: String Format v2 (P109 ISL-032, row D3) inserts a value exactly, so the replacement
+    // became a function when the spec moved.
+    const s = v !== undefined ? String(v) : '';
+    out = out.replace('{' + name + '}', () => s);
   }
   return out;
 }
