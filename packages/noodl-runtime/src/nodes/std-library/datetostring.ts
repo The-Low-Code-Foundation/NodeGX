@@ -2,6 +2,8 @@
 
 import type { NodeDefinitionOptions, NodeInstance, NodeModule } from '@noodl/types';
 
+import { toDate } from './date/datemath';
+
 interface DateToStringNodeInstance extends NodeInstance {
   _internal: {
     formatString: string;
@@ -211,9 +213,13 @@ const DateToStringNode: NodeDefinitionOptions = {
   methods: {
     _format(this: DateToStringNodeInstance) {
       try {
-        // An unset or invalid `currentInput` throws out of `getDate()` and lands in the
-        // catch below — that is the node's only validity check, so the try is load-bearing.
-        const t = this._internal.currentInput;
+        // P107-D14: the Date is read through `toDate`, as the rest of the date family reads it, so
+        // one rule holds with or without a Timezone — a timestamp renders, an empty Date (null,
+        // undefined) or an unreadable one is invalid. Before, the no-zone branch threw out of
+        // `getDate()` on a timestamp while `formatToParts` rendered it, and rendered null as 1970.
+        // The throw lands in the catch below, so the try is still load-bearing.
+        const t = toDate(this._internal.currentInput);
+        if (!t) throw new RangeError('Invalid date');
         const format = this._internal.formatString;
         const zone = this._internal.timeZone;
         // CMP-005. `''` is the "never touched this port" value seeded in `initialize`, and it has
@@ -222,10 +228,7 @@ const DateToStringNode: NodeDefinitionOptions = {
         const locale = this._internal.locale || 'en-US';
 
         // ⚠️ The no-zone branch is the ORIGINAL code, unchanged, and it has to be: an existing
-        // project must produce byte-identical output. `getDate()` on an unset or invalid
-        // `currentInput` is still this node's only validity check, so the throw is load-bearing
-        // in both branches — `fieldsInZone` reaches `formatToParts`, which throws `RangeError`
-        // on an invalid date just as readily.
+        // project must produce byte-identical output for a Date it could always read.
         const fields: DateFields = zone
           ? fieldsInZone(t, zone)
           : {

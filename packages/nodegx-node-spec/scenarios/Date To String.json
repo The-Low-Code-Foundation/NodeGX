@@ -70,15 +70,15 @@
     "steps": [{ "set": "input", "value": "2024-02-29T13:45:30.123Z" }, "settle", { "set": "formatString", "value": 5 }, "settle", { "set": "formatString", "value": "no tokens {}" }, "settle"]
   },
   {
-    "name": "D14, no zone: null and a numeric timestamp cannot be read — blank and Invalid Date; the same value arriving again is ignored; an unparseable string too",
-    "because": "datetostring.ts :264-273 getDate on null / a number throws; :194 `currentInput === _value`. NSP-013 §6 row D14, the no-zone arm",
+    "name": "with no zone: null is Invalid Date (blank), a numeric timestamp renders (2024-02-29), the same value arriving again is ignored, an unparseable string is Invalid Date (v2; was row D14: the timestamp could not be read)",
+    "because": "datetostring.ts _format reads the Date through toDate (date/datemath.ts), with or without a zone; :194 `currentInput === _value`. Ruled 2026-10-05 (P107-D14, \"One rule, like the other date nodes\"); was the no-zone arm of row D14",
     "params": {},
     "world": { "timeZone": "UTC" },
     "steps": [{ "set": "input", "value": null }, "settle", { "set": "input", "value": null }, "settle", { "set": "input", "value": 1709214330123 }, "settle", { "set": "input", "value": 1709214330123 }, "settle", { "set": "input", "value": "nope" }, "settle"]
   },
   {
-    "name": "D14, with a zone: the same numeric timestamp RENDERS (2024-02-29) and null renders the epoch (1970-01-01)",
-    "because": "datetostring.ts :39-71 formatToParts accepts anything Number() accepts. NSP-013 §6 row D14, the zone arm",
+    "name": "with a zone: the same numeric timestamp renders (2024-02-29) and null is Invalid Date, as with none (v2; was row D14: null rendered the epoch, 1970-01-01)",
+    "because": "datetostring.ts _format reads the Date through toDate before formatToParts sees it. Ruled 2026-10-05 (P107-D14, \"One rule, like the other date nodes\"); was the zone arm of row D14",
     "params": { "timeZone": "UTC" },
     "world": { "timeZone": "UTC" },
     "steps": [{ "set": "input", "value": 1709214330123 }, "settle", { "set": "input", "value": null }, "settle"]

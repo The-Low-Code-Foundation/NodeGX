@@ -162,11 +162,14 @@ describe('what the source does, not what it says — NSP-013 §6, pinned', () =>
     expect(differenceBetween(new Date('2020-01-01T00:00:00Z'), new Date('2023-06-01T00:00:00Z'), 'fortnights' as never)).toBe(3);
     restore();
   });
-  test('D14: with no zone null and a number cannot be read; with a zone a number renders and null renders the epoch', () => {
+  test('D14 (v2, fixed in P109 ISL-032): one rule with or without a zone — a number renders, null is Invalid Date', () => {
+    const restore = installTimeZone(new World({ timeZone: 'UTC' }));
     expect(formatDate(null, '{year}-{month}-{date}', '', '')).toEqual({ text: '', error: true });
-    expect(formatDate(1709214330123, '{year}-{month}-{date}', '', '')).toEqual({ text: '', error: true });
+    expect(formatDate(1709214330123, '{year}-{month}-{date}', '', '')).toEqual({ text: '2024-02-29', error: false });
+    restore();
     expect(formatDate(1709214330123, '{year}-{month}-{date}', 'UTC', '')).toEqual({ text: '2024-02-29', error: false });
-    expect(formatDate(null, '{year}-{month}-{date}', 'UTC', '')).toEqual({ text: '1970-01-01', error: false });
+    expect(formatDate(null, '{year}-{month}-{date}', 'UTC', '')).toEqual({ text: '', error: true });
+    expect(formatDate(undefined, '{year}-{month}-{date}', 'UTC', '')).toEqual({ text: '', error: true });
     expect(formatDate(new Date('nope'), '{year}', 'UTC', '')).toEqual({ text: '', error: true });
     expect(formatDate(new Date(0), '{year}', 'Not/AZone', '')).toEqual({ text: '', error: true });
   });

@@ -16,17 +16,15 @@
  * zone, an unknown locale, a `Format` that is not a string — sends `''` and pulses `Invalid
  * Date` first (:344-363). The tokens are `_format`'s (:250-341), ported verbatim below.
  *
- * ⚠️ What "cannot be read" means depends on whether a zone is set (:264-273): with NO zone the
- * fields come from `getDate()` and friends, so `null`, a number and `undefined` throw and render
- * `''` with `Invalid Date`; WITH a zone the fields come from `Intl.DateTimeFormat.formatToParts`,
- * which accepts anything `Number()` accepts — a numeric timestamp renders, `null` renders the
- * epoch, and `undefined` would render the world's "now" — so a `Date` port fed `null` or a
- * timestamp prints a date in one configuration and `Invalid Date` in the other. NSP-013 §6 row
- * D14; the spec does what the runtime does.
+ * The Date is read through `toDate` (date-math.ts), as the rest of the date family reads it: a
+ * `Date`, a finite timestamp or a date string renders; `null`, `undefined`, `''` and anything
+ * unreadable is `Invalid Date` — whether or not a zone is set (v2, row D14 ruled "One rule, like
+ * the other date nodes"). v1, as the runtime was, read `getDate()` with no zone (a timestamp and
+ * null threw) but `formatToParts` with one (a timestamp rendered, null rendered the epoch).
  */
 
 import { defineNode } from '../spec';
-import { DATE_EXAMPLES } from './date-math';
+import { DATE_EXAMPLES, toDate } from './date-math';
 
 /** :18-27 */
 interface DateFields {
@@ -81,10 +79,11 @@ export function formatDate(t: unknown, formatString: unknown, timeZone: unknown,
     const format = formatString as string;
     const zone = timeZone as string;
     const locale = (localeTag as string) || 'en-US'; // :259
-    const date = t as Date;
+    const date = toDate(t); // v2 (D14): one rule with or without a zone
+    if (!date) throw new RangeError('Invalid date');
 
     const fields: DateFields = zone
-      ? fieldsInZone(t, zone)
+      ? fieldsInZone(date, zone)
       : {
           date: date.getDate(),
           month: date.getMonth() + 1,
@@ -168,7 +167,9 @@ function setting(s: State): { set: Partial<State>; send: Array<'currentValue'>; 
 
 export const DateToString = defineNode({
   type: 'Date To String',
-  version: 1,
+  // v2 (P109 ISL-032, row D14 ruled "One rule, like the other date nodes"): the Date is read through toDate — a timestamp
+  // renders and an empty Date is Invalid Date, with or without a Timezone.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/datetostring.ts',
   needs: ['timezone'],
 
