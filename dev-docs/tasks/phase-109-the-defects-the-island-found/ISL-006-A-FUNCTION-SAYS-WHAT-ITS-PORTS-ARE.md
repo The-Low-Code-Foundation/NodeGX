@@ -1,6 +1,6 @@
 # ISL-006 — A Function says what its ports are
 
-**Status: 🟡 s19 (2026-10-05): slices 1 and 2 built — AC1, AC3, AC4 (D80 closed), AC5, AC6, AC7, AC9 met; AC10 met in its logic (real-project copy) and its `upgradeOnLoad` entry; AC2 met on the door and a deployed page. Owed, one editor session: AC2's panel half and AC10 opened live in the editor (the toast, the save). All three rulings in (1 "List adds, code still mines"; 2 "Not now"; 3 "Fix all three", re-asked once with corrected numbers, plus "fix up old projects"). AC8 handed to P108 IW-010.** **s18 status:** 🟢 ruled, not built — ruling 1 "List adds, code still mines"; census 1,210 Functions, 35 with a list, 4 by variable. **Earlier status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
+**Status: ✅ s20 (2026-10-06): closed. AC2's panel half and AC10 read live in the editor; the editor session found that the shared reader made no port in the editor's preview (ES5 build, `P109-S20-ES5READER`), fixed in `a7914b837`. AC8 handed to P108 IW-010. One small question filed, not blocking: `P109-S20-LISTDEFAULTTYPE` (needs-ruling).** **s19 status:** 🟡 s19 (2026-10-05): slices 1 and 2 built — AC1, AC3, AC4 (D80 closed), AC5, AC6, AC7, AC9 met; AC10 met in its logic (real-project copy) and its `upgradeOnLoad` entry; AC2 met on the door and a deployed page. Owed, one editor session: AC2's panel half and AC10 opened live in the editor (the toast, the save). All three rulings in (1 "List adds, code still mines"; 2 "Not now"; 3 "Fix all three", re-asked once with corrected numbers, plus "fix up old projects"). AC8 handed to P108 IW-010.** **s18 status:** 🟢 ruled, not built — ruling 1 "List adds, code still mines"; census 1,210 Functions, 35 with a list, 4 by variable. **Earlier status:** ⬜ not started — scoped 2026-10-01 at `27d891bf3`
 **Re-scoped s8 (2026-10-03), against "Native nodes first" and ISL-007:** its largest consumer goes. `Translate words`
 (696 outputs) is replaced by the i18next add-on (ISL-007, built s8) and deleted in [IW-010](../phase-108-the-island-works/IW-010-THE-ISLAND-IN-NATIVE-NODES.md)
 AC4. What is left is the general case: a Function whose outputs come from a list (`Outputs[key] = …`) mints none, and a
@@ -247,3 +247,47 @@ read in Chrome; 8/8, no console errors). One Function, four outputs: `declared` 
 
 **Next:** one editor session: AC2's panel half (three typed outputs declared in the panel, the node shows them) and AC10
 opened live on a copy of SuntappedX (the toast reads "Wired Function ports kept", the project saves, the 21 wires stay solid).
+
+### Session 20 (2026-10-06) — the editor session; one regression found and fixed; closed
+
+`npm run dev:debug` on a throwaway profile (`NOODL_USER_DATA_DIR` in the scratchpad with `firstRunLegal.json` and seeded recents;
+the 9222 listener's `--user-data-dir` checked before driving). Two COPIES in the scratchpad: SuntappedX and hsseq-test-main.
+
+**AC10, live.** Opening the SuntappedX copy showed one toast with two sections, "Text styles are now typography tokens" and
+**"Wired Function ports kept"** (21 ports), and a backup `SuntappedX-copy.before-0.3` was made. The saved `project.json` holds
+exactly 21 new list rows on 12 Functions, 3 of them `outtype-…: signal`, and 6,766 wires before and after (0 lost). Each of the 21
+names is a port in the editor (`getPorts`) with its one wire. Re-opened: no toast (the fix-up is idempotent). **Control:** the
+hsseq copy's toast has the text-styles section only. Function wire ends 584 alive, 0 dead, and 2,959 wires saved of 2,959.
+
+🔴 **Found while reading AC10: the editor showed 1,769 error-level wires on SuntappedX's Functions** ("Source/Target port
+doesn't exist"), 461 of 612 Functions with no port from their code. Cause: the viewer bundle compiles
+`function-ports.ts` with its own tsconfig (`target: es5`), where `for…of source.matchAll(…)` becomes an index loop over `.length`
+(`noodl.viewer.js` line 19619) and runs zero times. The dev log had said `[tsl] TS2802` and "compiled with 1 error" since s19.
+The unit specs never saw it because jest compiles the file at ES2015 or later. The deployed page's checks did not depend on it,
+because the runtime registers a port when a wire arrives. Which target the deploy bundle uses was not checked. **Fixed in `a7914b837`** with an exec loop. The spec now compiles the file with the viewer's
+own options and requires no TS2802, and it runs the ES5-compiled reader against the native one (sabotage: exactly 4 red).
+Re-read live after the viewer rebuilt: **0 Function errors, 2,707 wire ends alive, 3 dead**. The 3 dead are wires to `in-project_id`,
+`in-org_id` and `in-address` on a cloud Function whose script never names them, so they were dead before ISL-006 too. Ledger:
+`P109-S20-ES5READER` (fixed). The memory for viewer-react's ES5 `for…of` existed; this file sits in another package that the viewer
+also compiles.
+
+**AC2, the panel half (hsseq copy).** A Function was added with `Outputs.total = 3; Outputs.label = "three"; Outputs.ready = true;`.
+Before any list row, its outputs were `out-total`, `out-label` and `out-ready`, all `*`. Three rows were added through the Script
+Outputs panel with real clicks, typing and Enter, then Number, String and Boolean were picked in each row's Type select. The
+**Ports tab** read: `total number NOW 3`, `label * NOW "three"`, `ready boolean NOW true`. Those are three outputs, with live
+values from the preview. A wire from `out-total` into a String node is healthy. A wire from `out-ghost` reads "Source port doesn't
+exist." at level `error`. 🔴 `label` reads `*` although the panel said String: a listed output's port falls back to `*` while the
+select's default reads String, and re-picking String writes nothing. Filed as `P109-S20-LISTDEFAULTTYPE` (needs-ruling, low,
+recommendation: the panel shows "Any" for an output, nothing saved changes).
+
+**The toast's copy (mine, s19) rewritten in the same commit.** It said `a Function in /Offices/Office Settings keeps in-reps.` once
+per port. Each line started lowercase and named a port id, and two Functions in one component read as a repeated line. It now
+reads `In /Offices/Office Settings, 2 Functions keep the input reps.`, one sentence per place, with names as the node shows them,
+six places and then a count. The lead sentence's ", so" was split in two (`written.py` clean). Separately, the long toast grew past
+the window's top edge and hid its own title: the toast card has no maximum height and no scroll. Filed as `P109-S20-LONGTOAST`
+(open, the toast layer's), not fixed here.
+
+**Gates (2026-10-06, at `a7914b837`):** editor `tests-unit` isl-006 37, fix-007, sb-017 (79 across 4 suites); runtime 10 Function
+suites 123/123; core-ui scriptPorts and declaredPorts 38/38; exporter function-ports suite 14/14; `noodl-mcp` `isl006FunctionPortList` 6/6;
+`tsc --noEmit`: editor 0, project-contract 0. Stack stopped with `dev:stop` (26 processes).
+
