@@ -7,6 +7,7 @@ import type { StyleObject } from '../../../react-component-node';
 import { Noodl } from '../../../types';
 import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
+import { labelText } from '../labelText';
 
 export interface SelectProps extends Noodl.ReactProps {
   id: string;
@@ -179,7 +180,7 @@ export function Select(props: SelectProps) {
   if (selectedIndex >= 0 && selectedIndex < props.items.length) {
     label = <span>{props.items[selectedIndex].Label}</span>;
   } else if (props.placeholder) {
-    label = <span style={{ opacity: props.placeholderOpacity }}>{props.placeholder}</span>;
+    label = <span style={{ opacity: props.placeholderOpacity }}>{labelText(props.placeholder)}</span>;
   }
 
   //A hidden first option is preselected and added to the list of options, it makes it possible to select the first item in the dropdown
@@ -242,7 +243,7 @@ export function Select(props: SelectProps) {
           }}
           noodl-style-tag="label"
         >
-          {props.label}
+          {labelText(props.label)}
         </label>
         {inputWrapper}
       </div>

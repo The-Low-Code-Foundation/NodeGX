@@ -33,9 +33,10 @@
  *     browser keeps what it had — a fresh element selects the hidden empty option (:217), and an option that leaves the
  *     list hands the selection to the first enabled option (HTML's reset; the hidden one is disabled). A person picking
  *     the option already selected raises no `change` (the browser), so nothing moves.
- *   - **Items** (options.ts :158-171): `undefined` ignored; otherwise kept as handed and drawn at the next paint. A truthy
- *     value that is not a list throws in the render (`props.items.map`, Select.tsx :118; row C70) — here it offers no
- *     options. An option's value is its `Value` as text (`<option value>`, :119), or its Label's text when it has none
+ *   - **Items** (options.ts :158-171): `undefined` ignored; otherwise kept and drawn at the next paint. Text is the old
+ *     stored form, read as the editor reads it (options.ts `readItems`); any other truthy value that is not a list offers
+ *     no options, and an empty item in a list is skipped (v4, row C70 — v3 offered no options for text, and an empty
+ *     item drew an empty option; the runtime's render threw on all three). An option's value is its `Value` as text (`<option value>`, :119), or its Label's text when it has none
  *     (HTML's fallback); an option with `Disabled` true or `'true'` cannot be picked.
  *   - **Enabled**, **the pointer, the keyboard, a click's focus** (utils.ts :157-311 on the `<select>`, Select.tsx
  *     :211), **Focus** / **Blur** (utils.ts :366-440, the target is the `<select>`), **Mounted**, **Enable Label** (it
@@ -98,7 +99,10 @@ export const Dropdown = defineNode({
   // C80, known on the runtime.
   // v3 (NSP-023 step 4, 2026-10-06): the selection is the node's value — a remount and a new Items list keep a person's pick and
   // fire nothing (R14); v1 and v2 copied the component's `[props.value, props.items]` effect — rows D34 and C71, known on the runtime.
-  version: 3,
+  // v4 (P109 ISL-026, 2026-10-06, P107-C70 ruled "Read old text, else no options"): text on Items is read as the old stored list
+  // (`readItems`), and an empty item in a list is skipped; v3 offered no options for text and drew an empty item as an empty
+  // option (the runtime's render threw on both — row C70).
+  version: 4,
   source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the browser's selection with them
@@ -382,14 +386,44 @@ type Option = { value: string; disabled: boolean };
 /** HTML's `option.value` fallback: the option's text with ASCII whitespace stripped at the ends and collapsed within */
 const optionText = (label: unknown): string => (label === undefined || label === null || typeof label === 'boolean' ? '' : String(label)).replace(/[ \t\n\f\r]+/g, ' ').trim();
 
+/** options.ts `readItems` — the editor's reading of the old stored form of Items (a JSON text), copied: what is not a list is none. */
+function readStoredItems(stored: string): { Label: string; Value: string }[] {
+  if (stored.trim() === '') return [];
+  let source: unknown;
+  try {
+    source = JSON.parse(stored);
+  } catch {
+    return [];
+  }
+  if (!Array.isArray(source)) return [];
+  const out: { Label: string; Value: string }[] = [];
+  for (const item of source) {
+    if (item === null || item === undefined) continue;
+    if (typeof item === 'object') {
+      const row = item as Record<string, unknown>;
+      const label = row.Label !== undefined ? row.Label : row.label;
+      const value = row.Value !== undefined ? row.Value : row.value;
+      if (label === undefined && value === undefined) continue;
+      const labelText = String(label !== undefined ? label : value);
+      out.push({ Label: labelText, Value: value !== undefined ? String(value) : labelText });
+    } else {
+      const labelText = String(item);
+      out.push({ Label: labelText, Value: labelText });
+    }
+  }
+  return out;
+}
+
 /**
  * Select.tsx :115-124 — the `<option>`s the list offers: a falsy Items offers none (:117); a truthy one that is not a list throws in
- * the render on the runtime (`props.items.map`, row C70) and offers none here; each item's `Value` as text (`<option value>`, :119),
+ * the render on the runtime until v4 (`props.items.map`, row C70) and offers none; text is read as the old stored list (v4,
+ * options.ts `readItems`) and an empty item is skipped (v4); each item's `Value` as text (`<option value>`, :119),
  * or its Label's text when it has none; `Disabled` true or `'true'` disables it (:119)
  */
 function optionsOf(items: unknown): Option[] {
+  if (typeof items === 'string') return optionsOf(readStoredItems(items));
   if (!items || !Array.isArray(items)) return [];
-  return items.map((item) => {
+  return items.filter((item) => item !== null && item !== undefined).map((item) => {
     const o = (item !== null && typeof item === 'object' ? item : {}) as { Value?: unknown; Label?: unknown; Disabled?: unknown };
     const value = o.Value === undefined || o.Value === null || typeof o.Value === 'boolean' ? optionText(o.Label) : String(o.Value);
     return { value, disabled: o.Disabled === true || o.Disabled === 'true' };

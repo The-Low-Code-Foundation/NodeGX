@@ -215,20 +215,6 @@ const nullSuccessBody = (d: Divergence) => {
 };
 
 /**
- * NSP-016 §6 C65 — a Checkbox's Label wired an object or an array is rendered as it is (Checkbox.tsx :205-207) and React
- * throws at the next paint (a settle or an act). Narrow: React's own message, and a `set` of `label` to an object or an
- * array somewhere in the reference before the difference (a parameter is a set at the mount).
- */
-const objectChild = (port: string) => (d: Divergence) => {
-  if (d.difference.threw === undefined || !/Objects are not valid as a React child/.test(d.difference.threw)) return false;
-  // a throw at the mount (index 0) leaves no trace: any parameter set qualifies; else a set before the paint that threw
-  const upTo = d.difference.index === 0 ? d.reference.findIndex((e) => e.t !== 'set') : d.difference.index + 1;
-  return d.reference.slice(0, upTo < 0 ? d.reference.length : upTo).some((e) => isSet(e, port, (v, present) => present && typeof v === 'object' && v !== null));
-};
-const objectLabel = objectChild('label');
-/** s39 — C65's fourth instance: Select.tsx :182 renders `{props.placeholder}` raw while nothing is selected */
-const objectPlaceholder = objectChild('placeholder');
-/**
  * NSP-016 §6 C66 — a Checkbox whose Enable Label went from on to off has lost its root element (two elements, one ref
  * callback: the removed one nulls it), so a Focus action reports Unchanged with the box on the page. Narrow: the
  * difference is the Focus outcome — Unchanged on the runtime where the reference says Done — and the reference holds
@@ -284,17 +270,6 @@ const clickActionClick = (d: Divergence) => {
   return stage === 3;
 };
 
-/**
- * NSP-016 §6 C70 — a Dropdown's Items wired a truthy value that is not a list (the legacy stored form is a string), or a list
- * holding null: Select.tsx :118 maps it (`props.items.map`) and :119 reads `.Value` of each item, and React throws at the
- * next paint. Narrow: the throw's own message, and a `set` of `items` to such a value before the paint that threw.
- */
-const itemsNotAList = (d: Divergence) => {
-  if (d.difference.threw === undefined || !/props\.items\.(map|findIndex) is not a function|Cannot read properties of null \(reading 'Value'\)/.test(d.difference.threw)) return false;
-  const upTo = d.difference.index === 0 ? d.reference.findIndex((e) => e.t !== 'set') : d.difference.index + 1;
-  const offending = (v: unknown, present: boolean) => present && ((!!v && !Array.isArray(v)) || (Array.isArray(v) && v.some((i) => i === null)));
-  return d.reference.slice(0, upTo < 0 ? d.reference.length : upTo).some((e) => isSet(e, 'items', offending));
-};
 /**
  * NSP-016 §6 C71 — a Value written back to the very value React last rendered, after a person's pick, does not move the
  * selection: the component's effect keys on `props.value` (Select.tsx :44-47), which that write did not change, so the
@@ -585,8 +560,6 @@ const buttonPickWrittenBack = (d: Divergence) => {
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   'net.noodl.controls.textinput': [
-    // s38 — C65's second instance: TextInput.tsx :274 renders `{props.label}` raw too
-    { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
     // NSP-023 (R12) — the Text Input v2 states the intent; what React's drawing makes the runtime do instead
     { row: 'NSP-016 §6 C68 — a mouse press on a one-line field fires no Pointer Down, sets no Pressed and runs no drain (its own onMouseDown replaces the control\'s)', matches: mousePressOnOneLine },
     { row: 'NSP-016 §6 C72 — a write in the frame a Type or Max length change arrives converts / measures with the old one (the props React last drew)', matches: staleProps },
@@ -596,11 +569,8 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   // s39 — the Dropdown: C65's third instance (Select.tsx :245 renders `{props.label}` raw), and two of its own
   'net.noodl.controls.options': [
-    { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
-    { row: 'NSP-016 §6 C65 — a Placeholder wired an object or an array, with nothing selected: React throws rendering it at the next paint', matches: objectPlaceholder },
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the dropdown on the page', matches: lostRootAfterLabelOff },
     { row: 'NSP-016 §6 C80 — Enable Label changed while the dropdown holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
-    { row: 'NSP-016 §6 C70 — Items wired a truthy value that is not a list, or a list holding null: the render throws at the next paint', matches: itemsNotAList },
     { row: "NSP-016 §6 C71 — a Value written back to the value React last rendered, after a pick, leaves the pick selected: picking it again raises nothing", matches: pickWriteBackPick },
     // NSP-023 step 4 (v3) — the spec keeps the pick; what React's effect makes the runtime do instead
     { row: "NSP-016 §6 D34 — Changed fires with nobody picking: a remount, or Items written again, after a pick takes the author's Value back", matches: changedWithNobodyPicking }
@@ -612,7 +582,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   // s42 — the Radio Button: the Checkbox's label, so the Checkbox's C65 and C66 beside the three setters
   'net.noodl.controls.radiobutton': [
-    { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the button on the page', matches: lostRootAfterLabelOff },
     // NSP-023 step 5 (v2) — what React's drawing makes the runtime do instead of what the spec says
     { row: 'NSP-016 §6 C80 — Enable Label changed while the button holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
@@ -627,7 +596,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
   Text: [{ row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }],
   'net.noodl.controls.checkbox': [
-    { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the box on the page', matches: lostRootAfterLabelOff },
     { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick },
     { row: 'NSP-016 §6 C80 — Enable Label changed while the box holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard }

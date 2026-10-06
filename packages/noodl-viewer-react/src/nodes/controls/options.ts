@@ -57,6 +57,7 @@ const OptionsNode = {
   },
   initialize: function () {
     this._itemsChanged = () => {
+      this.props.items = optionItems(this._internal.items);
       this.forceUpdate();
     };
 
@@ -165,7 +166,7 @@ const OptionsNode = {
           if (newValue && typeof newValue.on === 'function') newValue.on('change', this._itemsChanged);
         }
 
-        this.props.items = this._internal.items;
+        this.props.items = optionItems(this._internal.items);
 
         this.forceUpdate();
       }
@@ -329,6 +330,21 @@ Utils.addFocusActions(OptionsNode, { noun: 'dropdown' });
  * read yields no options, and {@link updateValuePort} then leaves the port a plain string rather than
  * offering a list that would be missing rows.
  */
+/**
+ * P107-C70 (P109 ISL-026, ruled 2026-10-05 "Read old text, else no options"): what `Select` draws for whatever arrived on
+ * Items. Text is the old stored form and is read the way the editor reads it (`readItems`); a list keeps its identity (a
+ * live Array repaints on its own `change`) unless it holds an empty item, which is skipped; anything else that is not a
+ * list offers no options. A falsy Items is passed on as it was (`Select` offers none). Handed to the render as it came,
+ * a string or a record threw at `props.items.map` / `findIndex`, and a null item at `.Value` — the whole page, not one
+ * Dropdown.
+ */
+function optionItems(items: unknown): unknown {
+  if (!items) return items;
+  if (typeof items === 'string') return readItems(items);
+  if (!Array.isArray(items)) return [];
+  return items.some((item) => item === null || item === undefined) ? items.filter((item) => item !== null && item !== undefined) : items;
+}
+
 function readItems(stored: unknown): { Label: string; Value: string }[] {
   let source: unknown = stored;
 

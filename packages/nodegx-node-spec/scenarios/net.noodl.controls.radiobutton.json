@@ -2492,9 +2492,8 @@
     "row": "NSP-016 §6 C66"
   },
   {
-    "name": "a Label that is an object with Enable Label on: the label is drawn as its text on the interpreter — the runtime's React throws rendering it",
-    "because": "RadioButton.tsx :205-207 renders `{props.label}` as it is (the Button renders `String(props.label)`) — NSP-016 §7.2 row C65 (carried from the Checkbox: the same page model, utils.ts)",
-    "row": "NSP-016 §6 C65",
+    "name": "a Label that is an object with Enable Label on: the label is drawn as its text and the page keeps drawing",
+    "because": "P107-C65, ruled 2026-10-05 \"Turn them into text\", fixed in P109 ISL-026 (controls/labelText.ts); it was rendered raw (RadioButton.tsx :205-207 renders `{props.label}` as it is (the Button renders `String(props.label)`) — NSP-016 §7.2 row C65 (carried from the Checkbox: the same page model, utils.ts)) and React threw, taking the page down",
     "params": {
       "useLabel": true,
       "label": {

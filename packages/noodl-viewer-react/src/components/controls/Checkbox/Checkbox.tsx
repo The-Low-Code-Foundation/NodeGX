@@ -5,6 +5,7 @@ import Utils from '../../../nodes/controls/utils';
 import { Noodl } from '../../../types';
 import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
+import { labelText } from '../labelText';
 
 export interface CheckboxProps extends Noodl.ReactProps {
   id: string;
@@ -209,7 +210,7 @@ export function Checkbox(props: CheckboxProps) {
       >
         {checkbox}
         <label className="ndl-controls-pointer" style={labelStyle} htmlFor={props.id} noodl-style-tag="label">
-          {props.label}
+          {labelText(props.label)}
         </label>
       </div>
     );

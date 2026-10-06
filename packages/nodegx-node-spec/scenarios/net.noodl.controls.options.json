@@ -688,15 +688,14 @@
     ]
   },
   {
-    "name": "a Label that is an object with Enable Label on: the label is drawn as its text on the interpreter — the runtime's React throws rendering it",
-    "because": "Select.tsx :245 renders `{props.label}` raw (row C65, third instance)",
+    "name": "a Label that is an object with Enable Label on: the label is drawn as its text and the page keeps drawing",
+    "because": "P107-C65, ruled 2026-10-05 \"Turn them into text\", fixed in P109 ISL-026 (controls/labelText.ts); it was rendered raw (Select.tsx :245 renders `{props.label}` raw (row C65, third instance)) and React threw, taking the page down",
     "params": {
       "useLabel": true,
       "label": {
         "a": 1
       }
     },
-    "row": "NSP-016 §6 C65",
     "steps": [
       "settle",
       {
@@ -23184,6 +23183,107 @@
       },
       {
         "signal": "blur"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Items written as the old stored text: its options are offered, and choosing 'b' moves Value to 'b' with Changed",
+    "because": "P107-C70, ruled 2026-10-05 \"Read old text, else no options\" (v4): text on Items is read as the editor reads the old stored form (options.ts readItems); the runtime's render threw at props.items.map",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": "[{\"Label\":\"A\",\"Value\":\"a\"},{\"Label\":\"B\",\"Value\":\"b\"}]"
+      },
+      "settle",
+      {
+        "act": "choose",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Items written a number: no options are offered and the page keeps drawing; a list written after it is offered, and choosing its second option 'y' moves Value with Changed",
+    "because": "P107-C70 (v4): anything else that is not a list offers no options; the runtime's render threw at props.items.findIndex / map, the whole page with it",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": 5
+      },
+      "settle",
+      {
+        "act": "choose",
+        "value": "Option 1"
+      },
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          {
+            "Label": "X",
+            "Value": "x"
+          },
+          {
+            "Label": "Y",
+            "Value": "y"
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "choose",
+        "value": "y"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a list holding an empty item: the item is skipped and the others are offered — 'a' is selected by the browser's reset, and choosing 'b' moves Value with Changed",
+    "because": "P107-C70 (v4): an empty item is skipped; the runtime's render threw reading .Value of it",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "items",
+        "value": [
+          null,
+          {
+            "Label": "A",
+            "Value": "a"
+          },
+          {
+            "Label": "B",
+            "Value": "b"
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "choose",
+        "value": "b"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Placeholder that is an object, with nothing selected: drawn as its text, and the page keeps drawing — choosing 'Option 2' moves Value with Changed",
+    "because": "P107-C65, ruled 2026-10-05 \"Turn them into text\", fixed in P109 ISL-026 (controls/labelText.ts); Select.tsx rendered `{props.placeholder}` raw and React threw at the paint",
+    "params": {
+      "value": "nothing",
+      "placeholder": {
+        "a": 1
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "choose",
+        "value": "Option 2"
       },
       "settle"
     ]

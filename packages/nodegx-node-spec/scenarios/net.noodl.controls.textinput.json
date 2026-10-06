@@ -23824,5 +23824,33 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "a Label that is a list with Enable Label on: drawn as its text, and the page keeps drawing — a Value written after it reaches the text",
+    "because": "P107-C65, ruled 2026-10-05 \"Turn them into text\", fixed in P109 ISL-026 (controls/labelText.ts); TextInput.tsx rendered `{props.label}` raw and React threw at the paint",
+    "params": {
+      "useLabel": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "label",
+        "value": [
+          1,
+          2
+        ]
+      },
+      "settle",
+      {
+        "set": "label",
+        "value": "Name"
+      },
+      "settle",
+      {
+        "set": "startValue",
+        "value": "hi"
+      },
+      "settle"
+    ]
   }
 ]

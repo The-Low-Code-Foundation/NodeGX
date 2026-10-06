@@ -6,6 +6,7 @@ import { outwardValueForFieldType } from '../../../nodes/controls/textInputValue
 import { Noodl, Slot } from '../../../types';
 import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
+import { labelText } from '../labelText';
 
 //this stops a text field from being unfocused by the clickHandler in the viewer that handles focus globally.
 //The specific case is when a mouseDown is registered in the input, but the mouseUp is outside.
@@ -271,7 +272,7 @@ export class TextInput extends React.Component<TextInputProps, State> {
       return (
         <div ref={noodlRootRef(this.props.noodlNode)} {...dataAttributeProps(props.dom)} style={otherStyles}>
           <label htmlFor={props.id} style={labelStyle} noodl-style-tag="label">
-            {props.label}
+            {labelText(props.label)}
           </label>
           {inputWithWrapper}
         </div>
