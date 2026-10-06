@@ -54,7 +54,9 @@
  * Connected and Retry Count; an event sends the eight data and count outputs; a failure sends Last Error, Retry Count and
  * Duplicates Suppressed. v2 (row C56 ruled "Send them when they change"): an open also sends the Last Error it cleared, a
  * failure that schedules a retry sends Retry Count once it has gone up (`onRetry`), and a suppressed duplicate sends its
- * count (`onDuplicate`) — v1 sent none of the three, so the wire held stale values.
+ * count (`onDuplicate`) — v1 sent none of the three, so the wire held stale values. v3 (row C58 ruled "Say idle, as
+ * WebSocket does"): a URL change that does not reopen (Auto Connect off) sets the state `idle` and sends the three state
+ * outputs — v2's silent teardown left Connected true and Connection State `open` with no stream.
  *
  * NOT GRADED HERE, named:
  *   - With Credentials (conn :459): a `fetch` init's `credentials`, which the world's request record does not carry — the
@@ -228,6 +230,11 @@ class Run {
       this.settleConnect('unchanged');
       this.teardownConnection();
       if (this.s.autoConnect && this.s.url) this.doConnect(false);
+      else {
+        // v3 (row C58 ruled "Say idle, as WebSocket does"): nothing reopens, so the state is idle and the three are sent
+        this.s.connectionState = 'idle';
+        this.send(STATE_SENDS);
+      }
       return;
     }
     if (!this.s.autoConnect || !this.s.url) return;
@@ -607,7 +614,8 @@ export const ServerSentEvents = defineNode({
   type: 'net.noodl.SSE',
   // v2 (P109 ISL-030, row C56 ruled "Send them when they change"): Last Error at an open, Retry Count once it moved, and
   // Duplicates Suppressed as it counts are sent; v1 left all three stale on the wire.
-  version: 2,
+  // v3 (P109 ISL-030, row C58 ruled "Say idle, as WebSocket does"): a URL change that does not reopen says idle.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/agent/sse.ts; agent/sse-connection.ts; agent/stream-parsers.ts',
   needs: ['network', 'clock'],
   worldPool: { responses: RESPONSES, delays: [0, 0, 0, 3], advances: [0, 1, 1, 2, 3, 5, 10, 50, 100, 1000, 5000, 30000] },

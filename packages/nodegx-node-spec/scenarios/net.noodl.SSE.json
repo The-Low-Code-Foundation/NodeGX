@@ -557,7 +557,7 @@
         }
       ]
     },
-    "because": "conn :854-864; the count is not sent until an error (sse :714-719); v2 (P109 ISL-030, P107-C56 ruled \"Send them when they change\"): the count is sent as it moves (onDuplicate) \u2014 v1 counted silently"
+    "because": "conn :854-864; the count is not sent until an error (sse :714-719); v2 (P109 ISL-030, P107-C56 ruled \"Send them when they change\"): the count is sent as it moves (onDuplicate) — v1 counted silently"
   },
   {
     "name": "A server retry: is the backoff's base from then on",
@@ -726,7 +726,7 @@
     "because": "conn :298-303 — EventSource is not available in this environment"
   },
   {
-    "name": "A URL change while streaming reconnects to the new one silently; the pending Connect Unchanged",
+    "name": "A URL change while a Connect waits, Auto Connect off: torn down, nothing reconnects, and it says idle (v3, C58); the pending Connect Unchanged",
     "params": {
       "url": "https://api.example/stream"
     },
@@ -756,7 +756,7 @@
         }
       ]
     },
-    "because": "sse :565-580 — only the URL decides; the rebuild mints no token; Auto Connect is off so nothing reconnects"
+    "because": "sse :565-580 — only the URL decides; the rebuild mints no token; Auto Connect is off so nothing reconnects; v3 (P109 ISL-030, P107-C58 ruled \"Say idle, as WebSocket does\"): the three state outputs sent with idle. Its v1/v2 name said \"reconnects to the new one\", which it never did"
   },
   {
     "name": "A URL change with Auto Connect on reconnects to the new one",
@@ -1026,7 +1026,7 @@
     "because": "sse :133-136 — String(value); one pass per frame"
   },
   {
-    "name": "Auto Connect turned off with a URL change in one frame: torn down, nothing reconnects",
+    "name": "Auto Connect turned off with a URL change in one frame: torn down, nothing reconnects, and it says idle — Connected false (v3, C58)",
     "params": {
       "autoConnect": true,
       "url": "https://api.example/stream"
@@ -1059,7 +1059,7 @@
         }
       ]
     },
-    "because": "sse :570-580 — the new connection needs Auto Connect"
+    "because": "sse :570-580 — the new connection needs Auto Connect; v3 (P109 ISL-030, P107-C58 ruled \"Say idle, as WebSocket does\"): the three state outputs sent with idle — v2 left Connected true and Connection State open"
   },
   {
     "name": "Text Path written blank again: Text stays the raw payload",
@@ -1868,7 +1868,7 @@
     "world": {
       "network": []
     },
-    "because": "sse :565-580, :617 — the connection is the one opened against the URL now"
+    "because": "sse :565-580, :617 — the connection is the one opened against the URL now; v3 (C58): each URL move that does not reopen says idle"
   },
   {
     "name": "Auto Connect meets a 200 with no body; Disconnect afterwards is Unchanged",

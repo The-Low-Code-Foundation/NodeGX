@@ -579,6 +579,14 @@ const SSENode: NodeDefinitionOptions = {
           this.settleConnect('unchanged');
           this.teardownConnection();
           if (inner.autoConnect && inner.url) this.doConnect();
+          else {
+            // P107-C58 (P109 ISL-030, ruled "Say idle, as WebSocket does"): nothing reopens, so say so. The teardown is
+            // silent and Connection State is the node's own field: it stayed `open` (Connected true) with no stream.
+            inner.connectionState = 'idle';
+            this.flagOutputDirty('connectionState');
+            this.flagOutputDirty('connected');
+            this.flagOutputDirty('retryCount');
+          }
           return;
         }
 
