@@ -185,6 +185,7 @@ interface FakeInput {
   onchange: ((e: unknown) => void) | null;
   oncancel: (() => void) | null;
   click(): void;
+  removeAttribute(name: string): void;
   clicks: number;
   clickThrows?: Error;
 }
@@ -204,6 +205,10 @@ function installFakeDocument() {
         click() {
           input.clicks++;
           if (input.clickThrows) throw input.clickThrows;
+        },
+        // P109 ISL-030 (P107-C53, D27): every Open now removes a blank Capture / Accepted file types
+        removeAttribute(name: string) {
+          delete (input as unknown as Record<string, unknown>)[name];
         }
       };
       fakeInputs.push(input);

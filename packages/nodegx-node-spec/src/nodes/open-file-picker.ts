@@ -7,12 +7,12 @@
  *
  * THE ELEMENT — one file `<input>`, made at the node's making (`initialize`, :43-51 — "it doesn't work predictably in
  * Safari when created in the open signal function") and reused for every Open. Its `accept` and `capture` are REFLECTED
- * attributes (world.ts PICKER): whatever is assigned is held as a string. The node assigns them only on Open, from what it
- * holds (:141-145):
- *   `accept` — ALWAYS, Accepted file types as held: never set, that is `undefined`, and the element holds the STRING
- *     `"undefined"` (row D27);
- *   `capture` — only when Capture is TRUTHY: a Capture cleared to `''` after an Open that set it leaves the element's
- *     `capture` as it was, so the next dialog still asks for the camera (row C53).
+ * attributes (world.ts PICKER): whatever is assigned is held as a string. The node sets them on EVERY Open, from what it
+ * holds (v2, rows C53 + D27 ruled "Fix it" / "Blank means no filter"):
+ *   `accept` — Accepted file types as held; blank (`undefined`, `null`, `''`) REMOVES the attribute: no filter. v1 assigned
+ *     it raw, so unset it was the STRING `"undefined"` (D27);
+ *   `capture` — Capture when TRUTHY; otherwise the attribute is REMOVED. v1 set it only when truthy and never removed it, so
+ *     a Capture cleared after an Open that used it left the next dialog asking for the camera (C53).
  * HELD VALUES, stored raw as they arrive (:182-184, :192-194). Neither is sent anywhere; both reach the element at Open.
  *
  * OPEN (:58-174) — in this order, all inside the press:
@@ -74,9 +74,6 @@ type PickerState = {
   /** `_internal.acceptedFileTypes` / `_internal.capture` — held raw (:182-184, :192-194) */
   acceptedFileTypes: unknown;
   capture: unknown;
-  /** the element's `accept` / `capture` as the node's assignments left them (THE ELEMENT above) */
-  elementAccept: string;
-  elementCapture: string;
   /** `_internal.file` (:101) */
   file: unknown;
   /** `_internal.error` (:170) */
@@ -89,11 +86,13 @@ const fileField = (s: Readonly<PickerState>, key: 'path' | 'name' | 'size' | 'ty
 
 export const OpenFilePicker = defineNode({
   type: 'Open File Picker',
-  version: 1,
+  // v2 (P109 ISL-030, rows C53 + D27): every Open sets Capture and Accepted file types as they stand, and removes a blank one;
+  // v1 never removed Capture once set, and wrote the string "undefined" for an unset Accepted file types.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/openfilepicker.ts',
   needs: ['picker'],
   worldPool: { pickers: PICKERS },
-  state: { acceptedFileTypes: undefined, capture: undefined, elementAccept: '', elementCapture: '', file: undefined, error: undefined, pending: false } as PickerState,
+  state: { acceptedFileTypes: undefined, capture: undefined, file: undefined, error: undefined, pending: false } as PickerState,
   // :245-250
   outcomes: ['done', 'unchanged', 'failure'],
   inputs: {
@@ -151,15 +150,17 @@ export const OpenFilePicker = defineNode({
     // :58-174 — supersede, a token, the attributes, the click; a refused click fails at once
     open: (s, _i, w: WorldView) => {
       const settles = s.pending ? [{ outcome: 'unchanged' as const }] : undefined;
-      const elementAccept = String(s.acceptedFileTypes);
-      const elementCapture = s.capture ? String(s.capture) : s.elementCapture;
-      const picker = { accept: elementAccept, capture: elementCapture };
+      // v2 (C53, D27): both as they stand, a blank one removed (an absent attribute reads '')
+      const blank = s.acceptedFileTypes === undefined || s.acceptedFileTypes === null || s.acceptedFileTypes === '';
+      // v2: nothing the element held before is read, so it is not state
+      const picker = { accept: blank ? '' : String(s.acceptedFileTypes), capture: s.capture ? String(s.capture) : '' };
       const answer = w.pickerAnswer(0);
       if ('throws' in answer) {
         const error = openFailed(answer.throws);
-        return { set: { elementAccept, elementCapture, pending: false, error }, send: ['error' as const], outcome: 'failure' as const, error: OPEN_FAILED, settles, picker };
+        return { set: { pending: false, error }, send: ['error' as const], outcome: 'failure' as const, error: OPEN_FAILED, settles, picker };
       }
-      return { set: { elementAccept, elementCapture, pending: true }, send: [], outcome: 'pending' as const, settles, picker };
+      // only what changes (record.ts's rule): a superseding Open finds the press already pending
+      return { set: s.pending ? {} : { pending: true }, send: [], outcome: 'pending' as const, settles, picker };
     }
   },
   {

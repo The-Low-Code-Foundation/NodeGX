@@ -29,8 +29,8 @@
     }
   },
   {
-    "name": "D27: Accepted file types never set — the element's accept is the string \"undefined\"",
-    "because": "openfilepicker.ts :141 assigns the held value unconditionally; a reflected attribute holds String(undefined) (row P107-D27)",
+    "name": "D27: Accepted file types never set — the element has no accept: no filter (v2)",
+    "because": "openfilepicker.ts: a blank Accepted file types removes the attribute (P109 ISL-030, P107-D27 ruled \"Blank means no filter\"); v1 held the string \"undefined\"",
     "params": {},
     "steps": [
       "settle",
@@ -76,8 +76,8 @@
     }
   },
   {
-    "name": "C53: Capture cleared after an Open that set it — the next dialog still asks for the camera",
-    "because": "openfilepicker.ts :143-145 assigns capture only when truthy, so the element keeps the last one (row P107-C53)",
+    "name": "C53: Capture cleared after an Open that set it — the next dialog no longer asks for the camera (v2)",
+    "because": "openfilepicker.ts: a blank Capture removes the attribute on every Open (P109 ISL-030, P107-C53 ruled \"Fix it\"); v1 kept the last one",
     "params": {
       "acceptedFileTypes": "image/*"
     },
@@ -115,8 +115,8 @@
     }
   },
   {
-    "name": "C53 through a superseding Open: the Capture it assigned is the one a later blank Capture leaves",
-    "because": "openfilepicker.ts :66-70 then :141-145 — a superseding press assigns the attributes like any other (row P107-C53)",
+    "name": "C53 through a superseding Open: a later blank Capture removes the one it set (v2)",
+    "because": "openfilepicker.ts :66-70, then each Open sets the attributes as they stand (P109 ISL-030, P107-C53); v1 left the superseding Open's Capture on the element",
     "params": {},
     "steps": [
       "settle",

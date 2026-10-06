@@ -409,7 +409,8 @@
  *           hands the world's FILE INPUT (`WorldFileInput`; any other tag is refused: no node specced makes one). The
  *           element is a DOM element as far as a node reads it: `accept` and `capture` REFLECT their attributes, so what is
  *           assigned is held as a string (`String(v)` — WebIDL's DOMString: `undefined` is `"undefined"`, `null` `"null"`),
- *           `''` until assigned; `files` is a list (`length`, index, `item(i)`), empty until the person picks; assigning
+ *           `''` until assigned and after `removeAttribute(name)` (P109 ISL-030 — an absent attribute reads `''`; the world
+ *           does not tell an absent attribute from one assigned `''`, which a browser does for `capture`); `files` is a list (`length`, index, `item(i)`), empty until the person picks; assigning
  *           `value = ''` empties it; `onchange` / `oncancel` are handler PROPERTIES, `null` until assigned.
  *             A CLICK (`input.click()`) — recorded as handed, a `picker` trace event in the LOCATION group, in the frame it
  *               is made: `{ accept, capture }`, what the element holds AT THE CLICK (not what the node last set: a node
@@ -2206,6 +2207,10 @@ export class WorldFileInput {
   }
   set capture(v: unknown) {
     this.held = { ...this.held, capture: String(v) };
+  }
+  /** P109 ISL-030 (C53, D27): the attribute removed — a reflected attribute that is absent reads `''`. */
+  removeAttribute(name: string): void {
+    if (name === 'accept' || name === 'capture') this.held = { ...this.held, [name]: '' };
   }
   get value(): string {
     const first = this.files[0] as { name?: string } | undefined;

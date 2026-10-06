@@ -138,11 +138,15 @@ const OpenFilePicker: NodeDefinitionOptions = {
           settle('unchanged');
         };
 
-        input.accept = this._internal.acceptedFileTypes;
-
-        if (this._internal.capture) {
-          input.capture = this._internal.capture;
-        }
+        // P107-C53 + D27 (P109 ISL-030, ruled "Fix it" and "Blank means no filter"): each Open sets both as they stand,
+        // and a blank one REMOVES its attribute. Capture used to be set only when truthy and never removed, so once an
+        // Open used the camera every later one did; Accepted file types was assigned raw, so unset it was the string
+        // "undefined". Removed rather than set to '': an empty `capture` attribute still asks some phones for the camera.
+        const accept = this._internal.acceptedFileTypes;
+        if (accept !== undefined && accept !== null && accept !== '') input.accept = accept;
+        else input.removeAttribute('accept');
+        if (this._internal.capture) input.capture = this._internal.capture;
+        else input.removeAttribute('capture');
 
         input.onchange = onChange;
         input.oncancel = onCancel;
