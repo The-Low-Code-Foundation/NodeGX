@@ -47,7 +47,7 @@ export const ValueChanged = defineNode({
       type: 'signal',
       displayName: 'Value Changed',
       group: 'Events',
-      description: 'Fires when Input becomes a different value, including the first time it arrives'
+      description: 'Fires when Input becomes a different value, including the first time a value arrives'
     }
   }
 }).on({

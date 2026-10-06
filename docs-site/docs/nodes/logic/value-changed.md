@@ -33,7 +33,7 @@ Use it when something must happen at the moment data changes: restart a debounce
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `valueChanged` | Signal | — | Fires when Input becomes a different value, including the first time it arrives |
+| `valueChanged` | Signal | — | Fires when Input becomes a different value, including the first time a value arrives |
 
 ## Patterns
 

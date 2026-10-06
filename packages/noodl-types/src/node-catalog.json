@@ -33883,7 +33883,7 @@
             "name": "signal"
           },
           "isSignal": true,
-          "description": "Fires when Input becomes a different value, including the first time it arrives"
+          "description": "Fires when Input becomes a different value, including the first time a value arrives"
         }
       ],
       "dynamicPorts": null,

@@ -7,7 +7,7 @@
   },
   {
     "name": "a first arrival of undefined is NOT a change (lastValue starts undefined); null then is",
-    "because": "valuechanged.ts :15, :32 — `undefined === undefined`; the description's 'including the first time it arrives' has this one exception",
+    "because": "valuechanged.ts :15, :32 — `undefined === undefined`; so the description says 'including the first time a value arrives' (P109 ISL-027, D9, ruled 'Reword the description'): undefined is not a value",
     "params": {},
     "steps": [{ "set": "value" }, "settle", { "set": "value", "value": null }, "settle"]
   },
