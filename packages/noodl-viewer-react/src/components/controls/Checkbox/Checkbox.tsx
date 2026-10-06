@@ -27,6 +27,8 @@ export interface CheckboxProps extends Noodl.ReactProps {
   iconColor: Noodl.Color;
 
   checkedChanged: (checked: boolean) => void;
+  /** P107-C67 — counts the node's writes of Checked; the box redraws the node's value at each one */
+  checkedWrites?: number;
 }
 
 export function Checkbox(props: CheckboxProps) {
@@ -39,7 +41,7 @@ export function Checkbox(props: CheckboxProps) {
 
   useEffect(() => {
     setChecked(!!props.checked);
-  }, [props.checked]);
+  }, [props.checked, props.checkedWrites]);
 
   const style: React.CSSProperties = { ...props.style };
 

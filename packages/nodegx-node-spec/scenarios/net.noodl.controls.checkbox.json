@@ -1738,8 +1738,7 @@
   },
   {
     "name": "a click, an Uncheck and a click in one frame: the box ends ticked, Changed twice — the second click meets a box the Uncheck untick-ed",
-    "because": "checkbox.ts :34-52, :160-178 — the spec reads the node; the runtime's component keeps the box drawn as the first click left it (Checkbox.tsx :35-41 keys its effect on React's last-rendered `props.checked`), so the second click unticks what the node already had false and reports nothing — NSP-016 §7.2 row C67",
-    "row": "NSP-016 §6 C67",
+    "because": "checkbox.ts :34-52, :160-178 — the spec reads the node; the runtime's component keeps the box drawn as the first click left it (Checkbox.tsx :35-41 keys its effect on React's last-rendered `props.checked`), so the second click unticks what the node already had false and reports nothing — NSP-016 §7.2 was row C67, fixed in P109 ISL-031",
     "steps": [
       "settle",
       {

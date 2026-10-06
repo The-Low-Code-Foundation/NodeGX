@@ -52,28 +52,6 @@ function copyOfCounterWith(find: string, replace: string): NodeModule {
  * below must read 0 in the same commit.
  */
 /**
- * NSP-016 §6 C67 — a Check / Uncheck that reverts a person's click in the same frame does not redraw the box: `checkedChanged`
- * writes `props.checked` (FB-020) but React's last-rendered `props.checked` is the value before the click, so the component's
- * `useEffect([props.checked])` sees no change and keeps its local state — the input stays drawn as the person left it, and the
- * next click reports the opposite of what the spec reads. Narrow: an act `click`, then a `check` / `uncheck` pulse, then a
- * `click` (or a `set` of `checked` between the clicks), all before the difference, which is on `checked` or `onChange`.
- */
-const clickActionClick = (d: Divergence) => {
-  const ref = d.difference.reference as TraceEvent | undefined;
-  const act = d.difference.actual as TraceEvent | undefined;
-  const onTick = (e: TraceEvent | undefined) => !!e && ((e.t === 'value' && e.port === 'checked') || (e.t === 'signal' && e.port === 'onChange'));
-  if (!onTick(ref) && !onTick(act)) return false;
-  const before = d.reference.slice(0, d.difference.index);
-  let stage = 0;
-  for (const e of before) {
-    if (stage === 0 && e.t === 'act' && e.act === 'click') stage = 1;
-    else if (stage === 1 && ((e.t === 'in' && (e.port === 'check' || e.port === 'uncheck')) || (e.t === 'set' && e.port === 'checked'))) stage = 2;
-    else if (stage === 2 && e.t === 'act' && e.act === 'click') stage = 3;
-  }
-  return stage === 3;
-};
-
-/**
  * NSP-016 §6 C71 — a Value written back to the very value React last rendered, after a person's pick, does not move the
  * selection: the component's effect keys on `props.value` (Select.tsx :44-47), which that write did not change, so the
  * `<select>` keeps the pick; the output says the author's Value, the screen the pick, and picking it again raises nothing.
@@ -331,9 +309,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
     { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName }
   ],
-  'net.noodl.controls.checkbox': [
-    { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick },
-  ]
 };
 
 /**
