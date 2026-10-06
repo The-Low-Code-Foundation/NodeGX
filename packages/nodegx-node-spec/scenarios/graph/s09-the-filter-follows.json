@@ -1179,13 +1179,12 @@
     ]
   },
   {
-    "name": "C44 — a Filter Records holding null on Items breaks another node's save: the writer's Error carries its throw and a Query Records listening after it never hears the save",
+    "name": "a Filter Records holding null on Items leaves another node's save alone: the writer answers Done with no Error, and a Query Records listening after it hears the save (ISL-026, C44)",
     "clauses": [
       "S2",
       "N"
     ],
-    "because": "NSP-014 s25. filterdbmodelsnode.ts :153-166 cloudStoreEvents, bound by bindStoreEvents (:172 the legacy store; :547-553 the Backend's); the listener tests `collection === undefined` (:157) and then calls `null.contains` (:164) inside the adapter's event, which runs in the WRITER's success (RestDataAdapter.ts :1216-1219): the throw lands on Update Record's Error and the emitter stops before the Query Records. The claims are what a node holding no records should cause — nothing; the runtime does not bear them out — row C44. Control: the first scenario of this file (no Error on the writer)",
-    "row": "NSP-014 §6.14 C44",
+    "because": "NSP-014 s25 found it: the store listener (filterdbmodelsnode.ts cloudStoreEvents) called `null.contains` inside the adapter's event, which runs in the WRITER's success, so the throw landed on Update Record's Error and the emitter stopped before the Query Records (row C44). Fixed in ISL-026 (3f7c5eeb3, ruled 'Treat it as holding nothing'): null Items holds nothing. The claims are what a node holding no records should cause, nothing. Control: the first scenario of this file (no Error on the writer)",
     "nodes": {
       "f": {
         "type": "FilterDBModels",
@@ -1524,9 +1523,35 @@
       },
       {
         "t": "value",
-        "port": "error",
-        "value": "Cannot read properties of null (reading 'contains')",
-        "subject": "u"
+        "port": "count",
+        "value": 2,
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r2",
+        "subject": "q"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "15iCnKz2Hk",
+          "items": [
+            {
+              "id": "r2",
+              "n": 2,
+              "title": "b"
+            },
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "q"
       },
       {
         "t": "outcome",
