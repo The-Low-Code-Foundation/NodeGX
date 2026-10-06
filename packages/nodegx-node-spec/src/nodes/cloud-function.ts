@@ -33,7 +33,8 @@
  *     its `out-<key>` sent WHEN THE NODE HAS ONE (:302-305) — a result key the graph does not wire is held, unseen; then
  *     every token Done (:315).
  *   Anything else is failure (:323-337): Error = the body when it parsed to a string; else its `error` field when truthy
- *     (an OBJECT there stays an object — row D28); else `Could not reach the backend at <endpoint>` for status 0 (the
+ *     — always TEXT (v2, row D28 ruled "Always text": an object's `message`, else the object as JSON; v1 put the object on
+ *     the string port); else `Could not reach the backend at <endpoint>` for status 0 (the
  *     request never reached a server: the world's network error), `Failed running cloud function.` otherwise (a 204
  *     included: only 200 and 201 succeed). Then every token Failure (`cloud-function/call-failed`, :117, :188-196).
  *   Error and the results are never cleared: a later success leaves Error, a result the function stops returning keeps
@@ -166,7 +167,10 @@ function answered(s: CloudFunctionState, f: InFlight, status: number, json: unkn
   // :324-330
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const e: any = json;
-  const error = typeof e === 'string' ? e : (e && e.error) || (status === 0 ? 'Could not reach the backend at ' + String(f.endpoint) : 'Failed running cloud function.');
+  const raw = typeof e === 'string' ? e : (e && e.error) || (status === 0 ? 'Could not reach the backend at ' + String(f.endpoint) : 'Failed running cloud function.');
+  // v2 (row D28 ruled "Always text"): an object's `message` when it has one, else the object as JSON; anything else as text
+  const message = raw !== null && typeof raw === 'object' ? (raw as { message?: unknown }).message : undefined;
+  const error = typeof raw === 'string' ? raw : typeof message === 'string' && message !== '' ? message : raw !== null && typeof raw === 'object' ? JSON.stringify(raw) : String(raw);
   return { set: { error }, send: ['error' as const], outcomes: failures('call' as const, CALL_ERROR_CODE, n) }; // :336 → :188-196
 }
 
@@ -181,7 +185,8 @@ function parsed(text: string | null): unknown {
 
 export const CloudFunction = defineNode({
   type: 'CloudFunction2',
-  version: 1,
+  // v2 (P109 ISL-030, row D28 ruled "Always text"): Error is always text — an object's message, or the object as JSON.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/data/cloudfunction2.ts; noodl-editor/…/NodeTypeAdapters/CloudFunctionAdapter.ts',
   needs: ['network', 'project'],
   worldPool: { responses: ANSWERS, delays: [0, 0, 1, 100], advances: [0, 1, 100], cloudServices: CLOUD_SERVICES },

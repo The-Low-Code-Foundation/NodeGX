@@ -476,8 +476,8 @@
     }
   },
   {
-    "name": "a JSON string body on a failure is Error as it is; an object in the error field stays an object (D28)",
-    "because": "cloudfunction2.ts :325-327",
+    "name": "a JSON string body on a failure is Error as it is; an object in the error field becomes text — its message, or the object as JSON (v2, D28)",
+    "because": "cloudfunction2.ts errorText (P109 ISL-030, P107-D28 ruled \"Always text\"); v1 put the object on the string port",
     "params": {},
     "steps": [
       "settle",
@@ -523,6 +523,62 @@
               "code": 141,
               "error": {
                 "reason": "no such function"
+              }
+            }
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "an error object with a message: Error is the message (v2, D28)",
+    "because": "cloudfunction2.ts errorText — the object's `message` when it has one (P109 ISL-030, P107-D28 ruled \"Always text\")",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "function",
+        "value": "a"
+      },
+      {
+        "signal": "call"
+      },
+      "settle",
+      {
+        "set": "function",
+        "value": "b"
+      },
+      {
+        "signal": "call"
+      },
+      "settle"
+    ],
+    "world": {
+      "cloudServices": {
+        "appId": "app1",
+        "endpoint": "https://cloud.example"
+      },
+      "network": [
+        {
+          "match": {
+            "url": "https://cloud.example/functions/a"
+          },
+          "answer": {
+            "status": 500,
+            "body": "\"plain text error\""
+          }
+        },
+        {
+          "match": {
+            "url": "https://cloud.example/functions/b"
+          },
+          "answer": {
+            "status": 404,
+            "body": {
+              "code": "QUOTA",
+              "error": {
+                "message": "Quota exceeded",
+                "limit": 10
               }
             }
           }
