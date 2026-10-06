@@ -196,8 +196,8 @@
     ]
   },
   {
-    "name": "row C76 — a pick, then Value written back to the old value in the same frame: the Value goes back, but the picked button stays selected (the frame end's render brings no new Value to the effect), so picking it again raises nothing",
-    "because": "radiobuttongroup.ts :20-29 then :84-99 in one frame; RadioButtonGroup.tsx :37-39 the effect keys on the Value the last paint rendered — the pick's own re-render reused that paint's props (react-component-node.ts :1076-1103); NSP-016 §7.7 C76",
+    "name": "a pick of 'a', then Value written back to 'b' in the same frame: Changed for the pick, and the Value back at 'b' — the buttons show what the Value says, so picking 'a' again sends it with Changed",
+    "because": "the selection is the node's Value (Richard, 2026-10-05, on C76: \"Show what Value says\"); on the runtime the component's effect keys on the Value the last paint rendered (RadioButtonGroup.tsx :37-39 — the pick's own re-render reused that paint's props, react-component-node.ts :1076-1103), which the write-back did not change: the picked button stays selected and picking it again raises nothing (row C76)",
     "steps": [
       "settle",
       {
@@ -219,11 +219,12 @@
         "value": "a"
       },
       "settle"
-    ]
+    ],
+    "row": "NSP-016 §6 C76"
   },
   {
-    "name": "row C76, the other half — after the write-back, picking the button the Value names selects it and fires nothing (the node already holds that Value); the next pick fires again",
-    "because": "RadioButtonGroup.tsx :27-30 selects it, radiobuttongroup.ts :21 `_internal.value !== value` is false; NSP-016 §7.7 C76",
+    "name": "after a pick written back in its frame, picking the button the Value names raises nothing — it is the selected one; the next pick of 'a' fires (the runtime agrees for another reason: its screen still selects 'a', and the node already holds 'b')",
+    "because": "the selection is the node's Value (\"Show what Value says\"); RadioButton.tsx :58 a selected radio raises no change; on the runtime RadioButtonGroup.tsx :27-30 selects 'b' and radiobuttongroup.ts :21 finds the Value unchanged (row C76's state)",
     "steps": [
       "settle",
       {
@@ -242,6 +243,33 @@
       "settle",
       {
         "act": "pick",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle",
+      {
+        "set": "value",
+        "value": "b"
+      },
+      "settle",
+      {
+        "act": "pick",
+        "value": "a"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pick of 'a', then Value written back to 'b' in the NEXT frame: the buttons show 'b', so picking 'a' again sends it with Changed — C76's twin: a frame between the pick and the write-back, graded on both targets",
+    "because": "the pick's frame end renders 'a', so the write-back is a change to the runtime's effect too (NSP-016 §7.7 C76)",
+    "steps": [
+      "settle",
+      {
+        "set": "value",
         "value": "b"
       },
       "settle",

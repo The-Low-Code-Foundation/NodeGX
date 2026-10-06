@@ -67,6 +67,7 @@ const throwsOnToString = (ports: readonly string[], values: (v: unknown, present
 };
 const isNull = (v: unknown, present: boolean) => present && v === null;
 const isNullOrUndefined = (v: unknown, present: boolean) => !present || v === null;
+const isNull = (v: unknown, present: boolean) => present && v === null;
 
 /**
  * NSP-011 §6 C6 / R7 — node.ts `setInputValue` (:410-420) merges a later value into a `{ value,
@@ -463,18 +464,27 @@ const labelTakesKeyboard = (d: Divergence) => {
   let painted = written;
   let holds = false;
   let lost = false;
+  // s47 (the Radio Button's 10,000 at 20732): a settle group prints a frame's outputs after all its steps, so a Blurred there may
+  // belong to a Blur signal BEFORE the label's paint — only a Blurred or Will Unmount from a LATER frame gives the keyboard up
+  let frame = 0;
+  let lostIn = -1;
   for (let k = 0; k < d.difference.index; k++) {
     const e = d.reference[k] as TraceEvent & { act?: string };
     if (e.t === 'set' && portOf(e) === 'useLabel') written = !!valueOf(e);
     else if (e.t === 'in' && portOf(e) === 'focus') holds = true;
     else if (e.t === 'in' && portOf(e) === 'blur') holds = false;
     else if (e.t === 'settle' || e.t === 'act') {
-      if (written !== painted && holds) lost = true;
+      if (written !== painted && holds) { lost = true; lostIn = frame; }
       painted = written;
       if (e.t === 'act' && FOCUSING.has(e.act ?? '')) holds = true;
       if (e.t === 'act' && e.act === 'blur') holds = false;
+      if (e.t === 'settle') frame++;
     } else if (e.t === 'signal' && portOf(e) === 'onFocus') holds = true;
-    else if (e.t === 'signal' && (portOf(e) === 'onBlur' || portOf(e) === 'willUnmount')) { holds = false; lost = false; }
+    else if (e.t === 'signal' && (portOf(e) === 'onBlur' || portOf(e) === 'willUnmount')) {
+      holds = false;
+      // a group's outputs belong to the frame its settle closed (frame - 1)
+      if (frame - 1 > lostIn) lost = false;
+    }
   }
   return lost;
 };
@@ -569,6 +579,51 @@ const changedWithNobodyPicking = (d: Divergence) => {
   return remount && d.reference.slice(0, f[0]).some((e) => e.t === 'signal' && portOf(e) === 'willUnmount');
 };
 
+/**
+ * NSP-023 step 5 (2026-10-06, "Show what Value says") — NSP-016 §6 C76: the Radio Button Group's component keeps a copy of the
+ * selection and follows the node through an effect keyed on the Value its last PAINT rendered (RadioButtonGroup.tsx :21, :37-39);
+ * a Value written back to that one in the frame of a pick is no change to it, and the picked button stays selected: picking it
+ * again raises nothing. Narrow: the SPEC reports Value or Changed where the runtime does not, after a frame in which a pick was
+ * followed by a Value write.
+ */
+const groupPickWrittenBack = (d: Divergence) => {
+  const ref = d.difference.reference;
+  if (d.difference.threw !== undefined || !ref || !((ref.t === 'value' && portOf(ref) === 'value') || isChanged(ref))) return false;
+  let pickInFrame = false;
+  for (let k = 0; k < d.difference.index; k++) {
+    const e = d.reference[k] as TraceEvent & { act?: string };
+    if (e.t === 'settle') pickInFrame = false;
+    else if (e.t === 'act' && e.act === 'pick') pickInFrame = true;
+    else if (pickInFrame && e.t === 'set' && portOf(e) === 'value') return true;
+  }
+  return false;
+};
+
+/**
+ * NSP-023 step 5 (2026-10-06, "Fire from the click") — NSP-016 §6 D37: the Radio Button's component fires Changed from an effect
+ * (RadioButton.tsx :78-84 → radiobutton.ts :39-55) whenever its Checked moves while the group's last selection was a person's — a
+ * sibling carrying the same Value picked, its own Value written in the frame of a pick, a remount. Narrow: the RUNTIME fires a
+ * Changed where the spec prints something else.
+ */
+const changedWithNobodyClicking = (d: Divergence) => isChanged(d.difference.actual) && !isChanged(d.difference.reference);
+/**
+ * NSP-016 §6 C76 seen from a button: the group's component keeps a copy of the selection (RadioButtonGroup.tsx :21, :37-39), and the
+ * buttons read the copy; the group's Value written back in the frame of a pick (a world write, delivered at an `advance`) leaves the
+ * copy on the pick. Narrow: Checked or Changed differ, after a frame in which a pick or a click was followed by an advance.
+ */
+const buttonPickWrittenBack = (d: Divergence) => {
+  const on = (e: TraceEvent | undefined) => !!e && ((e.t === 'value' && portOf(e) === 'checked') || isChanged(e));
+  if (d.difference.threw !== undefined || !(on(d.difference.reference) || on(d.difference.actual))) return false;
+  let pickInFrame = false;
+  for (let k = 0; k < d.difference.index; k++) {
+    const e = d.reference[k] as TraceEvent & { act?: string };
+    if (e.t === 'settle') pickInFrame = false;
+    else if (e.t === 'act' && (e.act === 'pick' || e.act === 'click')) pickInFrame = true;
+    else if (pickInFrame && e.t === 'advance') return true;
+  }
+  return false;
+};
+
 const VISUAL_ROWS: KnownRow[] = [
   { row: 'NSP-016 §6 C61 — Font Family wired a truthy value that is not text: the setter throws calling `.split` on it', matches: throwsOnSet((p) => p.endsWith('fontFamily'), truthyNonString, /family\.split is not a function/) },
   { row: 'NSP-016 §6 C62 — a units-typed style input wired null: the generated setter reads `.value` of null and throws', matches: throwsOnSet(unitCssPort, isNull, /Cannot read properties of null \(reading 'value'\)/) },
@@ -615,10 +670,18 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   'net.noodl.controls.radiobutton': [
     ...VISUAL_ROWS,
     { row: 'NSP-016 §6 C65 — a Label wired an object or an array: React throws rendering it at the next paint', matches: objectLabel },
-    { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the button on the page', matches: lostRootAfterLabelOff }
+    { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the button on the page', matches: lostRootAfterLabelOff },
+    // NSP-023 step 5 (v2) — what React's drawing makes the runtime do instead of what the spec says
+    { row: 'NSP-016 §6 C80 — Enable Label changed while the button holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
+    { row: 'NSP-016 §6 C76 — the group\'s Value written back in the frame of a pick leaves the group\'s copy of the selection on the pick: the buttons show the pick', matches: buttonPickWrittenBack },
+    { row: 'NSP-016 §6 D37 — Changed fires with nobody clicking this button: a sibling carrying its Value picked, its Value written in a pick\'s frame, a remount', matches: changedWithNobodyClicking }
   ],
   // s42 — the Radio Button Group: no text style either — the Placement and units-typed style setters
-  'Radio Button Group': VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
+  'Radio Button Group': [
+    ...VISUAL_ROWS.filter((r) => !r.row.includes('C61')),
+    // NSP-023 step 5 (v2) — the buttons show what the Value says; what the component's copy of the selection makes the runtime do instead
+    { row: 'NSP-016 §6 C76 — a Value written back in the frame of a pick leaves the picked button selected: picking it again raises nothing', matches: groupPickWrittenBack }
+  ],
   // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
   Text: [...VISUAL_ROWS, { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }],
   'net.noodl.controls.checkbox': [

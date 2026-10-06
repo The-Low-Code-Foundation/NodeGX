@@ -9,7 +9,7 @@ area: runtime / Radio Button (components/controls/RadioButton/RadioButton.tsx, n
 found: P107 NSP-016 s42, 2026-10-04
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.7 (row D37); scenarios "row D37 — …" in packages/nodegx-node-spec/scenarios/net.noodl.controls.radiobutton.json — the runtime target and the spec agree
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.radiobutton.json "row D37 — a sibling picked that carries THIS button's Value: both are selected, and this one fires Changed though the person picked the other"
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.radiobutton.json "a sibling carrying THIS button's Value picked: both are selected — Checked true and no Changed (the person clicked the other); the other sibling picked: this one loses the selection to that click — Checked false and Changed"
 ---
 
 The Radio Button's **Changed** says "Fires when the user selects or deselects this button". The button learns whether a
@@ -42,3 +42,12 @@ Changed — the description's "deselects" — only when the button actually lost
 report with the flag the click handler sets for one render.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Fire from the click".** Changed comes from the person's click, and a button that loses the selection to that click reports the deselect. Small to medium change in the button's and the group's files. Two buttons with the same Value would still both show as selected. The question as asked: *"Should a Radio Button's Changed fire only when a person's click selects it or takes the selection away from it?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**s47 (2026-10-06): the spec states the ruled intent (NSP-023 §8.6, the Radio Button v2), and the runtime keeps this as a
+known row** (`changedWithNobodyClicking`: the runtime fires a Changed the spec does not). Changed now comes from this button's
+own click, and from a loss of the selection to a sibling's click while the button is on the page. A Checked that moves for any
+other reason (a same-Value sibling, its own Value written, the group's Value from the graph, a remount) is sent without
+Changed. One case the ruling does not name, a button off the page when a sibling's click takes its selection, shows the
+group's choice when it comes back, with no Changed. That reading comes from this file's remount case and from the runtime's
+own behaviour in that case; it is open to Richard (README §7 R15). Four row scenarios carry the row. 89 v1 scenarios that
+graded the group's flag and React's effect order were dropped (NSP-023 §8.6).

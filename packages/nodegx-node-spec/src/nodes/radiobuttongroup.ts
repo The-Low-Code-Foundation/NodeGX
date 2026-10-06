@@ -7,6 +7,11 @@
  *
  * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
  *
+ * v2 (NSP-023 step 5, R12, 2026-10-06): the spec states what a person gets where v1 copied how React draws. **The buttons show
+ * what the group's Value says** (Richard, 2026-10-05, on C76: "Show what Value says" — every write redraws them, so the next
+ * pick fires Changed). What the runtime does instead only because its component keeps a copy of the selection is a known row
+ * on the runtime target (C76).
+ *
  * THE FIRST VISUAL WITH CHILDREN. A group's whole behaviour is what its Radio Buttons do inside it: a person never acts
  * on the group, only on a button in it. So the group's PAGE holds its buttons — one Radio Button per value the `pick` act
  * draws (`PAGE_VALUES`, in that order; the one drawn as `undefined` is a button with no Value), each enabled, each a real
@@ -15,23 +20,18 @@
  * carries raises nothing. The buttons are the page, not subjects: what they report is the Radio Button's spec.
  *
  * THE RULE, before the citations. A Radio Button Group is a `<div>` that provides a context to the buttons inside it
- * (RadioButtonGroup.tsx :49-53): the SELECTION (`useState({ value, fromUser })`, :21), its `name`, and `checkedChanged`.
- *   - **the selection follows the node's renders** (:37-39): `useState` starts it at the node's Value at the mount, and
- *     the effect `[props.value]` sets it to the node's Value at every render whose Value differs (`Object.is`) from the
- *     last one's. The node keeps `props.value` and `_internal.value` together on both its write paths (radiobuttongroup.ts
- *     :20-23, :93), but a render is the NODE's: each paint hands React a fresh copy of the props (react-component-node.ts
- *     :1076-1103), and the component's own re-render after a pick (its `setSelection`) reuses the last copy. So the spec
- *     keeps three: the node's Value, the Value the last paint rendered, and the selection. A pick moves the node's Value
- *     at once and the rendered one only at the frame's end — a Value written back to the rendered one in the same frame
- *     is no change to the effect, and the picked button stays selected under a Value that says another (row C76).
+ * (RadioButtonGroup.tsx :49-53): the SELECTION, its `name`, and `checkedChanged`.
+ *   - **the selection is the node's Value** (`_internal.value`, radiobuttongroup.ts :20-23, :93): whatever wrote it last, a
+ *     person's pick or the graph. The runtime's component keeps a copy instead (`useState`, RadioButtonGroup.tsx :21) and
+ *     follows the node through an effect keyed on the Value its last PAINT rendered (:37-39; each paint hands React a fresh
+ *     copy of the props, react-component-node.ts :1076-1103): a Value written back to that one in the frame of a pick is no
+ *     change to the effect, and the picked button stays selected under a Value that says another (row C76).
  *   - **a button is selected** when the selection `===` its Value (RadioButton.tsx :58) — a strict compare: the number 1
  *     is not the text `"1"`, and while the group's Value has never been written the button with NO Value is the selected
  *     one (`undefined === undefined`).
- *   - **a pick** (RadioButton.tsx :187-189): a click on a selected radio changes nothing in a browser — no `change`, React
- *     raises no `onChange`. A click on any other selects it (the context's `checkedChanged(<its Value>)`, :27-30) and calls
- *     the node's `valueChanged` (radiobuttongroup.ts :20-29): when the Value it holds `!==` the button's, it takes it, sends
- *     **Value** and fires **Changed**. The two conditions are one while the selection is the node's Value — every paint
- *     makes it so, but for C76's frame: there a pick of the button the Value names selects it and fires nothing.
+ *   - **a pick** (RadioButton.tsx :187-189): a click on a selected radio changes nothing in a browser — no `change`, no
+ *     `onChange`. A click on any other selects it (the context's `checkedChanged(<its Value>)`, :27-30): the node takes the
+ *     button's Value (radiobuttongroup.ts :20-29), sends **Value** and fires **Changed**.
  *   - **Value** (radiobuttongroup.ts :84-99): a value that is not text but has a `toString` is converted by it (a number,
  *     a boolean, an object, an array); what is still not text then (null, undefined) is ignored. A change sends Value and
  *     NOT Changed (the description). The same value again: nothing.
@@ -48,12 +48,8 @@ import { SELF_REFERENCE } from '../trace';
 export const PAGE_VALUES: readonly unknown[] = ['a', 'b', 1, undefined];
 
 type State = {
-  /** radiobuttongroup.ts :21-22, :93 — `_internal.value` (and `props.value`, kept with it) */
+  /** radiobuttongroup.ts :21-22, :93 — `_internal.value`: the selection — a button is selected when it `===` the button's Value */
   value: unknown;
-  /** the node's Value at its last paint — what the component's effect `[props.value]` last compared (RadioButtonGroup.tsx :37-39) */
-  rendered: unknown;
-  /** the component's selection (RadioButtonGroup.tsx :21 `selection.value`) — a button is selected when it `===` the button's Value */
-  selected: unknown;
   /** react-component-node.ts :1267 `wantsToBeMounted` */
   mounted: boolean;
   /** the element is on the page: mounted and painted */
@@ -74,13 +70,14 @@ const NONE: Act = { send: [] };
 
 export const RadioButtonGroup = defineNode({
   type: 'Radio Button Group',
-  version: 1,
+  // v2 (NSP-023 step 5, 2026-10-06): the selection is the node's Value — v1 copied the component's selection and its effect (row C76)
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/controls/radiobuttongroup.ts',
   needs: ['person'],
-  // the page's syncs (spec.ts `synced`): not branches — the component's side of the selection, as the Slider's `shown`
-  synced: ['rendered', 'selected', 'pageVisible'],
+  // the page's syncs (spec.ts `synced`): not branches
+  synced: ['pageVisible'],
 
-  state: { value: undefined, rendered: undefined, selected: undefined, mounted: true, onPage: false, visible: true, pageVisible: true } as State,
+  state: { value: undefined, mounted: true, onPage: false, visible: true, pageVisible: true } as State,
 
   acts: {
     pick: { description: 'a person clicks the Radio Button inside this group whose Value is the one given (none given: the button with no Value)', values: PAGE_VALUES }
@@ -173,18 +170,16 @@ export const RadioButtonGroup = defineNode({
     world: { place: (s) => ({ ...painted(s), send: ['childrenCount'] }) },
     // every frame's end is a paint (react-component-node.ts :1675-1689)
     afterInputs: (s) => ({ ...painted(s), send: [] }),
-    // a person acts on a PAINTED page (adapter.ts `act`): the page follows first — the selection is then the node's Value
+    // a person acts on a PAINTED page (adapter.ts `act`): the page follows first
     person: {
       pick: (s, _i, v) =>
         onPainted(s, (p) => {
           // a Value no button on the page carries, or a hidden group (its buttons inherit the visibility): nothing to click
           if (!PAGE_VALUES.includes(v) || !p.pageVisible) return NONE;
           // RadioButton.tsx :58 — the picked button is the selected one: a click on a selected radio changes nothing
-          if (p.selected === v) return NONE;
-          // RadioButton.tsx :187-189 → RadioButtonGroup.tsx :27-30 selects it (the re-render reuses the last paint's props:
-          // `rendered` stays) → radiobuttongroup.ts :20-29 takes the Value when it differs (row C76: it may not)
-          if (p.value === v) return { set: { selected: v }, send: [] };
-          return { set: { selected: v, value: v }, send: ['value'], emit: ['onChange'] };
+          if (p.value === v) return NONE;
+          // RadioButton.tsx :187-189 → RadioButtonGroup.tsx :27-30 → radiobuttongroup.ts :20-29: the node takes the button's Value
+          return { set: { value: v }, send: ['value'], emit: ['onChange'] };
         })
     }
   }
@@ -200,16 +195,11 @@ export function asGroupValue(v: unknown): string | undefined {
   return typeof text === 'string' ? text : undefined;
 }
 
-/**
- * The page follows what the node wants (button.ts `painted`): a mount starts the selection at the Value (RadioButtonGroup.tsx
- * :21, and the mount's effect sets the same); a paint on the page whose Value differs from the last one rendered runs the
- * effect (:37-39).
- */
+/** The page follows what the node wants (button.ts `painted`): Visible, and Mounted — Did Mount, Will Unmount. */
 function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[] } {
   const seen: Partial<State> = s.pageVisible === s.visible ? {} : { pageVisible: s.visible };
-  if (s.mounted && !s.onPage) return { set: { ...seen, onPage: true, rendered: s.value, selected: s.value }, emit: ['didMount'] };
+  if (s.mounted && !s.onPage) return { set: { ...seen, onPage: true }, emit: ['didMount'] };
   if (!s.mounted && s.onPage) return { set: { ...seen, onPage: false }, emit: ['willUnmount'] };
-  if (s.onPage && !Object.is(s.rendered, s.value)) return { set: { ...seen, rendered: s.value, selected: s.value }, emit: [] };
   return { set: seen, emit: [] };
 }
 

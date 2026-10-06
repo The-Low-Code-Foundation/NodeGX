@@ -110,7 +110,13 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   ],
   // NSP-016 s41 — the Slider: the placing off the page and the four acts that meet no element (the Button's; the 10,000 run)
   // NSP-016 s43 — Visible is a page sync now: a group placed OFF the page carries only it, as the Button's placing does
-  'Radio Button Group': [{ reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE }],
+  'Radio Button Group': [
+    { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
+    // NSP-023 step 5 (v2, s47) — with the selection the node's own Value, a paint that changes no mount writes only the painted
+    // visibility, and the one reader of that is a pick, whose own paint writes it first
+    { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":[],"emit":[]', why: 'a frame end that only syncs the painted visibility: its one reader, a pick, paints the page itself first' },
+    { reducer: 'person.pick', kind: 'drop-set', branch: '"set":[],"emit":[]', why: 'a pick that reaches no button and only syncs the painted visibility: its one reader, the next pick, paints the page itself first' }
+  ],
   'net.noodl.controls.range': [
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },
     ...['hover', 'leave', 'touch', 'lift'].map((act) => ({ reducer: `person.${act}`, kind: 'drop-set' as const, branch: '"set":[],"emit":[]', why: ACT_OFF_PAGE })),

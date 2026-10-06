@@ -1,7 +1,7 @@
 # NSP-023 — The spec without React
 
 **Opened 2026-10-05, from ruling R12 (README §7).** **Depends on NSP-016** (the specs it converts) and the Text v3 (NSP-016 §7.9,
-the recipe). **Status: 🟡 steps 1–4 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5: the Dropdown v3); the Checkbox's and the Dropdown's label rule with step 1; the Radio Button's intents ruled (R14) for step 5.**
+the recipe). **Status: 🟡 steps 1–5 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5 the Dropdown v3 and §8.6 the radio pair); the Checkbox's and the Dropdown's label rule with step 1. Steps 6–8 left.**
 
 ## 1. The person sentence
 
@@ -375,3 +375,93 @@ hits on both seeds (200 sequences held no pick followed by a remount or an Items
 
 The Dropdown is a cheap spec to grade (16 s for 200 on the runtime). A step that runs the 10,000 straight after the 200s
 loses nothing.
+
+### 8.6 s47, 2026-10-06 — step 5: the radio pair (the Radio Button Group v2, the Radio Button v2)
+
+**No new question.** Both intents were ruled on P109's Track F page (2026-10-05) and are recorded as **R15** (README §7):
+- C76: **"Show what Value says"**.
+- D37: **"Fire from the click"**.
+
+One case neither answer names is a button that is *off the page* (Mounted off) when a sibling's click takes its selection.
+It was read from D37's measured cases, which call a remount's Changed a defect, and from scenario [11]: the runtime is quiet
+when such a button comes back. So the button shows the group's choice when it returns, with no Changed. That is s47's
+reading, open to Richard.
+
+**The sort (AC1) — the Radio Button Group, v1 state and rules:**
+
+| v1 | pile | evidence | v2 |
+|---|---|---|---|
+| `rendered`: the Value the last paint rendered (the effect's dependency) | React-made | C76 | gone |
+| `selected`: the component's copy of the selection (`useState`) | React-made | C76 | gone. The selection is the node's Value |
+| a pick where `selected === v` raises nothing, and one where `value === v` selects without Changed | the browser, plus React's copy | C76 | a pick of the button the Value names raises nothing; any other sends Value and fires Changed |
+| the Value input's conversion; Visible, Mounted, Children Count | the node's own | | stay |
+
+**The Radio Button, v1 state and rules:**
+
+| v1 | pile | evidence | v2 |
+|---|---|---|---|
+| `shownValue`: the button's Value as last rendered | React-made (the props React last drew). Every reader came after a paint, so it never differed from `value` where it was read | | gone |
+| `gRendered`, `gSelected`: the group's copy and its effect | React-made | C76 | gone. The button reads `gValue` |
+| `gFromUser`: the group's "a person made this selection" flag, read at every Checked change | React-made | D37 | gone. Changed fires from this button's click, and for a loss to a sibling's click while it is on the page |
+| effect order (the button's effect runs before the group's) | React-made | D37 | gone |
+| `wantsLabel` / `labelOn`: the tree rebuilt around a new input | React-made | C80 | gone. The label leaves the input and its keyboard (R14) |
+| Checked follows the group's Value at each paint while on the page | the node's page (the frame's paint, as every control's) | | stays, never with Changed |
+| a click on a selected radio raises nothing; a click on any other selects it | the browser | | stays |
+
+**The runtime's rows** (`conformance.test.ts`):
+- On the group, `groupPickWrittenBack` (C76): the spec reports Value or Changed where the runtime does not, after a frame in
+  which a pick was followed by a Value write.
+- On the button, `labelTakesKeyboard` (C80, the shared matcher).
+- On the button, `buttonPickWrittenBack` (C76 seen from a button): Checked or Changed differ, after a frame in which a pick or
+  a click was followed by an `advance` (that is where the play delivers the group's write).
+- On the button, `changedWithNobodyClicking` (D37): the runtime fires a Changed where the spec prints something else.
+
+**Scenarios.**
+- **The group: 22 → 23.** The C76 scenario became a row named for the intent. Its "other half" was renamed: it agrees on both
+  targets, but for different reasons (in v2 the button the Value names is the selected one; on the runtime the node
+  already holds that Value). The new twin puts a frame between the pick and the write-back.
+- **The Radio Button: 152 → 65.** 89 were dropped as React's timing only (§3 step 4):
+  - the effect-order family "a click, then X, then this button's Value written away" (10);
+  - "a sibling carrying this button's Value picked … then X" (19);
+  - the "read a frame later" matrix and its "already selected" companion (60). Half of these still agreed on both targets,
+    but every one was named for the group's flag;
+  - one duplicate.
+- **21 are rows:** C80 10, D37 4, C76 3, and C62, C63, C65, C66 as before. 13 more were renamed where v2 changed the claim
+  or the wording was React's. 3 kills are new.
+
+**v1 named one thing falsely:** "a write and an advance with no frame between: the selection waits for the frame's end — a
+click on the still-selected button in between raises the pointer events alone". The click's own paint shows the write
+first, so it meets an unselected button and selects it again, with Changed, on both targets. v1's `because` already said
+"an act paints the page first".
+
+**The mutants.** After the drop, the button had three survivors:
+- the paint of a pick that changes nothing, which a Focus action reads in an Enabled-off or Visible-off frame;
+- the same pick in a Mounted-off frame (seed 20731);
+- a pick that changes nothing, swapped for one that moves the group to 'a'. My first kill missed it at the wrong value:
+  a swap keeps the page's Checked, so only a button carrying 'a' itself reads the move.
+
+The group had two, both declared: a frame end or a pick whose only write is the painted visibility, whose one reader is a
+pick that paints first. Now 0 survivors on both specs at seeds 13, 20730 and 20731 on the interpreter.
+
+**Readings (2026-10-06, `523ade4a4` + this change):** on the runtime at 200, seeds 13 and 20730, both specs CONFORM:
+- the group: 20 of 23 scenarios pass (3 known); 47 of 50 mutants killed, 3 declared;
+- the button: 44 of 65 scenarios pass (21 known); 357 of 357 mutants killed. D37 had 1 generated hit at 20730 and C80 2 at 13.
+
+**The 10,000 (2026-10-06, seed 20732).**
+- **The group CONFORMED at the first run:** 0 divergences, C76 attributed 1; 47 of 50 mutants killed, 3 declared; 149 s.
+- **The button did not, at first:** 2 divergences and 6 survivors.
+  - Both divergences were C80 after a labelled placing, missed for a reason the Dropdown's fix did not cover. **A settle group
+    prints a frame's outputs after all its steps**, so a Blurred from a Blur signal sent BEFORE the label's paint printed
+    after the act, and the matcher read it as "the keyboard was given up". Read on the UNSHRUNK sequences (found by their
+    seeds); the shrunk replays named neither cause. `labelTakesKeyboard` now lets only a Blurred or Will Unmount from a
+    LATER frame cancel the loss.
+  - The six survivors were all picks in a frame that also mounts or unmounts the button, swapped among three shapes (no-op;
+    moves the group; unmounts). The kill is a remount-frame pick grid: Mounted off, or on after off, in the pick's frame;
+    the pick a no-op or moving the group; this button carrying 'a', 'b' or 'c'; then a Focus action, a remount and a click.
+    The 'c' half is graded on both targets; the 'a'/'b' half is a D37 row, because a same-Value sibling's pick fires the
+    runtime's Changed.
+- **After the fixes, the button CONFORMS at 10,000:** 0 divergences; C80 attributed 12, C76 7, D37 12; 451 of 455 mutants
+  killed, 4 declared; 207 s. On the interpreter at 10,000 (seed 20732): 0 survivors.
+- **The five specs that share the C80 matcher CONFORM at 200 on seed 13 after the change:** the Checkbox, the Text Input, the
+  Dropdown and both radios, with the known-rows test green. Both radios conform at 200 on 20730 too (the button: 45 of 67
+  scenarios pass, 22 known; 433 of 433 mutants killed).

@@ -36,3 +36,9 @@ wrapper). Small, once per component (Text Input, Checkbox, Dropdown, Radio Butto
 
 **s46 (2026-10-05): the Radio Button too** — Richard: "Yes, same rule" (R14). Its spec still models the rebuild; NSP-023 step 5
 takes it out and adds the C80 row to the Radio Button's runtime list.
+
+**s47 (2026-10-06): the Radio Button takes the same rule** (R14; NSP-023 §8.6, the Radio Button v2). Its spec drops
+`wantsLabel` / `labelOn`, and the runtime knows the row through the shared `labelTakesKeyboard` matcher (10 row scenarios).
+The Dropdown's 10,000 at seed 20732 found the matcher blind to a node PLACED with the label on: the placing is a paint, a
+Focus before the first frame waits for the element it drew, and a label written off before the first frame drops the
+keyboard. The matcher now starts from the placing's label (NSP-023 §8.5).

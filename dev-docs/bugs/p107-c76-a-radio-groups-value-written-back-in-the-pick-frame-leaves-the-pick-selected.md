@@ -9,7 +9,7 @@ area: runtime / Radio Button Group (components/controls/RadioButtonGroup/RadioBu
 found: P107 NSP-016 s42, 2026-10-04
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.7 (row C76); the two "row C76" scenarios in packages/nodegx-node-spec/scenarios/Radio Button Group.json, identical on the interpreter and the runtime target
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/Radio Button Group.json "row C76 — a pick, then Value written back to the old value in the same frame: the Value goes back, but the picked button stays selected (the frame end's render brings no new Value to the effect), so picking it again raises nothing"
+regression: packages/nodegx-node-spec/scenarios/Radio Button Group.json "a pick of 'a', then Value written back to 'b' in the same frame: Changed for the pick, and the Value back at 'b' — the buttons show what the Value says, so picking 'a' again sends it with Changed"
 ---
 
 The group's component keeps the selection in its own state (`useState`, RadioButtonGroup.tsx :21) and follows the node
@@ -43,3 +43,11 @@ on the node (set by `valueChanged`, cleared by the Value input), so a write-back
 buttons read the node's Value. The spec then loses `rendered` and `selected` and the two scenarios change their claim.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Show what Value says".** The buttons read the group's Value directly, so every write redraws them and the next pick fires Changed. Medium change in the group's two files; the group's description work loses two checks that model today's behaviour. The question as asked: *"Should the group always show the button its Value names, even after a write-back in the moment of a pick?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**s47 (2026-10-06): the spec states the ruled intent (NSP-023 §8.6, the Radio Button Group v2 and the Radio Button v2), and
+the runtime keeps this as a known row.** The group's spec drops `rendered` and `selected`, so the selection is the node's
+Value. The button's spec drops `gRendered` and `gSelected` and reads the group's Value. The matchers are
+`groupPickWrittenBack` (the group) and `buttonPickWrittenBack` (a button, where the group's write arrives at an `advance`) in
+`packages/noodl-runtime/test/node-spec/conformance.test.ts`. The group's row scenario has a twin with a frame between the pick
+and the write-back, which both targets pass. **When the app is fixed (ISL-031)**, the four C76 row scenarios (one on the group,
+three on the button) stop diverging: remove their `row` field and close the row.

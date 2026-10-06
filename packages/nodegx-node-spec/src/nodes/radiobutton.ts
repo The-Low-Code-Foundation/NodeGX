@@ -8,6 +8,15 @@
  *
  * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
  *
+ * v2 (NSP-023 step 5, R12 and R14, 2026-10-06): the spec states what a person gets where v1 copied how React draws. **The
+ * button shows what its group's Value says** (Richard, 2026-10-05, on C76: "Show what Value says"); **Changed fires from a
+ * person's click** — on the button clicked, and on a button that loses the selection to that click (on D37: "Fire from the
+ * click"; two buttons carrying the same Value both show as selected, and only the clicked one fires); **Enable Label leaves
+ * the input and the keyboard where they are** (R14, R13's label rule). A button that comes back with Mounted shows its
+ * group's choice and fires nothing (D37 named a remount's Changed a defect; the runtime is quiet there too unless C76's state
+ * left the selection a person's). What the runtime does instead only because of React is a known row on the runtime target
+ * (C76, D37, C80).
+ *
  * THE FIRST VISUAL INSIDE A PARENT. A Radio Button reads the Radio Button Group above it through React context
  * (RadioButton.tsx :41 `useContext`) and has no port naming it. So the group is the button's WORLD (world.ts GROUP): there is
  * one or none; it has a Value at load or not; the graph writes its Value later. The group's page holds the button and its
@@ -16,34 +25,29 @@
  *
  * THE RULE, before the citations. A Radio Button is an `<input type="radio">` in a box (RadioButton.tsx :172-192), with a
  * `<label>` beside it when Enable Label is on (:194-217).
- *   - **selected** (:58): the group's selection `===` the Value the button last RENDERED with — a strict compare, so the
- *     number 1 is not `"1"`; with no group, never. The node's **Checked** follows it through an effect (:78-84) keyed on that
- *     result: when it changes (and at every mount) the component calls `checkedChanged(checked, <the group's "a person made
- *     this selection">)` (radiobutton.ts :39-55), which sends Checked on a change and fires **Changed** only when that flag is
- *     set. The flag is the GROUP's, read at the render — so Changed fires on this button whenever its Checked moves while the
- *     group's last selection was a person's: a pick of a sibling that deselects it, a sibling carrying the same Value, its own
- *     Value written to the picked one, a remount (row D37).
- *   - **the group** (RadioButtonGroup.tsx, the group's spec): its node's Value; the Value its last paint rendered; the
- *     selection (`useState`, :21) and whether a person made it. In one paint React renders the group and the button, runs the
- *     BUTTON's effect first (a child's effects run before its parent's), then the group's (:37-39): when the Value it rendered
- *     differs (`Object.is`) from the last one's, the selection becomes that Value, made by nobody — and the button's effect
- *     runs again, with no Changed.
+ *   - **selected** (:58): the group's Value `===` this button's Value — a strict compare, so the number 1 is not `"1"`; with no
+ *     group, never. The node's **Checked** follows it at each paint while the button is on the page, sent on a change and with
+ *     no Changed. The runtime's component reads the group's COPY of the selection (RadioButtonGroup.tsx :21, :37-39 — row C76,
+ *     the group's spec) and fires Changed from an effect (:78-84 → radiobutton.ts :39-55) whenever Checked moves while the
+ *     group's last selection was a person's: a sibling carrying the same Value, its own Value written in the frame of a pick,
+ *     a remount in C76's state (row D37).
  *   - **a click** on an enabled button in a group: the Checkbox's press and release, then the browser's activation of a radio —
- *     a selected one raises no `change`; any other calls the group's `checkedChanged(<the Value it last rendered>)` (:187-189):
- *     the selection is that Value, made by a person, and the group's node takes the Value when it differs (radiobuttongroup.ts
- *     :20-29). React re-renders at once: the button selected, Checked sent, Changed fired. With no group a click is pointer
- *     events only (the input toggles in the DOM and React puts it back).
+ *     a selected one raises no `change`; any other hands its Value to the group (:187-189 → RadioButtonGroup.tsx :27-30), whose
+ *     node takes it (radiobuttongroup.ts :20-29): this button is selected — Checked sent, **Changed** fired. With no group a
+ *     click is pointer events only (the input toggles in the DOM and is put back).
  *   - **a pick** of a sibling: the keyboard leaves this button for the sibling (a mouse button down moves it — Blurred, if
- *     this one held it), then the sibling's click does what a click on this one does, for the sibling's Value; this button
- *     re-renders with the new selection if it is on the page.
+ *     this one held it), then the sibling's click hands the sibling's Value to the group. This button, if it is on the page,
+ *     shows the new selection at once: one that loses it to the click sends Checked false and fires **Changed** (the
+ *     deselect); one carrying the sibling's Value is selected too — Checked true, no Changed. Off the page it shows the
+ *     group's choice when it comes back, with no Changed.
  *   - **the graph writes the group's Value** (world.ts GROUP, `world.group`): converted as the group's Value input converts
- *     (`toString`; null and undefined ignored); the group renders it at the frame's end, where the effect above moves the
- *     selection and Checked follows — no Changed.
+ *     (`toString`; null and undefined ignored); the button shows it at the next paint — no Changed.
  *   - **Value** (the button's own, `inputProps` — react-component-node.ts `defineRegularInputProp`): stored raw (undefined
- *     deletes it) and rendered at the frame's end.
+ *     deletes it) and shown at the next paint.
  *   - **Enabled**, the pointer, the keyboard, a click's focus, **Focus** / **Blur**, **Mounted**, **Did Mount**, **Will
- *     Unmount**, **Enable Label** (the tree rebuilt around a new input), **Child Index** (0: the first child of its group, or a
- *     lone node), **This**, the **Bounding Box** outputs, **Scroll Into View**, **Label**: the Checkbox's.
+ *     Unmount**, **Enable Label** (a label beside the input; the input and its keyboard stay — the runtime builds a new
+ *     input, row C80), **Child Index** (0: the first child of its group, or a lone node), **This**, the **Bounding Box**
+ *     outputs, **Scroll Into View**, **Label**: the Checkbox's.
  */
 
 import { defineNode, type Patch } from '../spec';
@@ -63,10 +67,6 @@ type State = {
   focused: boolean;
   /** react-component-node.ts :1267 `wantsToBeMounted` */
   mounted: boolean;
-  /** `!!useLabel` as written (RadioButton.tsx :194 decides the tree by it) */
-  wantsLabel: boolean;
-  /** `!!useLabel` as PAINTED (the Checkbox's) */
-  labelOn: boolean;
   /** the element's `disabled` attribute follows Enabled at each paint (the Checkbox's) */
   pageEnabled: boolean;
   /** NSP-016 s43 — Visible as written (node-shared-port-definitions.ts :366-375 `visibility: hidden`) */
@@ -81,20 +81,12 @@ type State = {
   elementFocused: boolean;
   /** the element is on the page */
   onPage: boolean;
-  /** `props.value` as written (the Value input) */
+  /** `props.value` as written (the Value input) — what `selected` compares and a click hands the group */
   value: unknown;
-  /** `props.value` as the button last RENDERED it — what `selected` compares and a click hands the group */
-  shownValue: unknown;
   /** world.ts GROUP — the button sits in a Radio Button Group */
   inGroup: boolean;
-  /** the group's node Value (radiobuttongroup.ts `_internal.value`) */
+  /** the group's node Value (radiobuttongroup.ts `_internal.value`): its selection */
   gValue: unknown;
-  /** the group's Value at its last render — what its effect last compared (RadioButtonGroup.tsx :37-39) */
-  gRendered: unknown;
-  /** the group's selection (RadioButtonGroup.tsx :21 `selection.value`) */
-  gSelected: unknown;
-  /** … and whether a person made it (`selection.fromUser` — the context's `selectionFromUser`) */
-  gFromUser: boolean;
 };
 
 type O = typeof RadioButton extends { outputs: infer X } ? X : never;
@@ -108,15 +100,17 @@ const NONE: Act = { set: {}, send: [], emit: [] };
 
 export const RadioButton = defineNode({
   type: 'net.noodl.controls.radiobutton',
-  version: 1,
+  // v2 (NSP-023 step 5, 2026-10-06): the button shows its group's Value; Changed fires from a person's click; Enable Label leaves
+  // the input where it is — v1 copied the group's selection, its "a person made it" flag and the label rebuild (rows C76, D37, C80)
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/controls/radiobutton.ts',
   needs: ['person', 'group'],
   // the page's syncs (spec.ts `synced`): not branches
-  synced: ['pageEnabled', 'pageVisible', 'labelOn', 'shownValue', 'gRendered', 'gSelected', 'gFromUser', 'checked'],
+  synced: ['pageEnabled', 'pageVisible', 'checked'],
 
   state: {
-    enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, wantsLabel: false, labelOn: false, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
-    value: undefined, shownValue: undefined, inGroup: false, gValue: undefined, gRendered: undefined, gSelected: undefined, gFromUser: false
+    enabled: true, checked: false, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
+    value: undefined, inGroup: false, gValue: undefined
   } as State,
   // utils.ts `addFocusActions` — Focus / Blur report Done / Unchanged
   outcomes: ['done', 'unchanged'],
@@ -274,12 +268,12 @@ export const RadioButton = defineNode({
       if (enabled === s.enabled) return NOTHING;
       return { set: { enabled }, send: ['enabled'] };
     },
-    // react-component-node.ts `defineRegularInputProp` — stored raw; the button renders it at the frame's end
+    // react-component-node.ts `defineRegularInputProp` — stored raw; the button shows it at the next paint
     value: (_s, v) => ({ set: { value: v }, send: [] }),
     // react-component-node.ts :2310-2320
     mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
-    // node-shared-port-definitions.ts `addLabelInputs` — stored; RadioButton.tsx :194 reads its truthiness at each render
-    useLabel: (_s, v) => ({ set: { wantsLabel: !!v }, send: [] }),
+    // node-shared-port-definitions.ts `addLabelInputs` — a label beside the input; the input and its keyboard stay (v2, R14; row C80)
+    useLabel: () => NOTHING,
     // utils.ts :340-364 — on the element, as the Checkbox's
     focus: (s) => {
       if (!s.onPage) return { send: [], outcome: 'unchanged' };
@@ -300,11 +294,11 @@ export const RadioButton = defineNode({
       place: (s, _i, world) => {
         const g = world.group();
         const gValue = g.present && g.load ? asGroupValue(g.load.value) : undefined;
-        const at: State = { ...s, inGroup: g.present, gValue, gRendered: gValue, gSelected: gValue, gFromUser: false };
+        const at: State = { ...s, inGroup: g.present, gValue };
         const p = painted(at);
-        return { set: { inGroup: g.present, gValue, gRendered: gValue, gSelected: gValue, gFromUser: false, ...p.set }, send: p.send, emit: p.emit };
+        return { set: { inGroup: g.present, gValue, ...p.set }, send: p.send, emit: p.emit };
       },
-      // the graph wrote the group's Value: the group takes it (radiobuttongroup.ts :84-99) and renders it at the frame's end
+      // the graph wrote the group's Value: the group takes it (radiobuttongroup.ts :84-99); the button shows it at the next paint
       group: (s, _i, v) => {
         const text = asGroupValue(v);
         if (!s.inGroup || text === undefined || text === s.gValue) return NOTHING;
@@ -324,7 +318,7 @@ export const RadioButton = defineNode({
           if (!p.enabled) return NONE;
           const d = pressed(p);
           const up: Act = { set: { ...d.set, pressed: false }, send: [...d.send, 'pressedState'], emit: [...d.emit, 'pointerUp'] };
-          return then(p, up, (q) => select(q, q.shownValue));
+          return then(p, up, (q) => select(q, q.value, true));
         }),
       touch: (s) => onPainted(s, () => ({ set: { pressed: true }, send: ['pressedState'], emit: ['pointerDown'] })),
       lift: (s) => onPainted(s, () => ({ set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] })),
@@ -336,7 +330,7 @@ export const RadioButton = defineNode({
         const at: State = { ...s, ...p.set };
         if (!at.inGroup || !SIBLINGS.includes(v)) return p;
         const away: Act = at.elementFocused ? { set: { focused: false, elementFocused: false }, send: ['focusState'], emit: ['onBlur'] } : NONE;
-        return then(at, merge(p, away), (q) => select(q, v));
+        return then(at, merge(p, away), (q) => select(q, v, false));
       }
     }
   }
@@ -353,41 +347,30 @@ function then(s: Readonly<State>, first: Act, next: (after: State) => Act): Act 
 }
 
 /**
- * The button's effect (RadioButton.tsx :78-84 → radiobutton.ts :39-55) after a render of it: selected is the group's selection
- * `===` the Value it rendered; a change sends Checked, and fires Changed when the group's selection was a person's.
+ * A click on the radio whose Value is `v` (RadioButton.tsx :187-189): a selected one raises no `change`; any other hands `v` to the
+ * group, whose node takes it (RadioButtonGroup.tsx :27-30 → radiobuttongroup.ts :20-29). This button, on the page, shows it at once:
+ * selected by its own click, or losing the selection to a sibling's — both a person's doing, so Checked with Changed; selected by a
+ * sibling carrying its Value, Checked alone (v2, "Fire from the click"; the runtime's effect, row D37). Off the page it shows the
+ * group's choice when it comes back (`painted`).
  */
-function effect(s: Readonly<State>): Act {
-  const c = s.inGroup && s.gSelected === s.shownValue;
-  if (c === s.checked) return NONE;
-  return { set: { checked: c }, send: ['checked'], emit: s.inGroup && s.gFromUser ? ['onChange'] : [] };
+function select(s: Readonly<State>, v: unknown, own: boolean): Act {
+  if (!s.inGroup || s.gValue === v) return NONE;
+  const set: Partial<State> = { gValue: v };
+  if (!s.onPage) return { set, send: [], emit: [] };
+  const c = v === s.value;
+  if (c === s.checked) return { set, send: [], emit: [] };
+  return { set: { ...set, checked: c }, send: ['checked'], emit: own || !c ? ['onChange'] : [] };
 }
 
 /**
- * A click on the radio whose Value (as rendered) is `v` (RadioButton.tsx :187-189): a selected one raises no `change`; any other
- * hands `v` to the group — the selection is `v`, a person's (RadioButtonGroup.tsx :27-30), and the group's node takes it when it
- * differs (radiobuttongroup.ts :20-29) — and React re-renders this button at once, if it is on the page.
- */
-function select(s: Readonly<State>, v: unknown): Act {
-  if (!s.inGroup || s.gSelected === v) return NONE;
-  const set: Partial<State> = { gSelected: v, gFromUser: true };
-  if (s.gValue !== v) set.gValue = v;
-  const after: State = { ...s, ...set };
-  return merge({ set, send: [], emit: [] }, after.onPage ? effect(after) : NONE);
-}
-
-/**
- * The page follows what the node wants — a paint (the Checkbox's `painted`), and the render pass it is: the button renders with
- * the Value it holds (its effect runs at a mount, or when selected changed); then the group's effect, when the group renders a
- * Value other than its last (RadioButtonGroup.tsx :37-39): the selection is that Value, nobody's — and the button's effect again.
+ * The page follows what the node wants — a paint (the Checkbox's `painted`): Enabled, Visible, Mounted; on the page, Checked follows
+ * the group's Value against this button's — sent on a change, never with Changed (a mount included: the runtime's effect fires one
+ * when the group's last selection was a person's, row D37).
  */
 function painted(s: Readonly<State>): Act {
   const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
+  const send: Port[] = [];
   const emit: Pulse[] = [];
-  // Enable Label changed: the tree is rebuilt around a NEW input (the Checkbox's); the old one took the keyboard with it, no blur fires
-  if (s.wantsLabel !== s.labelOn) {
-    set.labelOn = s.wantsLabel;
-    if (s.onPage && s.mounted) set.elementFocused = false;
-  }
   if (s.mounted && !s.onPage) {
     set.onPage = true;
     emit.push('didMount');
@@ -397,21 +380,14 @@ function painted(s: Readonly<State>): Act {
     set.elementFocused = false;
     emit.push('willUnmount');
   }
-  let out: Act = { set, send: [], emit };
-  let at: State = { ...s, ...set };
-  if (at.onPage) {
-    if (!Object.is(at.shownValue, at.value)) out = merge(out, { set: { shownValue: at.value }, send: [], emit: [] });
-    at = { ...s, ...out.set };
-    // a mount runs the effect whatever it last saw; a render runs it when selected changed — both read as "Checked differs"
-    out = then(s, out, effect);
-    at = { ...s, ...out.set };
+  if ((set.onPage ?? s.onPage) === true) {
+    const c = s.inGroup && s.gValue === s.value;
+    if (c !== s.checked) {
+      set.checked = c;
+      send.push('checked');
+    }
   }
-  if (at.inGroup && !Object.is(at.gRendered, at.gValue)) {
-    out = merge(out, { set: { gRendered: at.gValue, gSelected: at.gValue, gFromUser: false }, send: [], emit: [] });
-    at = { ...s, ...out.set };
-    if (at.onPage) out = then(s, out, effect);
-  }
-  return out;
+  return { set, send, emit };
 }
 
 /** The act on the painted page (the Checkbox's `onPainted`). */
