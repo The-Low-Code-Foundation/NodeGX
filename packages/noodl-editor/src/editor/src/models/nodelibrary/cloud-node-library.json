@@ -10434,7 +10434,7 @@
           "plug": "input",
           "group": "Actions",
           "displayName": "Cancel",
-          "description": "Abandons a request that is still in flight, which answers on Canceled rather than Failure; reports Unchanged when there is nothing to cancel"
+          "description": "Abandons every request still in flight, each answering on Canceled rather than Failure; reports Unchanged when there is nothing to cancel"
         },
         {
           "name": "response",
