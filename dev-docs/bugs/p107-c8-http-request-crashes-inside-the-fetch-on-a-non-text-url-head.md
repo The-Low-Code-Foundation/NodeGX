@@ -1,12 +1,15 @@
 ---
 id: P107-C8
 title: HTTP Request crashes inside the fetch on a non-text URL, Headers, Query or Body Fields, and loses the outcome
-status: scheduled
+status: fixed
+commit: 283b46573
 phase: P109
 task: ISL-026
 severity: medium
 area: runtime / HTTP Request
 found: P107 (the node says what it does) s8, 2026-09-30/10-01
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/net.noodl.HTTP.json "Headers wired a number, with a POST: the Fetch fails naming Headers (C8)"
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-007-THE-WORLD.md §6 (row C8) — the row names how it is reproduced and pinned
 ---
 
@@ -25,3 +28,9 @@ scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/n
 dropped in the same commit. Plain-words question: README §7 of P107.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Fail and say which input".** Failure fires with a message naming the bad input, so the person can find it. A small change near the start of the request. The question as asked: *"Should HTTP Request report a Failure, naming the input, when one of these inputs is not text?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 2026-10-06 (P109 s21, ISL-026), as ruled.** Before anything is built, the first of URL, Query Parameters, Headers
+and (when a body is built) Body Fields holding a truthy non-text value fails the Fetch with `http/input-not-text`,
+Error "<input> is not text". Spec v2; a new Headers scenario; the idle frame-end branch's dropped set is declared
+equivalent. Runtime 200: conforms 18 / 19 (the C6 row stays known). Control: both C8 scenarios fail on HEAD's file, with
+41 generated divergences. Not changed: `responseMapping` is also split, at response time; it was not in this row.

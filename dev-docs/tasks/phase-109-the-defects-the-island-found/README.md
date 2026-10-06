@@ -124,7 +124,7 @@ the work:
 | [ISL-024](ISL-024-A-TEMPLATE-LIVES-IN-ITS-OWN-FOLDER.md) | A template lives in its own folder | F34 | repo | ✓ |
 | [ISL-025](ISL-025-THE-ISLAND-DROPS-THE-WORKAROUNDS.md) | The island drops the workarounds (closing task) — **🟡 s2: W1, W2 and W3 (ruling 1) landed and driven; the census spec pins 22 rows; s4: W13 ("Remove the force") and W21 (ISL-022) removed** | every WA | template | per row |
 | **Track F — the ledger sweep (2026-10-05): every P107 / P109 bug that had no task** | | | | |
-| [ISL-026](ISL-026-A-VALUE-OF-THE-WRONG-KIND-NEVER-KILLS-A-NODE.md) | A value of the wrong kind never kills a node — **20 bugs** (4 high · 13 medium · 3 low; 19 ruled ✅ 2026-10-05) | ledger | runtime | ✓ ruled |
+| [ISL-026](ISL-026-A-VALUE-OF-THE-WRONG-KIND-NEVER-KILLS-A-NODE.md) | A value of the wrong kind never kills a node — **20 bugs** (4 high · 13 medium · 3 low; 19 ruled ✅ 2026-10-05) — **🟡 s21: 17 of 20 fixed (C3, C4, C8, C10, C16, C18, D8, D15, C24, C44, C54, C57, C61–C63, C65, C70), one commit per ruling, each with a control; C6, C20, KITTHROWBLANKS left (task §9)** | ledger | runtime | ✓ ruled |
 | [ISL-027](ISL-027-EVERY-CHANGED-SIGNAL-THE-EDITOR-OFFERS-FIRES.md) | Every Changed signal the editor offers fires, and only when something changed — **6 bugs** (2 high · 1 medium · 3 low; 6 ruled ✅ 2026-10-05) | ledger | runtime | ✓ ruled |
 | [ISL-028](ISL-028-GOING-TO-A-PAGE-TWICE-WITH-NEW-PARAMETERS-GETS-THERE.md) | Going to a page twice, with new parameters, gets there — **10 bugs** (3 high · 4 medium · 3 low; 10 ruled ✅ 2026-10-05) | ledger | viewer | ✓ ruled |
 | [ISL-029](ISL-029-RECORDS-AND-QUERIES-SAY-WHAT-REALLY-HAPPENED.md) | Records and queries say what really happened — **12 bugs** (4 high · 4 medium · 4 low; 12 ruled ✅ 2026-10-05) | ledger | runtime | ✓ ruled |
@@ -549,4 +549,4 @@ job each.
 | C | **3** (ISL-011 ✅ s4, ISL-014 ✅ s4, ISL-015 ✅ s12) | 5 |
 | D | **4** (ISL-016 ✅ s15, ISL-017 ✅ s15, ISL-019 ✅ s13, ISL-021 ✅ s15; ISL-022 🟢 built, AC6 run once — inconclusive; ISL-018 🟡 built, one case open) | 7 |
 | E | **1** (ISL-023 ✅ s10; ISL-025 🟡 W1–W3, W13, W21 removed) | 3 |
-| F | 0 (scoped 2026-10-05 by the ledger sweep: 133 bugs, 12 tasks) | 12 |
+| F | 0 (scoped 2026-10-05 by the ledger sweep: 133 bugs, 12 tasks; ISL-026 🟡 17 / 20 in s21) | 12 |

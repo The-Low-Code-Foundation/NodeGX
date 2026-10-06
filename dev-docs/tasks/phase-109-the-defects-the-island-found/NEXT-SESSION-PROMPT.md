@@ -1,100 +1,96 @@
-# Next session — P109 session 21
+# Next session — P109 session 22
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 20 (2026-10-06, on `cline-dev`, `a7914b837` and `68f2d4d88`):** **15 of 25 closed: ISL-006 ✅.** The editor session read
-AC2's panel half and AC10 live on copies. It found that s19's shared reader made **no port** in the editor's preview, and fixed it.
+**Session 21 (2026-10-06, on `cline-dev`, `fae14dff4` … the handoff commit):** Track F committed on Richard's word, and
+**ISL-026 went from 0 to 17 of 20 fixed**. Each ruling shipped as its own commit, each with a control: HEAD's file
+against the new scenarios, red on exactly the rows it should be. The board is still 15 of 25 closed; ISL-026 is 🟡.
 
-## What s20 found that s19's handoff did not know
+## What s21 found that s20's handoff did not know
 
-- 🔴 **s19 shipped a regression, and every s19 gate was green.** The viewer bundle compiles `@nodegx/project-contract/function-ports.ts`
-  with ITS OWN tsconfig (`noodl-viewer-react`, `target: es5`), not the runtime's. There `for…of source.matchAll(…)` became an index
-  loop over `.length` and ran zero times. In the editor, every Function port made only by code was missing, and a copy of SuntappedX
-  showed **1,769 error-level Function wires**. jest compiles at ES2015+, the deploy drive never depended on mined ports, and
-  the dev log's `[tsl] TS2802 … compiled with 1 error` still emitted the bundle. Fixed (`a7914b837`). The spec now type-checks the file
-  with the viewer's options (no TS2802) and runs the ES5-compiled reader against the native one. Sabotage: 4 red.
-  **Any file the runtime imports from another package is compiled by the viewer at ES5.** Do not `for…of` or spread a Map, a Set or `matchAll` there.
-- The upgrade toast's "Wired Function ports kept" copy was rewritten (one sentence per place, names as the node shows them).
-- Filed: `P109-S20-LISTDEFAULTTYPE` (needs-ruling, low), `P109-S20-LONGTOAST` (open, the toast card, not P109's to fix).
+- **The Track F split was wrong.** s20 said "102 ledger files + 32 that belong to other peers". In fact 31 of the 32 were
+  Track F's own (`open` → `scheduled`, `phase:` / `task:` lines). Three files (C76, C80, D37) also held a live P107
+  session's paragraphs, which were left out by building those blobs from HEAD. `fae14dff4`: 146 files.
+- **"C70 needs no spec change" (the P107 peer's word) was wrong for one case.** The ruling "Read old text, else no
+  options" means old-format text *shows* its options; the Dropdown spec offered none for text. So it is Dropdown v4.
+- **The whole runtime conformance batch no longer fits its 30-minute `beforeAll`** on a loaded box. At seed 20732 the
+  Slider alone took 29 minutes. Every test then fails on the hook's timeout, which reads like 110 red specs. Run it with
+  `NSP_ONLY` in groups, never whole, and read the per-spec report lines ("X vN on runtime: CONFORMS").
+- **A snapshot of a file a live peer is editing goes stale.** My first C3 commit took a peer's matcher hunk from
+  `conformance.test.ts`, because the diff was snapshot → working and the peer had edited after the snapshot. Rebuilt
+  by CAS on the same parent (`350c3ec31`). From then on every commit built `conformance.test.ts` as **HEAD's copy plus
+  my edit script** (`git show HEAD:… | edit.py`), and checked that the result equals the working file.
+- **A peer's commit (`a65b077a8`) declared `const isNull` twice**, a half-applied line of my open C4 edit. Its
+  conformance file could not load; fixed in `f94bc681d`, and the peer was told.
+- **A spec edit that removes a `typeof` guard loses TypeScript's narrowing** (C18, C8). Then the whole conformance
+  file fails to compile for every session. Run `npx tsc --noEmit -p packages/nodegx-node-spec` before the suite.
 
-## The board (re-derived from each task file's status line, s20 — re-derive it again, never copy this table)
+## The board (re-derive it from each task file's status line; never copy this table)
 
 | state | tasks |
 |---|---|
-| ✅ closed (15) | ISL-001, 002, 003, 004, 005, **006**, 011, 014, 015, 016, 017, 019, 020, 021, 023 |
-| 🟡 ruled, one reading owed | **ISL-012** (AC3's full server render with hydration) · **ISL-018** (AC5: the agent round over the real protocol) |
-| 🟢 ruled, not built | **ISL-013** ("A kit says what it needs") · **ISL-024** ("Own package + a note", only in a quiet gap) |
-| 🟡 built here, one half elsewhere | ISL-008 (AC7 export → P18) · ISL-010 (AC4: llama.cpp, Richard's call) · ISL-009 (export → P18) · ISL-007 (AC4 → P108 IW-010) |
+| ✅ closed (15) | ISL-001, 002, 003, 004, 005, 006, 011, 014, 015, 016, 017, 019, 020, 021, 023 |
+| 🟡 ISL-026 17 / 20 | C6, C20, KITTHROWBLANKS left (task §9, in order) |
+| 🟡 ruled, one reading owed | ISL-012 (AC3's full server render with hydration) · ISL-018 (AC5: the agent round) |
+| 🟢 ruled, not built | ISL-013 ("A kit says what it needs") · ISL-024 ("Own package + a note", quiet gap only) |
+| 🟡 built here, one half elsewhere | ISL-008 (AC7 → P18) · ISL-010 (AC4, Richard) · ISL-009 (export → P18) · ISL-007 (AC4 → P108) |
 | 🟡 one case open | ISL-022 (AC6 inconclusive) · ISL-025 (the closing task) |
-| ⬜ Track F, every ruling taken, **NOT COMMITTED** | ISL-026 … ISL-033 buildable; ISL-034 … ISL-037 had no rulings. See "Track F's pile" below. |
-
-**End condition:** every task closed or handed over by name; ISL-025 last.
-
-## Track F's pile — read before touching ISL-026 … 037
-
-The side session that made Track F (transcript `d34e7a8a`, 2026-10-05) finished all 102 rulings, then asked Richard *"Shall I commit
-only my own changes (the 12 new task files, the bug files and the README lines) now?"* It got no answer. At s20's end, all of it is
-still uncommitted: the 12 task files ISL-026 … 037 are **untracked** (mtime 10-05 21:33), **102** ledger files carry its
-"Ruled 2026-10-05 (Track F rulings page)" hunks, and the README holds its 35-line block. Another 32 modified ledger files belong to
-other peers (P107 controls, older P109 rows); do not sweep them. s20 asked Richard (decision below). **If he says commit:** commit
-exactly the 12 task files, the 102 ledger files whose diff has the ruling text, and the README hunk, through a temporary index.
+| ⬜ Track F, ruled, buildable | ISL-027 … ISL-033 (ISL-031 waits on P107 NSP-023 one control at a time) |
+| ⬜ Track F, no rulings | ISL-034 … ISL-037 |
 
 ## Do, in this order
 
-1. **Track F's pile:** act on Richard's answer (above). Without a commit, ISL-026's ledger edits sit on top of that session's work.
-2. **ISL-026** (a wrong-kind value never kills a node, 20 rows, 19 ruled). AC1 first: re-measure every row at HEAD. That is the
-   node-spec conformance suite (`packages/noodl-runtime/test/node-spec/conformance.test.ts`, about 15 min for all specs; use
-   `NSP_ONLY="String Format,Date Add,…"` for the task's nodes). It is a heavy job: **check `pgrep -f conformance.test.ts` first.**
-   P107 peers were running 10,000-run deep suites all through s20. Then build worst first (§4 of the task: C3, C16, C65, C70, the kit
-   boundary, then C61–C63). C65 and C70 sit in P107 NSP-023's controls: agree with that session first.
-3. **ISL-013 build** (`requires` in the manifest, loaded first, a public accessor, refused by name; the catalog reader does NOT load
-   `dependencies`, so it loads a required kit's `main` first).
-4. **ISL-018 AC5**, the agent round ([[a-stranger-agent-round-recipe]]), in a worktree with real `dist` copies.
-5. **ISL-012 AC3's server render with hydration.** 6. ISL-024's move, only in a quiet gap.
+1. **ISL-026 C6** (task §9 item 1). The core `node.ts` merge, in two places. It ships alone, with grouped conformance
+   runs and the runtime's whole jest suite. `pgrep -f "jest|conformance"` first: P107 peers run 10,000-sequence suites.
+2. **ISL-026 C20**, following C19's stranger precedent (`fec895706`; task §9 item 2).
+3. **KITTHROWBLANKS** (re-measure, then an error boundary per kit node). With it, ISL-026 closes; AC4 then reads
+   `node scripts/bugs.js --from P107` / `--from P109` with none of the task's rows open.
+4. **ISL-027** (every Changed signal the editor offers fires). Same method: AC1 = the known rows still fire, then one
+   commit per ruling, each with a control.
+5. ISL-013 build; ISL-018 AC5; ISL-012 AC3.
 
 ## Decisions for Richard (not yours)
 
-- **Commit Track F's pile?** (the side session's own unanswered question, asked again in s20's closing message).
-- **`P109-S20-LISTDEFAULTTYPE`:** a listed Function output left on the panel's "String" is an untyped port. Should the panel show
-  "Any" for an output (recommended, nothing saved changes), or should the port become String (this retypes every listed output never
-  given a type, including 21 rows ISL-006's fix-up wrote on SuntappedX)?
-- **`P109-S18-REFRESHROWSTATE`:** a For Each Refresh rebuilds every row, so each row's Component Object starts empty. Keep it (say so
-  on the Refresh port) or reuse rows whose id stays.
+- `P109-S20-LISTDEFAULTTYPE`: a listed Function output left on "String" — show "Any", or retype the port?
+- `P109-S18-REFRESHROWSTATE`: For Each Refresh rebuilds rows (Component Object empties) — keep, or reuse rows by id?
 - ISL-010 AC4 (llama.cpp, or accept Ollama alone) and the Effort port's "None (no thinking)".
 - Pushing `cline-dev`; publishing Bot Garden Fonts / Garden Kit / Garden 3D Kit at the origin.
 
 ## Handed over (owed by another phase; say so where you meet it)
 
-- **The toast card (P92 chrome / P100 UPG-002's report):** `P109-S20-LONGTOAST`. A toast taller than the window hides its title, and
-  there is no max height or scroll.
-- **P78 TPL-011 (uncommitted pile, untracked since 09-27):** `P109-S19-TPL011UNREADID`. Nightbook's generator wires `pm-id` into
-  `openEnvelope`, whose script never reads `Inputs.id`, and the door now refuses it (`tpl011Template` 35 → 32). Also: D80's section in P78's
-  register is inside that pile. Its ledger file says fixed (`75e0e6cef`).
-- **P18:** ISL-008 AC7 export half; `P109-S17-EXPORTKITDEPS`; ISL-009's export half. `nodegx-export` full suite s19: 5 red in 3
-  suites (`hls006-every-listener`, `hls001-corpus-identity`, `sse` §F floor), not ISL-006's.
-- **P108 (IW-010):** ISL-006 AC8 (`Translate words`, the generator's `TYPE` table and `portsOf`); ISL-007 AC4; README §6.
-- **Templates:** `P109-S19-DEMOSTUBWIRES` (low). **Runtime, unowned:** `P109-S17-KITTHROWBLANKS` (ISL-026 lists it).
-- **Release notes:** ISL-008; ISL-004's Page port; the doctrine's two paragraphs; the reader's refusal names unloaded dependencies;
-  ISL-006: the written port list is the way to type a Function port; `unknown-function-port`; underscore signals work; `Inputs["x"]`
-  is an input; a comment makes no port; old projects keep their wired ports ("Wired Function ports kept").
+- **P18:** `P109-S21-EXPORTDATEUNITWIRED` (a wired date Unit refused for a reason that is gone), `P109-S21-EXPORTBLENDNAN`
+  (the exported `blendColor` still renders `#NaNNaNNaN`; NaN left the parity grid in `small-utilities.test.ts`, put it
+  back with the fix), plus s20's list (ISL-008 AC7, EXPORTKITDEPS, ISL-009's export half). C10's export side was **not
+  checked** (does an exported Array Filter / Map survive a non-list Items?).
+- **P107:** `P109-S21-DROPDOWNEMPTYRESET`. After a list offering no options, the browser selects the first enabled option of
+  the next list, and the spec does not; measured with a temporary scenario. C70's scenario chooses the second option
+  to stay clear of it. Also: the Text Input and the Slider each show one surviving spec mutant at seed 20732
+  (`person.release`, `world.place`). These are interpreter-side, so not ISL-026's, but they are a day-seed red on those two specs.
+- The rest of s20's list stands: the toast card (`P109-S20-LONGTOAST`), P78 TPL-011, P108 IW-010, templates, release notes.
+- **Release notes, add:** the ISL-026 behaviour changes. A wrong-kind value is read as text (String Format, SSE,
+  Parse XML), as empty (Substring, String Mapper, Cloud Function's null body, Filter Records' null Items), as the default
+  (date units, Placement), or refused with a named Failure (Array Filter / Map / Filter Records `not-a-list`, HTTP
+  `input-not-text`, Navigate To Path `no-path`). Color Blend keeps its colour; labels show objects as text; a Dropdown
+  reads its old text Items. Two new runtime errors: `color-blend/unreadable-blend-value`, and the date nodes'
+  `unknown-unit` warning.
 
-## Gate readings taken s20 (2026-10-06, at `a7914b837`)
+## Gate readings taken s21 (2026-10-06)
 
-- Editor `tests-unit`: isl-006 37 (incl. the ES5 rows and the TS2802 guard), fix-007, sb-017: 79 across 4 suites. `tsc --noEmit -p
-  packages/noodl-editor` 0; `project-contract` 0.
-- Runtime: 10 Function suites 123/123. core-ui `scriptPorts` + `declaredPorts` 38/38. Exporter function-ports suite 14/14. `noodl-mcp`
-  `isl006FunctionPortList` 6/6.
-- Editor, live (throwaway profile, copies): SuntappedX 0 Function errors, 2,707 ends alive, 3 dead (dead before ISL-006: the script
-  never names them), 6,766 wires saved of 6,766; hsseq 584 alive, 0 dead, 2,959 of 2,959. Stack stopped (26 processes).
-- `node scripts/bugs.js check`: 6 problems, all in a peer's P78 file (`p78-tpl008pj-nested-signal-…`), none in P109's.
+- **AC1** at `fae14dff4` (seed 20732, 19 ISL-026 nodes, `NSP_ONLY`): all conform with their known rows; the "known rows
+  still fire" test green. C8, C18, C20, D8 had no known row (their specs modelled the runtime), so the re-measure for
+  those was the fix's control.
+- Per fix, at its commit: the touched specs conform at seed 20732 with 0 generated divergences, and the control is red
+  (numbers in each commit message and in ISL-026 §9). A second seed (13) over all 21 touched specs except the Text
+  Input and the Slider, at `283b46573`: **all 21 CONFORM**, and the "known rows still fire" test green (22 passed).
+- Spec package, by suite, after the last fix: batch 315 / batch-data + catalog-parity 309 / batch-visual + catalog-parity
+  + schema + stranger 371 passed. Viewer tests on the touched controls 780 / 780. Export suites that load runtime files
+  changed today: 421 / 421 (+ small-utilities 20 / 20 after the grid change). Runtime, viewer and spec tsc: 0.
+- `node scripts/bugs.js check`: 6 problems, all in the peer's P78 file (unchanged from s20).
 
-## Facts measured in session 20 that are not in a task file
+## Tools s21 left in its scratchpad (gone; the recipes are enough)
 
-- The editor's `getPorts()` for a FRONTEND Function comes from the preview runtime's `sendDynamicPorts` (`simplejavascript.ts`
-  `setup`). It runs for every Function in the project, not only the ones on screen. A cloud Function's ports are derived in the editor
-  (`cloudDynamicPorts.ts`). So a reader broken only in the viewer bundle shows up only on frontend Functions.
-- Graph warnings are computed by `NodeGraphModel.evaluateHealth()`. A wire added through the model reads no warning until that runs.
-- Reach editor singletons from `cdp eval` with `webpackChunknoodl_editor.push([[Symbol()],{},r=>req=r])` and a scan of `req.m` for
-  the export (`WarningsModel.instance`, `NodeGraphNode`). `window.__nodeGraphEditor.activeComponent.owner` is the ProjectModel.
-- A proplist row is added in the panel by `[data-style-ports=scriptOutputs] [data-test=list-add-entry]`, then typing and Enter with
-  `Emulation.setFocusEmulationEnabled` on the same connection. The Type select is `[class*=PropertyPanelSelectInput-module__Root]`.
-  The driver scripts are in s20's scratchpad (gone); the recipe above is enough to rebuild them.
+- **A spec's reference trace for one scenario:** `ts-node --transpile-only` a 10-line script. It imports
+  `{ specs, mount, set, settle, act, signal, trace, loadScenarios }` from `packages/nodegx-node-spec/src`, replays a
+  scenario's steps and prints `trace(inst)`. Use it to check that a scenario's NAME says what its trace does. Twice in
+  s21 the name claimed more than the trace showed.
+- **A CAS commit script:** `read-tree HEAD`, an optional conformance edit applied to HEAD's copy, `git add` the paths,
+  check the staged count, `commit-tree` / `update-ref HEAD NEW BASE`, then reset the real index for those paths.

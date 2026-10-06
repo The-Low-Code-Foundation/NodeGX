@@ -1,6 +1,6 @@
 # ISL-026 — A value of the wrong kind never kills a node
 
-**Status: 🟡 s21 (2026-10-06): 16 of 20 rows fixed — C3, C4, C10, C16, C18, D8, D15, C24, C44, C54, C57, C61, C62, C63, C65, C70 (and AC1 re-measured: every row's known row still fired at HEAD before its fix). ✅ AC2: all 19 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 20 bugs from
+**Status: 🟡 s21 (2026-10-06): 17 of 20 rows fixed — C3, C4, C8, C10, C16, C18, D8, D15, C24, C44, C54, C57, C61, C62, C63, C65, C70; left: C6, C20, KITTHROWBLANKS (and AC1 re-measured: every row's known row still fired at HEAD before its fix). ✅ AC2: all 19 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 20 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 4 high · 13 medium · 3 low, **19 awaiting a ruling**. **Side:** runtime (node setters and frame-end callbacks), noodl-viewer-react (control render, kit nodes)
 
 ## 1. The person sentence
@@ -29,7 +29,7 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 | [P107-C70](../../bugs/p107-c70-a-dropdowns-items-wired-a-value-that-is-not-a-list-crashes-the-render.md) | high | ✅ fixed s21 | A Dropdown whose Items is wired a value that is not a list — the legacy string form included — or a list holding null crashes the page's render |
 | [P107-C4](../../bugs/p107-c4-substring-and-string-mapper-crash-in-the-setter-when-a-wire.md) | medium | ✅ fixed s21 | Substring and String Mapper crash in the setter when a wire sends null |
 | [P107-C6](../../bugs/p107-c6-a-number-arriving-on-a-port-that-once-held-a-unit-value-valu.md) | medium | needs-ruling | A number arriving on a port that once held a unit value ({ value, unit }) is merged into it |
-| [P107-C8](../../bugs/p107-c8-http-request-crashes-inside-the-fetch-on-a-non-text-url-head.md) | medium | needs-ruling | HTTP Request crashes inside the fetch on a non-text URL, Headers, Query or Body Fields, and loses the outcome |
+| [P107-C8](../../bugs/p107-c8-http-request-crashes-inside-the-fetch-on-a-non-text-url-head.md) | medium | ✅ fixed s21 | HTTP Request crashes inside the fetch on a non-text URL, Headers, Query or Body Fields, and loses the outcome |
 | [P107-C10](../../bugs/p107-c10-array-filter-and-array-map-crash-in-the-setter-when-items-ge.md) | medium | ✅ fixed s21 | Array Filter and Array Map crash in the setter when Items gets a number, boolean or plain object |
 | [P107-C18](../../bugs/p107-c18-parse-xml-goes-silent-when-always-array-is-not-text.md) | medium | ✅ fixed s21 | Parse XML goes silent — no Result, no Failure — while Always Array holds anything but text |
 | [P107-C20](../../bugs/p107-c20-animate-to-value-waits-forever-on-a-text-or-disconnected-delay.md) | medium | needs-ruling | Animate To Value waits forever when Delay arrives as text or is disconnected |
@@ -137,7 +137,20 @@ runtime's behaviour, R3), so their re-measure is the scenario named in the ledge
 | C10 | `06ca94db1` | `data/itemsinput.ts` — Array Filter, Array Map, Filter Records refuse a non-list with `<node>/not-a-list`; specs v4 / v3 / v2 | 3 scenarios, control red (+ 9 / 23 / 24 generated divergences on HEAD) |
 | C18 | `685ac731a` | Parse XML: Always Array as text; spec v2 | 1 scenario renamed + 1 new, control red (+ 54 generated) |
 | D8 | `8294bb913` | Color Blend keeps the last colour for a NaN Blend Value, warns once; spec v2 | 1 scenario + 2 viewer tests, control red (+ 39 generated); export parity grid lost NaN → `P109-S21-EXPORTBLENDNAN` |
+| C8 | `283b46573` | HTTP Request fails naming the first input that is not text (`http/input-not-text`); spec v2; one equivalent mutant declared | 1 scenario renamed + 1 new, control red (+ 41 generated) |
 
 Filed on the way: `P109-S21-EXPORTDATEUNITWIRED` (P18, low), `P109-S21-DROPDOWNEMPTYRESET` (P107's Dropdown spec, low), `P109-S21-EXPORTBLENDNAN` (P18, low).
 🔴 The full runtime conformance batch no longer fits its 30-minute `beforeAll` on a loaded box (the Slider alone took
 29 minutes at seed 20732): run it with `NSP_ONLY` per group, never whole.
+
+**Left for session 22, in this order:**
+1. **C6** (R7, "Only on size inputs"): `node.ts` merges a bare number into a held `{ value, unit }` on EVERY port, in two
+   places — `setInputValue` (:416) and the first-update queue (:1255). Merge only where the port's type has `units`.
+   Ships alone. Then drop the per-node C6 known rows (Value Changed, Log, HTTP, Variable2, StreamBuffer, Model2) and decide
+   `C6_ANY_PORT` by measurement: it may still be absorbing a units port's merge that the specs do not model. Grade with
+   grouped `NSP_ONLY` runs (the whole batch outgrows its hook), and run the runtime's whole jest suite.
+2. **C20** (Animate To Value's Delay as a number): the spec and its scenarios are stranger-guarded (round 3 —
+   `stranger-3/nodes.js` takes Delay raw). Follow C19's precedent (`fec895706`): spec v3 with a plain version note, hashes
+   re-recorded, and a fresh agent handed the note alone to bring `stranger-3/nodes.js` up to it (round 3c), all rounds green.
+3. **P109-S17-KITTHROWBLANKS** (a kit node that throws at mount blanks the page): an error boundary per kit node, a
+   viewer change; re-measure first.
