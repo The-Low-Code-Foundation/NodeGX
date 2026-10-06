@@ -289,7 +289,9 @@ const CloudFunctionNode: NodeDefinitionOptions = {
         content: this._internal.paramsValues,
         method: 'POST',
         success: (res) => {
-          if (res === undefined) {
+          // P107-C54 (ISL-026, ruled "Treat it as empty"): a body of JSON `null` is no result, as an empty one is —
+          // `res.result` on it threw inside the XHR handler and the Call was never answered
+          if (res === undefined || res === null) {
             // No result, still success
 
             this._internal.lastCallResult = {

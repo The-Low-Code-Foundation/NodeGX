@@ -39,9 +39,9 @@
  *   Error and the results are never cleared: a later success leaves Error, a result the function stops returning keeps
  *   the previous call's value. No `Unchanged` (:155-156).
  *
- * ROW C54 (NSP-014 §6.35): a success whose body is JSON `null` (`res !== undefined`, then `res.result`, :292, :301) THROWS
- * inside the XHR's `readystatechange` — nothing is sent and the presses are never answered. The spec states the sensible
- * reading (no result: Done, nothing moves); the runtime's is a known row.
+ * ROW C54 (NSP-014 §6.35, fixed in P109 ISL-026, ruled "Treat it as empty"): a success whose body is JSON `null` is no
+ * result: Done, nothing moves, on both targets. The runtime once read `res.result` of it and threw inside the XHR's
+ * `readystatechange`, and the presses were never answered.
  *
  * NOT GRADED HERE, named:
  *   - the editor's warnings (`cloud-function-2`, :253-265) — editor-only, the play has no editor connection;
@@ -134,7 +134,7 @@ const ANSWERS: readonly Answer[] = [
   { status: 500, body: '"plain text error"' },
   { status: 404, body: { code: 141, error: { reason: 'no such function' } } },
   { error: 'connect ECONNREFUSED' },
-  // C54 — known on the runtime (the success reads `.result` of null)
+  // C54 — a null success body is no result (fixed in ISL-026)
   { status: 200, body: null }
 ];
 

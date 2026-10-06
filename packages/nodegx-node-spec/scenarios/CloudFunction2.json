@@ -690,8 +690,8 @@
     }
   },
   {
-    "name": "C54: a success whose body is JSON null — the spec: Done, nothing moves; the runtime throws reading .result and never answers",
-    "because": "cloudfunction2.ts :292 (`res !== undefined`), :301 (`res.result`) — inside readystatechange",
+    "name": "C54: a success whose body is JSON null is no result — Done, nothing moves",
+    "because": "P107-C54, ruled 2026-10-05 \"Treat it as empty\", fixed in P109 ISL-026; the runtime once read `res.result` of null (cloudfunction2.ts :301) inside readystatechange and never answered",
     "params": {},
     "steps": [
       "settle",
@@ -717,7 +717,6 @@
           }
         }
       ]
-    },
-    "row": "NSP-014 §6.35 C54"
+    }
   }
 ]
