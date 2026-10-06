@@ -1,8 +1,8 @@
 # P107 — next session
 
-**Written 2026-10-06 (s47).** Read the [README](README.md) §2–§7 (R15 is the newest ruling). s47's record is
-[NSP-023 §8.5](NSP-023-THE-SPEC-WITHOUT-REACT.md) (the Dropdown v3) and §8.6 (the radio pair). s46's is §8.2–§8.4 (`turn`
-out; the Slider v2), s45's §8.1 (the Text Input v2), s44's NSP-016 §7.9 (the Text v3), s43's §7.8 and RESEARCH-DRAG-DROP.md.
+**Written 2026-10-06 (s48).** Read the [README](README.md) §2–§7 (R15 is the newest ruling). s48's record is
+[NSP-023 §8.7](NSP-023-THE-SPEC-WITHOUT-REACT.md) (the words) and §8.8 (the guard). s47's is §8.5 (the Dropdown v3) and §8.6
+(the radio pair); s46's §8.2–§8.4; s45's §8.1; s44's NSP-016 §7.9 (the Text v3); s43's §7.8 and RESEARCH-DRAG-DROP.md.
 
 ## Board (from the task files)
 
@@ -10,82 +10,66 @@ out; the Slider v2), s45's §8.1 (the Text Input v2), s44's NSP-016 §7.9 (the T
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
 | **NSP-016 the visual nodes** | 🟡 9 of 19 conform. The other 10 need infrastructure (NSP-016 §7.6). AC4 waits for NSP-017 | `aa8abb06f` … s45 |
-| **NSP-023 the spec without React** | **🟡 steps 1–5 done (s45 Text Input v2; s46 `turn` out, Slider v2; s47 Dropdown v3, the radio pair v2). Steps 6–8 left** | `00cd9046a`, `8203644c3`, `a19b5600d`, `523ade4a4`, s47's step-5 commit |
+| **NSP-023 the spec without React** | **🟡 steps 1–7 done (s45 Text Input v2; s46 `turn` out, Slider v2; s47 Dropdown v3, radio pair v2; s48 the words, the guard). Step 8 left (AC5)** | `00cd9046a`, `8203644c3`, `a19b5600d`, `523ade4a4`, `a65b077a8`, `e8df669ca` (step 6), s48's step-7 commit |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
-**115 of 147 conform on the runtime (78.2%)** — unchanged (a conversion keeps a node conforming; AC3). The census was not
+**115 of 147 conform on the runtime (78.2%)**, unchanged: neither step moved a behaviour (AC3). The census was not
 regenerated: it reads the working tree, and peers' piles move its counts.
 
-## What s47 settled
+## What s48 settled
 
-1. **Step 4, the Dropdown v3** (`523ade4a4`). `authorValue`, `shown` and `paintedItems` are gone: the selection is the node's
-   value, and a remount or a new list keeps a person's pick and fires nothing (R14). Row D34 is new on the runtime
-   (`changedWithNobodyPicking`); C71 is kept. 50 → 58 scenarios.
-2. **A new twin technique, "the graph confirms each pick."** The frame after each pick opens with a Value write equal to the
-   node's value. The spec does nothing with it, and the runtime's `props.value` then names the pick, so its effect has
-   nothing to take back. That turned five whole scenarios (the 704-segment matrix among them) into runtime-graded twins
-   with the same interpreter trace. **Read the value AFTER the settle's group has printed**: my first transform read it at
-   the settle event and wrote the pre-pick value, which is C71's write-back.
-3. **Step 5, the radio pair.** The intents were already ruled on P109's Track F page and are recorded as **R15**, so nothing
-   was asked twice. The group v2 has no copy of the selection (row C76). The button v2 has no group copy, no
-   "a person made it" flag and no label rebuild (rows C76 seen from a button, D37, C80). **89 of the button's 152 scenarios
-   were dropped**, under §3 step 4: they graded React's effect order and the group's flag, and their names said so. Only 3
-   kills were needed afterwards.
-4. **Three false v1/v2 names**, each graded by nothing:
-   - the Dropdown's "a pick from the new list: Value 's', Changed" (the new list had already selected 's');
-   - the Dropdown's [3], whose steps were listed out of order;
-   - the Radio Button's "a click on the still-selected button … raises the pointer events alone" (the click's own paint
-     shows the graph's write, so it selects again, with Changed).
-5. **The first 10,000 of the Dropdown found two matcher gaps and one trap** (§8.5):
-   - a pick in the Items write's own frame;
-   - C80 after a node PLACED with the label on (the placing is a paint; `labelTakesKeyboard` now starts from the placing's
-     label). This one predates v3;
-   - the Slider's hidden-remount trap again: an act's paint in the remount frame of a hidden control, read only by a Focus
-     action after it.
-6. **A settle group prints a frame's outputs after all its steps.** A matcher that walks the trace in order must not
-   treat a Blurred in the loss frame's own group as later than the loss. The radio 10,000 caught `labelTakesKeyboard` doing
-   that. Read divergences on the UNSHRUNK sequence (`zz-replay`: find the index whose `sequenceSeed` matches the replay's).
-7. **A swap's kill must be written at the value the recorded example HOLDS when the swap only moves a non-synced key.** A swap
-   keeps the page syncs (the Radio Button's Checked is one), so the only visible change is the moved key (the group's Value
-   'a'), and only a button carrying 'a' reads it. s44's rule, "a value the example does not hold", is the case where the
-   example's own output would coincide.
+1. **Step 6, the words** (`e8df669ca`). Every React word in `src/nodes` and the format files was read. Source citations stay,
+   and so does any sentence that credits a React mechanism to **the runtime** to explain a row. The rest now say what a person
+   or the browser sees: HTML's "a disabled form control gets no click" for "React drops `onClick`"; "on the page" for
+   "committed by React"; "the first paint" for "the first render"; spec.ts THE PERSON says "the node's REAL component, a React
+   one today". Three scenario names were renamed after their traces were read: the Checkbox's and the Dropdown's "the element
+   is rebuilt without the label" (since v2 nothing rebuilds), and the Icon's "commits". spec.ts and world.ts are hashed, so the
+   stranger hashes were refreshed and the three rounds re-run: green.
+2. **Step 7, the guard** (AC4; `tests/page-model.helper.ts`, `page-model.test.ts`, `page-model-plants.test.ts`):
+   - **The model.** Every visual spec has a hand-kept page model. It puts each state key in one class: **node**, **attr**
+     (follows a node key), **element** (which element), or **held** (the browser's, moved by a person). A held key either
+     **shows** a node value or **keeps** the keyboard, the caret or a module's attributes.
+   - **The rules.** Eight, checked on the interpreter over each spec's scenarios plus 200 sequences on two seeds:
+     - G2: the paint writes no node key outside the spec's `frameEnd` list.
+     - G3: no input, signal or world event depends on a page key, found by perturbation, outside the spec's `elementCalls`.
+     - G4: attrs follow, and what is shown shows.
+     - G5: the paint has no memory. Played with the page already drawn, it gives the same result.
+     - G6: a held key is moved by something other than a paint.
+     - G7: the paint fires only lifecycle pulses and the node's own frame-end pulses.
+     - G8: the world kinds are pinned.
+   - **The measurement.** Five shapes were planted in copies of converted specs, and they turn it red **20 of 20** times,
+     however the planted key is classified. The `shows` rule came from the one hole in the first version: a component copy
+     called "held".
+   - **The residual:** a false `keeps` claim. The guard makes it a written line, from a list of three.
+3. **Already guarding, and now written down:** on the runtime, a spec that copies React's behaviour on a row makes that row's
+   scenario pass, and the known-rows test goes red. The new guard covers the state with no row, and needs no runtime.
+4. **One more thing measured on the way:** over about 66,000 on-page paints, the Slider's handle equals its Value output, the
+   Dropdown's selection equals its Value wherever offered, and a text field's text equals its Value (Number aside). That is
+   R14's "show whatever the last value it received was", true of all three specs.
 
 **Readings (2026-10-06):**
-- **The Dropdown v3 CONFORMS.** On the runtime at 10,000 (seed 20732): 0 divergences, D34 attributed 3, C80 5; 385 / 390
-  killed, 5 declared; 185 s. On the interpreter at 10,000 (seed 20731): 0 divergences, 0 survivors. On the runtime at 200 on
-  seeds 13 and 20730: CONFORMS.
-- **The radio pair v2 CONFORMS on the runtime at 200** on seeds 13 and 20730 (the group: 20 / 23 scenarios, 3 rows; 47 / 50
-  killed, 3 declared; the button: 44 / 65, 21 rows; 357 / 357), and on the interpreter at 200 on 13, 20730 and 20731 (0
-  survivors). **At 10,000 (seed 20732) both CONFORM on the runtime** (the group at the first run; the button after a C80
-  matcher fix and a remount-frame pick grid: C80 12, C76 7, D37 12; 451 / 455 killed, 4 declared). §8.6.
-- The package's catalog-parity, reach, types and schema suites: 337 passed. `tsc --noEmit` is clean.
-- Load was 2–14 throughout, with a peer driving the editor.
+- Step 6: the Button, Checkbox, Text Input, Dropdown (v4 in the ledger), Icon and Text all CONFORM on the runtime at 200 on
+  seeds 13 and 20730. `tsc --noEmit` is clean. The stranger, catalog-parity, schema, types and reach suites: 378 passed.
+- Step 7: the guard 11 / 11, the plants 22 / 22.
+- The whole package suite with the guard in it (38 min; batch-visual alone 2,310 s): 21 of 22 suites, 910 passed, 17 deep runs skipped. **The one failure is `world.test.ts` › net.noodl.HTTP**, a P109 peer's open edit (`scenarios/net.noodl.HTTP.json` changed 10:10 and uncommitted, beside their C8 fix `283b46573`). P107 touched nothing on HTTP. Re-run it before trusting it either way. The guard's two files add 78 s and 90 s to that suite.
+- Load was 3–11 throughout, with peers driving.
 
-## What s48 does
+## What s49 does
 
-1. **NSP-023 step 6: the words.** Button, Checkbox and Icon, plus the docblocks above. There is no behaviour or scenario
-   change, so it is cheap. Grep each spec's docblock, state comments and scenario names for React's mechanics (`effect`,
-   `render`, `React`, `useState`, "nobody's", "rebuilt"), and rewrite them in the node's or the browser's words. **A
-   scenario name changes only after its trace is read** (`zz-side` with `ZZ_PRINT=1`). s47's survey: lines matching
-   `/react|useState|effect|forceUpdate|last render|rendered/i` number 23 in button.ts, 14 in checkbox.ts and 14 in icon.ts.
-   Many of them are file citations (`react-component-node.ts`), which stay. Scenario names with React words: the Checkbox
-   has 3; the Button and the Icon have 0.
-2. **Step 7: the guard (AC4).** Something must fail when a spec takes React-made state again. Design it in the session, then
-   **plant** each shape the sort found in a COPY of a spec, one at a time; each must turn the guard red, and every
-   converted spec must pass. The shapes:
-   - a last-rendered copy (`paintedValue`, `paintedItems`, `rendered`, `shownValue`);
-   - a component's copy of a value the node holds (`shown`, `selected`, `gSelected`);
-   - a "who made it" flag read at a paint (`gFromUser`);
-   - a commit-pending field;
-   - a `turn`-like hook.
-
-   A vocabulary grep alone does not count (§2: "rendered" means other things in clean specs).
-3. **Step 8: the proof (AC5).** A stranger agent (NSP-006's recipe, `NSP-006-BRIEF*.md`) builds the Slider or the Dropdown
-   on plain DOM with no React, from the spec and the suite alone. Anything it had to guess or ask is a finding against the
-   spec.
-4. Then NSP-016: the Text's step (b) (RESEARCH-DRAG-DROP.md §8), Group, Image and Circle. Each carries C79 as a known row,
-   under R11 from line one: do the §3 sort before modelling any divergence.
+1. **NSP-023 step 8, the proof (AC5).** A stranger agent (NSP-006's recipe, `NSP-006-BRIEF*.md`, `stranger*/`) builds the
+   Slider or the Dropdown on plain DOM with no React, from the spec and the suite alone. Anything it had to guess or ask is a
+   finding against the spec. Before briefing:
+   - Pick the control. The Dropdown is cheaper: 10,000 runtime sequences take 185 s, against the Slider's range rules.
+   - Decide what the stranger is handed. The format files plus the spec and its scenarios, as in round 3 (world.ts if the
+     control needs it). The page model is not part of the format (§8.8): say whether to hand it over.
+   - Write a `stranger-4/` round in `stranger-suite-hashes.helper.js` (`ROUNDS`) so its inputs are hashed.
+   - **Read P109's round 3c first** (NSP-006 §5.9, `NSP-006-BRIEF-3C.md`, 2026-10-06; uncommitted at s48's end). It is the
+     newest working recipe: the lab now carries a copy of `nodegx-backend-contract/src`, because the package imports its
+     types and the suite does not compile without it.
+2. Then NSP-016: the Text's step (b) (RESEARCH-DRAG-DROP.md §8), Group, Image and Circle. Each carries C79 as a known row,
+   under R11 from line one: do the §3 sort before modelling any divergence. **Each new visual spec now needs a page model**
+   (G1 fails without one). Write it while sorting; it is the same question.
 
 **Human decisions outstanding.** Each is a row to ask, in plain words (README §7 holds the earlier ones as written):
 - **New (s47), open to Richard:** a Radio Button that is off the page (Mounted off) when a sibling's click takes its
@@ -125,7 +109,7 @@ world's clock.
 - **After a `/clear`, a running suite or an uncommitted pile may be your own pre-clear session's**: read the `.jsonl` tail.
 - **Row scenarios are labels**: a scenario with a `row` counts as known on ANY divergence, and the matchers grade only the
   generated sequences. So a row scenario's name must say the intent, and a twin must grade what the row would hide.
-- **s47's probes** (deleted; each takes a minute to rebuild):
+- **The probes** (s47's, and s48 rebuilt `zz-side`; all deleted; each takes a minute to rebuild):
   - `noodl-runtime/test/node-spec/zz-side.test.ts`: every scenario of `NSP_TYPE` (or of the JSON file `ZZ_FILE`) on both
     targets, compact traces, `!!` on a difference. `ZZ_ONLY` takes indices, `ZZ_PRINT=1` prints the traces, `ZZ_ALL=1`
     keeps the quiet outputs.
@@ -135,6 +119,13 @@ world's clock.
   - `noodl-runtime/test/node-spec/zz-replay.test.ts`: the UNSHRUNK generated sequence for each seed in `ZZ_SEEDS` (from a
     replay file) at run seed `NSP_SEED`, played on both targets, with the events up to the first difference.
   - The rewrite scripts lived in the scratchpad. **The JSON is the source now.**
+  - s48's `zz-side` was 40 lines: `play` the scenario on `interpreterAdapter({ resolve: () => spec })` and on
+    `withViewerNodes(runtimeTarget())`, with a `World` only when the spec has `needs`, then `compareTraces(...).index >= 0`.
+    `specs` is a Record (use `Object.values`).
+- **The guard (§8.8) wraps reducers**; a Proxy cannot tell a read from a spread (`{ ...s }` reads every key), so G3 measures
+  dependence by PERTURBING a key and comparing the patch. A new visual spec fails G1 until it has a page model.
+  `page-model-plants.test.ts` makes each copy by text edits that must each match exactly once. If a spec it plants in
+  changes, re-read and re-point the edit, and never weaken the expectation.
 - **A replay file is a two-control experiment waiting to happen**: s47 checked the C80 replay with four variants (placed
   label × later change) before widening the matcher.
 - The census reads the WORKING TREE; `tiers.json` is hand-kept; a spec behaviour change is a version; an ADDITIVE format

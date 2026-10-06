@@ -1,7 +1,7 @@
 # NSP-023 — The spec without React
 
 **Opened 2026-10-05, from ruling R12 (README §7).** **Depends on NSP-016** (the specs it converts) and the Text v3 (NSP-016 §7.9,
-the recipe). **Status: 🟡 steps 1–6 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5 the Dropdown v3 and §8.6 the radio pair, s48 §8.7 the words); the Checkbox's and the Dropdown's label rule with step 1. Steps 7–8 left.**
+the recipe). **Status: 🟡 steps 1–7 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5 the Dropdown v3 and §8.6 the radio pair, s48 §8.7 the words and §8.8 the guard); the Checkbox's and the Dropdown's label rule with step 1. Step 8 (AC5, the stranger) left.**
 
 ## 1. The person sentence
 
@@ -498,3 +498,70 @@ spec.ts and world.ts are hashed by the stranger suites, so the hashes were refre
 **Readings (2026-10-06):** `tsc --noEmit` is clean. The package's stranger, catalog-parity, schema, types and reach suites:
 378 passed, with the 17 opt-in deep runs skipped. On the runtime at 200, the Button, Checkbox, Text Input, Dropdown, Icon and
 Text all CONFORM on seeds 13 and 20730.
+
+### 8.8 s48, 2026-10-06 — step 7: the guard (AC4)
+
+**What it is.** `packages/nodegx-node-spec/tests/page-model.helper.ts` holds a **page model** for every visual spec (one with
+`acts` or a `world.place`), kept by hand like `tiers.json`. It puts each state key in one class:
+
+- **node**: what the node's code holds.
+- **attr**: what the paint writes onto the element from the node, with its projection (`pageEnabled` follows `enabled`).
+- **element**: which element is on the page (the Text's `elem`).
+- **held**: what the browser holds and a person moves. Each one either **shows** a node value (the Slider's handle shows its
+  Value; the Dropdown's selection shows its Value wherever the list offers it; a text field shows its Value), or **keeps**
+  one of three things only a browser has (the keyboard, the caret, what a module put on the element).
+
+`tests/page-model.test.ts` plays each visual spec on the interpreter, wrapped, over its scenarios and 200 generated sequences
+on seeds 13 and 20731, and checks eight rules. "The paint" means what runs at a frame's end (`afterInputs`) and at the
+placing (`world.place`).
+
+| rule | what fails | the React shape it stops |
+|---|---|---|
+| G1 | a state key not classified exactly once; a visual spec with no model | a new key nobody sorted |
+| G2 | the paint writes a node key outside the spec's `frameEnd` list (the node's own frame-end work, each with its line) | a copy "as last rendered" or a commit, kept as node state |
+| G3 | an input, a signal or a world event depends on a page key (found by perturbing the key and comparing the reducer's patch), outside the spec's `elementCalls` (Focus / Blur meet the element; Clear, Backspace and Start Value write the field) | a write that reads what React committed |
+| G4 | after a paint, an attr off its projection, a held key off what it `shows`, an element key changing alone | a component's own copy of a value the node holds |
+| G5 | the paint, run on the state with every attr already drawn, leaves different node keys, sends or pulses (Did Mount and Will Unmount aside) | an effect keyed on what it last rendered: a paint with memory |
+| G6 | a held key that only a paint ever moves | a copy passed off as the browser's |
+| G7 | the paint fires anything but Did Mount, Will Unmount and the spec's own frame-end pulses | "who made it", read at a paint |
+| G8 | a world handler the format lacks, or a format kind not in the pinned list (read from spec.ts's `WorldHandlers` text) | a `turn`-like hook |
+
+**The converted specs pass, all nine visual ones**: Button, Checkbox, Icon, Text, Text Input, Slider, Dropdown, Radio Button
+Group and Radio Button. The first run failed three of them, all on model mistakes, not on React state:
+- the radio's placing hands it its group (`inGroup` and `gValue` joined its `frameEnd` list, citing world.ts GROUP);
+- `onPage` is never preset: an element appearing is a lifecycle event, and the Text Input announces itself and the Text's
+  `whenMounted` stops counting;
+- the Text Input's Clear, Backspace and Start Value write the field at once, so they are element calls;
+- `pageType` follows the Type only while the field is on the page.
+
+Measured before writing the shows rules, over about 66,000 paints on the page: the handle equals the Slider's Value output
+(0 misses), the selection equals the Dropdown's Value whenever the list offers it (0), and the text equals the Value (0, Number
+fields aside).
+
+**The measurement: each shape planted** (`tests/page-model-plants.test.ts`). Each plant is a copy of a converted spec, edited
+as text and compiled in memory; the real file is never touched. Each must turn the guard red however the planted key is
+classified: left out, called the node's, called an attr that follows its source, or called held and showing its source.
+
+| shape (from §8.1–§8.6) | plant | red by |
+|---|---|---|
+| a last-rendered copy | the Slider: `paintedValue`; a word equal to it is dropped (C73's React shape) | G1 · G2 · G5 · G4 + G6 |
+| a component's copy of a value the node holds | the Dropdown: `selected`, copied from Value when the element is made and moved only by a pick | G1 · G2 · G4 · G4 (the real `domSelected` stops showing the Value too) |
+| a "who made it" flag read at a paint | the Radio Button: `byPerson`, set by the click; the paint fires Changed (D37's React shape) | G1 · G2 + G7 · G5 + G7 + G4 · G7 + G4 |
+| a commit-pending field | the Text Input: `committed`, the field as the last paint left it, read by an edit (C69's React shape) | G1 · G2 · G3 + G5 · G3 |
+| a `turn`-like hook | a `turn` world handler in the Slider; a `turn?:` kind added to a copy of spec.ts's text | G8 · G8 |
+
+**20 of 20 cells red**, plus both hook plants. The first version had one hole, in the Dropdown's held cell: a component copy
+called "held" passed every rule. That is what the `shows` / `keeps` split closes.
+
+**The residual, written down:** a held key that falsely claims to **keep** the keyboard, the caret or a module's attributes.
+The guard cannot catch it. It does make the claim a line someone writes and a reviewer reads, from a list of three.
+
+**Why the model lives beside the test, not in the spec.** The format already has `synced` (page keys a mutant may skip), but that
+only shapes mutants. Declaring the page model in the format would change spec.ts and every visual spec for something only the
+guard reads. A stranger's target does not need it. If a stranger round ever wants it, it can move.
+
+**Also already guarding, and worth knowing:** on the runtime, a spec that copies React's behaviour on a row turns that row's
+scenario green, and a passing row scenario turns the known-rows test red (`conformance.test.ts`, "the known rows are still
+open"). That covers behaviour with a row; this guard covers React-made state with no row, and needs no runtime.
+
+**Readings (2026-10-06):** the guard 11 / 11 (each visual spec's run 0.3–8 s); the plants 22 / 22; `tsc --noEmit` clean.
