@@ -671,15 +671,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   'Filter Collection': [{ row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems }],
   'Map Collection': [{ row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems }],
-  'String Format': [
-    {
-      row: 'NSP-004 §6 C3 — a non-string Format is stored unconverted, `.match` throws in the after-inputs callback, the scheduler logs it, and `formatScheduled` is never cleared: the node never formats again',
-      matches: (d: Divergence) => {
-        const bad = d.reference.findIndex((e) => e.t === 'set' && e.port === 'format' && typeof (e as { value?: unknown }).value !== 'string');
-        return bad >= 0 && d.difference.index > bad;
-      }
-    }
-  ],
   Substring: [
     {
       row: 'NSP-011 §6 C4 — Substring `string`: `value.toString()` (:77) throws on null and undefined; the description says it "raises an error"',

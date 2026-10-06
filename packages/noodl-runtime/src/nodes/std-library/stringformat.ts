@@ -51,10 +51,13 @@ const StringFormatDefinition: NodeDefinitionOptions = {
       type: { name: 'string', multiline: true },
       displayName: 'Format',
       description: 'Template text; each {placeholder} becomes an input port, and a placeholder used twice fills only the first time',
-      set(this: StringFormatNodeInstance, value: string) {
-        if (this._internal.format === value) return;
+      set(this: StringFormatNodeInstance, value: unknown) {
+        // P107-C3 (ISL-026): a wired number, null or object arrives as its text, as the spec reads it —
+        // stored unconverted, `.match` threw in the frame-end callback
+        const format = String(value);
+        if (this._internal.format === format) return;
 
-        this._internal.format = value;
+        this._internal.format = format;
         this._internal.resultDirty = true;
         this.scheduleFormat();
       }
@@ -113,9 +116,13 @@ const StringFormatDefinition: NodeDefinitionOptions = {
 
       this.formatScheduled = true;
       this.scheduleAfterInputsHaveUpdated(() => {
-        this.formatValue();
-        this.flagOutputDirty('formatted');
-        this.formatScheduled = false;
+        // P107-C3 (ISL-026): cleared whatever the frame threw, or one bad frame left the node dead for good
+        try {
+          this.formatValue();
+          this.flagOutputDirty('formatted');
+        } finally {
+          this.formatScheduled = false;
+        }
       });
     }
   }

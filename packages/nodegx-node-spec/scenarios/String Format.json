@@ -127,15 +127,14 @@
     ]
   },
   {
-    "name": "a wired number on Format: the spec says '5', the runtime throws in the frame (§6 row)",
-    "because": "stringformat.ts :57 stores the value unconverted and :81 calls .match on it",
+    "name": "a wired number on Format is read as its text: '5'",
+    "because": "P107-C3, ruled 2026-10-05 \"Fix both halves\": the setter converts on arrival (String(value)); it once stored the number and .match threw in the frame",
     "params": {
       "format": 5
     },
     "steps": [
       "settle"
-    ],
-    "row": "NSP-004 §6 C3"
+    ]
   },
   {
     "name": "characters outside [A-Za-z0-9_] make it not a placeholder",
@@ -195,8 +194,8 @@
     ]
   },
   {
-    "name": "after a non-string Format the node never formats again — a later good format sends nothing (§6 row)",
-    "because": "stringformat.ts :114-118 — formatScheduled is set before the callback and cleared after formatValue; the .match TypeError (:81) is caught by the scheduler's try/catch and the flag is never cleared, so :112 returns early forever",
+    "name": "after a non-string Format the node formats again — a later good format is sent",
+    "because": "P107-C3, ruled 2026-10-05 \"Fix both halves\": formatScheduled is cleared in a finally, so a frame that throws cannot leave the node dead; it once returned early forever after the .match TypeError",
     "params": {},
     "steps": [
       {
@@ -213,7 +212,6 @@
         "value": "1"
       },
       "settle"
-    ],
-    "row": "NSP-004 §6 C3"
+    ]
   }
 ]

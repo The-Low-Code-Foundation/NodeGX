@@ -58,11 +58,9 @@ export const StringFormat = defineNode({
   inspect: (s) => formatValue(s.format, s.values),
 
   inputs: {
-    // :49-61. No declared default. ⚠️ The setter stores the value UNCONVERTED (:57) and
-    // `formatValue` calls `.match` on it (:81): a non-string arriving on `format` — a wired
-    // number, `null`, an object — throws inside the frame. The spec converts (`String(value)`)
-    // because "throws in the frame" is not a behaviour a wire can carry; the runtime does not,
-    // and the disagreement is a §6 row (proposed: runtime bug).
+    // :49-61. No declared default. The setter converts on arrival (`String(value)`): a wired
+    // number, `null`, an object is read as its text. It once stored the value unconverted and
+    // `.match` threw inside the frame, for good (P107-C3, fixed in ISL-026; the spec always read it so).
     format: {
       type: 'string',
       coerce: 'js-string',
