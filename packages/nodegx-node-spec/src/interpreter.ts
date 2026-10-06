@@ -281,7 +281,7 @@ function viewOf(inst: Instance): WorldView {
     popupAnswer: (target) => world.popup.answer(target),
     popupsInside: () => world.popup.inside,
     backendFor: (backendId) => world.backend.resolve(backendId),
-    backendUser: () => world.backend.user,
+    backendUser: (backend) => world.backend.userOn(backend),
     session: (backend) => world.backend.session(backend),
     userService: () => startUserService(world),
     authReturn: () => world.backend.authReturn,

@@ -265,11 +265,13 @@
  *               lands at once — the settle whose frame made the call sees it, as a network answer lands. A call no
  *               rule answers is a VIOLATION: answered `{ error }` so the play goes on, and the runner fails the run.
  *               An answer lands as a promise resolution does (a microtask after its moment).
- *             USER (s22) — the script's `user`: the id of the user signed in, as the Record family's access rules read
- *               it (`_getCurrentUser`, dbmodelcrudbase.ts :775-792 → `CloudStore.instance.currentUserId()`); absent,
- *               nobody. NOT the resolved backend's session: the rules ask the LEGACY store (the `cloudservices` app id's
- *               session, `Parse/<appId>/currentUser`), whichever backend the record goes to — a target plays the user
- *               where that store reads it.
+ *             USER (s22) — the script's `user`: the id of the user signed in on the LEGACY store (the `cloudservices`
+ *               app id's session, `Parse/<appId>/currentUser`); absent, nobody — a target plays it where that store reads
+ *               it. P109 ISL-029 (row D24, ruled "Ask the record's own backend"): the Record family's access rules no
+ *               longer read it. They ask the RECORD's backend (`_getCurrentUser`, dbmodelcrudbase.ts →
+ *               `CloudStore.forBackend(scope, backendId).currentUserId()`), and on a backend this world plays that is the
+ *               objectId of the session it holds (AUTH's `sessions`, RestDataAdapter `currentUserId`): `userOn(backend)`.
+ *               Before, a Log In on the record's backend was nobody to the rules and the legacy user was everybody's.
  *           After a write succeeds the adapter tells the store's listeners (the contract's event surface — `delete`
  *           `{ objectId, collection }`, …), AFTER the success callback (RestDataAdapter.ts :1216-1219): what a Query
  *           Records watching the store hears. A graph's writers cause it (s24: graph s08).
@@ -1416,9 +1418,18 @@ export class WorldBackend {
     };
   }
 
-  /** USER (s22): the id of the user signed in, as the Record family's access rules read it; `undefined`: nobody (or, s26, a failed start-up check cleared it — AUTH). */
+  /** USER (s22): the id of the user signed in on the LEGACY store; `undefined`: nobody (or, s26, a failed start-up check cleared it — AUTH). */
   get user(): string | undefined {
     return this.legacyUser;
+  }
+
+  /**
+   * USER (P109 ISL-029, D24): the id of the user signed in on `backend`, as the Record family's access rules read it — the
+   * objectId of the session that backend holds now (RestDataAdapter `currentUserId`); `undefined`: nobody signed in there.
+   */
+  userOn(backend: string): string | undefined {
+    const s = this.sessions.get(backend);
+    return s === undefined ? undefined : (s.objectId as string | undefined);
   }
 
   /**

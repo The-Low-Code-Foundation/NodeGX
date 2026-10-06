@@ -84,13 +84,14 @@ type UpdateRecordState = RecordIdState &
     nextCall: number;
   };
 
-/** The backends a sequence plays with: at once (weighted), late, a refused precondition, refused with and without a message, silent, a project with two. */
+/** The backends a sequence plays with: at once (weighted), late, a refused precondition, refused with and without a message, silent, a project with two, a user signed in on the active one, on the other one only (v4), and on the legacy store only (v4: nobody to the rules). */
 const BACKENDS: ReadonlyArray<BackendScript> = [
   { answers: [{ answer: { ok: { updatedAt: 't1' } } }] },
-  { answers: [{ answer: { ok: { title: 'from the backend' } } }], user: 'u1' },
-  { backends: ['main', 'other'], answers: [{ answer: { ok: {} }, after: 1 }] },
+  { answers: [{ answer: { ok: { title: 'from the backend' } } }], sessions: { main: { objectId: 'u1' } } },
+  { backends: ['main', 'other'], answers: [{ answer: { ok: {} }, after: 1 }], sessions: { other: { objectId: 'u3' } } },
   { answers: [{ answer: { error: 'conflict', detail: { reason: 'precondition-failed' } } }] },
-  { answers: [{ answer: { error: 'Forbidden' }, after: 100 }], user: 'u1' },
+  { answers: [{ answer: { error: 'Forbidden' }, after: 100 }], sessions: { main: { objectId: 'u1' } } },
+  { answers: [{ answer: { ok: { updatedAt: 't1' } } }], user: 'u9' },
   { answers: [{ answer: { error: null }, after: 10 }] },
   { answers: [{ answer: { never: true } }] },
   { backends: ['main', 'other'], answers: [{ match: { backend: 'other' }, answer: { error: 'Record not found' } }, { match: { collection: 'Lesson' }, answer: { ok: { version: 9 } }, after: 1 }, { answer: { error: '' } }] }
@@ -116,7 +117,9 @@ export const UpdateRecord = defineNode({
   // Backend the project does not have writes nothing; v1 kept the write on every failure but a refused precondition.
   // v3 (P109 ISL-029, row C35 ruled "Refuse the save and say why"): a rule set to Role that names no role fails the save
   // with ACL_ROLE_MISSING, nothing written or sent; v2 sent the key `role:undefined`.
-  version: 3,
+  // v4 (P109 ISL-029, row D24 ruled "Ask the record's own backend"): the access rules' signed-in user is the one signed in on
+  // the backend the save goes to (its session); v3 read the legacy store's, so a Log In there was nobody to the rules.
+  version: 4,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/setdbmodelpropertiesnode.ts; dbmodelcrudbase.ts',
   needs: ['backend', 'registry'],
   worldPool: {
@@ -291,7 +294,7 @@ export const UpdateRecord = defineNode({
           id,
           op: 'save',
           backend,
-          args: { collection: s.collectionId, objectId: record.getId(), data: s.storeProperties === 'all' ? { ...record.data } : { ...s.inputValues }, acl: aclFor(s, w.backendUser()), ifMatch }
+          args: { collection: s.collectionId, objectId: record.getId(), data: s.storeProperties === 'all' ? { ...record.data } : { ...s.inputValues }, acl: aclFor(s, w.backendUser(backend)), ifMatch }
         };
         calls = { ...calls, [id]: { n, record: bound, before } };
       }

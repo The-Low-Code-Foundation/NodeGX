@@ -1,0 +1,321 @@
+[
+  {
+    "name": "Log In, then Create Record with an Owner rule: the create carries the person who logged in, read and write",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "P109 ISL-029, row P107-D24 ruled \"Ask the record's own backend\" (the s27 probe graph's first arm). login.ts → world.ts AUTH (the session becomes the answer); dbmodelcrudbase.ts _getCurrentUser → CloudStore.forBackend(scope, backendId).currentUserId() → RestDataAdapter currentUserId (that backend's session). Before: the rules asked the legacy store, the create carried no ACL, and RestDataAdapter's \"ACL ignored\" warning never spoke.",
+    "nodes": {
+      "li": {
+        "type": "net.noodl.user.LogIn",
+        "params": {
+          "username": "bea",
+          "password": "secret"
+        }
+      },
+      "cr": {
+        "type": "NewDbModelProperties",
+        "params": {
+          "collectionName": "Lesson",
+          "accessControl": [
+            {
+              "id": "a1",
+              "label": "Owner"
+            }
+          ]
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "li",
+        "signal": "login"
+      },
+      "settle",
+      {
+        "node": "cr",
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "li",
+        "outcome": "done",
+        "count": 1
+      },
+      {
+        "at": 3,
+        "subject": "cr",
+        "outcome": "done",
+        "count": 1
+      }
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "logIn"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea"
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "create"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "username",
+        "value": "bea",
+        "subject": "li"
+      },
+      {
+        "t": "set",
+        "port": "password",
+        "value": "secret",
+        "subject": "li"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "cr"
+      },
+      {
+        "t": "set",
+        "port": "accessControl",
+        "value": [
+          {
+            "id": "a1",
+            "label": "Owner"
+          }
+        ],
+        "subject": "cr"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "login",
+        "subject": "li"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "login",
+        "value": "done",
+        "subject": "li"
+      },
+      {
+        "t": "backend",
+        "op": "logIn",
+        "backend": "main",
+        "args": {
+          "password": "secret",
+          "username": "bea"
+        },
+        "subject": "li"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "cr"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "n1",
+        "subject": "cr"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "cr"
+      },
+      {
+        "t": "backend",
+        "op": "create",
+        "backend": "main",
+        "args": {
+          "acl": {
+            "u2": {
+              "read": true,
+              "write": true
+            }
+          },
+          "collection": "Lesson",
+          "data": {}
+        },
+        "subject": "cr"
+      }
+    ]
+  },
+  {
+    "name": "(beside it) nobody logged in: the same create carries no ACL",
+    "clauses": [
+      "S1",
+      "N"
+    ],
+    "because": "The known-firing pair of the scenario above: the same graph without the Log In press. dbmodelcrudbase.ts _getACL — a rule no port has written and nobody signed in adds nothing, and no entry is no ACL.",
+    "nodes": {
+      "li": {
+        "type": "net.noodl.user.LogIn",
+        "params": {
+          "username": "bea",
+          "password": "secret"
+        }
+      },
+      "cr": {
+        "type": "NewDbModelProperties",
+        "params": {
+          "collectionName": "Lesson",
+          "accessControl": [
+            {
+              "id": "a1",
+              "label": "Owner"
+            }
+          ]
+        }
+      }
+    },
+    "steps": [
+      "settle",
+      "settle",
+      {
+        "node": "cr",
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 3,
+        "subject": "cr",
+        "outcome": "done",
+        "count": 1
+      }
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "match": {
+              "op": "logIn"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u2",
+                "email": "bea@example.com",
+                "username": "bea"
+              }
+            }
+          },
+          {
+            "match": {
+              "op": "create"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ]
+      }
+    },
+    "expect": [
+      {
+        "t": "set",
+        "port": "username",
+        "value": "bea",
+        "subject": "li"
+      },
+      {
+        "t": "set",
+        "port": "password",
+        "value": "secret",
+        "subject": "li"
+      },
+      {
+        "t": "set",
+        "port": "collectionName",
+        "value": "Lesson",
+        "subject": "cr"
+      },
+      {
+        "t": "set",
+        "port": "accessControl",
+        "value": [
+          {
+            "id": "a1",
+            "label": "Owner"
+          }
+        ],
+        "subject": "cr"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "store",
+        "subject": "cr"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "id",
+        "value": "n1",
+        "subject": "cr"
+      },
+      {
+        "t": "outcome",
+        "port": "store",
+        "value": "done",
+        "subject": "cr"
+      },
+      {
+        "t": "backend",
+        "op": "create",
+        "backend": "main",
+        "args": {
+          "collection": "Lesson",
+          "data": {}
+        },
+        "subject": "cr"
+      }
+    ]
+  }
+]

@@ -50,12 +50,13 @@ type CreateRecordState = RecordIdState &
     nextCall: number;
   };
 
-/** The backends a sequence plays with: at once (weighted), late, refused with and without a message, silent, a project with two, and one with a user signed in. */
+/** The backends a sequence plays with: at once (weighted), late, refused with and without a message, silent, a project with two, a user signed in on the active one, on the other one only (v4), and on the legacy store only (v4: nobody to the rules). */
 const BACKENDS: ReadonlyArray<BackendScript> = [
   { answers: [{ answer: { ok: { objectId: 'n1', title: 'from the backend' } } }] },
-  { answers: [{ answer: { ok: { objectId: 'n1' } } }], user: 'u1' },
-  { backends: ['main', 'other'], answers: [{ answer: { ok: { objectId: 'n2', version: 1 } }, after: 1 }] },
-  { answers: [{ answer: { ok: { objectId: 'm1', ACL: { u1: { read: true } }, n: 2 } }, after: 100 }], user: 'u1' },
+  { answers: [{ answer: { ok: { objectId: 'n1' } } }], sessions: { main: { objectId: 'u1' } } },
+  { backends: ['main', 'other'], answers: [{ answer: { ok: { objectId: 'n2', version: 1 } }, after: 1 }], sessions: { other: { objectId: 'u3' } } },
+  { answers: [{ answer: { ok: { objectId: 'm1', ACL: { u1: { read: true } }, n: 2 } }, after: 100 }], sessions: { main: { objectId: 'u1' } } },
+  { answers: [{ answer: { ok: { objectId: 'n1' } } }], user: 'u9' },
   { answers: [{ answer: { error: 'Forbidden' } }] },
   { answers: [{ answer: { error: null }, after: 10 }] },
   { answers: [{ answer: { never: true } }] },
@@ -69,7 +70,9 @@ export const CreateRecord = defineNode({
   // called it changed.
   // v3 (P109 ISL-029, row C35 ruled "Refuse the save and say why"): a rule set to Role that names no role fails the create
   // with ACL_ROLE_MISSING and sends nothing; v2 sent the key `role:undefined`.
-  version: 3,
+  // v4 (P109 ISL-029, row D24 ruled "Ask the record's own backend"): the access rules' signed-in user is the one signed in on
+  // the backend the create goes to (its session); v3 read the legacy store's, so a Log In there was nobody to the rules.
+  version: 4,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/newdbmodelpropertiesnode.ts; dbmodelcrudbase.ts; cloudstore.js _fromJSON',
   needs: ['backend', 'registry'],
   worldPool: {
@@ -150,7 +153,7 @@ export const CreateRecord = defineNode({
         set: { ...done, calls: { ...s.calls, [id]: n }, nextCall: s.nextCall + 1 },
         send: [],
         // :143-149
-        backend: { id, op: 'create', backend, args: { collection: s.collectionId, data, acl: aclFor(s, w.backendUser()), upsertOn: s.upsertOn } }
+        backend: { id, op: 'create', backend, args: { collection: s.collectionId, data, acl: aclFor(s, w.backendUser(backend)), upsertOn: s.upsertOn } }
       };
     },
     world: {

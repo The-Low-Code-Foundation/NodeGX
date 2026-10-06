@@ -1540,8 +1540,8 @@
     }
   },
   {
-    "name": "an access rule no port has written: the save carries the signed-in user",
-    "because": "dbmodelcrudbase.ts :964, :970-974; world.ts BACKEND USER",
+    "name": "an access rule no port has written: the save carries the user signed in on its backend",
+    "because": "dbmodelcrudbase.ts :964, :970-974, _getCurrentUser :775-800 (v4, D24: the record's backend's session); world.ts BACKEND USER",
     "params": {
       "accessControl": [
         {
@@ -1574,7 +1574,77 @@
             }
           }
         ],
-        "user": "u1"
+        "sessions": {
+          "main": {
+            "objectId": "u1"
+          }
+        }
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "an access rule no port has written: a save sent to the other backend carries the user signed in THERE, not the legacy one (v4, D24)",
+    "because": "_getCurrentUser :775-800 → CloudStore.forBackend(scope, backendId).currentUserId() (P109 ISL-029, D24)",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "Owner"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ],
+        "user": "u9",
+        "sessions": {
+          "main": {
+            "objectId": "u1"
+          },
+          "other": {
+            "objectId": "u3"
+          }
+        }
       },
       "registry": {
         "models": {

@@ -133,6 +133,8 @@ import {
   normalizeFileRef
 } from './fileRef';
 import { normalizeRecordIdentities, normalizeRecordIdentity } from './recordIdentity';
+import { restSessionKey } from './RestAuthAdapter';
+import { SessionStore } from './SessionStore';
 
 /** Query-string parameters as **pairs**, not a record — PostgREST repeats keys. */
 type Params = Array<[string, string]>;
@@ -2051,6 +2053,19 @@ export class RestDataAdapter extends AdapterEvents implements IDataAdapter {
         return;
       }
     }
+  }
+
+  /**
+   * The signed-in end user's id on this backend — P107-D24 (P109 ISL-029, ruled "Ask the record's own backend").
+   *
+   * Not an `IDataAdapter` method, for the reason `ParseWireAdapter.currentUserId` gives: the Record family's access
+   * rules ask the record's own store who is signed in, and the answer is the session a Log In on THIS backend wrote
+   * (`RestAuthAdapter`'s store, keyed `restSessionKey`). The store is made with a fixed tab id: it only reads, and a
+   * fresh one would otherwise draw `Math.random` for an identity nothing here uses.
+   */
+  currentUserId(handle: BackendHandle): string | undefined {
+    const session = new SessionStore({ key: restSessionKey(handle), tabId: 'current-user-reader' }).read();
+    return session !== undefined ? session.objectId : undefined;
   }
 
   /**

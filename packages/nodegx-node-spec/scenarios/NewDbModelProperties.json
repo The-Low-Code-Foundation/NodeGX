@@ -714,8 +714,49 @@
     }
   },
   {
-    "name": "an access rule no port has written: the signed-in user may read and write",
-    "because": "dbmodelcrudbase.ts :964, :970-974; world.ts BACKEND USER",
+    "name": "an access rule no port has written: the user signed in on the backend may read and write",
+    "because": "dbmodelcrudbase.ts :964, :970-974, _getCurrentUser :775-800 (v4, D24: the record's backend's session); world.ts BACKEND USER",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "Owner"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "n1"
+              }
+            }
+          }
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u1"
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "an access rule no port has written: somebody signed in only on the legacy store is nobody to the rules — no ACL (v4, D24)",
+    "because": "_getCurrentUser :775-800 asks the record's backend (P109 ISL-029, D24 ruled \"Ask the record's own backend\"); v3 read the legacy store's user here",
     "params": {
       "accessControl": [
         {
@@ -747,6 +788,58 @@
           }
         ],
         "user": "u1"
+      }
+    }
+  },
+  {
+    "name": "an access rule no port has written: a create sent to the other backend carries the user signed in THERE (v4, D24)",
+    "because": "_getCurrentUser :775-800 → CloudStore.forBackend(scope, backendId).currentUserId() (P109 ISL-029, D24)",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "Owner"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "o1"
+              }
+            }
+          }
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u1"
+          },
+          "other": {
+            "objectId": "u3"
+          }
+        }
       }
     }
   },
@@ -819,7 +912,11 @@
             }
           }
         ],
-        "user": "u1"
+        "sessions": {
+          "main": {
+            "objectId": "u1"
+          }
+        }
       }
     }
   },

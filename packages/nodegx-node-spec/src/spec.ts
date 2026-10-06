@@ -200,8 +200,11 @@ export interface WorldView {
    * `undefined` when the project has no such backend (falsy and `_active_` are the active one).
    */
   backendFor(backendId: unknown): string | undefined;
-  /** NSP-014 s22 — the id of the user signed in, as the Record family's access rules read it (world.ts BACKEND, USER); `undefined`: nobody. */
-  backendUser(): string | undefined;
+  /**
+   * NSP-014 s22 — the id of the user signed in, as the Record family's access rules read it (world.ts BACKEND, USER); `undefined`: nobody.
+   * P109 ISL-029 (D24): asked of the RECORD's backend — `backend` is the id the call goes to — and answered from that backend's session.
+   */
+  backendUser(backend: string): string | undefined;
   /** NSP-014 s26 — what `backend`'s session store holds now (world.ts AUTH): the signed-in user's fields, flat; `undefined`: nobody is signed in there. */
   session(backend: string): Readonly<Record<string, unknown>> | undefined;
   /**

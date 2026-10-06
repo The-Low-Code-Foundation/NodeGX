@@ -772,7 +772,7 @@ function _addRelationProperty(def: DbCrudNodeModule) {
   });
 }
 
-function _getCurrentUser(modelScope: ModelScopeLike | undefined): string | undefined {
+function _getCurrentUser(modelScope: ModelScopeLike | undefined, backendId: string | undefined): string | undefined {
   if (typeof _noodl_cloud_runtime_version === 'undefined') {
     // We are running in browser, try to find the current user.
     //
@@ -781,9 +781,16 @@ function _getCurrentUser(modelScope: ModelScopeLike | undefined): string | undef
     // Parse-shaped name, and which singleton to get an `appId` from. It was the
     // one genuine leak among the nine Parse-concept references this task
     // triaged, and it now asks the adapter, which is the only layer entitled to
-    // know how a backend keeps a session. BCN-006 replaces the mechanism; this
-    // call site will not have to change again when it does.
-    return CloudStore.instance.currentUserId();
+    // know how a backend keeps a session.
+    //
+    // P107-D24 (P109 ISL-029, ruled "Ask the record's own backend"): the adapter asked is the RECORD's backend's, not
+    // the legacy store's. Log In writes the session of the backend it signs in to; the legacy store reads the
+    // `cloudservices` app id's. On a `nodegx` backend under `backendServices` with no endpoint the two never met, so an
+    // Owner rule was silently dropped and, with the collection's creator-owns off, another signed-in user read the
+    // record (measured on a real backend, s24). On Directus / PocketBase the rule is now handed on and the adapter's
+    // "ACL ignored" warning says so. With an endpoint and no Backend picked, `forBackend` IS the legacy store: no change.
+    const store = CloudStore.forBackend(modelScope, backendId);
+    return store ? store.currentUserId() : undefined;
   } else {
     // Assume we are running in cloud runtime
     const request = modelScope.get('Request');
@@ -977,7 +984,7 @@ function _addAccessControl(def: DbCrudNodeModule) {
         };
       }
 
-      const currentUserId = _getCurrentUser(this.nodeScope.modelScope);
+      const currentUserId = _getCurrentUser(this.nodeScope.modelScope, this._internal.backendId as string | undefined);
 
       if (this._internal.accessControlRules !== undefined) {
         this._internal.accessControlRules.forEach((r) => {

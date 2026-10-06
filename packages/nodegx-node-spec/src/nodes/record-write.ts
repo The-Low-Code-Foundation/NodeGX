@@ -22,8 +22,9 @@
  *   - each entry is `{ read, write }`, an unwritten one `true` and a written one its value as written (:957-962);
  *   - no entry at all is NO ACL (`undefined`, :1020).
  *   Ports written for an id the list does not hold are kept and read by nothing.
- * THE SIGNED-IN USER (:775-792) is the LEGACY store's (`CloudStore.instance.currentUserId()`), whichever backend the
- * record goes to — world.ts BACKEND, USER: `WorldView.backendUser()`.
+ * THE SIGNED-IN USER (:775-800) is the RECORD's backend's (`CloudStore.forBackend(scope, backendId).currentUserId()`) —
+ * world.ts BACKEND, USER: `WorldView.backendUser(backend)`. P109 ISL-029 (row D24, ruled "Ask the record's own backend"):
+ * it was the LEGACY store's, whichever backend the record went to, so a Log In on that backend was nobody to the rules.
  */
 
 import type { InputDecl, ValueInputDecl } from '../spec';
