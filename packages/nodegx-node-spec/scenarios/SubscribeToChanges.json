@@ -417,8 +417,8 @@
     }
   },
   {
-    "name": "the same Class written again tears down and subscribes again",
-    "because": "subscribetochanges.ts :332-336 \u2014 the setter schedules whatever the value",
+    "name": "the same Class written again keeps the subscription \u2014 no teardown, no new one (v2, C55)",
+    "because": "subscribetochanges.ts: the setter reconnects only on a change (valueDidChange; P109 ISL-030, P107-C55 ruled \"Ignore repeated values\"); v1 tore down and subscribed again",
     "params": {
       "collectionName": "Lesson"
     },

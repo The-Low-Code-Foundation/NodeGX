@@ -2488,8 +2488,8 @@
     }
   },
   {
-    "name": "slice C: the same Class re-written reconnects — the old subscription disposed, Subscribed false, a new one opened — and queries nothing",
-    "because": ":563-571 — the reconnect at every write, the query only when the Class changed; :717-727",
+    "name": "slice C: the same Class re-written keeps the subscription, and queries nothing (v5, C55)",
+    "because": "dbcollectionnode2.ts setCollectionName: the reconnect only on a change (P109 ISL-030, P107-C55 ruled \"Ignore repeated values\"); v4 disposed the subscription and opened a new one",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2729,8 +2729,8 @@
     }
   },
   {
-    "name": "slice C: a subscription held, then Subscribe To Changes written again and Do in one frame — the old one disposed and a new one opened BEFORE the query",
-    "because": ":650-663 scheduled first, :1162-1169 Do second — the frame end runs them in that order",
+    "name": "slice C: a subscription held, then Subscribe To Changes off and on again and Do in one frame — the old one disposed and a new one opened BEFORE the query",
+    "because": ":650-663 scheduled first (by the off — a change; v5, C55: a same-value write schedules nothing, so v4's \"written again\" is now off-then-on), :1162-1169 Do second — the frame end runs them in that order",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2741,6 +2741,10 @@
         "advance": 1
       },
       "settle",
+      {
+        "set": "realtime",
+        "value": false
+      },
       {
         "set": "realtime",
         "value": true
@@ -2793,8 +2797,8 @@
     }
   },
   {
-    "name": "slice C: a subscription held, then Subscribe To Changes off and Do in one frame — disposed BEFORE the query; Do then the Class written: the query before the reconnect",
-    "because": ":650-663 then :1162-1169; then Do first, :563-571 second",
+    "name": "slice C: a subscription held, then Subscribe To Changes off and Do in one frame — disposed BEFORE the query; Do then the Class changed: the query before the reconnect",
+    "because": ":650-663 then :1162-1169; then Do first, :563-571 second (v5, C55: the Class written is a CHANGE, Lesson to Note — a same-value write would reconnect nothing)",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -2823,7 +2827,7 @@
       },
       {
         "set": "collectionName",
-        "value": "Lesson"
+        "value": "Note"
       },
       "settle"
     ],
@@ -3196,8 +3200,8 @@
     }
   },
   {
-    "name": "slice C: a subscription that never answers, the Class re-written twice — each reconnect disposes the one before (Realtime Status empty throughout); realtime off disposes the third, and on again opens a fourth",
-    "because": ":717-727 the teardown disposes what is held; :707-713 the status is never read",
+    "name": "slice C: a subscription that never answers: the same Class written twice keeps it (v5, C55); realtime off disposes it, and on again opens another (Realtime Status empty throughout)",
+    "because": ":717-727 the teardown disposes what is held; :707-713 the status is never read; v5 (C55): a same-value Class write no longer reconnects",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -3393,7 +3397,7 @@
   },
   {
     "name": "slice C: a subscription still connecting (the third), then a refused filter and Subscribe To Changes off in one frame — Error and Failure, the third disposed; on again opens a fourth",
-    "because": ":983 the refusal; :717-727 the teardown clears the `connecting` read at the subscribe (v2)",
+    "because": ":983 the refusal; :717-727 the teardown clears the `connecting` read at the subscribe (v2); v5 (C55): the second and third subscriptions come from two CHANGES of the Class (Note, then Lesson) — a same-value write reconnects nothing",
     "params": {
       "collectionName": "Lesson",
       "realtime": true
@@ -3402,7 +3406,7 @@
       "settle",
       {
         "set": "collectionName",
-        "value": "Lesson"
+        "value": "Note"
       },
       "settle",
       {

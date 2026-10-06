@@ -6,8 +6,9 @@
  * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
  *
  * THE RULE, before the citations: every input this node reads — Enabled, Class, Backend, Filter, a filter's parameters —
- * RECONFIGURES it at the frame's end (`scheduleReconfigure`, :392-400: one per frame however many arrive), whatever the
- * value, the same value included (each setter schedules unconditionally, :327-348, :567-572). Reconfiguring (:402-452)
+ * RECONFIGURES it at the frame's end (`scheduleReconfigure`, :392-400: one per frame however many arrive) when its value
+ * really changed (v2, row C55 ruled "Ignore repeated values" — `valueDidChange`: an object never compares equal; v1
+ * reconfigured at every write, the same value included). Reconfiguring (:402-452)
  * first TEARS DOWN (:454-464): the subscription held is disposed, and a status held is cleared — Subscribed and Realtime
  * Status sent. Then, unless Enabled is `false` (`!== false`, :323-325 — untouched is on) and there is a Class (truthy,
  * :406-407), it resolves the Backend: none is the not-configured error (:413-421); otherwise it subscribes — `{ collection,
@@ -41,6 +42,7 @@
 
 import { defineNode, type InputDecl } from '../spec';
 import type { BackendScript, RealtimeScriptEvent } from '../world';
+import { valueDidChange } from './condition';
 import { lowerToParse, toNeutral } from './record-match';
 
 const REALTIME = 'Realtime';
@@ -146,7 +148,9 @@ const BACKENDS: ReadonlyArray<BackendScript> = [
 
 export const SubscribeToChanges = defineNode({
   type: 'SubscribeToChanges',
-  version: 1,
+  // v2 (P109 ISL-030, row C55 ruled "Ignore repeated values"): a write of the value a setting already holds does not
+  // reconnect; v1 tore the subscription down and opened a new one at every write.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/subscribetochanges.ts; api/queryutils.ts',
   needs: ['backend'],
   worldPool: { backends: BACKENDS, advances: [0, 1, 1, 9, 10, 50, 100, 1000, 30000] },
@@ -200,8 +204,8 @@ export const SubscribeToChanges = defineNode({
   }
 }).on(
   {
-    // :327-330
-    enabled: (_s, v) => ({ set: { enabled: !!v, scheduled: true }, send: [] })
+    // :327-330 — v2 (row C55 ruled "Ignore repeated values"): only a change reconnects
+    enabled: (s, v) => (valueDidChange(s.enabled, !!v) ? { set: { enabled: !!v, scheduled: true }, send: [] } : { send: [] })
   },
   {
     derived: {
@@ -209,10 +213,15 @@ export const SubscribeToChanges = defineNode({
       discover,
       candidates: ['collectionName', 'backendId', 'visualFilter', 'qp-min', 'qp-other'],
       on: (s, port, v) => {
-        if (port === 'collectionName') return { set: { name: v, scheduled: true }, send: [] }; // :332-336
-        if (port === 'visualFilter') return { set: { visualFilter: v, scheduled: true }, send: [] }; // :338-341
-        if (port === 'backendId') return { set: { backendId: v, scheduled: true }, send: [] }; // :567-572
-        if (port.startsWith('qp-')) return { set: { queryParameters: { ...s.queryParameters, [port.slice('qp-'.length)]: v }, scheduled: true }, send: [] }; // :343-348, :557-561
+        // v2 (row C55 ruled "Ignore repeated values"): each setting reconnects only when it really changes (`valueDidChange` —
+        // an object never compares equal); v1 reconnected at every write, the same value included
+        if (port === 'collectionName') return valueDidChange(s.name, v) ? { set: { name: v, scheduled: true }, send: [] } : { send: [] };
+        if (port === 'visualFilter') return valueDidChange(s.visualFilter, v) ? { set: { visualFilter: v, scheduled: true }, send: [] } : { send: [] };
+        if (port === 'backendId') return valueDidChange(s.backendId, v) ? { set: { backendId: v, scheduled: true }, send: [] } : { send: [] };
+        if (port.startsWith('qp-')) {
+          const key = port.slice('qp-'.length);
+          return valueDidChange(s.queryParameters[key], v) ? { set: { queryParameters: { ...s.queryParameters, [key]: v }, scheduled: true }, send: [] } : { send: [] };
+        }
         return { send: [] }; // :575-581
       }
     },

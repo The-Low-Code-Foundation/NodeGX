@@ -57,8 +57,9 @@
  * at the frame end — the same values, so no trace shows it.
  *
  * SUBSCRIBE TO CHANGES (slice C, s35; :650-806 — Subscribe To Changes' twin, BCN-008). Writing `realtime` (`!!value`,
- * :650-653), the Class (:570 — every write, changed or not, whatever its box) or the Backend (:1187 — likewise) schedules
- * ONE reconnect at the frame's end (:656-663). The frame end runs its two callbacks — the query and the reconnect — in the
+ * :650-653; unset is off), the Class or the Backend schedules ONE reconnect at the frame's end (:656-663) — v5 (row C55
+ * ruled "Ignore repeated values"): only when the value really changed (`valueDidChange`, whatever its box); v4 reconnected
+ * at every write, changed or not. The frame end runs its two callbacks — the query and the reconnect — in the
  * order they were FIRST scheduled that frame (`scheduleAfterInputsHaveUpdated`), so a reconnect asked for before the query
  * makes its calls first (`subscribeFirst`). A reconnect (:665-715) first TEARS DOWN (:717-727): the subscription held is
  * disposed, and a status held is cleared — Subscribed and Realtime Status sent. Then, with `realtime` on and a Class, it
@@ -353,7 +354,9 @@ export const QueryRecords = defineNode({
   // v4 (P109 ISL-029, rows C40 "Drop the last; re-query if unsorted" and C41 "Move it to its new place"): over Limit the record
   // that sorts last is dropped under any sort, and with no sort the query runs again; a saved member that still matches moves
   // to where it now sorts. v3 dropped the FIRST unless the first sort key was descending, and left a saved member in place.
-  version: 4,
+  // v5 (P109 ISL-030, row C55 ruled "Ignore repeated values"): Subscribe To Changes, the Class and the Backend reconnect the
+  // subscription only when they really change; v4 reconnected at every write.
+  version: 5,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/dbcollectionnode2.ts; api/queryutils.ts; @noodl/backend-contract translators',
   needs: ['backend', 'registry', 'random'],
   worldPool: { backends: BACKENDS },
@@ -477,19 +480,22 @@ export const QueryRecords = defineNode({
         const reconnect = (fetching: boolean) => (s.rtScheduled ? {} : { rtScheduled: true, rtFirst: !fetching });
         if (port === 'runOnChange-records') return { set: { recordsBox: v !== false }, send: [] }; // s24 — read by the store listener
         if (port.startsWith('runOnChange-')) return { send: [] }; // the box only records its answer
-        if (port === 'realtime') return { set: { realtime: !!v, ...reconnect(s.fetchScheduled) }, send: [] }; // :650-653
+        // :650-653 — v5 (row C55 ruled "Ignore repeated values"): the reconnect only when it changed (unset is off)
+        if (port === 'realtime') return valueDidChange(s.realtime, !!v) ? { set: { realtime: !!v, ...reconnect(s.fetchScheduled) }, send: [] } : { send: [] };
         if (port === 'collectionName') {
-          // :563-571 — the query only when the Class changed under its box; the reconnect at every write
-          const fetch = schedule(valueDidChange(s.name, v) && ticked(derived, 'collectionName'));
-          return { set: { name: v, ...fetch, ...reconnect(s.fetchScheduled || 'fetchScheduled' in fetch) }, send: [] };
+          // :563-571 — the query only when the Class changed under its box; v5 (C55): the reconnect only when it changed
+          const changed = valueDidChange(s.name, v);
+          const fetch = schedule(changed && ticked(derived, 'collectionName'));
+          return { set: { name: v, ...fetch, ...(changed ? reconnect(s.fetchScheduled || 'fetchScheduled' in fetch) : {}) }, send: [] };
         }
         if (port === 'search') return { set: { search: v, ...schedule(valueDidChange(s.search, v) && ticked(derived, 'search')) }, send: [] }; // :1132-1139
         if (port === 'visualFilter') return { set: { visualFilter: v, ...schedule(ticked(derived, 'querySettings')) }, send: [] }; // :1119-1123
         if (port === 'visualSort') return { set: { visualSorting: v, ...schedule(ticked(derived, 'querySettings')) }, send: [] }; // :1124-1128
         if (port === 'backendId') {
-          // :1178-1188 — likewise: the query when it changed under Query settings, the reconnect at every write
-          const fetch = schedule(valueDidChange(s.backendId, v) && ticked(derived, 'querySettings'));
-          return { set: { backendId: v, ...fetch, ...reconnect(s.fetchScheduled || 'fetchScheduled' in fetch) }, send: [] };
+          // :1178-1188 — likewise: the query when it changed under Query settings; v5 (C55): the reconnect only when it changed
+          const changed = valueDidChange(s.backendId, v);
+          const fetch = schedule(changed && ticked(derived, 'querySettings'));
+          return { set: { backendId: v, ...fetch, ...(changed ? reconnect(s.fetchScheduled || 'fetchScheduled' in fetch) : {}) }, send: [] };
         }
         if (port.startsWith('qp-')) {
           const name = port.slice('qp-'.length); // :1140-1147

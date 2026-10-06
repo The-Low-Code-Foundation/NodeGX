@@ -49,7 +49,7 @@ import {
   recordSchemaContext
 } from './record-ports';
 import { sendSchemaPorts, staticPortNames } from './schema-ports';
-import { runOnChangeDynamicPorts } from '../../../run-on-value-change';
+import { runOnChangeDynamicPorts, valueDidChange } from '../../../run-on-value-change';
 
 /**
  * NDA-004 §2 — see `setError`.
@@ -590,7 +590,9 @@ const DbCollectionNode: NodeDefinitionOptions = {
 
       if (this.shouldRunOnValueChanged('collectionName', previous, name)) this.scheduleFetch();
       // A subscription is to a named collection; the old one is watching the wrong thing.
-      this.scheduleRealtimeReconfigure();
+      // P107-C55 (P109 ISL-030, ruled "Ignore repeated values"): a write of the value already held does not reconnect — it used to
+      // tear the subscription down and open a new one, and a change in that gap was never delivered.
+      if (valueDidChange(previous, name)) this.scheduleRealtimeReconfigure();
     },
     setCollection: function (this: DbCollectionNodeInstance, collection: CollectionLike) {
       this.bindCollection(collection);
@@ -671,8 +673,11 @@ const DbCollectionNode: NodeDefinitionOptions = {
     // ────────────────────────────────────────────────────────────────────────
 
     setRealtime: function (this: DbCollectionNodeInstance, value: boolean) {
+      const previous = this._internal.realtime;
       this._internal.realtime = !!value;
-      this.scheduleRealtimeReconfigure();
+      // P107-C55 (P109 ISL-030, ruled "Ignore repeated values"): a write of the value already held does not reconnect
+      // Unset is off (`reconfigureRealtime` reads it so), so a first write of off is no change.
+      if (valueDidChange(!!previous, this._internal.realtime)) this.scheduleRealtimeReconfigure();
     },
 
     /** Coalesce: a backend and a collection arriving in one update reconnect once. */
@@ -1214,8 +1219,8 @@ const DbCollectionNode: NodeDefinitionOptions = {
           this._internal.backendId = value;
           if (this.shouldRunOnValueChanged('querySettings', previous, value)) this.scheduleFetch();
           // BCN-008: and the subscription follows the picker, or it stays connected to
-          // whichever backend happened to be selected when the node first ran.
-          this.scheduleRealtimeReconfigure();
+          // whichever backend happened to be selected when the node first ran. P107-C55: only when it moved.
+          if (valueDidChange(previous, value)) this.scheduleRealtimeReconfigure();
         }) as (value: never) => void,
         realtime: this.setRealtime.bind(this) as (value: never) => void
       };
