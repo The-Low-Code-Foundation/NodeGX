@@ -373,8 +373,8 @@
     }
   },
   {
-    "name": "A provider's error coming back: Failure when the node is made AND again at the announcement a tick later (row C50)",
-    "because": "signinwith.ts :86-88 reads the final state, :85 hears the deferred event — two tokens (RestAuthAdapter.ts :1497-1502; world.ts AUTH, THE RETURN LEG)",
+    "name": "A provider's error coming back: Failure ONCE, when the node is made — the announcement a tick later is ignored (v3, row C50)",
+    "because": "signinwith.ts :86-88 reads the final state and reports it; :85 hears the deferred event and ignores it (`returnReported`, P109 ISL-030, P107-C50 ruled \"Fire it once\"; v2 reported twice) — RestAuthAdapter.ts :1497-1502; world.ts AUTH, THE RETURN LEG",
     "params": {},
     "steps": [
       "settle",
@@ -393,7 +393,7 @@
     }
   },
   {
-    "name": "A provider's error, the clock moved before the first frame: both Failures land in the first settle",
+    "name": "A provider's error, the clock moved before the first frame: the one Failure lands in the first settle (v3, C50)",
     "because": "signinwith.ts :86-88 then :85 — the announcement at 1 ms, before any frame was drawn",
     "params": {},
     "steps": [

@@ -36,8 +36,8 @@
  * state's (`undefined` when it has none: never sent, C3), Error cleared (`undefined`, never sent — D25's shape), Done;
  * failed: `setError` (:225 → :170-180) with the state's error or `Sign-in could not be completed.` — Error, Signing In
  * false, Failure with the node's code. A provider's error is final when the node is made AND announced a tick later
- * (world.ts AUTH), so the node reports it TWICE — at mount and at the event (row C50: the runtime's behaviour, R3 (a); the
- * comment at :80-84 says "idempotent per page load", which every call minting a fresh token makes untrue).
+ * (world.ts AUTH); v3 (row C50, ruled "Fire it once") reports it ONCE — the node remembers it reported the return
+ * (`returned`) and ignores the repeat. v2 reported it twice, every call minting a fresh token.
  *
  * NOT GRADED HERE, named:
  *   - where the browser goes on a handover (the adapter's discovery request, its parked flow, the provider URL), and the
@@ -146,28 +146,34 @@ type SignInWithState = Batch & {
   signingIn: boolean;
   /** `_internal.notice` (:217) — v2 */
   notice: string | undefined;
+  /** `_internal.returnReported` — v3, C50: the return's final state was reported */
+  returned: boolean;
 };
 
 /** :203-226 — a return applied: a state in progress sets Signing In; a settled one reports on an invocation no input opened (v2) */
 function applyReturn(s: SignInWithState, r: AuthReturnState) {
   if (r.inProgress) return { set: { signingIn: true }, send: ['signingIn' as const] }; // :203-207
+  // v3 (C50): one return per page load — its final state is reported once, and a repeat (the announcement after the read) ignored
+  if (s.returned) return { send: [] };
   if (r.succeeded) {
     // :208-223 — Signing In false, Notice, Error cleared (never sent: C3), then Done, last
-    return { set: { signingIn: false, notice: r.notice, error: undefined }, send: ['signingIn' as const, 'notice' as const, 'error' as const], opens: [{ outcome: 'done' as const }] };
+    return { set: { signingIn: false, notice: r.notice, error: undefined, returned: true }, send: ['signingIn' as const, 'notice' as const, 'error' as const], opens: [{ outcome: 'done' as const }] };
   }
   // :225 → :170-180 — Error, Signing In false, then Failure with the node's code
-  return { set: { signingIn: false, error: r.error || SIGN_IN_NOT_COMPLETED }, send: ['signingIn' as const, 'error' as const], opens: [{ outcome: 'failure' as const, error: SIGN_IN_WITH_ERROR_CODE }] };
+  return { set: { signingIn: false, error: r.error || SIGN_IN_NOT_COMPLETED, returned: true }, send: ['signingIn' as const, 'error' as const], opens: [{ outcome: 'failure' as const, error: SIGN_IN_WITH_ERROR_CODE }] };
 }
 
 export const SignInWith = defineNode({
   type: 'net.noodl.user.SignInWith',
   // v2 (s29): the receiver — a return already resolved at mount (:86-88) and every `oauthReturn` (:85) applied; Notice written.
   // v1 played the launcher only; no v1 trace moves (no v1 world carried a return)
-  version: 2,
+  // v3 (P109 ISL-030, row C50 ruled "Fire it once"): a return's final state is reported once per page load; v2 reported a
+  // provider's error twice — at mount and at the announcement a tick later.
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/user/signinwith.ts; userservice.ts; RestAuthAdapter.ts; ParseAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
   worldPool: { backends: [...pool('signInWithProvider', null), ...RETURNS] },
-  state: { provider: undefined, redirect: undefined, error: undefined, signingIn: false, notice: undefined, scheduled: false, presses: 0, calls: {}, nextCall: 1 } as SignInWithState,
+  state: { provider: undefined, redirect: undefined, error: undefined, signingIn: false, notice: undefined, returned: false, scheduled: false, presses: 0, calls: {}, nextCall: 1 } as SignInWithState,
   outcomes: ['done', 'failure'],
   inputs: {
     // :141-148
