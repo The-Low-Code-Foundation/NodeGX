@@ -52,7 +52,9 @@
  *
  * WHAT IS SENT. The connection's state goes to the node only through `onState` (sse :663-691), which sends Connection State,
  * Connected and Retry Count; an event sends the eight data and count outputs; a failure sends Last Error, Retry Count and
- * Duplicates Suppressed. Nothing else sends an output — a cleared Last Error at an open is not sent (row C56).
+ * Duplicates Suppressed. v2 (row C56 ruled "Send them when they change"): an open also sends the Last Error it cleared, a
+ * failure that schedules a retry sends Retry Count once it has gone up (`onRetry`), and a suppressed duplicate sends its
+ * count (`onDuplicate`) — v1 sent none of the three, so the wire held stale values.
  *
  * NOT GRADED HERE, named:
  *   - With Credentials (conn :459): a `fetch` init's `credentials`, which the world's request record does not carry — the
@@ -289,6 +291,7 @@ class Run {
   private onState(state: string): void {
     this.s.connectionState = state;
     this.send(STATE_SENDS);
+    if (state === 'open') this.send(['lastError']); // v2 (row C56): the cleared Last Error, told at the open
     if (state === 'open') this.emit('onOpen');
     if (state === 'closed' || state === 'error') this.emit('onClose');
     if (state === 'open') this.settleConnect('done');
@@ -398,6 +401,7 @@ class Run {
       if (c.opts.dedupeById !== false) {
         if (c.recentIds.includes(frame.id)) {
           c.duplicatesSuppressed++;
+          this.send(['duplicatesSuppressed']); // v2 (row C56): `onDuplicate` — sent as it counts
           return;
         }
         const ids = [...c.recentIds, frame.id];
@@ -435,6 +439,7 @@ class Run {
     }
     this.closeTransport();
     c.retryCount++;
+    this.send(['retryCount']); // v2 (row C56): `onRetry` — the count, current, before the reconnect is scheduled
     this.scheduleReconnect();
   }
 
@@ -600,7 +605,9 @@ const RESPONSES: readonly Answer[] = [
 
 export const ServerSentEvents = defineNode({
   type: 'net.noodl.SSE',
-  version: 1,
+  // v2 (P109 ISL-030, row C56 ruled "Send them when they change"): Last Error at an open, Retry Count once it moved, and
+  // Duplicates Suppressed as it counts are sent; v1 left all three stale on the wire.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/agent/sse.ts; agent/sse-connection.ts; agent/stream-parsers.ts',
   needs: ['network', 'clock'],
   worldPool: { responses: RESPONSES, delays: [0, 0, 0, 3], advances: [0, 1, 1, 2, 3, 5, 10, 50, 100, 1000, 5000, 30000] },

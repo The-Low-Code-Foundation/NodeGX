@@ -512,7 +512,7 @@
     "because": "conn :565-568; :454 Last-Event-ID on the retry"
   },
   {
-    "name": "Dedupe By Id drops a replayed id silently; with it off the replay is delivered",
+    "name": "Dedupe By Id drops a replayed id and counts it on Duplicates Suppressed (v2, C56); with it off the replay is delivered",
     "params": {
       "autoConnect": true,
       "url": "https://api.example/stream"
@@ -557,7 +557,7 @@
         }
       ]
     },
-    "because": "conn :854-864; the count is not sent until an error (sse :714-719)"
+    "because": "conn :854-864; the count is not sent until an error (sse :714-719); v2 (P109 ISL-030, P107-C56 ruled \"Send them when they change\"): the count is sent as it moves (onDuplicate) \u2014 v1 counted silently"
   },
   {
     "name": "A server retry: is the backoff's base from then on",

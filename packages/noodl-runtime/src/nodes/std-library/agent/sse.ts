@@ -640,6 +640,10 @@ const SSENode: NodeDefinitionOptions = {
         onState: (state) => this.handleState(state),
         onFrame: (frame) => this.handleFrame(frame),
         onError: (message) => this.handleError(message),
+        // P107-C56 (P109 ISL-030, ruled "Send them when they change"): Retry Count and Duplicates Suppressed are sent when
+        // they move. A failure sent the count BEFORE it went up, and a duplicate was counted silently until the next error.
+        onRetry: () => this.flagOutputDirty('retryCount'),
+        onDuplicate: () => this.flagOutputDirty('duplicatesSuppressed'),
         ...internal.seams
       };
 
@@ -668,6 +672,9 @@ const SSENode: NodeDefinitionOptions = {
       this.flagOutputDirty('connectionState');
       this.flagOutputDirty('connected');
       this.flagOutputDirty('retryCount');
+      // P107-C56: an open clears Last Error (the connection does), so the wire is told — it kept the last failure beside
+      // Connection State `open`.
+      if (state === 'open') this.flagOutputDirty('lastError');
 
       if (state === 'open') this.sendSignalOnOutput('onOpen');
       // 'error' is terminal, so it closes the stream from the graph's point of view
