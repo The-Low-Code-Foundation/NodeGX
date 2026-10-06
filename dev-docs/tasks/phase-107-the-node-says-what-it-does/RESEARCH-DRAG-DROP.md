@@ -160,14 +160,14 @@ Fixes 1 and 2 change when the face installs the page for all 8 visual nodes that
 | needed | jsdom | what the face does |
 |---|---|---|
 | `pointerdown` / `pointerup` / `pointermove` with `pointerType`, `pointerId`, `button`, `clientX/Y` | **no `PointerEvent`** — but a `MouseEvent` named `pointerdown` with `pointerType` defined on it reaches a capture listener with both read correctly (measured) | **built (s43)**: the press, release, click, touch and lift acts send the browser's pointer events before the compatibility events (`pointerdown` → `mousedown`, `pointerup` → `mouseup` → `click`; for a finger `pointerdown` → `touchstart`, `pointerup` → `touchend`). No component has an `onPointer*` handler, and the 8 re-runs confirmed it |
-| a move past the slop | — | **to add**: a `move` act — `pointermove` from the press point by more than 8 px, over the element the act names |
+| a move past the slop | — | **built (s50)**: a `move` act (`mouse` or `touch`) — a `pointermove` 10 px from the press point, over the element the act names, then `mousemove` / `touchmove` |
 | `document.elementFromPoint` | **undefined** | **built (s43)**: returns the element the last pointer act landed on, after the hit test. A face choice, like the keyboard slide and the keyboard pick: an act names *what* is under the pointer, never *where* |
 | element rectangles | all 0×0 | none. Drop Index from a pointer is geometry and waits for NSP-017. The keyboard grades the index |
 | `getComputedStyle` (flex direction, gaps, `display`) | yes, from inline style (`flexDirection: row`, `columnGap: 8px` measured); `translate` reads `""`, which the code takes as 0 | **built (s43)**: as a global (drag-drop calls it bare) |
 | `new DOMRect` | yes, as `window.DOMRect` | **built (s43)**: as a global (`restingRect`) |
 | focus on a `tabindex="0"` `<div>` | yes | — |
 | the hold timer | bare `setTimeout`, which is the world's (`installWorld` owns the timers) | **measured (s43)**: it runs on the world's clock (lifted at an advance of 500, not 499). In the spec it is `after` with the tag `hold` |
-| `DragEvent` / `DataTransfer` | **neither** (jsdom has `File`) | **to add**: `fileEnter`, `fileLeave` and `fileDrop` acts that dispatch plain `dragenter` / `dragover` / `dragleave` / `drop` events with a `dataTransfer` stand-in (`types: ['Files']`, `files: [File…]`) made from the act's `$file` values. React reads `dataTransfer` off the native event |
+| `DragEvent` / `DataTransfer` | **neither** (jsdom has `File`) | **built (s50)**: `fileEnter` (carrying a list of `$file`s; an empty list is a drag of text), `fileLeave` and `fileDrop` acts, run as HTML's drag-and-drop model runs them: the target moves first (a `dragleave` at the old one, a `dragenter` at the new), then a `dragover`; a let go is a `drop` when that `dragover` was cancelled, else a `dragleave`. Each event is a `MouseEvent` with a stand-in `dataTransfer` (`types` holds `Files` exactly when it carries a file). React reads `dataTransfer` off the native event (measured: the Text's file scenarios agree with the spec on the runtime) |
 
 ## 7. What a spec can say, per node
 

@@ -48,7 +48,7 @@ import type { AnyNodeSpec } from '../src';
 export const KEEP = Symbol('not drawn now');
 
 /** The few things a browser keeps on an element that show no node value. A held key that is none of these `shows` one. */
-export type Keeps = 'the keyboard' | 'the caret' | 'what a module put on the element';
+export type Keeps = 'the keyboard' | 'the caret' | 'what a module put on the element' | 'a drag from outside the page';
 export type Held = { shows: (s: Readonly<Record<string, unknown>>) => unknown } | { keeps: Keeps };
 
 export interface PageModel {
@@ -96,14 +96,15 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     held: {}
   },
   Text: {
-    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex'],
+    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'isDragOver', 'droppedFiles', 'droppedFile'],
     attr: {
       onPage,
       // an element's type cannot change: presetting it would claim an element the page does not have
       shownTag: { follows: (s) => (s.onPage ? s.tag : KEEP), preset: false }
     },
     element: { elem: { changesWith: ['onPage', 'shownTag'] } },
-    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' } },
+    // s50 — a file dragged from the desktop: the files it carries and the element it is over are the browser's drag, moved by a person
+    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' } },
     // drag-drop.ts :136-145 `whenMounted` counts frame starts until the node has an element
     frameEnd: ['chain'],
     elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [] }

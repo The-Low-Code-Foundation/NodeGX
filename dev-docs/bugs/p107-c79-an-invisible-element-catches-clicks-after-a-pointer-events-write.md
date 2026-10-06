@@ -44,6 +44,13 @@ The Text's spec does NOT copy this (version 3, NSP-016 §7.9; R11: a spec says w
 it says an element at Opacity 0 takes no pointer. This row is a known row on the runtime target (`invisibleTakesPointer`), carried by four
 row scenarios and counted in every generated run.
 
+**s50 (2026-10-06): a file dragged from the desktop is caught too.** The browser hit-tests a drag the same way, so the
+invisible Text that catches clicks also lights up as a file drop zone (Is Dragging Over true) and takes the drop (Files
+Dropped). Measured on the runtime target with the Text v4's file acts: the fifth row scenario, "row C79 — a file drag at
+Opacity 0 written after Pointer Events" (Pointer Events Enabled off at placing, then on and Opacity 0 in one frame, then a
+file drag). The matcher now also counts the file drop's signals, Is Dragging Over going true and the dropped file's values.
+The same fix covers it.
+
 **Proposed fix (small).** Leave `pointerEvents` to the render. Have the two Pointer Events setters force an update (as
 the opacity transition already does) instead of patching the DOM, so the component's opacity rule always has the last
 word.

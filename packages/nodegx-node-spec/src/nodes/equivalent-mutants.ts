@@ -65,7 +65,24 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     // element 1 with the chain at 0: a plain unmount's chain is already 0 (an element on the page with a chain waiting takes it at
     // the frame start), and element 1 — the first made — is at any unmount the one leaving or one already gone; every element after
     // it is a later one. The five-remount scenario kills the swap for any later element's number.
-    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["elementFocused","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["attrsOn","chain","elementFocused","onPage"],"emit":["willUnmount"]', why: 'a plain unmount handed the twin that put the attributes on element 1 with the chain at 0: the chain is 0 already, and element 1 is leaving or gone — no later element is element 1' }
+    { reducer: 'afterInputs', kind: 'swap-branch', branch: '"set":["elementFocused","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["attrsOn","chain","elementFocused","onPage"],"emit":["willUnmount"]', why: 'a plain unmount handed the twin that put the attributes on element 1 with the chain at 0: the chain is 0 already, and element 1 is leaving or gone — no later element is element 1' },
+    // s50: a leave or a let go with no drag from the desktop under way, handed the twin that ends one over nothing of this node's.
+    // With no drag the files are none and the target is none (every act that ends a drag writes both; the start has both), so the
+    // twin writes what the state holds
+    ...['fileLeave', 'fileDrop'].map((act) => ({ reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":[],"emit":[]', swappedWith: '"set":["fileCarry","fileOn"],"emit":[]', why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag from the desktop under way (no files, no target)`) })),
+    // s50: a drop taken with Is Dragging Over already false (the enter came while it was off), handed the drop that also turns it
+    // false: false over false, and a value sent unchanged is not recorded (adapter.ts :26-48)
+    { reducer: 'person.fileDrop', kind: 'swap-branch', branch: '"set":["dragDepth","droppedFile","droppedFiles","fileCarry","fileOn"],"emit":["filesDropped"]', swappedWith: '"set":["dragDepth","droppedFile","droppedFiles","fileCarry","fileOn","isDragOver"],"emit":["filesDropped"]', why: ALREADY_HELD('a drop taken with Is Dragging Over already false (Is Dragging Over false, and sent false)') },
+    // s50, from the 10,000 run (seed 20731). A leave with no drag handed the one that ends a drag over nothing of this node's (no
+    // files over none); a leave of a drag over nothing handed the one that also clears the target (none over none); a leave or a let
+    // go with no drag whose paint takes the element away, handed the one that also ends a drag (no files and no target over the same)
+    { reducer: 'person.fileLeave', kind: 'swap-branch', branch: '"set":[],"emit":[]', swappedWith: '"set":["fileCarry"],"emit":[]', why: ALREADY_HELD('a leave with no drag from the desktop under way (no files)') },
+    { reducer: 'person.fileLeave', kind: 'swap-branch', branch: '"set":["fileCarry"],"emit":[]', swappedWith: '"set":["fileCarry","fileOn"],"emit":[]', why: ALREADY_HELD('a leave of a drag over nothing of this node\'s (no target)') },
+    ...['fileLeave', 'fileDrop'].map((act) => ({ reducer: `person.${act}`, kind: 'swap-branch' as const, branch: '"set":["elementFocused","onPage"],"emit":["willUnmount"]', swappedWith: '"set":["elementFocused","fileCarry","fileOn","onPage"],"emit":["willUnmount"]', why: ALREADY_HELD(`a ${act === 'fileDrop' ? 'let go' : 'leave'} with no drag whose paint takes the element away (no files, no target)`) })),
+    // a click on an element its paint makes: a press that starts a pending gesture and a release that ends it, or neither — the
+    // gesture is idle before and after (the s43 pair above, with the mount paint)
+    { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["elem","elementFocused","onPage","shownTag"],"emit":["didMount","pointerDown","pointerUp","onClick"]', swappedWith: '"set":["elem","elementFocused","inZone","input","onPage","phase","shownTag"],"emit":["didMount","pointerDown","pointerUp","onClick"]', why: 'a click on the element its paint makes, handed the twin whose press starts a pending gesture and whose release ends it: the gesture is idle before and after' },
+    { reducer: 'person.click', kind: 'swap-branch', branch: '"set":["elem","elementFocused","inZone","input","onPage","phase","shownTag"],"emit":["didMount","pointerDown","pointerUp","onClick"]', swappedWith: '"set":["elem","elementFocused","onPage","shownTag"],"emit":["didMount","pointerDown","pointerUp","onClick"]', why: 'as the one above, the other way: the gesture is idle before and after the click' }
   ],
   'net.noodl.controls.button': [
     { reducer: 'world.place', kind: 'drop-set', branch: '"set":[],"emit":[]', why: PLACED_OFF_PAGE },

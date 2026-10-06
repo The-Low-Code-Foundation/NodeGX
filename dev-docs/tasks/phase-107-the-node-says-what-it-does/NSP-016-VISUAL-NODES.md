@@ -883,3 +883,77 @@ props as last rendered, the `turn`, the `<input>`'s missing Pointer Down and a f
 the intent Richard ruled and each of those is a known row on the runtime (C69, C72, C68, D35). The label rebuild (§7.2's Checkbox,
 §7.3, §7.4's Dropdown) is gone from all three specs: row C80. The Button's and the Checkbox's 10,000 runs (the hit test's debt from
 §7.8) are there too.
+
+### 7.11 s50, 2026-10-06 — the Text v4: the file drop and the pointer's move (step (b), first half)
+
+RESEARCH-DRAG-DROP.md §8's step (b) has three parts: the face's `move`, the file acts, and a Draggable sibling on the page for
+the zone side. s50 built the first two. **The zone side (a sibling on the page) is left.**
+
+**The format (additive).** An `act` step's value is now resolved like a `set` step's, and when it is a list, each item is
+resolved (adapter.ts `play`). A drag from the desktop carries a list of `{ "$file": … }`, and each target makes those files
+its own way. spec.ts names the four new acts. Both files are hashed for the stranger, so the hashes were refreshed and the
+stranger file re-run (readings below).
+
+**Text v4** ([text.ts](../../../packages/nodegx-node-spec/src/nodes/text.ts), 162 → 201 scenarios, 10 → 14 acts):
+- **`move`** (`mouse` or `touch`): the pointer that is down moves across the element, past both slops. A pending press (a
+  mouse, or a finger under Hold To Drag `never`) lifts: Is Lifted, then Picked Up. A held finger is scrolling, so it cancels
+  quietly and the timer then lifts nothing. A lifted drag finds no zone, because a zone inside the source never takes it
+  (drag-drop.ts :460). So **a pointer drag never drops on itself, where Space from the keyboard does (C78)**. The move is
+  the pointer's own: a finger's move does not lift a mouse press. A keyboard gesture (`pointerId` -1) hears no move.
+- **`fileEnter` (a list of files; none = a drag of text), `fileLeave`, `fileDrop`.** These are the node's own logic
+  (node-shared-port-definitions.ts :956-1137): armed only while Accept File Drops is on and the drag carries files, asked
+  at each event. The count of enters less leaves drives Is Dragging Over, sent only when it changes. A drop sets the count
+  to 0, filters the files by Accepted file types (trimmed and lower-cased; `.ext` on the name, `type/*` on the MIME type's
+  start, else the whole MIME type; blank takes all), and flags the five values, then Files Dropped or Files Rejected. **Where
+  the drag is, is the browser's:** at each act the target moves first (a leave at the element it was over, an enter at the
+  one under the pointer, under the hit test), then a `dragover`. A let go is a drop only when that `dragover` was cancelled
+  (armed), and a leave otherwise. A leave at an element no longer on the page reaches nothing. The spec holds the drag in two
+  keys, `fileCarry` (its files) and `fileOn` (the element it is over). The page model classes them as `held` under a new
+  `keeps`: *a drag from outside the page*.
+- **Face choices, written down:** the move is 10 px from where every act's pointer is (0, 0), over the element the act
+  names, and raises no hover or leave. A file act raises no events between acts, so an element hidden under a drag is left
+  at the next act, not at once (the s43 choice for the pointer). `fileEnter` during a drag keeps the drag's files.
+
+**Findings.**
+- **C79 reaches the file drag** ([the ledger](../../bugs/p107-c79-an-invisible-element-catches-clicks-after-a-pointer-events-write.md)):
+  an invisible Text that catches clicks also lights up for a file and takes the drop. The first runtime run diverged on a
+  scenario that mixed the intent with C79. It is now split: Pointer Events off, Opacity 0 with Pointer Events never written,
+  and a fifth C79 `row` scenario. The `invisibleTakesPointer` matcher counts the file drop's signals, Is Dragging Over going
+  true and the dropped file's values.
+- **P107-C81** (medium, new, [the ledger](../../bugs/p107-c81-a-file-drop-zone-stays-lit-after-the-drag-leaves.md)): a file
+  drop zone stays lit after the drag has left. This happens when its element was replaced under the drag (Mounted off and on,
+  a new Tag), because the old element's leave reaches nothing and the count never returns to 0. It also happens when Accept
+  File Drops is switched off during the drag. The spec models what the runtime does, so both targets agree. A Group whose
+  label is swapped while a file hovers should hit the same thing; that is the Group spec's to measure.
+- **P107-C82** (medium, new, [the ledger](../../bugs/p107-c82-a-file-drop-is-lost-when-accepted-file-types-is-not-text.md)),
+  found by the runtime's 10,000 run (seed 20732; two divergences, both shrunk to three steps): when Accepted file types holds
+  a truthy value that is not text, `(accept || '').split` throws in the drop handler. Is Dragging Over has already gone false,
+  and then the drop dies: no File, no Files Dropped, no Files Rejected. The spec reads the value as text (the proposed one-line
+  fix), so C82 is a known row on the runtime: `nonTextFileTypes` in conformance.test.ts, and a row scenario with its control
+  (false, 0 and the empty text are blank and take every file).
+
+**Mutants.** The first run left 10 alive. Seven were killed by scenarios that read what the survivor would leave wrong:
+- a drag that came in while the node was switched off, let go after it was switched on (it drops);
+- a stuck Is Dragging Over (an unheard leave), then a leave and a let go with no drag, then a full drag;
+- an enter while switched off and a leave after switching on, counted at the leave;
+- a drag that came in hidden, made visible, entered again;
+- a drag carrying a PDF that moves onto the element again (it keeps the PDF);
+- a drag of text that enters and leaves;
+- a finger that scrolled, then a mouse press and move.
+
+Three are declared equivalent, each writing what the state holds. Two are a leave or a let go with no drag under way (no
+files and no target, written again). One is a drop with Is Dragging Over already false, handed the twin that sends it false
+(an unchanged value is not recorded, adapter.ts :26-48). **A transient is invisible:** an enter and a drop in one act
+send Is Dragging Over true and then false, and the settle records neither. A mutant that skips only the enter survives that
+path. Another path (the drag entered again before a leave) kills it.
+
+**The 10,000 runs found more survivors** (the interpreter at seed 20731: 33; the runtime at seed 20732: 28). 0 divergences on
+the interpreter. Nearly all were acts whose paint makes or removes the element: each of the four new acts in a frame where
+Mounted goes off, comes back, or Tag changes. s44's recipe kills them. A Draggable write in the same frame reads which element
+is there, and focus and Space read whether the attributes went to the new element, each with and without a drag from the
+desktop under way, and with a trailing let go that reads whether the drag went on (35 scenarios). Then 17 were left. Seven
+more scenarios read the keyboard straight after a file act whose twin repaints, plus a renumbering twin (a mount paint's
+example holds element 1, which is visible only when element 1 still carries the attributes, C77). Six were declared
+equivalent: a leave with no drag (no files over none); a leave of a drag over nothing (no target over none); a leave or let go
+with no drag whose paint unmounts (both); and a click on the element its paint makes, with or without a pending gesture
+started and ended (idle before and after; s43's pair, with the paint).

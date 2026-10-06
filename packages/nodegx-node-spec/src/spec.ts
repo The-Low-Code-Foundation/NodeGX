@@ -782,7 +782,9 @@ export interface WorldHandlers<S, I, O> {
  * target-neutral names: `click`, `press` / `release` (a mouse button down / up), `hover` / `leave`
  * (the pointer onto / off the element), `touch` / `lift` (a finger down / up), `focus` / `blur`
  * (the keyboard put on / taken off it, as a Tab does), `type` (text entered), `choose` (an option
- * picked), `key` (a key pressed while it has focus) — a spec declares the ones its node answers.
+ * picked), `key` (a key pressed while it has focus), `move` (the pointer that is down moves across it, past a few
+ * pixels), `fileEnter` / `fileLeave` / `fileDrop` (a drag from the desktop moves onto it, moves off it, is let go over it;
+ * NSP-016 s50) — a spec declares the ones its node answers.
  */
 export type PersonReducers<S, I, O> = Readonly<Record<string, (state: Readonly<S>, inputs: Inputs<I>, value: unknown, world: WorldView) => PersonPatch<S, I, O>>>;
 

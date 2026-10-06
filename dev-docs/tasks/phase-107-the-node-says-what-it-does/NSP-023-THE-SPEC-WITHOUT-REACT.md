@@ -1,7 +1,7 @@
 # NSP-023 — The spec without React
 
 **Opened 2026-10-05, from ruling R12 (README §7).** **Depends on NSP-016** (the specs it converts) and the Text v3 (NSP-016 §7.9,
-the recipe). **Status: 🟡 steps 1–7 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5 the Dropdown v3 and §8.6 the radio pair, s48 §8.7 the words and §8.8 the guard, s49 §8.9 the proof); the Checkbox's and the Dropdown's label rule with step 1. All eight steps built; AC1–AC5 met (§8.9 adds AC5 and AC1's last reading). Left: AC6's one open ruling (the radio remount, README §7 R15).**
+the recipe). **Status: ✅ (s50) — steps 1–7 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5 the Dropdown v3 and §8.6 the radio pair, s48 §8.7 the words and §8.8 the guard, s49 §8.9 the proof); the Checkbox's and the Dropdown's label rule with step 1. All eight steps built; AC1–AC5 met (§8.9 adds AC5 and AC1's last reading); AC6 met s50 (Richard confirmed the radio remount, README §7 R15). ✅ All six ACs met.**
 
 ## 1. The person sentence
 
@@ -103,7 +103,7 @@ They are written under R11 from the first line, so this task never has to visit 
 5. **The proof:** a stranger agent (NSP-006's recipe) builds one converted control, the Slider or the Dropdown, on plain DOM
    with no React, from the spec and the suite alone, and it conforms. Anything it had to guess or ask is a finding against the
    spec. ✅ s49: the Dropdown v4, at 200 and 10,000 (§8.9, NSP-006 §5.10).
-6. **Rulings** asked in plain words and recorded in README §7.
+6. **Rulings** asked in plain words and recorded in README §7. ✅ s50: the last one, the radio remount, confirmed by Richard (R15: no Changed).
 
 ## 7. Watch for
 

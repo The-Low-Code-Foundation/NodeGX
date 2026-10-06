@@ -5484,5 +5484,3904 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "a file drop: Accept File Drops on — a drag of an image onto it: Is Dragging Over true; let go: false, then File, Files, File Name, File Type, File Size In Bytes and Files Dropped",
+    "because": "node-shared-port-definitions.ts :1009-1068",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Accept File Drops off (the default): a file dragged over and let go raises nothing; on, the same drag lights it and drops",
+    "because": "node-shared-port-definitions.ts :253-261 `fileDropArmed`",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag that carries no file (text) is not heard: nothing on enter or let go; a file drag after it is",
+    "because": "node-shared-port-definitions.ts :256-260 — `types` must hold Files",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": []
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Accepted file types .png matches the name's end lower-cased (photo.PNG): an image is dropped, a PDF is rejected (Files empty, File none, Files Rejected), both: only the image",
+    "because": "node-shared-port-definitions.ts :293-311",
+    "params": {
+      "acceptFileDrops": true,
+      "acceptedFileTypes": ".png"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          },
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          },
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Accepted file types image/* matches the MIME type's start: an image taken, a PDF and a file of no type rejected",
+    "because": "node-shared-port-definitions.ts :306-308",
+    "params": {
+      "acceptFileDrops": true,
+      "acceptedFileTypes": "image/*"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "README",
+              "type": "",
+              "size": 0
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Accepted file types ' .PDF , image/': trimmed and lower-cased, so the PDF is taken; 'image/' is an exact MIME type, so the image is not",
+    "because": "node-shared-port-definitions.ts :294-309",
+    "params": {
+      "acceptFileDrops": true,
+      "acceptedFileTypes": " .PDF , image/"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          },
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Accepted file types blank takes every file, one of no type and no size too; written later, it is read at the drop",
+    "because": "node-shared-port-definitions.ts :299",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "README",
+              "type": "",
+              "size": 0
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "set": "acceptedFileTypes",
+        "value": "application/pdf"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "README",
+              "type": "",
+              "size": 0
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "acceptedFileTypes",
+        "value": ""
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the drag leaves: Is Dragging Over false and the drag is gone, so a let go after it does nothing; a new drag lights it again",
+    "because": "node-shared-port-definitions.ts :1030-1035",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag already over it that moves onto it again is still one enter: a leave turns Is Dragging Over off; a new drag keeps its own files",
+    "because": "HTML's drag-and-drop model: an enter only when the target changes",
+    "params": {
+      "acceptFileDrops": true,
+      "acceptedFileTypes": ".pdf"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Accept File Drops switched off while a drag is over it: the leave is not heard, so Is Dragging Over stays true; on again, the next drag counts 2, a leave leaves it true, a drop clears it",
+    "because": "node-shared-port-definitions.ts :253-254, :1030-1035 — armed is asked at each event",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Accept File Drops switched off before the let go: the element does not take the drop (a leave instead, not heard) — nothing fires and Is Dragging Over stays true",
+    "because": "node-shared-port-definitions.ts :1021-1028 — the dragover is not cancelled",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Visible off under a drag: the next event leaves it (Is Dragging Over false) and the let go lands on what is behind it — nothing; visible again, the next drag drops",
+    "because": "the hit test: a visibility:hidden element is never the drag's target",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Pointer Events off before a drag: the drag is never over it — nothing on enter or let go; on again, the next drag drops",
+    "because": "the hit test: pointer-events none",
+    "params": {
+      "acceptFileDrops": true,
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Opacity exactly the number 0 (Pointer Events never written): a drag is never over it; Opacity 1, the next drag drops",
+    "because": "Text.tsx :88-90 — pointer-events none",
+    "params": {
+      "acceptFileDrops": true,
+      "opacity": 0
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "set": "opacity",
+        "value": 1
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C79 — a file drag at Opacity 0 written after Pointer Events: never over it (the runtime: Is Dragging Over true, and the drop)",
+    "because": "Text.tsx :88-90; node-shared-port-definitions.ts :784-793 — C79",
+    "params": {
+      "acceptFileDrops": true,
+      "pointerEventsEnabled": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "pointerEventsEnabled",
+        "value": true
+      },
+      {
+        "set": "opacity",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ],
+    "row": "NSP-016 §6 C79"
+  },
+  {
+    "name": "Mounted off and on under a drag: the old element's leave reaches nothing and the new one is entered — the count is 2; a let go clears it and drops",
+    "because": "react-component-node.ts :2283-2294 — a new element; dragDepth is the node's",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Mounted off and on under a drag, then the drag leaves: the count is still 1, so Is Dragging Over stays true with no drag over it",
+    "because": "react-component-node.ts :2283-2294; node-shared-port-definitions.ts :1030-1035",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a new Tag under a drag makes a new element: entered again, so a leave leaves Is Dragging Over true",
+    "because": "Text.tsx :50 — a new element type",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "off the page, a drag goes on over what is there: nothing; mounted under the drag, the let go enters and drops on the new element",
+    "because": "react-component-node.ts :2283-2294",
+    "params": {
+      "acceptFileDrops": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a file drop is not a drag of the element: Draggable and Accept Drops on, a file let go fires Files Dropped and none of Picked Up, Dropped or Landed",
+    "because": "RESEARCH-DRAG-DROP.md §1 — the two features share nothing",
+    "params": {
+      "acceptFileDrops": true,
+      "draggable": true,
+      "acceptDrops": true,
+      "dragValue": "card"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a mouse press on a Draggable text, then a move: Is Lifted and Picked Up (a mouse lifts past 4 px); release: nothing takes it — Cancelled — and the next click is swallowed until the event loop turns",
+    "because": "drag-drop.ts :285-306, :308-323, :920-927",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "not Draggable: a press and a move start nothing — Pointer Down only; Draggable on, the same press and move lift it",
+    "because": "drag-drop.ts :232-243",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a held finger that moves before Hold Time is scrolling: cancelled quietly, the timer lifts nothing; held still, the timer lifts it",
+    "because": "drag-drop.ts :295-299 (R2), :267-269",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "advance": 100
+      },
+      {
+        "act": "move",
+        "value": "touch"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "touch"
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a move is the pointer's own: a finger's move does not lift a mouse press, a mouse move does; a mouse move does not cancel a held finger, the timer lifts it",
+    "because": "drag-drop.ts :286 — `pointerId`",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "move",
+        "value": "touch"
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Hold To Drag never: a finger is pending and its move lifts it, the lift cancels; always: a mouse press holds, and its move past 8 px cancels it quietly",
+    "because": "drag-drop.ts :173-178, :295-303",
+    "params": {
+      "draggable": true,
+      "holdToDrag": "never"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "touch"
+      },
+      "settle",
+      {
+        "act": "lift"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "set": "holdToDrag",
+        "value": "always"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "advance": 500
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a move after a lift changes nothing; Escape cancels a pointer drag (Cancelled), and the release after it is nothing's",
+    "because": "drag-drop.ts :300-305, :768-839",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "act": "click"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a move with nothing pressed, or during a keyboard drag, is nothing; the keyboard drag's Escape still cancels it",
+    "because": "drag-drop.ts :286 — a keyboard gesture's pointerId is -1",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "act": "move",
+        "value": "touch"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pointer drag never drops on itself: Accept Drops on, press, move, release — Cancelled and no Drag Over (Space from the keyboard does drop on itself, C78)",
+    "because": "drag-drop.ts :460 — a zone inside the source never takes it",
+    "params": {
+      "draggable": true,
+      "acceptDrops": true,
+      "dragValue": "card"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle",
+      {
+        "advance": 1
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "hidden after the press: the move is still heard (the window listens) and lifts it; the release cancels",
+    "because": "drag-drop.ts :903-905 — window listeners",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "off the page after the press: a move there is nothing; mounted again, the move lifts the gesture the press began",
+    "because": "react-component-node.ts :2283-2294 — the gesture is the module's, not the element's",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag that came in while Accept File Drops was off, let go after it is switched on: dropped — its files are the drag's, kept from the enter",
+    "because": "node-shared-port-definitions.ts :253-261 — armed is asked at the drop",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Is Dragging Over left true with no drag (an unheard leave): a leave or a let go with no drag changes nothing; the next drag's enter and leave keep it true (the count went 1 → 2 → 1)",
+    "because": "node-shared-port-definitions.ts :1009-1035",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag that enters while switched off and leaves after it is switched on is counted at the leave: from 1, the count falls to 0 and Is Dragging Over goes false; from 2 it would stay true",
+    "because": "node-shared-port-definitions.ts :1030-1035",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag that came in while the text was hidden, made visible, let go: the browser enters it first — Is Dragging Over true, then false, and the drop",
+    "because": "the hit test; HTML's drag-and-drop model: the target moves before the drop",
+    "params": {
+      "acceptFileDrops": true,
+      "visible": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a finger that scrolled (moved before Hold Time) is no gesture: a mouse press and move then lift the text",
+    "because": "drag-drop.ts :232-233 — one gesture at a time; :295-299",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "touch"
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "touch"
+      },
+      "settle",
+      {
+        "act": "press"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag carrying a PDF that moves onto it again keeps the PDF, whatever a second enter names: Accepted file types .pdf takes it",
+    "because": "HTML's drag-and-drop model: a drag's data is set when it starts",
+    "params": {
+      "acceptFileDrops": true,
+      "acceptedFileTypes": ".pdf"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag that came in while the text was hidden, made visible, moved onto it again: entered — Is Dragging Over true; leaving: false",
+    "because": "the hit test; HTML's drag-and-drop model",
+    "params": {
+      "acceptFileDrops": true,
+      "visible": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag of text that enters and leaves is not counted: a file drag after it lights it, and its leave puts it out",
+    "because": "node-shared-port-definitions.ts :256-260, :1030-1035",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": []
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a leave or a let go with no drag under way is nothing: a drag after them lights it, and its leave puts it out",
+    "because": "HTML's drag-and-drop model: no drag, no events",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "move in the frame Mounted goes off: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "move in the frame Mounted comes back: its paint makes the element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110",
+    "params": {
+      "acceptFileDrops": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "move in the frame Tag becomes h1: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "move in the frame Tag becomes span: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true,
+      "as": "h2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "move in the frame Mounted goes off during a drag from the desktop: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts — then a let go reads whether the drag went on",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "move in the frame Mounted comes back during a drag from the desktop: its paint makes the element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame — then a let go reads whether the drag went on",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110",
+    "params": {
+      "acceptFileDrops": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "move in the frame Tag becomes h1 during a drag from the desktop: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame — then a let go reads whether the drag went on",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "move in the frame Tag becomes span during a drag from the desktop: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame — then a let go reads whether the drag went on",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true,
+      "as": "h2"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileEnter in the frame Mounted goes off: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileEnter in the frame Mounted comes back: its paint makes the element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110",
+    "params": {
+      "acceptFileDrops": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileEnter in the frame Tag becomes h1: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileEnter in the frame Tag becomes span: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true,
+      "as": "h2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileEnter in the frame Mounted goes off: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileEnter in the frame Mounted comes back: its paint makes the element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110",
+    "params": {
+      "acceptFileDrops": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileEnter in the frame Tag becomes h1: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileEnter in the frame Tag becomes span: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true,
+      "as": "h2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileLeave in the frame Mounted goes off: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "fileLeave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileLeave in the frame Mounted comes back: its paint makes the element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110",
+    "params": {
+      "acceptFileDrops": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "fileLeave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileLeave in the frame Tag becomes h1: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "fileLeave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileLeave in the frame Tag becomes span: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true,
+      "as": "h2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "fileLeave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileLeave in the frame Mounted goes off during a drag from the desktop: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts — then a let go reads whether the drag went on",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "fileLeave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileLeave in the frame Mounted comes back during a drag from the desktop: its paint makes the element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame — then a let go reads whether the drag went on",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110",
+    "params": {
+      "acceptFileDrops": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "fileLeave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileLeave in the frame Tag becomes h1 during a drag from the desktop: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame — then a let go reads whether the drag went on",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "fileLeave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileLeave in the frame Tag becomes span during a drag from the desktop: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame — then a let go reads whether the drag went on",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true,
+      "as": "h2"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "fileLeave"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileDrop in the frame Mounted goes off: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "fileDrop"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileDrop in the frame Mounted comes back: its paint makes the element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110",
+    "params": {
+      "acceptFileDrops": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "fileDrop"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileDrop in the frame Tag becomes h1: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "fileDrop"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileDrop in the frame Tag becomes span: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true,
+      "as": "h2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "fileDrop"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileDrop in the frame Mounted goes off during a drag from the desktop: its paint takes the element away first — a Draggable write in that frame waits for the next element, which Space then lifts — then a let go reads whether the drag went on",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110, :136-145",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "fileDrop"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileDrop in the frame Mounted comes back during a drag from the desktop: its paint makes the element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame — then a let go reads whether the drag went on",
+    "because": "adapter.ts `act` — an act paints first; drag-drop.ts :83-110",
+    "params": {
+      "acceptFileDrops": true,
+      "mounted": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "fileDrop"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileDrop in the frame Tag becomes h1 during a drag from the desktop: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame — then a let go reads whether the drag went on",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "fileDrop"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "fileDrop in the frame Tag becomes span during a drag from the desktop: its paint makes a new element first — a Draggable write in that frame puts the attributes on it, and Space lifts it before the next frame — then a let go reads whether the drag went on",
+    "because": "Text.tsx :50 — a new element type; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true,
+      "as": "h2"
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "fileDrop"
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a pending press, then a move in the frame Mounted goes off: the move meets nothing, the gesture goes on — mounted again, a move lifts it",
+    "because": "drag-drop.ts :285-306 — the gesture is the module's",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "press"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "move",
+        "value": "mouse"
+      },
+      "settle",
+      {
+        "act": "release"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag over the hidden text that leaves is gone: made visible, a let go does nothing; a new drag lights it and its leave puts it out",
+    "because": "HTML's drag-and-drop model: a drag that leaves the window is over",
+    "params": {
+      "acceptFileDrops": true,
+      "visible": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Is Dragging Over left true (an unheard leave), then a drag over the hidden text leaves: nothing is counted — visible, the next drag's let go clears it",
+    "because": "node-shared-port-definitions.ts :1030-1035 — a leave reaches only the element the drag was over",
+    "params": {
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "row C82 — Accepted file types wired a number is read as text: a PDF dropped is rejected (Files empty, Files Rejected); written as text after it, a PDF is taken (the runtime: the drop throws — no File, no signal)",
+    "because": "node-shared-port-definitions.ts :293-299 — C82",
+    "params": {
+      "acceptFileDrops": true,
+      "acceptedFileTypes": -1
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "set": "acceptedFileTypes",
+        "value": ".pdf"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ],
+    "row": "NSP-016 §6 C82"
+  },
+  {
+    "name": "Accepted file types written false, 0 or the empty text: blank, so every file is taken (the control beside row C82)",
+    "because": "node-shared-port-definitions.ts :294 — `accept || ''`",
+    "params": {
+      "acceptFileDrops": true,
+      "acceptedFileTypes": false
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "set": "acceptedFileTypes",
+        "value": 0
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "set": "acceptedFileTypes",
+        "value": ""
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "notes.pdf",
+              "type": "application/pdf",
+              "size": 5
+            }
+          }
+        ]
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a leave (no drag) in the frame a remount makes element 2, with the attributes still on element 1 (C77): element 2 takes no keyboard, Space lifts nothing",
+    "because": "drag-drop.ts :83-110 (C77); adapter.ts `act`",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "fileLeave"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a let go (no drag) in the frame a remount makes element 2, with the attributes still on element 1 (C77): element 2 takes no keyboard, Space lifts nothing",
+    "because": "drag-drop.ts :83-110 (C77); adapter.ts `act`",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "mounted",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "mounted",
+        "value": true
+      },
+      {
+        "act": "fileDrop"
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the keyboard on a Draggable text, then a drag from the desktop that is not heard (Accept File Drops off) enters and leaves: the leave moves no keyboard — Space lifts it in the same frame",
+    "because": "HTML's drag-and-drop model: a drag moves no focus",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the keyboard on a Draggable text that is then hidden, a drag over it and its leave: the hidden element keeps the keyboard — Space lifts it",
+    "because": "the hit test; jsdom has no focus fixup (a hidden element keeps the keyboard it holds)",
+    "params": {
+      "draggable": true,
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the keyboard on a Draggable text, a drag that came in while Accept File Drops was off and is let go after it is on: dropped, and the keyboard stays — Space lifts it in the same frame",
+    "because": "node-shared-port-definitions.ts :1036-1068",
+    "params": {
+      "draggable": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      "settle",
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag that is not heard (Accept File Drops off) enters in the frame Tag becomes h1: its paint makes the new element first — a Draggable write in that frame puts the attributes on it; switched on, a let go drops the drag it carried",
+    "because": "Text.tsx :50; adapter.ts `act`; node-shared-port-definitions.ts :253-261",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a drag that is not heard (Accept File Drops off) enters in the frame Tag becomes span: its paint makes the new element first — a Draggable write in that frame puts the attributes on it; switched on, a let go drops the drag it carried",
+    "because": "Text.tsx :50; adapter.ts `act`; node-shared-port-definitions.ts :253-261",
+    "params": {
+      "as": "h2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      {
+        "set": "acceptFileDrops",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "the keyboard on a Draggable text, then a leave and a let go with no drag under way: neither moves the keyboard — Space lifts it in the same frame, each time",
+    "because": "HTML's drag-and-drop model: no drag, no events",
+    "params": {
+      "draggable": true,
+      "acceptFileDrops": true
+    },
+    "steps": [
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "act": "fileLeave"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a new drag enters the hidden text in the frame Tag becomes h1: its paint makes the new element first — a Draggable write in that frame puts the attributes on it; visible, Space lifts it, and a let go drops the drag",
+    "because": "Text.tsx :50; the hit test; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true,
+      "visible": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "h1"
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a new drag enters the hidden text in the frame Tag becomes span: its paint makes the new element first — a Draggable write in that frame puts the attributes on it; visible, Space lifts it, and a let go drops the drag",
+    "because": "Text.tsx :50; the hit test; adapter.ts `act`",
+    "params": {
+      "acceptFileDrops": true,
+      "visible": false,
+      "as": "h2"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "as",
+        "value": "span"
+      },
+      {
+        "act": "fileEnter",
+        "value": [
+          {
+            "$file": {
+              "name": "photo.PNG",
+              "type": "image/png",
+              "size": 3
+            }
+          }
+        ]
+      },
+      {
+        "set": "draggable",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      {
+        "act": "key",
+        "value": " "
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Escape"
+      },
+      "settle",
+      {
+        "act": "fileDrop"
+      },
+      "settle"
+    ]
   }
 ]

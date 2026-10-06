@@ -88,7 +88,9 @@
  *                        a scenario value that is EXACTLY `{ "$file": { name, type?, size? } }` is handed
  *                        to the node as a file named `name`, of MIME type `type` (absent: `''`), `size`
  *                        zero bytes (absent: 0), `lastModified` 0 — what an Open File Picker's File output
- *                        carries to an Upload File. Canonical as `{ "$file": … }` (canonical.ts).
+ *                        carries to an Upload File. Canonical as `{ "$file": … }` (canonical.ts). An `act`
+ *                        step's value is resolved the same way, and when it is a list, each item (NSP-016 s50:
+ *                        the files a drag from the desktop carries).
  *   cloudFile(desc)      OPTIONAL, NSP-014 s30 — a STORED file, the target's own (the runtime's `CloudFile`):
  *                        a scenario value that is EXACTLY `{ "$cloudFile": { name, url, contentType?, size?,
  *                        target? } }` is handed as one — what an Upload File's Cloud File output or a
@@ -234,7 +236,9 @@ export async function play<H extends Handle>(
         await adapter.advance(h, step.advance);
       } else if ('act' in step) {
         if (!adapter.act) throw new Error(`${adapter.name} has no act(): it cannot play a scenario in which a person acts on the node`);
-        await adapter.act(h, step.act, step.value);
+        // NSP-016 s50 — an act's value is resolved as a set's is, and a list's items each: a file dragged from the desktop
+        // is a list of `{ "$file": … }`, made the target's way (file above)
+        await adapter.act(h, step.act, Array.isArray(step.value) ? step.value.map(resolve) : resolve(step.value));
       } else adapter.set(h, step.set, resolve(step.value));
     }
     return adapter.trace(h);

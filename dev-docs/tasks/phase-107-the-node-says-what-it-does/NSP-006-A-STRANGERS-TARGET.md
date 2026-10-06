@@ -359,7 +359,9 @@ Write call, verbatim.
 7. Smaller points, read right and not graded: visibility on both elements; Label and Placeholder drawn from the raw
    inputs (no state key, by design: never on the wire); data attributes fixed at mount; `install` a no-op.
 8. **The breach (its item 11) is a finding against the layout.** `dataAttributeNames` / `dataAttributeInput` live inside
-   another node's spec. Moving them to their own module is named, not done.
+   another node's spec. Moving them to their own module is named, not done. **Done s50:** they are in
+   `src/nodes/data-attributes.ts`, imported by text-input.ts and dropdown.ts (the only two users), and round 4's guarded files
+   name that module instead of text-input.ts.
 
 **What the round proves.** AC5 holds. An agent with no React and no runtime drew a converted control on a plain page,
 from the spec, the format and the suite. It conforms at 200 and 10,000, and the deaf page shows its answers come through

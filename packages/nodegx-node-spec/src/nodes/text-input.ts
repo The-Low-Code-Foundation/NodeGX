@@ -99,8 +99,9 @@
  *     this node's outputs show.
  */
 
-import { defineNode, type Patch, type ValueInputDecl } from '../spec';
+import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
+import { dataAttributeInput, dataAttributeNames } from './data-attributes';
 
 type State = {
   /** text-input.ts :74-91 `props.type` — read at each render and each write; `'text'` by default */
@@ -889,16 +890,4 @@ function join(a: Act, b: Act): Act {
   const outcomes = [...(a.outcomes ?? []), ...(b.outcomes ?? [])];
   if (outcomes.length > 0) out.outcomes = outcomes;
   return out;
-}
-
-/** react-component-node.ts :810-815 `listedDataAttributeNames` */
-const DATA_ATTRIBUTE_NAME = /^data-[a-z0-9][a-z0-9._-]*$/;
-export function dataAttributeNames(value: unknown): string[] {
-  if (value === undefined || value === null || value === '') return [];
-  const names = Array.isArray(value) ? value.map((v) => String(v)) : typeof value === 'string' ? value.split(',') : [];
-  return names.filter((name) => DATA_ATTRIBUTE_NAME.test(name));
-}
-/** react-component-node.ts :799-806 — the derived port, as the catalog's rule spells it */
-export function dataAttributeInput(name: string): ValueInputDecl {
-  return { type: 'string', coerce: 'none', displayName: name, group: 'Data Attributes', description: `Written on this element as ${name}` };
 }

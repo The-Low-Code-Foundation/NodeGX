@@ -29,8 +29,10 @@
  *     the element they were added to (:101-109). A `visibility: hidden` element takes no keyboard (the browser's focusing rule).
  *   - **the drag** (drag-drop.ts, one gesture at a time): a `pointerdown` on the element (`onPointerDown` :232-271) of a
  *     Draggable node on the page starts it — HELD (`holding`) when Hold To Drag says so (:173-178: `always`; `never` not; else a
- *     finger and not a mouse), the hold timer Hold Time seconds (:180-183: a finite number ≥ 0, else 0.5), else `pending` (a mouse
- *     waits for a move past 4 px, which no act here makes). The timer LIFTS it (`lift` :355-376: Is Lifted true, Picked Up). A
+ *     finger and not a mouse), the hold timer Hold Time seconds (:180-183: a finite number ≥ 0, else 0.5), else `pending`. A
+ *     MOVE of the same pointer (:285-306; the act moves it past both slops) lifts a pending one and cancels a held one quietly
+ *     (a finger that moves is scrolling); over this lone element it finds no zone (a zone inside the source never takes it,
+ *     :460). The timer LIFTS it (`lift` :355-376: Is Lifted true, Picked Up). A
  *     `pointerup` of the same pointer (:308-323) ends it: before the lift quietly; after it, a drop — over nothing that takes it
  *     (no other zone is on this page; a zone inside the source never takes it, :460) — so **Cancelled** and Is Lifted false
  *     (`cancel` :401-409), and the next click is swallowed until the event loop turns (:920-927). Space on the element while it
@@ -39,8 +41,20 @@
  *     it there (Dropped Value its own Drag Value, Drop Index 0, Dropped, Landed); with no zone, Cancelled. Escape cancels a lifted
  *     drag of either kind; Tab cancels a keyboard one (:768-839).
  *   - **Mounted**, **Did Mount**, **Will Unmount**, **Child Index**, **This**, the **Bounding Box** outputs: the Icon's.
- *   - **File drop** and the rest of the **Drop Zone**: stored; no act here drags a file or another element (step (b)).
- *     Is Dragging Over, Drag Over and Is Lifted are read at the first frame — false.
+ *   - **File drop** (node-shared-port-definitions.ts :956-1137, React's drag events on the element): a drag from the desktop
+ *     answers only while Accept File Drops is on AND it carries files (`fileDropArmed` :253-261, asked at each event). It
+ *     counts enters less leaves (`dragDepth`): Is Dragging Over is true from the first enter until the count is back at 0,
+ *     sent only when it changes (:264-269). A drop sets the count to 0 and Is Dragging Over false, keeps the files that pass
+ *     Accepted file types (:293-311: comma-separated, trimmed and lower-cased — `.ext` on the name's end, `type/*` on the
+ *     MIME type's start, else the whole MIME type; blank takes every file) and flags the five values: some passed — File
+ *     (the first), Files, its Name, Type and Size, then **Files Dropped**; none — Files `[]`, File none, then **Files
+ *     Rejected**. Where the drag is, is the BROWSER's: it fires a leave at the element it was over and an enter at the one it
+ *     is over now, each under the hit test above; a drop the element did not take (its last `dragover` not cancelled — not
+ *     armed) is a leave instead. A leave at an element no longer on the page reaches nothing. Accepted file types is read as
+ *     text: the runtime throws on a value that is not text (`split` on it, :294) and the drop is lost — row **C82**, a known row on
+ *     the runtime target. The count is the node's, so an element replaced under a drag never hears its leave — row **C81**, modelled.
+ *   - The rest of the **Drop Zone**: stored; no act here drags another element. Is Dragging Over, Drag Over and Is Lifted are
+ *     read at the first frame — false.
  */
 
 import { defineNode, type Patch } from '../spec';
@@ -92,12 +106,25 @@ type State = {
   isDropTarget: boolean;
   droppedValue: unknown;
   dropIndex: unknown;
+  /** file drop (`_internal`, node-shared-port-definitions.ts :956-1137) */
+  acceptFileDrops: boolean;
+  acceptedFileTypes: unknown;
+  dragDepth: number;
+  isDragOver: boolean;
+  droppedFiles: unknown;
+  droppedFile: unknown;
+  /** the browser's drag from the desktop: the files it carries (`undefined`: no drag), and the element it is over (-1: none of this node's) */
+  fileCarry: readonly FileLike[] | undefined;
+  fileOn: number;
 };
+
+/** A file the browser hands (adapter.ts `file`): what the filter and the outputs read of it. */
+type FileLike = { readonly name?: unknown; readonly type?: unknown; readonly size?: unknown };
 
 type O = typeof Text extends { outputs: infer X } ? X : never;
 type Send = Patch<State, O>;
-type Pulse = 'didMount' | 'willUnmount' | 'onClick' | 'pointerDown' | 'pointerUp' | 'pointerEnter' | 'hoverStart' | 'hoverEnd' | 'pickedUp' | 'landed' | 'dragCancelled' | 'dropped';
-type Val = 'isLifted' | 'isDropTarget' | 'droppedValue' | 'dropIndex';
+type Pulse = 'didMount' | 'willUnmount' | 'onClick' | 'pointerDown' | 'pointerUp' | 'pointerEnter' | 'hoverStart' | 'hoverEnd' | 'pickedUp' | 'landed' | 'dragCancelled' | 'dropped' | 'filesDropped' | 'filesRejected';
+type Val = 'isLifted' | 'isDropTarget' | 'droppedValue' | 'dropIndex' | 'isDragOver' | 'droppedFile' | 'droppedFiles' | 'droppedFileName' | 'droppedFileType' | 'droppedFileSizeInBytes';
 type Act = { set: Partial<State>; send: Val[]; emit: Pulse[]; after?: Array<{ ms: unknown; tag: string }>; cancel?: string[] };
 
 const NOTHING: Send = { send: [] };
@@ -105,13 +132,19 @@ const NONE: Act = { set: {}, send: [], emit: [] };
 /** drag-drop.ts :136 — `whenMounted`'s budget */
 const FRAMES = 60;
 const KEYS = [' ', 'Enter', 'Escape', 'Tab', 'ArrowRight', 'ArrowDown', 'x'] as const;
+/** what a drag from the desktop carries: an image (its extension upper-case), a PDF, both, a file of no known type, or no file (text) */
+const PNG = { $file: { name: 'photo.PNG', type: 'image/png', size: 3 } };
+const PDF = { $file: { name: 'notes.pdf', type: 'application/pdf', size: 5 } };
+const BARE = { $file: { name: 'README', type: '', size: 0 } };
+const FILE_DRAGS = [[PNG], [PDF], [PNG, PDF], [BARE], []] as const;
 
 export const Text = defineNode({
   type: 'Text',
   // v3 (NSP-016 s44, R11): v1's rule again — an element at Opacity 0, hidden, or with Pointer Events off takes no pointer, whatever
   // order the writes came in; the runtime's exceptions are row C79, a known row. v2 (b4c997ed9) copied the renderer's redraw rules
   // to reproduce C79 and was withdrawn the same day. Since v1: Mounted written the value it holds does nothing (:2285).
-  version: 3,
+  // v4 (s50, NSP-016 step (b) of RESEARCH-DRAG-DROP.md §8): the file drop and the pointer's move — new acts, the rules above
+  version: 4,
   source: 'packages/noodl-viewer-react/src/nodes/visual/text.ts',
   needs: ['person', 'clock'],
   // the hold timer: the default half second, either side of it, a second (Hold Time 1), and the turn that unswallows a click
@@ -144,7 +177,15 @@ export const Text = defineNode({
     isLifted: false,
     isDropTarget: false,
     droppedValue: undefined,
-    dropIndex: undefined
+    dropIndex: undefined,
+    acceptFileDrops: false,
+    acceptedFileTypes: undefined,
+    dragDepth: 0,
+    isDragOver: false,
+    droppedFiles: undefined,
+    droppedFile: undefined,
+    fileCarry: undefined,
+    fileOn: -1
   } as State,
 
   acts: {
@@ -157,7 +198,11 @@ export const Text = defineNode({
     lift: { description: 'the finger comes up' },
     focus: { description: 'the keyboard is put on it — a `<div>` takes it only with a tabindex' },
     blur: { description: 'the keyboard is taken off it' },
-    key: { description: 'a key is pressed with the keyboard put on it first, if it takes it', values: KEYS }
+    key: { description: 'a key is pressed with the keyboard put on it first, if it takes it', values: KEYS },
+    move: { description: 'the mouse, or the finger that is down, moves across it by more than a few pixels', values: ['mouse', 'touch'] },
+    fileEnter: { description: 'a drag from the desktop moves onto it: a new drag carries these files (none: something that is not a file), one under way keeps its own', values: FILE_DRAGS },
+    fileLeave: { description: 'the drag from the desktop moves off it and out of the window' },
+    fileDrop: { description: 'the drag from the desktop is let go over it' }
   },
 
   inputs: {
@@ -184,9 +229,9 @@ export const Text = defineNode({
     acceptKind: { type: 'string', coerce: 'none', displayName: 'Accept Kind', group: 'Drop Zone', description: 'Comma-separated Drag Kinds this zone takes; leave blank to take any Draggable. A source of another kind never lights this zone up', portability: 'logic' },
     makeRoom: { type: 'boolean', default: true, coerce: 'none', displayName: 'Make Room', group: 'Drop Zone', description: 'Slides the children apart to open a gap where the drop will land, while it hovers. Off keeps the children still and only reports Drop Index', portability: 'logic' },
     dropZoneName: { type: 'string', coerce: 'none', displayName: 'Zone Name', group: 'Drop Zone', description: "What a screen reader hears this zone called while a card is moved with the keyboard — \"Thursday\". Falls back to the element's accessible label", portability: 'logic' },
-    // :946-972 — file drop: no act here drags a file (step (b))
+    // :956-982 — file drop
     acceptFileDrops: { type: 'boolean', default: false, coerce: 'none', displayName: 'Accept File Drops', group: 'File Drop', description: 'Lets a file dragged from the desktop be dropped onto this element, which reveals the File Drop outputs below', portability: 'logic' },
-    acceptedFileTypes: { type: 'string', coerce: 'none', displayName: 'Accepted file types', group: 'File Drop', description: 'Comma-separated extensions or MIME types this element will take — ".png, .jpg" or "image/*"; leave blank to accept every file. A drop of nothing but rejected files fires Files Rejected instead of Files Dropped', portability: 'logic' },
+    acceptedFileTypes: { type: 'string', coerce: 'none', displayName: 'Accepted file types', group: 'File Drop', description: 'Comma-separated extensions or MIME types this element will take — ".png, .jpg" or "image/*"; leave blank to accept every file. A drop of nothing but rejected files fires Files Rejected instead of Files Dropped', portability: 'logic', examples: ['.png', 'image/*', ' .PDF , image/', 'application/pdf', ''] },
 
     // ---- look and layout (R10): stored, written to the style, read by no output; each with its class (visual-params.json) ----
     // (Tag, Visible, Opacity and Pointer Events Mode are read by the page: the element's type and the hit test)
@@ -264,13 +309,13 @@ export const Text = defineNode({
     droppedValue: { type: '*', from: (s: State) => s.droppedValue, displayName: 'Dropped Value', group: 'Drop Zone', description: 'The Drag Value of the element dropped here' },
     dropIndex: { type: 'number', from: (s: State) => s.dropIndex, displayName: 'Drop Index', group: 'Drop Zone', description: "Where among this zone's children it landed, counting from 0 and leaving the dropped element itself out — so it is the index to insert at once it is removed from where it was" },
     isDropTarget: { type: 'boolean', from: (s: State) => s.isDropTarget, displayName: 'Drag Over', group: 'Drop Zone', description: 'True while something this zone takes is held over it — wire it to a background or border so the zone lights up' },
-    // :1069-1124 — no file is dropped here: read once, at the first frame
-    droppedFile: { type: '*', from: () => undefined, displayName: 'File', group: 'File Drop', description: 'The first accepted file, in the form an Upload File node takes' },
-    droppedFiles: { type: 'array', from: () => undefined, displayName: 'Files', group: 'File Drop', description: 'Every accepted file in the drop, as an array — a drop can carry more than one' },
-    droppedFileName: { type: 'string', from: () => undefined, displayName: 'File Name', group: 'File Drop', description: 'Name of the first accepted file, extension included' },
-    droppedFileType: { type: 'string', from: () => undefined, displayName: 'File Type', group: 'File Drop', description: 'MIME type the browser reports for the first accepted file, blank for one it does not recognise' },
-    droppedFileSizeInBytes: { type: 'number', from: () => undefined, displayName: 'File Size In Bytes', group: 'File Drop', description: 'Size of the first accepted file, in bytes' },
-    isDragOver: { type: 'boolean', from: () => false, displayName: 'Is Dragging Over', group: 'File Drop', description: 'True while a file is being dragged over this element — wire it to a border or background so the drop zone reacts' }
+    // :1079-1135 — read off `_internal`
+    droppedFile: { type: '*', from: (s: State) => s.droppedFile, displayName: 'File', group: 'File Drop', description: 'The first accepted file, in the form an Upload File node takes' },
+    droppedFiles: { type: 'array', from: (s: State) => s.droppedFiles, displayName: 'Files', group: 'File Drop', description: 'Every accepted file in the drop, as an array — a drop can carry more than one' },
+    droppedFileName: { type: 'string', from: (s: State) => firstFile(s, 'name'), displayName: 'File Name', group: 'File Drop', description: 'Name of the first accepted file, extension included' },
+    droppedFileType: { type: 'string', from: (s: State) => firstFile(s, 'type'), displayName: 'File Type', group: 'File Drop', description: 'MIME type the browser reports for the first accepted file, blank for one it does not recognise' },
+    droppedFileSizeInBytes: { type: 'number', from: (s: State) => firstFile(s, 'size'), displayName: 'File Size In Bytes', group: 'File Drop', description: 'Size of the first accepted file, in bytes' },
+    isDragOver: { type: 'boolean', from: (s: State) => s.isDragOver, displayName: 'Is Dragging Over', group: 'File Drop', description: 'True while a file is being dragged over this element — wire it to a border or background so the drop zone reacts' }
   }
 }).on(
   {
@@ -304,7 +349,10 @@ export const Text = defineNode({
       if (s.phase !== 'idle' && s.inZone) return { set: { acceptDrops: false, inZone: false, isDropTarget: false }, send: ['isDropTarget'] };
       return { set: { acceptDrops: false }, send: [] };
     },
-    acceptKind: (_s, v) => ({ set: { acceptKind: v }, send: [] })
+    acceptKind: (_s, v) => ({ set: { acceptKind: v }, send: [] }),
+    // :958-981 — read at each drag event, never at a render
+    acceptFileDrops: (_s, v) => ({ set: { acceptFileDrops: !!v }, send: [] }),
+    acceptedFileTypes: (_s, v) => ({ set: { acceptedFileTypes: v }, send: [] })
   },
   {
     world: {
@@ -367,6 +415,25 @@ export const Text = defineNode({
         const f = takesKeyboard(p);
         const k = keyDown({ ...p, ...f }, String(value));
         return { ...k, set: { ...f, ...k.set } };
+      }),
+      // drag-drop.ts :285-306 — a window listener: the pointer's move is heard wherever it lands
+      move: (s, _i, value) => onPainted(s, (p) => pointerMove(p, value === 'touch' ? 'touch' : 'mouse')),
+      // the drag from the desktop: the browser moves its target first (a leave, then an enter), then a `dragover`
+      fileEnter: (s, _i, value) => paintedThen(s, (p) => {
+        const carry = p.fileCarry ?? (Array.isArray(value) ? (value as FileLike[]) : []);
+        return dragTo({ ...p, fileCarry: carry }, under(p), { fileCarry: carry });
+      }),
+      fileLeave: (s) => paintedThen(s, (p) => (p.fileCarry === undefined ? NONE : join(dragTo(p, -1), { ...NONE, set: { fileCarry: undefined } }))),
+      // :1021-1068 — let go: at the element under it, which takes it only when its last `dragover` was cancelled (armed); else
+      // the browser fires a leave there instead. The drag is over either way
+      fileDrop: (s) => paintedThen(s, (p) => {
+        if (p.fileCarry === undefined) return NONE;
+        const here = under(p);
+        const moved = dragTo(p, here);
+        const at = { ...p, ...moved.set };
+        const end: Act = { ...NONE, set: { fileCarry: undefined, fileOn: -1 } };
+        if (here === -1) return join(moved, end);
+        return join(join(moved, armed(at) ? fileDropped(at) : fileLeft(at)), end);
       })
     }
   }
@@ -411,6 +478,88 @@ function onPainted(s: Readonly<State>, then: (painted: Readonly<State>) => Act):
   const after: State = { ...s, ...p.set };
   const a = after.onPage ? then(after) : NONE;
   return { ...a, set: { ...p.set, ...a.set }, emit: [...p.emit, ...a.emit] };
+}
+
+/** The act on the painted page, whether or not the element is there (a drag from the desktop goes on over whatever is). */
+function paintedThen(s: Readonly<State>, then: (painted: Readonly<State>) => Act): Act {
+  const p = painted(s);
+  const a = then({ ...s, ...p.set });
+  return { ...a, set: { ...p.set, ...a.set }, emit: [...p.emit, ...a.emit] };
+}
+
+/** The element a pointer here lands on, if it is this node's (`hits`); -1, something else. */
+function under(s: Readonly<State>): number {
+  return hits(s) ? s.elem : -1;
+}
+
+/** `onPointerMove` (drag-drop.ts :285-306) — the same pointer only: a held press cancels quietly, a pending one lifts; a lifted one finds no zone. */
+function pointerMove(s: Readonly<State>, input: 'mouse' | 'touch'): Act {
+  if (s.phase === 'idle' || s.input !== input) return NONE;
+  if (s.phase === 'holding') return cancelled(s);
+  if (s.phase === 'pending') return lifted(s) as Act;
+  return NONE;
+}
+
+/** `fileDropArmed` (:253-261): Accept File Drops on, and the drag carries files. */
+function armed(s: Readonly<State>): boolean {
+  return s.acceptFileDrops && (s.fileCarry?.length ?? 0) > 0;
+}
+
+/** The browser moves the drag's target to `here`: a leave at the element it was over, if that is this node's element on the page, then an enter at `here`. */
+function dragTo(s: Readonly<State>, here: number, extra: Partial<State> = {}): Act {
+  if (s.fileOn === here) return { ...NONE, set: extra };
+  const left = s.onPage && s.fileOn === s.elem ? fileLeft(s) : NONE;
+  const mid = { ...s, ...left.set };
+  const entered = here === -1 ? NONE : fileEntered(mid);
+  return join(join(left, entered), { ...NONE, set: { ...extra, fileOn: here } });
+}
+
+/** `onDragEnter` (:1009-1019) */
+function fileEntered(s: Readonly<State>): Act {
+  if (!armed(s)) return NONE;
+  const over = dragOver(s, true);
+  return { ...over, set: { ...over.set, dragDepth: s.dragDepth + 1 } };
+}
+
+/** `onDragLeave` (:1030-1035) */
+function fileLeft(s: Readonly<State>): Act {
+  if (!armed(s)) return NONE;
+  const depth = Math.max(0, s.dragDepth - 1);
+  const over = depth === 0 ? dragOver(s, false) : NONE;
+  return { ...over, set: { ...over.set, dragDepth: depth } };
+}
+
+/** `setDragOver` (:264-269): sent only when it changes. */
+function dragOver(s: Readonly<State>, value: boolean): Act {
+  return s.isDragOver === value ? NONE : { ...NONE, set: { isDragOver: value }, send: ['isDragOver'] };
+}
+
+const FILE_VALUES: Val[] = ['droppedFile', 'droppedFiles', 'droppedFileName', 'droppedFileType', 'droppedFileSizeInBytes'];
+
+/** `onDrop` (:1036-1068) — the count to 0, Is Dragging Over false, the files that pass the filter, then one of the two signals. */
+function fileDropped(s: Readonly<State>): Act {
+  const over = dragOver(s, false);
+  const accepted = (s.fileCarry ?? []).filter((f) => matchesType(f, s.acceptedFileTypes));
+  const files: Partial<State> = accepted.length === 0 ? { droppedFiles: [], droppedFile: undefined } : { droppedFiles: accepted, droppedFile: accepted[0] };
+  return { set: { ...over.set, dragDepth: 0, ...files }, send: [...over.send, ...FILE_VALUES], emit: [accepted.length === 0 ? 'filesRejected' : 'filesDropped'] };
+}
+
+/** `fileMatchesAcceptedTypes` (:293-311) */
+function matchesType(file: FileLike, accept: unknown): boolean {
+  const patterns = String(accept || '')
+    .split(',')
+    .map((e) => e.trim().toLowerCase())
+    .filter(Boolean);
+  if (patterns.length === 0) return true;
+  const name = String(file.name || '').toLowerCase();
+  const mime = String(file.type || '').toLowerCase();
+  return patterns.some((p) => (p.startsWith('.') ? name.endsWith(p) : p.endsWith('/*') ? mime.startsWith(p.slice(0, -1)) : mime === p));
+}
+
+/** The File Drop outputs' getters (:1080-1134): a field of the first accepted file, none without one. */
+function firstFile(s: Readonly<State>, key: 'name' | 'type' | 'size'): unknown {
+  const f = s.droppedFile as FileLike | undefined;
+  return f && f[key];
 }
 
 /** `whenMounted` at a frame's start (drag-drop.ts :136-145): the element on the page takes the attributes; none, one frame fewer. */

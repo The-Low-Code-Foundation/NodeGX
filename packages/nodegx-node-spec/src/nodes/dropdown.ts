@@ -55,7 +55,7 @@
 
 import { defineNode, type Patch } from '../spec';
 import { SELF_REFERENCE } from '../trace';
-import { dataAttributeInput, dataAttributeNames } from './text-input';
+import { dataAttributeInput, dataAttributeNames } from './data-attributes';
 
 type State = {
   /** utils.ts :75-89 `_internal.enabled` */

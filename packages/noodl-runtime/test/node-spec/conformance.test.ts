@@ -155,18 +155,42 @@ const pickWriteBackPick = (d: Divergence) => {
  * NSP-016 §6 C79 — a Text (Group, Image, Circle, Video) at Opacity exactly 0 takes no pointer (Text.tsx :88-90), but a Pointer Events
  * Enabled / Mode write after it was drawn reaches the element directly and the opacity rule is not re-applied — the runtime raises a
  * pointer output the spec does not. Narrow: the first difference is a pointer output on the RUNTIME's side, the last Opacity written
- * before it is the number 0, and a Pointer Events input was written before it.
+ * before it is the number 0, and a Pointer Events input was written before it. s50: a drag from the desktop is under the same hit test,
+ * so what it raises on the element counts too — Files Dropped / Files Rejected, Is Dragging Over going true, a dropped file's values.
  */
-const POINTER_OUTPUTS = ['pointerDown', 'pointerUp', 'onClick', 'hoverStart', 'pointerEnter', 'hoverEnd'];
+const POINTER_OUTPUTS = ['pointerDown', 'pointerUp', 'onClick', 'hoverStart', 'pointerEnter', 'hoverEnd', 'filesDropped', 'filesRejected'];
+const FILE_DROP_VALUES = ['droppedFile', 'droppedFiles', 'droppedFileName', 'droppedFileType', 'droppedFileSizeInBytes'];
 const isZero = (v: unknown) => v === 0 || (typeof v === 'object' && v !== null && (v as { $num?: unknown }).$num === '-0');
 const invisibleTakesPointer = (d: Divergence) => {
   if (d.difference.threw !== undefined) return false;
   const a = d.actual[d.difference.index];
-  if (!a || a.t !== 'signal' || !POINTER_OUTPUTS.includes(a.port)) return false;
+  if (!a) return false;
+  const raised = a.t === 'signal' ? POINTER_OUTPUTS.includes(a.port) : a.t === 'value' && ((a.port === 'isDragOver' && a.value === true) || FILE_DROP_VALUES.includes(a.port));
+  if (!raised) return false;
   const before = d.reference.slice(0, d.difference.index);
   const opacity = before.filter((e) => e.t === 'set' && e.port === 'opacity').pop() as { value?: unknown } | undefined;
   if (!opacity || !isZero(opacity.value)) return false;
   return before.some((e) => e.t === 'set' && (e.port === 'pointerEventsEnabled' || e.port === 'pointerEventsMode'));
+};
+
+/**
+ * NSP-016 §6 C82 (s50) — Accepted file types holding a truthy value that is not text (a wired number, an object) makes the drop
+ * handler throw at `(accept || '').split` (node-shared-port-definitions.ts :294), after Is Dragging Over went false: no File value
+ * and neither Files Dropped nor Files Rejected. The spec reads the value as text. Narrow: a file drop came before the difference, the
+ * difference is at a file-drop output on either side, and the last Accepted file types (a write, else the placing's) is truthy and
+ * not a string (NaN and -0 are falsy).
+ */
+const FILE_DROP_OUTPUTS = [...FILE_DROP_VALUES, 'filesDropped', 'filesRejected', 'isDragOver'];
+const nonTextFileTypes = (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  const atFile = (e: TraceEvent | undefined) => !!e && (e.t === 'value' || e.t === 'signal') && FILE_DROP_OUTPUTS.includes(e.port);
+  if (!atFile(d.reference[d.difference.index]) && !atFile(d.actual[d.difference.index])) return false;
+  const before = d.reference.slice(0, d.difference.index);
+  if (!before.some((e) => e.t === 'act' && e.act === 'fileDrop')) return false;
+  const written = before.filter((e) => e.t === 'set' && e.port === 'acceptedFileTypes').pop() as { value?: unknown } | undefined;
+  const v = written ? written.value : d.params.acceptedFileTypes;
+  const falsyNum = typeof v === 'object' && v !== null && ['NaN', '-0'].includes(String((v as { $num?: unknown }).$num));
+  return !!v && !falsyNum && typeof v !== 'string';
 };
 
 /**
@@ -451,7 +475,10 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C76 — a Value written back in the frame of a pick leaves the picked button selected: picking it again raises nothing', matches: groupPickWrittenBack }
   ],
   // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
-  Text: [{ row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer }],
+  Text: [
+    { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
+    { row: 'NSP-016 §6 C82 — Accepted file types not text: the drop handler throws, so the drop gives no File and no signal', matches: nonTextFileTypes }
+  ],
   'net.noodl.controls.checkbox': [
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the box on the page', matches: lostRootAfterLabelOff },
     { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick },

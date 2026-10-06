@@ -203,6 +203,11 @@ let dom: Dom | undefined;
 let domInstalled: (() => void) | undefined;
 /** NSP-016 s43 — the element the last pointer act landed on (`personActs`): what `document.elementFromPoint` answers. One play's. */
 let pointerAt: any = null;
+/**
+ * NSP-016 s50 — a drag from the desktop (the `fileEnter` / `fileLeave` / `fileDrop` acts): the files it carries and the element the
+ * browser has as its target (`over`; null before the first act puts it anywhere). One play's.
+ */
+let fileDrag: { files: unknown[]; over: any } | undefined;
 
 /** The page, made once for the process; React loaded with its globals present (react-dom reads `window` at load), outside any play. */
 function ensureDom(): Dom {
@@ -285,6 +290,7 @@ function installGlobals(globals: Record<string, unknown>): () => void {
 function installPage(): () => void {
   const d = ensureDom();
   pointerAt = null;
+  fileDrag = undefined;
   // the window outlives the play (one page per process): a listener the play's page left on it — drag-drop.ts `swallowNextClick`
   // takes its own off with a `setTimeout(0)` on the WORLD's clock, which a play that ends first never turns — ate a click in a
   // LATER play. What the play added comes off with its page.
@@ -1609,6 +1615,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     // NSP-016 s42 — a `pick` acts on the CHILD whose Value is the act's (a Radio Button Group's button): the control a person sees
     // inside it; a Value no child carries, or a child off the page, is nothing to act on
     const el = act === 'pick' ? pickedElement(s, value) : ownElement(s);
+    // NSP-016 s50 — a drag from the desktop goes on over whatever is on the page, the node's element or not
+    if (act === 'fileEnter' || act === 'fileLeave' || act === 'fileDrop') return fileActs(act, value, el ? underPointer(w, el) : d.document.body);
     if (!el) return;
     const KEYBOARD = new Set(['focus', 'blur', 'type', 'key', 'choose', 'slide']);
     const hit = KEYBOARD.has(act) ? el : underPointer(w, el);
@@ -1670,6 +1678,20 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
         pointer('pointerup', 'touch');
         touch('touchend');
         break;
+      // NSP-016 s50 — the pointer that is down moves across the element, past both of drag-drop.ts's slops (4 px for a mouse, 8 for a
+      // held finger): a `pointermove` the window hears, then the compatibility event. Face choices, written down: the move is 10 px
+      // from where every act's pointer is (0, 0) and stays over the element the act names; it raises no hover or leave
+      case 'move': {
+        const kind = value === 'touch' ? 'touch' : 'mouse';
+        const e = new w.MouseEvent('pointermove', { bubbles: true, cancelable: true, composed: true, button: -1, buttons: 1, clientX: 10, clientY: 0 });
+        Object.defineProperty(e, 'pointerType', { value: kind });
+        Object.defineProperty(e, 'pointerId', { value: kind === 'mouse' ? 1 : 2 });
+        Object.defineProperty(e, 'isPrimary', { value: true });
+        hit.dispatchEvent(e);
+        if (kind === 'mouse') mouse('mousemove', { clientX: 10, buttons: 1 });
+        else touch('touchmove');
+        break;
+      }
       case 'focus':
         el.focus();
         break;
@@ -1739,6 +1761,45 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       default:
         throw new Error(`runtime: no person face for the act "${act}"${value === undefined ? '' : ` (${JSON.stringify(value)})`}`);
     }
+  }
+
+  /**
+   * PERSON (above, NSP-016 s50) — a file dragged from the desktop, as a browser runs the drag (HTML's drag-and-drop processing model).
+   * At each act the browser first moves the drag's target to the element under the pointer (`at`, after the hit test): a `dragleave`
+   * at the one it was over, then a `dragenter` at the new one; then a `dragover` there. `fileEnter` starts a drag carrying the act's
+   * files when none is under way (no file: a drag of something else, text); `fileLeave` takes it off the element and out of the
+   * window (a `dragleave`, and the drag is gone); `fileDrop` lets it go — a `drop` at the target when its last `dragover` was
+   * cancelled, else a `dragleave` there instead — and the drag is over. jsdom has no `DragEvent` or `DataTransfer`: each event is a
+   * `MouseEvent` carrying a stand-in `dataTransfer` (`types` holds `Files` exactly when it carries a file), which React reads off
+   * the native event. An event at an element no longer on the page reaches no handler, as in a browser.
+   */
+  function fileActs(act: string, value: unknown, at: any): void {
+    const w = ensureDom().window;
+    if (act === 'fileEnter' && !fileDrag) fileDrag = { files: Array.isArray(value) ? value : [], over: null };
+    const drag = fileDrag;
+    if (!drag) return;
+    const transfer = { types: drag.files.length > 0 ? ['Files'] : ['text/plain'], files: drag.files, dropEffect: 'none', effectAllowed: 'all', getData: () => '' };
+    const fire = (type: string, on: any) => {
+      const e = new w.MouseEvent(type, { bubbles: true, cancelable: type !== 'dragleave', composed: true });
+      Object.defineProperty(e, 'dataTransfer', { value: transfer });
+      return on.dispatchEvent(e);
+    };
+    const moveTo = (to: any) => {
+      if (drag.over === to) return;
+      if (drag.over) fire('dragleave', drag.over);
+      drag.over = to;
+      if (to) fire('dragenter', to);
+    };
+    if (act === 'fileLeave') {
+      moveTo(null);
+      fileDrag = undefined;
+      return;
+    }
+    moveTo(at);
+    const taken = !fire('dragover', at);
+    if (act !== 'fileDrop') return;
+    fire(taken ? 'drop' : 'dragleave', at);
+    fileDrag = undefined;
   }
 
   /**

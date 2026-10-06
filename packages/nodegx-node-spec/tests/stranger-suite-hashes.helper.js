@@ -44,8 +44,10 @@ const ROUNDS = [
   // NSP-013 s13: five nodes that live by the world (clock, timers and pending outcomes, frame time, random, viewport)
   round(3, 'stranger-3', 's13', ['Timer', 'Repeat', 'net.noodl.animatetovalue', 'net.noodl.UUID', 'Screen Resolution'], ['src/world.ts', 'src/nodes/ease-curves.ts']),
   // NSP-023 step 8 (AC5, s49): a converted visual control on plain DOM, no React — the Dropdown, drawn by the target into the
-  // page's document and acted on through it (`tests/stranger-page.js`); `text-input.ts` for the two helpers dropdown.ts imports
-  round(4, 'stranger-4', 's49', ['net.noodl.controls.options'], ['src/world.ts', 'src/nodes/text-input.ts', 'tests/stranger-page.js'], true)
+  // page's document and acted on through it (`tests/stranger-page.js`); the module of the two helpers dropdown.ts imports — in
+  // text-input.ts when round 4 ran, moved to `data-attributes.ts` in s50 (round 4's finding: the stranger had to read another
+  // node's spec to find them)
+  round(4, 'stranger-4', 's49', ['net.noodl.controls.options'], ['src/world.ts', 'src/nodes/data-attributes.ts', 'tests/stranger-page.js'], true)
 ];
 
 /** The union, sorted — the hash file's keys. */
