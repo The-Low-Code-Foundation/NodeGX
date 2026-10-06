@@ -27,6 +27,9 @@ should be). The board is **17 of 37 closed**, re-derived from the task files' st
 - **Another session is building stranger round 4** (`stranger-4/`, `tests/stranger-page.js`, edits to
   `stranger.test.ts` and `stranger-suite-hashes.helper.js`, uncommitted). The working tree's stranger suite is red on THEIR
   work. To grade a guarded-file change, check hashes with HEAD's helper and run HEAD's test in a lab copy (as C49 did).
+  🔴 **C49's commit (`c6bf4e8ac`) swept their regenerated `stranger-suite-hashes.json`** (they rewrote the whole file between
+  my one-line edit and my `git add`); `b8da3805a` restored the parent + my line, and they were told. For a shared
+  generated file, commit a blob built from `git show HEAD:<path>` + your edit, never the working copy.
 
 ## The board (re-derive it from each task file's status line; never copy this table)
 
