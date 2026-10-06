@@ -1,12 +1,15 @@
 ---
 id: P107-C45
 title: On a Directus / PocketBase project, a backend that fails the page-load session check (503, network down) fires Session Lost while the user stays signed in
-status: scheduled
+status: fixed
+commit: aead4edb8
 phase: P109
 task: ISL-030
 severity: medium
 area: viewer / user service (`userservice.ts` constructor) — every User node
 found: P107 (the node says what it does) s26, 2026-10-02
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/net.noodl.user.User.json "C45 — the backend is down when the page loads (503): nothing is said, and the user stays signed in (v3)" (the Parse-wire half: packages/noodl-viewer-react/tests/isl-030-the-page-load-check.test.ts "a 503 at load: …")
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.17 (row C45); scenarios/net.noodl.user.User.json "C45 — …" (two)
 ---
 
@@ -33,3 +36,5 @@ adapter already did that and announced it — so the service's own clear + annou
 as it is.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Stay signed in, say nothing".** Session Lost fires only when the backend actually refuses the sign-in, on every backend. A brief outage no longer sends anyone to the login page. On NodeGX's own backend this also stops a blip signing people out. One change that also makes Session Lost fire once instead of twice. The question as asked: *"When the backend cannot be reached at page load, should the person stay signed in or be signed out?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed aead4edb8 (P109 ISL-030, 2026-10-06), as ruled, with C46.** The user service's page-load check leaves a failure to the adapter: a rejected session (Parse 209, REST 401 / 403) is cleared and announced by the adapter; anything else changes nothing and says nothing. The legacy session is no longer cleared at load either. User v3.
