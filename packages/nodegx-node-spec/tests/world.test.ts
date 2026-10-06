@@ -15,7 +15,7 @@
  *   And the world's own rules: the timer delay rule, the wire forms, the delivery order.
  */
 
-import { backendEvent, Clock, DEFAULT_WORLD_POOL, generateSequence, installWorld, interpreterAdapter, normaliseRequest, play, run, runConformance, specs, timerDelay, toDelivery, validateTrace, World, worldFetch, worldXMLHttpRequest, defineNode, type AnyNodeSpec, type TraceEvent } from '../src';
+import { backendEvent, Clock, DEFAULT_WORLD_POOL, EQUIVALENT_MUTANTS, generateSequence, installWorld, interpreterAdapter, normaliseRequest, play, run, runConformance, specs, timerDelay, toDelivery, validateTrace, World, worldFetch, worldXMLHttpRequest, defineNode, type AnyNodeSpec, type TraceEvent } from '../src';
 import { Delay, HttpRequest, Uuid } from '../src/nodes';
 
 const WORLD_NODES = ['Timer', 'net.noodl.UUID', 'net.noodl.HTTP'];
@@ -25,7 +25,9 @@ describe('AC1 — the three world nodes conform on the interpreter: scenarios, 2
     test(`${type}`, async () => {
       const spec = specs[type];
       expect(spec.needs?.length).toBeGreaterThan(0);
-      const report = await runConformance(spec, interpreterAdapter({ resolve: () => spec }), { sequences: 200, seed: 7, mutants: true });
+      // P109 s22: the equivalents its siblings pass (batch-*.test.ts). Without them HTTP's, declared with C8 (283b46573),
+      // read as a survivor here from that commit on.
+      const report = await runConformance(spec, interpreterAdapter({ resolve: () => spec }), { sequences: 200, seed: 7, mutants: true, equivalent: EQUIVALENT_MUTANTS[type] });
       expect(report.refused).toBeUndefined();
       expect(report.scenarios.filter((s) => s.status !== 'passed').map((s) => `${s.status} ${s.name}: ${s.reason ?? ''}`)).toEqual([]);
       expect(report.scenarios.length).toBeGreaterThanOrEqual(3);
