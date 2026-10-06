@@ -48,8 +48,24 @@ const HTTP_ERROR_CODES = {
   noUrl: 'http/no-url',
   status: 'http/error-status',
   timeout: 'http/timeout',
-  network: 'http/network-error'
+  network: 'http/network-error',
+  inputNotText: 'http/input-not-text'
 };
+
+/**
+ * P107-C8 (P109 ISL-026, ruled 2026-10-05 "Fail and say which input"): the first text input that holds something else,
+ * in the order the request reads them — URL (`.match`), Query Parameters, Headers, and Body Fields when a body is built
+ * (`.split`). Read as it came, it threw inside `doFetch` after the tokens were drained, and the Fetch was never answered.
+ */
+function inputNotText(internal: { url?: unknown; queryParams?: unknown; headers?: unknown; bodyFields?: unknown; method?: unknown }): string | undefined {
+  const notText = (v: unknown) => !!v && typeof v !== 'string';
+  if (notText(internal.url)) return 'URL';
+  if (notText(internal.queryParams)) return 'Query Parameters';
+  if (notText(internal.headers)) return 'Headers';
+  const method = internal.method || 'GET';
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(method as string) && notText(internal.bodyFields)) return 'Body Fields';
+  return undefined;
+}
 
 /**
  * Extract value from object using JSONPath-like syntax
@@ -684,6 +700,17 @@ const HttpNode: NodeDefinitionOptions = {
       // whichever invocation's tokens happened to be sitting there when the response landed.
       const tokens = this._internal.pendingFetchOutcomes;
       this._internal.pendingFetchOutcomes = [];
+
+      const notText = inputNotText(this._internal);
+      if (notText !== undefined) {
+        this._internal.error = notText + ' is not text';
+        this.flagOutputDirty('error');
+        reportOutcomes(this, tokens, 'failure', {
+          code: HTTP_ERROR_CODES.inputNotText,
+          message: notText + ' is not text, so no request could be sent'
+        });
+        return;
+      }
 
       const url = this.buildUrl();
       const method = this._internal.method || 'GET';

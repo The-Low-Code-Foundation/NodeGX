@@ -54,11 +54,10 @@
  * `authConfigurators` read `inputs.authToken` … (:131-157) from the bag the ports fill under
  * `auth-authToken` … (:447-458, `_storeInputValue(name)`), so no preset ever adds a header or a
  * query parameter; the spec keeps the runtime's read (`authContribution` below) so the row can be
- * seen closing. **C8** a non-string `url` (`.match`, :1069), or a truthy non-string `headers` /
- * `queryParams` / `bodyFields` (`.split`, :909-975), throws inside the after-inputs callback
- * (swallowed at nodecontext.ts :472) AFTER the tokens were drained (:1050-1051): the Fetch's
- * outcomes are lost for good and nothing is reported — the spec models the loss (the pending
- * invocations are never settled). **D11** a body that fails to parse under `Response Type: JSON`
+ * seen closing. **C8** (v2, fixed in P109 ISL-026, ruled "Fail and say which input"): a truthy
+ * non-string `url`, `queryParams`, `headers` or — when a body is built — `bodyFields` fails the Fetch with
+ * `http/input-not-text`, Error "<the input> is not text", and no request; v1 modelled the loss (the runtime
+ * threw inside the callback after the tokens were drained, and the outcomes were never settled). **D11** a body that fails to parse under `Response Type: JSON`
  * or an `application/json` answer is reported as `http/network-error`, the code for "never
  * reached a server" (:1194-1203) — the description says "an unparseable body" is a failure, and
  * it is, under the wrong name.
@@ -259,7 +258,9 @@ const repeat = <T>(n: number, item: T): T[] => Array.from({ length: n }, () => i
 
 export const HttpRequest = defineNode({
   type: 'net.noodl.HTTP',
-  version: 1,
+  // v2 (P109 ISL-026, P107-C8 ruled "Fail and say which input"): an input the request reads as text that holds something else
+  // fails the Fetch with `http/input-not-text`, naming the input on Error; v1 lost the outcome (the runtime threw).
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/httpnode.ts',
   needs: ['network', 'clock'],
   worldPool: { advances: [0, 1, 100, 1000, 29999, 30000] },
@@ -469,17 +470,19 @@ export const HttpRequest = defineNode({
     // :1042-1200 `doFetch`, run once at the frame's end when a Fetch scheduled it (:494-500)
     afterInputs: (s) => {
       const drained = { scheduled: false, pendingTokens: 0 };
-      // a frame with no Fetch leaves the two the way they are — false and 0 — which is also exactly
-      // what a frame whose doFetch threw leaves (C8), so the two are one branch on purpose
+      // a frame with no Fetch leaves the two the way they are — false and 0
       if (!s.scheduled) return { set: drained };
       const tokens = s.pendingTokens;
       const rawUrl = s.url || '';
       const method = s.method || 'GET';
       // :951-959 — `bodyFields` is split BEFORE the body-type branch, so a raw body splits it too
       const bodyBuilt = !['GET', 'HEAD', 'OPTIONS'].includes(method as string);
-      // C8 — a throw in the callback after the tokens were drained: the outcomes are lost, nothing else moves
-      if (typeof rawUrl !== 'string' || badList(s.queryParams) || badList(s.headers) || (bodyBuilt && badList(s.bodyFields))) return { set: drained };
-      const url = buildUrl(rawUrl, s);
+      // C8 (v2) — the first input the request reads as text that holds something else, in the order it is read
+      const notText = typeof rawUrl !== 'string' ? 'URL' : badList(s.queryParams) ? 'Query Parameters' : badList(s.headers) ? 'Headers' : bodyBuilt && badList(s.bodyFields) ? 'Body Fields' : undefined;
+      if (notText !== undefined) {
+        return { set: { ...drained, error: notText + ' is not text' }, send: ['error'], outcomes: repeat(tokens, { port: 'fetch' as const, outcome: 'failure' as const, error: 'http/input-not-text' }) };
+      }
+      const url = buildUrl(rawUrl as string, s); // a string here: the C8 branch above returned for anything else
       const headers = buildHeaders(s);
       const body = buildBody(method, s);
       const timeout = s.timeout || 30000; // :1057

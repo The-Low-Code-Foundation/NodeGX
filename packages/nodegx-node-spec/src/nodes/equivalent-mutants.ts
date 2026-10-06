@@ -264,7 +264,13 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     }
   ],
   'net.noodl.ParseCSV': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on CSV yet, or nothing due)' }],
-  'net.noodl.ParseXML': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on XML yet, nothing due, or the Always Array that throws)' }],
+  'net.noodl.ParseXML': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on XML yet, or nothing due)' }],
+  // P109 ISL-026 (C8 fixed): the frame end with no Fetch due writes `scheduled: false, pendingTokens: 0` over the same two values —
+  // a Fetch sets both and every run drains both, so nothing is pending while nothing is scheduled. Until C8 this branch was shared
+  // with the throw that lost the outcomes, and that path killed the mutant.
+  'net.noodl.HTTP': [
+    { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["pendingTokens","scheduled"],"emit":[]', why: 'a frame end with no Fetch due clears a scheduled flag and a token count that are already false and 0' }
+  ],
   'net.noodl.ParseFeed': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on Feed yet, or nothing due)' }],
   'net.noodl.ToCSV': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on Items yet, or nothing due)' }],
   CollectionClear: [
