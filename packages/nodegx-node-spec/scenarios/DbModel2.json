@@ -613,8 +613,8 @@
     }
   },
   {
-    "name": "a null Id binds nothing but a Fetch asks the backend for it (D22)",
-    "because": ":313 treats null as empty; :411 checks only undefined and ''",
+    "name": "a null Id binds nothing, and a Fetch with it is Missing Id. — nothing asked (v4, D22)",
+    "because": "the Fetch uses the binding's empty test; the backend's scripted answer is never asked for (D22, fixed in P109 ISL-029 — it asked for the record 'null' and failed with the backend's sentence)",
     "params": {
       "runOnChange-record": false
     },

@@ -408,8 +408,9 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
         const tokens = internal.pendingFetch || [];
         internal.pendingFetch = [];
 
-        // Don't do fetch if no id
-        if (internal.modelId === undefined || internal.modelId === '') {
+        // Don't do fetch if no id. P107-D22 (ISL-029, ruled "Say 'Missing Id.'"): the binding's own empty test
+        // (`setModelID`) — a null Id, what a cleared wire carries, asked the backend for the record "null".
+        if (internal.modelId === undefined || internal.modelId === null || internal.modelId === '') {
           _this.setError('Missing Id.', tokens);
           return;
         }

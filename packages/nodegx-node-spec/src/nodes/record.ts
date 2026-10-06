@@ -16,8 +16,8 @@
  * enclosing Repeater's item at the frame end (:292-296); a node outside one binds NOTHING (foreachitem.ts).
  *
  * FETCH (:394-458): one token per press; ONE read per frame for any number of presses (`scheduleOnce`). At the
- * frame end: an Id that is `undefined` or `''` fails the batch `Missing Id.` (:411-414 — `null` is NOT caught here,
- * row D22); a Backend the project does not have, the not-configured sentence (:419-425); otherwise the node hands
+ * frame end: an Id that is `undefined`, `null` or `''` fails the batch `Missing Id.` (:411-414 — the binding's own
+ * empty test; v4, row D22: v3 asked the backend for the record "null"); a Backend the project does not have, the not-configured sentence (:419-425); otherwise the node hands
  * its backend `fetch({ collection: <Class>, objectId: <the Id input> })` (:428-430; world.ts BACKEND, R9) — no Class
  * check: a Fetch with no Class asks for `collection: undefined` (the write family's pre-flight is not this node's).
  * The answer settles its batch. Success (:431-452): the record handed back is written into the registry under ITS
@@ -174,7 +174,9 @@ export const RecordNode = defineNode({
   // v3 (P109 ISL-027, row C49 ruled "Compare the list's contents"): an answer's list with the same contents as the one the record
   // holds is not written again (cloudstore.js `_fromJSON`), so it is no change; v2 wrote the new array and the record store's `!==`
   // called it changed.
-  version: 3,
+  // v4 (P109 ISL-029, row D22 ruled "Say 'Missing Id.'"): a Fetch with a null Id fails `Missing Id.` and asks nothing, the
+  // binding's own empty test; v3 handed the backend `objectId: null`.
+  version: 4,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/dbmodelnode2.ts; cloudstore.js _fromJSON',
   needs: ['backend', 'registry', 'random'],
   worldPool: { backends: BACKENDS, registries: REGISTRIES },
@@ -331,8 +333,8 @@ export const RecordNode = defineNode({
         const n = st.presses;
         st.presses = 0;
         st.fetchScheduled = false;
-        if (st.modelId === undefined || st.modelId === '') {
-          st.error = MISSING_ID_MESSAGE; // :411-414
+        if (emptyId(st.modelId)) {
+          st.error = MISSING_ID_MESSAGE; // :411-414 — and a null Id (v4, D22)
           send.push('error');
           outcomes.push(...failures(n));
           continue;
