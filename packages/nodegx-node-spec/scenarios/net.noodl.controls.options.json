@@ -118,7 +118,6 @@
   {
     "name": "a pick, then Value written back to what the author set before the pick: Value sent, no Changed, and the selection follows on the interpreter — on the runtime the component's effect keys on the author's Value React last rendered, which this write did not change, so the pick stays selected and picking it again raises nothing",
     "because": "Select.tsx :44-47 `useEffect(..., [props.value, props.items])` — `props.value` was 'Option 1' at the last render and is 'Option 1' again (options.ts :194 writes it either way)",
-    "row": "NSP-016 §6 C71",
     "steps": [
       "settle",
       {
@@ -140,8 +139,7 @@
   },
   {
     "name": "Items written with the current Value absent: nothing on the wire, and the new list hands the selection to its first option — a pick of it raises only Focused; a pick of 'l': Value 'l', Changed; Items written again: the pick stays, nothing on the wire, and the new list, which lacks it, hands the selection to its first enabled option — a pick of it raises nothing, a pick of 'c' fires Changed",
-    "because": "R14 (2026-10-05): a dropdown handed its Items again keeps the pick; HTML's reset hands the selection to the first enabled option when the selected one leaves the list; on the runtime the component's effect takes the author's Value back with Changed (row D34). v2's name said a pick of 's' sent Value 's' with Changed — 's' was the option the new list had already selected, and nothing was sent",
-    "row": "NSP-016 §6 D34",
+    "because": "R14 (2026-10-05): a dropdown handed its Items again keeps the pick; HTML's reset hands the selection to the first enabled option when the selected one leaves the list; on the runtime the component's effect takes the author's Value back with Changed (was row D34, fixed in P109 ISL-031). v2's name said a pick of 's' sent Value 's' with Changed — 's' was the option the new list had already selected, and nothing was sent",
     "steps": [
       "settle",
       {
@@ -192,78 +190,6 @@
         "value": "a"
       },
       "settle",
-      {
-        "act": "choose",
-        "value": "c"
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "Items written with the current Value absent: nothing on the wire, and the new list hands the selection to its first option — a pick of it raises only Focused; a pick of 'l': Value 'l', Changed; Items written again: the pick stays, nothing on the wire, and the new list, which lacks it, hands the selection to its first enabled option — a pick of it raises nothing, a pick of 'c' fires Changed — with the graph confirming each pick (Value written to it the frame after), which leaves the runtime's effect nothing to take back: row D34's twin, graded on both targets",
-    "because": "the row's steps with a Value write equal to the node's value opening the frame after each pick: nothing in the spec, and the runtime's `props.value` (options.ts :194) then names the pick, so neither its remount nor a new list takes anything back",
-    "steps": [
-      "settle",
-      {
-        "set": "items",
-        "value": [
-          {
-            "Label": "Small",
-            "Value": "s"
-          },
-          {
-            "Label": "Large",
-            "Value": "l"
-          }
-        ]
-      },
-      "settle",
-      {
-        "act": "choose",
-        "value": "s"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "Option 1"
-      },
-      {
-        "act": "choose",
-        "value": "l"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "l"
-      },
-      {
-        "set": "items",
-        "value": [
-          {
-            "Label": "A",
-            "Value": "a"
-          },
-          {
-            "Label": "B",
-            "Value": "b",
-            "Disabled": true
-          },
-          {
-            "Label": "C",
-            "Value": "c"
-          }
-        ]
-      },
-      "settle",
-      {
-        "act": "choose",
-        "value": "a"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "l"
-      },
       {
         "act": "choose",
         "value": "c"
@@ -273,8 +199,7 @@
   },
   {
     "name": "a pick, then Mounted off and on: Will Unmount; Did Mount, and the dropdown is where the person left it — nothing on the wire; a pick of the same option raises only Focused (the element that came back did not hold the keyboard)",
-    "because": "R14 (2026-10-05): a Dropdown hidden with Mounted and shown again is where the person left it; on the runtime the component's effect takes the author's Value back with Changed (row D34)",
-    "row": "NSP-016 §6 D34",
+    "because": "R14 (2026-10-05): a Dropdown hidden with Mounted and shown again is where the person left it; on the runtime the component's effect takes the author's Value back with Changed (was row D34, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -282,37 +207,6 @@
         "value": "Option 2"
       },
       "settle",
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      {
-        "act": "choose",
-        "value": "Option 2"
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "a pick, then Mounted off and on: Will Unmount; Did Mount, and the dropdown is where the person left it — nothing on the wire; a pick of the same option raises only Focused (the element that came back did not hold the keyboard) — with the graph confirming each pick (Value written to it the frame after), which leaves the runtime's effect nothing to take back: row D34's twin, graded on both targets",
-    "because": "the row's steps with a Value write equal to the node's value opening the frame after each pick: nothing in the spec, and the runtime's `props.value` (options.ts :194) then names the pick, so neither its remount nor a new list takes anything back",
-    "steps": [
-      "settle",
-      {
-        "act": "choose",
-        "value": "Option 2"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "Option 2"
-      },
       {
         "set": "mounted",
         "value": false
@@ -21313,8 +21207,7 @@
   },
   {
     "name": "Mounted off after a pick: Will Unmount; Value keeps the pick; a click and a pick find nothing; a Focus is Unchanged; Mounted on: Did Mount and nothing else — the dropdown is where the person left it",
-    "because": "react-component-node.ts :2302-2321; focus-tracker.ts :61 — the Checkbox's scenario, on the `<select>`; R14 (2026-10-05) the remount keeps the pick; on the runtime the component's effect takes the author's Value back with Changed (row D34)",
-    "row": "NSP-016 §6 D34",
+    "because": "react-component-node.ts :2302-2321; focus-tracker.ts :61 — the Checkbox's scenario, on the `<select>`; R14 (2026-10-05) the remount keeps the pick; on the runtime the component's effect takes the author's Value back with Changed (was row D34, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -21338,48 +21231,6 @@
         "signal": "focus"
       },
       "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      "settle",
-      "settle"
-    ]
-  },
-  {
-    "name": "Mounted off after a pick: Will Unmount; Value keeps the pick; a click and a pick find nothing; a Focus is Unchanged; Mounted on: Did Mount and nothing else — the dropdown is where the person left it — with the graph confirming each pick (Value written to it the frame after), which leaves the runtime's effect nothing to take back: row D34's twin, graded on both targets",
-    "because": "the row's steps with a Value write equal to the node's value opening the frame after each pick: nothing in the spec, and the runtime's `props.value` (options.ts :194) then names the pick, so neither its remount nor a new list takes anything back",
-    "steps": [
-      "settle",
-      {
-        "act": "choose",
-        "value": "Option 2"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "Option 2"
-      },
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "act": "click"
-      },
-      {
-        "act": "choose",
-        "value": "Option 1"
-      },
-      {
-        "signal": "focus"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "Option 2"
-      },
       {
         "set": "mounted",
         "value": true
@@ -21703,8 +21554,7 @@
   },
   {
     "name": "a pick, Mounted off; Mounted on and a Tab onto it in the same frame: Did Mount and Focused — the pick stays and the fresh element took the keyboard; a Tab away and a pick of the same option: Blurred, Focused and nothing more; the same with Enabled off: Did Mount alone",
-    "because": "the paint inside the act commits the remount and the Tab meets the fresh element; a disabled one takes no keyboard; R14 (2026-10-05) the remount keeps the pick; on the runtime the component's effect takes the author's Value back with Changed (row D34)",
-    "row": "NSP-016 §6 D34",
+    "because": "the paint inside the act commits the remount and the Tab meets the fresh element; a disabled one takes no keyboard; R14 (2026-10-05) the remount keeps the pick; on the runtime the component's effect takes the author's Value back with Changed (was row D34, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -21733,64 +21583,6 @@
         "value": "Option 2"
       },
       "settle",
-      {
-        "set": "enabled",
-        "value": false
-      },
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      {
-        "act": "focus"
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "a pick, Mounted off; Mounted on and a Tab onto it in the same frame: Did Mount and Focused — the pick stays and the fresh element took the keyboard; a Tab away and a pick of the same option: Blurred, Focused and nothing more; the same with Enabled off: Did Mount alone — with the graph confirming each pick (Value written to it the frame after), which leaves the runtime's effect nothing to take back: row D34's twin, graded on both targets",
-    "because": "the row's steps with a Value write equal to the node's value opening the frame after each pick: nothing in the spec, and the runtime's `props.value` (options.ts :194) then names the pick, so neither its remount nor a new list takes anything back",
-    "steps": [
-      "settle",
-      {
-        "act": "choose",
-        "value": "Option 2"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "Option 2"
-      },
-      {
-        "set": "mounted",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "mounted",
-        "value": true
-      },
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "act": "blur"
-      },
-      {
-        "act": "choose",
-        "value": "Option 2"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "Option 2"
-      },
       {
         "set": "enabled",
         "value": false
@@ -21812,8 +21604,7 @@
   },
   {
     "name": "a pick and a Tab away, then Items written and a Tab onto the element in the same frame: Focused alone — the pick stays; a Tab away and a pick of the same option: Blurred, Focused and nothing more; the same on a disabled element: nothing",
-    "because": "the Tab meets the element the paint left; R14 (2026-10-05) a list handed again keeps the pick; on the runtime the component's effect takes the author's Value back with Changed (row D34)",
-    "row": "NSP-016 §6 D34",
+    "because": "the Tab meets the element the paint left; R14 (2026-10-05) a list handed again keeps the pick; on the runtime the component's effect takes the author's Value back with Changed (was row D34, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -21850,80 +21641,6 @@
         "value": "Option 2"
       },
       "settle",
-      {
-        "act": "blur"
-      },
-      {
-        "set": "enabled",
-        "value": false
-      },
-      "settle",
-      {
-        "set": "items",
-        "value": [
-          {
-            "Label": "Option 1",
-            "Value": "Option 1"
-          },
-          {
-            "Label": "Option 2",
-            "Value": "Option 2"
-          }
-        ]
-      },
-      {
-        "act": "focus"
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "a pick and a Tab away, then Items written and a Tab onto the element in the same frame: Focused alone — the pick stays; a Tab away and a pick of the same option: Blurred, Focused and nothing more; the same on a disabled element: nothing — with the graph confirming each pick (Value written to it the frame after), which leaves the runtime's effect nothing to take back: row D34's twin, graded on both targets",
-    "because": "the row's steps with a Value write equal to the node's value opening the frame after each pick: nothing in the spec, and the runtime's `props.value` (options.ts :194) then names the pick, so neither its remount nor a new list takes anything back",
-    "steps": [
-      "settle",
-      {
-        "act": "choose",
-        "value": "Option 2"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "Option 2"
-      },
-      {
-        "act": "blur"
-      },
-      "settle",
-      {
-        "set": "items",
-        "value": [
-          {
-            "Label": "Option 1",
-            "Value": "Option 1"
-          },
-          {
-            "Label": "Option 2",
-            "Value": "Option 2"
-          }
-        ]
-      },
-      {
-        "act": "focus"
-      },
-      "settle",
-      {
-        "act": "blur"
-      },
-      {
-        "act": "choose",
-        "value": "Option 2"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "Option 2"
-      },
       {
         "act": "blur"
       },
@@ -23087,8 +22804,7 @@
   },
   {
     "name": "a pick, the keyboard taken off, then Items rewritten and a mouse press in one frame: the pick stays and the press puts the keyboard on the dropdown (Pointer Down, Pressed, Focused) — a Blur action next frame gives it up (Blurred)",
-    "because": "the press's mousedown default takes the keyboard; the matrix reached this press only with a closing Focus action, which masks the press's own Focused (s45, a swap that survived at 200 on two seeds); R14 (2026-10-05) a list handed again keeps the pick; on the runtime the component's effect takes the author's Value back with Changed (row D34)",
-    "row": "NSP-016 §6 D34",
+    "because": "the press's mousedown default takes the keyboard; the matrix reached this press only with a closing Focus action, which masks the press's own Focused (s45, a swap that survived at 200 on two seeds); R14 (2026-10-05) a list handed again keeps the pick; on the runtime the component's effect takes the author's Value back with Changed (was row D34, fixed in P109 ISL-031)",
     "params": {
       "value": "Option 1"
     },
@@ -23099,57 +22815,6 @@
         "value": "Option 2"
       },
       "settle",
-      {
-        "act": "blur"
-      },
-      "settle",
-      {
-        "set": "items",
-        "value": [
-          {
-            "Label": "Option 1",
-            "Value": "Option 1"
-          },
-          {
-            "Label": "Option 2",
-            "Value": "Option 2"
-          },
-          {
-            "Label": "Three",
-            "Value": "3"
-          }
-        ]
-      },
-      {
-        "act": "press"
-      },
-      "settle",
-      {
-        "act": "release"
-      },
-      {
-        "signal": "blur"
-      },
-      "settle"
-    ]
-  },
-  {
-    "name": "a pick, the keyboard taken off, then Items rewritten and a mouse press in one frame: the pick stays and the press puts the keyboard on the dropdown (Pointer Down, Pressed, Focused) — a Blur action next frame gives it up (Blurred) — with the graph confirming each pick (Value written to it the frame after), which leaves the runtime's effect nothing to take back: row D34's twin, graded on both targets",
-    "because": "the row's steps with a Value write equal to the node's value opening the frame after each pick: nothing in the spec, and the runtime's `props.value` (options.ts :194) then names the pick, so neither its remount nor a new list takes anything back",
-    "params": {
-      "value": "Option 1"
-    },
-    "steps": [
-      "settle",
-      {
-        "act": "choose",
-        "value": "Option 2"
-      },
-      "settle",
-      {
-        "set": "value",
-        "value": "Option 2"
-      },
       {
         "act": "blur"
       },

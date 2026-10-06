@@ -12,7 +12,7 @@
  * I not let the node show whatever the last value or signal it received was? Whether it comes from the user or not");
  * **a Dropdown hidden with Mounted and shown again is where the person left it** and **one handed its Items again keeps the
  * pick** (R14); **only a person's pick fires Changed** (the descriptions of Value and Changed). What the runtime does instead
- * only because of React is a known row on the runtime target (D34, C71).
+ * only because of React was a known row on the runtime target (D34, C71), until P109 ISL-031 fixed it.
  *
  * THE RULE, before the citations. A Dropdown is a `<select>` drawn invisible (`opacity: 0`, Select.tsx :84-91) over
  * a span that shows the chosen option's Label (:179-183, :207-219), in a wrapper, with a `<label>` above it when
@@ -22,12 +22,11 @@
  *     `<select>` is told to select and the span labels. A pick writes it (`valueChanged`, :109-116: on a change, Value is
  *     sent and Changed fires) and so does the **Value** input (:181-200: `null` is ignored — it has no `toString` —
  *     anything else that is not text is made text with `toString`, `undefined` is kept; on a change Value is sent and
- *     Changed never fires). Nothing else moves it — not a remount and not a new Items list. The runtime's component keeps
- *     its own copy instead (`useState(props.value)`, Select.tsx :42) and follows the author's last Value through an effect
- *     keyed on `[props.value, props.items]` (:44-47): at a remount, or at a paint after Items was written again, it takes
- *     the author's Value back over a person's pick, sends it and fires Changed with nobody picking (row D34); and a Value
- *     written back to the very value React last rendered — after a pick, the author's own Value — leaves the pick on the
- *     screen (row C71).
+ *     Changed never fires). Nothing else moves it — not a remount and not a new Items list. The runtime's component kept
+ *     the author's Value apart from the pick: at a remount, or at a paint after Items was written again, it took the
+ *     author's Value back over a person's pick, sent it and fired Changed with nobody picking (row D34); and a Value
+ *     written back to the very value React last rendered left the pick on the screen (row C71). Both fixed in P109
+ *     ISL-031: a pick writes the node's value on both sides, and every write is counted so the next paint draws it.
  *   - **what the browser selects** (the `<select>`'s own selectedness, `domSelected`): the node's value while it names
  *     an option (:210 — the element is told which); otherwise the element is told nothing (`value={undefined}`) and the
  *     browser keeps what it had — a fresh element selects the hidden empty option (:217), and an option that leaves the
@@ -104,7 +103,7 @@ export const Dropdown = defineNode({
   // (Richard ruled the Text Input's C80 for all three controls); v1 rebuilt the <select> when the label changed, as React did — row
   // C80, fixed on the runtime in P109 ISL-031.
   // v3 (NSP-023 step 4, 2026-10-06): the selection is the node's value — a remount and a new Items list keep a person's pick and
-  // fire nothing (R14); v1 and v2 copied the component's `[props.value, props.items]` effect — rows D34 and C71, known on the runtime.
+  // fire nothing (R14); v1 and v2 copied the component's `[props.value, props.items]` effect — rows D34 and C71, known on the runtime until P109 ISL-031.
   // v4 (P109 ISL-026, 2026-10-06, P107-C70 ruled "Read old text, else no options"): text on Items is read as the old stored list
   // (`readItems`), and an empty item in a list is skipped; v3 offered no options for text and drew an empty item as an empty
   // option (the runtime's render threw on both — row C70).
@@ -309,12 +308,12 @@ export const Dropdown = defineNode({
       return { set: { enabled }, send: ['enabled'] };
     },
     // options.ts :158-171 — `undefined` is no opinion; anything else is kept as handed, drawn at the next paint (`painted`); the
-    // node's value stays (R14: a list handed again keeps the pick — the runtime's effect takes the author's Value back, row D34)
+    // node's value stays (R14: a list handed again keeps the pick — the runtime's effect took the author's Value back until P109 ISL-031, row D34)
     items: (s, v) => (v === undefined ? NOTHING : { set: { items: v }, send: [] }),
     // options.ts :181-200 — `null` has no `toString` and is ignored (:182-184); what is not text is made text; a change sends
     // Value and never Changed, and the selection follows it at the next paint (R14: the last word wins — the runtime's effect
-    // keys on the author's Value React last rendered, Select.tsx :44-47, so a write back to it after a pick leaves the pick on
-    // the screen, row C71)
+    // keyed on the author's Value React last rendered, so a write back to it after a pick left the pick on the screen, row C71,
+    // fixed in P109 ISL-031)
     value: (s, v) => {
       if (v === null) return NOTHING;
       const value = v === undefined ? undefined : String(v);
@@ -440,7 +439,7 @@ function optionsOf(items: unknown): Option[] {
  * The page follows what the node wants (checkbox.ts `painted`), and the `<select>`'s selection with it.
  *   - Enabled and Visible are painted onto the element; Enable Label changes nothing here (v2; the runtime's rebuild was row C80, fixed in P109 ISL-031).
  *   - Mounted off: the element leaves with the keyboard it held; Mounted on: Did Mount, a fresh element on the node's value — a
- *     person's pick included, and nothing on the wire (v3, R14; the runtime takes the author's Value back, row D34).
+ *     person's pick included, and nothing on the wire (v3, R14; the runtime took the author's Value back until P109 ISL-031, row D34).
  *   - the selection: the element is told the node's value while it names an option (:210); otherwise the browser keeps what it
  *     had — a fresh element selects the hidden empty option (:217), and a selected option that left the list hands the selection
  *     to the first enabled option (HTML's reset; the hidden one is disabled).

@@ -37,6 +37,8 @@ export interface SelectProps extends Noodl.ReactProps {
 
   onClick: () => void;
   valueChanged: (value: string) => void;
+  /** P107-C71 — counts the node's writes of its value; the <select> redraws the node's value at each one */
+  valueWrites?: number;
 }
 
 export function Select(props: SelectProps) {
@@ -45,7 +47,7 @@ export function Select(props: SelectProps) {
   useEffect(() => {
     setValue(props.value);
     props.valueChanged(props.value);
-  }, [props.value, props.items]);
+  }, [props.value, props.items, props.valueWrites]);
 
   let style = { ...props.style };
   Layout.size(style, props);

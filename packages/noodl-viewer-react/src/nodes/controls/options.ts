@@ -106,10 +106,17 @@ const OptionsNode = {
      * `set`, and the runtime never calls a port's `set` for an unauthored default.
      */
     this.props.value = this._internal.value = DEFAULT_ITEMS[0].Value;
+    // P107-C71 (P109 ISL-031, ruled "Fix it now"): bumped by every write of the value — a pick and the Value input — so the
+    // <select> redraws the node's value even when React's last render already held that value
+    this.props.valueWrites = 0;
 
     this.props.valueChanged = (value) => {
       const changed = this._internal.value !== value;
-      this._internal.value = value;
+      // P107-D34 (P109 ISL-031, ruled "Fix it now"): a pick is the node's value on BOTH sides. It wrote `_internal.value`
+      // alone, so a remount or a new Items list re-read the author's `props.value` and announced it as a change (Changed
+      // with nobody picking, the pick taken back); C71: and a Value written back to the last render was never drawn
+      this.props.value = this._internal.value = value;
+      this.props.valueWrites++;
       if (changed) {
         this.flagOutputDirty('value');
         this.sendSignalOnOutput('onChange');
@@ -193,6 +200,7 @@ const OptionsNode = {
 
         const changed = value !== this._internal.value;
         this.props.value = this._internal.value = value;
+        this.props.valueWrites++;
 
         if (changed) {
           this.forceUpdate();

@@ -52,30 +52,6 @@ function copyOfCounterWith(find: string, replace: string): NodeModule {
  * below must read 0 in the same commit.
  */
 /**
- * NSP-016 §6 C71 — a Value written back to the very value React last rendered, after a person's pick, does not move the
- * selection: the component's effect keys on `props.value` (Select.tsx :44-47), which that write did not change, so the
- * `<select>` keeps the pick; the output says the author's Value, the screen the pick, and picking it again raises nothing.
- * Narrow: an act `choose` of V, a `set` of `value` after it, then a `choose` of V again — all before the difference, which
- * is on `value` or `onChange` (the reference has them, the runtime has nothing).
- */
-const pickWriteBackPick = (d: Divergence) => {
-  const ref = d.difference.reference as TraceEvent | undefined;
-  const act = d.difference.actual as TraceEvent | undefined;
-  const onPick = (e: TraceEvent | undefined) => !!e && ((e.t === 'value' && e.port === 'value') || (e.t === 'signal' && e.port === 'onChange'));
-  if (!onPick(ref) && !onPick(act)) return false;
-  const before = d.reference.slice(0, d.difference.index);
-  let stage = 0;
-  let picked: unknown;
-  for (const e of before) {
-    if (e.t === 'act' && e.act === 'choose') {
-      if (stage === 2 && 'value' in e && e.value === picked) stage = 3;
-      else if (stage < 2) { stage = 1; picked = 'value' in e ? e.value : undefined; }
-    } else if (stage === 1 && e.t === 'set' && e.port === 'value') stage = 2;
-  }
-  return stage === 3;
-};
-
-/**
  * NSP-016 §6 C79 — a Text (Group, Image, Circle, Video) at Opacity exactly 0 takes no pointer (Text.tsx :88-90), but a Pointer Events
  * Enabled / Mode write after it was drawn reaches the element directly and the opacity rule is not re-applied — the runtime raises a
  * pointer output the spec does not. Narrow: the first difference is a pointer output on the RUNTIME's side, the last Opacity written
@@ -211,29 +187,6 @@ const graphValueDropped = (d: Divergence) => {
 };
 
 /**
- * NSP-023 step 4 (R14, 2026-10-05) — NSP-016 §6 D34: Changed with nobody picking. The Dropdown's component keeps its own copy of the
- * choice (`useState(props.value)`, Select.tsx :42) and an effect keyed on `[props.value, props.items]` (:44-47) that ends in
- * `valueChanged(props.value)`: at a remount, and at the paint after Items was written, a node holding a person's pick takes the
- * author's Value back, sends it and fires Changed. Narrow: the RUNTIME prints Value or Changed where the spec prints something else,
- * after a person's pick, in the settle group of a frame that holds an Items write or whose reference prints Did Mount after an earlier
- * Will Unmount.
- */
-const changedWithNobodyPicking = (d: Divergence) => {
-  const act = d.difference.actual;
-  if (!(isChanged(act) || (!!act && act.t === 'value' && portOf(act) === 'value'))) return false;
-  const f = settledFrame(d.reference, d.difference.index);
-  if (!f) return false;
-  const pickAt = d.reference.findIndex((e) => e.t === 'act' && (e as { act?: string }).act === 'choose');
-  if (pickAt < 0 || pickAt >= f[1]) return false;
-  // s47 (the 10,000 at 20732): a pick EARLIER IN THE FRAME than the Items write counts too — the frame's end paints the new list
-  if (d.reference.slice(Math.max(f[0], pickAt), f[1]).some((e) => e.t === 'set' && portOf(e) === 'items')) return true;
-  if (pickAt >= f[0]) return false;
-  let remount = false;
-  for (let g = f[1] + 1; g < d.reference.length && !isStep(d.reference[g]); g++) if (d.reference[g].t === 'signal' && portOf(d.reference[g]) === 'didMount') remount = true;
-  return remount && d.reference.slice(0, f[0]).some((e) => e.t === 'signal' && portOf(e) === 'willUnmount');
-};
-
-/**
  * NSP-023 step 5 (2026-10-06, "Show what Value says") — NSP-016 §6 C76: the Radio Button Group's component keeps a copy of the
  * selection and follows the node through an effect keyed on the Value its last PAINT rendered (RadioButtonGroup.tsx :21, :37-39);
  * a Value written back to that one in the frame of a pick is no change to it, and the picked button stays selected: picking it
@@ -279,12 +232,6 @@ const buttonPickWrittenBack = (d: Divergence) => {
 };
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
-  // s39 — the Dropdown: C65's third instance (Select.tsx :245 renders `{props.label}` raw), and two of its own
-  'net.noodl.controls.options': [
-    { row: "NSP-016 §6 C71 — a Value written back to the value React last rendered, after a pick, leaves the pick selected: picking it again raises nothing", matches: pickWriteBackPick },
-    // NSP-023 step 4 (v3) — the spec keeps the pick; what React's effect makes the runtime do instead
-    { row: "NSP-016 §6 D34 — Changed fires with nobody picking: a remount, or Items written again, after a pick takes the author's Value back", matches: changedWithNobodyPicking }
-  ],
   // s41 — the Slider: no label and no text style, so two of the three throwing setters (the Placement and units-typed style inputs)
   'net.noodl.controls.range': [
     { row: 'NSP-016 §6 D36 — Changed fires with nobody sliding (a graph Value, a clamping Min or Max, the mount), and a remount takes the author\'s Value back', matches: changedWithNobodySliding },
