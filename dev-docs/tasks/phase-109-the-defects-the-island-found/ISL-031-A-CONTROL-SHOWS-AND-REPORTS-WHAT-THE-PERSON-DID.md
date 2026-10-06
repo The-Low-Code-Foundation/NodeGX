@@ -1,6 +1,6 @@
 # ISL-031 — A control shows and reports what the person did
 
-**Status: ⬜ not started — ✅ AC2: all 15 rulings taken 2026-10-05 (1 against the recommendation). Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 23 bugs from
+**Status: 🟡 s26 (2026-10-06/07): 14 of 23 fixed, each with a control (§9) — the Text Input's eight, the label work on four controls (C80, C66), the Checkbox's C67, the Dropdown's C71 + D34, the radio pair's C76 + D37; left: the Slider's four (C73, C74, C75, D36), the shared C64 and D30, and the Text's drag rows C77, C78, C79 (P107's Group / Text specs were open in the working tree). ✅ AC2: all 15 rulings taken 2026-10-05 (1 against the recommendation). Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 23 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 1 high · 14 medium · 8 low, **15 awaiting a ruling**. **Side:** noodl-viewer-react (Text Input, Checkbox, Dropdown, Slider, Radio Button (Group), drag and drop, the shared control states)
 
 ## 1. The person sentence
@@ -23,29 +23,29 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 
 | bug | severity | status | what a person sees |
 |---|---|---|---|
-| [P107-C69](../../bugs/p107-c69-insert-text-and-backspace-read-the-field-as-react-last-drew-it.md) | high | open | Insert Text and Backspace read the field as React last drew it — one arriving in the same frame as a Value, Set, Clear or another edit works on stale text, and a Clear then a Backspace in one frame puts text back |
+| [P107-C69](../../bugs/p107-c69-insert-text-and-backspace-read-the-field-as-react-last-drew-it.md) | high | fixed `580ce9e27` | Insert Text and Backspace read the field as React last drew it — one arriving in the same frame as a Value, Set, Clear or another edit works on stale text, and a Clear then a Backspace in one frame puts text back |
 | [P107-C64](../../bugs/p107-c64-a-disabled-control-still-reports-a-finger-and-a-hover.md) | medium | needs-ruling | A disabled control still reports Pressed, Pointer Down and Pointer Up for a finger, and Hover for the pointer — Enabled promises it "ignores clicks, touches and typing" |
-| [P107-C66](../../bugs/p107-c66-a-checkbox-loses-its-element-when-enable-label-changes.md) | medium | needs-ruling | A Checkbox loses its root element when Enable Label is turned off — Focus then reports Unchanged, Scroll Into View says it is not mounted, while the box is on the page |
-| [P107-C67](../../bugs/p107-c67-an-action-reverting-a-click-in-the-same-frame-does-not-redraw-the-checkbox.md) | medium | needs-ruling | A Check or Uncheck that reverts a person's click in the same frame does not redraw the Checkbox — the box stays as the click left it and the next click reports the opposite of what the node holds |
-| [P107-C68](../../bugs/p107-c68-a-mouse-press-on-a-text-input-fires-no-pointer-down.md) | medium | open | A mouse press on a Text Input fires no Pointer Down and never sets Pressed — the component's own onMouseDown replaces the control's; a Text Area, a finger and the release still report |
-| [P107-C71](../../bugs/p107-c71-a-dropdowns-value-written-back-after-a-pick-leaves-the-pick-on-the-screen.md) | medium | needs-ruling | A Dropdown's Value written back to the value React last rendered, after a person's pick, changes the output but not the selection shown — picking the shown option again then raises nothing |
+| [P107-C66](../../bugs/p107-c66-a-checkbox-loses-its-element-when-enable-label-changes.md) | medium | fixed `94b83d7ea` | A Checkbox loses its root element when Enable Label is turned off — Focus then reports Unchanged, Scroll Into View says it is not mounted, while the box is on the page |
+| [P107-C67](../../bugs/p107-c67-an-action-reverting-a-click-in-the-same-frame-does-not-redraw-the-checkbox.md) | medium | fixed `b07b2a5a4` | A Check or Uncheck that reverts a person's click in the same frame does not redraw the Checkbox — the box stays as the click left it and the next click reports the opposite of what the node holds |
+| [P107-C68](../../bugs/p107-c68-a-mouse-press-on-a-text-input-fires-no-pointer-down.md) | medium | fixed `7a92ec4b1` | A mouse press on a Text Input fires no Pointer Down and never sets Pressed — the component's own onMouseDown replaces the control's; a Text Area, a finger and the release still report |
+| [P107-C71](../../bugs/p107-c71-a-dropdowns-value-written-back-after-a-pick-leaves-the-pick-on-the-screen.md) | medium | fixed `5d40a7aa3` | A Dropdown's Value written back to the value React last rendered, after a person's pick, changes the output but not the selection shown — picking the shown option again then raises nothing |
 | [P107-C73](../../bugs/p107-c73-a-sliders-value-written-back-after-a-slide-leaves-the-handle-where-the-person-put-it.md) | medium | needs-ruling | A Slider's Value written from the graph after a person's slide does nothing when it equals the last Value the author wrote — the handle stays where the person put it |
-| [P107-C76](../../bugs/p107-c76-a-radio-groups-value-written-back-in-the-pick-frame-leaves-the-pick-selected.md) | medium | needs-ruling | A Radio Button Group's Value written back in the same frame as a person's pick leaves the picked button selected under a Value that names another — picking it again raises nothing, and picking the named one raises no Changed |
+| [P107-C76](../../bugs/p107-c76-a-radio-groups-value-written-back-in-the-pick-frame-leaves-the-pick-selected.md) | medium | fixed `8dbeb8f33` | A Radio Button Group's Value written back in the same frame as a person's pick leaves the picked button selected under a Value that names another — picking it again raises nothing, and picking the named one raises no Changed |
 | [P107-C77](../../bugs/p107-c77-a-draggable-element-loses-its-keyboard-pickup-when-its-element-is-replaced.md) | medium | open | A Draggable element can no longer be picked up from the keyboard once its element is replaced — after Mounted goes off and on, after its Tag changes, or when it mounts more than about a second after Draggable was set |
 | [P107-C79](../../bugs/p107-c79-an-invisible-element-catches-clicks-after-a-pointer-events-write.md) | medium | open | A Text at Opacity 0 catches clicks once Pointer Events Enabled or Pointer Events Mode is written after it was drawn — the style write goes straight to the DOM and the component's "opacity 0 takes no pointer" rule is never re-applied |
-| [P107-C80](../../bugs/p107-c80-enable-label-takes-the-keyboard-away-from-a-text-input.md) | medium | open | Turning Enable Label on or off while someone is typing in a Text Input takes the keyboard away from them, silently — React builds a new field under the label, and Focused still says true |
+| [P107-C80](../../bugs/p107-c80-enable-label-takes-the-keyboard-away-from-a-text-input.md) | medium | fixed `94b83d7ea` | Turning Enable Label on or off while someone is typing in a Text Input takes the keyboard away from them, silently — React builds a new field under the label, and Focused still says true |
 | [P107-D30](../../bugs/p107-d30-focused-stays-true-after-a-control-leaves-the-page.md) | medium | needs-ruling | Focused (and Hover, Pressed) stay as they were after a control leaves the page with Mounted off — the element that comes back holds no keyboard while Focused still reads true |
-| [P107-D34](../../bugs/p107-d34-a-dropdown-fires-changed-with-nobody-picking-after-a-remount-or-an-items-write.md) | medium | needs-ruling | A Dropdown fires Changed with nobody picking — a remount, or Items written again after a person's pick, takes the author's Value back and announces it as a change |
+| [P107-D34](../../bugs/p107-d34-a-dropdown-fires-changed-with-nobody-picking-after-a-remount-or-an-items-write.md) | medium | fixed `5d40a7aa3` | A Dropdown fires Changed with nobody picking — a remount, or Items written again after a person's pick, takes the author's Value back and announces it as a change |
 | [P107-D36](../../bugs/p107-d36-a-slider-fires-changed-with-nobody-sliding.md) | medium | needs-ruling | A Slider fires Changed with nobody sliding — a Value written from the graph, a Min or Max that clamps the value, a remount after a slide, and a slider placed with Min equal to Max |
-| [P107-D37](../../bugs/p107-d37-a-radio-button-fires-changed-for-a-selection-it-did-not-get.md) | medium | needs-ruling | A Radio Button fires Changed when its Checked moves for any reason while its group's last selection was a person's — a sibling carrying the same Value picked, its own Value written in the frame of a pick, a remount after a pick |
-| [P107-C72](../../bugs/p107-c72-a-text-input-converts-and-measures-with-the-props-it-last-rendered.md) | low | open | A Text Input's Clear, Backspace and frame-end writes convert with the Type, and measure room with the Max length, the component LAST RENDERED — a Type turned Number with a Clear in the same frame publishes '' where the next frame says null |
+| [P107-D37](../../bugs/p107-d37-a-radio-button-fires-changed-for-a-selection-it-did-not-get.md) | medium | fixed `8dbeb8f33` | A Radio Button fires Changed when its Checked moves for any reason while its group's last selection was a person's — a sibling carrying the same Value picked, its own Value written in the frame of a pick, a remount after a pick |
+| [P107-C72](../../bugs/p107-c72-a-text-input-converts-and-measures-with-the-props-it-last-rendered.md) | low | fixed `580ce9e27` | A Text Input's Clear, Backspace and frame-end writes convert with the Type, and measure room with the Max length, the component LAST RENDERED — a Type turned Number with a Clear in the same frame publishes '' where the next frame says null |
 | [P107-C74](../../bugs/p107-c74-a-sliders-value-output-leaves-the-handle-past-a-lowered-max-and-off-the-step.md) | low | needs-ruling | A Slider's Value output disagrees with the handle — it keeps a slid value past a lowered Max, holds a graph value the browser rounds to the step, and Value Percent keeps its old figure when Min or Max moves |
 | [P107-C75](../../bugs/p107-c75-a-slider-with-min-equal-to-max-reports-value-percent-nan.md) | low | needs-ruling | A Slider with Min equal to Max reports Value Percent NaN, and every report fires Changed |
 | [P107-C78](../../bugs/p107-c78-a-keyboard-drag-drops-an-element-on-itself.md) | low | open | An element that is both Draggable and a drop zone, picked up with the keyboard, starts inside itself — Enter drops it on itself (Dropped and Landed on the same node, its own Drag Value), which the pointer can never do |
-| [P107-D31](../../bugs/p107-d31-set-fires-value-changed-with-nothing-changed.md) | low | needs-ruling | Text Input's Set fires Value Changed and reports Done when the field already holds the Value — "Fires whenever the Value output changes" is not what it does |
-| [P107-D32](../../bugs/p107-d32-a-text-fields-value-output-keeps-the-type-it-was-given-while-off-the-page.md) | low | needs-ruling | A text-type Text Input given a number publishes '5' (text) while on the page and 5 (a number) while off it — the Value output's type depends on whether the field is mounted |
-| [P107-D33](../../bugs/p107-d33-clear-on-a-number-field-reports-unchanged-while-it-empties-the-field.md) | low | needs-ruling | Clear on a Number field reports Unchanged while it empties text the field was holding — it reads the author's Value and the output, not the field |
-| [P107-D35](../../bugs/p107-d35-a-focus-action-counts-as-a-caret-the-person-placed.md) | low | open | A Focus action counts as "a caret someone placed" — on a Text Area an Insert Text then writes at the START of the text, where the browser's resting cursor is, and a field whose Type moved from Email or Number to Text inserts at the start too |
+| [P107-D31](../../bugs/p107-d31-set-fires-value-changed-with-nothing-changed.md) | low | fixed `a969b4b31` | Text Input's Set fires Value Changed and reports Done when the field already holds the Value — "Fires whenever the Value output changes" is not what it does |
+| [P107-D32](../../bugs/p107-d32-a-text-fields-value-output-keeps-the-type-it-was-given-while-off-the-page.md) | low | fixed `0a6bb1d90` | A text-type Text Input given a number publishes '5' (text) while on the page and 5 (a number) while off it — the Value output's type depends on whether the field is mounted |
+| [P107-D33](../../bugs/p107-d33-clear-on-a-number-field-reports-unchanged-while-it-empties-the-field.md) | low | fixed `70621abcc` | Clear on a Number field reports Unchanged while it empties text the field was holding — it reads the author's Value and the output, not the field |
+| [P107-D35](../../bugs/p107-d35-a-focus-action-counts-as-a-caret-the-person-placed.md) | low | fixed `7a92ec4b1` | A Focus action counts as "a caret someone placed" — on a Text Area an Insert Text then writes at the START of the text, where the browser's resting cursor is, and a field whose Type moved from Email or Number to Text inserts at the start too |
 
 ## 4. Order of work
 
@@ -111,3 +111,41 @@ ruling is still this task's work: the description changes, the node does not.
 | P107-D31 | Keep it, fix the description | **no** | Nothing changes in apps. Value Changed is described as firing whenever Set or a person writes into the field, changed or not. |
 | P107-D32 | Always text | yes | Value has one type whatever the field's visibility. One-word change on the hidden path. |
 | P107-D33 | Check the field's text | yes | Clear reports Done whenever it empties something. Small change in one file. |
+
+## 9. Session 26 (2026-10-06/07) — fourteen of twenty-three
+
+**AC1, re-measured** (the five control specs on the runtime at seed 20732, before any change): every known row still fired
+(the Text Input's C68 ×13, C72, C69 in generated sequences; the rest in their row scenarios). Three reds were not this task's:
+one surviving mutant each on the Text Input (`person.release`, still there at 20732 at the end, gone at seed 13) and the Slider
+(`world.place`), and a Text matrix scenario where the runtime threw "window is not defined" while P107's Group edit was open. No
+row had been fixed elsewhere.
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| D31 | `a969b4b31` | Value Changed's sentence: every write into the field fires it, changed or not (ruled against the recommendation) | words; every copy |
+| D32 | `0a6bb1d90` | off the page the value is made text as the component makes it, compared as published; Text Input v3 | control red on exactly 2 scenarios + 6 sequences |
+| D33 | `70621abcc` | Clear's "already empty" reads the field's text — the component's `text` (kept at once in setText) on the page, the start value off it; v4; a scenario for a focused Set; the on-page twin of an equivalent mutant declared | controls: red on the 2 D33 scenarios; the start value alone, on the focused one |
+| C69 + C72 | `580ce9e27` | `edit` reads `text` and a cursor kept at each write (`pendingCaret`); setText / edit read Type and Max length from the node's props | controls red on exactly 4 + 2 scenarios; the cursor half graded by two new GAM-011 viewer cases (the face never places a cursor mid-text) |
+| C68 + D35 | `7a92ec4b1` | the <input> runs the control's onMouseDown, then its own; a new <textarea>'s cursor is put at the end, once per element | controls red on exactly 15 + 3 scenarios |
+| C80 + C66 | `94b83d7ea` | Text Input, Checkbox, Dropdown, Radio Button render one tree whether the label shows or not (outer div always, `display: contents` without a label, one root ref); root styles the node wrote onto the old root are blanked (`clearedRootStyles`) | HEAD red on exactly 18 scenarios; without the clearing, on the 4 "hidden, holding the keyboard" ones (3 added) |
+| C67 | `b07b2a5a4` | the Checkbox counts every write of Checked; the component's effect is keyed on the count | control red on exactly its scenario |
+| D34 + C71 | `5d40a7aa3` | a pick writes the Dropdown's `props.value` too; the node counts value writes, the effect keys on the count; the six D34 twins dropped as the ledger asked | HEAD red on exactly 7; without the counter, on C71's 1 |
+| C76 + D37 | `8dbeb8f33` | the group counts Value writes; the selection carries the click (`RadioClick`), each button reports it once — Changed on the clicked button and the one that lost the selection | HEAD red on exactly 9; without the counter, on C76's 4 |
+
+**The pattern, five times over:** a component kept a copy of a value and re-read the node's through an effect keyed on what React
+LAST RENDERED, while the node wrote its props without a render. A write-back to the last render, or a person's change the node
+never mirrored, was invisible to the effect. The fix each time: the node writes one value on both sides and counts its writes; the
+effect keys on the count. The Slider's C73 is the same shape (next session).
+
+**Traps met:** zsh does not word-split `$FILES` — a control's backup loop copied nothing and HEAD's files stood in for mine until I
+re-applied the edits from their scripts ([[zsh-does-not-word-split-and-colon-is-a-modifier]]); a predicate-removal helper ran past a
+one-line arrow to the end of `KNOWN_ROWS` and took P107's open Group rows with it — rebuilt from HEAD + my removals + P107's two
+hunks (verbatim, their diff unchanged all session) before anyone wrote the file; s25's D10 commit had left `stranger.test.ts` red
+(round 3's hashes and Stop line, fixed `1d1496929`).
+
+**Gates:** the five control specs conform at seeds 20732 and 13 after each commit (the Text Input's baseline survivor aside);
+viewer suite 1777 / 1777 after the label work; spec stranger (rounds 1–4), batch-visual (Group's in-progress spec red, P107's),
+page model, catalog parity green; viewer, spec tsc 0. **Not measured:** layout of an unlabelled control in a real browser
+(`display: contents` takes the outer div out of layout; a stylesheet selecting a Group's children by position would see it).
+**The export:** not checked for any of these rows; the exported controls are React components with their own state.
+

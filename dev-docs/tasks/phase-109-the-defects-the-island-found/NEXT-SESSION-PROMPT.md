@@ -1,115 +1,109 @@
-# Next session — P109 session 26
+# Next session — P109 session 27
 
 **Phase:** [README](README.md) · **Audit:** [AUDIT-2026-10-01.md](AUDIT-2026-10-01.md) · scoped at `27d891bf3`.
-**Session 25 (2026-10-06, on `cline-dev`, `86139ddbf` … the handoff commit):** **ISL-032 closed (17 of 17)** — 15 fixed in
-11 commits, each with a control (HEAD's runtime file red on exactly the rows it should be), D4 and D5 closed as ruled (no
-change). The board is **21 of 37 closed**, re-derived from the task files' status lines. Record: ISL-032 §9.
+**Session 26 (2026-10-06/07, on `cline-dev`, `1d1496929` … the handoff commit):** **ISL-033 closed (6 of 6)** and **ISL-031
+14 of 23**, each fix with a control (HEAD's file red on exactly its rows). The board is **22 of 37 closed**, re-derived from
+the task files' status lines. Records: ISL-033 §9, ISL-031 §9.
 
-## What s25 found that s24's handoff did not know
+## What s26 found that s25's handoff did not know
 
-- 🔴 **A peer's pathspec commit swept my open hunk.** `63b7c4e91` (P107 Text v5) committed `conformance.test.ts` whole,
-  with my uncommitted C9 `KNOWN_ROWS` removal in it. Commit a hunk in a file a peer is editing AT ONCE, through a temp
-  index (HEAD + your hunk), or keep it out of the working file until you commit.
-- 🔴 **A peer's open edit can make the primary's runtime target unloadable.** A P107 Group spec in progress made
-  `node-spec-target.ts` load a viewer scroll plugin jest cannot parse (80 / 91 graph scenarios red on load). Grade in a
-  worktree at HEAD: `scripts/devtools/make-worktree.sh <name> HEAD <abs-parent>` (s25's was removed at
-  the end of the session), copy your files in, copy results back.
-- 🔴 **A spec fix on a node the strangers were handed moves their fixtures.** Rounds 1–2 (`stranger/`, `stranger-2/`) built
-  Counter, Switch, And, Condition, String Format (+ Inverter, Boolean To String) from v1. A behaviour change there turns the
-  rounds red: change the fixture's line, mark it "not the stranger's line", refresh the hashes. A comment-only edit to a
-  guarded spec moves its hash too.
-- **C9 was the only known row of the 17;** C12–C14 were graph `row` marks, C15 only in a recorded trace. Expect ISL-031's
-  NSP-016 rows to be `KNOWN_ROWS` entries (Text Input, Checkbox, Dropdown, Slider, Radio) — that file is P107's, edited
-  live by a peer: CAS-commit your hunk the moment it is measured.
-- **A fix can turn a mutant equivalent** (D10: Stop's `unchanged` branch). Declare it in `equivalent-mutants.ts` with why.
-- **`runtime graph.test.ts`'s first scenario times out at 5 s in a cold parallel run** — 0.4 s alone. A load flake.
-- **Two description copies hide outside the catalogs:** `docs/node-catalog/enrichment/*.json` and the editor's
-  `cloud-node-library.json` (`npm run cloud-library:check`). The cloud library was stale at HEAD (s24) — fixed `25328357c`.
+- 🔴 **s25 left `stranger.test.ts` red.** Its D10 commit moved `delay.ts` and `Timer.json`, two files stranger round 3 is
+  handed, without refreshing `stranger-suite-hashes.json`, and round 3's own Timer still said Unchanged for a queued Stop.
+  Fixed `1d1496929`. **After any edit to a guarded spec or scenario (rounds 1–4: Counter, Switch, And, Condition, String
+  Format, Inverter, Boolean To String, Timer, Repeat, Animate To Value, UUID, Screen Resolution, Dropdown) run
+  `node -e "require('./tests/stranger-suite-hashes.helper.js').write()"` in `nodegx-node-spec` and check the diff names only
+  your files.** A behaviour change on one of them also needs the stranger's own line moved, marked "not the stranger's line".
+- **`docs:nodes:check` was red at HEAD** (s24's and s25's sentences never reached their docs pages). Run all four after a
+  description change: `catalog:check`, `catalog:merge:check`, `docs:nodes:check`, `cloud-library:check`.
+- **The controls' pattern.** Five of ISL-031's rows were one shape: a component keeps a copy of a value and re-reads the
+  node's through an effect keyed on what React LAST RENDERED, while the node writes its props without a render. The fix each
+  time: the node writes one value on both sides and counts its writes (`checkedWrites`, `valueWrites`); the effect keys on the
+  count. **The Slider's C73 is the same shape** — start there.
+- **A component's root can move between two elements that both stay on the page** (the label work): the node writes root
+  styles straight onto the root (`setStyle`), React never learns them, so the element that stops being the root keeps them.
+  `noodl-root-ref.ts clearedRootStyles` blanks them.
+- **Description words are not a version** (NSP-010: a version is a behaviour change). D2/D6/D13 kept their spec versions.
+- **Function's and Expression's Run**: wiring Run does not stop the inputs re-running the node; it stops only the run at load
+  (and, for Function, on a code or used-file change). Measured, and now in both enrichments.
+- 🔴 **Two harness traps cost time:** zsh does not split `$FILES` (use an array: `FILES=(a b); for f in $FILES`), and a helper
+  that cut a predicate up to the next `\n};\n` ran past a one-line arrow to the end of `KNOWN_ROWS`, taking P107's open rows
+  with it (rebuilt before anyone wrote the file). The fixed helper is in ISL-031 §9's spirit: cut rows first, then
+  predicates, and treat a line ending in `;` as the whole arrow.
 
 ## The board (re-derive it from each task file's status line; never copy this table)
 
 | state | tasks |
 |---|---|
-| ✅ closed (21) | ISL-001, 002, 003, 004, 005, 006, 011, 014, 015, 016, 017, 019, 020, 021, 023, 026, 027, 028, 029, 030, 032 |
+| ✅ closed (22) | ISL-001, 002, 003, 004, 005, 006, 011, 014, 015, 016, 017, 019, 020, 021, 023, 026, 027, 028, 029, 030, 032, 033 |
+| 🟡 Track F, building | ISL-031 (14 of 23: left the Slider's four, C64, D30, C77, C78, C79) |
 | 🟡 ruled, one reading owed | ISL-012 (AC3's full server render with hydration) · ISL-018 (AC5: the agent round) |
 | 🟢 ruled, not built | ISL-013 ("A kit says what it needs") · ISL-024 ("Own package + a note", quiet gap only) |
 | 🟡 built here, one half elsewhere | ISL-008 (AC7 → P18) · ISL-010 (AC4, Richard) · ISL-009 (export → P18) · ISL-007 (AC4 → P108) |
 | 🟡 one case open | ISL-022 (AC6 inconclusive) · ISL-025 (the closing task) |
-| ⬜ Track F, ruled, buildable | ISL-033 (5, descriptions) · ISL-031 (15, controls — P107's NSP-016 files are live) |
 | ⬜ Track F, no rulings | ISL-034 … ISL-037 |
 
 ## Do, in this order
 
-1. **ISL-033** (5 description rows — the five copies of a sentence: viewer/runtime node, spec, docs page, both catalogs,
-   plus enrichment and the cloud library where they carry it). Check whether ISL-032's C12 sentence change already covers
-   one of its rows.
-2. **ISL-031** (15). Read each spec's "ROWS" / "NOT GRADED" block first; most rows sit in P107's `KNOWN_ROWS` and the
-   control specs P107 is still editing — check `git status` + mtimes on those files before every edit.
-3. **`P109-S22-COLLECTIONCHURN`** (low, open). Then ISL-013 build; ISL-018 AC5; ISL-012 AC3.
+1. **The Slider** (ISL-031: C73, D36 known rows; C74, C75 rows the spec still models as the runtime does). C73 + D36 are the
+   controls' pattern (count the node's Value writes; report a graph write without Changed — a second entry point that syncs
+   without announcing, as D36's ledger proposes). C74 and C75 change the spec too (clamp and round to the step as the browser
+   does; Percent 0 when Min = Max; a blank Min / Max is 0 / 100): spec v3, v4. **The Slider's conformance is the slowest spec**
+   (27 minutes in s26's first run beside a peer's job, 5,474 mutants) — run it alone, and only `NSP_ONLY=net.noodl.controls.range`.
+2. **C64 and D30** (shared, every control): a disabled control ignores a finger (keep hover); a control leaving the page resets
+   and announces Focused / Hover / Pressed. Both change every control's spec — check P107's live edits first.
+3. **C77, C78, C79** (the Text's drag rows): P107's Text v5 / Group spec was open in the working tree all of s26
+   (`group.ts`, `Group.json`, the Group known rows). Check `git status` and mtimes; do these when P107 is done with them.
+4. Then `P109-S22-COLLECTIONCHURN`, ISL-013 build, ISL-018 AC5, ISL-012 AC3.
 
 ## Decisions for Richard (not yours)
 
-- `P109-S24-SIGNINWITHERRORKEPT` (new) — Sign In With clears Error the way D25 used to (to nothing); probably unreachable
-  (one return per page load). Change it to blank text, or close it?
-- `P109-S22-BUILTINBOUNDARY` — built-in nodes get the kit nodes' error boundary? Recommendation: yes.
-- `P109-S20-LISTDEFAULTTYPE`, `P109-S18-REFRESHROWSTATE`, ISL-010 AC4 and the Effort port, pushing `cline-dev`,
-  publishing the Garden kits at the origin.
+- **Layout of an unlabelled control (s26, measured in jsdom only).** The label fix puts every Text Input, Checkbox, Dropdown and
+  Radio Button inside an outer `<div style="display: contents">` when it has no label. Layout should be unchanged (the box is
+  taken out of layout) and author classes sit on the input, not the root; a stylesheet that selects a Group's children by
+  position would see one more element. A real-browser check on a form template is owed before a release.
+- `P109-S24-SIGNINWITHERRORKEPT`, `P109-S22-BUILTINBOUNDARY` (recommendation: yes), `P109-S20-LISTDEFAULTTYPE`,
+  `P109-S18-REFRESHROWSTATE`, ISL-010 AC4 and the Effort port, pushing `cline-dev`, publishing the Garden kits at the origin.
 
 ## Handed over (owed by another phase; say so where you meet it)
 
-- **P18 (export), s25:** `P109-S25-EXPORTSTATESRUN` (C22's shape in `statesLib.ts`) and `P109-S25-EXPORTFEEDZONE`
-  (D16's reader in `parseLib.ts`), both read, not run. Not checked for the export: D17, D18, D10, D14, C14, C15, C9.
-- **Release notes, add (s25):** Receive Event's Consume now stops a Children or Siblings event at the component that
-  consumed it, and its description says it never stops a Global event. Condition's Is True / Is False report the last
-  test. Create New Array / Object and Set Object Properties answer every Do press. States: a move during an animation
-  lands where it says; a state that leaves a text empty clears it. String Format prints `$` exactly. Substring's End
-  "-1" as text runs to the end. Parse Feed: a date with no zone is UTC everywhere; CEST / BST dates are dropped rather
-  than shown wrong; Feed Updated clears; Count matches Items. Action Dispatcher: a Dispatch refused on the spot fires
-  Failure; Waiting For clears when a wait ends. Delay's Stop says Done for a countdown started the same frame. Date To
-  String: a timestamp renders and an empty Date is Invalid Date, with or without a Timezone.
+- **P18 (export):** none filed in s26. Read, not run: And is exported as an expression (no "nothing yet" state); the exported
+  Text Input types Value as text and has no hidden-field or Clear-outcome path. The exported controls were not checked for
+  C66–C80, C67, C71, D34, C76, D37. Plus s25's and earlier lists (STATESRUN, FEEDZONE, BADBODY, …).
+- **P107:** the Text Input's `person.release` surviving mutant at seed 20732 (present before s26's changes, gone at seed 13), the
+  Slider's `world.place` survivor in s26's baseline, and a Text matrix scenario that threw "window is not defined" while the
+  Group edit was open — all P107's to read.
+- **Release notes, add (s26):** And's Result is false from the start. String Format's, Boolean To String's and Array's Changed
+  descriptions, and Run on Function and Expression, say what the node does. Text Input: a text field's Value is always text;
+  Clear says Done whenever it empties the field; Insert Text and Backspace in one frame each work on what the last write left,
+  at the cursor it left; a Type or Max length change applies to writes in the same frame; a mouse press fires Pointer Down; a
+  Text Area's cursor rests at the end; Value Changed's description says it fires on every write. Enable Label no longer takes
+  the keyboard away or loses the control on Text Input, Checkbox, Dropdown and Radio Button. The Checkbox draws an app's Check
+  / Uncheck right after a click. The Dropdown keeps a pick through hiding and a refreshed list, fires Changed only for a pick,
+  and draws every Value written. Radio buttons show what the group's Value says after a write-back, and fire Changed only for
+  the click (and the deselect it causes).
 
-- **P18 (export):** `P109-S24-EXPORTBADBODY` filed (D11's twin: the exported HTTP Request reports an unreadable JSON body
-  as `http/network-error`). Not checked for the export: D24 (does an exported access rule read the record's own
-  backend?), the rest of ISL-030 (C7 is fine there — it reads `auth-authToken`; D12 n/a — Cancel defers; C47 probably
-  clears through React state). Plus s23's and earlier lists.
-- **P107:** `node-spec-target.ts` (P107's open edit) — its `installUser` docblock still says the access rules read the
-  legacy store; the code needs no change. Correct the sentence when the file is free.
-- **Release notes, add (s24):** an Owner access rule works on a NodeGX backend configured under Backend Services (it was
-  dropped); on Directus / PocketBase the "ACL ignored" warning appears again. HTTP Request: Authentication sends the
-  credential; an unreadable JSON body fails as `http/bad-body`; Cancel stops every request. Sign-in: a backend blip at
-  page load keeps the person signed in and says nothing; an expired session says Session Lost once; after sign-out the
-  User node's Id / Email / Username go blank and Roles / properties empty; a cancelled provider sign-in fails once.
-  Files: Error Status Code is the real HTTP status (an app that checked 119 checks 403); Error is always a sentence;
-  Cloud File's Name is the uploaded name; Sign File URL clears Expires At / TTL for a public link; Open File Picker's
-  cleared Capture no longer opens the camera. Set User Properties refuses a Username on Directus / PocketBase. Streams:
-  Subscribe To Changes and Query Records' realtime ignore repeated values; SSE's status outputs stay current and it says
-  idle after a URL change with Auto Connect off. Cloud Function's Error is always text. Request Magic Link clears Error.
+## Gate readings taken s26 (2026-10-06/07)
 
-## Gate readings taken s25 (2026-10-06)
-
-- **Per fix:** its specs at seeds 20732 and 13 CONFORM, every mutant killed but the declared equivalents; its control red
-  on exactly its rows (ISL-032 §9 has each).
-- Runtime jest without the conformance file 3179 passed (one cold-start timeout, 91 / 91 alone) — before C14/C15, D10,
-  D14; viewer 1775 / 1775 (same point); runtime graph 91 / 91; spec graph 123 / 123; spec catalog parity, schema, world,
-  batch, batch-data, batch-time, pilot, stranger green; runtime, spec, viewer tsc 0; catalog:check, catalog:merge:check,
-  cloud-library:check up to date; `bugs.js check` 5 problems, none P109 ISL-032's.
-- C14/C15, D10, D14 measured in the worktree at HEAD (graph 91 / 91, the dispatcher's unit + corpus 192, Date To String
-  108, viewer timer 48, three tsc 0).
-- **After the last commit, in the worktree (code = HEAD):** runtime jest without the conformance file 3179 passed, 1 failed —
-  the same cold-start timeout on graph.test.ts's first scenario; viewer 1775 / 1775.
-- **Not run:** the editor; the stranger 10,000 runs.
+- **Per fix:** its specs at seeds 20732 and 13 conform (the Text Input's baseline survivor aside), every other mutant killed
+  or declared; its control red on exactly its rows (each task's §9).
+- Spec: pilot, catalog parity, stranger (rounds 1–4), schema, world, batch, batch-data, batch-time, batch-records,
+  batch-navigation, types, runner, reach, canonical, adapter, coerce, counter, sha2, graph 123 / 123, page model green;
+  batch-visual green but for P107's in-progress Group spec. Runtime graph 91 / 91. Viewer 1777 / 1777 after the label work.
+  Runtime, spec, viewer tsc 0. catalog / merge / docs:nodes / cloud-library checks up to date. noodl-mcp description gates
+  green (cmp001's red is `P109-S9-CMP001RATE`, filed). `bugs.js check` 5 problems, none P109's.
+- **Closing (after the last code commit, `8dbeb8f33`):** viewer 1777 / 1777; runtime jest without the conformance file 3179
+  passed, 1 failed — the known cold-start timeout on graph.test.ts's first scenario (91 / 91 alone).
 
 ## Recipes
 
 - **A CAS commit:** `GIT_INDEX_FILE=<tmp>`, `git read-tree HEAD`, `git add` the paths (or `update-index --cacheinfo` a
   blob built from `git show HEAD:<path>` + your edit, for a file with a peer's open edit), check the staged count,
-  `commit-tree`, `update-ref HEAD NEW BASE`, then **`git reset -q -- <paths>`**.
-- **A control:** back up by FULL path, `git show HEAD:<path> > <path>`, run with `--forceExit` to a file, then restore
-  in a SEPARATE command and `cmp`. Never while a peer's run that loads that package is starting; a peer's
-  interpreter-only step (`nodegx-node-spec/tests/…`) does not load the runtime.
-- **Closing a ledger row:** status fixed, `commit:`, `kit: node-spec`, `regression:`, and a "Fixed <sha>" paragraph —
-  s24's helper was a 20-line python script (regex on the header); rebuild it.
-- **A per-ruling control inside one file:** build the partial from HEAD with the one fix applied (python string replace
-  on `git show HEAD:<path>`), run, restore in a separate command and `cmp`.
-- **Grading in a worktree:** `make-worktree.sh` links node_modules correctly; `git -C $W diff --quiet -- <path>` before
-  copying in; `cmp` the file back against primary after the run.
+  `commit-tree`, `update-ref HEAD NEW BASE`, then **reset each committed path in the real index**
+  (`git diff --name-only BASE NEW | while read f; do git reset -q -- "$f"; done`).
+- **Dropping a known row:** run the spec with the row still listed first (its scenarios should read "passed" and the
+  attribution 0), then remove the row and its predicate from BOTH the working `conformance.test.ts` and a copy of HEAD's, diff
+  the two (the peer's lines must be all that differs), commit the HEAD copy. Unmark the row scenarios in the same commit.
+- **A control:** back up each file by name (`cp $f $S/${f:t}`), `git show HEAD:$f > $f`, run, restore in the same command
+  and `cmp`. With zsh, put paths in an array.
+- **Splitting one file's hunks across commits:** replay `git diff -U0` hunks from HEAD by stage (s26's `stages.py` idea:
+  assign each hunk by a keyword, assert the full replay equals the working file).
