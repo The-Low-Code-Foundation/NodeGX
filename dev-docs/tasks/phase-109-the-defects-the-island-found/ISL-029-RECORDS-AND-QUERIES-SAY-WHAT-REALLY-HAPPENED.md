@@ -1,6 +1,6 @@
 # ISL-029 — Records and queries say what really happened
 
-**Status: ⬜ not started — ✅ AC2: all 12 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 12 bugs from
+**Status: 🟡 s23 (2026-10-06): 6 of 12 fixed — C43 (`83908a71e`), D22 (`1b367e1fa`), C36 (`011f0a9bd`), C38 + C39 (`724db53e7`), C42 (`8d3ebc83f`); open: C40, C41, C34, C33, C35, D24 (§9). ✅ AC2: all 12 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 12 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 4 high · 4 medium · 4 low, **12 awaiting a ruling**. **Side:** runtime (Record family, Query Records `DbCollection2`, Filter Records `FilterDBModels`), backend contract
 
 ## 1. The person sentence
@@ -95,3 +95,37 @@ ruling is still this task's work: the description changes, the node does not.
 | P107-C43 | Fail with an error | yes | The node fires Failure and puts the reason on Error, as it already does for the filter. A one-line change. |
 | P107-D22 | Say 'Missing Id.' | yes | Fetch uses the same test for an empty Id that the rest of the node uses. No request goes out and the node's own sentence shows. A one-line change. |
 | P107-D24 | Ask the record's own backend | yes | The rules see the person who really logged in. On Directus and PocketBase the warning appears again. On a NodeGX backend, if the mismatch is real there, Owner rules start working. A modest change to how every access rule finds the user, and the NodeGX case should be checked on a real backend first. |
+
+## 9. Session 23 (2026-10-06) — six rows
+
+AC1 for these six: re-measured at HEAD before each fix, and each still fired (C43 and C36 were known rows; D22's and
+C42's scenarios modelled the runtime; C38 and C39 are outside the spec and were red in a new runtime test first).
+
+| bug | commit | what changed | regression |
+|---|---|---|---|
+| C43 | `83908a71e` | Filter Records' sort inside the filter's `try`; known row dropped | the C43 scenario; control red |
+| D22 | `1b367e1fa` | Record's Fetch uses the binding's empty test (null is Missing Id.); Record v4 | the D22 scenario; control red |
+| C36 | `011f0a9bd` | Delete Record takes the record at the call; known row dropped | the C36 scenario; control red |
+| C38, C39 | `724db53e7` | no saved script runs the starter script; a parse error or a throw fails the node and asks nothing | `test/nodes/isl-029-query-records-filter-script.test.ts`; red on the 3 defect rows before |
+| C42 | `8d3ebc83f` | with no Backend written Filter Records binds the project's backend's store (creation and each run); Filter Records v3 | the C42 hand and graph scenarios + 2 new; controls red |
+
+**What the plan did not know.**
+- **C39 also closes FLD-008's route.** FLD-008's test rebuilds the node before FLD-008 to show the old widening; the throw
+  it provokes now lands in C39's catch, so that arm also puts C39's line back (asserted present).
+- **C42's first v3 left a mutant alive** that v2 had killed: a box write handed the Backend write's recorded patch
+  (`{ bound: 'main', picked: true }`). With an unwritten Backend now following the project, only a box written AFTER
+  Backend named the other backend, with a save on ONE backend, tells them apart. Two saves on two backends did not:
+  both arms re-ran once and read the same global registry.
+- **A scenario's NAME can go false while its trace still passes:** "a filter parameter's box written with no Backend
+  held … a save is still not heard" was true only of v2; renamed to what v3 shows.
+- **The conformance test file has another session's open edit** (P107's C79 predicate, s50). Both known-row removals
+  (C43, C36) were committed as HEAD's file minus those lines, never the working copy.
+
+**Readings (2026-10-06):** each fix at seeds 20732 and 13 where its spec changed, 0 divergences, every mutant killed
+(Filter Records 157 / 157; Record 145 / 147 and 133 / 135, the two declared equivalents; Delete Record 34 / 34; Query
+Records 1176 / 1178 at 20732, declared equivalents). Runtime graph 87 / 87; spec records batch, catalog parity, graph,
+world (and schema) 521–556; runtime record corpus 77 / 77 and 92 / 92; Filter Records corpus 29 / 29; runtime and spec tsc 0.
+
+**Next here:** C40 + C41 (a live query with a Limit, and a saved record's place), then C34, C33, C35; D24 last (its ruling
+asks for the NodeGX case to be checked on a real backend first).
+

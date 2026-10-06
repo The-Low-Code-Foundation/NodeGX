@@ -1,12 +1,15 @@
 ---
 id: P107-C36
 title: Delete Record reports Failure for a delete that succeeded when its Id changes while the delete is out
-status: scheduled
+status: fixed
+commit: 011f0a9bd
 phase: P109
 task: ISL-029
 severity: medium
 area: runtime / Record family — Delete Record (`DeleteDbModelProperties`)
 found: P107 (the node says what it does) s22, 2026-10-02 — the 10,000-sequence deep run (19 of 10,000 at seed 20728)
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/DeleteDbModelProperties.json "the binding cleared while the delete is out: Done for the record the call named (C36)" (no longer a known row)
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.5 (row C36); the known row in packages/noodl-runtime/test/node-spec/conformance.test.ts; scenario `DeleteDbModelProperties.json` "the binding cleared while the delete is out"
 ---
 
@@ -35,3 +38,5 @@ known row goes in the same commit as the fix.
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Remember the record at the press".** The node keeps the record it was asked to delete and reports Success for that one. Update Record already works this way. A small change. The question as asked: *"Should Delete Record report on the record it actually deleted, whatever the Id says by then?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 011f0a9bd (P109 ISL-029, 2026-10-06), as ruled.**

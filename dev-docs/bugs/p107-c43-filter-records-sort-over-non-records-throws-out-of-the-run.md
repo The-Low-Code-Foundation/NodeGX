@@ -1,12 +1,15 @@
 ---
 id: P107-C43
 title: Filter Records never answers a Filter press when its Sorting meets rows that are not records — no Error, no Failure
-status: scheduled
+status: fixed
+commit: 83908a71e
 phase: P109
 task: ISL-029
 severity: low
 area: runtime / Filter Records (`FilterDBModels`) — the run (`scheduleFilter`)
 found: P107 (the node says what it does) s25, 2026-10-02 — 4–8 of 200 generated sequences per seed
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/FilterDBModels.json "a Sorting over two rows that are not records is the filter's failure: Error, then Failure (C43, fixed in P109 ISL-029 — the runtime threw out of the run and never answered)" (no longer a known row)
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.14 (row C43); the known row in packages/noodl-runtime/test/node-spec/conformance.test.ts; scenarios/FilterDBModels.json "a Sorting over two rows that are not records …"
 ---
 
@@ -28,3 +31,5 @@ Filter does nothing at all — no error, no failure signal."*
 filter's failure); the runtime's is the known row.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Fail with an error".** The node fires Failure and puts the reason on Error, as it already does for the filter. A one-line change. The question as asked: *"Should a sort that cannot run fail the same way a filter that cannot run does?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 83908a71e (P109 ISL-029, 2026-10-06), as ruled.**

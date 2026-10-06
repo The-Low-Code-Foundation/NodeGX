@@ -1,12 +1,14 @@
 ---
 id: P107-C39
 title: A Query Records filter script that throws before calling where() fetches every row, as a Success
-status: scheduled
+status: fixed
+commit: 724db53e7
 phase: P109
 task: ISL-029
 severity: high
 area: runtime / Query Records (`DbCollection2`) — the Javascript filter
 found: P107 (the node says what it does) s23, 2026-10-02
+regression: packages/noodl-runtime/test/nodes/isl-029-query-records-filter-script.test.ts "ISL-029 C39 — a filter script that throws fails the node, and asks nothing"
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.8 (row C39) — the same six-arm probe as C38
 ---
 
@@ -31,3 +33,5 @@ A behaviour change; ships alone.
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Fail with the script's error".** The node does not query. It fires Failure and puts the crash message on Error. A small change. An app that was quietly showing every record now shows an error instead. The question as asked: *"Should a filter script that crashes make Query Records fail instead of fetching everything?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 724db53e7 (P109 ISL-029, 2026-10-06), as ruled.**

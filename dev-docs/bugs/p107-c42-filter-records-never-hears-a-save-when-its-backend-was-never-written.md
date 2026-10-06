@@ -1,12 +1,15 @@
 ---
 id: P107-C42
 title: Filter Records never re-filters when another node saves a record, unless its Backend picker was written — and that picker is hidden when the project has one backend
-status: scheduled
+status: fixed
+commit: 8d3ebc83f
 phase: P109
 task: ISL-029
 severity: high
 area: runtime / Filter Records (`FilterDBModels`) — `cloudStoreEvents`, `bindStoreEvents`
 found: P107 (the node says what it does) s25, 2026-10-02
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/FilterDBModels.json "C42 — with no Backend written the node is on the project's backend: a save that moves a member out of the filter is heard, and it re-filters (v3)" (and graph/s09-the-filter-follows.json "C42 — …", row mark dropped)
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.14 (row C42); graph scenarios/graph/s09-the-filter-follows.json (the row and its control); scenarios/FilterDBModels.json "C42 — …"
 ---
 
@@ -36,3 +39,5 @@ unset), rather than the legacy store; or bind at creation to `CloudStore.forBack
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; the spec states it as it is.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Follow the project's backend".** With no Backend picked, Filter Records listens to the same backend Query Records uses. A small change. Filtered lists start updating after edits, as the box says they do. The question as asked: *"Should Filter Records listen to the project's own backend when no Backend is picked?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 8d3ebc83f (P109 ISL-029, 2026-10-06), as ruled.**
