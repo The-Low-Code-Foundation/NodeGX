@@ -10,16 +10,17 @@
  * could not be read clears `Difference` and pulses `Invalid Date` (:136-142); otherwise
  * `Difference` is `To` − `From` in `Unit` (date-math.ts `differenceBetween` — exact and
  * fractional in a fixed unit, whole calendar steps in months and years), made positive when
- * `Absolute` is on (:144-145 `Math.abs`), and `Changed` pulses (:147). `Unit` is stored raw and an
- * empty one reads as days (:144 `|| 'days'`); `Absolute` is truthiness (:118 `!!value`).
+ * `Absolute` is on (:144-145 `Math.abs`), and `Changed` pulses (:147). A `Unit` that is empty or not
+ * one of the eight counts as days (datemath.ts `unitOrDays`); `Absolute` is truthiness (:118 `!!value`).
  *
- * A `Unit` that is not one of the eight and not empty does not throw here (unlike Date Add): it
- * misses every fixed unit and lands on the month path, whose last line reads anything but
- * `'months'` as YEARS (datemath.ts :115) — NSP-013 §6 row D15, graded as the runtime does it.
+ * An unknown `Unit` also shows the editor a warning until it is fixed (`setDiagnostic`, not on the
+ * wire). v1 graded it as the runtime then did it: it missed every fixed unit and landed on the
+ * month path, whose last line read anything but `'months'` as YEARS — NSP-013 §6 row D15, fixed in
+ * P109 ISL-026 with Date Add's C16.
  */
 
 import { defineNode } from '../spec';
-import { DATE_EXAMPLES, type DateUnit, differenceBetween, supplied, toDate, UNIT_VALUES } from './date-math';
+import { DATE_EXAMPLES, differenceBetween, isDateUnit, supplied, toDate, UNIT_VALUES } from './date-math';
 
 type State = {
   from: Date | undefined;
@@ -36,13 +37,15 @@ function recompute(s: State, delta: Partial<State>): { set: Partial<State>; send
   const n = { ...s, ...delta };
   if (!n.fromSupplied || !n.toSupplied) return { set: delta, send: [] }; // :134
   if (n.from === undefined || n.to === undefined) return { set: { ...delta, difference: undefined }, send: ['difference'], emit: ['failure'] }; // :138-142
-  const value = differenceBetween(n.from, n.to, (n.unit || 'days') as DateUnit); // :144
+  const value = differenceBetween(n.from, n.to, isDateUnit(n.unit) ? n.unit : 'days'); // :144, `unitOrDays` — v2 (D15)
   return { set: { ...delta, difference: n.absolute ? Math.abs(value) : value }, send: ['difference'], emit: ['changed'] }; // :145-147
 }
 
 export const DateDifference = defineNode({
   type: 'net.noodl.DateDifference',
-  version: 1,
+  // v2 (P109 ISL-026, P107-D15 ruled "Use days and warn once", with Date Add's C16): a Unit that is not one of
+  // the eight counts as days. In v1 it counted as YEARS.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/date/datedifference.ts; packages/noodl-runtime/src/nodes/std-library/date/datemath.ts',
   needs: ['timezone'],
 

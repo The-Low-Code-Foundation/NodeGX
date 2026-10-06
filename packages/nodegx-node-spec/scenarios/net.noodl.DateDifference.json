@@ -24,8 +24,8 @@
     "steps": [{ "set": "from", "value": "2024-02-29T00:00:00.000Z" }, { "set": "to", "value": "2025-02-28T00:00:00.000Z" }, "settle", { "set": "to", "value": "2025-02-27T00:00:00.000Z" }, "settle", { "set": "to", "value": "2023-02-28T00:00:00.000Z" }, "settle"]
   },
   {
-    "name": "D15: a Unit not in the list is counted in YEARS (it misses every fixed unit and lands on the month path's last line)",
-    "because": "datemath.ts :98-115 — `unit === 'months' ? whole : trunc(whole / 12)`. NSP-013 §6 row D15; Date Add throws for the same unit (C16)",
+    "name": "D15: a Unit not in the list counts as days, as Date Add does (1,247 days, not 3 years)",
+    "because": "v2 — datemath.ts `unitOrDays` (P107-D15, ruled 2026-10-05 \"Use days and warn once\" with C16); v1 read it as YEARS on the month path's last line",
     "params": { "unit": "fortnights" },
     "steps": [{ "set": "from", "value": "2020-01-01T00:00:00.000Z" }, { "set": "to", "value": "2023-06-01T00:00:00.000Z" }, "settle"]
   },

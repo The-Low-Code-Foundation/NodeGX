@@ -133,21 +133,6 @@ const deadPropertyChanged = (d: Divergence) => {
 };
 
 /**
- * NSP-013 §6 C16 — Date Add stores a Unit and then recomputes (dateadd.ts :77-78); a unit that is
- * not one of the eight and not empty THROWS in `addToDate` (datemath.ts :88), so the setter
- * throws and the runtime target dies at that step. Narrow: the throw's own message, at a `set`
- * of `unit` to such a value, and the difference no later than the step after it.
- */
-const unknownUnitThrows = (d: Divergence) => {
-  const m = d.difference.threw === undefined ? null : /^runtime threw: Unknown unit "(.*)"\.$/.exec(d.difference.threw);
-  if (!m) return false;
-  // the unit the throw names arrived on the port — as a mount parameter or a `set` before the difference
-  const named = m[1];
-  if (d.params.unit === named) return true;
-  return d.reference.findIndex((e, i) => i < d.difference.index + 1 && isSet(e, 'unit', (v) => v === named)) >= 0;
-};
-
-/**
  * NSP-011 §6 C6 is node.ts's, not a node's: `setInputValue` merges a later value into a `{ value, unit }`
  * the port once held, on EVERY port of EVERY node. The per-node entries below each carry a hand scenario
  * and must keep firing; this one is the same narrow predicate on any port, counted for every spec, so a
@@ -662,7 +647,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-015 §6.2 C24 — a Path that is not text throws at `.match` in the frame-end callback; the presses are never answered', matches: nonTextPath },
     { row: 'NSP-015 §6.2 C25 — a push the browser refuses (another origin) throws in the frame-end callback; no popstate, the presses are never answered', matches: refusedPush }
   ],
-  'net.noodl.DateAdd': [{ row: 'NSP-013 §6 C16 — an unknown Unit throws in Date Add\'s setter', matches: unknownUnitThrows }],
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   SetModelProperties: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('store') }],

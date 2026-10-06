@@ -57,10 +57,9 @@
     "steps": [{ "set": "input", "value": "2026-03-08T06:30:00.000Z" }, "settle", { "set": "unit", "value": "months" }, "settle"]
   },
   {
-    "name": "C16: a Unit that is not one of the eight THROWS in the setter on the runtime (the unit stored, the node dead); the spec stores it and abstains",
-    "because": "datemath.ts :88 `Unknown unit`; dateadd.ts :77-78 store then recompute. NSP-013 §6 row C16",
-    "row": "NSP-013 §6 C16 — an unknown Unit throws in Date Add's setter",
+    "name": "C16: a Unit that is not one of the eight counts as days, and the node keeps working: 2 then 3 fortnights land 2 and 3 days on",
+    "because": "v2 — datemath.ts `unitOrDays` (P107-C16, ruled 2026-10-05 \"Use days and warn once\"); v1's runtime threw in the setter and stayed dead",
     "params": {},
-    "steps": [{ "set": "input", "value": "2024-01-01T00:00:00.000Z" }, "settle", { "set": "unit", "value": "fortnights" }, "settle"]
+    "steps": [{ "set": "input", "value": "2024-01-01T00:00:00.000Z" }, { "set": "amount", "value": 2 }, "settle", { "set": "unit", "value": "fortnights" }, "settle", { "set": "amount", "value": 3 }, "settle"]
   }
 ]

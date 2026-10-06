@@ -10,14 +10,12 @@
  * Once supplied: a `Date` that could not be read (date-math.ts `toDate`) clears `Result` and
  * pulses `Invalid Date` (:123-128); otherwise `Result` is `Date` + `Amount` of `Unit` (date-math.ts
  * `addToDate` — months and years CLAMP) and `Changed` pulses (:130-133). `Amount` is `Number(value)`
- * on arrival (:65) and a non-finite amount adds 0 (:130); `Unit` is stored raw and an empty one
- * reads as days (:131 `|| 'days'`). The calendar is the world's zone (world.ts TIME ZONE).
+ * on arrival (:65) and a non-finite amount adds 0 (:130); a `Unit` that is empty or not one of the
+ * eight counts as days (datemath.ts `unitOrDays`). The calendar is the world's zone (world.ts TIME ZONE).
  *
- * ⚠️ A `Unit` that is not one of the eight and not empty — a wire can carry any string — THROWS
- * inside the setter (datemath.ts :88 `Unknown unit`), after the unit was stored (:77-78): the
- * runtime target dies at that step and every later recompute throws again. A throw is not a
- * behaviour a wire can carry: the spec stores the unit and abstains from the recompute, and the
- * runtime's throw is NSP-013 §6 row C16, counted by the runner.
+ * An unknown `Unit` also shows the editor a warning until it is fixed (`setDiagnostic`, not on the
+ * wire, so not in the trace). v1 graded it as the runtime then did it: the setter THREW and the node
+ * was dead from then on — NSP-013 §6 row C16, fixed in P109 ISL-026.
  */
 
 import { defineNode } from '../spec';
@@ -37,14 +35,15 @@ function recompute(s: State, delta: Partial<State>): { set: Partial<State>; send
   if (!n.inputSupplied) return { set: delta, send: [] }; // :121
   if (n.input === undefined) return { set: { ...delta, result: undefined }, send: ['result'], emit: ['failure'] }; // :123-128
   const amount = Number.isFinite(n.amount) ? n.amount : 0; // :130
-  const unit = n.unit || 'days'; // :131
-  if (!isDateUnit(unit)) return { set: delta, send: [] }; // row C16 — the runtime throws here
+  const unit = isDateUnit(n.unit) ? n.unit : 'days'; // `unitOrDays` — v2 (C16)
   return { set: { ...delta, result: addToDate(n.input, amount, unit) }, send: ['result'], emit: ['changed'] }; // :131-133
 }
 
 export const DateAdd = defineNode({
   type: 'net.noodl.DateAdd',
-  version: 1,
+  // v2 (P109 ISL-026, P107-C16 ruled "Use days and warn once"): a Unit that is not one of the eight counts as
+  // days. In v1 such a Unit left Result as it was and fired nothing (the runtime threw there, for good).
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/date/dateadd.ts; packages/noodl-runtime/src/nodes/std-library/date/datemath.ts',
   needs: ['timezone'],
 
