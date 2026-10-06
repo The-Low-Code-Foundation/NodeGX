@@ -847,7 +847,7 @@
     ]
   },
   {
-    "name": "Enable Label turned off while the pointer is over the box: the element is rebuilt without the label, and a leave afterwards still ends the hover",
+    "name": "Enable Label turned off (after a Check) while the pointer is over the box: the label goes, the box stays where it is, and a leave afterwards still ends the hover",
     "because": "Checkbox.tsx :186-210 — the wrapper goes and the box becomes the root; the person's events now go to the input (:66-69)",
     "params": {
       "useLabel": true

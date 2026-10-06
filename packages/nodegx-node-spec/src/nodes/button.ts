@@ -13,11 +13,11 @@
  * by no output: each is declared with its portability class (R10) and has no reducer.
  *
  *   - **Enabled** (utils.ts :75-89): `!!value`; a change sends the `enabled` output. The component
- *     renders `disabled={!props.enabled}` (Button.tsx :145). A disabled `<button>` takes no mouse
- *     press, release or click (React drops `onClick` / `onMouseDown` / `onMouseUp` on a disabled
- *     control) and cannot be focused (a disabled form control is not a focusable area) — but the
- *     pointer still moves over it (`onMouseOver` / `onMouseLeave` are not dropped) and a finger still
- *     lands on it (`onTouchStart` / `onTouchEnd` are not dropped either).
+ *     renders `disabled={!props.enabled}` (Button.tsx :145). A disabled `<button>` takes no click
+ *     (HTML: a disabled form control gets no click), no mouse press and no release (browsers have
+ *     differed on these two; here none reaches it), and cannot be focused (a disabled form control is
+ *     not a focusable area) — but the pointer still moves over it (Hover Start and Hover End still
+ *     fire) and a finger still lands on it (a touch still fires Pointer Down and Pointer Up).
  *   - **the pointer** (utils.ts :204-283): onto the button — `hoverState` true, `hoverStart`
  *     (:216-234); off it — `hoverState` false, `hoverEnd`, and `pressedState` false (:224-227,
  *     :235-243, :276-280: a release off the button is a release); a mouse button down — `pressedState`
@@ -38,7 +38,7 @@
  *     (:356-364): the keyboard is taken off it (nothing fires if it was not on it) and Done.
  *   - **Mounted** (react-component-node.ts :2302-2321): off takes the element off the page —
  *     `willUnmount` (NoodlReactComponent :993-1003) — and on puts it back — `didMount` (:982-990),
- *     which also fires once at the first render. Off the page a person finds nothing to act on, and
+ *     which also fires once at the first paint. Off the page a person finds nothing to act on, and
  *     the hover, pressed and focused states keep what they held (nothing resets them, :1000-1003
  *     resets only the VISUAL states).
  *   - **Child Index** and **Children Count** read 0 for a button nobody placed children in
@@ -80,7 +80,7 @@ type State = {
    * element that comes back is not focused while Focused still reads true (NSP-016 §7.2 row D30).
    */
   elementFocused: boolean;
-  /** the element is on the page: committed by React — what the node HAS. Follows `mounted` at each paint (the frame's end, or the page a person acts on). */
+  /** the element is on the page — what the node HAS. Follows `mounted` at each paint (the frame's end, or the page a person acts on). */
   onPage: boolean;
 }
 
@@ -281,11 +281,11 @@ export const Button = defineNode({
     visible: (_s, v) => ({ set: { visible: !!v }, send: [] })
   },
   {
-    // placed on the page with its params set — the first render (react-component-node.ts :1740-1743 reads `wantsToBeMounted`):
+    // placed on the page with its params set — the first paint (react-component-node.ts :1740-1743 reads `wantsToBeMounted`):
     // Did Mount, unless a Mounted parameter said no
     world: { place: (s) => ({ ...painted(s), send: [] }) },
     // and every frame's end is a paint: the page follows what the node wants (react-component-node.ts :1675-1689, :2310-2320
-    // → the commit, NoodlReactComponent :982-990 / :993-1003)
+    // → the element added or removed, NoodlReactComponent :982-990 / :993-1003)
     afterInputs: (s) => ({ ...painted(s), send: [] }),
     // a person acts on a PAINTED page (adapter.ts `act`): the page follows first, then the act meets what is there
     person: {
@@ -316,7 +316,7 @@ type Pulse = 'didMount' | 'willUnmount' | 'pointerDown' | 'pointerUp' | 'onClick
 type Act = { set?: Partial<State>; send: Array<'pressedState' | 'focusState' | 'hoverState'>; emit?: Pulse[] };
 
 /**
- * A paint: the page follows what the node wants. An element wanted and not there is committed — Did Mount
+ * A paint: the page follows what the node wants. An element wanted and not there is added — Did Mount
  * (NoodlReactComponent :982-990); one there and not wanted leaves — Will Unmount (:993-1003), its hover,
  * pressed and focused states keeping what they held (:1000-1003 resets only the visual states).
  */

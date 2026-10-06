@@ -295,7 +295,7 @@
     ]
   },
   {
-    "name": "an act between two Mounted writes in one frame commits the first: off, an act, on — Will Unmount at the act's paint and Did Mount at the frame's end; from off, on, an act, off — Did Mount at the act's paint and Will Unmount at the frame's end — every act",
+    "name": "an act between two Mounted writes in one frame paints the first: off, an act, on — Will Unmount at the act's paint and Did Mount at the frame's end; from off, on, an act, off — Did Mount at the act's paint and Will Unmount at the frame's end — every act",
     "because": "the face paints before the act (node-spec-target.ts PERSON); the frame's end paints again (react-component-node.ts :1675-1689) — a write after the act in the same frame is what tells the act's paint from the frame end's",
     "steps": [
       "settle",

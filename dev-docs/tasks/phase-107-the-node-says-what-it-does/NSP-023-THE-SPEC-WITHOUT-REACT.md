@@ -1,7 +1,7 @@
 # NSP-023 — The spec without React
 
 **Opened 2026-10-05, from ruling R12 (README §7).** **Depends on NSP-016** (the specs it converts) and the Text v3 (NSP-016 §7.9,
-the recipe). **Status: 🟡 steps 1–5 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5 the Dropdown v3 and §8.6 the radio pair); the Checkbox's and the Dropdown's label rule with step 1. Steps 6–8 left.**
+the recipe). **Status: 🟡 steps 1–6 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5 the Dropdown v3 and §8.6 the radio pair, s48 §8.7 the words); the Checkbox's and the Dropdown's label rule with step 1. Steps 7–8 left.**
 
 ## 1. The person sentence
 
@@ -465,3 +465,36 @@ pick that paints first. Now 0 survivors on both specs at seeds 13, 20730 and 207
 - **The five specs that share the C80 matcher CONFORM at 200 on seed 13 after the change:** the Checkbox, the Text Input, the
   Dropdown and both radios, with the known-rows test green. Both radios conform at 200 on 20730 too (the button: 45 of 67
   scenarios pass, 22 known; 433 of 433 mutants killed).
+
+### 8.7 s48, 2026-10-06 — step 6: the words
+
+No behaviour change, and no scenario added or removed. Every line in `src/nodes` and the format files that matched
+`/react|useState|effect|forceUpdate|render|commit|rebuil/i` was read. **Source citations stay** (`react-component-node.ts :2302`,
+`NoodlReactComponent :982`, `react-dom setValueForAttribute`): they are provenance. So does any sentence that credits a React
+mechanism to **the runtime** to explain a known row ("the runtime's effect takes the author's Value back", row D34). That is
+what R11 allows. The rest now say what a person or the browser sees:
+
+| file | was | now |
+|---|---|---|
+| button.ts | "React drops `onClick` / `onMouseDown` / `onMouseUp` on a disabled control" | HTML: a disabled form control gets no click; no press or release reaches it either (browsers have differed on those two); Hover Start / End and a touch still fire |
+| button.ts | `onPage`: "committed by React"; "the first render"; "the commit"; "is committed" | on the page; the first paint; the element added or removed; is added |
+| checkbox.ts | "React drops it"; v1 "rebuilt the box … as React does" | HTML: a disabled form control gets no click, so the box does not toggle; "as the runtime does" |
+| icon.ts | "the first render" | the first paint |
+| text.ts | "React makes a NEW element"; "an element React makes later"; "the frame end's render commits when the settle's React `act` closes" | a new element is made when the tag changes (an element's type cannot change); an element made later; the paint lands when the runtime target's settle closes |
+| text-input.ts | `maxlength`: "React puts `'' + value` on the attribute" | the attribute carries Max Length as text and is absent for null, undefined or a boolean (the runtime's renderer cited) |
+| spec.ts | `place`: "a loaded app renders"; `group`: "renders it"; THE PERSON: "the node's REAL React component" | first draws; shows it; the node's REAL component, a React one today |
+| world.ts GROUP | "renders alone; no context reaches it"; "the first render"; "renders it"; "the page renders the group" | is drawn alone, no group reaches it; the first paint; shows it; draws |
+
+**Scenario names, each renamed only after reading its trace on both targets** (`zz-side`, `ZZ_PRINT=1`):
+- The Checkbox's [19] and the Dropdown's [35] said "the element is rebuilt without the label". Since v2 neither spec rebuilds
+  anything; the traces show the hover, then the leave ending it. Renamed: "the label goes, the box (the dropdown) stays where it
+  is". The Checkbox's name also gained "(after a Check)", a step the old name left out.
+- The Icon's [6]: "commits the first" became "paints the first".
+- Every other React word in a visual spec's scenario names credits the runtime with a row (the Dropdown 13, the Slider 4, the
+  Text Input 2, the Checkbox 1), and they stay.
+
+spec.ts and world.ts are hashed by the stranger suites, so the hashes were refreshed and the three rounds re-run: green.
+
+**Readings (2026-10-06):** `tsc --noEmit` is clean. The package's stranger, catalog-parity, schema, types and reach suites:
+378 passed, with the 17 opt-in deep runs skipped. On the runtime at 200, the Button, Checkbox, Text Input, Dropdown, Icon and
+Text all CONFORM on seeds 13 and 20730.

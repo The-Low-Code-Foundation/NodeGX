@@ -117,7 +117,7 @@ export const Icon = defineNode({
     scrollIntoView: () => NOTHING
   },
   {
-    // placed on the page with its params set — the first render: Did Mount
+    // placed on the page with its params set — the first paint: Did Mount
     world: { place: (s) => ({ ...painted(s), send: [] }) },
     // every frame's end is a paint (react-component-node.ts :1675-1689)
     afterInputs: (s) => ({ ...painted(s), send: [] }),

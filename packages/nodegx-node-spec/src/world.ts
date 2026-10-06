@@ -470,16 +470,16 @@
  *   GROUP.  (NSP-016 s42) The Radio Button Group a Radio Button sits in — its PARENT on the page, played by the world as
  *           ROUTE plays the Router whose page a Page Inputs sits in: the group is another node (its own spec, Radio Button
  *           Group); what reaches the button through it is the button's. The script's `group`:
- *             `none: true` — the button sits in no group (it renders alone; no context reaches it). Absent `group` or
+ *             `none: true` — the button sits in no group (it is drawn alone; no group reaches it). Absent `group` or
  *               `none` absent: it sits in one, with the siblings its spec's page declares (the `pick` act's values).
- *             `value` — the group's Value parameter at load, set before the first render (absent: never set). Raw: the
+ *             `value` — the group's Value parameter at load, set before the first paint (absent: never set). Raw: the
  *               group converts it as its Value input does (`toString`; null and undefined ignored).
  *             `writes` — the graph writing the group's Value input later, each `at` ≥ 1 ms on the clock, in order:
  *               handed to the button's spec RAW (`WorldHandlers.group`) at that moment, inside the `advance` that
- *               reaches it; the group renders it at the frame's end, as any write is. Not a trace event — the world's
+ *               reaches it; the group shows it at the frame's end, as any write is. Not a trace event — the world's
  *               hand-off, as a timer's firing is not.
  *           A target holds a REAL group: the button is added to it (`addChild`) with its siblings, the group's Value
- *           parameter set at load and its Value input written at each `at`; the page renders the group.
+ *           parameter set at load and its Value input written at each `at`; the page draws the group.
  *
  * A TARGET'S VIEW (s13, from the third stranger's first question). A spec's reducers read the world
  * as `WorldView` (spec.ts); a target is handed THIS module's `World` by `install(world)`. One to one:

@@ -15,9 +15,9 @@
  *     (:56-72) sets it from the graph: `!!value`, `checked` sent on a change, no `onChange`. **Check**
  *     / **Uncheck** (:73-96, :160-178): Unchanged when the box is already so; else `checked` sent,
  *     then Done — never `onChange` (the description: Changed means the person did it).
- *   - **Enabled** (utils.ts :75-89): as the Button's. A disabled input takes no click (React drops it
- *     and the browser does not toggle), no press, no release and no focus; the pointer still hovers
- *     and a finger still lands.
+ *   - **Enabled** (utils.ts :75-89): as the Button's. A disabled input takes no click (HTML: a disabled
+ *     form control gets none, so the box does not toggle), no press, no release and no focus; the
+ *     pointer still hovers and a finger still lands.
  *   - **the pointer, the keyboard, a click's focus** (utils.ts :157-311; Checkbox.tsx :66-69, :202):
  *     the Button's rules, on the `<input>` when there is no label and on the wrapper when there is
  *     (a click on the input bubbles to it either way). **Enable Label** shows the label and leaves the box,
@@ -75,7 +75,7 @@ const NONE: Act = { send: [] };
 export const Checkbox = defineNode({
   type: 'net.noodl.controls.checkbox',
   // v2 (NSP-023, 2026-10-05): Enable Label shows a label and leaves the box and the keyboard on it where they are (Richard ruled the
-  // Text Input's C80 for all three controls); v1 rebuilt the box when the label changed, as React does — row C80, known on the runtime.
+  // Text Input's C80 for all three controls); v1 rebuilt the box when the label changed, as the runtime does — row C80, known on the runtime.
   version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/controls/checkbox.ts',
   needs: ['person'],

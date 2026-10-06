@@ -218,8 +218,8 @@ function sanitize(t: unknown, v: string): string {
   }
 }
 /**
- * The element's `maxlength`, read back: React puts `'' + value` on the attribute and nothing for null, undefined or a
- * boolean (react-dom `setValueForAttribute`); HTML reads it with the rules for parsing non-negative integers (ASCII
+ * The element's `maxlength`, read back: the attribute carries the Max Length as text (`'' + value`) and is absent for null,
+ * undefined or a boolean (the runtime's renderer: react-dom `setValueForAttribute`); HTML reads it with the rules for parsing non-negative integers (ASCII
  * whitespace, an optional `+`, the leading digits) — `-1` when absent or not a number (a long limited to non-negative
  * numbers). The browser refuses a key once the value's length (code units) is at it; a Number field has no maxlength.
  */

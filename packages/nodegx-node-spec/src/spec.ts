@@ -729,7 +729,7 @@ export interface WorldHandlers<S, I, O> {
   mount?: (state: Readonly<S>, inputs: Inputs<I>, world: WorldView) => AfterInputsPatch<S, I, O>;
   /**
    * NSP-016 s37 — the node is PLACED on the page: once, at mount, AFTER the params (`mount` above runs before them) — the
-   * moment a loaded app renders a visual node, its parameters already set (react-component-node.ts `render` reads
+   * moment a loaded app first draws a visual node, its parameters already set (react-component-node.ts `render` reads
    * `wantsToBeMounted`, which a Mounted parameter wrote first). Its patch lands in the first settle. A node that is not
    * drawn needs none.
    */
@@ -759,7 +759,7 @@ export interface WorldHandlers<S, I, O> {
   stream?: (state: Readonly<S>, inputs: Inputs<I>, event: StreamEvent, world: WorldView) => AfterInputsPatch<S, I, O>;
   /**
    * NSP-016 s42 — the graph wrote the Value input of the Radio Button Group this node sits in (world.ts GROUP), at its moment on
-   * the clock, inside the `advance` that reaches it: the value RAW, as the wire carries it. The group takes it at once and renders
+   * the clock, inside the `advance` that reaches it: the value RAW, as the wire carries it. The group takes it at once and shows
    * it at the frame's end. Only a spec that needs `group` is handed any.
    */
   group?: (state: Readonly<S>, inputs: Inputs<I>, value: unknown, world: WorldView) => AfterInputsPatch<S, I, O>;
@@ -774,8 +774,8 @@ export interface WorldHandlers<S, I, O> {
  * text, chooses an option, presses — the act's own `values` say what shapes a sequence draws).
  *
  * What an act IS on a target is the target's: on the runtime it is the DOM events a browser
- * raises for that act on the element a person sees, dispatched into the node's REAL React
- * component (noodl-runtime/test/helpers/node-spec-target.ts PERSON) — the component's own rules
+ * raises for that act on the element a person sees, dispatched into the node's REAL
+ * component, a React one today (noodl-runtime/test/helpers/node-spec-target.ts PERSON) — the component's own rules
  * (a disabled button takes no click) are what is graded, never copied. The acts themselves are
  * target-neutral names: `click`, `press` / `release` (a mouse button down / up), `hover` / `leave`
  * (the pointer onto / off the element), `touch` / `lift` (a finger down / up), `focus` / `blur`

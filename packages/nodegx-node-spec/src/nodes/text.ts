@@ -25,7 +25,7 @@
  *     redraw that changes it), counted as a known row on the runtime target, not copied here.
  *   - **the keyboard**: a `<div>` takes none — until **Draggable** gives its ELEMENT `tabindex="0"` (drag-drop.ts :83-110):
  *     at once when the node has an element, else at the start of each of the next 60 frames until it has one (`whenMounted`
- *     :136-145; a settle is TWO frame starts here — its frame and its drain — and both come before the settle's paint commits). An element React makes later (a remount, a new Tag) has none: row **C77**. Draggable off takes them off
+ *     :136-145; a settle is TWO frame starts here — its frame and its drain — and both come before the settle's paint commits). An element made later (a remount, a new Tag) has none: row **C77**. Draggable off takes them off
  *     the element they were added to (:101-109). A `visibility: hidden` element takes no keyboard (the browser's focusing rule).
  *   - **the drag** (drag-drop.ts, one gesture at a time): a `pointerdown` on the element (`onPointerDown` :232-271) of a
  *     Draggable node on the page starts it — HELD (`holding`) when Hold To Drag says so (:173-178: `always`; `never` not; else a
@@ -53,11 +53,11 @@ type State = {
   mounted: boolean;
   /** the element is on the page: mounted and painted */
   onPage: boolean;
-  /** Text.tsx :50 — the element type the next paint renders: `props.as || 'div'` */
+  /** Text.tsx :50 — the element type the next paint draws: `props.as || 'div'` */
   tag: unknown;
-  /** the element type the element on the page was made with; React makes a NEW element when it changes */
+  /** the element type the element on the page was made with; a NEW element is made when it changes (an element's type cannot change) */
   shownTag: unknown;
-  /** which element is on the page — a new one each time React makes one (a mount, a new tag) */
+  /** which element is on the page — a new one each time one is made (a mount, a new tag) */
   elem: number;
   /** the element the module's `tabindex` and `aria-roledescription` are on (drag-drop.ts :87-100), or none */
   attrsOn: number;
@@ -318,8 +318,8 @@ export const Text = defineNode({
       }
     },
     // every frame's end is a paint (react-component-node.ts :1675-1689). `whenMounted` checks at each frame START — two in a
-    // settle of the runtime target (its frame and its drain), and both before the paint: the frame end's render commits when
-    // the settle's React `act` closes, after the drain (measured: an element mounted by a Mounted write is found at the NEXT
+    // settle of the runtime target (its frame and its drain), and both before the paint: the frame end's paint lands when
+    // the runtime target's settle closes (React's `act` there), after the drain (measured: an element mounted by a Mounted write is found at the NEXT
     // settle's first frame start)
     afterInputs: (s) => {
       const a = chainCheck(s);
@@ -395,8 +395,8 @@ function takesKeyboard(s: Readonly<State>): Partial<State> {
 }
 
 /**
- * A paint: the page follows what the node wants (button.ts `painted`). A new element when React makes one — mounted, or a Tag
- * that renders another type (`shownTag`) — with no attributes on it and not holding the keyboard.
+ * A paint: the page follows what the node wants (button.ts `painted`). A new element whenever one is made — mounted, or a Tag
+ * that names another type (`shownTag`; an element's type cannot change) — with no attributes on it and not holding the keyboard.
  */
 function painted(s: Readonly<State>): { set: Partial<State>; emit: Pulse[] } {
   if (s.mounted && !s.onPage) return { set: { onPage: true, elem: s.elem + 1, shownTag: s.tag, elementFocused: false }, emit: ['didMount'] };
