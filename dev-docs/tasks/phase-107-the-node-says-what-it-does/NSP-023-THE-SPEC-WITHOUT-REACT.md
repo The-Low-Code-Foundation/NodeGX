@@ -1,7 +1,7 @@
 # NSP-023 — The spec without React
 
 **Opened 2026-10-05, from ruling R12 (README §7).** **Depends on NSP-016** (the specs it converts) and the Text v3 (NSP-016 §7.9,
-the recipe). **Status: 🟡 steps 1, 2 and 3 done (s45 §8.1, s46 §8.2, §8.3); the Checkbox's and the Dropdown's label rule with step 1; the Dropdown's and the Radio Button's intents ruled (R14) for steps 4 and 5.**
+the recipe). **Status: 🟡 steps 1–4 done (s45 §8.1, s46 §8.2–§8.4, s47 §8.5: the Dropdown v3); the Checkbox's and the Dropdown's label rule with step 1; the Radio Button's intents ruled (R14) for step 5.**
 
 ## 1. The person sentence
 
@@ -292,3 +292,86 @@ divergences outside the rows; D36 attributed 82 and 61, C73 by its scenarios; 2,
 attributed 3,796, C73 3, C62 / C63 as before; 5,443 / 5,476; 2,094 s); on the runtime at 200 on seeds 13 and 20730 (both tests
 green; 5,379 / 5,408). The package suite 20 suites, 878 passed (1,463 s — batch-visual plays the 68 scenarios).
 
+### 8.5 s47, 2026-10-06 — step 4: the Dropdown v3
+
+**No new ruling.** R14 had ruled both intents in s46: a Dropdown hidden with Mounted and shown again is where the person left
+it, and one handed its Items again keeps the pick. The last word wins, and C71's intent was already the spec's. The spec
+is now `version: 3` (v2 was s45's label rule).
+
+**The sort (AC1).** The Dropdown, v2 state and rules:
+
+| v2 | pile | evidence | v3 |
+|---|---|---|---|
+| `authorValue`: `props.value`, what the Value input last wrote, changed or not (options.ts :194) | React-made: only the component's `useState` and effect read it | D34, C71 | gone |
+| `shown`: the component's `useState` (Select.tsx :42), a copy of the choice that the effect re-syncs | React-made | D34, C71 | gone. The node's value is what the element is told to select (in v3 the two never differ) |
+| `paintedItems`: `props.items` as the last render saw it, the effect's dependency (by identity) | React-made | D34 | gone. Items is drawn at the next paint, whatever its identity |
+| the effect at a mount and at a new Items array takes the author's Value back, sends it and fires Changed | React-made | D34 | gone. A remount and a new list keep the pick, with nothing on the wire (R14); row D34 |
+| a Value written back to the value React last rendered leaves the pick on the screen | React-made (v1's intent already said the selection follows) | C71 | unchanged; row C71 |
+| the Value setter: `null` ignored, anything else made text, a change sends Value and never Changed | the node's own | | stays (the "equal" branch no longer records an author's Value) |
+| `domSelected`: the element selects the node's value while it names an option; otherwise the browser keeps its selection, a fresh element selects the empty option, and a removed option hands the selection to the first enabled one | HTML / the element | | stays, read from the node's value |
+| Items that is not a list crashes the render | the node's own | C70 | stays a row |
+| Enable Label keeps the `<select>` | ruled s45 | C80 | stays a row |
+
+**The runtime's row** (`conformance.test.ts`), `changedWithNobodyPicking` (D34): after a person's pick, the RUNTIME prints Value or
+Changed where the spec prints something else. It must happen in the settle group of a frame that holds an Items write, or
+of a frame whose reference prints Did Mount after an earlier Will Unmount.
+
+**Scenarios: 50 → 57.**
+- **Six D34 row scenarios**, renamed to the intent. Each has a **twin** that the runtime passes. The twin's trick is
+  new: *the graph confirms each pick.* The frame after each pick opens with a Value write equal to the node's value. The
+  spec does nothing with it. The runtime's setter records it as the author's Value (options.ts :194), so neither its
+  remount nor a new list has anything to take back.
+- **Five scenarios became twins in place**, because D34 was only incidental to them: the two act-on-a-painted-page grids
+  that remount, the 704-segment matrix, the matrix of a disabled Items rewrite, and the option-value fallback. Their
+  interpreter traces are unchanged, so they kill the same mutants and are now graded on the runtime too.
+- **One kill scenario** (below).
+
+The rewrite script (`zz-rewrite`, scratchpad, deleted) checked that every one of its 267 confirms is a no-op in the spec:
+each twin's trace equals its source's with only the writes added. From this commit the JSON is the source, so edit it by
+hand.
+
+**v2 named two things wrongly:**
+- "Items written with the current Value absent … a pick from the new list: Value 's', Changed" was false. The new list
+  had already handed the selection to 's', its first option, so that pick raised only Focused, and no pick ever preceded
+  the second Items write. D34 was never graded there. The scenario now picks 'l' too.
+- "a pick, then Value written to the picked value …" listed its steps out of order.
+
+**A trap in my own transform:** it first read the node's value AT each settle event. A frame's outputs print after that
+event, in its group, so every confirm wrote the value from before the pick. That is a write-back, C71's setup, and one
+segment of the matrix diverged on it. The transform now reads the value once the group has printed.
+
+**The mutants.** One survivor, on seeds 13 and 20730: the Items setter's "undefined is no opinion" branch, swapped with
+its sibling, whose recorded example is the default list. The only undefined write in the scenarios fell on the default
+list. v2 had killed that swap through the effect's Items identity, which v3 dropped. The kill is a new scenario: Items
+written undefined over a list of its own, then a pick of 'l'. **No new equivalents.** The Slider's trap (an act's paint
+against a frame-end draw, §8.3) cannot arise: the Dropdown v3's paint sends nothing, and its only page work, the
+selection, is read by the next pick.
+
+**Readings (2026-10-06, `0ea207e52` + this change; load 2–8, a peer driving the editor):** on the interpreter at 200, seeds
+13, 20730 and 20731: 0 divergences, 0 survivors. On the runtime at 200, seeds 13 and 20730: CONFORMS (0 divergences,
+11 row scenarios known, 345 of 346 mutants killed, the last one declared), and both tests are green. D34 had 0 generated
+hits on both seeds (200 sequences held no pick followed by a remount or an Items write); its six scenarios carry it.
+
+**The 10,000 (2026-10-06).** The first runtime run at today's seed, **20732** (305 s), did NOT conform: 2 divergences and 1 survivor.
+- **A pick and an Items write in the same frame.** Here it was the first frame, whose act paint also mounts the dropdown. The
+  D34 matcher had looked for a pick in an *earlier* frame. It now takes a pick anywhere before the Items write.
+- **C80 after a labelled placing.** The node was placed with the label on, given a Focus before the first frame, then had its
+  label written off. On the runtime the placing is already a paint, the Focus waits for the element it drew, and the label-off
+  rebuild drops the keyboard. A four-way control confirmed it: the divergence needs both the placed label and the later
+  change. `labelTakesKeyboard` now starts from the placing's label. This shape predates v3; v2's 10,000 at 20731 never drew it.
+- **The survivor:** the paint of a *leave* on a hidden dropdown in its remount frame. The act's paint puts the element back
+  (Did Mount), and a frame-end mount prints the same. This is the Slider's §8.4 trap (the remount frame with a hidden
+  control). The kill is a new grid: every act on a hidden dropdown brought back with Mounted in the act's frame, then a Focus
+  action, which is Done if the paint put it back and Unchanged if not.
+
+**Readings after the fixes (2026-10-06):**
+- **On the runtime, 10,000 at seed 20732: CONFORMS.** 0 divergences; D34 attributed 3, C80 5, C70 193; 385 of 390 mutants
+  killed, the other 5 declared; 185 s.
+- **On the interpreter, 10,000 at seed 20731: CONFORMS.** 0 divergences, 0 survivors; 65 s.
+- **On the runtime, 200 at seeds 13 and 20730: CONFORMS** (47 of 58 scenarios pass, the 11 others are known rows; 385 of 387
+  and 385 of 386 mutants killed); both tests are green.
+- The package's catalog-parity, reach, types and schema suites: 337 passed. `batch-visual`'s Dropdown test is the interpreter
+  run at seed 13 above. `tsc --noEmit` is clean.
+
+The Dropdown is a cheap spec to grade (16 s for 200 on the runtime). A step that runs the 10,000 straight after the 200s
+loses nothing.

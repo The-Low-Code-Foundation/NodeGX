@@ -7,35 +7,36 @@
  *
  * R3 (a): the runtime wins by default. Every rule below cites the line it was read from.
  *
+ * v3 (NSP-023 step 4, R12 and R14, 2026-10-06): the spec states what a person gets where v1 and v2 copied how React draws.
+ * **The selection shows the last value the dropdown was given, by a person's pick or by the graph** (R14, Richard: "Why would
+ * I not let the node show whatever the last value or signal it received was? Whether it comes from the user or not");
+ * **a Dropdown hidden with Mounted and shown again is where the person left it** and **one handed its Items again keeps the
+ * pick** (R14); **only a person's pick fires Changed** (the descriptions of Value and Changed). What the runtime does instead
+ * only because of React is a known row on the runtime target (D34, C71).
+ *
  * THE RULE, before the citations. A Dropdown is a `<select>` drawn invisible (`opacity: 0`, Select.tsx :84-91) over
  * a span that shows the chosen option's Label (:179-183, :207-219), in a wrapper, with a `<label>` above it when
- * Enable Label is on (:223-249); a PERSON picks an option from it. Four things hold the choice, and the spec keeps
- * them apart because the runtime does:
+ * Enable Label is on (:223-249); a PERSON picks an option from it. Three things hold the choice:
  *
- *   - **the node's value** (`_internal.value`, options.ts :107): what the Value OUTPUT reads (:245-247). A pick writes
- *     it (`valueChanged`, :109-116: on a change, Value is sent and Changed fires) and so does the **Value** input
- *     (:181-200: `null` is ignored — it has no `toString` — anything else that is not text is made text with
- *     `toString`, `undefined` is kept; on a change Value is sent and Changed never fires).
- *   - **the author's Value** (`props.value`, :194): what the Value input last wrote, changed or not. The component's
- *     effect keys on it (Select.tsx :44-47).
- *   - **the shown value** (the component's `useState`, Select.tsx :42): what the `<select>` is told to select and the
- *     span labels. A pick writes it at once (:213). The component's effect (:44-47, `[props.value, props.items]`)
- *     writes it to the author's Value at the mount and at a paint whose render saw a different Items ARRAY (by
- *     identity) or a different author's Value than the render before — and then calls `valueChanged(props.value)`:
- *     when the node's value differs, which is after a person's pick, the node takes the author's Value back, SENDS IT
- *     AND FIRES CHANGED with nobody picking (row D34: a remount, or Items written again after a pick). The spec writes
- *     the shown value on every Value write that changes the node's value; the runtime's effect misses the one that
- *     writes back the very value React last rendered — after a pick, the author's own Value — and leaves the pick on
- *     the screen (row C71, a `row` scenario).
- *   - **what the browser selects** (the `<select>`'s own selectedness, `domSelected`): the shown value while it names
- *     an option (:210 — React controls the element); otherwise React lets go (`value={undefined}`) and the browser
- *     keeps what it had — a fresh element selects the hidden empty option (:217), and an option that leaves the list
- *     hands the selection to the first enabled option (HTML's reset; the hidden one is disabled). A person picking
+ *   - **the node's value** (`_internal.value`, options.ts :107): what the Value OUTPUT reads (:245-247), and what the
+ *     `<select>` is told to select and the span labels. A pick writes it (`valueChanged`, :109-116: on a change, Value is
+ *     sent and Changed fires) and so does the **Value** input (:181-200: `null` is ignored — it has no `toString` —
+ *     anything else that is not text is made text with `toString`, `undefined` is kept; on a change Value is sent and
+ *     Changed never fires). Nothing else moves it — not a remount and not a new Items list. The runtime's component keeps
+ *     its own copy instead (`useState(props.value)`, Select.tsx :42) and follows the author's last Value through an effect
+ *     keyed on `[props.value, props.items]` (:44-47): at a remount, or at a paint after Items was written again, it takes
+ *     the author's Value back over a person's pick, sends it and fires Changed with nobody picking (row D34); and a Value
+ *     written back to the very value React last rendered — after a pick, the author's own Value — leaves the pick on the
+ *     screen (row C71).
+ *   - **what the browser selects** (the `<select>`'s own selectedness, `domSelected`): the node's value while it names
+ *     an option (:210 — the element is told which); otherwise the element is told nothing (`value={undefined}`) and the
+ *     browser keeps what it had — a fresh element selects the hidden empty option (:217), and an option that leaves the
+ *     list hands the selection to the first enabled option (HTML's reset; the hidden one is disabled). A person picking
  *     the option already selected raises no `change` (the browser), so nothing moves.
- *   - **Items** (options.ts :158-171): `undefined` ignored; otherwise kept as handed — the same array again included —
- *     and the paint re-renders. A truthy value that is not a list throws in the render (`props.items.map`, Select.tsx
- *     :118; row C70) — here it offers no options. An option's value is its `Value` as text (`<option value>`, :119), or
- *     its Label's text when it has none (HTML's fallback); an option with `Disabled` true or `'true'` cannot be picked.
+ *   - **Items** (options.ts :158-171): `undefined` ignored; otherwise kept as handed and drawn at the next paint. A truthy
+ *     value that is not a list throws in the render (`props.items.map`, Select.tsx :118; row C70) — here it offers no
+ *     options. An option's value is its `Value` as text (`<option value>`, :119), or its Label's text when it has none
+ *     (HTML's fallback); an option with `Disabled` true or `'true'` cannot be picked.
  *   - **Enabled**, **the pointer, the keyboard, a click's focus** (utils.ts :157-311 on the `<select>`, Select.tsx
  *     :211), **Focus** / **Blur** (utils.ts :366-440, the target is the `<select>`), **Mounted**, **Enable Label** (it
  *     leaves the `<select>`, its keyboard and its selection where they are — ruled 2026-10-05; the runtime builds a NEW
@@ -67,18 +68,12 @@ type State = {
   elementFocused: boolean;
   /** the component is on the page: mounted and painted */
   onPage: boolean;
-  /** options.ts :107 `_internal.value` — the Value output; `undefined` after a Value input of undefined (never sent, C3) */
+  /** options.ts :107 `_internal.value` — the Value output, and what the `<select>` is told to select; `undefined` after a Value input of undefined (never sent, C3) */
   value: string | undefined;
-  /** options.ts :194 `props.value` — what the Value input last wrote, changed or not */
-  authorValue: string | undefined;
-  /** options.ts :164-168 `_internal.items` / `props.items` — the list as handed (identity matters: the effect's dependency) */
+  /** options.ts :164-168 `_internal.items` — the list as handed */
   items: unknown;
-  /** Select.tsx :42 the component's `value` state — what the `<select>` is told to select; meaningless off the page */
-  shown: string | undefined;
   /** the `<select>`'s own selection: an option's value, or '' for the hidden empty option (:217) */
   domSelected: string;
-  /** `props.items` as the last render saw it (Select.tsx :47) */
-  paintedItems: unknown;
 };
 
 type O = typeof Dropdown extends { outputs: infer X } ? X : never;
@@ -101,15 +96,17 @@ export const Dropdown = defineNode({
   // v2 (NSP-023, 2026-10-05): Enable Label shows a label and leaves the <select> and the keyboard on it where they are, its selection too
   // (Richard ruled the Text Input's C80 for all three controls); v1 rebuilt the <select> when the label changed, as React does — row
   // C80, known on the runtime.
-  version: 2,
+  // v3 (NSP-023 step 4, 2026-10-06): the selection is the node's value — a remount and a new Items list keep a person's pick and
+  // fire nothing (R14); v1 and v2 copied the component's `[props.value, props.items]` effect — rows D34 and C71, known on the runtime.
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/controls/options.ts',
   needs: ['person'],
-  // the page's syncs (spec.ts `synced`): not branches — the React side of the choice with them
-  synced: ['pageEnabled', 'pageVisible', 'shown', 'domSelected', 'paintedItems'],
+  // the page's syncs (spec.ts `synced`): not branches — the browser's selection with them
+  synced: ['pageEnabled', 'pageVisible', 'domSelected'],
 
   state: {
     enabled: true, hover: false, pressed: false, focused: false, mounted: true, pageEnabled: true, visible: true, pageVisible: true, elementFocused: false, onPage: false,
-    value: 'Option 1', authorValue: 'Option 1', items: DEFAULT_ITEMS, shown: undefined, domSelected: '', paintedItems: undefined
+    value: 'Option 1', items: DEFAULT_ITEMS, domSelected: ''
   } as State,
   // utils.ts :402-411 `outcomeOutputs({ done, unchanged })` (addFocusActions)
   outcomes: ['done', 'unchanged'],
@@ -301,18 +298,18 @@ export const Dropdown = defineNode({
       if (enabled === s.enabled) return NOTHING;
       return { set: { enabled }, send: ['enabled'] };
     },
-    // options.ts :158-171 — `undefined` is no opinion; anything else is kept as handed (the same array again too) and the
-    // frame's end re-renders: whether the render's effect runs is the paint's to decide (identity, `painted`)
+    // options.ts :158-171 — `undefined` is no opinion; anything else is kept as handed, drawn at the next paint (`painted`); the
+    // node's value stays (R14: a list handed again keeps the pick — the runtime's effect takes the author's Value back, row D34)
     items: (s, v) => (v === undefined ? NOTHING : { set: { items: v }, send: [] }),
-    // options.ts :181-200 — `null` has no `toString` and is ignored (:182-184); what is not text is made text; the author's
-    // Value is written whether or not it changed (:194); a change sends Value and never Changed. The shown value follows a
-    // change (the intent: the runtime's effect keys on the author's Value React last rendered, Select.tsx :44-47, so a write
-    // back to it after a pick leaves the pick on the screen — row C71)
+    // options.ts :181-200 — `null` has no `toString` and is ignored (:182-184); what is not text is made text; a change sends
+    // Value and never Changed, and the selection follows it at the next paint (R14: the last word wins — the runtime's effect
+    // keys on the author's Value React last rendered, Select.tsx :44-47, so a write back to it after a pick leaves the pick on
+    // the screen, row C71)
     value: (s, v) => {
       if (v === null) return NOTHING;
       const value = v === undefined ? undefined : String(v);
-      if (value === s.value) return { set: { authorValue: value }, send: [] };
-      return { set: { value, authorValue: value, shown: value }, send: ['value'] };
+      if (value === s.value) return NOTHING;
+      return { set: { value }, send: ['value'] };
     },
     // react-component-node.ts :2310-2320
     mounted: (_s, v) => ({ set: { mounted: !!v }, send: [] }),
@@ -373,8 +370,8 @@ export const Dropdown = defineNode({
           if (!option || option.disabled) return NONE;
           const focus = p.elementFocused ? NONE : focusTaken();
           if (p.domSelected === picked) return focus;
-          const changed = p.value !== picked;
-          return join(focus, { set: { shown: picked, domSelected: picked, ...(changed ? { value: picked } : {}) }, send: changed ? ['value'] : [], emit: changed ? ['onChange'] : [] });
+          // the paint selected the node's value wherever the list offers it, so an option the element does not select is a change
+          return join(focus, { set: { value: picked, domSelected: picked }, send: ['value'], emit: ['onChange'] });
         }, 'keyboard')
     }
   }
@@ -400,48 +397,33 @@ function optionsOf(items: unknown): Option[] {
 }
 
 /**
- * The page follows what the node wants (checkbox.ts `painted`), and the component's effect and the `<select>`'s selection with it.
- *   - Enabled is painted onto the element; Enable Label changes nothing here (v2; the runtime's rebuild is row C80).
- *   - Mounted off: the element leaves with the keyboard it held; Mounted on: Did Mount, a fresh component (`useState(props.value)`).
- *   - the effect (Select.tsx :44-47): at the mount, and at a render that saw another Items array than the render before, the shown
- *     value becomes the author's Value and `valueChanged(props.value)` runs — a node holding a person's pick takes the author's
- *     Value back, sends it and fires Changed (row D34).
- *   - the selection: React controls the element while the shown value names an option (:210); otherwise the browser keeps what it
+ * The page follows what the node wants (checkbox.ts `painted`), and the `<select>`'s selection with it.
+ *   - Enabled and Visible are painted onto the element; Enable Label changes nothing here (v2; the runtime's rebuild is row C80).
+ *   - Mounted off: the element leaves with the keyboard it held; Mounted on: Did Mount, a fresh element on the node's value — a
+ *     person's pick included, and nothing on the wire (v3, R14; the runtime takes the author's Value back, row D34).
+ *   - the selection: the element is told the node's value while it names an option (:210); otherwise the browser keeps what it
  *     had — a fresh element selects the hidden empty option (:217), and a selected option that left the list hands the selection
  *     to the first enabled option (HTML's reset; the hidden one is disabled).
  */
 function painted(s: Readonly<State>): { set: Partial<State>; send: ValueOut[]; emit: Pulse[] } {
   const set: Partial<State> = { ...(s.pageEnabled === s.enabled ? {} : { pageEnabled: s.enabled }), ...(s.pageVisible === s.visible ? {} : { pageVisible: s.visible }) };
-  let fresh = false;
   if (!s.mounted && s.onPage) return { set: { ...set, onPage: false, elementFocused: false }, send: [], emit: ['willUnmount'] };
   if (!s.mounted) return { set, send: [], emit: [] };
-  const send: ValueOut[] = [];
   const emit: Pulse[] = [];
-  const mounting = !s.onPage;
-  if (mounting) {
+  const fresh = !s.onPage;
+  if (fresh) {
     set.onPage = true;
     emit.push('didMount');
-    fresh = true;
   }
-  let shown = s.shown;
-  if (mounting || s.items !== s.paintedItems) {
-    shown = s.authorValue;
-    set.shown = shown;
-    set.paintedItems = s.items;
-    if (s.value !== s.authorValue) {
-      set.value = s.authorValue;
-      send.push('value');
-      emit.push('onChange');
-    }
-  }
+  const value = s.value;
   const options = optionsOf(s.items);
-  const inList = shown !== undefined && options.some((o) => o.value === shown);
+  const inList = value !== undefined && options.some((o) => o.value === value);
   let dom = s.domSelected;
-  if (fresh) dom = inList ? (shown as string) : '';
-  else if (inList) dom = shown as string;
+  if (fresh) dom = inList ? (value as string) : '';
+  else if (inList) dom = value as string;
   else if (dom !== '' && !options.some((o) => o.value === dom)) dom = options.find((o) => !o.disabled)?.value ?? '';
   if (dom !== s.domSelected) set.domSelected = dom;
-  return { set, send, emit };
+  return { set, send: [], emit };
 }
 
 /**

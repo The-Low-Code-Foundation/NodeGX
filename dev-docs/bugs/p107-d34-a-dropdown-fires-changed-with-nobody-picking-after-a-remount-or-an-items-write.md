@@ -7,7 +7,7 @@ area: runtime / Dropdown (components/controls/Select/Select.tsx, nodes/controls/
 found: P107 NSP-016 s39, 2026-10-04
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.4 (row D34); scenarios "Items written with the current Value absent …" and "a pick, then Mounted off and on …" in packages/nodegx-node-spec/scenarios/net.noodl.controls.options.json
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.options.json "a pick, then Mounted off and on: Will Unmount; Did Mount, and the fresh component's mount effect takes the author's Value back — Value 'Option 1' sent and Changed fires"
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.options.json "a pick, then Mounted off and on: Will Unmount; Did Mount, and the dropdown is where the person left it — nothing on the wire; a pick of the same option raises only Focused (the element that came back did not hold the keyboard)"
 ---
 
 **Changed**'s description: "Fires when the user picks a different option; a value arriving on the Value input does not
@@ -34,3 +34,13 @@ Text Input's D31 does for Set.
 **s46 (2026-10-05): the INTENT is ruled (R14), for NSP-023 step 4.** A Dropdown hidden with Mounted and shown again keeps the
 person's pick and fires nothing ("Where the person left it"); handed its Items again — a fresh list still holding the pick — it
 keeps the pick and fires nothing ("The pick stays"). The Dropdown v2 (step 4) states it; this becomes a runtime-only row then.
+
+**s47 (2026-10-06): the spec states the intent (NSP-023 §8.5, the Dropdown v3), and the runtime keeps this as a known row**
+(`changedWithNobodyPicking` in `packages/noodl-runtime/test/node-spec/conformance.test.ts`). Six row scenarios carry it.
+Three remount after a pick ("a pick, then Mounted off and on …", "Mounted off after a pick …", and one with a Tab in the
+remount frame). Three write Items after a pick (one with a Tab, one with a mouse press, and "Items written with the current
+Value absent …", whose v2 name claimed a pick that never happened). Each has a twin that the runtime passes, in which the
+graph writes Value equal to the pick in the frame after it. The runtime's `props.value` then names the pick, so neither a
+remount nor a new list takes anything back. That is also the shape of the fix: the component reads the node's value and
+keeps no copy of its own. **When the app is fixed (ISL-031), the six stop diverging:** remove their `row` field (a row
+scenario that passes turns the "known rows" test red), drop the twins, and close the row.

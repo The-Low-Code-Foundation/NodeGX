@@ -472,8 +472,10 @@ const labelTakesKeyboard = (d: Divergence) => {
   // s45 (the Checkbox's 10,000 run): a Focus action or a focusing act earlier in the SAME frame holds the keyboard when the label's
   // paint comes, though its Focused prints only in the frame's settle group — so the frame's steps are read for it, in order
   const FOCUSING = new Set(['focus', 'press', 'click', 'type', 'key', 'choose']);
-  let written = false;
-  let painted = false;
+  // s47 (the Dropdown's 10,000 at 20732): the placing is a paint — a node placed with the label on, given a Focus before the first
+  // frame and its label written off, loses the keyboard at the first paint (the Focus waits for the element the placing drew)
+  let written = !!(d.params as Record<string, unknown> | undefined)?.useLabel;
+  let painted = written;
   let holds = false;
   let lost = false;
   for (let k = 0; k < d.difference.index; k++) {
@@ -559,6 +561,29 @@ const graphValueDropped = (d: Divergence) => {
   return slid || nan || percentAlone;
 };
 
+/**
+ * NSP-023 step 4 (R14, 2026-10-05) — NSP-016 §6 D34: Changed with nobody picking. The Dropdown's component keeps its own copy of the
+ * choice (`useState(props.value)`, Select.tsx :42) and an effect keyed on `[props.value, props.items]` (:44-47) that ends in
+ * `valueChanged(props.value)`: at a remount, and at the paint after Items was written, a node holding a person's pick takes the
+ * author's Value back, sends it and fires Changed. Narrow: the RUNTIME prints Value or Changed where the spec prints something else,
+ * after a person's pick, in the settle group of a frame that holds an Items write or whose reference prints Did Mount after an earlier
+ * Will Unmount.
+ */
+const changedWithNobodyPicking = (d: Divergence) => {
+  const act = d.difference.actual;
+  if (!(isChanged(act) || (!!act && act.t === 'value' && portOf(act) === 'value'))) return false;
+  const f = settledFrame(d.reference, d.difference.index);
+  if (!f) return false;
+  const pickAt = d.reference.findIndex((e) => e.t === 'act' && (e as { act?: string }).act === 'choose');
+  if (pickAt < 0 || pickAt >= f[1]) return false;
+  // s47 (the 10,000 at 20732): a pick EARLIER IN THE FRAME than the Items write counts too — the frame's end paints the new list
+  if (d.reference.slice(Math.max(f[0], pickAt), f[1]).some((e) => e.t === 'set' && portOf(e) === 'items')) return true;
+  if (pickAt >= f[0]) return false;
+  let remount = false;
+  for (let g = f[1] + 1; g < d.reference.length && !isStep(d.reference[g]); g++) if (d.reference[g].t === 'signal' && portOf(d.reference[g]) === 'didMount') remount = true;
+  return remount && d.reference.slice(0, f[0]).some((e) => e.t === 'signal' && portOf(e) === 'willUnmount');
+};
+
 const VISUAL_ROWS: KnownRow[] = [
   { row: 'NSP-016 §6 C61 — Font Family wired a truthy value that is not text: the setter throws calling `.split` on it', matches: throwsOnSet((p) => p.endsWith('fontFamily'), truthyNonString, /family\.split is not a function/) },
   { row: 'NSP-016 §6 C62 — a units-typed style input wired null: the generated setter reads `.value` of null and throws', matches: throwsOnSet(unitCssPort, isNull, /Cannot read properties of null \(reading 'value'\)/) },
@@ -589,7 +614,9 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the dropdown on the page', matches: lostRootAfterLabelOff },
     { row: 'NSP-016 §6 C80 — Enable Label changed while the dropdown holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
     { row: 'NSP-016 §6 C70 — Items wired a truthy value that is not a list, or a list holding null: the render throws at the next paint', matches: itemsNotAList },
-    { row: "NSP-016 §6 C71 — a Value written back to the value React last rendered, after a pick, leaves the pick selected: picking it again raises nothing", matches: pickWriteBackPick }
+    { row: "NSP-016 §6 C71 — a Value written back to the value React last rendered, after a pick, leaves the pick selected: picking it again raises nothing", matches: pickWriteBackPick },
+    // NSP-023 step 4 (v3) — the spec keeps the pick; what React's effect makes the runtime do instead
+    { row: "NSP-016 §6 D34 — Changed fires with nobody picking: a remount, or Items written again, after a pick takes the author's Value back", matches: changedWithNobodyPicking }
   ],
   // s41 — the Slider: no label and no text style, so two of the three throwing setters (the Placement and units-typed style inputs)
   'net.noodl.controls.range': [

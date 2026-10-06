@@ -35,3 +35,8 @@ props.items])`); `options.ts` :193-199 (`forceUpdate` only on a change of `_inte
 the Value setter `forceUpdate()` whenever `props.value` changed, not only `_internal.value` — then the effect's
 comparison always sees the last write. The spec says the selection follows every Value write that changes the node's
 value; the runner knows the row (`pickWriteBackPick`).
+
+**s47 (2026-10-06):** the Dropdown v3 (NSP-023 §8.5) keeps this row unchanged (`pickWriteBackPick`). The spec now drops the
+author's Value and the component's copy of the choice: the node's value is what the element is told to select. The
+D34 twins avoid this row the same way the fix would. Once `props.value` follows every Value write, the effect sees the
+write back.
