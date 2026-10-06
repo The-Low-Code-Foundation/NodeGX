@@ -38,10 +38,10 @@ export const Condition = defineNode({
   // `lastConditionValue` (:80) — the value that ARRIVED, kept for the DEF-046 comparison.
   // `tested` is the value the last test read (:180) — what the WIRE carries: `flagOutputDirty`
   // at :177-178 sends the getters' value at evaluation time, and nothing sends between tests.
-  // ⚠️ The getters themselves (:133, :143) read the input LIVE, so a wire made after a passive
-  // change (unticked, or a value arriving with no test) is handed a value no test produced,
-  // while wires made before hold the tested one. The spec models the wire (NSP-002 decision 6);
-  // the disagreement between the runtime's two readers is NSP-004 §6 row C2. Found by the
+  // The getters report the same tested value (row C2, fixed: ruled "Keep the tested result"); they
+  // used to read the input LIVE, so a wire made after a passive change (unticked, or a value
+  // arriving with no test) was handed a value no test produced, while wires made before held the
+  // tested one — graded by graph t13. The spec models the wire (NSP-002 decision 6). Found by the
   // generated phase at 200 sequences: the first cut of this spec modelled the getter.
   state: { last: undefined as unknown, tested: undefined as unknown, scheduled: false, evaluated: false },
   // :49-66 — the condition's value (the `[No input]` branch at :52-54 is overwritten at :61 and has

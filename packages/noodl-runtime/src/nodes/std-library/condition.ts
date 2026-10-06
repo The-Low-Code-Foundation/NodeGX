@@ -31,6 +31,8 @@ interface ConditionNodeInstance extends NodeInstance {
      * answer is `getInputValue('condition')`, which may be a parameter this never sees.
      */
     lastConditionValue?: unknown;
+    /** P107-C2 — what the last test found, which Is True and Is False both report (the wire and the getter agree). */
+    testedResult?: boolean;
   };
   scheduleEvaluate(token?: OutcomeToken): void;
 }
@@ -114,7 +116,8 @@ const ConditionNode: NodeDefinitionOptions = {
       description: 'Fires each time Condition is tested and found false, including while Condition has never been set'
     },
     /**
-     * NDA-017 §2 constraint 4. Both of these read the input back rather than caching, so
+     * NDA-017 §2 constraint 4. Both of these used to read the input back rather than caching
+     * (they now report the last test's answer, P107-C2), so
      * before anything has been tested they answered `false` and `true` respectively — and
      * `Is False` answering `true` is a *claim* that the condition is false, made by a node
      * that has never looked at one. `connectInput` pushes that claim down the wire the moment
@@ -130,7 +133,9 @@ const ConditionNode: NodeDefinitionOptions = {
         'If Condition is a constant, every test pushes the same value — a mounted gate wired that way only ever turns on; a Switch is the two-way shape',
       get(this: ConditionNodeInstance) {
         if (!this._internal.hasEvaluated) return null;
-        return !!this.getInputValue('condition');
+        // P107-C2: the last test's answer, not the input read live — a wire connected after a
+        // change nobody tested was handed a value no test produced, while older wires held the tested one.
+        return !!this._internal.testedResult;
       }
     },
     isfalse: {
@@ -140,7 +145,7 @@ const ConditionNode: NodeDefinitionOptions = {
       description: 'The opposite of Is True, so a false branch needs no Inverter; null until the first test',
       get(this: ConditionNodeInstance) {
         if (!this._internal.hasEvaluated) return null;
-        return !this.getInputValue('condition');
+        return !this._internal.testedResult;
       }
     },
     /**
@@ -174,10 +179,11 @@ const ConditionNode: NodeDefinitionOptions = {
       this.scheduleAfterInputsHaveUpdated(() => {
         this._internal.hasScheduledEvaluation = false;
         this._internal.hasEvaluated = true;
+        const condition = this.getInputValue('condition');
+        this._internal.testedResult = !!condition;
         this.flagOutputDirty('result');
         this.flagOutputDirty('isfalse');
 
-        const condition = this.getInputValue('condition');
         this.sendSignalOnOutput(condition ? 'ontrue' : 'onfalse');
 
         // Last, after the values and after the branch signal. The guard above coalesces two

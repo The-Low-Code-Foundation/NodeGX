@@ -19,7 +19,7 @@
   "src/nodes/and.ts": "d25fadf899b0d6cfaf8b96ea1ef1c583e31a59f019f9c88ca920b9cf76e46408",
   "src/nodes/animate-to-value.ts": "946b5601f0544d432f6a85602b39e0e67292cb6f8c73939644375d23a59f52fa",
   "src/nodes/boolean-to-string.ts": "ea8a223679ebc8a6f698dd1963ac6fdabe70bcfd1487aeae886b3f639e7c1b0c",
-  "src/nodes/condition.ts": "31d92e2571f3c7394e99fe1c95add5909df84c354ff1c5919128b2de85f73c4d",
+  "src/nodes/condition.ts": "c6ff72e6dd39f65e6834a42c70a6cb4846c4afeb54c2d0b51aa59934870d3594",
   "src/nodes/counter.ts": "fcfd9c92d5e39ff059eb569c54985102920b8d8d4a1de87cfeba96fa246889a1",
   "src/nodes/data-attributes.ts": "8fedddb1d1cb7abd5355adfaf13d5a37412fb55c725dae12a9e0440fc8ba9273",
   "src/nodes/delay.ts": "d1e624f95d58401cba87b8a87a65f6afae9555b69416522c02e75185eccda3b9",
