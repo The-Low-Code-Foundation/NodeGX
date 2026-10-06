@@ -182,23 +182,30 @@ function firstOf(...values: string[]): string {
 // Dates
 // ---------------------------------------------------------------------------------------------
 
+/** The zone names `Date.parse` reads (V8, measured 2026-10-06); `CEST`, `BST`, `CET`, `IST`, `JST` are not among them. */
+const ZONE_NAMES_READ = ['UT', 'UTC', 'GMT', 'Z', 'EST', 'EDT', 'CST', 'CDT', 'MST', 'MDT', 'PST', 'PDT'];
+
 /**
  * RSS carries RFC 822 (`Mon, 15 Sep 2026 08:00:00 +0000`), Atom carries ISO 8601, and `dc:date`
  * carries either. `Date.parse` handles both, and a feed whose date it cannot read gets `null`
  * rather than a guess — `published` reaches a sort and an invented date sorts wrongly forever.
+ *
+ * P107-D16 (ruled "UTC, and no date if unknown"): a date with no zone is read as UTC, so the same
+ * feed gives the same dates in a cloud function and in a browser in Paris (`Date.parse` reads it
+ * in the machine's zone); a trailing zone name `Date.parse` does not know gives `null`. It used to
+ * be rewritten to UTC, so `08:00:00 CEST` was published two hours late.
  */
 export function toISODate(value: unknown): string | null {
-  const raw = text(value).trim();
+  const raw = text(value).trim().replace(/\s*\([^)]*\)$/, '');
   if (!raw) return null;
 
-  const ms = Date.parse(raw);
-  if (!isNaN(ms)) return new Date(ms).toISOString();
-
-  // RFC 822 with a two-digit year, or a named zone `Date.parse` declines (`… 2026 08:00:00 EST`).
-  // One retry, stripping a trailing alphabetic zone and letting the rest stand as UTC.
-  const stripped = raw.replace(/\s+\([^)]*\)\s*$/, '').replace(/\s+[A-Z]{2,5}$/, ' UTC');
-  const retry = Date.parse(stripped);
-  return isNaN(retry) ? null : new Date(retry).toISOString();
+  const named = /\s([A-Z]{1,5})$/.exec(raw);
+  if (named && ZONE_NAMES_READ.indexOf(named[1]) === -1) return null;
+  const zoned = !!named || /(?:Z|[+-]\d{2}:?\d{2})$/.test(raw);
+  // An ISO date alone is UTC already; an ISO date-time takes `Z`, anything else ` GMT`.
+  const asUTC = zoned || /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : /^\d{4}-\d{2}-\d{2}T/.test(raw) ? raw + 'Z' : raw + ' GMT';
+  const ms = Date.parse(asUTC);
+  return isNaN(ms) ? null : new Date(ms).toISOString();
 }
 
 // ---------------------------------------------------------------------------------------------

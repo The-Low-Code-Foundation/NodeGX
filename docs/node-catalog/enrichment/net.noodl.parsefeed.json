@@ -7,7 +7,7 @@
     "text": "The feed document — RSS 2.0, Atom 1.0 or RDF/RSS 1.0. Wire an HTTP Request node's Response here with Response Type set to Text.",
     "maxBytes": "Refuse a document larger than this, before parsing it. Default 5 MB.",
     "items": "The feed's items, always an array. Id is never empty, which is what lets a collection store each item once. Left unchanged when a parse fails.",
-    "count": "How many items the last successful parse produced.",
+    "count": "How many items Items holds after the last successful parse.",
     "feedTitle": "The title of the feed itself, not of any item.",
     "feedLink": "The site the feed belongs to — its alternate link, never its own XML address.",
     "feedDescription": "The feed's description, or an Atom feed's subtitle.",

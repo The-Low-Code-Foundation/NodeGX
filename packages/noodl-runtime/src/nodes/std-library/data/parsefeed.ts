@@ -114,7 +114,9 @@ const ParseFeedNode: NodeDefinitionOptions = {
         'The feed\'s items, always an array whether the feed carried one or a hundred. Each has ' +
         'Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and ' +
         'Raw. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title ' +
-        'and date — which is what lets a collection store each item once. Unchanged while the feed ' +
+        'and date — which is what lets a collection store each item once. Each item is the app\'s shared ' +
+        'record of its Id: two items with one Id are one record, with the later item\'s fields, and an ' +
+        'Object node or another Parse Feed using that Id holds the same one. Unchanged while the feed ' +
         'cannot be parsed',
       getter: function (this: ParseFeedNodeInstance) {
         return this._internal.items;
@@ -124,7 +126,7 @@ const ParseFeedNode: NodeDefinitionOptions = {
       type: 'number',
       displayName: 'Count',
       group: 'Values',
-      description: 'How many items the last successful parse produced',
+      description: 'How many items Items holds after the last successful parse',
       getter: function (this: ParseFeedNodeInstance) {
         return this._internal.count;
       }
@@ -260,13 +262,16 @@ const ParseFeedNode: NodeDefinitionOptions = {
       // values — rather than widening the type the rest of the module is checked against.
       collection.set(items as unknown as Record<string, unknown>[]);
       this._internal.items = collection;
-      this._internal.count = items.length;
+      // P107-D18: what Items holds. Two items with one guid are one record of that id, so the
+      // collection holds it once — and Count said 2.
+      this._internal.count = collection.size();
 
       const feed = result.feed;
       this._internal.feedTitle = (feed && feed.title) || '';
       this._internal.feedLink = (feed && feed.link) || '';
       this._internal.feedDescription = (feed && feed.description) || '';
-      this._internal.feedUpdated = (feed && feed.updated) || undefined;
+      // P107-D17: empty text, as its siblings — an undefined is never sent, so the wire kept the previous feed's date.
+      this._internal.feedUpdated = (feed && feed.updated) || '';
       this._internal.kind = (feed && feed.kind) || '';
       this._internal.source = (feed && feed.source) || '';
 

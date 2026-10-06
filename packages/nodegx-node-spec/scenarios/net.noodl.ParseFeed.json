@@ -49,36 +49,36 @@
     "steps": [{ "set": "text", "value": "<rss><channel><title>T</title></channel></rss>" }, "settle", { "set": "text", "value": "<root><notafeed/></root>" }, "settle", { "set": "text", "value": "<!DOCTYPE x [<!ENTITY a \"b\">]><rss/>" }, "settle", { "set": "text", "value": "<rss><channel>" }, "settle", { "set": "text", "value": "<rss><channel><title>U</title></channel></rss>" }, "settle"]
   },
   {
-    "name": "a date with no offset is read in the world's zone — 08:00 is 08:00Z in UTC (D16)",
-    "because": "feed.ts :190-202 `Date.parse` — the zone's; the same steps in Paris below",
+    "name": "a date with no offset is read as UTC — 08:00 is 08:00Z in UTC (v2; row D16)",
+    "because": "feed.ts toISODate — a zoneless date takes `Z` (an ISO date-time) or ` GMT`; ruled 2026-10-05 (P107-D16, \"UTC, and no date if unknown\"); the same steps in Paris below",
     "params": {},
     "world": { "timeZone": "UTC" },
     "steps": [{ "set": "text", "value": "<rss><channel><title>Z</title><lastBuildDate>2026-09-15 08:00:00</lastBuildDate><item><guid>z1</guid><title>Z</title><pubDate>2026-09-15T08:00:00</pubDate></item></channel></rss>" }, "settle"]
   },
   {
-    "name": "… and the same feed in Europe/Paris is 06:00Z: one feed, two Published, by where it was parsed (D16)",
-    "because": "feed.ts :194-195 — a zoneless ISO date-time is local time in ECMAScript",
+    "name": "… and the same feed in Europe/Paris is 08:00Z too: one feed, one Published, wherever it is parsed (v2; was row D16: 06:00Z here)",
+    "because": "feed.ts toISODate — a zoneless ISO date-time is local time in ECMAScript, so the reader adds `Z` before `Date.parse` reads it",
     "params": {},
     "world": { "timeZone": "Europe/Paris" },
     "steps": [{ "set": "text", "value": "<rss><channel><title>Z</title><lastBuildDate>2026-09-15 08:00:00</lastBuildDate><item><guid>z1</guid><title>Z</title><pubDate>2026-09-15T08:00:00</pubDate></item></channel></rss>" }, "settle"]
   },
   {
-    "name": "a named zone Date.parse declines is read as UTC: 08:00 CEST is published as 08:00Z, two hours late; EST is understood (D16)",
-    "because": "feed.ts :197-201 the retry replaces a trailing [A-Z]{2,5} with ' UTC'; the docblock's own 'EST' example is one V8 accepts",
+    "name": "a zone name Date.parse does not know gives no date: 08:00 CEST is published as null, not 08:00Z; EST is understood (v2; was row D16: CEST read as UTC, two hours late)",
+    "because": "feed.ts toISODate — a trailing zone name outside the twelve V8 reads (UT, UTC, GMT, Z and the eight US names) gives null; v1's retry replaced it with ' UTC'",
     "params": {},
     "world": { "timeZone": "America/New_York" },
     "steps": [{ "set": "text", "value": "<rss><channel><title>N</title><item><guid>n1</guid><pubDate>Mon, 15 Sep 2026 08:00:00 CEST</pubDate></item><item><guid>n2</guid><pubDate>Mon, 15 Sep 2026 08:00:00 EST</pubDate></item><item><guid>n3</guid><pubDate>not a date</pubDate></item></channel></rss>" }, "settle"]
   },
   {
-    "name": "a feed that does not say when it changed leaves the previous feed's Feed Updated on the wire — '|| undefined' is never sent (D17)",
-    "because": "parsefeed.ts :269 `|| undefined`, :273-284 flagged; the description says 'empty when it did not say'; every other Feed output falls back to ''",
+    "name": "a feed that does not say when it changed sends Feed Updated as empty text, clearing the previous feed's date, as every other Feed output does (v3; was row D17: '|| undefined' was never sent)",
+    "because": "parsefeed.ts `|| ''`, flagged with the rest; the description says 'empty when it did not say'; ruled 2026-10-05 (P107-D17, \"Send empty text\")",
     "params": {},
     "world": { "timeZone": "UTC" },
     "steps": [{ "set": "text", "value": "<rss><channel><title>A</title><link>https://a.example</link><lastBuildDate>Mon, 15 Sep 2026 08:00:00 +0000</lastBuildDate></channel></rss>" }, "settle", { "set": "text", "value": "<rss><channel><title>B</title></channel></rss>" }, "settle"]
   },
   {
-    "name": "two items with one guid are ONE named record — Items holds it once, with the later item's fields, while Count says 2 (D18)",
-    "because": "parsefeed.ts :257-261 `collection.set(items)`; collection.ts → Model.create keys a record by its `id` (model.ts :243-252)",
+    "name": "two items with one guid are ONE named record — Items holds it once, with the later item's fields, and Count says 1 (v4; was row D18: Count said 2)",
+    "because": "parsefeed.ts `collection.set(items)`, Count = `collection.size()`; collection.ts → Model.create keys a record by its `id` (model.ts :243-252); ruled 2026-10-05 (P107-D18, \"Match Count, describe sharing\")",
     "params": {},
     "world": { "timeZone": "UTC" },
     "steps": [{ "set": "text", "value": "<rss><channel><title>Dup</title><item><guid>same</guid><title>First</title></item><item><guid>same</guid><title>Second</title></item></channel></rss>" }, "settle"]

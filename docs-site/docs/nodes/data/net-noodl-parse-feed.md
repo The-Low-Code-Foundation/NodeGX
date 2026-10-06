@@ -34,12 +34,12 @@ Any time you are reading a feed: a blog, a news site, a YouTube channel's /feeds
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `count` | Number | — | How many items the last successful parse produced |
+| `count` | Number | — | How many items Items holds after the last successful parse |
 | `feedDescription` | String | — | The feed's description, or an Atom feed's subtitle |
 | `feedLink` | String | — | The site the feed belongs to — its alternate link, never its own XML address |
 | `feedTitle` | String | — | The title of the feed itself, not of any item |
 | `feedUpdated` | String | — | When the feed last changed, as an ISO 8601 string; empty when it did not say |
-| `items` | Array | — | The feed's items, always an array whether the feed carried one or a hundred. Each has Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and Raw. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title and date — which is what lets a collection store each item once. Unchanged while the feed cannot be parsed |
+| `items` | Array | — | The feed's items, always an array whether the feed carried one or a hundred. Each has Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and Raw. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title and date — which is what lets a collection store each item once. Each item is the app's shared record of its Id: two items with one Id are one record, with the later item's fields, and an Object node or another Parse Feed using that Id holds the same one. Unchanged while the feed cannot be parsed |
 | `kind` | String | — | Which format this was: rss, atom or rdf |
 | `source` | String | — | A hint at where the feed came from, for a graph that wants to branch: youtube, reddit, podcast or generic. A hint, not a promise — generic is what an unrecognised source gets and it is not a failure |
 

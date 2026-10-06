@@ -15,18 +15,18 @@
  * `Collection.get()`, one guid draw, then `set`) and flags all eight value outputs, then
  * `Changed` (:248-286).
  *
- * ⚠️ Two things the sentence does not say, both the runtime's (R3 (a)):
  * - every item carries an `id`, so `set` makes each one a NAMED record (`Model.create` keys it by
- *   the id — the registry, not a guid): two items with one id in a feed are ONE
- *   record, held ONCE by Items with the later item's fields while Count says two; the same id in a
- *   later parse, or on an Object node anywhere in the app, is the same record (NSP-013 §6 row D18);
- * - `Feed Updated` is `|| undefined` (:269) — and an undefined is never sent, so a feed that does
- *   not say when it changed leaves the PREVIOUS feed's date on the wire where the description
- *   promises empty (row D17); every other Feed output falls back to `''` and is sent.
+ *   the id — the registry, not a guid): two items with one id in a feed are ONE record, held ONCE
+ *   by Items with the later item's fields, and Count says what Items holds (v4, row D18 ruled "Match
+ *   Count, describe sharing"; v3 said two). The same id in a later parse, or on an Object node
+ *   anywhere in the app, is the same record — Items' description says so.
+ * - `Feed Updated` falls back to `''` and is sent, as every other Feed output (v3, row D17 ruled "Send
+ *   empty text"; v2 was `|| undefined`, never sent, so the PREVIOUS feed's date stayed on the wire).
  *
- * Dates are the world's ZONE (`needs: 'timezone'`): feed.ts reads a date with `Date.parse`, and a
- * date with no offset is read in the zone the process runs in (row D16, with the named zones
- * `Date.parse` declines and feed.ts then reads as UTC).
+ * Dates (v2, row D16 ruled "UTC, and no date if unknown"): a date with no zone is read as UTC, so
+ * the world's zone no longer moves it; a trailing zone name `Date.parse` does not know (CEST, BST)
+ * gives no date. v1 read a zoneless date in the zone the process runs in and an unknown name as UTC.
+ * The zone stays a need: the D16 scenarios play it in three zones to show it no longer matters.
  */
 
 import { defineNode } from '../spec';
@@ -57,7 +57,9 @@ type State = {
 
 export const ParseFeed = defineNode({
   type: 'net.noodl.ParseFeed',
-  version: 1,
+  // v2 (P109 ISL-032, row D16): a zoneless date is UTC everywhere, an unknown zone name gives no date.
+  // v3 (row D17): Feed Updated is empty text when a feed does not say. v4 (row D18): Count is what Items holds.
+  version: 4,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/parsefeed.ts; packages/noodl-runtime/src/feed.ts; packages/noodl-runtime/src/xml.ts',
   needs: ['registry', 'random', 'timezone'],
 
@@ -102,11 +104,13 @@ export const ParseFeed = defineNode({
         'The feed\'s items, always an array whether the feed carried one or a hundred. Each has ' +
         'Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and ' +
         'Raw. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title ' +
-        'and date — which is what lets a collection store each item once. Unchanged while the feed ' +
+        'and date — which is what lets a collection store each item once. Each item is the app\'s shared ' +
+        'record of its Id: two items with one Id are one record, with the later item\'s fields, and an ' +
+        'Object node or another Parse Feed using that Id holds the same one. Unchanged while the feed ' +
         'cannot be parsed'
     },
     // :123-131
-    count: { type: 'number', from: (s) => s.count, displayName: 'Count', group: 'Values', description: 'How many items the last successful parse produced' },
+    count: { type: 'number', from: (s) => s.count, displayName: 'Count', group: 'Values', description: 'How many items Items holds after the last successful parse' },
     // :132-188
     feedTitle: { type: 'string', from: (s) => s.feedTitle, displayName: 'Feed Title', group: 'Feed', description: 'The title of the feed itself, not of any item' },
     feedLink: { type: 'string', from: (s) => s.feedLink, displayName: 'Feed Link', group: 'Feed', description: 'The site the feed belongs to — its alternate link, never its own XML address' },
@@ -171,11 +175,11 @@ export const ParseFeed = defineNode({
           lastError: undefined, // :248-251
           lastErrorCode: undefined,
           collectionId: collection.getId(), // :262
-          count: items.length, // :263
+          count: collection.size(), // :263 — what Items holds (v4, D18)
           feedTitle: (feed && feed.title) || '', // :266-271
           feedLink: (feed && feed.link) || '',
           feedDescription: (feed && feed.description) || '',
-          feedUpdated: (feed && feed.updated) || undefined,
+          feedUpdated: (feed && feed.updated) || '', // v3 (D17)
           kind: (feed && feed.kind) || '',
           source: (feed && feed.source) || ''
         },

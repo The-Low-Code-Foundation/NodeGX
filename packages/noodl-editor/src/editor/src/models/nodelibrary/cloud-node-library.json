@@ -5935,7 +5935,7 @@
           "plug": "output",
           "group": "Values",
           "displayName": "Items",
-          "description": "The feed's items, always an array whether the feed carried one or a hundred. Each has Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and Raw. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title and date — which is what lets a collection store each item once. Unchanged while the feed cannot be parsed"
+          "description": "The feed's items, always an array whether the feed carried one or a hundred. Each has Id, Title, Link, Published, Updated, Author, Summary, Content, Image, Enclosure, Tags and Raw. Id is never empty — it is the guid, or the Atom id, or the link, or a hash of title and date — which is what lets a collection store each item once. Each item is the app's shared record of its Id: two items with one Id are one record, with the later item's fields, and an Object node or another Parse Feed using that Id holds the same one. Unchanged while the feed cannot be parsed"
         },
         {
           "name": "count",
@@ -5943,7 +5943,7 @@
           "plug": "output",
           "group": "Values",
           "displayName": "Count",
-          "description": "How many items the last successful parse produced"
+          "description": "How many items Items holds after the last successful parse"
         },
         {
           "name": "feedTitle",
