@@ -1,12 +1,15 @@
 ---
 id: P107-D2
 title: String Format: a placeholder used twice fills every time, though the description says only the first
-status: scheduled
+status: fixed
+commit: 8f31517cc
 phase: P109
 task: ISL-033
 severity: low
 area: runtime / String Format
 found: P107 (the node says what it does) s3, 2026-09-30/10-01
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/String Format.json "a placeholder used twice fills EVERY time, as the port description says (was row D2: it said only the first)"
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-004-THE-PILOT-FIVE.md §6.2 (row D2) — the row names how it is reproduced and pinned
 ---
 
@@ -25,3 +28,5 @@ scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/n
 dropped in the same commit. Plain-words question: README §7 of P107.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Correct the words".** The port description and the code comment say every copy of a placeholder is filled. No app changes; people and agents stop being told the node cannot do something it already does. The question as asked: *"Should the description and the code comment be corrected to say every copy of a placeholder is filled?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 8f31517cc (P109 ISL-033, 2026-10-06), as ruled.** Wording only: Format's sentence is now "every copy of a placeholder is filled" (runtime node, spec, docs page, both catalogs, cloud node library), and the code comment says the same. No behaviour moved.
