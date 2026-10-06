@@ -174,14 +174,6 @@ const sortCannotCompare = (d: Divergence) => {
 };
 
 /**
- * NSP-014 §6.14 C44 — Filter Records' store listener tests `collection === undefined` (filterdbmodelsnode.ts :157) and
- * then calls `collection.contains` (:164): with null on Items it throws inside the store's `save` event — measured s25 in
- * a graph: the WRITER's Error output carries the message and a Query Records listening after it never hears the save.
- * The spec reads a null array as holding nothing. Narrow: the runtime threw that message, with null set on Items before it.
- */
-const nullContains = (d: Divergence) => /Cannot read properties of null \(reading 'contains'\)/.test(d.difference.threw ?? '') && d.reference.slice(0, d.difference.index + 1).some((e) => isSet(e, 'items', (v, present) => present && v === null));
-
-/**
  * NSP-016 §6 C66 — a Checkbox whose Enable Label went from on to off has lost its root element (two elements, one ref
  * callback: the removed one nulls it), so a Focus action reports Unchanged with the box on the page. Narrow: the
  * difference is the Focus outcome — Unchanged on the runtime where the reference says Done — and the reference holds
@@ -570,8 +562,7 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s25 — Array Filter's twin: the same `bindCollection` (filterdbmodelsnode.ts :316-320), and a sort outside the `try`
   FilterDBModels: [
     { row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems },
-    { row: 'NSP-014 §6.14 C43 — a Sorting over rows that are not records throws out of the run: no Error, no Failure, the press never answered', matches: sortCannotCompare },
-    { row: "NSP-014 §6.14 C44 — null on Items throws `null.contains` inside the store's save event: the writer's Error carries it, later listeners never hear the save", matches: nullContains }
+    { row: 'NSP-014 §6.14 C43 — a Sorting over rows that are not records throws out of the run: no Error, no Failure, the press never answered', matches: sortCannotCompare }
   ],
   // s23 — C11's twin on the Record node: `registerOutputIfNeeded` handles `prop-` only (dbmodelnode2.ts :478-480)
   DbModel2: [{ row: 'NSP-014 §6.8 C37 — the Record\'s `<field> Changed` never fires: nothing registers the output', matches: deadPropertyChanged }],

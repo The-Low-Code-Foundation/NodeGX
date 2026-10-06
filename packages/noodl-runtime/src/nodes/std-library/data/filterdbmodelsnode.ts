@@ -154,7 +154,9 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
       if (!_this.shouldRunOnValueChange('records')) return;
 
       if (_this._internal.visualFilter === undefined) return;
-      if (_this._internal.collection === undefined) return;
+      // P107-C44 (ISL-026, ruled "Treat it as holding nothing"): null on Items holds nothing, as undefined does —
+      // `null.contains` threw inside the store's save event, onto the WRITER's Error, and later listeners missed the save
+      if (_this._internal.collection === undefined || _this._internal.collection === null) return;
       if (args.collection !== _this._internal.collectionName) return;
 
       // Note this reaches for the *global* `Model` rather than `nodeScope.modelScope`,

@@ -2152,8 +2152,8 @@
     }
   },
   {
-    "name": "null on Items with a filter, a Class and a Backend: the spec hears nothing (a null array holds no record); the runtime throws `null.contains` inside the store's event (row C44)",
-    "because": "filterdbmodelsnode.ts :157 — `collection === undefined` is the test; null passes it, and `null.contains` (:164) is what the runtime reaches",
+    "name": "null on Items with a filter, a Class and a Backend holds nothing: a save to that Class is not heard here, and nothing throws in the store's event (row C44)",
+    "because": "P107-C44, ruled 2026-10-05 \"Treat it as holding nothing\", fixed in P109 ISL-026: the save listener stops at a null Items as at undefined; `null.contains` (:164) once threw inside the store's event",
     "params": {
       "items": null,
       "collectionName": "Lesson",
@@ -2177,7 +2177,6 @@
       },
       "settle"
     ],
-    "row": "NSP-014 §6.14 C44",
     "world": {
       "registry": {
         "models": {
