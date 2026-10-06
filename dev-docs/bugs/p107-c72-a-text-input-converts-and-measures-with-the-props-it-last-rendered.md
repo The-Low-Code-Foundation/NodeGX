@@ -1,7 +1,8 @@
 ---
 id: P107-C72
 title: A Text Input's Clear, Backspace and frame-end writes convert with the Type, and measure room with the Max length, the component LAST RENDERED — a Type turned Number with a Clear in the same frame publishes '' where the next frame says null
-status: scheduled
+status: fixed
+commit: 580ce9e27
 phase: P109
 task: ISL-031
 severity: low
@@ -9,7 +10,7 @@ area: runtime / Text Input (components/controls/TextInput/TextInput.tsx `setText
 found: P107 NSP-016 s40, 2026-10-04
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.5 (row C72); the 10,000-sequence runtime deep run (TEXT-INPUT-DEEP-RUN-2026-10-04.md, seeds 3832506663 and 955539596), replayed side by side on both targets (s40 zz probe, cases D6, D10)
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json "the component converts with the Type it last rendered (C72): Type Number and Clear in one frame publish '' (the old Type's empty), Done; a Clear in the next frame publishes null (the output was not the number field's empty), Done; a Backspace on a field holding '3' in the frame Type turns Number publishes '' too"
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json "a write converts with the Type as it stands: Type Number and Clear in one frame publish null (the Number field's empty), Done; a Clear in the next frame is Unchanged; a Backspace on a field holding '3' in the frame Type turns Number publishes null — the runtime converts with the Type it last drew ('' twice: row C72)"
 ---
 
 `TextInput.setText` converts the text it publishes with `this.props.type` (TextInput.tsx :94) and `edit` measures an Insert
@@ -42,3 +43,5 @@ props rather than its state).
 Ruled with C69 ("each sees the last"): a write converts with the Type, and measures an Insert Text's room with the Max length, as they
 stand when it runs. The Text Input spec v2 states it (no `shownType` / `shownMaxLength`); the runtime's behaviour is a **known row on the
 runtime target only** (`staleProps`, conformance.test.ts), carried by two row scenarios. The proposed fix above stands.
+
+**Fixed 580ce9e27 (P109 ISL-031, 2026-10-06), as ruled.** setText and edit read the Type and Max length from the node's props, which change as each input arrives. Known row gone; two scenarios unmarked. Control: red on exactly those two.

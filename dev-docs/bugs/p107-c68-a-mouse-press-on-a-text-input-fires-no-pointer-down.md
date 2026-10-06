@@ -1,7 +1,8 @@
 ---
 id: P107-C68
 title: A mouse press on a Text Input fires no Pointer Down and never sets Pressed — the component's own onMouseDown replaces the control's; a Text Area, a finger and the release still report
-status: scheduled
+status: fixed
+commit: 7a92ec4b1
 phase: P109
 task: ISL-031
 severity: medium
@@ -9,7 +10,7 @@ area: runtime / Text Input (components/controls/TextInput/TextInput.tsx)
 found: P107 NSP-016 s38, 2026-10-04
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-016-VISUAL-NODES.md §7.3 (row C68); scenario "a mouse press on the field puts the keyboard on it (Focused) and fires NO Pointer Down" in packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json "a mouse press on the field puts the keyboard on it (Focused) and fires NO Pointer Down and no Pressed; the release fires Pointer Up; a click is the same pair"
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json "a mouse press on the field fires Pointer Down with Pressed true and puts the keyboard on it (Focused); the release fires Pointer Up with Pressed false; a click is the same pair (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)"
 ---
 
 A mouse button going down on a Text Input moves nothing on **Pressed** and fires no **Pointer Down**; the release still
@@ -38,3 +39,5 @@ press on a one-line field fires Pointer Down, sets Pressed and drains the frame,
 behaviour is now a **known row on the runtime target only** (`mousePressOnOneLine`, `packages/noodl-runtime/test/node-spec/conformance.test.ts`),
 carried by 15 row scenarios in `scenarios/net.noodl.controls.textinput.json` (14 beside a Text Area twin the runtime passes; the first beside the Text Area press scenario that was already there). The
 proposed fix above stands: compose the two handlers (one line).
+
+**Fixed 7a92ec4b1 (P109 ISL-031, 2026-10-06), as ruled.** The <input> runs the control's onMouseDown, then its own (which arms preventGlobalFocusChange): a mouse press on a one-line field fires Pointer Down, sets Pressed and drains, as a Text Area does. The known row is gone from conformance.test.ts and its 15 scenarios lost their marks. Control: without the compose, red on exactly those 15 and 13 generated sequences.
