@@ -293,7 +293,9 @@ const SIGNED: readonly unknown[] = [
 export const SignFileUrl = defineNode({
   type: 'Sign File URL',
   // v2 (P109 ISL-030, row C51 ruled "Send the real status"): as Upload File's v2 — the HTTP status, and always a sentence.
-  version: 2,
+  // v3 (P109 ISL-030, row D26 ruled "Clear them"): a link with no expiry (a public one) sends blank Expires At and an empty
+  // TTL; v2 held them undefined, never sent, and a wire kept the previous link's expiry.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/signfileurl.ts; api/cloudstore.js, api/cloudfile.ts',
   needs: ['backend'],
   worldPool: { backends: [...pool('signFileUrl', SIGNED[0]), ...pool('signFileUrl', SIGNED[1]).slice(0, 1), ...pool('signFileUrl', SIGNED[2]).slice(2, 3)] },
@@ -374,7 +376,8 @@ export const SignFileUrl = defineNode({
       backend: (s, _i, answer) =>
         answered(s, answer, 'sign', SIGN_ERROR_CODE, (ok) => {
           const r = (ok ?? {}) as { url?: unknown; kind?: unknown; expiresAt?: unknown; ttlSeconds?: unknown };
-          return { set: { url: r.url, kind: r.kind, expiresAt: r.expiresAt, ttlSeconds: r.ttlSeconds }, send: ['url' as const, 'urlKind' as const, 'isShareable' as const, 'expiresAt' as const, 'ttlSeconds' as const] };
+          // v3 (row D26 ruled "Clear them"): a link with no expiry sends blank Expires At and an empty TTL — v2 held undefined, never sent
+          return { set: { url: r.url, kind: r.kind, expiresAt: r.expiresAt !== undefined ? r.expiresAt : '', ttlSeconds: r.ttlSeconds !== undefined ? r.ttlSeconds : null }, send: ['url' as const, 'urlKind' as const, 'isShareable' as const, 'expiresAt' as const, 'ttlSeconds' as const] };
         })
     }
   }

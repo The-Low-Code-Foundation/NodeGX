@@ -85,7 +85,7 @@ interface SignFileUrlInstance extends NodeInstance {
     url?: string;
     kind?: FileUrlKind;
     expiresAt?: string;
-    ttlSeconds?: number;
+    ttlSeconds?: number | null;
     error?: unknown;
     errorStatus?: number;
   };
@@ -156,8 +156,11 @@ const SignFileUrl: NodeDefinitionOptions = {
             success: (result: SignedUrlResult) => {
               this._internal.url = result.url;
               this._internal.kind = result.kind;
-              this._internal.expiresAt = result.expiresAt;
-              this._internal.ttlSeconds = result.ttlSeconds;
+              // P107-D26 (P109 ISL-030, ruled "Clear them"): a link with no expiry (a public one) sends blank Expires At and an
+              // empty TTL. They were `undefined`, never sent, and a wire kept the PREVIOUS link's expiry beside a link that
+              // never expires.
+              this._internal.expiresAt = result.expiresAt !== undefined ? result.expiresAt : '';
+              this._internal.ttlSeconds = result.ttlSeconds !== undefined ? result.ttlSeconds : null;
               this.flagOutputDirty('url');
               this.flagOutputDirty('urlKind');
               this.flagOutputDirty('isShareable');

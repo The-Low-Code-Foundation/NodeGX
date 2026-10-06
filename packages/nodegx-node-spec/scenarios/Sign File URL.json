@@ -144,8 +144,8 @@
     }
   },
   {
-    "name": "a public link: no expiry, no TTL — neither is sent",
-    "because": "signfileurl.ts :158-159 (undefined, never sent: C3)",
+    "name": "a public link: no expiry, no TTL — blank Expires At and an empty TTL are sent (v3, D26)",
+    "because": "signfileurl.ts: a link with no expiry sends '' and null (P109 ISL-030, P107-D26 ruled \"Clear them\"; v2 held undefined, never sent — C3)",
     "params": {},
     "steps": [
       "settle",
@@ -181,8 +181,8 @@
     }
   },
   {
-    "name": "re-signed to a public link: Expires At and TTL keep the previous link's on the wire",
-    "because": "signfileurl.ts :158-164 — `undefined` flagged and never sent (C3)",
+    "name": "re-signed to a public link: Expires At and TTL let go of the previous link's (v3, D26)",
+    "because": "signfileurl.ts: the public link's blank Expires At and empty TTL are sent over the private link's (P109 ISL-030, P107-D26 ruled \"Clear them\"; v2 kept the previous expiry on the wire)",
     "params": {},
     "steps": [
       "settle",
