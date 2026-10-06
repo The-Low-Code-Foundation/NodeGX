@@ -54,19 +54,7 @@ function copyOfCounterWith(find: string, replace: string): NodeModule {
 const isSet = (e: TraceEvent, port: string, bad: (value: unknown, present: boolean) => boolean) =>
   e.t === 'set' && e.port === port && bad((e as { value?: unknown }).value, 'value' in e);
 
-/**
- * NSP-011 §6 C4 — a `.toString()` in a setter: `null` (and, where noted, `undefined`) THROWS inside
- * `setInputValue`, so the runtime target dies at that step (or in `mount`, when the value is a
- * parameter — then nothing was recorded and the difference sits at 0). Narrow: the throw's own
- * message, and the difference no later than the step after the bad set.
- */
-const throwsOnToString = (ports: readonly string[], values: (v: unknown, present: boolean) => boolean) => (d: Divergence) => {
-  if (d.difference.threw === undefined || !/toString/.test(d.difference.threw)) return false;
-  const bad = d.reference.findIndex((e) => ports.some((p) => isSet(e, p, values)));
-  return bad >= 0 && d.difference.index <= bad + 1;
-};
 const isNull = (v: unknown, present: boolean) => present && v === null;
-const isNullOrUndefined = (v: unknown, present: boolean) => !present || v === null;
 const isNull = (v: unknown, present: boolean) => present && v === null;
 
 /**
@@ -718,21 +706,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   'Filter Collection': [{ row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems }],
   'Map Collection': [{ row: 'NSP-012 §6 C10 — a non-array on Items throws in the setter (`collection.on` on a number, a boolean, a plain object)', matches: nonArrayOnItems }],
-  Substring: [
-    {
-      row: 'NSP-011 §6 C4 — Substring `string`: `value.toString()` (:77) throws on null and undefined; the description says it "raises an error"',
-      matches: throwsOnToString(['string'], isNullOrUndefined)
-    }
-  ],
-  'String Mapper': [
-    {
-      row: 'NSP-011 §6 C4 — String Mapper: `.toString()` on Input String (:70) and on every numbered input (:42, :54) throws on null',
-      matches: (d: Divergence) => {
-        const numbered = d.reference.map((e) => (e.t === 'set' ? (e as { port: string }).port : '')).filter((p) => /^(input|output) \d+$/.test(p));
-        return throwsOnToString(['inputString', ...numbered], isNull)(d);
-      }
-    }
-  ],
   'Value Changed': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
   'net.noodl.Log': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
   'net.noodl.HTTP': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('headers') }],

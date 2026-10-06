@@ -171,8 +171,8 @@
     ]
   },
   {
-    "name": "null on Input String: the spec keeps the old lookup (a new Mapping 0 still lands), the runtime throws in the setter (§6 row C4)",
-    "because": "stringmapper.ts :70 — `null.toString()`",
+    "name": "null on Input String is empty text: it matches no input, so a new Mapping 0 publishes nothing",
+    "because": "v2 (P107-C4, ruled 2026-10-05 \"Read it as empty text\"); v1's runtime threw in the setter (`null.toString()`, :70)",
     "params": {
       "input 0": "zz",
       "output 0": "ZZ",
@@ -189,12 +189,11 @@
         "value": "ZZ2"
       },
       "settle"
-    ],
-    "row": "NSP-011 §6 C4"
+    ]
   },
   {
-    "name": "null on a numbered input: the same throw; the spec keeps the old input (a new Mapping 0 still lands) (§6 row C4)",
-    "because": "stringmapper.ts :42 — `null.toString()`",
+    "name": "null on a numbered input is empty text: Input 0 no longer matches, so a new Mapping 0 publishes nothing",
+    "because": "v2 (P107-C4); v1's runtime threw in the setter (`null.toString()`, :42)",
     "params": {
       "input 0": "zz",
       "output 0": "ZZ",
@@ -211,13 +210,11 @@
         "value": "ZZ2"
       },
       "settle"
-    ],
-    "row": "NSP-011 §6 C4"
+    ]
   },
   {
-    "name": "null on a numbered Mapping is ignored by the spec: nothing is scheduled, so the published mapping stands (the runtime throws, §6 row C4)",
-    "because": ":54 `value.toString()` throws on null (row C4); the spec ignores the write — nothing is scheduled, so nothing is published (NSP-013 s12: a swap of that branch survived on seed 20740, T4)",
-    "row": "NSP-011 §6 C4",
+    "name": "null on a numbered Mapping is empty text: Mapping 1 is '', the lookup on Input 0 still gives Q, so nothing new is sent",
+    "because": "v2 (P107-C4); v1's runtime threw (`value.toString()`, :54) and v1's spec ignored the write (NSP-013 s12: a swap of that branch survived on seed 20740, T4)",
     "params": {
       "input 0": "a",
       "output 0": "Q",

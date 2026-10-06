@@ -30,17 +30,15 @@
     "steps": ["settle", { "set": "start", "value": {} }, "settle"]
   },
   {
-    "name": "null on String: the spec keeps the old string, the runtime throws in the setter (§6 row C4)",
-    "because": "substring.ts :77 — `null.toString()`; the description says it 'raises an error'",
+    "name": "null on String is empty text: Result is ''",
+    "because": "v2 (P107-C4, ruled 2026-10-05 \"Read it as empty text\"); v1's runtime threw in the setter (`null.toString()`)",
     "params": { "string": "abc" },
-    "steps": ["settle", { "set": "string", "value": null }, "settle"],
-    "row": "NSP-011 §6 C4"
+    "steps": ["settle", { "set": "string", "value": null }, "settle"]
   },
   {
-    "name": "undefined on String: the same throw (§6 row C4)",
-    "because": "substring.ts :77 — `undefined.toString()`",
+    "name": "undefined on String is empty text too",
+    "because": "v2 (P107-C4); v1's runtime threw (`undefined.toString()`)",
     "params": { "string": "abc" },
-    "steps": ["settle", { "set": "string" }, "settle"],
-    "row": "NSP-011 §6 C4"
+    "steps": ["settle", { "set": "string" }, "settle"]
   }
 ]

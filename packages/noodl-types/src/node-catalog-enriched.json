@@ -32361,7 +32361,7 @@
           },
           "isSignal": false,
           "default": "",
-          "description": "Text to take the substring from; it must not be cleared to null, which raises an error rather than yielding an empty result"
+          "description": "Text to take the substring from; an empty value (null) counts as empty text"
         }
       ],
       "outputs": [

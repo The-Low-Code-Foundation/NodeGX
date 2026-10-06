@@ -11,10 +11,10 @@
  * (:101-102), and `Mapped String` flagged (:104) — so an unset pairing publishes nothing (C3) and
  * the wire keeps whatever it had.
  *
- * ⚠️ Every string setter here calls `value.toString()` — `inputString` (:70) and both numbered
- * families (:42, :54). `undefined` is handled (`''` on the numbered ports, `undefined` on Input
- * String) but `null` THROWS inside the setter, before anything is stored. The spec abstains where
- * the runtime throws; the throw is NSP-011 §6 row C4, counted by the runner.
+ * Every string setter here reads `null` as empty text — `inputString` (:70) and both numbered
+ * families (:42, :54); `undefined` is `''` on the numbered ports and "no input string" on Input
+ * String (v2 — NSP-011 §6 row C4, ruled "Read it as empty text", fixed in P109 ISL-026). In v1
+ * `null.toString()` threw inside the setter and the spec ignored the write.
  */
 
 import { defineNode, type ValueInputDecl } from '../spec';
@@ -54,7 +54,8 @@ export function mappingFor(
 
 export const StringMapper = defineNode({
   type: 'String Mapper',
-  version: 1,
+  // v2 (P109 ISL-026, P107-C4): null on Input String or a numbered port is empty text; v1 ignored the write (the runtime threw).
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/stringmapper.ts',
 
   // initialize (:27-30): inputs [], mappings []; the rest is unset until written
@@ -70,7 +71,7 @@ export const StringMapper = defineNode({
   inspect: (s) => String(s.mapped),
 
   inputs: {
-    // :61-73 — `value !== undefined ? value.toString() : undefined` (:70); null throws (row C4)
+    // :61-73 — undefined stays undefined, null is '' (v2, row C4), anything else `toString()` (:70)
     inputString: {
       type: 'string',
       coerce: 'none',
@@ -100,16 +101,15 @@ export const StringMapper = defineNode({
   }
 }).on(
   {
-    inputString: (_s, v) => (v === null ? {} : { set: { current: v === undefined ? undefined : String(v), scheduled: true } }),
+    inputString: (_s, v) => ({ set: { current: v === undefined ? undefined : v === null ? '' : String(v), scheduled: true } }),
     defaultMapping: (_s, v) => ({ set: { fallback: v, scheduled: true } })
   },
   {
     derived: {
       inputs: (params) => ({ ...drawn(params, 'input', inputPort), ...drawn(params, 'output', mappingPort) }),
-      // :40-45, :52-57 — `value === undefined ? '' : value.toString()`; null throws (row C4)
+      // :40-45, :52-57 — undefined and null are '' (v2, row C4), anything else `toString()`
       on: (s, portName, value) => {
-        if (value === null) return {};
-        const text = value === undefined ? '' : String(value);
+        const text = value === undefined || value === null ? '' : String(value);
         if (INPUT.test(portName)) return { set: { inputs: { ...s.inputs, [portName.slice('input '.length)]: text }, scheduled: true } };
         return { set: { mappings: { ...s.mappings, [portName.slice('output '.length)]: text }, scheduled: true } };
       },

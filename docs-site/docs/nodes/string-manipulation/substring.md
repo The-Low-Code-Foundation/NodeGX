@@ -27,7 +27,7 @@ Use it for simple positional trims: a short prefix of an id, truncating a previe
 |---|---|---|---|
 | `end` | Number | `-1` | Position to stop before; -1, the default, runs to the end of the string, and 0 yields an empty result |
 | `start` | Number | `0` | Position of the first character to keep, counting from zero; a negative value counts back from the end |
-| `string` | String | `` | Text to take the substring from; it must not be cleared to null, which raises an error rather than yielding an empty result |
+| `string` | String | `` | Text to take the substring from; an empty value (null) counts as empty text |
 
 ## Outputs
 

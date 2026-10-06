@@ -9,10 +9,9 @@
  * negative Start counts from the end, End is exclusive, and `end === -1` (strict, on the RAW
  * value: `'-1'` is not `-1`) means "to the end".
  *
- * ⚠️ The `string` setter calls `value.toString()` (:77) — `null` and `undefined` THROW inside the
- * setter, and the port description says so ("it must not be cleared to null, which raises an
- * error"). A throw is not a behaviour a wire can carry: the spec leaves the string as it was
- * (nothing was stored), and the runtime's throw is NSP-011 §6 row C4, counted by the runner.
+ * `null` and `undefined` on String are empty text (v2 — NSP-011 §6 row C4, ruled "Read it as empty
+ * text", fixed in P109 ISL-026). In v1 the setter's `value.toString()` threw on both and the spec
+ * left the string as it was.
  */
 
 import { defineNode } from '../spec';
@@ -25,7 +24,8 @@ export function substringOf(str: string, start: unknown, end: unknown): string {
 
 export const Substring = defineNode({
   type: 'Substring',
-  version: 1,
+  // v2 (P109 ISL-026, P107-C4): null or undefined on String is empty text; v1 kept the old string (the runtime threw).
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/substring.ts',
 
   // initialize (:26-33): startIndex 0, endIndex -1, inputString ''; the cache and its flag are not state a wire can see
@@ -50,14 +50,14 @@ export const Substring = defineNode({
       group: 'Values',
       description: 'Position to stop before; -1, the default, runs to the end of the string, and 0 yields an empty result'
     },
-    // :65-81 — `value.toString()` (:77): a string for anything that has one; null/undefined throw (row C4)
+    // :65-81 — `String(value)`, and null / undefined are '' (v2, row C4)
     string: {
       type: 'string',
       default: '',
       coerce: 'none',
       displayName: 'String',
       group: 'Values',
-      description: 'Text to take the substring from; it must not be cleared to null, which raises an error rather than yielding an empty result'
+      description: 'Text to take the substring from; an empty value (null) counts as empty text'
     }
   },
 
@@ -74,6 +74,6 @@ export const Substring = defineNode({
 }).on({
   start: (_s, v) => ({ set: { start: v } }),
   end: (_s, v) => ({ set: { end: v } }),
-  // :76-80 — `toString()` throws on null/undefined before anything is stored; the spec abstains there
-  string: (_s, v) => (v === null || v === undefined ? {} : { set: { str: String(v) } })
+  // :76-80 — null / undefined are empty text (v2, row C4)
+  string: (_s, v) => ({ set: { str: v === null || v === undefined ? '' : String(v) } })
 });

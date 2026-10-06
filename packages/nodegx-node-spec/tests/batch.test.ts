@@ -144,8 +144,11 @@ describe('what the source does, not what it says — NSP-011 §6, pinned', () =>
     expect(run(StringVariable, {}, ['settle', { signal: 'saveValue' }, 'settle'])).toContainEqual({ t: 'value', port: 'savedValue', value: '0' });
     expect(run(NumberVariable, {}, [{ set: 'value', value: 0 }, 'settle', { signal: 'saveValue' }, 'settle'])).toContainEqual({ t: 'outcome', port: 'saveValue', value: 'done' });
   });
-  test('C4: null on Substring\'s String / String Mapper\'s Input String is modelled as abstaining (the runtime throws)', () => {
-    expect(run(Substring, { string: 'abc' }, ['settle', { set: 'string', value: null }, 'settle']).filter((e) => e.t === 'value')).toEqual([{ t: 'value', port: 'result', value: 'abc' }]);
+  test('C4 (v2, fixed in P109 ISL-026): null on Substring\'s String is empty text; the String Mapper lookup is unchanged', () => {
+    expect(run(Substring, { string: 'abc' }, ['settle', { set: 'string', value: null }, 'settle']).filter((e) => e.t === 'value')).toEqual([
+      { t: 'value', port: 'result', value: 'abc' },
+      { t: 'value', port: 'result', value: '' }
+    ]);
     expect(mappingFor({ 0: 'a' }, { 0: 'A' }, 'a', 'D')).toBe('A');
     expect(mappingFor({ 0: 'a' }, {}, 'a', 'D')).toBeUndefined();
     expect(mappingFor({ 2: 'a', 0: 'b' }, { 2: 'Z' }, 'a', 'D')).toBe('Z');

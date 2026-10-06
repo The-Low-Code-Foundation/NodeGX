@@ -745,6 +745,18 @@
           "description": "JavaScript run when Run fires, reading Inputs.name and writing Outputs.name"
         },
         {
+          "name": "uses",
+          "type": {
+            "name": "stringlist",
+            "allowEditOnly": true,
+            "editorType": "script-uses"
+          },
+          "plug": "input",
+          "group": "General",
+          "displayName": "Uses",
+          "description": "The project's script files this Function uses. Each one is ready in the code as Scripts.<file name>, so engine/world.js is Scripts.world"
+        },
+        {
           "name": "run",
           "type": {
             "name": "signal",
@@ -4641,7 +4653,7 @@
           "plug": "input",
           "group": "Values",
           "displayName": "String",
-          "description": "Text to take the substring from; it must not be cleared to null, which raises an error rather than yielding an empty result",
+          "description": "Text to take the substring from; an empty value (null) counts as empty text",
           "default": ""
         },
         {
