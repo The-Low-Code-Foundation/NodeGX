@@ -49,14 +49,10 @@ be). The board is **20 of 37 closed**, re-derived from the task files' status li
 
 ## Do, in this order
 
-1. **The closing gates s24 could not run** (a peer's 10,000-sequence chain held the box): the runtime jest without the
-   conformance file, the viewer's whole suite, and every spec touched by s24 at seed 20732 — records (Create, Update,
-   Query Records), HTTP, User family, Sign File URL, Upload File, Cloud File, Open File Picker, Subscribe To Changes, SSE,
-   Cloud Function — in groups. Read §"Gate readings" below for what WAS run.
-2. **ISL-032** (17 rows) then **ISL-033** (5), then **ISL-031** (15). Same method: each spec's "ROWS"/"NOT GRADED" block
+1. **ISL-032** (17 rows) then **ISL-033** (5), then **ISL-031** (15). Same method: each spec's "ROWS"/"NOT GRADED" block
    first; red first; one commit per ruling with a control; ledger closed in a batched docs commit.
-3. **`P109-S22-COLLECTIONCHURN`** (low, open).
-4. ISL-013 build; ISL-018 AC5; ISL-012 AC3.
+2. **`P109-S22-COLLECTIONCHURN`** (low, open).
+3. ISL-013 build; ISL-018 AC5; ISL-012 AC3.
 
 ## Decisions for Richard (not yours)
 
@@ -93,7 +89,11 @@ be). The board is **20 of 37 closed**, re-derived from the task files' status li
 - After C47, C55, D23, C52: graph 89 / 89 (twice each time it moved); spec subset (records batch, catalog parity, graph,
   world, schema) 558 → 611 with the canonical tests; stranger rounds 46 passed after each guarded edit; runtime and spec
   and viewer tsc 0; `bugs.js check` 5 problems, none P109's.
-- **Not run after the last fixes:** the whole runtime and viewer suites (see Do 1), the editor, the stranger 10,000 runs.
+- **Closing gates (run at `aa3238412`, after the peer's chain ended):** runtime jest without the conformance file 3178
+  passed, 0 failed (189 suites); viewer 1775 / 1775 (144 suites); every spec s24 touched together at seed 20732 — the
+  records three, HTTP, the user family (7), Upload File, Sign File URL, Cloud File, Open File Picker, Subscribe To
+  Changes, SSE, Cloud Function — 18 CONFORM, and the known-rows test passes.
+- **Not run:** the editor; the stranger 10,000 runs; all 95+ specs in groups.
 
 ## Recipes
 
