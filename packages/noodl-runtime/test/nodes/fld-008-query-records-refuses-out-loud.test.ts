@@ -114,10 +114,17 @@ function withReverted<T>(body: (mod: unknown) => T): T {
 
   const CAPTURE = '              _filterFailed = err;\n';
   const GUARD = '              if (_this.context.editorConnection) {';
+  // P109 ISL-029 (P107-C39) closed the same widening a second way: a throw from the script now fails the node too. The
+  // reverted node is the one BEFORE FLD-008, so that line goes back to the log it was.
+  const C39 = "          return { failed: 'The filter script failed: ' + ((e as Error).message || String(e)) };";
   expect(original).toContain(CAPTURE);
   expect(original).toContain(GUARD);
+  expect(original).toContain(C39);
 
-  const reverted = original.replace(CAPTURE, '').replace(GUARD, '              if (true) {');
+  const reverted = original
+    .replace(CAPTURE, '')
+    .replace(GUARD, '              if (true) {')
+    .replace(C39, "          console.log('Error while running filter script: ' + e);");
   const revertedPath = path.join(path.dirname(NODE_SOURCE), `dbcollectionnode2.fld008-reverted.${process.pid}.ts`);
   fs.writeFileSync(revertedPath, reverted, 'utf8');
   try {

@@ -998,7 +998,13 @@ const DbCollectionNode: NodeDefinitionOptions = {
         // JSON filter
         if (!this._internal.filterFunc) {
           try {
-            let filterCode = storageSettings['storageJSONFilter'] as string;
+            // P107-C38 (ISL-029, ruled "Run the shown script; report typos"): no script saved runs the starter
+            // script the editor shows (a port default is not a parameter, so it is often absent). It threw on
+            // `.replace` here and the node never queried and never said why.
+            let filterCode =
+              typeof storageSettings['storageJSONFilter'] === 'string'
+                ? (storageSettings['storageJSONFilter'] as string)
+                : _defaultJSONQuery;
 
             // Parse out variables
             filterCode = filterCode.replace(/\/\*[\s\S]*?\*\/|\/\/.*/g, ''); // Remove comments
@@ -1010,11 +1016,10 @@ const DbCollectionNode: NodeDefinitionOptions = {
             this._internal.filterFunc = Function.apply(null, args);
           } catch (e) {
             this._internal.filterFunc = undefined;
-            console.log('Error while parsing filter script: ' + e);
+            // C38: a script that does not parse fails the node, and asks nothing
+            return { failed: 'The filter script could not be read: ' + ((e as Error).message || String(e)) };
           }
         }
-
-        if (!this._internal.filterFunc) return;
 
         let _filter: unknown = {},
           _filterFailed: string | undefined,
@@ -1081,8 +1086,11 @@ const DbCollectionNode: NodeDefinitionOptions = {
         try {
           this._internal.filterFunc.apply(this, filterFuncArgs);
         } catch (e) {
-          // Kept: before FLD-008 this was the only trace a swallowed refusal left.
-          console.log('Error while running filter script: ' + e);
+          // A refusal the translator raised was captured above (FLD-008); it is the better sentence.
+          if (_filterFailed !== undefined) return { failed: _filterFailed };
+          // P107-C39 (ISL-029, ruled "Fail with the script's error"): a script that throws fails the node. It was
+          // logged and the query went out with no filter — every row in the class, as a Success.
+          return { failed: 'The filter script failed: ' + ((e as Error).message || String(e)) };
         }
 
         if (_filterFailed !== undefined) return { failed: _filterFailed };
