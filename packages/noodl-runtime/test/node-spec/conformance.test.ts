@@ -51,9 +51,6 @@ function copyOfCounterWith(find: string, replace: string): NodeModule {
  * the next finding. When a row is ruled and fixed, its entry here goes, and the `known` count
  * below must read 0 in the same commit.
  */
-const isSet = (e: TraceEvent, port: string, bad: (value: unknown, present: boolean) => boolean) =>
-  e.t === 'set' && e.port === port && bad((e as { value?: unknown }).value, 'value' in e);
-
 /**
  * NSP-012 §6 C9 — Create New Array, Create New Object and Set Object Properties coalesce two `Do`
  * presses in one frame into ONE outcome (the `hasScheduled…` guard sits before `beginOutcome`),
@@ -72,24 +69,6 @@ const coalescedPress = (port: string) => (d: Divergence) => {
     }
   }
   return false;
-};
-
-/**
- * NSP-014 §6.5 C36 — Delete Record's success reads the record binding LIVE (deletedbmodelpropertiesnode.ts :70,
- * `internal.model.notify('delete')`): a binding cleared while the delete is out throws there, and the REST adapter hands
- * the throw to `error` (RestDataAdapter.ts :531) — Error is V8's TypeError text, every press Failure, the record deleted.
- * Narrow: the runtime's trace carries that text on Error at or before the first difference — or, when a later failure in
- * the same frame overwrote the text before the settle recorded it, the difference is the spec's Done against the family's
- * Failure, after a press and then a write that clears the binding (Id Source → From repeater, an empty Id).
- */
-const notifyOnCleared = (d: Divergence) => {
-  if (d.actual.slice(0, d.difference.index + 1).some((e) => e.t === 'value' && e.port === 'error' && /\(reading 'notify'\)/.test(String((e as { value: unknown }).value)))) return true;
-  const ref = d.difference.reference;
-  const act = d.difference.actual;
-  if (!ref || !act || ref.t !== 'outcome' || ref.value !== 'done' || act.t !== 'outcome' || act.value !== 'failure' || act.error !== 'record/storage-op-failed') return false;
-  const before = d.reference.slice(0, d.difference.index);
-  const press = before.findIndex((e) => e.t === 'in' && e.port === 'store');
-  return press >= 0 && before.slice(press).some((e) => isSet(e, 'idSource', (v) => v === 'foreach') || isSet(e, 'modelId', (v, present) => !present || v === null || v === ''));
 };
 
 /**
@@ -478,7 +457,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick },
     { row: 'NSP-016 §6 C80 — Enable Label changed while the box holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard }
   ],
-  DeleteDbModelProperties: [{ row: "NSP-014 §6.5 C36 — Delete Record's success reads the binding live; cleared while the delete is out, it throws: Failure, not Done", matches: notifyOnCleared }],
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   SetModelProperties: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('store') }]

@@ -63,11 +63,15 @@ const DeleteDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
           const cloudstore = _this.cloudStoreForScope(_this.nodeScope.ModelScope as ModelScopeLike, tokens);
           if (!cloudstore) return;
 
+          // P107-C36 (ISL-029, ruled "Remember the record at the press"): the record this delete is FOR, taken now, as
+          // Update Record does. The success read `internal.model` live: an Id cleared while the delete was out threw there
+          // (Failure for a delete that happened), and an Id moved to another record told THAT one it was deleted.
+          const model = internal.model;
           cloudstore.delete({
             collection: internal.collectionId,
-            objectId: internal.model.getId(), // Get the objectId part of the model id,
+            objectId: model.getId(), // Get the objectId part of the model id,
             success: function () {
-              internal.model.notify('delete'); // Notify that this model has been deleted
+              model.notify('delete'); // Notify that this model has been deleted
               reportOutcomes(_this, tokens, 'done');
             },
             error: function (err: string) {
