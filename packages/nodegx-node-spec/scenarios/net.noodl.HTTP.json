@@ -98,18 +98,32 @@
     "steps": [{ "signal": "fetch" }, "settle", { "signal": "cancel" }, { "signal": "cancel" }, "settle"]
   },
   {
-    "name": "an earlier request's completion disarms Cancel for a later one (D12): the aborted first request's landing clears the controller of the second, which then cannot be cancelled and completes",
-    "because": "httpnode.ts :1073-1074 one controller per node, :1176 `abortController = null` in the catch of ANY request",
+    "name": "an earlier request's completion no longer disarms Cancel for a later one (v5, D12): the aborted first request's landing removes only its own handle, and the second Cancel aborts the second request",
+    "because": "httpnode.ts abortControllers — one per request, each removed by its own completion (P109 ISL-030, P107-D12 ruled \"Every request still running\"); v4 kept one controller, cleared by ANY completion",
     "params": { "url": "https://api.example.com/slow" },
     "world": { "network": [{ "answer": { "status": 200, "body": "second" }, "after": 500 }] },
     "steps": [{ "signal": "fetch" }, "settle", { "signal": "cancel" }, { "signal": "fetch" }, "settle", { "signal": "cancel" }, "settle", { "advance": 500 }, "settle"]
   },
   {
-    "name": "the same disarming by a 304 (D12): the first request's Not Modified lands while the second is in flight; Cancel then reports unchanged and the second completes",
-    "because": "httpnode.ts :1108 `abortController = null` in the then of ANY request, before the 304 branch",
+    "name": "a 304 for the first request leaves Cancel able to abort the second (v5, D12): Not Modified lands while the second is in flight, then Cancel aborts the second",
+    "because": "httpnode.ts: the then removes only its own request's controller, before the 304 branch (v5, D12)",
     "params": { "url": "https://feed.example.com/rss" },
     "world": { "network": [{ "match": { "url": "https://feed.example.com/rss" }, "answer": { "status": 304 }, "after": 100 }, { "match": { "url": "https://api.example.com/other" }, "answer": { "status": 200 }, "after": 1000 }] },
     "steps": [{ "signal": "fetch" }, "settle", { "set": "url", "value": "https://api.example.com/other" }, { "signal": "fetch" }, "settle", { "advance": 100 }, { "signal": "cancel" }, "settle", { "advance": 900 }, "settle"]
+  },
+  {
+    "name": "a request answered 304, then Cancel: nothing is in flight, so Unchanged (v5, D12)",
+    "because": "httpnode.ts: the 304 branch removes its own request's controller (v5, D12), so Cancel finds nothing running",
+    "params": { "url": "https://feed.example.com/rss" },
+    "world": { "network": [{ "answer": { "status": 304 } }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "signal": "cancel" }, "settle"]
+  },
+  {
+    "name": "two requests in flight: one Cancel aborts both, each answering on Canceled (v5, D12)",
+    "because": "httpnode.ts cancelFetch aborts every controller still in the set, in the order the requests were sent (P107-D12 ruled \"Every request still running\")",
+    "params": { "url": "https://api.example.com/slow" },
+    "world": { "network": [{ "answer": { "status": 200, "body": "late" }, "after": 1000 }] },
+    "steps": [{ "signal": "fetch" }, "settle", { "set": "url", "value": "https://api.example.com/slower" }, { "signal": "fetch" }, "settle", { "signal": "cancel" }, "settle", { "advance": 1000 }, "settle"]
   },
   {
     "name": "Bearer authentication sends Authorization: Bearer <token> (v3, C7)",

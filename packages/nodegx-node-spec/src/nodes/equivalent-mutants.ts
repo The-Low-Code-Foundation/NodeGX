@@ -286,7 +286,9 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
   // a Fetch sets both and every run drains both, so nothing is pending while nothing is scheduled. Until C8 this branch was shared
   // with the throw that lost the outcomes, and that path killed the mutant.
   'net.noodl.HTTP': [
-    { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["pendingTokens","scheduled"],"emit":[]', why: 'a frame end with no Fetch due clears a scheduled flag and a token count that are already false and 0' }
+    { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["pendingTokens","scheduled"],"emit":[]', why: 'a frame end with no Fetch due clears a scheduled flag and a token count that are already false and 0' },
+    // v5 (P109 ISL-030, D12): only Cancel aborts a request without a timeout, and Cancel has already emptied the list it aborts
+    { reducer: 'world.response', kind: 'drop-set', branch: '"set":["abortable","inFlight"],"emit":["canceled"],"outcome":null,"outcomes":["fetch:unchanged"],"request":false', why: 'a cancelled request landing: Cancel already emptied the list it aborted, and the request it removes from in-flight has no timer left to read it' }
   ],
   'net.noodl.ParseFeed': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on Feed yet, or nothing due)' }],
   'net.noodl.ToCSV': [{ reducer: 'afterInputs', kind: 'drop-set', branch: '"set":["scheduled"],"emit":[]', why: STUCK_FLAG + ' (nothing on Items yet, or nothing due)' }],

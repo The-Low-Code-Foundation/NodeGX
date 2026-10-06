@@ -39,11 +39,10 @@
  * (:1179-1454) is what the editor draws for a given configuration. Only `url`, `fetch` and
  * `cancel` are declared (:370-402).
  *
- * **D12** the node keeps ONE abort controller and clears it on ANY completion (:1108, :1176): when
- * two requests overlap and the earlier one completes — an answer, a 304, an abort — `Cancel` can
- * no longer abort the later one and reports `unchanged` with the request still in flight. The
- * spec models it (`abortable` is cleared by every answer); the scenario "an earlier request's
- * completion disarms Cancel for a later one" is the record.
+ * **D12** (v5, fixed in P109 ISL-030, ruled "Every request still running"): one abort controller PER REQUEST, each
+ * removed when its own request completes, and `Cancel` aborts every one still running, in the order they were sent
+ * (`abortable` is that list). v4 kept ONE controller cleared by ANY completion, so an earlier request finishing left
+ * `Cancel` unable to reach a later one, which reported `unchanged` with the request still in flight.
  *
  * NOT IN THIS SPEC, named: `responseMapping` / `mapping-path-<name>` / the `out-<name>` OUTPUTS
  * (:1025-1039) — derived OUTPUTS are not yet a shape the format has (NSP-007 §5, for NSP-014);
@@ -270,14 +269,16 @@ export const HttpRequest = defineNode({
   // sent nothing (the presets read a key the ports never write).
   // v4 (P109 ISL-030, P107-D11 ruled "Give it its own code"): a body that cannot be read as JSON fails under `http/bad-body`;
   // v3 used `http/network-error`, the code for a request that never reached a server.
-  version: 4,
+  // v5 (P109 ISL-030, P107-D12 ruled "Every request still running"): a controller per request, and Cancel aborts every request
+  // still running; v4 kept one, cleared by any completion, so Cancel could miss a later request.
+  version: 5,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/httpnode.ts',
   needs: ['network', 'clock'],
   worldPool: { advances: [0, 1, 100, 1000, 29999, 30000] },
 
   // :316-337 `_internal`; :356-364 initialize. The bags: `values` is `inputValues`; the
   // configuration is one key each. `inFlight` (per request: the tokens it settles, its raw
-  // timeout, whether the timeout fired), `abortable` (THE abort controller, :1073), `scheduled`
+  // timeout, whether the timeout fired), `abortable` (the requests Cancel aborts, v5), `scheduled`
   // (`hasScheduledFetch`), `pendingTokens` (`pendingFetchOutcomes.length`), `nextId` (the spec's).
   state: {
     url: undefined as unknown,
@@ -293,7 +294,7 @@ export const HttpRequest = defineNode({
     pendingTokens: 0,
     nextId: 1,
     inFlight: {} as Readonly<Record<string, InFlight>>,
-    abortable: undefined as string | undefined,
+    abortable: [] as readonly string[],
     response: undefined as unknown,
     statusCode: undefined as number | undefined,
     responseHeaders: undefined as Record<string, string> | undefined,
@@ -323,7 +324,7 @@ export const HttpRequest = defineNode({
       outcome: true,
       displayName: 'Cancel',
       group: 'Actions',
-      description: 'Abandons a request that is still in flight, which answers on Canceled rather than Failure; reports Unchanged when there is nothing to cancel'
+      description: 'Abandons every request still in flight, each answering on Canceled rather than Failure; reports Unchanged when there is nothing to cancel'
     }
   },
 
@@ -371,8 +372,8 @@ export const HttpRequest = defineNode({
     // :386-394 + :494-500 — a token, and one request at the end of the frame
     fetch: (s) => ({ set: { pendingTokens: s.pendingTokens + 1, scheduled: true }, outcome: 'pending' }),
 
-    // :395-402 + :522-531 `cancelFetch` — abort THE controller and report at once
-    cancel: (s) => (s.abortable !== undefined ? { set: { abortable: undefined }, abort: [s.abortable], outcome: 'done' } : { outcome: 'unchanged' })
+    // `cancelFetch` — abort every request still running and report at once (v5, D12)
+    cancel: (s) => (s.abortable.length > 0 ? { set: { abortable: [] }, abort: [...s.abortable], outcome: 'done' } : { outcome: 'unchanged' })
   },
   {
     derived: {
@@ -504,7 +505,7 @@ export const HttpRequest = defineNode({
       else if (body && bodyType === 'urlencoded' && !headers['Content-Type']) headers['Content-Type'] = 'application/x-www-form-urlencoded';
       const id = String(s.nextId);
       return {
-        set: { ...drained, nextId: s.nextId + 1, inFlight: { ...s.inFlight, [id]: { tokens, timedOut: false, timeout } }, abortable: id, lastUrl: url },
+        set: { ...drained, nextId: s.nextId + 1, inFlight: { ...s.inFlight, [id]: { tokens, timedOut: false, timeout } }, abortable: [...s.abortable, id], lastUrl: url },
         after: [{ ms: timeout, tag: 'timeout:' + id }], // :1075-1078, armed before the request goes
         request: { id, method, url, headers, body }
       };
@@ -524,8 +525,8 @@ export const HttpRequest = defineNode({
         const f = s.inFlight[res.id];
         if (!f) return {};
         const { [res.id]: _done, ...rest } = s.inFlight;
-        // :1108 / :1176 — `clearTimeout`, `abortController = null`, on ANY completion
-        const base = { inFlight: rest, abortable: undefined as string | undefined };
+        // `clearTimeout`, and THIS request's controller leaves the set (v5, D12)
+        const base = { inFlight: rest, abortable: s.abortable.filter((x) => x !== res.id) };
         const cancel = ['timeout:' + res.id];
         const n = f.tokens;
         const failure = (code: string) => repeat(n, { port: 'fetch' as const, outcome: 'failure' as const, error: code });

@@ -236,7 +236,12 @@ interface HttpNodeInstance extends NodeInstance {
     error?: string;
     lastRequestUrl?: string;
     hasScheduledFetch?: boolean;
-    abortController?: AbortController | null;
+    /**
+     * P107-D12 (P109 ISL-030, ruled "Every request still running"): one per request in flight, each removed when its own
+     * request completes. There used to be ONE, cleared by ANY completion, so an earlier request finishing left Cancel
+     * unable to reach a later one still running.
+     */
+    abortControllers?: Set<AbortController>;
     /**
      * ERG-001 — `Fetch` pulses no `doFetch` call has taken ownership of yet.
      *
@@ -331,7 +336,7 @@ const HttpNode: NodeDefinitionOptions = {
       displayName: 'Cancel',
       group: 'Actions',
       description:
-        'Abandons a request that is still in flight, which answers on Canceled rather than Failure; reports Unchanged when there is nothing to cancel',
+        'Abandons every request still in flight, each answering on Canceled rather than Failure; reports Unchanged when there is nothing to cancel',
       valueChangedToTrue: function (this: HttpNodeInstance) {
         // Minted here and settled synchronously inside `cancelFetch`, which is not scheduled —
         // one pulse is one call, so there is nothing to batch.
@@ -525,9 +530,12 @@ const HttpNode: NodeDefinitionOptions = {
      * Two `Completed`s for one cancelled request is two action ports invoked, not a duplicate.
      */
     cancelFetch: function (this: HttpNodeInstance, token: OutcomeToken) {
-      if (this._internal.abortController) {
-        this._internal.abortController.abort();
-        this._internal.abortController = null;
+      const running = this._internal.abortControllers;
+      if (running && running.size > 0) {
+        // Every request still running, in the order they were sent (P107-D12).
+        const controllers = Array.from(running);
+        running.clear();
+        for (const controller of controllers) controller.abort();
         this.reportOutcome(token, 'done');
         return;
       }
@@ -763,7 +771,8 @@ const HttpNode: NodeDefinitionOptions = {
 
       // Set up abort controller for timeout and cancel
       const abortController = new AbortController();
-      this._internal.abortController = abortController;
+      if (!this._internal.abortControllers) this._internal.abortControllers = new Set();
+      this._internal.abortControllers.add(abortController);
 
       /**
        * NDA-012 (Data) — which of the two aborts this was.
@@ -824,7 +833,7 @@ const HttpNode: NodeDefinitionOptions = {
         )
         .then((response) => {
           clearTimeout(timeoutId);
-          this._internal.abortController = null;
+          this._internal.abortControllers?.delete(abortController);
 
           /**
            * 🔴 **304 is intercepted here, before the body is read and before `response.ok` is
@@ -909,7 +918,7 @@ const HttpNode: NodeDefinitionOptions = {
         })
         .catch((error) => {
           clearTimeout(timeoutId);
-          this._internal.abortController = null;
+          this._internal.abortControllers?.delete(abortController);
 
           if (error.name === 'AbortError' && !timedOut) {
             // The author pressed Cancel. Nothing went wrong, so nothing is reported.
