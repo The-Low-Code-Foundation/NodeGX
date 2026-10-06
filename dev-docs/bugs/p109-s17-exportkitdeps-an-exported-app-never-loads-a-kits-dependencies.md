@@ -1,7 +1,9 @@
 ---
 id: P109-S17-EXPORTKITDEPS
 title: An exported app never loads a kit's `manifest.dependencies` — the files are copied, nothing references them
-status: open
+status: scheduled
+phase: P109
+task: ISL-035
 severity: high
 area: export / kits (nodegx-export: the kit bridge `src/kits/<Kit>.tsx` and the scaffold's index.html)
 found: P109 ISL-012 AC6, session 17, 2026-10-05

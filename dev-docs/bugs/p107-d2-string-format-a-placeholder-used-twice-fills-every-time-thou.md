@@ -1,7 +1,9 @@
 ---
 id: P107-D2
 title: String Format: a placeholder used twice fills every time, though the description says only the first
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-033
 severity: low
 area: runtime / String Format
 found: P107 (the node says what it does) s3, 2026-09-30/10-01
@@ -21,3 +23,5 @@ String Format: a placeholder used twice fills every time, though the description
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Correct the words".** The port description and the code comment say every copy of a placeholder is filled. No app changes; people and agents stop being told the node cannot do something it already does. The question as asked: *"Should the description and the code comment be corrected to say every copy of a placeholder is filled?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

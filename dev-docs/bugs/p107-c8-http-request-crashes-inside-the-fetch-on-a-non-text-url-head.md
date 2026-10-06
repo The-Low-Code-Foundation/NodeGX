@@ -1,7 +1,9 @@
 ---
 id: P107-C8
 title: HTTP Request crashes inside the fetch on a non-text URL, Headers, Query or Body Fields, and loses the outcome
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / HTTP Request
 found: P107 (the node says what it does) s8, 2026-09-30/10-01
@@ -21,3 +23,5 @@ HTTP Request crashes inside the fetch on a non-text URL, Headers, Query or Body 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fail and say which input".** Failure fires with a message naming the bad input, so the person can find it. A small change near the start of the request. The question as asked: *"Should HTTP Request report a Failure, naming the input, when one of these inputs is not text?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

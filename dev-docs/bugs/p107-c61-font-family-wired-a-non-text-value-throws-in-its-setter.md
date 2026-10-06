@@ -1,7 +1,9 @@
 ---
 id: P107-C61
 title: Font Family wired a truthy value that is not text throws in its setter — the node's update dies there
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / every visual node with a text style (Button, Text, Checkbox, Text Input, Dropdown, Radio Button …)
 found: P107 NSP-016 s37, 2026-10-03
@@ -24,3 +26,5 @@ generator's pool (11 of 20 values).
 
 **Proposed fix:** `String(value)` before the `.split`, or treat a non-string as "no family" (the `else` branch,
 `removeStyle`). One line; line-count neutral.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Treat it as no family".** The node falls back to its default font and the rest of the update applies. A one-line change in one shared place. The question as asked: *"Should a Font Family that is not text be treated as no font family?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

@@ -1,7 +1,9 @@
 ---
 id: P107-D11
 title: HTTP Request reports a JSON body that fails to parse as a network error
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: medium
 area: runtime / HTTP Request
 found: P107 (the node says what it does) s8, 2026-09-30/10-01
@@ -21,3 +23,5 @@ HTTP Request reports a JSON body that fails to parse as a network error.
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Give it its own code".** A new code says the server answered but the body could not be read. The message stays the same. An app that checks for the network-error code in exactly this case would stop matching, which is unlikely. The question as asked: *"Should a reply that cannot be read as JSON get its own error code?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

@@ -1,7 +1,9 @@
 ---
 id: P107-D9
 title: Value Changed's "including the first time it arrives" is false for undefined
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-027
 severity: low
 area: runtime / Value Changed
 found: P107 (the node says what it does) s4, 2026-09-30/10-01
@@ -21,3 +23,5 @@ Value Changed's "including the first time it arrives" is false for undefined.
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Reword the description".** The sentence says 'including the first time a value arrives'. No behaviour changes and nothing can break. The question as asked: *"Should the description be reworded to match what the node does, or should the node change to match the description?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

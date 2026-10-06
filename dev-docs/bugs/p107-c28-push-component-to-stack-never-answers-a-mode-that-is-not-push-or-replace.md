@@ -1,7 +1,9 @@
 ---
 id: P107-C28
 title: Push Component To Stack never answers a press when Mode is neither push nor replace
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-028
 severity: low
 area: runtime / Push Component To Stack (viewer)
 found: P107 NSP-015 s18, 2026-10-01
@@ -23,3 +25,5 @@ call. Graded every run by `scenarios/PageStackNavigate.json` "C28 — …" (the 
 
 Proposed: an else that reports Failure `push-component-stack/unknown-mode` with an Error naming the value.
 One branch; ships alone.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fail and name the value".** The press fires Failure with an error such as "Unknown mode 'Push'", so the author sees what their wire sent. One extra branch in one place. The question as asked: *"Should a press with an unknown Mode report a failure that names the value it got?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

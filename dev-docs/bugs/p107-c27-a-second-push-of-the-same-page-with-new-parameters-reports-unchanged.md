@@ -1,7 +1,9 @@
 ---
 id: P107-C27
 title: A second push or replace of the same page with new parameters, from one Push Component To Stack, reports Unchanged and keeps the old page
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-028
 severity: high
 area: runtime / Push Component To Stack + Component Stack (viewer)
 found: P107 NSP-015 s18, 2026-10-01
@@ -34,3 +36,5 @@ row per item, a different Target Page each press.
 
 Proposed: hand a copy — `params: { ...this._internal.pageParams }` at navigate.ts :181 and :210 (the
 node's side, one line each); or have the stack copy what it stores. Ships alone.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Hand the stack a copy".** Each press opens the page with the values it was pressed with, so the second product opens. One line each for push and replace, on the node's side. The question as asked: *"Should Push Component To Stack hand the stack a copy of its parameters, so each press keeps its own values?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

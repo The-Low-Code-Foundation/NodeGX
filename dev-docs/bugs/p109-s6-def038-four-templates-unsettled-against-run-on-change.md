@@ -1,7 +1,9 @@
 ---
 id: P109-S6-DEF038
 title: The DBT demo template would be rewritten by an editor load — 6 Function inputs lose their run-on-change (DEF-038's settled gate)
-status: open
+status: scheduled
+phase: P109
+task: ISL-037
 severity: medium
 area: templates / digital-bricks-training-demo, run-on-value-change settling (NDA-017, DEF-038)
 found: P109 s6, 2026-10-03 (the first full `noodl-mcp` run in P109; met as a red neighbour, not this session's change)

@@ -1,7 +1,9 @@
 ---
 id: P109-S15-ARRAYFILTERPATHEXPORT
 title: The React export filters an Array Filter key like `owner.id` as one field name, while the running app reads the field inside `owner`
-status: open
+status: scheduled
+phase: P109
+task: ISL-035
 severity: low
 area: export / nodegx-export `src/analyze/plan.ts:7841` (the Array Filter's filter list, read by the export's own copy of the filter)
 found: P109 s15, 2026-10-05, building P109-S8-ARRAYFILTERPATH

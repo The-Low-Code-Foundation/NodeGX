@@ -1,7 +1,9 @@
 ---
 id: P107-C77
 title: A Draggable element can no longer be picked up from the keyboard once its element is replaced — after Mounted goes off and on, after its Tag changes, or when it mounts more than about a second after Draggable was set
-status: open
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / drag and drop (noodl-viewer-react/src/drag-drop.ts `setDraggable`, `whenMounted`) — every node with the Drag Source ports (Text, Image, Group, Circle, Video)
 found: P107 NSP-016 s43, 2026-10-05

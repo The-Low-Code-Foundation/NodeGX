@@ -1,7 +1,9 @@
 ---
 id: P107-D25
 title: Request Magic Link's Error says "empty until one does" fail and is cleared on a Done — but the clear never reaches a wire, so a label keeps the last failure after a success
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: low
 area: runtime / Request Magic Link (`requestmagiclink.ts` :157-161) — CONTRACT C3 (`Node.sendValue` never sends `undefined`, node.ts :820-822)
 found: P107 (the node says what it does) s28, 2026-10-02
@@ -25,3 +27,5 @@ Send an empty text on success?"* (one decision with C47's "is 'empty' a blank te
 **Proposed:** send `''` rather than `undefined` when a node clears a text output it once filled.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Clear it to blank text".** A Done sends blank text on Error, so the label empties. A tiny change, following whatever the User node ruling decides 'empty' means. The question as asked: *"Should a successful request clear the Error text on the wire?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

@@ -1,7 +1,9 @@
 ---
 id: P107-C57
 title: Server-Sent Events — Event Types or Method wired a value that is not text throws when the stream connects
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: low
 area: runtime / Server-Sent Events (`agent/sse.ts` :172-174, :217-219 keep `value || …`; :626-631 `.split`; `agent/sse-connection.ts` :419 `.toUpperCase`)
 found: P107 (the node says what it does) s34, 2026-10-03
@@ -22,3 +24,5 @@ connects instead of ignoring it. Should it just turn the value into text, like t
 **Proposed:** `String(value)` in both setters (the URL setter already does this, sse :134). The spec reads both as text.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules; the throw is a known row (conformance.test.ts `sseNonText`).
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Turn them into text".** The node connects as it does for URL. A wrong value then fails as a normal connection error instead of a crash. Two one-line changes. The question as asked: *"Should Event Types and Method turn what they receive into text, as URL already does?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

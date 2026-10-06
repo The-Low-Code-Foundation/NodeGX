@@ -1,7 +1,9 @@
 ---
 id: P109-S12-CAMELROOTS
 title: create_component drops a misnamed argument (visualRoots for visual_roots, a stringified array) without a word
-status: open
+status: scheduled
+phase: P109
+task: ISL-034
 severity: medium
 area: mcp / tool argument parsing (zod strips unknown keys), create_component
 found: P109 ISL-015 AC5 s12, 2026-10-03 (the stranger round)

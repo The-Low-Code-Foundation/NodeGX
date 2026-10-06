@@ -1,7 +1,9 @@
 ---
 id: P107-C67
 title: A Check or Uncheck that reverts a person's click in the same frame does not redraw the Checkbox — the box stays as the click left it and the next click reports the opposite of what the node holds
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / Checkbox (components/controls/Checkbox/Checkbox.tsx, nodes/controls/checkbox.ts)
 found: P107 NSP-016 s37, 2026-10-04 (the Checkbox's 10,000-sequence run on the runtime)
@@ -27,3 +29,5 @@ spec (and the person) expects Checked true and Changed from the second click; th
 **Proposed fix:** make the component read the node's value, not React's last render — `checkedChanged` calling `forceUpdate`
 so the click's `true` is rendered, or the effect keyed on a counter the node bumps on every write. The spec models today's
 behaviour as a known row.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Draw the last word".** The box always shows what the node holds, so an app can refuse or undo a tick and the person sees it. Small change in the Checkbox's two files. The question as asked: *"Should the Checkbox always draw what the app last set, even straight after a click?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

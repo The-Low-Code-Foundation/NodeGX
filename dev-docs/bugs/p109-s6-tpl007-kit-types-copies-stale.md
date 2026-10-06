@@ -1,7 +1,9 @@
 ---
 id: P109-S6-TPL007
 title: Rocket School's checked-in kit type copies differ from what the generator writes (two node-kit.d.ts)
-status: open
+status: scheduled
+phase: P109
+task: ISL-036
 severity: low
 area: templates / Rocket School generator (TPL-007), kit types copies (GAM-015 lineage)
 found: P109 s6, 2026-10-03 (full `noodl-mcp` run; red neighbour, not this session's change)

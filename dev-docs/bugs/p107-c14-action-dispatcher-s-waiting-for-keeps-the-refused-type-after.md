@@ -1,7 +1,9 @@
 ---
 id: P107-C14
 title: Action Dispatcher's Waiting For keeps the refused type after the wait expires
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-032
 severity: low
 area: runtime / Action Dispatcher
 found: P107 (the node says what it does) s10, 2026-09-30/10-01
@@ -21,3 +23,5 @@ Action Dispatcher's Waiting For keeps the refused type after the wait expires.
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Clear it when the wait ends".** The output goes blank as its description says. A one-line change. Nothing else in the node moves. The question as asked: *"Should Waiting For go blank as soon as the wait runs out?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

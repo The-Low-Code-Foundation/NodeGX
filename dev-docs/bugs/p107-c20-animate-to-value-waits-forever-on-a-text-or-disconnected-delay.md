@@ -1,7 +1,9 @@
 ---
 id: P107-C20
 title: Animate To Value waits forever when Delay arrives as text or is disconnected
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / Animate To Value
 found: P107 NSP-013 s13, 2026-10-01
@@ -19,3 +21,5 @@ Where: `packages/noodl-viewer-react/src/nodes/std-library/animate-to-value.ts` :
 Reproduce: `packages/nodegx-node-spec/scenarios/net.noodl.animatetovalue.json`, the two C20 scenarios.
 
 Proposed: `Number(value) || 0` in the setter (one line).
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Read it as a number".** "100" waits 100 ms and a missing Delay starts at once. A one-line change. The question as asked: *"Should Animate To Value read Delay as a number, and treat a missing Delay as no delay?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

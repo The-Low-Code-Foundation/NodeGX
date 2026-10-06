@@ -1,7 +1,9 @@
 ---
 id: P109-S4-UNROUTEDPAGE
 title: A page written through the door into a project with no Router is unreachable, and no tool says so
-status: open
+status: scheduled
+phase: P109
+task: ISL-034
 severity: medium
 area: MCP door (`noodl-mcp/src/project/pageRegistration.ts` `resolveRegistration` returns undefined for a router-less project; `noodl-editor/…/validation/navigation.ts` `checkPageShape` checks only the Page node)
 found: P109 s4, 2026-10-02 — ISL-014 AC6's agent run (Claude Code over the real stdio door)

@@ -1,7 +1,9 @@
 ---
 id: P107-C34
 title: Update Record keeps its write on the record when the save fails — including when nothing was ever sent
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: medium
 area: runtime / Record family — Update Record (`SetDbModelProperties`), `scheduleSave`
 found: P107 (the node says what it does) s22, 2026-10-02
@@ -30,3 +32,5 @@ branch (`Store to` = Local only) is unaffected. A behaviour change; ships alone.
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules. The spec (`update-record.ts`) states the
 runtime's behaviour today; a ruled fix is a spec version.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Put the old values back".** On any failure the record shows what the backend holds, and Failure fires as today. A small change. Anything bound to the record snaps back to the old value, so a field the person just changed can revert on screen. The question as asked: *"Should Update Record put the old values back when a save fails?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

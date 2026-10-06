@@ -1,7 +1,9 @@
 ---
 id: P107-C32
 title: Two Show Popups pressed in one frame — the first reports Dismissed AND Done, for a popup that never opened
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-028
 severity: low
 area: runtime / NodeContext.showPopup (Show Popup)
 found: P107 NSP-015 s20, 2026-10-02
@@ -28,3 +30,5 @@ Proposed (a choice): (a) return a marker from `showPopup` for the early return (
 `dismissed` reason) and have Show Popup report neither Done nor Failure for it (Dismissed already
 answered the press). That needs the outcome contract's view: is a press answered by Dismissed alone?
 (b) report Failure `show-popup/replaced-before-open`. (c) keep Done and re-word its description.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Drop the Done".** The node fires Dismissed only, and that answers the press. Done then always means the popup opened. This makes Dismissed alone a full answer to a press, which other nodes may want to agree with. The question as asked: *"When a popup is replaced before it opens, what should its node report besides Dismissed?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

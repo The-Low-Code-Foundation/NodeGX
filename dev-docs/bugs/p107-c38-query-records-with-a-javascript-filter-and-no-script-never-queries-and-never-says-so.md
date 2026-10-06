@@ -1,7 +1,9 @@
 ---
 id: P107-C38
 title: Query Records with a Javascript filter and no stored script (or a syntax error) never queries — and never says so
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: high
 area: runtime / Query Records (`DbCollection2`) — the Javascript filter
 found: P107 (the node says what it does) s23, 2026-10-02
@@ -35,3 +37,5 @@ list is empty."*
 fails with Error and Failure, as the visual filter's refusal does (:982). A behaviour change; ships alone.
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Run the shown script; report typos".** With no script saved, the node runs the starter script the editor shows, which fetches every record. A script with a syntax error fires Failure and puts the error on Error. A small change. Apps that were silent start to fetch. The question as asked: *"What should Query Records do when its Javascript filter is missing or will not run?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

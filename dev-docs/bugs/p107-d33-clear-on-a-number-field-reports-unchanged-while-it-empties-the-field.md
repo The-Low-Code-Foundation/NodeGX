@@ -1,7 +1,9 @@
 ---
 id: P107-D33
 title: Clear on a Number field reports Unchanged while it empties text the field was holding — it reads the author's Value and the output, not the field
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: low
 area: runtime / Text Input (nodes/controls/text-input.ts `clear`)
 found: P107 NSP-016 s38, 2026-10-04
@@ -18,3 +20,5 @@ where before it would have been Done.
 
 **Proposed fix:** compare the field's text (the component's state, or `props.startValue`) as well. Small. The spec
 models today's behaviour.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Check the field's text".** Clear reports Done whenever it empties something. Small change in one file. The question as asked: *"Should Clear check the field's own text when it decides whether anything changed?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

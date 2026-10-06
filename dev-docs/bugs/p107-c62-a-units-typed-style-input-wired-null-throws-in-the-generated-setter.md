@@ -1,7 +1,9 @@
 ---
 id: P107-C62
 title: A units-typed style input wired null throws in the generated setter — margins, paddings, font size, min / max size, border widths and radii
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / every visual node (react-component-node.ts, the `inputCss` setter)
 found: P107 NSP-016 s37, 2026-10-03
@@ -23,3 +25,5 @@ value.value !== undefined)` — `typeof null === 'object'`, so `.value` is read 
 (reading 'value')`.
 
 **Proposed fix:** `value !== null &&` in that test (one line, neutral), so null reads as "no value" like undefined.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Remove the style".** Both kinds of empty value behave the same and the update carries on. A one-line change in one shared place. The question as asked: *"Should an empty value on these inputs remove the style, the way undefined already does?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

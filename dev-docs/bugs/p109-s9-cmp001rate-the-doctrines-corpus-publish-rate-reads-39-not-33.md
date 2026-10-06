@@ -1,7 +1,9 @@
 ---
 id: P109-S9-CMP001RATE
 title: The interface doctrine says the example corpus publishes outputs at 33%; the corpus reads 39%, and the gate is red
-status: open
+status: scheduled
+phase: P109
+task: ISL-036
 severity: low
 area: `noodl-mcp/tests/cmp001InterfaceDoctrine.test.ts:360` (literal `33`) and the `**33%**` sentence in `noodl-editor/…/authoring/prompts/interfaces.ts`; population `noodl-types/src/node-catalog-enriched.json` `examples`
 found: P109 s9, 2026-10-03, running the CMP-001 gate for ISL-003's doctrine sentence (owner: P85 CMP-001)

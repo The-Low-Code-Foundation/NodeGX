@@ -1,7 +1,9 @@
 ---
 id: P107-C56
 title: Server-Sent Events — Last Error, Retry Count and Duplicates Suppressed change without being sent, so the wire shows stale values
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: low
 area: runtime / Server-Sent Events (`agent/sse.ts` :663-719 — only `handleState` and `handleError` flag status outputs; `agent/sse-connection.ts` :842-847, :902-931, :854-863)
 found: P107 (the node says what it does) s34, 2026-10-03
@@ -30,3 +32,5 @@ retry counter lags one behind while it keeps failing. Should those boxes update 
 (the connection's `onDuplicate` hook already exists, conn :861). A behaviour change, so the spec would go to v2.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules. The spec states the runtime's reading.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Send them when they change".** Last Error clears on reconnect, Retry Count is current, and Duplicates Suppressed counts as it goes. A small change in one node. Wires get a few more updates. The question as asked: *"Should these three outputs update the moment their values change?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

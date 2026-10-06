@@ -1,7 +1,9 @@
 ---
 id: P107-C15
 title: Action Dispatcher reports Done when the one action it was handed was refused
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-032
 severity: medium
 area: runtime / Action Dispatcher
 found: P107 (the node says what it does) s10, 2026-09-30/10-01
@@ -21,3 +23,5 @@ Action Dispatcher reports Done when the one action it was handed was refused.
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fire Failure, as described".** An action refused straight away no longer counts as accepted, so Done means something ran or was queued. A small change in one place. An app wired to Done for a refused action would stop moving on, which is the point. The question as asked: *"When every action in a Dispatch is refused straight away, should the node fire Failure instead of Done?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

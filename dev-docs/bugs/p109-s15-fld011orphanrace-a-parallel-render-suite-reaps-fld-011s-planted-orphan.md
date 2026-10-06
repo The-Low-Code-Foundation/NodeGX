@@ -1,7 +1,9 @@
 ---
 id: P109-S15-FLD011ORPHANRACE
 title: fld011ParallelTabs' "reaps an orphan" test fails in a full parallel run — another worker's render suite reaps its planted orphan before the precondition is read
-status: open
+status: scheduled
+phase: P109
+task: ISL-036
 severity: low
 area: gate / packages/noodl-mcp/tests/fld011ParallelTabs.test.ts:346-351 vs scripts/devtools/render-report.js:1678 (`reapOrphanedRenderProcesses` at every `withRenderedPage` start)
 found: P109 s15, 2026-10-05, the closing full `noodl-mcp` run (--maxWorkers=2)

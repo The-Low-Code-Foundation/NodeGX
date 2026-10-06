@@ -1,7 +1,9 @@
 ---
 id: P107-C51
 title: Upload File and Sign File URL's Error Status Code is never the HTTP status — always 0 on Directus, Supabase and PocketBase, and the Parse error code (e.g. 119) on the NodeGX / Parse wire
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: medium
 area: runtime / Upload File (`uploadfile.ts` `setError` :390-403), Sign File URL (`signfileurl.ts` `setError` :326-339), the REST adapter's file methods (`RestDataAdapter.ts` `fail: (message) => options.error({ error: message })` :1814, :1868, :1938, :2013; `request` :527)
 found: P107 (the node says what it does) s30, 2026-10-03
@@ -32,3 +34,5 @@ code). Make it the real HTTP status?"*
 `status` before `code`; a message-less envelope puts a sentence on Error, not the object. A spec v2 for both nodes.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Send the real status".** Both nodes show 403, 500 and so on, on every backend, and Error is always a sentence. A change to the backend layer and the two nodes. An app that checks for 119 on NodeGX's backend would need to check for 403 instead. The question as asked: *"Should Error Status Code carry the real HTTP status on every backend?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

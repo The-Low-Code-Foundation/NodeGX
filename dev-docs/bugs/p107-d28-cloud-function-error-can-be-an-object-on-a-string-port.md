@@ -1,7 +1,9 @@
 ---
 id: P107-D28
 title: Cloud Function — Error carries an object when the backend's error field is one
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: low
 area: viewer / Cloud Function (`cloudfunction2.ts` :324-327 — `(e && e.error) || …`)
 found: P107 (the node says what it does) s32, 2026-10-03
@@ -26,3 +28,5 @@ its JSON)?"*
 when it has one). A spec v2.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Always text".** Error is the object's message when it has one, or the object written out as text. A small change. A graph that read fields off the Error object would lose them. The question as asked: *"Should Error always be text?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

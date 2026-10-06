@@ -1,7 +1,9 @@
 ---
 id: P107-C24
 title: Navigate To Path never answers a press when Path is not text (null, a number) — the frame-end callback throws
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / Navigate To Path (viewer)
 found: P107 NSP-015 s17, 2026-10-01
@@ -24,3 +26,5 @@ not text (null) …" (row C24); the runtime suite counts it every run (33 of 200
 
 Proposed: read a Path that is not text as no Path — Failure `navigate-to-path/no-path`, Error "No path
 to navigate to" (what the spec says). One line (`typeof formattedPath !== 'string'` at :151); ships alone.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Treat it as no path".** Failure fires with 'No path to navigate to', the same as a missing Path today. A one-line change. The question as asked: *"Should a Path that is not text be treated as no path, with the existing 'No path to navigate to' Failure?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

@@ -1,7 +1,9 @@
 ---
 id: P107-C45
 title: On a Directus / PocketBase project, a backend that fails the page-load session check (503, network down) fires Session Lost while the user stays signed in
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: medium
 area: viewer / user service (`userservice.ts` constructor) — every User node
 found: P107 (the node says what it does) s26, 2026-10-02
@@ -29,3 +31,5 @@ adapter already did that and announced it — so the service's own clear + annou
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules. The world (world.ts AUTH, THE START-UP CHECK) plays the service
 as it is.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Stay signed in, say nothing".** Session Lost fires only when the backend actually refuses the sign-in, on every backend. A brief outage no longer sends anyone to the login page. On NodeGX's own backend this also stops a blip signing people out. One change that also makes Session Lost fire once instead of twice. The question as asked: *"When the backend cannot be reached at page load, should the person stay signed in or be signed out?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

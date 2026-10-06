@@ -1,7 +1,9 @@
 ---
 id: P107-C43
 title: Filter Records never answers a Filter press when its Sorting meets rows that are not records — no Error, no Failure
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: low
 area: runtime / Filter Records (`FilterDBModels`) — the run (`scheduleFilter`)
 found: P107 (the node says what it does) s25, 2026-10-02 — 4–8 of 200 generated sequences per seed
@@ -24,3 +26,5 @@ Filter does nothing at all — no error, no failure signal."*
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules. The spec states the sensible reading (the
 filter's failure); the runtime's is the known row.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fail with an error".** The node fires Failure and puts the reason on Error, as it already does for the filter. A one-line change. The question as asked: *"Should a sort that cannot run fail the same way a filter that cannot run does?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

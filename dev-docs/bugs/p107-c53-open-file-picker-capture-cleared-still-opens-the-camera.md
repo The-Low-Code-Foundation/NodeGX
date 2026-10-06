@@ -1,7 +1,9 @@
 ---
 id: P107-C53
 title: Open File Picker — clearing Capture after an Open that used it still opens the camera
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: medium
 area: viewer / Open File Picker (`openfilepicker.ts` :141-145 — `capture` assigned only when truthy, on a reused element)
 found: P107 (the node says what it does) s31, 2026-10-03
@@ -38,3 +40,5 @@ clearing Capture really clears it?"*
 follows Capture as held).
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fix it".** Each Open sets Capture as it stands and removes it when blank. A two-line change. Nobody relies on the camera sticking. The question as asked: *"Should clearing Capture make the next Open show the file list again?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

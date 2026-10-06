@@ -1,7 +1,9 @@
 ---
 id: P107-C48
 title: A User node's `<field> Changed` signals never fire — the editor offers them, nothing registers them (C11 / C37's twin)
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-027
 severity: low
 area: runtime / User (`user.ts` `registerOutputIfNeeded` :447-463)
 found: P107 (the node says what it does) s26, 2026-10-02
@@ -19,3 +21,5 @@ Changed (the general one) does."*
 **Proposed:** register `changed-` beside `prop-` in `registerOutputIfNeeded` — ask together with C11 and C37.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules; the spec states the pulse, the runtime's silence is a known row.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Make them fire".** Each 'nick Changed' pulses when that value changes. A one-line change to the User node. Apps that already have such a wire will start running whatever it leads to, which is what their builders meant. The question as asked: *"Should the User node's per-property Changed signals fire when that property changes?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

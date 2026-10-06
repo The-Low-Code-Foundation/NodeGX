@@ -1,7 +1,9 @@
 ---
 id: P107-C26
 title: Push Component To Stack's Back Results and Back Actions never connect — the TS port dropped `registerOutputIfNeeded`
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-028
 severity: high
 area: runtime / Push Component To Stack (viewer)
 found: P107 NSP-015 s18, 2026-10-01
@@ -33,3 +35,5 @@ Control in the same component: Show Popup's `closeAction-Save` → Counter conne
 Proposed: put the method back as it was (`backResult-<name>` with the getter `getBackResult(name)`,
 `backAction-<name>` with an empty getter) — the Show Popup shape. Ships alone; the spec's scenarios for
 it lose their `row` mark in the same commit.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Put the method back".** Wires from Back Results and Back Actions work again, the way Show Popup's close results already do. One method restored in one file, and it touches nothing else. The question as asked: *"Should the method that creates the Back Results and Back Actions outputs be put back as it was?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

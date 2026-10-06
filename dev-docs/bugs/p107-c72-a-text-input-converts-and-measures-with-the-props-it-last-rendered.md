@@ -1,7 +1,9 @@
 ---
 id: P107-C72
 title: A Text Input's Clear, Backspace and frame-end writes convert with the Type, and measure room with the Max length, the component LAST RENDERED — a Type turned Number with a Clear in the same frame publishes '' where the next frame says null
-status: open
+status: scheduled
+phase: P109
+task: ISL-031
 severity: low
 area: runtime / Text Input (components/controls/TextInput/TextInput.tsx `setText` :94, `edit` :346)
 found: P107 NSP-016 s40, 2026-10-04

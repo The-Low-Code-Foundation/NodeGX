@@ -1,7 +1,9 @@
 ---
 id: P107-C66
 title: A Checkbox loses its root element when Enable Label is turned off — Focus then reports Unchanged, Scroll Into View says it is not mounted, while the box is on the page
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / Checkbox (components/controls/Checkbox/Checkbox.tsx) and react-component-node.ts `setDOMElement`
 found: P107 NSP-016 s37, 2026-10-03
@@ -43,3 +45,5 @@ ref. Measured: scenario "Enable Label turned off, then the Focus action" in
 `packages/nodegx-node-spec/scenarios/net.noodl.controls.options.json` (marked row) and known row `lostRootAfterLabelOff`
 for the Dropdown in `conformance.test.ts`. The spec's matrix scenario starts every segment from a remount with the
 label off so that a rebuild in it is always off → on, which keeps the root.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fix it with the label work".** Focus and Scroll Into View keep working whatever the label does. About one line in each of the three controls, built alongside the label fix already scheduled. Nothing that works today depends on the lost element. The question as asked: *"Should the control keep hold of its element when its label is hidden?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

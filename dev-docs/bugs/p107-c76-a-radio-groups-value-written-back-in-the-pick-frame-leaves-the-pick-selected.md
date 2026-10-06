@@ -1,7 +1,9 @@
 ---
 id: P107-C76
 title: A Radio Button Group's Value written back in the same frame as a person's pick leaves the picked button selected under a Value that names another — picking it again raises nothing, and picking the named one raises no Changed
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / Radio Button Group (components/controls/RadioButtonGroup/RadioButtonGroup.tsx, nodes/controls/radiobuttongroup.ts)
 found: P107 NSP-016 s42, 2026-10-04
@@ -39,3 +41,5 @@ React last rendered.
 **Proposed fix:** drop the component's copy: render the selection from `props.value` and keep the "from a person" flag
 on the node (set by `valueChanged`, cleared by the Value input), so a write-back is a render like any other and the
 buttons read the node's Value. The spec then loses `rendered` and `selected` and the two scenarios change their claim.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Show what Value says".** The buttons read the group's Value directly, so every write redraws them and the next pick fires Changed. Medium change in the group's two files; the group's description work loses two checks that model today's behaviour. The question as asked: *"Should the group always show the button its Value names, even after a write-back in the moment of a pick?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

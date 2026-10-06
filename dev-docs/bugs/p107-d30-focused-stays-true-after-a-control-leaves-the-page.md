@@ -1,7 +1,9 @@
 ---
 id: P107-D30
 title: Focused (and Hover, Pressed) stay as they were after a control leaves the page with Mounted off — the element that comes back holds no keyboard while Focused still reads true
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / every control with the shared control states (Button, Checkbox, Radio Button, Dropdown, Slider, Text Input)
 found: P107 NSP-016 s37, 2026-10-03
@@ -38,3 +40,5 @@ stays true (scenarios "focused, then Enable Label turned on" and "focused, then 
 :366-440) — scenarios "focused, then Mounted off and on" and "focused, then Enable Label turned on" in
 `packages/nodegx-node-spec/scenarios/net.noodl.controls.options.json`: Enable Label changing rebuilds the tree around a
 new `<select>` (Select.tsx :223-252), the keyboard leaves with the old one and Focused stays true.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Reset and announce".** The outputs describe the page, and logic waiting for Blurred runs. Small change in shared code, felt by every control. An app that validates or saves on Blurred will now also do so when the field is hidden. The question as asked: *"When a control leaves the page, should Focused, Hover and Pressed go false, with Blurred and Hover End fired if they were on?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

@@ -123,8 +123,31 @@ the work:
 | [ISL-023](ISL-023-THE-GENERATOR-GATES-CATCH-A-TYPE-ERROR-AND-A-STRAY-BACKTICK.md) | The generator's gates catch a type error and a stray backtick — **✅ s10: CLOSED (`5ff15228b`): `scripts/template-gate.js` runs before every `template:*` (types of the generator's own files + a source scan for a stray backtick and a `${…}` in a produced comment, by file and line; 9 generators, 1,219 literals in 2.9 s); garden + rocket arms red with nothing written; the old gates measured blind (a backtick pair left 2 of 3 green)** | F32, F33 | tooling | — |
 | [ISL-024](ISL-024-A-TEMPLATE-LIVES-IN-ITS-OWN-FOLDER.md) | A template lives in its own folder | F34 | repo | ✓ |
 | [ISL-025](ISL-025-THE-ISLAND-DROPS-THE-WORKAROUNDS.md) | The island drops the workarounds (closing task) — **🟡 s2: W1, W2 and W3 (ruling 1) landed and driven; the census spec pins 22 rows; s4: W13 ("Remove the force") and W21 (ISL-022) removed** | every WA | template | per row |
+| **Track F — the ledger sweep (2026-10-05): every P107 / P109 bug that had no task** | | | | |
+| [ISL-026](ISL-026-A-VALUE-OF-THE-WRONG-KIND-NEVER-KILLS-A-NODE.md) | A value of the wrong kind never kills a node — **20 bugs** (4 high · 13 medium · 3 low; 19 ruled ✅ 2026-10-05) | ledger | runtime | ✓ ruled |
+| [ISL-027](ISL-027-EVERY-CHANGED-SIGNAL-THE-EDITOR-OFFERS-FIRES.md) | Every Changed signal the editor offers fires, and only when something changed — **6 bugs** (2 high · 1 medium · 3 low; 6 ruled ✅ 2026-10-05) | ledger | runtime | ✓ ruled |
+| [ISL-028](ISL-028-GOING-TO-A-PAGE-TWICE-WITH-NEW-PARAMETERS-GETS-THERE.md) | Going to a page twice, with new parameters, gets there — **10 bugs** (3 high · 4 medium · 3 low; 10 ruled ✅ 2026-10-05) | ledger | viewer | ✓ ruled |
+| [ISL-029](ISL-029-RECORDS-AND-QUERIES-SAY-WHAT-REALLY-HAPPENED.md) | Records and queries say what really happened — **12 bugs** (4 high · 4 medium · 4 low; 12 ruled ✅ 2026-10-05) | ledger | runtime | ✓ ruled |
+| [ISL-030](ISL-030-SIGN-IN-FILES-AND-STREAMS-REPORT-THE-TRUTH.md) | Sign-in, HTTP, files and streams report the truth — **18 bugs** (1 high · 8 medium · 9 low; 18 ruled ✅ 2026-10-05) | ledger | runtime | ✓ ruled |
+| [ISL-031](ISL-031-A-CONTROL-SHOWS-AND-REPORTS-WHAT-THE-PERSON-DID.md) | A control shows and reports what the person did — **23 bugs** (1 high · 14 medium · 8 low; 15 ruled ✅ 2026-10-05) | ledger | noodl-viewer-react | ✓ ruled |
+| [ISL-032](ISL-032-EVENTS-STATES-AND-TIMERS-KEEP-THEIR-WORD.md) | Events, states, timers and parsers keep their word — **17 bugs** (11 medium · 6 low; 17 ruled ✅ 2026-10-05) | ledger | runtime | ✓ ruled |
+| [ISL-033](ISL-033-A-NODES-DESCRIPTION-SAYS-WHAT-IT-DOES.md) | A node's description says what it does — **6 bugs** (6 low; 5 ruled ✅ 2026-10-05) | ledger | node catalog descriptions, enrichment docs, CONTRACT.md | ✓ ruled |
+| [ISL-034](ISL-034-THE-DOOR-AND-THE-DEPLOY-SAY-WHAT-WENT-WRONG.md) | The door and the deploy say what went wrong — **6 bugs** (4 medium · 2 low) | ledger | noodl-mcp | — |
+| [ISL-035](ISL-035-AN-EXPORTED-APP-LOADS-WHAT-THE-DEPLOYED-ONE-LOADS.md) | An exported app loads what the deployed one loads — **2 bugs** (1 high · 1 low) | ledger | nodegx-export | — |
+| [ISL-036](ISL-036-THE-GATES-ARE-GREEN-FOR-THE-RIGHT-REASON.md) | The gates are green for the right reason — **6 bugs** (6 low) | ledger | tooling | — |
+| [ISL-037](ISL-037-THE-TEMPLATES-CARRY-NO-SHAPE-THE-PRODUCT-WARNS-ABOUT.md) | The templates carry no shape the product warns about — **7 bugs** (4 medium · 3 low) | ledger | templates | — |
 
 🔒 = the task asks Richard something before it builds. "after AC1" = the ruling waits on a measurement.
+
+**Track F — the bugs other sessions found (added 2026-10-05, at Richard's request).** P107's node specs and this phase's
+own sessions filed 133 bugs to the ledger (`dev-docs/bugs/`) that no task owned: 111 from P107 (102 awaiting a ruling) and
+22 from P109. Richard: *"I feel like phases 107 and 109 are finding a lot of fundamental bugs, just want to make sure they're
+all tasked up. You can write them into phase 109 I think, it's a monster bug fixing phase."* They are grouped by what a
+person sees into ISL-026 … ISL-037, and each ledger file now carries `phase: P109` and `task:`. Rows that were `open` are
+now `scheduled`; rows awaiting a ruling keep `needs-ruling`, so `node scripts/bugs.js` still lists them for asking.
+**Not re-measured when filed:** each task's AC1 does that first. 🔴 **ISL-026 (a wrong-kind value kills a node, 20 rows)
+is the worst of the track.** ISL-031 waits on P107 NSP-023 one control at a time, and ISL-035 and ISL-037 hand over to P18 and
+P108 if those phases are running.
 
 ## 5. Handed to P91
 
@@ -454,6 +477,17 @@ recommendation:**
   unwired, in our corpus; 34 wired in 3 of Richard's old projects. Re-asked with those numbers → **"Fix it, fix up old projects"**
   (recommended this time).
 
+**Track F rulings round (2026-10-05) — 102 rows in one sitting, on a page.** Every `needs-ruling` row of ISL-026 … ISL-033
+was put to Richard on the [Phase 109 Rulings page](https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH): one card per bug, in plain
+words (what the node is, what a person sees, one question, two or three options with their cost, the recommendation first),
+77 cards marked "take the recommendation" and 25 "worth a thought". Eight readers drafted the cards from the ledger files and the
+NSP sections; four recommendations depart from the bug file's own proposal after a source read (Query Records with no script
+runs the starter script; a Role rule with no Role refuses the save; And with nothing wired sends false, as Or does; Consume on a
+Global event is described, not changed). **Ruled: 101 as recommended, 1 against** — P107-D31 (Text Input's Set fires Value
+Changed when the text is unchanged): *"Keep it, fix the description"*. P107-D4 (And's odd port names) is `wontfix` ("leave it,
+and say so"); P107-D5 (Switch's unread field) goes the next time Switch is touched. Each ruling is written into its ledger file
+(`status: scheduled`, the card's question quoted) and into its task's §8 table, so each task's AC2 is met.
+
 Each task's §5 has the full question, the options and the trade-offs. Ask in plain words, one decision
 per question, and only when the task is next to build. This table is the index, with the recommendation in brackets.
 
@@ -515,3 +549,4 @@ job each.
 | C | **3** (ISL-011 ✅ s4, ISL-014 ✅ s4, ISL-015 ✅ s12) | 5 |
 | D | **4** (ISL-016 ✅ s15, ISL-017 ✅ s15, ISL-019 ✅ s13, ISL-021 ✅ s15; ISL-022 🟢 built, AC6 run once — inconclusive; ISL-018 🟡 built, one case open) | 7 |
 | E | **1** (ISL-023 ✅ s10; ISL-025 🟡 W1–W3, W13, W21 removed) | 3 |
+| F | 0 (scoped 2026-10-05 by the ledger sweep: 133 bugs, 12 tasks) | 12 |

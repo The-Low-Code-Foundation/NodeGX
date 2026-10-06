@@ -1,7 +1,9 @@
 ---
 id: P107-D1
 title: And's description promises false when nothing is connected; it publishes nothing
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-033
 severity: low
 area: runtime / And
 found: P107 (the node says what it does) s3, 2026-09-30/10-01
@@ -21,3 +23,5 @@ And's description promises false when nothing is connected; it publishes nothing
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Make And start at false".** A node wired to And's Result gets false from the start, as Or gives today. A one-line behaviour change shipped alone; an app that relied on And staying silent before its first input would now see false at start-up. The question as asked: *"Should And start at false, as its description says, or should the description say it sends nothing until an input arrives?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

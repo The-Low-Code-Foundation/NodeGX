@@ -1,7 +1,9 @@
 ---
 id: P109-S6-D54
 title: D54's mutant row reads the wrong colour — a chip publishing a bare name is not swallowed on the re-press
-status: open
+status: scheduled
+phase: P109
+task: ISL-036
 severity: low
 area: noodl-mcp / theme presets (D54)
 found: P109 s6, 2026-10-03 (full `noodl-mcp` run; red neighbour, not this session's change)

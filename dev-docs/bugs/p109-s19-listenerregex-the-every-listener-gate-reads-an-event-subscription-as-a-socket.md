@@ -1,7 +1,9 @@
 ---
 id: P109-S19-LISTENERREGEX
 title: "HLS-006's every-listener gate reads `world.listen('resize')` as a socket, and is red at HEAD"
-status: open
+status: scheduled
+phase: P109
+task: ISL-036
 severity: low
 area: export tests / HLS-006 (`packages/nodegx-export/tests/hls006-every-listener.test.ts:109`, `LISTENS`)
 found: P109 ISL-005 build session 4, 2026-10-05 (attributing the whole nodegx-export run)

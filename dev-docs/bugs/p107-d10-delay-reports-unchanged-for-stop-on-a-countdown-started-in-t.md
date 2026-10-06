@@ -1,7 +1,9 @@
 ---
 id: P107-D10
 title: Delay reports Unchanged for Stop on a countdown started in the same frame, yet stops it
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-032
 severity: low
 area: runtime / Delay
 found: P107 (the node says what it does) s8, 2026-09-30/10-01
@@ -21,3 +23,5 @@ Delay reports Unchanged for Stop on a countdown started in the same frame, yet s
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Report Done".** Stop says it stopped something whenever it did. A small change in one node, and only graphs that start and stop in the same frame notice. The question as asked: *"Should Stop report Done when it cancels a countdown that was started in the same frame?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

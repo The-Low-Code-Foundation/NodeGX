@@ -1,7 +1,9 @@
 ---
 id: P107-C68
 title: A mouse press on a Text Input fires no Pointer Down and never sets Pressed — the component's own onMouseDown replaces the control's; a Text Area, a finger and the release still report
-status: open
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / Text Input (components/controls/TextInput/TextInput.tsx)
 found: P107 NSP-016 s38, 2026-10-04

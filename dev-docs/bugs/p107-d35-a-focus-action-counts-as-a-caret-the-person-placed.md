@@ -1,7 +1,9 @@
 ---
 id: P107-D35
 title: A Focus action counts as "a caret someone placed" — on a Text Area an Insert Text then writes at the START of the text, where the browser's resting cursor is, and a field whose Type moved from Email or Number to Text inserts at the start too
-status: open
+status: scheduled
+phase: P109
+task: ISL-031
 severity: low
 area: runtime / Text Input (components/controls/TextInput/TextInput.tsx `caret` :304-316, `hadCaret` :177-180)
 found: P107 NSP-016 s40, 2026-10-04

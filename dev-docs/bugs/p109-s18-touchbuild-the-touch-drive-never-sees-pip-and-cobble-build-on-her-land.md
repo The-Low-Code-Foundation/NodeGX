@@ -1,7 +1,9 @@
 ---
 id: P109-S18-TOUCHBUILD
 title: "`drive-iw007-touch.js` never sees Pip and Cobble build on her land at 1368 (BUILD, PILLS, PAY red on HEAD's garden too)"
-status: open
+status: scheduled
+phase: P109
+task: ISL-037
 severity: medium
 area: templates / bot-garden (her land: two robots building), or the drive itself — not diagnosed
 found: P109 ISL-005 build session 3, 2026-10-05 (the slice-6 drive census, run with a HEAD control)

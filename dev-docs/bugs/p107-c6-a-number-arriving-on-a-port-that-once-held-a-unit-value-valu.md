@@ -1,7 +1,9 @@
 ---
 id: P107-C6
 title: A number arriving on a port that once held a unit value ({ value, unit }) is merged into it
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / node.ts setInputValue (every port)
 found: P107 (the node says what it does) s4, 2026-09-30/10-01
@@ -21,3 +23,5 @@ A number arriving on a port that once held a unit value ({ value, unit }) is mer
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Only on size inputs".** Inputs built for sizes keep the behaviour; every other input receives exactly what was sent. A small change in the core of the runtime, shipped on its own. An app that relied on a generic input keeping the unit would see plain numbers instead. The question as asked: *"Should this unit-sticking behaviour apply only to inputs that are meant to hold sizes?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

@@ -1,7 +1,9 @@
 ---
 id: P107-C78
 title: An element that is both Draggable and a drop zone, picked up with the keyboard, starts inside itself — Enter drops it on itself (Dropped and Landed on the same node, its own Drag Value), which the pointer can never do
-status: open
+status: scheduled
+phase: P109
+task: ISL-031
 severity: low
 area: runtime / drag and drop (noodl-viewer-react/src/drag-drop.ts `keyboardLift` :841-878, `onKeyDown` :804-815) — every node with both port groups (Text, Image, Group, Circle, Video)
 found: P107 NSP-016 s43, 2026-10-05

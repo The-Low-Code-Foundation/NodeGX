@@ -1,7 +1,9 @@
 ---
 id: P107-G1
 title: A docs sentence claims no node ever computes from a half-updated upstream; per-write nodes do
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-033
 severity: low
 area: runtime / graph semantics (NSP-008 docs)
 found: P107 (the node says what it does) s7, 2026-09-30/10-01
@@ -19,3 +21,5 @@ A docs sentence claims no node ever computes from a half-updated upstream; per-w
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Yes, correct the docs sentence".** The page is rewritten to say what is true: the nodes feeding a node update first, but a node that recomputes on each input sees its inputs one at a time and can send a passing result. No app changes; the exported code stays different here, and that difference stays on the export's list. The question as asked: *"When two inputs of a node change in the same update, may the node briefly send a result built from one new input and one old one?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

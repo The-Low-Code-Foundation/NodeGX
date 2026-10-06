@@ -1,7 +1,9 @@
 ---
 id: P107-C65
 title: A Checkbox whose Label is wired an object or an array crashes the page's render — "Objects are not valid as a React child"
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: high
 area: runtime / Checkbox (components/controls/Checkbox/Checkbox.tsx) — and any control that renders its label without String()
 found: P107 NSP-016 s37, 2026-10-03
@@ -32,3 +34,5 @@ act) on the runtime target.
 the `<label>`, and :182 renders `{props.placeholder}` raw in the span while nothing is selected — a Placeholder wired an
 object crashes the render the same way (measured in the Dropdown's generated runs at seed 13: 2 runs on Label, 1 on
 Placeholder; known rows C65 `objectLabel` and `objectPlaceholder` in `conformance.test.ts`). `String()` on both.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Turn them into text".** The page keeps drawing and the label shows the object as text, for example '[object Object]'. That points the person to the mistake. One small change per control. The question as asked: *"Should these labels and the Placeholder be turned into text, as the Button's label already is?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

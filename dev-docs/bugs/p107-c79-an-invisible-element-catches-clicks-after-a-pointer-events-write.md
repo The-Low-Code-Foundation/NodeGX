@@ -1,7 +1,9 @@
 ---
 id: P107-C79
 title: A Text at Opacity 0 catches clicks once Pointer Events Enabled or Pointer Events Mode is written after it was drawn — the style write goes straight to the DOM and the component's "opacity 0 takes no pointer" rule is never re-applied
-status: open
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / every visual node with both the opacity rule and the Pointer Events inputs (react-component-node.ts `setStyle` :1802-1890 and `removeStyle`; Text.tsx :88-90, Group.tsx :328, Image.tsx :52, Circle.tsx :387, Video.tsx :213 — the five that call `addPointerEventOutputs`; Text Input has the opacity rule, TextInput.tsx :118, but no Pointer Events inputs, so nothing patches it)
 found: P107 NSP-016 s43, 2026-10-05

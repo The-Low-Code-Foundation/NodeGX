@@ -1,7 +1,10 @@
 ---
 id: P107-D4
 title: And accepts any port name starting with "input" (input alone aliases input 0)
-status: needs-ruling
+status: wontfix
+reason: ruled 2026-10-05 "Leave it, and say so" — No change. The odd names stay possible only through a hand-edited file, and the ledger records why it was left.
+phase: P109
+task: ISL-032
 severity: low
 area: runtime / And (nodedefinition.ts numbered inputs)
 found: P107 (the node says what it does) s3, 2026-09-30/10-01
@@ -21,3 +24,5 @@ And accepts any port name starting with "input" (input alone aliases input 0).
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Leave it, and say so".** No change. The odd names stay possible only through a hand-edited file, and the ledger records why it was left. The question as asked: *"Should And refuse input names the editor never makes?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

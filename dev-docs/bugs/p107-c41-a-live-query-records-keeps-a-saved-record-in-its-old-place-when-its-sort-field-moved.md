@@ -1,7 +1,9 @@
 ---
 id: P107-C41
 title: A live Query Records keeps a record in its old place when another node saves it with a different sort value
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: medium
 area: runtime / Query Records (`DbCollection2`) — keeping its rows live (`cloudStoreEvents`)
 found: P107 (the node says what it does) s24, 2026-10-02
@@ -25,3 +27,5 @@ list instead of moving to its new place, until the page reloads the list."*
 `_addModelAtCorrectIndex`). A behaviour change; ships with C40 if both are ruled together.
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; the spec states it as it is.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Move it to its new place".** On a save, the record is taken out and put back where its new value sorts. A small change. People see the item jump to its right place, which is what they expect. The question as asked: *"Should a live list move a saved record to its new sorted place?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

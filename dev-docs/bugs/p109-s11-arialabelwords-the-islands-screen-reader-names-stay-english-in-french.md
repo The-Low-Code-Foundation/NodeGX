@@ -1,7 +1,9 @@
 ---
 id: P109-S11-ARIALABELWORDS
 title: Eight screen-reader names on Olive's Island stay in English when the page is in French
-status: open
+status: scheduled
+phase: P109
+task: ISL-037
 severity: medium
 area: templates / bot-garden (Olive's Island), kit `label` ports (garden-kit Garden + Divider, garden-3d-kit Garden3D)
 found: P109 ISL-007 s11, 2026-10-03 (classifying the texts that did not switch for AC6's question)

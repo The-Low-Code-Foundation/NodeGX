@@ -1,7 +1,9 @@
 ---
 id: P107-D23
 title: Set User Properties' Username is thrown away on Directus and PocketBase — the write says Done and the username never changes
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: low
 area: runtime / REST auth adapter (`RestAuthAdapter.ts` `setUserProperties` :1607-1617); Set User Properties' port description
 found: P107 (the node says what it does) s26, 2026-10-02
@@ -20,3 +22,5 @@ the node still reports Done."*
 "nothing is silently missing" rule, user-ports.ts rule 3).
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Refuse with a reason".** The node fires Failure with a sentence saying this backend has no username, following the backend layer's rule that nothing is silently dropped. An app that sets Username alongside other details would see the whole save refused until it drops Username. The question as asked: *"On a backend with no usernames, what should Set User Properties do when Username is set?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

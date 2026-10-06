@@ -1,7 +1,9 @@
 ---
 id: P107-C54
 title: Cloud Function — a success whose body is JSON null throws, and the Call is never answered
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: viewer / Cloud Function (`cloudfunction2.ts` :292, :301 — `res !== undefined`, then `res.result`)
 found: P107 (the node says what it does) s32, 2026-10-03
@@ -35,3 +37,5 @@ Failure, nothing. Treat it like an empty answer (Done, nothing changes)?"*
 already states that reading (spec v1); the fix closes the row with no spec change.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Treat it as empty".** Done fires and nothing changes, the same as an empty answer today. A one-line change. The question as asked: *"Should an answer of null be treated like an empty answer, firing Done with no outputs changed?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

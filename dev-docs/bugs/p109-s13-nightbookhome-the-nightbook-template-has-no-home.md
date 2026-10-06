@@ -1,7 +1,9 @@
 ---
 id: P109-S13-NIGHTBOOKHOME
 title: The Nightbook template has no home page — its project file carries no rootNodeId, the D9 shape again
-status: open
+status: scheduled
+phase: P109
+task: ISL-037
 severity: medium
 area: template / templates/nightbook (generator packages/noodl-mcp/tests/tpl011Template.ts — both untracked since 2026-09-27/28)
 found: P109 s13, 2026-10-04, census for ISL-016's ruling

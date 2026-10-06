@@ -1,7 +1,9 @@
 ---
 id: P107-C80
 title: Turning Enable Label on or off while someone is typing in a Text Input takes the keyboard away from them, silently — React builds a new field under the label, and Focused still says true
-status: open
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / Text Input, Checkbox, Dropdown (TextInput.tsx render :233-281, Checkbox.tsx :167-210, Select.tsx :223-252); the Radio Button shares the Checkbox's tree
 found: P107 NSP-023 s45, 2026-10-05 (modelled as spec behaviour since NSP-016 s38; ruled the other way 2026-10-05)

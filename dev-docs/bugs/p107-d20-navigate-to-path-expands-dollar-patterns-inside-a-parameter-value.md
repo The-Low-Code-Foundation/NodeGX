@@ -1,7 +1,9 @@
 ---
 id: P107-D20
 title: Navigate To Path expands $&, $$ and friends inside a parameter value
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-028
 severity: low
 area: runtime / Navigate To Path (viewer)
 found: P107 NSP-015 s17, 2026-10-01
@@ -19,3 +21,5 @@ Reproduce: `scenarios/PageStackNavigateToPath.json`, "a parameter value holding 
 follows the runtime; this row asks whether it should).
 
 Proposed: replace with a function (`() => value`) so a value is inserted as written. Ships alone.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Insert values as written".** Any value, dollar signs included, lands in the address unchanged. One line in one place, the same fix as String Format's. The question as asked: *"Should parameter values always be inserted exactly as written?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

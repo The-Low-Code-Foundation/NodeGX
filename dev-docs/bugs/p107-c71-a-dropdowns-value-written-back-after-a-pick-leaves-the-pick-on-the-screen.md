@@ -1,7 +1,9 @@
 ---
 id: P107-C71
 title: A Dropdown's Value written back to the value React last rendered, after a person's pick, changes the output but not the selection shown — picking the shown option again then raises nothing
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / Dropdown (components/controls/Select/Select.tsx, nodes/controls/options.ts)
 found: P107 NSP-016 s39, 2026-10-04
@@ -35,6 +37,8 @@ props.items])`); `options.ts` :193-199 (`forceUpdate` only on a change of `_inte
 the Value setter `forceUpdate()` whenever `props.value` changed, not only `_internal.value` — then the effect's
 comparison always sees the last write. The spec says the selection follows every Value write that changes the node's
 value; the runner knows the row (`pickWriteBackPick`).
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fix it now".** Every Value from the app moves the selection, including one equal to an earlier write, so a Reset works after a pick. Small change in the Dropdown's two files. The question as asked: *"Should the running Dropdown follow your last-word rule now?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
 
 **s47 (2026-10-06):** the Dropdown v3 (NSP-023 §8.5) keeps this row unchanged (`pickWriteBackPick`). The spec now drops the
 author's Value and the component's copy of the choice: the node's value is what the element is told to select. The

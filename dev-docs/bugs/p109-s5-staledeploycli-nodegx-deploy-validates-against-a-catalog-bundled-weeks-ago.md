@@ -1,7 +1,9 @@
 ---
 id: P109-S5-STALEDEPLOYCLI
 title: In a checkout, `nodegx deploy` validates against the catalog baked into a gitignored bundle, and refuses a valid project when that bundle is stale
-status: open
+status: scheduled
+phase: P109
+task: ISL-034
 severity: medium
 area: `nodegx deploy` (`nodegx-export/dist/cli.mjs`) spawns `noodl-preview/dist/nodegx-deploy.cjs`, which carries its own copy of the validator and node catalog
 found: P109 s5, 2026-10-02 — ISL-009's deployed drive

@@ -1,7 +1,9 @@
 ---
 id: P109-S11-DBTPAGETITLES
 title: The Digital Bricks Training app's browser-tab titles stay in English when the app is in French
-status: open
+status: scheduled
+phase: P109
+task: ISL-037
 severity: low
 area: templates / digital-bricks-training (and -demo), Page `title`
 found: P109 ISL-007 s11, 2026-10-03 (the first run of the new `typed-word-not-translated` warning over the repository's translating projects)

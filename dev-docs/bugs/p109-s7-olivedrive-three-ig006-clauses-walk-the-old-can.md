@@ -1,7 +1,9 @@
 ---
 id: P109-S7-OLIVEDRIVE
 title: The Olive pages drive is red in three IG-006 clauses — its programs walk to where the can was before P108's R7
-status: open
+status: scheduled
+phase: P109
+task: ISL-037
 severity: low
 area: garden / drive (scripts/devtools/drive-cg005-olive.js, P-IG6-AC2, P-IG6-AC3, P-IG6-AC7)
 found: P109 s7, 2026-10-03 (ISL-009 AC7's drive; met as a red neighbour)

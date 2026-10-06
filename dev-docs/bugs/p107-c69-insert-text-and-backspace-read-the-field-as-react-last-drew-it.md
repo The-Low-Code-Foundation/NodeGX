@@ -1,7 +1,9 @@
 ---
 id: P107-C69
 title: Insert Text and Backspace read the field as React last drew it — one arriving in the same frame as a Value, Set, Clear or another edit works on stale text, and a Clear then a Backspace in one frame puts text back
-status: open
+status: scheduled
+phase: P109
+task: ISL-031
 severity: high
 area: runtime / Text Input (components/controls/TextInput/TextInput.tsx `edit`)
 found: P107 NSP-016 s38, 2026-10-04

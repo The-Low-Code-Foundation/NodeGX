@@ -1,7 +1,9 @@
 ---
 id: P107-D22
 title: A Record's Fetch with a null Id asks the backend for the record "null"
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: low
 area: runtime / Record (`DbModel2`)
 found: P107 (the node says what it does) s23, 2026-10-02
@@ -24,3 +26,5 @@ literally called 'null' instead of saying 'Missing Id.'."*
 **Proposed:** use the same empty test as the binding (`emptyId`). A behaviour change; ships alone.
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Say 'Missing Id.'".** Fetch uses the same test for an empty Id that the rest of the node uses. No request goes out and the node's own sentence shows. A one-line change. The question as asked: *"Should Fetch say 'Missing Id.' when the Id is empty in this way too?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

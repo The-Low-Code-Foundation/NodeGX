@@ -1,7 +1,9 @@
 ---
 id: P107-C47
 title: After a session ends (Log Out, Session Lost), a User node's Id, Email, Username and property outputs keep the person who left on every wire — only Authenticated moves
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: medium
 area: runtime / User (`user.ts` `setUserModel` :353-379) — CONTRACT C3
 found: P107 (the node says what it does) s26, 2026-10-02
@@ -23,3 +25,5 @@ ann@example.com — on a shared device the next person sees who was here before.
 properties (needs a ruling on what "empty" is on these ports; the descriptions already say "empty while nobody is signed in").
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules; the spec states C3 as the runtime does.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Blank text, empty for others".** Id, Email and Username become blank text, and Roles and the properties become empty. Labels clear at once. A graph that read Email after sign-out (to say goodbye, say) would get a blank. The port descriptions already promise this. The question as asked: *"When nobody is signed in, should the User node's outputs be cleared, and to what?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

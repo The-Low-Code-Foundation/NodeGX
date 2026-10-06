@@ -1,7 +1,9 @@
 ---
 id: P107-C36
 title: Delete Record reports Failure for a delete that succeeded when its Id changes while the delete is out
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: medium
 area: runtime / Record family — Delete Record (`DeleteDbModelProperties`)
 found: P107 (the node says what it does) s22, 2026-10-02 — the 10,000-sequence deep run (19 of 10,000 at seed 20728)
@@ -31,3 +33,5 @@ one, as Update Record does. A behaviour change; ships alone. The spec already st
 known row goes in the same commit as the fix.
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Remember the record at the press".** The node keeps the record it was asked to delete and reports Success for that one. Update Record already works this way. A small change. The question as asked: *"Should Delete Record report on the record it actually deleted, whatever the Id says by then?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

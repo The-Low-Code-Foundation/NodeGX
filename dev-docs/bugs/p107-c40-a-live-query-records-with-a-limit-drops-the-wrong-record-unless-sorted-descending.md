@@ -1,7 +1,9 @@
 ---
 id: P107-C40
 title: A live Query Records with a Limit drops the wrong record when a new one arrives, unless it is sorted descending
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: high
 area: runtime / Query Records (`DbCollection2`) — keeping its rows live (`cloudStoreEvents`)
 found: P107 (the node says what it does) s24, 2026-10-02
@@ -29,3 +31,5 @@ out. Lists sorted newest-first are fine."*
 the next query (a re-query, as a search already does). A behaviour change; ships alone.
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; the spec states it as it is.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Drop the last; re-query if unsorted".** Under any sort the record that sorts last is dropped, so the list matches what the backend would return. With no sort the node fetches the list again, because only the backend knows its order. A small change, plus one extra request in the unsorted case. The question as asked: *"Should a limited live list drop the record that sorts last, as the backend would?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

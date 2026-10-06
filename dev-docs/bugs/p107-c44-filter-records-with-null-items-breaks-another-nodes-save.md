@@ -1,7 +1,9 @@
 ---
 id: P107-C44
 title: A Filter Records holding null on Items crashes inside another node's save of its Class — the saving node's Error gets the message, and a Query Records listening after it misses the save
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / Filter Records (`FilterDBModels`) — `cloudStoreEvents`
 found: P107 (the node says what it does) s25, 2026-10-02
@@ -27,3 +29,5 @@ change."* (The throw needs: Record changes ticked, a filter, the save's class = 
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules. The spec reads null as holding nothing; the
 runtime's is the known row.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Treat it as holding nothing".** The save goes through cleanly and other lists update. A one-line change. The question as asked: *"Should Filter Records treat an empty Items as holding nothing, so it stops breaking other saves?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

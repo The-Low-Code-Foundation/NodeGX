@@ -1,7 +1,9 @@
 ---
 id: P107-C63
 title: A Placement input (Pos X / Pos Y / Rotation / Transform Origin X / Y) wired undefined throws in its setter
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / every visual node with Placement (node-shared-port-definitions.ts `addTransformInputs`)
 found: P107 NSP-016 s37, 2026-10-03
@@ -26,3 +28,5 @@ value.unit`) and the two origins' setters.
 
 **Proposed fix:** read `undefined` as the port's default (0, or 50 for an origin), as the `inputCss` ports do when a
 style is removed. One guard per setter.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Use the default".** Position and rotation go back to 0 and the origin to 50, both kinds of empty value included. One small guard in each of the five inputs. The question as asked: *"Should an empty value on these inputs fall back to the input's default (0, or 50 for an origin)?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

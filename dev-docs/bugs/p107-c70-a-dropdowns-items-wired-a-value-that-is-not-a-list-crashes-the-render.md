@@ -1,7 +1,9 @@
 ---
 id: P107-C70
 title: A Dropdown whose Items is wired a value that is not a list — the legacy string form included — or a list holding null crashes the page's render
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: high
 area: runtime / Dropdown (components/controls/Select/Select.tsx, nodes/controls/options.ts)
 found: P107 NSP-016 s39, 2026-10-04
@@ -29,3 +31,5 @@ nothing decodes it.
 **Proposed fix:** normalise in the setter — a string parsed as JSON (what `readItems` does for the editor), anything
 that is not an array after that treated as no options, `null` items dropped — so the render only ever sees a list.
 The spec models the intent (no options) and the runner knows the row.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Read old text, else no options".** Text in the old format shows its options, other wrong values show an empty Dropdown, and the page keeps drawing. A small change where Items arrives. The question as asked: *"Should the Dropdown read text on Items as the old list format, treat anything else that is not a list as no options, and skip empty entries?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

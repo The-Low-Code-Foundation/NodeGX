@@ -1,7 +1,9 @@
 ---
 id: P107-D36
 title: A Slider fires Changed with nobody sliding — a Value written from the graph, a Min or Max that clamps the value, a remount after a slide, and a slider placed with Min equal to Max
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / Slider (components/controls/Slider/Slider.tsx, nodes/controls/slider.ts)
 found: P107 NSP-016 s41, 2026-10-04
@@ -45,3 +47,5 @@ Changed the spec does not, or re-reports the author's Value at a remount). Row s
 then Mounted off and on …", the D36 matrix (440 segments) and the act-paint matrix in the scenario file. The proposed fix above
 (a second entry point that syncs without announcing, called from the effect; the remount keeping `_internal.outputValue`) is the
 question left.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fix it now".** Writes from the app move the handle and report Value without Changed, and a hidden Slider keeps its place. Small to medium change in two files. An app that relied on Changed firing at load stops getting it. The question as asked: *"Should the running Slider follow the description and your ruling now?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

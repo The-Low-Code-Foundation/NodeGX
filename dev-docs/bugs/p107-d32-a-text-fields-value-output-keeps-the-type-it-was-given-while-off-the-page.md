@@ -1,7 +1,9 @@
 ---
 id: P107-D32
 title: A text-type Text Input given a number publishes '5' (text) while on the page and 5 (a number) while off it — the Value output's type depends on whether the field is mounted
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: low
 area: runtime / Text Input (nodes/controls/text-input.ts, controls/textInputValue.ts)
 found: P107 NSP-016 s38, 2026-10-04
@@ -18,3 +20,5 @@ differ for every other.
 
 **Proposed fix:** `String(text)` before `outwardValueForFieldType` on the unmounted path (and in `edit`'s and `clear`'s
 unmounted paths, which already start from `String(startValue)`). One token. The spec models today's behaviour.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Always text".** Value has one type whatever the field's visibility. One-word change on the hidden path. The question as asked: *"Should a text field's Value always be text, shown or hidden?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

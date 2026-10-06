@@ -1,7 +1,9 @@
 ---
 id: P109-S4-ROWWRAP
 title: Four template rows are set to wrap and cannot — nightbook's three text-tool rows and landing-pages' nav, with no CSS rescuing them
-status: open
+status: scheduled
+phase: P109
+task: ISL-037
 severity: low
 area: templates (nightbook `Pages/Tonight#tnFonts`, `#tnEffects`, `#tnColours`; landing-pages `Site/Header#hdNav`)
 found: P109 s4, 2026-10-02 — ISL-022's census of the new `row-cannot-wrap` code

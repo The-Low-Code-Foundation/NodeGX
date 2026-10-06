@@ -1,7 +1,9 @@
 ---
 id: P107-D7
 title: Substring's End of -1 runs to the end only as a number, not the text "-1"
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-032
 severity: low
 area: runtime / Substring
 found: P107 (the node says what it does) s4, 2026-09-30/10-01
@@ -21,3 +23,5 @@ Substring's End of -1 runs to the end only as a number, not the text "-1".
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Treat it as -1".** End reads the text '-1' as the number, so it runs to the end. A one-line change, and nobody wants the empty result. The question as asked: *"Should Substring treat the text '-1' on End the same as the number -1?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

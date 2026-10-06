@@ -1,7 +1,9 @@
 ---
 id: P107-C16
 title: Date Add crashes and stays dead when Unit is a value it does not know
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: high
 area: runtime / Date Add
 found: P107 (the node says what it does) s11, 2026-09-30/10-01
@@ -21,3 +23,5 @@ Date Add crashes and stays dead when Unit is a value it does not know.
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Use days and warn once".** An unknown Unit counts as days, its default, and the node shows a warning once. This matches the earlier ruling for an unknown animation curve. Two small changes, one in each node. The question as asked: *"What should Date Add and Date Difference do with a Unit they do not know?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

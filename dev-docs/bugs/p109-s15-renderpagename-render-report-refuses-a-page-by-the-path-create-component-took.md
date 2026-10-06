@@ -1,7 +1,9 @@
 ---
 id: P109-S15-RENDERPAGENAME
 title: render_report / drive_page refuse a page asked for by the path create_component took ("Pages/Garden") or by its title ("Garden"); only "/Pages/Garden" or its route resolve
-status: open
+status: scheduled
+phase: P109
+task: ISL-034
 severity: low
 area: mcp + render harness / page lookup (scripts/devtools/render-report.js `resolvePageRequest`, :961)
 found: P109 ISL-017 AC5 s15, 2026-10-04 (Claude Code over the stdio server)

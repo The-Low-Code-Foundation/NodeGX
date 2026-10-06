@@ -1,7 +1,9 @@
 ---
 id: P107-C64
 title: A disabled control still reports Pressed, Pointer Down and Pointer Up for a finger, and Hover for the pointer — Enabled promises it "ignores clicks, touches and typing"
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / every control with the shared control states (controls/utils.ts)
 found: P107 NSP-016 s37, 2026-10-03
@@ -26,3 +28,5 @@ visual side was gated.
 
 **Proposed fix (for a ruling):** gate the five handlers on `this._internal.enabled` as the visual state already is;
 or narrow the description to what the control does ignore. The spec models today's behaviour.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Ignore touches, keep hover".** A finger on a disabled control reports nothing, exactly as the description promises. Hover still reports, so a tooltip that explains why a button is disabled keeps working. Small change in one shared file, felt by every control. The question as asked: *"When Enabled is off, which pointer outputs should the control stop reporting?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

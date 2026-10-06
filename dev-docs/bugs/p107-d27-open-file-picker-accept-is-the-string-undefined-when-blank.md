@@ -1,7 +1,9 @@
 ---
 id: P107-D27
 title: Open File Picker — with Accepted file types never set, the dialog's accept attribute is the string "undefined"
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: low
 area: viewer / Open File Picker (`openfilepicker.ts` :141 — `input.accept = this._internal.acceptedFileTypes`, unguarded)
 found: P107 (the node says what it does) s31, 2026-10-03
@@ -27,3 +29,5 @@ Graded s31 by one scenario (and every generated sequence that opens with the por
 rides with C53's fix to the same three lines.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Blank means no filter".** A blank setting sends no filter to the browser. A one-line change, shipped with the Capture fix. Nothing visible changes in browsers that already ignore the bad value. The question as asked: *"Should a blank Accepted file types mean no filter at all?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

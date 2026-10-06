@@ -1,7 +1,9 @@
 ---
 id: P107-C75
 title: A Slider with Min equal to Max reports Value Percent NaN, and every report fires Changed
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: low
 area: runtime / Slider (nodes/controls/slider.ts)
 found: P107 NSP-016 s41, 2026-10-04
@@ -22,3 +24,5 @@ makes the author's Value `NaN` (:263); Value then reads NaN with Changed until a
 **Proposed fix (for a ruling):** Value Percent is 0 when Max equals Min (the handle sits at the start, as the browser
 draws it); an empty Min or Max uses the port's default (0 / 100) in the clamp and the percent, as the browser does for
 the attribute.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Percent 0, defaults for blanks".** Value Percent reads 0 when Min equals Max, where the browser draws the handle. A blank Min or Max counts as 0 or 100, as the browser does. Small change in one file. The question as asked: *"What should a Slider report when its range collapses or Min or Max is cleared?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

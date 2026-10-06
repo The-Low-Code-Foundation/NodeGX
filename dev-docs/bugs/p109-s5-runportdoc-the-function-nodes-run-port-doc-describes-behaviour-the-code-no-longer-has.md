@@ -1,7 +1,9 @@
 ---
 id: P109-S5-RUNPORTDOC
 title: The Function node's `run` port doc says wiring Run stops auto-runs; the code decides by the Run On Value Change boxes
-status: open
+status: scheduled
+phase: P109
+task: ISL-033
 severity: low
 area: `docs/node-catalog/enrichment/javascriptfunction.json` (`ports.run`) vs `noodl-runtime/src/nodes/std-library/simplejavascript.ts:612-627`
 found: P109 s5, 2026-10-02 — ISL-005's census (finding 15), re-read at HEAD

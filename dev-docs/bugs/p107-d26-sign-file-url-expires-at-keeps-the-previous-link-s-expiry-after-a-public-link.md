@@ -1,7 +1,9 @@
 ---
 id: P107-D26
 title: After Sign File URL mints a link with no expiry (a public link), Expires At and TTL keep the PREVIOUS link's values downstream
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: low
 area: runtime / Sign File URL (`signfileurl.ts` success :156-164 — `undefined` flagged, never sent: CONTRACT C3)
 found: P107 (the node says what it does) s30, 2026-10-03
@@ -22,3 +24,5 @@ Reach is small: one node's links change kind only when its File moves between a 
 **Proposed:** with C47 / D25's ruling.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Clear them".** A public link sends empty values on Expires At and TTL. A tiny change, following whatever the User node ruling decides 'empty' means. Few apps meet it: only a node whose file moves between public and private. The question as asked: *"Should signing a public link clear Expires At and TTL?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

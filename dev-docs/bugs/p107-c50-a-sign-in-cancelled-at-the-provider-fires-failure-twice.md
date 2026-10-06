@@ -1,7 +1,9 @@
 ---
 id: P107-C50
 title: A sign-in cancelled (or refused) at the provider fires Sign In With's Failure twice on the page it returns to — and raises the error twice
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: medium
 area: runtime / Sign In With (`signinwith.ts` `initialize` :76-89, `applyReturn` :202-226) with the adapters' return leg (`RestAuthAdapter.ts` `consumeAuthReturn` :1497-1513; `ParseAuthAdapter.ts` :765-770)
 found: P107 (the node says what it does) s28, 2026-10-02
@@ -41,3 +43,5 @@ Fire it once?"*
 and ignore the same one again), or drop the deferred re-emit for a node that has already read the state.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fire it once".** The node remembers it has already reported this return and ignores the repeat. Small change in one node. The question as asked: *"Should a cancelled or refused provider sign-in fire Failure once?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

@@ -1,7 +1,9 @@
 ---
 id: P109-S1-CN004
 title: Under strict validation a stray node type is reported as two unknown-node-type diagnostics, not one
-status: open
+status: scheduled
+phase: P109
+task: ISL-034
 severity: low
 area: noodl-mcp / validate_project (strict) — the validator report joined with the precondition checks
 found: P109 ISL-014 s1, 2026-10-01 (met as a red neighbour spec; not this task's)

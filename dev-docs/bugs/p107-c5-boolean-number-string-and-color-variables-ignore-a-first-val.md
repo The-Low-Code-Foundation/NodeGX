@@ -1,7 +1,9 @@
 ---
 id: P107-C5
 title: Boolean, Number, String and Color variables ignore a first Value of 0
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-027
 severity: medium
 area: runtime / Variables
 found: P107 (the node says what it does) s4, 2026-09-30/10-01
@@ -21,3 +23,5 @@ Boolean, Number, String and Color variables ignore a first Value of 0.
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Start with no remembered value".** A first 0 is stored and fires Changed like any other value. Set before any value reports that nothing changed. A one-line change, and an app that relied on Set storing the hidden 0 would see the Variable keep its starting value instead. The question as asked: *"Should a Variable start with no remembered value, so a first 0 is stored and Set before any value does nothing?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

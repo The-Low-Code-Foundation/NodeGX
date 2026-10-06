@@ -1,7 +1,9 @@
 ---
 id: P109-S17-KITTHROWBLANKS
 title: A kit node that throws when it mounts blanks the whole page, not just itself
-status: open
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / kit React nodes (no error boundary around a kit node's component in noodl-viewer-react)
 found: P109 ISL-012, session 17, 2026-10-05 (AC1's red arm)

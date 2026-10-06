@@ -1,7 +1,9 @@
 ---
 id: P107-C30
 title: A popup that failed to open keeps its place on the popup stack — the next popup reports Dismissed for it, and Escape stops working
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-028
 severity: medium
 area: runtime / NodeContext.showPopup (Show Popup)
 found: P107 NSP-015 s20, 2026-10-02
@@ -40,3 +42,5 @@ called), an app with no popup host (nothing is pushed).
 Proposed: give the slot back when the build fails. In `showPopup`, wrap the `await` and on a rejection
 splice `entry` out of `popupStack` (mark it dismissed so a racing replace does not report it) and
 rethrow, so Show Popup still reports Failure. One place, no change for any popup that opens.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Give the place back".** A failed popup leaves no trace, so later popups and Escape behave normally. One change in one place, and no change for any popup that opens. The question as asked: *"Should a popup that fails to open give its place back?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

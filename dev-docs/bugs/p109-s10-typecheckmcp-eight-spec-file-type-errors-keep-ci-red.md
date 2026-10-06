@@ -1,7 +1,9 @@
 ---
 id: P109-S10-TYPECHECKMCP
 title: "`typecheck:mcp` (a CI step) is red with eight type errors in the island's spec files"
-status: open
+status: scheduled
+phase: P109
+task: ISL-036
 severity: low
 area: tooling / noodl-mcp tests (typecheck:mcp, pr.yml)
 found: P109 ISL-023 s10, 2026-10-03

@@ -1,7 +1,9 @@
 ---
 id: P107-C37
 title: The Record node's "<field> Changed" signals have never fired
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-027
 severity: high
 area: runtime / Record (`DbModel2`)
 found: P107 (the node says what it does) s23, 2026-10-02
@@ -30,3 +32,5 @@ question: "make the per-property Changed signals work on both nodes").
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Make them fire".** Each 'title Changed' pulses when that value changes. A one-line change to the Record node. Apps that already have such a wire will start running whatever it leads to, which is what their builders meant. The question as asked: *"Should the Record node's per-field Changed signals fire when that field changes?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

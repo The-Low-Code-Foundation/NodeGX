@@ -1,7 +1,9 @@
 ---
 id: P107-D16
 title: Parse Feed's dates depend on where it runs, and a CEST or BST date is published hours wrong
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-032
 severity: medium
 area: runtime / Parse Feed
 found: P107 NSP-013 s13, 2026-10-01
@@ -20,3 +22,5 @@ Reproduce: `packages/nodegx-node-spec/scenarios/net.noodl.ParseFeed.json`, the t
 Europe/Paris, America/New_York). Measured with `TZ=… node -e` on V8 too.
 
 Proposed: read a zoneless date as UTC (one answer everywhere); a trailing zone name V8 does not know → `null`.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "UTC, and no date if unknown".** A date with no timezone is read as UTC everywhere, and an unknown name such as CEST gives no date. A small change in one function. Feeds using CEST or BST lose their dates instead of showing wrong ones. The question as asked: *"How should Parse Feed read a date with no timezone, or with a timezone name it does not know?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

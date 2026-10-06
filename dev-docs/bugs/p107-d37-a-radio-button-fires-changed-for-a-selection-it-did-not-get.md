@@ -1,7 +1,9 @@
 ---
 id: P107-D37
 title: A Radio Button fires Changed when its Checked moves for any reason while its group's last selection was a person's — a sibling carrying the same Value picked, its own Value written in the frame of a pick, a remount after a pick
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / Radio Button (components/controls/RadioButton/RadioButton.tsx, nodes/controls/radiobutton.ts) and Radio Button Group (components/controls/RadioButtonGroup/RadioButtonGroup.tsx)
 found: P107 NSP-016 s42, 2026-10-04
@@ -38,3 +40,5 @@ any change of `checked`).
 not from the effect; keep the effect for Checked. A sibling's click then deselects this button with Checked false and
 Changed — the description's "deselects" — only when the button actually lost the selection, which the effect can still
 report with the flag the click handler sets for one render.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fire from the click".** Changed comes from the person's click, and a button that loses the selection to that click reports the deselect. Small to medium change in the button's and the group's files. Two buttons with the same Value would still both show as selected. The question as asked: *"Should a Radio Button's Changed fire only when a person's click selects it or takes the selection away from it?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

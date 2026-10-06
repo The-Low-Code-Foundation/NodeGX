@@ -1,7 +1,9 @@
 ---
 id: P107-D24
 title: After a Log In on Directus / PocketBase, a record's Owner access rule is dropped without the "ACL ignored" warning that exists to say so
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: low
 area: runtime / the Record family's access rules (`dbmodelcrudbase.ts` `_getCurrentUser` :775-792 → `CloudStore.instance.currentUserId()`); `RestDataAdapter.ts` create :1043-1050
 found: P107 (the node says what it does) s27, 2026-10-02
@@ -33,3 +35,5 @@ expected there — but the warning that is supposed to say so never appears once
 session) rather than the legacy store; or warn at the rule when the backend has no `data.acl`.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Ask the record's own backend".** The rules see the person who really logged in. On Directus and PocketBase the warning appears again. On a NodeGX backend, if the mismatch is real there, Owner rules start working. A modest change to how every access rule finds the user, and the NodeGX case should be checked on a real backend first. The question as asked: *"Should access rules ask the record's own backend who is logged in?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

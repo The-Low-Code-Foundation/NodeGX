@@ -1,7 +1,9 @@
 ---
 id: P107-C73
 title: A Slider's Value written from the graph after a person's slide does nothing when it equals the last Value the author wrote — the handle stays where the person put it
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: medium
 area: runtime / Slider (components/controls/Slider/Slider.tsx, nodes/controls/slider.ts)
 found: P107 NSP-016 s41, 2026-10-04
@@ -35,3 +37,5 @@ Value from the graph as a word for the handle, the same value as the last one in
 Value the runtime drops, after a slide or with the author's Value NaN — the effect's `Object.is` drops a second NaN too). Row
 scenarios: "a slide to 70, then Value written 0 …", "… Value written 40 and 0 in one frame …", "a slide to 80, then Max lowered to
 60 and Value written 0 …". The proposed fix (compare with the node's output) matches the ruling; whether to apply it is still to ask.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fix it now".** Every Value from the app moves the handle, so a Reset works after a slide. Small change in one file: the new Value is compared with where the handle is. The question as asked: *"Should the running Slider follow your last-word rule now?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

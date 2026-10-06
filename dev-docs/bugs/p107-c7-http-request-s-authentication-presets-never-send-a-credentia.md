@@ -1,7 +1,9 @@
 ---
 id: P107-C7
 title: HTTP Request's authentication presets never send a credential
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: high
 area: runtime / HTTP Request
 found: P107 (the node says what it does) s8, 2026-09-30/10-01
@@ -21,3 +23,5 @@ HTTP Request's authentication presets never send a credential.
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fix it, send the credential".** Bearer adds the Authorization header, Basic adds the encoded user name and password, API Key adds the header or query parameter. A small change in one node. An app that worked round it with its own Authorization header could now send the credential twice, so the fix names that in its notes. The question as asked: *"Should the Authentication setting send the credential it was given?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

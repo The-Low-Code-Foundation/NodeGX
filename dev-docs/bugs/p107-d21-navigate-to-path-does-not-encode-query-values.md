@@ -1,7 +1,9 @@
 ---
 id: P107-D21
 title: Navigate To Path does not encode Query values — a value with & or # breaks the URL
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-028
 severity: medium
 area: runtime / Navigate To Path (viewer)
 found: P107 NSP-015 s17, 2026-10-01
@@ -20,3 +22,5 @@ appended as 'null', a value with & is not encoded" (the spec follows the runtime
 
 Proposed: `encodeURIComponent` both name and value (and read `null` as unset). A behaviour change to
 every URL a project with Query values builds; ships alone, with the router's reading checked.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Encode, and skip null".** Any text travels safely and arrives unchanged, because the router already decodes what it reads. It changes every address with query values, and an author who encoded values by hand would see them encoded twice. The question as asked: *"Should Navigate To Path encode query names and values, and leave out a value that is null?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

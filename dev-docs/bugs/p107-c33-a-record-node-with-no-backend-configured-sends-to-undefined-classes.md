@@ -1,7 +1,9 @@
 ---
 id: P107-C33
 title: A Record node in a project with no backend configured sends its operation to `undefined/classes/…` on the app's own host, and off the browser is never answered
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: medium
 area: runtime / Record family (Create / Update / Delete Record, Add / Remove Record Relation) — `CloudStore.forBackend`
 found: P107 (the node says what it does) s21, 2026-10-02
@@ -38,3 +40,5 @@ after start would be refused.
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules. Outside the world the BACKEND seam plays (R9:
 every play has at least one backend), so no spec scenario carries it; the fix would add one.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Refuse with a clear sentence".** At the moment of the write, if there is still no backend address, the node fires Failure with a sentence such as "This project has no backend configured. Add one in the Backend panel." No request goes out. A backend address added later at deploy time keeps working. A small change. The question as asked: *"Should a Record node say 'no backend configured' when the project has none?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

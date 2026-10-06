@@ -1,7 +1,9 @@
 ---
 id: P107-C55
 title: Subscribe To Changes — writing a value an input already holds tears the subscription down and opens a new one
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: low
 area: runtime / Subscribe To Changes (`subscribetochanges.ts` :327-348, :567-572 — every setter calls `scheduleReconfigure` unconditionally)
 found: P107 (the node says what it does) s33, 2026-10-03
@@ -44,3 +46,4 @@ To Changes, changed or not (`dbcollectionnode2.ts` :563-571, :1177-1187, :650-65
 on a change (DEF-046). Scenario "slice C: the same Class re-written reconnects …" (`scenarios/DbCollection2.json`). The same
 guard fixes both.
 
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Ignore repeated values".** Both nodes reconnect only when a setting really changes, as Query Records' query already does. A small guard on each setting. A graph that re-sent the same value on purpose to force a reconnect would lose that trick. The question as asked: *"Should Subscribe To Changes and Query Records ignore a value they already hold?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

@@ -1,7 +1,9 @@
 ---
 id: P107-C3
 title: String Format dies for good when Format is not text (a wired number, null, an object)
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: high
 area: runtime / String Format
 found: P107 (the node says what it does) s3, 2026-09-30/10-01
@@ -21,3 +23,5 @@ String Format dies for good when Format is not text (a wired number, null, an ob
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fix both halves".** A number on Format is read as its text, and a node that fails once builds again on the next change. Two small changes; the second is the one that stops a dead node. The question as asked: *"Should String Format turn a non-text Format into text, and recover after one bad update?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

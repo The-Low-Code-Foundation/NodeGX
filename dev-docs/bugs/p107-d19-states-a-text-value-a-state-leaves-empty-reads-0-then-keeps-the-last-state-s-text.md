@@ -1,7 +1,9 @@
 ---
 id: P107-D19
 title: States — a text or true/false value reads 0 in the starting state; a text a state leaves empty keeps the previous state's
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-032
 severity: medium
 area: runtime / States
 found: P107 NSP-013 s14, 2026-10-01
@@ -23,3 +25,5 @@ not name, and its false, are published as 0" — the runtime and the spec agree 
 
 Proposed: one rule per type in both paths — the type's empty value (`''` for text, `false` for true/false,
 0 for a number) when a state names none.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Send empty text".** Moving into A clears the label, as the empty box in the editor suggests. A small change in one place. Apps that relied on an empty state leaving the text alone would see it cleared. The question as asked: *"When a state leaves a text value empty, should moving into it send empty text?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

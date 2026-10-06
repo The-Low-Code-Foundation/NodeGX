@@ -1,7 +1,9 @@
 ---
 id: P107-C10
 title: Array Filter and Array Map crash in the setter when Items gets a number, boolean or plain object
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / Array Filter, Array Map, Filter Records (s25)
 found: P107 (the node says what it does) s9, 2026-09-30/10-01
@@ -21,3 +23,5 @@ Array Filter and Array Map crash in the setter when Items gets a number, boolean
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Refuse it with a Failure".** The node produces no items and Failure fires with a message saying Items is not a list. A small change in one shared place. The question as asked: *"When Items is not a list, should these nodes refuse it with a Failure?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

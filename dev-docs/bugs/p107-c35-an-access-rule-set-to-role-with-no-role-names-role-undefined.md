@@ -1,7 +1,9 @@
 ---
 id: P107-C35
 title: An access rule set to Role with no Role named writes the ACL key `role:undefined`
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: low
 area: runtime / Record family — Create / Update Record, `addAccessControl` `_getACL`
 found: P107 (the node says what it does) s22, 2026-10-02
@@ -27,3 +29,5 @@ a role literally called 'undefined' — nobody can read it."*
 …`). A behaviour change; ships alone.
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Refuse the save and say why".** The node fires Failure with a sentence saying the Role rule has no role named. Nothing is saved. The author finds the slip at once. A modest change, and an app with this slip stops saving until it is fixed. The question as asked: *"What should happen when a Role access rule has no role named?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

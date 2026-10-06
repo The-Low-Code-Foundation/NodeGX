@@ -1,7 +1,9 @@
 ---
 id: P107-C31
 title: A Close Popup in a nested popup cannot close the outer popup by name — the Popup input's "when popups are nested" never works
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-028
 severity: medium
 area: runtime / NodeContext.showPopup + Close Popup (viewer)
 found: P107 NSP-015 s20, 2026-10-02
@@ -31,3 +33,5 @@ only in Close Popup's `resolvePopup`, continue from `popup.popupParent` when a c
 input does what it says; or (b) say what it does: the Popup input only ever matches the enclosing popup.
 Re-word its description and docblock, or remove it. (a) is a change of where a nested Close Popup
 resolves, so it needs a ruling.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Reach the outer popup".** Naming the outer popup closes it, as the setting promises. This changes how a nested Close Popup finds its popup, so a nested popup whose name matches an outer one could close something new. The question as asked: *"Should Close Popup be able to reach the popup that opened its popup, or should its words say it only closes the popup it sits in?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

@@ -1,7 +1,9 @@
 ---
 id: P107-C58
 title: Server-Sent Events — after a URL change with Auto Connect off, Connected stays true and Connection State "open" though the stream is gone
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: low
 area: runtime / Server-Sent Events (`agent/sse.ts` :565-580 — `teardownConnection` is silent and `connectionState` is the node's own field)
 found: P107 (the node says what it does) s34, 2026-10-03
@@ -22,3 +24,5 @@ still says 'Connected'. Should it say idle (as the WebSocket node does), or keep
 **Proposed:** in the teardown, set the state to `idle` and send the three state outputs, as the WebSocket rebuild does.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules. The spec states the runtime's reading.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Say idle, as WebSocket does".** Connected becomes false and Connection State idle. The app connects to the new URL when it chooses. A small change, and the two live-connection nodes then agree. The question as asked: *"After the URL changes with Auto Connect off, what should the node do?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

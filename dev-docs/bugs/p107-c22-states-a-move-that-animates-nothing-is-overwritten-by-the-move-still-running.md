@@ -1,7 +1,9 @@
 ---
 id: P107-C22
 title: States — a move that animates nothing, made while a move is still running, is overwritten by the old move
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-032
 severity: medium
 area: runtime / States
 found: P107 NSP-013 s14, 2026-10-01
@@ -25,3 +27,5 @@ stop a run still going" — the runtime and the spec agree (R3 (a): the spec wri
 
 Proposed: stop the timer at the start of every move after the first (`internal.animation.stop()` before
 the value loop in `goToState`), as `jumpToState` (:586) already does.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Stop the running animation".** A move that sets values at once now lands where it says, and Has Reached fires once. A small change, and the node's other way of jumping to a state already does this. Only apps that move during an animation notice. The question as asked: *"Should every move stop an animation that is still running?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

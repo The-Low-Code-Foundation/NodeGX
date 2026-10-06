@@ -1,7 +1,9 @@
 ---
 id: P107-C18
 title: Parse XML goes silent — no Result, no Failure — while Always Array holds anything but text
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-026
 severity: medium
 area: runtime / Parse XML
 found: P107 NSP-013 s13, 2026-10-01
@@ -20,3 +22,5 @@ Reproduce: `packages/nodegx-node-spec/scenarios/net.noodl.ParseXML.json`, the C1
 the silence; the runtime conforms to it).
 
 Proposed: `String(value)` in the setter (one line), or refuse it through the Failure contract with an `xml/…` code.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Turn it into text".** Parsing carries on, and a list of names wired in works as the person meant. A one-line change. The question as asked: *"Should Parse XML turn a non-text Always Array into text?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

@@ -1,7 +1,9 @@
 ---
 id: P109-S18-UNNAMEDROUTER
 title: A Router written with no `name` is left out of the deployed router index, so every URL opens its start page
-status: open
+status: scheduled
+phase: P109
+task: ISL-034
 severity: medium
 area: door / deploy (create_component accepts the Router; the deployed `projectData.routerIndex.routers` is empty)
 found: P109 ISL-005 build session 3, 2026-10-05 (authoring the AC2 two-page project through the door)

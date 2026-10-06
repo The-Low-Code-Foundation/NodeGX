@@ -1,7 +1,9 @@
 ---
 id: P107-C74
 title: A Slider's Value output disagrees with the handle — it keeps a slid value past a lowered Max, holds a graph value the browser rounds to the step, and Value Percent keeps its old figure when Min or Max moves
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-031
 severity: low
 area: runtime / Slider (components/controls/Slider/Slider.tsx, nodes/controls/slider.ts)
 found: P107 NSP-016 s41, 2026-10-04
@@ -28,3 +30,5 @@ Percent**: "Where the handle sits as a whole number from 0 to 100". Three ways t
 **Proposed fix (for a ruling):** after Min, Max or Step changes, re-sanitize the value ON THE SCREEN (the component's
 state) the way the browser does — clamp, then round to the step from Min — and report it (without Changed, per D36);
 apply the same sanitizing to a Value write. Then Value and Value Percent always describe the handle.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Follow the handle".** After Min, Max or Step change, and after a Value write, the value is clamped and rounded to the step as the browser draws it, and reported without firing Changed. A Value of 33.5 with Step 1 then reads 34. Moderate change in one file. The question as asked: *"Should Value and Value Percent always describe where the handle is drawn?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

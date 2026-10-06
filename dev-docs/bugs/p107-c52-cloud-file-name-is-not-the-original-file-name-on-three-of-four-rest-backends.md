@@ -1,7 +1,9 @@
 ---
 id: P107-C52
 title: Cloud File's Name is the original file name only on NodeGX — on PocketBase it is the random suffix, on Directus a UUID, on Supabase the bucket path
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: medium
 area: runtime / Cloud File (`cloudfilenode.ts` Name :30-43), the stored file (`api/cloudfile.ts` — `filename` not kept), `api/backends/fileRef.ts` (each backend's stored `name`)
 found: P107 (the node says what it does) s30, 2026-10-03
@@ -31,3 +33,5 @@ the Parse wire. (A file read back from a record property has no `filename` — t
 `size` already document.) A spec v2.
 
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Keep the real name".** The node keeps the uploaded name and shows it. When the name is unknown (a file read back from a record), it shows the stored name whole instead of chopping it. A moderate change. Those read-back files still show a stored name, as their type and size already do. The question as asked: *"Should Cloud File's Name be the name the person uploaded, on every backend?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

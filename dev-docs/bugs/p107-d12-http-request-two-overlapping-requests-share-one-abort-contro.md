@@ -1,7 +1,9 @@
 ---
 id: P107-D12
 title: HTTP Request: two overlapping requests share one abort controller, so Cancel can miss the live one
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-030
 severity: medium
 area: runtime / HTTP Request
 found: P107 (the node says what it does) s8, 2026-09-30/10-01
@@ -21,3 +23,5 @@ HTTP Request: two overlapping requests share one abort controller, so Cancel can
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Every request still running".** Each request gets its own cancel handle, and Cancel stops all of them. This is what a person pressing Cancel expects. A modest change inside one node. The question as asked: *"When two requests from one node are running, what should Cancel stop?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

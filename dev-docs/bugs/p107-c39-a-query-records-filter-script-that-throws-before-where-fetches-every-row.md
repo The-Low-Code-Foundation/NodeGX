@@ -1,7 +1,9 @@
 ---
 id: P107-C39
 title: A Query Records filter script that throws before calling where() fetches every row, as a Success
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-029
 severity: high
 area: runtime / Query Records (`DbCollection2`) — the Javascript filter
 found: P107 (the node says what it does) s23, 2026-10-02
@@ -27,3 +29,5 @@ the node fetches EVERY record in the class and reports success, instead of sayin
 A behaviour change; ships alone.
 
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Fail with the script's error".** The node does not query. It fires Failure and puts the crash message on Error. A small change. An app that was quietly showing every record now shows an error instead. The question as asked: *"Should a filter script that crashes make Query Records fail instead of fetching everything?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)

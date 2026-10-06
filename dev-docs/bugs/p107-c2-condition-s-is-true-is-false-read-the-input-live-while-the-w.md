@@ -1,7 +1,9 @@
 ---
 id: P107-C2
 title: Condition's Is True / Is False read the input live, while the wire carries the value from the last test
-status: needs-ruling
+status: scheduled
+phase: P109
+task: ISL-032
 severity: medium
 area: runtime / Condition
 found: P107 (the node says what it does) s3, 2026-09-30/10-01
@@ -21,3 +23,5 @@ Condition's Is True / Is False read the input live, while the wire carries the v
 **Ruling:** P107's rule R3 (a) — the runtime wins until Richard rules; each fix then ships alone, with the
 scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/node-spec/conformance.test.ts)
 dropped in the same commit. Plain-words question: README §7 of P107.
+
+**Ruled 2026-10-05 (Track F rulings page), as recommended: "Keep the tested result".** The node remembers the value it last tested and both outputs report that. A small change in one node. A person only notices in the rare case above, where two wires now agree. The question as asked: *"Should Is True and Is False always give the result of the last test?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
