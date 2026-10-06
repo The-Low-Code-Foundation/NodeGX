@@ -201,7 +201,9 @@ class Glide {
         this.span = v;
         return;
       case 'delay':
-        this.delay = v;
+        // v3 (P109 ISL-026, row C20): read as a number when written; anything that is not a number
+        // (NaN: 'x', undefined, an object) is no delay, 0. `null`, '' and -0 come out 0 as well.
+        this.delay = Number(v) || 0;
         return;
       case 'easingCurve':
         this.curveName = v;

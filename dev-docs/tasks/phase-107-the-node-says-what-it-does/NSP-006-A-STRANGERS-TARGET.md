@@ -261,3 +261,33 @@ as if that were the node's rule — rewritten. (3) No mutant encodes v1 (the cou
 nothing about a version change. (4) The format has no home for a change note and a target cannot say which version
 it implements — an out-of-date target reads as trace differences. (3) and (4) are NSP-010's ("a change is a
 version"), named there.
+
+### 5.9 Round 3c — P109 s22, 2026-10-06: a second change, Animate To Value v3 (ISL-026 row C20)
+
+C20 was ruled "Read it as a number" (Track F, 2026-10-05), so Animate To Value's spec went to **v3**: a Delay is read
+as a number when it is written, and anything that is not a number is no delay. v2 joined a text Delay onto the frame
+time as text and made NaN of `undefined`. Round 3's target, at v2 since round 3b, went red on exactly the two C20
+scenarios. The recipe was 3b's, with one addition: the lab also carries a copy of `nodegx-backend-contract/src`,
+because the package now imports its types (`query-records.ts`). Without it the suite does not compile. Brief:
+[NSP-006-BRIEF-3C.md](NSP-006-BRIEF-3C.md); its report is the "Round 3c" section of `stranger-3/REPORT.md`.
+
+| | reading |
+|---|---|
+| found the change by | `grep -i version` over the five specs, then the version note. "The version note alone was enough" |
+| change | one line in `Glide.receive`: `this.delay = Number(v) \|\| 0` |
+| before / after, narrowed | `1 failed, 1 skipped, 8 passed` exit 1 → `1 skipped, 9 passed` exit 0 |
+| full, then deep (`NSP_DEEP=10000`, the one node) | `17 skipped, 41 passed, 58 total` exit 0; v3 CONFORMS, 16/16, 10000/10000, 25/25 mutants |
+| cost | about 2 min 10 s (10:19:00–10:21:10 CEST); 86 k tokens; 15 tool calls; 5 jest runs |
+| in primary, three rounds | `17 skipped, 41 passed, 58 total` exit 0, hash gate green |
+
+**Checked, not trusted:** its 15 tool calls, read from the transcript. Every one stayed inside the lab and read only
+listed files. It opened no interpreter, adapter, runner body, registry, other round's target, sibling package, parent
+directory or git. The only lab file that differs from primary is `stranger-3/` (the one line and the report).
+
+**What it found.** (1) Delay's port still declares `coerce: 'none'`, so the number read is visible only in the reducer
+and the port table shows no change between v2 and v3. (2) "Read as a number" means different things on one node:
+Target Value ignores a NaN (the old value stands), while Delay resets to 0. No scenario writes a non-number over an
+earlier number, so only the generator grades that. (3) `Infinity` and negative Delays are not mentioned
+(`Number(v) || 0` keeps both). (4) Coercing on write has a side effect the note does not state: `'0'` now gets the
+t = 0 frame when the run joins. (5) Still no mutant encodes the previous version (25 / 25 again), as 3b found. (1),
+(2) and (5) are NSP-010's.

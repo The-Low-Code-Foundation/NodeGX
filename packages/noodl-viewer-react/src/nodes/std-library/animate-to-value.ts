@@ -204,8 +204,11 @@ const AnimateToValue: NodeDefinitionOptions = {
       displayName: 'Delay',
       description: 'How long to wait before the move begins, in milliseconds',
       default: 0,
-      set: function (this: AnimateToValueInstance, value: number) {
-        this._internal._animation.delay = value;
+      set: function (this: AnimateToValueInstance, value: unknown) {
+        // ISL-026 / P107-C20, ruled "Read it as a number": text "100" waits 100 ms, and anything that is
+        // not a number (a wire let go, null) is no delay. Stored raw, the scheduler's `now + delay` joined
+        // text onto the frame time and made NaN of undefined, a start no frame ever reached.
+        this._internal._animation.delay = Number(value) || 0;
       }
     },
     easingCurve: {

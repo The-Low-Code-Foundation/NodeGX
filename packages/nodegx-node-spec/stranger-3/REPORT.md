@@ -346,3 +346,128 @@ beyond the grep, or `canon.js`. I opened nothing outside the lab, wrote no log f
 
 - Start: Thu Oct 1 19:58:29 CEST 2026
 - End: Thu Oct  1 20:00:41 CEST 2026 (about 2 minutes 12 seconds)
+
+## Round 3c (P109 ISL-026)
+
+I inherited this target (round 3, then 3b). One spec had gone up a version. I brought the target up
+to it using only the spec files and the suite.
+
+### 1. What changed, as read from the spec
+
+**Animate To Value (`net.noodl.animatetovalue`), version 2 → 3.** Delay is now read as a number
+when it is written. Text `'100'` waits 100 ms. Anything that is not a number (`undefined` from a
+wire let go, `'x'`) is no delay, 0. In v2 the raw value was added to the frame time. A text Delay
+therefore joined as text (`'100'` at time 1000 started at `'1000100'`, so the run waited until then).
+An `undefined` Delay gave a start of `NaN`, which no frame reaches, so the run never started.
+
+How I found it:
+1. `grep -i version` across the five specs. Four say `version: 1`; `animate-to-value.ts` says
+   `version: 3`. The previous report says v2, so the jump was visible in one command.
+2. The version note directly above `version: 3` (lines 83–85) describes v3 and what v2 did. The
+   header (lines 33–35) says the same thing and cites the row (NSP-013 §6.2 C20). The reducer is one
+   line (line 167): `delay: (_s, v) => ({ set: { delay: Number(v) || 0 }, send: [] })`.
+3. Two scenarios are tagged "(v3, C20)" by name (indexes 11 and 12: a text `'100'` Delay, and a
+   Delay written `undefined`).
+4. The failing run agreed. Exactly those two scenarios failed and nothing else.
+
+As in round 3b, the version note alone was enough. The reducer line confirmed it in one glance.
+
+### 2. What I changed
+
+One line in `stranger-3/nodes.js`, `Glide.receive`, case `'delay'`: it was `this.delay = v`, and it is
+now `this.delay = Number(v) || 0` (with a comment). Coercing at write time keeps the rest of
+`frameEnd` as it was. `now + this.delay` is now always arithmetic. The `this.delay === 0` test (the
+t = 0 frame at the join) now also holds for `'0'`, `null`, `''`, `undefined` and `-0`, because the
+spec's state holds the coerced value and its `=== 0` reads that.
+
+### 3. Readings
+
+| Run | `Tests:` line | Exit |
+|---|---|---|
+| Before, narrowed (`NSP_ONLY=net.noodl.animatetovalue`) | `Tests: 1 failed, 1 skipped, 8 passed, 10 total` | 1 |
+| Before, full | `Tests: 1 failed, 17 skipped, 40 passed, 58 total` | 1 |
+| After, narrowed | `Tests: 1 skipped, 9 passed, 10 total` | 0 |
+| After, full | `Tests: 17 skipped, 41 passed, 58 total` | 0 |
+| Deep, narrowed, `-t deep` | `Tests: 9 skipped, 1 passed, 10 total` | 0 |
+
+On the narrowed run before the change, the failing assertion listed exactly two scenarios: "failed a
+Delay arriving as TEXT…" and "failed a Delay written undefined…". I sent the runner's stdout to
+`/dev/null` on both runs before the change, so I do **not** have the before-change
+`DOES NOT CONFORM` line or its count of generated divergences. jest's assertion stops at the scenario
+check (line 130) before it reaches the divergence check, so the failure message does not show the
+count either.
+
+After, narrowed (default budget):
+```
+net.noodl.animatetovalue v3 on stranger-3: CONFORMS (107 ms, seed 20732)
+  scenarios: 16 / 16 passed
+  generated: 200 / 200 ran, 0 divergence(s)
+  mutants: 25 / 25 killed
+```
+Deep (`NSP_DEEP=10000`):
+```
+net.noodl.animatetovalue v3 on stranger-3: CONFORMS (4851 ms, seed 20732)
+  scenarios: 16 / 16 passed
+  generated: 10000 / 10000 ran, 0 divergence(s)
+  mutants: 25 / 25 killed
+```
+There were 5 jest runs in all: 2 before the change, 2 after it, and the deep run. One code change, and
+it went green on the first run after it.
+
+### 4. Where the spec alone was thin
+
+1. **The port declaration says `coerce: 'none'` for a port that is now coerced.** `delay` is still
+   `{ type: 'number', default: 0, coerce: 'none', … }`. The number read lives only in the reducer
+   (`Number(v) || 0`). A reader who works from the port table, or a tool that derives behaviour from
+   `coerce`, sees no change between v2 and v3. I went by the reducer and the version note. I did not
+   reopen `coerce.ts` to check whether a named coercion would match `Number(v) || 0` exactly. Not
+   corrected; the suite agrees with the reducer.
+2. **"Read as a number" here is not the same as Target Value's "read as a number".** Target Value
+   uses `numericOf` and **ignores** a NaN, so the old value stands. Delay **resets** to 0 on a NaN.
+   The header's words ("anything that is not a number … is no delay, 0") do say this. But the same
+   phrase means two different things on two ports of one node. I followed the reducer: a `'x'`
+   written after a Delay of 100 makes the Delay 0, not 100. No scenario writes a non-number over an
+   earlier number, so only the generator can grade this, and it agreed at 10000.
+3. **Infinity and negative values are left unsaid.** `Number(v) || 0` keeps `Infinity` (a run that
+   never joins) and negative values (`-50`, which starts in the past, so the next frame reads t past
+   0). The note says "anything that is not a number is no delay" and is silent about numbers that
+   make no sense as a wait. I copied the reducer. `-50` is in the examples and the generator agreed.
+   `'Infinity'` is not in the examples, so it is ungraded.
+4. **Coerce on write, or on use?** The spec coerces on write, and the `=== 0` test reads the stored
+   value. So `'0'` now gets the t = 0 frame at the join, where in v2 it did not (`'0' !== 0`). The
+   version note does not mention this side effect. I coerce on write as the spec does, so I inherit it.
+   The suite did not single it out.
+5. **The scenario count did not move, but two scenarios were added.** Round 3b read 16 scenarios at v2.
+   v3 also has 16, two of them tagged v3. So two v2-era scenarios were removed or merged, and from the
+   files alone I cannot tell which ones or why. The format has no change log for scenarios.
+6. **Still no mutant encodes the previous version.** Mutants stayed at 25 / 25 across v2 → v3, as in
+   3b. The old behaviour (Delay stored raw) was killed by the two v3 scenarios. The mutation gate does
+   not record the change. A mutant `delay: (_s, v) => ({ set: { delay: v } })` would.
+7. **The before-change run did not show the generator's verdict.** A stale target fails at the scenario
+   assertion first, so an inheritor sees "2 scenarios failed" and never learns how far the generator
+   diverged. That is my own loss (I discarded stdout), but the test's assertion order also hides it.
+
+### 5. Files opened, in order
+
+All paths are relative to `packages/nodegx-node-spec/`.
+1. `stranger-3/REPORT.md`, read in full, together with an `ls` of `stranger-3/` and `wc -l` of its
+   `.js` files.
+2. `src/nodes/delay.ts`, `src/nodes/repeat.ts`, `src/nodes/animate-to-value.ts`, `src/nodes/uuid.ts`,
+   `src/nodes/screen-resolution.ts`, through `grep -n -i version` only (matching lines, not whole files).
+3. `src/nodes/animate-to-value.ts`, read in full.
+4. `stranger-3/nodes.js`, lines 150–323 (the `Glide`, `IdMaker` and `WindowSize` classes and the
+   catalog).
+5. `scenarios/net.noodl.animatetovalue.json`, through a `node -e` that `require`d it and printed every
+   scenario's name, then printed in full the three whose names match `/v3|delay/i` (indexes 10, 11
+   and 12).
+
+I opened nothing else. That covers the format files, the other specs and scenarios, `ease-curves.ts`,
+`tests/stranger.test.ts` (I only ran it; its line 130 appears in jest's failure output), the hashes
+helper, `target.js`, `canon.js` and `curves.js`. I opened nothing outside the lab, wrote no log
+files, and used no `git`.
+
+### 6. Time
+
+- Start: Tue Oct  6 10:19:00 CEST 2026
+- Green, deep run done: Tue Oct  6 10:20:27 CEST 2026 (about 1.5 minutes)
+- End, after writing this report: Tue Oct  6 10:21:10 CEST 2026 (about 2 minutes 10 seconds in all)

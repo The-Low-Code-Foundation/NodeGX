@@ -15,21 +15,24 @@
  * (timerscheduler.ts :43-50, :85-94). `Jump To` (a rising edge) stops the timer wherever it is,
  * puts `Current Value` at `Jump Value` (as a number; NaN ignored) at once, adopts it as the end if
  * nothing had arrived, and at the frame end starts a run from there unless the run's end already
- * equals it (:54-76) — a jump is not an arrival. `Duration`, `Delay` and `Easing Curve` are stored
- * RAW on the timer (:197-227: no conversion; the curve is looked up by name).
+ * equals it (:54-76) — a jump is not an arrival. `Duration` and `Easing Curve` are stored RAW on the
+ * timer (:197-227: no conversion; the curve is looked up by name); `Delay` is read as a number (below).
  *
  * THE FRAME (timerscheduler.ts `runTimers(now)`, :116-198, run once per frame after the inputs'
  * frame-end work, nodecontext.ts :495-503): (1) a RUNNING timer whose start is reached runs its
  * curve at `t = (now − start) / duration` (1 when `duration > 0` is false), clamped to 1 at the end
  * (:132-154); at `t ≥ 1` it finishes and `At Target Value` fires (:156-174, :111-113). (2) a QUEUED
- * timer joins with `start = now + delay` (:177-183 — a JS `+`, so a text Delay CONCATENATES and an
- * undefined one is NaN, a start never reached), and with a delay `=== 0` runs its curve at 0 at
+ * timer joins with `start = now + delay` (:177-183), and with a delay `=== 0` runs its curve at 0 at
  * once (:185-194) — which is `startValue`, so the value only moves on a LATER frame. The world's
  * clock is the frame time; a frame is a settle.
  *
  * An Easing Curve that is not one of `EaseCurves`' own names (a wire carries any text; an old
  * project a curve no longer listed; `''`, `null`, `undefined`) moves along Ease Out, the port's
  * default (v2 — NSP-013 §6 row C19, ruled "fix it" 2026-10-01).
+ *
+ * A Delay is read as a number: text `'100'` waits 100 ms, and anything that is not a number (a wire
+ * let go, `null`, `'x'`) is no delay, 0 (v3 — NSP-013 §6.2 row C20, ruled "Read it as a number"
+ * 2026-10-05, P109 ISL-026).
  */
 
 import { defineNode } from '../spec';
@@ -77,7 +80,10 @@ export const AnimateToValue = defineNode({
   // v2 (NSP-013 s16, row C19 ruled "fix it"): an Easing Curve that is not one of the set's own names moves
   // along Ease Out. In v1 such a run did not move the value at all — no Current Value — though it still
   // finished and fired At Target Value on time.
-  version: 2,
+  // v3 (P109 ISL-026, row C20 ruled "Read it as a number"): Delay is read as a number, and anything that is
+  // not a number is no delay. In v2 a text Delay was joined onto the frame time as text ('100' at time 1000
+  // waited until 1000100), and a Delay that was not set (undefined) never started the run at all.
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/animate-to-value.ts; packages/noodl-runtime/src/timerscheduler.ts; packages/noodl-viewer-react/src/easecurves.ts',
   needs: ['clock'],
   worldPool: { advances: [0, 1, 16, 100, 150, 299, 300, 301, 1000] },
@@ -158,7 +164,7 @@ export const AnimateToValue = defineNode({
       return { set, send: ['currentValue'] }; // :68
     },
     duration: (_s, v) => ({ set: { duration: v }, send: [] }), // :198
-    delay: (_s, v) => ({ set: { delay: v }, send: [] }), // :208
+    delay: (_s, v) => ({ set: { delay: Number(v) || 0 }, send: [] }), // :208 — v3, C20
     easingCurve: (_s, v) => ({ set: { ease: v }, send: [] }) // :226
   },
   {

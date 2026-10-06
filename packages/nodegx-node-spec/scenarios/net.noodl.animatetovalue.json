@@ -66,14 +66,14 @@
     "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "set": "targetValue", "value": 100 }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle", { "advance": 50 }, "settle"]
   },
   {
-    "name": "a Delay arriving as TEXT is concatenated onto the frame time: at time 0 '100' waits 100 ms, at time 1000 it waits until 1000100",
-    "because": "animate-to-value.ts :208 stores it raw; timerscheduler.ts :180 `currentTime + timer.delay` is a string join, :132 compares it as a number (row C20)",
+    "name": "a Delay arriving as TEXT is read as a number: at time 1000 '100' waits 100 ms, so the run reaches its target and fires At Target Value at 1200 (v3, C20)",
+    "because": "v3, ISL-026 (row C20, ruled 'Read it as a number'). In v2 it was joined onto the frame time as text and the run waited until 1000100",
     "params": { "easingCurve": "linear", "duration": 100 },
     "steps": [{ "set": "targetValue", "value": 0 }, { "set": "delay", "value": "100" }, "settle", { "advance": 1000 }, "settle", { "set": "targetValue", "value": 100 }, "settle", { "advance": 200 }, "settle", { "advance": 5000 }, "settle"]
   },
   {
-    "name": "a Delay written undefined (a wire let go) starts the run at NaN — a start no frame reaches: the value does not move and At Target Value does not fire, however long the clock runs, until a number reaches Delay and a new target restarts the run (C20)",
-    "because": "animate-to-value.ts :208 raw; timerscheduler.ts :180 `now + undefined` is NaN, :132 `now >= NaN` is false for ever",
+    "name": "a Delay written undefined (a wire let go) is no delay: the run joins at once and reaches its target over Duration, and At Target Value fires (v3, C20)",
+    "because": "v3, ISL-026 (row C20, ruled 'Read it as a number'). In v2 the start was NaN, a start no frame reaches: the value never moved",
     "params": { "easingCurve": "linear", "duration": 100 },
     "steps": [{ "set": "targetValue", "value": 0 }, "settle", { "set": "delay" }, { "set": "targetValue", "value": 100 }, "settle", { "advance": 1000 }, "settle", { "set": "delay", "value": 0 }, { "set": "targetValue", "value": 50 }, "settle", { "advance": 100 }, "settle"]
   },
