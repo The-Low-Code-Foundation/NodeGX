@@ -34,3 +34,5 @@ and (when a body is built) Body Fields holding a truthy non-text value fails the
 Error "<input> is not text". Spec v2; a new Headers scenario; the idle frame-end branch's dropped set is declared
 equivalent. Runtime 200: conforms 18 / 19 (the C6 row stays known). Control: both C8 scenarios fail on HEAD's file, with
 41 generated divergences. Not changed: `responseMapping` is also split, at response time; it was not in this row.
+
+**s22 (2026-10-06):** the equivalent mutant declared with this fix did not reach `tests/world.test.ts`, which called `runConformance` without `EQUIVALENT_MUTANTS`, so HTTP failed there from `283b46573` on. Fixed in `3d0a57283` (world.test.ts 48 / 48).

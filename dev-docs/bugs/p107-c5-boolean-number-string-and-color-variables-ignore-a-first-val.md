@@ -1,12 +1,15 @@
 ---
 id: P107-C5
 title: Boolean, Number, String and Color variables ignore a first Value of 0
-status: scheduled
+status: fixed
+commit: e3c322aa5
 phase: P109
 task: ISL-027
 severity: medium
 area: runtime / Variables
 found: P107 (the node says what it does) s4, 2026-09-30/10-01
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/Number.json "a FIRST value of 0 is stored and fires Changed; 1 then stores (v2, C5)" (and one more in each of Boolean, String, Color, Number)
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-011-BATCH-LOGIC-MATH-STRINGS.md §6 (row C5) — the row names how it is reproduced and pinned
 ---
 
@@ -25,3 +28,5 @@ scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/n
 dropped in the same commit. Plain-words question: README §7 of P107.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Start with no remembered value".** A first 0 is stored and fires Changed like any other value. Set before any value reports that nothing changed. A one-line change, and an app that relied on Set storing the hidden 0 would see the Variable keep its starting value instead. The question as asked: *"Should a Variable start with no remembered value, so a first 0 is stored and Set before any value does nothing?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 2026-10-06 (P109 s22, ISL-027), as ruled.** `variablebase.ts` seeds `latestValue` as `undefined`: a first 0 is stored and fires Changed, and a Set before any Value abstains and reports Unchanged. One line serves all four (Color's viewer node shares the base). The specs (v2) and eight scenarios say it; `tests/batch.test.ts`'s pin is rewritten. Runtime at 20732 and 13: all four conform. Control (HEAD's `variablebase.ts`): the eight scenarios fail, plus 76 / 60 / 60 / 55 generated.
