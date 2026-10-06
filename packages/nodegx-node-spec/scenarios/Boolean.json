@@ -36,14 +36,14 @@
     "steps": [{ "signal": "saveValue" }, { "signal": "saveValue" }, "settle"]
   },
   {
-    "name": "Set before any Value stores the seed 0 → false, and fires Changed + Done for the value it already showed (§6 row C5)",
-    "because": "variablebase.ts :121 `latestValue = 0`, :285 `!hasBeenSet`",
+    "name": "Set before any Value has nothing to store: no Changed, and it reports Unchanged (v2, C5)",
+    "because": "v2, ISL-027 (row C5, ruled 'Start with no remembered value'). In v1 latestValue was seeded 0, so a first 0 equalled it and was ignored, and a Set before any Value stored that 0 and reported Done. variablebase.ts :121 `latestValue = 0`, :285 `!hasBeenSet`",
     "params": {},
     "steps": ["settle", { "signal": "saveValue" }, "settle"]
   },
   {
-    "name": "a FIRST value of 0 is ignored — it equals the seed — and a later Set then reports Done (§6 row C5)",
-    "because": "variablebase.ts :164-168 — valueDidChange(0, 0) is false",
+    "name": "a FIRST value of 0 is stored as false and fires Changed; a later Set then reports Unchanged (v2, C5)",
+    "because": "v2, ISL-027 (row C5, ruled 'Start with no remembered value'). In v1 latestValue was seeded 0, so a first 0 equalled it and was ignored, and a Set before any Value stored that 0 and reported Done. variablebase.ts :164-168 — valueDidChange(0, 0) is false",
     "params": {},
     "steps": [{ "set": "value", "value": 0 }, "settle", { "signal": "saveValue" }, "settle"]
   },

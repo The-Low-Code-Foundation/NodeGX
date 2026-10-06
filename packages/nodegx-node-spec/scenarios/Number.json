@@ -49,8 +49,8 @@
     ]
   },
   {
-    "name": "a FIRST value of 0 is ignored — it equals the seed (§6 row C5); 1 then stores",
-    "because": "variablebase.ts :121, :164-168",
+    "name": "a FIRST value of 0 is stored and fires Changed; 1 then stores (v2, C5)",
+    "because": "v2, ISL-027 (row C5, ruled 'Start with no remembered value'). In v1 latestValue was seeded 0, so a first 0 equalled it and was ignored, and a Set before any Value stored that 0 and reported Done. variablebase.ts :121, :164-168",
     "params": {},
     "steps": [
       {
@@ -66,8 +66,8 @@
     ]
   },
   {
-    "name": "Set before any Value: stores the seed 0 (no new value on the wire) but fires Changed and reports Done (§6 row C5)",
-    "because": "variablebase.ts :121, :285",
+    "name": "Set before any Value has nothing to store: no Changed, and it reports Unchanged (v2, C5)",
+    "because": "v2, ISL-027 (row C5, ruled 'Start with no remembered value'). In v1 latestValue was seeded 0, so a first 0 equalled it and was ignored, and a Set before any Value stored that 0 and reported Done. variablebase.ts :121, :285",
     "params": {},
     "steps": [
       "settle",

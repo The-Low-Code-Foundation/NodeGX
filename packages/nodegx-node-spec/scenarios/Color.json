@@ -18,8 +18,8 @@
     ]
   },
   {
-    "name": "a number is stored and published on the colour port unchanged (identity cast) — and a first 0 is ignored (§6 row C5)",
-    "because": "color.ts :20-22; variablebase.ts :164-168",
+    "name": "a number is stored and published on the colour port unchanged (identity cast), a first 0 included (v2, C5)",
+    "because": "v2, ISL-027 (row C5, ruled 'Start with no remembered value'). In v1 latestValue was seeded 0, so a first 0 equalled it and was ignored, and a Set before any Value stored that 0 and reported Done. color.ts :20-22; variablebase.ts :164-168",
     "params": {},
     "steps": [
       {
@@ -35,8 +35,8 @@
     ]
   },
   {
-    "name": "Set before any Value stores the NUMBER 0 on a Color variable — Changed, Done (§6 row C5)",
-    "because": "variablebase.ts :121, :204; color.ts :20-22",
+    "name": "Set before any Value on a Color variable has nothing to store: the start colour stays, no Changed, Unchanged (v2, C5)",
+    "because": "v2, ISL-027 (row C5, ruled 'Start with no remembered value'). In v1 latestValue was seeded 0, so a first 0 equalled it and was ignored, and a Set before any Value stored that 0 and reported Done. variablebase.ts :121, :204; color.ts :20-22",
     "params": {},
     "steps": [
       "settle",

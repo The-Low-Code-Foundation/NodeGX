@@ -139,10 +139,11 @@ describe('ports(params) — the three numbered families of the batch (R6, NSP-02
 });
 
 describe('what the source does, not what it says — NSP-011 §6, pinned', () => {
-  test('C5: a first Value of 0 is not stored by any Variable (latestValue is seeded 0); Set before any Value stores that seed', () => {
-    expect(run(StringVariable, {}, [{ set: 'value', value: 0 }, 'settle']).filter((e) => e.t === 'signal')).toEqual([]);
-    expect(run(StringVariable, {}, ['settle', { signal: 'saveValue' }, 'settle'])).toContainEqual({ t: 'value', port: 'savedValue', value: '0' });
-    expect(run(NumberVariable, {}, [{ set: 'value', value: 0 }, 'settle', { signal: 'saveValue' }, 'settle'])).toContainEqual({ t: 'outcome', port: 'saveValue', value: 'done' });
+  test('C5 (v2, fixed in P109 ISL-027): a first Value of 0 is stored by every Variable; Set before any Value has nothing to store', () => {
+    expect(run(StringVariable, {}, [{ set: 'value', value: 0 }, 'settle']).filter((e) => e.t === 'signal')).toEqual([{ t: 'signal', port: 'changed' }]);
+    expect(run(StringVariable, {}, ['settle', { signal: 'saveValue' }, 'settle'])).not.toContainEqual({ t: 'value', port: 'savedValue', value: '0' });
+    expect(run(StringVariable, {}, ['settle', { signal: 'saveValue' }, 'settle'])).toContainEqual({ t: 'outcome', port: 'saveValue', value: 'unchanged' });
+    expect(run(NumberVariable, {}, [{ set: 'value', value: 0 }, 'settle', { signal: 'saveValue' }, 'settle'])).toContainEqual({ t: 'outcome', port: 'saveValue', value: 'unchanged' });
   });
   test('C4 (v2, fixed in P109 ISL-026): null on Substring\'s String is empty text; the String Mapper lookup is unchanged', () => {
     expect(run(Substring, { string: 'abc' }, ['settle', { set: 'string', value: null }, 'settle']).filter((e) => e.t === 'value')).toEqual([

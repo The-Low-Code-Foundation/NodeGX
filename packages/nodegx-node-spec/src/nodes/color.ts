@@ -27,7 +27,10 @@ export const COLOR: VariableArgs & { type: 'color' } = {
 
 export const ColorVariable = defineNode({
   type: 'Color',
-  version: 1,
+  // v2 (P109 ISL-027, row C5 ruled "Start with no remembered value"): a first Value of 0 is stored and fires
+  // Changed like any other value, and a Set before any Value reports Unchanged. v1 ignored a first 0 (it equalled
+  // a hidden seed of 0) and a Set before any Value stored that seed and reported Done.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/variables/color.ts',
   state: variableState(COLOR),
   inspect: (s) => String(s.current),

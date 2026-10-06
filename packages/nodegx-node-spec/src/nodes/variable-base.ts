@@ -18,15 +18,12 @@
  *   - "changed" is `!hasBeenSet || current !== casted` (:285) — the NDA-002 guard against a
  *     seeded start value passing for an author's.
  *
- * Two things the wire shows that the descriptions do not say, both NSP-011 §6 rows:
- *   - `latestValue` is seeded `0` (:121), not `undefined`, and the value setter compares the new
- *     value against it (DEF-046, :164-168). So the FIRST value to arrive, if it is `0`, is not a
- *     change and is never stored: a String variable handed the number 0 stays `''`, a Boolean
- *     stays `false` with `hasBeenSet` false, and a later Set then reports `done` for a value it
- *     had all along (row C5).
- *   - a `Set` pulsed before any Value stores that seed: `setValueTo(0)` — so a String variable
- *     stores `'0'`, a Color variable stores the NUMBER 0, and both fire Changed and report done
- *     (row C5 too; `initialize`'s comment at :121 gives no reason for 0).
+ * `latestValue` starts with no remembered value (v2, P109 ISL-027, row C5 ruled "Start with no
+ * remembered value"): the value setter compares the new value against it (DEF-046), so a FIRST `0`
+ * is a change like any other and is stored, and a `Set` pulsed before any Value has nothing to store
+ * and reports Unchanged. In v1 it was seeded `0`: a first 0 was ignored (a String handed the number
+ * 0 stayed `''`), and a Set before any Value stored that hidden 0 (`'0'` on a String, the NUMBER 0 on
+ * a Color) and reported Done.
  *
  * The `Set` outcome is DEFERRED (spec.ts `ReducerOutcome`): each pulse schedules its own
  * `setValueTo(latestValue)` for frame end (:200-206), so two pulses in one frame are two
@@ -58,7 +55,7 @@ export interface VariableArgs {
 export type VariableState = {
   /** `_internal.currentValue` — the stored value, what every output reads */
   current: unknown;
-  /** `_internal.latestValue` — the pending value; seeded 0 (:121) */
+  /** `_internal.latestValue` — the pending value; none until a Value arrives (v2, row C5) */
   latest: unknown;
   /** `_internal.hasBeenSet` (:39, :122) */
   hasBeenSet: boolean;
@@ -67,7 +64,7 @@ export type VariableState = {
 };
 
 /** initialize (:119-124). `treatEmptyAs` is an input here (its default is `emptyOptions[0].value`, :123, :181). */
-export const variableState = (args: VariableArgs): VariableState => ({ current: args.startValue, latest: 0, hasBeenSet: false, sets: 0 });
+export const variableState = (args: VariableArgs): VariableState => ({ current: args.startValue, latest: undefined, hasBeenSet: false, sets: 0 });
 
 const VALUE_DESCRIPTION =
   'The empty-value contract (dev-docs/reference/EMPTY-VALUE-CONTRACT.md): `undefined` ' +

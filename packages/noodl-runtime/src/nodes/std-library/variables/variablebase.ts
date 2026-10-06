@@ -118,7 +118,10 @@ export function createDefinition(args: VariableDefinitionArgs): NodeDefinitionOp
     runOnValueChange: { controlSignal: 'saveValue', inputs: ['value'] },
     initialize: function (this: VariableNodeInstance) {
       this._internal.currentValue = args.startValue;
-      this._internal.latestValue = 0;
+      // ISL-027 / P107-C5, ruled "Start with no remembered value": seeded 0, a first Value of 0 equalled it
+      // and was never stored, and a Set before any Value stored that hidden 0. `undefined` is no value:
+      // the first 0 is a change, and a Set with nothing pending abstains (`setValueTo`) and reports Unchanged.
+      this._internal.latestValue = undefined;
       this._internal.hasBeenSet = false;
       this._internal.treatEmptyAs = args.emptyOptions[0].value;
     },
@@ -248,10 +251,9 @@ export function createDefinition(args: VariableDefinitionArgs): NodeDefinitionOp
       setValueTo: function (this: VariableNodeInstance, value: unknown): boolean {
         // `undefined` abstains (EMPTY-VALUE-CONTRACT.md corollary 4). The `value` input
         // already filters it before calling in, but `saveValue` can also reach here with a
-        // pending `latestValue` that was never given an opinion (`initialize` seeds it `0`,
-        // which is a real value, not `undefined` — this guard is for completeness per "cast:
-        // not reached — if reached, abstain" in the contract's table, not a load-bearing path
-        // today).
+        // pending `latestValue` that was never given an opinion (`initialize` seeds it
+        // `undefined` since ISL-027 / P107-C5): this is the path a Set before any Value takes,
+        // and it reports Unchanged.
         if (value === undefined) return false;
 
         // `null` maps to the type's empty value (contract corollary 2) rather than through
