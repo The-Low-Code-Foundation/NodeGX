@@ -1,12 +1,15 @@
 ---
 id: P107-C30
 title: A popup that failed to open keeps its place on the popup stack — the next popup reports Dismissed for it, and Escape stops working
-status: scheduled
+status: fixed
+commit: 3ce778c4f
 phase: P109
 task: ISL-028
 severity: medium
 area: runtime / NodeContext.showPopup (Show Popup)
 found: P107 NSP-015 s20, 2026-10-02
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/NavigationShowPopup.json "C30 — a failed build gives its slot back: the next show (Replace It) tells this node nothing for it, only Done (v2)" (and "C30 — a failed build on top (Show On Top) holds no slot: Escape cancels the popup beneath (v2)")
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md §6.1f, §6.2
 ---
 
@@ -44,3 +47,5 @@ splice `entry` out of `popupStack` (mark it dismissed so a racing replace does n
 rethrow, so Show Popup still reports Failure. One place, no change for any popup that opens.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Give the place back".** A failed popup leaves no trace, so later popups and Escape behave normally. One change in one place, and no change for any popup that opens. The question as asked: *"Should a popup that fails to open give its place back?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 3ce778c4f (P109 ISL-028, 2026-10-06), as ruled.**

@@ -1,12 +1,14 @@
 ---
 id: P107-C26
 title: Push Component To Stack's Back Results and Back Actions never connect — the TS port dropped `registerOutputIfNeeded`
-status: scheduled
+status: fixed
+commit: d57c0e053
 phase: P109
 task: ISL-028
 severity: high
 area: runtime / Push Component To Stack (viewer)
 found: P107 NSP-015 s18, 2026-10-01
+regression: packages/noodl-viewer-react/tests/isl-028-push-back-results-and-actions.test.ts "ISL-028 C26 — Push Component To Stack: wires from Back Results and Back Actions connect and deliver"
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md §6.1d, §6.2
 ---
 
@@ -37,3 +39,5 @@ Proposed: put the method back as it was (`backResult-<name>` with the getter `ge
 it lose their `row` mark in the same commit.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Put the method back".** Wires from Back Results and Back Actions work again, the way Show Popup's close results already do. One method restored in one file, and it touches nothing else. The question as asked: *"Should the method that creates the Back Results and Back Actions outputs be put back as it was?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed d57c0e053 (P109 ISL-028, 2026-10-06), as ruled.**

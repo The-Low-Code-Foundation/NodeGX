@@ -1,12 +1,15 @@
 ---
 id: P107-C31
 title: A Close Popup in a nested popup cannot close the outer popup by name — the Popup input's "when popups are nested" never works
-status: scheduled
+status: fixed
+commit: 7f31bf97d
 phase: P109
 task: ISL-028
 severity: medium
 area: runtime / NodeContext.showPopup + Close Popup (viewer)
 found: P107 NSP-015 s20, 2026-10-02
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/graph/t12-popups.json "nested popups: a Close Popup in the inner popup naming the OUTER one closes the outer — its opener hears Closed" (row mark dropped); also packages/noodl-viewer-react/tests/isl-028-nested-close-popup.test.ts
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md §6.1f, §6.2; packages/nodegx-node-spec/scenarios/graph/t12-popups.json
 ---
 
@@ -35,3 +38,5 @@ Re-word its description and docblock, or remove it. (a) is a change of where a n
 resolves, so it needs a ruling.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Reach the outer popup".** Naming the outer popup closes it, as the setting promises. This changes how a nested Close Popup finds its popup, so a nested popup whose name matches an outer one could close something new. The question as asked: *"Should Close Popup be able to reach the popup that opened its popup, or should its words say it only closes the popup it sits in?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 7f31bf97d (P109 ISL-028, 2026-10-06), as ruled.**

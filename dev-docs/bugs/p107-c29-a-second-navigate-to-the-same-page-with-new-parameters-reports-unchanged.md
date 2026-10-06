@@ -1,12 +1,14 @@
 ---
 id: P107-C29
 title: A second Navigate to the same page with new parameters, from one Navigate node, reports Unchanged and keeps the old page
-status: scheduled
+status: fixed
+commit: 3ae687fbe
 phase: P109
 task: ISL-028
 severity: high
 area: runtime / Navigate + Router (viewer)
 found: P107 NSP-015 s19, 2026-10-01
+regression: packages/noodl-viewer-react/tests/isl-028-a-second-press-with-new-parameters.test.ts "ISL-028 C29 — Navigate…" (the second press builds the page again with the second id; the same id twice is still Unchanged)
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md §6.1e, §6.2
 ---
 
@@ -39,3 +41,5 @@ Proposed: hand a copy — `params: { ...this._internal.pageParams }` at router-n
 node's side, one line); or have the Router copy what it keeps at :917. Same ruling as C27; ships alone.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Hand the Router a copy".** Each press opens the page with the values it was pressed with, so the second product opens. One line on the node's side. The question as asked: *"Should Navigate hand the Router a copy of its parameters, so each press keeps its own values?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 3ae687fbe (P109 ISL-028, 2026-10-06), as ruled.**

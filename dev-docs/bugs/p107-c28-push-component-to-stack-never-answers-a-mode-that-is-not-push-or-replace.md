@@ -1,12 +1,15 @@
 ---
 id: P107-C28
 title: Push Component To Stack never answers a press when Mode is neither push nor replace
-status: scheduled
+status: fixed
+commit: e965f8241
 phase: P109
 task: ISL-028
 severity: low
 area: runtime / Push Component To Stack (viewer)
 found: P107 NSP-015 s18, 2026-10-01
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/PageStackNavigate.json "C28 — a Mode that is neither push nor replace hands nothing and is Failure, Error naming the value; push again answers (v2)"
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md §6.1d, §6.2
 ---
 
@@ -27,3 +30,5 @@ Proposed: an else that reports Failure `push-component-stack/unknown-mode` with 
 One branch; ships alone.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Fail and name the value".** The press fires Failure with an error such as "Unknown mode 'Push'", so the author sees what their wire sent. One extra branch in one place. The question as asked: *"Should a press with an unknown Mode report a failure that names the value it got?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed e965f8241 (P109 ISL-028, 2026-10-06), as ruled.**

@@ -1,12 +1,15 @@
 ---
 id: P107-C32
 title: Two Show Popups pressed in one frame — the first reports Dismissed AND Done, for a popup that never opened
-status: scheduled
+status: fixed
+commit: 46837f595
 phase: P109
 task: ISL-028
 severity: low
 area: runtime / NodeContext.showPopup (Show Popup)
 found: P107 NSP-015 s20, 2026-10-02
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/graph/t12-popups.json "two Show Popups pressed in one frame: the first is replaced while it is still being built — Dismissed, and by its own Done sentence no Done, since it never opened" (row mark dropped)
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md §6.1f, §6.2; packages/nodegx-node-spec/scenarios/graph/t12-popups.json
 ---
 
@@ -32,3 +35,5 @@ answered the press). That needs the outcome contract's view: is a press answered
 (b) report Failure `show-popup/replaced-before-open`. (c) keep Done and re-word its description.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Drop the Done".** The node fires Dismissed only, and that answers the press. Done then always means the popup opened. This makes Dismissed alone a full answer to a press, which other nodes may want to agree with. The question as asked: *"When a popup is replaced before it opens, what should its node report besides Dismissed?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 46837f595 (P109 ISL-028, 2026-10-06), as ruled.**

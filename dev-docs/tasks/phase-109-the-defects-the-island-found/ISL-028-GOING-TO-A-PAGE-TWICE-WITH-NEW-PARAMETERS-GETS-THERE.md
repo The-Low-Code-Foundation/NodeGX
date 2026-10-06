@@ -1,6 +1,6 @@
 # ISL-028 — Going to a page twice, with new parameters, gets there
 
-**Status: ⬜ not started — ✅ AC2: all 10 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 10 bugs from
+**Status: ✅ s23 (2026-10-06): all 10 rows fixed, AC1–AC4 met — C27 + C29 (`3ae687fbe`), C26 (`d57c0e053`), C25 (`30b54e988`), D20 + D21 (`9404f00c4`), C28 (`e965f8241`), C30 (`3ce778c4f`), C32 (`46837f595`), C31 (`7f31bf97d`); §9. ✅ AC2: all 10 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 10 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 3 high · 4 medium · 3 low, **10 awaiting a ruling**. **Side:** viewer (Router, Navigate, Navigate To Path, Component Stack, Show / Close Popup)
 
 ## 1. The person sentence
@@ -88,3 +88,52 @@ ruling is still this task's work: the description changes, the node does not.
 | P107-C28 | Fail and name the value | yes | The press fires Failure with an error such as "Unknown mode 'Push'", so the author sees what their wire sent. One extra branch in one place. |
 | P107-C32 | Drop the Done | yes | The node fires Dismissed only, and that answers the press. Done then always means the popup opened. This makes Dismissed alone a full answer to a press, which other nodes may want to agree with. |
 | P107-D20 | Insert values as written | yes | Any value, dollar signs included, lands in the address unchanged. One line in one place, the same fix as String Format's. |
+
+## 9. Session 23 (2026-10-06) — what landed
+
+AC1: each row re-measured at the session's HEAD before its fix, and every one still fired. Only C25 was a known row (the
+"known rows still fire" test green for it at 20732). C28, C30, D20 and D21 had no known row: their specs modelled the
+runtime (R3), so each control is HEAD's runtime file failing the rewritten scenario. C31 and C32 were `row`-marked graph
+scenarios. C26, C27 and C29 were graded NOWHERE: the spec world records `params` canonically and has no back channel, so
+their red runs are new viewer tests written first (red on exactly the defect rows, their controls green).
+
+| bug | commit | what changed | regression |
+|---|---|---|---|
+| C27, C29 | `3ae687fbe` | Push (push and replace) and Navigate hand `{ ...pageParams }` | `isl-028-a-second-press-with-new-parameters.test.ts`, 9 rows; red on the 6 defect rows before |
+| C26 | `d57c0e053` | Push's `registerOutputIfNeeded` restored (Show Popup's shape) | `isl-028-push-back-results-and-actions.test.ts`; red on the 2 Push rows before |
+| C25 | `30b54e988` | the refused `pushState` is caught: Failure `navigate-to-path/refused`; known row and predicate dropped | the C25 scenario; control red on it alone |
+| D20, D21 | `9404f00c4` | a function replacement; query name and value encoded, null left out; the API twin too; Navigate To Path v2 | 3 scenarios (1 new) + `isl-028-navigate-to-path-api-query.test.ts`; controls red |
+| C28 | `e965f8241` | an unknown Mode is Failure `push-component-stack/unknown-mode`, Error naming it; Push v2 | the C28 scenario; control red |
+| C30 | `3ce778c4f` | `showPopup` gives a failed build's slot back; Show Popup v2 (its dead Escape arm removed) | the two C30 scenarios; control red on both |
+| C32 | `46837f595` | `showPopup` resolves `'dismissed'` for a popup replaced before it opened; Show Popup reports no Done for it | t12 graph scenario, unmarked, re-recorded (one event gone: a's Done); control red |
+| C31 | `7f31bf97d` | Close Popup's walk crosses from a popup to the component that opened it (`popupParent`), in Close Popup only | t12 graph scenario, unmarked, re-recorded (one event added: Closed) + `isl-028-nested-close-popup.test.ts`; controls red |
+
+**What the plan did not know.**
+- **Three of the ten rows had no grade anywhere** (C26, C27, C29). The NSP-015 specs said so in their docblocks; the
+  task's §5 assumed every row was a known row. Each now has a viewer test on the real stack / Router methods.
+- **D21 had a twin the ruling did not name:** `Noodl.Navigation.navigateToPath` built its query the same raw way (the
+  ledger file names it). Fixed in the same commit so the scripting API and the node keep one rule; its doc comment said
+  "Values are not URL-encoded".
+- **The ruling's premise for D21 was checked before building on it:** the Router's `_getSearchParams` decodes both halves
+  (`decodeURIComponent`, `+` as a space), so encoded text arrives as sent. The API test round-trips through that loop.
+- **C30 and C32 meet in one place:** a popup replaced while its build then FAILS has already answered with Dismissed, so the
+  C30 catch returns `'dismissed'` for it rather than a Failure on top.
+- **C31 was scoped to Close Popup**, not `componentwalk.ts`, which Parent Component Object and others share: the ruling is
+  about how a Close Popup finds its popup. A blank Popup still closes the nearest (a control row says so).
+- **Read, not measured:** ISL-004's kept page stored the same live `params` (`_isl004Page.params`); with C29's copy each
+  kept page holds its own. No test names this.
+- The `showPopup` return type is declared in THREE places (`nodecontext.ts`, `noodl-runtime/src/internal.d.ts`,
+  `@noodl/types` `node-definition.d.ts`); the second is the one the runtime's own type check reads.
+
+**Readings (2026-10-06):** each fix at seeds 20732 and 13 where its spec changed, 0 divergences, every mutant killed
+(Navigate To Path 26 / 26, Push 46 / 46, Show Popup 119 / 119 and 142 / 142; Close Popup's two declared equivalents as
+before). Runtime jest without the conformance file 3161 passed (one earlier run read 1 failed and the two reruns 0 — not
+named, recorded as a flake); runtime graph 87 / 87; spec navigation batch, catalog parity, graph, world, schema 509 / 509;
+viewer full suite 1772 / 1772 (143 suites); runtime, spec and viewer tsc 0. AC4: `bugs.js` lists none of the ten open;
+`--status fixed --from P107` lists all ten. `bugs.js check`: 5 problems, none in P109's rows (s22: 5).
+
+**Owed by P18 (the export):** does the exported app (a) hand a copy of a Navigate / Push's parameters (C27, C29), (b)
+register Push's back outputs (C26), (c) answer a refused push (C25), (d) insert path values as written and encode its
+query (D20, D21), (e) fail an unknown Mode (C28), (f) give a failed popup's slot back, report no Done for a popup
+replaced before it opened, and let a nested Close Popup reach the outer popup (C30, C32, C31)? Not checked here.
+

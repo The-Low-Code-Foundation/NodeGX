@@ -1,12 +1,15 @@
 ---
 id: P107-C25
 title: Navigate To Path never answers a press when the browser refuses the push (a Path on another origin with the Path URL type)
-status: scheduled
+status: fixed
+commit: 30b54e988
 phase: P109
 task: ISL-028
 severity: medium
 area: runtime / Navigate To Path (viewer)
 found: P107 NSP-015 s17, 2026-10-01
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/PageStackNavigateToPath.json "C25 — the path type with a Path on another origin: the push is made, the browser refuses it, Failure navigate-to-path/refused" (no longer a known row)
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-015-BATCH-NAVIGATION-AND-COMPONENTS.md §6.1c, §6.2
 ---
 
@@ -29,3 +32,5 @@ navigate to this path" (what the spec says). Alternatively open another origin's
 `window.location` / External Link semantics — a product choice, which is why this is a ruling.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Report a clear failure".** The press fires Failure with the error "The browser refused to navigate to this path", so the author's failure branch runs and they can see why. One small change in one place; to open another website they use External Link. The question as asked: *"When the browser refuses an address on another website, should the node report a failure or open that website?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 30b54e988 (P109 ISL-028, 2026-10-06), as ruled.**
