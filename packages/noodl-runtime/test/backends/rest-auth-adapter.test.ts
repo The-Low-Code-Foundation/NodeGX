@@ -17,6 +17,7 @@ import type { BackendHandle } from '@noodl/backend-contract';
 
 import {
   REST_USER_READONLY_FIELDS,
+  REST_USERNAME_UNSUPPORTED,
   RestAuthAdapter,
   SUPABASE_AUTH_UNSUPPORTED,
   jwtExpiryMs,
@@ -902,6 +903,44 @@ describe('readAuthMethods', () => {
     expect(readAuthMethods(profile, { data: [{ name: 'okta', driver: 'openid', label: 'Okta' }] }).providers).toEqual([
       { id: 'okta', displayName: 'Okta' }
     ]);
+  });
+});
+
+describe('a Username on a backend that has none (P107-D23)', () => {
+  // P109 ISL-030, ruled "Refuse with a reason": the write used to drop Username, PATCH the rest and say Done.
+  it('refuses the whole write with the sentence, and sends nothing', async () => {
+    const { adapter, fetcher, storage } = makeAdapter();
+    storage[restSessionKey(pocketbase)] = JSON.stringify({ objectId: 'pb-1', sessionToken: 'tok' });
+    const errors: unknown[] = [];
+    let done = false;
+    try {
+      adapter.setUserProperties(pocketbase, {
+        username: 'zed',
+        properties: { nickname: 'Z' },
+        success: () => (done = true),
+        error: (e) => errors.push(e)
+      });
+      await settle();
+      expect(fetcher.calls).toHaveLength(0);
+      expect(errors).toEqual([REST_USERNAME_UNSUPPORTED]);
+      expect(done).toBe(false);
+    } finally {
+      // Always: a red run that skipped it left the adapter's timer open and jest never exited.
+      adapter.dispose();
+    }
+  });
+
+  it('(control) a blank Username keeps the current one and writes the rest', async () => {
+    const { adapter, fetcher, storage } = makeAdapter();
+    storage[restSessionKey(pocketbase)] = JSON.stringify({ objectId: 'pb-1', sessionToken: 'tok' });
+    fetcher.reply(200, { id: 'pb-1', nickname: 'Z' });
+    try {
+      adapter.setUserProperties(pocketbase, { username: '', properties: { nickname: 'Z' }, success: () => undefined, error: () => undefined });
+      await settle();
+      expect(fetcher.calls[0].body).toEqual({ nickname: 'Z' });
+    } finally {
+      adapter.dispose();
+    }
   });
 });
 

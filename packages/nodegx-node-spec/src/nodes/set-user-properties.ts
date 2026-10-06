@@ -15,7 +15,8 @@
  * the node reaches the service (`forScope`, :188 — the first reach in a play makes it, world.ts AUTH) and hands it
  * `setUserProperties({ backendId, email, username, properties })` — the held values as they are AT THE FRAME END. A Backend
  * the project does not have: the service's sentence (userservice.ts :228-231, :430-431), no call. Otherwise the call goes
- * to that backend (world.ts AUTH — `Nobody is signed in.` at once when it holds no session). Success: every press Done
+ * to that backend (world.ts AUTH — `Nobody is signed in.` at once when it holds no session; v2, row D23: a Username that is
+ * not blank refused at once with `USERNAME_UNSUPPORTED`, nothing written). Success: every press Done
  * (:193-195). Failure: Error is the message AS GIVEN — no fallback sentence, so a failure with none sends nothing on Error
  * (`undefined` is never sent, CONTRACT C3) — and every press Failure with `user/set-properties-failed` (:197-200).
  * Error is never cleared. No Unchanged (:94-95). What the write does to the session is the backend's (world.ts AUTH: the
@@ -88,7 +89,9 @@ const BACKENDS: ReadonlyArray<BackendScript> = [
 
 export const SetUserProperties = defineNode({
   type: 'net.noodl.user.SetUserProperties',
-  version: 1,
+  // v2 (P109 ISL-030, row D23 ruled "Refuse with a reason"): a Username to a REST backend fails the write with the
+  // world's USERNAME_UNSUPPORTED sentence, nothing written; v1's adapter dropped it, wrote the rest and said Done.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/user/setuserproperties.ts; noodl-viewer-react/.../user/userservice.ts; RestAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
   worldPool: { backends: BACKENDS },

@@ -1063,12 +1063,12 @@
     ]
   },
   {
-    "name": "Sign Up, then Set User Properties: the User shows the new account, then the written property — and Username stays as it was (row D23)",
+    "name": "Sign Up, then Set User Properties: the User shows the new account, then the written property — and Username stays as it was",
     "clauses": [
       "S1",
       "N"
     ],
-    "because": "NSP-014 s27. signup.ts :166-173 → world.ts AUTH (signUp lands as a sign-in); setuserproperties.ts → RestAuthAdapter.ts :1607-1617 (Username dropped from the write — D23), :1634-1637 the session merged, sessionChanged → the bridge's write → user.ts :103-112",
+    "because": "NSP-014 s27. signup.ts :166-173 → world.ts AUTH (signUp lands as a sign-in); setuserproperties.ts → RestAuthAdapter.ts :1607-1617 (no Username in the write: on these backends a set one is refused — D23, v2 of Set User Properties), :1634-1637 the session merged, sessionChanged → the bridge's write → user.ts :103-112",
     "nodes": {
       "su": {
         "type": "net.noodl.user.SignUp",
@@ -1081,7 +1081,6 @@
       "sp": {
         "type": "net.noodl.user.SetUserProperties",
         "params": {
-          "username": "bee",
           "prop-nick": "B2"
         }
       },
@@ -1203,12 +1202,6 @@
         "port": "email",
         "value": "bea@example.com",
         "subject": "su"
-      },
-      {
-        "t": "set",
-        "port": "username",
-        "value": "bee",
-        "subject": "sp"
       },
       {
         "t": "set",
@@ -1355,8 +1348,7 @@
         "args": {
           "properties": {
             "nick": "B2"
-          },
-          "username": "bee"
+          }
         },
         "subject": "sp"
       },

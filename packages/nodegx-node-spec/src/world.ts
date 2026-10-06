@@ -340,7 +340,9 @@
  *               fields flat (`objectId` among them, tokens never); absent, nobody. `session(backend)` reads it NOW.
  *             THE REFUSAL BEFORE THE WIRE — a `fetchCurrentUser` to a backend holding no session, a `setUserProperties` to
  *               one holding none or none with an `objectId`: `Nobody is signed in.`, answered at once, inside the call
- *               (`refused`); recorded, never a violation, no rule read. (s27) A `logOut` to a backend holding no session is
+ *               (`refused`); recorded, never a violation, no rule read. (P109 ISL-030, row D23) A `setUserProperties` with a
+ *               Username (not blank) to a backend that holds a session: `USERNAME_UNSUPPORTED`, refused the same way — these
+ *               backends have no usernames, and the REST adapter no longer drops it and writes the rest. (s27) A `logOut` to a backend holding no session is
  *               no request either: it SUCCEEDS at once, inside the call (`inCall`) — and lands as below. (s28) A
  *               `signInWithProvider` with no provider (falsy — `!options.provider`): `Sign In With: no provider was set.`,
  *               refused inside the call (RestAuthAdapter.ts :1377-1380; ParseAuthAdapter.ts :616-619 — the same sentence).
@@ -1313,6 +1315,8 @@ export const isAuthOp = (op: string): boolean => AUTH_OPS.includes(op);
 
 /** RestAuthAdapter.ts :1153 / :1603 (and ParseAuthAdapter.ts :682 — the one sentence for the condition). */
 export const NOBODY_SIGNED_IN = 'Nobody is signed in.';
+/** AUTH (P109 ISL-030, row D23 ruled "Refuse with a reason"): a `setUserProperties` with a Username, to a REST backend (RestAuthAdapter.ts `REST_USERNAME_UNSUPPORTED`). */
+export const USERNAME_UNSUPPORTED = 'This backend has no usernames, so Username cannot be set. Leave Username blank, or change Email instead.';
 
 /** RestAuthAdapter.ts :1378 / ParseAuthAdapter.ts :617 — a provider sign-in handed no provider (s28). */
 export const NO_PROVIDER_SET = 'Sign In With: no provider was set.';
@@ -1546,6 +1550,8 @@ export class WorldBackend {
     const s = this.sessions.get(backend);
     if (op === 'fetchCurrentUser' && s === undefined) return { error: NOBODY_SIGNED_IN, refused: true };
     if (op === 'setUserProperties' && (s === undefined || !s.objectId)) return { error: NOBODY_SIGNED_IN, refused: true };
+    // P109 ISL-030 (D23): a Username to a REST backend is refused, before the wire — v1 of this world dropped it and wrote the rest
+    if (op === 'setUserProperties' && args?.username !== undefined && args.username !== null && args.username !== '') return { error: USERNAME_UNSUPPORTED, refused: true };
     if (op === 'logOut' && s === undefined) return { ok: undefined, inCall: true };
     return undefined;
   }

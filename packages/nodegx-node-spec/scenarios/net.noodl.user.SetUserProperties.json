@@ -24,8 +24,61 @@
     }
   },
   {
-    "name": "Do writes the held values: one call with Email, Username and the properties, then Done",
-    "because": "setuserproperties.ts :187-195",
+    "name": "Do writes the held values: one call with Email and the properties, then Done",
+    "because": "setuserproperties.ts :187-195 (v2: Username left blank — a set one is refused on these backends, row D23)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "prop-nick",
+        "value": "Annie"
+      },
+      {
+        "set": "email",
+        "value": "annie@example.com"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          },
+          {
+            "match": {
+              "op": "setUserProperties"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Do with Username set: refused at once — this backend has no usernames — Failure, nothing written (v2, D23)",
+    "because": "RestAuthAdapter.ts setUserProperties → REST_USERNAME_UNSUPPORTED (P109 ISL-030, P107-D23 ruled \"Refuse with a reason\"); v1 dropped Username, wrote the rest and said Done",
     "params": {},
     "steps": [
       "settle",
