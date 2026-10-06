@@ -89,7 +89,8 @@ const SubStringNode: NodeDefinitionOptions = {
         const internal = this._internal;
 
         if (internal.resultDirty) {
-          if (internal.endIndex === -1) {
+          // P107-D7: the text '-1' (a text field, an expression) runs to the end too, as the number does.
+          if (Number(internal.endIndex) === -1) {
             internal.cachedResult = internal.inputString.substr(internal.startIndex);
           } else {
             internal.cachedResult = internal.inputString.substr(

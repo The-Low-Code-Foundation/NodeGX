@@ -154,9 +154,9 @@ describe('what the source does, not what it says — NSP-011 §6, pinned', () =>
     expect(mappingFor({ 0: 'a' }, {}, 'a', 'D')).toBeUndefined();
     expect(mappingFor({ 2: 'a', 0: 'b' }, { 2: 'Z' }, 'a', 'D')).toBe('Z');
   });
-  test('D7: End as the text "-1" is not -1 — the result is empty, not the rest of the string', () => {
+  test('D7 (v3, fixed in P109 ISL-032): End as the text "-1" runs to the end, as the number does', () => {
     expect(substringOf('hello', 0, -1)).toBe('hello');
-    expect(substringOf('hello', 0, '-1')).toBe('');
+    expect(substringOf('hello', 0, '-1')).toBe('hello');
     expect(substringOf('hello', -2, -1)).toBe('lo');
   });
   test('D8 (v2, fixed in P109 ISL-026): a non-numeric Blend Value gives no colour (the node keeps the last); var() reads only through its fallback', () => {

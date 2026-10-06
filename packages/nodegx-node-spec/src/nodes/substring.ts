@@ -6,8 +6,8 @@
  *
  * The getter computes lazily and caches (:89-105); a wire cannot see the cache, so here `result`
  * is a function of the three inputs. The runtime's `substr` is kept verbatim (:94, :96-99) —
- * negative Start counts from the end, End is exclusive, and `end === -1` (strict, on the RAW
- * value: `'-1'` is not `-1`) means "to the end".
+ * negative Start counts from the end, End is exclusive, and End reading as -1 — the number or the
+ * text `'-1'` (v3, row D7 ruled "Treat it as -1"; v2's check was strict on the raw value) — means "to the end".
  *
  * `null` and `undefined` on String are empty text (v2 — NSP-011 §6 row C4, ruled "Read it as empty
  * text", fixed in P109 ISL-026). In v1 the setter's `value.toString()` threw on both and the spec
@@ -19,13 +19,14 @@ import { defineNode } from '../spec';
 /** :92-102 — `substr(start)` when End is -1, else `substr(start, end - start)`; raw values, JS's own conversions. */
 export function substringOf(str: string, start: unknown, end: unknown): string {
   // eslint-disable-next-line @typescript-eslint/no-deprecated -- the runtime's call, verbatim (:94, :96)
-  return end === -1 ? str.substr(start as number) : str.substr(start as number, (end as number) - (start as number));
+  return Number(end) === -1 ? str.substr(start as number) : str.substr(start as number, (end as number) - (start as number));
 }
 
 export const Substring = defineNode({
   type: 'Substring',
   // v2 (P109 ISL-026, P107-C4): null or undefined on String is empty text; v1 kept the old string (the runtime threw).
-  version: 2,
+  // v3 (P109 ISL-032, row D7 ruled "Treat it as -1"): End as the text '-1' runs to the end, as the number does.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/substring.ts',
 
   // initialize (:26-33): startIndex 0, endIndex -1, inputString ''; the cache and its flag are not state a wire can see
