@@ -335,6 +335,9 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     }
   ],
   // NSP-013 s14
+  // P109 ISL-032 — Delay v2 (row D10): Stop's `unchanged` branch is reached only with the timer neither running nor queued,
+  // and `started` is set only while running and cleared wherever running ends — so the three flags it writes are already false.
+  Timer: [{ reducer: 'stop', kind: 'drop-set', branch: '"outcome":"unchanged"', why: 'a Stop on a timer neither running nor queued: its set writes queued, running and started false, which they already are' }],
   States: [
     {
       reducer: 'afterInputs',

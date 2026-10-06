@@ -27,9 +27,9 @@
  * Outcomes (timer.ts :54-65, :71-77, :103-108): `Start` reports `unchanged` while the timer IS
  * RUNNING — `_isRunning`, which is set only when the timer joins at the frame (:181) — so two
  * Starts in one frame both report `done`; `Restart` always reports `done`; `Stop` reports `done`
- * when the timer was running and `unchanged` otherwise, INCLUDING when it was queued and the Stop
- * did cancel it (:105-107 read `_isRunning`; :108-113 remove it from the queue anyway) — a row in
- * NSP-007 §6 (D10).
+ * when the timer was running or queued — it cancels either — and `unchanged` otherwise (v2, row D10
+ * ruled "Report Done": v1 read only `_isRunning`, so a Stop cancelling a countdown started in the
+ * same frame said `unchanged`).
  */
 
 import { defineNode } from '../spec';
@@ -40,7 +40,8 @@ const js = (v: unknown): any => v;
 
 export const Delay = defineNode({
   type: 'Timer',
-  version: 1,
+  // v2 (P109 ISL-032, row D10 ruled "Report Done"): Stop on a countdown queued this frame reports done.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/timer.ts; packages/noodl-runtime/src/timerscheduler.ts',
   needs: ['clock'],
   worldPool: { advances: [0, 1, 49, 50, 99, 100, 101, 1000] },
@@ -112,9 +113,9 @@ export const Delay = defineNode({
     // leaves the running set, `_hasCalledOnStart` false), then queued; always `done`.
     restart: () => ({ set: { queued: true, running: false, started: false }, outcome: 'done' }),
 
-    // :103-108 — `done` if it was running, `unchanged` otherwise; stop() removes it from whichever
-    // set holds it (:96-114) — a QUEUED timer is cancelled and still reports `unchanged` (D10).
-    stop: (s) => ({ set: { queued: false, running: false, started: false }, outcome: s.running ? 'done' : 'unchanged' })
+    // `done` if it was running or queued (v2, D10), `unchanged` otherwise; stop() removes it from
+    // whichever set holds it (:96-114).
+    stop: (s) => ({ set: { queued: false, running: false, started: false }, outcome: s.running || s.queued ? 'done' : 'unchanged' })
   },
   {
     // The frame's timer pass — timerscheduler.ts `runTimers(currentTime)` (:116-198), run once per

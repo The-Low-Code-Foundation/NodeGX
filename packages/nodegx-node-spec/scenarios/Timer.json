@@ -24,8 +24,8 @@
     "steps": [{ "signal": "start" }, { "signal": "start" }, "settle", { "signal": "start" }, "settle"]
   },
   {
-    "name": "Stop while queued: reports unchanged, yet the countdown is cancelled — no Started ever (D10)",
-    "because": "timer.ts :105-107 reads _isRunning (false while queued); timerscheduler.ts :108-113 removes it from the queue anyway",
+    "name": "Stop while queued: reports done — the countdown is cancelled, no Started ever (v2; was row D10: it reported unchanged)",
+    "because": "timer.ts Stop reads _isRunning OR the scheduler's queue (newTimers); timerscheduler.ts :108-113 removes a queued timer; ruled 2026-10-05 (P107-D10, \"Report Done\")",
     "params": { "duration": 100 },
     "steps": [{ "signal": "start" }, { "signal": "stop" }, "settle", { "advance": 100 }, "settle"]
   },

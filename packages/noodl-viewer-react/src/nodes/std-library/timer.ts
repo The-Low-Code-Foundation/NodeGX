@@ -8,7 +8,7 @@ interface TimerInstance extends NodeInstance {
      * input below. It is not on the published `Timer` interface — `isRunning()` is —
      * so it is declared here rather than widening the shared type.
      */
-    _animation: SchedulerTimer & { _isRunning: boolean };
+    _animation: SchedulerTimer & { _isRunning: boolean; scheduler?: { newTimers?: unknown[] } };
     /** ISL-004 — a countdown paused while its kept page is hidden, and its own Duration and Start Delay. */
     paused?: { left: number; duration: number; delay: number };
     /** ISL-004 — set while a paused countdown runs out its remainder: Started already fired for it. */
@@ -110,8 +110,12 @@ const Timer: NodeDefinitionOptions = {
       description: 'Abandons the countdown, so Finished never fires for it',
       valueChangedToTrue: function (this: TimerInstance) {
         const outcome = this.beginOutcome();
-        const wasRunning = this._internal._animation._isRunning !== false;
-        this._internal._animation.stop();
+        const a = this._internal._animation;
+        // P107-D10: a countdown Started this frame is QUEUED — `_isRunning` is set only when it joins at
+        // the frame end — and `stop()` cancels it all the same, so that is a Stop that did something.
+        const queued = !!a.scheduler && !!a.scheduler.newTimers && a.scheduler.newTimers.indexOf(a) !== -1;
+        const wasRunning = a._isRunning !== false || queued;
+        a.stop();
         this._internal.paused = undefined;
         this._restoreAfterResume();
         this.reportOutcome(outcome, wasRunning ? 'done' : 'unchanged');
