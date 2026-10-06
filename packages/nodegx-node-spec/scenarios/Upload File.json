@@ -69,8 +69,8 @@
     }
   },
   {
-    "name": "Directus's FileRef: id and filename are not kept on the stored file",
-    "because": "uploadfile.ts :209 → cloudfile.ts :57-77 (name, url, contentType, size, target only)",
+    "name": "Directus's FileRef: the filename it reports is kept on the stored file — over the sent file's name — the id is not (v3, C52)",
+    "because": "uploadfile.ts: the backend's `filename` kept (P109 ISL-030, P107-C52 ruled \"Keep the real name\"); v2 dropped it",
     "params": {},
     "steps": [
       "settle",
@@ -98,7 +98,49 @@
                 "name": "6f1c0a52",
                 "url": "https://directus.example/assets/6f1c0a52",
                 "id": "6f1c0a52",
-                "filename": "photo.png"
+                "filename": "Holiday photo.png"
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a FileRef with no filename (PocketBase): the stored file keeps the sent file's name (v3, C52)",
+    "because": "uploadfile.ts: no `filename` reported, so the name of the file this upload sent (P109 ISL-030, P107-C52 ruled \"Keep the real name\")",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$file": {
+            "name": "photo.png",
+            "type": "image/png",
+            "size": 3
+          }
+        }
+      },
+      {
+        "signal": "upload"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "name": "photo_g235k8arvj.png",
+                "url": "https://pb.example/api/files/notes/r1/photo_g235k8arvj.png",
+                "target": {
+                  "kind": "record",
+                  "collection": "notes",
+                  "recordId": "r1",
+                  "field": "attachment"
+                }
               }
             }
           }

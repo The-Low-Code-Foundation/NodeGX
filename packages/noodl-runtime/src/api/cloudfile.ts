@@ -53,19 +53,28 @@ class CloudFile {
    * Widening the persisted envelope is a stored-data change on the Parse wire.
    */
   readonly target?: FileTarget;
+  /**
+   * The name the file was uploaded as — P107-C52 (P109 ISL-030, ruled "Keep the real name"). Directus reports it
+   * (`filename_download`); on the other backends Upload File keeps the name of the file it sent. The stored `name` is an
+   * address, not a name a person gave: a UUID on Directus, `<name>_<suffix>` on PocketBase, a path on Supabase. Absent on
+   * a file read back from a record, which persists `{ url, name }` only (the round-trip limit `contentType` has).
+   */
+  readonly filename?: string;
 
   constructor({
     name,
     url,
     contentType,
     size,
-    target
+    target,
+    filename
   }: {
     name: string;
     url: string;
     contentType?: string;
     size?: number;
     target?: FileTarget;
+    filename?: string;
   }) {
     this.name = name;
     this.url = url;
@@ -74,6 +83,7 @@ class CloudFile {
     if (contentType !== undefined) this.contentType = contentType;
     if (size !== undefined) this.size = size;
     if (target !== undefined) this.target = target;
+    if (filename !== undefined) this.filename = filename;
   }
 
   getUrl(): string {
@@ -90,6 +100,11 @@ class CloudFile {
 
   getSize(): number | undefined {
     return this.size;
+  }
+
+  /** See {@link CloudFile.filename}. */
+  getFilename(): string | undefined {
+    return this.filename;
   }
 
   /** See {@link CloudFile.target}. `undefined` on the three backends that do not need one. */

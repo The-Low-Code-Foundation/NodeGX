@@ -93,7 +93,7 @@
  *                        the files a drag from the desktop carries).
  *   cloudFile(desc)      OPTIONAL, NSP-014 s30 — a STORED file, the target's own (the runtime's `CloudFile`):
  *                        a scenario value that is EXACTLY `{ "$cloudFile": { name, url, contentType?, size?,
- *                        target? } }` is handed as one — what an Upload File's Cloud File output or a
+ *                        target?, filename? } }` is handed as one — what an Upload File's Cloud File output or a
  *                        record's file property carries. A plain object with the same keys is NOT one, and
  *                        the nodes that take a stored file drop it (`instanceof CloudFile`).
  *   act(h, act, value)   OPTIONAL, NSP-016 s37 — THE PERSON (spec.ts): records `{ t: 'act', act, value? }` (value
@@ -155,6 +155,8 @@ export interface CloudFileDesc {
   contentType?: string;
   size?: number;
   target?: Readonly<Record<string, unknown>>;
+  /** P109 ISL-030 (row C52): the name it was uploaded as, when known */
+  filename?: string;
 }
 
 /** NSP-014 s30 — a scenario value tagged with `tag`: an object whose ONLY key is `tag`, an object. */

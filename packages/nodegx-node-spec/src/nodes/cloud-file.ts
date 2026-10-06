@@ -8,9 +8,11 @@
  * `instanceof CloudFile`, :76; here `isStoredFile` — what canonical.ts tags `$cloudFile`) replaces the held one and sends
  * all four outputs (:79-83); ANY other value — `null`, a string, a plain object with the same keys — leaves the held file
  * in place and sends nothing (:76-78). The outputs read the held file: URL (:27), Content Type (:55) and Size (:64) its
- * getters, `undefined` (never sent, C3) when it did not carry one; Name (:36-41) its stored name with everything up to
- * the FIRST underscore dropped — Parse's `<guid>_` prefix — when there is one: `abc_my_photo.png` → `my_photo.png`,
- * `plain.png` → `plain.png`, `_x` → `x`.
+ * getters, `undefined` (never sent, C3) when it did not carry one; Name (v2, row C52 ruled "Keep the real name") the name
+ * the file was uploaded as when it carries one (`getFilename`); else, for a file addressed by a target (PocketBase,
+ * Supabase), its stored name whole; else its stored name with everything up to the FIRST underscore dropped — Parse's
+ * `<guid>_` prefix — when there is one: `abc_my_photo.png` → `my_photo.png`, `plain.png` → `plain.png`, `_x` → `x`.
+ * v1 applied that last rule to every file, so PocketBase's `photo_g235k8arvj.png` showed `g235k8arvj.png`.
  *
  * No world: a stored file carries everything the node reports, and the node asks nothing of the backend.
  *
@@ -37,20 +39,31 @@ export const STORED_FILES: readonly unknown[] = [
   { $cloudFile: { name: 'photo_g235k8arvj.png', url: 'https://pb.example/api/files/notes/r1/photo_g235k8arvj.png', target: { kind: 'record', collection: 'notes', recordId: 'r1', field: 'attachment' } } },
   // Directus's: the file's UUID (fileRef.ts DIRECTUS_FILE_FIELDS — `name` is `id`)
   { $cloudFile: { name: '6f1c0a52-1b6e-4c1e-9a2b-1d2c3e4f5a6b', url: 'https://directus.example/assets/6f1c0a52-1b6e-4c1e-9a2b-1d2c3e4f5a6b' } },
+  // v2 (C52): files that know the name they were uploaded as — Directus's reported one, PocketBase's from Upload File
+  { $cloudFile: { name: '6f1c0a52-1b6e-4c1e-9a2b-1d2c3e4f5a6b', url: 'https://directus.example/assets/6f1c0a52-1b6e-4c1e-9a2b-1d2c3e4f5a6b', filename: 'holiday photo.png' } },
+  { $cloudFile: { name: 'photo_g235k8arvj.png', url: 'https://pb.example/api/files/notes/r1/photo_g235k8arvj.png', target: { kind: 'record', collection: 'notes', recordId: 'r1', field: 'attachment' }, filename: 'photo.png' } },
   // a plain object with a stored file's keys: dropped
   { name: 'abc_photo.png', url: 'https://files.example/abc_photo.png' }
 ];
 
 const names = (s: Readonly<CloudFileState>) => {
   if (!s.file) return undefined;
-  // :38-41 — "parse prefixes the file with a guid_"
+  // v2 (row C52 ruled "Keep the real name"): the name it was uploaded as, when known
+  const filename = typeof s.file.getFilename === 'function' ? s.file.getFilename() : undefined;
+  if (typeof filename === 'string' && filename !== '') return filename;
+  // v2: a file addressed by a target (PocketBase, Supabase) — its stored name whole; v1 chopped it at its first underscore
+  if (s.file.getTarget() !== undefined) return String(s.file.getName());
+  // :38-41 — "parse prefixes the file with a guid_" (a Directus UUID has no underscore: whole either way)
   const n = String(s.file.getName()).split('_');
   return n.length === 1 ? n[0] : n.slice(1).join('_');
 };
 
 export const CloudFile = defineNode({
   type: 'Cloud File',
-  version: 1,
+  // v2 (P109 ISL-030, row C52 ruled "Keep the real name"): Name is the name the file was uploaded as when it is known; else a
+  // target-addressed file's stored name whole; else the Parse wire's prefix dropped. v1 dropped everything to the first
+  // underscore on every backend (PocketBase showed its random suffix).
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/cloudfilenode.ts; api/cloudfile.ts',
   state: { file: undefined } as CloudFileState,
   inputs: {

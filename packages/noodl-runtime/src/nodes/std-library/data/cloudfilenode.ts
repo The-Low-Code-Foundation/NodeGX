@@ -33,11 +33,19 @@ const CloudFileNode: NodeDefinitionOptions = {
       group: 'General',
       description: 'Original file name as it was uploaded, without the storage prefix',
       get(this: CloudFileNodeInstance) {
-        if (!this._internal.cloudFile) return;
+        const file = this._internal.cloudFile;
+        if (!file) return;
 
-        //parse prefixes the file with a guid_
-        //remove it so the name is the same as the original file name
-        const n = this._internal.cloudFile.getName().split('_');
+        // P107-C52 (P109 ISL-030, ruled "Keep the real name"): the name it was uploaded as, when that is known.
+        const filename = typeof file.getFilename === 'function' ? file.getFilename() : undefined;
+        if (typeof filename === 'string' && filename !== '') return filename;
+        // Not known (a file read back from a record). A file addressed by a target (PocketBase, Supabase) has a stored
+        // name that is not prefixed — `<name>_<suffix>`, a path — so it is shown whole rather than chopped at its first
+        // underscore, which showed PocketBase's random suffix.
+        if (file.getTarget() !== undefined) return file.getName();
+        // The Parse wire prefixes the file with a guid_; remove it so the name is the one uploaded. (A Directus UUID has
+        // no underscore, so it is whole either way.)
+        const n = file.getName().split('_');
         return n.length === 1 ? n[0] : n.slice(1).join('_');
       }
     },

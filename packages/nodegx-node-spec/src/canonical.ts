@@ -21,7 +21,7 @@
  * | unit object `{ value, unit }` (C10)  | kept WHOLE — it is a plain object, never reduced to its number |
  * | object with `toJSON`                 | `toJSON()` first, then the rules above           |
  * | a FILE the browser hands (NSP-014 s30): a `Blob` — `arrayBuffer()` a function, `size` a number, `type` a string | `{ "$file": { "name"?, "size", "type" } }` — the bytes are not on the wire, `name` only when it is a string (a `File`; a bare `Blob` has none), `lastModified` never (a clock reading) |
- * | a STORED file (NSP-014 s30): `getUrl`, `getName` and `getTarget` all functions — the runtime's `CloudFile` | `{ "$cloudFile": { "name", "url", "contentType"?, "size"?, "target"? } }` from those getters (and `getContentType` / `getSize`), each canonical, an absent one dropped. Tagged, unlike other class instances (below): Cloud File, Sign File URL and a record's file property take ONLY a stored file (`instanceof CloudFile`) and drop a plain object with the same keys, so the difference is behaviour a trace must show |
+ * | a STORED file (NSP-014 s30): `getUrl`, `getName` and `getTarget` all functions — the runtime's `CloudFile` | `{ "$cloudFile": { "name", "url", "contentType"?, "size"?, "target"?, "filename"? } }` from those getters (and `getContentType` / `getSize` / `getFilename`, P109 ISL-030), each canonical, an absent one dropped. Tagged, unlike other class instances (below): Cloud File, Sign File URL and a record's file property take ONLY a stored file (`instanceof CloudFile`) and drop a plain object with the same keys, so the difference is behaviour a trace must show |
  * | BYTES (NSP-014 s34): an `ArrayBuffer`, a typed array or a `DataView` | `{ "$bytes": [b, …] }` — the bytes it views, each 0–255, in order. Tagged: a WebSocket's binary frame is behaviour on the wire, and a typed array's own keys sort `"10"` before `"2"` while an `ArrayBuffer` has none at all — `{}` for every buffer graded nothing |
  * | other object (class instance, Map…)  | its own enumerable keys, sorted — no class tag (see below) |
  * | `undefined` (top level)              | `undefined` — the CALLER decides: a `value` event never carries it (C3), a `set` event omits the field |
@@ -100,7 +100,7 @@ function walk(value: unknown, path: string, seen: object[]): Canonical | undefin
     // NSP-014 s30 — the two file shapes, duck-typed (a target's own classes; never by constructor)
     if (isStoredFile(obj)) {
       const f = obj as unknown as StoredFileLike;
-      const fields: Record<string, unknown> = { name: f.getName(), url: f.getUrl(), contentType: f.getContentType?.(), size: f.getSize?.(), target: f.getTarget() };
+      const fields: Record<string, unknown> = { name: f.getName(), url: f.getUrl(), contentType: f.getContentType?.(), size: f.getSize?.(), target: f.getTarget(), filename: f.getFilename?.() };
       return { $cloudFile: walk(fields, `${path}.$cloudFile`, seen) as Canonical };
     }
     if (isBrowserFile(obj)) {
@@ -147,6 +147,8 @@ export interface StoredFileLike {
   getTarget(): unknown;
   getContentType?(): unknown;
   getSize?(): unknown;
+  /** P109 ISL-030 (row C52): the name it was uploaded as, when known */
+  getFilename?(): unknown;
 }
 
 /** NSP-014 s30 — a stored file (the `$cloudFile` row above): `getUrl`, `getName` and `getTarget` all functions. */

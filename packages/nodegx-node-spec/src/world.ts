@@ -1264,8 +1264,8 @@ export function fileError(d: { error: string | undefined; detail?: Record<string
 
 /**
  * FILES (s30): a stored file as a target that has no class of its own for one makes it — the runtime's `CloudFile`
- * (cloudfile.ts :57-103) by its surface: the fields of a `FileRef` it keeps (name, url, and contentType / size / target
- * only when present) and their getters. canonical.ts tags it `$cloudFile`.
+ * (cloudfile.ts :57-103) by its surface: the fields of a `FileRef` it keeps (name, url, and contentType / size / target /
+ * filename only when present — `filename` since P109 ISL-030, row C52) and their getters. canonical.ts tags it `$cloudFile`.
  */
 export class StoredFile {
   readonly name: string;
@@ -1273,12 +1273,15 @@ export class StoredFile {
   readonly contentType?: string;
   readonly size?: number;
   readonly target?: unknown;
-  constructor(ref: { name: string; url: string; contentType?: string; size?: number; target?: unknown }) {
+  /** P109 ISL-030 (row C52): the name it was uploaded as, when known (cloudfile.ts `filename`). */
+  readonly filename?: string;
+  constructor(ref: { name: string; url: string; contentType?: string; size?: number; target?: unknown; filename?: string }) {
     this.name = ref.name;
     this.url = ref.url;
     if (ref.contentType !== undefined) this.contentType = ref.contentType;
     if (ref.size !== undefined) this.size = ref.size;
     if (ref.target !== undefined) this.target = ref.target;
+    if (ref.filename !== undefined) this.filename = ref.filename;
   }
   getUrl(): string {
     return this.url;
@@ -1294,6 +1297,9 @@ export class StoredFile {
   }
   getTarget(): unknown {
     return this.target;
+  }
+  getFilename(): string | undefined {
+    return this.filename;
   }
   toString(): string {
     return this.url;

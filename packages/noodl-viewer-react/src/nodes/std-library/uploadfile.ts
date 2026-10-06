@@ -206,8 +206,13 @@ const UploadFile: NodeDefinitionOptions = {
               contentType?: string;
               size?: number;
               target?: FileTarget;
+              filename?: string;
             }) => {
-              this._internal.cloudFile = new CloudFile(response);
+              // P107-C52 (P109 ISL-030, ruled "Keep the real name"): the name the file was uploaded as — the backend's
+              // when it reports one (Directus), else the name of the file this upload sent.
+              const sent = file && typeof (file as { name?: unknown }).name === 'string' ? (file as { name: string }).name : undefined;
+              const filename = response.filename !== undefined ? response.filename : sent;
+              this._internal.cloudFile = new CloudFile(filename !== undefined ? Object.assign({}, response, { filename }) : response);
               this.flagOutputDirty('cloudFile');
               // Last, after the value it is about.
               this.reportOutcome(outcome, 'done');

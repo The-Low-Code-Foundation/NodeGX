@@ -123,8 +123,8 @@
     ]
   },
   {
-    "name": "a PocketBase file: its stored name's first part is dropped — Name is the random suffix (row C52)",
-    "because": "cloudfilenode.ts :38-41 — the prefix rule is Parse's, applied to every backend; PocketBase stores photo.png as photo_<random10>.png (BCN-007-FILES-PROBE-OUTPUT.txt :62)",
+    "name": "a PocketBase file read back from a record (no uploaded name): Name is its stored name whole (v2, C52)",
+    "because": "cloudfilenode.ts: a file addressed by a target is not prefixed, so it is not chopped (P109 ISL-030, P107-C52 ruled \"Keep the real name\"); v1 dropped up to the first underscore and showed the random suffix",
     "params": {},
     "steps": [
       "settle",
@@ -140,6 +140,50 @@
               "recordId": "r1",
               "field": "attachment"
             }
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a PocketBase file Upload File made: Name is the name it was uploaded as (v2, C52)",
+    "because": "cloudfilenode.ts: `getFilename` first (P109 ISL-030, P107-C52 ruled \"Keep the real name\")",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "photo_g235k8arvj.png",
+            "url": "https://pb.example/api/files/notes/r1/photo_g235k8arvj.png",
+            "target": {
+              "kind": "record",
+              "collection": "notes",
+              "recordId": "r1",
+              "field": "attachment"
+            },
+            "filename": "photo.png"
+          }
+        }
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a Directus file: Name is the name it was uploaded as, not the UUID (v2, C52)",
+    "because": "cloudfilenode.ts: `getFilename` first — Directus reports `filename_download` (P109 ISL-030, P107-C52)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "file",
+        "value": {
+          "$cloudFile": {
+            "name": "6f1c0a52-1b6e-4c1e-9a2b-1d2c3e4f5a6b",
+            "url": "https://directus.example/assets/6f1c0a52-1b6e-4c1e-9a2b-1d2c3e4f5a6b",
+            "filename": "holiday photo.png"
           }
         }
       },

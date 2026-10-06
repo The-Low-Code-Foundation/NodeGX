@@ -156,6 +156,8 @@ type UploadState = Presses & {
   field: unknown;
   /** `_internal.cloudFile` (:209) */
   cloudFile: StoredFile | undefined;
+  /** v3 (row C52): the name of the file each call sent, by the spec's call id — the closure's `file` (:174) */
+  callNames: Readonly<Record<string, string | undefined>>;
   /** `_internal.progressTotal` / `progressLoaded` (:188-189) — never written by the adapter the world plays */
   progressTotal: number | undefined;
   progressLoaded: number | undefined;
@@ -173,7 +175,9 @@ export const UploadFile = defineNode({
   type: 'Upload File',
   // v2 (P109 ISL-030, row C51 ruled "Send the real status"): Error Status Code is the HTTP status (never a Parse code) and
   // Error always a sentence; v1 read `code || status || 0` and put a message-less envelope on Error.
-  version: 2,
+  // v3 (P109 ISL-030, row C52 ruled "Keep the real name"): the Cloud File keeps the name it was uploaded as (the backend's
+  // `filename`, else the sent file's name); v2's dropped `filename` and knew only the stored name.
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/uploadfile.ts; noodl-runtime api/cloudstore.js, api/cloudfile.ts',
   needs: ['backend'],
   worldPool: { backends: [...pool('uploadFile', FILE_REFS[0]), ...pool('uploadFile', FILE_REFS[1]).slice(0, 1), ...pool('uploadFile', FILE_REFS[2]).slice(2, 3)] },
@@ -187,6 +191,7 @@ export const UploadFile = defineNode({
     field: undefined,
     backendId: undefined,
     cloudFile: undefined,
+    callNames: {},
     error: undefined,
     errorStatus: undefined,
     progressTotal: undefined,
@@ -265,11 +270,25 @@ export const UploadFile = defineNode({
       on: (_s, _port, v) => ({ set: { backendId: v }, send: [] })
     },
     // :172-216
-    afterInputs: (s, _i, w) => frame(s, w, !!s.file, 'uploadFile', () => ({ file: s.file, private: s.private, target: fileTarget(s) }), UPLOAD_ERROR_CODE, 'upload'),
+    afterInputs: (s, _i, w) => {
+      const r = frame(s, w, !!s.file, 'uploadFile', () => ({ file: s.file, private: s.private, target: fileTarget(s) }), UPLOAD_ERROR_CODE, 'upload');
+      if (!('backend' in r) || !r.backend) return r;
+      // v3 (C52): each call remembers the name of the file it sent
+      const f = s.file as { name?: unknown } | undefined;
+      const sent = f && typeof f.name === 'string' ? f.name : undefined;
+      const callNames: Record<string, string | undefined> = { ...s.callNames };
+      for (const c of r.backend) callNames[c.id] = sent;
+      return { ...r, set: { ...r.set, callNames } };
+    },
     world: {
-      // :202-214 — a stored file made from the FileRef, then Done; a failure through `setError`
+      // :202-214 — a stored file made from the FileRef, then Done; a failure through `setError`. v3 (row C52 ruled "Keep the
+      // real name"): it keeps the name it was uploaded as — the backend's `filename` when it reports one, else the call's file's
       backend: (s, _i, answer) =>
-        answered(s, answer, 'upload', UPLOAD_ERROR_CODE, (ok) => ({ set: { cloudFile: new StoredFile(ok as ConstructorParameters<typeof StoredFile>[0]) }, send: ['cloudFile' as const] }))
+        answered(s, answer, 'upload', UPLOAD_ERROR_CODE, (ok) => {
+          const ref = ok as ConstructorParameters<typeof StoredFile>[0];
+          const filename = ref.filename !== undefined ? ref.filename : s.callNames[answer.id];
+          return { set: { cloudFile: new StoredFile(filename !== undefined ? { ...ref, filename } : ref) }, send: ['cloudFile' as const] };
+        })
     }
   }
 );
