@@ -1,0 +1,934 @@
+<title>GX-16 Groovebox</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Michroma&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/15.1.22/Tone.js"></script>
+<style>
+/* Layout: one device on a bench. Front panel = the app; under the lid = its graph, drawn as a circuit board
+   or as NodeGX nodes, with an inspector and a parts bin. The device keeps its colours in both themes; the bench follows the theme. */
+:root {
+  --bench: #e6e8ec; --bench-ink: #1c1f24; --bench-muted: #5d6470; --bench-line: #c9cdd4; --bench-raise: #f4f5f7;
+  --focus: #2f6cf6;
+  /* the device: fixed in both themes */
+  --chassis: #f1f0ec; --chassis-edge: #cfccc5; --chassis-shadow: rgba(20,22,28,.28); --silk: #2a2a2a; --silk-soft: #77736b;
+  --pad: #ffffff; --pad-edge: #d3d0c9;
+  --lcd: #17241e; --lcd-ink: #9df2c2; --lcd-dim: #4f7d64;
+  --kick: #ff6a13; --snare: #f2b705; --hats: #19b26b; --bass: #2f6cf6; --lead: #d83f87;
+  /* under the lid: NodeGX wire colours (canvas-look), plus copper for audio */
+  --wire-signal: #35c3e8; --wire-value: #45d08a; --wire-audio: #ff9d3a; --wire-pulse: #ffffff;
+  --pcb: #0e2f23; --pcb-dot: rgba(160,230,190,.10); --chip: #16181b; --chip-edge: #2b2f33; --chip-ink: #e9efe9; --chip-sub: #8fa39a; --pin: #c9a54a;
+  --ng-ground: #141318; --ng-card: #232129; --ng-border: #33323d; --ng-text: #ffffff; --ng-sub: #c4cedb; --ng-select: #4da3ff;
+  --ng-head-logic: rgb(66, 54, 26); --ng-head-visual: rgb(34, 49, 70); --ng-head-kit: rgb(46, 42, 66);
+  --font-silk: "Michroma", "Eurostile", "Arial Black", sans-serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --bench: #121418; --bench-ink: #e7e9ee; --bench-muted: #9aa1ad; --bench-line: #2b2f37; --bench-raise: #1a1d23; --focus: #7fa6ff; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --bench: #121418; --bench-ink: #e7e9ee; --bench-muted: #9aa1ad; --bench-line: #2b2f37; --bench-raise: #1a1d23; --focus: #7fa6ff; color-scheme: dark; }
+
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { background: var(--bench); color: var(--bench-ink); font: 15px/1.5 var(--font-body); }
+.wrap { max-width: 1240px; margin: 0 auto; padding-inline: 16px; padding-block: 20px 40px; display: grid; gap: 16px; }
+header.top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; }
+header.top h1 { margin: 0; font: 400 26px/1.1 var(--font-silk); letter-spacing: .04em; }
+header.top p { margin: 0; color: var(--bench-muted); max-width: 66ch; }
+
+.bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn { font: 500 14px/1 var(--font-body); color: var(--bench-ink); background: var(--bench-raise); border: 1px solid var(--bench-line);
+  border-radius: 8px; padding: 9px 14px; cursor: pointer; }
+.btn:hover { border-color: var(--bench-muted); }
+.btn:focus-visible, .seg button:focus-visible, .pad:focus-visible, .cell:focus-visible, .knob:focus-visible, .trk:focus-visible, .insp input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.btn.play { background: var(--bench-ink); color: var(--bench); border-color: var(--bench-ink); min-width: 96px; }
+.btn.play[aria-pressed="true"] { background: var(--kick); border-color: var(--kick); color: #1b0d03; }
+.btn:disabled { opacity: .5; cursor: not-allowed; }
+.btn.small { padding: 6px 10px; font-size: 13px; }
+.seg { display: inline-flex; border: 1px solid var(--bench-line); border-radius: 8px; overflow: hidden; background: var(--bench-raise); }
+.seg button { font: 500 14px/1 var(--font-body); color: var(--bench-muted); background: transparent; border: 0; padding: 9px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--bench-ink); color: var(--bench); }
+.spacer { flex: 1; }
+
+/* ---------- the device ---------- */
+.device { background: var(--chassis); color: var(--silk); border-radius: 18px; padding: 20px 22px 22px; position: relative;
+  box-shadow: 0 1px 0 #fff inset, 0 -2px 0 var(--chassis-edge) inset, 0 18px 40px -18px var(--chassis-shadow), 0 2px 6px var(--chassis-shadow);
+  display: grid; gap: 18px; }
+.screw { position: absolute; width: 10px; height: 10px; border-radius: 50%; background: radial-gradient(circle at 35% 35%, #fafafa, #b8b4ac); box-shadow: 0 0 0 1px var(--chassis-edge); }
+.screw::after { content: ""; position: absolute; left: 2px; right: 2px; top: 4.5px; height: 1px; background: #8d887f; transform: rotate(35deg); }
+.screw.tl { top: 8px; left: 8px; } .screw.tr { top: 8px; right: 8px; } .screw.bl { bottom: 8px; left: 8px; } .screw.br { bottom: 8px; right: 8px; }
+.dev-top { display: flex; flex-wrap: wrap; gap: 18px 26px; align-items: center; }
+.brand { display: grid; gap: 2px; }
+.brand b { font: 400 22px/1 var(--font-silk); letter-spacing: .08em; color: var(--silk); }
+.brand span { font: 400 9px/1.2 var(--font-silk); letter-spacing: .18em; color: var(--silk-soft); text-transform: uppercase; }
+.lcd { background: var(--lcd); color: var(--lcd-ink); border-radius: 6px; padding: 8px 12px; font: 500 13px/1.35 var(--font-mono);
+  box-shadow: 0 2px 0 rgba(0,0,0,.35) inset; min-width: 200px; font-variant-numeric: tabular-nums; }
+.lcd .dim { color: var(--lcd-dim); }
+.knobs { display: flex; flex-wrap: wrap; gap: 14px 18px; flex: 1 1 340px; min-width: 0; }
+.knob-unit { display: grid; justify-items: center; gap: 3px; width: 78px; }
+.knob { width: 56px; height: 56px; border-radius: 50%; cursor: ns-resize; touch-action: none; }
+.knob svg { width: 100%; height: 100%; display: block; }
+.klabel { font: 400 9px/1.2 var(--font-silk); letter-spacing: .1em; text-transform: uppercase; text-align: center; color: var(--silk); }
+.ksub { font: 400 8px/1 var(--font-silk); letter-spacing: .12em; text-transform: uppercase; color: var(--silk-soft); }
+.kval { font: 500 11px/1 var(--font-mono); color: var(--silk-soft); font-variant-numeric: tabular-nums; }
+.knob-unit.spare .klabel { color: var(--silk-soft); }
+
+.grid { display: grid; gap: 8px; }
+.row { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 10px; align-items: center; }
+.leds, .pads, .cells { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 5px; }
+.led { height: 5px; border-radius: 3px; background: #dcd8d0; }
+.led.q { background: #c6c1b7; }
+.led.on { background: var(--kick); box-shadow: 0 0 6px var(--kick); }
+.trk { display: flex; align-items: center; gap: 6px; border: 0; background: transparent; padding: 4px 0; cursor: pointer; color: var(--silk);
+  font: 400 10px/1 var(--font-silk); letter-spacing: .1em; text-transform: uppercase; }
+.trk i { width: 9px; height: 9px; border-radius: 50%; background: var(--c); box-shadow: 0 0 6px var(--c); }
+.trk[aria-pressed="false"] { color: var(--silk-soft); }
+.trk[aria-pressed="false"] i { background: #cfcac1; box-shadow: none; }
+.pad { aspect-ratio: 1; max-width: 100%; border-radius: 5px; border: 1px solid var(--pad-edge); background: var(--pad); cursor: pointer; padding: 0;
+  box-shadow: 0 2px 0 var(--pad-edge); transition: transform .05s, background .08s; }
+.pad:nth-child(4n+1) { background: #faf9f6; }
+.pad:active { transform: translateY(1px); box-shadow: 0 1px 0 var(--pad-edge); }
+.pad[aria-pressed="true"] { background: var(--c); border-color: color-mix(in srgb, var(--c) 70%, black); box-shadow: 0 2px 0 color-mix(in srgb, var(--c) 60%, black), 0 0 10px -2px var(--c); }
+.pad.head { outline: 2px solid var(--silk); outline-offset: 1px; }
+.pad.hit, .cell.hit { filter: brightness(1.25); }
+.muted .pad[aria-pressed="true"], .muted .cell[aria-pressed="true"] { opacity: .45; }
+.tune { display: grid; gap: 3px; border-top: 1px dashed var(--chassis-edge); padding-top: 12px; }
+.tune .row { gap: 10px; }
+.note { font: 500 10px/1 var(--font-mono); color: var(--silk-soft); text-align: right; padding-right: 6px; }
+.cell { height: 15px; border-radius: 3px; border: 1px solid var(--pad-edge); background: var(--pad); padding: 0; cursor: pointer; }
+.cell:nth-child(4n+1) { background: #faf9f6; }
+.cell[aria-pressed="true"] { background: var(--c); border-color: color-mix(in srgb, var(--c) 70%, black); box-shadow: 0 0 8px -2px var(--c); }
+.cell.head { border-color: var(--silk); }
+.tune-head { display: flex; align-items: center; gap: 12px; }
+.tune-head span { font: 400 8px/1.2 var(--font-silk); letter-spacing: .14em; text-transform: uppercase; color: var(--silk-soft); }
+.dev-foot { display: flex; flex-wrap: wrap; gap: 6px 18px; font: 400 8px/1.4 var(--font-silk); letter-spacing: .14em; text-transform: uppercase; color: var(--silk-soft); }
+
+/* ---------- under the lid ---------- */
+.lid { display: grid; gap: 12px; }
+.parts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.parts > span { color: var(--bench-muted); font-size: 13px; margin-right: 2px; }
+.boardwrap { overflow-x: auto; border-radius: 14px; border: 1px solid var(--bench-line); }
+svg.board { display: block; width: 100%; min-width: 920px; height: auto; font-family: var(--font-mono); user-select: none; -webkit-user-select: none; }
+.board .ground { fill: var(--pcb); }
+.board .dots { fill: url(#dots); }
+.board [data-node] { cursor: grab; touch-action: none; }
+.board .chip-body { fill: var(--chip); stroke: var(--chip-edge); stroke-width: 1.5; }
+.board .chip-body.sel { stroke: var(--wire-pulse); stroke-width: 2.5; }
+.board .chip-head { fill: #0b0c0e; }
+.board .chip-title { fill: var(--chip-ink); font: 400 11px var(--font-silk); letter-spacing: .08em; }
+.board .chip-type { fill: var(--chip-sub); font-size: 10px; }
+.board .port { fill: var(--chip-ink); font-size: 12px; }
+.board .val { fill: var(--wire-value); font-size: 11px; }
+.board .pin { fill: var(--pin); stroke: #0008; stroke-width: 1; }
+.board .hit { fill: transparent; cursor: pointer; }
+.board .wire { fill: none; stroke-width: 2.5; stroke-linejoin: round; opacity: .9; transition: stroke .2s, stroke-width .2s; }
+.board .wire.signal { stroke: var(--wire-signal); }
+.board .wire.value { stroke: var(--wire-value); }
+.board .wire.audio { stroke: var(--wire-audio); stroke-width: 3.5; opacity: .75; }
+.board .wire.fire { stroke: var(--wire-pulse); stroke-width: 4; opacity: 1; transition: none; filter: drop-shadow(0 0 4px var(--wire-pulse)); }
+.board .wire.carry { stroke-dasharray: 6 5; opacity: .5; }
+.board .chip-led { fill: #2a2f2b; }
+.board .chip-led.fire { fill: var(--wire-pulse); filter: drop-shadow(0 0 3px var(--wire-pulse)); }
+.board .pin.target { fill: var(--wire-pulse); }
+.board .pin.picked { fill: var(--wire-pulse); stroke: var(--focus); stroke-width: 3; }
+.board .pin.dead { opacity: .35; }
+/* NodeGX skin: the same graph in the editor's canvas look */
+.board.ng .ground { fill: var(--ng-ground); }
+.board.ng .dots { fill: url(#ngdots); }
+.board.ng .chip-body { fill: var(--ng-card); stroke: var(--ng-border); }
+.board.ng .chip-body.sel { stroke: var(--ng-select); stroke-width: 2.5; }
+.board.ng .chip-head { fill: var(--ng-head-kit); }
+.board.ng .chip-head.logic { fill: var(--ng-head-logic); }
+.board.ng .chip-head.visual { fill: var(--ng-head-visual); }
+.board.ng .chip-title { fill: var(--ng-text); font: 600 12px var(--font-body); letter-spacing: 0; }
+.board.ng .chip-type { fill: var(--ng-sub); }
+.board.ng .port { fill: var(--ng-sub); font-family: var(--font-body); }
+.board.ng .pin { stroke: none; }
+.board.ng .pin.signal { fill: var(--wire-signal); } .board.ng .pin.value { fill: var(--wire-value); } .board.ng .pin.audio { fill: var(--wire-audio); }
+.board.ng .pin.target { fill: var(--wire-pulse); }
+.board.ng .chip-led { opacity: 0; }
+
+.lid-foot { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.lid-left { display: grid; gap: 12px; min-width: 0; }
+.status { margin: 0; min-height: 3em; color: var(--bench-ink); }
+.key { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--bench-muted); font-size: 13px; }
+.key span::before { content: ""; display: inline-block; width: 18px; height: 3px; border-radius: 2px; background: var(--k); margin-right: 6px; vertical-align: middle; }
+.card { border: 1px solid var(--bench-line); border-radius: 10px; padding: 12px 14px; background: var(--bench-raise); min-width: 0; }
+.card h2 { margin: 0 0 6px; font: 600 12px/1.3 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--bench-muted); }
+.insp h3 { margin: 0; font: 600 17px/1.3 var(--font-body); }
+.insp .type { font: 400 12px/1.3 var(--font-mono); color: var(--bench-muted); }
+.insp p { margin: 6px 0 10px; max-width: 62ch; }
+.insp .ports { display: grid; gap: 8px; }
+.insp .prow { display: grid; grid-template-columns: 92px minmax(0, 1fr) 84px; gap: 10px; align-items: center; }
+.insp .prow label, .insp .prow .pn { font-weight: 500; }
+.insp .prow .pv { font: 500 12px/1 var(--font-mono); text-align: right; font-variant-numeric: tabular-nums; }
+.insp .prow .from { color: var(--bench-muted); font-size: 13px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.insp input[type=range] { width: 100%; accent-color: var(--focus); }
+.insp .actions { margin-top: 12px; display: flex; gap: 8px; flex-wrap: wrap; }
+.try ol { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; }
+.try li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 6px; }
+.try li::before { content: "○"; color: var(--bench-muted); }
+.try li.done::before { content: "●"; color: var(--hats); }
+.try li.done { color: var(--bench-muted); }
+.note-p { color: var(--bench-muted); font-size: 13px; max-width: 80ch; margin: 0; }
+.warn { color: var(--kick); }
+
+@media (max-width: 640px) {
+  .row { grid-template-columns: 1fr; gap: 4px; }
+  .tune .row { grid-template-columns: 34px minmax(0, 1fr); gap: 4px; }
+  .tune .row.tune-top { grid-template-columns: 1fr; }
+  .pads, .leds, .cells { gap: 3px; }
+  .pad { border-radius: 3px; }
+  .device { padding: 18px 14px; }
+  .lid-foot { grid-template-columns: 1fr; }
+  .insp .prow { grid-template-columns: 80px minmax(0, 1fr) 70px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .board .wire, .pad { transition: none; }
+  .board .wire.fire, .board .chip-led.fire { filter: none; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <h1>GX-16</h1>
+    <p>A sixteen-step groovebox with a lead synth. Press Play, tap the pads, write a tune, turn the knobs. Then open the lid and rewire the circuit.</p>
+  </header>
+
+  <div class="bar">
+    <button class="btn play" id="play" aria-pressed="false">▶ Play</button>
+    <div class="seg" role="group" aria-label="View">
+      <button id="v-front" aria-pressed="true">Front panel</button>
+      <button id="v-lid" aria-pressed="false">Under the lid</button>
+    </div>
+    <span class="spacer"></span>
+    <div class="seg" role="group" aria-label="Board look" id="skinseg" hidden>
+      <button id="s-board" aria-pressed="true">Circuit board</button>
+      <button id="s-ng" aria-pressed="false">NodeGX nodes</button>
+    </div>
+  </div>
+
+  <section id="front" aria-label="Front panel">
+    <div class="device">
+      <i class="screw tl"></i><i class="screw tr"></i><i class="screw bl"></i><i class="screw br"></i>
+      <div class="dev-top">
+        <div class="brand"><b>GX-16</b><span>step groovebox</span></div>
+        <div class="lcd" aria-live="off"><div id="lcd1">120 BPM · C MINOR</div><div id="lcd2" class="dim">STOPPED · STEP --</div></div>
+        <div class="knobs" id="knobs"></div>
+      </div>
+      <div class="grid" id="tracks"></div>
+      <div class="tune" id="tune" style="--c: var(--lead)"></div>
+      <div class="dev-foot"><span>5 tracks</span><span>16 steps</span><span>tap a name to mute it</span></div>
+    </div>
+  </section>
+
+  <section id="lid" class="lid" aria-label="Under the lid" hidden>
+    <div class="parts" role="group" aria-label="Parts bin">
+      <span>Add a part:</span>
+      <button class="btn small" data-add="knob">Knob</button>
+      <button class="btn small" data-add="lfo">Wobble</button>
+      <button class="btn small" data-add="chance">Chance</button>
+      <button class="btn small" data-add="random">Random</button>
+    </div>
+    <div class="boardwrap"><svg class="board" id="board" viewBox="0 0 1400 800" role="img" aria-label="The groovebox's circuit: knobs, clock, sequencer, five voices, mixer, filter, echo and speaker"></svg></div>
+    <div class="key"><span style="--k: var(--wire-signal)">signal: a step fires</span><span style="--k: var(--wire-value)">value: a number, like a knob's position</span><span style="--k: var(--wire-audio)">audio: sound</span></div>
+    <div class="lid-foot">
+      <div class="lid-left">
+        <p class="status" id="status" aria-live="polite">Drag a part to move it, click it to see what it does. Click a gold pin to pick up its wire, then click a port to plug it in.</p>
+        <div class="card insp" id="insp"></div>
+      </div>
+      <div class="card try"><h2>Try this</h2><ol id="try"></ol></div>
+    </div>
+  </section>
+
+  <p class="note-p">Prototype for phase 114. The graph on this page is a small stand-in written for the page, so the NodeGX editor cannot open it yet; phase 114 makes the real one a NodeGX project built from two kits. Sound is made by Tone.js 15.1.22 and scheduled on the browser's audio clock.</p>
+  <p class="note-p warn" id="noaudio" hidden>Tone.js did not load, so there is no sound. The pads, knobs and wiring still work.</p>
+</div>
+
+<script>
+(() => {
+  const HAS_TONE = typeof window.Tone !== 'undefined';
+  const $ = (s) => document.querySelector(s);
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+
+  // ---------- vocabulary ----------
+  // Value ports carry a position (0..1); each input maps it onto its own range.
+  const P = (name, kind, o = {}) => Object.assign({ name, kind }, o);
+  const V = (name, min, max, curve, def, unit) => P(name, 'value', { min, max, curve, def, unit });
+  const TRACKS = [
+    { id: 'kick', name: 'Kick', color: 'var(--kick)' },
+    { id: 'snare', name: 'Snare', color: 'var(--snare)' },
+    { id: 'hats', name: 'Hats', color: 'var(--hats)' },
+    { id: 'bass', name: 'Bass', color: 'var(--bass)' },
+  ];
+  const VOICES = [...TRACKS, { id: 'lead', name: 'Lead', color: 'var(--lead)' }];
+  const SCALE = [60, 63, 65, 67, 70, 72, 75, 77]; // C minor pentatonic, C4 to F5
+  const WAVES = ['sine', 'triangle', 'square', 'sawtooth'];
+  const WAVE_NAMES = ['Sine', 'Triangle', 'Square', 'Saw'];
+  const RATES = [{ beats: 8, label: '2 bars' }, { beats: 4, label: '1 bar' }, { beats: 2, label: '1/2' }, { beats: 1, label: '1/4' }, { beats: 0.5, label: '1/8' }];
+  const SHAPES = ['Smooth', 'Square', 'Ramp'];
+  const KNOB_COLORS = ['#2f6cf6', '#19b26b', '#fbfaf7', '#ff6a13', '#d83f87', '#9a968e', '#9a968e', '#9a968e'];
+
+  const DESC = {
+    'controls.Knob': 'A knob on the front panel. Its position goes down its wire, and the port it plugs into decides what that position means.',
+    'controls.Pad Grid': 'The kick, snare, hats and bass pads on the front panel, as one pattern.',
+    'controls.Note Grid': 'The lead’s note grid on the front panel: one note, or none, for each step.',
+    'audio.Clock': 'Counts sixteenth notes at the tempo. Each tick carries the exact time it must sound at.',
+    'audio.Step Sequencer': 'On each tick, sends a signal down every track that has a pad lit for that step.',
+    'audio.Drum Voice': 'A drum. It sounds when Trigger fires, at the time the signal carries.',
+    'audio.Synth Voice': 'A synth. It plays its note when Trigger fires, at the time the signal carries.',
+    'audio.Mixer': 'Adds the five voices together.',
+    'audio.Filter': 'Cuts the high end of everything. A lower Cutoff sounds darker; more Resonance makes it ring.',
+    'audio.Echo': 'Repeats the sound a dotted eighth later. Mix sets how loud the repeats are, Feedback how many there are.',
+    'audio.Speaker': 'The output. Volume is the whole box.',
+    'audio.LFO': 'Moves a number up and down in time with the beat. Plug it into Filter › Cutoff for the classic wobble.',
+    'logic.Chance': 'Lets each signal through with the chance you set. Half the hats getting through makes a looser groove.',
+    'logic.Random': 'Picks a new number every few steps. Plug it into Hats › Decay or Lead › Glide.',
+  };
+
+  const nodes = [
+    { id: 'pads', title: 'Pads', type: 'controls.Pad Grid', cat: 'visual', x: 210, y: 470, w: 160, ins: [], outs: [P('Pattern', 'value')] },
+    { id: 'tune', title: 'Tune', type: 'controls.Note Grid', cat: 'visual', x: 210, y: 560, w: 160, ins: [], outs: [P('Melody', 'value')] },
+    { id: 'clock', title: 'Clock', type: 'audio.Clock', cat: 'logic', x: 210, y: 30, w: 160,
+      ins: [V('Tempo', 60, 180, 'int', 120, 'bpm'), V('Swing', 0, 0.5, 'lin', 0, '%')], outs: [P('Tick', 'signal')] },
+    { id: 'seq', title: 'Sequencer', type: 'audio.Step Sequencer', cat: 'logic', x: 210, y: 150, w: 160,
+      ins: [P('Tick', 'signal'), P('Pattern', 'value'), P('Melody', 'value')], outs: VOICES.map((t) => P(t.name, 'signal', { movable: true })) },
+    { id: 'kick', title: 'Kick', type: 'audio.Drum Voice', x: 450, y: 15, w: 175,
+      ins: [P('Trigger', 'signal'), V('Tune', 35, 90, 'exp', 50, 'Hz'), V('Decay', 0.1, 1.2, 'lin', 0.45, 's'), V('Level', -30, 6, 'lin', 0, 'dB')], outs: [P('Audio', 'audio')] },
+    { id: 'snare', title: 'Snare', type: 'audio.Drum Voice', x: 450, y: 140, w: 175,
+      ins: [P('Trigger', 'signal'), V('Tone', 600, 6000, 'exp', 1800, 'Hz'), V('Decay', 0.04, 0.5, 'lin', 0.16, 's'), V('Level', -30, 6, 'lin', -4, 'dB')], outs: [P('Audio', 'audio')] },
+    { id: 'hats', title: 'Hats', type: 'audio.Drum Voice', x: 450, y: 265, w: 175,
+      ins: [P('Trigger', 'signal'), V('Decay', 0.01, 0.4, 'exp', 0.06, 's'), V('Level', -30, 6, 'lin', -8, 'dB')], outs: [P('Audio', 'audio')] },
+    { id: 'bass', title: 'Bass', type: 'audio.Synth Voice', x: 450, y: 370, w: 175,
+      ins: [P('Trigger', 'signal'), V('Note', 0, 12, 'int', 0, 'note'), V('Cutoff', 60, 2400, 'exp', 220, 'Hz'), V('Level', -30, 6, 'lin', -4, 'dB')], outs: [P('Audio', 'audio')] },
+    { id: 'lead', title: 'Lead', type: 'audio.Synth Voice', x: 450, y: 495, w: 175,
+      ins: [P('Trigger', 'signal'), V('Wave', 0, 3, 'int', 1, 'wave'), V('Glide', 0, 0.25, 'lin', 0, 's'), V('Decay', 0.05, 1, 'exp', 0.25, 's'), V('Octave', 0, 2, 'int', 1, 'oct'), V('Level', -30, 6, 'lin', -9, 'dB')], outs: [P('Audio', 'audio')] },
+    { id: 'mixer', title: 'Mixer', type: 'audio.Mixer', x: 690, y: 220, w: 140,
+      ins: VOICES.map((t) => P(t.name, 'audio')), outs: [P('Mix', 'audio')] },
+    { id: 'filter', title: 'Filter', type: 'audio.Filter', x: 860, y: 110, w: 165,
+      ins: [P('Audio', 'audio'), V('Cutoff', 120, 18000, 'exp', 18000, 'Hz'), V('Resonance', 0.5, 14, 'exp', 1, 'Q')], outs: [P('Out', 'audio')] },
+    { id: 'echo', title: 'Echo', type: 'audio.Echo', x: 1050, y: 250, w: 160,
+      ins: [P('Audio', 'audio'), V('Mix', 0, 0.7, 'lin', 0.15, '%'), V('Feedback', 0, 0.85, 'lin', 0.35, '%')], outs: [P('Out', 'audio')] },
+    { id: 'speaker', title: 'Speaker', type: 'audio.Speaker', x: 1240, y: 390, w: 150,
+      ins: [P('Audio', 'audio'), V('Volume', -40, 0, 'lin', -6, 'dB')], outs: [] },
+  ];
+  nodes.forEach((n) => { n.fixed = true; });
+  const byId = Object.fromEntries(nodes.map((n) => [n.id, n]));
+
+  let wires = [
+    { from: 'pads.Pattern', to: 'seq.Pattern', fixed: true },
+    { from: 'tune.Melody', to: 'seq.Melody', fixed: true },
+    { from: 'clock.Tick', to: 'seq.Tick', fixed: true },
+    ...VOICES.map((t) => ({ from: 'seq.' + t.name, to: t.id + '.Trigger' })),
+    ...VOICES.map((t) => ({ from: t.id + '.Audio', to: 'mixer.' + t.name, fixed: true })),
+    { from: 'mixer.Mix', to: 'filter.Audio', fixed: true },
+    { from: 'filter.Out', to: 'echo.Audio', fixed: true },
+    { from: 'echo.Out', to: 'speaker.Audio', fixed: true },
+  ];
+
+  // ---------- parts ----------
+  let knobCount = 0, partCount = 0;
+  const knobs = () => nodes.filter((n) => n.type === 'controls.Knob');
+  const PARTS = {
+    knob: () => { knobCount++; return { id: 'k' + knobCount, title: 'Knob ' + knobCount, type: 'controls.Knob', cat: 'visual', w: 120, value: 0.5, color: KNOB_COLORS[(knobCount - 1) % 8], ins: [], outs: [P('Value', 'value', { movable: true })] }; },
+    lfo: () => ({ id: 'lfo' + (++partCount), title: 'Wobble', type: 'audio.LFO', cat: 'logic', w: 175,
+      ins: [V('Rate', 0, 4, 'int', 2, 'rate'), V('Depth', 0, 1, 'lin', 0.7, '%'), V('Centre', 0, 1, 'lin', 0.55, '%'), V('Shape', 0, 2, 'int', 0, 'shape')], outs: [P('Value', 'value', { movable: true })] }),
+    chance: () => ({ id: 'chance' + (++partCount), title: 'Chance', type: 'logic.Chance', cat: 'logic', w: 165,
+      ins: [P('In', 'signal'), V('Chance', 0, 1, 'lin', 0.5, '%')], outs: [P('Out', 'signal', { movable: true })] }),
+    random: () => ({ id: 'random' + (++partCount), title: 'Random', type: 'logic.Random', cat: 'logic', w: 175, cur: 0.5,
+      ins: [V('Every', 1, 16, 'int', 2, 'steps'), V('Range', 0, 1, 'lin', 0.7, '%'), V('Centre', 0, 1, 'lin', 0.5, '%')], outs: [P('Value', 'value', { movable: true })] }),
+  };
+
+  const portOf = (key) => { const [nid, pname] = key.split('.'); const n = byId[nid]; return n && (n.ins.find((p) => p.name === pname) || n.outs.find((p) => p.name === pname)); };
+  const nodeOf = (key) => byId[key.split('.')[0]];
+  const toRange = (p, n) => {
+    if (p.curve === 'exp') return p.min * Math.pow(p.max / p.min, n);
+    const v = p.min + n * (p.max - p.min);
+    return p.curve === 'int' ? Math.round(v) : v;
+  };
+  const fromRange = (p, v) => p.curve === 'exp' ? Math.log(v / p.min) / Math.log(p.max / p.min) : (v - p.min) / (p.max - p.min);
+  const NOTE = ['C', 'C♯', 'D', 'E♭', 'E', 'F', 'F♯', 'G', 'A♭', 'A', 'B♭', 'B'];
+  const midiName = (m) => NOTE[m % 12] + (Math.floor(m / 12) - 1);
+  function fmt(p, v) {
+    switch (p.unit) {
+      case 'bpm': return v + ' BPM';
+      case 'Hz': return v >= 1000 ? (v / 1000).toFixed(v >= 10000 ? 0 : 1) + 'k Hz' : Math.round(v) + ' Hz';
+      case 's': return v < 0.1 ? Math.round(v * 1000) + ' ms' : v.toFixed(2) + ' s';
+      case 'dB': return (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(0) + ' dB';
+      case '%': return Math.round(v * 100) + '%';
+      case 'Q': return 'Q ' + v.toFixed(1);
+      case 'note': return midiName(36 + v);
+      case 'wave': return WAVE_NAMES[v];
+      case 'oct': return ['−1 oct', '0 oct', '+1 oct'][v];
+      case 'rate': return RATES[v].label;
+      case 'shape': return SHAPES[v];
+      case 'steps': return 'every ' + v;
+      default: return String(v);
+    }
+  }
+
+  // ---------- reading values ----------
+  let playing = false;
+  const T = HAS_TONE ? Tone.getTransport() : null;
+  function srcNorm(n, depth) {
+    if (n.type === 'controls.Knob') return n.value;
+    if (n.type === 'logic.Random') return n.cur;
+    if (n.type === 'audio.LFO') {
+      const rate = RATES[valueAt(n.id + '.Rate', depth)].beats;
+      const bpm = T ? T.bpm.value : 120;
+      const secs = playing && T ? T.seconds : performance.now() / 1000;
+      const ph = ((secs * bpm / 60) / rate) % 1;
+      const shape = valueAt(n.id + '.Shape', depth);
+      const w = shape === 1 ? (ph < 0.5 ? 1 : -1) : shape === 2 ? 1 - 2 * ph : Math.sin(2 * Math.PI * ph);
+      return clamp(valueAt(n.id + '.Centre', depth) + valueAt(n.id + '.Depth', depth) / 2 * w);
+    }
+    return 0;
+  }
+  // the value an input port has right now: from the part wired into it, or its own setting
+  function valueAt(key, depth = 0) {
+    const p = portOf(key);
+    if (!p) return 0;
+    const w = wires.find((w) => w.to === key);
+    if (w && depth < 6 && portOf(w.from).kind === 'value' && portOf(w.from).movable) return toRange(p, srcNorm(nodeOf(w.from), depth + 1));
+    return p.def;
+  }
+  const driverOf = (key) => { const w = wires.find((w) => w.to === key); return w && !w.fixed ? w.from : null; };
+
+  // ---------- sound ----------
+  const A = {};
+  if (HAS_TONE) {
+    A.master = new Tone.Volume(-6).toDestination();
+    A.echo = new Tone.FeedbackDelay({ delayTime: '8n.', feedback: 0.35, wet: 0.15 });
+    A.filter = new Tone.Filter({ type: 'lowpass', frequency: 18000, Q: 1, rolloff: -12 });
+    A.mixer = new Tone.Gain(0.8);
+    A.mixer.chain(A.filter, A.echo, A.master);
+    for (const t of VOICES) A[t.id + 'Vol'] = new Tone.Volume(0).connect(A.mixer);
+    A.kick = new Tone.MembraneSynth({ pitchDecay: 0.04, octaves: 6, envelope: { attack: 0.001, decay: 0.45, sustain: 0.01, release: 0.6 } }).connect(A.kickVol);
+    A.snareHP = new Tone.Filter({ type: 'highpass', frequency: 1800 }).connect(A.snareVol);
+    A.snare = new Tone.NoiseSynth({ noise: { type: 'white' }, envelope: { attack: 0.001, decay: 0.16, sustain: 0, release: 0.05 } }).connect(A.snareHP);
+    A.hats = new Tone.MetalSynth({ envelope: { attack: 0.001, decay: 0.06, release: 0.01 }, harmonicity: 5.1, modulationIndex: 32, resonance: 4000, octaves: 1.5 }).connect(A.hatsVol);
+    A.hats.volume.value = -14;
+    A.bass = new Tone.MonoSynth({ oscillator: { type: 'sawtooth' }, filter: { Q: 3, type: 'lowpass', rolloff: -24 },
+      envelope: { attack: 0.005, decay: 0.2, sustain: 0.25, release: 0.12 },
+      filterEnvelope: { attack: 0.005, decay: 0.16, sustain: 0.2, release: 0.2, baseFrequency: 220, octaves: 3 } }).connect(A.bassVol);
+    A.lead = new Tone.Synth({ oscillator: { type: 'triangle' }, envelope: { attack: 0.004, decay: 0.25, sustain: 0.15, release: 0.25 }, portamento: 0 }).connect(A.leadVol);
+    T.swingSubdivision = '16n';
+  } else {
+    $('#noaudio').hidden = false;
+    $('#play').disabled = true;
+  }
+  const ramp = (sig, v) => { try { sig.rampTo(v, 0.04); } catch (e) { try { sig.value = v; } catch (e2) {} } };
+  let kickHz = 50, leadOct = 0;
+  const SETTERS = {
+    'clock.Tempo': (v) => { if (T) T.bpm.value = v; },
+    'clock.Swing': (v) => { if (T) T.swing = v; },
+    'kick.Tune': (v) => { kickHz = v; },
+    'kick.Decay': (v) => { if (A.kick) A.kick.envelope.decay = v; },
+    'kick.Level': (v) => A.kickVol && ramp(A.kickVol.volume, v),
+    'snare.Tone': (v) => A.snareHP && ramp(A.snareHP.frequency, v),
+    'snare.Decay': (v) => { if (A.snare) A.snare.envelope.decay = v; },
+    'snare.Level': (v) => A.snareVol && ramp(A.snareVol.volume, v),
+    'hats.Decay': (v) => { if (A.hats) A.hats.envelope.decay = v; },
+    'hats.Level': (v) => A.hatsVol && ramp(A.hatsVol.volume, v),
+    'bass.Cutoff': (v) => { if (A.bass) A.bass.filterEnvelope.baseFrequency = v; },
+    'bass.Level': (v) => A.bassVol && ramp(A.bassVol.volume, v),
+    'lead.Wave': (v) => { if (A.lead && A.lead.oscillator.type !== WAVES[v]) A.lead.oscillator.type = WAVES[v]; },
+    'lead.Glide': (v) => { if (A.lead) A.lead.portamento = v; },
+    'lead.Decay': (v) => { if (A.lead) { A.lead.envelope.decay = v; A.lead.envelope.release = v; } },
+    'lead.Octave': (v) => { leadOct = (v - 1) * 12; },
+    'lead.Level': (v) => A.leadVol && ramp(A.leadVol.volume, v),
+    'filter.Cutoff': (v) => A.filter && ramp(A.filter.frequency, v),
+    'filter.Resonance': (v) => A.filter && ramp(A.filter.Q, v),
+    'echo.Mix': (v) => A.echo && ramp(A.echo.wet, v),
+    'echo.Feedback': (v) => A.echo && ramp(A.echo.feedback, v),
+    'speaker.Volume': (v) => A.master && ramp(A.master.volume, v),
+  };
+  function apply(key) { const s = SETTERS[key]; if (s) s(valueAt(key)); }
+  function applyAll() { for (const k of Object.keys(SETTERS)) apply(k); }
+
+  // ---------- the pattern and the tune ----------
+  const steps = (on) => Array.from({ length: 16 }, (_, i) => on.includes(i));
+  const pattern = { kick: steps([0, 4, 8, 12]), snare: steps([4, 12]), hats: steps([2, 6, 10, 14, 15]), bass: steps([0, 3, 6, 8, 11, 14]) };
+  const RIFF = [0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 10, 0, 0, 7, 0];
+  // one scale row (0 = C4 … 7 = F5) or null per step
+  const melody = [5, null, 4, 3, null, null, 3, 4, 6, null, 5, null, 4, null, 3, 2];
+  const muted = { kick: false, snare: false, hats: false, bass: false, lead: false };
+
+  // ---------- running the graph ----------
+  // A step reaches a voice as a signal that carries the audio-clock time it must sound at, so the sound
+  // is scheduled on the sample even though the signal itself arrives a little early.
+  const last = {};
+  const once = (id, time, fn) => { if (last[id] === time) return; last[id] = time; try { fn(); } catch (e) { /* a voice refused a time; skip it */ } };
+  let lastLead = 5;
+  const TRIGGER = {
+    'kick.Trigger': (time) => once('kick', time, () => A.kick.triggerAttackRelease(kickHz, '8n', time)),
+    'snare.Trigger': (time) => once('snare', time, () => A.snare.triggerAttackRelease('16n', time)),
+    'hats.Trigger': (time) => once('hats', time, () => A.hats.triggerAttackRelease(260, '32n', time, 0.7)),
+    'bass.Trigger': (time, s) => once('bass', time, () => A.bass.triggerAttackRelease(Tone.Frequency(36 + valueAt('bass.Note') + RIFF[s], 'midi').toFrequency(), '16n', time)),
+    'lead.Trigger': (time, s) => once('lead', time, () => {
+      const row = melody[s] ?? lastLead; lastLead = row;
+      A.lead.triggerAttackRelease(Tone.Frequency(SCALE[row] + leadOct, 'midi').toFrequency(), '16n', time);
+    }),
+  };
+  let fired = [];
+  function fire(outKey, time, s, depth = 0) {
+    if (depth > 6) return;
+    wires.forEach((w, i) => {
+      if (w.from !== outKey) return;
+      fired.push(i);
+      const to = w.to, n = nodeOf(to);
+      if (to === 'seq.Tick') seqTick(time, s);
+      else if (n && n.type === 'logic.Chance') { fired.push('led:' + n.id); if (Math.random() < valueAt(n.id + '.Chance')) fire(n.id + '.Out', time, s, depth + 1); }
+      else if (TRIGGER[to] && A.kick) { fired.push('led:' + n.id); TRIGGER[to](time, s); }
+    });
+  }
+  function seqTick(time, s) {
+    for (const t of TRACKS) if (pattern[t.id][s] && !muted[t.id]) fire('seq.' + t.name, time, s);
+    if (melody[s] !== null && !muted.lead) fire('seq.Lead', time, s);
+  }
+  let step = 0;
+  if (T) {
+    T.scheduleRepeat((time) => {
+      const s = step; step = (step + 1) % 16;
+      fired = [];
+      fire('clock.Tick', time, s);
+      const hit = fired.slice();
+      Tone.getDraw().schedule(() => {
+        for (const n of nodes) if (n.type === 'logic.Random' && s % valueAt(n.id + '.Every') === 0) {
+          const c = valueAt(n.id + '.Centre'), r = valueAt(n.id + '.Range');
+          n.cur = clamp(c + (Math.random() - 0.5) * r);
+          hit.push('led:' + n.id);
+        }
+        showStep(s, hit);
+      }, time);
+    }, '16n');
+  }
+
+  // ---------- front panel ----------
+  const tracksEl = $('#tracks'), tuneEl = $('#tune');
+  const ledRow = () => '<div class="row"><span></span><div class="leds" id="leds">' + Array.from({ length: 16 }, (_, i) => `<i class="led${i % 4 === 0 ? ' q' : ''}"></i>`).join('') + '</div></div>';
+  const muteBtn = (t) => `<button class="trk" aria-pressed="${!muted[t.id]}" data-mute="${t.id}" aria-label="${t.name} track, ${muted[t.id] ? 'muted' : 'playing'}"><i></i>${t.name}</button>`;
+  function renderTracks() {
+    let html = ledRow();
+    for (const t of TRACKS) {
+      html += `<div class="row${muted[t.id] ? ' muted' : ''}" style="--c:${t.color}">${muteBtn(t)}
+        <div class="pads">${pattern[t.id].map((on, i) => `<button class="pad" data-t="${t.id}" data-s="${i}" aria-pressed="${on}" aria-label="${t.name} step ${i + 1}"></button>`).join('')}</div></div>`;
+    }
+    tracksEl.innerHTML = html;
+  }
+  function renderTune() {
+    let html = `<div class="row tune-top${muted.lead ? ' muted' : ''}"><div class="tune-head">${muteBtn(VOICES[4])}</div><div class="tune-head"><span>one note per step · tap again to clear</span></div></div>`;
+    for (let r = SCALE.length - 1; r >= 0; r--) {
+      html += `<div class="row${muted.lead ? ' muted' : ''}"><span class="note">${midiName(SCALE[r] + leadOct)}</span><div class="cells">` +
+        melody.map((m, s) => `<button class="cell" data-r="${r}" data-s="${s}" aria-pressed="${m === r}" aria-label="Lead step ${s + 1}, ${midiName(SCALE[r] + leadOct)}"></button>`).join('') + '</div></div>';
+    }
+    tuneEl.innerHTML = html;
+  }
+  function previewLead(row) {
+    if (!A.lead || Tone.getContext().state !== 'running' || playing) return;
+    try { A.lead.triggerAttackRelease(Tone.Frequency(SCALE[row] + leadOct, 'midi').toFrequency(), '8n', Tone.now() + 0.01); } catch (e) {}
+  }
+  function onMute(t) {
+    muted[t] = !muted[t];
+    if (t === 'lead') renderTune(); else renderTracks();
+    document.querySelector(`[data-mute="${t}"]`).focus();
+  }
+  tracksEl.addEventListener('click', (e) => {
+    const pad = e.target.closest('.pad');
+    if (pad) { const t = pad.dataset.t, s = +pad.dataset.s; pattern[t][s] = !pattern[t][s]; pad.setAttribute('aria-pressed', pattern[t][s]); return; }
+    const m = e.target.closest('[data-mute]'); if (m) onMute(m.dataset.mute);
+  });
+  tuneEl.addEventListener('click', (e) => {
+    const c = e.target.closest('.cell');
+    if (c) {
+      const r = +c.dataset.r, s = +c.dataset.s;
+      melody[s] = melody[s] === r ? null : r;
+      tuneEl.querySelectorAll(`.cell[data-s="${s}"]`).forEach((el) => el.setAttribute('aria-pressed', melody[s] === +el.dataset.r));
+      if (melody[s] !== null) previewLead(r);
+      return;
+    }
+    const m = e.target.closest('[data-mute]'); if (m) onMute(m.dataset.mute);
+  });
+
+  const knobTarget = (k) => { const w = wires.find((w) => w.from === k.id + '.Value'); return w ? w.to : null; };
+  function knobFace(k) {
+    const target = knobTarget(k);
+    const ang = -135 + k.value * 270;
+    let label = 'Spare', sub = 'not wired', val = '—';
+    if (target) { label = target.split('.')[1]; sub = nodeOf(target).title; val = fmt(portOf(target), valueAt(target)); }
+    const ticks = Array.from({ length: 11 }, (_, i) => { const a = (-135 + i * 27) * Math.PI / 180; return `<line x1="${28 + Math.sin(a) * 24}" y1="${28 - Math.cos(a) * 24}" x2="${28 + Math.sin(a) * 27}" y2="${28 - Math.cos(a) * 27}" stroke="#a9a59d" stroke-width="1.2"/>`; }).join('');
+    const light = k.color === '#fbfaf7';
+    return `<div class="knob-unit${target ? '' : ' spare'}" data-k="${k.id}">
+      <div class="knob" role="slider" tabindex="0" aria-label="${k.title}, ${target ? sub + ' ' + label : 'not wired'}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(k.value * 100)}" aria-valuetext="${val}">
+        <svg viewBox="0 0 56 56" aria-hidden="true">${ticks}
+          <circle cx="28" cy="29.5" r="20" fill="rgba(0,0,0,.18)"/>
+          <circle cx="28" cy="28" r="20" fill="${k.color}" stroke="${light ? '#cfccc5' : 'rgba(0,0,0,.25)'}" stroke-width="1"/>
+          <circle cx="28" cy="28" r="14" fill="${k.color}" stroke="rgba(255,255,255,.35)" stroke-width="1"/>
+          <g transform="rotate(${ang} 28 28)"><rect x="26.6" y="10" width="2.8" height="10" rx="1.4" fill="${light ? '#2a2a2a' : '#ffffff'}"/></g>
+        </svg></div>
+      <div class="klabel">${label}</div><div class="ksub">${sub}</div><div class="kval">${val}</div></div>`;
+  }
+  const knobsEl = $('#knobs');
+  function renderKnobs() { knobsEl.innerHTML = knobs().map(knobFace).join(''); }
+  function setKnob(id, v) {
+    const k = byId[id];
+    k.value = clamp(v);
+    const target = knobTarget(k);
+    if (target) apply(target);
+    const unit = knobsEl.querySelector(`[data-k="${id}"]`);
+    if (unit) {
+      const focused = document.activeElement && unit.contains(document.activeElement);
+      unit.outerHTML = knobFace(k);
+      if (focused) knobsEl.querySelector(`[data-k="${id}"] .knob`).focus();
+    }
+    if (target) { updateBoardValue(target); if (target === 'lead.Octave') renderTune(); }
+    updateBoardValue(id + '.Value');
+    syncInspector();
+    updateLcd();
+  }
+  let drag = null;
+  knobsEl.addEventListener('pointerdown', (e) => {
+    const kn = e.target.closest('.knob'); if (!kn) return;
+    const id = kn.parentElement.dataset.k;
+    drag = { id, y: e.clientY, v: byId[id].value, pid: e.pointerId };
+    knobsEl.setPointerCapture(e.pointerId);
+    kn.focus(); e.preventDefault();
+  });
+  knobsEl.addEventListener('pointermove', (e) => { if (!drag || e.pointerId !== drag.pid) return; setKnob(drag.id, drag.v + (drag.y - e.clientY) / 180); });
+  const endDrag = (e) => { if (drag && e.pointerId === drag.pid) drag = null; };
+  knobsEl.addEventListener('pointerup', endDrag); knobsEl.addEventListener('pointercancel', endDrag);
+  knobsEl.addEventListener('keydown', (e) => {
+    const kn = e.target.closest('.knob'); if (!kn) return;
+    const id = kn.parentElement.dataset.k; const k = byId[id];
+    const d = { ArrowUp: 0.02, ArrowRight: 0.02, ArrowDown: -0.02, ArrowLeft: -0.02, PageUp: 0.1, PageDown: -0.1 }[e.key];
+    if (d !== undefined) { setKnob(id, k.value + d); e.preventDefault(); }
+    else if (e.key === 'Home') { setKnob(id, 0); e.preventDefault(); } else if (e.key === 'End') { setKnob(id, 1); e.preventDefault(); }
+  });
+  knobsEl.addEventListener('wheel', (e) => {
+    const kn = e.target.closest('.knob'); if (!kn) return;
+    const id = kn.parentElement.dataset.k;
+    setKnob(id, byId[id].value - Math.sign(e.deltaY) * 0.02); e.preventDefault();
+  }, { passive: false });
+
+  function updateLcd(s) {
+    $('#lcd1').textContent = fmt(portOf('clock.Tempo'), valueAt('clock.Tempo')) + ' · C MINOR';
+    $('#lcd2').textContent = (playing ? 'PLAYING' : 'STOPPED') + ' · STEP ' + (s === undefined ? '--' : String(s + 1).padStart(2, '0'));
+  }
+
+  // ---------- under the lid ----------
+  const ROW = 19, HEAD = 26, W = 1400, H = 800;
+  const boardEl = $('#board');
+  let skin = 'board', carry = null, selected = null;
+  const geo = (n) => ({ h: HEAD + Math.max(n.ins.length, n.outs.length, 1) * ROW + (skin === 'ng' ? 20 : 10) });
+  function pinXY(key) {
+    const [nid, pn] = key.split('.'); const n = byId[nid];
+    let i = n.ins.findIndex((p) => p.name === pn);
+    if (i >= 0) return [n.x, n.y + HEAD + i * ROW + ROW / 2 + 2];
+    i = n.outs.findIndex((p) => p.name === pn);
+    return [n.x + n.w, n.y + HEAD + i * ROW + ROW / 2 + 2];
+  }
+  function wirePath(w, idx) {
+    const [x1, y1] = pinXY(w.from), [x2, y2] = pinXY(w.to);
+    if (skin === 'ng') { const dx = Math.max(40, Math.abs(x2 - x1) * 0.45); return `M${x1},${y1} C${x1 + dx},${y1} ${x2 - dx},${y2} ${x2},${y2}`; }
+    const lane = ((idx * 7) % 5 - 2) * 6;
+    const fromCol = nodeOf(w.from).x < 100;
+    const vx = fromCol ? x1 + 22 + lane + (idx % 4) * 5 : x2 - 26 - lane;
+    return `M${x1},${y1} H${vx} V${y2} H${x2}`;
+  }
+  const kindOf = (key) => portOf(key).kind;
+  const isLive = (n) => n.type === 'audio.LFO' || n.type === 'logic.Random';
+  function canTake(inKey) {
+    if (!carry) return false;
+    const pIn = portOf(inKey), pOut = portOf(carry);
+    if (!pIn || pIn.kind !== pOut.kind || nodeOf(inKey) === nodeOf(carry)) return false;
+    if (pOut.kind === 'value') return pIn.min !== undefined;
+    if (pOut.kind === 'signal') return pIn.name === 'Trigger' || nodeOf(inKey).type === 'logic.Chance';
+    return false;
+  }
+  function renderBoard() {
+    boardEl.classList.toggle('ng', skin === 'ng');
+    let s = `<defs><pattern id="dots" width="16" height="16" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1.1" fill="var(--pcb-dot)"/></pattern>
+      <pattern id="ngdots" width="20" height="20" patternUnits="userSpaceOnUse"><circle cx="2" cy="2" r="1" fill="rgba(255,255,255,.07)"/></pattern></defs>
+      <rect class="ground" width="${W}" height="${H}"/><rect class="dots" width="${W}" height="${H}"/>`;
+    wires.forEach((w, i) => { s += `<path class="wire ${kindOf(w.from)}${carry && w.from === carry ? ' carry' : ''}" data-w="${i}" data-src="${w.from}" d="${wirePath(w, i)}"/>`; });
+    const rx = skin === 'ng' ? 6 : 2;
+    for (const n of nodes) {
+      const { h } = geo(n);
+      s += `<g data-node="${n.id}"><rect class="chip-body${selected === n.id ? ' sel' : ''}" x="${n.x}" y="${n.y}" width="${n.w}" height="${h}" rx="${rx}"/>
+        <rect class="chip-head ${n.cat || ''}" x="${n.x + 1}" y="${n.y + 1}" width="${n.w - 2}" height="${HEAD - 2}" rx="${rx}"/>
+        <text class="chip-title" x="${n.x + 9}" y="${n.y + 17}">${skin === 'ng' ? n.title : n.title.toUpperCase()}</text>
+        <circle class="chip-led" data-led="${n.id}" cx="${n.x + n.w - 11}" cy="${n.y + 13}" r="3.5"/>`;
+      n.ins.forEach((p, i) => {
+        const key = n.id + '.' + p.name; const y = n.y + HEAD + i * ROW + ROW / 2 + 2;
+        const val = p.min !== undefined ? `<tspan class="val" data-val="${key}" dx="6">${fmt(p, valueAt(key))}</tspan>` : '';
+        s += `<text class="port" x="${n.x + 10}" y="${y + 4}">${p.name}${val}</text>`;
+        const tgt = canTake(key);
+        s += `<rect class="pin ${p.kind}${tgt ? ' target' : ''}${carry && !tgt ? ' dead' : ''}" x="${n.x - 5}" y="${y - 4}" width="10" height="8" rx="${skin === 'ng' ? 4 : 1}"/>`;
+        if (tgt || driverOf(key)) s += `<circle class="hit" data-in="${key}" cx="${n.x}" cy="${y}" r="12"><title>${n.title} › ${p.name}</title></circle>`;
+      });
+      n.outs.forEach((p, i) => {
+        const key = n.id + '.' + p.name; const y = n.y + HEAD + i * ROW + ROW / 2 + 2;
+        const live = p.kind === 'value' && p.movable ? `<tspan class="val" data-oval="${key}">${Math.round(srcNorm(n, 0) * 100)}%</tspan> ` : '';
+        s += `<text class="port" x="${n.x + n.w - 10}" y="${y + 4}" text-anchor="end">${live}${p.name}</text>`;
+        s += `<rect class="pin ${p.kind}${carry === key ? ' picked' : ''}${carry && carry !== key ? ' dead' : ''}" x="${n.x + n.w - 5}" y="${y - 4}" width="10" height="8" rx="${skin === 'ng' ? 4 : 1}"/>`;
+        if (p.movable) s += `<circle class="hit" data-out="${key}" cx="${n.x + n.w}" cy="${y}" r="12"><title>${n.title} › ${p.name}</title></circle>`;
+      });
+      s += `<text class="chip-type" x="${n.x + 9}" y="${n.y + h - 5}">${skin === 'ng' ? n.type : ''}</text></g>`;
+    }
+    boardEl.innerHTML = s;
+    renderTry();
+  }
+  function updateBoardValue(key) {
+    const el = boardEl.querySelector(`[data-val="${key}"]`); if (el) el.textContent = fmt(portOf(key), valueAt(key));
+    const o = boardEl.querySelector(`[data-oval="${key}"]`); if (o) o.textContent = Math.round(srcNorm(nodeOf(key), 0) * 100) + '%';
+  }
+  const say = (t) => { $('#status').textContent = t; };
+  const label = (key) => nodeOf(key).title + ' › ' + key.split('.')[1];
+
+  // ---------- wiring ----------
+  function plug(out, inKey) {
+    const old = wires.find((w) => w.from === out);
+    const kind = kindOf(out);
+    const displaced = kind === 'value' ? wires.find((w) => w.to === inKey && !w.fixed && w.from !== out) : null;
+    wires = wires.filter((w) => w.from !== out && w !== displaced);
+    wires.push({ from: out, to: inKey });
+    if (old) apply(old.to);
+    apply(inKey);
+    let msg = `${label(out)} now drives ${label(inKey)}.`;
+    if (old && old.to !== inKey && kindOf(old.to) === 'value') msg += ` ${label(old.to)} is back on its own setting.`;
+    if (displaced) msg += ` ${label(displaced.from)} was unplugged from it.`;
+    say(msg);
+  }
+  function unplug(out) {
+    const old = wires.find((w) => w.from === out);
+    wires = wires.filter((w) => w.from !== out);
+    if (old) apply(old.to);
+    say(old ? `Unplugged ${label(out)}.${kindOf(old.to) === 'value' ? ` ${label(old.to)} is back on its own setting.` : ''}` : `${label(out)} is not plugged in.`);
+  }
+  // a press on a part selects it at pointerup; the click that follows must not also count as a click on the ground
+  let swallowClick = false;
+  boardEl.addEventListener('click', (e) => {
+    if (swallowClick) { swallowClick = false; return; }
+    const out = e.target.closest('[data-out]'), inn = e.target.closest('[data-in]');
+    if (out) {
+      const key = out.dataset.out;
+      if (carry === key) { unplug(key); carry = null; }
+      else { carry = key; say(`Holding the wire from ${label(key)}. Click a white port to plug it in, click this pin again to unplug it, or press Esc.`); }
+      return afterEdit();
+    }
+    if (inn) {
+      const key = inn.dataset.in;
+      if (carry && canTake(key)) { plug(carry, key); carry = null; }
+      else if (!carry) { const d = driverOf(key); if (d) { carry = d; say(`Holding the wire from ${label(carry)}. Click a white port to plug it in, or click its pin again to unplug it.`); } }
+      else say(`${label(key)} cannot take that wire. A value plugs into a number; a signal plugs into a Trigger or a Chance.`);
+      return afterEdit();
+    }
+    if (!e.target.closest('[data-node]')) {
+      if (carry) { carry = null; say('Put the wire back where it was.'); }
+      selected = null; afterEdit();
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && carry) { carry = null; say('Put the wire back where it was.'); afterEdit(); }
+    if ((e.key === 'Delete' || e.key === 'Backspace') && selected && !$('#lid').hidden && !/INPUT|TEXTAREA/.test(document.activeElement.tagName)) { removePart(selected); e.preventDefault(); }
+  });
+  function afterEdit() { renderBoard(); renderKnobs(); renderInspector(); updateLcd(); }
+
+  // dragging a part around the board
+  const svgPt = (e) => { const pt = boardEl.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY; return pt.matrixTransform(boardEl.getScreenCTM().inverse()); };
+  let bdrag = null;
+  boardEl.addEventListener('pointerdown', (e) => {
+    if (e.target.closest('.hit') || e.button > 0) return;
+    const g = e.target.closest('[data-node]'); if (!g) return;
+    const n = byId[g.dataset.node]; const p = svgPt(e);
+    bdrag = { n, dx: p.x - n.x, dy: p.y - n.y, sx: e.clientX, sy: e.clientY, moved: false, pid: e.pointerId };
+    e.preventDefault();
+  });
+  window.addEventListener('pointermove', (e) => {
+    if (!bdrag || e.pointerId !== bdrag.pid) return;
+    if (!bdrag.moved && Math.hypot(e.clientX - bdrag.sx, e.clientY - bdrag.sy) < 4) return;
+    bdrag.moved = true;
+    const p = svgPt(e), n = bdrag.n;
+    n.x = Math.round(clamp(p.x - bdrag.dx, 0, W - n.w)); n.y = Math.round(clamp(p.y - bdrag.dy, 0, H - geo(n).h));
+    renderBoard();
+  });
+  window.addEventListener('pointerup', (e) => {
+    if (!bdrag || e.pointerId !== bdrag.pid) return;
+    const { n, moved } = bdrag; bdrag = null;
+    swallowClick = true; setTimeout(() => { swallowClick = false; }, 0);
+    if (!moved) { selected = n.id; renderBoard(); renderInspector(); }
+  });
+
+  // ---------- inspector ----------
+  function renderInspector() {
+    const el = $('#insp');
+    const n = selected && byId[selected];
+    if (!n) { el.innerHTML = '<h2>Inspector</h2><p>Click a part on the board to see what it does and change its settings.</p>'; return; }
+    let rows = '';
+    if (n.type === 'controls.Knob') {
+      rows += `<div class="prow"><label for="ins-knob">Position</label><input id="ins-knob" type="range" min="0" max="1000" value="${Math.round(n.value * 1000)}" data-knob="${n.id}"><span class="pv" data-pv="${n.id}.Value">${Math.round(n.value * 100)}%</span></div>`;
+    }
+    for (const p of n.ins) {
+      const key = n.id + '.' + p.name;
+      if (p.min === undefined) {
+        const src = wires.filter((w) => w.to === key).map((w) => label(w.from));
+        rows += `<div class="prow"><span class="pn">${p.name}</span><span class="from">${src.length ? '← ' + src.join(', ') : 'not plugged in'}</span><span class="pv">${p.kind}</span></div>`;
+        continue;
+      }
+      const d = driverOf(key);
+      if (d) rows += `<div class="prow"><span class="pn">${p.name}</span><span class="from">← ${label(d)} <button class="btn small" data-unplug="${d}">Unplug</button></span><span class="pv" data-pv="${key}">${fmt(p, valueAt(key))}</span></div>`;
+      else rows += `<div class="prow"><label for="ins-${key}">${p.name}</label><input id="ins-${key}" type="range" min="0" max="1000" value="${Math.round(clamp(fromRange(p, p.def)) * 1000)}" data-port="${key}"><span class="pv" data-pv="${key}">${fmt(p, p.def)}</span></div>`;
+    }
+    for (const p of n.outs) {
+      const key = n.id + '.' + p.name;
+      const to = wires.filter((w) => w.from === key).map((w) => label(w.to));
+      rows += `<div class="prow"><span class="pn">${p.name} →</span><span class="from">${to.length ? to.join(', ') : 'not plugged in'}</span><span class="pv">${p.kind}</span></div>`;
+    }
+    el.innerHTML = `<h2>Inspector</h2><h3>${n.title}</h3><div class="type">${n.type}</div><p>${DESC[n.type] || ''}</p><div class="ports">${rows}</div>
+      <div class="actions">${n.fixed ? '<span class="type">Built in: it can move but not be removed.</span>' : `<button class="btn small" data-remove="${n.id}">Remove ${n.title}</button>`}</div>`;
+  }
+  function syncInspector() {
+    if (!selected) return;
+    $('#insp').querySelectorAll('[data-pv]').forEach((el) => {
+      const key = el.dataset.pv; const n = nodeOf(key); if (!n) return;
+      el.textContent = n.type === 'controls.Knob' ? Math.round(n.value * 100) + '%' : fmt(portOf(key), valueAt(key));
+    });
+    const k = $('#insp').querySelector('[data-knob]'); if (k && document.activeElement !== k && byId[k.dataset.knob]) k.value = Math.round(byId[k.dataset.knob].value * 1000);
+  }
+  $('#insp').addEventListener('input', (e) => {
+    const t = e.target;
+    if (t.dataset.knob) { setKnob(t.dataset.knob, t.value / 1000); return; }
+    if (t.dataset.port) {
+      const key = t.dataset.port, p = portOf(key);
+      p.def = toRange(p, t.value / 1000);
+      apply(key); updateBoardValue(key); syncInspector(); updateLcd();
+      if (key === 'lead.Octave') renderTune();
+    }
+  });
+  $('#insp').addEventListener('click', (e) => {
+    const u = e.target.closest('[data-unplug]'); if (u) { unplug(u.dataset.unplug); afterEdit(); return; }
+    const r = e.target.closest('[data-remove]'); if (r) removePart(r.dataset.remove);
+  });
+  function removePart(id) {
+    const n = byId[id]; if (!n) return;
+    if (n.fixed) { say(`${n.title} is built in. It can move but not be removed.`); return; }
+    const touched = wires.filter((w) => nodeOf(w.from) === n).map((w) => w.to);
+    wires = wires.filter((w) => nodeOf(w.from) !== n && nodeOf(w.to) !== n);
+    nodes.splice(nodes.indexOf(n), 1); delete byId[id];
+    touched.forEach(apply);
+    if (carry && carry.startsWith(id + '.')) carry = null;
+    selected = null;
+    say(`Removed ${n.title}.${touched.length ? ' What it drove is back on its own setting.' : ''}`);
+    afterEdit();
+  }
+
+  // ---------- parts bin ----------
+  const overlaps = (x, y, w, h) => nodes.some((n) => x < n.x + n.w + 12 && n.x < x + w + 12 && y < n.y + geo(n).h + 12 && n.y < y + h + 12);
+  function freeSpot(part) {
+    const h = HEAD + Math.max(part.ins.length, 1) * ROW + 20;
+    const cands = part.type === 'controls.Knob' ? Array.from({ length: 10 }, (_, i) => [20, 20 + i * 68]) : [];
+    for (const y of [470, 570, 670, 30]) for (const x of [690, 860, 1050, 1220]) cands.push([x, y]);
+    for (const [x, y] of cands) if (y + h <= H && !overlaps(x, y, part.w, h)) return [x, y];
+    return [690, 640];
+  }
+  document.querySelector('.parts').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-add]'); if (!b) return;
+    if (b.dataset.add === 'knob' && knobs().length >= 8) { say('The front panel has room for eight knobs.'); return; }
+    const part = PARTS[b.dataset.add]();
+    [part.x, part.y] = freeSpot(part);
+    nodes.push(part); byId[part.id] = part;
+    carry = part.id + '.' + part.outs[0].name;
+    selected = part.id;
+    const where = part.type === 'controls.Knob' ? ' It is on the front panel too.' : '';
+    say(`Added ${part.title}.${where} Its wire is in your hand: click a white port to plug it in, or press Esc to leave it unplugged.`);
+    afterEdit();
+  });
+
+  const TRY = [
+    { text: 'Add a Wobble and plug it into Filter › Cutoff. Press Play for the classic wobble.', ok: () => wires.some((w) => w.to === 'filter.Cutoff' && nodeOf(w.from).type === 'audio.LFO') },
+    { text: 'Add a Chance between the sequencer’s Hats and the Hats voice.', ok: () => nodes.some((n) => n.type === 'logic.Chance' && wires.some((w) => w.from === 'seq.Hats' && w.to === n.id + '.In') && wires.some((w) => w.from === n.id + '.Out' && w.to === 'hats.Trigger')) },
+    { text: 'Plug a knob into Lead › Wave and turn it to hear the lead change.', ok: () => wires.some((w) => w.to === 'lead.Wave' && nodeOf(w.from).type === 'controls.Knob') },
+    { text: 'Add a Random and plug it into Hats › Decay.', ok: () => wires.some((w) => w.to === 'hats.Decay' && nodeOf(w.from).type === 'logic.Random') },
+  ];
+  function renderTry() { $('#try').innerHTML = TRY.map((t) => `<li class="${t.ok() ? 'done' : ''}">${t.text}</li>`).join(''); }
+
+  // ---------- moving values (Wobble, Random) ----------
+  let lastFrame = 0;
+  function frame(now) {
+    requestAnimationFrame(frame);
+    if (now - lastFrame < 33) return;
+    lastFrame = now;
+    const lidOpen = !$('#lid').hidden;
+    for (const n of nodes) {
+      if (!isLive(n)) continue;
+      const out = n.id + '.' + n.outs[0].name, v = srcNorm(n, 0);
+      for (const w of wires) if (w.from === out) { apply(w.to); if (lidOpen) updateBoardValue(w.to); }
+      if (lidOpen) {
+        updateBoardValue(out);
+        boardEl.querySelectorAll(`[data-src="${out}"]`).forEach((el) => { if (!el.classList.contains('carry')) el.style.opacity = (0.25 + 0.75 * v).toFixed(2); });
+      }
+    }
+    if (lidOpen && selected) syncInspector();
+  }
+  requestAnimationFrame(frame);
+
+  // ---------- step display ----------
+  let flashTimer = null;
+  function showStep(s, hit) {
+    document.querySelectorAll('.pad.head, .pad.hit, .cell.head, .cell.hit').forEach((p) => p.classList.remove('head', 'hit'));
+    document.querySelectorAll(`.pad[data-s="${s}"], .cell[data-s="${s}"]`).forEach((p) => { p.classList.add('head'); if (p.getAttribute('aria-pressed') === 'true') p.classList.add('hit'); });
+    document.querySelectorAll('#leds .led').forEach((l, i) => l.classList.toggle('on', i === s));
+    updateLcd(s);
+    if (!$('#lid').hidden) {
+      boardEl.querySelectorAll('.fire').forEach((el) => el.classList.remove('fire'));
+      for (const h of hit) {
+        const el = typeof h === 'number' ? boardEl.querySelector(`[data-w="${h}"]`) : boardEl.querySelector(`[data-led="${h.slice(4)}"]`);
+        if (el) el.classList.add('fire');
+      }
+      boardEl.querySelector('[data-led="seq"]')?.classList.add('fire');
+      clearTimeout(flashTimer);
+      flashTimer = setTimeout(() => boardEl.querySelectorAll('.fire').forEach((el) => el.classList.remove('fire')), 90);
+    }
+  }
+
+  // ---------- controls ----------
+  $('#play').addEventListener('click', async () => {
+    if (!T) return;
+    await Tone.start();
+    if (!playing) { step = 0; T.start('+0.05'); playing = true; }
+    else {
+      T.stop(); playing = false;
+      document.querySelectorAll('.pad.head, .pad.hit, .cell.head, .cell.hit').forEach((p) => p.classList.remove('head', 'hit'));
+      document.querySelectorAll('#leds .led').forEach((l) => l.classList.remove('on'));
+    }
+    $('#play').setAttribute('aria-pressed', playing);
+    $('#play').textContent = playing ? '■ Stop' : '▶ Play';
+    updateLcd();
+  });
+  function view(lid) {
+    $('#front').hidden = lid; $('#lid').hidden = !lid;
+    $('#v-front').setAttribute('aria-pressed', !lid); $('#v-lid').setAttribute('aria-pressed', lid);
+    $('#skinseg').hidden = !lid;
+    if (lid) { renderBoard(); renderInspector(); } else renderKnobs();
+  }
+  $('#v-front').addEventListener('click', () => view(false));
+  $('#v-lid').addEventListener('click', () => view(true));
+  const setSkin = (s) => { skin = s; $('#s-board').setAttribute('aria-pressed', s === 'board'); $('#s-ng').setAttribute('aria-pressed', s === 'ng'); renderBoard(); };
+  $('#s-board').addEventListener('click', () => setSkin('board'));
+  $('#s-ng').addEventListener('click', () => setSkin('ng'));
+
+  // ---------- start ----------
+  function startKnob(n, target) {
+    const k = PARTS.knob(); k.x = 20; k.y = 20 + (knobCount - 1) * 68; k.value = n;
+    nodes.push(k); byId[k.id] = k;
+    wires.push({ from: k.id + '.Value', to: target });
+  }
+  startKnob(fromRange(portOf('clock.Tempo'), 120), 'clock.Tempo');
+  startKnob(fromRange(portOf('filter.Cutoff'), 6000), 'filter.Cutoff');
+  startKnob(fromRange(portOf('echo.Mix'), 0.18), 'echo.Mix');
+  startKnob(0, 'bass.Note');
+  startKnob(fromRange(portOf('lead.Decay'), 0.25), 'lead.Decay');
+  applyAll();
+  renderTracks(); renderTune(); renderKnobs(); renderBoard(); renderInspector(); updateLcd();
+  if (location.hash === '#lid') view(true);
+})();
+</script>
