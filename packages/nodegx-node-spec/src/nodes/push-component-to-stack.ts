@@ -25,11 +25,12 @@
  * the Component Stack named Stack, its pages and the target component's inputs (:301-345) — so they are
  * registered on first write here (:242-261), as the runtime registers them.
  *
- * TWO ROWS (NSP-015 §6.2) the trace cannot show through the world's stand-in stacks:
- *   C26 — the `backResult-<name>` and `backAction-<name>` outputs the editor draws (from the target
- *         component's Pop Component Stack nodes, :347-375) are never registered (no
- *         `registerOutputIfNeeded`; dropped in the TypeScript port), so a wire from one is refused and
- *         the back channel reaches nothing. The spec declares no such output, as the runtime has none.
+ * TWO ROWS (NSP-015 §6.2) the trace cannot show through the world's stand-in stacks, both fixed in P109 ISL-028:
+ *   C26 (fixed) — the `backResult-<name>` and `backAction-<name>` outputs the editor draws (from the target
+ *         component's Pop Component Stack nodes) were never registered (`registerOutputIfNeeded` was dropped
+ *         in the TypeScript port), so a wire from one was refused. The method is back. The world's stacks have
+ *         no back channel, so the spec still declares no such output; graded in the viewer
+ *         (`isl-028-push-back-results-and-actions.test.ts`).
  *   C27 (fixed, P109 ISL-028) — `params` was the node's LIVE object, which the stack kept on the entry, so a
  *         later press of the same page with new `pm-` values was "already showing". The node now hands a
  *         copy (:183, :214). The world records `params` canonically at the call and answers by script, so

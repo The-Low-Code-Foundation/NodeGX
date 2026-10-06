@@ -265,6 +265,28 @@ const Navigate: NodeDefinitionOptions = {
           set: this.setPageParam.bind(this, name.substring('pm-'.length))
         });
       }
+    },
+    /**
+     * ISL-028 (P107-C26): the outputs the editor draws from the pushed component's Pop Component Stack nodes. The
+     * TypeScript port (PLAT-003 slice 8) dropped this method, so every wire from Back Results and Back Actions was
+     * refused when the component was built. Put back as it was — Show Popup's `closeResult-` / `closeAction-` shape.
+     */
+    registerOutputIfNeeded: function (this: NavigateInstance, name: string) {
+      if (this.hasOutput(name)) {
+        return;
+      }
+
+      if (name.startsWith('backResult-'))
+        return this.registerOutput(name, {
+          getter: this.getBackResult.bind(this, name.substring('backResult-'.length))
+        });
+
+      if (name.startsWith('backAction-'))
+        return this.registerOutput(name, {
+          getter: function () {
+            /** Not needed for signals */
+          }
+        });
     }
   }
 };

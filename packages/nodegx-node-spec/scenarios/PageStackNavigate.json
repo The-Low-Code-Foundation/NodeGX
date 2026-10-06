@@ -241,7 +241,7 @@
   },
   {
     "name": "two frames, two requests: the parameters are handed as they are at each call",
-    "because": "navigate.ts :181 hands the live object; the trace records it at the call (C27 is the stack's reading of that object, not graded here)",
+    "because": "navigate.ts hands a copy of the parameters at each call (C27, fixed in P109 ISL-028; graded in the viewer, not here); the trace records them at the call",
     "world": {
       "stack": {
         "names": [
