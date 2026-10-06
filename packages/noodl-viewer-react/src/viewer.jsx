@@ -10,6 +10,7 @@ import NoodlJSAPI from './noodl-js-api';
 import { PopupDialogLayer } from './popup-dialog';
 import projectSettings from './project-settings';
 import { createNodeFromReactComponent } from './react-component-node';
+import { withKitBoundary } from './kit-node-boundary';
 import registerNodes from './register-nodes';
 import Styles from './styles';
 
@@ -145,7 +146,8 @@ function registerModuleIsolated(noodlRuntime, module) {
   if (module.reactNodes) {
     const reactNodes = [];
     for (const nodeDefinition of module.reactNodes) {
-      reactNodes.push(createNodeFromReactComponent(nodeDefinition));
+      // ISL-026 (KITTHROWBLANKS): a kit node's throw while drawing stays inside that node.
+      reactNodes.push(createNodeFromReactComponent(withKitBoundary(nodeDefinition)));
     }
     const nodes = module.nodes || [];
     module.nodes = nodes.concat(reactNodes);
