@@ -1,6 +1,6 @@
 # ISL-032 — Events, states, timers and parsers keep their word
 
-**Status: ⬜ not started — ✅ AC2: all 17 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 17 bugs from
+**Status: ✅ CLOSED s25 (2026-10-06): 15 fixed, each with a control (§9), D4 and D5 closed as ruled (no change) — AC1 by the controls (C9 was the only known row), AC3 one commit per ruling or per node, AC4 no row open. ✅ AC2: all 17 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 17 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 11 medium · 6 low, **17 awaiting a ruling**. **Side:** runtime (Condition, Send / Receive Event, Action Dispatcher, States, Delay, Create New Array / Object, String Format, Substring, And, Switch, Date To String, Parse Feed)
 
 ## 1. The person sentence
@@ -103,3 +103,55 @@ ruling is still this task's work: the description changes, the node does not.
 | P107-D7 | Treat it as -1 | yes | End reads the text '-1' as the number, so it runs to the end. A one-line change, and nobody wants the empty result. |
 | P107-D10 | Report Done | yes | Stop says it stopped something whenever it did. A small change in one node, and only graphs that start and stop in the same frame notice. |
 | P107-D14 | One rule, like the other date nodes | yes | A timestamp renders in both cases and an empty Date is invalid in both. A small change. Apps that showed 1970 for an empty date with a Timezone now show 'Invalid Date' instead. |
+
+## 9. Session 25 (2026-10-06) — all seventeen
+
+**AC1, re-measured:** only C9 was a known row in the runtime's conformance table (three `KNOWN_ROWS` entries); C12, C13 and
+C14 were `row` marks in graph scenarios (t04, t05); C15 lived only in t04's recorded outcomes (a claim cannot name an
+outcome); the rest were scenarios stating the runtime's reading. D19's first half (the first state's text and false read
+as 0) had already been closed by ISL-002 (`06e65ab47`); its second half was still live. Each row was re-measured by its
+control: HEAD's runtime file red on exactly the scenarios the fix changes.
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C9 | `86139ddbf` | each Do mints its token before the coalescing guard; one array / object / write, an outcome per press (a Failure raised once) | spec unchanged (it said per press); control red on the three "two Do in one frame" scenarios |
+| C12 + C13 | `a7710e300` | the Children and Siblings walks stop at the first consuming receiver (indexed loops, not `forEach`); Consume's sentence says it does not stop a Global event (five copies) | t05: C12 claims the new sentence, C13's mark dropped, a Siblings twin added; control red on the two consume walks |
+| C2 | `a598f83e5` | Is True / Is False report the last test's answer (`testedResult`) | graph t13 (new: a wire made after an untested change); control red on it |
+| D3 | `2b30bc667` | a function replacement — no `$`-pattern expands; String Format v2 | control red on the D3 scenario; the stranger fixtures moved (below) |
+| D7 | `7761b440a` | `Number(end) === -1`; Substring v3 | control red on the D7 scenario |
+| C22 + D19 | `9e1d8afa7` | every later move stops the running timer; a text a state leaves empty is `''`; States v3 + v4 | two one-fix controls: each red on exactly the other's scenario |
+| D16 + D17 + D18 | `f6700d187` | a zoneless date is UTC, an unknown zone name gives null (V8 reads twelve, measured); Feed Updated `''`; Count = what Items holds, Items says each item is the shared record of its Id; Parse Feed v4 | HEAD's feed.ts red on the two D16 scenarios; HEAD + D17 only red on exactly D18 |
+| C14 + C15 | `0dd6bdff5` | `unpark` flags the queue when a wait ends; an action refused inside its own Dispatch call is not admitted | t04 re-recorded (three Dispatches done → failure, Waiting For sent blank); control red on the four moved scenarios, the wait-then-register path unchanged |
+| D10 | `375993cb3` | Stop is Done for a running OR queued countdown; Delay (Timer) v2; one drop-set mutant now equivalent, declared | control red on the D10 scenario |
+| D14 | `844f8569b` | the Date read through `toDate`, with or without a zone; Date To String v2 | control red on both D14 scenarios |
+| D4 | — | already `wontfix` at ruling ("Leave it, and say so") | — |
+| D5 | — | `wontfix`, ruled "Remove it with the next change": the field goes when Switch is next changed | — |
+
+Also `25328357c`: the cloud node library was stale at HEAD (s24's HTTP Cancel sentence) — regenerated, its one line.
+
+**What the plan did not know.**
+- 🔴 **A peer's pathspec commit swept my open hunk.** `63b7c4e91` (P107's Text v5) committed `conformance.test.ts` whole,
+  including my uncommitted removal of the three C9 `KNOWN_ROWS` entries, so HEAD briefly had the rows gone and the runtime
+  unfixed. C9 was committed next (`86139ddbf`), and its message says where the other half went.
+- 🔴 **A spec fix on a node the strangers were handed moves their fixtures.** String Format is guarded and was built by
+  stranger rounds 1 and 2 from v1, which said `$`-patterns apply. v2 turned both rounds red. Each fixture's one line became
+  a function, with a comment saying it is not the stranger's line; hashes refreshed; rounds green. Condition's spec
+  comment moved its hash too (C2).
+- 🔴 **A peer's open edit can make the primary's runtime target unloadable.** Mid-session a peer's Group spec (P107) made
+  `node-spec-target.ts` load a viewer scroll plugin jest cannot parse: 80 of 91 graph scenarios red on load. C14, C15,
+  D10 and D14 were graded in a worktree at HEAD (`scripts/devtools/make-worktree.sh`), with the files copied in and the
+  results copied back.
+- **Old tests pinned the defects:** `pilot.test.ts` (D3), `batch.test.ts` (D7), `batch-time.test.ts` (D14).
+- **A fix can turn a mutant equivalent.** After D10, Stop's `unchanged` branch runs only with the timer idle, where the
+  flags it clears are already false; declared with its reason.
+- **The graph test's first scenario times out (5 s) in a cold, parallel full run** and passes in 0.4 s alone: a load
+  flake, not a regression (seen twice).
+
+**Gates (2026-10-06):** each fix's specs at seeds 20732 and 13, CONFORM, every mutant killed but the declared equivalents;
+runtime jest without the conformance file 3179 passed (one cold-start timeout, 91 / 91 alone); viewer 1775 / 1775;
+runtime graph 91 / 91; spec graph 123 / 123; spec catalog parity, schema, world, batch, batch-data, batch-time, pilot and
+stranger (rounds re-graded) green; runtime, spec and viewer tsc 0; catalog:check, catalog:merge:check, cloud-library:check
+up to date; `bugs.js check` 5 problems, none ISL-032's.
+
+**Handed over:** P18 — `P109-S25-EXPORTSTATESRUN` (C22's shape in `statesLib.ts`) and `P109-S25-EXPORTFEEDZONE` (D16's
+reader in `parseLib.ts`), both read, not run. Not checked for the export: D17, D18, D10, D14, C14, C15, C9.

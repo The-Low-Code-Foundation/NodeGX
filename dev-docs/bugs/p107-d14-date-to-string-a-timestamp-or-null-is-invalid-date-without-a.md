@@ -1,12 +1,15 @@
 ---
 id: P107-D14
 title: Date To String: a timestamp or null is "Invalid Date" without a Timezone but renders with one
-status: scheduled
+status: fixed
+commit: 844f8569b
 phase: P109
 task: ISL-032
 severity: low
 area: runtime / Date To String
 found: P107 (the node says what it does) s11, 2026-09-30/10-01
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/Date To String.json "with a zone: the same numeric timestamp renders (2024-02-29) and null is Invalid Date, as with none (v2; …)" (and "with no zone: …")
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-013-BATCH-DATES-PARSERS-UTILITIES.md §6.2 (row D14) — the row names how it is reproduced and pinned
 ---
 
@@ -25,3 +28,5 @@ scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/n
 dropped in the same commit. Plain-words question: README §7 of P107.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "One rule, like the other date nodes".** A timestamp renders in both cases and an empty Date is invalid in both. A small change. Apps that showed 1970 for an empty date with a Timezone now show 'Invalid Date' instead. The question as asked: *"Should Date To String read its Date the same way whether or not a Timezone is set?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 844f8569b (P109 ISL-032, 2026-10-06), as ruled.** The Date is read through `toDate`, as the rest of the date family reads it. Date To String v2.

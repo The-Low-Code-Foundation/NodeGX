@@ -1,7 +1,8 @@
 ---
 id: P107-D5
 title: Switch keeps a field it never reads
-status: scheduled
+status: wontfix
+reason: ruled 2026-10-05 "Remove it with the next change" — no change now; the unused `_internal.initialized` field goes the next time Switch is changed for another reason
 phase: P109
 task: ISL-032
 severity: low
@@ -25,3 +26,5 @@ scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/n
 dropped in the same commit. Plain-words question: README §7 of P107.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Remove it with the next change".** No change now. It goes the next time Switch is touched for another reason. The question as asked: *"Should this unused bookkeeping be removed now, or the next time someone changes Switch?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Closed 2026-10-06 (P109 ISL-032) as ruled:** nothing changed. Whoever next changes Switch removes the field in that commit.

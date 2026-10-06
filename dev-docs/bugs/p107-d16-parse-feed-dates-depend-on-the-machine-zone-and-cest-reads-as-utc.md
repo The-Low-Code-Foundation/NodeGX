@@ -1,12 +1,15 @@
 ---
 id: P107-D16
 title: Parse Feed's dates depend on where it runs, and a CEST or BST date is published hours wrong
-status: scheduled
+status: fixed
+commit: f6700d187
 phase: P109
 task: ISL-032
 severity: medium
 area: runtime / Parse Feed
 found: P107 NSP-013 s13, 2026-10-01
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/net.noodl.ParseFeed.json "… and the same feed in Europe/Paris is 08:00Z too: one feed, one Published, wherever it is parsed (v2; …)" (and "a zone name Date.parse does not know gives no date: …")
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-013-BATCH-DATES-PARSERS-UTILITIES.md §6.2
 ---
 
@@ -24,3 +27,5 @@ Europe/Paris, America/New_York). Measured with `TZ=… node -e` on V8 too.
 Proposed: read a zoneless date as UTC (one answer everywhere); a trailing zone name V8 does not know → `null`.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "UTC, and no date if unknown".** A date with no timezone is read as UTC everywhere, and an unknown name such as CEST gives no date. A small change in one function. Feeds using CEST or BST lose their dates instead of showing wrong ones. The question as asked: *"How should Parse Feed read a date with no timezone, or with a timezone name it does not know?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed f6700d187 (P109 ISL-032, 2026-10-06), as ruled.** A zoneless date takes `Z` / ` GMT` before `Date.parse`; a trailing zone name outside the twelve V8 reads gives null. Parse Feed v2. The exporter's parseLib.ts keeps the old reader (P18 row P109-S25-EXPORTFEEDZONE).
