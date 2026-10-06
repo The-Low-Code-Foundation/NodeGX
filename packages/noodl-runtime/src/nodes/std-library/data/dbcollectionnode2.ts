@@ -285,6 +285,14 @@ const DbCollectionNode: NodeDefinitionOptions = {
         const sort = _this._internal.currentQuery.sort;
         const hasSort = Array.isArray(sort) ? sort.length > 0 : sort !== undefined;
 
+        // P107-C40 (ISL-029, ruled "Drop the last; re-query if unsorted"): with no sort only the backend knows which
+        // records a Limit keeps, so a record that would go over it asks the backend again rather than guess
+        const limit = _this._internal.currentQuery.limit;
+        if (!hasSort && limit !== undefined && _this._internal.collection.size() + 1 > limit) {
+          _this.scheduleFetch();
+          return;
+        }
+
         // `i` is declared outside the loop because the original relied on `var` hoisting to
         // read it after the `break` (PLAT-003 NOTES §23.1).
         let i = 0;
@@ -298,16 +306,12 @@ const DbCollectionNode: NodeDefinitionOptions = {
           _this._internal.collection.add(m);
         }
 
-        // Make sure we don't exceed limit
+        // Make sure we don't exceed limit. C40: the record that sorts LAST goes, under any sort — the list is in sort
+        // order, so that is the end, ascending or descending. It used to drop the FIRST unless the first key was
+        // descending: a new record that belonged at the top vanished at once, and one past the end pushed the top out.
         const size = _this._internal.collection.size();
-        if (_this._internal.currentQuery.limit !== undefined && size > _this._internal.currentQuery.limit) {
-          // Which end to drop from depends on the sort direction. The first sort key
-          // carries it as a leading `-`, and it is read the same way whether `sort` is
-          // a string (`'-rank'`) or an array (`['-rank']`) — which is what the original
-          // `sort[0][0]` did by accident, and is preserved deliberately.
-          const firstKey = hasSort ? (Array.isArray(sort) ? sort[0] : sort) : undefined;
-          const descending = typeof firstKey === 'string' && firstKey.charAt(0) === '-';
-          _this._internal.collection.remove(_this._internal.collection.get(descending ? size - 1 : 0));
+        if (limit !== undefined && size > limit) {
+          _this._internal.collection.remove(_this._internal.collection.get(size - 1));
         }
 
         //Send the array again over the items output to trigger function nodes etc that might be connected
@@ -345,6 +349,25 @@ const DbCollectionNode: NodeDefinitionOptions = {
           } else if (matchesQuery && !_this._internal.collection.contains(m)) {
             // It's not part of the result collection but now matches they query, add it and resort
             _addModelAtCorrectIndex(m);
+          } else if (matchesQuery) {
+            // P107-C41 (ISL-029, ruled "Move it to its new place"): a member that still matches moves to where its
+            // values now sort. It kept its old place, and the list stayed out of order until the query ran again.
+            const sort = _this._internal.currentQuery.sort;
+            if (Array.isArray(sort) ? sort.length > 0 : sort !== undefined) {
+              const collection = _this._internal.collection;
+              let from = -1;
+              for (let k = 0; k < collection.size(); k++) if (collection.get(k) === m) from = k;
+              collection.remove(m);
+              let i = 0;
+              for (i = 0; i < collection.size(); i++) if (QueryUtils.compareObjects(sort, collection.get(i), m) > 0) break;
+              collection.addAtIndex(m, i);
+              if (i !== from) {
+                _this.flagOutputDirty('items');
+                _this.flagOutputDirty('count');
+                _this.flagOutputDirty('firstItemId');
+                _this.flagOutputDirty('isEmpty');
+              }
+            }
           }
         }
       } else if (args.type === 'delete') {

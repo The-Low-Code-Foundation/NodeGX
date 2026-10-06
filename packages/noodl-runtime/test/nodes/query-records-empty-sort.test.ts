@@ -82,25 +82,31 @@ describe('Query Records survives a create notification with an empty sort', () =
     expect(() => notifyCreate(node, 'c')).not.toThrow();
   });
 
-  test('an empty sort is treated as no sort — the row is appended and the first is dropped', () => {
+  // P109 ISL-029 (P107-C40, ruled "Drop the last; re-query if unsorted"): with no sort only the backend knows which
+  // records a Limit keeps, so a record that would go over it asks the backend again. These two rows used to pin the
+  // old guess — appended, and the FIRST dropped.
+  test('an empty sort is treated as no sort — over the limit, the rows stay and the query runs again', () => {
     const node = makeNode({ where: {}, sort: [], limit: 2 });
+    const refetch = jest.spyOn(node, 'scheduleFetch').mockImplementation(() => undefined);
     notifyCreate(node, 'c');
 
-    // Unsorted + over limit drops from the front, exactly as `sort: undefined` does.
     const ids = node._internal.collection.items.map((m: Any) => m.getId());
-    expect(ids).toEqual(['b', 'c']);
+    expect(ids).toEqual(['a', 'b']);
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   test('an absent sort behaves identically — the two cases agree', () => {
     const node = makeNode({ where: {}, sort: undefined, limit: 2 });
+    const refetch = jest.spyOn(node, 'scheduleFetch').mockImplementation(() => undefined);
     notifyCreate(node, 'c');
 
     const ids = node._internal.collection.items.map((m: Any) => m.getId());
-    expect(ids).toEqual(['b', 'c']);
+    expect(ids).toEqual(['a', 'b']);
+    expect(refetch).toHaveBeenCalledTimes(1);
   });
 
   test('a descending sort still drops from the END, as the leading "-" says', () => {
-    // The behaviour the original `sort[0][0]` expressed, kept deliberately.
+    // The end of the sorted list — which C40 now drops under ANY sort.
     const node = makeNode({ where: {}, sort: ['-title'], limit: 2 });
 
     expect(() => notifyCreate(node, 'c')).not.toThrow();

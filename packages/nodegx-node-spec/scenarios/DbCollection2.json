@@ -1304,8 +1304,8 @@
     }
   },
   {
-    "name": "Limit under an ASCENDING sort drops the FIRST record: a new record that sorts first is dropped again at once, one that sorts last pushes the first out (row C40)",
-    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :301-311 — no leading '-': `remove(get(0))`; the backend would answer the two smallest",
+    "name": "Limit under an ASCENDING sort drops the record that sorts LAST: a new record that sorts first stays and pushes the last out; one that sorts last is dropped again at once (v4, C40)",
+    "because": "over Limit the end of the sorted list goes, under any sort — what the backend would answer (C40, fixed in P109 ISL-029 — v3 dropped the FIRST unless the first key was descending)",
     "params": {},
     "steps": [
       {
@@ -1387,8 +1387,8 @@
     }
   },
   {
-    "name": "Limit with NO sort: the new record goes at the end and the first is dropped (row C40)",
-    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :297-311 — `add`, then `remove(get(0))`",
+    "name": "Limit with NO sort: a record that would go over the Limit asks the backend again — only it knows which records the Limit keeps (v4, C40)",
+    "because": "with no sort, a join over Limit schedules the query again (C40, fixed in P109 ISL-029 — v3 appended it and dropped the first)",
     "params": {},
     "steps": [
       {
@@ -1527,8 +1527,8 @@
     }
   },
   {
-    "name": "a member whose sort key moved keeps its place: a save that still matches changes nothing in Items",
-    "because": "dbcollectionnode2.ts :251-363 cloudStoreEvents (s24) :345 — only `matches && !contains` adds; nothing re-sorts",
+    "name": "a member whose sort key moved moves to its new place: a save that still matches re-sorts Items (v4, C41)",
+    "because": "a saved member that still matches is taken out and put back where it now sorts (C41, fixed in P109 ISL-029 — v3 left it in its old place)",
     "params": {},
     "steps": [
       {

@@ -46,9 +46,11 @@
  * read from the registry (which already holds the write) and matched against the query MADE last — its Parse `where`,
  * sort and limit (:874-880), even while that query's answer is still out — by the LOCAL matcher (record-match.ts):
  *   - `create`: a match joins — under a sort before the first member that sorts after it, with none at the end; then,
- *     over Limit, one is dropped: the LAST under a descending first sort key, otherwise the FIRST (row C40);
+ *     over Limit, the record that sorts LAST is dropped, under any sort; with NO sort, a join that would go over Limit
+ *     asks the backend again instead, since only it knows which records the Limit keeps (v4, row C40);
  *   - `save`: a member that no longer matches leaves; a non-member that now matches joins as a create does; a member
- *     that still matches keeps its place, whatever moved (row C41);
+ *     that still matches moves to where it now sorts — the four re-sent only when its place changed; with no sort it
+ *     stays (v4, row C41);
  *   - `delete`: the member goes.
  * A change re-sends Items, Count, First Record Id and Is Empty; a create or save that changed nothing re-sends nothing,
  * and a delete re-sends the four even when nothing was removed (unchanged values: no trace shows it). The node's own array watcher (:237-249) re-sends three of them
@@ -348,7 +350,10 @@ export const QueryRecords = defineNode({
   // v3 (P109 ISL-027, row C49 ruled "Compare the list's contents"): an answer's list with the same contents as the one the record
   // holds is not written again (cloudstore.js `_fromJSON`), so it is no change; v2 wrote the new array and the record store's `!==`
   // called it changed.
-  version: 3,
+  // v4 (P109 ISL-029, rows C40 "Drop the last; re-query if unsorted" and C41 "Move it to its new place"): over Limit the record
+  // that sorts last is dropped under any sort, and with no sort the query runs again; a saved member that still matches moves
+  // to where it now sorts. v3 dropped the FIRST unless the first sort key was descending, and left a saved member in place.
+  version: 4,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/dbcollectionnode2.ts; api/queryutils.ts; @noodl/backend-contract translators',
   needs: ['backend', 'registry', 'random'],
   worldPool: { backends: BACKENDS },
@@ -553,21 +558,21 @@ export const QueryRecords = defineNode({
         const c = w.registry.collection(s.collection);
         const q = s.query!; // an array is held only once a query was made
         const all = ['items', 'count', 'firstItemId', 'isEmpty'] as const;
+        const sort = q.sort;
+        const hasSort = sort !== undefined && sort.length > 0; // :285-286 — an empty sort is no sort
         // :271-319 — at its sorted place (before the first member that sorts after it), or at the end with no sort; then Limit
         const add = (m: RecordRef) => {
-          const sort = q.sort;
-          const hasSort = sort !== undefined && sort.length > 0; // :285-286 — an empty sort is no sort
+          // v4 (C40): with no sort only the backend knows which records a Limit keeps — one that would go over it asks again
+          if (!hasSort && q.limit !== undefined && c.size() + 1 > q.limit) return { set: s.fetchScheduled ? {} : { fetchScheduled: true }, send: [] };
           if (hasSort) {
             let i = 0;
             for (i = 0; i < c.size(); i++) if (compareObjects(sort, c.get(i)!, m) > 0) break;
             c.addAtIndex(m, i);
           } else c.add(m);
-          // :301-311 — over Limit, one is dropped: the LAST under a descending first sort key, otherwise the FIRST
+          // :301-311 — over Limit, the record that sorts LAST is dropped, under any sort (v4, C40: v3 dropped the FIRST
+          // unless the first sort key was descending)
           const size = c.size();
-          if (q.limit !== undefined && size > q.limit) {
-            const descending = hasSort && sort[0].charAt(0) === '-';
-            c.remove(c.get(descending ? size - 1 : 0)!);
-          }
+          if (q.limit !== undefined && size > q.limit) c.remove(c.get(size - 1)!);
           return { send: all };
         };
         if (e.type === 'create') {
@@ -576,13 +581,22 @@ export const QueryRecords = defineNode({
         }
         const m = w.registry.model(e.objectId);
         if (e.type === 'save') {
-          // :330-349 — out of the filter: removed; into it: added; a member that still matches keeps its place
+          // :330-349 — out of the filter: removed; into it: added; a member that still matches moves to where it now sorts
+          // (v4, C41: v3 left it in its old place), the four re-sent only when its place changed; with no sort it stays
           const matches = matchesQuery(m, q.where);
           if (!matches && c.contains(m)) {
             c.remove(m);
             return { send: all };
           }
-          return matches && !c.contains(m) ? add(m) : { send: [] };
+          if (matches && !c.contains(m)) return add(m);
+          if (!matches || !hasSort) return { send: [] };
+          let from = -1;
+          for (let k = 0; k < c.size(); k++) if (c.get(k) === m) from = k;
+          c.remove(m);
+          let i = 0;
+          for (i = 0; i < c.size(); i++) if (compareObjects(sort, c.get(i)!, m) > 0) break;
+          c.addAtIndex(m, i);
+          return i !== from ? { send: all } : { send: [] };
         }
         // :350-362 — removed if a member; the four re-sent either way
         c.remove(m);
