@@ -1,6 +1,6 @@
 # ISL-029 — Records and queries say what really happened
 
-**Status: 🟡 s23 (2026-10-06): 11 of 12 fixed — C43 (`83908a71e`), D22 (`1b367e1fa`), C36 (`011f0a9bd`), C38 + C39 (`724db53e7`), C42 (`8d3ebc83f`), C40 + C41 (`6593e7deb`), C34 (`8a1afd591`), C33 (`5286345e8`), C35 (`8ec177377`); open: D24, whose ruling asks for a probe on a real NodeGX backend first (§9). ✅ AC2: all 12 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 12 bugs from
+**Status: ✅ CLOSED s24 (2026-10-06): 12 of 12 fixed — D24 (`225542f5b`, after the real-backend probe its ruling asked for found a security row: §10). s23: 11 of 12 fixed — C43 (`83908a71e`), D22 (`1b367e1fa`), C36 (`011f0a9bd`), C38 + C39 (`724db53e7`), C42 (`8d3ebc83f`), C40 + C41 (`6593e7deb`), C34 (`8a1afd591`), C33 (`5286345e8`), C35 (`8ec177377`). ✅ AC2: all 12 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 12 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 4 high · 4 medium · 4 low, **12 awaiting a ruling**. **Side:** runtime (Record family, Query Records `DbCollection2`, Filter Records `FilterDBModels`), backend contract
 
 ## 1. The person sentence
@@ -144,3 +144,41 @@ the declared equivalents (Filter Records 157 / 157; Record 145 / 147 and 133 / 1
 world, schema 556 / 556; runtime and spec tsc 0. `bugs.js check`: 5 problems, none in P109's rows.
 
 **Owed by P18 (the export), not checked:** whether the exported app has any of these eleven.
+
+## 10. Session 24 (2026-10-06) — D24, the twelfth
+
+**The probe first, as the ruling asked.** A real `nodegx-backend` (`dist/cli.js`, built from current source; dev-open off)
+configured under `backendServices` with no `cloudservices` endpoint; the real `ParseAuthAdapter` signing in through the
+handle `UserService._handle()` answers there (the entry's `publicToken`); the real Create Record methods, an Owner rule.
+Log In wrote `Parse/<publicToken>/currentUser`; the rules asked `CloudStore.instance`, whose app id is `undefined`: nobody.
+The create carried the person's session and **no `ACL`**. With the collection's creator-owns on (the default) the server
+stamped the owner itself and a second signed-in user got 404. **With creator-owns off the record was stored `ACL: null`
+and the second user read it** (`GET` 200, and in their `find`). Control: the same press with a `cloudservices` endpoint
+sent and stored `ACL: {<owner>: read, write}`. So the NodeGX case was real: a security row, masked by the default posture.
+The ledger row's severity went from low to medium on that reading.
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| D24 | `225542f5b` | `_getCurrentUser(scope, backendId)` asks `CloudStore.forBackend(…).currentUserId()`; `RestDataAdapter.currentUserId` reads the session a REST Log In wrote (`restSessionKey`, a fixed tab id so it draws no `Math.random`); Create v4, Update v4 (`world.backend.userOn(<the call's backend>)`) | `test/nodes/isl-029-access-rules-ask-the-records-backend.test.ts` (5 rows: NodeGX, two backends, nobody on the record's one, legacy control, Directus warning) red on 3 before; 3 scenarios reseeded `user` → `sessions` + 3 new, control red on exactly those 5; graph s11 (Log In → Owner rule, and beside it nobody), control red on the Log In arm only |
+
+**What the plan did not know.**
+- **Creator-owns hid it.** The backend's default stamps the creator as owner on any create with a session, so on a fresh
+  backend the dropped rule changes nothing visible. Only a collection with creator-owns off shows the hole; a probe on
+  the default posture alone would have read "safe".
+- **The world's USER was the defect, written down.** `world.ts` defined `user` as "the legacy store's, whichever backend
+  the record goes to" — the reference recorded the bug as the rule. It now plays only the legacy store (which no record
+  rule reads), and `userOn(backend)` is the session the backend holds.
+- **Two guarded files.** `spec.ts` and `world.ts` are in the stranger rounds' hash list; refreshed in the fix commit, the
+  four rounds re-graded green (46 passed, the deep runs skipped).
+- **ERG-001's stub store had no `currentUserId`** (the rules now ask the record's store): one line in the fix commit.
+- **Not touched:** `packages/noodl-runtime/test/helpers/node-spec-target.ts` (another session's open edit). Its
+  `installUser` docblock still says the rules read the legacy store; the code needs no change (it already writes each
+  backend's session where `RestDataAdapter.currentUserId` reads it). Correct the sentence when that file is free.
+
+**Readings (2026-10-06, at `225542f5b`):** Create Record and Update Record at seeds 20732 and 13: 25 / 25 and 32 / 32
+scenarios, 200 / 200 sequences, 0 divergences, mutants 40 / 40 and 78 / 78. Runtime graph 89 / 89, twice. Runtime jest
+without the conformance file 3174 passed, 0 failed; viewer 1772 / 1772 (143 suites). Spec subset (records batch, catalog
+parity, graph, world, schema) 558 / 558. Runtime and spec tsc 0. Stranger rounds 46 passed. `bugs.js check`: 5 problems,
+none in P109's rows.
+
+**Owed by P18 (the export), not checked:** does the exported app's access rule read the record's own backend's user?
