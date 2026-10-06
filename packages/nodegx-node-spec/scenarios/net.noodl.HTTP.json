@@ -70,10 +70,17 @@
     "steps": [{ "signal": "fetch" }, "settle"]
   },
   {
-    "name": "Response Type JSON on a body that is not JSON: Failure, Error says so — under http/network-error (D11)",
-    "because": "httpnode.ts :1139-1150 throws into the .catch at :1191-1203, whose code is the network error's",
+    "name": "Response Type JSON on a body that is not JSON: Failure, Error says so — under http/bad-body (v4, D11)",
+    "because": "httpnode.ts badBody: the parse failure is marked and the .catch reports HTTP_ERROR_CODES.badBody (P109 ISL-030, P107-D11 ruled \"Give it its own code\"); v3 used the network error's code",
     "params": { "url": "https://api.example.com/text", "responseType": "json" },
     "world": { "network": [{ "answer": { "status": 200, "body": "not json" } }] },
+    "steps": [{ "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "Auto on an application/json answer that is not JSON: Failure under http/bad-body (v4, D11)",
+    "because": "httpnode.ts `response.json()` rejected → badBody; the message is the parser's, as it was",
+    "params": { "url": "https://api.example.com/broken" },
+    "world": { "network": [{ "answer": { "status": 200, "headers": { "content-type": "application/json" }, "body": "{oops" } }] },
     "steps": [{ "signal": "fetch" }, "settle"]
   },
   {

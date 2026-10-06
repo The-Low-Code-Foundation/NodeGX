@@ -56,10 +56,10 @@
  * the loss (the configurators read `authToken` … from a bag the ports fill under `auth-authToken` …). **C8** (v2, fixed in P109 ISL-026, ruled "Fail and say which input"): a truthy
  * non-string `url`, `queryParams`, `headers` or — when a body is built — `bodyFields` fails the Fetch with
  * `http/input-not-text`, Error "<the input> is not text", and no request; v1 modelled the loss (the runtime
- * threw inside the callback after the tokens were drained, and the outcomes were never settled). **D11** a body that fails to parse under `Response Type: JSON`
- * or an `application/json` answer is reported as `http/network-error`, the code for "never
- * reached a server" (:1194-1203) — the description says "an unparseable body" is a failure, and
- * it is, under the wrong name.
+ * threw inside the callback after the tokens were drained, and the outcomes were never settled). **D11** (v4, fixed in P109
+ * ISL-030, ruled "Give it its own code"): a body that fails to parse under `Response Type: JSON` or an `application/json`
+ * answer fails under `http/bad-body`, its message unchanged; v3 reported `http/network-error`, the code for "never reached a
+ * server".
  */
 
 import { defineNode, type ValueInputDecl } from '../spec';
@@ -268,7 +268,9 @@ export const HttpRequest = defineNode({
   // fails the Fetch with `http/input-not-text`, naming the input on Error; v1 lost the outcome (the runtime threw).
   // v3 (P109 ISL-030, P107-C7 ruled "Fix it, send the credential"): the Authentication presets send their credential; v2
   // sent nothing (the presets read a key the ports never write).
-  version: 3,
+  // v4 (P109 ISL-030, P107-D11 ruled "Give it its own code"): a body that cannot be read as JSON fails under `http/bad-body`;
+  // v3 used `http/network-error`, the code for a request that never reached a server.
+  version: 4,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/httpnode.ts',
   needs: ['network', 'clock'],
   worldPool: { advances: [0, 1, 100, 1000, 29999, 30000] },
@@ -549,8 +551,9 @@ export const HttpRequest = defineNode({
           } else if ((res.headers['content-type'] || '').includes('application/json')) body = JSON.parse(text); // :1152-1155 `response.json()`
           else body = text;
         } catch (e) {
-          // :1191-1203 — the catch: no output moves, the message is the error's (D11: reported under the network error's code)
-          return { set: { ...base, error: (e as Error).message || 'Network error' }, cancel, send: ['error'], outcomes: failure('http/network-error') };
+          // :1191-1203 — the catch: no output moves, the message is the error's; the code is `http/bad-body` (v4, D11 — v3
+          // reported the network error's code for a request the server answered)
+          return { set: { ...base, error: (e as Error).message || 'Network error' }, cancel, send: ['error'], outcomes: failure('http/bad-body') };
         }
         // :995-1040 `processResponse`, then :1160-1170
         const moved = { ...base, response: body, statusCode: res.status, responseHeaders: res.headers };

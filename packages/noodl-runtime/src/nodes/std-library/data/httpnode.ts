@@ -49,8 +49,25 @@ const HTTP_ERROR_CODES = {
   status: 'http/error-status',
   timeout: 'http/timeout',
   network: 'http/network-error',
-  inputNotText: 'http/input-not-text'
+  inputNotText: 'http/input-not-text',
+  /** P107-D11 (P109 ISL-030, ruled "Give it its own code"): the server answered, and its body could not be read as JSON. */
+  badBody: 'http/bad-body'
 };
+
+/**
+ * P107-D11: a body that failed to parse reached the same `catch` as a request that never left, and was reported under
+ * `http/network-error` — "never reached a server" — for a request the server answered. The parse failures are marked
+ * here so the `catch` can tell them apart; the message is unchanged.
+ */
+function badBody(error: unknown): unknown {
+  // The error itself is marked, never wrapped: a parser's error can come from another realm (`instanceof Error` false),
+  // and re-making it from `String(error)` would put its class name in front of the message.
+  if (error !== null && typeof error === 'object') {
+    (error as { httpBadBody?: boolean }).httpBadBody = true;
+    return error;
+  }
+  return Object.assign(new Error(String(error)), { httpBadBody: true });
+}
 
 /**
  * P107-C8 (P109 ISL-026, ruled 2026-10-05 "Fail and say which input"): the first text input that holds something else,
@@ -849,9 +866,11 @@ const HttpNode: NodeDefinitionOptions = {
               try {
                 return { response, body: JSON.parse(text) };
               } catch (e) {
-                throw new Error(
-                  'Response Type is JSON but the body is not JSON: ' +
-                    (e && (e as Error).message ? (e as Error).message : String(e))
+                throw badBody(
+                  new Error(
+                    'Response Type is JSON but the body is not JSON: ' +
+                      (e && (e as Error).message ? (e as Error).message : String(e))
+                  )
                 );
               }
             });
@@ -859,7 +878,12 @@ const HttpNode: NodeDefinitionOptions = {
 
           const contentType = response.headers.get('content-type') || '';
           if (contentType.includes('application/json')) {
-            return response.json().then((json) => ({ response, body: json }));
+            return response.json().then(
+              (json) => ({ response, body: json }),
+              (e) => {
+                throw badBody(e);
+              }
+            );
           }
           return response.text().then((text) => ({ response, body: text }));
         })
@@ -905,7 +929,11 @@ const HttpNode: NodeDefinitionOptions = {
               : error.message || 'Network error';
             this.flagOutputDirty('error');
             reportOutcomes(this, tokens, 'failure', {
-              code: timedOut ? HTTP_ERROR_CODES.timeout : HTTP_ERROR_CODES.network,
+              code: timedOut
+                ? HTTP_ERROR_CODES.timeout
+                : error.httpBadBody
+                ? HTTP_ERROR_CODES.badBody
+                : HTTP_ERROR_CODES.network,
               message: this._internal.error,
               detail: { url: this._internal.lastRequestUrl, timeout: timedOut ? timeout : undefined }
             });
