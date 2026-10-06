@@ -75,15 +75,6 @@ const coalescedPress = (port: string) => (d: Divergence) => {
 };
 
 /**
- * NSP-015 §6.2 C25 — Navigate To Path's frame-end callback THROWS (the scheduler logs it,
- * nodecontext.ts :466-472) and the frame's presses are never answered. Narrow: the first difference
- * is the spec's own answer for that case (the outcome's code). (C24, a Path that is not text, fixed in ISL-026.)
- */
-const navigateToPathAnswer = (message: string, code: string) => (e: TraceEvent | undefined) =>
-  !!e && ((e.t === 'value' && e.port === 'error' && e.value === message) || (e.t === 'outcome' && e.port === 'navigate' && e.value === 'failure' && e.error === code));
-const refusedPush = (d: Divergence) => navigateToPathAnswer('The browser refused to navigate to this path', 'navigate-to-path/refused')(d.difference.reference);
-
-/**
  * NSP-014 §6.5 C36 — Delete Record's success reads the record binding LIVE (deletedbmodelpropertiesnode.ts :70,
  * `internal.model.notify('delete')`): a binding cleared while the delete is out throws there, and the REST adapter hands
  * the throw to `error` (RestDataAdapter.ts :531) — Error is V8's TypeError text, every press Failure, the record deleted.
@@ -508,9 +499,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   FilterDBModels: [{ row: 'NSP-014 §6.14 C43 — a Sorting over rows that are not records throws out of the run: no Error, no Failure, the press never answered', matches: sortCannotCompare }],
   DeleteDbModelProperties: [{ row: "NSP-014 §6.5 C36 — Delete Record's success reads the binding live; cleared while the delete is out, it throws: Failure, not Done", matches: notifyOnCleared }],
-  PageStackNavigateToPath: [
-    { row: 'NSP-015 §6.2 C25 — a push the browser refuses (another origin) throws in the frame-end callback; no popstate, the presses are never answered', matches: refusedPush }
-  ],
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   SetModelProperties: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('store') }]

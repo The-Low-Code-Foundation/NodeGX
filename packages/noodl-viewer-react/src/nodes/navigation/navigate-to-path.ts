@@ -217,7 +217,21 @@ const NavigateToPathNode: NodeDefinitionOptions = {
           return;
         }
       } else {
-        window.history.pushState({}, '', compiledUrl);
+        // P107-C25 (ISL-028, ruled "Report a clear failure"): the browser refuses a push to another origin (a Path
+        // like `https://…` with the Path URL type) with a SecurityError. It threw out of this frame-end callback and
+        // every press went unanswered. Another website is External Link's job; here it is a Failure that says why.
+        try {
+          window.history.pushState({}, '', compiledUrl);
+        } catch (e) {
+          internal.lastError = 'The browser refused to navigate to this path';
+          this.flagOutputDirty('error');
+          reportOutcomes(this, tokens, 'failure', {
+            code: 'navigate-to-path/refused',
+            message: 'The browser refused to navigate to this path',
+            detail: { url: compiledUrl, reason: e instanceof Error ? e.message : String(e) }
+          });
+          return;
+        }
         dispatchEvent(new PopStateEvent('popstate', {}));
       }
 

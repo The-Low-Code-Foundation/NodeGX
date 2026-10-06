@@ -392,7 +392,7 @@
   },
   {
     "name": "C25 — the path type with a Path on another origin: the push is made, the browser refuses it, Failure navigate-to-path/refused",
-    "because": "the runtime's pushState throws a SecurityError at :218 inside the frame-end callback; no popstate, the press is never answered",
+    "because": "the browser refuses pushState to another origin with a SecurityError; the node catches it and answers Failure (C25, fixed in P109 ISL-028 — it used to throw out of the frame-end callback, the press never answered)",
     "params": {
       "path": "https://other.example/x"
     },
@@ -411,8 +411,7 @@
         "signal": "navigate"
       },
       "settle"
-    ],
-    "row": "NSP-015 §6.2 C25"
+    ]
   },
   {
     "name": "the hash type keeps another origin's address inside the hash: pushed, Done",

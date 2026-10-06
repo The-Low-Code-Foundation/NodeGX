@@ -32,10 +32,10 @@
  * logs it (nodecontext.ts :466-472) and every press of that frame goes unanswered, for good:
  *   C24 — FIXED in P109 ISL-026 (ruled "Treat it as no path"): a Path that is not text (`null`, a number) is no
  *         Path (Failure `navigate-to-path/no-path`) on both; the runtime once threw at `.match`.
- *   C25 — a push the browser refuses (a path on another origin — `https://…` or `//…` with the
- *         `path` type; world.ts LOCATION) throws at :218, after the call. The spec records the push
- *         and answers Failure `navigate-to-path/refused`, Error "The browser refused to navigate to
- *         this path"; proposed, not the runtime.
+ *   C25 — FIXED in P109 ISL-028 (ruled "Report a clear failure"): a push the browser refuses (a path on another
+ *         origin — `https://…` or `//…` with the `path` type; world.ts LOCATION) is recorded, then answered Failure
+ *         `navigate-to-path/refused`, Error "The browser refused to navigate to this path", on both; the runtime once
+ *         threw out of the frame-end callback.
  */
 
 import { defineNode, type ValueInputDecl, type WorldView } from '../spec';
@@ -168,7 +168,7 @@ export const NavigateToPath = defineNode({
         }
         return { set: reset, send: [], open, outcomes: answer('done') }; // :222
       }
-      // C25: a push the browser refuses throws at :218 in the runtime — recorded, then refused here
+      // C25 (fixed, ISL-028): a push the browser refuses is recorded, then answered Failure
       if (!world.pushes(url)) {
         return { set: { ...reset, error: REFUSED }, send: ['error'], push: { url }, outcomes: answer('failure', 'navigate-to-path/refused') };
       }
