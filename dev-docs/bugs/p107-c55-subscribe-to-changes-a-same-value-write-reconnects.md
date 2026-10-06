@@ -1,12 +1,15 @@
 ---
 id: P107-C55
 title: Subscribe To Changes — writing a value an input already holds tears the subscription down and opens a new one
-status: scheduled
+status: fixed
+commit: bbd4d5539
 phase: P109
 task: ISL-030
 severity: low
 area: runtime / Subscribe To Changes (`subscribetochanges.ts` :327-348, :567-572 — every setter calls `scheduleReconfigure` unconditionally)
 found: P107 (the node says what it does) s33, 2026-10-03
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/SubscribeToChanges.json "the same Class written again keeps the subscription — no teardown, no new one (v2, C55)" (and DbCollection2.json "slice C: the same Class re-written keeps the subscription, and queries nothing (v5, C55)")
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.37–§6.39 (row C55); scenario "the same Class written again tears down and subscribes again" (packages/nodegx-node-spec/scenarios/SubscribeToChanges.json), passing on the interpreter AND the runtime — the spec states the runtime's reading
 ---
 
@@ -47,3 +50,5 @@ on a change (DEF-046). Scenario "slice C: the same Class re-written reconnects �
 guard fixes both.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Ignore repeated values".** Both nodes reconnect only when a setting really changes, as Query Records' query already does. A small guard on each setting. A graph that re-sent the same value on purpose to force a reconnect would lose that trick. The question as asked: *"Should Subscribe To Changes and Query Records ignore a value they already hold?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed bbd4d5539 (P109 ISL-030, 2026-10-06), as ruled.** Subscribe To Changes' five settings and Query Records' Subscribe To Changes, Class and Backend reconnect only when the value really changes (`valueDidChange`; an object never compares equal). Subscribe To Changes v2, Query Records v5.

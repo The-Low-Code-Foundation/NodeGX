@@ -1,12 +1,15 @@
 ---
 id: P107-D23
 title: Set User Properties' Username is thrown away on Directus and PocketBase — the write says Done and the username never changes
-status: scheduled
+status: fixed
+commit: 58cff6c06
 phase: P109
 task: ISL-030
 severity: low
 area: runtime / REST auth adapter (`RestAuthAdapter.ts` `setUserProperties` :1607-1617); Set User Properties' port description
 found: P107 (the node says what it does) s26, 2026-10-02
+kit: node-spec
+regression: packages/noodl-runtime/test/backends/rest-auth-adapter.test.ts "a Username on a backend that has none (P107-D23) refuses the whole write with the sentence, and sends nothing" (and SetUserProperties.json "Do with Username set: refused at once — this backend has no usernames — Failure, nothing written (v2, D23)")
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.17 (row D23); the s26 probe (body sent `{"nick":"Z","email":"z@x"}` for Username `zed`)
 ---
 
@@ -24,3 +27,5 @@ the node still reports Done."*
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Refuse with a reason".** The node fires Failure with a sentence saying this backend has no username, following the backend layer's rule that nothing is silently dropped. An app that sets Username alongside other details would see the whole save refused until it drops Username. The question as asked: *"On a backend with no usernames, what should Set User Properties do when Username is set?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 58cff6c06 (P109 ISL-030, 2026-10-06), as ruled.** The REST adapter refuses a Set User Properties that carries a Username (not blank) with `REST_USERNAME_UNSUPPORTED`, nothing sent; the node fires Failure with that sentence. Set User Properties v2. The spec's control stays green (the runtime target plays auth through the world), so the regression is the adapter's unit test.
