@@ -26,7 +26,7 @@ Use it to turn app state into UI copy: a toggle button's label, an on/off status
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `falseString` | String | — | Text published on Current Value while Selector is false |
-| `input` | Boolean | — | Which of the two strings to publish; anything that is not true counts as false |
+| `input` | Boolean | — | Which of the two strings to publish: false, 0, empty text or no value picks String for false; anything else picks String for true |
 | `trueString` | String | — | Text published on Current Value while Selector is true |
 
 ## Outputs

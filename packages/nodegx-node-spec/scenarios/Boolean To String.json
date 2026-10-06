@@ -18,7 +18,7 @@
     "steps": [{ "set": "input", "value": true }, "settle", { "set": "input", "value": true }, "settle"]
   },
   {
-    "name": "a truthy non-boolean picks String for true — 'yes', 1, {} — although the description says 'anything that is not true counts as false' (§6 row D6)",
+    "name": "a truthy non-boolean picks String for true — 'yes', 1, {} — as the description says (was row D6: it said 'anything that is not true counts as false')",
     "because": "booleantostring.ts :86 — truthiness, not `=== true`",
     "params": { "trueString": "T", "falseString": "F" },
     "steps": [{ "set": "input", "value": "yes" }, "settle", { "set": "input", "value": 1 }, "settle", { "set": "input", "value": {} }, "settle", { "set": "input", "value": 0 }, "settle"]

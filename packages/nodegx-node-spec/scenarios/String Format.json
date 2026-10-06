@@ -23,8 +23,8 @@
     ]
   },
   {
-    "name": "a placeholder used twice fills EVERY time — the port description says only the first (§6 row)",
-    "because": "stringformat.ts :89-94 — one replace per match, each on the first occurrence still standing; the description at :52 and the comment at :91-92 say otherwise",
+    "name": "a placeholder used twice fills EVERY time, as the port description says (was row D2: it said only the first)",
+    "because": "stringformat.ts :89-94 — one replace per match, each on the first occurrence still standing; the description at :52 said only the first copy filled until P109 ISL-033 (P107-D2, ruled \"Correct the words\")",
     "params": {
       "format": "{a}{a}"
     },

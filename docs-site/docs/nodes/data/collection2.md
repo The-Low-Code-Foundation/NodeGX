@@ -51,7 +51,7 @@ Local list state shared across components without any wiring between them: give 
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `changed` | Signal | — | Fires when the bound array gains or loses items; suppressed while Fetch is connected |
+| `changed` | Signal | — | Fires when the bound array gains or loses items; with Array contents unticked it stays silent and only Fetch updates the node |
 | `completed` | Signal | — | Fires after every invocation. This node has no other outcome — no Unchanged and no Failure — so it always fires together with Done, and wiring either one does the same thing. It is here on every action so that reaching for it is never a per-node decision |
 | `done` | Signal | — | Fires when a Fetch finished and the outputs are up to date |
 | `fetched` | Signal | — | Fires once Fetch has rebound this node and the outputs are up to date |

@@ -152,7 +152,7 @@ export const Collection2 = defineNode({
     // :200-208
     count: { type: 'number', displayName: 'Count', group: 'General', description: 'How many objects the bound array holds', from: (s, w) => (s.bound !== undefined ? w.registry.collection(s.bound).size() : 0) },
     // :209-214
-    changed: { type: 'signal', displayName: 'Changed', group: 'Events', description: 'Fires when the bound array gains or loses items; suppressed while Fetch is connected' },
+    changed: { type: 'signal', displayName: 'Changed', group: 'Events', description: 'Fires when the bound array gains or loses items; with Array contents unticked it stays silent and only Fetch updates the node' },
     // :215-220
     fetched: { type: 'signal', displayName: 'Fetched', group: 'Events', description: 'Fires once Fetch has rebound this node and the outputs are up to date' }
   }

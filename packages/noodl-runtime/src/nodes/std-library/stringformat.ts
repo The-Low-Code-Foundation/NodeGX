@@ -50,7 +50,7 @@ const StringFormatDefinition: NodeDefinitionOptions = {
       group: 'Values',
       type: { name: 'string', multiline: true },
       displayName: 'Format',
-      description: 'Template text; each {placeholder} becomes an input port, and a placeholder used twice fills only the first time',
+      description: 'Template text; each {placeholder} becomes an input port, and every copy of a placeholder is filled',
       set(this: StringFormatNodeInstance, value: unknown) {
         // P107-C3 (ISL-026): a wired number, null or object arrives as its text, as the spec reads it —
         // stored unconverted, `.match` threw in the frame-end callback
@@ -91,8 +91,8 @@ const StringFormatDefinition: NodeDefinitionOptions = {
 
         inputs.forEach(function (name) {
           const v = internal.inputValues[name];
-          // `replace` with a string pattern substitutes the *first* occurrence only, so a
-          // placeholder repeated in one format string fills only once. Kept verbatim. The value goes in
+          // `inputs` holds one name per MATCH, duplicates kept, and each `replace` fills the first copy
+          // still standing — so a placeholder used twice is filled both times (P107-D2). The value goes in
           // through a function so it is inserted exactly: a string replacement expands `$&`, `$$`, `$'`
           // and `` $` ``, and a price of `$$5` printed as `$5` (P107-D3).
           const text = v !== undefined ? String(v) : '';

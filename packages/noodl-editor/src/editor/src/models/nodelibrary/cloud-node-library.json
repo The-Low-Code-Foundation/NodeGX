@@ -2687,7 +2687,7 @@
           "plug": "output",
           "group": "Events",
           "displayName": "Changed",
-          "description": "Fires when the bound array gains or loses items; suppressed while Fetch is connected"
+          "description": "Fires when the bound array gains or loses items; with Array contents unticked it stays silent and only Fetch updates the node"
         },
         {
           "name": "fetched",
@@ -4470,7 +4470,7 @@
           "plug": "input",
           "group": "Values",
           "displayName": "Selector",
-          "description": "Which of the two strings to publish; anything that is not true counts as false"
+          "description": "Which of the two strings to publish: false, 0, empty text or no value picks String for false; anything else picks String for true"
         },
         {
           "name": "currentValue",
@@ -4683,7 +4683,7 @@
           "plug": "input",
           "group": "Values",
           "displayName": "Format",
-          "description": "Template text; each {placeholder} becomes an input port, and a placeholder used twice fills only the first time"
+          "description": "Template text; each {placeholder} becomes an input port, and every copy of a placeholder is filled"
         },
         {
           "name": "formatted",

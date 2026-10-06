@@ -6,9 +6,9 @@
  *
  * Two readers of `input` that do not agree with each other, both carried: the guard (:71) is
  * `===` on the RAW value — so `1` after `true` is a change and fires Selector Changed, and `NaN`
- * after `NaN` fires every time — while the getter (:86) applies truthiness. The port's description
- * says "anything that is not true counts as false"; the code counts anything truthy as true
- * (`'yes'`, `1`, `{}` pick String for true) — NSP-011 §6 row D6.
+ * after `NaN` fires every time — while the getter (:86) applies truthiness: `'yes'`, `1`, `{}` pick
+ * String for true. The port's description said "anything that is not true counts as false" until
+ * P109 ISL-033 (NSP-011 §6 row D6, ruled "Correct the words"); it now names the falsy values.
  */
 
 import { defineNode } from '../spec';
@@ -50,7 +50,7 @@ export const BooleanToString = defineNode({
       coerce: 'none',
       displayName: 'Selector',
       group: 'Values',
-      description: 'Which of the two strings to publish; anything that is not true counts as false'
+      description: 'Which of the two strings to publish: false, 0, empty text or no value picks String for false; anything else picks String for true'
     }
   },
 

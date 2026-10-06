@@ -5,7 +5,7 @@
   "whenToUse": "Small computations and predicates inline in a graph: arithmetic, comparisons, string interpolation via template syntax, ternaries. For multi-statement logic, side effects, or async work use the Function node; for combining two booleans And/Or are clearer.",
   "ports": {
     "expression": "The expression source text. The names it reads define the node's data inputs. JavaScript's own names are available and never become ports (String, Number, JSON, Date, parseInt, Math…), and so are the Math shortcuts round(), abs(), min(), pi.",
-    "run": "Signal; when connected, the expression stops auto-evaluating on input changes and evaluates only when this fires.",
+    "run": "Signal; evaluates the expression now. Inputs still re-evaluate it while Run is connected; untick an input under Run On Value Change to stop that one triggering a run. What connecting Run takes away is the evaluation at load: Result stays empty until an input changes or Run fires.",
     "result": "Untyped output ('*') carrying the raw value — connectable to any input, so type discipline is on the author.",
     "isTrueEv": "Signal; fires when an evaluation turns the result truthy — an edge, unlike the `isTrue` level."
   },

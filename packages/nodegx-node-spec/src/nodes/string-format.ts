@@ -11,10 +11,11 @@
  * halves are in `derived`: `inputs(params)` is what the editor draws, `discover` is what the
  * runtime accepts.
  *
- * Two things the source says about itself that the code does not do, both §6 rows in NSP-004:
- *   - "a placeholder used twice fills only the first time" (:52, and the comment at :91-92). The
- *     loop at :89-94 runs once PER MATCH, and each `replace` fills the first occurrence still
- *     standing — so `{a}{a}` with `a = 'x'` gives `xx`. Every occurrence is filled.
+ * Two things the source once said about itself that the code did not do, both §6 rows in NSP-004:
+ *   - every copy of a placeholder is filled: the loop at :89-94 runs once PER MATCH, and each
+ *     `replace` fills the first occurrence still standing — so `{a}{a}` with `a = 'x'` gives `xx`.
+ *     The description (:52) and the comment at :91-92 said only the first copy filled (row D2,
+ *     ruled "Correct the words" in P109 ISL-033; the code did not change).
  *   - v2 (row D3, ruled "Insert values exactly"): a value goes in exactly as it is. v1, as the
  *     runtime was, replaced with a string, which interprets `$&`, `$$`, `` $` `` and `$'` in the
  *     REPLACEMENT: a value of `$&` printed the placeholder back, `$$5` printed `$5`.
@@ -68,7 +69,7 @@ export const StringFormat = defineNode({
       coerce: 'js-string',
       displayName: 'Format',
       group: 'Values',
-      description: 'Template text; each {placeholder} becomes an input port, and a placeholder used twice fills only the first time'
+      description: 'Template text; each {placeholder} becomes an input port, and every copy of a placeholder is filled'
     }
   },
 

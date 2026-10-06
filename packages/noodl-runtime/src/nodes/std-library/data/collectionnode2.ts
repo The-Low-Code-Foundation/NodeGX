@@ -210,7 +210,7 @@ const CollectionNode: NodeDefinitionOptions = {
       group: 'Events',
       type: 'signal',
       displayName: 'Changed',
-      description: 'Fires when the bound array gains or loses items; suppressed while Fetch is connected'
+      description: 'Fires when the bound array gains or loses items; with Array contents unticked it stays silent and only Fetch updates the node'
     },
     fetched: {
       group: 'Events',

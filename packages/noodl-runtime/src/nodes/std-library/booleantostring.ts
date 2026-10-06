@@ -66,7 +66,7 @@ const BooleanToStringNode: NodeDefinitionOptions = {
       group: 'Values',
       type: { name: 'boolean' },
       displayName: 'Selector',
-      description: 'Which of the two strings to publish; anything that is not true counts as false',
+      description: 'Which of the two strings to publish: false, 0, empty text or no value picks String for false; anything else picks String for true',
       set: function (this: BooleanToStringNodeInstance, value: boolean) {
         if (this._internal.currentInput === value) return;
 

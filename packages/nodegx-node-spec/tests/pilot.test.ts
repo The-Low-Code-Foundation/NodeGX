@@ -100,7 +100,7 @@ describe('afterInputs — one test per frame (Condition, NDA-017 §2 constraint 
 });
 
 describe('String Format — what the source does, not what it says (NSP-004 §6 rows D2, D3)', () => {
-  test('a placeholder used twice fills EVERY time', () => {
+  test('D2 (the words fixed in P109 ISL-033): a placeholder used twice fills EVERY time, as the description now says', () => {
     expect(formatValue('{a}{a}', { a: 'x' })).toBe('xx');
     expect(formatValue('{a} and {a}', { a: 1 })).toBe('1 and 1');
   });
