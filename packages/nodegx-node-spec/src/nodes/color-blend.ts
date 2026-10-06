@@ -20,7 +20,11 @@
  * a defined token and diverge; that is a world need NSP-007 has no arm for yet (NSP-011 §6).
  *
  * Before any colour is written the result is `'#000000'` (:78) and never recomputed (:147-149);
- * the function below returns the same, so nothing special is carried.
+ * the function below returns the same.
+ *
+ * A Blend Value that does not read as a number (`Number(value)` is NaN — text, an object, nothing) keeps the colour
+ * last shown and nothing is sent; a runtime error is raised once per value (v2 — NSP-011 §6 row D8, ruled "Keep last
+ * colour, warn once", fixed in P109 ISL-026). v1 rendered `#NaNNaNNaN`. So the result is state here, not a function.
  */
 
 import { defineNode, type ValueInputDecl } from '../spec';
@@ -90,13 +94,18 @@ function rgbToHex(rgb: RGB) {
 /** easecurves.ts :80-82 */
 const linear = (start: number, end: number, t: number) => start + (end - start) * t;
 
-/** :145-185 `updateColor`, on the sparse list (indices written → values) and the raw blend value. */
+/**
+ * :145-185 `updateColor`, on the sparse list (indices written → values) and the raw blend value; `undefined` when the
+ * Blend Value is not a number (v2, D8 — the node keeps what it showed).
+ */
 export function blend(colors: Readonly<Record<string, unknown>>, blendValue: unknown): unknown {
   const indices = Object.keys(colors).map(Number);
   const length = indices.length ? Math.max(...indices) + 1 : 0;
   if (length === 0) return '#000000'; // :147-149, :78
+  const value = Number(blendValue);
+  if (Number.isNaN(value)) return undefined; // v2 — D8
   const getColor = (index: number): unknown => (colors[index] ? colors[index] : '#000000'); // :151-153
-  const clamped = clamp(0, length - 1, blendValue as number); // :155
+  const clamped = clamp(0, length - 1, value); // :155
   const index = Math.floor(clamped);
   const t = clamped - index;
   if (t === 0) return getColor(index); // :159-162 — verbatim
@@ -110,15 +119,26 @@ export function blend(colors: Readonly<Record<string, unknown>>, blendValue: unk
   ]); // :174-180
 }
 
+type BlendState = { colors: Readonly<Record<string, unknown>>; blendValue: unknown; result: unknown };
+
+/** Every setter stores and recomputes (:86-91, :101-104); a Blend Value that is not a number leaves the result where it was (v2, D8). */
+function recompute(s: BlendState, delta: Partial<BlendState>): { set: Partial<BlendState> } {
+  const n = { ...s, ...delta };
+  const r = blend(n.colors, n.blendValue);
+  return { set: r === undefined ? delta : { ...delta, result: r } };
+}
+
 export const ColorBlend = defineNode({
   type: 'Color Blend',
-  version: 1,
+  // v2 (P109 ISL-026, P107-D8 ruled "Keep last colour, warn once"): a Blend Value that is not a number keeps the colour last
+  // shown and sends nothing; v1 rendered '#NaNNaNNaN'.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/colorblend.ts',
 
   // initialize (:75-81): resultColor '#000000', blendValue 0, colors []
-  state: { colors: {} as Readonly<Record<string, unknown>>, blendValue: 0 as unknown },
+  state: { colors: {} as Readonly<Record<string, unknown>>, blendValue: 0 as unknown, result: '#000000' as unknown },
   // :72-74 — a colour entry holding the result
-  inspect: (s) => String(blend(s.colors, s.blendValue)),
+  inspect: (s) => String(s.result),
 
   inputs: {
     // :95-105 — raw
@@ -136,7 +156,7 @@ export const ColorBlend = defineNode({
     // :108-118
     result: {
       type: 'color',
-      from: (s) => blend(s.colors, s.blendValue),
+      from: (s) => s.result,
       displayName: 'Result',
       group: 'Values',
       description:
@@ -145,7 +165,7 @@ export const ColorBlend = defineNode({
     }
   }
 }).on(
-  { blendValue: (_s, v) => ({ set: { blendValue: v } }) },
+  { blendValue: (s, v) => recompute(s, { blendValue: v }) },
   {
     derived: {
       // nodedefinition.ts `collectPorts`: highest index mentioned plus one spare, or `color 0` alone
@@ -159,7 +179,7 @@ export const ColorBlend = defineNode({
         return ports;
       },
       // :86-91 — store under the index, recompute
-      on: (s, portName, value) => ({ set: { colors: { ...s.colors, [portName.slice('color '.length)]: value } } }),
+      on: (s, portName, value) => recompute(s, { colors: { ...s.colors, [portName.slice('color '.length)]: value } }),
       discover: (portName) => (NUMBERED.test(portName) ? port(Number(portName.slice('color '.length))) : undefined),
       candidates: ['color 0', 'color 1', 'color 2']
     }

@@ -158,8 +158,9 @@ describe('what the source does, not what it says — NSP-011 §6, pinned', () =>
     expect(substringOf('hello', 0, '-1')).toBe('');
     expect(substringOf('hello', -2, -1)).toBe('lo');
   });
-  test('D8: a non-numeric Blend Value renders #NaNNaNNaN; var() reads only through its fallback', () => {
-    expect(blend({ 0: '#000', 1: '#fff' }, 'abc')).toBe('#NaNNaNNaN');
+  test('D8 (v2, fixed in P109 ISL-026): a non-numeric Blend Value gives no colour (the node keeps the last); var() reads only through its fallback', () => {
+    expect(blend({ 0: '#000', 1: '#fff' }, 'abc')).toBeUndefined();
+    expect(blend({ 0: '#000', 1: '#fff' }, '0.5')).toBe('#7f7f7f');
     expect(blend({ 0: '#000', 1: '#fff' }, 0.5)).toBe('#7f7f7f');
     expect(blend({}, 0.5)).toBe('#000000');
     expect(blend({ 0: 'red', 1: '#fff' }, 0.25)).toBe('red');

@@ -48,10 +48,10 @@
     "steps": ["settle", { "set": "color 0", "value": "" }, "settle"]
   },
   {
-    "name": "a non-numeric Blend Value renders '#NaNNaNNaN' — the P79 E2 failure shape through another door (§6 row D8)",
-    "because": "colorblend.ts :155-158 — clamp(NaN) is NaN, `colors[NaN]` is a hole, and Math.floor(NaN).toString(16) is 'NaN'",
-    "params": { "color 0": "#000", "color 1": "#fff", "blendValue": "abc" },
-    "steps": ["settle"]
+    "name": "a Blend Value that is not a number keeps the colour last shown: halfway grey stays grey through 'abc', and 1 then shows white (D8)",
+    "because": "P107-D8, ruled 2026-10-05 \"Keep last colour, warn once\", fixed in P109 ISL-026 (the warning is a runtime error, off the trace); v1 rendered '#NaNNaNNaN' — clamp(NaN), :155-158",
+    "params": { "color 0": "#000", "color 1": "#fff", "blendValue": 0.5 },
+    "steps": ["settle", { "set": "blendValue", "value": "abc" }, "settle", { "set": "blendValue", "value": 1 }, "settle"]
   },
   {
     "name": "a number on a colour port at a whole position is passed through as a number",
