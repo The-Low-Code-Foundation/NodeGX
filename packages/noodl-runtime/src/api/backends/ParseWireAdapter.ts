@@ -125,6 +125,9 @@ interface WireError {
   [field: string]: unknown;
 }
 
+/** P107-C33 — what a request answers when the project has no backend address at the moment it is made. */
+export const NO_BACKEND_CONFIGURED = 'This project has no backend configured. Add one in the Backend panel.';
+
 /** The shape `_makeRequest` takes. Internal to this adapter. */
 interface WireRequest {
   method?: string;
@@ -210,6 +213,19 @@ export class ParseWireAdapter extends AdapterEvents implements IDataAdapter {
    * is a different field and must never arrive here.
    */
   _makeRequest(handle: BackendHandle, path: string, options: WireRequest): void {
+    // P107-C33 (ISL-029, ruled "Refuse with a clear sentence"): a project with no backend at all reaches here on the
+    // legacy store with no address, and `undefined + path` is a RELATIVE url — the request went to the app's own host
+    // and the person saw its "Not Found" (on Node, `XMLHttpRequest` threw and nothing answered). Checked at the moment
+    // of the request, never at resolution: a deploy can inject the endpoint after start, and that must keep working.
+    const address =
+      typeof _noodl_cloud_runtime_version !== 'undefined' && typeof _noodl_cloudservices !== 'undefined'
+        ? _noodl_cloudservices.endpoint
+        : handle.url;
+    if (!address) {
+      options.error({ error: NO_BACKEND_CONFIGURED });
+      return;
+    }
+
     if (typeof _noodl_cloud_runtime_version === 'undefined') {
       // Running in browser
       var xhr = new XMLHttpRequest();

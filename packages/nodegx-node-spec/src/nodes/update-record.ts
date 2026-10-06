@@ -31,7 +31,8 @@
  *     will see the rest;
  *   - the adapter's own refusals (Only If Unchanged on a backend that cannot check it, a save answered with no record):
  *     under R9 they are a backend's answers — a world scripts them as `{ error }`;
- *   - the success's `save` event on the store; a project with NO backend configured at all (row C33).
+ *   - the success's `save` event on the store; a project with NO backend configured at all (row C33, fixed in P109
+ *     ISL-029: the wire refuses with its sentence and sends nothing; graded by the runtime's isl-029-no-backend-configured test).
  */
 
 import { defineNode } from '../spec';

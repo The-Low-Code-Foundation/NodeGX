@@ -25,10 +25,10 @@
  *     call, as Update Record does: a binding cleared or moved while the delete is out changes nothing — Done. The
  *     runtime once read the binding live: a cleared one threw there (the REST adapter handed the TypeError to `error`,
  *     Failure for a delete that happened), and a moved one told the WRONG record it was deleted.
- *   - a project with NO backend configured: `forBackend` falls back to the legacy store (`CloudStore.forScope`)
- *     with no endpoint — a browser sends `DELETE undefined/classes/<Class>/<id>` to the app's own host and reports
- *     what it answers; on Node the press is never answered (row C33, NSP-014 §6.2). Not a world the BACKEND seam
- *     plays (R9: every play has a backend).
+ *   - a project with NO backend configured: the Parse wire refuses the request at the moment it would be made — Failure
+ *     "This project has no backend configured. Add one in the Backend panel.", nothing sent (row C33, fixed in P109
+ *     ISL-029; it used to send `DELETE undefined/classes/…` to the app's own host). Not a world the BACKEND seam plays
+ *     (R9: every play has a backend): graded by noodl-runtime `test/nodes/isl-029-no-backend-configured.test.ts`.
  */
 
 import { defineNode } from '../spec';
