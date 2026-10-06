@@ -416,10 +416,26 @@ function _fromJSON(item, collectionName, modelScope) {
 
     var _type = schema && schema.properties && schema.properties[key] ? schema.properties[key].type : undefined;
 
-    m.set(key, _deserializeJSON(item[key], _type, modelScope));
+    const value = _deserializeJSON(item[key], _type, modelScope);
+    // ISL-027 / P107-C49, ruled "Compare the list's contents": a list arrives as a NEW array on every
+    // read (the session store and every answer are parsed JSON), and `Model.set`'s `!==` called it
+    // changed, so a signed-in user with Roles pulsed Changed three times per Fetch with nothing moved.
+    // A list with the same contents as the one the record holds is not written.
+    if (Array.isArray(value) && sameList(m.get(key), value)) continue;
+    m.set(key, value);
   }
 
   return m;
+}
+
+/** Two plain lists with the same contents, in order (what JSON can carry). */
+function sameList(held, value) {
+  if (!Array.isArray(held) || held.length !== value.length) return false;
+  try {
+    return JSON.stringify(held) === JSON.stringify(value);
+  } catch (e) {
+    return false;
+  }
 }
 
 /**

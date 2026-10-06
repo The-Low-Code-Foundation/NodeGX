@@ -32,6 +32,7 @@ import { defineNode } from '../spec';
 import type { BackendScript } from '../world';
 import { discoverRecordPort, NO_BACKEND_MESSAGE, NO_CLASS_MESSAGE, onRecordPort, RECORD_CANDIDATES, RECORD_ERROR_OUTPUT, RECORD_FAILURE_CODE, RECORD_ID_OUTPUT, RECORD_ID_STATE, type RecordIdState } from './record-base';
 import { ACCESS_CONTROL_INPUT, aclFor, aclInputs, discoverWritePort, dones, failures, onWritePort, RECORD_WRITE_STATE, WRITE_CANDIDATES, type RecordWriteState } from './record-write';
+import { sameList } from '../world';
 
 type CreateRecordState = RecordIdState &
   RecordWriteState & {
@@ -62,7 +63,10 @@ const BACKENDS: ReadonlyArray<BackendScript> = [
 
 export const CreateRecord = defineNode({
   type: 'NewDbModelProperties',
-  version: 1,
+  // v2 (P109 ISL-027, row C49 ruled "Compare the list's contents"): an answer's list with the same contents as the one the record
+  // holds is not written again (cloudstore.js `_fromJSON`), so it is no change; v1 wrote the new array and the record store's `!==`
+  // called it changed.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/newdbmodelpropertiesnode.ts; dbmodelcrudbase.ts; cloudstore.js _fromJSON',
   needs: ['backend', 'registry'],
   worldPool: {
@@ -155,6 +159,7 @@ export const CreateRecord = defineNode({
           m._class = s.collectionId;
           for (const key in item) {
             if (key === 'objectId' || key === 'ACL') continue;
+            if (Array.isArray(item[key]) && sameList(m.get(key), item[key] as unknown[])) continue; // v2, C49
             m.set(key, item[key]);
           }
           // :157-158 — `setModel` flags Id, then the outcome

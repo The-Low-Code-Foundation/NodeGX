@@ -88,6 +88,7 @@ import type { BackendScript, RealtimeScriptEvent } from '../world';
 import { valueDidChange } from './condition';
 import { NO_BACKEND_MESSAGE } from './record-base';
 import { compareObjects, lowerToParse, matchesQuery, toNeutral } from './record-match';
+import { sameList } from '../world';
 
 type QueryRecordsState = {
   /** `_internal.name` — the Class (:563-570) */
@@ -344,7 +345,10 @@ export const QueryRecords = defineNode({
   // v2 (s36, row D29 ruled "Yes, say connecting" by Richard 2026-10-03): a subscription made shows Realtime Status
   // `connecting` at once, read off the handle (:714) as Subscribe To Changes does; v1 showed it empty until the backend's
   // first status. Every cite past :713 moved by one line with the fix.
-  version: 2,
+  // v3 (P109 ISL-027, row C49 ruled "Compare the list's contents"): an answer's list with the same contents as the one the record
+  // holds is not written again (cloudstore.js `_fromJSON`), so it is no change; v2 wrote the new array and the record store's `!==`
+  // called it changed.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/dbcollectionnode2.ts; api/queryutils.ts; @noodl/backend-contract translators',
   needs: ['backend', 'registry', 'random'],
   worldPool: { backends: BACKENDS },
@@ -527,7 +531,11 @@ export const QueryRecords = defineNode({
               // cloudstore.js _fromJSON :407-422 — the Class as it is now
               const m = w.registry.model(item.objectId);
               m._class = s.name;
-              for (const key in item) if (key !== 'objectId' && key !== 'ACL') m.set(key, item[key]);
+              for (const key in item) {
+                if (key === 'objectId' || key === 'ACL') continue;
+                if (Array.isArray(item[key]) && sameList(m.get(key), item[key] as unknown[])) continue; // v3, C49
+                m.set(key, item[key]);
+              }
               return m;
             })
           );

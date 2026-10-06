@@ -55,6 +55,7 @@ import type { BackendScript, WorldScript } from '../world';
 import { valueDidChange } from './condition';
 import { emptyId, runOnChange } from './data-base';
 import { discoverRecordPort, NO_BACKEND_MESSAGE, onRecordPort, RECORD_CANDIDATES, RECORD_FAILURE_CODE } from './record-base';
+import { sameList } from '../world';
 
 /** The fields a play's graph wires from a Record (THE PROPERTY OUTPUTS above) — the Class's, in a project. */
 export const RECORD_FIELDS = ['title', 'n'] as const;
@@ -170,7 +171,10 @@ export const RecordNode = defineNode({
   // is graded for the first time. The runtime's listener sends each field's Changed and then Changed for every
   // key a write moves, one key at a time (dbmodelnode2.ts onModelChangedCallback); v1 queued every
   // `<field> Changed` of a frame ahead of every Changed and Fetched, an order nothing had observed.
-  version: 2,
+  // v3 (P109 ISL-027, row C49 ruled "Compare the list's contents"): an answer's list with the same contents as the one the record
+  // holds is not written again (cloudstore.js `_fromJSON`), so it is no change; v2 wrote the new array and the record store's `!==`
+  // called it changed.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/dbmodelnode2.ts; cloudstore.js _fromJSON',
   needs: ['backend', 'registry', 'random'],
   worldPool: { backends: BACKENDS, registries: REGISTRIES },
@@ -369,6 +373,7 @@ export const RecordNode = defineNode({
         m._class = s.collectionId;
         for (const key in item) {
           if (key === 'objectId' || key === 'ACL') continue;
+          if (Array.isArray(item[key]) && sameList(m.get(key), item[key] as unknown[])) continue; // v3, C49
           const differs = m.get(key) !== item[key];
           m.set(key, item[key]);
           if (already && differs) react(st, w, key, i['runOnChange-record'], r);

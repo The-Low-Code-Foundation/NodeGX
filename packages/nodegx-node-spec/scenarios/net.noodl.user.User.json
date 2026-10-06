@@ -727,8 +727,8 @@
     }
   },
   {
-    "name": "Roles: a real list — and a fresh one on every read, so a Fetch that returns the same roles still pulses Changed",
-    "because": "user.ts :246-261; the store is JSON parsed on every read (SessionStore.ts), and the record store's !== calls a new array changed",
+    "name": "Roles: a real list; a Fetch that returns the same roles pulses no Changed (v2, C49)",
+    "because": "v2, ISL-027 (row C49, ruled 'Compare the list's contents'): a list read from the session store is a new array every time (parsed JSON), and the record store's !== called it changed: v1 pulsed Changed on every read. A list with the same contents is not written again. The next scenario is the control: roles that differ still pulse",
     "params": {},
     "steps": [
       "settle",
@@ -761,6 +761,50 @@
                 "objectId": "u1",
                 "roles": [
                   "editor"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "Roles that really differ on a Fetch: Roles moves and Changed pulses (v2, C49's control)",
+    "because": "v2, ISL-027 (row C49): only a list with the same contents is skipped; a Fetch whose answer brings another list writes it, and the node hears the change",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1,
+            "roles": [
+              "editor"
+            ]
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "ok": {
+                "objectId": "u1",
+                "roles": [
+                  "editor",
+                  "admin"
                 ]
               }
             }
@@ -983,6 +1027,125 @@
       {
         "set": "backendId",
         "value": "other"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1,
+            "bio": "main"
+          },
+          "other": {
+            "objectId": "u1",
+            "bio": "other"
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "The same account on two backends, ticked: after the switch announces the other session, a Fetch goes to the Backend now held",
+    "because": "user.ts :441-444 stores Backend and re-reads; the node's own listener hears the moved field (Changed). The Fetch's call names the Backend the node holds now (:409). Added in P109 ISL-027 s22: once C49 stopped a list re-write from pulsing on every read, nothing showed a switch whose Backend was not stored (the derived drop-set mutant)",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "sessions": {
+          "main": {
+            "objectId": "u1",
+            "email": "ann@example.com",
+            "username": "ann",
+            "nick": "Ann",
+            "n": 1,
+            "bio": "main"
+          },
+          "other": {
+            "objectId": "u1",
+            "bio": "other"
+          }
+        },
+        "answers": [
+          {
+            "match": {
+              "op": "fetchCurrentUser"
+            },
+            "answer": {
+              "never": true
+            }
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "User properties unticked while running, and unticked again: switching Backend pulses no Changed; ticked, and ticked again, switching back pulses Changed",
+    "because": "user.ts :285 the Run On Change setter holds `live`; :441-444 re-reads with it on a Backend switch. Added in P109 ISL-027 s22: once C49 stopped a list re-write from pulsing on every read, nothing showed a tick that `live` did not follow (the swap-branch mutant). Each value is written twice: a write of the value already held must leave `live` as it is",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "runOnChange-user",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "runOnChange-user",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "other"
+      },
+      "settle",
+      {
+        "set": "runOnChange-user",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "runOnChange-user",
+        "value": true
+      },
+      "settle",
+      {
+        "set": "backendId",
+        "value": "main"
       },
       "settle"
     ],

@@ -734,14 +734,33 @@ export function storeEventOf(e: StoreEventScript, backend: string): StoreEvent {
   return { backend, type: e.type, objectId: e.objectId, object: { objectId: e.objectId, ...(e.data ?? {}) }, collection: e.collection };
 }
 
-/** The writer's half of a scripted write (BACKEND above, s24) on a registry: `_fromJSON` — the class, then each key of `data` but `objectId` / `ACL`. */
-export function writeStoreEvent(registry: { model(id?: unknown): { set(name: string, value: unknown): void; [key: string]: unknown } }, e: StoreEvent): void {
+/**
+ * The writer's half of a scripted write (BACKEND above, s24) on a registry: `_fromJSON` — the class, then each key of `data` but
+ * `objectId` / `ACL`. A list with the same contents as the one the record holds is not written (P109 ISL-027, row C49, ruled
+ * "Compare the list's contents"): a list read from JSON is a new array every time, and the record store's `!==` would call it changed.
+ */
+export function writeStoreEvent(
+  registry: { model(id?: unknown): { set(name: string, value: unknown): void; get(name: string): unknown; [key: string]: unknown } },
+  e: StoreEvent
+): void {
   if (e.type === 'delete') return;
   const m = registry.model(e.objectId);
   m._class = e.collection;
   for (const key in e.object) {
     if (key === 'objectId' || key === 'ACL') continue;
-    m.set(key, e.object[key]);
+    const value = e.object[key];
+    if (Array.isArray(value) && sameList(m.get(key), value)) continue;
+    m.set(key, value);
+  }
+}
+
+/** Two plain lists with the same contents, in order (ISL-027, C49: `_fromJSON` does not write such a list again). */
+export function sameList(held: unknown, value: readonly unknown[]): boolean {
+  if (!Array.isArray(held) || held.length !== value.length) return false;
+  try {
+    return JSON.stringify(held) === JSON.stringify(value);
+  } catch (e) {
+    return false;
   }
 }
 

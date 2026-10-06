@@ -1105,6 +1105,104 @@
     }
   },
   {
+    "name": "a fetched list with the same contents as the bound record's is not a change: no Changed, only Fetched (v3, C49)",
+    "because": "v3, ISL-027 (row C49, ruled 'Compare the list's contents'): an answer is parsed JSON, so its list is a new array every time; cloudstore.js _fromJSON no longer writes a list whose contents the record already holds. v2 wrote it and the record store's !== called it changed",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "tags": [
+                  "a",
+                  "b"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "tags": [
+              "a",
+              "b"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
+    "name": "a fetched list whose contents differ from the bound record's is written: Changed pulses (v3, C49's control)",
+    "because": "v3, ISL-027 (row C49): only a list with the same contents is skipped; another list is written and the node hears it",
+    "params": {},
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      "settle",
+      {
+        "signal": "fetch"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {
+                "objectId": "r1",
+                "tags": [
+                  "a",
+                  "c"
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "old",
+            "tags": [
+              "a",
+              "b"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
     "name": "Id emptied while bound: the record is unbound, so a later Fetch has no Id — Missing Id., no call",
     "because": "dbmodelnode2.ts :268-273 → setModelID :310-318 (an empty id binds nothing) → :411-414; s30: closes a mutant seed 20729's sequences left alive (modelId drop-set on the unbind branch)",
     "params": {},

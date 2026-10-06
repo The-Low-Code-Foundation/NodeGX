@@ -49,7 +49,7 @@
 
 import type { ChangeEvent, OutputDecl, WorldView } from '../spec';
 import { defineNode } from '../spec';
-import { userRecordEvent, type BackendScript } from '../world';
+import { sameList, userRecordEvent, type BackendScript } from '../world';
 import { runOnChange } from './data-base';
 
 /** The fields a play's graph wires from a User (THE PROPERTY OUTPUTS above) — the accounts table's, in a project. */
@@ -120,8 +120,10 @@ function currentUser(st: UserState, w: WorldView, on: boolean, r: Reaction): str
   m._class = e.collection;
   for (const key in e.object) {
     if (key === 'objectId' || key === 'ACL') continue;
-    const differs = m.get(key) !== e.object[key];
-    m.set(key, e.object[key]);
+    const value = e.object[key];
+    if (Array.isArray(value) && sameList(m.get(key), value)) continue; // v2, C49: the same list is not written again
+    const differs = m.get(key) !== value;
+    m.set(key, value);
     if (mine && differs) react(st, w, key, on, r);
   }
   return m.getId();
@@ -184,7 +186,10 @@ const BACKENDS: ReadonlyArray<BackendScript> = [
 
 export const UserNode = defineNode({
   type: 'net.noodl.user.User',
-  version: 1,
+  // v2 (P109 ISL-027, row C49 ruled "Compare the list's contents"): a list read from the session (Roles) that has the same
+  // contents as the one the record holds is not written again, so a Fetch, a sign-in or the start-up check that brings the
+  // same roles pulses no Changed. v1 wrote the new array every read, and the record store's `!==` called it changed.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/user/user.ts; noodl-viewer-react/.../user/userservice.ts; RestAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
   worldPool: { backends: BACKENDS },
