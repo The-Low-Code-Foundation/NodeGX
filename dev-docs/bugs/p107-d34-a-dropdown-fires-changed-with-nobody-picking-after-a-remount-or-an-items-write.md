@@ -1,7 +1,8 @@
 ---
 id: P107-D34
 title: A Dropdown fires Changed with nobody picking — a remount, or Items written again after a person's pick, takes the author's Value back and announces it as a change
-status: scheduled
+status: fixed
+commit: 5d40a7aa3
 phase: P109
 task: ISL-031
 severity: medium
@@ -48,3 +49,5 @@ graph writes Value equal to the pick in the frame after it. The runtime's `props
 remount nor a new list takes anything back. That is also the shape of the fix: the component reads the node's value and
 keeps no copy of its own. **When the app is fixed (ISL-031), the six stop diverging:** remove their `row` field (a row
 scenario that passes turns the "known rows" test red), drop the twins, and close the row.
+
+**Fixed 5d40a7aa3 (P109 ISL-031, 2026-10-06), as ruled.** A pick writes `props.value` as well as `_internal.value`, so the node holds one value and a remount or a new Items list re-reads the pick; nothing is announced. The six row scenarios lost their marks and their six twins were dropped, as this file asked. Control: HEAD's Dropdown red on exactly the seven C71 / D34 scenarios.

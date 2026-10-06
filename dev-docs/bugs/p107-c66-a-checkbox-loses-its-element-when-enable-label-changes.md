@@ -1,7 +1,8 @@
 ---
 id: P107-C66
 title: A Checkbox loses its root element when Enable Label is turned off — Focus then reports Unchanged, Scroll Into View says it is not mounted, while the box is on the page
-status: scheduled
+status: fixed
+commit: 94b83d7ea
 phase: P109
 task: ISL-031
 severity: medium
@@ -47,3 +48,5 @@ for the Dropdown in `conformance.test.ts`. The spec's matrix scenario starts eve
 label off so that a rebuild in it is always off → on, which keeps the root.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Fix it with the label work".** Focus and Scroll Into View keep working whatever the label does. About one line in each of the three controls, built alongside the label fix already scheduled. Nothing that works today depends on the lost element. The question as asked: *"Should the control keep hold of its element when its label is hidden?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 94b83d7ea (P109 ISL-031, 2026-10-06), as ruled, with the label work (C80).** Each control renders one tree whether the label shows or not, and one element carries the root ref at a time (the outer div with a label, the box or wrapper without one), so turning the label off no longer nulls the node's element. Known rows gone from the Checkbox, Dropdown and Radio Button lists. Control: HEAD's components red on exactly the C66 / C80 scenarios.

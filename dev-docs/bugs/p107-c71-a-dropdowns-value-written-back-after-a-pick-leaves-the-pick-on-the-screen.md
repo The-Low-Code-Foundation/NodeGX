@@ -1,7 +1,8 @@
 ---
 id: P107-C71
 title: A Dropdown's Value written back to the value React last rendered, after a person's pick, changes the output but not the selection shown — picking the shown option again then raises nothing
-status: scheduled
+status: fixed
+commit: 5d40a7aa3
 phase: P109
 task: ISL-031
 severity: medium
@@ -44,3 +45,5 @@ value; the runner knows the row (`pickWriteBackPick`).
 author's Value and the component's copy of the choice: the node's value is what the element is told to select. The
 D34 twins avoid this row the same way the fix would. Once `props.value` follows every Value write, the effect sees the
 write back.
+
+**Fixed 5d40a7aa3 (P109 ISL-031, 2026-10-06), as ruled.** The node counts every write of its value (`props.valueWrites`) and the component's effect is keyed on it. Control: without the counter, red on exactly this scenario.

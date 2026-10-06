@@ -1,7 +1,8 @@
 ---
 id: P107-C76
 title: A Radio Button Group's Value written back in the same frame as a person's pick leaves the picked button selected under a Value that names another — picking it again raises nothing, and picking the named one raises no Changed
-status: scheduled
+status: fixed
+commit: 8dbeb8f33
 phase: P109
 task: ISL-031
 severity: medium
@@ -51,3 +52,5 @@ Value. The button's spec drops `gRendered` and `gSelected` and reads the group's
 `packages/noodl-runtime/test/node-spec/conformance.test.ts`. The group's row scenario has a twin with a frame between the pick
 and the write-back, which both targets pass. **When the app is fixed (ISL-031)**, the four C76 row scenarios (one on the group,
 three on the button) stop diverging: remove their `row` field and close the row.
+
+**Fixed 8dbeb8f33 (P109 ISL-031, 2026-10-06), as ruled.** The group's node counts every write of its Value (`props.valueWrites`) and the group's effect is keyed on the count, so a write-back in a pick's frame is drawn. Control: without the counter, red on exactly the four C76 scenarios (group 1, button 3).

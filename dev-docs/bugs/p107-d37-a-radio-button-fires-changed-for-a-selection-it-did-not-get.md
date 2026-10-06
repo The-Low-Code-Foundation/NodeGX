@@ -1,7 +1,8 @@
 ---
 id: P107-D37
 title: A Radio Button fires Changed when its Checked moves for any reason while its group's last selection was a person's — a sibling carrying the same Value picked, its own Value written in the frame of a pick, a remount after a pick
-status: scheduled
+status: fixed
+commit: 8dbeb8f33
 phase: P109
 task: ISL-031
 severity: medium
@@ -51,3 +52,5 @@ Changed. One case the ruling does not name, a button off the page when a sibling
 group's choice when it comes back, with no Changed. That reading comes from this file's remount case and from the runtime's
 own behaviour in that case; it is open to Richard (README §7 R15). Four row scenarios carry the row. 89 v1 scenarios that
 graded the group's flag and React's effect order were dropped (NSP-023 §8.6).
+
+**Fixed 8dbeb8f33 (P109 ISL-031, 2026-10-06), as ruled.** The group's selection carries the click that made it (`RadioClick`: a number, the clicked button's id, the selection it took over); each button reports a click once — Changed on the button clicked and on the one that lost the selection to it, nothing for a same-Value sibling, a Value write or a remount. Control: HEAD's radio files red on exactly the nine C76 / D37 scenarios.

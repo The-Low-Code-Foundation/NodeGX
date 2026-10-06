@@ -1,7 +1,8 @@
 ---
 id: P107-C80
 title: Turning Enable Label on or off while someone is typing in a Text Input takes the keyboard away from them, silently — React builds a new field under the label, and Focused still says true
-status: scheduled
+status: fixed
+commit: 94b83d7ea
 phase: P109
 task: ISL-031
 severity: medium
@@ -9,7 +10,7 @@ area: runtime / Text Input, Checkbox, Dropdown (TextInput.tsx render :233-281, C
 found: P107 NSP-023 s45, 2026-10-05 (modelled as spec behaviour since NSP-016 s38; ruled the other way 2026-10-05)
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-023-THE-SPEC-WITHOUT-REACT.md §8; scenarios "focused, then Enable Label turned on: the field and the keyboard on it stay …" and "focused and a finger held across a frame, then Enable Label turned on …" in packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json
 kit: node-spec
-regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json "focused, then Enable Label turned on: the field and the keyboard on it stay — a Focus action is Done with nothing more; turned off again, the same"
+regression: packages/nodegx-node-spec/scenarios/net.noodl.controls.textinput.json "focused, then Enable Label turned on: the field and the keyboard on it stay — a Focus action is Done with nothing more; turned off again, the same — the runtime rebuilds the input under the label and the keyboard leaves with the old one, silently (a Focus fires Focused again: was row C80, fixed in P109 ISL-031)"
 ---
 
 **What a person sees.** Someone is typing in a Text Input. The app turns its label on (or off), for example to show an error. The
@@ -42,3 +43,5 @@ takes it out and adds the C80 row to the Radio Button's runtime list.
 The Dropdown's 10,000 at seed 20732 found the matcher blind to a node PLACED with the label on: the placing is a paint, a
 Focus before the first frame waits for the element it drew, and a label written off before the first frame drops the
 keyboard. The matcher now starts from the placing's label (NSP-023 §8.5).
+
+**Fixed 94b83d7ea (P109 ISL-031, 2026-10-06), as ruled, on all four controls.** One tree either way: the outer <div> always, the label in its slot or null; without a label the outer div is `display: contents` and the wrapper is the root with its old styles, so an unlabelled control lays out as before. Root styles the node wrote straight onto the old root are blanked on the element that is no longer the root (noodl-root-ref.ts `clearedRootStyles`) — found by the Radio Button's "hidden, holding the keyboard" scenario, now added to the other three. Control: HEAD's components red on exactly the 18 C66 / C80 scenarios; without the clearing, on exactly the four hidden ones. Not measured: layout in a real browser.
