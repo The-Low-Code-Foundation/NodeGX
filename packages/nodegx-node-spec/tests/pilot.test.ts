@@ -129,8 +129,10 @@ describe('And — the sparse array, as a record', () => {
     expect(and({ '2': true })).toBe(true);
     expect(and({ '0': false, '2': true })).toBe(false);
   });
-  test('nothing is published before the first input; a hole counts as true', () => {
-    expect(run(And, {}, ['settle'])).toEqual([{ t: 'settle' }]);
+  test('v2 (row D1, P109 ISL-033): false is published before the first input; a hole counts as true', () => {
+    expect(run(And, {}, ['settle'])).toEqual([{ t: 'settle' }, { t: 'value', port: 'result', value: false }]);
+    // a first input of false leaves the answer at false: nothing more is published
+    expect(run(And, {}, ['settle', { set: 'input 0', value: false }, 'settle']).filter((e) => e.t === 'value')).toEqual([{ t: 'value', port: 'result', value: false }]);
     expect(run(And, {}, [{ set: 'input 2', value: true }, 'settle'])).toContainEqual({ t: 'value', port: 'result', value: true });
   });
 });

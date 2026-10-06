@@ -5,8 +5,8 @@
  *
  * And's sibling (and.ts), with two differences a wire can see: `result` is NOT cached (:41
  * flags on every changed input; :52-54 reads `some(isTrue)` live), so the first settle publishes
- * `false` from the getter — an Or with nothing connected says `false`, where an And says nothing
- * (NSP-004 §6 D1). And a hole in the sparse array (:8-11) is skipped by `some`, so it counts as
+ * `false` from the getter — an Or with nothing connected says `false`, as an And does since its v2
+ * (NSP-004 §6 D1, fixed in P109 ISL-033; v1 And said nothing). And a hole in the sparse array (:8-11) is skipped by `some`, so it counts as
  * FALSE here where And's `some((v) => !v)` skips it as true.
  */
 

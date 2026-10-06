@@ -14,7 +14,9 @@ function allTrue(written) {
 
 module.exports = {
   type: 'And',
-  boot: () => ({ written: {}, answer: undefined }),
+  // Not the stranger's line: And v2 (P109 ISL-033, row D1) starts at false, so `answer` boots false when the spec
+  // moved; the stranger wrote `answer: undefined` (nothing published before the first input), as v1 said.
+  boot: () => ({ written: {}, answer: false }),
   ports: {},
   fire: {},
   outs: { result: (s) => s.answer },

@@ -1,7 +1,7 @@
 [
   {
-    "name": "nothing is published before the first input; the first input publishes the first result",
-    "because": "and.ts :14, :44-46 — `result` is undefined until an input arrives, so the first settle sends nothing (C3), whatever the port description at :57 says",
+    "name": "false is published before the first input; the first input publishes the next result",
+    "because": "and.ts initialize — `result` starts false, as the port description says (v2, P109 ISL-033: row D1 ruled \"Make And start at false\"; v1 sent nothing until an input arrived)",
     "params": {},
     "steps": ["settle", { "set": "input 0", "value": true }, "settle"]
   },

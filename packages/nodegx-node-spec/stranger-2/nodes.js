@@ -85,7 +85,9 @@ class And {
       accept(name) { return NUMBERED.test(name) ? val('js-boolean', undefined) : undefined; }
     };
   }
-  constructor() { this.seen = {}; this.answer = undefined; }
+  // Not the stranger's line: And v2 (P109 ISL-033, row D1) starts at false, so `answer` starts false when the spec
+  // moved; the stranger wrote `this.answer = undefined`, as v1 said.
+  constructor() { this.seen = {}; this.answer = false; }
   read() { return { result: this.answer }; }
   derivedWrite(fx, name, v) {
     this.seen[name] = v;

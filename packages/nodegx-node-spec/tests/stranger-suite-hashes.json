@@ -1,5 +1,5 @@
 {
-  "scenarios/And.json": "39da4bec7240198164009d0f611b3956c60ec039edd2678bbb30298e68345c9a",
+  "scenarios/And.json": "71990272d83915a46bac31baaedaa157247db4ae1f14eff916d8db6ae7051bb4",
   "scenarios/Boolean To String.json": "b3a4c4a8eda2485b1005ff3b2c010b8f5e1e4c3b4a7b43327141eb5ed45e57c9",
   "scenarios/Condition.json": "31c331f56dc4ffcd533e0f19588614954d2501f91b82e8feef11d38b818a6ec4",
   "scenarios/Counter.json": "6ed4795ca94f92b688e80bfff4d1589ceba5508054dca4f510aa5bdb04b1f181",
@@ -16,7 +16,7 @@
   "src/adapter.ts": "5f5a95e038911151e6cb2bb7a788524d6fdb5990475c4f186cb1bd5087bb9457",
   "src/canonical.ts": "03fd83120750ef53e7c0f422a2588d4e1cfbf5af141e02eca77897bbc24ffa7c",
   "src/coerce.ts": "8cde509bfd132094d2f1d0a372d3cc258211ef917e99616157c4dc7fa02bafdd",
-  "src/nodes/and.ts": "d25fadf899b0d6cfaf8b96ea1ef1c583e31a59f019f9c88ca920b9cf76e46408",
+  "src/nodes/and.ts": "26df7868779f10dee0c3dd703164f2525e6c98cbe2bc1e34f777cc336b2a8a36",
   "src/nodes/animate-to-value.ts": "946b5601f0544d432f6a85602b39e0e67292cb6f8c73939644375d23a59f52fa",
   "src/nodes/boolean-to-string.ts": "464a18b7edac17f1eddf14c6d4ffb34d1f916ecf579be37030022b1a71321382",
   "src/nodes/condition.ts": "c6ff72e6dd39f65e6834a42c70a6cb4846c4afeb54c2d0b51aa59934870d3594",

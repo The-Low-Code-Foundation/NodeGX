@@ -31,15 +31,16 @@ export function and(inputs: Readonly<Record<string, boolean>>): boolean {
 
 export const And = defineNode({
   type: 'And',
-  version: 1,
+  // v2 (P109 ISL-033, row D1 ruled "Make And start at false"): Result is false before any input arrives, as the
+  // description says and as Or gives. v1, as the runtime was, published nothing until the first input.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/and.ts',
 
-  // initialize (:22-24): `inputs = []`; `result` is left undefined (:14) and only exists once an
-  // input has arrived (:44-45) — so NOTHING is published before the first input (C3), whatever
-  // the port description says ("false when no input is connected at all", :57 — a §6 row).
-  state: { inputs: {} as Readonly<Record<string, boolean>>, result: undefined as boolean | undefined },
-  // :25-28 — a value entry holding `and(inputs)` (NOT the cached `result`: `and([])` is false
-  // while `result` is still undefined, so the inspector shows "false" for a node that has sent nothing)
+  // initialize: `inputs = []`, `result = false` (v2, row D1) — so the first settle publishes
+  // `false` before any input arrives, as the port description says. A first input of `false`
+  // leaves the answer where it was and publishes nothing more.
+  state: { inputs: {} as Readonly<Record<string, boolean>>, result: false as boolean },
+  // a value entry holding `and(inputs)` — `and([])` is false, the same as the cached `result` at the start
   inspect: (s) => String(and(s.inputs)),
 
   inputs: {},
