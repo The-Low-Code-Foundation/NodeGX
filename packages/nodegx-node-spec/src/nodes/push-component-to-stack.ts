@@ -13,7 +13,8 @@
  *   - Mode `replace` hands the same as a REPLACE (:203-231, :209), with `type` = Transition or `'None'` when
  *     it is empty;
  *   - any other Mode (`'Push'`, `''`, `null` — the port is an enum, a wire carries anything) hands
- *     NOTHING and the presses are never answered (row C28).
+ *     nothing; Error is "Unknown mode '<the value>' — Mode must be push or replace" and every press is
+ *     Failure `push-component-stack/unknown-mode` (v2, row C28 — v1 never answered them).
  * Stack, Target and every `pm-<name>` are handed as stored (raw) — Stack `undefined` until written, its
  * declared default `Main` never reaching the setter; `params` is the `pm-` values by name.
  * The stacks' answer settles every press of the frame alike (:142-152, one settle per request even when
@@ -35,7 +36,7 @@
  *         later press of the same page with new `pm-` values was "already showing". The node now hands a
  *         copy (:183, :214). The world records `params` canonically at the call and answers by script, so
  *         this is graded in the viewer (`isl-028-a-second-press-with-new-parameters.test.ts`), not here.
- * ONE ROW the trace shows: C28 — a Mode that is neither `push` nor `replace` answers no press.
+ * ONE ROW the trace shows, fixed in P109 ISL-028: C28 — a Mode that is neither `push` nor `replace` answered no press.
  */
 
 import { defineNode, type InputDecl, type ValueInputDecl } from '../spec';
@@ -89,7 +90,9 @@ const TRANSITIONING = { failure: { code: 'push-component-stack/stack-transitioni
 
 export const PushComponentToStack = defineNode({
   type: 'PageStackNavigate',
-  version: 1,
+  // v2 (P109 ISL-028, row C28 ruled "Fail and name the value"): a press with a Mode that is neither push nor replace
+  // is Failure `push-component-stack/unknown-mode`, Error naming the value. v1 handed nothing and never answered it.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigate.ts',
   needs: ['stack'],
   worldPool: {
@@ -150,6 +153,8 @@ export const PushComponentToStack = defineNode({
     afterInputs: (s, _inputs, world) => {
       if (!s.scheduled) return { send: [] };
       const reset = { scheduled: false, presses: 0 };
+      const answerAll = (outcome: 'done' | 'unchanged' | 'failure', error?: string) =>
+        Array.from({ length: s.presses }, () => (error === undefined ? { port: 'navigate', outcome } : { port: 'navigate', outcome, error }));
       let op: 'push' | 'replace';
       let type: unknown;
       if (s.mode === 'push' || s.mode === undefined) {
@@ -159,13 +164,13 @@ export const PushComponentToStack = defineNode({
         op = 'replace';
         type = s.transition || 'None'; // :209
       } else {
-        return { set: reset, send: [] }; // C28 — no branch: nothing handed, the presses stay unanswered
+        // C28 (v2): nothing handed; Error names the value, then every press is Failure
+        const error = `Unknown mode '${String(s.mode)}' — Mode must be push or replace`;
+        return { set: { ...reset, error }, send: ['error'], outcomes: answerAll('failure', 'push-component-stack/unknown-mode') };
       }
       const stack = { op, stack: s.stack, target: s.target, params: s.pageParams, transition: { ...{ type }, ...s.transitionParams } };
       const answer = world.stackAnswer(op, s.stack, s.target);
       if (answer === undefined) return { set: reset, send: [], stack }; // queued by the handler — never answered in a play
-      const answerAll = (outcome: 'done' | 'unchanged' | 'failure', error?: string) =>
-        Array.from({ length: s.presses }, () => (error === undefined ? { port: 'navigate', outcome } : { port: 'navigate', outcome, error }));
       if (answer === 'done') return { set: reset, send: [], stack, outcomes: answerAll('done') };
       if (answer === 'unchanged') return { set: reset, send: [], stack, outcomes: answerAll('unchanged') };
       // :153-159 reportFailure — Error first, then Failure

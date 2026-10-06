@@ -226,6 +226,14 @@ const Navigate: NodeDefinitionOptions = {
             this.reportFailure(pending, code, message);
           }
         });
+      } else {
+        // P107-C28 (ISL-028, ruled "Fail and name the value"): Mode is an enum, but a wire carries anything — 'Push',
+        // '', null. There was no branch for it: nothing reached a stack and the presses were never answered.
+        this.reportFailure(
+          pending,
+          'push-component-stack/unknown-mode',
+          `Unknown mode '${String(this._internal.navigationMode)}' — Mode must be push or replace`
+        );
       }
     },
     setTransitionParam: function (this: NavigateInstance, param: string, value: unknown) {

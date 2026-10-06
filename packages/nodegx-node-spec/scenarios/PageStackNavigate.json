@@ -273,8 +273,8 @@
     ]
   },
   {
-    "name": "C28 — a Mode that is neither push nor replace hands nothing and never answers; push again answers",
-    "because": "navigate.ts :177, :203 — no else branch",
+    "name": "C28 — a Mode that is neither push nor replace hands nothing and is Failure, Error naming the value; push again answers (v2)",
+    "because": "an enum on a wire carries anything; v1 had no else branch and never answered the press (C28, fixed in P109 ISL-028)",
     "world": {
       "stack": {
         "names": [
