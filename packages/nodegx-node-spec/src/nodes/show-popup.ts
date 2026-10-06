@@ -15,10 +15,10 @@
  * popups this node opened (nodecontext.ts :1212-1330):
  *   - no popup host: nothing opens, and every press is Done (:1213, :288-301);
  *   - `replace`: every popup on the stack is dismissed FIRST, each telling its opener `Dismissed` (:1240-1242,
- *     :1220-1236) — a popup whose build failed included; then the new popup takes a slot on top (:1243);
+ *     :1220-1236); then the new popup takes a slot on top (:1243);
  *   - the component builds: Done (:288-290); it does not: Error is set to `The popup "<target>" could not be
- *     opened: <why>` and every press is Failure `show-popup/target-failed` (:291-297) — and its slot is never given
- *     back (nodecontext.ts has no `catch` around :1245): it stays on the stack, uncancellable (row C30).
+ *     opened: <why>` and every press is Failure `show-popup/target-failed` (:291-297), and its slot is given back
+ *     (v2, row C30 — v1 kept it: a later Replace It reported Dismissed for it, and on top it took Escape).
  * LATER, what the person does (world.ts POPUP `events`) — a close through the popup's Close Popup, or Escape (the
  * top popup whose Modal is on, and only when its Close On Escape is on and it was built, :1183-1195) — takes the
  * popup off the stack at the START of the next frame (:1284-1300) and only then tells this node: a close's
@@ -38,8 +38,8 @@ type Rec = Readonly<Record<string, unknown>>;
 
 /** One of this node's slots on the context's popup stack (nodecontext.ts `PopupStackEntry`). */
 type Slot = Readonly<{
-  /** the ordinal of the popup among those this node opened; `undefined` for a build that failed */
-  n: number | undefined;
+  /** the ordinal of the popup among those this node opened (a build that failed holds no slot: v2, C30) */
+  n: number;
   modal: boolean;
   closeOnEscape: boolean;
   /** a close or an Escape is on its way: it leaves at the next frame's start */
@@ -89,7 +89,10 @@ const NO_TARGET = 'No Target component is set on this Show Popup node';
 
 export const ShowPopup = defineNode({
   type: 'NavigationShowPopup',
-  version: 1,
+  // v2 (P109 ISL-028, row C30 ruled "Give the place back"): a popup whose build failed gives its slot back. v1 kept
+  // it: a later Replace It told this node Dismissed for a popup that never opened, and on top it took Escape away
+  // from the popup beneath.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/showpopup.ts',
   needs: ['popup'],
   worldPool: {
@@ -237,10 +240,9 @@ export const ShowPopup = defineNode({
         const slot: Slot = { n: s.opened, modal: popup.modal, closeOnEscape: popup.closeOnEscape, leaving: false };
         return { set: { ...shown, stack: [...stack, slot], opened: s.opened + 1 }, send: [], sendDerived, pulses, popup, outcomes: all('done') };
       }
-      // :291-297 — the build failed; the slot stays (C30)
-      const slot: Slot = { n: undefined, modal: popup.modal, closeOnEscape: popup.closeOnEscape, leaving: false };
+      // :291-297 — the build failed; its slot is given back (v2, C30)
       const error = 'The popup "' + String(s.target) + '" could not be opened: ' + answer.error;
-      return { set: { ...shown, stack: [...stack, slot], error }, send: ['error'], sendDerived, pulses, popup, outcomes: all('failure', 'show-popup/target-failed') };
+      return { set: { ...shown, stack, error }, send: ['error'], sendDerived, pulses, popup, outcomes: all('failure', 'show-popup/target-failed') };
     },
     derived: {
       inputs: () => ({}),
@@ -262,7 +264,7 @@ export const ShowPopup = defineNode({
         if (event.kind === 'escape') {
           // nodecontext.ts :1183-1195 — the top MODAL popup, and only it
           const top = [...s.stack].reverse().find((slot) => slot.modal);
-          if (!top || !top.closeOnEscape || top.n === undefined || top.leaving) return { send: [] };
+          if (!top || !top.closeOnEscape || top.leaving) return { send: [] };
           return { set: { stack: s.stack.map((slot) => (slot === top ? { ...slot, leaving: true } : slot)), leaving: [...s.leaving, { n: top.n, kind: 'cancelled' }] }, send: [] };
         }
         // the handler of the n-th popup opened (absent: the last); one no longer open, or already leaving, does nothing (:1289)

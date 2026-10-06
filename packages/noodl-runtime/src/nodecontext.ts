@@ -1242,7 +1242,18 @@ NodeContext.prototype.showPopup = async function (popupComponent, params, args) 
   }
   this.popupStack.push(entry);
 
-  const popupNode = await nodeScope.createNode(popupComponent);
+  let popupNode;
+  try {
+    popupNode = await nodeScope.createNode(popupComponent);
+  } catch (e) {
+    // P107-C30 (ISL-028, ruled "Give the place back"): a popup that could not be built gives its slot back. It
+    // used to stay on the stack: the next Replace It told this popup's opener Dismissed for a popup nobody saw,
+    // and on top it took Escape away from the popup beneath. Marked spoken-for, so nothing reports it again.
+    entry.dismissed = true;
+    const index = this.popupStack.indexOf(entry);
+    if (index !== -1) this.popupStack.splice(index, 1);
+    throw e;
+  }
 
   if (entry.dismissed) {
     // Replaced while this one was still being built. Nothing was shown, so nothing is

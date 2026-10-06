@@ -149,8 +149,8 @@
     ]
   },
   {
-    "name": "C30 — a failed build keeps its slot: the next show (Replace It) tells THIS node Dismissed for a popup that never opened",
-    "because": "nodecontext.ts :1243-1245 — no catch around the await; :1240-1242 dismisses it",
+    "name": "C30 — a failed build gives its slot back: the next show (Replace It) tells this node nothing for it, only Done (v2)",
+    "because": "v1 kept the slot (no catch around the await) and the next Replace It dismissed it: Dismissed for a popup nobody saw (C30, fixed in P109 ISL-028)",
     "world": {
       "popup": {
         "components": [
@@ -177,8 +177,8 @@
     ]
   },
   {
-    "name": "C30 — a failed build on top (Show On Top) takes Escape: the popup beneath cannot be cancelled",
-    "because": "nodecontext.ts :1183-1195 — the top modal slot has no cancel",
+    "name": "C30 — a failed build on top (Show On Top) holds no slot: Escape cancels the popup beneath (v2)",
+    "because": "v1 kept the failed slot on top, which has no cancel, so Escape did nothing (C30, fixed in P109 ISL-028)",
     "world": {
       "popup": {
         "components": [
@@ -217,7 +217,7 @@
     ]
   },
   {
-    "name": "the control for C30's Escape: with no failed build on top, the same Escape cancels the popup — Cancelled at the next frame",
+    "name": "the control for C30's Escape: with no failed build at all, the same Escape cancels the popup — Cancelled at the next frame",
     "because": "nodecontext.ts :1183-1195, :1284-1300, :1306-1308",
     "world": {
       "popup": {
