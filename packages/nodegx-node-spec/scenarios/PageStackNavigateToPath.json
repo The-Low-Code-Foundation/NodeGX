@@ -165,8 +165,8 @@
     ]
   },
   {
-    "name": "a parameter value holding $& is expanded as a replacement pattern — the placeholder comes back",
-    "because": ":172 — String.prototype.replace with a string replacement expands $&, $$, $` and $'",
+    "name": "a parameter value holding $& is inserted as written (v2, D20)",
+    "because": "a function replacement: v1 expanded $&, $$, $` and $' in a value, so $& put the placeholder back (D20, fixed in P109 ISL-028)",
     "params": {
       "path": "/product/{id}"
     },
@@ -214,8 +214,8 @@
     ]
   },
   {
-    "name": "Query with the path type: path, then ?query; a null value is appended as 'null', a value with & is not encoded",
-    "because": ":183-184 — only `undefined` is left out; `q + '=' + value`",
+    "name": "Query with the path type: path, then ?query; a null value is left out, a value with & is encoded (v2, D21)",
+    "because": "null is unset like undefined; name and value through encodeURIComponent, as the Router decodes them (D21, fixed in P109 ISL-028 — v1 appended 'page=null' and an unencoded 'sort=a&b')",
     "params": {
       "path": "/list",
       "queryNames": "page,sort"
@@ -238,6 +238,35 @@
       {
         "set": "q-sort",
         "value": "a&b"
+      },
+      {
+        "signal": "navigate"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "Query with the hash type: a value with # and a name with a space are encoded, so the hash still starts the page (v2, D21)",
+    "because": "v1 put '?q=a#b#/list' in the address: the browser read the hash from the first #, so the router read the wrong page (D21, fixed in P109 ISL-028)",
+    "params": {
+      "path": "/list",
+      "queryNames": "q,x y"
+    },
+    "world": {
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      },
+      "activation": true
+    },
+    "steps": [
+      {
+        "set": "q-q",
+        "value": "a#b"
+      },
+      {
+        "set": "q-x y",
+        "value": "50% off"
       },
       {
         "signal": "navigate"

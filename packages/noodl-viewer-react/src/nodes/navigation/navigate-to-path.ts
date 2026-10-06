@@ -171,7 +171,10 @@ const NavigateToPathNode: NodeDefinitionOptions = {
 
       inputs.forEach(function (name) {
         const v = internal.params[name];
-        formattedPath = formattedPath.replace('{' + name + '}', v !== undefined ? String(v) : '');
+        // P107-D20 (ISL-028, ruled "Insert values as written"): a function replacement, so a `$&` or `$$` in the
+        // value is text — a string replacement read it as a pattern and `$&` put the placeholder back
+        const text = v !== undefined ? String(v) : '';
+        formattedPath = formattedPath.replace('{' + name + '}', () => text);
       });
 
       let urlPath, hashPath;
@@ -182,8 +185,11 @@ const NavigateToPathNode: NodeDefinitionOptions = {
       const query: string[] = [];
       if (internal.queryNames !== undefined) {
         internal.queryNames.split(',').forEach((q) => {
-          if (internal.query[q] !== undefined) {
-            query.push(q + '=' + internal.query[q]);
+          const v = internal.query[q];
+          // P107-D21 (ISL-028, ruled "Encode, and skip null"): a value with `&` or `#` broke the address, and a null
+          // arrived as the text 'null'. The Router decodes both halves (`_getSearchParams`).
+          if (v !== undefined && v !== null) {
+            query.push(encodeURIComponent(q) + '=' + encodeURIComponent(String(v)));
           }
         });
       }

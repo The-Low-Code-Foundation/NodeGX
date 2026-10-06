@@ -11,13 +11,12 @@
  *     with or without a window (:150-160);
  *   - otherwise the URL is built (:162-192): every `{name}` in Path (letters, digits, `_`; one
  *     replacement per occurrence) is replaced, first occurrence first, by `String(<p-name>)` — `''`
- *     for a parameter never set — with JavaScript's `String.prototype.replace`, so a `$&`, `$$`,
- *     `` $` `` or `$'` in a VALUE is expanded as a replacement pattern (as String Format's D3); the
- *     project's `navigationPathType` (world.ts PROJECT) puts the result after a `#` when it is
- *     unset or `'hash'`, and in the path for anything else; the Query names, split on `,` and
- *     neither trimmed nor de-duplicated, add `name=value` for each whose value is not `undefined`,
- *     joined by `&` after a `?`, unencoded. The URL is `path` + `?query` + `#hash`, each only when
- *     present;
+ *     for a parameter never set — inserted as written (v2, D20: a `$&` or `$$` in a value is text, not
+ *     a replacement pattern); the project's `navigationPathType` (world.ts PROJECT) puts the result
+ *     after a `#` when it is unset or `'hash'`, and in the path for anything else; the Query names,
+ *     split on `,` and neither trimmed nor de-duplicated, add `name=value` for each whose value is
+ *     neither `undefined` nor `null`, name and value each through `encodeURIComponent` (v2, D21), joined
+ *     by `&` after a `?`. The URL is `path` + `?query` + `#hash`, each only when present;
  *   - no window — a server render — is Unchanged, and nothing is opened or pushed (:199-202);
  *   - Open In New Tab (truthy, :88-90) hands the URL to `window.open(url, '_blank')` — no features
  *     (:205); a `null` handle (world.ts LOCATION: the popup blocker refused) is Failure
@@ -70,15 +69,18 @@ export function compileUrl(path: string, params: Readonly<Record<string, unknown
   let formatted = path;
   for (const name of placeholders(path)) {
     const v = params[name];
-    // a STRING pattern replaces the first occurrence; the replacement's `$` patterns are expanded (:172)
-    formatted = formatted.replace('{' + name + '}', v !== undefined ? String(v) : '');
+    // the first occurrence; a function replacement, so a `$` in the value is inserted as written (v2, D20)
+    const text = v !== undefined ? String(v) : '';
+    formatted = formatted.replace('{' + name + '}', () => text);
   }
   const type = world.projectSettings().navigationPathType; // :176
   const hash = type === undefined || type === 'hash';
   const parts: string[] = [];
   if (queryNames !== undefined) {
     for (const q of (queryNames as string).split(',')) {
-      if (query[q] !== undefined) parts.push(q + '=' + query[q]); // :184 — `+`, unencoded
+      const v = query[q];
+      // v2 (D21): null is unset like undefined; name and value encoded, as the Router decodes them
+      if (v !== undefined && v !== null) parts.push(encodeURIComponent(q) + '=' + encodeURIComponent(String(v)));
     }
   }
   return (hash ? '' : formatted) + (parts.length >= 1 ? '?' + parts.join('&') : '') + (hash ? '#' + formatted : '');
@@ -90,7 +92,11 @@ const queryPort = (): ValueInputDecl => ({ type: '*', coerce: 'none', group: 'Qu
 
 export const NavigateToPath = defineNode({
   type: 'PageStackNavigateToPath',
-  version: 1,
+  // v2 (P109 ISL-028, rows D20 "Insert values as written" and D21 "Encode, and skip null"): a parameter value is
+  // inserted into Path as written — v1 expanded `$&`, `$$`, `` $` `` and `$'` in it — and each Query name and value is
+  // encoded with `encodeURIComponent`, a `null` value left out like an unset one — v1 appended `name=value` raw, so a
+  // value with `&` or `#` broke the URL, and a null arrived as the text 'null'.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/navigation/navigate-to-path.ts',
   needs: ['location', 'project'],
   worldPool: {
