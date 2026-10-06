@@ -11,6 +11,7 @@
   "scenarios/Timer.json": "7c0efe794030738f54537d0aa685bf6490f84f02e5bdfaffbddd4f737a62f127",
   "scenarios/net.noodl.UUID.json": "f5aaa5d63702f97d8ce3de12517d3eb77708276e2dae69da5dcde3faf0fc0f40",
   "scenarios/net.noodl.animatetovalue.json": "08882c97382f9ccd1d3316af8d97371cc2e1c261e5111c36748dee013ade304c",
+  "scenarios/net.noodl.controls.options.json": "22ba4dea751a7ce8c32515fb62553e3e42f28d1ac19d8d6367118ec3a6b8eb0b",
   "schema/trace.schema.json": "0d3078f14b1d51692e455d54424f0821021f575f9132bed72516fc18a18978d0",
   "src/adapter.ts": "66c4d8a1a2ecc82e0fb09b886cda448f7d86ac6c7d81aa1918f4fea9f0716cf9",
   "src/canonical.ts": "3c5d4a7e2c062662a488d2ebb32bca7f1ad4a0105f37cdd1b14cbc7077937598",
@@ -21,14 +22,17 @@
   "src/nodes/condition.ts": "31d92e2571f3c7394e99fe1c95add5909df84c354ff1c5919128b2de85f73c4d",
   "src/nodes/counter.ts": "fcfd9c92d5e39ff059eb569c54985102920b8d8d4a1de87cfeba96fa246889a1",
   "src/nodes/delay.ts": "d1e624f95d58401cba87b8a87a65f6afae9555b69416522c02e75185eccda3b9",
+  "src/nodes/dropdown.ts": "b5123dc9cb46183d96407c764aa8784b22eded0d91afd87403af6cdf7a15b4ff",
   "src/nodes/ease-curves.ts": "0d706fafdec909b56bc8ea89237010494d674005f2e9c14b09081304c004a601",
   "src/nodes/inverter.ts": "cded868c740e9b566311077125efadccfacda3354a41263cc3fb34aefc6d9455",
   "src/nodes/repeat.ts": "ecae353be44af6dfa24f22fd04e6ded50b3055cd04d754540413b19f3e008959",
   "src/nodes/screen-resolution.ts": "9d63f01e3ac24d4a4e887aa1dfeebe4caee6abade215ae4eeb7beb3726894fd9",
   "src/nodes/string-format.ts": "2b14c5f4820c7e89169977697bbd2ae8a73dffec2642c5c9ef486721632e8959",
   "src/nodes/switch.ts": "15896daa7c22306f9a2220a1a0daf7cf71262db7e8b587c926bd27ea107d8680",
+  "src/nodes/text-input.ts": "769bafd98de62416f9c4b930bb78f174710a3ae8a1f04b7ab5700484ae82a66d",
   "src/nodes/uuid.ts": "d5e2f60d7f81ca7ebee8083955d58b7534b5d4d2589bfc1716c0d0bdca03aadf",
   "src/spec.ts": "fa4eba11934a4505050b1957ffc10c2ee10a305bff04539ab9ef2d7c87a352c3",
   "src/trace.ts": "c432e2300cad17fc67f07633c962091632914122e8f2f73b1b3c97aba4a3a132",
-  "src/world.ts": "cf783ab203797c3da282e878b93e3b011082faa7142479a53c319a3f67e46210"
+  "src/world.ts": "cf783ab203797c3da282e878b93e3b011082faa7142479a53c319a3f67e46210",
+  "tests/stranger-page.js": "b81ec9de4633acd8b3960e15fe9b461e64ca23bb520fafd6e38d2dcb25a15e35"
 }

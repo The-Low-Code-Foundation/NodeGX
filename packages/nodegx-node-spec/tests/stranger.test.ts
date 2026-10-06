@@ -33,10 +33,11 @@ import * as path from 'path';
 import type { AnyNodeSpec, Step, TargetAdapter, TraceEvent } from '../src';
 import { compareTraces, discoverBranches, formatReport, generateSequence, interpreterAdapter, loadScenarios, mutantsOf, play, PlayError, runConformance, validateTrace, World, type WorldScript } from '../src';
 import { specFor } from '../src/nodes';
+import { EQUIVALENT_MUTANTS } from '../src/nodes/equivalent-mutants';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const rounds = require('./stranger-suite-hashes.helper.js') as {
-  ROUNDS: Array<{ round: number; dir: string; session: string; nodes: string[]; guarded: string[] }>;
+  ROUNDS: Array<{ round: number; dir: string; session: string; nodes: string[]; guarded: string[]; page: boolean }>;
   GUARDED_FILES: string[];
   hashOf: (relative: string) => string;
 };
@@ -53,15 +54,32 @@ const deep = Number(process.env.NSP_DEEP || 0);
  */
 const worldFor = (spec: AnyNodeSpec, script: WorldScript | undefined): World | undefined => (spec.needs && spec.needs.length > 0 ? new World(script ?? {}) : undefined);
 
-/** `<dir>/target.js` exports `strangerTarget(): TargetAdapter` — a FRESH target per call. */
-function loadTarget(targetFile: string): TargetAdapter {
+/**
+ * NSP-023 step 8 (round 4) — the page a person acts on (`tests/stranger-page.js`): one per process, handed to a page round's
+ * target as `strangerTarget(page)`.
+ */
+type Page = { window: unknown; document: unknown; act(root: unknown, act: string, value?: unknown): void };
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const pageOf = (): Page => (require('./stranger-page.js') as { makePage(): Page }).makePage();
+
+/**
+ * NSP-023 step 8 — a mutant the spec's own ports cannot tell from the original (`EQUIVALENT_MUTANTS`, runner/conformance.ts
+ * `isEquivalent`): no target can disagree with it, so it is no survivor of the stranger's either. Matched as the runner matches.
+ */
+const declaredEquivalent = (type: string, m: { reducer: string; kind: string; branch: string; swappedWith?: string }): boolean =>
+  (EQUIVALENT_MUTANTS[type] ?? []).some(
+    (e) => e.reducer === m.reducer && (e.kind === undefined || e.kind === m.kind) && (e.branch === undefined || m.branch.includes(e.branch)) && (e.swappedWith === undefined || (m.swappedWith ?? '').includes(e.swappedWith))
+  );
+
+/** `<dir>/target.js` exports `strangerTarget(): TargetAdapter` — a FRESH target per call; a page round's takes the page. */
+function loadTarget(targetFile: string, page?: Page): TargetAdapter {
   if (!fs.existsSync(targetFile)) {
     throw new Error(`${targetFile} does not exist — the stranger's target is a CommonJS module there exporting strangerTarget(): TargetAdapter`);
   }
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const mod = require(targetFile) as { strangerTarget?: unknown };
   if (typeof mod.strangerTarget !== 'function') throw new Error(`${targetFile} must export a function strangerTarget() returning a TargetAdapter`);
-  const target = (mod.strangerTarget as () => TargetAdapter)();
+  const target = page ? (mod.strangerTarget as (p: Page) => TargetAdapter)(page) : (mod.strangerTarget as () => TargetAdapter)();
   for (const m of ['mount', 'set', 'signal', 'settle', 'trace', 'dispose'] as const) {
     if (typeof target[m] !== 'function') throw new Error(`the stranger's target has no ${m}()`);
   }
@@ -85,7 +103,7 @@ describe('NSP-006 — the suite the strangers were handed is unchanged (hash gat
 for (const round of rounds.ROUNDS) {
   const STRANGER_DIR = path.join(ROOT, round.dir);
   const TARGET_FILE = path.join(STRANGER_DIR, 'target.js');
-  const strangerTarget = () => loadTarget(TARGET_FILE);
+  const strangerTarget = (page: Page | undefined = round.page ? pageOf() : undefined) => loadTarget(TARGET_FILE, page);
   const handed = round.nodes.map((n) => {
     const spec = specFor(n);
     if (!spec) throw new Error(`round ${round.round} names a node with no spec: ${n}`);
@@ -121,7 +139,7 @@ for (const round of rounds.ROUNDS) {
     const reports = new Map<string, ReturnType<typeof formatReport>>();
     for (const spec of graded) {
       test(`${spec.type} conforms on the stranger's target`, async () => {
-        const report = await runConformance(spec, strangerTarget(), { sequences: 200, mutants: true });
+        const report = await runConformance(spec, strangerTarget(), { sequences: 200, mutants: true, equivalent: EQUIVALENT_MUTANTS[spec.type] });
         reports.set(spec.type, formatReport(report));
         // eslint-disable-next-line no-console
         console.log(formatReport(report));
@@ -188,7 +206,7 @@ for (const round of rounds.ROUNDS) {
               break;
             }
           }
-          if (!caught) survivors.push(`${m.reducer} ${m.kind} on ${m.branch}${m.swappedWith ? ' ↔ ' + m.swappedWith : ''}`);
+          if (!caught && !declaredEquivalent(spec.type, m)) survivors.push(`${m.reducer} ${m.kind} on ${m.branch}${m.swappedWith ? ' ↔ ' + m.swappedWith : ''}`);
         }
         // eslint-disable-next-line no-console
         console.log(`${spec.type}: ${mutants.length - survivors.length} / ${mutants.length} mutants caught by the stranger's target`);
@@ -197,10 +215,49 @@ for (const round of rounds.ROUNDS) {
     }
   });
 
+  /**
+   * NSP-023 step 8 (AC5) — the person reaches the node THROUGH THE PAGE. A target that answered an act from its own copy of the
+   * spec's reducer would conform as well as one whose answer comes from the listeners on the elements it drew. So each act is
+   * made deaf in turn — `page.act` raises nothing for it — and the target must then disagree with the spec somewhere in the
+   * suite (the hand scenarios and 200 sequences, seed 20726): an act whose answer survives a deaf page did not come from it.
+   */
+  if (round.page) describe(`NSP-023 AC5 ${label} — every act reaches the node through the page: deafen it and the target disagrees`, () => {
+    for (const spec of graded) {
+      test(`${spec.type}: each declared act, raised on no element, changes some trace`, async () => {
+        const suite: Array<{ name: string; params: Record<string, unknown>; steps: Step[]; world?: WorldScript }> = loadScenarios(spec.type).map((s) => ({ name: `scenario ${s.name}`, params: s.params, steps: s.steps, world: s.world }));
+        for (let i = 0; i < 200; i++) {
+          const seq = generateSequence(spec, 20726, i);
+          suite.push({ name: `sequence ${i}`, params: seq.params, steps: seq.steps, world: seq.world });
+        }
+        const reference = interpreterAdapter({ resolve: () => spec });
+        const references: TraceEvent[][] = [];
+        for (const item of suite) references.push(await play(reference, spec.type, item.params, item.steps, worldFor(spec, item.world)));
+        const page = pageOf();
+        const unheard: string[] = [];
+        for (const act of Object.keys(spec.acts ?? {})) {
+          const deaf: Page = { ...page, act: (root, name, value) => (name === act ? undefined : page.act(root, name, value)) };
+          let heard = false;
+          for (let i = 0; i < suite.length && !heard; i++) {
+            if (!suite[i].steps.some((st) => typeof st === 'object' && 'act' in st && st.act === act)) continue;
+            try {
+              heard = compareTraces(references[i], await play(strangerTarget(deaf), spec.type, suite[i].params, suite[i].steps, worldFor(spec, suite[i].world))).index >= 0;
+            } catch (e) {
+              if (!(e instanceof PlayError)) throw e;
+              heard = true;
+            }
+          }
+          if (!heard) unheard.push(act);
+        }
+        expect(Object.keys(spec.acts ?? {}).length).toBeGreaterThan(0);
+        expect(unheard).toEqual([]);
+      }, 600_000);
+    }
+  });
+
   (deep > 0 ? describe : describe.skip)(`NSP-006 AC1 deep run ${label} — ${deep} sequences on the stranger's target, shrink on`, () => {
     for (const spec of graded) {
       test(`${spec.type} at ${deep}`, async () => {
-        const report = await runConformance(spec, strangerTarget(), { sequences: deep, shrink: true, mutants: true, replayDir: process.env.NSP_REPLAY_DIR });
+        const report = await runConformance(spec, strangerTarget(), { sequences: deep, shrink: true, mutants: true, equivalent: EQUIVALENT_MUTANTS[spec.type], replayDir: process.env.NSP_REPLAY_DIR });
         // eslint-disable-next-line no-console
         console.log(formatReport(report));
         expect(report.generated.divergences.map((d) => JSON.stringify([d.params, d.steps, d.difference]))).toEqual([]);
