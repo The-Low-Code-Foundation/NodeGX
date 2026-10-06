@@ -178,7 +178,9 @@ const Navigate: NodeDefinitionOptions = {
         NavigationHandler.instance.navigate(this._internal.stack, {
           target: this._internal.target,
           transition: { ...{ type: this._internal.transition }, ...this._internal.transitionParams },
-          params: this._internal.pageParams,
+          // ISL-028 (P107-C27): a copy — the stack keeps what it is handed on the entry, and a later `pm-`
+          // write must not change the page already showing, or the next press reads as "already showing".
+          params: { ...this._internal.pageParams },
           backCallback: (action, results) => {
             this._internal.backResults = results;
 
@@ -207,7 +209,9 @@ const Navigate: NodeDefinitionOptions = {
           // could not animate. It defaults to `None` rather than push's `Push`, so every
           // replace already out there behaves exactly as it did.
           transition: { ...{ type: this._internal.transition || 'None' }, ...this._internal.transitionParams },
-          params: this._internal.pageParams,
+          // ISL-028 (P107-C27): a copy — the stack keeps what it is handed on the entry, and a later `pm-`
+          // write must not change the page already showing, or the next press reads as "already showing".
+          params: { ...this._internal.pageParams },
           hasNavigated: () => {
             this.scheduleAfterInputsHaveUpdated(() => {
               this.settle(pending, 'done');

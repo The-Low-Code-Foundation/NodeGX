@@ -25,9 +25,10 @@
  * (:158-176), as the runtime registers them. NSP-020's case, as Push Component To Stack's.
  *
  * READ, NOT GRADED HERE (the stand-in router answers by script; NSP-015 §6.2):
- *   - `params` is the node's LIVE object (:132). The handler reads it 1 ms after the call, and the Router keeps
- *     it as `currentParams` (router.tsx :917), comparing it with the next navigate's — which, from the same
- *     node, is the same object. Push Component To Stack's C27, on the Router (row C29).
+ *   - row C29 (fixed, P109 ISL-028): `params` was the node's LIVE object, which the Router keeps as
+ *     `currentParams` and compares with the next navigate's — from the same node, the same object, so a new
+ *     `pm-` value read as "already showing". The node now hands a copy (:134); graded in the viewer
+ *     (`isl-028-a-second-press-with-new-parameters.test.ts`).
  */
 
 import { defineNode, type InputDecl, type ValueInputDecl } from '../spec';

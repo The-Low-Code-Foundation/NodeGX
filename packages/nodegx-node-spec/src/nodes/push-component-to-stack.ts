@@ -30,9 +30,10 @@
  *         component's Pop Component Stack nodes, :347-375) are never registered (no
  *         `registerOutputIfNeeded`; dropped in the TypeScript port), so a wire from one is refused and
  *         the back channel reaches nothing. The spec declares no such output, as the runtime has none.
- *   C27 — `params` is the node's LIVE object (:181, :210); the stack keeps it, so a later press of the
- *         same page with new `pm-` values is "already showing" to a real stack. The world records
- *         `params` canonically at the call and answers by script, so this is graded nowhere here.
+ *   C27 (fixed, P109 ISL-028) — `params` was the node's LIVE object, which the stack kept on the entry, so a
+ *         later press of the same page with new `pm-` values was "already showing". The node now hands a
+ *         copy (:183, :214). The world records `params` canonically at the call and answers by script, so
+ *         this is graded in the viewer (`isl-028-a-second-press-with-new-parameters.test.ts`), not here.
  * ONE ROW the trace shows: C28 — a Mode that is neither `push` nor `replace` answers no press.
  */
 

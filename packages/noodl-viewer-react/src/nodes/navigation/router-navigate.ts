@@ -129,7 +129,9 @@ const RouterNavigate: NodeDefinitionOptions = {
     navigate(this: RouterNavigateInstance, pending: PendingNavigation) {
       RouterHandler.instance.navigate(this._internal.router, {
         target: this._internal.target,
-        params: this._internal.pageParams,
+        // ISL-028 (P107-C29): a copy — the Router keeps what it is handed (`currentParams`), and a later `pm-`
+        // write must not change the page already showing, or the next press reads as "already showing".
+        params: { ...this._internal.pageParams },
         openInNewTab: this._internal.openInNewTab,
         hasNavigated: () => {
           this.scheduleAfterInputsHaveUpdated(() => {
