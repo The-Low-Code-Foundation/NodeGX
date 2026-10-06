@@ -30,8 +30,8 @@
  *
  * TWO ROWS (NSP-015 §6.2), where the runtime THROWS inside the frame-end callback — the scheduler
  * logs it (nodecontext.ts :466-472) and every press of that frame goes unanswered, for good:
- *   C24 — a Path that is not text (`null`, a number; :162 `.match`) throws before any branch. The
- *         spec reads it as no Path (Failure `navigate-to-path/no-path`); proposed, not the runtime.
+ *   C24 — FIXED in P109 ISL-026 (ruled "Treat it as no path"): a Path that is not text (`null`, a number) is no
+ *         Path (Failure `navigate-to-path/no-path`) on both; the runtime once threw at `.match`.
  *   C25 — a push the browser refuses (a path on another origin — `https://…` or `//…` with the
  *         `path` type; world.ts LOCATION) throws at :218, after the call. The spec records the push
  *         and answers Failure `navigate-to-path/refused`, Error "The browser refused to navigate to
@@ -155,7 +155,7 @@ export const NavigateToPath = defineNode({
       const reset = { scheduled: false, presses: 0 };
       const answer = (outcome: 'done' | 'unchanged' | 'failure', error?: string) =>
         Array.from({ length: s.presses }, () => (error === undefined ? { port: 'navigate', outcome } : { port: 'navigate', outcome, error }));
-      // :150-160 — and C24: a Path that is not text throws at :162 in the runtime; read as no Path here
+      // :150-160 — and C24 (fixed, ISL-026): a Path that is not text is no Path
       if (typeof s.path !== 'string') {
         return { set: { ...reset, error: NO_PATH }, send: ['error'], outcomes: answer('failure', 'navigate-to-path/no-path') };
       }

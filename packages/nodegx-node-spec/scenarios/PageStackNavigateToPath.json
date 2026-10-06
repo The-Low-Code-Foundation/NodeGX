@@ -371,7 +371,7 @@
   },
   {
     "name": "C24 — a Path that is not text (null) is read as no Path: Failure navigate-to-path/no-path",
-    "because": "the runtime throws at :162 (`.match` on null) inside the frame-end callback; the scheduler logs it and the press is never answered",
+    "because": "P107-C24, ruled 2026-10-05 \"Treat it as no path\", fixed in P109 ISL-026; the runtime once threw at :162 (`.match` on null) inside the frame-end callback and the press was never answered",
     "world": {
       "viewport": {
         "width": 1280,
@@ -388,8 +388,7 @@
         "signal": "navigate"
       },
       "settle"
-    ],
-    "row": "NSP-015 §6.2 C24"
+    ]
   },
   {
     "name": "C25 — the path type with a Path on another origin: the push is made, the browser refuses it, Failure navigate-to-path/refused",

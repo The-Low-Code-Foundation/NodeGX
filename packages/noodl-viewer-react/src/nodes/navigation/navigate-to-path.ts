@@ -148,7 +148,9 @@ const NavigateToPathNode: NodeDefinitionOptions = {
       internal.pendingNavigateOutcomes = undefined;
 
       let formattedPath = internal.path;
-      if (formattedPath === undefined) {
+      // P107-C24 (ISL-026, ruled "Treat it as no path"): a Path that is not text — null from an empty wire, a
+      // number — is no path; `.match` on it threw in this frame-end callback and every press went unanswered
+      if (typeof formattedPath !== 'string') {
         // Was a bare `return`: the node was told to navigate, could not, and said nothing.
         internal.lastError = 'No path to navigate to';
         this.flagOutputDirty('error');
