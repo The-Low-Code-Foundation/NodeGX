@@ -12,8 +12,8 @@ change). The board is **21 of 37 closed**, re-derived from the task files' statu
   index (HEAD + your hunk), or keep it out of the working file until you commit.
 - 🔴 **A peer's open edit can make the primary's runtime target unloadable.** A P107 Group spec in progress made
   `node-spec-target.ts` load a viewer scroll plugin jest cannot parse (80 / 91 graph scenarios red on load). Grade in a
-  worktree at HEAD: `scripts/devtools/make-worktree.sh <name> HEAD <abs-parent>` (s25's is
-  `OpenNoodl-worktrees/isl032-s25` — remove it with `git worktree remove` when done), copy your files in, copy results back.
+  worktree at HEAD: `scripts/devtools/make-worktree.sh <name> HEAD <abs-parent>` (s25's was removed at
+  the end of the session), copy your files in, copy results back.
 - 🔴 **A spec fix on a node the strangers were handed moves their fixtures.** Rounds 1–2 (`stranger/`, `stranger-2/`) built
   Counter, Switch, And, Condition, String Format (+ Inverter, Boolean To String) from v1. A behaviour change there turns the
   rounds red: change the fixture's line, mark it "not the stranger's line", refresh the hashes. A comment-only edit to a
