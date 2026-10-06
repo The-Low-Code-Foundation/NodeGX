@@ -4,7 +4,7 @@ import Layout from '../../../layout';
 import Utils from '../../../nodes/controls/utils';
 import { outwardValueForFieldType } from '../../../nodes/controls/textInputValue';
 import { Noodl, Slot } from '../../../types';
-import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps, clearedRootStyles } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
 import { labelText } from '../labelText';
 
@@ -294,9 +294,9 @@ export class TextInput extends React.Component<TextInputProps, State> {
 
     const inputWithWrapper = (
       <div
-        ref={noodlRootRef(this.props.noodlNode)}
+        ref={props.useLabel ? undefined : noodlRootRef(this.props.noodlNode)}
         {...(props.useLabel ? undefined : dataAttributeProps(props.dom))}
-        style={inputWrapperStyle} noodl-style-tag="inputWrapper">
+        style={props.useLabel ? { ...clearedRootStyles(style), ...inputWrapperStyle } : inputWrapperStyle} noodl-style-tag="inputWrapper">
         {props.useIcon && props.iconPlacement === 'left' ? _renderIcon() : null}
         {inputContent}
         {props.useIcon && props.iconPlacement === 'right' ? _renderIcon() : null}
@@ -316,6 +316,9 @@ export class TextInput extends React.Component<TextInputProps, State> {
       labelStyle.color = props.noodlNode.context.styles.resolveColor(labelStyle.color);
 
       return (
+      // P107-C80 / C66 (P109 ISL-031, ruled "keeps the keyboard" and "Fix it with the label work"): ONE tree whether the label
+      // shows or not, so React keeps the field (and the keyboard on it) when Enable Label changes, and one element carries
+      // the root ref. Without a label the outer div makes no box (display: contents) and the wrapper is the root, as before.
         <div ref={noodlRootRef(this.props.noodlNode)} {...dataAttributeProps(props.dom)} style={otherStyles}>
           <label htmlFor={props.id} style={labelStyle} noodl-style-tag="label">
             {labelText(props.label)}
@@ -324,7 +327,12 @@ export class TextInput extends React.Component<TextInputProps, State> {
         </div>
       );
     } else {
-      return inputWithWrapper;
+      return (
+        <div style={{ ...clearedRootStyles(style), display: 'contents' }}>
+          {null}
+          {inputWithWrapper}
+        </div>
+      );
     }
   }
 

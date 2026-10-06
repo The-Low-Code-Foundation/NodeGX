@@ -21,8 +21,8 @@
  *   - **the pointer, the keyboard, a click's focus** (utils.ts :157-311; Checkbox.tsx :66-69, :202):
  *     the Button's rules, on the `<input>` when there is no label and on the wrapper when there is
  *     (a click on the input bubbles to it either way). **Enable Label** shows the label and leaves the box,
- *     and the keyboard on it, where they are (ruled 2026-10-05; the runtime builds a new input when the
- *     label changes and the keyboard leaves with the old one, silently — row C80, known on the runtime). A press puts the keyboard on the input (the
+ *     and the keyboard on it, where they are (ruled 2026-10-05; the runtime built a new input when the
+ *     label changed and the keyboard left with the old one, silently — row C80, fixed in P109 ISL-031). A press puts the keyboard on the input (the
  *     browser's `mousedown` default; there is no Keeps Focus here), so a click on an unfocused box is
  *     `pointerDown`, `onFocus`, `pointerUp`, then the tick: `checked`, `onChange`.
  *   - **Focus** / **Blur** (utils.ts :340-364): the Button's — the target is the input (:402-405).
@@ -75,7 +75,7 @@ const NONE: Act = { send: [] };
 export const Checkbox = defineNode({
   type: 'net.noodl.controls.checkbox',
   // v2 (NSP-023, 2026-10-05): Enable Label shows a label and leaves the box and the keyboard on it where they are (Richard ruled the
-  // Text Input's C80 for all three controls); v1 rebuilt the box when the label changed, as the runtime does — row C80, known on the runtime.
+  // Text Input's C80 for all three controls); v1 rebuilt the box when the label changed, as the runtime did — row C80, fixed in P109 ISL-031.
   version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/controls/checkbox.ts',
   needs: ['person'],

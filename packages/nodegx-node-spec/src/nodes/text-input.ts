@@ -86,8 +86,8 @@
  *     replaced the control's — row C68, fixed in P109 ISL-031: both run); the
  *     browser's `mousedown` default then puts the keyboard on the field. **Enable Label** shows a
  *     label above the field and leaves the field, and the keyboard on it, where they are (ruled
- *     2026-10-05; the runtime builds a new element under the label and the keyboard leaves with the
- *     old one, silently — row C80, known on the runtime).
+ *     2026-10-05; the runtime built a new element under the label and the keyboard left with the
+ *     old one, silently — row C80, fixed in P109 ISL-031: one tree either way).
  *   - **a pointer act drains the frame** (pointerlisteners.ts :173-186): every pointer handler the control
  *     installs runs the graph's dirty nodes after its own work, so a Set or Insert Text queued for the frame's
  *     end runs AT a hover, leave, press, release, click, touch or lift, in the order pressed; a write pulsed

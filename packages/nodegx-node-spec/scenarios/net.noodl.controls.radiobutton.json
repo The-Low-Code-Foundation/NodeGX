@@ -1800,7 +1800,7 @@
   },
   {
     "name": "focused, then Enable Label turned on: the input and its keyboard stay — a press fires Pointer Down with no Focused; turned off again while focused: the same — a Tab onto it finds the keyboard there already",
-    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (row C80)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -1828,12 +1828,11 @@
         "act": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "focused, then Enable Label changed and a Tab away in the same frame: the keyboard is still on the button, so the Tab takes it — Blurred; a Blur action after it is Done alone; changed back with another Tab away: nothing to take",
-    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (row C80)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -1862,12 +1861,11 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "pressed and focused, then Enable Label changed and the release in the same frame: Pointer Up, and the keyboard is still there — a Blur action after it fires Blurred; a Tab onto it then fires Focused",
-    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (row C80)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -1889,8 +1887,7 @@
         "act": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "Mounted off then on, and a Tab onto the button in the same frame: Did Mount and Focused together; the same with Enabled off: Did Mount alone, a Focus after it Done",
@@ -1952,7 +1949,7 @@
   },
   {
     "name": "focused, then disabled; Enable Label changed and a release in the same frame: nothing (a disabled input takes no release) and the keyboard stays; re-enabled, a Blur action gives it up (Blurred)",
-    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (row C80)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -1981,12 +1978,11 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "focused, then Enable Label changed and the pointer moving onto the button in the same frame: Hover Start, and the keyboard is still there — a Blur action after it fires Blurred",
-    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (row C80)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -2004,8 +2000,7 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "focused, then the pointer onto the button and a Blur action in the same frame: Hover Start, then Blurred — a hover alone moves no keyboard",
@@ -2256,7 +2251,7 @@
   },
   {
     "name": "focused, then Enable Label changed and the pointer leaving in the same frame: Hover End, and the keyboard is still there — a Blur action after it fires Blurred",
-    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (row C80)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -2277,12 +2272,11 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "focused, then Enable Label changed and a pick of the sibling already selected in the same frame: the mouse press on the sibling takes the keyboard — Blurred — and nothing else (a selected radio raises no change); a Blur action after it is Done alone",
-    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (row C80)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
     "params": {
       "value": "c"
     },
@@ -2309,8 +2303,7 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "focused, a sibling picked: Blurred, and the group takes its Value — this button's Value written to it later is selected (nobody clicked it: no Changed)",
@@ -2417,7 +2410,7 @@
   },
   {
     "name": "focused, then Enable Label changed and a touch in the same frame: Pointer Down, and the keyboard is still there — a Blur action after it fires Blurred",
-    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (row C80)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -2438,12 +2431,11 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "focused, then Enable Label changed and a lift in the same frame: Pointer Up, and the keyboard is still there — a Blur action after it fires Blurred",
-    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (row C80)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -2464,12 +2456,11 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "Enable Label turned off, then the Focus action: the button is on the page and takes the keyboard (Focused, Done)",
-    "because": "utils.ts :340-355 — a button on the page can be asked; RadioButton.tsx :167 and :199 put the SAME root ref on the button and on the wrapper, so the wrapper's removal nulls the node's element (react-component-node.ts :1934-1945) and `_focusTarget` finds nothing — the runtime reports Unchanged with the button in plain sight (NSP-016 §7.2 row C66) (carried from the Checkbox: the same page model, utils.ts)",
+    "because": "utils.ts :340-355 — a button on the page can be asked; RadioButton.tsx :167 and :199 put the SAME root ref on the button and on the wrapper, so the wrapper's removal nulls the node's element (react-component-node.ts :1934-1945) and `_focusTarget` finds nothing — the runtime reports Unchanged with the button in plain sight (NSP-016 §7.2 was row C66, fixed in P109 ISL-031) (carried from the Checkbox: the same page model, utils.ts)",
     "params": {
       "useLabel": true
     },
@@ -2488,8 +2479,7 @@
         "act": "click"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C66"
+    ]
   },
   {
     "name": "a Label that is an object with Enable Label on: the label is drawn as its text and the page keeps drawing",
@@ -2792,7 +2782,7 @@
   },
   {
     "name": "hidden, holding the keyboard, Enable Label changed with every pointer act: the act meets nothing and the keyboard stays — the Blur action after each finds it on the button (Blurred)",
-    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (row C80)",
+    "because": "R14 (2026-10-05): the Radio Button takes R13's label rule — showing or hiding the label leaves the input and its keyboard where they are; the runtime builds a new input and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -2956,8 +2946,7 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "Enabled off, a pick of the sibling already selected and a Focus action in one frame: the pick's paint disables the input first, so the Focus is Done and takes nothing; Visible off the same way: Done, nothing",

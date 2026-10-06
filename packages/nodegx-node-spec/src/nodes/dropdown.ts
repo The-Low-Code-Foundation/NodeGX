@@ -43,8 +43,8 @@
  *     (HTML's fallback); an option with `Disabled` true or `'true'` cannot be picked.
  *   - **Enabled**, **the pointer, the keyboard, a click's focus** (utils.ts :157-311 on the `<select>`, Select.tsx
  *     :211), **Focus** / **Blur** (utils.ts :366-440, the target is the `<select>`), **Mounted**, **Enable Label** (it
- *     leaves the `<select>`, its keyboard and its selection where they are — ruled 2026-10-05; the runtime builds a NEW
- *     `<select>`, Select.tsx :223-252, and the keyboard leaves with the old one, silently: row C80), **Label**
+ *     leaves the `<select>`, its keyboard and its selection where they are — ruled 2026-10-05; the runtime built a NEW
+ *     `<select>` and the keyboard left with the old one, silently: row C80, fixed in P109 ISL-031), **Label**
  *     (drawn raw, :245 — row C65's third instance), **Placeholder** (drawn, never on the wire) and the look: the
  *     Checkbox's. A pick is a keyboard pick: it puts the keyboard on the element first (the focusing steps), as a Tab
  *     does, and a disabled element takes no pick. **A person's act meets a page painted first** (`onPainted`: what the
@@ -101,8 +101,8 @@ const DEFAULT_ITEMS: readonly unknown[] = [
 export const Dropdown = defineNode({
   type: 'net.noodl.controls.options',
   // v2 (NSP-023, 2026-10-05): Enable Label shows a label and leaves the <select> and the keyboard on it where they are, its selection too
-  // (Richard ruled the Text Input's C80 for all three controls); v1 rebuilt the <select> when the label changed, as React does — row
-  // C80, known on the runtime.
+  // (Richard ruled the Text Input's C80 for all three controls); v1 rebuilt the <select> when the label changed, as React did — row
+  // C80, fixed on the runtime in P109 ISL-031.
   // v3 (NSP-023 step 4, 2026-10-06): the selection is the node's value — a remount and a new Items list keep a person's pick and
   // fire nothing (R14); v1 and v2 copied the component's `[props.value, props.items]` effect — rows D34 and C71, known on the runtime.
   // v4 (P109 ISL-026, 2026-10-06, P107-C70 ruled "Read old text, else no options"): text on Items is read as the old stored list
@@ -438,7 +438,7 @@ function optionsOf(items: unknown): Option[] {
 
 /**
  * The page follows what the node wants (checkbox.ts `painted`), and the `<select>`'s selection with it.
- *   - Enabled and Visible are painted onto the element; Enable Label changes nothing here (v2; the runtime's rebuild is row C80).
+ *   - Enabled and Visible are painted onto the element; Enable Label changes nothing here (v2; the runtime's rebuild was row C80, fixed in P109 ISL-031).
  *   - Mounted off: the element leaves with the keyboard it held; Mounted on: Did Mount, a fresh element on the node's value — a
  *     person's pick included, and nothing on the wire (v3, R14; the runtime takes the author's Value back, row D34).
  *   - the selection: the element is told the node's value while it names an option (:210); otherwise the browser keeps what it

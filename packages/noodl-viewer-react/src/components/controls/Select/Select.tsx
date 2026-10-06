@@ -5,7 +5,7 @@ import Layout from '../../../layout';
 import Utils from '../../../nodes/controls/utils';
 import type { StyleObject } from '../../../react-component-node';
 import { Noodl } from '../../../types';
-import { noodlRootRef, dataAttributeProps } from '../../noodl-root-ref';
+import { noodlRootRef, dataAttributeProps, clearedRootStyles } from '../../noodl-root-ref';
 import { IconGlyph } from '../../visual/Icon/IconGlyph';
 import { labelText } from '../labelText';
 
@@ -186,10 +186,10 @@ export function Select(props: SelectProps) {
   //A hidden first option is preselected and added to the list of options, it makes it possible to select the first item in the dropdown
   const inputWrapper = (
     <div
-      ref={noodlRootRef(props.noodlNode)}
+      ref={props.useLabel ? undefined : noodlRootRef(props.noodlNode)}
       {...(props.useLabel ? undefined : dataAttributeProps(props.dom))}
       className="ndl-controls-pointer"
-      style={inputWrapperStyle}
+      style={props.useLabel ? { ...clearedRootStyles(style), ...inputWrapperStyle } : inputWrapperStyle}
       noodl-style-tag="inputWrapper"
     >
       {props.useIcon && props.iconPlacement === 'left' ? _renderIcon() : null}
@@ -233,6 +233,9 @@ export function Select(props: SelectProps) {
     }
 
     return (
+      // P107-C80 / C66 (P109 ISL-031, ruled "keeps the keyboard" and "Fix it with the label work"): ONE tree whether the label
+      // shows or not, so React keeps the select (and the keyboard on it) when Enable Label changes, and one element carries
+      // the root ref. Without a label the outer div makes no box (display: contents) and the input wrapper is the root, as before.
       <div ref={noodlRootRef(props.noodlNode)} {...dataAttributeProps(props.dom)} style={outerWrapperStyle}>
         <label
           htmlFor={props.id}
@@ -249,6 +252,11 @@ export function Select(props: SelectProps) {
       </div>
     );
   } else {
-    return inputWrapper;
+    return (
+      <div style={{ ...clearedRootStyles(style), display: 'contents' }}>
+        {null}
+        {inputWrapper}
+      </div>
+    );
   }
 }

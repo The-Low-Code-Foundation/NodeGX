@@ -610,8 +610,8 @@
     ]
   },
   {
-    "name": "a pick, then Enable Label turned on: the <select> and the keyboard stay — the next picks select with no Focused; a Blur action gives the keyboard up (Blurred); turned off again, a pick takes it back (Focused) — the runtime rebuilds the <select> and the keyboard leaves with the old one, silently (row C80)",
-    "because": "ruled 2026-10-05 (C80, all three controls): showing or hiding the label does not touch the <select>; Select.tsx :223-252 the tree differs with a label, so React makes the <select> anew (row C80)",
+    "name": "a pick, then Enable Label turned on: the <select> and the keyboard stay — the next picks select with no Focused; a Blur action gives the keyboard up (Blurred); turned off again, a pick takes it back (Focused) — the runtime rebuilds the <select> and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "because": "ruled 2026-10-05 (C80, all three controls): showing or hiding the label does not touch the <select>; Select.tsx :223-252 the tree differs with a label, so React makes the <select> anew (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -648,8 +648,7 @@
         "value": "Option 2"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "Placeholder and every look or layout input change nothing on the wire",
@@ -21500,8 +21499,8 @@
     }
   },
   {
-    "name": "Enable Label turned off, then the Focus action: the dropdown is on the page and takes the keyboard (Focused, Done) — on the runtime the label-off rebuild nulled the root ref (two elements, one ref; row C66), so Focus reports Unchanged",
-    "because": "utils.ts :340-355 — a dropdown on the page can be asked; Select.tsx :167 and :199 put the SAME root ref on the dropdown and on the wrapper, so the wrapper's removal nulls the node's element (react-component-node.ts :1934-1945) and `_focusTarget` finds nothing — the runtime reports Unchanged with the dropdown in plain sight (NSP-016 §7.2 row C66) — the Checkbox's scenario, on the `<select>`",
+    "name": "Enable Label turned off, then the Focus action: the dropdown is on the page and takes the keyboard (Focused, Done) — on the runtime the label-off rebuild nulled the root ref (two elements, one ref; was row C66, fixed in P109 ISL-031), so Focus reports Unchanged",
+    "because": "utils.ts :340-355 — a dropdown on the page can be asked; Select.tsx :167 and :199 put the SAME root ref on the dropdown and on the wrapper, so the wrapper's removal nulls the node's element (react-component-node.ts :1934-1945) and `_focusTarget` finds nothing — the runtime reports Unchanged with the dropdown in plain sight (NSP-016 §7.2 was row C66, fixed in P109 ISL-031) — the Checkbox's scenario, on the `<select>`",
     "steps": [
       "settle",
       {
@@ -21520,8 +21519,7 @@
     ],
     "params": {
       "useLabel": true
-    },
-    "row": "NSP-016 §6 C66"
+    }
   },
   {
     "name": "disabled and unmounted in one frame, then enabled and remounted in one frame, then a quiet frame: Did Mount once, Enabled true, and nothing more",
@@ -21596,8 +21594,8 @@
     }
   },
   {
-    "name": "focused, then Enable Label turned on and a press in the same frame: the dropdown keeps the keyboard — the press fires Pointer Down with Pressed and no Focused; turned off again, a Tab onto it finds the keyboard there already — the runtime rebuilds the <select> and the keyboard leaves with the old one, silently (row C80)",
-    "because": "ruled 2026-10-05 (C80, all three controls): showing or hiding the label does not touch the <select>; Select.tsx :223-252 the tree differs with a label, so React makes the <select> anew (row C80)",
+    "name": "focused, then Enable Label turned on and a press in the same frame: the dropdown keeps the keyboard — the press fires Pointer Down with Pressed and no Focused; turned off again, a Tab onto it finds the keyboard there already — the runtime rebuilds the <select> and the keyboard leaves with the old one, silently (was row C80, fixed in P109 ISL-031)",
+    "because": "ruled 2026-10-05 (C80, all three controls): showing or hiding the label does not touch the <select>; Select.tsx :223-252 the tree differs with a label, so React makes the <select> anew (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -21625,8 +21623,7 @@
         "act": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "Mounted off then on, and a Tab onto the dropdown in the same frame: Did Mount and Focused together; the same with Enabled off: Did Mount alone, a Focus after it Done",
@@ -23311,6 +23308,174 @@
       },
       {
         "set": "value"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "hidden, holding the keyboard, Enable Label changed with every pointer act: the act meets nothing and the keyboard stays — the Blur action after each finds it on the dropdown (Blurred); shown again, the dropdown takes the keyboard (the Radio Button's scenario)",
+    "because": "P109 ISL-031 (C80, C66): the label's wrapper and the input's both stay on the page, and the node writes its root styles straight onto whichever is the root (react-component-node.ts setStyle) — a Visible written while one was the root must not stay on it once the other is (noodl-root-ref.ts clearedRootStyles)",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
       },
       "settle"
     ]

@@ -596,8 +596,8 @@
     ]
   },
   {
-    "name": "focused, then Enable Label turned on: the field and the keyboard on it stay — a Focus action is Done with nothing more; turned off again, the same — the runtime rebuilds the input under the label and the keyboard leaves with the old one, silently (a Focus fires Focused again: row C80)",
-    "because": "ruled 2026-10-05: showing or hiding the label does not touch the field; TextInput.tsx :248-281 the tree differs with a label, so React makes the <input> anew (row C80)",
+    "name": "focused, then Enable Label turned on: the field and the keyboard on it stay — a Focus action is Done with nothing more; turned off again, the same — the runtime rebuilds the input under the label and the keyboard leaves with the old one, silently (a Focus fires Focused again: was row C80, fixed in P109 ISL-031)",
+    "because": "ruled 2026-10-05: showing or hiding the label does not touch the field; TextInput.tsx :248-281 the tree differs with a label, so React makes the <input> anew (was row C80, fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -622,8 +622,7 @@
         "signal": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "focused, then Type changed to Text Area: a <textarea> replaces the <input> and the keyboard leaves with it, silently; a Focus action takes it again",
@@ -4050,7 +4049,7 @@
     ]
   },
   {
-    "name": "focused and a finger held across a frame, then Enable Label turned on and the finger lifted in the same frame: Pointer Up and Pressed false; the field keeps the keyboard, so a Focus action is Done alone — the runtime's rebuilt input lost it (Focused again: row C80)",
+    "name": "focused and a finger held across a frame, then Enable Label turned on and the finger lifted in the same frame: Pointer Up and Pressed false; the field keeps the keyboard, so a Focus action is Done alone — the runtime's rebuilt input lost it (Focused again: was row C80, fixed in P109 ISL-031)",
     "because": "utils.ts :270-275 the lift; TextInput.tsx :248-281 the rebuild; the Focus action meets a fresh element",
     "steps": [
       "settle",
@@ -4073,8 +4072,7 @@
         "signal": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C80"
+    ]
   },
   {
     "name": "focused, then disabled; an act on the disabled field (a press, click, key or Tab takes nothing; a finger or the pointer still report); re-enabled, a Focus action is Done alone — the element still held the keyboard, the page never took it away — every act",
@@ -23865,6 +23863,174 @@
       {
         "set": "startValue",
         "value": "hi"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "hidden, holding the keyboard, Enable Label changed with every pointer act: the act meets nothing and the keyboard stays — the Blur action after each finds it on the field (Blurred); shown again, the field takes the keyboard (the Radio Button's scenario)",
+    "because": "P109 ISL-031 (C80, C66): the label's wrapper and the input's both stay on the page, and the node writes its root styles straight onto whichever is the root (react-component-node.ts setStyle) — a Visible written while one was the root must not stay on it once the other is (noodl-root-ref.ts clearedRootStyles)",
+    "steps": [
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "hover"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "leave"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "press"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "release"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "click"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": false
+      },
+      {
+        "act": "touch"
+      },
+      {
+        "signal": "blur"
+      },
+      "settle",
+      {
+        "set": "visible",
+        "value": true
+      },
+      {
+        "act": "focus"
+      },
+      {
+        "set": "visible",
+        "value": false
+      },
+      "settle",
+      {
+        "set": "useLabel",
+        "value": true
+      },
+      {
+        "act": "lift"
+      },
+      {
+        "signal": "blur"
       },
       "settle"
     ]

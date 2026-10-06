@@ -45,8 +45,8 @@
  *   - **Value** (the button's own, `inputProps` — react-component-node.ts `defineRegularInputProp`): stored raw (undefined
  *     deletes it) and shown at the next paint.
  *   - **Enabled**, the pointer, the keyboard, a click's focus, **Focus** / **Blur**, **Mounted**, **Did Mount**, **Will
- *     Unmount**, **Enable Label** (a label beside the input; the input and its keyboard stay — the runtime builds a new
- *     input, row C80), **Child Index** (0: the first child of its group, or a lone node), **This**, the **Bounding Box**
+ *     Unmount**, **Enable Label** (a label beside the input; the input and its keyboard stay — the runtime built a new
+ *     input, row C80, fixed in P109 ISL-031), **Child Index** (0: the first child of its group, or a lone node), **This**, the **Bounding Box**
  *     outputs, **Scroll Into View**, **Label**: the Checkbox's.
  */
 

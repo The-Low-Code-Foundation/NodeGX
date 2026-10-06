@@ -41,3 +41,17 @@ export function dataAttributeProps(dom: Record<string, unknown> | undefined): Re
   }
   return out;
 }
+
+/**
+ * P109 ISL-031 (P107-C80, C66) — a node writes its root styles straight onto the element holding its root ref
+ * (react-component-node.ts `setStyle`), so React never learns them. A control whose root moves between two elements that both
+ * stay on the page (a label's wrapper and the input's own) gives the element that is NOT the root every root key blank: React
+ * then clears what was written there while it was the root (a `visibility: hidden` would hide the input under a visible root,
+ * or, inherited through `display: contents`, under a visible input).
+ */
+export function clearedRootStyles(style: object | undefined): Record<string, string> {
+  const out: Record<string, string> = {};
+  if (style) for (const key of Object.keys(style)) out[key] = '';
+  return out;
+}
+

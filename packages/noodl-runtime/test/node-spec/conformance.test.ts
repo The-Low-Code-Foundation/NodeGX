@@ -52,40 +52,6 @@ function copyOfCounterWith(find: string, replace: string): NodeModule {
  * below must read 0 in the same commit.
  */
 /**
- * NSP-016 §6 C66 — a Checkbox whose Enable Label went from on to off has lost its root element (two elements, one ref
- * callback: the removed one nulls it), so a Focus action reports Unchanged with the box on the page. Narrow: the
- * difference is the Focus outcome — Unchanged on the runtime where the reference says Done — and the reference holds
- * a truthy `useLabel` (a parameter or a set) followed by a falsy one before it.
- */
-const lostRootAfterLabelOff = (d: Divergence) => {
-  // the frame of the difference: the runtime reports the Focus Unchanged where the reference reports Done (the value
-  // and signal lines of that frame sort before the outcome, so the first difference may be one of them)
-  const frameStart = (t: readonly TraceEvent[], i: number) => { let k = i; while (k > 0 && t[k - 1].t !== 'settle') k--; return k; };
-  const frameEnd = (t: readonly TraceEvent[], i: number) => { let k = i; while (k < t.length && t[k].t !== 'settle') k++; return k; };
-  const has = (t: readonly TraceEvent[], v: string) => t.slice(frameStart(t, d.difference.index), frameEnd(t, d.difference.index + 1)).some((e) => e.t === 'outcome' && e.port === 'focus' && e.value === v);
-  // s45 (the Checkbox's 10,000 run, seed 970083277): the same lost root met by a Blur action — Done on both sides, but the keyboard stays
-  // on the runtime's element, so the reference's Focused false / Blurred is the difference
-  const ref = d.difference.reference as TraceEvent | undefined;
-  const frame = settledFrame(d.reference, d.difference.index);
-  const blurLost =
-    !!ref &&
-    !!frame &&
-    ((ref.t === 'value' && ref.port === 'focusState' && ref.value === false) || (ref.t === 'signal' && ref.port === 'onBlur')) &&
-    d.reference.slice(frame[0], frame[1]).some((e) => e.t === 'in' && e.port === 'blur');
-  if (!blurLost && (!has(d.actual, 'unchanged') || !has(d.reference, 'done'))) return false;
-  const before = d.reference.slice(0, d.difference.index);
-  let on = false;
-  let offAfterOn = false;
-  for (const e of before) {
-    if (e.t !== 'set' || e.port !== 'useLabel') continue;
-    const v = 'value' in e ? e.value : undefined;
-    if (v) on = true;
-    else if (on) offAfterOn = true;
-  }
-  return offAfterOn;
-};
-
-/**
  * NSP-016 §6 C67 — a Check / Uncheck that reverts a person's click in the same frame does not redraw the box: `checkedChanged`
  * writes `props.checked` (FB-020) but React's last-rendered `props.checked` is the value before the click, so the component's
  * `useEffect([props.checked])` sees no change and keeps its local state — the input stays drawn as the person left it, and the
@@ -218,48 +184,6 @@ function settledFrame(t: readonly TraceEvent[], index: number): [number, number]
   return [start + 1, k];
 }
 /**
- * NSP-016 §6 C80 — TextInput.tsx :248-281: the field sits in a different tree with a label, so React builds a new element when Enable
- * Label changes, and the keyboard leaves with the old one, silently (row D30's silence). Narrow: the label's truthiness changed at a
- * paint (a settle or an act) while the reference's field held the keyboard (a Focused signal, or a Focus action or focusing act earlier
- * in that frame), and no Blurred or Will Unmount in the reference from that paint to the difference.
- */
-const labelTakesKeyboard = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  // s45 (the Checkbox's 10,000 run): a Focus action or a focusing act earlier in the SAME frame holds the keyboard when the label's
-  // paint comes, though its Focused prints only in the frame's settle group — so the frame's steps are read for it, in order
-  const FOCUSING = new Set(['focus', 'press', 'click', 'type', 'key', 'choose']);
-  // s47 (the Dropdown's 10,000 at 20732): the placing is a paint — a node placed with the label on, given a Focus before the first
-  // frame and its label written off, loses the keyboard at the first paint (the Focus waits for the element the placing drew)
-  let written = !!(d.params as Record<string, unknown> | undefined)?.useLabel;
-  let painted = written;
-  let holds = false;
-  let lost = false;
-  // s47 (the Radio Button's 10,000 at 20732): a settle group prints a frame's outputs after all its steps, so a Blurred there may
-  // belong to a Blur signal BEFORE the label's paint — only a Blurred or Will Unmount from a LATER frame gives the keyboard up
-  let frame = 0;
-  let lostIn = -1;
-  for (let k = 0; k < d.difference.index; k++) {
-    const e = d.reference[k] as TraceEvent & { act?: string };
-    if (e.t === 'set' && portOf(e) === 'useLabel') written = !!valueOf(e);
-    else if (e.t === 'in' && portOf(e) === 'focus') holds = true;
-    else if (e.t === 'in' && portOf(e) === 'blur') holds = false;
-    else if (e.t === 'settle' || e.t === 'act') {
-      if (written !== painted && holds) { lost = true; lostIn = frame; }
-      painted = written;
-      if (e.t === 'act' && FOCUSING.has(e.act ?? '')) holds = true;
-      if (e.t === 'act' && e.act === 'blur') holds = false;
-      if (e.t === 'settle') frame++;
-    } else if (e.t === 'signal' && portOf(e) === 'onFocus') holds = true;
-    else if (e.t === 'signal' && (portOf(e) === 'onBlur' || portOf(e) === 'willUnmount')) {
-      holds = false;
-      // a group's outputs belong to the frame its settle closed (frame - 1)
-      if (frame - 1 > lostIn) lost = false;
-    }
-  }
-  return lost;
-};
-
-/**
  * NSP-023 step 3 (R12, R14, the remount ruling — 2026-10-05) — the Slider v2 states the intent; what the runtime does instead only
  * because its component reports the graph's Value through React's effect (Slider.tsx :88-95) is these two rows.
  */
@@ -377,14 +301,8 @@ const buttonPickWrittenBack = (d: Divergence) => {
 };
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
-  'net.noodl.controls.textinput': [
-    // NSP-023 (R12) — the Text Input v2 states the intent; what React's drawing makes the runtime do instead
-    { row: 'NSP-016 §6 C80 — Enable Label changed while the field holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
-  ],
   // s39 — the Dropdown: C65's third instance (Select.tsx :245 renders `{props.label}` raw), and two of its own
   'net.noodl.controls.options': [
-    { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the dropdown on the page', matches: lostRootAfterLabelOff },
-    { row: 'NSP-016 §6 C80 — Enable Label changed while the dropdown holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
     { row: "NSP-016 §6 C71 — a Value written back to the value React last rendered, after a pick, leaves the pick selected: picking it again raises nothing", matches: pickWriteBackPick },
     // NSP-023 step 4 (v3) — the spec keeps the pick; what React's effect makes the runtime do instead
     { row: "NSP-016 §6 D34 — Changed fires with nobody picking: a remount, or Items written again, after a pick takes the author's Value back", matches: changedWithNobodyPicking }
@@ -396,9 +314,7 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   ],
   // s42 — the Radio Button: the Checkbox's label, so the Checkbox's C65 and C66 beside the three setters
   'net.noodl.controls.radiobutton': [
-    { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the button on the page', matches: lostRootAfterLabelOff },
     // NSP-023 step 5 (v2) — what React's drawing makes the runtime do instead of what the spec says
-    { row: 'NSP-016 §6 C80 — Enable Label changed while the button holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
     { row: 'NSP-016 §6 C76 — the group\'s Value written back in the frame of a pick leaves the group\'s copy of the selection on the pick: the buttons show the pick', matches: buttonPickWrittenBack },
     { row: 'NSP-016 §6 D37 — Changed fires with nobody clicking this button: a sibling carrying its Value picked, its Value written in a pick\'s frame, a remount', matches: changedWithNobodyClicking }
   ],
@@ -416,9 +332,7 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName }
   ],
   'net.noodl.controls.checkbox': [
-    { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the box on the page', matches: lostRootAfterLabelOff },
     { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick },
-    { row: 'NSP-016 §6 C80 — Enable Label changed while the box holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard }
   ]
 };
 
