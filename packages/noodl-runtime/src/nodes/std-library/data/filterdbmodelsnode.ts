@@ -170,11 +170,13 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
         _this.scheduleFilter();
     };
 
-    // BCN-004 step 5: bound to the legacy store here, exactly as before, and moved by
-    // `bindStoreEvents` when the `Backend` input names another one. A node watching the
-    // wrong backend's saves re-filters when nothing it holds has changed, and does not
-    // re-filter when something has.
-    this.bindStoreEvents(CloudStore.instance);
+    // BCN-004 step 5: moved by `bindStoreEvents` when the `Backend` input names another one. A node watching the
+    // wrong backend's saves re-filters when nothing it holds has changed, and does not re-filter when something has.
+    // P107-C42 (ISL-029, ruled "Follow the project's backend"): with no Backend written — the editor hides the picker
+    // when the project has one backend — the store the project's backend resolves to, as Query Records and the
+    // writers use. It was the legacy store, which no save on a `backendServices` backend reaches, so a filtered list
+    // went stale after an edit. Re-resolved at each run (`scheduleFilter`), as Query Records re-resolves at each query.
+    this.bindStoreEvents(CloudStore.forBackend(this.nodeScope.modelScope, undefined) || CloudStore.instance);
 
     this._internal.enabled = true;
     this._internal.filterSettings = {};
@@ -438,6 +440,9 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
 
       this.scheduleAfterInputsHaveUpdated(() => {
         this.collectionChangedScheduled = false;
+
+        // C42: the store this run's records live in — the Backend's, or the project's when none was written
+        this.bindStoreEvents(CloudStore.forBackend(this.nodeScope.modelScope, this._internal.backendId) || CloudStore.instance);
 
         // Drained before the run starts, so a later `Filter` owns its own batch.
         const tokens = this._internal.pendingFilterOutcomes || [];

@@ -36,6 +36,11 @@ jest.mock('../../src/api/cloudstore', () => ({
     off() {
       /* symmetry */
     }
+  },
+  // P109 ISL-029 (P107-C42): with no Backend written the node binds the store the project's backend resolves to;
+  // none here, so the `|| CloudStore.instance` fallback — `erg-001-filter-records-outcomes.test.ts` stubs it the same
+  forBackend() {
+    return undefined;
   }
 }));
 

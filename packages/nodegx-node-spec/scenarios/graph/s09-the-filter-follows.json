@@ -397,12 +397,11 @@
     ]
   },
   {
-    "name": "C42 — a Filter Records whose Backend was never written (the picker is hidden with one backend) never hears the save: its result keeps the record that left the filter",
+    "name": "C42 — a Filter Records whose Backend was never written (the picker is hidden with one backend) hears the save on the project's backend: the record that left the filter leaves its result",
     "clauses": [
       "N"
     ],
-    "because": "NSP-014 s25. filterdbmodelsnode.ts :153-166 cloudStoreEvents, bound by bindStoreEvents (:172 the legacy store; :547-553 the Backend's); with no Backend written the node stays on the legacy store, and a project with backendServices writes through another store (cloudstore.js forBackend :509-536). The claim is the sentence on Filter Records' Record changes box; the runtime does not bear it out — row C42",
-    "row": "NSP-014 §6.14 C42",
+    "because": "NSP-014 s25. filterdbmodelsnode.ts cloudStoreEvents, bound by bindStoreEvents: with no Backend written, the store the project's backend resolves to (cloudstore.js forBackend), the one Update Record writes through. The claim is the sentence on Filter Records' Record changes box (C42, fixed in P109 ISL-029 — the node stayed on the legacy store and never heard the save)",
     "nodes": {
       "q": {
         "type": "DbCollection2",
@@ -723,6 +722,38 @@
       },
       {
         "t": "settle"
+      },
+      {
+        "t": "value",
+        "port": "count",
+        "value": 1,
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "firstItemId",
+        "value": "r3",
+        "subject": "f"
+      },
+      {
+        "t": "value",
+        "port": "items",
+        "value": {
+          "$array": "MxMwFQsNrQ",
+          "items": [
+            {
+              "id": "r3",
+              "n": 3,
+              "title": "a"
+            }
+          ]
+        },
+        "subject": "f"
+      },
+      {
+        "t": "signal",
+        "port": "modified",
+        "subject": "f"
       },
       {
         "t": "outcome",

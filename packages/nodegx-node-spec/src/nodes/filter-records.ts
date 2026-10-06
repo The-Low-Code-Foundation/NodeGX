@@ -31,10 +31,11 @@
  * press with no outcome at all.
  *
  * WATCHING THE STORE (:153-166, :321-329, :547-553). The node listens for `save` — not `create`, not `delete` — on ONE
- * store: the LEGACY store from creation (:172, which no world write reaches: world.ts BACKEND), moved by a write to
- * `Backend` to that backend's store (`CloudStore.forBackend(…) || CloudStore.instance`: a backend the project does not
- * have puts it back on the legacy store). Row C42: the editor hides the Backend picker when the project has ONE backend
- * (`hideWhenSingleBackend`), so that port is never written there and the node never hears a save. A save on the bound
+ * store: the one `Backend` names (`CloudStore.forBackend(…) || CloudStore.instance`: a backend the project does not
+ * have puts it on the legacy store, which no world write reaches: world.ts BACKEND), and with no Backend written the
+ * PROJECT's backend, as Query Records and the writers use (v3, row C42 ruled "Follow the project's backend": v2 stayed
+ * on the legacy store, and the editor hides the picker when the project has one backend, so the node never heard a
+ * save). The runtime binds at creation and re-resolves at each run; a play's active backend never moves. A save on the bound
  * store re-runs the node when the `Record changes` box is ticked, a visual filter is held, an array is held, the save's
  * class is the Class, and the array holds that record (`contains(Model.get(id))`, the GLOBAL registry).
  *
@@ -74,8 +75,10 @@ type FilterRecordsState = {
   tokens: number;
   /** `collectionChangedScheduled` (:429-433) */
   scheduled: boolean;
-  /** `_internal.boundStore`: the backend whose store the node listens to; `undefined` the legacy store (:172, :547-553) */
+  /** `_internal.boundStore` once Backend was written: the backend whose store the node listens to; `undefined` the legacy store (:547-553) */
   bound: string | undefined;
+  /** v3 (C42) — whether Backend was ever written; until it is, the node listens on the project's backend */
+  picked: boolean;
   /** the `Filter settings` box, mirrored for the derived reducer */
   settingsBox: boolean;
 };
@@ -162,7 +165,9 @@ export const FilterRecords = defineNode({
   // v2 (P109 ISL-026, P107-C10 ruled "Refuse it with a Failure"): a value on Items that is not a list — a number, `true`, a plain
   // object, a record — fails the run with `filter-records/not-a-list`; v1 filtered it as a list of one (the runtime threw in
   // the setter).
-  version: 2,
+  // v3 (P109 ISL-029, P107-C42 ruled "Follow the project's backend"): with no Backend written the node hears saves on the
+  // project's backend, as Query Records does; v2 stayed on the legacy store, which no save on that backend reaches.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/filterdbmodelsnode.ts; api/queryutils.ts; @noodl/backend-contract translators',
   needs: ['registry', 'random', 'backend'],
   worldPool: { registries: REGISTRIES, backends: BACKENDS },
@@ -182,6 +187,7 @@ export const FilterRecords = defineNode({
     tokens: 0,
     scheduled: false,
     bound: undefined,
+    picked: false,
     settingsBox: true
   } as FilterRecordsState,
   outcomes: ['done', 'failure'], // :295-298
@@ -287,7 +293,7 @@ export const FilterRecords = defineNode({
         const schedule = (go: boolean) => (go && !s.scheduled ? { scheduled: true } : {});
         if (port.startsWith('runOnChange-')) return { send: [] }; // the box only records its answer
         if (port === 'collectionName') return { set: { collectionName: v }, send: [] }; // :513-515 — stored, nothing run
-        if (port === 'backendId') return { set: { bound: w.backendFor(v) }, send: [] }; // :547-553 — the subscription moves, nothing run
+        if (port === 'backendId') return { set: { bound: w.backendFor(v), picked: true }, send: [] }; // :547-553 — the subscription moves, nothing run
         if (port === 'visualFilter') return { set: { visualFilter: v, ...schedule(s.settingsBox) }, send: [] }; // :516-520 — changed or not
         if (port === 'visualSorting') return { set: { visualSorting: v, ...schedule(s.settingsBox) }, send: [] }; // :521-525
         if (port.startsWith('fp-')) {
@@ -354,7 +360,8 @@ export const FilterRecords = defineNode({
       // :153-166 — a SAVE heard on the store this node is bound to
       store: (s, i, e, w) => {
         if (e.type !== 'save') return { send: [] }; // :328 — `save` is the one event it listens for
-        if (s.bound !== e.backend) return { send: [] }; // :172, :547-553 — the legacy store hears no world write
+        // :547-553 — the Backend's store, or (v3, C42) the project's when none was written; the legacy store hears no world write
+        if ((s.picked ? s.bound : w.backendFor(undefined)) !== e.backend) return { send: [] };
         if (!i['runOnChange-records']) return { send: [] }; // :154
         if (s.visualFilter === undefined) return { send: [] }; // :156
         if (s.source === undefined) return { send: [] }; // :157

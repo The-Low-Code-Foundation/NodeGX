@@ -954,8 +954,8 @@
     }
   },
   {
-    "name": "C42 — with no Backend written the node is on the legacy store: a save that moves a member out of the filter is NOT heard (the next Filter shows it)",
-    "because": "filterdbmodelsnode.ts :172 bindStoreEvents(CloudStore.instance); world.ts BACKEND — the legacy store hears no world write; row C42 (the picker is hidden with one backend)",
+    "name": "C42 — with no Backend written the node is on the project's backend: a save that moves a member out of the filter is heard, and it re-filters (v3)",
+    "because": "with no Backend written the node binds the store the project's backend resolves to, as Query Records does (C42, fixed in P109 ISL-029 — it stayed on the legacy store, and the picker is hidden with one backend)",
     "params": {
       "items": {
         "$array": "rows"
@@ -1176,8 +1176,8 @@
     }
   },
   {
-    "name": "a filter parameter's box written with no Backend held moves no subscription: a save is still not heard",
-    "because": "filterdbmodelsnode.ts :570 registerRunOnValueChangeInput, :172 — a box records its answer and nothing else",
+    "name": "a filter parameter's box written with no Backend held moves no subscription: the node stays on the project's backend and hears the save (v3, C42)",
+    "because": "filterdbmodelsnode.ts :570 registerRunOnValueChangeInput — a box records its answer and nothing else; with no Backend written the node is on the project's backend (C42, P109 ISL-029; v2 stayed on the legacy store and heard nothing)",
     "params": {
       "items": {
         "$array": "rows"
@@ -1894,6 +1894,173 @@
               "title": "a"
             },
             "backend": "other"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "C42's control: Backend written names the OTHER backend — a save on the project's backend is not heard; one on the named backend is (v3)",
+    "because": "a written Backend wins over the project's; only an unwritten one follows the project (C42, P109 ISL-029)",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "other"
+    },
+    "steps": [
+      "settle",
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            }
+          },
+          {
+            "at": 7,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r3",
+            "data": {
+              "title": "z"
+            },
+            "backend": "other"
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "a Record changes box written after Backend named the OTHER backend leaves the node there: a save on the project's backend is not heard (v3)",
+    "because": "a box records only its answer; it moves no store (C42, P109 ISL-029 — with an unwritten Backend following the project, this is what tells a box write from a Backend write)",
+    "params": {
+      "items": {
+        "$array": "rows"
+      },
+      "collectionName": "Lesson",
+      "visualFilter": {
+        "type": "and",
+        "conditions": [
+          {
+            "field": "title",
+            "operator": "equalTo",
+            "valueSource": "static",
+            "value": "a"
+          }
+        ]
+      },
+      "backendId": "other"
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "runOnChange-fp-min",
+        "value": false
+      },
+      {
+        "advance": 10
+      },
+      "settle"
+    ],
+    "world": {
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "a",
+            "n": 1
+          },
+          "r2": {
+            "title": "b",
+            "n": 2
+          },
+          "r3": {
+            "title": "a",
+            "n": 3
+          }
+        },
+        "collections": {
+          "rows": [
+            "r1",
+            "r2",
+            "r3"
+          ]
+        },
+        "classes": {
+          "r1": "Lesson",
+          "r2": "Lesson",
+          "r3": "Lesson"
+        }
+      },
+      "backend": {
+        "backends": [
+          "main",
+          "other"
+        ],
+        "events": [
+          {
+            "at": 5,
+            "type": "save",
+            "collection": "Lesson",
+            "objectId": "r1",
+            "data": {
+              "title": "z"
+            },
+            "backend": "main"
           }
         ]
       }
