@@ -1,85 +1,88 @@
 # P107 — next session
 
-**Written 2026-10-06 (s50).** Read the [README](README.md) §2–§7 (R15 is the newest ruling, now confirmed). s50's record is
-[NSP-016 §7.11](NSP-016-VISUAL-NODES.md) (the Text v4); s49's is NSP-023 §8.9 and NSP-006 §5.10 (stranger round 4).
+**Written 2026-10-06 (s51).** Read the [README](README.md) §2–§7 (R15 is the newest ruling). s51's record is
+[NSP-016 §7.12](NSP-016-VISUAL-NODES.md) (the Text v5, the zone side); s50's is §7.11.
 
 ## Board (from the task files)
 
 | task | built | committed |
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
-| **NSP-016 the visual nodes** | 🟡 9 of 19 conform. **The Text v4 (s50): step (b)'s first half — the move and the file drop. Left of step (b): the zone side.** The other 10 need infrastructure (§7.6). AC4 waits for NSP-017 | `aa8abb06f` … s50 |
-| **NSP-023 the spec without React** | ✅ **all six ACs met (s50: Richard confirmed R15's radio remount, "No Changed")** | s45 … s49, s50 |
+| **NSP-016 the visual nodes** | 🟡 9 of 19 conform. **The Text v5 (s51): step (b) done — the zone side.** The other 10 need infrastructure (§7.6). AC4 waits for NSP-017 | `aa8abb06f` … s51 |
+| NSP-023 the spec without React | ✅ all six ACs (s50) | s45 … s50 |
 | NSP-006 the stranger | ✅ rounds 1–4 | `649e6864d` |
 | NSP-020 ports without a viewer | rows only | s20 |
 | NSP-022 the cloud-only nodes | 📋 (needs a second runtime target) | s21 |
 
 **115 of 147 conform on the runtime (78.2%)**, unchanged: the Text was already counted. The census was not regenerated.
 
-## What s50 settled
+## What s51 settled
 
-1. **AC6 (NSP-023):** asked plainly, Richard chose "No Changed" for a radio button that comes back after a sibling's click took its
-   selection. Recorded in README §7 R15; NSP-023 ✅.
-2. **The Text v4** (text.ts; 162 → 248 scenarios; acts 10 → 14):
-   - `move` (`mouse` / `touch`): a pending press lifts; a held finger cancels quietly (it is scrolling); a pointer drag never drops
-     on itself (a zone inside the source never takes it), unlike Space (C78).
-   - `fileEnter` (a list of `$file`s; empty = a text drag), `fileLeave`, `fileDrop`: the node's file-drop logic, driven as the
-     browser's drag model (the target moves first: a leave at the old element, an enter at the new; a let go is a drop only when
-     the last dragover was cancelled, else a leave). The drag's files and target are `held` page keys (a new `keeps`: *a drag from
-     outside the page*).
-   - **Format (additive):** adapter.ts `play` resolves an ACT's value like a set's, a list item by item. spec.ts names the acts.
-     Stranger hashes refreshed; the stranger file green (all four rounds).
-3. **Rows:** C79 also catches a file drag (the matcher widened; a fifth C79 row scenario). **C81 new** (medium): a file zone stays
-   lit after the drag leaves when its element was replaced under the drag, or Accept File Drops was switched off during it (the
-   depth count). The spec models it; both targets agree. **C82 new** (medium): Accepted file types holding a non-text value throws
-   in the drop handler, and the drop is lost silently. Found only by the runtime's 10,000; a known row (`nonTextFileTypes`).
-4. **The deep runs' survivors** were s44's shape again: each new act in a frame whose paint mounts, unmounts or retags. Killed with
-   a Draggable write in that frame + focus/Space before the next frame, and a trailing let go for the drag. Seven new equivalents
-   declared in all (equivalent-mutants.ts), each writing what the state holds.
-5. **Small (from round 4):** `dataAttributeNames` / `dataAttributeInput` moved to `src/nodes/data-attributes.ts` (two importers);
-   round 4 guards that module instead of text-input.ts.
+1. **The zone side** (text.ts v5; 248 → 1,203 scenarios; acts 14 → 17). Three cards sit on the Text's page (`CARDS`: a Drag
+   Value and a Drag Kind each). The runtime face builds them as real Draggable Texts in their own containers, armed after
+   their first render (`page.cards`, `cardActs` in node-spec-target.ts). New acts: `grab` (mouse), `pickUp` (keyboard) and
+   `away` (the pointer onto nothing). The module has ONE gesture, so the Text's existing `move`, `release`, `click` and `key`
+   carry a card's gesture. State: `carry`, `carryBy`. No format change, nothing hashed moved, so the stranger was not re-run.
+2. **Two runtime rules the handoff did not foresee, found by the deep run's matrix and modelled (R3):**
+   - the keyboard can be on a card (`cardFocused`): a Space the Text cannot take goes to the card and lifts it;
+   - a pointer drag whose element was replaced drops the Text on ITSELF (`sourceElem`, `pointerAt`; zoneAt skips only zones
+     inside the OLD element). This is **C78 by the pointer**: the C78 ledger's "the pointer can never do it" was wrong, and a
+     paragraph was added (the file is P109's, ISL-031).
+   `pointerAt` is declared `synced` (it follows every pointer act).
+3. **Three new rows.** **C83** (low): a card carried from the keyboard drops into a zone that has left the page (Mounted off);
+   modelled, as C81 is. **C84 and C85** (medium; found by the runtime's 10,000, both C82's shape): drag-drop.ts reads Accept Kind
+   (`kindsOf`) and Zone Name (`zoneName`) as text and throws on anything else. With a bad Accept Kind a pointer let go dies
+   before its swallow and its drop, the gesture never ends, and no later drag starts; with a bad Zone Name a drop fires Dropped
+   and then never finishes. Known rows on the runtime (`nonTextAcceptKind`, `nonTextZoneName`), each a row scenario + twin.
+4. **How the mutants converged** (worth knowing for Group): adding the matrix first pushed the 200 run to 345 survivors.
+   **Writes made only when a value changes doubled the branch shapes.** Writing what an act always does, unconditionally,
+   took it to 44. Then 7 new equivalents (a click that starts and ends its own press; a carry ended outside a zone) and the
+   paint recipe with one change: **END every gesture before Space reads the keyboard** (a card's mouse carry swallowed the
+   Space). The "mounted again" case needed the read inside the act's own frame.
+5. **The handoff's "human decisions outstanding" list was stale.** `node scripts/bugs.js --from P107 --all` at s51: 71 fixed,
+   45 scheduled (P109, mostly ISL-028 … ISL-033), 1 wontfix, **0 needs-ruling, and open: C81, C82 (s50) and C83, C84, C85
+   (s51).** P109 owns asking
+   about and fixing the app for the scheduled ones.
+6. **C79 reaches the drag**: an invisible Text takes the press that starts its own drag (the runtime's 10,000, sequence 5059 of
+   seed 20732). The `invisibleTakesPointer` matcher now also counts Is Lifted / Drag Over going true and Picked Up.
 
-**Readings (2026-10-06, load 2–4):** the spec package suite 22 suites, 916 passed, 18 skipped, exit 0 (before the deep-run
-scenarios; batch-visual 2,371 s); the stranger file green inside it. The Text, after the last scenario change: the interpreter at
-200 (seed 13) CONFORMS, page model green; at 10,000 (seed 20731) CONFORMS, 248 / 248, 0 divergences, 1,615 / 1,633 killed, the
-rest declared. The runtime at 200, seeds 13 and 20730: CONFORMS, 242 / 248 (the six row scenarios), 0 divergences, 1,567 / 1,583,
-the known rows still fire. The runtime at 10,000 (seed 20732): CONFORMS, 0 divergences, C79 attributed 4 and C82 2, 1,567 / 1,583,
-the rest declared (293 s). All nine visuals on the runtime at 200 (seed 13) CONFORM, read from
-each report (the batch as one run times out its 30-minute `beforeAll` hook: the Slider alone took 1,722 s). `tsc --noEmit` clean.
+**Readings (2026-10-06; load 3–6, a P109 peer's suites running beside; the census not regenerated).**
+- Interpreter, 200 (seed 13), all 1,203 scenarios: CONFORMS, 0 divergences, 3,228 / 3,254 mutants killed, 26 declared, 0
+  survivors (244 s). This is `batch-visual`'s gate for the Text.
+- Interpreter, 10,000 (seed 20731), 1,201 scenarios (before the last two kills): CONFORMS, 0 divergences, 3,274 / 3,302
+  killed, 28 declared, 0 survivors (451 s).
+- Runtime, 200: CONFORMS on seed 13 (550 s) and seed 20730 (526 s) at 1,191 scenarios, and on seed 20732 (565 s) at 1,203,
+  where C85 was attributed once. The known-rows test is green: C79, C82, C84 and C85 each still fire.
+- Runtime, 10,000 (seed 20732), 1,203 scenarios, after the C79 matcher was widened: CONFORMS, 0 unattributed divergences;
+  known C79 ×4, C82 ×1, C84 ×5, C85 ×1; 3,228 / 3,254 mutants; all 7 tests of the file green (1,516 s).
+- Package checks: page model, page-model plants, catalog parity, schema and adapter, 360 / 360; `tsc --noEmit` clean.
+  **Not run:** the whole package suite (`batch-visual` is ~40 minutes); its Text part is the 200 reading above, and no other
+  spec moved. **Not run either: the stranger file.** A P109 peer has an open edit to spec.ts and world.ts (ISL-029 D24,
+  `backendUser(backend)`), both hashed. That is theirs to refresh. s51 touched no hashed file.
 
-## What s51 does
+## What s52 does
 
-1. **NSP-016, step (b)'s second half: the zone side.** A Draggable sibling on the Text's page (s42's design: the spec declares the
-   page's other nodes, the face builds real ones). An act of the zone carries the sibling's drag: Drag Over on enter and leave,
-   Dropped Value (the sibling's Drag Value at the drop), Drop Index 0 (a Text has no slots), Dropped on the zone and Landed on the
-   source, Accept Kind against the sibling's Drag Kind. RESEARCH-DRAG-DROP.md §7 has the shape. Deep-run it at 10,000 on both
-   targets before the handoff; expect s44's paint-branch survivors for each new act.
-2. **Then Group** (its children are the slots, Drop Index from the keyboard; and measure C81's label-swap case there), **then
-   Image and Circle** (the Text with another look). Each needs a page model (G1), written while sorting.
+1. **Group** (NSP-016; its children are the slots): Drop Index from the keyboard (ArrowUp / ArrowDown over the slots), a card
+   that is one of its own children (its home index, `homeIndex`), and C81's label-swap case (a "Drop files here" child
+   replaced while a file hovers). Reuse the Text's cards (`acts.grab.values`) and its page-model keys. **Build the matrix
+   from the start**, with the s51 observer (Space on it hidden, Escape, a move and a let go, the hold, Space after a new
+   Tag), and write what an act always does unconditionally. Deep-run at 10,000 on both targets before the handoff.
+2. **Then Image and Circle** (the Text with another look). Each needs a page model (G1), written while sorting.
 3. Re-run the whole runtime visual batch per spec (`NSP_ONLY=<one type>`), not as one run.
+4. **Cost to watch:** the Text at 200 now takes ~230 s on the interpreter (with mutants) and ~530 s on the runtime (was 115 s).
+   The package's `batch-visual` is ~4 minutes longer. If a matrix for Group would double that again, join its segments
+   (the s45 recipe: play each segment alone, then the joined run) rather than adding plays.
 
-**Human decisions outstanding.** Each is a row to ask, in plain words (README §7 holds the earlier ones as written):
-- **New s50 rows, not yet asked:** C81 (the stuck file zone: reset on any drag end, and on Accept File Drops off) and C82 (read
-  Accepted file types as text). Both have a proposed fix in their ledger file; neither needs a ruling on intent.
-- **P109's ISL-031 now owns the APP fixes** for every NSP-023 row: C68, C69, C71, C72, C73, C76, C80, D34, D35, D36 and D37.
-  Their intents are ruled; ask about fixing the app there, not here. When the app is fixed, each row scenario stops
-  diverging: remove its `row` field (a row scenario that passes turns the "known rows" test red) and close the row (each
-  bug file says which scenarios).
-- **s43 (drag and drop):** C79 (Richard, s44: "I dunno" — open), C77 and C78.
-- **s41 (the Slider):** C74 and C75.
-- **s39:** C70.
-- **s37:** C65, C61 / C62 / C63 together, C66, C67, and C64 with D30.
-- Then the s46 list: C27 + C29 together, C30, C26, C24, C31, C32, C28, C25, D20, D21; C22, D19 (second half), C11 with C37,
-  C12, C15, C16, C20, C7, D14, D16; the Record family C34, C36, C35, C33, D22; Query Records C38, C39, C40 + C41; Filter
-  Records C42, C44, C43; the user nodes C47, C45 + C46, C48, C49, D23, D24, C50, D25; the files C52, C51, D26; C53, D27; C54,
-  D28; C55; C58, C56, C57; then R7, R8, R4's confirmation and G1; and NSP-017's question about the templates' CSS sheets.
+**Human decisions outstanding.** Ask in plain words (README §7 holds the earlier ones):
+- **C81, C82, C83, C84, C85** (all open, none asked yet). Each has a proposed fix in its ledger file, and none needs a ruling on
+  intent. They may belong on P109's list beside ISL-031's drag-and-drop rows (C77, C78, C79). Ask whether to hand them over.
+  C84 and C85 are one-line fixes (`String(...)`) that unstick every drag on a page; they are the most worth fixing.
+- **R7, R8, R4's confirmation and G1**, and NSP-017's question about the templates' CSS sheets, as before.
 
-The list: `node scripts/bugs.js --from P107`. (`check` reports five problems at s50, none in P107's files.)
-
-**Known face choices, written down (not gaps):** as s46's handoff, unchanged. A press is a focus with no geometry. jsdom has
-no focus fixup. A Dropdown's `choose` and a Slider's `slide` are keyboard acts. A reversed range is not slid. An act paints
-the node first, and in the face that paint is a redraw. An act's pointer has no position. The click swallow expires at the
-world's clock.
+**Known face choices, written down (not gaps):** as s46's handoff, plus s51's: a card is drawn first and armed after, so it
+has its tabindex before the first step; a card is never hidden; `grab` is a press and a move past the slop, over the card;
+`away` moves onto the page's body; `elementFromPoint` answers the element the last pointer act landed on while it is
+connected, so a pointer act on an element that is later hidden still counts as "over it" at the hold timer.
 
 ## Before you start
 
@@ -93,7 +96,10 @@ world's clock.
 - **After a `/clear`, a running suite or an uncommitted pile may be your own pre-clear session's**: read the `.jsonl` tail.
 - **Row scenarios are labels**: a scenario with a `row` counts as known on ANY divergence, and the matchers grade only the
   generated sequences. So a row scenario's name must say the intent, and a twin must grade what the row would hide.
-- **The probes** (s47's, and s48 rebuilt `zz-side`; all deleted; each takes a minute to rebuild):
+- **The probes** (s47's; s48 and s51 rebuilt `zz-side`; all deleted; each takes a minute to rebuild). s51 added `zz-mut.test.ts`
+  in the spec package: `discoverBranches` over the suite, then ONE mutant (`ZZ_M` = reducer||kind||branch||swappedWith) played on
+  the scenarios whose names hold `ZZ_NAMES`, with the branch's and the sibling's recorded examples printed. Read the examples
+  before calling a survivor equivalent. The matrix generators lived in the scratchpad; the JSON is the source.
   - `noodl-runtime/test/node-spec/zz-side.test.ts`: every scenario of `NSP_TYPE` (or of the JSON file `ZZ_FILE`) on both
     targets, compact traces, `!!` on a difference. `ZZ_ONLY` takes indices, `ZZ_PRINT=1` prints the traces, `ZZ_ALL=1`
     keeps the quiet outputs.

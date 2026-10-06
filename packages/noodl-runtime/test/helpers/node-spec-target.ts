@@ -340,6 +340,12 @@ interface Page {
    * a real node, holding the node and its siblings (`children`); the page renders IT. Deleted with the page.
    */
   group?: RuntimeNode & { cachedChildren?: unknown };
+  /**
+   * NSP-016 s51 — the Draggable cards beside the node, when its spec's `grab` act names some (text.ts THE ZONE SIDE): each a real
+   * Text in the node's scope, in its own container after the node's, with the Drag Value and Drag Kind it was made with — which
+   * is how a `grab` or a `pickUp` finds it. Deleted with the page.
+   */
+  cards?: Array<{ node: RuntimeNode; value: unknown; root: { unmount(): void }; container: any }>;
 }
 
 /**
@@ -1539,6 +1545,44 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     void d.act(() => {
       page.root.render(React.createElement(Host, { ref: (r: Page['host']) => (page.host = r) }));
     });
+    // NSP-016 s51 — the cards a person picks up and carries onto the node (text.ts THE ZONE SIDE; `acts.grab.values`). Face choices,
+    // written down: each card is drawn first and armed after (Draggable, then its Drag Value and Drag Kind), so its element has
+    // drag-drop.ts's tabindex before the play's first step — a card's own arming is the card's spec, not this node's
+    const cards = (spec?.acts?.grab?.values ?? []) as ReadonlyArray<{ dragValue?: unknown; dragKind?: unknown }>;
+    page.cards = cards.map((card, i) => {
+      const n = context.nodeRegister.createNode('Text', `${s.h.id}/card${i}`, scope) as unknown as RuntimeNode & Holder;
+      const box = d.document.createElement('div');
+      d.document.body.appendChild(box);
+      const cardRoot = d.createRoot(box);
+      let cardHost: Page['host'] = null;
+      n.parent = {
+        props: { layout: 'column' },
+        style: { flexDirection: 'column' },
+        cachedChildren: undefined,
+        children: [],
+        innerReactComponentRef: null,
+        contains: () => false,
+        getVisualParentNode: () => undefined,
+        forceUpdate: () => {
+          context.eventEmitter.once('frameEnd', () => cardHost?.forceUpdate());
+          context.scheduleUpdate();
+        }
+      };
+      class CardHost extends React.Component {
+        render() {
+          return n.render() ?? null;
+        }
+      }
+      void d.act(() => {
+        cardRoot.render(React.createElement(CardHost, { ref: (r: Page['host']) => (cardHost = r) }));
+      });
+      const set = (port: string, v: unknown) => (n as unknown as NodeInstance).setInputValue(port, v);
+      set('text', `card ${i}`);
+      set('draggable', true);
+      if (card.dragValue !== undefined) set('dragValue', card.dragValue);
+      if (card.dragKind !== undefined) set('dragKind', card.dragKind);
+      return { node: n, value: card, root: cardRoot, container: box };
+    });
     s.page = page;
     onPage.add(s);
   }
@@ -1552,8 +1596,14 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       page.root.unmount();
     });
     page.container.remove();
+    for (const c of page.cards ?? []) {
+      void d.act(() => {
+        c.root.unmount();
+      });
+      c.container.remove();
+    }
     // the children go with the page: off it already, their teardown cannot reach a render
-    for (const n of [...(page.children ?? []).map((c) => c.node), ...(page.group ? [page.group] : [])]) {
+    for (const n of [...(page.children ?? []).map((c) => c.node), ...(page.cards ?? []).map((c) => c.node), ...(page.group ? [page.group] : [])]) {
       try {
         n._onNodeDeleted();
       } catch {
@@ -1617,6 +1667,8 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
     const el = act === 'pick' ? pickedElement(s, value) : ownElement(s);
     // NSP-016 s50 — a drag from the desktop goes on over whatever is on the page, the node's element or not
     if (act === 'fileEnter' || act === 'fileLeave' || act === 'fileDrop') return fileActs(act, value, el ? underPointer(w, el) : d.document.body);
+    // NSP-016 s51 — a card beside the node, and the pointer off everything: acts on the page, the node's element or not
+    if (act === 'grab' || act === 'pickUp' || act === 'away') return cardActs(s, act, value);
     if (!el) return;
     const KEYBOARD = new Set(['focus', 'blur', 'type', 'key', 'choose', 'slide']);
     const hit = KEYBOARD.has(act) ? el : underPointer(w, el);
@@ -1761,6 +1813,50 @@ export function runtimeTarget(options: RuntimeTargetOptions = {}): RuntimeTarget
       default:
         throw new Error(`runtime: no person face for the act "${act}"${value === undefined ? '' : ` (${JSON.stringify(value)})`}`);
     }
+  }
+
+  /**
+   * PERSON (above, NSP-016 s51) — the cards beside the node (`page.cards`) and the pointer off everything. `grab`: the mouse goes down on
+   * the card named (its Drag Value and Drag Kind) — `pointerdown`, `mousedown` and, not cancelled, the keyboard onto it — then moves
+   * across it past the mouse's slop (a `pointermove` the window hears, then `mousemove`), and the pointer is over the card. `pickUp`: the
+   * keyboard onto the card, then Space (`keydown`, `keyup`). `away`: the mouse, or the finger that is down, moves past both slops onto
+   * nothing — the page's body — and the pointer is over that. Face choices, written down: as `move`, 10 px from (0, 0); a card is never
+   * hidden, so its acts need no hit test; a card that is not on the page, or one the act does not name, is nothing to act on.
+   */
+  function cardActs(s: State, act: string, value: unknown): void {
+    const d = ensureDom();
+    const w = d.window;
+    const pointerEvent = (on: any, type: string, kind: 'mouse' | 'touch', init: Record<string, unknown>) => {
+      const e = new w.MouseEvent(type, { bubbles: true, cancelable: true, composed: true, button: 0, ...init });
+      Object.defineProperty(e, 'pointerType', { value: kind });
+      Object.defineProperty(e, 'pointerId', { value: kind === 'mouse' ? 1 : 2 });
+      Object.defineProperty(e, 'isPrimary', { value: true });
+      return on.dispatchEvent(e);
+    };
+    if (act === 'away') {
+      const kind = value === 'touch' ? 'touch' : 'mouse';
+      const body = d.document.body;
+      pointerAt = body;
+      pointerEvent(body, 'pointermove', kind, { button: -1, buttons: 1, clientX: 10, clientY: 0 });
+      if (kind === 'mouse') body.dispatchEvent(new w.MouseEvent('mousemove', { bubbles: true, cancelable: true, composed: true, clientX: 10, buttons: 1 }));
+      else body.dispatchEvent(new w.TouchEvent('touchmove', { bubbles: true, cancelable: true, composed: true }));
+      return;
+    }
+    const named = JSON.stringify(value);
+    const card = s.page?.cards?.find((c) => JSON.stringify(c.value) === named);
+    const el = card && elementSeen(card.node as unknown as { getDOMElement(): unknown });
+    if (!el || !el.isConnected) return;
+    if (act === 'grab') {
+      pointerAt = el;
+      pointerEvent(el, 'pointerdown', 'mouse', { buttons: 1 });
+      if (el.dispatchEvent(new w.MouseEvent('mousedown', { bubbles: true, cancelable: true, composed: true, button: 0 }))) el.focus();
+      pointerEvent(el, 'pointermove', 'mouse', { button: -1, buttons: 1, clientX: 10, clientY: 0 });
+      el.dispatchEvent(new w.MouseEvent('mousemove', { bubbles: true, cancelable: true, composed: true, clientX: 10, buttons: 1 }));
+      return;
+    }
+    el.focus();
+    el.dispatchEvent(new w.KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true, composed: true }));
+    el.dispatchEvent(new w.KeyboardEvent('keyup', { key: ' ', bubbles: true, cancelable: true, composed: true }));
   }
 
   /**

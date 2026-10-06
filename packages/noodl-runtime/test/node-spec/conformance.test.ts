@@ -52,26 +52,6 @@ function copyOfCounterWith(find: string, replace: string): NodeModule {
  * below must read 0 in the same commit.
  */
 /**
- * NSP-012 §6 C9 — Create New Array, Create New Object and Set Object Properties coalesce two `Do`
- * presses in one frame into ONE outcome (the `hasScheduled…` guard sits before `beginOutcome`),
- * where the spec, the contract and their siblings (Array's Fetch, Set Variable, Array Filter)
- * report one per press. Narrow: a frame with two or more `in` on the port, and the difference at
- * or after that frame's settle.
- */
-const coalescedPress = (port: string) => (d: Divergence) => {
-  let presses = 0;
-  for (let i = 0; i < d.reference.length; i++) {
-    const e = d.reference[i];
-    if (e.t === 'in' && e.port === port) presses++;
-    else if (e.t === 'settle') {
-      if (presses >= 2 && d.difference.index >= i) return true;
-      presses = 0;
-    }
-  }
-  return false;
-};
-
-/**
  * NSP-016 §6 C66 — a Checkbox whose Enable Label went from on to off has lost its root element (two elements, one ref
  * callback: the removed one nulls it), so a Focus action reports Unchanged with the box on the page. Narrow: the
  * difference is the Focus outcome — Unchanged on the runtime where the reference says Done — and the reference holds
@@ -165,7 +145,11 @@ const invisibleTakesPointer = (d: Divergence) => {
   if (d.difference.threw !== undefined) return false;
   const a = d.actual[d.difference.index];
   if (!a) return false;
-  const raised = a.t === 'signal' ? POINTER_OUTPUTS.includes(a.port) : a.t === 'value' && ((a.port === 'isDragOver' && a.value === true) || FILE_DROP_VALUES.includes(a.port));
+  // s51 — and the drag: the invisible element takes the press that starts its own drag (Is Lifted, Picked Up), or lights as a card's zone
+  const raised =
+    a.t === 'signal'
+      ? POINTER_OUTPUTS.includes(a.port) || a.port === 'pickedUp'
+      : a.t === 'value' && ((['isDragOver', 'isLifted', 'isDropTarget'].includes(a.port) && a.value === true) || FILE_DROP_VALUES.includes(a.port));
   if (!raised) return false;
   const before = d.reference.slice(0, d.difference.index);
   const opacity = before.filter((e) => e.t === 'set' && e.port === 'opacity').pop() as { value?: unknown } | undefined;
@@ -192,6 +176,30 @@ const nonTextFileTypes = (d: Divergence) => {
   const falsyNum = typeof v === 'object' && v !== null && ['NaN', '-0'].includes(String((v as { $num?: unknown }).$num));
   return !!v && !falsyNum && typeof v !== 'string';
 };
+
+/**
+ * NSP-016 §6 C84 and C85 (s51) — two more inputs drag-drop.ts reads as text with `(value || '').split` / `.trim()`: a truthy value
+ * that is not text throws inside the controller. Accept Kind (`kindsOf` :155-160, from `accepts`, in `zoneAt` and `orderedZones`):
+ * a drag that meets the zone dies there — a pointer let go before its swallow and its drop, so the gesture never ends; a keyboard
+ * pick-up starts in no zone. Zone Name (`zoneName` :740-748, in `drop` :393 before `finish`): the drop fires Dropped and Landed, then
+ * never ends — the zone stays lit, the source lifted, and no other drag can start. The spec reads both as text (the intent). Shared
+ * shape: the difference is on a drag output, and the input held such a value at some point before it with Accept Drops on.
+ */
+const DRAG_OUTPUTS = ['isDropTarget', 'droppedValue', 'dropIndex', 'isLifted', 'dropped', 'landed', 'pickedUp', 'dragCancelled', 'onClick'];
+const notText = (v: unknown) => {
+  const falsyNum = typeof v === 'object' && v !== null && ['NaN', '-0'].includes(String((v as { $num?: unknown }).$num));
+  return !!v && !falsyNum && typeof v !== 'string';
+};
+const everHeld = (d: Divergence, port: string, test: (v: unknown) => boolean) =>
+  test(d.params[port]) || d.reference.slice(0, d.difference.index).some((e) => e.t === 'set' && e.port === port && test((e as { value?: unknown }).value));
+const nonTextDragInput = (port: string) => (d: Divergence) => {
+  if (d.difference.threw !== undefined) return false;
+  const atDrag = (e: TraceEvent | undefined) => !!e && (e.t === 'value' || e.t === 'signal') && DRAG_OUTPUTS.includes(e.port);
+  if (!atDrag(d.reference[d.difference.index]) && !atDrag(d.actual[d.difference.index])) return false;
+  return everHeld(d, port, notText) && everHeld(d, 'acceptDrops', (v) => !!v);
+};
+const nonTextAcceptKind = nonTextDragInput('acceptKind');
+const nonTextZoneName = nonTextDragInput('dropZoneName');
 
 /**
  * NSP-023 (R12, ruled 2026-10-05) — the Text Input v2 states the intent; what the runtime does instead only because of how React
@@ -477,16 +485,16 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   // s43 — the Text: a text style (C61) and the Placement and units-typed style setters; s44 — C79 (R11: the spec says the intent)
   Text: [
     { row: 'NSP-016 §6 C79 — at Opacity 0 after a Pointer Events write the element takes the pointer', matches: invisibleTakesPointer },
-    { row: 'NSP-016 §6 C82 — Accepted file types not text: the drop handler throws, so the drop gives no File and no signal', matches: nonTextFileTypes }
+    { row: 'NSP-016 §6 C82 — Accepted file types not text: the drop handler throws, so the drop gives no File and no signal', matches: nonTextFileTypes },
+    // s51 — the zone side's two: the drag controller reads Accept Kind and Zone Name as text and throws on anything else
+    { row: 'NSP-016 §6 C84 — Accept Kind not text: the drag controller throws where it reads the kinds, so a drag that meets the zone dies there', matches: nonTextAcceptKind },
+    { row: 'NSP-016 §6 C85 — Zone Name not text: a drop on the zone throws after Dropped, so the drag never ends', matches: nonTextZoneName }
   ],
   'net.noodl.controls.checkbox': [
     { row: 'NSP-016 §6 C66 — Enable Label on then off: the node lost its root element (two elements share the root ref), so Focus reports Unchanged with the box on the page', matches: lostRootAfterLabelOff },
     { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick },
     { row: 'NSP-016 §6 C80 — Enable Label changed while the box holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard }
-  ],
-  CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
-  NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
-  SetModelProperties: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('store') }]
+  ]
 };
 
 /**

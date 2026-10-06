@@ -30,3 +30,14 @@ Over true. Press Enter: Dropped Value `{id: 7}`, Drop Index 0, Dropped, Landed. 
 
 **Proposed fix (small).** Have `orderedZones` leave out every zone inside the source (`g.sourceEl.contains(z.el)`), as
 `zoneAt` does. The keyboard and the pointer then agree.
+
+**The pointer can do it too, once the element is replaced (P107 s51, 2026-10-06).** The sentence above, "with a mouse
+or a finger this cannot happen", holds only while the element stays the same. The gesture remembers the element the
+press started on (`g.sourceEl`). `zoneAt` skips zones inside THAT element. If the node's element is replaced while the
+press is held or the drag is lifted (Mounted off and on, or a new Tag), its new element is not inside the old one. A
+move over the new element then finds the node as its own zone (Drag Over true), and the let go drops it on itself:
+Dropped with its own Drag Value, then Landed. The hold timer's lift tracks too, so a held finger whose element was
+replaced lifts straight into itself when the pointer was last over the new element. Both targets agree, and the Text's
+spec models it: the "where the pointer is" scenarios and the matrix rows "its own mouse press pending … mounted again"
+in packages/nodegx-node-spec/scenarios/Text.json (NSP-016 §7.12). **The same fix covers it if it compares against the
+node, not the element:** skip a zone whose node is the source (`node === g.source`), in `zoneAt` and in `orderedZones`.

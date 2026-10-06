@@ -957,3 +957,119 @@ example holds element 1, which is visible only when element 1 still carries the 
 equivalent: a leave with no drag (no files over none); a leave of a drag over nothing (no target over none); a leave or let go
 with no drag whose paint unmounts (both); and a click on the element its paint makes, with or without a pending gesture
 started and ended (idle before and after; s43's pair, with the paint).
+
+### 7.12 s51, 2026-10-06 — the Text v5: the zone side (step (b), second half)
+
+**The page.** The Text's spec now names three cards (`CARDS` in text.ts, the values of the new `grab` and `pickUp` acts). Each
+card is a Drag Value with a Drag Kind: `card-1` of kind `card`, `7` of kind ` task ` (trimmed when read), and `loose` with no
+kind. The runtime face builds each one as a real Text in the node's scope, in its own container after the node's, armed
+(Draggable, then its Drag Value and Drag Kind) after its first render. That way its element has drag-drop.ts's tabindex
+before the first step. Arming a card is the card's own spec, not this one's, so this is written down as a face choice. No
+format change: an act's values were already resolved item by item (s50), and the cards are plain objects. Nothing hashed
+moved, so the stranger was not re-run.
+
+**Three new acts, and the old ones carry the rest.**
+- **`grab`** (a card): the mouse goes down on the card, which takes the keyboard, then moves past the mouse's slop. With no
+  gesture under way, the card lifts at once, over itself, where no zone is.
+- **`pickUp`** (a card): the keyboard goes onto the card, then Space. With no gesture under way, the card lifts from the
+  keyboard into the first zone that takes it: the Text, when Accept Drops is on, its element is on the page, and its Accept
+  Kind takes the card's kind. Drag Over goes true at once.
+- **`away`** (`mouse` or `touch`): the pointer that is down moves onto nothing.
+
+The module has ONE gesture. So once a card is carried, the Text's existing acts are that gesture's:
+- `move` over the Text enters it when the hit test finds the Text and the Text takes the card. Drag Over goes true.
+- `away`, or a `move` over a Text the pointer passes through (hidden, Opacity 0), leaves it. Drag Over goes false.
+- `release` and `click` track the pointer where the mouse came up, then drop: Dropped Value is the card's, Drop Index is 0
+  (a Text's element has no element children), then Dropped and Drag Over false. Over anything else it is a cancel. Either
+  way the swallow eats the next click (exactly one).
+- `key`: Enter or Space drops a keyboard carry, Escape or Tab cancels it, and an arrow enters the Text when the Text takes
+  the card now. Escape cancels a mouse carry too.
+
+The other way round also holds. While a card is carried, the Text's own press starts nothing. While the Text's own press is
+pending, a card's press starts nothing, and its move is the Text's own pointer moving: the Text lifts. The cards' own
+signals (Picked Up, Landed, Cancelled) belong to the cards' spec. Two state keys hold the card's gesture, `carry` (which card)
+and `carryBy` (the mouse or the keyboard). The page model classes them as node keys, beside `phase` and `input`.
+
+**Two more rules, found by the deep run's matrix and modelled (R3: the runtime wins).**
+- **The keyboard can be on a card.** A card takes the keyboard at its press and at a pick-up. The Text takes it back when it can.
+  A key the Text cannot take (it is hidden, or its element is new and has no tabindex, C77) goes to whatever holds the
+  keyboard. So a Space then is a Space on the card, and lifts the card. State: `cardFocused`, the card that holds it.
+- **The Text's own pointer drag can drop it on itself once its element is replaced.** `zoneAt` skips a zone inside the element
+  the press STARTED on (`g.sourceEl`). A new element (Mounted off and on, a new Tag) is not inside the old one. So a move over
+  it, the let go over it, or the hold timer's lift with the pointer last over it finds the Text as its own zone, and it drops on
+  itself: Dropped with its own Drag Value, then Landed. That is row **C78**'s pointer route, added to its ledger. The keyboard
+  route was already known, and the fix proposed there (compare the zone's node, not its element) covers both. State:
+  `sourceElem` (the element the press started on), and `pointerAt` (the element the last pointer act landed on, which is
+  what the face's `elementFromPoint` answers). `pointerAt` is declared `synced`: it follows every pointer act, as a page sync,
+  and is not the work of any branch.
+
+**Findings.**
+- **P107-C83** (low, new, [the ledger](../../bugs/p107-c83-a-card-carried-from-the-keyboard-drops-into-a-zone-that-has-left-the-page.md)):
+  a card carried from the keyboard drops into a zone that has left the page. A zone is left only when it is deleted, when
+  Accept Drops goes off, or when the pointer finds another zone. Mounted off is none of these. A keyboard drop takes the
+  gesture's zone without checking it again, so Dropped fires on a Text that is not on the page, and its Drag Over stays true
+  while it is gone. A mouse drag does not have this problem, because its next move tracks the pointer again. The spec models
+  what the runtime does (as for C81), so both targets agree.
+- **C78 reaches the pointer** (above; [the ledger](../../bugs/p107-c78-a-keyboard-drag-drops-an-element-on-itself.md)).
+- **P107-C84** (medium, new, [the ledger](../../bugs/p107-c84-a-drag-dies-at-a-zone-whose-accept-kind-is-not-text.md)) and
+  **P107-C85** (medium, new, [the ledger](../../bugs/p107-c85-a-drop-never-ends-on-a-zone-whose-zone-name-is-not-text.md)),
+  found by the runtime's 10,000 run (seed 20732), both C82's shape: drag-drop.ts reads Accept Kind (`kindsOf`) and Zone Name
+  (`zoneName`) with `(value || '').split` / `.trim()`, so a truthy value that is not text throws inside the controller. With
+  Accept Kind, a pointer let go dies before its swallow and its drop, so the gesture never ends and no later drag can start,
+  and a keyboard pick-up starts in no zone. With Zone Name, a drop fires Dropped and Landed and then never finishes: the zone
+  stays lit and the gesture is stuck, so the next let go drops the same card again. The spec reads both as text (the intent),
+  so they are known rows on the runtime (`nonTextAcceptKind`, `nonTextZoneName` in conformance.test.ts). Each has a row
+  scenario named for the intent and a twin the runtime passes.
+- Also modelled, with no row: a keyboard drop does not re-check the kind either. A zone whose Accept Kind changed after the
+  card started in it still takes the drop.
+
+**Scenarios: 248 → 1,203.** The first 23 hand scenarios played identically on both targets on the first run. Reading their
+traces showed four false names, fixed: (1) a let go with no move first enters and drops in one act, and Drag Over's true then
+false is not on the wire; (2) a finger's acts during a mouse carry still fire Pointer Down and Up; (3) a second card's move
+leaves the zone, and the let go then drops the FIRST card; (4) "a card grabbed takes the keyboard" graded nothing, because the
+`key` act puts the keyboard back on the Text first. (4) was rebuilt on a hidden Text, with a twin without the grab. Eleven
+more hand scenarios killed the 200 run's first survivors (a no-op key or another pointer's `away` during a carry; a carry
+ended outside a zone; the swallow eats exactly one click; a grab during a keyboard carry or the Text's own held finger).
+
+**The deep run.** The interpreter at 10,000 (seed 20731), on the 280 hand scenarios: 0 divergences, but 84 survivors. They were
+the new acts in states no hand scenario reached. So the session built a matrix: each gesture that can be under way (none,
+the Text's own press, held finger or keyboard lift, a card carried by mouse or keyboard, in the zone or refused, a card that
+took the keyboard and was put down) × the keyboard on the Text or not × a paint in the act's frame (none, Mounted off, mounted
+again, a new Tag) × each of 23 acts, each read by one observer (Space on the Text hidden, Escape, a move and a let go, the
+hold, then Space after a new Tag: who holds the keyboard, the carry, the zone, the timer). The first matrix diverged on the
+runtime in 62 of 400 plays. Those were the two rules above, not face faults. Modelled, all 758 matrix plays agree.
+
+**Mutants: what made them converge.** Adding the matrix first raised the 200 run's survivors to 345, then 137 (5,161 mutants),
+because every write made only when the value changed doubled the branch shapes. The fix was in the spec, not in more
+scenarios: an act that always does a thing now always writes it. A press that takes the keyboard always takes it off any
+card, a grab or a pick-up always puts it on the card, and a press always records its source. With that, 44 survivors were
+left (3,174 mutants, 309 s). Then:
+- **Declared equivalent (seven new rows).** A click whose press starts the Text's own pending gesture and whose release ends it leaves
+  `phase`, `input` and the zone as they were, and the source it records is written again by the next press before anything
+  reads it. The other case is a key that ends a card's carry outside a zone, handed the twin that also left it. The earlier
+  rows whose shapes moved (a Space lift of an element that holds the keyboard, the clicks that start and end a pending
+  press) were re-pointed at the new shapes, with their reasons unchanged.
+- **Killed by seven scenarios:** a click that cannot take the keyboard (C77's new element, or not Draggable) beside a twin
+  that would; an eaten click during a keyboard gesture (the Text's own, or a card's) beside a twin that ends it.
+- **The `away` paint family** (an `away` whose paint mounts, unmounts or retags, swapped with one that does not) needed s44's
+  recipe plus one change. The gesture has to be ENDED (a release, a finger lift, Escape) before Space reads the keyboard. A
+  card's mouse carry, still under way, swallowed the Space that was meant to read it. Then the "mounted again" case needed
+  the read inside the act's own frame: the mutant's 60-frame chain catches up at the next frame start (108 scenarios).
+
+The interpreter's 10,000 then left 8 survivors (a click that lets a card go while the pointer passes through the Text, and a
+pick-up whose paint retags). Six more scenarios killed them, and s50's two paint-click rows were re-pointed at the shapes with
+the source element.
+
+**C79 reaches the drag** ([the ledger](../../bugs/p107-c79-an-invisible-element-catches-clicks-after-a-pointer-events-write.md)):
+the runtime's 10,000 found an invisible Text taking the press that starts its own drag (sequence 5059 of seed 20732). The
+matcher now counts a drag starting and a zone lighting.
+
+**Readings (2026-10-06, load 3–6, a peer's suites running beside).**
+- The interpreter at 200 (seed 13), 1,203 scenarios: CONFORMS, 0 divergences, 3,228 / 3,254 killed, 26 declared, 0 survivors
+  (244 s).
+- The interpreter at 10,000 (seed 20731), 1,201 scenarios: CONFORMS, 0 divergences, 3,274 / 3,302 killed, 28 declared, 0
+  survivors (451 s).
+- The runtime at 200: CONFORMS on seeds 13 (550 s) and 20730 (526 s) with 1,191 scenarios, and on seed 20732 with 1,203
+  (565 s; C85 attributed once). The known-rows test is green: C79, C82, C84 and C85 each still fire.
+- The runtime at 10,000 (seed 20732): the first run had 10 of 11 divergences known (C79 ×3, C82, C84 ×5, C85) and one C79 the
+  matcher missed. With the matcher widened: CONFORMS, 0 unattributed divergences (C79 ×4, C82, C84 ×5, C85), 1,516 s.

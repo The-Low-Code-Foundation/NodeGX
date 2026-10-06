@@ -179,6 +179,10 @@ Fixes 1 and 2 change when the face installs the page for all 8 visual nodes that
   face builds real nodes (a Draggable sibling, a Text with a `Drag Value` and a `Drag Kind`), and an act of the zone's
   carries the drag. Drop Index needs slots, so it is the **Group's** to grade (its children are the slots, also on its
   page). A Text zone has no element children, so its index is always 0.
+  **Built for the Text in s51** (NSP-016 §7.12): three cards on the page beside it, each a real Draggable Text with its own
+  Drag Value and Drag Kind, in its own container; `grab` (the mouse), `pickUp` (the keyboard) and `away` (the pointer onto
+  nothing). The Text's existing acts (`move`, `release`, `click`, `key`) carry a card's gesture, because it is the module's
+  one gesture.
 - **A source and a zone in one play** sit on one page, one process-wide gesture. A target must end every gesture with its
   play (§5, fix 3).
 - **The file drop is the node's own logic**: the type filter, the depth count, the two signals and the five values. Three
@@ -194,7 +198,8 @@ Fixes 1 and 2 change when the face installs the page for all 8 visual nodes that
      Enter, Hover Start, Hover End, with the hover visual state), Mounted, the Bounding Box outputs, and both drop
      features' inputs stored. In this step the person acts are the Icon's plus the pointer events. The keyboard lift and
      its endings are graded, with C77 in the scenarios. The first frame's three false values are graded too.
-   - **(b)** The face's `move` and the file acts, with a Draggable sibling on the page for the zone side.
+   - **(b)** The face's `move` and the file acts, with a Draggable sibling on the page for the zone side. *(Built: s50 the
+     move and the file acts, s51 the zone side.)*
 2. Re-run all 8 conforming visuals on the runtime (200, seeds 13 and 20730) **after the face's §5 fixes and again after
    the pointer events**. Both change what every visual play sees.
 3. **Then Group**: a page with children that are slots, plus the drop index from the keyboard. **Then Image and Circle**,

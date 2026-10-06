@@ -51,6 +51,11 @@ Opacity 0 written after Pointer Events" (Pointer Events Enabled off at placing, 
 file drag). The matcher now also counts the file drop's signals, Is Dragging Over going true and the dropped file's values.
 The same fix covers it.
 
+**s51 (2026-10-06): a drag is caught too.** The invisible Text takes the press that starts its own drag, so a mouse move
+then lifts it (Is Lifted, Picked Up). Found by the runtime's 10,000 run (seed 20732, sequence 5059: Opacity 0 and Pointer
+Events Enabled `-1` as parameters, then a press and a move). The matcher now also counts a drag starting (Is Lifted true,
+Picked Up) and the element lighting as a card's drop zone (Drag Over true).
+
 **Proposed fix (small).** Leave `pointerEvents` to the render. Have the two Pointer Events setters force an update (as
 the opacity transition already does) instead of patching the DOM, so the component's opacity rule always has the last
 word.

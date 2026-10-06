@@ -48,7 +48,7 @@ import type { AnyNodeSpec } from '../src';
 export const KEEP = Symbol('not drawn now');
 
 /** The few things a browser keeps on an element that show no node value. A held key that is none of these `shows` one. */
-export type Keeps = 'the keyboard' | 'the caret' | 'what a module put on the element' | 'a drag from outside the page';
+export type Keeps = 'the keyboard' | 'the caret' | 'what a module put on the element' | 'a drag from outside the page' | 'where the pointer is';
 export type Held = { shows: (s: Readonly<Record<string, unknown>>) => unknown } | { keeps: Keeps };
 
 export interface PageModel {
@@ -96,7 +96,7 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     held: {}
   },
   Text: {
-    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'isDragOver', 'droppedFiles', 'droppedFile'],
+    node: ['mounted', 'tag', 'chain', 'visible', 'opacityZero', 'peStyle', 'peEnabled', 'draggable', 'dragValue', 'holdToDrag', 'holdTime', 'acceptDrops', 'acceptKind', 'dragKind', 'phase', 'input', 'inZone', 'carry', 'carryBy', 'swallow', 'isLifted', 'isDropTarget', 'droppedValue', 'dropIndex', 'acceptFileDrops', 'acceptedFileTypes', 'dragDepth', 'isDragOver', 'droppedFiles', 'droppedFile'],
     attr: {
       onPage,
       // an element's type cannot change: presetting it would claim an element the page does not have
@@ -104,10 +104,15 @@ export const PAGE_MODELS: Readonly<Record<string, PageModel>> = {
     },
     element: { elem: { changesWith: ['onPage', 'shownTag'] } },
     // s50 — a file dragged from the desktop: the files it carries and the element it is over are the browser's drag, moved by a person
-    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' } },
+    held: { elementFocused: keyboard, attrsOn: { keeps: 'what a module put on the element' }, fileCarry: { keeps: 'a drag from outside the page' }, fileOn: { keeps: 'a drag from outside the page' },
+      // s51 — the zone side: a card beside it holds the keyboard; the element the pointer is over; the element its own pointer drag started on
+      cardFocused: keyboard,
+      pointerAt: { keeps: 'where the pointer is' },
+      sourceElem: { keeps: 'what a module put on the element' }
+    },
     // drag-drop.ts :136-145 `whenMounted` counts frame starts until the node has an element
     frameEnd: ['chain'],
-    elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [] }
+    elementCalls: { 'on.draggable': ['onPage', 'elem', 'attrsOn'], 'on.acceptDrops': [], 'world.timer': ['onPage', 'elem', 'pointerAt', 'sourceElem'] }
   },
   'net.noodl.controls.textinput': {
     node: ['fieldType', 'runOnChange', 'maxLength', 'textToInsert', 'text', 'startValue', 'out', 'wire', 'announced', 'hasAnnounced', 'queue', 'blocksPointer', 'opacityZero', ...CONTROL_NODE],
