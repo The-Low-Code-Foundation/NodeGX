@@ -5,7 +5,7 @@
       "N",
       "S2"
     ],
-    "because": "actionhandlernode.ts header: \"This node IS the allow-list\"; `trigger`: \"Fires when a dispatcher has an action of this type to run\"; `registered`: \"True while this handler is in the allow-list\"; actiondispatchernode.ts `actionCompleted`: \"Fires once one action has finished and Result holds its answer\"; `idle`: \"Fires when the queue has drained after doing at least one thing\"; `refused` / `refusalReason`: \"unknown\"; `actionId`: \"taken from the message when it carried one\". RECORDED (row C15, in the trace \u2014 outcomes are not claimable): the Dispatch of PONG at frame 3 reports `done`, where `failure`'s sentence says it \"Fires when a Dispatch admitted nothing at all, because every action in it was refused\" \u2014 `dispatch()` counts an action admitted once it is QUEUED (action-dispatcher.ts :453-501) and the refusal happens in the same call's pump (:573-578)",
+    "because": "actionhandlernode.ts header: \"This node IS the allow-list\"; `trigger`: \"Fires when a dispatcher has an action of this type to run\"; `registered`: \"True while this handler is in the allow-list\"; actiondispatchernode.ts `actionCompleted`: \"Fires once one action has finished and Result holds its answer\"; `idle`: \"Fires when the queue has drained after doing at least one thing\"; `refused` / `refusalReason`: \"unknown\"; `actionId`: \"taken from the message when it carried one\". Was row C15 (in the trace \u2014 outcomes are not claimable): the Dispatch of PONG at frame 3 reported `done`, where `failure`'s sentence says it \"Fires when a Dispatch admitted nothing at all, because every action in it was refused\" \u2014 `dispatch()` counted an action admitted once QUEUED and the refusal happens in the same call's pump. Fixed (ruled 2026-10-05 \"Fire Failure, as described\"): an action refused inside its own call is not admitted, so the trace records `failure`",
     "world": {},
     "nodes": {
       "h": {
@@ -536,7 +536,8 @@
       {
         "t": "outcome",
         "port": "dispatch",
-        "value": "done",
+        "value": "failure",
+        "error": "action-dispatcher/nothing-admitted",
         "subject": "d"
       }
     ]
@@ -546,7 +547,7 @@
     "clauses": [
       "N"
     ],
-    "because": "actiondispatchernode.ts `builtIns`: \"empty, the default, means a server cannot write to the store at all\"; `allowedKeys`: \"blank means any key, and setting any key also refuses CLEAR_STORE\"; action-dispatcher.ts header: \"They write only to the store named on the dispatcher node, never to a store named in the message\". RECORDED (row C15): d0's Dispatch at frame 2 reports `done` beside its `refused` \u2014 admitted means queued, and the not-allowed refusal happens inside the same call",
+    "because": "actiondispatchernode.ts `builtIns`: \"empty, the default, means a server cannot write to the store at all\"; `allowedKeys`: \"blank means any key, and setting any key also refuses CLEAR_STORE\"; action-dispatcher.ts header: \"They write only to the store named on the dispatcher node, never to a store named in the message\". Was row C15: d0's Dispatch at frame 2 reported `done` beside its `refused`. Fixed (ruled 2026-10-05 \"Fire Failure, as described\"): a refusal inside the same call admits nothing, so each refused-on-the-spot Dispatch here records `failure`",
     "world": {},
     "nodes": {
       "a": {
@@ -992,7 +993,8 @@
       {
         "t": "outcome",
         "port": "dispatch",
-        "value": "done",
+        "value": "failure",
+        "error": "action-dispatcher/nothing-admitted",
         "subject": "d0"
       },
       {
@@ -1156,7 +1158,8 @@
       {
         "t": "outcome",
         "port": "dispatch",
-        "value": "done",
+        "value": "failure",
+        "error": "action-dispatcher/nothing-admitted",
         "subject": "d1"
       },
       {
@@ -1213,7 +1216,8 @@
       {
         "t": "outcome",
         "port": "dispatch",
-        "value": "done",
+        "value": "failure",
+        "error": "action-dispatcher/nothing-admitted",
         "subject": "d1"
       }
     ]
@@ -2401,6 +2405,12 @@
         "subject": "d"
       },
       {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "",
+        "subject": "d"
+      },
+      {
         "t": "signal",
         "port": "refused",
         "subject": "d"
@@ -2417,8 +2427,7 @@
     "clauses": [
       "N"
     ],
-    "row": "NSP-012 \u00a76 C14",
-    "because": "actiondispatchernode.ts `waitingFor`: \"Action type holding the head of the queue because its handler has not registered yet; blank when nothing is waiting\" \u2014 the claim is the sentence. RECORDED: the wire keeps the refused type \u2014 the expiry path (`park`'s wait timer \u2192 `unpark` \u2192 `refuseEntry`, action-dispatcher.ts :614-622, :894-905) flags no queue change, so `Waiting For` is never re-sent and a label wired to it reads the refused type until the next queue change",
+    "because": "actiondispatchernode.ts `waitingFor`: \"Action type holding the head of the queue because its handler has not registered yet; blank when nothing is waiting\" \u2014 the claim is the sentence. Was row C14: the expiry path (`park`'s wait timer \u2192 `unpark` \u2192 `refuseEntry`) flagged no queue change, so Waiting For was never re-sent and a label wired to it read the refused type until the next queue change. Fixed (ruled 2026-10-05 \"Clear it when the wait ends\"): `unpark` flags the queue change when a wait ends",
     "world": {},
     "nodes": {
       "d": {
@@ -2622,6 +2631,12 @@
         "t": "value",
         "port": "refusedType",
         "value": "GHOST",
+        "subject": "d"
+      },
+      {
+        "t": "value",
+        "port": "waitingFor",
+        "value": "",
         "subject": "d"
       },
       {
