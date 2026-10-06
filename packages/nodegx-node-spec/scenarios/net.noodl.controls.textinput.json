@@ -120,7 +120,7 @@
   },
   {
     "name": "Run On Value Change off: a Value is stored and the field keeps what it shows; Set puts it in the field (Done, Value, Value Changed); a second Set is Done again and fires Value Changed again with nothing changed",
-    "because": "text-input.ts :237 shouldRunOnValueChange gates the arrival; :188-196 Set at the frame's end — setText through the component fires Value Changed on every call (:374-378) — row D31",
+    "because": "text-input.ts :237 shouldRunOnValueChange gates the arrival; :188-196 Set at the frame's end — setText through the component fires Value Changed on every call (:374-378), as its description says (was row D31, ruled \"Keep it, fix the description\" in P109 ISL-031)",
     "params": {
       "runOnChange-startValue": false
     },
@@ -3965,7 +3965,7 @@
   },
   {
     "name": "Run On Value Change off: Value 'a', Set (Done, Value 'a'), the same Value again (ignored), Set again (Done, Value Changed again with nothing changed); Value 'b' then Set: Value 'b'",
-    "because": "text-input.ts :226 a repeat is ignored; :195 Set reads _internal.text at the frame's end; :374-378 Value Changed on every write through the component — row D31",
+    "because": "text-input.ts :226 a repeat is ignored; :195 Set reads _internal.text at the frame's end; :374-378 Value Changed on every write through the component, as its description says (was row D31)",
     "params": {
       "runOnChange-startValue": false
     },

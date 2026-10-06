@@ -392,7 +392,7 @@ const TextInputNode = {
       type: 'signal',
       group: 'General',
       description:
-        'Fires whenever the Value output changes, so a graph can sequence off the new value rather than poll it',
+        'Fires each time a value is written into the field (Set, Value, Insert Text, Backspace, Clear or the person typing), whether or not it changed. A write made while the field is off the page is announced when the field comes back',
       index: 2
     },
 
