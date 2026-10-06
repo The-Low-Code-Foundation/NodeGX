@@ -5,7 +5,7 @@
       "N",
       "S2"
     ],
-    "because": "eventsender.ts `sendEvent`: \"Sends one event on Channel Name, after every payload input has settled\"; `channelName`: \"Name every Receive Event must match to hear this\"; eventreceiver.ts `eventReceived`: \"Fires when an event arrives on Channel, once the payload outputs carry that event's values\" (NDA-012: the payload lands before Received \u2014 the sink behind the payload port reads the new value in the frame Received fires); `enabled`: \"while off they are ignored\"; eventsender.ts `error`: 'No channel name, so the event was not sent'",
+    "because": "eventsender.ts `sendEvent`: \"Sends one event on Channel Name, after every payload input has settled\"; `channelName`: \"Name every Receive Event must match to hear this\"; eventreceiver.ts `eventReceived`: \"Fires when an event arrives on Channel, once the payload outputs carry that event's values\" (NDA-012: the payload lands before Received — the sink behind the payload port reads the new value in the frame Received fires); `enabled`: \"while off they are ignored\"; eventsender.ts `error`: 'No channel name, so the event was not sent'",
     "world": {},
     "nodes": {
       "s": {
@@ -225,11 +225,11 @@
     ]
   },
   {
-    "name": "Consume = Always on one receiver stops a global event reaching the other receiver on the same channel",
+    "name": "Consume = Always does not stop a Global event: both receivers on the channel hear it (Consume applies to Parent, Children and Siblings events)",
     "clauses": [
       "N"
     ],
-    "because": "eventreceiver.ts `consume`: \"Whether receiving an event stops it reaching other receivers on the same channel\" \u2014 the claim is the sentence; the global path (nodecontext.ts :1148-1149 `eventSenderEmitter.emit`) is what is graded. RECORDED: both receivers fire \u2014 the global path emits to every listener and `onEventReceived` drops `handleEvent`'s return (eventreceiver.ts :142-143); Consume has never applied to a Global event",
+    "because": "eventreceiver.ts `consume`: \"Whether receiving an event stops it reaching other receivers on the same channel. Applies to Parent, Children and Siblings events; a Global event reaches every receiver\" — ruled 2026-10-05 (P107-C12, \"Change the description\"): the global path (nodecontext.ts :1148-1149 `eventSenderEmitter.emit`) emits to every listener and `onEventReceived` drops `handleEvent`'s return, so the sentence now says Consume does not apply to a Global event. Was row C12, whose claim was the old sentence",
     "world": {},
     "nodes": {
       "s": {
@@ -272,7 +272,7 @@
         "at": 2,
         "subject": "r2",
         "signal": "eventReceived",
-        "count": 0
+        "count": 1
       }
     ],
     "expect": [
@@ -333,15 +333,14 @@
         "port": "eventReceived",
         "subject": "r2"
       }
-    ],
-    "row": "NSP-012 \u00a76 C12"
+    ]
   },
   {
     "name": "Send to = Parent reaches the receivers in the enclosing component only: not the sender's own component, not a sibling component",
     "clauses": [
       "N"
     ],
-    "because": "eventsender.ts `propagation`: \"the whole app, or only the receivers above, below or beside this node\"; nodescope.ts `sendEventFromThisScope` :561-568 \u2014 `parent` skips this scope and delivers in the parent scope",
+    "because": "eventsender.ts `propagation`: \"the whole app, or only the receivers above, below or beside this node\"; nodescope.ts `sendEventFromThisScope` :561-568 — `parent` skips this scope and delivers in the parent scope",
     "world": {},
     "components": {
       "child": {},
@@ -465,7 +464,7 @@
     "clauses": [
       "N"
     ],
-    "because": "eventsender.ts `propagation`: \"only the receivers ... below\"; nodescope.ts :569-582 \u2014 `children` walks every component-instance child of this scope's nodes and recurses",
+    "because": "eventsender.ts `propagation`: \"only the receivers ... below\"; nodescope.ts :569-582 — `children` walks every component-instance child of this scope's nodes and recurses",
     "world": {},
     "components": {
       "a": {},
@@ -620,7 +619,7 @@
     "clauses": [
       "N"
     ],
-    "because": "eventsender.ts `propagation`: \"only the receivers ... beside this node\"; nodescope.ts :583-607 \u2014 `siblings` walks the parent scope's component-instance children except this scope",
+    "because": "eventsender.ts `propagation`: \"only the receivers ... beside this node\"; nodescope.ts :583-607 — `siblings` walks the parent scope's component-instance children except this scope",
     "world": {},
     "components": {
       "a": {},
@@ -769,7 +768,7 @@
     "clauses": [
       "N"
     ],
-    "because": "eventreceiver.ts `consume`: \"Whether receiving an event stops it reaching other receivers on the same channel\" \u2014 the claim is the sentence, on the `children` walk (nodescope.ts :573-581). RECORDED: the second child fires too \u2014 the `return true` at nodescope.ts :579 returns from the forEach callback, not from the walk, so a consumed Children (and Siblings, :603) event stops only within the component that consumed it",
+    "because": "eventreceiver.ts `consume`: \"Whether receiving an event stops it reaching other receivers on the same channel. Applies to Parent, Children and Siblings events; a Global event reaches every receiver\" — the claim is the sentence, on the `children` walk (nodescope.ts `sendEventFromThisScope`). Was row C13: the `return true` returned from a forEach callback, not from the walk, so a consumed Children event stopped only within the component that consumed it; fixed (an indexed loop)",
     "world": {},
     "components": {
       "a": {},
@@ -873,13 +872,121 @@
         "t": "signal",
         "port": "eventReceived",
         "subject": "rA"
+      }
+    ]
+  },
+  {
+    "name": "Consume = Always in the first sibling component stops a Siblings event reaching the second",
+    "clauses": [
+      "N"
+    ],
+    "because": "eventreceiver.ts `consume`: \"Whether receiving an event stops it reaching other receivers on the same channel. Applies to Parent, Children and Siblings events; a Global event reaches every receiver\" — the claim is the sentence, on the `siblings` walk (nodescope.ts `sendEventFromThisScope`). Before P107-C13 was fixed both siblings heard it: the walk's `return true` sat in a forEach callback",
+    "world": {},
+    "components": {
+      "a": {},
+      "b": {},
+      "c": {}
+    },
+    "nodes": {
+      "s": {
+        "type": "Event Sender",
+        "params": {
+          "channelName": "c",
+          "propagation": "siblings"
+        },
+        "in": "a"
+      },
+      "rB": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c",
+          "consume": "always"
+        },
+        "in": "b"
+      },
+      "rC": {
+        "type": "Event Receiver",
+        "params": {
+          "channelName": "c"
+        },
+        "in": "c"
+      }
+    },
+    "steps": [
+      "settle",
+      {
+        "node": "s",
+        "signal": "sendEvent"
+      },
+      "settle"
+    ],
+    "claims": [
+      {
+        "at": 2,
+        "subject": "rB",
+        "signal": "eventReceived",
+        "count": 1
+      },
+      {
+        "at": 2,
+        "subject": "rC",
+        "signal": "eventReceived",
+        "count": 0
+      }
+    ],
+    "expect": [
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "propagation",
+        "value": "siblings",
+        "subject": "s"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rB"
+      },
+      {
+        "t": "set",
+        "port": "consume",
+        "value": "always",
+        "subject": "rB"
+      },
+      {
+        "t": "set",
+        "port": "channelName",
+        "value": "c",
+        "subject": "rC"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "in",
+        "port": "sendEvent",
+        "subject": "s"
+      },
+      {
+        "t": "settle"
+      },
+      {
+        "t": "outcome",
+        "port": "sendEvent",
+        "value": "done",
+        "subject": "s"
       },
       {
         "t": "signal",
         "port": "eventReceived",
         "subject": "rB"
       }
-    ],
-    "row": "NSP-012 \u00a76 C13"
+    ]
   }
 ]

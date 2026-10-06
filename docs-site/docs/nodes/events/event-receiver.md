@@ -3,7 +3,7 @@ title: "Receive Event"
 ---
 Receive Event: fires when a Send Event broadcasts on the same channel, delivering the event's payload values as outputs.
 
-Event Receiver listens on `channelName` and fires its `eventReceived` signal each time an Event Sender sends on that channel, from anywhere in the app. Payload values declared by the sender appear as value outputs holding the payload of the most recent event. `enabled` mutes the receiver; `consume` controls whether this receiver swallows the event or lets other receivers on the channel also fire.
+Event Receiver listens on `channelName` and fires its `eventReceived` signal each time an Event Sender sends on that channel, from anywhere in the app. Payload values declared by the sender appear as value outputs holding the payload of the most recent event. `enabled` mutes the receiver; `consume` controls whether this receiver swallows the event or lets other receivers on the channel also fire; it applies to Parent, Children and Siblings events, and a Global event always reaches every receiver.
 
 ## When to use it
 
@@ -26,7 +26,7 @@ The reacting end of decoupled notifications: refresh triggers, toasts, logout cl
 | Name | Type | Default | Description |
 |---|---|---|---|
 | `channelName` | String (EventChannelName id) | — | Name to listen on, which must match a Send Event exactly; nothing reports a name no sender uses |
-| `consume` | Enum (`never`, `always`) | `never` | Whether receiving an event stops it reaching other receivers on the same channel |
+| `consume` | Enum (`never`, `always`) | `never` | Whether receiving an event stops it reaching other receivers on the same channel. Applies to Parent, Children and Siblings events; a Global event reaches every receiver |
 | `enabled` | Boolean | `true` | Whether events on this channel are acted on; while off they are ignored and not passed to another receiver either |
 
 ## Outputs
