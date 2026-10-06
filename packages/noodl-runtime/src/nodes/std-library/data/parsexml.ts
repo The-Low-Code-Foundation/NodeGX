@@ -104,8 +104,10 @@ const ParseXMLNode: NodeDefinitionOptions = {
         'Comma-separated tag names that are always an array, however many times they appear. ' +
         'Without this, a document with one <item> and a document with ten have different shapes ' +
         'and everything downstream needs a branch',
-      set: function (this: ParseXMLNodeInstance, value: string) {
-        this._internal.alwaysArray = value || '';
+      // P107-C18 (ISL-026, ruled "Turn it into text"): a list of names wired in reads as 'a,b'; a number or an object
+      // kept as it came threw at `.split` in the frame-end callback, and every parse went silent while it stood
+      set: function (this: ParseXMLNodeInstance, value: unknown) {
+        this._internal.alwaysArray = value ? String(value) : '';
         this._schedule();
       }
     },

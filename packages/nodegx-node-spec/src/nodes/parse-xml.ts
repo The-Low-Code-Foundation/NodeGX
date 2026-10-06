@@ -17,11 +17,9 @@
  * `Always Array` is `value || ''` (:108); `Trim Values` is truthiness (:119); `Max Bytes` is
  * `Number(value)`, the default unless finite and above 0 (:132-133).
  *
- * ⚠️ `Always Array` is split as a string at PARSE time (:202-205): a truthy non-string (a number,
- * `true`, an array, an object) throws there, inside the frame-end callback, AFTER `scheduled` was
- * cleared (:191-192) — the scheduler logs the throw and the node sends nothing, not even
- * `Failure`; the next frame parses again (and throws again while the value stands). The spec
- * writes that silence (R3 (a)); NSP-013 §6 row C18.
+ * `Always Array` is read as text on arrival (`String(value)`, v2 — NSP-013 §6 row C18, ruled "Turn it into
+ * text", fixed in P109 ISL-026): a list of names wired in reads as `'a,b'`. In v1 a truthy non-string threw at
+ * `.split` inside the frame-end callback and every parse sent nothing, not even `Failure`, while it stood.
  */
 
 import { defineNode } from '../spec';
@@ -47,7 +45,9 @@ type State = {
 
 export const ParseXML = defineNode({
   type: 'net.noodl.ParseXML',
-  version: 1,
+  // v2 (P109 ISL-026, P107-C18 ruled "Turn it into text"): Always Array is `String(value)` on arrival; v1 wrote the runtime's
+  // silence for a value that was not text.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/parsexml.ts; packages/noodl-runtime/src/xml.ts',
 
   // :61-66 initialize — the real defaults (a declared `default` never runs its setter)
@@ -139,7 +139,7 @@ export const ParseXML = defineNode({
   {
     text: (_s, v) => ({ set: { text: v, textSupplied: v !== undefined && v !== null, scheduled: true }, send: [] }), // :80-82
     attributePrefix: (_s, v) => ({ set: { attributePrefix: v === undefined || v === null ? '@' : v, scheduled: true }, send: [] }), // :94-95
-    alwaysArray: (_s, v) => ({ set: { alwaysArray: v || '', scheduled: true }, send: [] }), // :108-109
+    alwaysArray: (_s, v) => ({ set: { alwaysArray: v ? String(v) : '', scheduled: true }, send: [] }), // :108-109 — v2 (C18): as text
     trimValues: (_s, v) => ({ set: { trimValues: v, scheduled: true }, send: [] }), // :119-120
     maxBytes: (_s, v) => {
       const n = Number(v); // :132
@@ -151,12 +151,10 @@ export const ParseXML = defineNode({
     afterInputs: (s) => {
       const idle = { set: { scheduled: false }, send: [] as Array<'error'> };
       if (!s.scheduled || !s.textSupplied) return idle; // :191, :198
-      // :202-205 — `.split` on a truthy non-string throws in the runtime; the callback's throw is logged and nothing is sent (row C18)
-      if (typeof s.alwaysArray !== 'string') return idle;
 
       const result = parseXML(s.text as string, {
         attributePrefix: s.attributePrefix as string,
-        alwaysArray: s.alwaysArray
+        alwaysArray: String(s.alwaysArray)
           .split(',')
           .map((x) => x.trim())
           .filter(Boolean),

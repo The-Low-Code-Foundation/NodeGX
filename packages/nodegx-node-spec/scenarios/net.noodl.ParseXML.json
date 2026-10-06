@@ -72,9 +72,28 @@
     "steps": [{ "set": "text", "value": "<a>1</a>" }, "settle", { "set": "trimValues", "value": true }, "settle"]
   },
   {
-    "name": "a truthy non-string Always Array makes every parse silent — no Result, no Changed, no Failure — until a string arrives (C18)",
-    "because": "parsexml.ts :108 `value || ''` stores it, :202 `.split` throws in the frame-end callback after :191 cleared the flag; the scheduler logs the throw",
+    "name": "a number on Always Array is read as its text ('5'): every parse carries on (C18)",
+    "because": "P107-C18, ruled 2026-10-05 \"Turn it into text\", fixed in P109 ISL-026: the setter keeps String(value); it once kept the number and :202 `.split` threw in the frame-end callback, so every parse went silent",
     "params": {},
     "steps": [{ "set": "alwaysArray", "value": 5 }, { "set": "text", "value": "<a>1</a>" }, "settle", { "set": "text", "value": "<a>2</a>" }, "settle", { "set": "alwaysArray", "value": "a" }, "settle"]
+  },
+  {
+    "name": "a list of names wired into Always Array is read as 'a,b': both tags are always arrays (C18)",
+    "because": "P107-C18 (v2): String(['a','b']) is 'a,b' — the ruling's \"a list of names wired in works as the person meant\"",
+    "params": {},
+    "steps": [
+      {
+        "set": "alwaysArray",
+        "value": [
+          "a",
+          "b"
+        ]
+      },
+      {
+        "set": "text",
+        "value": "<r><a>1</a><b>2</b></r>"
+      },
+      "settle"
+    ]
   }
 ]
