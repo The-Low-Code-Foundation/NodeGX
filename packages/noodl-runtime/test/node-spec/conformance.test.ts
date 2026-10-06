@@ -55,7 +55,6 @@ const isSet = (e: TraceEvent, port: string, bad: (value: unknown, present: boole
   e.t === 'set' && e.port === port && bad((e as { value?: unknown }).value, 'value' in e);
 
 const isNull = (v: unknown, present: boolean) => present && v === null;
-const isNull = (v: unknown, present: boolean) => present && v === null;
 
 /**
  * NSP-011 §6 C6 / R7 — node.ts `setInputValue` (:410-420) merges a later value into a `{ value,
