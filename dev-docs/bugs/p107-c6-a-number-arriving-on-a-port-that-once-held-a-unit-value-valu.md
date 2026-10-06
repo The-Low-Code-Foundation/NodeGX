@@ -1,12 +1,15 @@
 ---
 id: P107-C6
 title: A number arriving on a port that once held a unit value ({ value, unit }) is merged into it
-status: scheduled
+status: fixed
+commit: ebeefb060
 phase: P109
 task: ISL-026
 severity: medium
 area: runtime / node.ts setInputValue (every port)
 found: P107 (the node says what it does) s4, 2026-09-30/10-01
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/Value Changed.json "a primitive after a unit object arrives as sent, so a repeated 2 fires once, not on every write (ISL-026, C6)" (and one each in Log, HTTP, Variable2, StreamBuffer, Model2)
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-011-BATCH-LOGIC-MATH-STRINGS.md §6 (row C6) — the row names how it is reproduced and pinned
 ---
 
@@ -25,3 +28,5 @@ scenario's `row` mark and the known-row predicate (packages/noodl-runtime/test/n
 dropped in the same commit. Plain-words question: README §7 of P107.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Only on size inputs".** Inputs built for sizes keep the behaviour; every other input receives exactly what was sent. A small change in the core of the runtime, shipped on its own. An app that relied on a generic input keeping the unit would see plain numbers instead. The question as asked: *"Should this unit-sticking behaviour apply only to inputs that are meant to hold sizes?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 2026-10-06 (P109 s22, ISL-026), as ruled "Only on size inputs".** `node.ts` merges a later value into a held `{ value, unit }` only on a port whose type declares `units`, in both places: `setInputValue` and the first-update queue. Every other port receives exactly what was sent. The six row scenarios lost their mark and were renamed to say what now happens (each name checked against the spec's trace); the five per-node known rows, the Object node's, and `C6_ANY_PORT` are gone from `conformance.test.ts`, with their predicates. Runtime, seed 20732, every spec in 17 `NSP_ONLY` groups: all CONFORM, 0 generated divergences without `C6_ANY_PORT`, so nothing it absorbed was still firing. Control (HEAD's `node.ts`): exactly the six scenarios fail. Reach of the one change a person could see: a component instance's input port has no type, so a size passed through a component input now arrives as the bare number when a wire replaces it. In 170 local projects, 4,792 component instances hold 491 unit-valued parameters and none of them also has a wire into the same port.

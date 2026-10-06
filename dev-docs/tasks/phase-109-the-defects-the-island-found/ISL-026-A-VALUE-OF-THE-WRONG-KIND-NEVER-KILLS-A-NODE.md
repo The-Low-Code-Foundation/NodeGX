@@ -1,6 +1,6 @@
 # ISL-026 — A value of the wrong kind never kills a node
 
-**Status: 🟡 s21 (2026-10-06): 17 of 20 rows fixed — C3, C4, C8, C10, C16, C18, D8, D15, C24, C44, C54, C57, C61, C62, C63, C65, C70; left: C6, C20, KITTHROWBLANKS (and AC1 re-measured: every row's known row still fired at HEAD before its fix). ✅ AC2: all 19 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 20 bugs from
+**Status: ✅ s22 (2026-10-06): all 20 rows fixed, AC1–AC4 met. s21 fixed 17 (C3, C4, C8, C10, C16, C18, D8, D15, C24, C44, C54, C57, C61, C62, C63, C65, C70); s22 fixed C6 (`ebeefb060`), C20 (`dbd5b9c90`) and KITTHROWBLANKS (`7abed2878`), and closed C44's graph scenario (`84dab5b7a`). One ruling is owed and stands apart from the task (§10: should built-in nodes get the same boundary?). ✅ AC2: all 19 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 20 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 4 high · 13 medium · 3 low, **19 awaiting a ruling**. **Side:** runtime (node setters and frame-end callbacks), noodl-viewer-react (control render, kit nodes)
 
 ## 1. The person sentence
@@ -28,18 +28,18 @@ to ask. This table is generated from the ledger headers. **The ledger file is th
 | [P107-C65](../../bugs/p107-c65-a-checkbox-label-wired-an-object-crashes-the-render.md) | high | ✅ fixed s21 | A Checkbox whose Label is wired an object or an array crashes the page's render — "Objects are not valid as a React child" |
 | [P107-C70](../../bugs/p107-c70-a-dropdowns-items-wired-a-value-that-is-not-a-list-crashes-the-render.md) | high | ✅ fixed s21 | A Dropdown whose Items is wired a value that is not a list — the legacy string form included — or a list holding null crashes the page's render |
 | [P107-C4](../../bugs/p107-c4-substring-and-string-mapper-crash-in-the-setter-when-a-wire.md) | medium | ✅ fixed s21 | Substring and String Mapper crash in the setter when a wire sends null |
-| [P107-C6](../../bugs/p107-c6-a-number-arriving-on-a-port-that-once-held-a-unit-value-valu.md) | medium | needs-ruling | A number arriving on a port that once held a unit value ({ value, unit }) is merged into it |
+| [P107-C6](../../bugs/p107-c6-a-number-arriving-on-a-port-that-once-held-a-unit-value-valu.md) | medium | ✅ fixed s22 | A number arriving on a port that once held a unit value ({ value, unit }) is merged into it |
 | [P107-C8](../../bugs/p107-c8-http-request-crashes-inside-the-fetch-on-a-non-text-url-head.md) | medium | ✅ fixed s21 | HTTP Request crashes inside the fetch on a non-text URL, Headers, Query or Body Fields, and loses the outcome |
 | [P107-C10](../../bugs/p107-c10-array-filter-and-array-map-crash-in-the-setter-when-items-ge.md) | medium | ✅ fixed s21 | Array Filter and Array Map crash in the setter when Items gets a number, boolean or plain object |
 | [P107-C18](../../bugs/p107-c18-parse-xml-goes-silent-when-always-array-is-not-text.md) | medium | ✅ fixed s21 | Parse XML goes silent — no Result, no Failure — while Always Array holds anything but text |
-| [P107-C20](../../bugs/p107-c20-animate-to-value-waits-forever-on-a-text-or-disconnected-delay.md) | medium | needs-ruling | Animate To Value waits forever when Delay arrives as text or is disconnected |
+| [P107-C20](../../bugs/p107-c20-animate-to-value-waits-forever-on-a-text-or-disconnected-delay.md) | medium | ✅ fixed s22 | Animate To Value waits forever when Delay arrives as text or is disconnected |
 | [P107-C24](../../bugs/p107-c24-navigate-to-path-never-answers-when-path-is-not-text.md) | medium | ✅ fixed s21 | Navigate To Path never answers a press when Path is not text (null, a number) — the frame-end callback throws |
 | [P107-C44](../../bugs/p107-c44-filter-records-with-null-items-breaks-another-nodes-save.md) | medium | ✅ fixed s21 | A Filter Records holding null on Items crashes inside another node's save of its Class — the saving node's Error gets the message, and a Query Records listening after it misses the save |
 | [P107-C54](../../bugs/p107-c54-cloud-function-a-null-success-body-never-answers-the-call.md) | medium | ✅ fixed s21 | Cloud Function — a success whose body is JSON null throws, and the Call is never answered |
 | [P107-C61](../../bugs/p107-c61-font-family-wired-a-non-text-value-throws-in-its-setter.md) | medium | ✅ fixed s21 | Font Family wired a truthy value that is not text throws in its setter — the node's update dies there |
 | [P107-C62](../../bugs/p107-c62-a-units-typed-style-input-wired-null-throws-in-the-generated-setter.md) | medium | ✅ fixed s21 | A units-typed style input wired null throws in the generated setter — margins, paddings, font size, min / max size, border widths and radii |
 | [P107-C63](../../bugs/p107-c63-a-placement-input-wired-undefined-throws.md) | medium | ✅ fixed s21 | A Placement input (Pos X / Pos Y / Rotation / Transform Origin X / Y) wired undefined throws in its setter |
-| [P109-S17-KITTHROWBLANKS](../../bugs/p109-s17-kitthrowblanks-a-kit-node-that-throws-at-mount-blanks-the-whole-page.md) | medium | open | A kit node that throws when it mounts blanks the whole page, not just itself |
+| [P109-S17-KITTHROWBLANKS](../../bugs/p109-s17-kitthrowblanks-a-kit-node-that-throws-at-mount-blanks-the-whole-page.md) | medium | ✅ fixed s22 | A kit node that throws when it mounts blanks the whole page, not just itself |
 | [P107-C57](../../bugs/p107-c57-sse-non-text-event-types-or-method-throws-at-connect.md) | low | ✅ fixed s21 | Server-Sent Events — Event Types or Method wired a value that is not text throws when the stream connects |
 | [P107-D8](../../bugs/p107-d8-color-blend-renders-nannannan-for-a-non-numeric-blend-value.md) | low | ✅ fixed s21 | Color Blend renders "#NaNNaNNaN" for a non-numeric Blend Value |
 | [P107-D15](../../bugs/p107-d15-date-difference-counts-an-unknown-unit-as-years-date-add-cra.md) | low | ✅ fixed s21 | Date Difference counts an unknown Unit as years (Date Add crashes on the same value) |
@@ -154,3 +154,44 @@ Filed on the way: `P109-S21-EXPORTDATEUNITWIRED` (P18, low), `P109-S21-DROPDOWNE
    re-recorded, and a fresh agent handed the note alone to bring `stranger-3/nodes.js` up to it (round 3c), all rounds green.
 3. **P109-S17-KITTHROWBLANKS** (a kit node that throws at mount blanks the page): an error boundary per kit node, a
    viewer change; re-measure first.
+
+## 10. Session 22 (2026-10-06) — the last three, and what s21's list got wrong
+
+| bug | commit | what changed | regression |
+|---|---|---|---|
+| KITTHROWBLANKS | `7abed2878` | `viewer.jsx` draws each kit node's component inside an error boundary (`kit-node-boundary.ts`, `forwardRef`); a throw draws nothing and raises `kit-node/render-failed` once on the error bus | `noodl-viewer-react/tests/isl026-a-kit-node-that-throws-stays-inside-itself.test.tsx`: the defect re-measured without the boundary (the page goes), then an effect throw and a render throw contained, a healthy node's ref intact. Control: the two containment rows red |
+| C6 | `ebeefb060` | `node.ts` merges into a held `{ value, unit }` only on a size port, in `setInputValue` and the first update's queue; `defineNode` marks such a port `hasUnits` | 6 scenarios unmarked and renamed; `noodl-runtime/test/isl026-c6-unit-merge-only-on-size-ports.test.js` (two controls, each red on its own rows). Control: HEAD's `node.ts` fails exactly the 6 scenarios |
+| C44 (graph) | `84dab5b7a` | the graph scenario s21 left marked as row C44; trace re-recorded | runtime graph 87 / 87 |
+| C20 | `dbd5b9c90` | Animate To Value reads Delay as `Number(value) \|\| 0`; spec v3 | 2 scenarios rewritten; stranger round 3c (P107 NSP-006 §5.9). Control: both red, plus 3 generated |
+
+**What the handoff did not know.**
+- 🔴 **C6's predicate is not `input.type.units`.** A library port's type is not kept on the instance's input
+  (`nodedefinition.ts` keeps only colour, text style, array, object and string), so the first build switched the merge
+  off on EVERY size port. The 95-spec conformance run did not see it (the specs barely model units); GAM-015 did, in the
+  viewer. Fixed with a `hasUnits` mark; the runtime test now grades a library port and a dynamic one.
+- **"Decide `C6_ANY_PORT` by measurement" came out: drop it.** Every spec, 17 `NSP_ONLY` groups at seed 20732 without it:
+  0 generated divergences anywhere; the known-rows test green in every group. The only red specs are the two
+  interpreter-side survivors s21 recorded (Slider `world.place`, Text Input `person.release`).
+- **C6 was written into the contract.** `nodegx-core/CONTRACT.md` C10 said a bare number inherits the unit on any port, and
+  its graph scenario claimed it; both narrowed to size ports. `node-expression-evaluation.test.js` pinned it on a plain
+  `number` port; rewritten as a size-port row and a plain-port row.
+- **C44's graph scenario had been red since s21's fix.** s21 graded the conformance file, not `graph.test.ts`.
+- **The kit boundary reports on the error bus alone.** The bus already reaches the editor's warning, the console and On
+  App Error (`nodecontext.ts`), so a `setDiagnostic` beside it would report the failure twice.
+- **The stranger lab needs `nodegx-backend-contract/src` beside the package now** (`query-records.ts` imports its types).
+
+**Reach of C6** (the one change a person could see): a component instance's input port has no type, so a size passed
+through a component input now arrives as the bare number when a wire replaces it. In 170 local projects, 4,792 component
+instances hold 491 unit-valued parameters, and none of them also has a wire into the same port.
+
+**Readings (2026-10-06):** runtime jest without the conformance file 3156 passed (the 4 red were three stale C6 pins,
+since updated, and C44's graph row); runtime graph 87 / 87; spec package graph 119 / 119; batches + catalog parity
+444 / 444; stranger rounds 41 passed / 17 skipped, hash gate green; viewer kit and units tests 72 / 72; runtime,
+viewer and spec tsc 0. AC4: `node scripts/bugs.js --from P107` / `--from P109` list none of this task's 20 rows open.
+
+**A ruling owed, apart from this task: `P109-S22-BUILTINBOUNDARY`.** Kit nodes now have an error boundary; built-in
+nodes do not, so a built-in node's render throw still blanks the page. C65 and C70 were fixed where they threw. The
+question: *"Should every node on the page, built-in ones included, be drawn so that one node failing shows nothing in
+its place and the page keeps drawing?"* Recommendation: yes. It is the same sentence as this task's, and the boundary
+already exists.
+

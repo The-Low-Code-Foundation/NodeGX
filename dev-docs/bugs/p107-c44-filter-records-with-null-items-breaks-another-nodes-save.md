@@ -36,3 +36,5 @@ runtime's is the known row.
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Treat it as holding nothing".** The save goes through cleanly and other lists update. A one-line change. The question as asked: *"Should Filter Records treat an empty Items as holding nothing, so it stops breaking other saves?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
 
 **Fixed 2026-10-06 (P109 s21, ISL-026), as ruled.** The save listener stops at a null Items as at undefined. Runtime 200: Filter Records conforms, mutants 157 / 157. Control: the C44 scenario fails on HEAD's file.
+
+**s22 (2026-10-06):** the fix left the graph scenario in `scenarios/graph/s09-the-filter-follows.json` marked as row C44, so `noodl-runtime` graph.test.ts reported "row no longer reproduces" from then on. Mark dropped and the trace re-recorded in `84dab5b7a`.
