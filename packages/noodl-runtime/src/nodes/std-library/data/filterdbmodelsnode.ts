@@ -468,40 +468,39 @@ const FilterDBModelsNode: NodeDefinitionOptions = {
         let filtered: ModelLike[] = [].concat(this._internal.collection.items);
 
         if (this._internal.enabled) {
-          const _filter = this._internal.visualFilter;
-          if (_filter !== undefined) {
-            let filter;
-            try {
-              filter = QueryUtils.convertVisualFilter(_filter, {
+          // P107-C43 (ISL-029, ruled "Fail with an error"): the sort sits inside the filter's failure path. Sorting rows
+          // that are not records (`a.get is not a function`) threw out of the scheduled run with the press's token
+          // already drained, so the press got no outcome at all.
+          try {
+            const _filter = this._internal.visualFilter;
+            if (_filter !== undefined) {
+              const filter = QueryUtils.convertVisualFilter(_filter, {
                 queryParameters: this._internal.filterParameters,
                 collectionName: this._internal.collectionName,
                 valuePortPrefix: 'fp-'
               });
               if (filter) filtered = filtered.filter((m) => QueryUtils.matchesQuery(m, filter));
-            } catch (e) {
-              // Array Filter's second failure, in the same position: a filter that cannot be
-              // built or applied threw out of a *scheduled callback* into `nodecontext.ts`'s
-              // blanket catch — a console line with no code and no provenance, and the rest of
-              // this node's update pass abandoned. Not gated on `requested`, because a filter
-              // that cannot be applied is wrong whenever it arrives.
-              this.reportFailure(
-                'filter-records/filter-failed',
-                'The filter could not be applied: ' + ((e as Error).message || String(e)),
-                { collectionName: this._internal.collectionName },
-                tokens
-              );
-              return;
             }
-          }
 
-          // `sort` is declared outside the `if` deliberately: the original relied on `var`
-          // hoisting to read it below the block it was assigned in (PLAT-003 NOTES §23.1).
-          const _sort = this._internal.visualSorting;
-          let sort: unknown;
-          if (_sort !== undefined && _sort.length > 0) {
-            sort = QueryUtils.convertVisualSorting(_sort);
+            const _sort = this._internal.visualSorting;
+            if (_sort !== undefined && _sort.length > 0) {
+              const sort = QueryUtils.convertVisualSorting(_sort);
+              if (sort) filtered.sort(QueryUtils.compareObjects.bind(this, sort));
+            }
+          } catch (e) {
+            // Array Filter's second failure, in the same position: a filter (or a sort) that cannot be
+            // built or applied threw out of a *scheduled callback* into `nodecontext.ts`'s
+            // blanket catch — a console line with no code and no provenance, and the rest of
+            // this node's update pass abandoned. Not gated on `requested`, because a filter
+            // that cannot be applied is wrong whenever it arrives.
+            this.reportFailure(
+              'filter-records/filter-failed',
+              'The filter could not be applied: ' + ((e as Error).message || String(e)),
+              { collectionName: this._internal.collectionName },
+              tokens
+            );
+            return;
           }
-          if (sort) filtered.sort(QueryUtils.compareObjects.bind(this, sort));
 
           const skip = this.getSkip();
           if (skip) filtered = filtered.slice(skip, filtered.length);

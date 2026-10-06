@@ -896,7 +896,7 @@
     }
   },
   {
-    "name": "a Sorting over two rows that are not records: the spec fails the press as the filter's failure; the runtime throws out of the run and never answers it (row C43)",
+    "name": "a Sorting over two rows that are not records is the filter's failure: Error, then Failure (C43, fixed in P109 ISL-029 — the runtime threw out of the run and never answered)",
     "because": "filterdbmodelsnode.ts :486-491 — `filtered.sort(compareObjects…)` sits OUTSIDE the try (:461-481); the token was drained at :436-437",
     "params": {
       "items": [
@@ -921,7 +921,6 @@
       },
       "settle"
     ],
-    "row": "NSP-014 §6.14 C43",
     "world": {
       "registry": {
         "models": {

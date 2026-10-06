@@ -25,10 +25,10 @@
  * (:402-427) — a press owes its outcome regardless, and a value-path failure with no press pulses `Failure` as a plain
  * signal, once per distinct message.
  *
- * THE SORT THAT CANNOT COMPARE (row, NSP-014 §6.14): the runtime sorts OUTSIDE the filter's `try` (:491), so a Sorting
- * over two or more rows that are not records (`a.get is not a function`) throws out of the scheduled run — the press's
- * token already drained (:436-437), no outcome ever. Stated here as the filter's failure, which is what the sentence on
- * `Failure` promises ("when the filter could not be applied"); the runtime's reading is the known row.
+ * THE SORT THAT CANNOT COMPARE (row C43, NSP-014 §6.14, fixed in P109 ISL-029): a Sorting over two or more rows that
+ * are not records (`a.get is not a function`) is the filter's failure, which is what the sentence on `Failure` promises
+ * ("when the filter could not be applied"). The runtime once sorted outside the filter's `try`, and the throw left the
+ * press with no outcome at all.
  *
  * WATCHING THE STORE (:153-166, :321-329, :547-553). The node listens for `save` — not `create`, not `delete` — on ONE
  * store: the LEGACY store from creation (:172, which no world write reaches: world.ts BACKEND), moved by a write to

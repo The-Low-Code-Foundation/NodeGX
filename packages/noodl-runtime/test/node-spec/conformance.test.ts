@@ -93,25 +93,6 @@ const notifyOnCleared = (d: Divergence) => {
 };
 
 /**
- * NSP-014 §6.14 C43 — Filter Records sorts OUTSIDE its filter's `try` (filterdbmodelsnode.ts :491): a Sorting over two
- * or more rows that are not records throws `a.get is not a function` out of the scheduled run, the press's token already
- * drained — nothing on Error, no Failure, no outcome. The spec reports it as the filter's failure. Narrow: the first
- * differing reference event is that failure — its Error value carrying the comparator's own message, or (the message
- * already on Error) its failure outcome or plain Failure pulse with that message the last one on Error.
- */
-const SORT_CANNOT_COMPARE = /^The filter could not be applied: [ab]\.get is not a function$/;
-const sortCannotCompare = (d: Divergence) => {
-  const ref = d.difference.reference;
-  if (!ref) return false;
-  const errorText = (e: TraceEvent) => (e.t === 'value' && e.port === 'error' ? String((e as { value?: unknown }).value) : undefined);
-  if (errorText(ref) !== undefined) return SORT_CANNOT_COMPARE.test(errorText(ref)!);
-  const failing = (ref.t === 'outcome' && ref.value === 'failure' && ref.error === 'filter-records/filter-failed') || (ref.t === 'signal' && ref.port === 'failure');
-  if (!failing) return false;
-  const last = d.reference.slice(0, d.difference.index).reverse().find((e) => errorText(e) !== undefined);
-  return last !== undefined && SORT_CANNOT_COMPARE.test(errorText(last)!);
-};
-
-/**
  * NSP-016 §6 C66 — a Checkbox whose Enable Label went from on to off has lost its root element (two elements, one ref
  * callback: the removed one nulls it), so a Focus action reports Unchanged with the box on the page. Narrow: the
  * difference is the Focus outcome — Unchanged on the runtime where the reference says Done — and the reference holds
@@ -497,7 +478,6 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C67 — a Check / Uncheck or a Checked write reverting a click in the same frame leaves the box drawn as the click left it; the next click reports the opposite', matches: clickActionClick },
     { row: 'NSP-016 §6 C80 — Enable Label changed while the box holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard }
   ],
-  FilterDBModels: [{ row: 'NSP-014 §6.14 C43 — a Sorting over rows that are not records throws out of the run: no Error, no Failure, the press never answered', matches: sortCannotCompare }],
   DeleteDbModelProperties: [{ row: "NSP-014 §6.5 C36 — Delete Record's success reads the binding live; cleared while the delete is out, it throws: Failure, not Done", matches: notifyOnCleared }],
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
