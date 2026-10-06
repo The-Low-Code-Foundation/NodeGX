@@ -155,7 +155,9 @@ const RequestMagicLinkNodeDefinition: NodeDefinitionOptions = {
           email: this._internal.email,
           redirect: this._internal.redirect,
           success: () => {
-            this._internal.error = undefined;
+            // P107-D25 (P109 ISL-030, ruled "Clear it to blank text"): blank, which is SENT — `undefined` never was, and a
+            // label showing Error kept the last failure after a success.
+            this._internal.error = '';
             this.flagOutputDirty('error');
             // Last, after the value it clears.
             reportOutcomes(this, tokens, 'done');

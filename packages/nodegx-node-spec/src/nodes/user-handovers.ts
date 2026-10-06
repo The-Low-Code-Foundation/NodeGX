@@ -15,8 +15,8 @@
  * of presses; the batch taken before the call goes out (requestmagiclink.ts :140-165, signinwith.ts :242-264). At the frame
  * end the node reaches the service (`UserService.instance` — the first reach in a play makes it, and its start-up check,
  * world.ts AUTH) and hands it the operation with the held values AS THEY ARE AT THE FRAME END:
- *   Request Magic Link — `requestMagicLink({ email, redirect })`. Success: Error cleared (:158-159 — `undefined`, which is
- *     never SENT, CONTRACT C3: the wire keeps the last failure; row D25) and every press Done (:161). Failure: Error is the
+ *   Request Magic Link — `requestMagicLink({ email, redirect })`. Success: Error cleared to blank text, SENT (v2, row D25
+ *     ruled "Clear it to blank text"; v1's `undefined` never was, and the wire kept the last failure) and every press Done (:161). Failure: Error is the
  *     message AS GIVEN and every press Failure with the node's code (:163 → `setError` :124-132). No Unchanged (:71-78).
  *   Sign In With — Signing In becomes true (:251-252), then `signInWithProvider({ provider, redirect })`. The operation has
  *     no success (world.ts AUTH): a handover the backend accepts sends the browser away, nothing comes back, and every
@@ -100,7 +100,9 @@ type MagicLinkState = Batch & {
 
 export const RequestMagicLink = defineNode({
   type: 'net.noodl.user.RequestMagicLink',
-  version: 1,
+  // v2 (P109 ISL-030, row D25 ruled "Clear it to blank text"): a Done sends blank Error, so a label lets go of the last
+  // failure; v1 cleared it to `undefined`, which is never sent.
+  version: 2,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/user/requestmagiclink.ts; userservice.ts; ParseAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
   worldPool: { backends: pool('requestMagicLink', null) },
@@ -130,8 +132,8 @@ export const RequestMagicLink = defineNode({
         const n = s.calls[answer.id] ?? 0;
         // :163 → :124-132 — Error as given, then Failure with the node's code
         if (!('ok' in answer)) return { set: { error: answer.error }, send: ['error' as const], outcomes: failures('send', REQUEST_MAGIC_LINK_ERROR_CODE, n) };
-        // :157-161 — Error cleared (never sent: C3, row D25), then Done
-        return { set: { error: undefined }, send: ['error' as const], outcomes: dones('send', n) };
+        // :157-161 — Error cleared to blank text, SENT (v2, row D25 ruled "Clear it to blank text"; v1's `undefined` never was), then Done
+        return { set: { error: '' }, send: ['error' as const], outcomes: dones('send', n) };
       }
     }
   }

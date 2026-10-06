@@ -210,8 +210,8 @@
     }
   },
   {
-    "name": "A Done after a Failure clears Error inside the node, and the wire keeps the failure — the clear is undefined, never sent",
-    "because": "requestmagiclink.ts :166-167 — `_internal.error = undefined` then flagged (C3; row D25)",
+    "name": "A Done after a Failure clears Error to blank text, and the wire lets go of the failure (v2, D25)",
+    "because": "requestmagiclink.ts — `_internal.error = ''` then flagged, so the blank is sent (P109 ISL-030, P107-D25 ruled \"Clear it to blank text\"; v1 cleared to undefined, never sent — C3)",
     "params": {},
     "steps": [
       "settle",
