@@ -9,9 +9,9 @@
  * THE RULE, before the citations: `Do` mints a fresh ANONYMOUS record at the frame end (a guid
  * draw, :59), writes the held property values onto it (object-crud-base.ts, `_pushInputValues`
  * :61), publishes its id (:63) and reports `done` (:67) — Id before the outcome, so a graph wired
- * `Done → Insert` reads the id. Two presses in one frame mint ONE record and, as written, report
- * ONE outcome: the guard sits before `beginOutcome` (:49-55, by its own comment deliberately).
- * The spec follows the contract (ERG-001 §4) and reports `done` per press; NSP-012 §6 row C9.
+ * `Done → Insert` reads the id. Two presses in one frame mint ONE record and report `done` per
+ * press, both naming it (ERG-001 §4). Row C9 (fixed, ruled "One Done per press"): the guard sat
+ * before `beginOutcome`, so the runtime reported one; the token is now opened before the guard.
  */
 
 import { defineNode } from '../spec';

@@ -1,12 +1,12 @@
 'use strict';
 
-import type { ModelModule } from '@noodl/types';
+import type { ModelModule, OutcomeToken } from '@noodl/types';
 
 import type { MixinNodeModule, ModelIdInstance } from './crud-mixins';
 
 import ModelImport = require('../../../model');
 import ModelCRUDBase = require('./modelcrudbase');
-import { outcomeOutputs } from '../../../outcome';
+import { outcomeOutputs, reportOutcomes } from '../../../outcome';
 
 const Model = ModelImport as unknown as ModelModule;
 
@@ -14,6 +14,8 @@ const Model = ModelImport as unknown as ModelModule;
 interface NewModelNodeInstance extends ModelIdInstance {
   /** On the instance rather than in `_internal` — guards {@link scheduleNew}. */
   hasScheduledNew?: boolean;
+  /** One token per `Do` of the frame: the presses share one object, and each is answered (P107-C9). */
+  pendingNewOutcomes?: OutcomeToken[];
   scheduleNew(): void;
   _pushInputValues(model: ReturnType<ModelModule['get']>): void;
 }
@@ -46,16 +48,19 @@ const NewModelNodeDefinition: MixinNodeModule = {
     }),
     methods: {
       scheduleNew: function (this: NewModelNodeInstance) {
+        // P107-C9: opened BEFORE the coalescing guard. Two `Do` pulses inside one frame still mint
+        // one object — the node deliberately collapses them into one store — but each press is
+        // answered, and both Dones name that object. The tokens are taken off the instance in the
+        // callback, so none outlives the frame it was opened in (NV-iii's latched-result class).
+        if (!this.pendingNewOutcomes) this.pendingNewOutcomes = [];
+        this.pendingNewOutcomes.push(this.beginOutcome());
         if (this.hasScheduledNew) return;
         this.hasScheduledNew = true;
-        // Opened after the coalescing guard, so two `Do` pulses inside one frame — which this
-        // node deliberately collapses into one store — produce one invocation and one outcome.
-        // Captured by the closure rather than parked on the instance: a token that cannot
-        // outlive its invocation is what makes NV-iii's latched-result class unrepresentable.
-        const outcome = this.beginOutcome();
 
         this.scheduleAfterInputsHaveUpdated(() => {
           this.hasScheduledNew = false;
+          const tokens = this.pendingNewOutcomes || [];
+          this.pendingNewOutcomes = undefined;
           const newModel = (this.nodeScope.modelScope || Model).get();
 
           this._pushInputValues(newModel);
@@ -64,7 +69,7 @@ const NewModelNodeDefinition: MixinNodeModule = {
 
           // Last, after `setModel` has flagged `Id` dirty: a graph wired `Done -> Insert` must
           // already be able to read the id when the pulse lands.
-          this.reportOutcome(outcome, 'done');
+          reportOutcomes(this, tokens, 'done');
         });
       }
     }

@@ -35,9 +35,8 @@
     ]
   },
   {
-    "name": "Two Do pulses in one frame: one array, and an outcome per press (row C9: the runtime reports one)",
-    "because": ":73-75 — the hasScheduledNew guard sits before beginOutcome; ERG-001 §4 and the Array node's Fetch report one per press",
-    "row": "NSP-012 §6 C9",
+    "name": "Two Do pulses in one frame: one array, and an outcome per press",
+    "because": "collectionnode-new.ts scheduleNew — the token is opened before the hasScheduledNew guard (P107-C9, ruled 2026-10-05 \"One Done per press\"); was row C9: the guard sat before beginOutcome, so the runtime reported one. ERG-001 §4 and the Array node's Fetch report one per press",
     "params": {},
     "steps": [
       {

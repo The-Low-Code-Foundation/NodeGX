@@ -34,9 +34,8 @@
     ]
   },
   {
-    "name": "Two Do in one frame: one record, an outcome per press (row C9: the runtime reports one)",
-    "because": ":49-55 the guard before the token",
-    "row": "NSP-012 §6 C9",
+    "name": "Two Do in one frame: one record, an outcome per press, both naming it",
+    "because": "newmodelnode.ts scheduleNew — the token is opened before the guard (P107-C9, ruled 2026-10-05 \"One Done per press\"); was row C9: the guard sat before the token, so the runtime reported one",
     "params": {},
     "steps": [
       {

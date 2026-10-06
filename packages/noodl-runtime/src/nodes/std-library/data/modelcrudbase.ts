@@ -21,6 +21,7 @@ import ModelImport = require('../../../model');
 import Node = require('../../../node');
 
 import { forgetForEachItem, resolveForEachItem } from '../../../foreachitem';
+import { reportOutcomes } from '../../../outcome';
 
 const Collection = CollectionImport as unknown as CollectionModule;
 const Model = ModelImport as unknown as ModelModule;
@@ -76,7 +77,7 @@ function _addFailure(def: MixinNodeModule, codePrefix: string) {
      * as the contract's examples do (`set-object-properties/no-object`) instead of echoing an
      * internal type name, and so a rename of either cannot silently change the other.
      */
-    _failNoModel: function (this: FailableNodeInstance, outcome: OutcomeToken, action: string) {
+    _failNoModel: function (this: FailableNodeInstance, outcome: OutcomeToken, action: string, quiet?: boolean) {
       const fromRepeater = this._internal.idSource === 'foreach';
       const message = fromRepeater
         ? 'Nothing to ' + action + ' — Id Source is "From repeater" and no item resolved.'
@@ -100,7 +101,8 @@ function _addFailure(def: MixinNodeModule, codePrefix: string) {
         code: codePrefix + '/no-object',
         message,
         detail: { idSource: 'explicit' },
-        raise: !fromRepeater
+        // `quiet`: a second press of the same frame, failing for the same reason — answered, not raised again.
+        raise: !fromRepeater && !quiet
       });
     }
   });
@@ -139,9 +141,11 @@ interface ModelIdNodeInstance extends NodeInstance {
  * is what keeps `Create New Object`, which applies one mixin and not the other, honest.
  */
 interface InputPropertiesNodeInstance extends ModelIdNodeInstance {
-  _failNoModel?(outcome: OutcomeToken, action: string): void;
+  _failNoModel?(outcome: OutcomeToken, action: string, quiet?: boolean): void;
   /** On the instance rather than in `_internal` — guards {@link scheduleStore}. */
   hasScheduledStore?: boolean;
+  /** One token per `Do` of the frame: the presses share one store, and each is answered (P107-C9). */
+  pendingStoreOutcomes?: OutcomeToken[];
   _pushInputValues(model: ModelLike): void;
   _setInputValue(name: string, value: unknown): void;
   _setInputType(name: string, value: string): void;
@@ -535,16 +539,19 @@ function _addInputProperties(def: MixinNodeModule) {
      * re-read the node, not pattern-match on shape.
      */
     scheduleStore: function (this: InputPropertiesNodeInstance) {
+      // P107-C9: before the guard. Two `Do` pulses inside one frame coalesce into one store, and
+      // each press is answered — the token used to be opened after the guard, so the second press
+      // got no Done. Taken off the instance in the callback, so none outlives its frame.
+      if (!this.pendingStoreOutcomes) this.pendingStoreOutcomes = [];
+      this.pendingStoreOutcomes.push(this.beginOutcome());
       if (this.hasScheduledStore) return;
       this.hasScheduledStore = true;
-      // After the guard: two `Do` pulses inside one frame coalesce into one store, so they are
-      // one invocation and must produce one outcome. Captured by the closure rather than
-      // parked on the instance, so it cannot outlive the invocation it belongs to.
-      const outcome = this.beginOutcome();
 
       const internal = this._internal;
       this.scheduleAfterInputsHaveUpdated(() => {
         this.hasScheduledStore = false;
+        const tokens = this.pendingStoreOutcomes || [];
+        this.pendingStoreOutcomes = undefined;
 
         // NDA-004 §2: `Do` on a node with no object bound used to return here — no write, no
         // `Done`, no report. From the graph that is indistinguishable from a write that
@@ -558,7 +565,7 @@ function _addInputProperties(def: MixinNodeModule) {
           // mixins a node composed, so without it a consumer that forgot `addFailure` would
           // get a `TypeError` thrown out of a scheduler — the least legible failure there is,
           // and precisely what this task exists to remove. Named instead.
-          if (this._failNoModel) this._failNoModel(outcome, 'store');
+          if (this._failNoModel) for (let k = 0; k < tokens.length; k++) this._failNoModel(tokens[k], 'store', k > 0);
           else this.raiseRuntimeError('data/mixin-missing', 'This node cannot report failures: addFailure was not applied');
           return;
         }
@@ -566,7 +573,7 @@ function _addInputProperties(def: MixinNodeModule) {
         this._pushInputValues(internal.model);
 
         // Last: `_pushInputValues` has already notified everything watching the object.
-        this.reportOutcome(outcome, 'done');
+        reportOutcomes(this, tokens, 'done');
       });
     },
     registerInputIfNeeded: function (this: InputPropertiesNodeInstance, name: string) {

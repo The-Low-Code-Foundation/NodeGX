@@ -15,8 +15,8 @@
  * onto the bound record at the frame end (:537-571) — see object-crud-base.ts for the write —
  * and reports `done` (:569); with no record bound it FAILS with `set-object-properties/no-object`,
  * the sentence on `Error` naming which way it was unbound (:556-563, :79-105). Two presses in one
- * frame do ONE write and, as written, report ONE outcome (:538-543, the guard before the token);
- * the spec reports one per press (NSP-012 §6 row C9).
+ * frame do ONE write and report one outcome per press, a failure too (only the first raises). Row C9
+ * (fixed, ruled "One Done per press"): the guard sat before the token, so the runtime reported one.
  */
 
 import { defineNode } from '../spec';

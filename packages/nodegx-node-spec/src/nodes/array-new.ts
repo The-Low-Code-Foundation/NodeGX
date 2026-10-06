@@ -10,13 +10,10 @@
  * then publishes the new array's id (:85) and reports `done` (:87). The array it made last time is
  * left as it is: a second `Do` makes a second array with a second id, so `Id` moves every time.
  *
- * Two presses in one frame do ONE mint (:73-74, the `hasScheduledNew` guard) and, as the runtime
- * is written, ONE outcome: the guard sits BEFORE `beginOutcome` (:73-75), so the second press
- * reports nothing at all — where the Array node's `Fetch` (collectionnode2.ts :294-300), Set
- * Variable's `Do` and Array Filter's `Filter` mint a token per press and report each. The spec
- * follows the contract and the three siblings (ERG-001 §4: one outcome per invocation): every
- * press reports `done`. NSP-012 §6 row C9 holds the difference for a ruling; the runtime's
- * reading is counted under it, never hidden.
+ * Two presses in one frame do ONE mint (the `hasScheduledNew` guard) and every press reports
+ * `done` (ERG-001 §4: one outcome per invocation), as the Array node's `Fetch`, Set Variable's `Do`
+ * and Array Filter's `Filter` do. Row C9 (fixed, ruled "One Done per press"): the guard sat BEFORE
+ * `beginOutcome`, so the second press reported nothing; the token is now opened before the guard.
  */
 
 import { defineNode } from '../spec';

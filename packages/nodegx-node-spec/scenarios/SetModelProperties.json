@@ -26,9 +26,8 @@
     ]
   },
   {
-    "name": "Two Do in one frame: one write, an outcome per press (row C9: the runtime reports one)",
-    "because": "modelcrudbase.ts :538-543",
-    "row": "NSP-012 §6 C9",
+    "name": "Two Do in one frame: one write, an outcome per press",
+    "because": "modelcrudbase.ts scheduleStore — the token is opened before the guard (P107-C9, ruled 2026-10-05 \"One Done per press\"); was row C9: the runtime reported one",
     "params": {
       "properties": "a",
       "modelId": "m1",
