@@ -217,28 +217,6 @@ function settledFrame(t: readonly TraceEvent[], index: number): [number, number]
   while (start >= 0 && t[start].t !== 'settle') start--;
   return [start + 1, k];
 }
-/** The Type the reference last wrote before `index` (params arrive as sets first); `'text'` when none. */
-const typeBefore = (t: readonly TraceEvent[], index: number) => {
-  for (let k = index - 1; k >= 0; k--) if (t[k].t === 'set' && portOf(t[k]) === 'type') return valueOf(t[k]);
-  return 'text';
-};
-
-/**
- * NSP-016 §6 C68 — TextInput.tsx :202-204: the one-line field's own `onMouseDown` replaces the control's, so a mouse press fires no
- * Pointer Down, sets no Pressed and runs no drain. Narrow: the difference is in the settle group of a frame holding a `press` or
- * `click` act (an act's outputs print with its frame's settle) on a field that was not a Text Area at that act.
- */
-const mousePressOnOneLine = (d: Divergence) => {
-  if (d.difference.threw !== undefined) return false;
-  const f = settledFrame(d.reference, d.difference.index);
-  if (!f) return false;
-  for (let k = f[0]; k < f[1]; k++) {
-    const a = d.reference[k] as { t: string; act?: string };
-    if (a.t === 'act' && (a.act === 'press' || a.act === 'click') && typeBefore(d.reference, k) !== 'textArea') return true;
-  }
-  return false;
-};
-
 /**
  * NSP-016 §6 C80 — TextInput.tsx :248-281: the field sits in a different tree with a label, so React builds a new element when Enable
  * Label changes, and the keyboard leaves with the old one, silently (row D30's silence). Narrow: the label's truthiness changed at a
@@ -279,24 +257,6 @@ const labelTakesKeyboard = (d: Divergence) => {
     }
   }
   return lost;
-};
-
-/**
- * NSP-016 §6 D35 — a `<textarea>` React puts on the page holds its text as default content, so its cursor rests at the START, where the
- * spec rests a field's cursor at the end: an Insert Text, a typed key or an Enter goes in at the start, a Backspace finds nothing
- * before it. Narrow: the field is a Text Area, and the difference is the Value holding the same characters in another order, or a
- * Backspace the runtime answers Unchanged where the reference says Done.
- */
-const textAreaRestsAtStart = (d: Divergence) => {
-  if (d.difference.threw !== undefined || typeBefore(d.reference, d.difference.index) !== 'textArea') return false;
-  const r = d.difference.reference;
-  const a = d.difference.actual;
-  if (!r || !a) return false;
-  if (r.t === 'outcome' && a.t === 'outcome' && portOf(r) === 'backspace' && portOf(a) === 'backspace') return valueOf(r) === 'done' && valueOf(a) === 'unchanged';
-  if (r.t !== 'value' || a.t !== 'value' || portOf(r) !== 'onTextChanged' || portOf(a) !== 'onTextChanged') return false;
-  const rv = valueOf(r);
-  const av = valueOf(a);
-  return typeof rv === 'string' && typeof av === 'string' && rv !== av && [...rv].sort().join('') === [...av].sort().join('');
 };
 
 /**
@@ -419,9 +379,7 @@ const buttonPickWrittenBack = (d: Divergence) => {
 const KNOWN_ROWS: Record<string, KnownRow[]> = {
   'net.noodl.controls.textinput': [
     // NSP-023 (R12) — the Text Input v2 states the intent; what React's drawing makes the runtime do instead
-    { row: 'NSP-016 §6 C68 — a mouse press on a one-line field fires no Pointer Down, sets no Pressed and runs no drain (its own onMouseDown replaces the control\'s)', matches: mousePressOnOneLine },
     { row: 'NSP-016 §6 C80 — Enable Label changed while the field holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard },
-    { row: 'NSP-016 §6 D35 — a Text Area React puts on the page rests its cursor at the start: an insert, a key or an Enter goes in before the text', matches: textAreaRestsAtStart }
   ],
   // s39 — the Dropdown: C65's third instance (Select.tsx :245 renders `{props.label}` raw), and two of its own
   'net.noodl.controls.options': [

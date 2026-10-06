@@ -87,6 +87,9 @@ export class TextInput extends React.Component<TextInputProps, State> {
    */
   private pendingCaret: number | null = null;
 
+  /** P107-D35 — the <textarea> whose cursor was put at the end when it attached. */
+  private restedTextArea: HTMLTextAreaElement | null = null;
+
   /** P107-C72 — the Type or Max length as it stands on the node, not as React last drew it. */
   private live(key: 'type' | 'maxLength') {
     const props = (this.props.noodlNode as unknown as TextInputNodeSeam | undefined)?.props;
@@ -229,7 +232,12 @@ export class TextInput extends React.Component<TextInputProps, State> {
           type={this.props.type}
           {...inputProps}
           onKeyDown={(e) => this.onKeyDown(e)}
-          onMouseDown={() => window.addEventListener('click', preventGlobalFocusChange, true)}
+          onMouseDown={(e) => {
+            // P107-C68 (P109 ISL-031, ruled "Pointer Down fires"): this replaced the control's own handler from the
+            // spread above, so a mouse press fired no Pointer Down, set no Pressed and ran no drain; run both
+            (inputProps as { onMouseDown?: (e: React.MouseEvent) => void }).onMouseDown?.(e);
+            window.addEventListener('click', preventGlobalFocusChange, true);
+          }}
           noodl-style-tag="input"
         />
       );
@@ -241,6 +249,17 @@ export class TextInput extends React.Component<TextInputProps, State> {
           // cleanup function, and the concise `(ref) => (this.ref.current = ref)` form
           // returns the element itself.
           ref={(ref) => {
+            // P107-D35 (P109 ISL-031, ruled "at the end, both"): React gives a new <textarea> its text as default
+            // content, cursor at 0, where an <input> gets its value through the setter, which leaves it at the end.
+            // A field nobody has put a cursor in has it at the end. Once per element: this runs again on every render.
+            if (ref && ref !== this.restedTextArea) {
+              this.restedTextArea = ref;
+              try {
+                ref.setSelectionRange(ref.value.length, ref.value.length);
+              } catch (e) {
+                // no selection API
+              }
+            }
             this.ref.current = ref;
           }}
           {...inputProps}

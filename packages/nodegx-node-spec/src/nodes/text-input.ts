@@ -61,7 +61,7 @@
  *     :358). Insert Text writes while the field has the keyboard (that is what it is for, GAM-011).
  *     Where the caret IS (State `caret`): a field nobody has placed a caret in has it at the END of
  *     its text, a one-line field and a Text Area alike (ruled 2026-10-05 — the runtime's Text Area
- *     rests it at the START, row D35, known on the runtime); a field whose Type moved from Email or
+ *     rested it at the START, row D35, fixed in P109 ISL-031); a field whose Type moved from Email or
  *     Number to Text has it at the start (HTML's type change steps).
  *   - **one write after another** (ruled 2026-10-05, R12): every write from the graph acts on the
  *     field as the write before it left it — a Backspace after a Clear in the same frame finds the
@@ -82,8 +82,8 @@
  *     Unmount**, **Child Index** (0), **This**, the **Bounding Box** outputs, **Scroll Into View**,
  *     the label and pointer-event inputs: the Button's. A mouse button down on the field fires
  *     **Pointer Down** and sets **Pressed**, as a finger does (ruled 2026-10-05, from the output's
- *     description; the runtime's one-line field fires neither — its component's own `onMouseDown`
- *     replaces the control's, TextInput.tsx :202-204 — row C68, known on the runtime); the
+ *     description; the runtime's one-line field fired neither — its component's own `onMouseDown`
+ *     replaced the control's — row C68, fixed in P109 ISL-031: both run); the
  *     browser's `mousedown` default then puts the keyboard on the field. **Enable Label** shows a
  *     label above the field and leaves the field, and the keyboard on it, where they are (ruled
  *     2026-10-05; the runtime builds a new element under the label and the keyboard leaves with the
@@ -149,7 +149,7 @@ type State = {
   /**
    * The element's TEXT ENTRY CURSOR (HTML), in code units — meaningful on a type the selection API applies to (text, url,
    * password, a textarea; HTML's "selection API applies" list — not email, not number). Where it is: a field nobody has placed
-   * a caret in has it at the END of its text (ruled 2026-10-05, both kinds of field — the runtime's Text Area: row D35); a type
+   * a caret in has it at the END of its text (ruled 2026-10-05, both kinds of field — the runtime's Text Area until P109 ISL-031: row D35); a type
    * change from a type without the API to one with it puts it at the start (HTML's type change steps); a keystroke leaves it
    * after the key; a write from the graph that changes what the element shows moves it to the end (HTML's value setter), and an
    * Insert Text or Backspace then puts it after what it wrote if the field has the keyboard (:359-369). A press is a focus here
@@ -569,7 +569,7 @@ export const TextInput = defineNode({
       // utils.ts :224-227, :235-243, :276-280 — hover before the press it ends
       leave: (s) => onPainted(s, (p) => thenDrained(p, { set: { hover: false, pressed: false }, send: ['hoverState', 'pressedState'], emit: ['hoverEnd'] })),
       // a Text Area's mousedown is the control's (wrapped: it drains, inside the handler — before the browser's default action puts
-      // the keyboard on the element); an <input>'s is the component's own (C68: no Pointer Down, no drain)
+      // the keyboard on the element); an <input>'s too, since P109 ISL-031 (C68: its own handler replaced the control's)
       press: (s) => onPainted(s, (p) => blockerFirst(p, (q) => (q.enabled ? pressed(q) : NONE))),
       release: (s) => onPainted(s, (p) => blockerFirst(p, (q) => (q.enabled ? thenDrained(q, { set: { pressed: false }, send: ['pressedState'], emit: ['pointerUp'] }) : NONE))),
       // the press, the release, and a click nothing listens for (the node has no Click output); the release's handler drains
@@ -870,7 +870,7 @@ function thenDrained(p: Readonly<State>, a: Act): Act {
 
 /**
  * A mouse button down on an enabled field (utils.ts :255-259, :285-293): Pressed and Pointer Down, and the handler's drain
- * (pointerlisteners.ts :180-183), on a one-line field and a Text Area alike (docblock; the runtime's one-line field: row C68);
+ * (pointerlisteners.ts :180-183), on a one-line field and a Text Area alike (docblock; the runtime's one-line field until P109 ISL-031: row C68);
  * then the browser's default action of `mousedown`: the keyboard onto the element, if it is not there already.
  */
 function pressed(s: Readonly<State>): Act {

@@ -490,8 +490,8 @@
     ]
   },
   {
-    "name": "a mouse press on the field fires Pointer Down with Pressed true and puts the keyboard on it (Focused); the release fires Pointer Up with Pressed false; a click is the same pair — the runtime's one-line field fires neither (row C68)",
-    "because": "the Pointer Down description ('fires as a mouse button or finger goes down on this control'), ruled 2026-10-05; TextInput.tsx :202-204 replaces the control's onMouseDown on an <input> (row C68)",
+    "name": "a mouse press on the field fires Pointer Down with Pressed true and puts the keyboard on it (Focused); the release fires Pointer Up with Pressed false; a click is the same pair (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
+    "because": "the Pointer Down description ('fires as a mouse button or finger goes down on this control'), ruled 2026-10-05; TextInput.tsx's <input> runs the control's onMouseDown before its own (was row C68: its own replaced it; fixed in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -506,8 +506,7 @@
         "act": "click"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: a press fires Pointer Down with Pressed true and takes the keyboard; the release Pointer Up with Pressed false",
@@ -909,7 +908,7 @@
     ]
   },
   {
-    "name": "a person acts on a painted page: Mounted written off and an act in the same frame find no element (a Focus after it is Unchanged); written on, the act meets the element (a Focus after it is Done) — every act, both ways — the runtime's one-line field fires neither (row C68)",
+    "name": "a person acts on a painted page: Mounted written off and an act in the same frame find no element (a Focus after it is Unchanged); written on, the act meets the element (a Focus after it is Done) — every act, both ways (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "the holder re-renders before the act is dispatched (node-spec-target.ts PERSON), as a browser paints before a person can act; each pair toggles the page",
     "steps": [
       "settle",
@@ -1225,8 +1224,7 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area, its press and click: a person acts on a painted page: Mounted written off and an act in the same frame find no element (a Focus after it is Unchanged); written on, the act meets the element (a Focus after it is Done) — every act, both ways",
@@ -1323,7 +1321,7 @@
     }
   },
   {
-    "name": "a person acts on a painted page: Enabled written off and an act in the same frame meet a disabled element (a Focus after it takes nothing, a Blur gives nothing up); written on, an enabled one — every act, both ways — the runtime's one-line field fires neither (row C68)",
+    "name": "a person acts on a painted page: Enabled written off and an act in the same frame meet a disabled element (a Focus after it takes nothing, a Blur gives nothing up); written on, an enabled one — every act, both ways (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "the element's disabled attribute is painted with the page (TextInput.tsx :181); the Focus and Blur actions meet the painted element (text-input.ts :288-320)",
     "steps": [
       "settle",
@@ -1639,8 +1637,7 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: a person acts on a painted page: Enabled written off and an act in the same frame meet a disabled element (a Focus after it takes nothing, a Blur gives nothing up); written on, an enabled one — every act, both ways",
@@ -1965,7 +1962,7 @@
     }
   },
   {
-    "name": "a person acts on a painted page: Enabled and Mounted both written and an act in the same frame — off together (no element; a Focus after it Unchanged), on together (Did Mount, an enabled element) — every act, both ways — the runtime's one-line field fires neither (row C68)",
+    "name": "a person acts on a painted page: Enabled and Mounted both written and an act in the same frame — off together (no element; a Focus after it Unchanged), on together (Did Mount, an enabled element) — every act, both ways (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "the paint inside the act commits the remount and the enabled attribute at once; a Focus and a Blur after it read what was painted",
     "steps": [
       "settle",
@@ -2369,8 +2366,7 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area, its press and click: a person acts on a painted page: Enabled and Mounted both written and an act in the same frame — off together (no element; a Focus after it Unchanged), on together (Did Mount, an enabled element) — every act, both ways",
@@ -2898,7 +2894,7 @@
     ]
   },
   {
-    "name": "a Text Area on a painted page: Mounted written off and an act in the same frame find no element; written on, the act meets the <textarea> (a press fires Pointer Down) — every act, both ways; the remounted field's cursor rests at the end, so Enter writes its newline after the text — the runtime's before it (row D35)",
+    "name": "a Text Area on a painted page: Mounted written off and an act in the same frame find no element; written on, the act meets the <textarea> (a press fires Pointer Down) — every act, both ways; the remounted field's cursor rests at the end, so Enter writes its newline after the text (was row D35: the runtime's went before it; fixed in P109 ISL-031)",
     "because": "TextInput.tsx :211-221 the <textarea> keeps the control's onMouseDown — the press branch an <input> never reaches",
     "params": {
       "type": "textArea"
@@ -3217,8 +3213,7 @@
         "signal": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D35"
+    ]
   },
   {
     "name": "a Text Area on a painted page: Mounted written off and an act in the same frame find no element; written on, the act meets the <textarea> (a press fires Pointer Down) — every act but typing and Enter, both ways",
@@ -3586,7 +3581,7 @@
     ]
   },
   {
-    "name": "a finger down and up in one frame: Pointer Down and Pointer Up, Pressed ends where it began; a finger held across a frame then a mouse click on the focused field: the click's release ends the press (Pressed false, Pointer Up) — the runtime's one-line field fires neither (row C68)",
+    "name": "a finger down and up in one frame: Pointer Down and Pointer Up, Pressed ends where it began; a finger held across a frame then a mouse click on the focused field: the click's release ends the press (Pressed false, Pointer Up) (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "utils.ts :260-275 the touch pair; :265-269 mouseup writes pressedState false whatever began the press",
     "steps": [
       "settle",
@@ -3608,8 +3603,7 @@
         "act": "click"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: a finger down and up in one frame: Pointer Down and Pointer Up, Pressed ends where it began; a finger held across a frame then a mouse click on the focused field: the click's release ends the press (Pressed false, Pointer Up)",
@@ -3751,7 +3745,7 @@
     ]
   },
   {
-    "name": "Mounted off, then Mounted on with a press in the same frame: Did Mount, Pressed and Pointer Down, and Focused (the press's mousedown default takes the keyboard); again with a Tab onto it (focus act): Did Mount and Focused; again disabled: Did Mount alone — the runtime's one-line field fires neither (row C68)",
+    "name": "Mounted off, then Mounted on with a press in the same frame: Did Mount, Pressed and Pointer Down, and Focused (the press's mousedown default takes the keyboard); again with a Tab onto it (focus act): Did Mount and Focused; again disabled: Did Mount alone (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "the paint inside the act commits the remount; the press and the Tab meet the fresh enabled element (TextInput.tsx :204 the mousedown default is not cancelled); a disabled one takes neither",
     "steps": [
       "settle",
@@ -3807,8 +3801,7 @@
         "act": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: Mounted off, then Mounted on with a press in the same frame: Did Mount and Focused (the press's mousedown default takes the keyboard), nothing else; again with a Tab onto it (focus act): Did Mount and Focused; again disabled: Did Mount alone",
@@ -4362,7 +4355,7 @@
     ]
   },
   {
-    "name": "a pointer act drains the frame: a Set and an empty Insert Text queued, then the act, then a Clear in the same frame — the Set lands at the act (Done, Value 'x', Value Changed) and the Insert is Unchanged there, the Clear then empties the field (Done, Value '') — hover, leave, release, click, touch, lift — the runtime's one-line field fires neither (row C68)",
+    "name": "a pointer act drains the frame: a Set and an empty Insert Text queued, then the act, then a Clear in the same frame — the Set lands at the act (Done, Value 'x', Value Changed) and the Insert is Unchanged there, the Clear then empties the field (Done, Value '') — hover, leave, release, click, touch, lift (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "pointerlisteners.ts :173-186 every pointer handler the control installs runs the graph's dirty nodes after its own work; node.ts :743-746 the node's frame-end callbacks run in that update; without the act the Clear would run first and the Set last (measured s38, cases k and s)",
     "params": {
       "runOnChange-startValue": false
@@ -4519,8 +4512,7 @@
         "act": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: a pointer act drains the frame: a Set and an empty Insert Text queued, then the act, then a Clear in the same frame — the Set lands at the act (Done, Value 'x', Value Changed) and the Insert is Unchanged there, the Clear then empties the field (Done, Value '') — hover, leave, release, click, touch, lift",
@@ -4720,7 +4712,7 @@
     ]
   },
   {
-    "name": "a press and a click drain the frame as every pointer act does, a Tab onto the field and a key do NOT: a Set queued, the act, then a Clear — after a press the Set lands at the act and the Clear runs last; after a Tab or a key the Clear runs first and the Set, at the frame's end, finds the keyboard on the field (Unchanged), each time — the runtime's one-line press does not drain (row C68)",
+    "name": "a press and a click drain the frame as every pointer act does, a Tab onto the field and a key do NOT: a Set queued, the act, then a Clear — after a press the Set lands at the act and the Clear runs last; after a Tab or a key the Clear runs first and the Set, at the frame's end, finds the keyboard on the field (Unchanged), each time (was row C68: the runtime's one-line press did not drain; fixed in P109 ISL-031)",
     "because": "TextInput.tsx :204 the <input>'s onMouseDown is the component's own, not the control's wrapped one (C68); onFocus / onKeyDown are not pointer handlers (pointerlisteners.ts :173) — only a pointer handler drains",
     "params": {
       "runOnChange-startValue": false
@@ -4774,8 +4766,7 @@
         "signal": "clear"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: an <input>'s press, a Tab onto the field and a key do NOT drain the frame: a Set queued, the act, then a Clear — the Clear runs first and the Set lands at the frame's end (Value 'x' wins), each time",
@@ -4864,7 +4855,7 @@
     ]
   },
   {
-    "name": "a pointer act drains the frame, one write at a time: a Set alone (Done, or Unchanged while the field has the keyboard) or an empty Insert Text alone (Unchanged) queued, the act, then a Clear — the queued press is answered at the act, before the Clear's Done — hover, leave, release, click, touch, lift, with the keyboard off and on the field — the runtime's one-line field fires neither (row C68)",
+    "name": "a pointer act drains the frame, one write at a time: a Set alone (Done, or Unchanged while the field has the keyboard) or an empty Insert Text alone (Unchanged) queued, the act, then a Clear — the queued press is answered at the act, before the Clear's Done — hover, leave, release, click, touch, lift, with the keyboard off and on the field (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "pointerlisteners.ts :173-186; each branch of the drain alone, so a copy that leaves the press for the frame's end answers it after the Clear",
     "params": {
       "runOnChange-startValue": false
@@ -5303,8 +5294,7 @@
         "signal": "clear"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: a pointer act drains the frame, one write at a time: a Set alone (Done, or Unchanged while the field has the keyboard) or an empty Insert Text alone (Unchanged) queued, the act, then a Clear — the queued press is answered at the act, before the Clear's Done — hover, leave, release, click, touch, lift, with the keyboard off and on the field",
@@ -5750,7 +5740,7 @@
     ]
   },
   {
-    "name": "a Value written off the page, then Mounted on and an act in the same frame: the act's paint remounts and announces the Value (Value Changed, Did Mount) before the act, and a Focus action after it finds the element — every act — the runtime's one-line field fires neither (row C68)",
+    "name": "a Value written off the page, then Mounted on and an act in the same frame: the act's paint remounts and announces the Value (Value Changed, Did Mount) before the act, and a Focus action after it finds the element — every act (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "TextInput.tsx :97-110 the mount announces what the output has not announced; the paint inside the act commits the remount (onPainted); the deep run reached this branch under a release and a key",
     "steps": [
       "settle",
@@ -6031,8 +6021,7 @@
         "act": "blur"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area, its press and click: a Value written off the page, then Mounted on and an act in the same frame: the act's paint remounts and announces the Value (Value Changed, Did Mount) before the act, and a Focus action after it finds the element — every act",
@@ -21504,8 +21493,8 @@
     ]
   },
   {
-    "name": "a Text Area's cursor rests at the END of its text: a Focus action then an Insert Text 'x' writes 'abcx'; typing 'y' goes in after it ('abcxy'); Backspace removes the 'y' before the cursor; after a Blur action the Insert still lands at the cursor ('abcxx') — the runtime's Text Area rests it at the START ('xabc': row D35)",
-    "because": "ruled 2026-10-05: a field nobody has placed a caret in has it at the end, a one-line field and a Text Area alike; a <textarea> React mounts holds its text as default content, cursor at 0 (row D35)",
+    "name": "a Text Area's cursor rests at the END of its text: a Focus action then an Insert Text 'x' writes 'abcx'; typing 'y' goes in after it ('abcxy'); Backspace removes the 'y' before the cursor; after a Blur action the Insert still lands at the cursor ('abcxx') (was row D35: the runtime's Text Area rested it at the START, 'xabc'; fixed in P109 ISL-031)",
+    "because": "ruled 2026-10-05: a field nobody has placed a caret in has it at the end, a one-line field and a Text Area alike; a <textarea> React mounts holds its text as default content, cursor at 0, so TextInput puts it at the end when the element attaches (was row D35, fixed in P109 ISL-031)",
     "params": {
       "type": "textArea",
       "startValue": "abc",
@@ -21538,8 +21527,7 @@
         "signal": "insert"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D35"
+    ]
   },
   {
     "name": "an <input>'s cursor rests at the END: a Focus action then an Insert Text 'x' writes 'abcx'; a Value from the graph while unfocused moves the cursor to the end of the new text ('defx' after a Focus and an Insert)",
@@ -21578,7 +21566,7 @@
     ]
   },
   {
-    "name": "a Type change from Email (no selection API) to Text puts the cursor at the START: 'a' typed into an Email field, Type Text, then Insert Text 'bc' writes 'bca'; typing 'z' then goes in after the inserted text ('bcza'); a Text Area made from it is a fresh element with its cursor at the end ('bczabc') — the runtime's at the start (row D35)",
+    "name": "a Type change from Email (no selection API) to Text puts the cursor at the START: 'a' typed into an Email field, Type Text, then Insert Text 'bc' writes 'bca'; typing 'z' then goes in after the inserted text ('bcza'); a Text Area made from it is a fresh element with its cursor at the end ('bczabc') (was row D35: the runtime's was at the start; fixed in P109 ISL-031)",
     "because": "HTML's type change steps: previouslySelectable false and nowSelectable true → the text entry cursor to the start (jsdom follows it: the 10,000 run's 'abca'); a <textarea> replacing an <input> is a new element (TextInput.tsx :192-223); measured (s40 probes D1, P6)",
     "params": {
       "type": "email",
@@ -21614,8 +21602,7 @@
         "signal": "insert"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 D35"
+    ]
   },
   {
     "name": "a Type change from Email (no selection API) to Text puts the cursor at the START: 'a' typed into an Email field, Type Text, then Insert Text 'bc' writes 'bca'; typing 'z' then goes in after the inserted text ('bcza')",
@@ -21674,7 +21661,7 @@
     ]
   },
   {
-    "name": "focused, then disabled; Enabled on and an act in the same frame, then a Blur action: the act's paint re-enabled the element, so the Blur takes the keyboard off it (Blurred, Done) — every act (a Tab away blurs it itself; the Blur after it is Done alone; a press or Enter lands on the re-enabled field) — the runtime's one-line field fires neither (row C68)",
+    "name": "focused, then disabled; Enabled on and an act in the same frame, then a Blur action: the act's paint re-enabled the element, so the Blur takes the keyboard off it (Blurred, Done) — every act (a Tab away blurs it itself; the Blur after it is Done alone; a press or Enter lands on the re-enabled field) (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "the act's paint syncs `pageEnabled` before the act; a Blur action in the same frame reads it (text-input.ts :315-319 → the element's blur(), which a disabled element refuses nothing) — kills a drop of the paint's syncs on an act whose own set is empty (s40, the surviving `person.key` drop-set at seed 13)",
     "params": {},
     "steps": [
@@ -21905,8 +21892,7 @@
         "signal": "focus"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: focused, then disabled; Enabled on and an act in the same frame, then a Blur action: the act's paint re-enabled the element, so the Blur takes the keyboard off it (Blurred, Done) — every act (a Tab away blurs it itself; the Blur after it is Done alone; a press or Enter lands on the re-enabled field)",
@@ -22145,7 +22131,7 @@
     ]
   },
   {
-    "name": "focused, Text To Insert empty: a Set (absorbed — the field has the keyboard) and an Insert Text queued, a pointer act, then a Clear in one frame: both presses are answered Unchanged at the act, before the Clear's Done — hover, leave, press, release, click, touch, lift — the runtime's one-line field fires neither (row C68)",
+    "name": "focused, Text To Insert empty: a Set (absorbed — the field has the keyboard) and an Insert Text queued, a pointer act, then a Clear in one frame: both presses are answered Unchanged at the act, before the Clear's Done — hover, leave, press, release, click, touch, lift (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "pointerlisteners.ts :173-186 — the drain inside the handler resolves both deferred presses before the Clear runs; kills the 10,000 run's swap of this drain with the act that drained nothing (s40, seed 20729)",
     "params": {
       "textToInsert": ""
@@ -22282,8 +22268,7 @@
         "value": "xlift"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: focused, Text To Insert empty: a Set (absorbed — the field has the keyboard) and an Insert Text queued, a pointer act, then a Clear in one frame: both presses are answered Unchanged at the act, before the Clear's Done — hover, leave, press, release, click, touch, lift",
@@ -22733,7 +22718,7 @@
     ]
   },
   {
-    "name": "unfocused, Run On Value Change off, Text To Insert 'z': a Set and an Insert Text queued, a pointer act, then a Clear in one frame — the act's drain lands both (Set Done with the Value, Insert Done with the Value plus 'z', Value Changed twice) BEFORE the Clear's Done; an <input>'s press drains nothing, so there the Clear comes first and the two land at the frame's end — hover, leave, press, release, click, touch, lift — the runtime's one-line field fires neither (row C68)",
+    "name": "unfocused, Run On Value Change off, Text To Insert 'z': a Set and an Insert Text queued, a pointer act, then a Clear in one frame — the act's drain lands both (Set Done with the Value, Insert Done with the Value plus 'z', Value Changed twice) BEFORE the Clear's Done; an <input>'s press drains nothing, so there the Clear comes first and the two land at the frame's end — hover, leave, press, release, click, touch, lift (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "pointerlisteners.ts :173-186 — the drain inside the handler; TextInput.tsx :204 — the <input>'s press is the component's own (C68); kills the 10,000 run's two surviving swaps of a release that landed both writes with the bare release (s40, seed 20729, 1,645 s)",
     "params": {
       "runOnChange-startValue": false,
@@ -22881,8 +22866,7 @@
         "signal": "clear"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: unfocused, Run On Value Change off, Text To Insert 'z': a Set and an Insert Text queued, a pointer act, then a Clear in one frame — the act's drain lands both (Set Done with the Value, Insert Done with the Value plus 'z', Value Changed twice) BEFORE the Clear's Done; an <input>'s press drains nothing, so there the Clear comes first and the two land at the frame's end — hover, leave, press, release, click, touch, lift",
@@ -23037,7 +23021,7 @@
     ]
   },
   {
-    "name": "Visible off: a hidden field is under no pointer and takes no keyboard — every act raises nothing; the Focus action is Done with nothing; shown again, a click is a click — the runtime's one-line field fires neither (row C68)",
+    "name": "Visible off: a hidden field is under no pointer and takes no keyboard — every act raises nothing; the Focus action is Done with nothing; shown again, a click is a click (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "node-shared-port-definitions.ts :366-375 `visibility: hidden`: the browser hit-tests past a hidden element and `focus()` refuses one (Chromium `IsFocusableStyle`)",
     "steps": [
       "settle",
@@ -23091,8 +23075,7 @@
         "act": "click"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: Visible off: a hidden field is under no pointer and takes no keyboard — every act raises nothing; the Focus action is Done with nothing; shown again, a click is a click",
@@ -23218,7 +23201,7 @@
     ]
   },
   {
-    "name": "Opacity exactly the number 0: the field takes no pointer (TextInput.tsx :118-120 pointer-events none) — but the keyboard reaches it: a focus and typing land; the string \"0\" takes the pointer — the runtime's one-line field fires neither (row C68)",
+    "name": "Opacity exactly the number 0: the field takes no pointer (TextInput.tsx :118-120 pointer-events none) — but the keyboard reaches it: a focus and typing land; the string \"0\" takes the pointer (was row C68: the runtime's one-line field fired neither; fixed in P109 ISL-031)",
     "because": "TextInput.tsx :118-120 compares style.opacity with 0 strictly; opacity does not stop a focus",
     "steps": [
       "settle",
@@ -23256,8 +23239,7 @@
         "act": "click"
       },
       "settle"
-    ],
-    "row": "NSP-016 §6 C68"
+    ]
   },
   {
     "name": "a Text Area: Opacity exactly the number 0: the field takes no pointer (TextInput.tsx :118-120 pointer-events none) — but the keyboard reaches it: a focus and typing land; the string \"0\" takes the pointer",
