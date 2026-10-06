@@ -9,7 +9,8 @@
  * press keeps its port's name as the action, and the last one pressed in the frame is the one handed; it is taken
  * by that close, so the next close without one hands none (:260-268). The node then finds the popup it closes
  * (:206-247), walking out from its own component through the popups it sits inside (world.ts POPUP `inside`,
- * nearest first):
+ * nearest first) — a popup opened from inside another popup sits inside that one too (row C31, fixed in P109
+ * ISL-028: the runtime's walk went from a popup to the root and never reached the outer popup):
  *   - Popup set (`value || undefined`, :97-99): the popup of that name among them, or Failure
  *     `close-popup/target-not-found` with Error `This node is not inside a popup named "<Popup>"`, followed by
  *     ` — it is inside: <names>` when it sits inside any (:216-229) — never a fall back to the nearest one;

@@ -17,6 +17,34 @@ import type {
 /** BINDING-CONTRACT §(b): which popup this node will close, on the node card. */
 const resolvedTargets = new ResolvedTargetReporter();
 
+/** A cycle guard for {@link popupWalk}: far above any real nesting of popups. */
+const MAX_POPUP_HOPS = 100;
+
+/**
+ * The components above a Close Popup node, nearest first — and at a popup, on into the component that opened it.
+ *
+ * P107-C31 (ISL-028, ruled "Reach the outer popup"): every popup is built in the ROOT component's scope, whoever opened
+ * it, so `componentAncestors` goes popup → root and never through the popup that opened it. A Close Popup in an inner
+ * popup naming the outer one therefore never found it, though the Popup input promises exactly that. `showPopup`
+ * records the opener's component on the popup (`popupParent`); the walk crosses there. Here only: this is how a Close
+ * Popup finds its popup, not how any other node finds its parent.
+ */
+function popupWalk(owner: ComponentInstanceLike | undefined): ComponentInstanceLike[] {
+  let chain: ComponentInstanceLike[] = [];
+  let at = owner;
+  for (let hops = 0; at && hops < MAX_POPUP_HOPS; hops++) {
+    const segment = [at].concat(componentAncestors(at));
+    let popupAt = -1;
+    for (let i = 0; i < segment.length && popupAt === -1; i++) {
+      if ((segment[i] as { popupParent?: unknown }).popupParent) popupAt = i;
+    }
+    if (popupAt === -1) return chain.concat(segment);
+    chain = chain.concat(segment.slice(0, popupAt + 1));
+    at = (segment[popupAt] as { popupParent?: ComponentInstanceLike }).popupParent;
+  }
+  return chain;
+}
+
 /** What an attempt to find the enclosing popup came back with. */
 interface PopupResolution {
   /** The popup's component instance, when one was found. */
@@ -201,11 +229,13 @@ const ClosePopupNode: NodeDefinitionOptions = {
      *
      * Order matters in the walk: the node's own component owner is tested first, because a
      * Close Popup node sitting directly in the popup component belongs to *that* popup, and
-     * `componentAncestors` deliberately never returns the starting component.
+     * `componentAncestors` deliberately never returns the starting component. At a popup the
+     * walk crosses into the component that opened it ({@link popupWalk}, P107-C31), so an
+     * outer popup is a candidate too — nearest first, so a blank Popup is unchanged.
      */
     resolvePopup: function (this: ClosePopupInstance): PopupResolution {
       const owner = this.nodeScope && this.nodeScope.componentOwner;
-      const chain: ComponentInstanceLike[] = owner ? [owner].concat(componentAncestors(owner)) : [];
+      const chain = popupWalk(owner);
       const popups = chain.filter((component) => typeof component._popupCloseHandler === 'function');
       const candidates = popups.map((component) => component.name);
       const wanted = this._internal.targetComponent;

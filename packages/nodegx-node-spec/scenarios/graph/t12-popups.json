@@ -430,8 +430,7 @@
     "clauses": [
       "N"
     ],
-    "row": "C31",
-    "because": "closepopup.ts `targetComponent` (Popup): \"Which popup to close when popups are nested; leave blank to close the nearest enclosing one\"; its docblock :89-90: \"popups nest — a popup opened from inside a popup gives a Close Popup node two honest answers, and only the author knows which was meant\". The inner Show Popup is Show On Top, so opening Inner does not dismiss Outer (nodecontext.ts :1240). Read: every popup is built in the ROOT scope (:1215, :1245), so Outer is never on Inner's component walk; `popupParent` (:1258) is read by nothing",
+    "because": "closepopup.ts `targetComponent` (Popup): \"Which popup to close when popups are nested; leave blank to close the nearest enclosing one\"; its docblock :89-90: \"popups nest — a popup opened from inside a popup gives a Close Popup node two honest answers, and only the author knows which was meant\". The inner Show Popup is Show On Top, so opening Inner does not dismiss Outer (nodecontext.ts :1240). Every popup is built in the ROOT scope, so Outer is never on Inner's component walk; Close Popup's walk now crosses from a popup to the component that opened it (`popupParent`) (C31, fixed in P109 ISL-028 — the miss was close-popup/target-not-found)",
     "definitions": {
       "Outer": {
         "inputs": {
@@ -564,6 +563,11 @@
       },
       {
         "t": "settle"
+      },
+      {
+        "t": "signal",
+        "port": "Closed",
+        "subject": "show"
       },
       {
         "t": "settle"
