@@ -80,7 +80,8 @@ export interface RuntimeNodeContext {
   nodeIsDirty(node: RuntimeNode): void;
   scheduleNextFrame(callback: () => void): void;
   /** Opens a popup component in the viewer's popup layer; resolves immediately without one. See `nodecontext.ts`. */
-  showPopup(popupComponent: string, params: Record<string, unknown>, args?: unknown): Promise<void>;
+  /** Resolves `'dismissed'` for a popup replaced before it opened: its opener already heard Dismissed (P107-C32). */
+  showPopup(popupComponent: string, params: Record<string, unknown>, args?: unknown): Promise<'dismissed' | void>;
   /** Runs `callback` once the current update has finished processing every dirty node. */
   scheduleAfterUpdate(callback: () => void): void;
   /** Flushes the dirty-node queue synchronously. DOM event handlers call this so a

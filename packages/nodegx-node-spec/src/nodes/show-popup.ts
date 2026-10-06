@@ -19,6 +19,9 @@
  *   - the component builds: Done (:288-290); it does not: Error is set to `The popup "<target>" could not be
  *     opened: <why>` and every press is Failure `show-popup/target-failed` (:291-297), and its slot is given back
  *     (v2, row C30 — v1 kept it: a later Replace It reported Dismissed for it, and on top it took Escape).
+ * NOT REACHED BY ONE NODE'S PLAY (the world answers a show at once): a popup replaced while it is still being built —
+ * two Show Popups pressed in one frame — tells its opener Dismissed and nothing else; Done means the popup opened
+ * (row C32, fixed in P109 ISL-028: it also reported Done). Graded by `scenarios/graph/t12-popups.json`.
  * LATER, what the person does (world.ts POPUP `events`) — a close through the popup's Close Popup, or Escape (the
  * top popup whose Modal is on, and only when its Close On Escape is on and it was built, :1183-1195) — takes the
  * popup off the stack at the START of the next frame (:1284-1300) and only then tells this node: a close's

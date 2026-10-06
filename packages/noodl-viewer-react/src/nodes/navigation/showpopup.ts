@@ -287,7 +287,11 @@ const ShowPopupNode: NodeDefinitionOptions = {
       // here.
       if (shown && shown.then) {
         shown.then(
-          () => reportOutcomes(this, tokens, 'done'),
+          // P107-C32 (ISL-028, ruled "Drop the Done"): replaced before it opened — Dismissed has answered the press,
+          // and Done means the popup opened, so nothing more is reported
+          (result) => {
+            if (result !== 'dismissed') reportOutcomes(this, tokens, 'done');
+          },
           (e: unknown) => {
             this.reportFailure(
               'show-popup/target-failed',

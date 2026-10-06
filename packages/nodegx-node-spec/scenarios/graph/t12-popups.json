@@ -300,8 +300,7 @@
     "clauses": [
       "N"
     ],
-    "row": "C32",
-    "because": "showpopup.ts `Done`: \"Fires once the popup has been opened. Closed and Dismissed are later events about the same popup, not this signal\"; `Dismissed`: \"Fires when another popup replaced this one before the user closed it\". nodecontext.ts :1247-1253 — a popup dismissed while its build is awaited is deleted and never shown, and `showPopup` RETURNS (resolves) — showpopup.ts :288-290 reports Done on that",
+    "because": "showpopup.ts `Done`: \"Fires once the popup has been opened. Closed and Dismissed are later events about the same popup, not this signal\"; `Dismissed`: \"Fires when another popup replaced this one before the user closed it\". A popup dismissed while its build is awaited is deleted and never shown; `showPopup` resolves 'dismissed' for it and Show Popup reports no Done (C32, fixed in P109 ISL-028 — it reported Done on any resolution)",
     "definitions": {
       "Stay": {
         "inputs": {},
@@ -393,12 +392,6 @@
       {
         "t": "signal",
         "port": "Dismissed",
-        "subject": "a"
-      },
-      {
-        "t": "outcome",
-        "port": "show",
-        "value": "done",
         "subject": "a"
       },
       {
