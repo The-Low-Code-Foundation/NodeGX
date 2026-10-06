@@ -824,8 +824,8 @@
     }
   },
   {
-    "name": "access rules: a User rule with no User Id and nobody signed in adds nothing; a Role rule with no Role names `role:undefined` (row C35)",
-    "because": "dbmodelcrudbase.ts :999-1015 (NDA-012 guards the user branch, not the role branch)",
+    "name": "access rules: a User rule with no User Id and nobody signed in adds nothing; a Role rule with no Role refuses the create, nothing sent (v3, C35)",
+    "because": "dbmodelcrudbase.ts :999-1015 (NDA-012 guards the user branch, not the role branch) — and a Role rule naming no role refuses the write (C35, fixed in P109 ISL-029; v2 sent `role:undefined`)",
     "params": {
       "accessControl": [
         {

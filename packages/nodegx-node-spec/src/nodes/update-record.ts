@@ -51,7 +51,7 @@ import {
   RECORD_ID_STATE,
   type RecordIdState
 } from './record-base';
-import { ACCESS_CONTROL_INPUT, aclFor, aclInputs, discoverWritePort, dones, failures, onWritePort, RECORD_WRITE_STATE, WRITE_CANDIDATES, type RecordWriteState } from './record-write';
+import { ACCESS_CONTROL_INPUT, aclFor, aclInputs, aclRefusal, discoverWritePort, dones, failures, onWritePort, RECORD_WRITE_STATE, WRITE_CANDIDATES, type RecordWriteState } from './record-write';
 
 /** :211-214 */
 export const PRECONDITION_MESSAGE = 'Someone else changed this record after it was read, so this update was not applied. Fetch the record again, then retry.';
@@ -114,7 +114,9 @@ export const UpdateRecord = defineNode({
   type: 'SetDbModelProperties',
   // v2 (P109 ISL-029, row C34 ruled "Put the old values back"): any failed save puts back what its write replaced, and a
   // Backend the project does not have writes nothing; v1 kept the write on every failure but a refused precondition.
-  version: 2,
+  // v3 (P109 ISL-029, row C35 ruled "Refuse the save and say why"): a rule set to Role that names no role fails the save
+  // with ACL_ROLE_MISSING, nothing written or sent; v2 sent the key `role:undefined`.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/setdbmodelpropertiesnode.ts; dbmodelcrudbase.ts',
   needs: ['backend', 'registry'],
   worldPool: {
@@ -267,6 +269,11 @@ export const UpdateRecord = defineNode({
           }
         }
         if (refused) continue;
+        const aclRefused = aclRefusal(s); // v3 (C35) — rules that cannot be sent refuse the save, nothing written
+        if (aclRefused !== undefined) {
+          fail(n, aclRefused);
+          continue;
+        }
         const backend = w.backendFor(s.backendId); // dbmodelcrudbase.ts :283-301 — v2 (C34): before the write, which it spares
         if (backend === undefined) {
           fail(n, NO_BACKEND_MESSAGE(s.backendId));

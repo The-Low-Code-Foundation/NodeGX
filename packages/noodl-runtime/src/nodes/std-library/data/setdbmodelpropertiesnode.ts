@@ -179,6 +179,13 @@ const SetDbModelPropertiedNodeDefinition: DbCrudNodeModule = {
               ifMatch[name] = held as string | number | boolean | null;
             }
           }
+          // P107-C35: rules that cannot be sent refuse the save before anything is written or sent
+          const aclRefusal = _this._aclRefusal();
+          if (aclRefusal !== undefined) {
+            _this.setError(aclRefusal, tokens);
+            return;
+          }
+
           // BCN-004 step 5: the store the `Backend` input names, not the singleton. P107-C34 (ISL-029, ruled "Put the
           // old values back"): resolved BEFORE the write, so a backend the project does not have writes nothing — it
           // used to leave the record showing values no backend was ever sent.

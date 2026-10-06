@@ -918,6 +918,71 @@
     }
   },
   {
+    "name": "a Role rule naming no role refuses the save: the not-sendable sentence, nothing written or sent; named, the save goes out with it (v3, C35)",
+    "because": "rules that cannot be sent refuse the write before anything is written (C35, fixed in P109 ISL-029 — v2 sent the key `role:undefined`, a role nobody holds)",
+    "params": {
+      "accessControl": [
+        {
+          "id": "a1",
+          "label": "Admins"
+        }
+      ]
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "collectionName",
+        "value": "Lesson"
+      },
+      {
+        "set": "modelId",
+        "value": "r1"
+      },
+      {
+        "set": "prop-title",
+        "value": "y"
+      },
+      {
+        "set": "acl-a1-target",
+        "value": "role"
+      },
+      {
+        "signal": "store"
+      },
+      "settle",
+      {
+        "set": "acl-a1-role",
+        "value": "admins"
+      },
+      {
+        "signal": "store"
+      },
+      "settle"
+    ],
+    "world": {
+      "backend": {
+        "answers": [
+          {
+            "answer": {
+              "ok": {}
+            }
+          }
+        ]
+      },
+      "registry": {
+        "models": {
+          "r1": {
+            "title": "x",
+            "version": 3,
+            "tags": [
+              "a"
+            ]
+          }
+        }
+      }
+    }
+  },
+  {
     "name": "Local only: no Class needed; no Id is Missing Record Id for each press",
     "because": "setdbmodelpropertiesnode.ts :223-244 — no pre-flight; minted before the guard",
     "params": {},

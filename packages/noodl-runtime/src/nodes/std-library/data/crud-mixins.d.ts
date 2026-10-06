@@ -210,5 +210,7 @@ export interface AccessControlInstance extends NodeInstance {
   };
   /** The assembled ACL, or `undefined` when no rule produced an entry. */
   _getACL(): AccessControlList | undefined;
+  /** P107-C35 — why the rules cannot be sent (a Role rule naming no role), or `undefined` when they can. */
+  _aclRefusal(): string | undefined;
   setAccessControl(name: string, value: unknown): void;
 }

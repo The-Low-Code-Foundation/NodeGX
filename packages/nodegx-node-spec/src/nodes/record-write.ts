@@ -16,8 +16,9 @@
  * rule by rule, in the list's order — a later rule's key overwrites an earlier one's:
  *   - a rule no port has written: the signed-in user, read and write (:970-974) — nobody signed in, nothing;
  *   - Target unset is `user` (:994, NDA-012); `everyone` is `*`; `user` is the rule's User Id, else the signed-in
- *     user, else nothing (:999-1013, NDA-012); `role` is `role:` + the rule's Role, AS IS — a Role never written is
- *     the key `role:undefined` (:1015; row C35, NSP-014 §6.5 — the twin of NDA-012's `acl['undefined']`);
+ *     user, else nothing (:999-1013, NDA-012); `role` is `role:` + the rule's Role — and a rule set to Role that names
+ *     no role (`undefined`, `null` or `''`) refuses the whole write before anything is written or sent, with
+ *     `ACL_ROLE_MISSING` (row C35, fixed in P109 ISL-029: it was the key `role:undefined`, a role nobody holds);
  *   - each entry is `{ read, write }`, an unwritten one `true` and a written one its value as written (:957-962);
  *   - no entry at all is NO ACL (`undefined`, :1020).
  *   Ports written for an id the list does not hold are kept and read by nothing.
@@ -110,6 +111,19 @@ export function onWritePort(s: Readonly<RecordWriteState>, port: string, value: 
   if (port.startsWith('prop-')) return { inputValues: { ...s.inputValues, [port.slice('prop-'.length)]: value } };
   const parts = port.split('-');
   return { accessControl: { ...s.accessControl, [parts[1]]: { ...(s.accessControl[parts[1]] ?? {}), [parts[2]]: value } } };
+}
+
+/** C35 — the sentence a write fails with when a rule set to Role names no role. */
+export const ACL_ROLE_MISSING = 'An access rule is set to Role but names no role. Name the role, or choose another target.';
+
+/** C35 (`_aclRefusal`) — why the rules cannot be sent, or `undefined` when they can. Only a rule the list holds counts. */
+export function aclRefusal(s: Readonly<RecordWriteState>): string | undefined {
+  if (s.accessControlRules === undefined) return undefined;
+  for (const r of s.accessControlRules as ReadonlyArray<{ id: string }>) {
+    const written = s.accessControl[r.id];
+    if (written !== undefined && written.target === 'role' && (written.role === undefined || written.role === null || written.role === '')) return ACL_ROLE_MISSING;
+  }
+  return undefined;
 }
 
 /** :954-1021 `_getACL`, with `user` the signed-in user (:964). */

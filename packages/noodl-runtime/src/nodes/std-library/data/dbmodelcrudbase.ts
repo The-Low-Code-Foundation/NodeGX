@@ -951,6 +951,22 @@ function _addAccessControl(def: DbCrudNodeModule) {
 
       _methods && _methods.registerInputIfNeeded && (_methods.registerInputIfNeeded as MixinMethod).call(this, name);
     },
+    /**
+     * P107-C35 (ISL-029, ruled "Refuse the save and say why"): a rule set to Role that names no role. `_getACL` wrote the
+     * key `role:undefined`, so the record was readable and writable only by a role called "undefined" — nobody. The
+     * writes ask this before anything is written or sent, and fail with its sentence.
+     */
+    _aclRefusal: function (this: AccessControlInstance): string | undefined {
+      const rules = this._internal.accessControlRules;
+      if (rules === undefined) return undefined;
+      for (let i = 0; i < rules.length; i++) {
+        const rule = (this._internal.accessControl || {})[rules[i].id];
+        if (rule && rule.target === 'role' && (rule.role === undefined || rule.role === null || rule.role === '')) {
+          return 'An access rule is set to Role but names no role. Name the role, or choose another target.';
+        }
+      }
+      return undefined;
+    },
     _getACL: function (this: AccessControlInstance): AccessControlList | undefined {
       const acl: AccessControlList = {};
 

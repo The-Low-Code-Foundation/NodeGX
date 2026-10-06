@@ -32,7 +32,7 @@
 import { defineNode } from '../spec';
 import type { BackendScript } from '../world';
 import { discoverRecordPort, NO_BACKEND_MESSAGE, NO_CLASS_MESSAGE, onRecordPort, RECORD_CANDIDATES, RECORD_ERROR_OUTPUT, RECORD_FAILURE_CODE, RECORD_ID_OUTPUT, RECORD_ID_STATE, type RecordIdState } from './record-base';
-import { ACCESS_CONTROL_INPUT, aclFor, aclInputs, discoverWritePort, dones, failures, onWritePort, RECORD_WRITE_STATE, WRITE_CANDIDATES, type RecordWriteState } from './record-write';
+import { ACCESS_CONTROL_INPUT, aclFor, aclInputs, aclRefusal, discoverWritePort, dones, failures, onWritePort, RECORD_WRITE_STATE, WRITE_CANDIDATES, type RecordWriteState } from './record-write';
 import { sameList } from '../world';
 
 type CreateRecordState = RecordIdState &
@@ -67,7 +67,9 @@ export const CreateRecord = defineNode({
   // v2 (P109 ISL-027, row C49 ruled "Compare the list's contents"): an answer's list with the same contents as the one the record
   // holds is not written again (cloudstore.js `_fromJSON`), so it is no change; v1 wrote the new array and the record store's `!==`
   // called it changed.
-  version: 2,
+  // v3 (P109 ISL-029, row C35 ruled "Refuse the save and say why"): a rule set to Role that names no role fails the create
+  // with ACL_ROLE_MISSING and sends nothing; v2 sent the key `role:undefined`.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/newdbmodelpropertiesnode.ts; dbmodelcrudbase.ts; cloudstore.js _fromJSON',
   needs: ['backend', 'registry'],
   worldPool: {
@@ -137,6 +139,8 @@ export const CreateRecord = defineNode({
       // :132-136 — Object.assign({}, <the source record's data>, <the property ports>)
       const source = s.sourceObjectId ? w.registry.model(s.sourceObjectId).data : {};
       const data = Object.assign({}, source, s.inputValues);
+      const refused = aclRefusal(s); // v3 (C35) — rules that cannot be sent refuse the create
+      if (refused !== undefined) return { set: { ...done, error: refused }, send: ['error'], outcomes: failures(n, RECORD_FAILURE_CODE) };
       const backend = w.backendFor(s.backendId); // :140-141, dbmodelcrudbase.ts :283-301
       if (backend === undefined) {
         return { set: { ...done, error: NO_BACKEND_MESSAGE(s.backendId) }, send: ['error'], outcomes: failures(n, RECORD_FAILURE_CODE) };
