@@ -24,10 +24,9 @@
     "steps": [{ "set": "value", "value": 0 }, "settle", { "set": "value", "value": { "$num": "-0" } }, "settle", { "set": "value", "value": { "a": 1 } }, "settle", { "set": "value", "value": { "a": 1 } }, "settle"]
   },
   {
-    "name": "a primitive after a unit object: node.ts merges it into a NEW object, so a repeated 2 fires again on the runtime (§6 row C6)",
-    "because": "node.ts setInputValue :410-420 — `{ value: 2, unit: 'px' }` is minted on every write once the port held a unit",
+    "name": "a primitive after a unit object arrives as sent, so a repeated 2 fires once, not on every write (ISL-026, C6)",
+    "because": "was NSP-011 §6 C6 (R7): node.ts setInputValue merged a later value into a unit object on ANY port; since ISL-026 only a port whose type declares units merges; it minted a new { value: 2, unit } on every write, so a repeated 2 fired again",
     "params": {},
-    "steps": [{ "set": "value", "value": { "value": 1, "unit": "px" } }, "settle", { "set": "value", "value": 2 }, "settle", { "set": "value", "value": 2 }, "settle"],
-    "row": "NSP-011 §6 C6"
+    "steps": [{ "set": "value", "value": { "value": 1, "unit": "px" } }, "settle", { "set": "value", "value": 2 }, "settle", { "set": "value", "value": 2 }, "settle"]
   }
 ]

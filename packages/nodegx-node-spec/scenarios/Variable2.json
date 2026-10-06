@@ -143,9 +143,8 @@
     ]
   },
   {
-    "name": "ROW C6 — a number after a unit object on Value is merged into it by node.ts: the runtime stores { value: 2, unit }",
-    "because": "node.ts setInputValue :410-420 (NSP-011 §6 C6, R7)",
-    "row": "NSP-011 §6 C6",
+    "name": "a number after a unit object on Value is stored as sent: 2, not { value: 2, unit } (ISL-026, C6)",
+    "because": "was NSP-011 §6 C6 (R7): node.ts setInputValue merged a later value into a unit object on ANY port; since ISL-026 only a port whose type declares units merges",
     "params": {
       "name": "x"
     },

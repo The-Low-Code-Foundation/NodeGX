@@ -66,6 +66,13 @@ function registerInput(object: SharedInputs, metadata: NodeMetadata, name: strin
     object[name].setUnitType = input.setUnitType;
   }
 
+  // ISL-026 / P107-C6: a port built for sizes. Its type stays in the metadata (only the types listed
+  // above are kept on the instance's input), so `node.ts` reads this mark to decide whether a bare number
+  // is merged into the unit the port holds. Every other port receives exactly what was sent.
+  if (object[name] && input.type && Array.isArray((input.type as PortType).units)) {
+    (object[name] as InputPortDefinition & { hasUnits?: true }).hasUnits = true;
+  }
+
   metadata.inputs[name] = {
     displayName: input.displayName,
     editorName: input.editorName,

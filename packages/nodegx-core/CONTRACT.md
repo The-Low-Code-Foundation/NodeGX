@@ -132,10 +132,11 @@ so the app degrades instead of freezing.
 
 ### C10. Unit-carrying values travel as objects
 
-A value with a unit is `{ value, unit }`, and a bare number written over one inherits the existing
-unit rather than dropping it ([node.ts:341-348](../noodl-runtime/src/node.ts#L341-L348),
-[node.ts:1031-1040](../noodl-runtime/src/node.ts#L1031-L1040)). Exported code that flattens
-`{value: 12, unit: 'px'}` to `12` loses the unit permanently.
+A value with a unit is `{ value, unit }` and travels intact. On a port built for sizes (its type
+declares `units`), a bare number written over one inherits the existing unit rather than dropping it;
+every other port receives exactly what was sent (P107-C6, ruled R7 (a) "Only on size inputs", P109
+ISL-026: `portHasUnits` in node.ts `setInputValue` and the first update's queue). Exported code that
+flattens `{value: 12, unit: 'px'}` to `12` loses the unit permanently.
 
 ### C11. A connection made late catches up
 

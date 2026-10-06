@@ -401,6 +401,18 @@ Node.prototype._evaluateExpressionParameter = function (paramValue, portName) {
   }
 };
 
+/**
+ * A port built for sizes: its type declares `units` (`{ name: 'number', units: ['px', '%'] }`). A library
+ * port carries `hasUnits` (nodedefinition.ts keeps only some types on the instance's input); a port
+ * registered at run time keeps its whole type.
+ */
+function portHasUnits(input: { type?: unknown; hasUnits?: boolean } | undefined): boolean {
+  if (!input) return false;
+  if (input.hasUnits === true) return true;
+  const type = input.type;
+  return !!type && typeof type === 'object' && Array.isArray((type as { units?: unknown }).units);
+}
+
 Node.prototype.setInputValue = function (name, value) {
   const input = this.getInput(name);
   if (!input) {
@@ -411,9 +423,13 @@ Node.prototype.setInputValue = function (name, value) {
   //inputs with units always expect objects in the shape of {value, unit, ...}
   //these inputs might sometimes get raw numbers without units, and in those cases
   //Noodl should just update the value and not the other parameters
+  //
+  // ISL-026 / P107-C6 (R7, ruled "Only on size inputs"): only a port whose TYPE declares units
+  // merges. Every other port receives exactly what was sent — a `*` port that once held a
+  // `{ value, unit }` used to turn every later number, null or boolean into one.
   const currentInputValue = this._inputValues[name] as { unit?: string } | undefined;
 
-  if (isNaN(value as number) === false && currentInputValue && currentInputValue.unit) {
+  if (portHasUnits(input) && isNaN(value as number) === false && currentInputValue && currentInputValue.unit) {
     //update the value, and keep the other parameters
     const newValue = Object.assign({}, currentInputValue); //copy it, so we don't modify the original object (e.g. it might come from a variant)
     (newValue as { value?: unknown }).value = value;
@@ -1252,7 +1268,9 @@ Node.prototype.queueInput = function (inputName, value, causeSeq) {
       //and the node will get a value without ever getting a unit.
       //To make sure that doesn't happen, look at the value being overwritten
       //and use the unit from that before overwriting
+      // ISL-026 / P107-C6: on a port whose type declares units only, as in `setInputValue`.
       if (
+        portHasUnits(this._inputs[inputName]) &&
         queueValue instanceof Object &&
         (queueValue as { unit?: string }).unit &&
         (value as unknown) instanceof Object === false

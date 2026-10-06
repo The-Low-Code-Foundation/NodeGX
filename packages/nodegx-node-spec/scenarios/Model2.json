@@ -368,9 +368,8 @@
     ]
   },
   {
-    "name": "ROW C6 — a later value after a unit object held on a property input is merged into it by node.ts: the Fetch that binds writes { value: false, unit }",
-    "because": "node.ts setInputValue :410-420 (NSP-011 §6 C6, R7) — the runner's shrink of generated seed 4128598514 (s12). The held value reaches the record only when a Fetch binds it; Properties left empty so no `<p> Changed` port (row C11) is in the way",
-    "row": "NSP-011 §6 C6",
+    "name": "a later value after a unit object on a property input arrives as sent: the Fetch that binds writes false, not { value: false, unit } (ISL-026, C6)",
+    "because": "was NSP-011 §6 C6 (R7): node.ts setInputValue merged a later value into a unit object on ANY port; since ISL-026 only a port whose type declares units merges — the runner's shrink of generated seed 4128598514 (s12). The held value reaches the record only when a Fetch binds it; Properties left empty so no `<p> Changed` port (row C11) is in the way",
     "world": {
       "registry": {
         "models": {

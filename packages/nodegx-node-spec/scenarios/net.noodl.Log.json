@@ -61,8 +61,8 @@
     ]
   },
   {
-    "name": "a number after a unit object on Value: the spec passes 2 through, the runtime passes { value: 2, unit: 'px' } (§6 row C6)",
-    "because": "node.ts setInputValue :410-420",
+    "name": "a number after a unit object on Value is passed through as sent: 2, not { value: 2, unit: 'px' } (ISL-026, C6)",
+    "because": "was NSP-011 §6 C6 (R7): node.ts setInputValue merged a later value into a unit object on ANY port; since ISL-026 only a port whose type declares units merges",
     "params": {},
     "steps": [
       {
@@ -78,7 +78,6 @@
         "value": 2
       },
       "settle"
-    ],
-    "row": "NSP-011 §6 C6"
+    ]
   }
 ]

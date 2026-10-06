@@ -55,25 +55,6 @@ const isSet = (e: TraceEvent, port: string, bad: (value: unknown, present: boole
   e.t === 'set' && e.port === port && bad((e as { value?: unknown }).value, 'value' in e);
 
 /**
- * NSP-011 §6 C6 / R7 — node.ts `setInputValue` (:410-420) merges a later value into a `{ value,
- * unit }` object the port once held. Narrow: a unit object set on the port, then a later set on
- * the SAME port of something that is not one, and the difference after that later set.
- */
-const unitMerge = (port: string) => (d: Divergence) => {
-  const withUnit = (v: unknown) => !!v && typeof v === 'object' && !Array.isArray(v) && 'unit' in (v as object);
-  const first = d.reference.findIndex((e) => isSet(e, port, (v) => withUnit(v)));
-  if (first < 0) return false;
-  const later = d.reference.findIndex((e, i) => i > first && isSet(e, port, (v) => !withUnit(v)));
-  return later >= 0 && d.difference.index > later;
-};
-
-/** C6 on every port a predicate names — the Object node's `prop-<name>` inputs are derived, any name. */
-const unitMergeOnAny = (portMatches: (port: string) => boolean) => (d: Divergence) => {
-  const ports = new Set(d.reference.filter((e) => e.t === 'set' && portMatches((e as { port: string }).port)).map((e) => (e as { port: string }).port));
-  return [...ports].some((port) => unitMerge(port)(d));
-};
-
-/**
  * NSP-012 §6 C9 — Create New Array, Create New Object and Set Object Properties coalesce two `Do`
  * presses in one frame into ONE outcome (the `hasScheduled…` guard sits before `beginOutcome`),
  * where the spec, the contract and their siblings (Array's Fetch, Set Variable, Array Filter)
@@ -104,15 +85,6 @@ const deadPropertyChanged = (d: Divergence) => {
   const e = d.reference[d.difference.index];
   return e !== undefined && e.t === 'signal' && /^changed-/.test(e.port);
 };
-
-/**
- * NSP-011 §6 C6 is node.ts's, not a node's: `setInputValue` merges a later value into a `{ value, unit }`
- * the port once held, on EVERY port of EVERY node. The per-node entries below each carry a hand scenario
- * and must keep firing; this one is the same narrow predicate on any port, counted for every spec, so a
- * daily rotation that first draws C6 on a port nobody listed (s12: Object, Variable, HTTP's Headers — one
- * a day for three of seven seeds) reads as the known row, not as a red run. Never asserted to fire.
- */
-const C6_ANY_PORT: KnownRow = { row: 'NSP-011 §6 C6 (any port — node.ts) — a later value merged into a unit object the port once held (R7)', matches: unitMergeOnAny(() => true) };
 
 /**
  * NSP-015 §6.2 C25 — Navigate To Path's frame-end callback THROWS (the scheduler logs it,
@@ -558,14 +530,8 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   SetModelProperties: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('store') }],
-  Model2: [{ row: 'NSP-012 §6 C11 — `<property> Changed` never fires: nothing registers the output', matches: deadPropertyChanged },
-    { row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMergeOnAny((p) => p.startsWith('prop-')) }
-  ],
-  'Value Changed': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
-  'net.noodl.Log': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
-  'net.noodl.HTTP': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('headers') }],
-  Variable2: [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('value') }],
-  'net.noodl.StreamBuffer': [{ row: 'NSP-011 §6 C6 — node.ts merges a later value into a unit object the port once held (R7)', matches: unitMerge('data') }]
+  Model2: [{ row: 'NSP-012 §6 C11 — `<property> Changed` never fires: nothing registers the output', matches: deadPropertyChanged }
+  ]
 };
 
 /**
@@ -586,7 +552,7 @@ describe('NSP-004 / NSP-011 — every registered spec on the runtime, 200 sequen
   const daySeed = process.env.NSP_SEED ? Number(process.env.NSP_SEED) : undefined;
   beforeAll(async () => {
     for (const spec of pilot) {
-      const report = await runConformance(spec, batchTarget(), { sequences: 200, seed: daySeed, mutants: true, known: [...(KNOWN_ROWS[spec.type] ?? []), C6_ANY_PORT], equivalent: EQUIVALENT_MUTANTS[spec.type] });
+      const report = await runConformance(spec, batchTarget(), { sequences: 200, seed: daySeed, mutants: true, known: KNOWN_ROWS[spec.type] ?? [], equivalent: EQUIVALENT_MUTANTS[spec.type] });
       // eslint-disable-next-line no-console
       console.log(formatReport(report));
       reports.set(spec.type, report);
@@ -652,7 +618,7 @@ const deep = Number(process.env.NSP_DEEP || 0);
         shrink: true,
         mutants: true,
         replayDir: process.env.NSP_REPLAY_DIR,
-        known: [...(KNOWN_ROWS[spec.type] ?? []), C6_ANY_PORT],
+        known: KNOWN_ROWS[spec.type] ?? [],
         equivalent: EQUIVALENT_MUTANTS[spec.type]
       });
       // eslint-disable-next-line no-console
