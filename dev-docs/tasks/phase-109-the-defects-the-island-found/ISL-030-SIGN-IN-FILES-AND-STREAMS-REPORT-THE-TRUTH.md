@@ -1,6 +1,6 @@
 # ISL-030 — Sign-in, HTTP, files and streams report the truth
 
-**Status: ⬜ not started — ✅ AC2: all 18 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 18 bugs from
+**Status: ✅ CLOSED s24 (2026-10-06): 18 of 18 fixed, each with a control (§9) — AC1 by the controls (no row was a known row), AC3 one commit per ruling, AC4 no row open. ✅ AC2: all 18 rulings taken 2026-10-05, all as recommended. Scoped 2026-10-05 at `8292f1d55` by the ledger sweep (Track F).** **Source:** 18 bugs from
 the ledger (`dev-docs/bugs/`) that had no task: 1 high · 8 medium · 9 low, **18 awaiting a ruling**. **Side:** runtime (HTTP Request, User, Sign In With, Upload File, Cloud File, Sign File URL, SSE, Subscribe To Changes), viewer (user service, Open File Picker, Cloud Function)
 
 ## 1. The person sentence
@@ -106,3 +106,54 @@ ruling is still this task's work: the description changes, the node does not.
 | P107-D26 | Clear them | yes | A public link sends empty values on Expires At and TTL. A tiny change, following whatever the User node ruling decides 'empty' means. Few apps meet it: only a node whose file moves between public and private. |
 | P107-D27 | Blank means no filter | yes | A blank setting sends no filter to the browser. A one-line change, shipped with the Capture fix. Nothing visible changes in browsers that already ignore the bad value. |
 | P107-D28 | Always text | yes | Error is the object's message when it has one, or the object written out as text. A small change. A graph that read fields off the Error object would lose them. |
+
+## 9. Session 24 (2026-10-06) — all eighteen
+
+**AC1, re-measured:** none of the 18 was a known row in the runtime's conformance table (`KNOWN_ROWS` holds only the
+controls' rows), so §5's "a row that stops firing turns the test red" could not re-measure any of them. Each was recorded
+in its spec instead (a scenario stating the runtime's reading, or a "ROWS" docblock) — or, for C51, in no scenario at all.
+Each row was re-measured by its control: HEAD's runtime file red on exactly the scenarios the fix changes.
+
+| Row | Commit | What changed | Grade |
+|---|---|---|---|
+| C7 | `684d881f2` | `authInputs` strips the `auth-` prefix for the presets; the Authentication port says Bearer/Basic set Authorization; HTTP Request v3 | 4 scenarios (1 flipped, 3 new); control red on all 4 |
+| D11 | `962edf855` | a JSON body that will not parse is `http/bad-body` (the error marked, never wrapped — a cross-realm SyntaxError gained a prefix when wrapped); HTTP v4; enrichment lists the codes | 2 scenarios; control red on both |
+| D12 | `ef0632424` | one abort controller per request, Cancel aborts every one; HTTP v5; one equivalent declared (a cancelled request's landing) | 4 scenarios; control red on the 3 that change |
+| C45 + C46 | `aead4edb8` | the page-load check's failure is the adapter's alone; the bridge lets go of `current` on `sessionLost`; User v3; world: `serviceCheckFailed` removed | spec + `noodl-viewer-react/tests/isl-030-the-page-load-check.test.ts` (Parse wire); controls red |
+| C47 | `df793e7eb` | nobody signed in: Id / Email / Username `''`, Roles and properties `null` (DEF-005's row moved from `undefined` to `null`); User v4; graph s10 re-recorded | control red on 7 scenarios |
+| C50 | `69efd9820` | Sign In With reports a return once (`returnReported`); Sign In With v3 | control red on the 3 with a provider error |
+| C51 | `091e86d1c` | the REST and Parse-wire file envelopes carry the HTTP status; `fileFailureOf` for both nodes; Upload File v2, Sign File URL v2 | spec + adapter unit rows; controls red |
+| C53 + D27 | `a664d36b4` | every Open sets Capture and Accept as they stand and REMOVES a blank one; world file input gains `removeAttribute`; Open File Picker v2 | control red on 15 of 16 |
+| D25 | `f34e59460` | Request Magic Link's Done sends blank Error; its D25 equivalent mutant removed (now killed); RML v2 | control red on every Done scenario |
+| D26 | `8d15b190c` | a link with no expiry sends `''` / `null`; Sign File URL v3 | control red on both |
+| C55 | `bbd4d5539` | Subscribe To Changes' five settings and Query Records' realtime three reconnect only on a change (`valueDidChange`); STC v2, Query Records v5 | three Query Records scenarios reworked to make a real change; control red on the C55 ones |
+| C56 | `af96a5310` | SSE sends Last Error at an open, Retry Count after it moves (`onRetry`), Duplicates Suppressed as it counts (`onDuplicate`); SSE v2 | control red on 10 |
+| C58 | `5afc27a75` | a URL change that does not reopen says idle; SSE v3 | control red on the 3 |
+| D28 | `68e0cd9a7` | Cloud Function's Error always text (`errorText`); Cloud Function v2 | control red on both |
+| D23 | `58cff6c06` | the REST adapter refuses a Username (`REST_USERNAME_UNSUPPORTED`); world pre-flight the same; Set User Properties v2 | ⚠️ the spec's control stays GREEN (the runtime target plays auth through the world); graded by `rest-auth-adapter.test.ts`, red on HEAD |
+| C52 | `214020378` | the stored file keeps the name it was uploaded as (`filename`: the backend's, else the sent file's); Cloud File reads it first, a target-addressed file's name whole, else the Parse prefix rule; Upload File v3, Cloud File v2 | control (HEAD's three files) red on the 3 Cloud File C52 scenarios and every Upload File scenario ending in a stored file |
+
+**What the plan did not know.**
+- **Not one row was a known row.** §5 assumed the conformance table would re-measure them; it holds none of Track F's
+  ISL-030 rows. The controls did the re-measuring.
+- **The world can hide a runtime half.** D23's spec control stayed green on HEAD's adapter: the runtime target answers auth
+  calls with the world's model, so the real `setUserProperties` never ran. Grade such a fix with a unit test on the real
+  adapter. The same held for C51's and C45's Parse-wire halves (the world plays only REST).
+- **Names went false again**, and three Query Records scenarios lost what they graded (their reconnects came from
+  same-value writes): reworked to make a real change, not just renamed. One SSE scenario's name had been false before
+  this task ("reconnects to the new one", Auto Connect off).
+- **Old tests pinned the defects:** DEF-005's "nobody signed in reads undefined", `file-ref.test.ts`'s envelope without
+  status, `signfileurl.test.ts`'s 119, two viewer stubs of the file input without `removeAttribute`.
+- **C52's ruling text and its recommendation differ.** The card's short text says "show the stored name whole instead of
+  chopping it"; the recommendation it accepted says "fall back to the prefix rule only on the Parse wire". Built as the
+  recommendation (a target-addressed file whole; else the prefix rule, which leaves a Directus UUID whole anyway), because
+  the short text read literally would break NodeGX files read back from a record, which are correct today.
+- **A hung jest left a control file in place** (D23: a failing assertion skipped `dispose()`, a timer kept jest alive,
+  and the chained restore never ran) while a peer's conformance chain was starting. Restored by hand; the rows now
+  dispose in a `finally`. Run the restore as its own step, never chained after a jest that can hang.
+
+**Owed by P18 (the export), not checked:** whether the exported app has any of these eighteen; filed:
+`P109-S24-EXPORTBADBODY` (D11's twin, read). C7: the export already reads `auth-authToken`. D12: the export defers a
+wired Cancel. C47: the export reads the session through React state (probably clears; not run).
+
+**Filed this session:** `P109-S24-SIGNINWITHERRORKEPT` (needs a ruling; probably unreachable).

@@ -1,12 +1,15 @@
 ---
 id: P107-C52
 title: Cloud File's Name is the original file name only on NodeGX — on PocketBase it is the random suffix, on Directus a UUID, on Supabase the bucket path
-status: scheduled
+status: fixed
+commit: 214020378
 phase: P109
 task: ISL-030
 severity: medium
 area: runtime / Cloud File (`cloudfilenode.ts` Name :30-43), the stored file (`api/cloudfile.ts` — `filename` not kept), `api/backends/fileRef.ts` (each backend's stored `name`)
 found: P107 (the node says what it does) s30, 2026-10-03
+kit: node-spec
+regression: packages/nodegx-node-spec/scenarios/Cloud File.json "a PocketBase file Upload File made: Name is the name it was uploaded as (v2, C52)" (and the read-back and Directus rows; Upload File.json "a FileRef with no filename (PocketBase): the stored file keeps the sent file's name (v3, C52)")
 evidence: dev-docs/tasks/phase-107-the-node-says-what-it-does/NSP-014-BATCH-DATA-AND-CLOUD.md §6.28–§6.29 (row C52); scenario "a PocketBase file: its stored name's first part is dropped — Name is the random suffix (row C52)" (scenarios/Cloud File.json); PocketBase's stored names measured in dev-docs/tasks/phase-16-runtime-deploy-health/uba-e2e/BCN-007-FILES-PROBE-OUTPUT.txt :62, :97
 ---
 
@@ -35,3 +38,5 @@ the Parse wire. (A file read back from a record property has no `filename` — t
 **Ruling:** R3 (a) — the runtime wins until Richard rules.
 
 **Ruled 2026-10-05 (Track F rulings page), as recommended: "Keep the real name".** The node keeps the uploaded name and shows it. When the name is unknown (a file read back from a record), it shows the stored name whole instead of chopping it. A moderate change. Those read-back files still show a stored name, as their type and size already do. The question as asked: *"Should Cloud File's Name be the name the person uploaded, on every backend?"* (https://claude.ai/artifact/CPcSy8ABRQpn2dMZYuvXDH)
+
+**Fixed 214020378 (P109 ISL-030, 2026-10-06), as ruled (as recommended: the prefix rule kept for the Parse wire).** The stored file keeps the name it was uploaded as and Cloud File's Name reads it first; unknown, a target-addressed file shows its stored name whole, otherwise the Parse prefix is dropped. Cloud File v2, Upload File v3.
