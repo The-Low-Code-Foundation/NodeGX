@@ -3,7 +3,7 @@ title: "Receive Event"
 ---
 Receive Event: fires when a Send Event broadcasts on the same channel, delivering the event's payload values as outputs.
 
-Event Receiver listens on `channelName` and fires its `eventReceived` signal each time an Event Sender sends on that channel, from anywhere in the app. Payload values declared by the sender appear as value outputs holding the payload of the most recent event. `enabled` mutes the receiver; `consume` controls whether this receiver swallows the event or lets other receivers on the channel also fire; it applies to Parent, Children and Siblings events, and a Global event always reaches every receiver.
+Event Receiver listens on `channelName` and fires its `eventReceived` signal each time an Event Sender sends on that channel, from anywhere in the app. Payload values declared by the sender appear as value outputs holding the payload of the most recent event. `enabled` mutes the receiver; `consume` controls whether this receiver swallows the event or lets other receivers on the channel also fire.
 
 ## When to use it
 

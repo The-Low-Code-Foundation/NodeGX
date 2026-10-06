@@ -31,7 +31,7 @@ One-off or simple API calls where the response can be consumed directly or hande
 
 | Name | Type | Default | Description |
 |---|---|---|---|
-| `cancel` | Signal | — | Abandons a request that is still in flight, which answers on Canceled rather than Failure; reports Unchanged when there is nothing to cancel |
+| `cancel` | Signal | — | Abandons every request still in flight, each answering on Canceled rather than Failure; reports Unchanged when there is nothing to cancel |
 | `fetch` | Signal | — | Sends the request using the values currently on the inputs |
 
 ## Outputs
@@ -69,7 +69,7 @@ Input and output ports derive from node parameters: configured headers and query
 
 ## Ports at runtime
 
-Header and body inputs are runtime-registered from the node's method/headers configuration; only the core trigger/result surface is static. Dynamic outputs minted from Response Mapping are all prefixed `out-`, so an author's mapping name can never collide with the node's own ports. NDA-012: exceeding `timeout` fires `failure` with a message naming the timeout — `canceled` fires only for an explicit `cancel`. ERG-001: failures now also reach the runtime error channel, so `On App Error` sees them in a deployed build — codes are `http/no-url`, `http/error-status`, `http/timeout` and `http/network-error`. Requests genuinely overlap: a second `fetch` while one is in flight starts a second request, and each invocation carries its own outcome. `statusCode` and `response` keep the *previous* request's answer when a request never reached the server, because a value output cannot be cleared. Deleting the node does not abandon a request already in flight.
+Header and body inputs are runtime-registered from the node's method/headers configuration; only the core trigger/result surface is static. Dynamic outputs minted from Response Mapping are all prefixed `out-`, so an author's mapping name can never collide with the node's own ports. NDA-012: exceeding `timeout` fires `failure` with a message naming the timeout — `canceled` fires only for an explicit `cancel`. ERG-001: failures now also reach the runtime error channel, so `On App Error` sees them in a deployed build — codes are `http/no-url`, `http/input-not-text` (a text input holding something else), `http/error-status`, `http/timeout`, `http/network-error` (the request never reached a server) and `http/bad-body` (the server answered, and its body could not be read as JSON). Requests genuinely overlap: a second `fetch` while one is in flight starts a second request, and each invocation carries its own outcome. `statusCode` and `response` keep the *previous* request's answer when a request never reached the server, because a value output cannot be cleared. Deleting the node does not abandon a request already in flight.
 
 ## Patterns
 
