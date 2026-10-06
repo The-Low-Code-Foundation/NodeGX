@@ -23,11 +23,12 @@
  *
  * The FIRST move jumps (:765-768, `jumpToState` :580-616): every value takes the state's value OR
  * 0 — whatever its type (:592) — `State` is set, `At <state>` ports are set, and `State Changed` does
- * NOT fire (:601-613). Every later move (:769-850): text, text styles and true/false (`undefined` →
+ * NOT fire (:601-613). Every later move (:769-850): text (`undefined` → `''`, v4), text styles and true/false (`undefined` →
  * false, else `!!`) are set at once; a number or a colour transitions on the state's curve for that
  * value (`transition-<state>-<value>`, else the state's `transitiondef-<state>`, else ease-out over
  * 300 ms, :791-797) unless that curve is 0 ms with 0 delay, `Use Transitions` is off, or the state is
- * one the frame only passes through — then it is set at once (:799-808). `State` moves at once and
+ * one the frame only passes through — then it is set at once (:799-808). Every later move first stops a run still going
+ * (v3, row C22; the timer is otherwise only restarted when something animates). `State` moves at once and
  * `State Changed` fires; `Has Reached <state>` fires now if nothing animates (:839-843), else when
  * the run finishes (:255-258). `Done` follows an invocation's move (:849).
  *
@@ -276,7 +277,8 @@ function schedule(w: State, state: unknown, port?: string): 'unchanged' | 'defer
 /** `typedStateValue` — a true/false or a text as every move publishes it, the first entry too (ISL-002) */
 function typedStateValue(type: unknown, value: unknown): { value: unknown } | undefined {
   if (type === 'boolean') return { value: value === undefined ? false : !!value };
-  if (type === 'string' || type === 'textStyle') return { value };
+  if (type === 'string') return { value: value === undefined ? '' : value }; // v4 (row D19 ruled "Send empty text")
+  if (type === 'textStyle') return { value };
   return undefined;
 }
 
@@ -319,6 +321,7 @@ function goToState(w: State, state: unknown, settleImmediately: boolean, port: s
     if (port) out.outcomes.push({ port, outcome: 'done' });
     return;
   }
+  stop(w); // v3 (row C22 ruled "Stop the running animation"): every later move stops a run still going
   /* eslint-disable @typescript-eslint/no-explicit-any */
   let delay: any = 0;
   let dur: any = 0;
@@ -522,7 +525,11 @@ export const States = defineNode({
   // v2 (NSP-013 s16, row C21 ruled "fix it"): a transition that would animate along a curve that is not
   // four finite numbers with both x in [0, 1] reads as the state's Default transition (or, when the
   // Default is the one refused or is refused too, ease-out over 300 ms). v1 set such a value at once.
-  version: 2,
+  // v3 (P109 ISL-032, row C22 ruled "Stop the running animation"): every move after the first stops a run still going, so
+  // a move that sets every value at once lands where it says and Has Reached fires once; v2 let the old run land its target.
+  // v4 (P109 ISL-032, row D19 ruled "Send empty text"): a text a state leaves empty is sent as empty text on every move into
+  // it, the first entry too; v3 left it unset, so the wire kept the previous state's text.
+  version: 4,
   source: 'packages/noodl-viewer-react/src/nodes/std-library/states.ts; packages/noodl-runtime/src/timerscheduler.ts; node_modules/bezier-easing (1.1.1); packages/noodl-viewer-react/src/color-reader.ts',
   needs: ['clock'],
   worldPool: { advances: [0, 1, 16, 50, 100, 150, 299, 300, 301, 1000] },

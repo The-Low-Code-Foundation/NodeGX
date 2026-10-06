@@ -54,8 +54,8 @@
     "steps": ["settle", { "signal": "to-B" }, "settle", { "signal": "to-A" }, "settle", { "advance": 400 }, "settle"]
   },
   {
-    "name": "the first state publishes a false as false and leaves a text it does not name unset, as every later move does (ISL-002; was D19: both left as 0)",
-    "because": "states.ts typedStateValue, read by jumpToState and goToState alike; ruled 2026-10-02 (P109 ISL-002 §5): the first state sends the typed value",
+    "name": "a text a state does not name is sent as empty text on every move into it, the first entry too, and the first state publishes a false as false (v4; was D19: the first entry left both as 0, and a move back left the previous state's text on the wire)",
+    "because": "states.ts typedStateValue, read by jumpToState and goToState alike; ruled 2026-10-02 (P109 ISL-002 §5): the first state sends the typed value; ruled 2026-10-05 (P107-D19, \"Send empty text\"): a text the state leaves empty is the empty text",
     "params": { "states": "A,B", "values": "label,on", "type-label": "string", "type-on": "boolean", "value-A-on": false, "value-B-label": "hello", "value-B-on": true },
     "steps": ["settle", { "signal": "to-B" }, "settle", { "signal": "to-A" }, "settle"]
   },
@@ -96,8 +96,8 @@
     "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 50 }, "settle", { "signal": "to-A" }, "settle", { "advance": 50 }, "settle", { "advance": 60 }, "settle"]
   },
   {
-    "name": "a move that animates nothing does not stop a run still going: the old run carries on and lands the value on the PREVIOUS state's target",
-    "because": "states.ts :824-829 the timer is only started (and so only stopped) when something animates; :231-232 the run lands on the target onStart read; :256 Has Reached names the state the node is in by then; NSP-013 §6 C22 (the runtime and the spec agree, R3 (a))",
+    "name": "a move that animates nothing stops a run still going: the value lands on the new state's at once and stays there, and Has Reached fires once (v3; was row C22: the old run carried on and landed the PREVIOUS state's target)",
+    "because": "states.ts goToState: every move after the first stops the running timer before it sets values, as jumpToState does; ruled 2026-10-05 (P107-C22, \"Stop the running animation\"). Before, the timer was only (re)started when something animated, so the old run kept writing B's target and its Has Reached fired a second time",
     "params": { "states": "A,B", "values": "x", "value-A-x": 0, "value-B-x": 100, "transitiondef-B": { "curve": [0, 0, 1, 1], "dur": 100, "delay": 0 } },
     "steps": ["settle", { "signal": "to-B" }, "settle", { "advance": 50 }, "settle", { "set": "useTransitions", "value": false }, { "signal": "to-A" }, "settle", { "advance": 20 }, "settle", { "advance": 40 }, "settle"]
   },

@@ -116,7 +116,10 @@ function curveAccepted(points: unknown): boolean {
  */
 function typedStateValue(type: unknown, value: unknown): { value: unknown } | undefined {
   if (type === 'boolean') return { value: value === undefined ? false : !!value };
-  if (type === 'string' || type === 'textStyle') return { value };
+  // P107-D19: a text the state leaves empty is empty text, so a move into it clears the label rather than
+  // sending nothing (an undefined is never sent, and the wire kept the previous state's text).
+  if (type === 'string') return { value: value === undefined ? '' : value };
+  if (type === 'textStyle') return { value };
   return undefined;
 }
 const previousStates: Record<string, string[] | undefined> = {},
@@ -821,6 +824,12 @@ const StatesNode: NodeDefinitionOptions = {
         this.jumpToState(state);
         if (token) this.reportOutcome(token, 'done');
       } else {
+        // P107-C22: every move stops a run still going, as `jumpToState` does. The timer is only
+        // (re)started below when something animates, so a move that sets every value at once used
+        // to leave the old run writing the previous state's targets — and its Has Reached fired
+        // a second time, naming the state the node had moved to.
+        internal.animation.stop();
+
         // Copy current values as start values
         let delay = 0;
         let dur = 0;
