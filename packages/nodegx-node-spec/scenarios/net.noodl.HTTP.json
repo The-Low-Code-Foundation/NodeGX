@@ -105,11 +105,32 @@
     "steps": [{ "signal": "fetch" }, "settle", { "set": "url", "value": "https://api.example.com/other" }, { "signal": "fetch" }, "settle", { "advance": 100 }, { "signal": "cancel" }, "settle", { "advance": 900 }, "settle"]
   },
   {
-    "name": "Bearer authentication adds no header (C7): the presets read a key the ports never write",
-    "because": "httpnode.ts :131-133 read inputs.authToken; :447-458 store under auth-authToken. The request carries no Authorization — the spec models the runtime until the row is ruled",
+    "name": "Bearer authentication sends Authorization: Bearer <token> (v3, C7)",
+    "because": "httpnode.ts authInputs → authConfigurators.bearer (P109 ISL-030, P107-C7 ruled \"Fix it, send the credential\"); v2 sent no Authorization: the presets read inputs.authToken, the port stores auth-authToken",
     "params": { "url": "https://api.example.com/private", "authType": "bearer" },
     "world": { "network": [{ "answer": { "status": 200 } }] },
     "steps": [{ "set": "auth-authToken", "value": "secret" }, { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "Basic authentication sends the encoded user name and password (v3, C7)",
+    "because": "authConfigurators.basic — Authorization: Basic base64(user:password)",
+    "params": { "url": "https://api.example.com/private", "authType": "basic" },
+    "world": { "network": [{ "answer": { "status": 200 } }] },
+    "steps": [{ "set": "auth-authUsername", "value": "ada" }, { "set": "auth-authPassword", "value": "s3cret" }, { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "API Key in a header sends the header it names (v3, C7)",
+    "because": "authConfigurators.apiKey — Add To unset is the header",
+    "params": { "url": "https://api.example.com/private", "authType": "apiKey" },
+    "world": { "network": [{ "answer": { "status": 200 } }] },
+    "steps": [{ "set": "auth-authApiKeyName", "value": "X-Api-Key" }, { "set": "auth-authApiKeyValue", "value": "k-123" }, { "signal": "fetch" }, "settle"]
+  },
+  {
+    "name": "API Key as a query parameter goes on the URL (v3, C7)",
+    "because": "authConfigurators.apiKey with Add To = query → buildUrl appends it after the query ports",
+    "params": { "url": "https://api.example.com/private", "authType": "apiKey" },
+    "world": { "network": [{ "answer": { "status": 200 } }] },
+    "steps": [{ "set": "auth-authApiKeyName", "value": "api_key" }, { "set": "auth-authApiKeyValue", "value": "k-123" }, { "set": "auth-authApiKeyLocation", "value": "query" }, { "signal": "fetch" }, "settle"]
   },
   {
     "name": "a non-string URL fails the Fetch with http/input-not-text and Error 'URL is not text' (C8); nothing goes out, and the node still works afterwards",

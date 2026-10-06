@@ -50,11 +50,10 @@
  * `conditional` (:1244-1258, FED-004) — the validator store is the backend host's, a world seam
  * NSP-014 adds; in a browser the port changes nothing on the wire (:1283-1301).
  *
- * ROWS this spec found (NSP-007 §6): **C7** the authentication presets contribute NOTHING —
- * `authConfigurators` read `inputs.authToken` … (:131-157) from the bag the ports fill under
- * `auth-authToken` … (:447-458, `_storeInputValue(name)`), so no preset ever adds a header or a
- * query parameter; the spec keeps the runtime's read (`authContribution` below) so the row can be
- * seen closing. **C8** (v2, fixed in P109 ISL-026, ruled "Fail and say which input"): a truthy
+ * ROWS this spec found (NSP-007 §6): **C7** (v3, fixed in P109 ISL-030, ruled "Fix it, send the credential"): the
+ * presets read the `auth-…` ports by the names they store under (`authInputs`), so Bearer sends `Authorization:
+ * Bearer <token>`, Basic the encoded user name and password, and API Key its header or query parameter; v2 modelled
+ * the loss (the configurators read `authToken` … from a bag the ports fill under `auth-authToken` …). **C8** (v2, fixed in P109 ISL-026, ruled "Fail and say which input"): a truthy
  * non-string `url`, `queryParams`, `headers` or — when a body is built — `bodyFields` fails the Fetch with
  * `http/input-not-text`, Error "<the input> is not text", and no request; v1 modelled the loss (the runtime
  * threw inside the callback after the tokens were drained, and the outcomes were never settled). **D11** a body that fails to parse under `Response Type: JSON`
@@ -144,7 +143,9 @@ const CONFIG: Readonly<Record<string, ValueInputDecl>> = Object.freeze({
     default: 'none',
     displayName: 'Authentication',
     group: 'Authentication',
-    description: 'Credential scheme to apply, which decides which credential inputs appear below'
+    description:
+      'Credential scheme to apply, which decides which credential inputs appear below; Bearer and Basic set the ' +
+      'Authorization header, so leave Authorization out of Headers'
   }),
   responseType: port({
     type: 'enum',
@@ -162,19 +163,24 @@ const CONFIG: Readonly<Record<string, ValueInputDecl>> = Object.freeze({
 /** :452-462 — the prefixes whose ports store a value and nothing more. */
 const VALUE_PREFIXES = ['path-', 'header-', 'query-', 'body-', 'auth-', 'mapping-path-'];
 
-/** :131-157 `authConfigurators`, reading the bag AS THE NODE DOES — by the unprefixed names the ports never write (C7). `authType` itself is :901-903's store. */
+/** `authConfigurators` on `authInputs(inputValues)` — the `auth-…` ports by the names they store under (v3, C7). `authType` itself is :901-903's store. */
 function authContribution(values: Values): { headers?: Record<string, string>; queryParams?: Record<string, string> } {
-  const v = values as { authType?: unknown; authToken?: string; authUsername?: string; authPassword?: string; authApiKeyName?: string; authApiKeyValue?: string; authApiKeyLocation?: string };
+  const v = values as Record<string, any>;
+  const token = v['auth-authToken'];
+  const user = v['auth-authUsername'];
+  const password = v['auth-authPassword'];
+  const keyName = v['auth-authApiKeyName'];
+  const keyValue = v['auth-authApiKeyValue'];
   switch (v.authType) {
     case 'bearer':
-      return { headers: v.authToken ? { Authorization: `Bearer ${v.authToken}` } : {} };
+      return { headers: token ? { Authorization: `Bearer ${token}` } : {} };
     case 'basic':
-      if (!v.authUsername || !v.authPassword) return {};
-      return { headers: { Authorization: `Basic ${btoa(v.authUsername + ':' + v.authPassword)}` } };
+      if (!user || !password) return {};
+      return { headers: { Authorization: `Basic ${btoa(user + ':' + password)}` } };
     case 'apiKey':
-      if (!v.authApiKeyName || !v.authApiKeyValue) return {};
-      if (v.authApiKeyLocation === 'query') return { queryParams: { [v.authApiKeyName]: v.authApiKeyValue } };
-      return { headers: { [v.authApiKeyName]: v.authApiKeyValue } };
+      if (!keyName || !keyValue) return {};
+      if (v['auth-authApiKeyLocation'] === 'query') return { queryParams: { [keyName]: keyValue } };
+      return { headers: { [keyName]: keyValue } };
     default:
       return {}; // 'none', undefined, or a name no configurator has (:945 `authConfigurators[authType]`)
   }
@@ -260,7 +266,9 @@ export const HttpRequest = defineNode({
   type: 'net.noodl.HTTP',
   // v2 (P109 ISL-026, P107-C8 ruled "Fail and say which input"): an input the request reads as text that holds something else
   // fails the Fetch with `http/input-not-text`, naming the input on Error; v1 lost the outcome (the runtime threw).
-  version: 2,
+  // v3 (P109 ISL-030, P107-C7 ruled "Fix it, send the credential"): the Authentication presets send their credential; v2
+  // sent nothing (the presets read a key the ports never write).
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/httpnode.ts',
   needs: ['network', 'clock'],
   worldPool: { advances: [0, 1, 100, 1000, 29999, 30000] },
@@ -456,9 +464,7 @@ export const HttpRequest = defineNode({
             return { set: { bodyFields: js(value) || '' } }; // :893-895
           case 'bodyType':
             return { set: { bodyType: value } }; // :889-891 raw
-          // `authType` (:901-903) is stored with the value ports, in `values`: until C7 is ruled
-          // nothing a wire can see reads it — `authConfigurators[authType]` runs, and reads a bag
-          // the ports never fill — so a state key of its own would be a branch no test can grade
+          // `authType` (:901-903) is stored with the value ports, in `values`, beside the `auth-…` values it reads (v3, C7)
           case 'responseType':
             return { set: { responseType: js(value) || 'auto' } }; // :913-915
           default:

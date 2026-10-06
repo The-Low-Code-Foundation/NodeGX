@@ -127,10 +127,9 @@ interface AuthContribution {
 }
 
 /**
- * The values the `auth-…` dynamic inputs write, keyed *with* their prefix stripped by the
- * port names themselves (`auth-authToken` → `authToken`). Every one of these ports is
- * declared `type: 'string'` in `updatePorts`, which is why the two call sites narrow the
- * node's `Record<string, unknown>` to this on the way in.
+ * The values the `auth-…` dynamic inputs write, keyed with their `auth-` prefix stripped
+ * (`auth-authToken` → `authToken`) by {@link authInputs}. Every one of these ports is
+ * declared `type: 'string'` in `updatePorts`.
  */
 interface AuthInputs {
   authToken?: string;
@@ -139,6 +138,19 @@ interface AuthInputs {
   authApiKeyName?: string;
   authApiKeyValue?: string;
   authApiKeyLocation?: 'header' | 'query';
+}
+
+/**
+ * P107-C7 (P109 ISL-030, ruled "Fix it, send the credential"): the `auth-…` ports store under their FULL names
+ * (`_storeInputValue(name)`), and the configurators read the short ones. Nothing stripped the prefix, so no preset
+ * ever sent a credential: Bearer added no Authorization header and API Key no header or query parameter.
+ */
+function authInputs(inputValues: Record<string, unknown>): AuthInputs {
+  const out: Record<string, unknown> = {};
+  for (const key of Object.keys(inputValues)) {
+    if (key.startsWith('auth-')) out[key.slice('auth-'.length)] = inputValues[key];
+  }
+  return out as AuthInputs;
 }
 
 const authConfigurators: Record<string, (inputs: AuthInputs) => AuthContribution> = {
@@ -541,7 +553,7 @@ const HttpNode: NodeDefinitionOptions = {
       // From auth (API Key in query)
       const authType = this._internal.authType;
       if (authType && authConfigurators[authType]) {
-        const authConfig = authConfigurators[authType](this._internal.inputValues as AuthInputs);
+        const authConfig = authConfigurators[authType](authInputs(this._internal.inputValues));
         if (authConfig.queryParams) {
           Object.assign(queryParams, authConfig.queryParams);
         }
@@ -579,7 +591,7 @@ const HttpNode: NodeDefinitionOptions = {
       // From auth
       const authType = this._internal.authType;
       if (authType && authConfigurators[authType]) {
-        const authConfig = authConfigurators[authType](this._internal.inputValues as AuthInputs);
+        const authConfig = authConfigurators[authType](authInputs(this._internal.inputValues));
         if (authConfig.headers) {
           Object.assign(headers, authConfig.headers);
         }
@@ -1244,7 +1256,9 @@ function updatePorts(nodeId: string, parameters: Record<string, unknown>, editor
     default: 'none',
     plug: 'input',
     group: 'Authentication',
-    description: 'Credential scheme to apply, which decides which credential inputs appear below'
+    description:
+      'Credential scheme to apply, which decides which credential inputs appear below; Bearer and Basic set the ' +
+      'Authorization header, so leave Authorization out of Headers'
   });
 
   // Auth-specific inputs
