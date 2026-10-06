@@ -69,6 +69,12 @@ interface TextInputNodeSeam {
 
 export class TextInput extends React.Component<TextInputProps, State> {
   ref: React.MutableRefObject<InputRef>;
+  /**
+   * The text the field holds as of the last write, at once — `state.value` only catches up when
+   * React draws, so a second write in the same frame would read the text before the first.
+   * Every write and keystroke goes through `setText`. Clear reads it (P107-D33).
+   */
+  text: string;
 
   constructor(props: TextInputProps) {
     super(props);
@@ -78,6 +84,7 @@ export class TextInput extends React.Component<TextInputProps, State> {
       // start value as a number, and the controlled `<input>` needs a string.
       value: props.startValue === null || props.startValue === undefined ? '' : String(props.startValue)
     } satisfies State;
+    this.text = this.state.value;
 
     this.ref = React.createRef();
   }
@@ -91,6 +98,7 @@ export class TextInput extends React.Component<TextInputProps, State> {
     // Inward it is always text: `startValue` may arrive as a number on a Number field, and the
     // `<input>`'s `value` has to be a string or React drops the control.
     const text = value === null || value === undefined ? '' : String(value);
+    this.text = text;
     this.setState({ value: text }, afterRender);
     this.props.onTextChanged && this.props.onTextChanged(outwardValueForFieldType(this.props.type, text));
   }

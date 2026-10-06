@@ -3875,8 +3875,8 @@
     }
   },
   {
-    "name": "a Number field: Value null, then Insert Text 'ab' puts text that is not a number in the field (Value stays null, Done); Clear reports Unchanged — it reads the author's Value and the output, both already empty — yet empties the field, so a Backspace then is Unchanged",
-    "because": "text-input.ts :490 wasEmpty compares _internal.text and the output, not the field; :496-504 empties all three regardless — row D33",
+    "name": "a Number field: Value null, then Insert Text 'ab' puts text that is not a number in the field (Value stays null, Done); Clear reports Done — it empties the field's text, though the author's Value and the output were already empty (v4; was row D33: Unchanged) — so a Backspace then is Unchanged",
+    "because": "text-input.ts :490 wasEmpty reads the field's text (the start value) as well as _internal.text and the output (v4, P107-D33 ruled \"Check the field's text\" in P109 ISL-031); :496-504 empties all three",
     "params": {
       "type": "number"
     },
@@ -3893,6 +3893,46 @@
       },
       {
         "signal": "insert"
+      },
+      "settle",
+      {
+        "signal": "clear"
+      },
+      "settle",
+      {
+        "signal": "backspace"
+      },
+      "settle"
+    ]
+  },
+  {
+    "name": "a focused Number field: Value null, Insert Text 'ab', then Set — the keyboard is on the field, so Set lands only in the start value (Unchanged) and the field keeps 'ab'; Clear reads the field, not the start value: Done, and the field is empty",
+    "because": "text-input.ts setText :525-529 writes only the start value while the field has the keyboard; clear :490 reads the component's own text on the page (v4, P107-D33 ruled \"Check the field's text\" in P109 ISL-031) — the start value alone would read empty here",
+    "params": {
+      "type": "number",
+      "runOnChange-startValue": false
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "startValue",
+        "value": null
+      },
+      "settle",
+      {
+        "act": "focus"
+      },
+      "settle",
+      {
+        "set": "textToInsert",
+        "value": "ab"
+      },
+      {
+        "signal": "insert"
+      },
+      "settle",
+      {
+        "signal": "set"
       },
       "settle",
       {

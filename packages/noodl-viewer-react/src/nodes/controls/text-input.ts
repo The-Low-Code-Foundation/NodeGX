@@ -487,7 +487,16 @@ const TextInputNode = {
       // have to ask what kind of field it is. Left as `''` it read "not empty" on every already
       // empty number field, and `Clear` reported `Done` for doing nothing.
       const empty = emptyValueForFieldType(this.props.type);
-      const wasEmpty = this._internal.text === empty && this.outputPropValues['onTextChanged'] === empty;
+      // P107-D33 (P109 ISL-031, ruled "Check the field's text"): the field's own text too — the
+      // component's on the page (`text`, kept at once: a Set that met a focused field wrote only
+      // the start value, and `state.value` lags a write earlier in the frame), the start value off
+      // it — so a Number field holding 'ab' (not a number, so Value is null) reports Done when
+      // Clear empties it.
+      const fieldText = this.innerReactComponentRef ? this.innerReactComponentRef.text : this.props.startValue;
+      const wasEmpty =
+        this._internal.text === empty &&
+        this.outputPropValues['onTextChanged'] === empty &&
+        (fieldText === null || fieldText === undefined || String(fieldText) === '');
       // NDA-012 (Visual), A1. This blanked `props.startValue` and the DOM and left the node's own
       // copy of the text holding the old string. `Set` reads `_internal.text`, so a later `Set`
       // pulse **restored text the author had explicitly cleared** — and it also did not flag

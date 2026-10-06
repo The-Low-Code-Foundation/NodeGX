@@ -249,7 +249,8 @@ export const TextInput = defineNode({
   // keeps the keyboard (C80), a field's resting cursor is at the end (D35); v1's `turn` handler is gone. Every row is known on
   // the runtime target (conformance.test.ts), never in this spec.
   // v3 (P109 ISL-031, P107-D32 "Always text"): off the page the value is made text before it is published.
-  version: 3,
+  // v4 (P109 ISL-031, P107-D33 "Check the field's text"): Clear is Unchanged only when the field's text was empty too.
+  version: 4,
   source: 'packages/noodl-viewer-react/src/nodes/controls/text-input.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the page following the node at each paint, like the disabled
@@ -679,7 +680,10 @@ function written(s: Readonly<State>, text: string, edited: number | null): Parti
 /** text-input.ts :485-512 */
 function clear(s: Readonly<State>): Write {
   const empty = emptyFor(s.fieldType);
-  const wasEmpty = s.text === empty && s.out === empty; // :490
+  // :490 — v4 (P109 ISL-031, row D33 ruled "Check the field's text"): the field's own text too — the field on the page (a Set
+  // that met the keyboard wrote only the start value), the start value off it. v1–v3, as the runtime was, read only the
+  // author's Value and the output, so emptying 'ab' from a Number field reported Unchanged
+  const wasEmpty = s.text === empty && s.out === empty && (s.onPage ? s.field : str(s.startValue)) === '';
   const emptied: Partial<State> = { text: empty, startValue: empty }; // :496-497 — every path
   if (s.onPage) {
     const c = componentSetText(s, ''); // :504 — focused or not

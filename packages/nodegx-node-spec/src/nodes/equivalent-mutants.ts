@@ -132,7 +132,12 @@ export const EQUIVALENT_MUTANTS: Readonly<Record<string, EquivalentMutant[]>> = 
     { reducer: 'afterInputs', kind: 'drop-set', branch: '"set":[],"emit":[]', why: 'a frame end with nothing scheduled and nothing to paint: its set is empty, there is nothing to drop' },
     // Clear off the page with the author's Value and the output already empty: every writer of the output writes the start value with
     // it, so the start value is empty too — the three keys it writes already hold the value (text-input.ts :490-497)
-    { reducer: 'clear', kind: 'drop-set', branch: '"set":["out","startValue","text","wire"],"emit":[],"outcome":"unchanged"', why: "a Clear off the page that finds the author's Value, the start value and the output already empty writes what is there (s40: the wire's copy too)" }
+    { reducer: 'clear', kind: 'drop-set', branch: '"set":["out","startValue","text","wire"],"emit":[],"outcome":"unchanged"', why: "a Clear off the page that finds the author's Value, the start value and the output already empty writes what is there (s40: the wire's copy too)" },
+    // v4 (P109 ISL-031, D33): its twin ON the page answers Unchanged only when the field is empty too, so the component's write puts
+    // back what is there — the field and its cursor (an empty field does not move it), the output and the wire's copy, the
+    // announcement (every write on the page announces the output); the start value differs at most as null for '', and every
+    // reader of it makes it text first
+    { reducer: 'clear', kind: 'drop-set', branch: '"set":["announced","field","hasAnnounced","out","startValue","text","wire"],"emit":["textChanged"],"outcome":"unchanged"', why: "a Clear on the page that finds the author's Value, the output and the field already empty writes what is there" }
     // (v2, NSP-023 s45: no label rebuild; the s38 rebuild family and the drain's rebuild twins are gone with it — the Type swap
     // between Text Area and a one-line field still replaces the element, and the deep run says whether it needs any of them back)
   ],
