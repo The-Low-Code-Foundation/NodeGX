@@ -527,12 +527,17 @@ const TextInputNode = {
           return true;
         }
         return false;
-      } else if (this.outputPropValues['onTextChanged'] !== text) {
-        //text component isn't mounted yet, set the output manually
-        // FB-026 — mounted, `TextInput.setText` converts on the way out; unmounted, nothing
-        // does, so a Number field that was `Set` before it mounted published the raw string and
-        // the two paths disagreed about the type of the same port.
-        this.outputPropValues['onTextChanged'] = outwardValueForFieldType(this.props.type, text);
+      }
+      //text component isn't mounted yet, set the output manually
+      // FB-026 — mounted, `TextInput.setText` converts on the way out; unmounted, nothing
+      // did, so a Number field that was `Set` before it mounted published the raw string and
+      // the two paths disagreed about the type of the same port.
+      // P107-D32 (P109 ISL-031, ruled "Always text"): the value is made text first, as the
+      // component makes it on the page, so a text field given the number 5 off the page
+      // publishes '5' as it does on it. Compared as it would be published.
+      const next = outwardValueForFieldType(this.props.type, text === null || text === undefined ? '' : String(text));
+      if (this.outputPropValues['onTextChanged'] !== next) {
+        this.outputPropValues['onTextChanged'] = next;
         this.flagOutputDirty('onTextChanged');
         return true;
       }

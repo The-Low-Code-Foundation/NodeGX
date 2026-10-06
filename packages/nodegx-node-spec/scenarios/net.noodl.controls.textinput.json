@@ -224,8 +224,8 @@
     ]
   },
   {
-    "name": "a text field given the number 5 while on the page publishes '5' (text); given 6 while OFF the page publishes the number 6 — the output's type depends on whether the field is mounted",
-    "because": "TextInput.tsx :92 String(value) on the page; text-input.ts :535 hands the raw value to outwardValueForFieldType off it, which returns it as is for a text field — row D32",
+    "name": "a text field given the number 5 while on the page publishes '5' (text); given 6 while OFF the page publishes '6' (text) too — one type whatever the field's visibility (v3; was row D32: off the page it published the number 6)",
+    "because": "TextInput.tsx :92 String(value) on the page; text-input.ts setText makes the value text the same way off the page before outwardValueForFieldType (v3, P107-D32 ruled \"Always text\" in P109 ISL-031)",
     "steps": [
       "settle",
       {
@@ -21614,8 +21614,8 @@
     ]
   },
   {
-    "name": "off the page, an Insert Text and a Set with no Value ever written in one frame: the wire gets '0' (the Insert's) and keeps it while the output's getter is emptied by the Set (undefined is never sent); a second Set is Unchanged (the getter already reads it); Mounted on announces the empty field ('')",
-    "because": "node.ts sends at every flag and never sends undefined (last-sent-value); text-input.ts :521-540 setText(undefined) off the page; the 10,000 deep run (s40)",
+    "name": "off the page, an Insert Text and a Set with no Value ever written in one frame: the Set makes no value empty text, as the field does on the page, so the output and the wire read '' (v3, P107-D32; v1–v2 emptied the getter to undefined, never sent, and the wire kept the Insert's '0'); a second Set is Unchanged (the output already reads it); Mounted on announces the empty field ('')",
+    "because": "node.ts sends at every flag and never sends undefined (last-sent-value); text-input.ts :521-540 setText(undefined) off the page makes it '' first (v3); the 10,000 deep run (s40) found the v1 shape",
     "params": {
       "textToInsert": "0",
       "mounted": false

@@ -32,9 +32,9 @@
  *     every call, changed or not); a write while the field is off the page sets the output alone
  *     (:505-509, :530-537, :479-481) and Value Changed waits for the next mount, which announces a
  *     value the output has not announced (TextInput.tsx :101-110 `_announcedValueIs`, :449-455).
- *     OFF the page a text field's output keeps the value's TYPE as written (a number stays a
- *     number, :535 hands the raw value to `outward…`, which returns it); ON the page the component
- *     has made it text first (:92) — row D32.
+ *     Off the page the value is made text first, as the component makes it on the page (:92), so
+ *     the output has one type whatever the field's visibility (v3, row D32 ruled "Always text";
+ *     v1–v2 kept the raw value's type off the page).
  *   - **typing** (THE PERSON): a person types into the field the keyboard is on — the act puts it
  *     there first if it is not (a Tab's focusing steps: Focused, `focusState`) — one character at a
  *     time; the browser refuses a key past **Max length** (the element's `maxlength`, read back as a
@@ -248,7 +248,8 @@ export const TextInput = defineNode({
   // (v1 `field` / `pending`, the props as last rendered: rows C69, C72), a mouse press fires Pointer Down (C68), Enable Label
   // keeps the keyboard (C80), a field's resting cursor is at the end (D35); v1's `turn` handler is gone. Every row is known on
   // the runtime target (conformance.test.ts), never in this spec.
-  version: 2,
+  // v3 (P109 ISL-031, P107-D32 "Always text"): off the page the value is made text before it is published.
+  version: 3,
   source: 'packages/noodl-viewer-react/src/nodes/controls/text-input.ts',
   needs: ['person'],
   // the page's syncs (spec.ts `synced`): not branches — the page following the node at each paint, like the disabled
@@ -643,7 +644,10 @@ function setText(s: Readonly<State>, text: unknown): Write {
     const c = componentSetText(s, text); // :526
     return { set: { ...startValue, ...c.set }, send: c.send, emit: c.emit, landed: true };
   }
-  if (s.out !== text) return { set: { ...startValue, ...sent(s, outward(s.fieldType, text)) }, send: ['onTextChanged'], emit: [], landed: true }; // :530-537
+  // v3 (P109 ISL-031, row D32 ruled "Always text"): made text first, as the component makes it on the page, and compared
+  // as it would be published. v1–v2, as the runtime was, published the raw value (a number stayed a number on a text field)
+  const out = outward(s.fieldType, str(text));
+  if (s.out !== out) return { set: { ...startValue, ...sent(s, out) }, send: ['onTextChanged'], emit: [], landed: true }; // :530-537
   return { set: startValue, send: [], emit: [], landed: false };
 }
 
