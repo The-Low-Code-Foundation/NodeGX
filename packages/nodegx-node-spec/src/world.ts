@@ -381,12 +381,11 @@
  *                 THE START-UP CHECK — made when the service is made, if the active backend holds a session: a
  *                   `fetchCurrentUser` with nothing in its args, the SERVICE's call (no node's — on no trace), answered by
  *                   the script's first rule for it, landing at its `after` but NEVER BEFORE 1 ms (a page's first frame is
- *                   drawn before any answer to its load). Its landing is the adapter's steps, and then — when it FAILED,
- *                   for any reason — the service's own (`serviceCheckFailed`, userservice.ts :147-158): the LEGACY session
- *                   cleared (USER goes: the service clears the Parse-wire store under the active handle's app id, and a
- *                   REST handle has none — the legacy store's own key), then `sessionLost`. The backend's own session is
- *                   NOT cleared by the service (row C45: a 503 at load says Session Lost while the user stays signed in),
- *                   and a `lost` failure announces `sessionLost` twice (the adapter's, then the service's — row C46).
+ *                   drawn before any answer to its load). Its landing is the adapter's steps and NOTHING of the service's
+ *                   (P109 ISL-030, rows C45 + C46 ruled "Stay signed in, say nothing" / "Fire it once"): a `lost` failure is
+ *                   cleared and announced once, by the adapter; any other failure (a 503, the network) leaves the person
+ *                   signed in and says nothing. Before, the service cleared the LEGACY session and announced `sessionLost`
+ *                   on ANY failure — a 503 said Session Lost to a person still signed in, and a rejection was said twice.
  *             THE RETURN LEG (s29) — the script's `return`: this page load is a sign-in coming back to the ACTIVE backend.
  *               The service, as it is made, asks the adapter FIRST (`consumeReturn`, userservice.ts :138) and, when there is
  *               one, makes NO start-up check. A provider `error` is final at once and ANNOUNCED at 1 ms (the adapter's
@@ -1324,7 +1323,6 @@ export type AuthEventType = 'sessionChanged' | 'loggedIn' | 'loggedOut' | 'sessi
 export type AuthStep =
   | { do: 'write'; backend: string; session: Record<string, unknown> }
   | { do: 'clear'; backend: string }
-  | { do: 'clear-legacy' }
   | { do: 'event'; type: AuthEventType; backend: string }
   | { do: 'success' }
   | { do: 'error'; message: string | undefined }
@@ -1377,8 +1375,8 @@ export class WorldBackend {
   private storeListeners: Array<(e: StoreEvent) => void> = [];
   /** AUTH (s26): what each backend's session store holds now, by backend id; absent: nobody signed in there. */
   private readonly sessions = new Map<string, Readonly<Record<string, unknown>>>();
-  /** USER (s22), as state since s26: a failed start-up check clears it (AUTH below). */
-  private legacyUser: string | undefined;
+  /** USER (s22). P109 ISL-030 (C45 + C46): nothing clears it any more — a failed start-up check is the adapter's alone. */
+  private readonly legacyUser: string | undefined;
   /** AUTH (s26): whether the app's user service exists yet — it makes the start-up check once, when it is made. */
   private serviceMade = false;
 
@@ -1418,7 +1416,7 @@ export class WorldBackend {
     };
   }
 
-  /** USER (s22): the id of the user signed in on the LEGACY store; `undefined`: nobody (or, s26, a failed start-up check cleared it — AUTH). */
+  /** USER (s22): the id of the user signed in on the LEGACY store; `undefined`: nobody. */
   get user(): string | undefined {
     return this.legacyUser;
   }
@@ -1447,8 +1445,8 @@ export class WorldBackend {
    * holds a session, the service checks it — a `fetchCurrentUser` call to the active backend with nothing in its args, made
    * by the SERVICE (recorded in `calls`; no listener hears it, so it is no node's), answered by the script's first rule for
    * it, landing on the clock at its `after` but never before 1 ms (THE START-UP CHECK, AUTH above). `deliver` gets the
-   * answer at its moment; what lands is the target's to perform — the adapter's half (`landAuth`) and, where the target
-   * plays the service itself, the service's (`serviceCheckFailed`). Returns whether a check was made.
+   * answer at its moment; what lands is the target's to perform — the adapter's steps (`landAuth`), and nothing of the
+   * service's (P109 ISL-030, C45 + C46). Returns whether a check was made.
    */
   startService(deliver: (d: BackendDelivery) => void, performReturn: (step: AuthStep) => void = () => undefined, landReturn?: ReturnLanding): boolean {
     if (this.serviceMade) return false;
@@ -1615,18 +1613,6 @@ export class WorldBackend {
     }
     if (op === 'signInWithProvider') return; // s28 — the handover accepted: the browser leaves, nothing comes back
     throw new Error(`world: ${op} is not an auth operation the world plays`);
-  }
-
-  /**
-   * AUTH (s26): the SERVICE's half of a start-up check that failed — what userservice.ts :147-158 does, for a target that
-   * plays the service itself (the runtime runs the real one): the LEGACY session cleared (the service clears the Parse-wire
-   * store under the active handle's app id — a REST backend's handle has none, which is the legacy store's own key: USER
-   * goes), and `sessionLost` announced. The backend's own session is NOT touched: it survives (row C45).
-   */
-  serviceCheckFailed(perform: (step: AuthStep) => void): void {
-    this.legacyUser = undefined;
-    perform({ do: 'clear-legacy' });
-    perform({ do: 'event', type: 'sessionLost', backend: this.ids[0] });
   }
 
   /** Called with every call as it is made — how a target attributes it to the node that made it. */

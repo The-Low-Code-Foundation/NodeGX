@@ -163,8 +163,8 @@
     }
   },
   {
-    "name": "C45 — the backend is down when the page loads (503): Session Lost fires and the user stays signed in",
-    "because": "userservice.ts :147-158 — the service clears the Parse-wire store, not this backend's; the session survives, Authenticated stays true (NSP-014 §6.17 row C45)",
+    "name": "C45 — the backend is down when the page loads (503): nothing is said, and the user stays signed in (v3)",
+    "because": "userservice.ts: a failed start-up check is the adapter's alone, and a 503 is not the backend refusing the session (P109 ISL-030, P107-C45 ruled \"Stay signed in, say nothing\"); v2 pulsed Session Lost here",
     "params": {},
     "steps": [
       "settle",
@@ -203,8 +203,8 @@
     }
   },
   {
-    "name": "C46 + C47 — the backend rejects the session when the page loads (401): Session Lost TWICE, Authenticated false, and Id / Email / Username / the properties keep the user who left",
-    "because": "RestAuthAdapter.ts :1177-1186 then userservice.ts :147-158 (two sessionLost); user.ts :375 — nothing is sent for an ended session, and undefined is never sent (CONTRACT C3)",
+    "name": "C46 + C47 — the backend rejects the session when the page loads (401): Session Lost ONCE (v3), Authenticated false, and Id / Email / Username / the properties keep the user who left",
+    "because": "RestAuthAdapter.ts :1177-1186 clears and announces; the service says nothing more (P109 ISL-030, P107-C46 ruled \"Fire it once\"; v2 pulsed twice); user.ts :375 — nothing is sent for an ended session, and undefined is never sent (CONTRACT C3)",
     "params": {},
     "steps": [
       "settle",

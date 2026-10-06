@@ -162,7 +162,7 @@ const SESSION = { objectId: 'u1', email: 'ann@example.com', username: 'ann', nic
 /**
  * The backends a sequence plays with. Every one answers `fetchCurrentUser` (the start-up check is made whenever the active
  * backend holds a session): signed in and the backend agrees, signed in and the backend moved a field, nobody signed in, a
- * session the backend rejects (401 — rows C46, C47), a backend that is down (503 — row C45), late, silent, a user with
+ * session the backend rejects (401 — rows C46, C47), a backend that is down (503 — row C45, v3: nothing said), late, silent, a user with
  * roles, and a project with two backends each holding its own account.
  */
 const BACKENDS: ReadonlyArray<BackendScript> = [
@@ -189,7 +189,9 @@ export const UserNode = defineNode({
   // v2 (P109 ISL-027, row C49 ruled "Compare the list's contents"): a list read from the session (Roles) that has the same
   // contents as the one the record holds is not written again, so a Fetch, a sign-in or the start-up check that brings the
   // same roles pulses no Changed. v1 wrote the new array every read, and the record store's `!==` called it changed.
-  version: 2,
+  // v3 (P109 ISL-030, rows C45 + C46 ruled "Stay signed in, say nothing" / "Fire it once"): the start-up check's failure is the
+  // adapter's alone — a rejected session pulses Session Lost once; a backend that is down says nothing and keeps the person.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/user/user.ts; noodl-viewer-react/.../user/userservice.ts; RestAuthAdapter.ts',
   needs: ['backend', 'registry', 'clock'],
   worldPool: { backends: BACKENDS },

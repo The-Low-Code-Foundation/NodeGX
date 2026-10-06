@@ -317,7 +317,7 @@ function performAuth(world: World, step: AuthStep, callback: (step: AuthStep) =>
     }
     return;
   }
-  if (step.do !== 'event') return; // a write / clear moved the world's sessions already; USER is the world's (`clear-legacy`)
+  if (step.do !== 'event') return; // a write / clear moved the world's sessions already
   const { all, auth } = instancesOf(world);
   if (step.type === 'sessionChanged') {
     // THE BRIDGE — the active backend's session handed to the record store; no instance is the writer: every watcher hears it
@@ -359,11 +359,8 @@ function startUserService(world: World): void {
   world.backend.startService(
     (d: BackendDelivery) => {
       for (const i of [...instancesOf(world).all]) deliver(i);
-      world.backend.landAuth('fetchCurrentUser', backend, {}, atCall, d, (step) =>
-        performAuth(world, step, (s) => {
-          if (s.do === 'error') world.backend.serviceCheckFailed((t) => performAuth(world, t, () => undefined));
-        })
-      );
+      // P109 ISL-030 (C45 + C46): the adapter's steps alone — the service neither clears nor announces on a failed check
+      world.backend.landAuth('fetchCurrentUser', backend, {}, atCall, d, (step) => performAuth(world, step, () => undefined));
     },
     // s29 — THE RETURN LEG: its steps as a landing's (no caller); at each later moment what already landed runs first
     (step) => performAuth(world, step, () => undefined),

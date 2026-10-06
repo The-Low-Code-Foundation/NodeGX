@@ -145,16 +145,14 @@ class UserService {
       this.fetchCurrentUser({
         success: () => {},
         error: () => {
-          // The session is nolonger valid.
+          // P107-C45 + C46 (P109 ISL-030, ruled "Stay signed in, say nothing" and "Fire it once"): the ADAPTER decides.
+          // When the backend rejected the session (Parse 209, REST 401 / 403) it has already cleared its own store and
+          // announced `sessionLost`, and the bridge below has let go of `current`. Anything else — a 503, the network
+          // down — is not the backend refusing anybody, and the person stays signed in.
           //
-          // On a Parse `209` the adapter has already cleared the session and
-          // emitted `sessionLost`, so this fires it a second time. Pre-existing
-          // and preserved: `user.ts` handles the event idempotently, and
-          // "fix the double emit" is a behaviour change that would spend the
-          // only signal this move produces.
-          this.adapter.sessionStore(this._defaultHandle()).clear();
-          delete this.current;
-          this.events.emit('sessionLost');
+          // This used to clear the PARSE-WIRE store and announce `sessionLost` on ANY failure: on Directus / PocketBase a
+          // blip at load said Session Lost while the person stayed signed in (the REST store was never touched), on the
+          // NodeGX backend a blip signed them out, and a real rejection was announced twice.
         }
       });
     }
@@ -293,7 +291,12 @@ class UserService {
     adapter.on('loggedIn', () => this.events.emit('loggedIn'));
     adapter.on('loggedOut', () => this.events.emit('loggedOut'));
     adapter.on('sessionGained', () => this.events.emit('sessionGained'));
-    adapter.on('sessionLost', () => this.events.emit('sessionLost'));
+    // P107-C46: a rejected session is announced once, by the adapter that cleared it, so `current` lets go here — the
+    // service's own second announcement, which used to do this, is gone.
+    adapter.on('sessionLost', () => {
+      if (adapter.getCurrentUser(this._defaultHandle()) === undefined) delete this.current;
+      this.events.emit('sessionLost');
+    });
 
     // The provider return leg — BAK-004's for the Parse wire, BCN-006 step 5's
     // for PocketBase. Bridged **here** rather than beside the Parse adapter's
