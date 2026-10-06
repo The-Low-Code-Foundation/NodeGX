@@ -40,8 +40,9 @@ class Countdown {
       this.begun = false;
       return L.verdict('restart', 'done');
     }
-    // stop
-    const was = this.live;
+    // stop. Not the stranger's line: Timer v2 (P109 ISL-032, row D10) reports Done for a countdown still queued too, so
+    // `|| this.waiting` was added when the spec moved; the stranger wrote `this.live` alone, as v1 said.
+    const was = this.live || this.waiting;
     this.waiting = false;
     this.live = false;
     this.begun = false;
