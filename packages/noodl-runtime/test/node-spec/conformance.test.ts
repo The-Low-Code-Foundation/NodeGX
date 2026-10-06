@@ -75,18 +75,6 @@ const coalescedPress = (port: string) => (d: Divergence) => {
 };
 
 /**
- * NSP-012 §6 C11 — the Object node's `<property> Changed` outputs are declared to the editor
- * (modelnode2.ts :517-525) and never registered: `registerOutputIfNeeded` handles `prop-` only
- * (:451-460), a wire from `<p> Changed` throws inside the connection and is dropped
- * (nodescope.ts :149-153), and the pulse at :113 is guarded by `hasOutput`. Narrow: the first
- * differing event in the reference is a `changed-…` signal.
- */
-const deadPropertyChanged = (d: Divergence) => {
-  const e = d.reference[d.difference.index];
-  return e !== undefined && e.t === 'signal' && /^changed-/.test(e.port);
-};
-
-/**
  * NSP-015 §6.2 C25 — Navigate To Path's frame-end callback THROWS (the scheduler logs it,
  * nodecontext.ts :466-472) and the frame's presses are never answered. Narrow: the first difference
  * is the spec's own answer for that case (the outcome's code). (C24, a Path that is not text, fixed in ISL-026.)
@@ -519,19 +507,13 @@ const KNOWN_ROWS: Record<string, KnownRow[]> = {
     { row: 'NSP-016 §6 C80 — Enable Label changed while the box holds the keyboard: React builds a new element and the keyboard leaves with the old one, silently', matches: labelTakesKeyboard }
   ],
   FilterDBModels: [{ row: 'NSP-014 §6.14 C43 — a Sorting over rows that are not records throws out of the run: no Error, no Failure, the press never answered', matches: sortCannotCompare }],
-  // s23 — C11's twin on the Record node: `registerOutputIfNeeded` handles `prop-` only (dbmodelnode2.ts :478-480)
-  DbModel2: [{ row: 'NSP-014 §6.8 C37 — the Record\'s `<field> Changed` never fires: nothing registers the output', matches: deadPropertyChanged }],
-  // s26 — C37's twin on the User node: `registerOutputIfNeeded` handles `prop-` and the three session signals only (user.ts :447-463)
-  'net.noodl.user.User': [{ row: 'NSP-014 §6.17 C48 — the User\'s `<field> Changed` never fires: nothing registers the output', matches: deadPropertyChanged }],
   DeleteDbModelProperties: [{ row: "NSP-014 §6.5 C36 — Delete Record's success reads the binding live; cleared while the delete is out, it throws: Failure, not Done", matches: notifyOnCleared }],
   PageStackNavigateToPath: [
     { row: 'NSP-015 §6.2 C25 — a push the browser refuses (another origin) throws in the frame-end callback; no popstate, the presses are never answered', matches: refusedPush }
   ],
   CollectionNew: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
   NewModel: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('new') }],
-  SetModelProperties: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('store') }],
-  Model2: [{ row: 'NSP-012 §6 C11 — `<property> Changed` never fires: nothing registers the output', matches: deadPropertyChanged }
-  ]
+  SetModelProperties: [{ row: 'NSP-012 §6 C9 — a second Do in one frame reports nothing (the guard sits before beginOutcome)', matches: coalescedPress('store') }]
 };
 
 /**

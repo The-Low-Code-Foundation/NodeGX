@@ -87,8 +87,8 @@
     }
   },
   {
-    "name": "C48 — the start-up check brings a moved field: its <field> Changed, Changed, and the property output — the runtime never pulses <field> Changed",
-    "because": "world.ts AUTH — the bridge writes the active backend's session into the record store; the node is bound to it (:103-112). user.ts :447-463 registers prop- and the three session signals, never changed- (C37's twin)",
+    "name": "the start-up check brings a moved field: its <field> Changed, Changed, and the property output (ISL-027, C48)",
+    "because": "world.ts AUTH — the bridge writes the active backend's session into the record store; the node is bound to it (:103-112). user.ts registerOutputIfNeeded registered prop- and the three session signals but not changed- until ISL-027 (C48, C37's twin)",
     "params": {},
     "steps": [
       "settle",
@@ -122,8 +122,7 @@
           }
         ]
       }
-    },
-    "row": "NSP-014 §6.17 C48"
+    }
   },
   {
     "name": "The start-up check brings a moved field no output is wired to: Changed",

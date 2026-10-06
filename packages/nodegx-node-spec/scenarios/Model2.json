@@ -31,7 +31,7 @@
     ]
   },
   {
-    "name": "A property value written: stored at the frame end; the record notifies: the property re-sent, its own Changed and Changed (row C11: `<property> Changed` never fires on the runtime — nothing registers the output)",
+    "name": "A property value written: stored at the frame end; the record notifies: the property re-sent, its own Changed and Changed (ISL-027, C11)",
     "because": ":479-490, :327-329, :107-116",
     "params": {
       "properties": "a",
@@ -44,11 +44,10 @@
         "value": 5
       },
       "settle"
-    ],
-    "row": "NSP-012 §6 C11"
+    ]
   },
   {
-    "name": "A value arriving before the object is held and written once one is (row C11: `<property> Changed` never fires on the runtime)",
+    "name": "A value arriving before the object is held and written once one is, and its own Changed fires (ISL-027, C11)",
     "because": ":425-441",
     "params": {
       "properties": "a"
@@ -64,8 +63,7 @@
         "value": "m1"
       },
       "settle"
-    ],
-    "row": "NSP-012 §6 C11"
+    ]
   },
   {
     "name": "Fetch with an empty Id fails with object/fetch-failed; with an Id, Fetched and done per press",
@@ -257,7 +255,7 @@
     ]
   },
   {
-    "name": "A property written and Fetch pressed in one frame, then another frame: the store's pulses, Fetched, done — and nothing re-reported (row C11: `<property> Changed` never fires on the runtime)",
+    "name": "A property written and Fetch pressed in one frame, then another frame: the store's pulses, its own Changed among them, Fetched, done — and nothing re-reported (ISL-027, C11)",
     "because": ":312-331 then :356-373 in scheduling order; a frame end that forgot to clear its tokens would report again at the next",
     "world": {
       "registry": {
@@ -283,8 +281,7 @@
       },
       "settle",
       "settle"
-    ],
-    "row": "NSP-012 §6 C11"
+    ]
   },
   {
     "name": "A value written and then written BACK in one frame stores the last one: the write equal to what the record holds still replaces the held value, so nothing changes",

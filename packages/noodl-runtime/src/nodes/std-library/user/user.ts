@@ -460,6 +460,10 @@ const UserNodeDefinition: NodeDefinitionOptions = {
         this.registerOutput(name, {
           getter: this.getUserProperty.bind(this, name.substring('prop-'.length))
         });
+      // ISL-027 / P107-C48, ruled "Make them fire": the editor offers `<field> Changed` beside each field, and the
+      // model's change callback pulses it behind `hasOutput`. Registered only for `prop-`, the wire was dropped and
+      // the signal never fired.
+      if (name.startsWith('changed-')) this.registerOutput(name, { type: 'signal', getter: () => undefined });
     },
     getUserProperty: function (this: UserNodeInstance, name: string) {
       return this._internal.model !== undefined ? this._internal.model.get(name) : undefined;

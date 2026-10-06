@@ -1224,6 +1224,11 @@
       },
       {
         "t": "signal",
+        "port": "changed-nick",
+        "subject": "u"
+      },
+      {
+        "t": "signal",
         "port": "changed",
         "subject": "u"
       }

@@ -88,7 +88,10 @@ function setModel(st: ObjectState, w: WorldView, id: unknown): void {
 }
 
 /** :394-403 setModelID — an empty id binds nothing; a name reaches its record and announces Fetched. */
-function setModelID(st: ObjectState, w: WorldView, id: unknown, emit: Array<'fetched' | 'changed'>): void {
+/** One frame's pulses in the order the runtime sends them (spec.ts `pulses`): declared, or `{ derived }`. */
+type Pulse = 'fetched' | 'changed' | { derived: string };
+
+function setModelID(st: ObjectState, w: WorldView, id: unknown, emit: Pulse[]): void {
   if (emptyId(id)) {
     setModel(st, w, undefined);
     return;
@@ -102,7 +105,11 @@ export const Model2 = defineNode({
   // v2 (NSP-013 s12): a plain object on Id that names the record the node is ALREADY bound to writes its
   // fields into that record, and the node reacts to that write as to any other on its record — Changed
   // (and the property's output) for each key whose value differs. v1 wrote the fields and reacted to none.
-  version: 2,
+  // v3 (P109 ISL-027, row C11 ruled "Make them fire"): `<property> Changed` fires on the runtime now, so its
+  // ORDER is graded for the first time. The runtime's listener sends each property's Changed and then Changed
+  // for every key a write moves, one key at a time (modelnode2.ts onModelChangedCallback); v2 queued every
+  // `<property> Changed` of a frame ahead of every Changed and Fetched, an order nothing had observed.
+  version: 3,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/modelnode2.ts',
   needs: ['registry', 'random'],
 
@@ -212,7 +219,7 @@ export const Model2 = defineNode({
       // the bound record's own listener (:107-116) heard each key `Model.create` changed on it — written
       // here, beside the write (a node never hears its own write, registry.ts); NSP-013 s12, found by
       // generated seed 1104497702 once the daily rotation stopped replaying one corpus (T4)
-      const own: { emit: Array<'fetched' | 'changed'>; emitDerived: string[] } = { emit: [], emitDerived: [] };
+      const own: Pulse[] = [];
       if (w.registry.isRecord(v)) v = v.getId(); // :251
       else if (typeof v === 'object' && v !== null) {
         // :259-260 — `Model.create`: the record named by `id`, every other key `set` (model.ts — a `set` notifies when `!==`)
@@ -226,9 +233,9 @@ export const Model2 = defineNode({
             if (key === 'id' || before[key] === data[key]) continue;
             if (s.properties.includes(key)) {
               w.send('prop-' + key, s); // :111 — at the flag
-              own.emitDerived.push('changed-' + key); // :113
+              own.push({ derived: 'changed-' + key }); // :113
             }
-            own.emit.push('changed'); // :115
+            own.push('changed'); // :115
           }
         }
       }
@@ -236,11 +243,11 @@ export const Model2 = defineNode({
       if (valueDidChange(previous, v) && i['runOnChange-modelId']) {
         // :268 setModelID(v)
         const st: ObjectState = { ...s, modelId: v };
-        const emit: Array<'fetched' | 'changed'> = [...own.emit];
-        setModelID(st, w, v, emit);
-        return { set: { modelId: v, bound: st.bound, jobs: st.jobs, storeScheduled: st.storeScheduled }, send: [], emit, emitDerived: own.emitDerived };
+        const pulses: Pulse[] = [...own];
+        setModelID(st, w, v, pulses);
+        return { set: { modelId: v, bound: st.bound, jobs: st.jobs, storeScheduled: st.storeScheduled }, send: [], pulses };
       }
-      return { set: { modelId: v }, send: ['id'], emit: own.emit, emitDerived: own.emitDerived }; // :270
+      return { set: { modelId: v }, send: ['id'], pulses: own }; // :270
     },
     // :274-280 — `set: function () {}`
     properties: () => ({ send: [] }),
@@ -285,8 +292,7 @@ export const Model2 = defineNode({
     afterInputs: (s, i, w) => {
       if (s.jobs.length === 0) return { send: [] };
       const st: ObjectState = { ...s };
-      const emit: Array<'fetched' | 'changed'> = [];
-      const emitDerived: string[] = [];
+      const pulses: Pulse[] = [];
       const outcomes: Array<{ port: 'fetch'; outcome: 'done' | 'failure'; error?: string }> = [];
       for (let pass = 0; pass < 10 && st.jobs.length > 0; pass++) {
         const jobs = st.jobs;
@@ -310,9 +316,9 @@ export const Model2 = defineNode({
               if (own && i['runOnChange-object']) {
                 if (st.properties.includes(key)) {
                   w.send('prop-' + key, st); // :111 — at the flag
-                  emitDerived.push('changed-' + key); // :113
+                  pulses.push({ derived: 'changed-' + key }); // :113
                 }
-                emit.push('changed'); // :115
+                pulses.push('changed'); // :115
               }
             }
             st.dirty = {}; // :330
@@ -327,7 +333,7 @@ export const Model2 = defineNode({
               for (let k = 0; k < n; k++) outcomes.push({ port: 'fetch', outcome: 'failure', error: OBJECT_FETCH_ERROR_CODE }); // :362-367
               break;
             }
-            setModelID(st, w, st.modelId, emit); // :371
+            setModelID(st, w, st.modelId, pulses); // :371
             for (let k = 0; k < n; k++) outcomes.push({ port: 'fetch', outcome: 'done' }); // :372
             break;
           }
@@ -337,8 +343,7 @@ export const Model2 = defineNode({
       return {
         set: { bound: st.bound, dirty: st.dirty, jobs: st.jobs, fetches: st.fetches, fetchScheduled: st.fetchScheduled, storeScheduled: st.storeScheduled },
         send: [],
-        emit,
-        emitDerived,
+        pulses,
         outcomes
       };
     },

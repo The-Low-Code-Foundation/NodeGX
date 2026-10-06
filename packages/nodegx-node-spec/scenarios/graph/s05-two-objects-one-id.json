@@ -190,6 +190,11 @@
       },
       {
         "t": "signal",
+        "port": "changed-a",
+        "subject": "o1"
+      },
+      {
+        "t": "signal",
         "port": "changed",
         "subject": "o1"
       },
@@ -197,6 +202,11 @@
         "t": "value",
         "port": "prop-a",
         "value": "hello",
+        "subject": "o2"
+      },
+      {
+        "t": "signal",
+        "port": "changed-a",
         "subject": "o2"
       },
       {

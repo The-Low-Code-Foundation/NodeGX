@@ -479,6 +479,10 @@ const ModelNodeDefinition: NodeDefinitionOptions = {
         this.registerOutput(name, {
           getter: userOutputGetter.bind(this, name.substring('prop-'.length))
         });
+      // ISL-027 / P107-C37, ruled "Make them fire": the editor offers `<field> Changed` beside each field, and the
+      // model's change callback pulses it behind `hasOutput`. Registered only for `prop-`, the wire was dropped and
+      // the signal never fired.
+      if (name.startsWith('changed-')) this.registerOutput(name, { type: 'signal', getter: () => undefined });
     },
     registerInputIfNeeded: function (this: DbModelNodeInstance, name: string) {
       if (this.hasInput(name)) {

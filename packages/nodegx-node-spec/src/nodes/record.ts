@@ -116,16 +116,17 @@ function changes(before: Readonly<RecordState>, after: RecordState, keys: Readon
 
 const isField = (key: string) => (RECORD_FIELDS as readonly string[]).includes(key);
 
-type Reaction = { emit: Array<'changed' | 'fetched'>; emitDerived: string[] };
+/** One frame's pulses in the order the runtime sends them (spec.ts `pulses`): declared, or `{ derived }`. */
+type Reaction = { pulses: Array<'changed' | 'fetched' | { derived: string }> };
 
 /** :136-145 onModelChangedCallback — this node's reaction to a write of `key` on its bound record, written beside the write (registry.ts: a node never hears its own write). */
 function react(st: RecordState, w: WorldView, key: string, on: boolean, r: Reaction): void {
   if (!on) return;
   if (isField(key)) {
     w.send('prop-' + key, st); // :140 — at the flag
-    r.emitDerived.push('changed-' + key); // :142
+    r.pulses.push({ derived: 'changed-' + key }); // :142
   }
-  r.emit.push('changed'); // :144
+  r.pulses.push('changed'); // :144
 }
 
 /** :320-343 setModel — swap the subscription; send Id and the property outputs the record holds; pulse Fetched. */
@@ -136,7 +137,7 @@ function setModel(st: RecordState, w: WorldView, id: unknown, r: Reaction): void
   if (id === undefined) return; // :334
   w.watch({ model: id }); // :336
   for (const key of Object.keys(w.registry.model(id).data)) if (isField(key)) w.send('prop-' + key, st); // :339-341
-  r.emit.push('fetched'); // :342
+  r.pulses.push('fetched'); // :342
 }
 
 /** :310-318 setModelID — an empty id binds nothing; a name reaches its record (create-on-read). */
@@ -165,7 +166,11 @@ const REGISTRIES: ReadonlyArray<NonNullable<WorldScript['registry']>> = [{ model
 
 export const RecordNode = defineNode({
   type: 'DbModel2',
-  version: 1,
+  // v2 (P109 ISL-027, row C37 ruled "Make them fire"): `<field> Changed` fires on the runtime now, so its ORDER
+  // is graded for the first time. The runtime's listener sends each field's Changed and then Changed for every
+  // key a write moves, one key at a time (dbmodelnode2.ts onModelChangedCallback); v1 queued every
+  // `<field> Changed` of a frame ahead of every Changed and Fetched, an order nothing had observed.
+  version: 2,
   source: 'packages/noodl-runtime/src/nodes/std-library/data/dbmodelnode2.ts; cloudstore.js _fromJSON',
   needs: ['backend', 'registry', 'random'],
   worldPool: { backends: BACKENDS, registries: REGISTRIES },
@@ -260,7 +265,7 @@ export const RecordNode = defineNode({
     repeaterComponent: (s, v) => ({ set: { repeaterComponent: v || undefined, jobs: s.idSource === 'foreach' ? [...s.jobs, 'bind' as const] : s.jobs }, send: [] }),
     // :250-275
     modelId: (s, value, i, w) => {
-      const r: Reaction = { emit: [], emitDerived: [] };
+      const r: Reaction = { pulses: [] };
       let v: unknown = value;
       if (w.registry.isRecord(v)) v = v.getId(); // :253
       else if (typeof v === 'object' && v !== null) {
@@ -280,9 +285,9 @@ export const RecordNode = defineNode({
         // :271 setModelID
         const st: RecordState = { ...s, modelId: v };
         setModelID(st, w, v, r);
-        return { set: changes(s, st, ['modelId', 'bound']), send: [], emit: r.emit, emitDerived: r.emitDerived };
+        return { set: changes(s, st, ['modelId', 'bound']), send: [], pulses: r.pulses };
       }
-      return { set: Object.is(previous, v) ? {} : { modelId: v }, send: ['id'], emit: r.emit, emitDerived: r.emitDerived }; // :273
+      return { set: Object.is(previous, v) ? {} : { modelId: v }, send: ['id'], pulses: r.pulses }; // :273
     },
     // :282-284 → :394-406 — a token per press, one read per frame
     fetch: (s) => ({ set: { presses: s.presses + 1, fetchScheduled: true, jobs: s.fetchScheduled ? s.jobs : [...s.jobs, 'fetch' as const] }, send: [], outcome: 'pending' })
@@ -309,7 +314,7 @@ export const RecordNode = defineNode({
     afterInputs: (s, _i, w) => {
       if (s.jobs.length === 0) return { send: [] };
       const st: RecordState = { ...s };
-      const r: Reaction = { emit: [], emitDerived: [] };
+      const r: Reaction = { pulses: [] };
       const send: Array<'error'> = [];
       const outcomes: Array<{ port: 'fetch'; outcome: 'done' | 'failure'; error?: string }> = [];
       let call: { id: string; op: string; backend: string; args: Record<string, unknown> } | undefined;
@@ -344,7 +349,7 @@ export const RecordNode = defineNode({
       const patch = {
         set: changes(s, st, ['bound', 'error', 'jobs', 'fetchScheduled', 'presses', 'calls', 'nextCall']),
         send,
-        emit: r.emit,
+        pulses: r.pulses,
         outcomes
       };
       return call ? { ...patch, backend: call } : patch;
@@ -358,7 +363,7 @@ export const RecordNode = defineNode({
         // to is heard by its listener (:136-145) — written here, beside the write
         const item = answer.ok as Record<string, unknown>;
         const st: RecordState = { ...s };
-        const r: Reaction = { emit: [], emitDerived: [] };
+        const r: Reaction = { pulses: [] };
         const m = w.registry.model(item.objectId);
         const already = s.bound !== undefined && m.getId() === s.bound;
         m._class = s.collectionId;
@@ -377,7 +382,7 @@ export const RecordNode = defineNode({
         w.send('id', st); // :442
         for (const key in item) if (key !== 'objectId' && isField(key)) w.send('prop-' + key, st); // :444-449
         // :451-452 — Fetched, then the batch's outcome
-        return { set: changes(s, st, ['bound']), send: [], emit: [...r.emit, 'fetched'], emitDerived: r.emitDerived, outcomes: dones(n) };
+        return { set: changes(s, st, ['bound']), send: [], pulses: [...r.pulses, 'fetched'], outcomes: dones(n) };
       },
       // :136-145 onModelChangedCallback — the bound record, any key, written by ANOTHER node
       change: (s, i, e: ChangeEvent) => {

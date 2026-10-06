@@ -431,6 +431,11 @@
       },
       {
         "t": "signal",
+        "port": "changed-n",
+        "subject": "f"
+      },
+      {
+        "t": "signal",
         "port": "changed",
         "subject": "f"
       },
@@ -468,18 +473,22 @@
       },
       {
         "t": "signal",
+        "port": "changed-n",
+        "subject": "w"
+      },
+      {
+        "t": "signal",
         "port": "changed",
         "subject": "w"
       }
     ]
   },
   {
-    "name": "a field a Record wires moves under it: its <field> Changed pulses (row C37: never registered on the runtime — the claim on changed-title is the finding)",
+    "name": "a field a Record wires moves under it: its <field> Changed pulses (ISL-027, C37)",
     "clauses": [
       "N"
     ],
-    "because": "NSP-014 §6.8 C37 — dbmodelnode2.ts :142 is guarded by `hasOutput('changed-' + name)`, and :473-481 registers `prop-` only; the editor offers the port (:560). C11's twin (Object node)",
-    "row": "NSP-014 §6.8 C37",
+    "because": "was NSP-014 §6.8 C37: dbmodelnode2.ts pulses `changed-<field>` behind `hasOutput`, and registerOutputIfNeeded registered `prop-` only, though the editor offers the port. ISL-027 registers it when a wire asks. C11's twin (Object node)",
     "nodes": {
       "u": {
         "type": "SetDbModelProperties",
@@ -637,6 +646,11 @@
         "t": "value",
         "port": "prop-title",
         "value": "new",
+        "subject": "r"
+      },
+      {
+        "t": "signal",
+        "port": "changed-title",
         "subject": "r"
       },
       {
