@@ -55,7 +55,7 @@ Status dots, avatars' presence badges, decorative shapes, and progress rings/pie
 | `opacity` | Number | `1` | How opaque this element is, from 0 for invisible to 1 for solid |
 | `pointerEventsEnabled` | Boolean | `true` | When disabled, mouse and touch events pass through to whatever is behind this element |
 | `pointerEventsMode` | Enum (`inherit`, `explicit`) | `inherit` | Whether pointer handling is inherited from the parent or set explicitly on this element |
-| `points` | Number | `5` | How many sides a Polygon has, or how many points a Star has; the minimum is 3 |
+| `points` | Number | `5` | How many sides a Polygon has, or how many points a Star has, from 3 to 500; a value that is not a number draws 5 |
 | `position` | Enum (`relative`, `absolute`, `sticky`, `fixed`) | `relative` | How the element is placed: In Layout follows its siblings, Absolute ignores them, Sticky pins to the parent edge on overflow, Fixed stays put and takes no space |
 | `scrollIntoViewAlign` | Enum (`nearest`, `start`, `center`, `end`) | `nearest` | Where Scroll Into View leaves the element: Nearest edge moves only as far as needed |
 | `shape` | Enum (`circle`, `square`, `triangle`, `polygon`, `star`, `svg`) | `circle` | Which outline this element draws inside its Size × Size box |

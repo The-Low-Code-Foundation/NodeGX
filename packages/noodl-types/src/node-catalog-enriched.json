@@ -4053,7 +4053,7 @@
           },
           "isSignal": false,
           "default": 5,
-          "description": "How many sides a Polygon has, or how many points a Star has; the minimum is 3",
+          "description": "How many sides a Polygon has, or how many points a Star has, from 3 to 500; a value that is not a number draws 5",
           "index": 6,
           "allowVisualStates": true
         },

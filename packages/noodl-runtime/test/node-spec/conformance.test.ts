@@ -165,8 +165,7 @@ const groupFocusOffPage = (d: Divergence) => {
 };
 
 const WITHHELD: Record<string, Readonly<Record<string, Withheld>>> = {
-  // C92 — Circle.tsx builds a Polygon or Star of `Math.round(Points)` vertices: 1e9, 2^53 or Infinity runs the heap out (measured)
-  Circle: { points: { values: [1e9, 2 ** 53, Infinity], row: 'NSP-016 §6 C92 — a Polygon or Star with a huge or infinite Points builds that many vertices and the page runs out of memory' } }
+  // none: C92 (a Shape's Points of 1e9, 2^53 or Infinity ran the heap out) was fixed in P109 ISL-038 — Circle.tsx caps it at 500
 };
 
 const KNOWN_ROWS: Record<string, KnownRow[]> = {

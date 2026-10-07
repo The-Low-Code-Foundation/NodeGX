@@ -105776,5 +105776,46 @@
       },
       "settle"
     ]
+  },
+  {
+    "name": "Points far too big — 1e9 as a Polygon is placed, then Infinity, then 2^53 on a Star: the Shape still answers (a card from the keyboard drops at 0)",
+    "because": "Circle.tsx `pointCountOf` caps Points at 500 and draws 5 for a value that is not finite — P107-C92 (the runtime ran out of memory building 1e9 vertices)",
+    "params": {
+      "acceptDrops": true,
+      "shape": "polygon",
+      "points": 1000000000
+    },
+    "steps": [
+      "settle",
+      {
+        "set": "points",
+        "value": {
+          "$num": "Infinity"
+        }
+      },
+      "settle",
+      {
+        "set": "shape",
+        "value": "star"
+      },
+      {
+        "set": "points",
+        "value": 9007199254740992
+      },
+      "settle",
+      {
+        "act": "pickUp",
+        "value": {
+          "dragValue": "card-1",
+          "dragKind": "card"
+        }
+      },
+      "settle",
+      {
+        "act": "key",
+        "value": "Enter"
+      },
+      "settle"
+    ]
   }
 ]

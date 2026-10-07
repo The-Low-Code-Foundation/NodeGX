@@ -169,6 +169,18 @@ function vertexAt(size: number, angleFromTop: number, radiusScale = 1): Point {
   return { x: c + r * Math.cos(a), y: c + r * Math.sin(a) };
 }
 
+/**
+ * P107-C92 — the most corners a Polygon or Star draws. Points had no upper bound, so a wired Infinity (a divide by zero) or a count
+ * read from the wrong field built that many vertices and the tab ran out of memory. At 500 a polygon already reads as a circle.
+ */
+export const MAX_POINTS = 500;
+
+/** Points as a corner count: 3 to {@link MAX_POINTS}; a value that is not a finite number (Infinity, NaN, a word) draws the default 5. */
+export function pointCountOf(points: unknown): number {
+  const n = Math.round(Number(points ?? 5));
+  return Number.isFinite(n) ? Math.min(MAX_POINTS, Math.max(3, n)) : 5;
+}
+
 /** A regular n-gon inscribed in the box, first vertex at the top, wound clockwise. */
 function polygonPoints(size: number, sides: number): Point[] {
   const n = Math.max(3, Math.round(sides));
@@ -357,7 +369,7 @@ export class Circle extends React.Component<CircleProps> {
       // does: a connection can deliver `undefined`, and a project saved before stage 2 has neither
       // parameter. 5 points is a pentagon and a five-pointed star, which is what those two words
       // draw in anybody's head.
-      const pointCount = Math.max(3, Math.round(this.props.points ?? 5));
+      const pointCount = pointCountOf(this.props.points);
       const cornerRadius = Math.max(0, this.props.cornerRadius ?? 0);
       const points = shapePoints(shape, this.props.size, pointCount);
 
