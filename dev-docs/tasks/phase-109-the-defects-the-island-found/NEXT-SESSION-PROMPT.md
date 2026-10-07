@@ -5,6 +5,17 @@
 14 of 23**, each fix with a control (HEAD's file red on exactly its rows). The board is **22 of 37 closed**, re-derived from
 the task files' status lines. Records: ISL-033 §9, ISL-031 §9.
 
+## 🔴 s27 state (2026-10-07, read before anything below — "Do, in this order" items 1 and 2 are done or built)
+
+- On `cline-dev`: the Slider's four (`21b27462d`, `c92fa2afa`), C64 (`d8a9f0069`), C93 (`fe5ebfab5`), ISL-038 opened (`6a5f1b55d`).
+- **Built, graded, NOT landed:** D30 and `P109-S22-COLLECTIONCHURN` on worktree branch `p109-d30`
+  (`/Users/richardosborne/vscode_projects/p109-d30`, tip `b7451602f`, rebased on `cf60225e1`; tsc 0; page-model, plants,
+  stranger, schema, catalog-parity, pilot, batch-data green there). The landing (move `cline-dev` to it, write its files into the
+  primary tree, apply its `page-model.helper.ts` hunks over a peer's open Group v2 edit) was refused by the auto-mode classifier —
+  **Richard decides how it lands.** Rebase again first if HEAD moved.
+- **New task ISL-038** (P107 R16 handed over C81–C94): C93 done; next the one-line throws C82, C84, C85, C87, C89 — each drops a
+  known row from `conformance.test.ts`, which P107 (a1) has open for the Group v2 / C95. Ask C88, C90, C91, C92 first.
+
 ## What s26 found that s25's handoff did not know
 
 - 🔴 **s25 left `stranger.test.ts` red.** Its D10 commit moved `delay.ts` and `Timer.json`, two files stranger round 3 is
