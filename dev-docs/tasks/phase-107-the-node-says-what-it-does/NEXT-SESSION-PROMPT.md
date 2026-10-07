@@ -8,7 +8,7 @@
 | task | built | committed |
 |---|---|---|
 | NSP-000 … NSP-015 | as s44 (NSP-013 left: AC2, the deep run for s11–s14; NSP-014 / NSP-015 left: AC2's export half, P18) | s1 … s44 |
-| **NSP-016 the visual nodes** | 🟡 **12 of 19 conform. The Shape (`Circle`) and the Image v1 (s53)** on both targets at 200 and 10,000. The other 7 need infrastructure (§7.6). AC4 waits for NSP-017 | `aa8abb06f` … s53 |
+| **NSP-016 the visual nodes** | 🟡 **12 of 19 conform. The Shape (`Circle`) and the Image v1 (s53)** on both targets at 200 and 10,000. The other 7 need infrastructure (§7.6). AC4 waits for NSP-017 | `aa8abb06f` … `99d0d2353` |
 | NSP-023 the spec without React | ✅ all six ACs (s50) | s45 … s50 |
 | NSP-006 the stranger | ✅ rounds 1–4 | `649e6864d` |
 | NSP-020 ports without a viewer | rows only | s20 |
@@ -40,13 +40,15 @@
 7. **R16 (Richard, 2026-10-07):** C81–C94 go to **P109**, C93 first. P109 re-headed C91–C94 to its ISL-038 and **fixed C93 the same day
    (`fe5ebfab5`**: Image.tsx keeps the based source in a local; a viewer regression renders twice per base). C95 came after and follows the same ruling.
    And a Focus on a Group off the page reports **Unchanged**, like a field: the **Group v2** (group.ts), with C95 as its known row.
-   Group v2 readings: the interpreter at 200 on four seeds and at 10,000, the runtime at 200 on seeds 13 and 20730: CONFORM (§7.14).
+   Group v2 readings: the interpreter at 200 on four seeds and at 10,000, the runtime at 200 on seeds 13 and 20730 and at 10,000 (seed
+   20733; C95 ×418): CONFORM, 0 unattributed (§7.14).
 
 **Readings (2026-10-07).** Interpreter: the Shape at 200 on seeds 13, 20729, 20730, 7 and at 10,000 (20731) CONFORM, 0 survivors; the
 Image the same (after its last fix: 2,398 / 2,424 killed at 200, 2,410 / 2,436 at 10,000, the rest declared). Runtime: the Shape at 200
 on seeds 13 and 20730 and at 10,000 (seed 20733; C79 ×1, C82 ×1, C84 ×2, C85 ×1; Points withheld) CONFORM, 0 unattributed; the Image at 200 on seeds 13 and 20730 and at 10,000 (C79 ×5, C84 ×2, C85 ×2, C94 ×7) CONFORM.
 The shared changes, on the runtime at seed 13: the 9 other visual specs (the peer's C64 control specs included) and all 86 non-visual
-specs conform; the guard (page-model.test.ts) green for all 14 visual specs; catalog parity green; `tsc --noEmit` clean. The full package suite was NOT run before the commit (P109 was waiting on it): runner, parity, types and reach tests 327 / 327.
+specs conform; the guard (page-model.test.ts) green for all 14 visual specs; catalog parity green; `tsc --noEmit` clean. After both commits (HEAD `99d0d2353`): the package suite 22 suites, 935 passed, 18 skipped (568 s); the runtime's graph
+and target suites 106 / 106.
 The stranger file was not run: no file it hashes changed (spec.ts untouched; `withheld` lives in the runner).
 
 ## What s54 does

@@ -1249,7 +1249,8 @@ the two frame-end matrices with a Focus in the frame Mounted comes back are now 
 graded on both targets. 1,394 scenarios. Readings: the interpreter at 200 on seeds 13, 20729, 20730 and 7 CONFORMS (9,844 / 9,877
 killed at seed 13, the rest declared; about 200 s each) and at 10,000 (seed 20731, 573 s, 10,467 / 10,489); the runtime at 200 on seeds
 13 (441 s; C87 ×17, C89 ×3, C95 ×12) and 20730 (402 s; C79 ×1, C87 ×12, C89 ×3, C95 ×7) CONFORMS, 0 unattributed. The side-by-side probe:
-the newly differing scenarios were exactly the C95 rows; the two twins agree on both targets.
+the newly differing scenarios were exactly the C95 rows; the two twins agree on both targets. The runtime at 10,000 (seed 20733,
+1,091 s): CONFORMS, 0 unattributed (C95 ×418, C87 ×582, C89 ×119, C90 ×8, C84 ×6, C85 ×1; 10,620 / 10,647 killed).
 
 **Readings.** 2026-10-07, load 3–5, one heavy job at a time (a peer's Slider run went first).
 - The interpreter, Shape: CONFORMS at 200 on seeds 13, 20729, 20730 and 7 (2,369 / 2,395 mutants killed, the rest declared, 0
@@ -1264,5 +1265,7 @@ the newly differing scenarios were exactly the C95 rows; the two twins agree on 
   C85 ×2, C94 ×7; 2,428 / 2,454 killed). Its first 10,000 had 23 unattributed divergences: 16 the spec's `[]` error, 7 row C94.
 - The shared changes (the face's `Noodl.Env`, the runner's `withheld`), on the runtime at seed 13: the other 9 visual specs (with P109's
   committed C64 control specs) and all 86 non-visual specs conform; the runner's own tests and the pinned digest pass.
-- The guard (page-model.test.ts, seeds 13 and 20731): all 14 visual specs green, the two new ones included. Catalog parity green for
-  both. `tsc --noEmit` clean in both packages.
+- The guard (page-model.test.ts, seeds 13 and 20731): all 14 visual specs green, the two new ones and the Group v2 included. Catalog
+  parity green for both. `tsc --noEmit` clean in both packages.
+- After both commits (HEAD 99d0d2353): the package suite 22 suites, 935 passed, 18 skipped (568 s; the Shape, the Image and the Group v2
+  in `batch-visual`); the runtime's graph and target suites 106 / 106. The stranger file was not run: no file it hashes changed.
