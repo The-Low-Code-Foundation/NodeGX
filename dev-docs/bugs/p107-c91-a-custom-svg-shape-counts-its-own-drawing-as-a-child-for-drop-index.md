@@ -29,3 +29,5 @@ targets.
 **Proposed fix.** Count only the children a node lays out: let `slots` skip an element the zone's node marks as its own
 drawing (a data attribute on Custom SVG's wrapper). Making the wrapper `position: absolute` would also hide it from `slots`, but
 it takes the wrapper out of the flow, and that could change the Shape's size. When it is fixed, remove the scenarios' `row` fields and the C91 entry from KNOWN_ROWS in the same commit.
+
+**Ruled 2026-10-07 (P109 s28, asked in one batch of four), as recommended: "Don't count the drawing".** The Shape marks its drawing box so the drag code skips it; Drop Index is 0 on every shape. Nothing about how the Shape looks changes. The question as asked: *"Should the drawing stop counting?"*

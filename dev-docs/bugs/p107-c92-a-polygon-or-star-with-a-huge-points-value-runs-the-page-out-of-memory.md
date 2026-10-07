@@ -28,3 +28,5 @@ runner's `withheld`), and every report prints that it did.
 **Proposed fix.** Clamp the count where it is read: `Math.min(MAX_POINTS, Math.max(3, Math.round(points)))`, treating a value that is not
 finite as the default, with MAX_POINTS somewhere a person could still see (a few hundred). Add the cap to the Points description. When it
 is fixed, remove the `Circle` entry from `WITHHELD` and add a scenario at Points 1e9 to scenarios/Circle.json in the same commit.
+
+**Ruled 2026-10-07 (P109 s28, asked in one batch of four), as recommended: "Cap at 500".** Points stops at 500 (a polygon already reads as a circle there); Infinity or a value that is not a number draws the default 5; the cap goes into Points' description. Not chosen: 100, 1,000. The question as asked: *"Where should Points stop?"*

@@ -27,3 +27,5 @@ Index port's own words), so the scenario carries `row` and the runtime's differe
 **Proposed fix.** Let a node name the element its children are laid out in, and have `slots`, `homeIndex`, `indexAt` and
 `openGap` use it: the Group returns the wrapper when the scroller is on. When it is fixed, remove the scenario's `row` field
 and the C88 entry from KNOWN_ROWS in the same commit.
+
+**Ruled 2026-10-07 (P109 s28, asked in one batch of four), as recommended: "Count the cards".** The Group tells the drag code which box its cards really sit in, so Drop Index counts the cards in a snapping scroll Group as it does in one that does not scroll. The question as asked: *"Should Drop Index count the cards inside the wrapper?"*

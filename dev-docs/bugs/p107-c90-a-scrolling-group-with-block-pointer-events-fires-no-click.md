@@ -29,3 +29,5 @@ Click on the runtime.
 listeners, e.g. by not blocking `pointerdown` / `pointerup` / `mousedown` / `mouseup` on the scroller element itself), or pass
 `click: false` when Block Pointer Events is on and let React's own click stand. When it is fixed, remove the scenario's `row` field
 and the C90 entry from KNOWN_ROWS in the same commit.
+
+**Ruled 2026-10-07 (P109 s28, asked in one batch of four), as recommended: "Let the list's taps through".** The blocker stops presses after the list has seen them, so the list's tap-not-swipe check still works and Click fires; the page behind still gets nothing, and a swipe is still no click. Not chosen: turning the list's own tap check off (a mouse drag that scrolls could end as a Click). The question as asked: *"With Block Pointer Events and a snapping scroll list both on, which fix?"*

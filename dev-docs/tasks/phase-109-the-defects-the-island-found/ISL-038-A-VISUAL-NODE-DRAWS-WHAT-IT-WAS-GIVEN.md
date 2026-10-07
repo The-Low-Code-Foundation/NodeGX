@@ -34,13 +34,13 @@ one reasonable answer: ask it in plain words (§5) before building.
 | [P107-C84](../../bugs/p107-c84-a-drag-dies-at-a-zone-whose-accept-kind-is-not-text.md) | medium | open | as proposed | A drag dies at a drop zone whose Accept Kind holds a value that is not text (a wired number, a list) — a pointer drag never ends and blocks every later drag; a keyboard pick-up starts in no zone |
 | [P107-C85](../../bugs/p107-c85-a-drop-never-ends-on-a-zone-whose-zone-name-is-not-text.md) | medium | open | as proposed | A drop on a zone whose Zone Name holds a value that is not text fires Dropped and then never ends — the zone stays lit, the card stays lifted, and no other drag can start |
 | [P107-C87](../../bugs/p107-c87-a-group-whose-tag-is-empty-crashes-its-render.md) | medium | open | as proposed | A Group whose Tag arrives empty (or null, 0, false) throws while React draws it, and the page stops drawing |
-| [P107-C88](../../bugs/p107-c88-a-scrolling-group-counts-its-scroller-as-its-only-child-for-drop-index.md) | medium | open | ask first | A Group with Enable Scroll on and Native platform scroll off reports Drop Index as if it had one child — a card dropped from the keyboard lands at 0 or 1, whatever the Group holds |
-| [P107-C90](../../bugs/p107-c90-a-scrolling-group-with-block-pointer-events-fires-no-click.md) | medium | open | ask first | A Group with the JavaScript scroller (Enable Scroll on, Native platform scroll off) and Block Pointer Events on never fires Click — on itself or from a child |
-| [P107-C92](../../bugs/p107-c92-a-polygon-or-star-with-a-huge-points-value-runs-the-page-out-of-memory.md) | medium | open | ask first | A Shape set to Polygon or Star with a huge or infinite Points builds that many vertices, and the page runs out of memory |
+| [P107-C88](../../bugs/p107-c88-a-scrolling-group-counts-its-scroller-as-its-only-child-for-drop-index.md) | medium | open | ruled: count the cards | A Group with Enable Scroll on and Native platform scroll off reports Drop Index as if it had one child — a card dropped from the keyboard lands at 0 or 1, whatever the Group holds |
+| [P107-C90](../../bugs/p107-c90-a-scrolling-group-with-block-pointer-events-fires-no-click.md) | medium | open | ruled: let the list's taps through | A Group with the JavaScript scroller (Enable Scroll on, Native platform scroll off) and Block Pointer Events on never fires Click — on itself or from a child |
+| [P107-C92](../../bugs/p107-c92-a-polygon-or-star-with-a-huge-points-value-runs-the-page-out-of-memory.md) | medium | open | ruled: cap at 500 | A Shape set to Polygon or Star with a huge or infinite Points builds that many vertices, and the page runs out of memory |
 | [P107-C83](../../bugs/p107-c83-a-card-carried-from-the-keyboard-drops-into-a-zone-that-has-left-the-page.md) | low | open | as proposed | A card carried from the keyboard is dropped into a drop zone that has left the page (Mounted off), and the zone stays lit while it is gone |
 | [P107-C86](../../bugs/p107-c86-a-click-on-a-group-after-a-tag-change-counts-as-a-click-elsewhere.md) | low | open | as proposed | After a Group's Tag changes, a click on it counts as a click somewhere else — it fires Focus Lost instead of Focused, until the Group leaves the page and comes back |
 | [P107-C89](../../bugs/p107-c89-native-platform-scroll-wired-a-value-that-is-not-true-starts-the-scroller-on-unwrapped-children.md) | low | open | as proposed | Native platform scroll wired a truthy value that is not true (1, "false") starts the JavaScript scroller on children it never wrapped — Scroll To Index fails for every child, and clicks can be lost |
-| [P107-C91](../../bugs/p107-c91-a-custom-svg-shape-counts-its-own-drawing-as-a-child-for-drop-index.md) | low | open | ask first | A Shape set to Custom SVG counts its own drawing as a child for Drop Index — a card dropped on it from the keyboard lands at 1, where every other shape says 0 |
+| [P107-C91](../../bugs/p107-c91-a-custom-svg-shape-counts-its-own-drawing-as-a-child-for-drop-index.md) | low | open | ruled: don't count the drawing | A Shape set to Custom SVG counts its own drawing as a child for Drop Index — a card dropped on it from the keyboard lands at 1, where every other shape says 0 |
 | [P107-C94](../../bugs/p107-c94-an-image-placed-with-source-set-true-fetches-a-picture-called-true.md) | low | open | as proposed | An Image placed with Source Set true fetches a picture called "true" — React 19 writes srcset="true" on the element it creates, and none when Source Set changes to true later |
 
 ## 4. Order of work
@@ -66,7 +66,7 @@ the same commit (drop the known row, bump the spec's `version` with a `changes` 
 ## 7. Acceptance criteria
 
 - **AC1** — every row in §3 is re-measured at the session's HEAD before it is built.
-- **AC2** — C88, C90, C91 and C92 are asked in plain words and ruled.
+- **AC2** — C88, C90, C91 and C92 are asked in plain words and ruled. ✅ 2026-10-07 (s28): all four as recommended, in one batch; each ruling is in its ledger file.
 - **AC3** — every row ruled or marked "as proposed" is fixed, one commit each (or one per shared mechanism), with its
   regression green and its known row dropped in the same commit.
 - **AC4** — `node scripts/bugs.js --from P107` lists none of this task's rows as `open` or `needs-ruling`.
