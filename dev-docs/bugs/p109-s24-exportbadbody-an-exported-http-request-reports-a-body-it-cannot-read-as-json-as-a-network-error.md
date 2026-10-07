@@ -1,7 +1,9 @@
 ---
 id: P109-S24-EXPORTBADBODY
 title: An exported HTTP Request reports a body it cannot read as JSON under http/network-error, where the runtime now says http/bad-body
-status: open
+status: scheduled
+phase: P109
+task: ISL-043
 severity: low
 area: export / HTTP Request (the emitted request function in `nodegx-export/src/emit/emitApp.ts` and its failure arm in `src/emit/component.ts`)
 found: P109 s24 (ISL-030, the P107-D11 fix), 2026-10-06

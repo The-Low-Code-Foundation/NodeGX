@@ -1,7 +1,9 @@
 ---
 id: P100-UPG001-SNAP
 title: nodegx export stops outright with "Cannot access 'snapActionList' before initialization" on four real projects
-status: open
+status: scheduled
+phase: P109
+task: ISL-043
 severity: high
 area: export / plan
 found: P100 UPG-001 s6 (§3.8), 2026-09-23

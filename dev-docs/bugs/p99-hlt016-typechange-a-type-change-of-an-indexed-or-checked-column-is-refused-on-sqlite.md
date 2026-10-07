@@ -1,7 +1,9 @@
 ---
 id: P99-HLT016-TYPECHANGE
 title: On SQLite, changing the type of a field that has an index or a rule fails and rolls back
-status: open
+status: scheduled
+phase: P109
+task: ISL-041
 severity: medium
 area: backend / SQLite schema (changeColumnType)
 found: P99 HLT-016 s17 (checks), 2026-09-22

@@ -1,7 +1,9 @@
 ---
 id: P78-D84
 title: The headless cloud-function bundler fails when loading the project logs a line (the fix is uncommitted)
-status: open
+status: scheduled
+phase: P109
+task: ISL-042
 severity: high
 area: mcp / cloud function bundler (deploy_cloud_functions)
 found: P78 TPL-011 s3, 2026-09-26

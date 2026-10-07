@@ -1,7 +1,9 @@
 ---
 id: P78-DBT-DEVSWEEP
 title: Starting the editor's dev stack kills a backend someone started by hand from the checkout
-status: open
+status: scheduled
+phase: P109
+task: ISL-047
 severity: medium
 area: devtools / dev stack sweep (dev-processes.js)
 found: P78 Digital Bricks Training template, 2026-09-23

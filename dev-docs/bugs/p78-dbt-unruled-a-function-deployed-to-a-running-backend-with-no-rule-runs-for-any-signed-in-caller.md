@@ -1,7 +1,9 @@
 ---
 id: P78-DBT-UNRULED
 title: A function deployed to a running backend with no rule runs for any signed-in caller, and nothing says so
-status: open
+status: scheduled
+phase: P109
+task: ISL-040
 severity: high
 area: backend / function permissions (hot deploy)
 found: P78 Digital Bricks Training template, TASK-L190, 2026-10-01

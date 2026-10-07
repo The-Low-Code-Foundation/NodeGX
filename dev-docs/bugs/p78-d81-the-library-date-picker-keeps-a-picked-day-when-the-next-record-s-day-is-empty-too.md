@@ -1,7 +1,9 @@
 ---
 id: P78-D81
 title: The library Date picker keeps a picked day when the next record's day is empty too
-status: open
+status: scheduled
+phase: P109
+task: ISL-046
 severity: medium
 area: templates / library Date picker (TPL-008 todo list, TPL-010 planning)
 found: P78 TPL-010-B s11, 2026-09-23 (read from the script); reach into TPL-008-RC §4, 2026-09-23

@@ -1,7 +1,9 @@
 ---
 id: P101-INS003-SHIFTTAB
 title: Shift+Tab from the canvas goes into the embedded preview and stays there
-status: open
+status: scheduled
+phase: P109
+task: ISL-044
 severity: medium
 area: editor / keyboard focus (preview webview)
 found: P101 INS-003 s3 (row 5), 2026-09-24

@@ -1,7 +1,9 @@
 ---
 id: P99-HLT016-NOACL
 title: Without an ACL, a save, delete or increment that matches no row answers success
-status: open
+status: scheduled
+phase: P109
+task: ISL-039
 severity: medium
 area: backend / data adapters (SQLite and PostgreSQL)
 found: P99 HLT-018 s15 and HLT-016 s16, 2026-09-22

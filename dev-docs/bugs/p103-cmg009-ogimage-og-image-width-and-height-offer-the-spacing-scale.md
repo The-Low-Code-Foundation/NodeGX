@@ -1,7 +1,9 @@
 ---
 id: P103-CMG009-OGIMAGE
 title: Page's og:image:width / og:image:height fields offer spacing tokens
-status: open
+status: scheduled
+phase: P109
+task: ISL-044
 severity: low
 area: editor / token picker (Page meta ports)
 found: P103 CMG-009 s1 ("Found on the way"), 2026-09-24; re-read at HEAD 2026-10-01

@@ -1,7 +1,9 @@
 ---
 id: P101-INS003-ICONBTN
 title: Icon-only buttons across the editor have no accessible name (the inspector's collapse button among them)
-status: open
+status: scheduled
+phase: P109
+task: ISL-044
 severity: medium
 area: core-ui / IconButton
 found: P101 INS-003 s3 (row 5), 2026-09-24; re-read at HEAD 2026-10-01

@@ -1,7 +1,9 @@
 ---
 id: P78-DBT-BUNDLEWIRES
 title: A function bundle whose wires reach nothing deploys and loads clean, and every call hangs 30 seconds
-status: open
+status: scheduled
+phase: P109
+task: ISL-042
 severity: medium
 area: backend / workflow deploy (bundle validation)
 found: P78 Digital Bricks Training template, TASK-L170, 2026-09-23

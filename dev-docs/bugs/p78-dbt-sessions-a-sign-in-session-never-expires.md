@@ -2,6 +2,8 @@
 id: P78-DBT-SESSIONS
 title: A sign-in session never expires, by any door
 status: needs-ruling
+phase: P109
+task: ISL-040
 severity: medium
 area: backend / auth sessions
 found: P78 Digital Bricks Training template, TASK-L185, 2026-10-01; re-read at HEAD 2026-10-01

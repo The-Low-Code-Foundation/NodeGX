@@ -3,6 +3,7 @@ id: P109-S22-BUILTINBOUNDARY
 title: A built-in node that throws while it draws still blanks the whole page (kit nodes no longer do)
 status: needs-ruling
 phase: P109
+task: ISL-045
 severity: low
 area: viewer / react-component-node.ts (no error boundary around a built-in node's component)
 found: P109 ISL-026 s22, 2026-10-06, beside the KITTHROWBLANKS fix

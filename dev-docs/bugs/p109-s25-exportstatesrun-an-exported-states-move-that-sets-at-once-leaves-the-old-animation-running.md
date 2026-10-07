@@ -1,7 +1,9 @@
 ---
 id: P109-S25-EXPORTSTATESRUN
 title: An exported States move that sets every value at once leaves the previous move's animation running, which lands the old state's value
-status: open
+status: scheduled
+phase: P109
+task: ISL-043
 severity: low
 area: export / States (`nodegx-export/src/emit/statesLib.ts`, the emitted `goToState`)
 found: P109 s25 (ISL-032, the P107-C22 fix), 2026-10-06

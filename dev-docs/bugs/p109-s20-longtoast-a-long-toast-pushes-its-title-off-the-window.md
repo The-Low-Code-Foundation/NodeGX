@@ -1,7 +1,9 @@
 ---
 id: P109-S20-LONGTOAST
 title: A long toast grows past the top of the window, so its title and first sentences cannot be read
-status: open
+status: scheduled
+phase: P109
+task: ISL-044
 severity: medium
 area: editor / ToastLayer (ToastCard.module.scss)
 found: P109 ISL-006 s20, 2026-10-06

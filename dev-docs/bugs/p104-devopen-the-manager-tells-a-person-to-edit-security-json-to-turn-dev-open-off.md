@@ -1,7 +1,9 @@
 ---
 id: P104-DEVOPEN
 title: The backend manager tells a person to set "devOpen": false in security.json, and no page offers the switch
-status: open
+status: scheduled
+phase: P109
+task: ISL-040
 severity: medium
 area: backend / manager (security, API keys, permissions)
 found: P104 s18 (measured before Richard's BMG-013 drive), 2026-09-26; re-read at HEAD 2026-10-01

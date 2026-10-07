@@ -1,7 +1,9 @@
 ---
 id: P109-S21-DROPDOWNEMPTYRESET
 title: The Dropdown spec thinks the hidden option is still selected after Items offered no options, so a person choosing the first option of the next list reads as a change the browser never raises
-status: open
+status: scheduled
+phase: P109
+task: ISL-045
 severity: low
 area: node-spec / Dropdown (`net.noodl.controls.options`, dropdown.ts `painted`, the `domSelected` model)
 found: P109 s21 (ISL-026, writing C70's scenarios), 2026-10-06

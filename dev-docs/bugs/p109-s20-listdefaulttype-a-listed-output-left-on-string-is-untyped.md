@@ -2,6 +2,8 @@
 id: P109-S20-LISTDEFAULTTYPE
 title: A Function output added to the list shows Type "String" in the panel, but its port is untyped until another type is picked
 status: needs-ruling
+phase: P109
+task: ISL-044
 severity: low
 area: runtime / Function (scriptOutputs proplist, simplejavascript.ts)
 found: P109 ISL-006 s20, 2026-10-06

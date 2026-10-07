@@ -1,7 +1,9 @@
 ---
 id: P78-DBT-NUL
 title: A NUL character in a query value works on SQLite and is a 400 on PostgreSQL
-status: open
+status: scheduled
+phase: P109
+task: ISL-039
 severity: medium
 area: backend / PostgreSQL adapter (query values)
 found: P78 Digital Bricks Training template, the move to PostgreSQL, 2026-09-23

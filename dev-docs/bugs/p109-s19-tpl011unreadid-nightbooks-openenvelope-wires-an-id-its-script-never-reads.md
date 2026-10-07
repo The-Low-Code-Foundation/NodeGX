@@ -1,7 +1,9 @@
 ---
 id: P109-S19-TPL011UNREADID
 title: Nightbook's generator wires the envelope id into a Function that never reads it, and the door now refuses the build
-status: open
+status: scheduled
+phase: P109
+task: ISL-046
 severity: low
 area: template / Nightbook generator (packages/noodl-mcp/tests/tpl011Cloud.ts, uncommitted)
 found: P109 ISL-006 s19, 2026-10-05

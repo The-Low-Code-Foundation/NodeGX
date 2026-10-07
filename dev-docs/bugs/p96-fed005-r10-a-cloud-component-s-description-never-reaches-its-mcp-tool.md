@@ -1,7 +1,9 @@
 ---
 id: P96-FED005-R10
 title: A cloud component's description never reaches its MCP tool, so every tool says "Run the cloud function X"
-status: open
+status: scheduled
+phase: P109
+task: ISL-042
 severity: medium
 area: export / cloud functions → backend MCP
 found: P96 FED-005 (register R10), 2026-09; hit again by P78 Digital Bricks Training sprint 55 (TASK-L189), 2026-10-01

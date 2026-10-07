@@ -2,6 +2,8 @@
 id: P78-TPL011-VARIDS
 title: An array of plain objects kept in a Variable comes back with an `id` on each object, which then gets saved
 status: needs-ruling
+phase: P109
+task: ISL-045
 severity: low
 area: runtime / Variable (arrays of objects become records)
 found: P78 TPL-011 s3 (V1-4), 2026-09-26

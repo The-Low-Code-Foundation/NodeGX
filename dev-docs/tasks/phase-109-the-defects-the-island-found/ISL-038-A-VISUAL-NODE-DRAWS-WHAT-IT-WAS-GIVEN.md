@@ -1,6 +1,6 @@
 # ISL-038 — A visual node draws what it was given, every time
 
-**Status: 🟡 s28 (2026-10-07): 7 of 14 fixed — C82 + C84 + C85 (`f2d9d349b`), C94 (`2dc8fd90d`), C91 (`dd71d0d83`), C92 (`4a48f6eb7`), each graded on the runtime at two seeds with a control (§9); AC2 ✅ (C88, C90, C91, C92 ruled as recommended). Left: the Group's C87, C88, C89, C90, C86 and the shared C81, C83 (both change the spec on all four nodes). s27: C93 (`fe5ebfab5`), first as ruled. Scoped 2026-10-07 from P107 R16 ("Hand all to P109, C93 first"): the open rows P107 NSP-016 s50–s53 found on the Text's drag and file drop, the Group, the Shape and the Image.** **Source:** 14 bugs from the ledger: 1 high · 8 medium · 5 low. **Side:** noodl-viewer-react (Image,
+**Status: 🟡 s28 (2026-10-07): 7 of 15 fixed (C95 joined s28: P107's handoff says "C81–C95 are theirs") — C82 + C84 + C85 (`f2d9d349b`), C94 (`2dc8fd90d`), C91 (`dd71d0d83`), C92 (`4a48f6eb7`), each graded on the runtime at two seeds with a control (§9); AC2 ✅ (C88, C90, C91, C92 ruled as recommended). Left: the Group's C87, C88, C89, C90, C86 and the shared C81, C83 (both change the spec on all four nodes). s27: C93 (`fe5ebfab5`), first as ruled. Scoped 2026-10-07 from P107 R16 ("Hand all to P109, C93 first"): the open rows P107 NSP-016 s50–s53 found on the Text's drag and file drop, the Group, the Shape and the Image.** **Source:** 14 bugs from the ledger: 1 high · 8 medium · 5 low. **Side:** noodl-viewer-react (Image,
 Shape (`Circle`), Group, drag and drop, file drop)
 
 ## 1. The person sentence
@@ -40,6 +40,7 @@ one reasonable answer: ask it in plain words (§5) before building.
 | [P107-C89](../../bugs/p107-c89-native-platform-scroll-wired-a-value-that-is-not-true-starts-the-scroller-on-unwrapped-children.md) | low | open | as proposed | Native platform scroll wired a truthy value that is not true (1, "false") starts the JavaScript scroller on children it never wrapped — Scroll To Index fails for every child, and clicks can be lost |
 | [P107-C91](../../bugs/p107-c91-a-custom-svg-shape-counts-its-own-drawing-as-a-child-for-drop-index.md) | low | fixed `dd71d0d83` | ruled: don't count the drawing | A Shape set to Custom SVG counts its own drawing as a child for Drop Index — a card dropped on it from the keyboard lands at 1, where every other shape says 0 |
 | [P107-C94](../../bugs/p107-c94-an-image-placed-with-source-set-true-fetches-a-picture-called-true.md) | low | fixed `2dc8fd90d` | as proposed | An Image placed with Source Set true fetches a picture called "true" — React 19 writes srcset="true" on the element it creates, and none when Source Set changes to true later |
+| [P107-C95](../../bugs/p107-c95-a-focus-on-a-group-off-the-page-reports-done-and-fires-focused.md) | low | scheduled | as ruled (R16: Unchanged) | A Focus on a Group that is not on the page reports Done and fires Focused — a field reports Unchanged there, and R16 rules the Group should too |
 
 ## 4. Order of work
 
@@ -58,8 +59,9 @@ the same commit (drop the known row, bump the spec's `version` with a `changes` 
 - 🔴 **P107 is still writing specs on these nodes** (s53: the Group v2, R16's second ruling, row C95 on the focus tracker;
   touching `group.ts`, `Group.json`, `conformance.test.ts`, `equivalent-mutants.ts`). Check `git status` and mtimes on those
   files before a row that drops a known row, and land through a temporary index.
-- C95 (a Focus on a Group off the page reports Done) is filed by P107 after R16's hand-over line; it is P109's only if R16's
-  reading covers it. Not counted here until it does.
+- C95 (a Focus on a Group off the page reports Done) was filed after R16's hand-over line. P107's s53 handoff says "C81–C95
+  are theirs" and "C95 came after and follows the same ruling", so it joined this task in s28. P107's Group v2 already rules
+  the answer (Unchanged, like a field's), so it needs no question: fix the runtime and drop the known row.
 
 ## 7. Acceptance criteria
 

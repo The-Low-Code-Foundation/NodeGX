@@ -1,7 +1,9 @@
 ---
 id: P78-TPL011-INSTALLER
 title: Nightbook 0.0.4 will not install over 0.0.3 on either tablet ("Nightbook cannot be closed")
-status: open
+status: scheduled
+phase: P109
+task: ISL-046
 severity: high
 area: templates / Nightbook desktop installer (electron-builder NSIS upgrade)
 found: P78 TPL-011, 2026-09-30 (Richard, on both tablets)

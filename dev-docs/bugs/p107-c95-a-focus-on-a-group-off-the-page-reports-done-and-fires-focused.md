@@ -1,7 +1,9 @@
 ---
 id: P107-C95
 title: A Focus on a Group that is not on the page reports Done and fires Focused — a field reports Unchanged there, and R16 rules the Group should too
-status: open
+status: scheduled
+phase: P109
+task: ISL-038
 severity: low
 area: runtime / Group and the focus tracker (noodl-viewer-react/src/focus-tracker.ts `setNodeFocused` :56-75; nodes/visual/group.ts Focus action, `_focus`)
 found: P107 NSP-016 s53, 2026-10-07

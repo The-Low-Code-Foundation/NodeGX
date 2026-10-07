@@ -1,7 +1,9 @@
 ---
 id: P109-S21-EXPORTDATEUNITWIRED
 title: The export refuses a Date Add or Date Difference whose Unit is wired, for a reason that is gone (the runtime no longer throws on an unknown unit)
-status: open
+status: scheduled
+phase: P109
+task: ISL-043
 severity: low
 area: export / Date Add, Date Difference (plan.ts DATE_NODES, `enum: true`)
 found: P109 s21 (ISL-026, the C16 / D15 fix), 2026-10-06

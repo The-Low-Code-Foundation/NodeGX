@@ -34,18 +34,19 @@ ISL-038 and ISL-013 moved, none closed). Records: ISL-038 §9, ISL-013 §8 "Sess
 | state | tasks |
 |---|---|
 | ✅ closed (22) | ISL-001, 002, 003, 004, 005, 006, 011, 014, 015, 016, 017, 019, 020, 021, 023, 026, 027, 028, 029, 030, 032, 033 |
-| 🟡 Track F, building | ISL-031 (20 of 23: left the Text's drag rows C77, C78, C79), ISL-038 (7 of 14: left the Group's C86–C90, the shared C81, C83) |
+| 🟡 Track F, building | ISL-031 (20 of 23: left the Text's drag rows C77, C78, C79), ISL-038 (7 of 15: left the Group's C86–C90 and C95, the shared C81, C83) |
 | 🟡 building | ISL-013 (slice 1 landed; left AC1's deployed drive, AC3's Settings → Kits, AC4 garden kits, AC5 job table, AC6 census) |
 | 🟡 ruled, one reading owed | ISL-012 (AC3's full server render with hydration) · ISL-018 (AC5: the agent round) |
 | 🟢 ruled, not built | ISL-024 ("Own package + a note", quiet gap only) |
 | 🟡 built here, one half elsewhere | ISL-008 (AC7 → P18) · ISL-010 (AC4, Richard) · ISL-009 (export → P18) · ISL-007 (AC4 → P108) |
 | 🟡 one case open | ISL-022 (AC6 inconclusive) · ISL-025 (the closing task) |
 | ⬜ Track F, no rulings | ISL-034 … ISL-037 |
+| ⬜ Track G, not started (added s28) | ISL-039 … ISL-047: 51 bugs no phase owned. Blockers in ISL-039, security rows in ISL-040 |
 
 ## Do, in this order
 
-1. **ISL-038's Group rows**, now that P107's Group v2 is committed (`99d0d2353`): C87 (empty Tag: `as || 'div'`), C89 (Native
-   platform scroll read as a boolean), C88 (ruled: count the cards — a node names the element its children sit in, `slots` /
+1. **ISL-038's Group rows**, now that P107's Group v2 is committed (`99d0d2353`): C95 (as ruled: a Focus off the page is
+   Unchanged), C87 (empty Tag: `as || 'div'`), C89 (Native platform scroll read as a boolean), C88 (ruled: count the cards — a node names the element its children sit in, `slots` /
    `homeIndex` / `indexAt` / `openGap` use it), C90 (ruled: let the list's taps through the blocker), C86. Check `git status` and
    mtimes on `group.ts`, `Group.json`, `conformance.test.ts` first; P107 said it is done with shared files.
 2. **C81 and C83** (shared drag / file drop, change the spec on Text, Shape, Image, Group: specs bump, `changes` entries).
@@ -55,6 +56,10 @@ ISL-038 and ISL-013 moved, none closed). Records: ISL-038 §9, ISL-013 §8 "Sess
    module's injection byte-identical: none declares `requires` today, so only the adopters move), AC3's Settings → Kits, AC1's
    deployed drive. The exporter's two bootstraps (`nodegx-export/src/parse/kitSource.ts`, `emit/kits.ts`) are P18's: hand over.
 5. Then ISL-018 AC5, ISL-012 AC3.
+6. **Track G (ISL-039 … ISL-047, README §4):** written from the ledger, not re-measured. Its blockers (ISL-039: a restore that
+   loses data, a migrate that overwrites it) and security rows (ISL-040) outrank items 3–5 by severity: ask Richard which comes
+   first. Most of it sits in packages P104 (backend) and P18 (export) are working in; each task's §6 says whom to ask.
+   P107-C96, C97, C98 (the Video) were left out while a P107 session filed them; take them when P107 hands them over.
 
 ## Decisions for Richard (not yours)
 

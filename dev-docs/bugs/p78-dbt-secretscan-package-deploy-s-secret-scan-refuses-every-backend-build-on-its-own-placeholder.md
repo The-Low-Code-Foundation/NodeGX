@@ -1,7 +1,9 @@
 ---
 id: P78-DBT-SECRETSCAN
 title: package-deploy's secret scan refuses every backend build because of the backend's own error-message placeholder
-status: open
+status: scheduled
+phase: P109
+task: ISL-042
 severity: high
 area: backend / package-deploy secret scan
 found: P78 Digital Bricks Training template, TASK-L183, 2026-09-30

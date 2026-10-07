@@ -1,7 +1,9 @@
 ---
 id: P100-UPG001-ADDUNIQUE
 title: Array update operators (AddUnique, Add, Remove) are stored as the operator object instead of applied
-status: open
+status: scheduled
+phase: P109
+task: ISL-039
 severity: medium
 area: backend / Parse wire (PUT /classes)
 found: P100 UPG-001 s3 (§3.6b), 2026-09-23; re-read at HEAD 2026-10-01

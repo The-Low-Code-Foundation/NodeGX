@@ -1,7 +1,9 @@
 ---
 id: P78-DBT-MCPOAUTH
 title: Claude on the web and on a phone cannot connect to a backend's MCP door, because it takes only an API key
-status: open
+status: scheduled
+phase: P109
+task: ISL-040
 severity: high
 area: backend / MCP (FED-005)
 found: P78 Digital Bricks Training template, sprint 55 (TASK-L191), 2026-10-01; re-confirmed on production 2026-10-01

@@ -1,7 +1,9 @@
 ---
 id: P100-UPG001-PTREQ
 title: Filtering on a Pointer written as a Parse pointer object is a 500 (cannot translate: __type)
-status: open
+status: scheduled
+phase: P109
+task: ISL-039
 severity: medium
 area: runtime / local-sql query (backend data API)
 found: P100 UPG-001 s3 (§3.6b), 2026-09-23; re-read at HEAD 2026-10-01

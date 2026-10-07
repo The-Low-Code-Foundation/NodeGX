@@ -1,7 +1,9 @@
 ---
 id: P109-S21-EXPORTBLENDNAN
 title: An exported Color Blend still renders "#NaNNaNNaN" for a Blend Value that is not a number, where the runtime now keeps the colour it last showed
-status: open
+status: scheduled
+phase: P109
+task: ISL-043
 severity: low
 area: export / Color Blend (the emitted `blendColor` helper)
 found: P109 s21 (ISL-026, the P107-D8 fix), 2026-10-06

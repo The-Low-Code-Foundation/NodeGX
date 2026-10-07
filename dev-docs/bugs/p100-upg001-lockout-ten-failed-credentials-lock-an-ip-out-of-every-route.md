@@ -1,7 +1,9 @@
 ---
 id: P100-UPG001-LOCKOUT
 title: Ten failed credentials from one IP lock it out of every route for five minutes, /health and valid admin calls included
-status: open
+status: scheduled
+phase: P109
+task: ISL-040
 severity: medium
 area: backend / auth rate limit
 found: P100 UPG-001 s3 (§3.6b), 2026-09-23 (on 0.2.4); re-read at HEAD 2026-10-01

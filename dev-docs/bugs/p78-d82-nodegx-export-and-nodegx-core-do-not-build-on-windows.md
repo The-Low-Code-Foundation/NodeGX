@@ -1,7 +1,9 @@
 ---
 id: P78-D82
 title: @nodegx/export and @nodegx/core do not build on Windows (a bare `npx` spawn)
-status: open
+status: scheduled
+phase: P109
+task: ISL-043
 severity: high
 area: export / package build (Windows)
 found: P78 TPL-011-DESKTOP, 2026-09-26 (GitHub windows-latest run 36250068983)

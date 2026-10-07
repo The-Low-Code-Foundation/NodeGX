@@ -2,6 +2,8 @@
 id: P78-DBT-KEYORDER
 title: An Object field reads back with its keys in a different order from the one saved
 status: needs-ruling
+phase: P109
+task: ISL-039
 severity: low
 area: backend / Object fields (PostgreSQL jsonb; seen on SQLite by TPL-011)
 found: P78 Digital Bricks Training template, 2026-09-23 (PostgreSQL); P78 TPL-011 s6, 2026-09-27 (Nightbook)

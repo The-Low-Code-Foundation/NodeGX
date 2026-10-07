@@ -1,7 +1,9 @@
 ---
 id: P78-DBT-MIGRATE
 title: nodegx-backend migrate overwrites the rows of a PostgreSQL database that already holds data
-status: open
+status: scheduled
+phase: P109
+task: ISL-039
 severity: blocker
 area: backend / migrate (SQLite to PostgreSQL)
 found: P78 Digital Bricks Training template, TASK-L179, 2026-09-24

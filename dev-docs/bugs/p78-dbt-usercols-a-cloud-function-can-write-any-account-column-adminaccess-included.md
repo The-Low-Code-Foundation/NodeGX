@@ -1,7 +1,9 @@
 ---
 id: P78-DBT-USERCOLS
 title: A cloud function can write any account column, adminAccess included
-status: open
+status: scheduled
+phase: P109
+task: ISL-040
 severity: high
 area: backend / cloud runtime + data path (_User)
 found: P78 Digital Bricks Training template, TASK-L185, 2026-10-01; code path re-read at HEAD 2026-10-01

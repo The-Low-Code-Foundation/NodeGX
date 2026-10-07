@@ -1,7 +1,9 @@
 ---
 id: P108-S7-METERS3D
 title: In the 3D Workshop on her land, the spa's two parts' meter chips are drawn on top of each other
-status: open
+status: scheduled
+phase: P109
+task: ISL-046
 severity: low
 area: library garden-3d-kit / the overlay's meter chips (positionOverlay)
 found: P108 s7, 2026-10-01 (drive-iw007-touch.js --mode 3d, shot iw7t-pip-stones-program.png)

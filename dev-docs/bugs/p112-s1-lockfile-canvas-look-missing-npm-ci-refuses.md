@@ -1,7 +1,9 @@
 ---
 id: P112-S1-LOCKFILE
 title: The root package-lock.json has no entry for the new @nodegx/canvas-look workspace — `npm ci` refuses the tree, so every CI job that installs the monorepo fails before it builds
-status: open
+status: scheduled
+phase: P109
+task: ISL-047
 severity: high
 area: build / root package-lock.json (`packages/nodegx-canvas-look`, added by 77c8ffdf8)
 found: P108 (the island works) s9, 2026-10-03 — checking the tip before pushing the Windows installer build

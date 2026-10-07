@@ -1,7 +1,9 @@
 ---
 id: P99-HLT016-RENAME
 title: Renaming a field leaves its index and rule declarations naming the old field
-status: open
+status: scheduled
+phase: P109
+task: ISL-041
 severity: medium
 area: backend / schema (renameColumn, SQLite and PostgreSQL)
 found: P99 HLT-016 s17 (checks), 2026-09-22

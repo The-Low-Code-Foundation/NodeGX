@@ -1,7 +1,9 @@
 ---
 id: P78-TPL010-MOVEARROW
 title: Opening a project in the planner adds another "→ " (or "✓ Wed 30 · ") to its stored next move, every time
-status: open
+status: scheduled
+phase: P109
+task: ISL-046
 severity: high
 area: template / planning (Logic/Card rows → Week/Project group For Each), runtime / For Each + Model
 found: P78 TPL-010, user report from the hosted planner, 2026-10-05 (read-only trace, not driven)

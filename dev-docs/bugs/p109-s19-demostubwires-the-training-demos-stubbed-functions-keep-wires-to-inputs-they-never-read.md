@@ -1,7 +1,9 @@
 ---
 id: P109-S19-DEMOSTUBWIRES
 title: The training demo's stubbed Functions keep wires into inputs they no longer read
-status: open
+status: scheduled
+phase: P109
+task: ISL-046
 severity: low
 area: template / digital-bricks-training-demo (templates/digital-bricks-training/tools/build-demo.mjs)
 found: P109 ISL-006 s19, 2026-10-05

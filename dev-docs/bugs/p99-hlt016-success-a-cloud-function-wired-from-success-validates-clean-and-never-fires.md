@@ -1,7 +1,9 @@
 ---
 id: P99-HLT016-SUCCESS
 title: A Cloud Function wired from `success` passes validation with 0 errors and never fires
-status: open
+status: scheduled
+phase: P109
+task: ISL-042
 severity: high
 area: editor / validator (Cloud Function)
 found: DBT stream TASK-L177 drive, 2026-09-30; recorded in P99 HLT-016 ("not filed as a row")

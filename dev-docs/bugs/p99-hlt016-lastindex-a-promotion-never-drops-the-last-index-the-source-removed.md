@@ -1,7 +1,9 @@
 ---
 id: P99-HLT016-LASTINDEX
 title: Promoting a schema whose source removed its last index leaves that index on the target, silently
-status: open
+status: scheduled
+phase: P109
+task: ISL-041
 severity: medium
 area: backend / schema promotion (schema-migrate)
 found: P99 HLT-016 s17 (checks), 2026-09-22 (pre-existing since FED-002)

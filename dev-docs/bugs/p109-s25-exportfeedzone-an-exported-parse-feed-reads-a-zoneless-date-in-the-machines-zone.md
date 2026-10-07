@@ -1,7 +1,9 @@
 ---
 id: P109-S25-EXPORTFEEDZONE
 title: An exported Parse Feed reads a date with no zone in the machine's zone, and a zone name it does not know as UTC
-status: open
+status: scheduled
+phase: P109
+task: ISL-043
 severity: low
 area: export / Parse Feed (`nodegx-export/src/emit/parseLib.ts`, the emitted `toISODate`)
 found: P109 s25 (ISL-032, the P107-D16 fix), 2026-10-06

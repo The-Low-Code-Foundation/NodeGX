@@ -1,7 +1,9 @@
 ---
 id: P78-TPL008PJ-NESTEDSIGNAL
 title: A signal a For Each row passes up from a For Each of its own reads as a broken wire in the deploy's wire check — the wire works in both viewers
-status: open
+status: scheduled
+phase: P109
+task: ISL-044
 severity: low
 area: editor / NodeGraphModel wire health (`NodeGraphModel.ts:933`), as the deploy runs it (`packages/noodl-preview/src/wireHealth.ts`)
 found: TPL-008-PJ s2, 2026-10-05, building the todo list's Projects tab

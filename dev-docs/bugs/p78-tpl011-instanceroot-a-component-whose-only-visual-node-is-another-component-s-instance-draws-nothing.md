@@ -1,7 +1,9 @@
 ---
 id: P78-TPL011-INSTANCEROOT
 title: A component whose only visual node is another component's instance draws nothing (cause not isolated)
-status: open
+status: scheduled
+phase: P109
+task: ISL-045
 severity: medium
 area: runtime / component instance as a component's root (door, export or runtime — not isolated)
 found: P78 TPL-011 s3 (V1-2), 2026-09-26
